@@ -32,3 +32,4 @@ Current packages:
 
 - `@galaxy-foundry/summary-nextflow-schema` -> `validate-summary-nextflow`
 - `@galaxy-foundry/galaxy-tool-discovery-schema` -> `validate-galaxy-tool-discovery`
+- `@galaxy-foundry/tests-format-schema` -> `validate-tests-format`

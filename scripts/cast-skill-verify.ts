@@ -14,7 +14,6 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import AjvImport from "ajv";
-import Ajv2020Import from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
@@ -22,8 +21,6 @@ import { readMarkdown } from "./lib/frontmatter.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Ajv = ((AjvImport as any).default ?? AjvImport) as typeof AjvImport;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Ajv2020 = ((Ajv2020Import as any).default ?? Ajv2020Import) as typeof Ajv2020Import;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addFormats = ((addFormatsImport as any).default ?? addFormatsImport) as typeof addFormatsImport;
 
@@ -83,6 +80,17 @@ interface Provenance {
   refs: ProvenanceRefEntry[];
 }
 
+interface VerifyManifest {
+  verify_schema_version: number;
+  entries: Array<{
+    artifact_id?: unknown;
+    direction?: unknown;
+    schema?: unknown;
+    validator_bin?: unknown;
+    args?: unknown;
+  }>;
+}
+
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const repoRoot = process.cwd();
@@ -112,6 +120,41 @@ function main(): void {
   if (!validateProv(prov)) {
     for (const err of validateProv.errors ?? []) {
       errors.push(`_provenance.json: ${err.instancePath || "(root)"} ${err.message}`);
+    }
+  }
+
+  const verifyPath = path.join(bundleRoot, "_verify.json");
+  if (!existsSync(verifyPath)) {
+    errors.push("missing _verify.json in cast bundle");
+  } else {
+    try {
+      const verify = JSON.parse(readFileSync(verifyPath, "utf8")) as VerifyManifest;
+      if (verify.verify_schema_version !== 1) {
+        errors.push("_verify.json: verify_schema_version must be 1");
+      }
+      if (!Array.isArray(verify.entries)) {
+        errors.push("_verify.json: entries must be an array");
+      } else {
+        verify.entries.forEach((entry, index) => {
+          if (typeof entry.artifact_id !== "string") {
+            errors.push(`_verify.json: entries[${index}].artifact_id must be a string`);
+          }
+          if (entry.direction !== "input" && entry.direction !== "output") {
+            errors.push(`_verify.json: entries[${index}].direction must be input or output`);
+          }
+          if (typeof entry.schema !== "string") {
+            errors.push(`_verify.json: entries[${index}].schema must be a string`);
+          }
+          if (typeof entry.validator_bin !== "string") {
+            errors.push(`_verify.json: entries[${index}].validator_bin must be a string`);
+          }
+          if (!Array.isArray(entry.args) || !entry.args.every((arg) => typeof arg === "string")) {
+            errors.push(`_verify.json: entries[${index}].args must be a string array`);
+          }
+        });
+      }
+    } catch (e) {
+      errors.push(`_verify.json does not parse as JSON: ${(e as Error).message}`);
     }
   }
 
@@ -193,37 +236,6 @@ function main(): void {
   for (const forbidden of target.skill_constraints.forbid_packaged_files) {
     const matches = walkAndFind(bundleRoot, forbidden);
     if (matches.length) errors.push(`forbidden file packaged: ${matches.join(", ")}`);
-  }
-
-  // runs/*/summary.json validates against the bundled schema (when present).
-  const schemaRef =
-    (prov.refs ?? []).find((r) => r.kind === "schema" && r.ref === "[[summary-nextflow]]") ??
-    (prov.refs ?? []).find((r) => r.kind === "schema");
-  if (schemaRef) {
-    const schemaAbs = path.join(bundleRoot, schemaRef.dst);
-    if (existsSync(schemaAbs)) {
-      try {
-        const schemaJson = JSON.parse(readFileSync(schemaAbs, "utf8"));
-        const schemaUri = typeof schemaJson?.$schema === "string" ? schemaJson.$schema : "";
-        const runAjv = schemaUri.includes("2020-12")
-          ? new Ajv2020({ allErrors: true, strict: false })
-          : new Ajv({ allErrors: true, strict: false });
-        addFormats(runAjv);
-        const validate = runAjv.compile(schemaJson);
-        const runsDir = path.join(bundleRoot, "runs");
-        if (existsSync(runsDir)) {
-          for (const summary of walkAndFind(runsDir, "summary.json")) {
-            const data = JSON.parse(readFileSync(summary, "utf8"));
-            if (!validate(data)) {
-              const messages = (validate.errors ?? []).map((e) => `${e.instancePath || "(root)"} ${e.message}`).join("; ");
-              errors.push(`${path.relative(bundleRoot, summary)} fails bundled schema: ${messages}`);
-            }
-          }
-        }
-      } catch (e) {
-        errors.push(`bundled schema unusable for runs validation: ${(e as Error).message}`);
-      }
-    }
   }
 
   if (errors.length) {
