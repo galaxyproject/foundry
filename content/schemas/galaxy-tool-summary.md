@@ -4,6 +4,7 @@ name: galaxy-tool-summary
 title: Galaxy tool summary manifest
 package: "@galaxy-foundry/galaxy-tool-summary-schema"
 package_export: "galaxyToolSummarySchema"
+validator_bin: validate-galaxy-tool-summary
 upstream: "https://github.com/jmchilton/foundry/blob/main/packages/galaxy-tool-summary-schema/src/galaxy-tool-summary.schema.json"
 tags:
   - schema

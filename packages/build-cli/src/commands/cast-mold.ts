@@ -415,12 +415,45 @@ interface Provenance {
   cast_history?: Array<{ rev: number; date: string; note: string }>;
   refs: ProvenanceRefEntry[];
   artifacts?: ProvenanceArtifacts;
+  validation_results?: ValidationResult[];
   open_questions?: string[];
 }
 
 interface ProducerInfo {
   schema?: string;
+  kind?: string;
+  default_filename?: string;
   producers: string[];
+  hasSchemaGap?: boolean;
+}
+
+export interface VerifyManifestEntry {
+  artifact_id: string;
+  direction: "input" | "output";
+  kind?: string;
+  default_filename?: string;
+  schema: string;
+  validator_bin: string;
+  args: string[];
+}
+
+export interface VerifyManifest {
+  verify_schema_version: 1;
+  entries: VerifyManifestEntry[];
+}
+
+interface ValidationResult {
+  artifact_id: string;
+  path: string;
+  status: "passed" | "failed" | "error";
+  validator_bin: string;
+  artifact_hash?: string;
+  stdout: string;
+  stderr: string;
+  stdout_hash?: string;
+  stderr_hash?: string;
+  exit_code?: number | null;
+  error?: string;
 }
 
 export function buildProducerIndex(
@@ -438,8 +471,15 @@ export function buildProducerIndex(
       if (typeof o.id !== "string") continue;
       const info = idx.get(o.id) ?? { producers: [] };
       info.producers.push(producerSlug);
+      if (typeof o.kind === "string" && !info.kind) info.kind = o.kind;
+      if (typeof o.default_filename === "string" && !info.default_filename) {
+        info.default_filename = o.default_filename;
+      }
       const schema = typeof o.schema === "string" ? o.schema : undefined;
-      if (schema) {
+      if (!schema) {
+        info.schema = undefined;
+        info.hasSchemaGap = true;
+      } else if (!info.hasSchemaGap) {
         if (info.schema && info.schema !== schema) {
           info.schema = undefined; // disagreement — drop the inherited hint
         } else {
@@ -450,6 +490,72 @@ export function buildProducerIndex(
     }
   }
   return idx;
+}
+
+function schemaValidatorBin(
+  schemaRef: string,
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): string | undefined {
+  const target = resolveWikiLink(schemaRef, slugMap);
+  if (!target) return undefined;
+  const meta = metaByPath.get(target);
+  return typeof meta?.validator_bin === "string" ? meta.validator_bin : undefined;
+}
+
+export function buildVerifyManifest(
+  meta: Frontmatter,
+  producerIndex: Map<string, ProducerInfo>,
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): VerifyManifest {
+  const entries: VerifyManifestEntry[] = [];
+  const rawOut = meta.output_artifacts;
+  if (Array.isArray(rawOut)) {
+    for (const a of rawOut) {
+      if (!a || typeof a !== "object") continue;
+      const o = a as Record<string, unknown>;
+      if (typeof o.id !== "string" || typeof o.schema !== "string") continue;
+      const validatorBin = schemaValidatorBin(o.schema, slugMap, metaByPath);
+      if (!validatorBin) continue;
+      entries.push({
+        artifact_id: o.id,
+        direction: "output",
+        kind: typeof o.kind === "string" ? o.kind : undefined,
+        default_filename: typeof o.default_filename === "string" ? o.default_filename : undefined,
+        schema: o.schema,
+        validator_bin: validatorBin,
+        args: ["{artifact_path}"],
+      });
+    }
+  }
+  const rawIn = meta.input_artifacts;
+  if (Array.isArray(rawIn)) {
+    for (const a of rawIn) {
+      if (!a || typeof a !== "object") continue;
+      const o = a as Record<string, unknown>;
+      if (typeof o.id !== "string") continue;
+      const producer = producerIndex.get(o.id);
+      if (!producer?.schema) continue;
+      const validatorBin = schemaValidatorBin(producer.schema, slugMap, metaByPath);
+      if (!validatorBin) continue;
+      entries.push({
+        artifact_id: o.id,
+        direction: "input",
+        kind: producer.kind,
+        default_filename: producer.default_filename,
+        schema: producer.schema,
+        validator_bin: validatorBin,
+        args: ["{artifact_path}"],
+      });
+    }
+  }
+  entries.sort((a, b) =>
+    a.direction === b.direction
+      ? a.artifact_id.localeCompare(b.artifact_id)
+      : a.direction.localeCompare(b.direction),
+  );
+  return { verify_schema_version: 1, entries };
 }
 
 export function readArtifactContracts(
@@ -499,6 +605,7 @@ interface LegacyProvenanceCarryOver {
   cast_revision?: number;
   cast_history?: Array<{ rev: number; date: string; note: string }>;
   open_questions?: string[];
+  validation_results?: ValidationResult[];
   prior_refs?: Map<string, ProvenanceRefEntry>;
 }
 
@@ -515,6 +622,9 @@ function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOv
       : undefined,
     open_questions: Array.isArray(data.open_questions)
       ? (data.open_questions as string[])
+      : undefined,
+    validation_results: Array.isArray(data.validation_results)
+      ? (data.validation_results as ValidationResult[])
       : undefined,
   };
   // For schema v2 provenance, capture prior refs by src so condense LLM output and prompt provenance carry over.
@@ -877,6 +987,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const carry = readExistingProvenance(provenancePath);
 
   const { slugMap, metaByPath } = buildSlugMap(repoRoot);
+  const producerIndex = buildProducerIndex(metaByPath);
 
   const rawRefs = Array.isArray(moldParsed.meta.references)
     ? (moldParsed.meta.references as unknown[])
@@ -904,7 +1015,6 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     if (result.drift) drift.push({ src: r.src, reason: result.drift });
   }
 
-  const producerIndex = buildProducerIndex(metaByPath);
   const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
   const skillText = renderSkillMarkdown({
     moldName: args.moldName,
@@ -917,6 +1027,20 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   });
   const skillResult = reconcileSkillMarkdown(bundleRoot, skillText, args.check);
   if (skillResult.drift) drift.push({ src: "SKILL.md", reason: skillResult.drift });
+
+  const verify = buildVerifyManifest(moldParsed.meta, producerIndex, slugMap, metaByPath);
+  const verifyText = JSON.stringify(verify, null, 2) + "\n";
+  const verifyPath = path.join(bundleRoot, "_verify.json");
+  if (args.check) {
+    const existingVerifyHash = existsSync(verifyPath) ? sha256(verifyPath) : null;
+    const expectedVerifyHash = sha256OfBuffer(verifyText);
+    if (existingVerifyHash !== expectedVerifyHash) {
+      drift.push({
+        src: "_verify.json",
+        reason: existingVerifyHash ? "verify manifest content drifted" : "verify manifest missing",
+      });
+    }
+  }
 
   // runs/*/summary.json validation — find a schema ref for this mold and validate any committed runs.
   const schemaRefEntry =
@@ -973,6 +1097,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     cast_history: carry.cast_history,
     refs: refEntries,
     artifacts: artifactContracts,
+    validation_results: carry.validation_results,
     open_questions: carry.open_questions,
   };
 
@@ -988,6 +1113,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
 
   writeFileSync(provenancePath, JSON.stringify(next, null, 2) + "\n");
+  writeFileSync(verifyPath, verifyText);
   console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
   if (drift.length) console.log(`reconciled ${drift.length} drifted ref(s)`);
   if (refEntries.some((r) => r.pending_llm)) {

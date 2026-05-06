@@ -87,6 +87,38 @@
           }
         }
       }
+    },
+    "validation_results": {
+      "type": "array",
+      "description": "Process evidence from artifact validator CLI runs. Exit code is authoritative; stdout/stderr are captured as opaque diagnostics.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_id",
+          "path",
+          "validator_bin",
+          "status",
+          "exit_code",
+          "stdout",
+          "stderr",
+          "stdout_hash",
+          "stderr_hash"
+        ],
+        "properties": {
+          "artifact_id": { "type": "string" },
+          "path": { "type": "string" },
+          "validator_bin": { "type": "string" },
+          "status": { "enum": ["passed", "failed", "error"] },
+          "exit_code": { "type": ["integer", "null"] },
+          "artifact_hash": { "type": "string" },
+          "stdout": { "type": "string" },
+          "stderr": { "type": "string" },
+          "stdout_hash": { "type": "string" },
+          "stderr_hash": { "type": "string" },
+          "error": { "type": "string" }
+        }
+      }
     }
   },
   "definitions": {

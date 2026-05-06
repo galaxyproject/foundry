@@ -4,9 +4,16 @@ import process from "node:process";
 import { runCastMoldCommand } from "../commands/cast-mold.js";
 import { runGenerateDashboardCommand } from "../commands/generate-dashboard.js";
 import { runGenerateIndexCommand } from "../commands/generate-index.js";
+import { runValidateArtifactCommand } from "../commands/validate-artifact.js";
 import { runValidateCommand } from "../commands/validate.js";
 
-const COMMANDS = ["validate", "generate-index", "generate-dashboard", "cast"] as const;
+const COMMANDS = [
+  "validate",
+  "generate-index",
+  "generate-dashboard",
+  "cast",
+  "validate-artifact",
+] as const;
 
 async function main(argv = process.argv.slice(2)): Promise<void> {
   const [command, ...rest] = argv;
@@ -19,6 +26,7 @@ async function main(argv = process.argv.slice(2)): Promise<void> {
   else if (command === "generate-index") runGenerateIndexCommand(rest);
   else if (command === "generate-dashboard") runGenerateDashboardCommand(rest);
   else if (command === "cast") await runCastMoldCommand(rest);
+  else if (command === "validate-artifact") runValidateArtifactCommand(rest);
   else {
     process.stderr.write(`unknown command: ${command}\n\n`);
     printHelp();

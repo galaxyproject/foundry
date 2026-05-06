@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 11,
-    "content_hash": "52a520839d6ae1dbdce047e2c62e4525d7faae19d2bc3d98a9639a5909d7c6e9",
-    "commit": "d11541598236ff8dff65c682b1cde8fb6e2ceceb"
+    "content_hash": "1c693a2013b67c7324508d19ad7b3023fc4b109b334bdc1dca9e4df9510b130e",
+    "commit": "0be197c7bd3aace22d155f7af46dc1dde1cd01c3"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-06T15:51:37.199Z",
+  "cast_at": "2026-05-06T16:02:02.420Z",
   "cast_date": "2026-05-06",
   "cast_revision": 9,
   "cast_history": [
@@ -177,6 +177,20 @@
     ],
     "consumes": []
   },
+  "validation_results": [
+    {
+      "artifact_id": "summary-nextflow",
+      "path": "casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json",
+      "validator_bin": "validate-summary-nextflow",
+      "status": "passed",
+      "exit_code": 0,
+      "artifact_hash": "9193bc9b6f94ac57d04ccbb72047f94eaf612a8c736297f84d5e37685c175208",
+      "stdout": "casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json: valid\n",
+      "stderr": "",
+      "stdout_hash": "6a46379bfea97b008c65073ec062ee9d06013867110e3a53a0551ba6e0b67d3d",
+      "stderr_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
   "open_questions": [
     "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17."
   ]

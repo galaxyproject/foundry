@@ -34,7 +34,7 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 
 ## Validation
 
-- Validate `summary-nextflow.json` for `summary-nextflow` against schema summary-nextflow when a validator is available.
+- Validate `summary-nextflow.json` for `summary-nextflow` with `validate-summary-nextflow`; schema: summary-nextflow.
 
 ## Procedure
 

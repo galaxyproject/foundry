@@ -13,23 +13,23 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 
 ## Inputs
 
-- `summary-nextflow`; schema: summary-nextflow; producer(s): `summarize-nextflow`; Structured Nextflow pipeline summary emitted by summarize-nextflow; the source-of-truth JSON for interface choices..
+- `summary-nextflow`; schema: summary-nextflow; producer(s): `summarize-nextflow`; Structured Nextflow pipeline summary emitted by summarize-nextflow; the source-of-truth JSON for interface choices.
 
 ## Outputs
 
-- `nextflow-galaxy-interface`; kind: `markdown`; default filename: `nextflow-galaxy-interface.md`; Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance..
+- `nextflow-galaxy-interface`; kind: `markdown`; default filename: `nextflow-galaxy-interface.md`; Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance.
 
 ## Load Upfront
 
-- `references/notes/nextflow-params-to-galaxy-inputs.md`; kind: `research`; mode: `verbatim`; Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs..
-- `references/notes/nextflow-path-glob-to-galaxy-datatype.md`; kind: `research`; mode: `verbatim`; Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs..
-- `references/notes/nextflow-to-galaxy-channel-shape-mapping.md`; kind: `research`; mode: `verbatim`; Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes..
-- `references/schemas/summary-nextflow.schema.json`; kind: `schema`; mode: `verbatim`; Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs..
+- `references/notes/nextflow-params-to-galaxy-inputs.md`; kind: `research`; mode: `verbatim`; Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs.
+- `references/notes/nextflow-path-glob-to-galaxy-datatype.md`; kind: `research`; mode: `verbatim`; Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs.
+- `references/notes/nextflow-to-galaxy-channel-shape-mapping.md`; kind: `research`; mode: `verbatim`; Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes.
+- `references/schemas/summary-nextflow.schema.json`; kind: `schema`; mode: `verbatim`; Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.
 
 ## Load On Demand
 
-- `references/notes/galaxy-sample-sheet-collections.md`; kind: `research`; mode: `verbatim`; Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs.; Trigger: When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input..
-- `references/notes/galaxy-workflow-testability-design.md`; kind: `research`; mode: `verbatim`; Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address.; Trigger: When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs..
+- `references/notes/galaxy-sample-sheet-collections.md`; kind: `research`; mode: `verbatim`; Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs; Trigger: When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.
+- `references/notes/galaxy-workflow-testability-design.md`; kind: `research`; mode: `verbatim`; Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address; Trigger: When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.
 
 ## Validation
 

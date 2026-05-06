@@ -70,7 +70,7 @@ Same heuristic applies recursively to each on-demand referenced note's body.
 
 ### Body-vs-`related_notes` drift
 
-Every wiki-link target in `index.md`'s body should generally appear in the frontmatter `related_notes` (or in `references[].ref`, `output_schemas`, `cli_commands`, etc.). Body wiki-links that resolve to no manifest entry are a sign the manifest is stale. Flag mismatches.
+Every wiki-link target in `index.md`'s body should generally appear in the frontmatter `related_notes` (or in `references[].ref`, `output_artifacts[].schema`, `cli_commands`, etc.). Body wiki-links that resolve to no manifest entry are a sign the manifest is stale. Flag mismatches.
 
 ### Eval coverage of triggers
 

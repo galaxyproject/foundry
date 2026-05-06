@@ -13,15 +13,15 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 
 ## Inputs
 
-- `nextflow-galaxy-interface`; producer(s): `nextflow-summary-to-galaxy-interface`; Galaxy interface brief from nextflow-summary-to-galaxy-interface when running the NEXTFLOW → GALAXY pipeline..
-- `nextflow-galaxy-data-flow`; producer(s): `nextflow-summary-to-galaxy-data-flow`; Galaxy data-flow brief from nextflow-summary-to-galaxy-data-flow when running the NEXTFLOW → GALAXY pipeline..
-- `cwl-galaxy-interface`; producer(s): `cwl-summary-to-galaxy-interface`; Galaxy interface brief from cwl-summary-to-galaxy-interface when running the CWL → GALAXY pipeline..
-- `cwl-galaxy-data-flow`; producer(s): `cwl-summary-to-galaxy-data-flow`; Galaxy data-flow brief from cwl-summary-to-galaxy-data-flow when running the CWL → GALAXY pipeline..
-- `paper-galaxy-design`; producer(s): `paper-summary-to-galaxy-design`; Combined Galaxy interface + data-flow design brief from paper-summary-to-galaxy-design when running the PAPER → GALAXY pipeline..
+- `nextflow-galaxy-interface`; producer(s): `nextflow-summary-to-galaxy-interface`; Galaxy interface brief from nextflow-summary-to-galaxy-interface when running the NEXTFLOW → GALAXY pipeline.
+- `nextflow-galaxy-data-flow`; producer(s): `nextflow-summary-to-galaxy-data-flow`; Galaxy data-flow brief from nextflow-summary-to-galaxy-data-flow when running the NEXTFLOW → GALAXY pipeline.
+- `cwl-galaxy-interface`; producer(s): `cwl-summary-to-galaxy-interface`; Galaxy interface brief from cwl-summary-to-galaxy-interface when running the CWL → GALAXY pipeline.
+- `cwl-galaxy-data-flow`; producer(s): `cwl-summary-to-galaxy-data-flow`; Galaxy data-flow brief from cwl-summary-to-galaxy-data-flow when running the CWL → GALAXY pipeline.
+- `paper-galaxy-design`; producer(s): `paper-summary-to-galaxy-design`; Combined Galaxy interface + data-flow design brief from paper-summary-to-galaxy-design when running the PAPER → GALAXY pipeline.
 
 ## Outputs
 
-- `iwc-comparison-notes`; kind: `markdown`; default filename: `iwc-comparison-notes.md`; Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring..
+- `iwc-comparison-notes`; kind: `markdown`; default filename: `iwc-comparison-notes.md`; Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring.
 
 ## Load Upfront
 
@@ -29,12 +29,12 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 
 ## Load On Demand
 
-- `references/cli/convert.json`; kind: `cli-command`; mode: `sidecar`; Normalize fetched IWC workflows into a consistent representation for structural comparison.; Trigger: After fetching a candidate IWC workflow file and before structural comparison..
-- `references/patterns/galaxy-collection-patterns.md`; kind: `pattern`; mode: `verbatim`; Compare proposed collection transformations against curated corpus-observed pattern guidance.; Trigger: When the data-flow brief proposes collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections..
-- `references/patterns/galaxy-tabular-patterns.md`; kind: `pattern`; mode: `verbatim`; Compare proposed tabular transformations against curated corpus-observed pattern guidance.; Trigger: When the data-flow brief proposes tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections..
-- `references/notes/galaxy-data-flow-draft-contract.md`; kind: `research`; mode: `verbatim`; Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.; Trigger: When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details..
-- `references/notes/iwc-shortcuts-anti-patterns.md`; kind: `research`; mode: `verbatim`; Flag proposed shortcuts that are accepted in IWC versus shortcuts that should be treated as smells.; Trigger: When the design briefs propose tests, assertions, labels, or expected-output comparisons..
-- `references/notes/iwc-test-data-conventions.md`; kind: `research`; mode: `verbatim`; Compare proposed test-data placement and fixture shapes against IWC conventions.; Trigger: When the design briefs hint at workflow tests or input fixture organization..
+- `references/cli/convert.json`; kind: `cli-command`; mode: `sidecar`; Normalize fetched IWC workflows into a consistent representation for structural comparison; Trigger: After fetching a candidate IWC workflow file and before structural comparison.
+- `references/patterns/galaxy-collection-patterns.md`; kind: `pattern`; mode: `verbatim`; Compare proposed collection transformations against curated corpus-observed pattern guidance; Trigger: When the data-flow brief proposes collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections.
+- `references/patterns/galaxy-tabular-patterns.md`; kind: `pattern`; mode: `verbatim`; Compare proposed tabular transformations against curated corpus-observed pattern guidance; Trigger: When the data-flow brief proposes tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections.
+- `references/notes/galaxy-data-flow-draft-contract.md`; kind: `research`; mode: `verbatim`; Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution; Trigger: When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.
+- `references/notes/iwc-shortcuts-anti-patterns.md`; kind: `research`; mode: `verbatim`; Flag proposed shortcuts that are accepted in IWC versus shortcuts that should be treated as smells; Trigger: When the design briefs propose tests, assertions, labels, or expected-output comparisons.
+- `references/notes/iwc-test-data-conventions.md`; kind: `research`; mode: `verbatim`; Compare proposed test-data placement and fixture shapes against IWC conventions; Trigger: When the design briefs hint at workflow tests or input fixture organization.
 
 ## Validation
 
