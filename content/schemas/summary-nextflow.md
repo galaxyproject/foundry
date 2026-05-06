@@ -4,6 +4,7 @@ name: summary-nextflow
 title: Nextflow pipeline summary
 package: "@galaxy-foundry/summary-nextflow-schema"
 package_export: "summaryNextflowSchema"
+validator_bin: validate-summary-nextflow
 upstream: "https://github.com/jmchilton/foundry/blob/main/packages/summary-nextflow-schema/src/summary-nextflow.schema.json"
 license: MIT
 tags:
@@ -61,7 +62,7 @@ Three sub-shapes mirror gxy-sketches verbatim — see [[gxy-sketches-alignment]]
 
 ## Cast-time role
 
-Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[summarize-nextflow]] via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
+Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[summarize-nextflow]] via `output_artifacts[].schema` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
 
 ## What is intentionally not modeled
 

@@ -12,8 +12,6 @@ revised: 2026-05-05
 revision: 5
 ai_generated: true
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
-input_schemas:
-  - "[[galaxy-tool-summary]]"
 input_artifacts:
   - id: galaxy-tool-summary
     description: "Galaxy tool summary manifest from [[summarize-galaxy-tool]] conforming to [[galaxy-tool-summary]]; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`."

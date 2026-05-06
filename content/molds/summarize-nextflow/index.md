@@ -11,8 +11,6 @@ created: 2026-04-30
 revised: 2026-05-05
 revision: 10
 ai_generated: true
-output_schemas:
-  - "[[summary-nextflow]]"
 output_artifacts:
   - id: summary-nextflow
     kind: json

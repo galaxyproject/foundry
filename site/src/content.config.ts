@@ -111,8 +111,6 @@ const moldSchema = z.object({
   source: z.enum(['paper', 'nextflow', 'cwl', 'snakemake']).optional(),
   target: z.enum(['galaxy', 'cwl', 'web', 'generic']).optional(),
   tool: z.enum(['gxwf', 'planemo']).optional(),
-  input_schemas: z.array(wikiLink).optional(),
-  output_schemas: z.array(wikiLink).optional(),
   output_artifacts: z.array(outputArtifact).optional(),
   input_artifacts: z.array(inputArtifact).optional(),
   references: z.array(typedReference).optional(),

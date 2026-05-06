@@ -6,7 +6,7 @@ This is a v1 inventory, not the Mold metadata spec. Names, splits, and groupings
 
 ## Reference model status
 
-Current Molds are authored as a procedural body plus an operational `references:` manifest. The older top-level reference fields (`patterns`, `cli_commands`, `prompts`, `examples`) remain supported during migration, and `input_schemas` / `output_schemas` still describe Mold IO contracts, but new operational references should use object-shaped entries:
+Current Molds are authored as a procedural body plus an operational `references:` manifest. The older top-level reference fields (`patterns`, `cli_commands`, `prompts`, `examples`) remain supported during migration. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]` with the producer-owned `output_artifacts[].schema` wiki-link. New operational references should use object-shaped entries:
 
 ```yaml
 references:

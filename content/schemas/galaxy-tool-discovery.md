@@ -4,6 +4,7 @@ name: galaxy-tool-discovery
 title: Galaxy tool discovery recommendation
 package: "@galaxy-foundry/galaxy-tool-discovery-schema"
 package_export: "galaxyToolDiscoverySchema"
+validator_bin: validate-galaxy-tool-discovery
 upstream: "https://github.com/jmchilton/foundry/blob/main/packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json"
 tags:
   - schema
@@ -58,7 +59,7 @@ The schema uses Foundry's JSON contract style: `snake_case` fields such as `tool
 
 ## Cast-time role
 
-Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[discover-shed-tool]] via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted recommendation with `validate-galaxy-tool-discovery` before returning; downstream phases bind to this object and would produce worse errors later.
+Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[discover-shed-tool]] via `output_artifacts[].schema` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted recommendation with `validate-galaxy-tool-discovery` before returning; downstream phases bind to this object and would produce worse errors later.
 
 The same object feeds several consumers:
 

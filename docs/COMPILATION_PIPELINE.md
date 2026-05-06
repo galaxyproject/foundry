@@ -25,7 +25,7 @@ Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for k
 
 ### Typed reference manifest
 
-Molds may declare the new object-shaped `references` manifest. It is additive during migration and will replace `patterns`, `cli_commands`, `prompts`, and `examples` once enough Molds have moved. `input_schemas` and `output_schemas` remain explicit Mold IO fields for now because they describe the Mold contract as well as cast packaging.
+Molds may declare the new object-shaped `references` manifest. It is additive during migration and will replace `patterns`, `cli_commands`, `prompts`, and `examples` once enough Molds have moved. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`, with the producer-owned `output_artifacts[].schema` wiki-link pointing at the schema note that cast packages.
 
 ```yaml
 references:
@@ -105,7 +105,7 @@ To cast a Mold, the casting process consumes:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
   - `cli_commands` — legacy wiki links into `content/cli/<tool>/<cmd>.md`.
-  - `input_schemas` / `output_schemas` — wiki-link arrays into `content/schemas/<name>.md`; resolved at cast time via the schema note's `package` + `package_export` to a runtime import from `packages/<name>-schema/`.
+  - `output_artifacts[].schema` (and inherited consumer-side schemas via `input_artifacts[].id`) — wiki-links into `content/schemas/<name>.md`; resolved at cast time via the schema note's `package` + `package_export` to a runtime import from `packages/<name>-schema/`.
   - `prompts` — legacy wiki links into `content/prompts/` (when the Mold needs them).
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).

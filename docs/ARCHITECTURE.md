@@ -155,11 +155,11 @@ Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (n
 
 - `patterns` — wiki links into `content/patterns/`. Cast: LLM-condensed.
 - `cli_commands` — wiki links into `content/cli/<tool>/`. Cast to JSON sidecars by action Molds.
-- `input_schemas` / `output_schemas` — wiki-link arrays into `content/schemas/<name>.md` (e.g. `[[summary-nextflow]]`). The schema note declares `package` + `package_export`; cast imports the named runtime export from the package and serializes it into the cast bundle's `references/schemas/<name>.schema.json`.
+- `output_artifacts[].schema` — producer-owned wiki-link into `content/schemas/<name>.md` (e.g. `[[summary-nextflow]]`); consumers inherit via shared artifact `id`. The schema note declares `package` + `package_export`, plus optional `validator_bin`; cast imports the named runtime export from the package and serializes it into the cast bundle's `references/schemas/<name>.schema.json`.
 - `prompts` — wiki links into `content/prompts/` (new; deferred until first Mold needs it). Cast: inlined verbatim, no LLM rewrite.
 - `examples` — typed path arrays into `content/molds/<slug>/examples/` or shared `content/examples/`. Cast: copied verbatim.
 
-The validator resolves each kind with its own check (slug-resolves for wiki-link kinds; file-exists + JSON-Schema-parseable for `input_schemas` / `output_schemas`; etc.). The casting tool dispatches per kind — see `COMPILATION_PIPELINE.md`.
+The validator resolves each kind with its own check (slug-resolves for wiki-link kinds; for `output_artifacts[].schema`, the wiki-link target must be a `type: schema` note declaring `package` + `package_export`; etc.). The casting tool dispatches per kind — see `COMPILATION_PIPELINE.md`.
 
 **Wiki-link frontmatter fields** (regex `^\[\[.+\]\]$`):
 - `parent_pattern` (single, optional).
@@ -185,7 +185,7 @@ Layered validation (`validateData` orchestrates):
 7. **`validateIwcTags`** — every `iwc/<category>` tag used in a note is declared in `meta_tags.yml`. Same enforcement as the existing tag pipeline; no separate mechanism.
 8. **`validateMoldRefs`** — every Mold's typed references resolve, per kind:
    - `patterns`, `cli_commands`, `prompts` — slug resolves to a content note of the expected type.
-   - `input_schemas` / `output_schemas` — wiki-link slug resolves to a `type: schema` note that declares `package` and `package_export`.
+   - `output_artifacts[].schema` — wiki-link slug resolves to a `type: schema` note that declares `package` and `package_export`; any `validator_bin` must exist in the package's `bin` map.
    - `examples` — path exists.
    Failures error. The per-kind dispatch here is the static-validation analog of casting's per-kind dispatch.
 9. **`validatePipelinePhases`** — every `pipeline` note's `phases` items resolve:
@@ -499,7 +499,7 @@ foundry/
 Key decisions reflected in the layout:
 - **`content/` content root** — Astro idiom. Reads accurately to a new contributor; the Foundry isn't an Obsidian vault by intent.
 - **`content/molds/<slug>/index.md` as directory note** — one validator rule (`DIR_NOTE_TYPES`) covers it.
-- **`content/schemas/` separate from `meta_schema.yml`** — `meta_schema.yml` is the frontmatter contract for content notes; `content/schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas live as content notes (renderable via `SchemaBody.astro`) so they show up in the dashboard, in the Index, and in tag/backlink browses; the actual JSON Schema lives in the schema's TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored: hand-edited there; vendored: synced from an upstream package). The note's frontmatter declares `package` + `package_export`; `site/src/lib/schema-registry.ts` imports each schema directly from its package, and casting imports the named runtime export and serializes it into cast bundles. Molds reference schemas via wiki-link frontmatter fields (`input_schemas`, `output_schemas`, `references[].ref` for `kind: schema`).
+- **`content/schemas/` separate from `meta_schema.yml`** — `meta_schema.yml` is the frontmatter contract for content notes; `content/schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas live as content notes (renderable via `SchemaBody.astro`) so they show up in the dashboard, in the Index, and in tag/backlink browses; the actual JSON Schema lives in the schema's TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored: hand-edited there; vendored: synced from an upstream package). The note's frontmatter declares `package` + `package_export`; `site/src/lib/schema-registry.ts` imports each schema directly from its package, and casting imports the named runtime export and serializes it into cast bundles. Molds reference schemas via wiki-link frontmatter fields (`output_artifacts[].schema` on the producer side, `references[].ref` for `kind: schema`).
 - **`content/cli/<tool>/<cmd>.md` flat per tool** — CLI manual pages are organized two-deep for browsing, but each command is a single flat file; not directory-note semantics.
 - **`casts/` outside `content/`** — casts are not foundry notes. They have their own provenance shape and target-specific layouts; collapsing them into `content/` would muddy the validator and the site.
 - **`docs/` for Foundry-meta** — long-form design docs (architecture, MOLD_SPEC) live here, not as content notes.
@@ -531,7 +531,7 @@ Schema:
 - **Source/target/tool as typed fields vs tags?** `source/nextflow`, `target/galaxy`, `tool/gxwf` are clean as tags today; promoting to typed enum fields buys validation but adds schema churn. Decide once `MOLD_SPEC` is real.
 - **Mold subtypes?** The `axis` field (`source-specific | target-specific | tool-specific | generic`) may want to graduate into a `subtype`, with conditional requireds (e.g., source-specific Molds require a `source` value, tool-specific Molds require a `tool`). Punt to walk-throughs.
 - **`related_molds` legitimacy.** Mold-to-Mold wiki links are flagged as a smell in `COMPILATION_PIPELINE.md` (recursive casting depth). Keep as a warned-but-allowed field, or forbid outright? v1: allow, warn at cast time. The intended escape valve for "two Molds need shared content" is to factor that content into a pattern page, manpage, or schema — not a Mold-to-Mold link.
-- **Exact shape of the typed-reference manifest.** Field names (`patterns` vs `related_patterns`, `cli_commands` vs `manpages`, `input_schemas` vs nested under a `schemas` object) are sketch-level above; lock in after walking 2-3 Molds end-to-end (suggested order in `MOLDS.md`).
+- **Exact shape of the typed-reference manifest.** Field names (`patterns` vs `related_patterns`, `cli_commands` vs `manpages`) are sketch-level above; lock in after walking 2-3 Molds end-to-end (suggested order in `MOLDS.md`).
 - **CLI command slug strategy.** `cli-command` notes live two-deep (`content/cli/<tool>/<cmd>.md`). Wiki-link slug should disambiguate across tools — likely `<tool>-<cmd>` or `cli/<tool>/<cmd>` namespacing. Update the shared `wiki-links.ts` resolver when the first `cli-command` notes land.
 - **Manpage authoring source.** Seed from `--help` output (deterministic but thin) or hand-author and use `--help` only for cross-checking? CLI command pages should pin install/source, invocation, output, failure, examples, and gotchas.
 - **Whole-CLI Mold or command references?** Current direction: CLI command pages are reference content, and action Molds reference exact commands. Revisit only if a real whole-CLI action emerges.
