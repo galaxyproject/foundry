@@ -46,7 +46,7 @@ Alphabetical.
 
 **Harness** — hand-authored orchestration glue that sequences Molds, manages user-approval gates, maintains run state, handles routing decisions (e.g., the discover-or-author branch). Not cast from a Mold; not in the Foundry's casting pipeline. May be heavyweight (Archon-style) or a lightweight orchestration skill.
 
-**Harness-level concern** — a recurring pipeline activity that belongs to the harness, not to any individual Mold. Examples: approval gates, scope confirmation, plan presentation, tool-discovery routing, test-data fallback chains, state and resumption. These are **not Molds**. Some of them surface inline in pipelines as non-Mold phase kinds (`[branch]` for routing, the future `[gate]` for checkpoints); others (state, resumption, autonomy posture) are off-pipeline harness-internal concerns. See the relevant section of `INITIAL_HARNESS_PIPELINES.md`.
+**Harness-level concern** — a recurring pipeline activity that belongs to the harness, not to any individual Mold. Examples: approval gates, scope confirmation, plan presentation, tool-discovery routing, test-data fallback chains, state and resumption. These are **not Molds**. Some of them surface inline in pipelines as non-Mold phase kinds (`[branch]` for routing, the future `[gate]` for checkpoints); others (state, resumption, autonomy posture) are off-pipeline harness-internal concerns. See `docs/HARNESS_PIPELINES.md`.
 
 **IWC** — Intergalactic Workflow Commission. Curates the canonical set of high-quality Galaxy workflows. The Foundry's foundational corpus.
 

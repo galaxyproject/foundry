@@ -1,9 +1,24 @@
+---
+type: research
+subtype: component
+tags:
+  - research/component
+component: "Archon harness substrate evaluation"
+status: draft
+created: 2026-04-29
+revised: 2026-05-06
+revision: 2
+ai_generated: true
+summary: "Archon as a possible Foundry harness substrate; strong fit for heavy harnesses, with per-step sub-DAG looping as the main gap."
+sources:
+  - "https://github.com/coleam00/Archon"
+---
+
 # Archon evaluation
 
-Project-infrastructure research on Archon as a possible Foundry harness substrate. Last reviewed
-against `https://github.com/coleam00/Archon` on 2026-04-29, using the `dev` branch at the commit
-matching CHANGELOG `0.3.10`. Treat operational details below as point-in-time evidence and re-check
-before adopting Archon.
+Project-infrastructure research on Archon as a possible Foundry harness substrate. Reviewed against
+`https://github.com/coleam00/Archon` on 2026-04-29, `dev` branch at CHANGELOG `0.3.10`. Operational
+details are point-in-time evidence — re-check before adopting.
 
 ## 1. What is it?
 

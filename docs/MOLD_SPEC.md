@@ -62,6 +62,38 @@ It must declare:
 
 Legacy top-level fields such as `patterns`, `cli_commands`, `prompts`, and `examples` remain supported during migration. New operational dependencies should use `references:`.
 
+## Typed Reference Manifest
+
+`references:` is the operational dependency manifest. Each entry is object-shaped:
+
+```yaml
+references:
+  - kind: schema
+    ref: "[[summary-nextflow]]"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "Validate emitted summary JSON."
+```
+
+Required fields:
+
+- `kind` selects the resolver and casting behavior (`pattern`, `cli-command`, `schema`, `prompt`, `example`, `research`).
+- `ref` is a wiki link for note-backed references. Current schema references use the `content/schemas/<name>.md` schema note as the wiki-link target.
+- `used_at` records whether the reference is used at cast time, runtime, or both.
+- `load` is `upfront` or `on-demand`; `on-demand` references require `trigger`.
+- `mode` declares the transformation (`verbatim`, `condense`, `sidecar`).
+- `evidence` tracks confidence: `hypothesis`, `corpus-observed`, or `cast-validated`.
+
+Conditional fields:
+
+- `verification` is required when `evidence: hypothesis`.
+- `trigger` is required when `load: on-demand`.
+- `purpose` is strongly recommended for generated-skill instructions and reviewer context.
+
+`reference_contract.yml` owns labels, descriptions, and allowed values. Casting consumes the manifest by kind; see `COMPILATION_PIPELINE.md` for output layout and provenance.
+
 ## Eval, Usage, Refinement: what goes where
 
 Three sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences.
@@ -140,7 +172,7 @@ The validator should expose the same facts a UI Mold-health panel needs:
 
 The site surfaces this contract in two places: each Mold page has a Mold health panel, and the Mold inventory table has a compact health column plus eval-plan coverage count.
 
-## Deferred
+## Later Work
 
 - Richer `io:` object model for named inputs/outputs.
 - Full cast execution/eval harness.

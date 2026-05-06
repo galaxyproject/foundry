@@ -1,8 +1,6 @@
-# Initial Harness Pipelines
+# Harness Pipelines
 
-Initial sketch of harness pipelines for the Galaxy Workflow Foundry. Used to derive the initial Mold inventory: each named pipeline phase corresponds to one (atomic, harness-step-sized) Mold, and the union of phases across pipelines is the Mold catalog. See `MOLDS.md`.
-
-These are sketches, not specs. Phase names are provisional. Phase counts and exact sequencing will shift as we work through real examples from the IWC corpus.
+Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase corresponds to one atomic, harness-step-sized Mold, and the union of phases across pipelines is the Mold catalog. See `MOLDS.md`.
 
 ## Framing
 
@@ -142,7 +140,7 @@ CWL is already structured; the upstream extraction work is much lighter.
   - Validate: `validate-galaxy-step`, `validate-galaxy-workflow`, `validate-cwl`.
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
-- **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts. May or may not factor cleanly through a shared intermediate; defer.
+- **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
 - **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` is its own thing because a paper rarely ships a test bundle the way NF/CWL pipelines do.
 
 ## Pattern pages, not Molds
@@ -151,9 +149,6 @@ Per the architecture, the `design-*` knowledge skills (collection manipulation, 
 
 Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidance) plus a companion **action Mold** (`author-galaxy-tool-wrapper`) that performs the authoring. The Mold links to the pattern page; the pattern page is consumed by the generated skill via link resolution.
 
-## Open questions
+## Tracked Follow-Up
 
-- Whether to surface `PAPER → CWL → GALAXY` and `NEXTFLOW → CWL → GALAXY` as distinct named harnesses or leave them as runtime compositions of two harnesses. (Either way the Mold inventory is unchanged — both paths reuse existing Molds.)
-- Whether `compare-against-iwc-exemplar` should also fire post-template or post-implementation (after the per-step loop) in addition to its pre-template position, to catch divergences that only appear once draft structure or full step granularity exist.
-- Whether `run-workflow-test` factors cleanly across Galaxy and CWL targets via Planemo, or splits into per-target variants once we hit real test execution.
-- Whether the `<source>-test-to-<target>-tests` Molds factor through a shared intermediate or stay per-pair.
+- Composed paths (`PAPER -> CWL -> GALAXY`, `NEXTFLOW -> CWL -> GALAXY`) reuse the existing Mold inventory. Track whether they become distinct pipeline notes or remain runtime compositions in [issue #200](https://github.com/jmchilton/foundry/issues/200).
