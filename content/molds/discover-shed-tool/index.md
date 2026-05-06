@@ -20,10 +20,6 @@ output_artifacts:
     default_filename: galaxy-tool-pin.json
     schema: "[[galaxy-tool-discovery]]"
     description: "(owner, repo, tool_id, version, changeset_revision) pin for a Tool Shed wrapper plus discovery classification."
-cli_commands:
-  - "[[tool-search]]"
-  - "[[tool-versions]]"
-  - "[[tool-revisions]]"
 related_notes:
   - "[[component-tool-shed-search]]"
 references:

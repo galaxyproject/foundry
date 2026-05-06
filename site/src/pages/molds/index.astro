@@ -34,8 +34,7 @@ function healthFor(m: typeof molds[number]): 'ok' | 'warn' | 'error' {
   const refs = Array.isArray(d.references) ? d.references : [];
   if (refs.some((ref: any) => ref.evidence === 'hypothesis' && !ref.verification)) return 'error';
   if (refs.some((ref: any) => ref.load === 'on-demand' && !ref.trigger)) return 'warn';
-  const legacyCount = (d.patterns?.length ?? 0) + (d.cli_commands?.length ?? 0) + (d.prompts?.length ?? 0) + (d.examples?.length ?? 0);
-  return legacyCount > 0 ? 'warn' : 'ok';
+  return 'ok';
 }
 ---
 <Base title="Molds">

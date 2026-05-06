@@ -143,21 +143,6 @@ properties:
   tool:
     type: string
     enum: [gxwf, planemo]
-  patterns:
-    type: array
-    items:
-      type: string
-      pattern: "^\\[\\[.+\\]\\]$"
-  cli_commands:
-    type: array
-    items:
-      type: string
-      pattern: "^\\[\\[.+\\]\\]$"
-  prompts:
-    type: array
-    items:
-      type: string
-      pattern: "^\\[\\[.+\\]\\]$"
   input_schemas:
     type: array
     items:
@@ -215,10 +200,6 @@ properties:
         description:
           type: string
           minLength: 20
-  examples:
-    type: array
-    items:
-      type: string
   references:
     type: array
     items:

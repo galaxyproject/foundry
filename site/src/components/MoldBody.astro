@@ -16,15 +16,6 @@ const { entry, linkMap, artifactGraph, entryById } = Astro.props;
 const data = entry.data as any;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-function resolveAll(arr: string[] | undefined) {
-  if (!arr) return [];
-  return arr.map(wl => resolveWikiLink(wl, linkMap, base));
-}
-
-const patterns = resolveAll(data.patterns);
-const cliCommands = resolveAll(data.cli_commands);
-const prompts = resolveAll(data.prompts);
-
 const axisChip = data.axis;
 const specifier = data.source ?? data.target ?? data.tool ?? null;
 
@@ -309,54 +300,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
   }
 </style>
 
-{(patterns.length + cliCommands.length + prompts.length) > 0 && (
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-    {patterns.length > 0 && (
-      <section class="p-3 rounded-lg border border-(--color-border)">
-        <h3 class="text-sm font-semibold mb-2">Patterns</h3>
-        <ul class="list-none p-0 space-y-1 text-sm">
-          {patterns.map(l => (
-            <li>
-              {l.href
-                ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
-                : <span class="dangling">{l.label}</span>}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
-    {cliCommands.length > 0 && (
-      <section class="p-3 rounded-lg border border-(--color-border)">
-        <h3 class="text-sm font-semibold mb-2">CLI Commands</h3>
-        <ul class="list-none p-0 space-y-1 text-sm font-mono">
-          {cliCommands.map(l => (
-            <li>
-              {l.href
-                ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
-                : <span class="dangling">{l.label}</span>}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
-    {prompts.length > 0 && (
-      <section class="p-3 rounded-lg border border-(--color-border)">
-        <h3 class="text-sm font-semibold mb-2">Prompts</h3>
-        <ul class="list-none p-0 space-y-1 text-sm">
-          {prompts.map(l => (
-            <li>
-              {l.href
-                ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
-                : <span class="dangling">{l.label}</span>}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
-  </div>
-)}
-
-{(data.input_schemas || data.output_schemas || data.examples) && (
+{(data.input_schemas || data.output_schemas) && (
   <dl class="meta mb-6 p-3 rounded-lg bg-(--color-surface-raised) text-sm">
     {data.input_schemas && data.input_schemas.length > 0 && (
       <>
@@ -368,12 +312,6 @@ function producersOf(id: string): { moldId: string; description: string }[] {
       <>
         <dt>Output schemas:</dt>
         <dd>{data.output_schemas.join(', ')}</dd>
-      </>
-    )}
-    {data.examples && data.examples.length > 0 && (
-      <>
-        <dt>Examples:</dt>
-        <dd>{data.examples.join(', ')}</dd>
       </>
     )}
   </dl>
