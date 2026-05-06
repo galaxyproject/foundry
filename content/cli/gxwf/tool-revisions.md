@@ -2,13 +2,15 @@
 type: cli-command
 tool: gxwf
 command: tool-revisions
+package: "@galaxy-tool-util/cli"
+upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
 tags:
   - cli-command
   - cli/gxwf
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 summary: "Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin."
 related_notes:
@@ -19,25 +21,7 @@ related_notes:
 
 Resolve a Tool Shed tool to the changeset revisions that publish it, ordered oldest→newest by `get_ordered_installable_revisions`. Needed when emitting a workflow that pins `(name, owner, changeset_revision)` for reproducible reinstall — TRS version strings alone are insufficient because the Tool Shed dedupes versions across changesets.
 
-## Install
-
-Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Prefer the project-local executable when running inside a checked-out Foundry or galaxy-tool-util workspace.
-
-## Synopsis
-
-```
-gxwf tool-revisions <tool-id> [options]
-```
-
 `<tool-id>` accepts both TRS form (`owner~repo~tool_id`) and pretty form (`owner/repo/tool_id`).
-
-## Options
-
-| Option | Description |
-|---|---|
-| `--tool-version <v>` | Restrict to revisions that publish this exact tool version. The flag is `--tool-version` rather than `--version` because commander's program-level `--version` flag intercepts. |
-| `--latest` | Print only the newest matching revision. |
-| `--json` | Emit `{ trsToolId, version?, revisions: [{ changesetRevision, toolVersion }] }`. |
 
 ## Output
 
@@ -56,14 +40,6 @@ Default: lines of `<changesetRevision>\t<toolVersion>`.
 ```
 
 `--json` without `--tool-version` returns every installable revision for the tool, each tagged with whatever XML `version` it publishes.
-
-## Exit codes
-
-| Code | Meaning |
-|---|---|
-| `0` | At least one revision. |
-| `2` | Empty result (no matching revisions; e.g. `--tool-version` doesn't match). |
-| `3` | HTTP / fetch error. |
 
 ## Examples
 

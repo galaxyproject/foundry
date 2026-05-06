@@ -63,7 +63,6 @@ Long-form design narrative under `docs/`:
 - `COMPILATION_PIPELINE.md` — casting design.
 - `CORPUS_INGESTION.md` — IWC grounding; pattern-bodies-cite-by-URL principle.
 - `SCHEMA_PACKAGES.md` — standard package shape for Foundry-authored JSON Schemas and CLI validators.
-- `COMPONENT_ARCHON.md` — research on Archon as a heavyweight harness option.
 
 ## Status
 

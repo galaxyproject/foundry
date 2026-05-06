@@ -8,19 +8,21 @@ interface HealthItem {
 interface Props {
   title: string;
   items: HealthItem[];
+  maxColumns?: number;
 }
 
-const { title, items } = Astro.props;
+const { title, items, maxColumns } = Astro.props;
 const stateRank = { ok: 0, warn: 1, error: 2 } as const;
 const overall = items.reduce<'ok' | 'warn' | 'error'>((state, item) => stateRank[item.state] > stateRank[state] ? item.state : state, 'ok');
 const headingId = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-heading`;
+const maxColumnClass = maxColumns === 3 ? ' health-grid-max-3' : '';
 ---
 <section class={`health-panel health-panel-${overall}`} aria-labelledby={headingId}>
   <div class="health-panel-head">
     <h2 id={headingId}>{title}</h2>
     <span class={`health-pill health-${overall}`}>{overall}</span>
   </div>
-  <ul class="health-grid">
+  <ul class={`health-grid${maxColumnClass}`}>
     {items.map(item => (
       <li class={`health-item health-${item.state}`}>
         <span class="health-dot" aria-hidden="true"></span>
@@ -70,6 +72,9 @@ const headingId = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-heading`;
     padding: 0;
     list-style: none;
   }
+  .health-grid-max-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
   .health-item {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -109,5 +114,15 @@ const headingId = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-heading`;
   .health-pill.health-error {
     background: #c53030;
     color: white;
+  }
+  @media (max-width: 760px) {
+    .health-grid-max-3 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 520px) {
+    .health-grid-max-3 {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

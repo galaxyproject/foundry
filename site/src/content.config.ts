@@ -143,6 +143,8 @@ const cliCommandSchema = z.object({
   type: z.literal('cli-command'),
   tool: z.enum(['gxwf', 'planemo']),
   command: z.string(),
+  package: z.string().optional(),
+  upstream: z.string().optional(),
   ...baseFields,
 }).strict();
 

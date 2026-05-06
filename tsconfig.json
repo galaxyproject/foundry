@@ -17,6 +17,6 @@
       "@foundry/lib/*": ["scripts/lib/*"]
     }
   },
-  "include": ["scripts/**/*.ts", "tests/**/*.ts", "site/src/**/*.ts"],
+  "include": ["scripts/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "site/.astro", "site/dist", "casts"]
 }

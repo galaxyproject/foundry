@@ -56,20 +56,6 @@ export const DESIGN_DOCS: DesignDoc[] = [
     category: 'foundation',
   },
   {
-    slug: 'archon',
-    title: 'Archon Evaluation',
-    source: 'COMPONENT_ARCHON.md',
-    summary: 'Infrastructure research on Archon as a possible harness substrate: useful boundaries, fit, and risks.',
-    category: 'infrastructure',
-  },
-  {
-    slug: 'cli-metadata',
-    title: 'CLI Metadata Integration',
-    source: 'CLI_META_INTEGRATION.md',
-    summary: 'Implementation plan for rendering CLI command docs from upstream spec metadata instead of prose tables.',
-    category: 'infrastructure',
-  },
-  {
     slug: 'pattern-authorship',
     title: 'Pattern Authorship Policy',
     source: 'PATTERNS.md',

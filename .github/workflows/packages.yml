@@ -36,8 +36,29 @@ jobs:
       - name: Install site dependencies
         run: npm --prefix site install --no-audit --no-fund
 
+      - name: Typecheck root and site
+        run: npm run typecheck
+
       - name: Run repo tests
         run: npm run test
+
+      - name: Cache Nextflow pipeline fixtures
+        id: fixture-cache
+        uses: actions/cache@v4
+        with:
+          path: workflow-fixtures/pipelines
+          key: nf-fixtures-v1-${{ hashFiles('workflow-fixtures/fixtures.yaml') }}
+
+      - name: Materialize required Nextflow fixtures
+        if: steps.fixture-cache.outputs.cache-hit != 'true'
+        run: |
+          # Only fetch the pipelines the integration tests actually exercise;
+          # `make fixtures-nextflow` clones all 15 pinned pipelines, which is
+          # wasteful on a cold CI cache. Add new names here as tests grow.
+          set -euo pipefail
+          for name in nf-core/demo nf-core/bacass nf-core/rnaseq; do
+            workflow-fixtures/scripts/fetch.sh "$name"
+          done
 
       - name: Test packages
         run: npm run packages-test

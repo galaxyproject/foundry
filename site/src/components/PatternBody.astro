@@ -16,7 +16,10 @@ const isImplementationPattern = ['operation', 'recipe'].includes(data.pattern_ki
 const exemplars = Array.isArray(data.iwc_exemplars) ? data.iwc_exemplars : [];
 const relatedPatterns = (data.related_patterns ?? [])
   .map((link: string) => resolveWikiLink(link, linkMap, base))
-  .filter((link: ReturnType<typeof resolveWikiLink>) => link.href);
+  .filter(
+    (link: ReturnType<typeof resolveWikiLink>): link is ReturnType<typeof resolveWikiLink> & { href: string } =>
+      link.href !== null,
+  );
 ---
 
 {placement === 'before' && isMap && (
@@ -32,8 +35,8 @@ const relatedPatterns = (data.related_patterns ?? [])
     </p>
     {relatedPatterns.length > 0 && (
       <div class="pattern-map-links">
-        {relatedPatterns.map(link => (
-          <a href={link.href!} class="pattern-map-link no-underline">
+        {relatedPatterns.map((link: (typeof relatedPatterns)[number]) => (
+          <a href={link.href} class="pattern-map-link no-underline">
             <span>{link.label}</span>
             {link.summary && <small>{link.summary}</small>}
           </a>

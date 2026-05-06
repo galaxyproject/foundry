@@ -4,15 +4,15 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 10,
-    "content_hash": "b0bc32df1a66c488457022a871e6c7871b8478a835325e6461f6501108c7ef63",
-    "commit": "3a32d273753664f60404d0a95851e771d6ed90f2"
+    "revision": 11,
+    "content_hash": "8d3400077caa35cc3341cd81becb39466047c3d6406286d7d56459864bb82f69",
+    "commit": "fbee1ec7fd0fdd6d6cd3c0792835e433a0a4b7ee"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-06T03:21:58.488Z",
-  "cast_date": "2026-05-05",
-  "cast_revision": 5,
+  "cast_at": "2026-05-06T15:10:16.211Z",
+  "cast_date": "2026-05-06",
+  "cast_revision": 6,
   "cast_history": [
     {
       "rev": 1,
@@ -38,6 +38,11 @@
       "rev": 5,
       "date": "2026-05-05",
       "note": "refresh provenance after reference dispatch cleanup"
+    },
+    {
+      "rev": 6,
+      "date": "2026-05-06",
+      "note": "rev 9: expand Param metadata (#186)"
     }
   ],
   "refs": [

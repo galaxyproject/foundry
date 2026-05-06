@@ -1,76 +1,33 @@
-# Initial Compilation Pipeline
+# Compilation Pipeline
 
-Initial sketch of how Molds become cast artifacts. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` → `casts/<target>/<name>/`). Working premise: **LLM-driven, evolution-friendly, reproducible enough to diff**. Casting is not deterministic; it is recorded.
+How Molds become cast artifacts. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **LLM-driven, evolution-friendly, reproducible enough to diff**. Casting is not deterministic; it is recorded.
 
 ## What casting is
 
-Casting takes a Mold (a typed reference manifest plus a procedural body) and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific cast artifact. The cast is **condensed and isolated** — no links back to the Foundry, no runtime dependency on it.
+Casting takes a Mold (a typed reference manifest plus a procedural body) and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific cast artifact. `MOLD_SPEC.md` owns the source-layout and manifest contract; this document describes how casting consumes that contract. The cast is **condensed and isolated** — no links back to the Foundry, no runtime dependency on it.
 
 Casting operates as **per-kind dispatch** over the manifest, not a single resolve-and-inline pass. Different reference kinds get different transformations:
 
 | Reference kind | Source location | Casting transformation | Lands at | Status |
 |---|---|---|---|---|
 | `pattern` | `content/patterns/*.md` | Verbatim copy or LLM-condense per `mode` | `references/patterns/<slug>.md` | v1 |
-| `cli-command` | `content/cli/<tool>/<cmd>.md` | Deterministic JSON sidecar | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
+| `cli-command` | `content/cli/<tool>/<cmd>.md` framing note plus registered upstream CLI metadata | Deterministic JSON sidecar sourced from registry metadata + framing markdown | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
 | `schema` | `[[wiki-link]]` to a `type: schema` note in `content/schemas/`. The note declares `package` + `package_export`; cast imports the named runtime export at build time and serializes it. Foundry-authored: schemas in `packages/<name>-schema/src/<name>.schema.json` (e.g. `summary-nextflow`, `galaxy-tool-discovery`). Vendored: schemas synced from upstream packages into `packages/<name>-schema/src/` (e.g. `tests-format` from `@galaxy-tool-util/schema`). | Verbatim copy of the imported export, JSON-serialized | `references/schemas/<note-slug>.schema.json` | v1 |
 | `research` | `content/research/*.md` or paired structured sources under `content/research/` | Verbatim copy or LLM condense per `mode` | `references/notes/<source-basename>` (strict 1:1) | v1 |
-| `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | `references/prompts/` (inlined or copied) | **deferred** — rejected by v1 caster as "not implemented" until a real Mold needs it |
-| `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` | **deferred** — same as `prompt` |
+| `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | `references/prompts/` (inlined or copied) | Contracted; caster rejects until a real Mold needs it |
+| `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` | Contracted; caster rejects until a real Mold needs it |
 | `eval` | `content/molds/<slug>/eval.md` | **Never packaged** | — (Foundry-only) | n/a |
-| `mold` (smell) | another Mold | Discouraged; see Open questions | — | n/a |
+| `mold` (smell) | another Mold | Discouraged; factor shared content into other reference kinds | — | n/a |
 
 Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for kinds where it adds value (patterns, research notes). `mode: condense` is implemented as a **two-phase contract**: the deterministic caster records a `pending_llm: true` placeholder for the ref (with a slot for prompt provenance and dst hash), and the `/cast` LLM phase fills it in. The deterministic verifier rejects committed provenance with any unfilled `pending_llm` entry.
 
-`example` and `prompt` are declared in the contract but no Mold uses them yet, so the v1 caster fails fast on them rather than guessing dst conventions; the first Mold to need either kind shapes the rule.
+`example` and `prompt` are declared in the contract but no Mold uses them yet, so the caster fails fast on them rather than guessing dst conventions; the first Mold to need either kind shapes the rule.
 
 ### Typed reference manifest
 
-Molds may declare the new object-shaped `references` manifest. It is additive during migration and will replace `patterns`, `cli_commands`, `prompts`, and `examples` once enough Molds have moved. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`, with the producer-owned `output_artifacts[].schema` wiki-link pointing at the schema note that cast packages.
+Molds declare operational dependencies through the object-shaped `references` manifest. `MOLD_SPEC.md` is canonical for field requirements and authoring rules; `reference_contract.yml` is canonical for vocabulary labels and descriptions. Casting reads the manifest, resolves each reference by `kind`, and writes the target-specific reference layout described below.
 
-```yaml
-references:
-  - kind: schema
-    ref: "[[summary-nextflow]]"
-    used_at: both
-    load: upfront
-    mode: verbatim
-    evidence: cast-validated
-    purpose: "Validate emitted summary JSON."
-  - kind: research
-    ref: "[[component-nextflow-testing]]"
-    used_at: runtime
-    load: on-demand
-    mode: condense
-    evidence: hypothesis
-    purpose: "Extract nf-test fixtures and snapshots."
-    trigger: "When filling test_fixtures or nf_tests."
-    verification: "Run the generated summarize-nextflow skill on nf-core/bacass and confirm nf_tests extraction improves."
-```
-
-Field contract:
-
-- `kind` selects the resolver and transformation handler: `pattern`, `cli-command`, `schema`, `prompt`, `example`, or `research`.
-- `ref` is a wiki link for note-backed kinds (`pattern`, `cli-command`, `prompt`, `research`) and a path for file-backed kinds (`schema`, `example`).
-- `used_at` is `cast-time`, `runtime`, or `both`; it says whether the reference is consumed while building the cast, consulted by the generated skill at runtime, or both.
-- `load` is `upfront` or `on-demand`; it is the progressive-disclosure contract and should be honored by generated skill instructions and sidecar layout.
-- `mode` is `verbatim`, `condense`, or `sidecar`; it declares the transformation.
-- `evidence` is `hypothesis`, `corpus-observed`, or `cast-validated`; it records whether the connection is speculative, observed in real-world source/corpus work, or verified by a generated-skill run.
-- `verification` is required when `evidence: hypothesis`; it names the real-data run or check needed to prove the connection is useful.
-- `purpose` and `trigger` are optional prose for maintainers and generated-skill instructions. `trigger` is especially important for `load: on-demand` references.
-
-`load: never` is deliberately omitted. Non-operational graph links stay in `related_notes`; once a reference appears in `references`, casting and validation should treat it as operational.
-
-#### Reference evidence
-
-Reference connections can be exploratory without hiding that uncertainty:
-
-- `hypothesis` — added because it seems useful; not yet proven by a real cast run. Requires `verification`.
-- `corpus-observed` — grounded in survey or research over real workflows, upstream source, or runtime behavior.
-- `cast-validated` — a generated skill used this reference successfully on real data.
-
-This lets maintainers add promising references while preserving an implicit TODO: run the generated skill on real-world data and promote or remove the connection based on the result.
-
-The controlled vocabulary, labels, descriptions, and help links for `kind`, `used_at`, `load`, `mode`, and `evidence` live in `reference_contract.yml`. Validation and site rendering both read that registry.
+Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`. Producer-owned `output_artifacts[].schema` wiki-links point at schema notes that casting packages; consumers inherit those contracts by binding to the same artifact `id`.
 
 ### Agent-facing vs. human-facing vendored artifacts
 
@@ -90,11 +47,11 @@ The casting process is itself expected to evolve. Today: an LLM with a target-sp
 
 Three triggers, in increasing automation:
 
-1. **Manual.** Today: `npm run cast -- <mold-name> --target=<target>` for the deterministic prepare, plus the `/cast` slash command for the full validate → prepare → LLM → verify loop.
-2. **CI on Mold change.** When a PR touches `molds/<name>/`, CI re-casts that Mold against all configured targets and surfaces the diff in review. (Not wired yet — cast artifacts are committed manually.)
-3. **Watch-on-change** (dev convenience). Future.
+1. **Manual.** `npm run cast -- <mold-name> --target=<target>` for the deterministic prepare, plus the `/cast` slash command for the full validate -> prepare -> LLM -> verify loop.
+2. **CI on Mold change.** When a PR touches `molds/<name>/`, CI re-casts that Mold against all configured targets and surfaces the diff in review.
+3. **Watch-on-change** for development convenience.
 
-Drift surfaces today via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, pending LLM entries). A repo-wide `foundry status` is future work.
+Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, pending LLM entries).
 
 ## Input contract
 
@@ -109,13 +66,13 @@ To cast a Mold, the casting process consumes:
   - `prompts` — legacy wiki links into `content/prompts/` (when the Mold needs them).
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
-  - Other Molds (`related_molds`) — flagged as a smell; see Open questions.
+  - Other Molds (`related_molds`) — flagged as a smell; shared operational content should move to a pattern page, CLI manual page, schema, prompt, example, or research note.
 - **The cast target spec** — a per-target adapter (prompt templates per kind + output structure) declared in `casts/<target>/_target.yml`.
 - **A casting model and prompt version** — recorded in provenance.
 
 Resolution policy is per-kind, not a single rule:
 - `pattern` — verbatim inline if under a size threshold; LLM-summarize otherwise. Casting hints (`inline: true` / `summarize: true`) may override.
-- `cli-command` — always cast to JSON sidecar (deterministic structuring; no token-budget condensation needed because the sidecar is loaded only when the agent needs that command).
+- `cli-command` — always cast to JSON sidecar from registered upstream metadata plus the Foundry framing note; no token-budget condensation needed because the sidecar is loaded only when the agent needs that command.
 - `schema`, `example`, `prompt` — always verbatim copy unless the typed reference declares a future supported transformation.
 - `research` — operational background; copied or condensed according to `mode`, and loaded according to `used_at` / `load`. `mode: condense` is specified but not implemented in v1 tooling yet.
 - `eval` — never packaged.
@@ -133,8 +90,8 @@ casts/claude/<mold-name>/
 │   ├── cli/                  # deterministic JSON sidecars (flat, <slug>.json)
 │   ├── patterns/             # verbatim or condensed pattern excerpts
 │   ├── notes/                # research notes (verbatim by default; condense per ref mode)
-│   ├── prompts/              # (deferred — kind not yet wired)
-│   └── examples/             # (deferred — kind not yet wired)
+│   ├── prompts/              # populated when prompt refs exist
+│   └── examples/             # populated when example refs exist
 └── _provenance.json          # required, not part of the skill (schema v2 — see below)
 ```
 
@@ -142,7 +99,7 @@ Per-kind dst conventions are declared in `casts/<target>/_target.yml` (`kinds.<k
 
 Per-kind subdirectories under `references/` mirror the casting dispatch and let the generated skill's runtime locate any artifact deterministically.
 
-For the **web target** (sketch):
+For the **web target**:
 ```
 casts/web/<mold-name>/
 ├── skill.json                # structured skill description
@@ -150,9 +107,9 @@ casts/web/<mold-name>/
 └── _provenance.json
 ```
 
-For **generic**: shape TBD; probably a single self-contained markdown.
+For **generic**: single self-contained markdown unless a richer consumer appears.
 
-`_provenance.json` is required for every cast. The contract is `scripts/lib/schemas/cast-provenance.schema.json` (schema version 2). Sketch:
+`_provenance.json` is required for every cast. The contract is `scripts/lib/schemas/cast-provenance.schema.json` (schema version 2). Shape:
 
 ```json
 {
@@ -167,7 +124,7 @@ For **generic**: shape TBD; probably a single self-contained markdown.
   },
   "cast_at": "2026-05-02T22:44:00.546Z",
   "cast_history": [
-    { "rev": 1, "date": "2026-05-01", "note": "initial hand-cast" }
+    { "rev": 1, "date": "2026-05-01", "note": "hand-cast" }
   ],
   "refs": [
     {
@@ -233,18 +190,18 @@ cast_mold(mold_name, target):
   validate every ref exists and conforms to its kind's contract
   target   <- load_target_adapter(target)
 
-  # Per-kind dispatch (v1):
+  # Per-kind dispatch:
   for ref in refs:
     case ref.kind:
       pattern      -> verbatim copy or LLM-condense per mode
                       write to references/patterns/<source-basename>
-      cli-command  -> deterministic JSON sidecar from frontmatter + body
+      cli-command  -> deterministic JSON sidecar from registry metadata + framing body
                       write to references/cli/<source-slug>.json
       schema       -> copy verbatim to references/schemas/<source-basename>
       research     -> copy verbatim or condense per mode
                       write to references/notes/<source-basename>
-      prompt       -> reject (deferred — not implemented in v1)
-      example      -> reject (deferred — not implemented in v1)
+      prompt       -> reject until first prompt ref establishes target convention
+      example      -> reject until first example ref establishes target convention
       eval         -> skip (never packaged)
 
   skill_md  <- target.assemble_skill(mold.body, condensed_refs, manifest)
@@ -290,22 +247,14 @@ We do not guarantee that re-casting produces byte-identical output. We do guaran
 - **Does not update Molds.** If casting reveals a Mold is wrong, that's a hand edit by the maintainer.
 - **Does not touch eval plans.** `eval.md` is Foundry-only; never read by casting.
 
-## v1 minimum
+## Minimum Exercise
 
 To exercise the architecture without overbuilding:
 
-- One cast target: **Claude**. Web and generic deferred.
+- One cast target: **Claude**. Web and generic stay out of scope until the Claude path is proven.
 - One casting model: pick one, pin in `casts/claude/_target.yml`.
 - Cast 3-4 Molds end-to-end: `summarize-paper` (exercises `schema` + `pattern`), `implement-galaxy-tool-step` (exercises `pattern` + `example`), `validate-galaxy-step` (exercises `cli-command` reference from an action Mold), `validate-galaxy-workflow` (exercises terminal validation posture). Diversity exercises the per-kind dispatch, not just the prompt.
-- Manual `foundry cast` only — no CI, no watch.
+- Manual `foundry cast` only.
 - Commit casts to the repo so we can review the actual outputs.
 
 If those casts look reasonable and the provenance flow holds, scale to more Molds and more targets.
-
-## Open questions
-
-- **Casting prompt granularity.** Per-kind prompts are baseline (pattern-condense vs. manpage-to-JSON vs. skill-assembly are different jobs). Open: do action Molds vs. analytical Molds want different *skill-assembly* prompts? v1: one skill-assembly prompt per target; refactor when one prompt no longer fits.
-- **Recursive casting depth.** If Mold A wiki-links Mold B (`related_molds`), do we resolve B's content into A's cast, or just summarize that B exists? v1: surface as a smell, allow but warn. The intended escape valve for "two Molds need shared content" is to factor that content into a **pattern page, CLI manual page, prompt fragment, or schema** — kinds that already have casting transformations — not a Mold-to-Mold link. Revisit if a legitimate Mold-to-Mold need surfaces.
-- **Caching ref resolution.** Re-resolving every wiki link every cast is wasteful at scale. v1: no cache. Add when casting count makes it noticeable.
-- **Cast diff hygiene.** LLM output is noisy; casts will produce churny diffs even on small Mold edits. Consider an output-stabilization pass (deterministic re-formatting). Defer until churn becomes painful.
-- **Multi-target casts in one run.** `foundry cast <mold-name>` (no `--target`) — cast to all configured targets in parallel? v1: explicit `--target` required.
