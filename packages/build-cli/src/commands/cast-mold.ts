@@ -707,6 +707,143 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
   };
 }
 
+// ---- deterministic SKILL.md assembly ----
+
+function scalar(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function stripWikiLinks(text: string): string {
+  return text.replace(/\[\[([^\]#|]+)(?:#[^\]|]+)?(?:\|([^\]]+))?\]\]/g, (_m, target, label) =>
+    String(label || target).trim(),
+  );
+}
+
+function escapeFrontmatterString(text: string): string {
+  return text.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, " ");
+}
+
+function artifactRows(artifacts: ProvenanceArtifactOutput[] | ProvenanceArtifactInput[]): string[] {
+  return artifacts.map((a) => {
+    const parts = [`- \`${a.id}\``];
+    if ("kind" in a && a.kind) parts.push(`kind: \`${a.kind}\``);
+    if ("default_filename" in a && a.default_filename) {
+      parts.push(`default filename: \`${a.default_filename}\``);
+    }
+    const schema =
+      "schema" in a ? a.schema : "inherited_schema" in a ? a.inherited_schema : undefined;
+    if (schema) parts.push(`schema: ${stripWikiLinks(schema)}`);
+    if ("producers" in a && a.producers?.length) {
+      parts.push(`producer(s): ${a.producers.map((p) => `\`${p}\``).join(", ")}`);
+    }
+    if (a.description) parts.push(stripWikiLinks(a.description).replace(/[.]+$/, ""));
+    return `${parts.join("; ")}.`;
+  });
+}
+
+function refRows(refs: ProvenanceRefEntry[]): string[] {
+  return refs.map((r) => {
+    const details = [`- \`${r.dst}\``, `kind: \`${r.kind}\``, `mode: \`${r.mode}\``];
+    if (r.purpose) details.push(stripWikiLinks(r.purpose).replace(/[.]+$/, ""));
+    if (r.trigger) details.push(`Trigger: ${stripWikiLinks(r.trigger).replace(/[.]+$/, "")}`);
+    return details.join("; ") + ".";
+  });
+}
+
+function schemaValidationRows(
+  outputs: ProvenanceArtifactOutput[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): string[] {
+  const rows: string[] = [];
+  for (const output of outputs) {
+    if (!output.schema) continue;
+    const target = resolveWikiLink(output.schema, slugMap);
+    const meta = target ? metaByPath.get(target) : undefined;
+    const validator = scalar(meta?.validator_bin);
+    const schemaName = stripWikiLinks(output.schema);
+    const file = output.default_filename
+      ? `\`${output.default_filename}\``
+      : "the emitted artifact";
+    rows.push(
+      validator
+        ? `- Validate ${file} for \`${output.id}\` with \`${validator}\`; schema: ${schemaName}.`
+        : `- Validate ${file} for \`${output.id}\` against schema ${schemaName} when a validator is available.`,
+    );
+  }
+  return rows;
+}
+
+function renderSection(title: string, lines: string[], empty = "- None declared."): string {
+  return [`## ${title}`, "", ...(lines.length ? lines : [empty]), ""].join("\n");
+}
+
+function renderSkillMarkdown(args: {
+  moldName: string;
+  meta: Frontmatter;
+  body: string;
+  refs: ProvenanceRefEntry[];
+  artifacts?: ProvenanceArtifacts;
+  slugMap: Map<string, string>;
+  metaByPath: Map<string, Frontmatter>;
+}): string {
+  const summary = scalar(args.meta.summary) ?? `Run the ${args.moldName} Mold.`;
+  const consumes = args.artifacts?.consumes ?? [];
+  const produces = args.artifacts?.produces ?? [];
+  const upfront = args.refs.filter((r) => r.load === "upfront" && r.used_at !== "cast-time");
+  const onDemand = args.refs.filter((r) => r.load === "on-demand" && r.used_at !== "cast-time");
+  const validationRows = schemaValidationRows(produces, args.slugMap, args.metaByPath);
+  const body = stripWikiLinks(args.body.trim());
+  const lines = [
+    "---",
+    `name: ${args.moldName}`,
+    `description: "${escapeFrontmatterString(stripWikiLinks(summary))}"`,
+    "---",
+    "",
+    `# ${args.moldName}`,
+    "",
+    "This skill was deterministically cast from its Mold. Treat the Mold body below as the procedure and the artifact/reference sections as the runtime contract.",
+    "",
+    renderSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
+    renderSection(
+      "Inputs",
+      artifactRows(consumes),
+      "- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.",
+    ),
+    renderSection("Outputs", artifactRows(produces)),
+    renderSection("Load Upfront", refRows(upfront)),
+    renderSection("Load On Demand", refRows(onDemand)),
+    renderSection("Validation", validationRows),
+    "## Procedure",
+    "",
+    body || "No Mold body supplied.",
+    "",
+    "## Runtime Notes",
+    "",
+    "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
+    "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
+    "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
+    "",
+  ];
+  return lines.join("\n");
+}
+
+function reconcileSkillMarkdown(
+  bundleRoot: string,
+  expected: string,
+  check: boolean,
+): { drift?: string } {
+  const skillPath = path.join(bundleRoot, "SKILL.md");
+  const expectedHash = sha256OfBuffer(expected);
+  const exists = existsSync(skillPath);
+  const currentHash = exists ? sha256(skillPath) : null;
+  if (currentHash === expectedHash) return {};
+  if (!check) writeFileSync(skillPath, expected);
+  return {
+    drift: exists ? "SKILL.md content differs from deterministic render" : "SKILL.md missing",
+  };
+}
+
 // ---- main ----
 
 export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<void> {
@@ -767,6 +904,20 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     if (result.drift) drift.push({ src: r.src, reason: result.drift });
   }
 
+  const producerIndex = buildProducerIndex(metaByPath);
+  const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
+  const skillText = renderSkillMarkdown({
+    moldName: args.moldName,
+    meta: moldParsed.meta,
+    body: moldParsed.body,
+    refs: refEntries,
+    artifacts: artifactContracts,
+    slugMap,
+    metaByPath,
+  });
+  const skillResult = reconcileSkillMarkdown(bundleRoot, skillText, args.check);
+  if (skillResult.drift) drift.push({ src: "SKILL.md", reason: skillResult.drift });
+
   // runs/*/summary.json validation — find a schema ref for this mold and validate any committed runs.
   const schemaRefEntry =
     refEntries.find((r) => r.kind === "schema" && r.ref === "[[summary-nextflow]]") ??
@@ -821,7 +972,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     cast_revision: carry.cast_revision,
     cast_history: carry.cast_history,
     refs: refEntries,
-    artifacts: readArtifactContracts(moldParsed.meta, buildProducerIndex(metaByPath)),
+    artifacts: artifactContracts,
     open_questions: carry.open_questions,
   };
 

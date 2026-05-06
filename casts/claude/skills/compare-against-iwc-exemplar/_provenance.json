@@ -1,0 +1,166 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "compare-against-iwc-exemplar",
+    "path": "content/molds/compare-against-iwc-exemplar/index.md",
+    "revision": 6,
+    "content_hash": "e810e04f7bb3fc0d5f5e2c26b0657dab886727933e1848882a5ca3af1eba8b36",
+    "commit": "d11541598236ff8dff65c682b1cde8fb6e2ceceb"
+  },
+  "cast_at": "2026-05-06T15:47:25.684Z",
+  "cast_date": "2026-05-06",
+  "cast_revision": 2,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-05-06",
+      "note": "cast requested nextflow-to-galaxy chain"
+    },
+    {
+      "rev": 2,
+      "date": "2026-05-06",
+      "note": "deterministic skill render"
+    }
+  ],
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[convert]]",
+      "src": "content/cli/gxwf/convert.md",
+      "dst": "references/cli/convert.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Normalize fetched IWC workflows into a consistent representation for structural comparison.",
+      "trigger": "After fetching a candidate IWC workflow file and before structural comparison.",
+      "src_hash": "24b91f53b0e7850d1dfc38df1074f2d4270c72f20778d0e4d710545bf64be3e0",
+      "dst_hash": "fad8586b1d2afeed3ee70189fb7db7a8019c77e24cc4fd4697b2210d9bc3012c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-patterns]]",
+      "src": "content/patterns/galaxy-collection-patterns.md",
+      "dst": "references/patterns/galaxy-collection-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Compare proposed collection transformations against curated corpus-observed pattern guidance.",
+      "trigger": "When the data-flow brief proposes collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections.",
+      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tabular-patterns]]",
+      "src": "content/patterns/galaxy-tabular-patterns.md",
+      "dst": "references/patterns/galaxy-tabular-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Compare proposed tabular transformations against curated corpus-observed pattern guidance.",
+      "trigger": "When the data-flow brief proposes tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections.",
+      "src_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "dst_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-data-flow-draft-contract]]",
+      "src": "content/research/galaxy-data-flow-draft-contract.md",
+      "dst": "references/notes/galaxy-data-flow-draft-contract.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
+      "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
+      "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
+      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-shortcuts-anti-patterns]]",
+      "src": "content/research/iwc-shortcuts-anti-patterns.md",
+      "dst": "references/notes/iwc-shortcuts-anti-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Flag proposed shortcuts that are accepted in IWC versus shortcuts that should be treated as smells.",
+      "trigger": "When the design briefs propose tests, assertions, labels, or expected-output comparisons.",
+      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Compare proposed test-data placement and fixture shapes against IWC conventions.",
+      "trigger": "When the design briefs hint at workflow tests or input fixture organization.",
+      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "iwc-comparison-notes",
+        "kind": "markdown",
+        "default_filename": "iwc-comparison-notes.md",
+        "description": "Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "nextflow-galaxy-interface",
+        "description": "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] when running the NEXTFLOW → GALAXY pipeline.",
+        "producers": [
+          "nextflow-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "nextflow-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[nextflow-summary-to-galaxy-data-flow]] when running the NEXTFLOW → GALAXY pipeline.",
+        "producers": [
+          "nextflow-summary-to-galaxy-data-flow"
+        ]
+      },
+      {
+        "id": "cwl-galaxy-interface",
+        "description": "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] when running the CWL → GALAXY pipeline.",
+        "producers": [
+          "cwl-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "cwl-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] when running the CWL → GALAXY pipeline.",
+        "producers": [
+          "cwl-summary-to-galaxy-data-flow"
+        ]
+      },
+      {
+        "id": "paper-galaxy-design",
+        "description": "Combined Galaxy interface + data-flow design brief from [[paper-summary-to-galaxy-design]] when running the PAPER → GALAXY pipeline.",
+        "producers": [
+          "paper-summary-to-galaxy-design"
+        ]
+      }
+    ]
+  }
+}

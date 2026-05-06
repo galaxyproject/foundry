@@ -77,7 +77,12 @@
             "required": ["id", "description"],
             "properties": {
               "id": { "type": "string" },
-              "description": { "type": "string" }
+              "description": { "type": "string" },
+              "inherited_schema": { "type": "string" },
+              "producers": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           }
         }

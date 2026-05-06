@@ -1,0 +1,173 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-summary-to-galaxy-template",
+    "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
+    "revision": 2,
+    "content_hash": "bb11827969de07dff848e3c647986111d91d5c506f749d1b660e8761abbd6084",
+    "commit": "d11541598236ff8dff65c682b1cde8fb6e2ceceb"
+  },
+  "cast_at": "2026-05-06T15:47:25.690Z",
+  "cast_date": "2026-05-06",
+  "cast_revision": 2,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-05-06",
+      "note": "cast requested nextflow-to-galaxy chain"
+    },
+    {
+      "rev": 2,
+      "date": "2026-05-06",
+      "note": "deterministic skill render"
+    }
+  ],
+  "refs": [
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-patterns]]",
+      "src": "content/patterns/galaxy-collection-patterns.md",
+      "dst": "references/patterns/galaxy-collection-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
+      "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
+      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tabular-patterns]]",
+      "src": "content/patterns/galaxy-tabular-patterns.md",
+      "dst": "references/patterns/galaxy-tabular-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
+      "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
+      "src_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "dst_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.md",
+      "dst": "references/notes/galaxy-collection-semantics.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
+      "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
+      "src_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "dst_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-data-flow-draft-contract]]",
+      "src": "content/research/galaxy-data-flow-draft-contract.md",
+      "dst": "references/notes/galaxy-data-flow-draft-contract.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
+      "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
+      "verification": "Promote after two worked Nextflow-to-Galaxy templates preserve the data-flow/template split without schema changes.",
+      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton.",
+      "trigger": "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[gxformat2-schema]]",
+      "src": "content/research/gxformat2-schema.md",
+      "dst": "references/notes/gxformat2-schema.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and producer-side output actions while emitting the skeleton.",
+      "src_hash": "2f35f0ca8cd4410736a595f2324274a883b5c42d79165156e15b2a75c3f1e359",
+      "dst_hash": "2f35f0ca8cd4410736a595f2324274a883b5c42d79165156e15b2a75c3f1e359",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summary-nextflow-schema#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context.",
+      "src_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
+      "dst_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-draft",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-draft.gxwf.yml",
+        "description": "gxformat2 skeleton: workflow inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; consulted while emitting placeholder steps.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "nextflow-galaxy-interface",
+        "description": "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] that pins workflow inputs, outputs, labels.",
+        "producers": [
+          "nextflow-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "nextflow-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[nextflow-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices.",
+        "producers": [
+          "nextflow-summary-to-galaxy-data-flow"
+        ]
+      },
+      {
+        "id": "iwc-comparison-notes",
+        "description": "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design briefs); steers the skeleton toward IWC-aligned structure before per-step authoring.",
+        "producers": [
+          "compare-against-iwc-exemplar"
+        ]
+      }
+    ]
+  }
+}

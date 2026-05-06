@@ -4,15 +4,15 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 10,
-    "content_hash": "b0bc32df1a66c488457022a871e6c7871b8478a835325e6461f6501108c7ef63",
-    "commit": "f23b21ea11d7e3c84d2af6c564a6149f03a6f810"
+    "revision": 11,
+    "content_hash": "52a520839d6ae1dbdce047e2c62e4525d7faae19d2bc3d98a9639a5909d7c6e9",
+    "commit": "d11541598236ff8dff65c682b1cde8fb6e2ceceb"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-06T13:48:24.178Z",
+  "cast_at": "2026-05-06T15:51:37.199Z",
   "cast_date": "2026-05-06",
-  "cast_revision": 6,
+  "cast_revision": 9,
   "cast_history": [
     {
       "rev": 1,
@@ -43,6 +43,21 @@
       "rev": 6,
       "date": "2026-05-06",
       "note": "rev 9: expand Param metadata (#186)"
+    },
+    {
+      "rev": 7,
+      "date": "2026-05-06",
+      "note": "cast requested nextflow-to-galaxy chain"
+    },
+    {
+      "rev": 8,
+      "date": "2026-05-06",
+      "note": "deterministic skill render"
+    },
+    {
+      "rev": 9,
+      "date": "2026-05-06",
+      "note": "migrate polished skill guidance into mold"
     }
   ],
   "refs": [

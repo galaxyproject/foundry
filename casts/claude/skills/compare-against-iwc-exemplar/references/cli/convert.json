@@ -1,0 +1,9 @@
+{
+  "type": "cli-command",
+  "tool": "gxwf",
+  "command": "convert",
+  "summary": "Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.",
+  "source_path": "content/cli/gxwf/convert.md",
+  "source_revision": 2,
+  "body": "# `gxwf convert`\n\nConvert a Galaxy workflow between the native `.ga` JSON and the `.gxwf.yml` format2 representation. Use this to normalize fetched IWC workflows into a consistent comparison representation.\n\n## Output\n\nDefault output is the converted workflow on stdout. With `--output`, the result is written to a file. JSON output is selected with `--json` (or `--to native`); YAML output is selected with `--yaml` (or `--to format2`).\n\n## Examples\n\n```bash\ngxwf convert workflow.ga --to format2 --output workflow.gxwf.yml\ngxwf convert workflow.ga --to format2 --compact\ngxwf convert workflow.gxwf.yml --to native --output workflow.ga\n```\n\n## Gotchas\n\n- Default output is stdout; pipe or pass `--output` when persisting.\n- `--compact` drops node position metadata; useful for structural diffs and skeleton generation.\n- `--stateful` requires a populated tool cache (see `galaxy-tool-cache`); without it, tool-state stays as fetched."
+}

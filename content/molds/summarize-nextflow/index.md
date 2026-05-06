@@ -76,7 +76,7 @@ references:
     verification: "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction."
 related_notes:
   - "[[summary-nextflow]]"
-summary: "Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to."
+summary: "Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds."
 ---
 
 # summarize-nextflow
@@ -96,7 +96,7 @@ The Mold expects:
 - Optional **profile hint** (`test`, `test_full`, …) selecting which `conf/<profile>.config` to read for fixtures. Defaults to `test`.
 - Optional **test-data directory**. When provided with fixture fetching, remote samplesheets and referenced files are downloaded under that directory and their local paths are recorded in `test_fixtures.inputs[].path`.
 
-The Mold does **not** accept "summarize this single subworkflow" subset hints; whole-pipeline summary is the unit. Subset summarization is an open question — see Non-goals.
+Whole-pipeline only. The Mold does **not** accept "summarize this single subworkflow" subset hints; subset summarization is an open question — see Non-goals.
 
 ## Outputs
 
@@ -224,7 +224,7 @@ Everything the schema demands as a typed enum or path is deterministic. Free-tex
 
 Branch shallow on layout:
 - nf-core: `nextflow.config` declares `manifest.name = 'nf-core/...'`; `modules/nf-core/`, `subworkflows/nf-core/`, and `nextflow_schema.json` are present. Prefer `meta.yml` as IO ground truth.
-- ad-hoc DSL2: no `nextflow_schema.json`, no module `meta.yml`. Falls back to `script:`-block IO inference.
+- ad-hoc DSL2: no `nextflow_schema.json`, no module `meta.yml`. Falls back to `script:`-block IO inference. Consult [[component-nextflow-pipeline-anatomy]] when layout differs from nf-core conventions in ways these rules do not cover.
 - DSL1: rare; emit the `source` block and exit early with a `warnings[]` entry. Out of scope for v1.
 
 Real pipelines have **multiple named workflow blocks** — typically an anonymous `workflow {}` entrypoint in `main.nf` that wires `PIPELINE_INITIALISATION → NFCORE_<NAME> → PIPELINE_COMPLETION`, plus a substantive named workflow under `workflows/<name>.nf`. Selection rule for the primary `workflow`: pick the named workflow that invokes the most pipeline processes. The anonymous `workflow {}` glue and the `NFCORE_<NAME>` wrapper land in `subworkflows[]`, marked `kind: utility` and `kind: pipeline` respectively.
@@ -235,7 +235,7 @@ Populate `source` from `git remote get-url`, `git rev-parse HEAD` (or the user-s
 
 ### 3. Parse parameters and profiles
 
-Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schema.json` exists (nf-core), prefer it as the source of truth for `type`, `description`, and `required` — it is real JSON Schema, copy verbatim. Enumerate `profiles { ... }` keys.
+Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schema.json` exists (nf-core), prefer it as the source of truth for `type`, `description`, and `required` — it is real JSON Schema, copy verbatim. Some params are computed at config-load time (for example `params.fasta = getGenomeAttribute('fasta')` in `main.nf`) and will not appear in `nextflow_schema.json`; include them with a description noting the dynamic source. Enumerate `profiles { ... }` keys.
 
 ### 3.5. Resolve sample-sheet schemas
 
@@ -281,15 +281,15 @@ Tool name and version are typically derivable from any of the resolved fields. D
 
 ### 6. Reconcile the workflow DAG
 
-Enumerate the top-level workflow's `include` statements and channel construction (`Channel.fromPath`, `Channel.fromFilePairs`, `Channel.fromSamplesheet`, `params.*`). For operator chains, the deterministic parser records the *literal* chain (`["map", "join", "groupTuple"]` in `via`). Reconciling chained operators into a coherent `from → to` edge is the second LLM call: given the literal chain, the source channel shape, and the downstream process's declared input shape, emit the resolved edge.
+Enumerate the top-level workflow's `include` statements and channel construction (`Channel.fromPath`, `Channel.fromFilePairs`, `Channel.fromSamplesheet`, `params.*`, `channel.empty()`, `channel.topic('<name>')`). For operator chains, the deterministic parser records the *literal* chain (`["map", "join", "groupTuple"]` in `via`). Reconciling chained operators into a coherent `from → to` edge is the second LLM call: given the literal chain, the source channel shape, and the downstream process's declared input shape, emit the resolved edge.
 
 Workflow-level conditionals (`if (params.skip_alignment) { ... }`) emit `conditionals[]` entries with the guard, the branch (`alternate` vs `default`), and the set of processes affected.
 
 Subworkflows split into two kinds:
 - `kind: pipeline` — invokes pipeline processes (data-flow contributor). The `NFCORE_<NAME>` wrapper and any nested `subworkflows/local/` that calls processes.
-- `kind: utility` — composes free-function calls only (`paramsHelp`, `samplesheetToList`, `completionEmail`). nf-core template subworkflows like `PIPELINE_INITIALISATION` and `PIPELINE_COMPLETION`. `Subworkflow.calls` is empty for utilities; their job is to produce channels (e.g. the validated samplesheet) the primary workflow consumes.
+- `kind: utility` — composes free-function calls only (`paramsHelp`, `samplesheetToList`, `completionEmail`, `imNotification`). nf-core template subworkflows like `PIPELINE_INITIALISATION` and `PIPELINE_COMPLETION`. `Subworkflow.calls` is empty for utilities; their job is to produce channels (e.g. the validated samplesheet) the primary workflow consumes.
 
-Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVersionsToYAML`, `methodsDescriptionText`) are not modeled as processes or subworkflows. Their channel outputs flow into the primary workflow's `channels[]`; the function names are nf-core template idiom, not pipeline-specific signal.
+Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVersionsToYAML`, `methodsDescriptionText`) are not modeled as processes or subworkflows. Their channel outputs flow into the primary workflow's `channels[]`; the function names are nf-core template idiom, not pipeline-specific signal. Operator chains with deeply nested closures may produce edges flagged with low confidence in `notes`.
 
 ### 7. Surface test fixtures and nf-tests
 
@@ -316,11 +316,11 @@ Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field 
   - `snap_path` = repo-relative path of the corresponding `.nf.test.snap` file.
 - `prose_assertions[]` = any other complex/non-snapshot assertions, summarized to prose strings. Empty for snapshot-only tests (the common nf-core case).
 
-**Consult `references/notes/nextflow-testing.md`** when fixtures use a layout outside `conf/test.config` + nf-test (e.g. legacy `test/` scripts, external test harnesses) or when assertions are non-snapshot equality / regex / `containsString` checks.
+Consult [[component-nextflow-testing]] when fixtures use a layout outside `conf/test.config` + nf-test (e.g. legacy `test/` scripts, external test harnesses) or when assertions are non-snapshot equality / regex / `containsString` checks.
 
 ### 8. Validate and emit
 
-Validate the assembled object with `validate-summary-nextflow` before emitting. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early.
+Validate the assembled object with `validate-summary-nextflow` before emitting. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
 
 ## Caveats baked into the procedure
 
@@ -331,7 +331,14 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 - **Channel shapes are strings, not structured types.** `"tuple(meta, [path,path])"` is enough for downstream Molds to reason about; structured channel typing is a research project. Downstream Molds that need structure must parse the string.
 - **Operator chains are summarized, not executed.** The LLM reconciliation pass is best-effort. Workflows with deeply nested closures (`map { ... }` with substantial Groovy logic) may produce edges flagged with low confidence in `notes`.
 - **`include` aliasing is followed one level.** `include { FASTP as TRIM_PROC } from '...'` resolves to `FASTP` in `processes[].name` and the alias is recorded in the call graph. Multi-level aliasing chains are not chased.
-- **Test-fixture fetching is bounded.** The CLI fetches selected-profile URL params and direct remote URLs discovered in fetched samplesheets. It does not recursively crawl archives or arbitrary generated paths.
+- **Test-fixture fetching is bounded.** Without explicit fixture fetching, record URL, role, filetype, and expected SHA-1 if present; do not download content for validation. When fixture fetching is requested, fetch only selected-profile URL params and direct remote URLs discovered in fetched samplesheets. Do not recursively crawl archives or arbitrary generated paths.
+
+## Reference dispatch
+
+- [[summary-nextflow]] — always validate output against this schema before emitting.
+- [[component-nextflow-pipeline-anatomy]] — consult on ad-hoc DSL2 layouts that do not match nf-core conventions, or on workflow-block patterns the multi-workflow selection rule does not resolve.
+- [[component-nextflow-containers-and-envs]] — consult on container/conda directives outside the resolver patterns above, including mulled-v2, custom registries, env modules, Wave, and multi-dependency `environment.yml` files.
+- [[component-nextflow-testing]] — consult on test fixture layouts outside `conf/test.config` + nf-test, or on snapshot/assertion patterns the structured fallback does not capture well.
 
 ## Non-goals
 

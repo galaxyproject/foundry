@@ -1,10 +1,12 @@
 # Compilation Pipeline
 
-How Molds become cast artifacts. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **LLM-driven, evolution-friendly, reproducible enough to diff**. Casting is not deterministic; it is recorded.
+How Molds become cast artifacts. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **deterministic assembly first, LLM condensation only where needed, reproducible enough to diff**. The generated skill body is deterministic; individual condensed references may still be LLM-produced and recorded.
 
 ## What casting is
 
-Casting takes a Mold (a typed reference manifest plus a procedural body) and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific cast artifact. `MOLD_SPEC.md` owns the source-layout and manifest contract; this document describes how casting consumes that contract. The cast is **condensed and isolated** — no links back to the Foundry, no runtime dependency on it.
+Casting takes a Mold (a typed reference manifest plus a procedural body), its artifact IO contracts, and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific cast artifact. `MOLD_SPEC.md` owns the source-layout and manifest contract; this document describes how casting consumes that contract. The cast is **isolated** — no links back to the Foundry, no runtime dependency on it.
+
+For the Claude target, `SKILL.md` is always rendered from Mold source. The renderer combines the Mold `summary`, `input_artifacts[]`, `output_artifacts[]`, inherited producer/schema metadata, resolved `references[]`, and the procedural body of `index.md`. Generated skill bodies are not hand-maintained; if a cast looks under-instructed, improve the Mold body or referenced notes and re-cast.
 
 Casting operates as **per-kind dispatch** over the manifest, not a single resolve-and-inline pass. Different reference kinds get different transformations:
 
@@ -39,28 +41,29 @@ Canonical examples: [[galaxy-collection-semantics]] and [[galaxy-xsd]]. Upstream
 
 Casting policy: a cast that needs collection-semantics knowledge resolves the `.yml` and inlines/condenses from there; a cast that needs Galaxy wrapper syntax resolves `galaxy.xsd`; the rendered MyST is a site-rendering concern only. Pattern generalizes — when both forms exist, agents read structure, humans read prose.
 
-The casting process is itself expected to evolve. Today: an LLM with a target-specific prompt for the condensation steps; deterministic file copies for the rest. Tomorrow: maybe smarter prompts, different models per kind, partial determinism within a kind. The Foundry does not lock in a casting algorithm; it locks in a **contract** (input shape, output shape, provenance).
+The casting process is itself expected to evolve. Today: deterministic `SKILL.md` assembly, deterministic file copies and sidecars, and LLM involvement only for reference kinds explicitly cast with `mode: condense`. Tomorrow: maybe smarter condensation prompts, different models per kind, or additional target renderers. The Foundry does not lock in every implementation detail; it locks in a **contract** (input shape, output shape, provenance).
 
 ## When casting runs
 
 Three triggers, in increasing automation:
 
-1. **Manual.** `npm run cast -- <mold-name> --target=<target>` for the deterministic prepare, plus the `/cast` slash command for the full validate -> prepare -> LLM -> verify loop.
+1. **Manual.** `npm run cast -- <mold-name> --target=<target>` for deterministic assembly. A future `/cast` wrapper may fill `mode: condense` references, but it must not hand-maintain `SKILL.md`.
 2. **CI on Mold change.** When a PR touches `molds/<name>/`, CI re-casts that Mold against all configured targets and surfaces the diff in review.
 3. **Watch-on-change** for development convenience.
 
-Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, pending LLM entries).
+Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, pending LLM entries, and missing or stale `SKILL.md`).
 
 ## Input contract
 
 To cast a Mold, the casting process consumes:
 
-- **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. The cast consumes only the procedural body of `index.md`; sibling files (`eval.md`, `changes.md`, `cast-skill-verification.md`) are Foundry-only and never packaged. Author-facing meta-content (changelog entries, casting open-questions) belongs in those sibling files, not in the body of `index.md` — anything in the body is a candidate for the cast.
+- **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. The cast renders the procedural body of `index.md` into `SKILL.md`; sibling files (`eval.md`, `changes.md`, `cast-skill-verification.md`) are Foundry-only and never packaged. Author-facing meta-content (changelog entries, casting open-questions) belongs in those sibling files, not in the body of `index.md` — anything in the body is runtime instruction.
+- **Artifact IO contracts** — `input_artifacts[]` and `output_artifacts[]` define what a skill consumes and produces. Producer-owned schemas declared on `output_artifacts[].schema` are surfaced to consumers by shared artifact `id`; cast provenance records the producer list and inherited schema hints for harnesses.
 - **All typed references declared in the manifest**, resolved by kind:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
   - `cli_commands` — legacy wiki links into `content/cli/<tool>/<cmd>.md`.
-  - `input_schemas` / `output_schemas` — wiki-link arrays into `content/schemas/<name>.md`; resolved at cast time via the schema note's `package` + `package_export` to a runtime import from `packages/<name>-schema/`.
+  - `input_schemas` / `output_schemas` — legacy wiki-link arrays into `content/schemas/<name>.md`; retained during migration, but new Mold IO contracts should live on `input_artifacts[]` / `output_artifacts[].schema`.
   - `prompts` — legacy wiki links into `content/prompts/` (when the Mold needs them).
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
@@ -82,7 +85,7 @@ Per cast: `casts/<target>/<mold-name>/`. Layout depends on target.
 For the **Claude target**:
 ```
 casts/claude/<mold-name>/
-├── SKILL.md                  # the skill body Claude loads
+├── SKILL.md                  # deterministic render of Mold body + artifacts + refs
 ├── references/               # supporting content, organized by kind
 │   ├── schemas/              # verbatim *.schema.json
 │   ├── cli/                  # deterministic JSON sidecars (flat, <slug>.json)
@@ -96,6 +99,8 @@ casts/claude/<mold-name>/
 Per-kind dst conventions are declared in `casts/<target>/_target.yml` (`kinds.<kind>.dst_dir` + `dst_extension` + allowed `modes`). For verbatim modes the dst basename matches the source 1:1; for sidecars it's `<source-slug><dst_extension>`.
 
 Per-kind subdirectories under `references/` mirror the casting dispatch and let the generated skill's runtime locate any artifact deterministically.
+
+For Claude, `SKILL.md` contains deterministic sections for when to use the skill, upstream artifact inputs, produced artifacts, upfront references, on-demand references and triggers, validation hints, the Mold procedure, and runtime notes. Raw Foundry wiki-links are stripped or resolved to packaged reference paths so the skill is self-contained.
 
 For the **web target**:
 ```
@@ -122,7 +127,7 @@ For **generic**: single self-contained markdown unless a richer consumer appears
   },
   "cast_at": "2026-05-02T22:44:00.546Z",
   "cast_history": [
-    { "rev": 1, "date": "2026-05-01", "note": "hand-cast" }
+    { "rev": 1, "date": "2026-05-01", "note": "initial deterministic cast" }
   ],
   "refs": [
     {
@@ -152,11 +157,19 @@ For **generic**: single self-contained markdown unless a richer consumer appears
       "prompt": { "origin": "casting_md", "identity": "research-condense", "hash": "<sha256>" },
       "model": { "name": "claude-opus-4-7", "version": "..." }
     }
-  ]
+  ],
+  "artifacts": {
+    "produces": [
+      { "id": "summary-nextflow", "kind": "json", "default_filename": "summary-nextflow.json", "schema": "[[summary-nextflow]]", "description": "..." }
+    ],
+    "consumes": [
+      { "id": "nextflow-galaxy-interface", "description": "...", "producers": ["nextflow-summary-to-galaxy-interface"] }
+    ]
+  }
 }
 ```
 
-`refs[]` is sorted by `(kind, src)` for stable diffs. Each entry's `source` field records whether the dst was produced deterministically or by an LLM step. While a condense ref is awaiting LLM output, the entry carries `pending_llm: true` and the deterministic verifier rejects committed provenance with any unfilled entry.
+`refs[]` is sorted by `(kind, src)` for stable diffs. Each entry's `source` field records whether the dst was produced deterministically or by an LLM step. `artifacts` records the runtime handoff contract after producer inheritance. While a condense ref is awaiting LLM output, the entry carries `pending_llm: true` and the deterministic verifier rejects committed provenance with any unfilled entry.
 
 Provenance is the foundation for drift detection, reproducibility audits, and "why does this cast contain X" forensics.
 
@@ -202,7 +215,8 @@ cast_mold(mold_name, target):
       example      -> reject until first example ref establishes target convention
       eval         -> skip (never packaged)
 
-  skill_md  <- target.assemble_skill(mold.body, condensed_refs, manifest)
+  artifacts <- read_artifact_contracts(mold.meta, producer_index)
+  skill_md  <- target.assemble_skill(mold.summary, mold.body, artifacts, refs)
   write SKILL.md to casts/<target>/<mold_name>/
   write _provenance.json (schema v2: mold object, refs[] sorted by kind+src,
                           per-ref src_hash/dst_hash, source=deterministic|llm,
@@ -210,17 +224,18 @@ cast_mold(mold_name, target):
                           prompt + model identity for LLM-produced entries)
 ```
 
-The deterministic phase (`foundry-build cast`) handles verbatim copies, sidecars, and condense placeholders without invoking an LLM. The LLM phase lives in the `/cast` slash command: it reads the Mold and any `casting.md` guidance, fills in `pending_llm` entries, updates SKILL.md, and rewrites `_provenance.json`. The deterministic verifier (`scripts/cast-skill-verify.ts`) enforces the contract on the result.
+The deterministic phase (`foundry-build cast`) handles verbatim copies, sidecars, condense placeholders, `SKILL.md` rendering, and provenance. Any LLM phase may fill `pending_llm` reference entries and rewrite provenance for those refs, but it must not hand-edit generated `SKILL.md`; skill-body changes flow from Mold source changes. The deterministic verifier (`scripts/cast-skill-verify.ts`) enforces the contract on the result.
 
 ## Drift detection
 
 A cast is **stale** when any of:
 - The Mold's `index.md` content hash differs from `_provenance.mold.content_hash`.
 - Any resolved ref's source hash differs from the recorded `refs[*].src_hash`, or its dst hash drifts from `refs[*].dst_hash`.
+- The deterministic `SKILL.md` render differs from the committed `SKILL.md`.
 - The target adapter (prompt version) has changed.
 - The casting model has changed (and we want to re-cast against the new model).
 
-`foundry status` enumerates stale casts; `foundry cast --all` re-casts every stale entry. Re-casting against an unchanged Mold and unchanged refs with the same model produces a different artifact because the LLM is non-deterministic — that's expected and reviewed via diff.
+`foundry status` enumerates stale casts; `foundry cast --all` re-casts every stale entry. Re-casting an unchanged Mold with unchanged deterministic refs should produce the same `SKILL.md`, sidecars, copied refs, and provenance shape except for cast timestamps/history. LLM-condensed refs can still differ when explicitly re-condensed; those differences are reviewed via provenance and diff.
 
 ## Versioning
 
@@ -230,19 +245,19 @@ This keeps the Foundry's iteration loop fast: change a Mold, re-cast, review the
 
 ## Reproducibility
 
-Casting is **non-deterministic** (LLM). What we guarantee instead is **traceability**: every cast records exactly what went into it (Mold hash, ref hashes, model, prompt version). A reviewer can:
+Casting is **deterministic for skill assembly** and traceable for any LLM-produced ref condensation. Every cast records exactly what went into it (Mold hash, ref hashes, artifact contracts, model/prompt identity for LLM refs). A reviewer can:
 
 - Check whether a cast is up-to-date (drift detection).
-- Reproduce the *inputs* to a cast (clone the repo at the recorded commit SHA, re-cast).
+- Reproduce deterministic cast outputs from the recorded Mold and refs.
 - Compare two casts' provenance to explain content differences.
 
-We do not guarantee that re-casting produces byte-identical output. We do guarantee that re-casting produces output derivable from the same inputs.
+We expect deterministic assembly to be byte-stable aside from timestamps/provenance history. We do not guarantee byte-identical output for explicit LLM condensation, but provenance records the source, prompt, and model identity for review.
 
 ## What casting does *not* do
 
 - **Does not write to the Foundry.** Casting is read-only against `content/molds/`, `content/patterns/`, `content/cli/`, `content/prompts/`, `content/examples/`, and `content/schemas/`. All writes go to `casts/`.
 - **Does not invoke gxwf or Planemo.** Those are the generated skill's responsibility at runtime, not casting time. (Validation tooling does invoke schemas, but that's distinct.)
-- **Does not update Molds.** If casting reveals a Mold is wrong, that's a hand edit by the maintainer.
+- **Does not update Molds.** If casting reveals a generated skill is weak or wrong, migrate the needed instruction into the Mold body or referenced notes by hand, then re-cast.
 - **Does not touch eval plans.** `eval.md` is Foundry-only; never read by casting.
 
 ## Minimum Exercise
