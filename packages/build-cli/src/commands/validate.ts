@@ -575,7 +575,10 @@ function validateArtifactGraph(
           path: f.path,
           index,
           schema: typeof schema === "string" ? schema : undefined,
-          schemaTarget: typeof schema === "string" ? resolveWikiLink(schema, slugMap) : undefined,
+          schemaTarget:
+            typeof schema === "string"
+              ? (resolveWikiLink(schema, slugMap) ?? undefined)
+              : undefined,
         });
         producersById.set(id, producers);
       }
