@@ -49,9 +49,6 @@ const WIKI_LINK_FIELDS: Record<string, "single" | "array"> = {
   related_patterns: "array",
   related_molds: "array",
   implemented_by_patterns: "array",
-  patterns: "array",
-  cli_commands: "array",
-  prompts: "array",
 };
 
 // ---- per-file validation ----
@@ -225,8 +222,6 @@ function validateMoldRefs(
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const checks: Array<{ field: string; expected: string }> = [
-    { field: "patterns", expected: "pattern" },
-    { field: "cli_commands", expected: "cli-command" },
     { field: "related_patterns", expected: "pattern" },
     { field: "related_molds", expected: "mold" },
   ];

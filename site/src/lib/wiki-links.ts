@@ -81,9 +81,6 @@ export type BacklinkField =
   | 'related_patterns'
   | 'related_molds'
   | 'implemented_by_patterns'
-  | 'patterns'
-  | 'cli_commands'
-  | 'prompts'
   | 'phases'
   | 'output_artifact_schema';
 
@@ -124,9 +121,6 @@ export function buildBacklinkMap(
       ['related_patterns', data.related_patterns],
       ['related_molds', data.related_molds],
       ['implemented_by_patterns', data.implemented_by_patterns],
-      ['patterns', data.patterns],
-      ['cli_commands', data.cli_commands],
-      ['prompts', data.prompts],
     ];
     for (const [field, arr] of arrays) {
       if (!arr) continue;

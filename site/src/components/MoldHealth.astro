@@ -97,7 +97,6 @@ const nonIndexFrontmatter = listMarkdownFiles(moldDir)
   .filter(path => !path.endsWith('/index.md'))
   .filter(hasFrontmatter);
 
-const legacyCount = (data.patterns?.length ?? 0) + (data.cli_commands?.length ?? 0) + (data.prompts?.length ?? 0) + (data.examples?.length ?? 0);
 const items: HealthItem[] = [
   {
     label: 'Source layout',
@@ -111,11 +110,6 @@ const items: HealthItem[] = [
   },
   evalDetail(),
   ...referenceFindings(),
-  {
-    label: 'Legacy refs',
-    state: legacyCount === 0 ? 'ok' : 'warn',
-    detail: legacyCount === 0 ? 'Operational references use references:.' : `${legacyCount} legacy top-level reference${legacyCount === 1 ? '' : 's'} still present.`,
-  },
 ];
 
 ---

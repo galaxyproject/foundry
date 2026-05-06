@@ -17,8 +17,6 @@ related_notes:
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-asserts-idioms]]"
   - "[[tests-format]]"
-cli_commands:
-  - "[[validate-tests]]"
 summary: "Assemble Galaxy workflow test fixtures and assertions."
 input_artifacts:
   - id: galaxy-test-plan
