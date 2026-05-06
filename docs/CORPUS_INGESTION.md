@@ -1,14 +1,6 @@
-# Initial IWC Integration
+# IWC Integration
 
-(Filename retained as `CORPUS_INGESTION.md` for continuity, but "ingestion" overstates what survives. After deconstruction, the Foundry has **no IWC ingestion pipeline, no exemplar mirror, and no `workflow-fixtures` runtime dependency**. This document describes the lighter integration that replaces the earlier sketch.)
-
-## What changed and why
-
-Earlier sketch: ingest `gxformat2`-cleaned IWC workflows from `workflow-fixtures/` into per-workflow exemplar pages with auto-generated structural metadata (step counts, tool lists, test fixtures) and hand-curated annotations preserved across re-ingestion.
-
-Problem: the unique value per exemplar page is the hand-curated `## Patterns demonstrated` cross-reference. Everything else (step count, tool list, has_tests, the auto-generated Steps body) is just re-rendering of upstream `.gxwf.yml` content. The `<!-- foundry:hand-curated -->` markers, idempotent regeneration, drift warnings, and structural-change detection are a lot of machinery to protect a paragraph of hand-written cross-reference per workflow.
-
-`workflow-fixtures` was R&D scratch for pattern-research. Treating it as Foundry-runtime input recreates the "we mirror IWC" problem in lighter clothing. Agents have `gxwf` and can clean / inspect IWC directly. Foundry contributors can use `workflow-fixtures` locally as an authoring aid without the Foundry depending on it.
+The Foundry has **no IWC ingestion pipeline, no exemplar mirror, and no `workflow-fixtures` runtime dependency**. It integrates the IWC corpus through citations, survey notes, optional inline excerpts, and Molds that can fetch live corpus evidence at runtime.
 
 `workflow-fixtures/` now lives as a top-level directory inside the Foundry checkout (Foundry support infrastructure, not a separate product). Generated corpora — `pipelines/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/` — are gitignored. The validator and site-content traversal stay scoped to `content/`; `workflow-fixtures/` is invisible to them. The directory is cited by `$IWC_FORMAT2/...` and `$IWC_SKELETONS/...` from authoring/survey notes; nothing in `casts/` or `content/` reads from it at build time.
 
@@ -40,7 +32,7 @@ The pattern is **skeletons + selective full reads**, not skeletons replacing ful
 
 2. **Inline excerpts when they earn it.** A pattern author may paste 10–30 lines of cleaned `gxformat2` directly into a pattern body to illustrate an idiom. The cleaning is done **at authoring time** by the human running `gxwf` locally (probably against `workflow-fixtures`, or against a fresh clone, or against a raw IWC URL — the Foundry doesn't care). The excerpt is committed verbatim into the pattern page; no build-time regeneration; rot is rot.
 
-3. **No IWC category aggregation layer for now.** Earlier plans had an `iwc/*` tag family and generated overview. Current pattern work has pulled back from that: corpus grounding lives in survey notes, pattern exemplars, and body citations.
+3. **No IWC category aggregation layer.** Corpus grounding lives in survey notes, pattern exemplars, and body citations.
 
 4. **`compare-against-iwc-exemplar` (the Mold) operates against live IWC.** The generated skill loads with instructions to fetch IWC at runtime via `WebFetch` / `gxwf`, not against Foundry-hosted exemplar pages. The Mold's source artifact describes the *procedure*, not a corpus index.
 
@@ -53,26 +45,19 @@ The pattern is **skeletons + selective full reads**, not skeletons replacing ful
 
 ## Validation
 
-There is no IWC-specific validator layer right now. Citations in pattern bodies are not validated (URLs are URLs; the cost of brokenness is moderate, the cost of automated link-check at scale is real).
+There is no IWC-specific validator layer. Citations in pattern bodies are not validated (URLs are URLs; the cost of brokenness is moderate, the cost of automated link-check at scale is real).
 
 ## What lives where (summary)
 
 - **In the Foundry repo:** patterns with IWC citations and optional excerpts in body, plus surveys that explain the corpus evidence.
 - **NOT in the Foundry repo:** workflow-fixtures, exemplar pages, `_pin.txt`, ingest scripts, hand-curated annotation markers, frontmatter schema for `exemplar` notes.
-- **In the user's home:** workflow-fixtures stays where it is, used as an authoring aid by humans cleaning excerpts. No reference from Foundry tooling.
+- **In generated fixture directories:** workflow-fixtures supports authoring and survey work only. No reference from Foundry tooling.
 
-## v1 minimum
+## Minimum Exercise
 
 To exercise this lighter integration:
 
 1. Author 2–3 patterns end-to-end with `## Exemplars` sections citing IWC paths/URLs and one inline excerpt when useful.
 2. Confirm a Mold can wiki-link a pattern and that casting preserves the citations as live evidence pointers, not embedded mirrors.
 
-If the loop holds, scale to more patterns. No further integration tooling planned for v1.
-
-## Open questions
-
-- **Stale citation detection.** Pin-to-SHA citations rot silently when IWC moves files. Worth a periodic `tsx scripts/check-citations.ts` that verifies each cited URL still resolves (HEAD request)? Cheap, but adds a CI dependency on network. Defer unless rot becomes visible.
-- ~~**`iwc/*` seed source of truth.**~~ Resolved: top-level directories under `<iwc-clone>/workflows/`, slugified. See vocabulary section above.
-- **Inline excerpts in pattern bodies — typeset how?** Plain fenced Markdown with `gxformat2` as the language hint, or a custom directive? Plain fenced is simplest; revisit if syntax highlighting matters.
-- **`compare-against-iwc-exemplar` Mold's discovery mechanism.** Without a Foundry-hosted exemplar index, how does the generated skill find candidate exemplars to compare against? Probably via IWC's own listing (URL TBD) plus `gxwf` tooling. The Mold's `eval.md` will need to specify this; not blocking for the Foundry's architecture.
+If the loop holds, scale to more patterns. No further integration tooling is planned.

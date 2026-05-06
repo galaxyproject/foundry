@@ -13,7 +13,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Molds
 
 - [[author-galaxy-tool-wrapper]] — Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable.
-- [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against a draft.
+- [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
 - [[cwl-summary-to-galaxy-data-flow]] — Translate a CWL summary into a Galaxy data-flow design brief.
 - [[cwl-summary-to-galaxy-interface]] — Map a CWL summary into a Galaxy workflow interface design brief.
 - [[cwl-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs.
@@ -122,6 +122,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Component Research
 
+- [[component-archon]] — Archon as a possible Foundry harness substrate; strong fit for heavy harnesses, with per-step sub-DAG looping as the main gap.
 - [[component-nextflow-channel-operators]] — Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation.
 - [[component-nextflow-containers-and-envs]] — Container URL grammar (depot, BioContainers, mulled-v2, Wave, ORAS) and conda directive resolution rules backing summarize-nextflow §5.
 - [[component-nextflow-inspect]] — White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision.
@@ -153,8 +154,11 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
 - [[nextflow-snapshot-to-galaxy-assertions]] — Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape.
 - [[nextflow-operators-to-galaxy-collection-recipes]] — Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.
+- [[nextflow-params-to-galaxy-inputs]] — Rules for translating Nextflow params, sample sheets, channels, and control flags into gxformat2 inputs.
+- [[nextflow-path-glob-to-galaxy-datatype]] — Rules for mapping Nextflow path, glob, sample-sheet, and output filename evidence to Galaxy datatype extensions.
 - [[nextflow-workflow-io-semantics]] — Defines Nextflow workflow inputs and outputs from docs plus observed fixture pipeline structures.
 - [[nextflow-to-galaxy-channel-shape-mapping]] — Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes.
+- [[nf-schema-samplesheet-galaxy-gaps]] — nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary.
 - [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
 - [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 

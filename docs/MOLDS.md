@@ -1,35 +1,8 @@
-# Initial Molds
+# Molds
 
-Initial Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines sketched in `HARNESS_PIPELINES.md`. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
+Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines in `HARNESS_PIPELINES.md`. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
 
-This is a v1 inventory, not the Mold metadata spec. Names, splits, and groupings will shift as we ground each Mold against IWC corpus exemplars and write them end-to-end. The reference model has moved out of this inventory: `COMPILATION_PIPELINE.md`, `meta_schema.yml`, and `reference_contract.yml` now define the authoritative `references:` manifest, progressive-disclosure controls, and evidence labels.
-
-## Reference model status
-
-Current Molds are authored as a procedural body plus an operational `references:` manifest. The older top-level reference fields (`patterns`, `cli_commands`, `prompts`, `examples`) remain supported during migration, and `input_schemas` / `output_schemas` still describe Mold IO contracts, but new operational references should use object-shaped entries:
-
-```yaml
-references:
-  - kind: research
-    ref: "[[component-nextflow-testing]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: hypothesis
-    purpose: "Extract nf-test files and snapshot fixtures."
-    trigger: "When filling test_fixtures or nf_tests sections."
-    verification: "Run the generated summarize-nextflow skill on a real nf-core pipeline and confirm extraction improves."
-```
-
-The important contract pieces are:
-
-- `kind` chooses resolver and casting behavior (`pattern`, `cli-command`, `schema`, `prompt`, `example`, `research`).
-- `used_at` records whether the reference is used at cast time, runtime, or both.
-- `load` is the automatic progressive-disclosure annotation: `upfront` references are loaded with the generated skill; `on-demand` references need a `trigger` that tells the skill when to consult them.
-- `mode` declares the transformation (`verbatim`, `condense`, `sidecar`, `copy`). Some modes are specified before all cast handlers are fully implemented.
-- `evidence` tracks confidence in the reference connection: `hypothesis`, `corpus-observed`, or `cast-validated`. `hypothesis` requires `verification` so speculative links carry their own promotion/removal check.
-
-`reference_contract.yml` owns the controlled vocabulary and labels. The validator injects those enums into `meta_schema.yml` and checks typed references by kind.
+This is the inventory, not the Mold source-layout contract. `MOLD_SPEC.md` owns Mold authoring rules and the `references:` manifest; `reference_contract.yml` owns the typed-reference vocabulary and labels.
 
 ## Bucketing axes
 
@@ -40,7 +13,7 @@ Each Mold falls along these axes:
 - **Tool-specific** — reserved for a future action that genuinely depends on one external tool's behavior. Whole-CLI reference surfaces are not Molds.
 - **Generic** — none of the above.
 
-This isn't a frontmatter schema; it's a mental model for v1 grouping. `tool-specific` remains provisional and should not be used for whole-CLI catalogs.
+This isn't a frontmatter schema; it's a mental model for grouping. `tool-specific` is reserved for actions that depend on one external tool's behavior and should not be used for whole-CLI catalogs.
 
 ## Catalog
 
@@ -102,8 +75,6 @@ Two-step shape (translation/derivation, then assembly):
 
 The derivation/test-plan Molds and assembly Molds are complementary, not redundant: derivation produces fixtures or a reviewable test plan; assembly produces the test artifact. Both fire in NF→Galaxy, CWL→Galaxy, etc.
 
-Open question: whether the `<source>-test-to-<target>-tests` family factors cleanly through a generic intermediate, or stays per-pair.
-
 ### Validation (target-specific)
 
 Validate Molds describe the **step in the process** even where they wrap a static / structured CLI. The underlying validation is deterministic, but the generated skill is the Mold-shaped procedural description (when to run, how to interpret results, what to recommend on failure, when to loop back to authoring). Wraps gxwf / cwltool but is *not* a hand-authored CLI skill — it's a Mold that references the relevant CLI manual pages.
@@ -134,7 +105,7 @@ CLI command docs live under `content/cli/<tool>/<command>.md`. Action Molds refe
 
 Excluded from the inventory by design. Naming them keeps the boundary visible.
 
-- **Pure reference content.** Pattern pages (`design-galaxy-tabular-manipulation`, `design-galaxy-collection-manipulation`, `design-galaxy-conditional-handling`, the custom-tool-authoring pattern, …), CLI manual pages (`content/cli/<tool>/<cmd>.md`), IO schemas (`content/schemas/<name>.md` schema notes, with the JSON itself in `packages/<name>-schema/src/`), prompt fragments, examples, and operational research notes are **referenced by** Molds, not Molds themselves. Casting handles each kind differently — patterns may be LLM-condensed, manpages become JSON sidecars, schemas and examples are copied, and research notes are copied or condensed according to the reference's `mode` / `load` contract. See `ARCHITECTURE.md` and `COMPILATION_PIPELINE.md`.
+- **Pure reference content.** Pattern pages (`design-galaxy-tabular-manipulation`, `design-galaxy-collection-manipulation`, `design-galaxy-conditional-handling`, the custom-tool-authoring pattern, ...), CLI manual pages (`content/cli/<tool>/<cmd>.md`), IO schemas (`content/schemas/<name>.md` schema notes, with the JSON itself in `packages/<name>-schema/src/`), prompt fragments, examples, and operational research notes are **referenced by** Molds, not Molds themselves. Casting handles each kind according to the `MOLD_SPEC.md` and `reference_contract.yml` contract.
 - **Harnesses.** `nf-to-galaxy`, the conjectural Archon harness, lightweight orchestration skills — all hand-authored, sequence Molds, never cast.
 - **Approval gates / scope confirmation / plan presentation.** Harness-level concerns, not Molds. See `HARNESS_PIPELINES.md` for the rationale.
 - **Hand-authored prior-art skills (being replaced).** The current `~/.claude/skills/gxwf-cli` (help-text dump) and the `find-shed-tool` skill design (`old/PLAN_SEARCH_CLI.md`) are *not* Foundry artifacts; they are prior art. Their content feeds CLI manual pages and action Molds; their form does not.
@@ -152,7 +123,7 @@ Excluded from the inventory by design. Naming them keeps the boundary visible.
 
 ## What this list is for
 
-This list exists to keep the Mold inventory and pipeline coverage understandable. The metadata schema is now carried by `meta_schema.yml` plus the `reference_contract.yml` registry; `COMPILATION_PIPELINE.md` is the design narrative for casting and reference dispatch. Suggested first walks, in priority order:
+This list exists to keep the Mold inventory and pipeline coverage understandable. The metadata schema is carried by `meta_schema.yml` plus the `reference_contract.yml` registry; `MOLD_SPEC.md` is the Mold authoring contract, and `COMPILATION_PIPELINE.md` is the design narrative for casting and reference dispatch. Suggested first walks, in priority order:
 
 1. `summarize-paper` — most novel, most uncertain, exercises source-summarization shape and IO-schema reference.
 2. `implement-galaxy-tool-step` — runs in inner loop, pulls heavily from pattern pages and corpus, exercises wiki-link resolution and condensation.
