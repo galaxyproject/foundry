@@ -4,13 +4,13 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 10,
-    "content_hash": "b0bc32df1a66c488457022a871e6c7871b8478a835325e6461f6501108c7ef63",
-    "commit": "f23b21ea11d7e3c84d2af6c564a6149f03a6f810"
+    "revision": 11,
+    "content_hash": "8d3400077caa35cc3341cd81becb39466047c3d6406286d7d56459864bb82f69",
+    "commit": "eef25246cac31f45b9826028ca08c670bb6dcb7e"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-06T13:48:24.178Z",
+  "cast_at": "2026-05-06T15:16:08.648Z",
   "cast_date": "2026-05-06",
   "cast_revision": 6,
   "cast_history": [

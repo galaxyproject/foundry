@@ -2,7 +2,7 @@
 
 Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines in `HARNESS_PIPELINES.md`. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
 
-This is the inventory, not the Mold source-layout contract. `MOLD_SPEC.md` owns Mold authoring rules and the `references:` manifest; `reference_contract.yml` owns the typed-reference vocabulary and labels.
+This is the inventory, not the Mold source-layout contract. `MOLD_SPEC.md` owns Mold authoring rules and the `references:` manifest; `reference_contract.yml` owns the typed-reference vocabulary and labels. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`; producer-owned `output_artifacts[].schema` wiki-links attach schemas to emitted artifact IDs.
 
 ## Bucketing axes
 

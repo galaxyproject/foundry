@@ -299,20 +299,3 @@ function producersOf(id: string): { moldId: string; description: string }[] {
     gap: 0.4rem 0.7rem;
   }
 </style>
-
-{(data.input_schemas || data.output_schemas) && (
-  <dl class="meta mb-6 p-3 rounded-lg bg-(--color-surface-raised) text-sm">
-    {data.input_schemas && data.input_schemas.length > 0 && (
-      <>
-        <dt>Input schemas:</dt>
-        <dd>{data.input_schemas.join(', ')}</dd>
-      </>
-    )}
-    {data.output_schemas && data.output_schemas.length > 0 && (
-      <>
-        <dt>Output schemas:</dt>
-        <dd>{data.output_schemas.join(', ')}</dd>
-      </>
-    )}
-  </dl>
-)}

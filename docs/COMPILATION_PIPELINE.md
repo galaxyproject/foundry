@@ -27,6 +27,8 @@ Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for k
 
 Molds declare operational dependencies through the object-shaped `references` manifest. `MOLD_SPEC.md` is canonical for field requirements and authoring rules; `reference_contract.yml` is canonical for vocabulary labels and descriptions. Casting reads the manifest, resolves each reference by `kind`, and writes the target-specific reference layout described below.
 
+Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`. Producer-owned `output_artifacts[].schema` wiki-links point at schema notes that casting packages; consumers inherit those contracts by binding to the same artifact `id`.
+
 ### Agent-facing vs. human-facing vendored artifacts
 
 When an upstream project ships *both* a structured source (YAML, JSON Schema, IDL) *and* a derived human-rendered form (LaTeX-heavy Markdown, generated HTML), **cast from the structured source, not the rendered form.** The structured source is denser per token, schema-regular, and preserves identifiers (labels, test pin names) that the renderer typically discards.
@@ -60,7 +62,7 @@ To cast a Mold, the casting process consumes:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
   - `cli_commands` — legacy wiki links into `content/cli/<tool>/<cmd>.md`.
-  - `input_schemas` / `output_schemas` — wiki-link arrays into `content/schemas/<name>.md`; resolved at cast time via the schema note's `package` + `package_export` to a runtime import from `packages/<name>-schema/`.
+  - `output_artifacts[].schema` (and inherited consumer-side schemas via `input_artifacts[].id`) — wiki-links into `content/schemas/<name>.md`; resolved at cast time via the schema note's `package` + `package_export` to a runtime import from `packages/<name>-schema/`.
   - `prompts` — legacy wiki links into `content/prompts/` (when the Mold needs them).
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).

@@ -12,8 +12,6 @@ revised: 2026-05-04
 revision: 3
 ai_generated: true
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
-output_schemas:
-  - "[[galaxy-tool-discovery]]"
 output_artifacts:
   - id: galaxy-tool-pin
     kind: json

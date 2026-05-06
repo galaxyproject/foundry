@@ -421,6 +421,7 @@ interface Provenance {
 interface ProducerInfo {
   schema?: string;
   producers: string[];
+  hasSchemaGap?: boolean;
 }
 
 export function buildProducerIndex(
@@ -439,7 +440,10 @@ export function buildProducerIndex(
       const info = idx.get(o.id) ?? { producers: [] };
       info.producers.push(producerSlug);
       const schema = typeof o.schema === "string" ? o.schema : undefined;
-      if (schema) {
+      if (!schema) {
+        info.schema = undefined;
+        info.hasSchemaGap = true;
+      } else if (!info.hasSchemaGap) {
         if (info.schema && info.schema !== schema) {
           info.schema = undefined; // disagreement — drop the inherited hint
         } else {

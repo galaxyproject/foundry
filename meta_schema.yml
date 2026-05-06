@@ -143,16 +143,6 @@ properties:
   tool:
     type: string
     enum: [gxwf, planemo]
-  input_schemas:
-    type: array
-    items:
-      type: string
-      pattern: "^\\[\\[.+\\]\\]$"
-  output_schemas:
-    type: array
-    items:
-      type: string
-      pattern: "^\\[\\[.+\\]\\]$"
   # Typed artifact handoffs between Molds. Producer side: this Mold emits
   # `id` as one of its outputs. Consumer side (input_artifacts): this Mold
   # requires `id` to be supplied by a prior Mold in a Pipeline run. ids are
@@ -184,9 +174,7 @@ properties:
   # Schema is producer-owned: declare `schema:` on the producer Mold's
   # `output_artifacts[]` entry. Consumers inherit the contract by binding to
   # the same `id`; cast-mold surfaces the inherited schema on each consumer
-  # input in the resolved provenance. To list a runtime-validation hint
-  # without a producer commitment (e.g. external/free-floating input), use
-  # the top-level `input_schemas` array instead.
+  # input in the resolved provenance.
   input_artifacts:
     type: array
     items:
@@ -267,6 +255,10 @@ properties:
   package_export:
     type: string
     description: "For package-vendored schemas: the named runtime export from `package` that returns the JSON Schema object (e.g. `testsSchema`). cast-mold imports and stringifies this when resolving a typed `kind: schema` reference."
+  validator_bin:
+    type: string
+    pattern: "^[A-Za-z0-9._-]+$"
+    description: "Optional package bin that validates files conforming to this schema. The validator checks it exists in the schema package's package.json bin map."
 
   # --- Vendoring fields (any note redistributing upstream content) ---
   # SPDX identifier of the content's license. Set on schema notes whose

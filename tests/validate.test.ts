@@ -82,7 +82,6 @@ describe("validateData (per-file)", () => {
     const msg = r.errors.find((e) => /input_artifacts\.0/.test(e)) ?? "";
     expect(msg).toMatch(/'schema' is producer-owned/);
     expect(msg).toMatch(/output_artifacts\[\]\.schema/);
-    expect(msg).toMatch(/input_schemas/);
   });
 
   it("rejects pipeline missing phases", () => {
@@ -1181,6 +1180,231 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
+  });
+
+  it("rejects inconsistent schemas across producers of the same artifact id", () => {
+    writeFm(path.join(dir, "molds/producer-a/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "producer-a",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "summary-x",
+            kind: "json",
+            default_filename: "summary-x.json",
+            schema: "[[schema-x]]",
+            description: "Structured summary from one branch producer.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "molds/producer-b/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "producer-b",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "summary-x",
+            kind: "json",
+            default_filename: "summary-x.json",
+            schema: "[[schema-y]]",
+            description: "Structured summary from another branch producer.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "schemas/schema-x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-x",
+        title: "Schema X",
+        package: "@example/schema-x",
+        package_export: "schemaX",
+      }),
+    });
+    writeFm(path.join(dir, "schemas/schema-y.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-y",
+        title: "Schema Y",
+        package: "@example/schema-y",
+        package_export: "schemaY",
+      }),
+    });
+
+    const before = process.stdout.write;
+    let captured = "";
+    process.stdout.write = (chunk: any) => {
+      captured += String(chunk);
+      return true;
+    };
+    try {
+      const r = validateDirectory({
+        directory: dir,
+        schemaPath: SCHEMA_PATH,
+        tagsPath: TAGS_PATH,
+      });
+      expect(r.errors).toBeGreaterThanOrEqual(1);
+    } finally {
+      process.stdout.write = before;
+    }
+    expect(captured).toMatch(/inconsistent producer schemas/);
+  });
+
+  it("warns when only some producers of an artifact id declare a schema", () => {
+    writeFm(path.join(dir, "molds/producer-a/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "producer-a",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "summary-x",
+            kind: "json",
+            default_filename: "summary-x.json",
+            schema: "[[schema-x]]",
+            description: "Structured summary from one branch producer.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "molds/producer-b/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "producer-b",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "summary-x",
+            kind: "json",
+            default_filename: "summary-x.json",
+            description: "Structured summary from another branch producer.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "schemas/schema-x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-x",
+        title: "Schema X",
+        package: "@example/schema-x",
+        package_export: "schemaX",
+      }),
+    });
+
+    const before = process.stdout.write;
+    let captured = "";
+    process.stdout.write = (chunk: any) => {
+      captured += String(chunk);
+      return true;
+    };
+    try {
+      const r = validateDirectory({
+        directory: dir,
+        schemaPath: SCHEMA_PATH,
+        tagsPath: TAGS_PATH,
+      });
+      expect(r.errors).toBe(0);
+      expect(r.warnings).toBeGreaterThanOrEqual(1);
+    } finally {
+      process.stdout.write = before;
+    }
+    expect(captured).toMatch(/mixed schema coverage/);
+  });
+
+  it("rejects an artifact schema whose target schema note lacks package_export", () => {
+    writeFm(path.join(dir, "molds/producer/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "producer",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "summary-x",
+            kind: "json",
+            default_filename: "summary-x.json",
+            schema: "[[schema-x]]",
+            description: "Structured summary with an under-declared schema note.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "schemas/schema-x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-x",
+        title: "Schema X",
+        package: "@example/schema-x",
+      }),
+    });
+
+    const before = process.stdout.write;
+    let captured = "";
+    process.stdout.write = (chunk: any) => {
+      captured += String(chunk);
+      return true;
+    };
+    try {
+      const r = validateDirectory({
+        directory: dir,
+        schemaPath: SCHEMA_PATH,
+        tagsPath: TAGS_PATH,
+      });
+      expect(r.errors).toBeGreaterThanOrEqual(1);
+    } finally {
+      process.stdout.write = before;
+    }
+    expect(captured).toMatch(/package_export/);
+  });
+
+  it("rejects schema validator_bin missing from package bin map", () => {
+    writeFm(path.join(dir, "schemas/schema-x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-x",
+        title: "Schema X",
+        package: "@galaxy-foundry/schema-x",
+        package_export: "schemaX",
+        validator_bin: "validate-schema-x",
+      }),
+    });
+    mkdirSync(path.join(dir, "packages/schema-x"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "packages/schema-x/package.json"),
+      JSON.stringify({ name: "@galaxy-foundry/schema-x", bin: {} }, null, 2),
+    );
+
+    const before = process.stdout.write;
+    let captured = "";
+    process.stdout.write = (chunk: any) => {
+      captured += String(chunk);
+      return true;
+    };
+    try {
+      const r = validateDirectory({
+        directory: dir,
+        schemaPath: SCHEMA_PATH,
+        tagsPath: TAGS_PATH,
+      });
+      expect(r.errors).toBeGreaterThanOrEqual(1);
+    } finally {
+      process.stdout.write = before;
+    }
+    expect(captured).toMatch(/validator_bin 'validate-schema-x'/);
+    expect(captured).toMatch(/package\.json bin map/);
   });
 
   it("warns when a pipeline phase consumes an artifact no prior phase produces", () => {

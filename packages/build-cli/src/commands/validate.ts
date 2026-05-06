@@ -2,7 +2,7 @@
 // Foundry frontmatter validator.
 // See INITIAL_ARCHITECTURE.md §6 for the layered pipeline.
 
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import type { ErrorObject } from "ajv";
@@ -88,7 +88,7 @@ function validateSchema(data: Frontmatter, schema: JsonSchema): string[] {
       params?.additionalProperty === "schema" &&
       /^input_artifacts\.\d+$/.test(loc)
     ) {
-      return `${loc}: 'schema' is producer-owned — declare it on the producer Mold's output_artifacts[].schema (consumers inherit via id). For a runtime-validation hint without a producer commitment, list the schema in the top-level 'input_schemas' array.`;
+      return `${loc}: 'schema' is producer-owned — declare it on the producer Mold's output_artifacts[].schema (consumers inherit via id).`;
     }
     return `${loc}: ${e.message ?? "validation failed"}${extra}`;
   });
@@ -552,6 +552,8 @@ function collectPhaseMoldRefs(
  *   - Every `input_artifacts[].id` must resolve to some `output_artifacts[].id`
  *     declared by another Mold (multi-producer is allowed; same id can come
  *     from a discover-or-author branch).
+ *   - All producers of the same artifact id must declare the same schema, or
+ *     none at all; consumers inherit the contract by id.
  *   - When `output_artifacts[].schema` is set, the wiki-link must resolve to a
  *     `type: schema` note.
  */
@@ -562,14 +564,55 @@ function validateArtifactGraph(
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const producerIds = new Set<string>();
+  const producersById = new Map<
+    string,
+    Array<{ path: string; index: number; schema?: string; schemaTarget?: string }>
+  >();
   for (const f of files) {
     if (f.meta.type !== "mold") continue;
     const out = f.meta.output_artifacts;
     if (!Array.isArray(out)) continue;
-    for (const a of out) {
+    out.forEach((a, index) => {
       if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
-        producerIds.add((a as { id: string }).id);
+        const id = (a as { id: string }).id;
+        producerIds.add(id);
+        const schema = (a as { schema?: unknown }).schema;
+        const producers = producersById.get(id) ?? [];
+        producers.push({
+          path: f.path,
+          index,
+          schema: typeof schema === "string" ? schema : undefined,
+          schemaTarget:
+            typeof schema === "string"
+              ? (resolveWikiLink(schema, slugMap) ?? undefined)
+              : undefined,
+        });
+        producersById.set(id, producers);
       }
+    });
+  }
+  for (const [id, producers] of producersById) {
+    if (producers.length < 2) continue;
+    const declaredSchemas = producers.filter((p) => p.schema);
+    const schemaTargets = new Set(declaredSchemas.map((p) => p.schemaTarget ?? p.schema));
+    if (schemaTargets.size > 1) {
+      const declared = producers
+        .map((p) => `${p.path}:output_artifacts[${p.index}].schema=${p.schema ?? "(none)"}`)
+        .join(", ");
+      findings.push({
+        path: producers[0]!.path,
+        severity: "error",
+        message: `output_artifacts id '${id}' has inconsistent producer schemas; consumers inherit by id, so all producers must declare the same schema or none (${declared})`,
+      });
+    } else if (declaredSchemas.length > 0 && declaredSchemas.length < producers.length) {
+      const declared = producers
+        .map((p) => `${p.path}:output_artifacts[${p.index}].schema=${p.schema ?? "(none)"}`)
+        .join(", ");
+      findings.push({
+        path: producers[0]!.path,
+        severity: "warning",
+        message: `output_artifacts id '${id}' has mixed schema coverage across producers; consumers cannot inherit a guaranteed contract until every producer declares the same schema (${declared})`,
+      });
     }
   }
   for (const f of files) {
@@ -589,12 +632,23 @@ function validateArtifactGraph(
           });
           return;
         }
-        const targetType = metaByPath.get(tp)?.type;
+        const noteMeta = metaByPath.get(tp);
+        const targetType = noteMeta?.type;
         if (targetType !== "schema") {
           findings.push({
             path: f.path,
             severity: "error",
             message: `output_artifacts[${i}].schema: wiki link ${schema} resolves to type=${targetType ?? "(none)"}, expected schema`,
+          });
+          return;
+        }
+        const pkg = typeof noteMeta?.package === "string" ? noteMeta.package : null;
+        const exp = typeof noteMeta?.package_export === "string" ? noteMeta.package_export : null;
+        if (!pkg || !exp) {
+          findings.push({
+            path: f.path,
+            severity: "error",
+            message: `output_artifacts[${i}].schema: target schema note ${schema} must declare both 'package' and 'package_export' (got package=${pkg ?? "(none)"}, package_export=${exp ?? "(none)"})`,
           });
         }
       });
@@ -648,6 +702,66 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
         path: f.path,
         severity: "error",
         message: `license_file: file does not exist or is empty: ${licenseFile}`,
+      });
+    }
+  }
+  return findings;
+}
+
+function packageJsonPath(repoRoot: string, packageName: string): string {
+  if (packageName.startsWith("@galaxy-foundry/")) {
+    return path.join(repoRoot, "packages", packageName.split("/")[1]!, "package.json");
+  }
+  return path.join(repoRoot, "node_modules", ...packageName.split("/"), "package.json");
+}
+
+function validateSchemaValidatorBins(files: FileMeta[], contentRoot: string): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const repoRoot =
+    path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
+  for (const f of files) {
+    if (f.meta.type !== "schema") continue;
+    const validatorBin = typeof f.meta.validator_bin === "string" ? f.meta.validator_bin : "";
+    if (!validatorBin) continue;
+    const packageName = typeof f.meta.package === "string" ? f.meta.package : "";
+    if (!packageName) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `validator_bin '${validatorBin}' requires package frontmatter`,
+      });
+      continue;
+    }
+    const pkgPath = packageJsonPath(repoRoot, packageName);
+    if (!existsSync(pkgPath)) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `validator_bin '${validatorBin}' package ${packageName} has no package.json at ${path.relative(repoRoot, pkgPath)}`,
+      });
+      continue;
+    }
+    let pkg: Record<string, unknown>;
+    try {
+      pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as Record<string, unknown>;
+    } catch (e) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `validator_bin '${validatorBin}' package ${packageName} package.json is not valid JSON: ${(e as Error).message}`,
+      });
+      continue;
+    }
+    const bin = pkg.bin;
+    const hasBin =
+      typeof bin === "string"
+        ? validatorBin === packageName.split("/").pop()
+        : !!(bin && typeof bin === "object" && validatorBin in bin);
+    if (!hasBin) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `validator_bin '${validatorBin}' is not declared in ${packageName} package.json bin map`,
       });
     }
   }
@@ -1193,6 +1307,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateArtifactGraph(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateSchemaVendoring(validFiles, opts.directory));
+  crossFindings.push(...validateSchemaValidatorBins(validFiles, opts.directory));
   crossFindings.push(
     ...validateMoldSourceLayout(
       opts.directory,
