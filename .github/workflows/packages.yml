@@ -36,6 +36,9 @@ jobs:
       - name: Install site dependencies
         run: npm --prefix site install --no-audit --no-fund
 
+      - name: Typecheck root and site
+        run: npm run typecheck
+
       - name: Run repo tests
         run: npm run test
 

@@ -9,7 +9,8 @@
     "validate": "tsx packages/build-cli/src/bin/foundry-build.ts validate --root .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && npm --prefix site run typecheck",
+    "typecheck:root": "tsc --noEmit",
     "dashboard": "tsx packages/build-cli/src/bin/foundry-build.ts generate-dashboard --root .",
     "check:dashboard": "tsx packages/build-cli/src/bin/foundry-build.ts generate-dashboard --root . --check",
     "index": "tsx packages/build-cli/src/bin/foundry-build.ts generate-index --root .",
@@ -29,6 +30,7 @@
     "release": "pnpm -r build && changeset publish",
     "site:dev": "npm --prefix site run dev",
     "site:build": "npm --prefix site run build",
+    "site:typecheck": "npm --prefix site run typecheck",
     "site:preview": "npm --prefix site run preview"
   },
   "devDependencies": {
