@@ -2,13 +2,15 @@
 type: cli-command
 tool: gxwf
 command: tool-search
+package: "@galaxy-tool-util/cli"
+upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
 tags:
   - cli-command
   - cli/gxwf
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 summary: "Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence."
 related_notes:
@@ -21,30 +23,7 @@ Free-text search over the Galaxy Tool Shed's tool index. Designed to feed `galax
 
 Instance-agnostic; targets `https://toolshed.g2.bx.psu.edu` by default.
 
-## Install
-
-Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Prefer the project-local executable when running inside a checked-out Foundry or galaxy-tool-util workspace.
-
-## Synopsis
-
-```
-gxwf tool-search <query> [options]
-```
-
 `<query>` is free text; whitespace separates terms. The Tool Shed wraps the term as `*term*` server-side, so noisy queries can match description and help text.
-
-## Options
-
-| Option | Description |
-|---|---|
-| `--page-size <n>` | Server-side page size (default `20`). |
-| `--max-results <n>` | Hard cap on hits returned (default `50`). |
-| `--page <n>` | Starting page (1-indexed; default `1`). |
-| `--owner <user>` | Restrict to one repo owner. **Client-side filter** — `tool-search` has no server `owner:` keyword. |
-| `--match-name` | Drop hits where the query is not a token in the tool name. Tightens noisy queries. |
-| `--json` | Emit `{ query, hits: [NormalizedToolHit, ...] }`. |
-| `--enrich` | Resolve each hit's `ParsedTool` (one fetch per hit) and attach as `parsedTool` on each JSON hit. Off by default. Best for skills that pick top 1–3; wasteful for paged exploration. |
-| `--cache-dir <dir>` | Tool cache used by `--enrich`. Defaults to `galaxy-tool-cache`'s location. |
 
 ## Output
 
@@ -70,14 +49,6 @@ Default: human-readable list.
 ```
 
 A hit identifies `(owner, repoName, toolId)` plus a `trsToolId` (`owner~repo~toolId`). It does **not** include a changeset revision or specific tool version — those come from [[tool-versions]] and [[tool-revisions]].
-
-## Exit codes
-
-| Code | Meaning |
-|---|---|
-| `0` | At least one hit. |
-| `2` | Empty result (no hits, including after `--match-name` / `--owner` filtering). |
-| `3` | HTTP / fetch error. |
 
 ## Examples
 

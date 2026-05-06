@@ -514,7 +514,14 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "cli/gxwf/validate.md"), {
-      ...baseRequired({ type: "cli-command", tags: ["cli-command", "cli/gxwf"], tool: "gxwf", command: "validate" }),
+      ...baseRequired({
+        type: "cli-command",
+        tags: ["cli-command", "cli/gxwf"],
+        tool: "gxwf",
+        command: "validate",
+        package: "@galaxy-tool-util/cli",
+        upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
+      }),
     });
 
     const r = validateDirectory({
@@ -523,6 +530,26 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
+  });
+
+  it("rejects CLI command notes missing upstream metadata", () => {
+    writeFm(path.join(dir, "cli/gxwf/not-real.md"), {
+      ...baseRequired({
+        type: "cli-command",
+        tags: ["cli-command", "cli/gxwf"],
+        tool: "gxwf",
+        command: "not-real",
+        package: "@galaxy-tool-util/cli",
+        upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
+      }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
   it("rejects typed references that resolve to the wrong type", () => {

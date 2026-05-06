@@ -2,13 +2,15 @@
 type: cli-command
 tool: gxwf
 command: validate-tests
+package: "@galaxy-tool-util/cli"
+upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
 tags:
   - cli-command
   - cli/gxwf
 status: draft
 created: 2026-05-03
-revised: 2026-05-04
-revision: 2
+revised: 2026-05-06
+revision: 3
 ai_generated: true
 summary: "Validate Galaxy workflow test files and optionally cross-check labels against their workflow."
 related_notes:
@@ -20,37 +22,13 @@ related_notes:
 
 Validate a Galaxy workflow test file (`*-tests.yml` or `*.gxwf-tests.yml`) against the Galaxy tests schema. Optionally cross-check the test file against a workflow so missing input labels, missing output labels, and type mismatches fail before a slow Planemo run.
 
-## Install
-
-Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Inside this repo, `validate-tests-format` from `@galaxy-foundry/tests-format-schema` exposes the same schema gate plus workflow cross-check for harness and package tests.
-
-## Synopsis
-
-```bash
-gxwf validate-tests <file> [options]
-```
-
 `<file>` is a workflow test YAML file, usually named `<workflow>-tests.yml` or `<workflow>.gxwf-tests.yml`.
-
-## Options
-
-| Option | Description |
-|---|---|
-| `--json` | Emit a structured JSON validation report. Preferred for cast skills and harness routing. |
-| `--workflow <path>` | Cross-check job inputs and output assertions against a Galaxy workflow (`.ga` or `.gxwf.yml`). |
 
 ## Output
 
 Default output is human-readable validation diagnostics.
 
 With `--json`, the command emits a structured report describing schema errors and, when `--workflow` is supplied, workflow-coherence errors such as missing labels or incompatible input values.
-
-## Exit codes
-
-| Code | Meaning |
-|---|---|
-| `0` | Test file is schema-valid and any requested workflow cross-check passed. |
-| non-zero | The test file is invalid, the workflow cross-check failed, or an input file could not be loaded. |
 
 ## Examples
 
