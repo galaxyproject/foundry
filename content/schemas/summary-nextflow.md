@@ -12,7 +12,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-06
-revision: 7
+revision: 8
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
@@ -103,6 +103,18 @@ Snapshot-sidecar parsing landed for module and subworkflow tests whose interesti
 - **`SnapshotFixture.parsed_content: SnapshotContent[]` added.** Each parsed sidecar entry preserves the snapshot name plus channel-keyed `SnapshotChannel` values.
 - **`SnapshotFile` added.** `<path>:md5,<hex>` strings become file digest assertions with `path`, `basename`, `md5`, and a `stub` flag for empty-file md5s.
 - **Non-file values preserved.** Version tuples, counts, and other scalar snapshot values remain in `SnapshotChannel.values` so downstream test-plan Molds do not re-read `.snap` files.
+
+## Revision 7 — 2026-05-06
+
+Top-level `Param` entries gained the nf-schema metadata previously only available on sample-sheet columns. Resolves jmchilton/foundry#186.
+
+- **`Param.format` added** (string|null). nf-schema `format` keyword: `file-path`, `directory-path`, `path`, `file-path-pattern`. Disambiguates path-typed params from plain strings without re-reading `nextflow_schema.json`.
+- **`Param.hidden` added** (boolean|null). nf-schema `hidden` keyword. CLI-plumbing params (`validate_params`, `pipelines_testdata_base_path`, `version`, …) now drop out of user-facing target interfaces structurally.
+- **`Param.mimetype` added** (string|null). nf-schema `mimetype` keyword. Seeds Galaxy `format` on path params when present.
+- **`Param.schema_group` added** (string|null). The parent `$defs` section's `title` (e.g. `Input/output options`, `Reference genome options`). Preserves nf-schema sectioning for UI grouping.
+- **`Param.fa_icon` added** (string|null). The parent section's Font Awesome icon hint.
+
+Downstream Molds — [[nextflow-summary-to-galaxy-interface]], [[nextflow-summary-to-cwl-interface]], [[nextflow-summary-to-galaxy-data-flow]] — can now consume these structurally instead of re-parsing the source schema. Mapping table in [[nextflow-params-to-galaxy-inputs]].
 
 ## Revision 6 — 2026-05-05
 

@@ -8,8 +8,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-05
-revision: 10
+revised: 2026-05-06
+revision: 11
 ai_generated: true
 output_schemas:
   - "[[summary-nextflow]]"
