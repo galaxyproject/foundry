@@ -28,8 +28,6 @@ output_artifacts:
     kind: markdown
     default_filename: iwc-comparison-notes.md
     description: "Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring."
-cli_commands:
-  - "[[convert]]"
 references:
   - kind: cli-command
     ref: "[[convert]]"
