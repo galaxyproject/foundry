@@ -8,6 +8,7 @@ import process from "node:process";
 import type { ErrorObject } from "ajv";
 import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
+import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
@@ -41,6 +42,12 @@ const TYPE_TAG_MAP: Record<string, string> = {
   "research|design-spec": "research/design-spec",
   "schema|": "schema",
 };
+
+const CLI_METADATA_KEYS = new Set(
+  [gxwfCliMeta, galaxyToolCacheCliMeta].flatMap((program) =>
+    program.commands.map((command) => `${program.name}/${command.name}`),
+  ),
+);
 
 /** Single-value vs array wiki-link fields. Schema's regex catches missing brackets; this catches whitespace-only inner text. */
 const WIKI_LINK_FIELDS: Record<string, "single" | "array"> = {
@@ -967,9 +974,31 @@ function validateMoldStubBody(files: FileMeta[]): CrossFileFinding[] {
 
 function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
-  const requiredSections = ["Install", "Synopsis", "Output", "Exit codes", "Examples", "Gotchas"];
+  const requiredSections = ["Output", "Examples", "Gotchas"];
   for (const f of files) {
     if (f.meta.type !== "cli-command") continue;
+    const key = `${String(f.meta.tool)}/${String(f.meta.command)}`;
+    if (!CLI_METADATA_KEYS.has(key)) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `cli-command ${key} is absent from @galaxy-tool-util/cli metadata`,
+      });
+    }
+    if (typeof f.meta.package !== "string" || f.meta.package.length === 0) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: "cli-command must declare package for metadata-backed rendering",
+      });
+    }
+    if (typeof f.meta.upstream !== "string" || f.meta.upstream.length === 0) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: "cli-command must declare upstream for metadata-backed rendering",
+      });
+    }
     const body = readMarkdown(f.path).body;
     for (const section of requiredSections) {
       if (new RegExp(`^##\\s+${section}\\b`, "m").test(body)) continue;

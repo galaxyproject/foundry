@@ -2,13 +2,15 @@
 type: cli-command
 tool: gxwf
 command: tool-versions
+package: "@galaxy-tool-util/cli"
+upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
 tags:
   - cli-command
   - cli/gxwf
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 summary: "List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence."
 related_notes:
@@ -19,28 +21,11 @@ related_notes:
 
 List the TRS-published versions of a Tool Shed tool, ordered oldest→newest (newest last). Used after [[tool-search]] has surfaced a candidate `trsToolId` and the caller needs to pick a version to cache.
 
-## Install
-
-Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Prefer the project-local executable when running inside a checked-out Foundry or galaxy-tool-util workspace.
-
-## Synopsis
-
-```
-gxwf tool-versions <tool-id> [options]
-```
-
 `<tool-id>` accepts both forms:
 - TRS form: `owner~repo~tool_id` (e.g. `devteam~fastqc~fastqc`).
 - Pretty form: `owner/repo/tool_id` (e.g. `devteam/fastqc/fastqc`).
 
 The `~` form is the Tool Shed's TRS encoding (slashes break FastAPI path-param decoding); the CLI accepts both and normalizes.
-
-## Options
-
-| Option | Description |
-|---|---|
-| `--latest` | Print only the newest version. |
-| `--json` | Emit `{ trsToolId, versions: [...] }`. |
 
 ## Output
 
@@ -63,14 +48,6 @@ Default: one version string per line, oldest first.
   "versions": ["0.74+galaxy0"]
 }
 ```
-
-## Exit codes
-
-| Code | Meaning |
-|---|---|
-| `0` | At least one version. |
-| `2` | Empty result (TRS tool exists but has no installable versions, or unknown tool id). |
-| `3` | HTTP / fetch error. |
 
 ## Examples
 

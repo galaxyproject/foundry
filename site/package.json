@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
-    "@galaxy-tool-util/cli": "^1.1.0",
+    "@galaxy-tool-util/cli": "^1.4.0",
     "@galaxy-tool-util/schema": "^1.1.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",

@@ -11,7 +11,7 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 | Reference kind | Source location | Casting transformation | Lands at | Status |
 |---|---|---|---|---|
 | `pattern` | `content/patterns/*.md` | Verbatim copy or LLM-condense per `mode` | `references/patterns/<slug>.md` | v1 |
-| `cli-command` | `content/cli/<tool>/<cmd>.md` | Deterministic JSON sidecar | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
+| `cli-command` | `content/cli/<tool>/<cmd>.md` framing note plus registered upstream CLI metadata | Deterministic JSON sidecar sourced from registry metadata + framing markdown | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
 | `schema` | `[[wiki-link]]` to a `type: schema` note in `content/schemas/`. The note declares `package` + `package_export`; cast imports the named runtime export at build time and serializes it. Foundry-authored: schemas in `packages/<name>-schema/src/<name>.schema.json` (e.g. `summary-nextflow`, `galaxy-tool-discovery`). Vendored: schemas synced from upstream packages into `packages/<name>-schema/src/` (e.g. `tests-format` from `@galaxy-tool-util/schema`). | Verbatim copy of the imported export, JSON-serialized | `references/schemas/<note-slug>.schema.json` | v1 |
 | `research` | `content/research/*.md` or paired structured sources under `content/research/` | Verbatim copy or LLM condense per `mode` | `references/notes/<source-basename>` (strict 1:1) | v1 |
 | `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | `references/prompts/` (inlined or copied) | **deferred** — rejected by v1 caster as "not implemented" until a real Mold needs it |
@@ -115,7 +115,7 @@ To cast a Mold, the casting process consumes:
 
 Resolution policy is per-kind, not a single rule:
 - `pattern` — verbatim inline if under a size threshold; LLM-summarize otherwise. Casting hints (`inline: true` / `summarize: true`) may override.
-- `cli-command` — always cast to JSON sidecar (deterministic structuring; no token-budget condensation needed because the sidecar is loaded only when the agent needs that command).
+- `cli-command` — always cast to JSON sidecar from registered upstream metadata plus the Foundry framing note; no token-budget condensation needed because the sidecar is loaded only when the agent needs that command.
 - `schema`, `example`, `prompt` — always verbatim copy unless the typed reference declares a future supported transformation.
 - `research` — operational background; copied or condensed according to `mode`, and loaded according to `used_at` / `load`. `mode: condense` is specified but not implemented in v1 tooling yet.
 - `eval` — never packaged.
@@ -238,7 +238,7 @@ cast_mold(mold_name, target):
     case ref.kind:
       pattern      -> verbatim copy or LLM-condense per mode
                       write to references/patterns/<source-basename>
-      cli-command  -> deterministic JSON sidecar from frontmatter + body
+      cli-command  -> deterministic JSON sidecar from registry metadata + framing body
                       write to references/cli/<source-slug>.json
       schema       -> copy verbatim to references/schemas/<source-basename>
       research     -> copy verbatim or condense per mode
