@@ -19,9 +19,23 @@ import { validateSummary } from "@galaxy-foundry/summary-nextflow-schema";
 const PKG_ROOT = resolve(__dirname, "..", "..");
 const FOUNDRY_ROOT = resolve(PKG_ROOT, "..", "..");
 const CLI = resolve(PKG_ROOT, "dist/bin/summarize-nextflow.js");
-const FIXTURES = resolve(os.homedir(), "projects/repositories/workflow-fixtures/pipelines");
+// Prefer repo-local materialization (`make fixtures-nextflow` →
+// $REPO/workflow-fixtures/pipelines/) so CI exercises the same paths.
+// Fall back to a developer-managed external clone for backwards compatibility.
+const REPO_FIXTURES = resolve(FOUNDRY_ROOT, "workflow-fixtures/pipelines");
+const HOME_FIXTURES = resolve(os.homedir(), "projects/repositories/workflow-fixtures/pipelines");
+const FIXTURES = (() => {
+  try {
+    if (statSync(REPO_FIXTURES).isDirectory()) return REPO_FIXTURES;
+  } catch {
+    /* fall through */
+  }
+  return HOME_FIXTURES;
+})();
 const DEMO_PIPELINE = resolve(FIXTURES, "nf-core__demo");
 const BACASS_PIPELINE = resolve(FIXTURES, "nf-core__bacass");
+const RNASEQ_PIPELINE = resolve(FIXTURES, "nf-core__rnaseq");
+const SPAWN_MAX_BUFFER = 64 * 1024 * 1024;
 const DEMO_SUMMARY = resolve(
   FOUNDRY_ROOT,
   "casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json",
@@ -42,6 +56,7 @@ function fixturePresent(path: string): boolean {
 const itIfBuilt = cliBuilt() ? it : it.skip;
 const itIfDemoFixture = cliBuilt() && fixturePresent(DEMO_PIPELINE) ? it : it.skip;
 const itIfBacassFixture = cliBuilt() && fixturePresent(BACASS_PIPELINE) ? it : it.skip;
+const itIfRnaseqFixture = cliBuilt() && fixturePresent(RNASEQ_PIPELINE) ? it : it.skip;
 
 describe("summarize-nextflow CLI — built bin", () => {
   itIfBuilt("--version emits a semver", () => {
@@ -530,6 +545,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
   itIfDemoFixture("emits valid JSON summary for the demo fixture", () => {
     const r = spawnSync("node", [CLI, DEMO_PIPELINE, "--no-with-nextflow", "--no-validate"], {
       encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
     });
     expect(r.status).toBe(0);
 
@@ -559,6 +575,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
 
     const r = spawnSync("node", [CLI, DEMO_PIPELINE, "--no-validate"], {
       encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
       env: { ...process.env, PATH: `${binDir}${process.env.PATH ? `:${process.env.PATH}` : ""}` },
     });
     expect(r.status).toBe(0);
@@ -572,7 +589,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
     const r = spawnSync(
       "node",
       [CLI, DEMO_PIPELINE, "--no-with-nextflow", "--fetch-test-data", "--no-validate"],
-      { encoding: "utf8", timeout: 120_000 },
+      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER, timeout: 120_000 },
     );
     expect(r.status).toBe(0);
 
@@ -596,6 +613,77 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
         .every((input) => /^[a-f0-9]{40}$/u.test(input.sha1)),
     ).toBe(true);
   });
+
+  itIfDemoFixture("emits nf-schema metadata on Param entries (issue #186)", () => {
+    const r = spawnSync("node", [CLI, DEMO_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const params = data.params as {
+      name: string;
+      format: string | null;
+      hidden: boolean | null;
+      mimetype: string | null;
+      schema_group: string | null;
+      fa_icon: string | null;
+    }[];
+
+    const input = params.find((p) => p.name === "input");
+    expect(input).toBeDefined();
+    expect(input!.format).toBe("file-path");
+    expect(input!.mimetype).toBe("text/csv");
+    expect(input!.schema_group).toBe("Input/output options");
+    expect(input!.fa_icon).toBe("fas fa-terminal");
+
+    const outdir = params.find((p) => p.name === "outdir");
+    expect(outdir!.format).toBe("directory-path");
+
+    const version = params.find((p) => p.name === "version");
+    expect(version!.hidden).toBe(true);
+    expect(version!.schema_group).toBe("Generic options");
+
+    const skipTrim = params.find((p) => p.name === "skip_trim");
+    expect(skipTrim!.format).toBeNull();
+    expect(skipTrim!.hidden).toBeNull();
+    expect(skipTrim!.schema_group).toBe("Process skipping options");
+  });
+});
+
+describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () => {
+  itIfRnaseqFixture("emits nf-schema Param metadata on the flagship pipeline (issue #186)", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const validation = validateSummary(data);
+    expect(validation.valid).toBe(true);
+
+    const params = data.params as {
+      name: string;
+      format: string | null;
+      hidden: boolean | null;
+      mimetype: string | null;
+      schema_group: string | null;
+      fa_icon: string | null;
+    }[];
+
+    const input = params.find((p) => p.name === "input");
+    expect(input!.format).toBe("file-path");
+    expect(input!.mimetype).toBe("text/csv");
+    expect(input!.schema_group).toBe("Input/output options");
+
+    expect(params.some((p) => p.hidden === true)).toBe(true);
+
+    const groups = new Set(
+      params.map((p) => p.schema_group).filter((g): g is string => typeof g === "string"),
+    );
+    expect(groups.size).toBeGreaterThan(3);
+    expect(groups.has("Input/output options")).toBe(true);
+  });
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () => {
@@ -614,7 +702,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
         dataDir,
         "--no-validate",
       ],
-      { encoding: "utf8", timeout: 120_000 },
+      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER, timeout: 120_000 },
     );
     expect(r.status).toBe(0);
 
@@ -654,6 +742,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
   itIfBacassFixture("extracts multi-dependency bioconda tools from bacass modules", () => {
     const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
       encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
     });
     expect(r.status).toBe(0);
 
@@ -671,6 +760,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
   itIfBacassFixture("extracts repeated module aliases from bacass includes", () => {
     const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
       encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
     });
     expect(r.status).toBe(0);
 
@@ -686,6 +776,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
   itIfBacassFixture("extracts bacass named subworkflows", () => {
     const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
       encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
     });
     expect(r.status).toBe(0);
 
@@ -707,6 +798,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
   itIfBacassFixture("extracts bacass graph operators and conditionals", () => {
     const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
       encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
     });
     expect(r.status).toBe(0);
 

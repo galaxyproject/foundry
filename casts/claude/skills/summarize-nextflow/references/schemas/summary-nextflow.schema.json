@@ -165,6 +165,41 @@
           "type": "array",
           "items": {},
           "description": "Allowed values when nextflow_schema.json declares them."
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "JSON Schema `format` keyword from nextflow_schema.json. nf-schema vocabulary: `file-path`, `directory-path`, `path`, `file-path-pattern`. Distinguishes path-typed params (datasets/collections) from plain strings without re-reading the source schema. Null when undeclared."
+        },
+        "hidden": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "nf-schema `hidden` keyword. True for CLI-plumbing params (e.g. `validate_params`, `pipelines_testdata_base_path`, `version`) that shouldn't surface in user-facing target interfaces. Null when undeclared."
+        },
+        "mimetype": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "nf-schema `mimetype` keyword (e.g. `text/csv`, `text/plain`, `application/gzip`). Useful for seeding Galaxy `format` on path-typed params. Null when undeclared."
+        },
+        "schema_group": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Human-readable group label from the parent nextflow_schema.json `$defs` section's `title` (e.g. `Input/output options`, `Reference genome options`). Preserves nf-schema sectioning so target interfaces can group inputs without re-parsing the source. Null when the param is not under a titled section."
+        },
+        "fa_icon": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Font Awesome icon class from the parent `$defs` section's `fa_icon` (e.g. `fas fa-terminal`). Optional UI hint; null when undeclared."
         }
       }
     },

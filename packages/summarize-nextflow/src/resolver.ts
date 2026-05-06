@@ -80,6 +80,11 @@ interface Param {
   description?: string;
   required: boolean;
   enum?: unknown[];
+  format?: string | null;
+  hidden?: boolean | null;
+  mimetype?: string | null;
+  schema_group?: string | null;
+  fa_icon?: string | null;
 }
 
 interface Tool {
@@ -374,12 +379,19 @@ function parseParams(pipelineRoot: string): Param[] {
   const schema = JSON.parse(readText(schemaPath)) as {
     $defs?: Record<
       string,
-      { required?: string[]; properties?: Record<string, Record<string, unknown>> }
+      {
+        title?: string;
+        fa_icon?: string;
+        required?: string[];
+        properties?: Record<string, Record<string, unknown>>;
+      }
     >;
   };
   const params = new Map<string, Param>();
   for (const section of Object.values(schema.$defs ?? {})) {
     const required = new Set(section.required ?? []);
+    const schema_group = typeof section.title === "string" ? section.title : null;
+    const fa_icon = typeof section.fa_icon === "string" ? section.fa_icon : null;
     for (const [name, property] of Object.entries(section.properties ?? {})) {
       const type = Array.isArray(property.type)
         ? String(property.type[0])
@@ -391,6 +403,11 @@ function parseParams(pipelineRoot: string): Param[] {
         description: typeof property.description === "string" ? property.description : undefined,
         required: required.has(name),
         enum: Array.isArray(property.enum) ? property.enum : undefined,
+        format: typeof property.format === "string" ? property.format : null,
+        hidden: typeof property.hidden === "boolean" ? property.hidden : null,
+        mimetype: typeof property.mimetype === "string" ? property.mimetype : null,
+        schema_group,
+        fa_icon,
       });
     }
   }
