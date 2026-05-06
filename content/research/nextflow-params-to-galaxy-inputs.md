@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-05-06
 revised: 2026-05-06
-revision: 1
+revision: 3
 ai_generated: true
 related_notes:
   - "[[nextflow-workflow-io-semantics]]"
@@ -82,7 +82,7 @@ Design inference: translate from launch params plus materialization evidence, no
 | `string` | `string` | Add `restrictions` from enum when choices are closed. |
 | Primitive list | `[string]`, `[int]`, `[float]`, `[boolean]` | Use only when Galaxy should expose multiple primitive values; otherwise keep as string or ask for interface design. |
 | Path string that is a user dataset | `data` or `collection` | Do not leave as scalar if Galaxy should receive uploaded or selected data. |
-| Path string that selects reference data | Usually `string` | Often a data-table, CVMFS, or admin-managed reference choice in Galaxy. |
+| Path string that selects reference data | `data` input the user supplies, or a workflow-curated `string` enum with `restrictions` | Avoid introducing new Galaxy data tables (`from_data_table` / `.loc`); see §Reference data below. |
 
 A path-like Nextflow string is not automatically Galaxy `data`. First decide whether it is a dataset, collection, sample sheet, reference selector, output directory, or runtime-control path.
 
@@ -139,6 +139,24 @@ Keep as Galaxy scalar inputs when they alter workflow shape:
 
 A `save_*` or `skip_*` name is not enough. Classify by effect: if the param only changes `publishDir`, exclude. If it changes whether processes run, which tool is called, or which files a command creates, keep as scalar input or resolve to a fixed Galaxy design default.
 
+### Warning and impact assessment
+
+Most execution-control params (`outdir`, `publish_dir_mode`, email, `save_*` toggles, reporting flags) are not Galaxy workflow concerns: Galaxy owns history layout, output exposure, and notifications. Drop them silently from the Galaxy interface, but record them so casting can surface a single warning to the user and a per-param impact note to the agent.
+
+Cast Mold posture:
+
+- **Warn the user.** Emit one consolidated notice listing each Nextflow param dropped from the Galaxy interface, grouped by class (publish, notification, runtime UX, CLI plumbing). The user should know the Galaxy target is not a faithful CLI replica.
+- **Assess problematic cases.** For each dropped param the agent must decide whether the omission only changes runtime UX (safe) or changes scientific output (problematic). Mark a param problematic when any of these hold:
+  - It is referenced outside `publishDir` / report config — e.g. inside a process script, channel construction, or branch guard.
+  - A `save_*` flag gates a tool argument or process that produces a published dataset the Galaxy target should expose.
+  - A `skip_*` flag gates a process whose outputs feed downstream steps the target keeps.
+  - It selects a reference / database location with no portable Galaxy substitute (user-supplied `data`, curated `string` enum, or existing CVMFS path).
+  - It is required by nf-schema and has no Galaxy-side substitute.
+- **Promote, don't drop, when problematic.** Convert the param into a scalar input, fixed design default, or recorded validation loss; do not let it stay in the silent-exclude bucket.
+- **Record the decision.** Each excluded param gets `source_param`, `class`, `effect`, `assessment` (`safe` or `problematic`), and a one-line reason in the interface brief, so review can audit the exclusion list.
+
+Default to safe-exclude only after the agent has traced the param's references in the summary; a name match alone is not assessment.
+
 ## Requiredness and defaults
 
 | Evidence | Interpretation | Strength |
@@ -187,10 +205,17 @@ Foundry-internal:
 - [[galaxy-sample-sheet-collections]] defines `sample_sheet`, `sample_sheet:paired`, `sample_sheet:paired_or_unpaired`, and `sample_sheet:record`.
 - [[nextflow-workflow-io-semantics]] records that `params.input` is only a name; materialization decides whether it is a sample sheet, direct dataset, directory, glob, accession list, or mode switch.
 
+## Reference data
+
+Nextflow pipelines often pass reference paths through params (genomes, indices, annotation bundles, kraken DBs). Translating these to Galaxy:
+
+- **Prefer a `data` input the user supplies** when the reference is small, distributable, or already lives on the Galaxy instance as a regular dataset.
+- **Prefer a workflow-curated `string` input with `restrictions`** when there is a small closed set of supported references the workflow author wants to enumerate.
+- **Reuse existing CVMFS / data-table-backed inputs** only when an established Galaxy tool the workflow already calls expects that exact `.loc` value (e.g. `bowtie2_indexes`). The string is then the `.loc` first column, as in [[iwc-test-data-conventions]].
+- **Do not introduce new Galaxy data tables to support a translated workflow.** Data tables require admin install, `tool_data_table_conf.xml` edits, and `.loc` files, which break the Foundry's portability-first posture: a translated workflow should run on a stock Galaxy with user-uploaded inputs. Record the loss and ask for an interface decision instead.
+
+The same rule applies to database/reference sample sheets (e.g. nf-core/taxprofiler `databases`): map them to a regular sample-sheet collection of user-supplied datasets, or to a curated string selector — not to a new admin-managed table.
+
 ## Open questions
 
-- Confirm the target Galaxy/gxformat2 importer preserves `column_definitions` for `sample_sheet*` workflow inputs.
 - Conditional requiredness has no clean pure-gxformat2 expression; interface briefs need review notes.
-- Database/reference sample sheets may map better to Galaxy data tables or admin-managed references than user collections.
-- Rich nf-schema validation and cross-row constraints are lossy in Galaxy sample-sheet validators.
-- Current `summary-nextflow` does not expose all param metadata (`format`, `hidden`, `mimetype`, schema grouping) outside `sample_sheets[]`; downstream Molds may need future schema expansion.
