@@ -10,7 +10,7 @@ const DOCS_DIR = path.join(REPO_ROOT, "docs");
 function extractSources(): string[] {
   const text = fs.readFileSync(DESIGN_DOCS_FILE, "utf-8");
   const matches = text.matchAll(/source:\s*['"]([^'"]+)['"]/g);
-  return [...matches].map((m) => m[1]);
+  return [...matches].flatMap((m) => (m[1] ? [m[1]] : []));
 }
 
 describe("site design-docs", () => {

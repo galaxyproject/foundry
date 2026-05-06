@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { DESIGN_DOCS, getDesignDoc, renderDesignDoc } from '../../lib/design-docs';
+import { DESIGN_DOCS, renderDesignDoc } from '../../lib/design-docs';
 
 export function getStaticPaths() {
   return DESIGN_DOCS.map(doc => ({

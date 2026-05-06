@@ -117,6 +117,7 @@ export default function remarkWikiLinks(opts: Options) {
           replacements.push({ type: 'text', value: value.slice(last, m.index) });
         }
         const inner = m[1];
+        if (inner === undefined) continue;
         const pipe = inner.indexOf('|');
         const target = pipe >= 0 ? inner.slice(0, pipe) : inner;
         const display = pipe >= 0 ? inner.slice(pipe + 1) : inner;
