@@ -10,8 +10,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs."
 input_artifacts:
@@ -27,8 +27,16 @@ output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
-    description: "gxformat2 skeleton: workflow inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
+    description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): workflow inputs, outputs, placeholder steps, rough connections, free-text _plan_state / _plan_context per step; tool_id / tool_state / tool_shed_repository may be TODO or absent for later implementation Molds."
 references:
+  - kind: research
+    ref: "[[galaxy-workflow-draft-format]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields."
+    verification: "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
     used_at: runtime
