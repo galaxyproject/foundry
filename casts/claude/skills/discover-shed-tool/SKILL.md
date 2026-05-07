@@ -1,89 +1,156 @@
 ---
 name: discover-shed-tool
-description: Search the Galaxy Tool Shed for an existing wrapper, resolve the best candidate to a pinnable version and changeset revision, and emit a hit/weak/miss recommendation validated against references/schemas/galaxy-tool-discovery.schema.json. Use when implementing a Galaxy workflow step and deciding whether to reuse a Tool Shed wrapper or fall through to authoring a new wrapper.
+description: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 ---
 
 # discover-shed-tool
 
-Find an installable Galaxy Tool Shed wrapper for one workflow step. Emit a structured recommendation that validates against `references/schemas/galaxy-tool-discovery.schema.json` before returning.
+Follow the procedure below and use the artifact/reference sections as the runtime contract.
 
-This skill owns only the Tool Shed discovery half of the `discover-or-author` branch. On `hit`, recommend the pin. On `weak`, surface why confirmation or fallthrough is appropriate. On `miss`, fall through to wrapper authoring.
+## When To Use
+
+- Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
 
 ## Inputs
 
-- Free-text `need`: what the step must do, including file formats, algorithm/tool name, container clues, version constraints, and license constraints when known.
-- Optional `owner_hint`, such as `iuc` or `devteam`.
-- Optional `exact_name_hint`, such as a known XML tool id.
+- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.
 
-## Method
+## Outputs
 
-### 1. Search
+- `galaxy-tool-pin`; kind: `json`; default filename: `galaxy-tool-pin.json`; schema: galaxy-tool-discovery; (owner, repo, tool_id, version, changeset_revision) pin for a Tool Shed wrapper plus discovery classification.
 
-Run `gxwf tool-search` with a narrow keyword query first:
+## Load Upfront
 
-```sh
+- `references/schemas/galaxy-tool-discovery.schema.json`; kind: `schema`; mode: `verbatim`; Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.
+
+## Load On Demand
+
+- `references/cli/tool-revisions.json`; kind: `cli-command`; mode: `sidecar`; Resolve a Tool Shed tool version to an installable changeset revision; Trigger: After selecting a candidate version that needs a reproducible changeset pin.
+- `references/cli/tool-search.json`; kind: `cli-command`; mode: `sidecar`; Search the Tool Shed for candidate wrappers matching a step's tool need; Trigger: When resolving a workflow step to an installable Galaxy tool wrapper.
+- `references/cli/tool-versions.json`; kind: `cli-command`; mode: `sidecar`; List available Tool Shed versions for a selected candidate; Trigger: After a Tool Shed search candidate is selected and before pinning a version.
+- `references/notes/component-tool-shed-search.md`; kind: `research`; mode: `verbatim`; Explain Tool Shed search/indexing limitations that affect hit scoring and fallthrough decisions; Trigger: When results are missing, weak, duplicated across owners, stale, or ambiguous.
+
+## Validation
+
+- Validate `galaxy-tool-pin.json` for `galaxy-tool-pin` with `validate-galaxy-tool-discovery`; schema: galaxy-tool-discovery.
+
+## Procedure
+
+Discover whether the Galaxy Tool Shed already publishes a wrapper for the tool a workflow step needs, and resolve the discovery to a `(owner, repo, tool_id, version, changeset_revision)` quintuple that downstream steps can pin and cache.
+
+This skill is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the skill recommends a pin and exits successfully. On a miss (or a low-quality hit), it falls through to author-galaxy-tool-wrapper. The branch itself is harness logic; this skill owns only the discovery half.
+
+### Inputs
+
+The skill expects, per step:
+
+- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences).
+- Optional **owner hint** (e.g. `devteam`, `iuc`) when the caller has a strong prior.
+- Optional **exact-name hint** when the caller knows the canonical XML id.
+
+### Outputs
+
+A structured recommendation object, JSON-shaped:
+
+```json
+{
+  "status": "hit",
+  "candidate": {
+    "tool_shed_url": "https://toolshed.g2.bx.psu.edu",
+    "owner": "devteam",
+    "repo": "fastqc",
+    "tool_id": "fastqc",
+    "trs_tool_id": "devteam~fastqc~fastqc",
+    "version": "0.74+galaxy0",
+    "changeset_revision": "5ec9f6bceaee",
+    "score": 12.3,
+    "matched_terms": ["fastqc"],
+    "match_fields": ["name", "description"],
+    "rationale": "single dominant hit on tool name"
+  },
+  "alternates": [],
+  "rationale": "single dominant hit on tool name; latest version pinned to newest changeset",
+  "warnings": []
+}
+```
+
+`status` semantics:
+- `hit` — recommend pinning. Caller should cache and proceed.
+- `weak` — candidate exists but the skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller should confirm or fall through.
+- `miss` — no usable hit. Caller falls through to author-galaxy-tool-wrapper.
+
+### Procedure
+
+The skill follows the gxwf-shaped discover-and-pin chain. **It does not call the Tool Shed HTTP API directly** — the TS CLI wraps the call sequence and gotchas covered in component-tool-shed-search.
+
+#### 1. Search
+
+Issue tool-search with the need's keywords. Start narrow:
+
+```
 gxwf tool-search "<keywords>" --json --max-results 10
 ```
 
-If `owner_hint` is present, add `--owner <owner>`. If `exact_name_hint` is present, add `--match-name`. Lowercase uncertain queries because Tool Shed tool search has case-sensitivity rough edges.
+If an owner hint is present, add `--owner <owner>`. If an exact-name hint is present, add `--match-name`. Lowercase the query (the tool index does not lowercase, see component-tool-shed-search §6).
 
-Read `references/cli/tool-search.json` when you need exact flags, output shape, or exit-code handling.
+#### 2. Triage hits
 
-### 2. Triage Hits
+For each hit, score on:
+- **Name match.** Exact match on `toolId` or `name` is a strong signal; help-only matches are weak.
+- **Owner reputation.** `iuc` and `devteam` repos are typically maintained; an unfamiliar owner with a single-tool repo is a weaker prior. (No machine-readable approval flag exists — the Tool Shed's `approved` field is dead code.)
+- **Recency.** Recent `last_updated` strengthens a hit; very old wrappers can still be valid but warrant the `weak` classification.
+- **Duplicates across repos.** Two owners can publish wrappers with the same XML id. Either pick the maintained one or downgrade to `weak` and surface the choice.
 
-Score candidates using:
+Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see component-tool-shed-search §6.
 
-- Name match: exact `toolId` / name matches are strongest; help-text-only matches are weak.
-- Owner reputation: `iuc` and `devteam` are strong priors.
-- Recency and stale-index risk.
-- Duplicate XML ids across owners/repos.
-- Deprecated or stale-looking repos.
-
-Consult `references/notes/component-tool-shed-search.md` when results are missing, weak, duplicated, stale, or ambiguous.
-
-### 3. Resolve Version
+#### 3. Resolve to a pinnable version
 
 For the top candidate, list versions:
 
-```sh
+```
 gxwf tool-versions <trsToolId> --json
 ```
 
-Pick the newest installable version unless the step need specifies a historical version. Read `references/cli/tool-versions.json` for exact output and gotchas.
+Pick the newest installable version unless the need specifies otherwise (rare: a workflow may pin to a specific historical version for reproducibility). Be aware that **TRS dedupes by version string** — multiple changesets may publish the same version, and only one is visible at this layer.
 
-### 4. Resolve Changeset
+#### 4. Resolve to a changeset
 
-Resolve the selected `(trsToolId, version)` to a concrete changeset:
+Drill from `(trsToolId, version)` to a concrete changeset:
 
-```sh
-gxwf tool-revisions <trsToolId> --tool-version <version> --latest --json
+```
+gxwf tool-revisions <trsToolId> --tool-version <v> --latest --json
 ```
 
-Use the returned `changesetRevision` for reproducible workflow pinning. Read `references/cli/tool-revisions.json` for exact output and edge cases.
+Prefer `--latest` so the newest changeset publishing that version wins (tool versions are not monotonic; two changesets can legally publish the same version with different content). The output's `changesetRevision` is what lands in the workflow's `tool_shed_repository.changeset_revision` for reproducible reinstall.
 
-### 5. Classify And Emit
+#### 5. Classify and emit
 
-Emit one recommendation object:
+Combine the scored hit and the resolved pin into the recommendation object above:
+- One dominant hit + clean version+changeset resolution → `hit`.
+- Multiple plausible hits, ambiguous owner, deprecated suspicion, or only-help-text match → `weak` with the leading candidate plus alternates.
+- No usable hit → `miss`.
 
-- `hit`: one dominant candidate with clean version and changeset resolution.
-- `weak`: plausible candidate exists, but owner, match quality, duplicate wrappers, deprecation, or stale-index risk needs confirmation or fallthrough.
-- `miss`: no usable wrapper after reasonable query variants.
+Validate the recommendation with `validate-galaxy-tool-discovery` before returning it. Do not rely on prose-only shape checks; downstream phases branch on this contract.
 
-Always include rationale and warnings. For `hit` or `weak`, include the chosen candidate and useful alternates.
+### Caveats baked into the procedure
 
-Validate the final JSON with `validate-galaxy-tool-discovery` if available, or equivalent JSON Schema validation against `references/schemas/galaxy-tool-discovery.schema.json`.
+The procedure assumes — and the skill must surface in its rationale when relevant — the following Tool Shed realities (full detail in component-tool-shed-search §6):
 
-## Caveats
+- **Indexes are stale by design.** A freshly published tool may not appear; a deprecated tool may still appear. Treat absence as soft evidence, not proof.
+- **Wildcard `*term*` wrapping** disables stemming; spelling matters. Try alternate phrasings before declaring `miss`.
+- **No EDAM in shed search** — semantic queries that work in Galaxy's installed-toolbox search will not work here. Stick to lexical name/keyword queries.
+- **Same XML id across repos.** Hits collapse only on `(repoName, owner)`; expect duplicates that need triage.
+- **Repo-level discovery is a different surface.** For "find me the *package* that contains a tool about X" with server-side `owner:` / `category:` keywords, `gxwf repo-search` is the right command — out of scope for this skill but a known sibling.
 
-- Tool Shed search has no EDAM, no installed-tool panel context, and stale indexes.
-- Search hits do not include changeset revisions; version and changeset resolution are separate steps.
-- TRS versions can dedupe multiple changesets with the same XML version; pin the newest matching changeset unless the caller specifies otherwise.
-- `repo-search` is a different discovery surface. This skill searches for a tool wrapper, not a package/category.
+### Non-goals
 
-## Reference Dispatch
+- **Authoring.** This skill never produces a tool wrapper. On `miss`, the harness's `discover-or-author` branch fall-through invokes author-galaxy-tool-wrapper.
+- **Caching.** This skill emits a pin recommendation. The caller (or the next phase) runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` to populate the cache.
+- **Galaxy-instance discovery.** Hitting a running Galaxy server's installed-tool index (EDAM-aware, panel-aware) is a different mechanism — the future `discover-tool-via-galaxy-api` skill. The contrast is sketched in component-tool-shed-search §4.
+- **Test-data resolution.** Out of scope; handled by the `test-data-resolution` branch elsewhere in the pipeline.
 
-- `references/schemas/galaxy-tool-discovery.schema.json` — validate the emitted recommendation.
-- `references/cli/tool-search.json` — consult for search flags, JSON hit shape, and exit codes.
-- `references/cli/tool-versions.json` — consult for version-list behavior and TRS id forms.
-- `references/cli/tool-revisions.json` — consult for changeset resolution and pinning semantics.
-- `references/notes/component-tool-shed-search.md` — consult when ranking, missing results, duplicates, stale indexes, TRS limitations, or Tool Shed API behavior affects the recommendation.
+## Runtime Notes
+
+- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.
+- Preserve declared artifact filenames unless the user or harness supplies explicit paths.
+- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.

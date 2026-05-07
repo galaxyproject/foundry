@@ -6,13 +6,13 @@
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 11,
     "content_hash": "1c693a2013b67c7324508d19ad7b3023fc4b109b334bdc1dca9e4df9510b130e",
-    "commit": "0be197c7bd3aace22d155f7af46dc1dde1cd01c3"
+    "commit": "30c3ef064eb4217a5efecd0d55ab545629ea00dc"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-06T16:02:02.420Z",
-  "cast_date": "2026-05-06",
-  "cast_revision": 9,
+  "cast_at": "2026-05-07T15:51:42.716Z",
+  "cast_date": "2026-05-07",
+  "cast_revision": 10,
   "cast_history": [
     {
       "rev": 1,
@@ -58,6 +58,11 @@
       "rev": 9,
       "date": "2026-05-06",
       "note": "migrate polished skill guidance into mold"
+    },
+    {
+      "rev": 10,
+      "date": "2026-05-07",
+      "note": "runtime-facing deterministic skill render"
     }
   ],
   "refs": [

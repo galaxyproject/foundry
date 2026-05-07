@@ -5,7 +5,7 @@ description: "Translate a Nextflow summary into a Galaxy data-flow design brief.
 
 # nextflow-summary-to-galaxy-data-flow
 
-This skill was deterministically cast from its Mold. Treat the Mold body below as the procedure and the artifact/reference sections as the runtime contract.
+Follow the procedure below and use the artifact/reference sections as the runtime contract.
 
 ## When To Use
 
@@ -39,8 +39,6 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 - None declared.
 
 ## Procedure
-
-# nextflow-summary-to-galaxy-data-flow
 
 Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
 

@@ -5,7 +5,7 @@ description: "Map a Nextflow summary into a Galaxy workflow interface design bri
 
 # nextflow-summary-to-galaxy-interface
 
-This skill was deterministically cast from its Mold. Treat the Mold body below as the procedure and the artifact/reference sections as the runtime contract.
+Follow the procedure below and use the artifact/reference sections as the runtime contract.
 
 ## When To Use
 
@@ -36,8 +36,6 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 - None declared.
 
 ## Procedure
-
-# nextflow-summary-to-galaxy-interface
 
 Read a Nextflow summary and emit a reviewable Markdown interface brief for a Galaxy workflow. Capture workflow inputs, workflow outputs, labels, Galaxy collection shapes, checkpoint outputs worth exposing for tests, source-summary provenance, confidence, and open questions.
 

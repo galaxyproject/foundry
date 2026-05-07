@@ -6,11 +6,11 @@
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 2,
     "content_hash": "bb11827969de07dff848e3c647986111d91d5c506f749d1b660e8761abbd6084",
-    "commit": "0be197c7bd3aace22d155f7af46dc1dde1cd01c3"
+    "commit": "30c3ef064eb4217a5efecd0d55ab545629ea00dc"
   },
-  "cast_at": "2026-05-06T16:02:02.386Z",
-  "cast_date": "2026-05-06",
-  "cast_revision": 2,
+  "cast_at": "2026-05-07T15:51:42.679Z",
+  "cast_date": "2026-05-07",
+  "cast_revision": 3,
   "cast_history": [
     {
       "rev": 1,
@@ -21,6 +21,11 @@
       "rev": 2,
       "date": "2026-05-06",
       "note": "deterministic skill render"
+    },
+    {
+      "rev": 3,
+      "date": "2026-05-07",
+      "note": "runtime-facing deterministic skill render"
     }
   ],
   "refs": [
