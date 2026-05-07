@@ -5,7 +5,7 @@ description: "Find nearest IWC exemplar(s) and surface a structural diff against
 
 # compare-against-iwc-exemplar
 
-This skill was deterministically cast from its Mold. Treat the Mold body below as the procedure and the artifact/reference sections as the runtime contract.
+Follow the procedure below and use the artifact/reference sections as the runtime contract.
 
 ## When To Use
 
@@ -42,19 +42,17 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 
 ## Procedure
 
-# compare-against-iwc-exemplar
+Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream `*-summary-to-galaxy-template` skill before per-step authoring effort is spent.
 
-Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream `*-summary-to-galaxy-template` Mold before per-step authoring effort is spent.
+This skill is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs (or the combined paper design brief) and before the gxformat2 template skill. Discovery, ranking, and comparison are one action — there is no separate retrieval skill.
 
-This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs (or the combined paper design brief) and before the gxformat2 template Mold. Discovery, ranking, and comparison are one action — there is no separate retrieval Mold.
-
-## Procedure
+### Procedure
 
 - Clone or pull and merge the IWC `<url>` to `~/.foundry/iwc`.
 - Normalize candidate workflows with convert as needed for structural comparison.
 - Find the closest workflow and rank it.
 
-## Feature Hierarchy
+### Feature Hierarchy
 
 1. Domain or analysis intent.
 2. Input collection topology.
@@ -65,7 +63,7 @@ This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after
 
 Domain comes first so a structurally similar workflow in the wrong science area does not become a misleading exemplar. Topology comes second because collection shape is one of the most important Galaxy-specific design decisions. Test style is useful after a workflow match, but should not drive initial retrieval. Briefs with no domain signal should not produce a high-confidence exemplar even if they share generic tools.
 
-## Confidence Levels
+### Confidence Levels
 
 | Level | Meaning |
 |---|---|
@@ -74,21 +72,21 @@ Domain comes first so a structurally similar workflow in the wrong science area 
 | Low | Cross-domain structural match only. Useful for a pattern comparison, not a nearest domain exemplar. |
 | No nearest exemplar | Candidate lacks domain or topology alignment, or only shares generic tools such as MultiQC. |
 
-## Routing findings forward
+### Routing findings forward
 
 Each finding should name the authoring surface most likely to own the fix:
 
-- Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague — surfaced for the downstream `*-summary-to-galaxy-template` Mold to apply.
+- Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague — surfaced for the downstream `*-summary-to-galaxy-template` skill to apply.
 - Pattern issue: recurring Galaxy idiom should become or update a pattern page.
 - Tool-step issue: exact wrapper or parameterization will be handled later in the per-step loop.
 - Test issue: defer to `*-test-to-galaxy-test-plan` or `implement-galaxy-workflow-test`.
 
-Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance for the template Mold and the user.
+Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance for the template skill and the user.
 
-## Non-goals
+### Non-goals
 
 - **No tool discovery.** Do not replace discover-shed-tool.
-- **No automatic rewrite.** This Mold emits structural diff guidance; the harness or user decides which changes to apply.
+- **No automatic rewrite.** This skill emits structural diff guidance; the harness or user decides which changes to apply.
 - **No forced nearest.** A no-match result is valid when IWC lacks a close exemplar.
 
 ## Runtime Notes

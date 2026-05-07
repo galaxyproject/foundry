@@ -829,6 +829,19 @@ function stripWikiLinks(text: string): string {
   );
 }
 
+function runtimeProcedureBody(body: string, moldName: string): string {
+  return stripWikiLinks(body.trim())
+    .replace(new RegExp(`^#\\s+${moldName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\n+`), "")
+    .replace(/^(#{2,5})\s/gm, "$1# ")
+    .replace(/\bcast skill\b/g, "skill")
+    .replace(/\bThis Mold\b/g, "This skill")
+    .replace(/\bThe Mold\b/g, "The skill")
+    .replace(/\bthis Mold\b/g, "this skill")
+    .replace(/\bthe Mold\b/g, "the skill")
+    .replace(/\bMolds\b/g, "skills")
+    .replace(/\bMold\b/g, "skill");
+}
+
 function escapeFrontmatterString(text: string): string {
   return text.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, " ");
 }
@@ -903,7 +916,7 @@ function renderSkillMarkdown(args: {
   const upfront = args.refs.filter((r) => r.load === "upfront" && r.used_at !== "cast-time");
   const onDemand = args.refs.filter((r) => r.load === "on-demand" && r.used_at !== "cast-time");
   const validationRows = schemaValidationRows(produces, args.slugMap, args.metaByPath);
-  const body = stripWikiLinks(args.body.trim());
+  const body = runtimeProcedureBody(args.body, args.moldName);
   const lines = [
     "---",
     `name: ${args.moldName}`,
@@ -912,7 +925,7 @@ function renderSkillMarkdown(args: {
     "",
     `# ${args.moldName}`,
     "",
-    "This skill was deterministically cast from its Mold. Treat the Mold body below as the procedure and the artifact/reference sections as the runtime contract.",
+    "Follow the procedure below and use the artifact/reference sections as the runtime contract.",
     "",
     renderSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
     renderSection(

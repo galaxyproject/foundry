@@ -5,7 +5,7 @@ description: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and
 
 # nextflow-summary-to-galaxy-template
 
-This skill was deterministically cast from its Mold. Treat the Mold body below as the procedure and the artifact/reference sections as the runtime contract.
+Follow the procedure below and use the artifact/reference sections as the runtime contract.
 
 ## When To Use
 
@@ -41,9 +41,7 @@ This skill was deterministically cast from its Mold. Treat the Mold body below a
 
 ## Procedure
 
-# nextflow-summary-to-galaxy-template
-
-Read the original Nextflow source artifact, the `summary-nextflow.json` summary, the Nextflow-to-Galaxy interface brief, and the Nextflow-to-Galaxy data-flow brief. Emit a gxformat2 skeleton with workflow inputs, workflow outputs, placeholder steps, rough connections, and TODO slots for later implementation Molds.
+Read the original Nextflow source artifact, the `summary-nextflow.json` summary, the Nextflow-to-Galaxy interface brief, and the Nextflow-to-Galaxy data-flow brief. Emit a gxformat2 skeleton with workflow inputs, workflow outputs, placeholder steps, rough connections, and TODO slots for later implementation skills.
 
 The interface and data-flow briefs guide the skeleton, but they do not replace source evidence. Treat the prior-step index as the working context: Nextflow source, source summary, interface brief, data-flow brief, and any open questions carried forward.
 

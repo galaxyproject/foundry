@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 3
+revised: 2026-05-07
+revision: 4
 ai_generated: true
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 output_artifacts:
@@ -50,7 +50,7 @@ references:
     used_at: runtime
     load: upfront
     mode: verbatim
-    evidence: hypothesis
+    evidence: cast-validated
     purpose: "Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery."
     verification: "Run discover-shed-tool against known FastQC, ambiguous BWA-style, and no-hit queries and validate each emitted recommendation."
   - kind: research
