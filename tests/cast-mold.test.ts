@@ -100,6 +100,19 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
     expect(existsSync(path.join(bundle, "_verify.json"))).toBe(true);
   });
 
+  it("SKILL.md is rendered from Mold metadata, references, and body", () => {
+    const skillPath = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "SKILL.md");
+    const text = readFileSync(skillPath, "utf8");
+    expect(text).toContain("This skill was deterministically cast from its Mold");
+    expect(text).toContain("## Inputs");
+    expect(text).toContain("## Outputs");
+    expect(text).toContain("`summary-nextflow`");
+    expect(text).toContain("references/schemas/summary-nextflow.schema.json");
+    expect(text).toContain("## Procedure");
+    expect(text).toContain("Read a Nextflow pipeline source tree");
+    expect(text).not.toMatch(/\[\[[^\]]+\]\]/);
+  });
+
   it("rejects unknown flags", () => {
     const r = runTsx(castVerify, ["summarize-nextflow", "--target=claude", "--bogus"]);
     expect(r.code).not.toBe(0);

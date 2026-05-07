@@ -1,0 +1,16 @@
+{
+  "verify_schema_version": 1,
+  "entries": [
+    {
+      "artifact_id": "summary-nextflow",
+      "direction": "input",
+      "kind": "json",
+      "default_filename": "summary-nextflow.json",
+      "schema": "[[summary-nextflow]]",
+      "validator_bin": "validate-summary-nextflow",
+      "args": [
+        "{artifact_path}"
+      ]
+    }
+  ]
+}

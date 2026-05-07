@@ -5,14 +5,14 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 11,
-    "content_hash": "8d3400077caa35cc3341cd81becb39466047c3d6406286d7d56459864bb82f69",
-    "commit": "4d58a870033b83fa61d9b0ff417c446bf91e2f76"
+    "content_hash": "1c693a2013b67c7324508d19ad7b3023fc4b109b334bdc1dca9e4df9510b130e",
+    "commit": "0be197c7bd3aace22d155f7af46dc1dde1cd01c3"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-06T15:34:12.172Z",
+  "cast_at": "2026-05-06T16:02:02.420Z",
   "cast_date": "2026-05-06",
-  "cast_revision": 6,
+  "cast_revision": 9,
   "cast_history": [
     {
       "rev": 1,
@@ -43,6 +43,21 @@
       "rev": 6,
       "date": "2026-05-06",
       "note": "rev 9: expand Param metadata (#186)"
+    },
+    {
+      "rev": 7,
+      "date": "2026-05-06",
+      "note": "cast requested nextflow-to-galaxy chain"
+    },
+    {
+      "rev": 8,
+      "date": "2026-05-06",
+      "note": "deterministic skill render"
+    },
+    {
+      "rev": 9,
+      "date": "2026-05-06",
+      "note": "migrate polished skill guidance into mold"
     }
   ],
   "refs": [
@@ -162,9 +177,6 @@
     ],
     "consumes": []
   },
-  "open_questions": [
-    "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17."
-  ],
   "validation_results": [
     {
       "artifact_id": "summary-nextflow",
@@ -178,5 +190,8 @@
       "stdout_hash": "6a46379bfea97b008c65073ec062ee9d06013867110e3a53a0551ba6e0b67d3d",
       "stderr_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
+  ],
+  "open_questions": [
+    "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17."
   ]
 }

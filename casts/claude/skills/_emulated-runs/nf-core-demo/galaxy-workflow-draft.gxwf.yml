@@ -1,0 +1,93 @@
+class: GalaxyWorkflow
+name: "nf-core demo Galaxy draft skeleton"
+doc: |
+  Draft skeleton produced by emulating the generated Foundry skills against the bundled nf-core/demo summary.
+  Placeholder tool IDs and TODO labels are intentional; later per-step skills must resolve wrappers and parameters.
+inputs:
+  - id: input_samples
+    label: input_samples
+    type: collection
+    collection_type: sample_sheet:paired_or_unpaired
+    doc: "Rows from params.input with sample, fastq_1, and optional fastq_2 columns."
+  - id: skip_trim
+    label: skip_trim
+    type: boolean
+    default: false
+    optional: true
+    doc: "Source guard for SEQTK_TRIM; false preserves trimming."
+  - id: multiqc_config
+    label: multiqc_config
+    type: data
+    format:
+      - yaml
+    optional: true
+    doc: "Optional custom MultiQC config; review whether to keep public."
+outputs:
+  - id: fastqc_zip
+    label: fastqc_zip
+    outputSource: fastqc_raw/zip
+    doc: "Checkpoint FastQC ZIP reports per sample."
+  - id: multiqc_report
+    label: multiqc_report
+    outputSource: multiqc/report
+    doc: "Primary MultiQC HTML report."
+steps:
+  - id: fastqc_raw
+    label: TODO_FASTQC_RAW
+    tool_id: TODO_FASTQC_WRAPPER
+    tool_version: TODO
+    doc: "Source process FASTQC; map over input_samples."
+    in:
+      - id: reads
+        source: input_samples
+    out:
+      - id: html
+      - id: zip
+    tool_state:
+      reads:
+        __class__: ConnectedValue
+  - id: trim_reads
+    label: TODO_SEQTK_TRIM
+    tool_id: TODO_SEQTK_TRIM_WRAPPER
+    tool_version: TODO
+    doc: "Source process SEQTK_TRIM; guarded by !skip_trim. Review whether first draft should preserve this branch."
+    in:
+      - id: reads
+        source: input_samples
+      - id: when
+        source: skip_trim
+    out:
+      - id: reads
+    tool_state:
+      reads:
+        __class__: ConnectedValue
+    when: $(!inputs.when)
+  - id: build_multiqc_inputs
+    label: TODO_BUILD_MULTIQC_INPUT_LIST
+    tool_id: TODO_COLLECTION_OR_LIST_BUILDING_STEP
+    tool_version: TODO
+    doc: "Represents Nextflow collect/mix of FastQC ZIPs, versions, workflow summary, and methods text."
+    in:
+      - id: fastqc_zip
+        source: fastqc_raw/zip
+    out:
+      - id: multiqc_files
+    tool_state:
+      fastqc_zip:
+        __class__: ConnectedValue
+  - id: multiqc
+    label: TODO_MULTIQC
+    tool_id: TODO_MULTIQC_WRAPPER
+    tool_version: TODO
+    doc: "Source process MULTIQC; exact inputs and config handling unresolved."
+    in:
+      - id: multiqc_files
+        source: build_multiqc_inputs/multiqc_files
+      - id: multiqc_config
+        source: multiqc_config
+    out:
+      - id: report
+      - id: data
+    tool_state:
+      multiqc_files:
+        __class__: ConnectedValue

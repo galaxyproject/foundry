@@ -1,0 +1,134 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-summary-to-galaxy-interface",
+    "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
+    "revision": 2,
+    "content_hash": "08bce8071a41fb3101e7660f64c1cf26b9a1323a0fc1b77e29512af5a0ae7114",
+    "commit": "0be197c7bd3aace22d155f7af46dc1dde1cd01c3"
+  },
+  "cast_at": "2026-05-06T16:02:02.385Z",
+  "cast_date": "2026-05-06",
+  "cast_revision": 2,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-05-06",
+      "note": "cast requested nextflow-to-galaxy chain"
+    },
+    {
+      "rev": 2,
+      "date": "2026-05-06",
+      "note": "deterministic skill render"
+    }
+  ],
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-sample-sheet-collections]]",
+      "src": "content/research/galaxy-sample-sheet-collections.md",
+      "dst": "references/notes/galaxy-sample-sheet-collections.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs.",
+      "trigger": "When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.",
+      "src_hash": "acc585cf282252827c191dde13c2bac5710d2212e35dfce97b03f72b35d18c6b",
+      "dst_hash": "acc585cf282252827c191dde13c2bac5710d2212e35dfce97b03f72b35d18c6b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address.",
+      "trigger": "When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-params-to-galaxy-inputs]]",
+      "src": "content/research/nextflow-params-to-galaxy-inputs.md",
+      "dst": "references/notes/nextflow-params-to-galaxy-inputs.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs.",
+      "src_hash": "5cb3a44a24b3189cc3af4adeb34498ce2f67fea3eb11f95fe90c8759121ed87b",
+      "dst_hash": "5cb3a44a24b3189cc3af4adeb34498ce2f67fea3eb11f95fe90c8759121ed87b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-path-glob-to-galaxy-datatype]]",
+      "src": "content/research/nextflow-path-glob-to-galaxy-datatype.md",
+      "dst": "references/notes/nextflow-path-glob-to-galaxy-datatype.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs.",
+      "src_hash": "5d1073c20db944b31f2cd15701ab271493999a3c32c85c7bf5498e84f1c2470c",
+      "dst_hash": "5d1073c20db944b31f2cd15701ab271493999a3c32c85c7bf5498e84f1c2470c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-to-galaxy-channel-shape-mapping]]",
+      "src": "content/research/nextflow-to-galaxy-channel-shape-mapping.md",
+      "dst": "references/notes/nextflow-to-galaxy-channel-shape-mapping.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes.",
+      "src_hash": "c709a5fcfa5b7fba62faafd7636d947981a2cacae12a71e15407245dc9cebd28",
+      "dst_hash": "c709a5fcfa5b7fba62faafd7636d947981a2cacae12a71e15407245dc9cebd28",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summary-nextflow-schema#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.",
+      "src_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
+      "dst_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "nextflow-galaxy-interface",
+        "kind": "markdown",
+        "default_filename": "nextflow-galaxy-interface.md",
+        "description": "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the source-of-truth JSON for interface choices.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      }
+    ]
+  }
+}

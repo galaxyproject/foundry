@@ -28,17 +28,17 @@ Markdown files at the top level of a Mold directory must not contain frontmatter
 
 ### `index.md` body discipline
 
-The body of `index.md` is procedural content the cast skill consumes. **Do not put author-facing meta-content in the body** — it leaks into casts. In particular:
+The body of `index.md` is procedural content the cast skill renders into generated `SKILL.md`. **Do not put author-facing meta-content in the body** — it leaks into runtime artifacts. If a generated skill needs better instructions, improve the Mold body or referenced notes, then re-cast. In particular:
 
 - Revision history / changelog → `changes.md`.
-- "Reference dispatch (for casting)" or similar redundant restatements of the `references:` manifest → delete; the metadata is the contract.
+- "Reference dispatch (for casting)" or similar redundant restatements of the `references:` manifest → delete; the metadata is the contract. Runtime guidance about when to consult a packaged reference is allowed when it adds operational judgment beyond the manifest.
 - Open authoring questions about scope or future references → `casting.md` (cast-time) or the Mold's eval/notes, not the body.
 
 ### File roles at a glance
 
 | File                          | Audience                          | Packaged into cast?            |
 | ----------------------------- | --------------------------------- | ------------------------------ |
-| `index.md`                    | Mold contract + casting manifest  | Driver only; body not packaged |
+| `index.md`                    | Mold contract + casting manifest  | Body rendered into generated skills |
 | `eval.md`                     | Foundry maintainers               | Never                          |
 | `usage.md`                    | Mold authors / readers            | Never (v1)                     |
 | `refinement.md`               | Mold authors / `/refine-mold`     | Never                          |

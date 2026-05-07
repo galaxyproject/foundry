@@ -2,7 +2,7 @@
 
 Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines in `HARNESS_PIPELINES.md`. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
 
-This is the inventory, not the Mold source-layout contract. `MOLD_SPEC.md` owns Mold authoring rules and the `references:` manifest; `reference_contract.yml` owns the typed-reference vocabulary and labels. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`; producer-owned `output_artifacts[].schema` wiki-links attach schemas to emitted artifact IDs.
+This is the inventory, not the Mold source-layout contract. `MOLD_SPEC.md` owns Mold authoring rules, the procedural Mold body, and the `references:` manifest; `reference_contract.yml` owns the typed-reference vocabulary and labels. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`; producer-owned `output_artifacts[].schema` wiki-links attach schemas to emitted artifact IDs. Cast skills are deterministic renderings of Mold body + artifact contracts + typed references, so any improvement to a generated skill belongs back in the Mold or its referenced notes.
 
 ## Bucketing axes
 
@@ -92,6 +92,10 @@ Validate Molds describe the **step in the process** even where they wrap a stati
 - `debug-cwl-workflow-output` — given a failing CWL run's outputs/logs, classify the failure and propose fixes.
 
 Note: this run/debug tier is sized for "smart enough as a Claude skill, but Claude could often do it ad-hoc without one." Treat them as nominally Mold-shaped for inventory completeness, but accept that they may end up thinner than the authoring Molds.
+
+### Generated skill bodies
+
+Claude `SKILL.md` bodies are not hand-maintained. Casting renders them from the Mold `summary`, `input_artifacts[]`, `output_artifacts[]`, inherited producer/schema metadata, typed `references[]`, and the body of `index.md`. Hand-polished behavior discovered in a generated skill should be migrated into the Mold body or supporting reference notes before recasting.
 
 ### CLI reference content
 

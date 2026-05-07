@@ -1,0 +1,1191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://galaxyproject.org/foundry/schemas/summary-nextflow.schema.json",
+  "$comment": "Canonical source: packages/summary-nextflow-schema/src/summary-nextflow.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[summary-nextflow]] wiki-links; the cast pipeline imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.",
+  "title": "Nextflow Pipeline Summary",
+  "description": "Structured per-source summary emitted by the summarize-nextflow Mold.\n\nPer-source schema by design — paper, Nextflow, and CWL each have their own summary shape; downstream Molds (data flow, templates, tool wrappers) consume any source's summary and handle the polymorphism.\n\nField names mirror gxy-sketches' SketchSource / ToolSpec / TestDataRef / ExpectedOutputRef where parity exists; see content/research/gxy-sketches-alignment.md.",
+  "$ref": "#/$defs/Summary",
+  "$defs": {
+    "Summary": {
+      "title": "Summary",
+      "description": "Top-level shape. Every Nextflow summary is exactly this object.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "params",
+        "sample_sheets",
+        "profiles",
+        "tools",
+        "processes",
+        "subworkflows",
+        "workflow",
+        "test_fixtures",
+        "nf_tests"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/SourceRecord"
+        },
+        "params": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Param"
+          }
+        },
+        "sample_sheets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SampleSheet"
+          },
+          "description": "Structured sample-sheet inputs. Each entry binds one `params[]` parameter to a row schema (column names, types, path-vs-meta classification, required flags, enums, patterns). Promoted from prose inside `params[].description` so downstream target translations (Galaxy `sample_sheet*` collections, CWL records-of-arrays) can choose collection variants without re-parsing the source pipeline. Empty array when no sample-sheet idiom is detected. Discovery sources: nf-schema `schema:` references, `samplesheetToList()` calls, and `splitCsv(header: true)` materializations."
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Tool"
+          }
+        },
+        "processes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Process"
+          }
+        },
+        "subworkflows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Subworkflow"
+          }
+        },
+        "workflow": {
+          "$ref": "#/$defs/Workflow"
+        },
+        "test_fixtures": {
+          "$ref": "#/$defs/TestFixtures",
+          "description": "Test-input data shape for the *selected* profile (the cast's `profile` argument, default `test`). For pipelines with multiple test profiles, see `nf_tests[]` for the full enumeration."
+        },
+        "nf_tests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NfTest"
+          },
+          "description": "All `tests/*.nf.test` files in the pipeline. Each entry captures one test-program — its profile, params overrides, and structured assertions. Empty array when the pipeline has no nf-test fixtures."
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Cast-skill-emitted advisory messages (e.g. DSL1 detected, meta.yml/script disagreement, lossy assertion summarization). Empty array on a clean run."
+        }
+      }
+    },
+    "SourceRecord": {
+      "title": "SourceRecord",
+      "description": "Provenance block. Mirrors gxy-sketches SketchSource field names so a Foundry summary is structurally consumable by anyone using that shape.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ecosystem",
+        "workflow",
+        "url",
+        "version",
+        "slug"
+      ],
+      "properties": {
+        "ecosystem": {
+          "type": "string",
+          "enum": [
+            "nf-core",
+            "nextflow"
+          ],
+          "description": "Pipeline flavor. `nf-core` when `manifest.name` is `nf-core/<slug>` and the canonical layout is present; `nextflow` for ad-hoc DSL2 pipelines. Superset of gxy-sketches' enum (which adds `iwc`, `snakemake-workflows`, `wdl` for its other ingestors)."
+        },
+        "workflow": {
+          "type": "string",
+          "description": "Pipeline name (typically the part after `nf-core/`)."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Git remote URL of the pipeline repository."
+        },
+        "version": {
+          "type": "string",
+          "description": "Tag, branch, or commit SHA the summary was derived from."
+        },
+        "license": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "SPDX license identifier when detectable from a LICENSE file."
+        },
+        "slug": {
+          "type": "string",
+          "description": "Kebab-case identifier; `<owner>-<repo>` for nf-core, repo basename otherwise."
+        }
+      }
+    },
+    "Param": {
+      "title": "Param",
+      "description": "One pipeline parameter. Sourced from `nextflow.config`'s `params { ... }` block, augmented from `nextflow_schema.json` when present (nf-core).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "required"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON Schema-style type when nextflow_schema.json supplies it (string, integer, number, boolean, path); free-form when inferred from a default value."
+        },
+        "default": {
+          "description": "Default value verbatim from the source. May be null."
+        },
+        "description": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "enum": {
+          "type": "array",
+          "items": {},
+          "description": "Allowed values when nextflow_schema.json declares them."
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "JSON Schema `format` keyword from nextflow_schema.json. nf-schema vocabulary: `file-path`, `directory-path`, `path`, `file-path-pattern`. Distinguishes path-typed params (datasets/collections) from plain strings without re-reading the source schema. Null when undeclared."
+        },
+        "hidden": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "nf-schema `hidden` keyword. True for CLI-plumbing params (e.g. `validate_params`, `pipelines_testdata_base_path`, `version`) that shouldn't surface in user-facing target interfaces. Null when undeclared."
+        },
+        "mimetype": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "nf-schema `mimetype` keyword (e.g. `text/csv`, `text/plain`, `application/gzip`). Useful for seeding Galaxy `format` on path-typed params. Null when undeclared."
+        },
+        "schema_group": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Human-readable group label from the parent nextflow_schema.json `$defs` section's `title` (e.g. `Input/output options`, `Reference genome options`). Preserves nf-schema sectioning so target interfaces can group inputs without re-parsing the source. Null when the param is not under a titled section."
+        },
+        "fa_icon": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Font Awesome icon class from the parent `$defs` section's `fa_icon` (e.g. `fas fa-terminal`). Optional UI hint; null when undeclared."
+        }
+      }
+    },
+    "SampleSheet": {
+      "title": "SampleSheet",
+      "description": "One sample-sheet-shaped pipeline input. Captures the row schema, path-vs-meta column classification, and discovery provenance so downstream Molds can map onto Galaxy `sample_sheet[:variant]` collections, CWL records-of-arrays, or other target shapes without re-reading the source.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "param",
+        "discovered_via",
+        "columns"
+      ],
+      "properties": {
+        "param": {
+          "type": "string",
+          "description": "Foreign key into `params[].name` — the parameter whose value points at the sample-sheet file."
+        },
+        "schema_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative path of the JSON Schema file describing rows (e.g. `assets/schema_input.json`), resolved from the param's nf-schema entry's `schema:` keyword. Null when discovered via `samplesheetToList` without a schema reference, or via `splitCsv(header: true)` ad-hoc parsing."
+        },
+        "discovered_via": {
+          "type": "string",
+          "enum": [
+            "nf-schema",
+            "samplesheetToList",
+            "splitCsv",
+            "ad-hoc"
+          ],
+          "description": "How the sample-sheet shape was detected. `nf-schema`: nextflow_schema.json entry has `schema:` keyword. `samplesheetToList`: workflow imports nf-schema's helper and calls it on the param. `splitCsv`: workflow uses `splitCsv(header: true)` on the param's path. `ad-hoc`: pipeline-specific CSV/TSV parsing inferred from script bodies."
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "csv",
+            "tsv",
+            "csv-or-tsv",
+            null
+          ],
+          "description": "Tabular format declared by the param's `mimetype` or inferred from `samplesheetToList` / `splitCsv` semantics. Null when undeclared."
+        },
+        "header": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the file is expected to have a header row. Null when the discovery source doesn't pin it."
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SampleSheetColumn"
+          },
+          "description": "Row schema in declaration order. nf-schema's `samplesheetToList` emits columns in property order, not source-column order — preserve property order here so downstream translations match runtime channel item layout."
+        }
+      }
+    },
+    "SampleSheetColumn": {
+      "title": "SampleSheetColumn",
+      "description": "One column in a sample-sheet row schema. Type vocabulary is JSON Schema-style scalar; `kind` separates dataset-reference columns from per-row metadata. Validation hints (`pattern`, `enum`, `exists`, `mimetype`) are preserved verbatim — target Molds decide which of them survive translation (e.g. Galaxy's `sample_sheet` validator allowlist is regex/in_range/length).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "kind",
+        "required"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean"
+          ],
+          "description": "JSON Schema-style scalar type. Path columns are typed `string` with a `format: file-path|directory-path|path` qualifier — see `format` and `kind`."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "data",
+            "meta"
+          ],
+          "description": "`data`: path-typed column whose values are dataset references (becomes element/inner-collection slot in Galaxy `sample_sheet`). `meta`: scalar metadata column (becomes a `column_definitions` entry, populated per row in `columns[]`). Includes the nf-schema `meta:` annotation when present; in its absence inferred from `format` (`file-path`/`directory-path`/`path` → `data`, anything else → `meta`)."
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "JSON Schema `format` keyword. nf-schema vocabulary: `file-path`, `directory-path`, `path`, `file-path-pattern`. Null for scalar metadata columns without a format hint."
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "default": {
+          "description": "Default value verbatim from the sample-sheet schema. May be null."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "enum": {
+          "type": "array",
+          "items": {},
+          "description": "Allowed values when the column schema declares an `enum`. Empty array when absent."
+        },
+        "pattern": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "JSON Schema regex `pattern` when present."
+        },
+        "exists": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "nf-schema `exists` flag for path columns. True when the parser must verify the file exists."
+        },
+        "mimetype": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "nf-schema `mimetype` keyword (e.g. `text/csv`, `application/gzip`). Useful for target datatypes."
+        }
+      }
+    },
+    "Tool": {
+      "title": "Tool",
+      "description": "One tool/dependency the pipeline runs. Mirrors gxy-sketches ToolSpec (name + version) and augments it with the resolved container/conda strings the bridge to author-galaxy-tool-wrapper needs.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Canonical tool name (e.g. `fastp`, `samtools`). Used as the foreign key from `processes[].tool`."
+        },
+        "version": {
+          "type": "string"
+        },
+        "biocontainer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "BioContainers image reference when one was found. Includes both `quay.io/biocontainers/<name>:<version>--<build>` and the docker.io alias `biocontainers/<name>:<version>--<build>` (modern nf-core modules typically use the docker.io form in the docker branch and the depot.galaxyproject.org form in the singularity branch)."
+        },
+        "bioconda": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "`bioconda::<name>=<version>` spec when a `conda` directive provides one — directly or by reference to a `${moduleDir}/environment.yml` whose `dependencies:` list contains a single bioconda entry. The latter is the modern nf-core convention."
+        },
+        "docker": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Non-biocontainer Docker registry image string when present."
+        },
+        "singularity": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Singularity image reference when present (e.g. `https://depot.galaxyproject.org/singularity/...`)."
+        },
+        "wave": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Seqera Wave / community-cr registry reference (e.g. `community.wave.seqera.io/library/<name>:<version>--<digest>` or `https://community-cr-prod.seqera.io/.../sha256/<digest>/data`). Wave-built containers are increasingly common in nf-core; kept distinct from `docker` because the resolution rules and provenance differ."
+        },
+        "mulled_components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolSpec"
+          },
+          "description": "Constituent Bioconda packages for an opaque `mulled-v2-*` multi-package container when resolved from a cached BioContainers multi-package-containers TSV. Omitted when no matching cached row is available."
+        }
+      }
+    },
+    "ToolSpec": {
+      "title": "ToolSpec",
+      "description": "One constituent package in a decomposed multi-package container.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "bioconda"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "bioconda": {
+          "type": "string",
+          "description": "Exact Bioconda requirement spec, e.g. `bioconda::samtools=1.20`."
+        }
+      }
+    },
+    "ChannelIO": {
+      "title": "ChannelIO",
+      "description": "One declared input or output channel of a process. Channel shape is a string, not a structured type — `tuple(meta, [path,path])` is enough for downstream Molds and avoids a research project on NF channel typing.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "shape"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "shape": {
+          "type": "string",
+          "description": "String-encoded channel shape, e.g. `tuple(meta, [path,path])`, `path`, `val(integer)`."
+        },
+        "description": {
+          "type": "string"
+        },
+        "topic": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Nextflow channel-topic name when this output is bound to a topic (e.g. `versions` for the standard nf-core version-aggregation topic). Topics are a Nextflow 24+ feature; the module-level `topic: <name>` annotation on a process output emits to a global named channel that any consumer can `channel.topic('<name>')` to read. Null for non-topic outputs and for all inputs."
+        }
+      }
+    },
+    "Process": {
+      "title": "Process",
+      "description": "One Nextflow `process { ... }` block.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "module_path",
+        "meta",
+        "module_tests",
+        "inputs",
+        "outputs"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Canonical process name (uppercase NF convention) as declared by the `process <NAME>` line in `module_path`."
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Alias names this process is imported as in workflow scopes via `include { <NAME> as <ALIAS> }`. Real nf-core pipelines re-import a single module multiple times under different aliases to invoke it with distinct runtime args (e.g. `MINIMAP2_ALIGN as MINIMAP2_CONSENSUS`, `MINIMAP2_ALIGN as MINIMAP2_POLISH`). Each alias appears in `workflow.edges[].from`/`.to` exactly as written; the canonical `name` does not appear in edges unless an unaliased import exists. Default `[]` when the process is only imported under its canonical name."
+        },
+        "module_path": {
+          "type": "string",
+          "description": "Relative path from the pipeline root to the file declaring the process."
+        },
+        "meta": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModuleMeta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Normalized `meta.yml` from the module directory when present. Null for local/ad-hoc processes without module metadata."
+        },
+        "module_tests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NfTest"
+          },
+          "description": "Module-scoped nf-test files under the module's `tests/` directory. Empty for local/ad-hoc modules without unit tests."
+        },
+        "tool": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Foreign key into `tools[].name` when the process runs a single recognizable tool; null for multi-tool or pure-Groovy processes."
+        },
+        "container": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Verbatim text of the process's `container` directive (or null). Modern nf-core modules use a ternary expression `\"${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? '<singularity-uri>' : '<docker-uri>' }\"` — keep that text intact here. The two resolved branches are split out into `tools[].docker` / `tools[].singularity` (and `tools[].wave` / `tools[].biocontainer` as appropriate)."
+        },
+        "conda": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Verbatim text of the process's `conda` directive (or null). Two common shapes: a literal `bioconda::<name>=<version>` (legacy) or a file reference `${moduleDir}/environment.yml` (modern nf-core convention). Either way the resolved bioconda spec lands in `tools[].bioconda`."
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChannelIO"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChannelIO"
+          }
+        },
+        "when": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Verbatim `when:` guard expression, or null if absent."
+        },
+        "script_summary": {
+          "type": "string",
+          "description": "One-line LLM-derived summary of what the `script:` body does. Free text."
+        },
+        "publish_dir": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "`publishDir` value when the process publishes outputs (or null)."
+        }
+      }
+    },
+    "ModuleMeta": {
+      "title": "ModuleMeta",
+      "description": "Normalized subset of nf-core module `meta.yml`, captured next to a process so module-scoped downstream Molds can consume `processes[i]` without reading the full pipeline summary.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keywords",
+        "authors",
+        "maintainers",
+        "tools",
+        "input",
+        "output"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maintainers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
+        },
+        "input": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
+        },
+        "output": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
+        }
+      }
+    },
+    "ModuleMetaEntry": {
+      "title": "ModuleMetaEntry",
+      "description": "One named entry from a module `meta.yml` section, normalized from nf-core's single-key YAML maps into `{ name, ...fields }` objects.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "homepage": {
+          "type": "string"
+        },
+        "documentation": {
+          "type": "string"
+        },
+        "tool_dev_url": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string"
+        },
+        "licence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        }
+      }
+    },
+    "Subworkflow": {
+      "title": "Subworkflow",
+      "description": "One named `workflow <NAME> { ... }` block other than the primary workflow. Includes nf-core utility wrappers (PIPELINE_INITIALISATION, PIPELINE_COMPLETION, UTILS_NFCORE_PIPELINE) which exist to compose helper-function calls rather than to invoke processes.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "path",
+        "kind",
+        "calls",
+        "tests"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string",
+          "description": "Relative path from the pipeline root."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "pipeline",
+            "utility"
+          ],
+          "description": "`pipeline` when the subworkflow invokes pipeline processes (data-flow contributor). `utility` when it composes helper functions only — common nf-core template subworkflows like PIPELINE_INITIALISATION (which calls `paramsHelp`, `samplesheetToList`, `UTILS_NFSCHEMA_PLUGIN`) and PIPELINE_COMPLETION (`completionEmail`, `completionSummary`). Utility subworkflows have empty `calls[]` for processes but may still expose channel outputs the primary workflow consumes."
+        },
+        "calls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Names of processes and nested subworkflows this subworkflow invokes. Free-function calls (e.g. `paramsHelp`, `completionEmail`) are NOT recorded here; they're implied by `kind = utility`."
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChannelIO"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChannelIO"
+          }
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NfTest"
+          },
+          "description": "Subworkflow-scoped nf-test files under the subworkflow's `tests/` directory. Empty when absent."
+        }
+      }
+    },
+    "Channel": {
+      "title": "Channel",
+      "description": "One top-level channel constructed in the workflow. Sources include `Channel.fromPath`, `Channel.fromFilePairs`, `Channel.fromSamplesheet`, and `params.*`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "source",
+        "shape"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "description": "Verbatim channel-construction expression."
+        },
+        "shape": {
+          "type": "string",
+          "description": "String-encoded channel shape; same convention as ChannelIO."
+        }
+      }
+    },
+    "Edge": {
+      "title": "Edge",
+      "description": "One edge in the workflow's call graph. The deterministic parser records the literal operator chain in `via`; reconciliation of the source and target shapes is the LLM step.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Channel name or `<PROCESS>.out.<chan>` reference."
+        },
+        "to": {
+          "type": "string",
+          "description": "Process or subworkflow name receiving this channel."
+        },
+        "via": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Operators on the path between source and target, in order (e.g. `[\"map\", \"join\", \"groupTuple\"]`). Empty for a direct edge."
+        },
+        "notes": {
+          "type": "string",
+          "description": "LLM-emitted note when the reconciliation is low-confidence (e.g. deeply nested closures)."
+        }
+      }
+    },
+    "Conditional": {
+      "title": "Conditional",
+      "description": "One workflow-level conditional that gates a subgraph.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guard",
+        "branch",
+        "affects"
+      ],
+      "properties": {
+        "guard": {
+          "type": "string",
+          "description": "Verbatim guard expression, e.g. `params.skip_alignment`."
+        },
+        "branch": {
+          "type": "string",
+          "enum": [
+            "default",
+            "alternate"
+          ],
+          "description": "Which side of the conditional this entry describes. `default` is the truthy branch; `alternate` is the else branch."
+        },
+        "affects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Process or subworkflow names whose execution is gated by this conditional."
+        }
+      }
+    },
+    "Workflow": {
+      "title": "Workflow",
+      "description": "Primary workflow: channel construction plus the call-graph DAG. Real nf-core pipelines have multiple named `workflow` blocks (an anonymous entrypoint `workflow {}` in main.nf that wires PIPELINE_INITIALISATION → NFCORE_<NAME> → PIPELINE_COMPLETION; a named NFCORE_<NAME> wrapper; a substantive named workflow under workflows/<name>.nf). The summary collapses this into one primary `workflow` plus `subworkflows[]`. Selection rule: pick the workflow that invokes the most pipeline processes — typically the one under `workflows/<name>.nf`. The anonymous `workflow {}` glue and the NFCORE_<NAME> wrapper land in `subworkflows[]`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "channels",
+        "edges"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the selected primary workflow (uppercase NF convention). The anonymous `workflow {}` entrypoint is never the primary; if it is the only workflow block, the pipeline is too small to summarize and the cast skill should emit a warning."
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Channel"
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Edge"
+          }
+        },
+        "conditionals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Conditional"
+          }
+        }
+      }
+    },
+    "TestDataRef": {
+      "title": "TestDataRef",
+      "description": "One test-fixture input. Field names mirror gxy-sketches' TestDataRef verbatim. The sketch-bundle constraint that `path` must live under `test_data/` is intentionally dropped; the Foundry summary describes fixtures as data, it does not bundle them.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": "Logical role of the input (e.g. `samplesheet`, `reference_fasta`)."
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative path when the fixture lives in-tree, or local filesystem path when the CLI fetched the remote fixture into a caller-provided test-data directory."
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "sha1": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "SHA-1 integrity hash when published alongside the fixture."
+        },
+        "filetype": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "File format, e.g. `fastq.gz`, `csv`."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "path"
+          ]
+        },
+        {
+          "required": [
+            "url"
+          ]
+        }
+      ]
+    },
+    "ExpectedOutputRef": {
+      "title": "ExpectedOutputRef",
+      "description": "One expected output. Field names mirror gxy-sketches' ExpectedOutputRef verbatim. At least one of path / url / assertions is required.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role"
+      ],
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "kind": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Coarse output kind: `report`, `tabular`, `image`, `archive`, `sequence`, `other`."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "assertions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Assertion strings. Simple equality / regex / contains-string checks are preserved verbatim; complex Groovy assertions are summarized to prose with a `warnings[]` flag in the parent Summary."
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "path"
+          ]
+        },
+        {
+          "required": [
+            "url"
+          ]
+        },
+        {
+          "required": [
+            "assertions"
+          ]
+        }
+      ]
+    },
+    "TestFixtures": {
+      "title": "TestFixtures",
+      "description": "Test fixtures derived from a `conf/<profile>.config` for the cast's selected profile. Pipelines with multiple test profiles (bacass has 11) record only the selected profile here; the full nf-test enumeration lives in `nf_tests[]`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "inputs",
+        "outputs"
+      ],
+      "properties": {
+        "profile": {
+          "type": "string",
+          "description": "Which `conf/<profile>.config` produced these fixtures (typically `test`)."
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestDataRef"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpectedOutputRef"
+          }
+        }
+      }
+    },
+    "NfTest": {
+      "title": "NfTest",
+      "description": "One `tests/*.nf.test` file. nf-core templates use a near-uniform shape: a `nextflow_pipeline { test(\"<desc>\") { when { params { ... } } then { assertAll(...) } } }` block, with one test() per profile, asserting `workflow.success` plus a snapshot match. This shape captures the data so downstream test-conversion molds (e.g. nextflow-test-to-target-tests) don't have to re-parse Groovy.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "path",
+        "profiles",
+        "assert_workflow_success",
+        "prose_assertions"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Description string passed to `test(\"...\")`. Often duplicates the profile name."
+        },
+        "path": {
+          "type": "string",
+          "description": "Repo-relative path of the .nf.test file (e.g. `tests/dfast.nf.test`)."
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Profile name(s) the test runs under, from the file-level `profile \"<name>\"` declaration and/or per-test config overrides. Usually a single profile."
+        },
+        "params_overrides": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "The `when { params { ... } }` block as a key→value map. Most templates set only `outdir`; pipeline-specific overrides land here."
+        },
+        "assert_workflow_success": {
+          "type": "boolean",
+          "description": "Whether the test asserts `workflow.success`. Almost always true for nf-core templates."
+        },
+        "snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SnapshotFixture"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Structured representation of the `assert snapshot(...).match()` clause when present; null when the test uses no snapshot."
+        },
+        "prose_assertions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Other assertions (regex matches, count checks, content equality on specific files) summarized to prose strings. Empty for snapshot-only tests, which is the common nf-core case."
+        }
+      }
+    },
+    "SnapshotFixture": {
+      "title": "SnapshotFixture",
+      "description": "Structured shape of an nf-test `snapshot(...).match()` assertion. nf-core templates pass a small set of values into snapshot() — succeeded-task count, version YAML (with Nextflow version stripped), stable file-name list, stable file-content list — and prune the comparison via `getAllFilesFromDir(..., ignoreFile: ..., ignore: [...])` helpers. This breakdown lets downstream consumers reconstruct equivalent assertions in target test frameworks without re-parsing Groovy.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "captures",
+        "helpers",
+        "ignore_files",
+        "ignore_globs"
+      ],
+      "properties": {
+        "captures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Logical names of values passed to snapshot(), in order. Common set: `succeeded_task_count`, `versions_yml`, `stable_names`, `stable_paths`. Free-form strings rather than an enum because pipelines can pass other values."
+        },
+        "helpers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "nf-test helper functions invoked in the snapshot expression (e.g. `getAllFilesFromDir`, `removeNextflowVersion`). Used to detect whether a target framework can replicate the comparison."
+        },
+        "ignore_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Repo-relative paths passed as `ignoreFile:` to helpers (e.g. `tests/.nftignore`, `tests/.nftignore_files_entirely`). The files themselves are line-delimited globs."
+        },
+        "ignore_globs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Inline `ignore: [...]` glob list passed to helpers (e.g. `['Prokka/**', '**/multiqc_busco.yaml']`). Distinct from ignore_files which references on-disk lists."
+        },
+        "snap_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative path of the corresponding `.nf.test.snap` file when present."
+        },
+        "parsed_content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SnapshotContent"
+          },
+          "description": "Parsed entries from the `.nf.test.snap` JSON sidecar. Empty when the sidecar is absent, too large for compact summary output, or not valid JSON. Each entry preserves the snapshot name plus channel-keyed file md5 assertions and non-file scalar values."
+        }
+      }
+    },
+    "SnapshotContent": {
+      "title": "SnapshotContent",
+      "description": "One top-level snapshot entry from an nf-test `.snap` JSON sidecar.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "channels"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Top-level key in the `.snap` file, usually the `test(\"...\")` name."
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SnapshotChannel"
+          },
+          "description": "Channel-keyed snapshot values. Pipeline-template flat file lists use `key: null`."
+        }
+      }
+    },
+    "SnapshotChannel": {
+      "title": "SnapshotChannel",
+      "description": "One output channel or flat snapshot list inside a `.snap` entry.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "files",
+        "values"
+      ],
+      "properties": {
+        "key": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Channel key from the snapshot object, e.g. `0`, `1`, or `genome_gtf`; null for flat file-list snapshots."
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SnapshotFile"
+          },
+          "description": "File md5 assertions parsed from `<path>:md5,<hex>` strings."
+        },
+        "values": {
+          "type": "array",
+          "items": {},
+          "description": "Non-file snapshot values preserved verbatim for consumers that need versions, counts, or scalar tuple emissions."
+        }
+      }
+    },
+    "SnapshotFile": {
+      "title": "SnapshotFile",
+      "description": "One file digest assertion from a `.snap` sidecar.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "basename",
+        "md5",
+        "stub"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path portion before `:md5,` exactly as stored in the sidecar."
+        },
+        "basename": {
+          "type": "string",
+          "description": "Final path segment, suitable for Galaxy test `file:` assertions when the snapshot stores only basenames."
+        },
+        "md5": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{32}$",
+          "description": "MD5 digest from the sidecar."
+        },
+        "stub": {
+          "type": "boolean",
+          "description": "True when the digest is the empty-file md5 emitted by many `-stub` tests."
+        }
+      }
+    }
+  }
+}
