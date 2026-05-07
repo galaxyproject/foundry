@@ -139,7 +139,7 @@ function buildSlugMap(repoRoot: string): {
 // ---- ref resolution ----
 
 interface ResolvedRef {
-  kind: "schema" | "research" | "pattern" | "cli-command";
+  kind: "schema" | "research" | "pattern" | "cli-command" | "prompt";
   mode: "verbatim" | "condense" | "sidecar";
   ref: string;
   src: string;
@@ -154,8 +154,8 @@ interface ResolvedRef {
   package_source?: { spec: string; exportName: string };
 }
 
-const SUPPORTED_KINDS = new Set(["schema", "research", "pattern", "cli-command"]);
-const NOT_IMPLEMENTED_KINDS = new Set(["example", "prompt"]);
+const SUPPORTED_KINDS = new Set(["schema", "research", "pattern", "cli-command", "prompt"]);
+const NOT_IMPLEMENTED_KINDS = new Set(["example"]);
 
 function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
   // 1:1 strict slug mapping. For verbatim copies, preserve the source basename
@@ -249,7 +249,21 @@ function resolveMoldRef(
         error: `references[${index}]: ${kind} ref ${refStr} resolves to type=${targetType ?? "(none)"}, expected ${expected}`,
       };
     }
-    src = tp;
+    if (kind === "prompt") {
+      const promptFile = metaByPath.get(tp)?.prompt_file;
+      if (typeof promptFile !== "string" || promptFile.length === 0) {
+        return {
+          error: `references[${index}]: prompt ref ${refStr} target is missing prompt_file`,
+        };
+      }
+      src = path.posix.join(path.posix.dirname(tp), promptFile);
+      dstOverride = path.posix.join(
+        kindCfg.dst_dir,
+        `${path.basename(tp, ".md")}${kindCfg.dst_extension}`,
+      );
+    } else {
+      src = tp;
+    }
   }
 
   const dst = dstOverride ?? deriveDst(kind, src, mode, kindCfg);

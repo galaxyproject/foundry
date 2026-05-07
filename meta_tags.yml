@@ -24,6 +24,12 @@ research/design-spec:
   description: "Design specification for a Foundry component"
 schema:
   description: "Schema note (renderable JSON Schema reference, vendored or Foundry-authored)"
+prompt:
+  description: "Prompt wrapper note (metadata and human framing for raw prompt sidecars)"
+
+# --- Prompt classifications ---
+prompt/galaxy-internal:
+  description: "Prompt sourced from Galaxy's internal agent prompt library"
 # --- CLI affiliation (for cli-command notes) ---
 cli/gxwf:
   description: "gxwf CLI commands (design-time)"

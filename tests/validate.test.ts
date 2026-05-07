@@ -27,22 +27,24 @@ const baseRequired = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const patternRequired = (overrides: Record<string, unknown> = {}) => baseRequired({
-  pattern_kind: "operation",
-  evidence: "corpus-observed",
-  ...overrides,
-});
+const patternRequired = (overrides: Record<string, unknown> = {}) =>
+  baseRequired({
+    pattern_kind: "operation",
+    evidence: "corpus-observed",
+    ...overrides,
+  });
 
-const sourcePatternRequired = (overrides: Record<string, unknown> = {}) => baseRequired({
-  type: "source-pattern",
-  tags: ["source-pattern", "source/nextflow", "target/galaxy"],
-  source: "nextflow",
-  target: "galaxy",
-  source_pattern_kind: "operator",
-  implemented_by_patterns: ["[[pattern-x]]"],
-  title: "Nextflow Source Pattern",
-  ...overrides,
-});
+const sourcePatternRequired = (overrides: Record<string, unknown> = {}) =>
+  baseRequired({
+    type: "source-pattern",
+    tags: ["source-pattern", "source/nextflow", "target/galaxy"],
+    source: "nextflow",
+    target: "galaxy",
+    source_pattern_kind: "operator",
+    implemented_by_patterns: ["[[pattern-x]]"],
+    title: "Nextflow Source Pattern",
+    ...overrides,
+  });
 
 describe("validateData (per-file)", () => {
   const schema = loadRealSchema();
@@ -106,10 +108,7 @@ describe("validateData (per-file)", () => {
   });
 
   it("rejects mold missing axis", () => {
-    const r = validateData(
-      baseRequired({ type: "mold", tags: ["mold"], name: "x" }),
-      schema,
-    );
+    const r = validateData(baseRequired({ type: "mold", tags: ["mold"], name: "x" }), schema);
     expect(r.errors.some((e) => /axis/.test(e))).toBe(true);
   });
 
@@ -138,7 +137,8 @@ describe("validateData (per-file)", () => {
             evidence: "hypothesis",
             purpose: "Explain when to load this reference.",
             trigger: "When the runtime task needs component details.",
-            verification: "Run the generated skill on a real fixture and confirm this reference helps.",
+            verification:
+              "Run the generated skill on a real fixture and confirm this reference helps.",
           },
         ],
       }),
@@ -209,9 +209,25 @@ describe("validateData (per-file)", () => {
   });
 
   it("accepts source-pattern metadata", () => {
-    const r = validateData(sourcePatternRequired({
-      review_triggers: ["unmatched keys need review"],
-    }), schema);
+    const r = validateData(
+      sourcePatternRequired({
+        review_triggers: ["unmatched keys need review"],
+      }),
+      schema,
+    );
+    expect(r.errors).toEqual([]);
+  });
+
+  it("accepts prompt metadata", () => {
+    const r = validateData(
+      baseRequired({
+        type: "prompt",
+        tags: ["prompt", "prompt/galaxy-internal", "target/galaxy"],
+        title: "Galaxy Prompt",
+        prompt_file: "galaxy-prompt.upstream.prompt",
+      }),
+      schema,
+    );
     expect(r.errors).toEqual([]);
   });
 
@@ -221,30 +237,36 @@ describe("validateData (per-file)", () => {
   });
 
   it("accepts iwc_exemplars metadata", () => {
-    const r = validateData(patternRequired({
-      iwc_exemplars: [
-        {
-          workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
-          steps: [{ label: "Map strandedness", id: 12 }],
-          why: "Shows workflow enum values mapped into downstream tool dialect.",
-          confidence: "high",
-        },
-      ],
-    }), schema);
+    const r = validateData(
+      patternRequired({
+        iwc_exemplars: [
+          {
+            workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
+            steps: [{ label: "Map strandedness", id: 12 }],
+            why: "Shows workflow enum values mapped into downstream tool dialect.",
+            confidence: "high",
+          },
+        ],
+      }),
+      schema,
+    );
     expect(r.errors).toEqual([]);
   });
 
   it("requires label or id for iwc_exemplars steps", () => {
-    const r = validateData(patternRequired({
-      iwc_exemplars: [
-        {
-          workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
-          steps: [{}],
-          why: "Shows workflow enum values mapped into downstream tool dialect.",
-          confidence: "high",
-        },
-      ],
-    }), schema);
+    const r = validateData(
+      patternRequired({
+        iwc_exemplars: [
+          {
+            workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
+            steps: [{}],
+            why: "Shows workflow enum values mapped into downstream tool dialect.",
+            confidence: "high",
+          },
+        ],
+      }),
+      schema,
+    );
     expect(r.errors.length).toBeGreaterThan(0);
   });
 });
@@ -289,11 +311,14 @@ describe("validateDirectory (cross-file)", () => {
     const workflowFile = path.join(dir, "verification-workflows/gate.gxformat2.yml");
     mkdirSync(path.dirname(workflowFile), { recursive: true });
     writeFileSync(workflowFile, "class: GalaxyWorkflow\n");
-    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
-      title: "Pattern X",
-      evidence: "corpus-and-verified",
-      verification_paths: [path.relative(repoRoot, workflowFile)],
-    }));
+    writeFm(
+      path.join(dir, "patterns/pattern-x.md"),
+      patternRequired({
+        title: "Pattern X",
+        evidence: "corpus-and-verified",
+        verification_paths: [path.relative(repoRoot, workflowFile)],
+      }),
+    );
 
     const r = validateDirectory({
       directory: dir,
@@ -304,11 +329,14 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("rejects a missing verification path", () => {
-    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
-      title: "Pattern X",
-      evidence: "corpus-and-verified",
-      verification_paths: ["verification/workflows/missing/gate.gxformat2.yml"],
-    }));
+    writeFm(
+      path.join(dir, "patterns/pattern-x.md"),
+      patternRequired({
+        title: "Pattern X",
+        evidence: "corpus-and-verified",
+        verification_paths: ["verification/workflows/missing/gate.gxformat2.yml"],
+      }),
+    );
 
     const r = validateDirectory({
       directory: dir,
@@ -319,10 +347,13 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("rejects structurally verified evidence without verification paths", () => {
-    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
-      title: "Pattern X",
-      evidence: "structurally-verified",
-    }));
+    writeFm(
+      path.join(dir, "patterns/pattern-x.md"),
+      patternRequired({
+        title: "Pattern X",
+        evidence: "structurally-verified",
+      }),
+    );
 
     const r = validateDirectory({
       directory: dir,
@@ -336,10 +367,13 @@ describe("validateDirectory (cross-file)", () => {
     const workflowFile = path.join(dir, "verification-workflows/gate.gxformat2.yml");
     mkdirSync(path.dirname(workflowFile), { recursive: true });
     writeFileSync(workflowFile, "class: GalaxyWorkflow\n");
-    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
-      title: "Pattern X",
-      verification_paths: [path.relative(repoRoot, workflowFile)],
-    }));
+    writeFm(
+      path.join(dir, "patterns/pattern-x.md"),
+      patternRequired({
+        title: "Pattern X",
+        verification_paths: [path.relative(repoRoot, workflowFile)],
+      }),
+    );
 
     const r = validateDirectory({
       directory: dir,
@@ -350,15 +384,20 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("accepts abstract IWC workflow IDs in iwc_exemplars", () => {
-    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
-      title: "Pattern X",
-      iwc_exemplars: [{
-        workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
-        steps: [{ label: "Map strandedness", id: "12" }],
-        why: "Shows workflow enum values mapped into downstream tool dialect.",
-        confidence: "high",
-      }],
-    }));
+    writeFm(
+      path.join(dir, "patterns/pattern-x.md"),
+      patternRequired({
+        title: "Pattern X",
+        iwc_exemplars: [
+          {
+            workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
+            steps: [{ label: "Map strandedness", id: "12" }],
+            why: "Shows workflow enum values mapped into downstream tool dialect.",
+            confidence: "high",
+          },
+        ],
+      }),
+    );
 
     const r = validateDirectory({
       directory: dir,
@@ -369,14 +408,19 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("rejects generated IWC paths in iwc_exemplars", () => {
-    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
-      title: "Pattern X",
-      iwc_exemplars: [{
-        workflow: "$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:270-299",
-        why: "Shows workflow enum values mapped into downstream tool dialect.",
-        confidence: "high",
-      }],
-    }));
+    writeFm(
+      path.join(dir, "patterns/pattern-x.md"),
+      patternRequired({
+        title: "Pattern X",
+        iwc_exemplars: [
+          {
+            workflow: "$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:270-299",
+            why: "Shows workflow enum values mapped into downstream tool dialect.",
+            confidence: "high",
+          },
+        ],
+      }),
+    );
 
     const r = validateDirectory({
       directory: dir,
@@ -469,9 +513,38 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
-          { kind: "pattern", ref: "[[pattern-x]]", used_at: "cast-time", load: "upfront", mode: "condense", evidence: "corpus-observed" },
-          { kind: "schema", ref: "[[schema-x]]", used_at: "both", load: "upfront", mode: "verbatim", evidence: "cast-validated" },
+          {
+            kind: "research",
+            ref: "[[component-x]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "verbatim",
+            evidence: "corpus-observed",
+          },
+          {
+            kind: "pattern",
+            ref: "[[pattern-x]]",
+            used_at: "cast-time",
+            load: "upfront",
+            mode: "condense",
+            evidence: "corpus-observed",
+          },
+          {
+            kind: "schema",
+            ref: "[[schema-x]]",
+            used_at: "both",
+            load: "upfront",
+            mode: "verbatim",
+            evidence: "cast-validated",
+          },
+          {
+            kind: "prompt",
+            ref: "[[prompt-x]]",
+            used_at: "runtime",
+            load: "upfront",
+            mode: "verbatim",
+            evidence: "corpus-observed",
+          },
         ],
       }),
     });
@@ -491,6 +564,15 @@ describe("validateDirectory (cross-file)", () => {
         package_export: "schemaX",
       }),
     });
+    writeFm(path.join(dir, "prompts/prompt-x.md"), {
+      ...baseRequired({
+        type: "prompt",
+        tags: ["prompt", "prompt/galaxy-internal", "target/galaxy"],
+        title: "Prompt X",
+        prompt_file: "prompt-x.upstream.prompt",
+      }),
+    });
+    writeFileSync(path.join(dir, "prompts/prompt-x.upstream.prompt"), "Prompt body\n");
 
     const r = validateDirectory({
       directory: dir,
@@ -498,6 +580,24 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
+  });
+
+  it("rejects prompt notes with missing prompt_file", () => {
+    writeFm(path.join(dir, "prompts/prompt-x.md"), {
+      ...baseRequired({
+        type: "prompt",
+        tags: ["prompt", "prompt/galaxy-internal", "target/galaxy"],
+        title: "Prompt X",
+        prompt_file: "missing.upstream.prompt",
+      }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
   it("resolves CLI command references by tool and command", () => {
@@ -508,7 +608,15 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "cli-command", ref: "[[gxwf validate]]", used_at: "runtime", load: "on-demand", mode: "sidecar", evidence: "corpus-observed", trigger: "After editing a Galaxy workflow." },
+          {
+            kind: "cli-command",
+            ref: "[[gxwf validate]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "sidecar",
+            evidence: "corpus-observed",
+            trigger: "After editing a Galaxy workflow.",
+          },
         ],
       }),
     });
@@ -519,7 +627,8 @@ describe("validateDirectory (cross-file)", () => {
         tool: "gxwf",
         command: "validate",
         package: "@galaxy-tool-util/cli",
-        upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
+        upstream:
+          "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
       }),
     });
 
@@ -539,7 +648,8 @@ describe("validateDirectory (cross-file)", () => {
         tool: "gxwf",
         command: "not-real",
         package: "@galaxy-tool-util/cli",
-        upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
+        upstream:
+          "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
       }),
     });
 
@@ -559,7 +669,14 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "research", ref: "[[not-research]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
+          {
+            kind: "research",
+            ref: "[[not-research]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "verbatim",
+            evidence: "corpus-observed",
+          },
         ],
       }),
     });
@@ -576,9 +693,12 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("validates source-pattern implementation links", () => {
-    writeFm(path.join(dir, "source-patterns/nextflow/source-x.md"), sourcePatternRequired({
-      implemented_by_patterns: ["[[pattern-x]]"],
-    }));
+    writeFm(
+      path.join(dir, "source-patterns/nextflow/source-x.md"),
+      sourcePatternRequired({
+        implemented_by_patterns: ["[[pattern-x]]"],
+      }),
+    );
     writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({ title: "Pattern X" }));
 
     const r = validateDirectory({
@@ -590,9 +710,12 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("rejects source-pattern links that do not resolve", () => {
-    writeFm(path.join(dir, "source-patterns/nextflow/source-x.md"), sourcePatternRequired({
-      implemented_by_patterns: ["[[missing-pattern]]"],
-    }));
+    writeFm(
+      path.join(dir, "source-patterns/nextflow/source-x.md"),
+      sourcePatternRequired({
+        implemented_by_patterns: ["[[missing-pattern]]"],
+      }),
+    );
 
     const r = validateDirectory({
       directory: dir,
@@ -603,9 +726,12 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("rejects source-pattern links that resolve to non-patterns", () => {
-    writeFm(path.join(dir, "source-patterns/nextflow/source-x.md"), sourcePatternRequired({
-      implemented_by_patterns: ["[[not-a-pattern]]"],
-    }));
+    writeFm(
+      path.join(dir, "source-patterns/nextflow/source-x.md"),
+      sourcePatternRequired({
+        implemented_by_patterns: ["[[not-a-pattern]]"],
+      }),
+    );
     writeFm(path.join(dir, "research/not-a-pattern.md"), {
       ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
     });
@@ -700,7 +826,8 @@ describe("validateDirectory (cross-file)", () => {
         name: "x",
         title: "X",
         package: "@galaxy-foundry/x-schema",
-        upstream: "https://github.com/jmchilton/foundry/blob/main/packages/x-schema/src/x.schema.json",
+        upstream:
+          "https://github.com/jmchilton/foundry/blob/main/packages/x-schema/src/x.schema.json",
         license: "MIT",
       }),
     });
@@ -721,7 +848,14 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "hypothesis" },
+          {
+            kind: "research",
+            ref: "[[component-x]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "verbatim",
+            evidence: "hypothesis",
+          },
         ],
       }),
     });
@@ -745,7 +879,14 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
+          {
+            kind: "research",
+            ref: "[[component-x]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "verbatim",
+            evidence: "corpus-observed",
+          },
         ],
       }),
     });
@@ -947,11 +1088,19 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("ignores body wiki-links inside fenced or inline code", () => {
-    const fm = baseRequired({ type: "research", tags: ["research/component"], subtype: "component" });
+    const fm = baseRequired({
+      type: "research",
+      tags: ["research/component"],
+      subtype: "component",
+    });
     mkdirSync(path.dirname(path.join(dir, "research/component-x.md")), { recursive: true });
     writeFileSync(
       path.join(dir, "research/component-x.md"),
-      `---\n${Object.entries(fm).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join("\n")}\n---\n\nInline \`[[ghost-inline]]\` and fenced:\n\n\`\`\`\n[[ghost-fenced]]\n\`\`\`\n`,
+      `---\n${Object.entries(fm)
+        .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+        .join(
+          "\n",
+        )}\n---\n\nInline \`[[ghost-inline]]\` and fenced:\n\n\`\`\`\n[[ghost-fenced]]\n\`\`\`\n`,
     );
 
     const r = validateDirectory({
@@ -971,7 +1120,15 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "schema", ref: "[[schema-x]]", used_at: "both", load: "upfront", mode: "verbatim", evidence: "hypothesis", verification: "Run cast and confirm output validates." },
+          {
+            kind: "schema",
+            ref: "[[schema-x]]",
+            used_at: "both",
+            load: "upfront",
+            mode: "verbatim",
+            evidence: "hypothesis",
+            verification: "Run cast and confirm output validates.",
+          },
         ],
       }),
     });
@@ -1003,12 +1160,22 @@ describe("validateDirectory (cross-file)", () => {
       name: "m",
       axis: "generic",
       references: [
-        { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed", trigger: "x" },
+        {
+          kind: "research",
+          ref: "[[component-x]]",
+          used_at: "runtime",
+          load: "on-demand",
+          mode: "verbatim",
+          evidence: "corpus-observed",
+          trigger: "x",
+        },
       ],
     });
     writeFileSync(
       path.join(dir, "molds/m/index.md"),
-      `---\n${Object.entries(fm).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join("\n")}\n---\n\n# m\n\nStub. Replace with real content later.\n`,
+      `---\n${Object.entries(fm)
+        .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+        .join("\n")}\n---\n\n# m\n\nStub. Replace with real content later.\n`,
     );
     writeFm(path.join(dir, "research/component-x.md"), {
       ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
@@ -1430,9 +1597,7 @@ describe("validateDirectory (cross-file)", () => {
         tags: ["mold"],
         name: "consumer",
         axis: "generic",
-        input_artifacts: [
-          { id: "summary-x", description: "Upstream structured summary." },
-        ],
+        input_artifacts: [{ id: "summary-x", description: "Upstream structured summary." }],
       }),
     });
     // Out-of-order pipeline: consumer first, producer second.
@@ -1441,10 +1606,7 @@ describe("validateDirectory (cross-file)", () => {
         type: "pipeline",
         tags: ["pipeline"],
         title: "Bad Order",
-        phases: [
-          { mold: "[[consumer]]" },
-          { mold: "[[producer]]" },
-        ],
+        phases: [{ mold: "[[consumer]]" }, { mold: "[[producer]]" }],
       }),
     });
 

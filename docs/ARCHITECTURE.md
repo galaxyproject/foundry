@@ -15,6 +15,7 @@ Foundry-internal (in the `foundry/` repo):
 - **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds (e.g., `validate-galaxy-step` → `cli/gxwf/validate`). Cast to JSON sidecars, not inlined as prose.
 - **Research / reference notes** — background syntheses (e.g., Nextflow testing, CWL conformance) that aren't actions and aren't Galaxy patterns.
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
+- **Prompts** — wrapper notes under `content/prompts/` that add Foundry metadata and usage framing around raw prompt sidecars. Molds reference the wrapper via `kind: prompt`; casting copies the raw `prompt_file` verbatim.
 - **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Each has a `type: schema` content note under `content/schemas/<name>.md`; the JSON itself lives in its TypeScript package at `packages/<name>-schema/src/<name>.schema.json` or beside the content note when vendored as research/reference material. Two flavors: **Foundry-authored** (the JSON is hand-edited in the package, e.g. `packages/summary-nextflow-schema/src/summary-nextflow.schema.json`) and **vendored** (the JSON is synced from an upstream source, e.g. `tests-format` from `@galaxy-tool-util/schema`). Mold frontmatter cites schemas via `[[wiki-link]]` to the note; the note declares `package` + `package_export`, and cast imports the named runtime export at build time and serializes it into the cast bundle.
 - **Frontmatter schema** — `meta_schema.yml`, JSON Schema Draft 07 in YAML, contract for content notes. Distinct from the Mold IO schemas under `content/schemas/`.
 - **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the schema at validate time.
@@ -32,7 +33,7 @@ Consumers (external):
 Authoritative term definitions live in `content/glossary.md`; this section is the architectural picture.
 
 - **Note** — a single `.md` file with frontmatter under the foundry's content root. Identity = filename stem, used as the wiki-link target.
-- **Type** — top-level kind of note (`type:` in frontmatter): `mold | pattern | source-pattern | cli-command | pipeline | research | schema`.
+- **Type** — top-level kind of note (`type:` in frontmatter): `mold | pattern | source-pattern | cli-command | pipeline | research | schema | prompt`.
 - **Subtype** — second-level discriminator. Used for `research` (`component | design-problem | design-spec`). Molds use `axis`, `source`, `target`, and `tool` instead of `subtype`.
 - **Tag** — controlled hierarchical label declared in `meta_tags.yml`. Two roles: classify the note's kind (note-type tags like `mold`, `pattern`, `research/component`) and classify subject area (e.g., `iwc/<category>` for IWC domain coverage; further subject-area families bloom as content lands — see §4).
 - **Mold** — `content/molds/<slug>/index.md`. Directory-based note: `index.md` is the only top-level frontmatter-bearing file; siblings (`eval.md`, `usage.md`, `refinement.md`, `refinements/`, `examples/`, optional `casting.md` / `cast-skill-verification.md` / `changes.md`) ride along verbatim. Files under `refinements/` are the one carve-out: each refinement-journal entry carries small structured frontmatter. Content shape: typed reference manifest in frontmatter + procedural body skeleton.
@@ -41,6 +42,7 @@ Authoritative term definitions live in `content/glossary.md`; this section is th
 - **CLI command** — single `.md` under `content/cli/<tool>/<cmd>.md` (e.g., `content/cli/gxwf/tool-search.md`, `content/cli/gxwf/validate.md`). Reference content describing one CLI command/subcommand: synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas. Wiki-linked from Molds. Cast to a JSON sidecar (not inlined as prose) by casting's `cli-command`-kind dispatch.
 - **Pipeline** — single `.md` under `content/pipelines/`. Ordered sequence of phases that compose into a harness journey (e.g., `nextflow-to-galaxy.md`, `paper-to-galaxy.md`). **Dual purpose**: (a) build artifact — names the Molds a harness will orchestrate; (b) navigation primitive — renders as a "subway map" / journey index over the KB. Each phase is a `mold` reference, a `[loop]`-flagged Mold, or a `[branch]`-flagged routing step (not a Mold; harness-level orchestration — binary branches with fallthrough, or N-step fallback chains). Other inline harness annotations (e.g., `[gate]` for an approval / scope-confirmation checkpoint) will be coined when they first surface as inline phases; the set is open and not pre-enumerated. Pipelines are *not* cast; they are referenced content. The Mold inventory invariant — "Molds = union of pipeline phases" — is machine-checked: every phase resolves to a Mold (or is explicitly a non-Mold annotation like `[branch]`), and Molds with no pipeline membership stand out.
 - **Schema** — single `.md` under `content/schemas/`. Renderable reference note for a JSON Schema package/export or vendored schema artifact.
+- **Prompt** — single `.md` wrapper under `content/prompts/`, plus a sibling raw `prompt_file` sidecar. The wrapper is human-facing and linkable; the raw sidecar is what casting packages.
 - **Cast** / **Casting** / **Cast skill** / **Cast target** — per `content/glossary.md`. The cast directory tree (`casts/<target>/<name>/`) is generated from Molds, committed to the repo, and skipped by the validator.
 - **Wiki link** — Obsidian-flavored `[[Target]]`. First-class in both frontmatter (typed fields like `parent_pattern`, `related_patterns`, `related_notes`) and body prose (resolved by a remark plugin in the site).
 - **Log** — `content/log.md`, append-only journal of foundry operations (`cast`, `lint`, `query`). Excluded from validator and site collection.
@@ -66,6 +68,7 @@ Source of truth: `meta_schema.yml` `type.enum` and the `allOf/if/then` block; `m
 | `research` | `design-problem` | (base + `subtype`) | `research/design-problem` | `content/research/` |
 | `research` | `design-spec` | (base + `subtype`) | `research/design-spec` | `content/research/` |
 | `schema` | — | `name`, `title` | `schema` | `content/schemas/` |
+| `prompt` | — | `title`, `prompt_file` | `prompt` (+ optional `prompt/*`) | `content/prompts/` |
 
 `mold` has a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling `.md` files in `content/molds/<slug>/` are skipped). Mold is the only directory-note type; `docs/` holds long-form design docs.
 
@@ -91,7 +94,8 @@ iwc/rna-seq:
 Validation injects the registry keys into the schema at runtime (`scripts/lib/schema.ts:loadTags` / `loadSchema`), so `meta_schema.yml`'s tag enum stays empty on disk. Vocabulary changes touch one file; the schema stays static. The separation is load-bearing.
 
 Tag families:
-- **Note-type tags** (`mold`, `pattern`, `source-pattern`, `cli-command`, `pipeline`, `research/*`, `schema`) — every note carries exactly one. Coherence-checked.
+- **Note-type tags** (`mold`, `pattern`, `source-pattern`, `cli-command`, `pipeline`, `research/*`, `schema`, `prompt`) — every note carries exactly one. Coherence-checked.
+- **Prompt tags** (`prompt/*`) — classify reusable upstream or Foundry-authored prompt families, e.g. `prompt/galaxy-internal` for prompts sourced from Galaxy's internal agent prompt library.
 - **`iwc/*` (IWC domain coverage)** — not used as an aggregation surface. Pattern work relies on corpus citations in bodies.
 - **`cli/*` (CLI affiliation)** — every `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and action-Mold reference surfaces.
 - **Source/target/tool axis tags** (`source/paper`, `source/nextflow`, `source/cwl`, `target/galaxy`, `target/cwl`, `tool/gxwf`, `tool/planemo`) — complement typed Mold and source-pattern fields and drive browse surfaces.
@@ -128,6 +132,8 @@ Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (n
   then: { required: [title, phases] }
 - if: { properties: { type: { const: schema } }, required: [type] }
   then: { required: [name, title] }
+- if: { properties: { type: { const: prompt } }, required: [type] }
+  then: { required: [title, prompt_file] }
 ```
 
 **Foundry-specific field types**:

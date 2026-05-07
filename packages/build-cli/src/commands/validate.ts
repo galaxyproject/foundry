@@ -41,6 +41,7 @@ const TYPE_TAG_MAP: Record<string, string> = {
   "research|design-problem": "research/design-problem",
   "research|design-spec": "research/design-spec",
   "schema|": "schema",
+  "prompt|": "prompt",
 };
 
 const CLI_METADATA_KEYS = new Set(
@@ -1126,6 +1127,32 @@ function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
   return findings;
 }
 
+function validatePromptFiles(files: FileMeta[]): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    if (f.meta.type !== "prompt") continue;
+    const promptFile = typeof f.meta.prompt_file === "string" ? f.meta.prompt_file : "";
+    if (!promptFile) continue;
+    const fullPath = path.resolve(path.dirname(f.path), promptFile);
+    if (!existsSync(fullPath)) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `prompt_file: file does not exist: ${promptFile}`,
+      });
+      continue;
+    }
+    if (!statSync(fullPath).isFile()) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `prompt_file: path is not a file: ${promptFile}`,
+      });
+    }
+  }
+  return findings;
+}
+
 function validatePatternVerificationEvidence(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
@@ -1315,6 +1342,7 @@ export function validateDirectory(opts: ValidateOptions): {
     ),
   );
   crossFindings.push(...validateCliCommandDocs(validFiles));
+  crossFindings.push(...validatePromptFiles(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
   crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));
   crossFindings.push(...validateMoldStubBody(validFiles));

@@ -16,14 +16,14 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 | `cli-command` | `content/cli/<tool>/<cmd>.md` framing note plus registered upstream CLI metadata | Deterministic JSON sidecar sourced from registry metadata + framing markdown | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
 | `schema` | `[[wiki-link]]` to a `type: schema` note in `content/schemas/`. The note declares `package` + `package_export`; cast imports the named runtime export at build time and serializes it. Foundry-authored: schemas in `packages/<name>-schema/src/<name>.schema.json` (e.g. `summary-nextflow`, `galaxy-tool-discovery`). Vendored: schemas synced from upstream packages into `packages/<name>-schema/src/` (e.g. `tests-format` from `@galaxy-tool-util/schema`). | Verbatim copy of the imported export, JSON-serialized | `references/schemas/<note-slug>.schema.json` | v1 |
 | `research` | `content/research/*.md` or paired structured sources under `content/research/` | Verbatim copy or LLM condense per `mode` | `references/notes/<source-basename>` (strict 1:1) | v1 |
-| `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | `references/prompts/` (inlined or copied) | Contracted; caster rejects until a real Mold needs it |
+| `prompt` | `content/prompts/*.md` wrapper note plus sibling `prompt_file` sidecar | Raw prompt sidecar copied verbatim, no LLM rewrite | `references/prompts/<slug>.md` | v1 |
 | `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` | Contracted; caster rejects until a real Mold needs it |
 | `eval` | `content/molds/<slug>/eval.md` | **Never packaged** | — (Foundry-only) | n/a |
 | `mold` (smell) | another Mold | Discouraged; factor shared content into other reference kinds | — | n/a |
 
 Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for kinds where it adds value (patterns, research notes). `mode: condense` is implemented as a **two-phase contract**: the deterministic caster records a `pending_llm: true` placeholder for the ref (with a slot for prompt provenance and dst hash), and the `/cast` LLM phase fills it in. The deterministic verifier rejects committed provenance with any unfilled `pending_llm` entry.
 
-`example` and `prompt` are declared in the contract but no Mold uses them yet, so the caster fails fast on them rather than guessing dst conventions; the first Mold to need either kind shapes the rule.
+`example` is declared in the contract but no Mold uses it yet, so the caster fails fast rather than guessing dst conventions. `prompt` is active for wrapper notes that point at raw prompt sidecars via `prompt_file`.
 
 ### Typed reference manifest
 
@@ -93,7 +93,7 @@ casts/claude/<mold-name>/
 │   ├── cli/                  # deterministic JSON sidecars (flat, <slug>.json)
 │   ├── patterns/             # verbatim or condensed pattern excerpts
 │   ├── notes/                # research notes (verbatim by default; condense per ref mode)
-│   ├── prompts/              # populated when prompt refs exist
+│   ├── prompts/              # raw prompt sidecars copied from prompt wrapper notes
 │   └── examples/             # populated when example refs exist
 └── _provenance.json          # required, not part of the skill (schema v2 — see below)
 ```

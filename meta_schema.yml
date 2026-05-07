@@ -10,7 +10,7 @@ required: [type, tags, status, created, revised, revision, ai_generated, summary
 properties:
   type:
     type: string
-    enum: [mold, pattern, source-pattern, cli-command, pipeline, research, schema]
+    enum: [mold, pattern, source-pattern, cli-command, pipeline, research, schema, prompt]
   tags:
     type: array
     items:
@@ -260,6 +260,12 @@ properties:
     pattern: "^[A-Za-z0-9._-]+$"
     description: "Optional package bin that validates files conforming to this schema. The validator checks it exists in the schema package's package.json bin map."
 
+  # --- Prompt fields ---
+  prompt_file:
+    type: string
+    pattern: "^[A-Za-z0-9._/-]+$"
+    description: "Sibling-relative raw prompt file consumed by casting. Wrapper prose remains human-facing Foundry context."
+
   # --- Vendoring fields (any note redistributing upstream content) ---
   # SPDX identifier of the content's license. Set on schema notes whose
   # `upstream` lives outside this repo, and on research notes that vendor a
@@ -361,6 +367,14 @@ allOf:
       required: [type]
     then:
       required: [name, title]
+
+  # prompt requires title + raw prompt sidecar
+  - if:
+      properties:
+        type: { const: prompt }
+      required: [type]
+    then:
+      required: [title, prompt_file]
 
 # Strict mode: unknown fields are rejected to catch typos and schema drift.
 additionalProperties: false

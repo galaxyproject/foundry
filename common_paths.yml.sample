@@ -41,6 +41,12 @@ galaxy:
   repo: galaxyproject/galaxy
   ref: dev
 
+# Temporary source for Galaxy prompt work before the upstream branch merges.
+galaxy_dannon:
+  path: ~/projects/repositories/dannon-galaxy
+  repo: dannon/galaxy
+  ref: 69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e
+
 tools_iuc:
   path: ~/projects/repositories/tools-iuc
   repo: galaxyproject/tools-iuc
