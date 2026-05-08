@@ -4,13 +4,13 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 11,
-    "content_hash": "b07458e2f5fc3dda1e189659e67d7116131c6e9870f9cc225cfcef39d49b003a",
+    "revision": 12,
+    "content_hash": "a7bf4935f4b886e3488fc6d1be3d1f2a8850ee2507b192216f086688ad4a407d",
     "commit": "9fd80031b01aadd1e6e1b109b726643407edbe5f"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-08T14:09:46.897Z",
+  "cast_at": "2026-05-08T14:47:51.905Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -182,7 +182,7 @@
         "kind": "json",
         "default_filename": "summary-nextflow.json",
         "schema": "[[summary-nextflow]]",
-        "description": "Structured summary of a Nextflow pipeline: processes, channels, params, containers, tools, test fixtures, nf-tests."
+        "description": "A structured JSON summary of a Nextflow pipeline, including its interface, processes, data flow, software environment, and test fixtures."
       }
     ],
     "consumes": []

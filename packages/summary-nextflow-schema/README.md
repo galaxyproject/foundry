@@ -28,7 +28,7 @@ if (!result.valid) {
 ## CLI
 
 ```sh
-npx @galaxy-foundry/summary-nextflow-schema validate-summary-nextflow path/to/summary.json
+npx --package @galaxy-foundry/summary-nextflow-schema validate-summary-nextflow path/to/summary.json
 ```
 
 Exit codes: `0` valid, `3` schema-validation failure, `1` input error.

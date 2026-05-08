@@ -860,30 +860,60 @@ function escapeFrontmatterString(text: string): string {
   return text.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, " ");
 }
 
-function artifactRows(artifacts: ProvenanceArtifactOutput[] | ProvenanceArtifactInput[]): string[] {
+function sentence(text: string): string {
+  const cleaned = stripWikiLinks(text).trim().replace(/[.]+$/, "");
+  return cleaned ? `${cleaned}.` : "";
+}
+
+function lowerFirst(text: string): string {
+  return text ? text[0]!.toLowerCase() + text.slice(1) : text;
+}
+
+function triggerSentence(text: string): string {
+  const cleaned = stripWikiLinks(text)
+    .trim()
+    .replace(/[.]+$/, "")
+    .replace(/^when\s+/i, "");
+  return cleaned ? `Use when: ${lowerFirst(cleaned)}.` : "";
+}
+
+function refKindLabel(ref: ProvenanceRefEntry): string {
+  if (ref.kind === "schema") return "Schema file";
+  if (ref.kind === "research") return "Research note";
+  if (ref.kind === "pattern") return "Pattern note";
+  if (ref.kind === "cli-command") return "CLI command reference";
+  return `${ref.kind} reference`;
+}
+
+function artifactRows(
+  artifacts: ProvenanceArtifactOutput[] | ProvenanceArtifactInput[],
+  direction: "input" | "output",
+): string[] {
   return artifacts.map((a) => {
-    const parts = [`- \`${a.id}\``];
-    if ("kind" in a && a.kind) parts.push(`kind: \`${a.kind}\``);
-    if ("default_filename" in a && a.default_filename) {
-      parts.push(`default filename: \`${a.default_filename}\``);
-    }
+    const filename =
+      "default_filename" in a && a.default_filename ? `\`${a.default_filename}\`` : undefined;
+    const action = direction === "output" ? "Write" : "Read";
+    const parts = [`- ${action} artifact \`${a.id}\`${filename ? ` as ${filename}` : ""}.`];
+    if ("kind" in a && a.kind) parts.push(`Format: \`${a.kind}\`.`);
     const schema =
       "schema" in a ? a.schema : "inherited_schema" in a ? a.inherited_schema : undefined;
-    if (schema) parts.push(`schema: ${stripWikiLinks(schema)}`);
+    if (schema) parts.push(`Schema: ${stripWikiLinks(schema)}.`);
     if ("producers" in a && a.producers?.length) {
-      parts.push(`producer(s): ${a.producers.map((p) => `\`${p}\``).join(", ")}`);
+      parts.push(`Produced by ${a.producers.map((p) => `\`${p}\``).join(", ")}.`);
     }
-    if (a.description) parts.push(stripWikiLinks(a.description).replace(/[.]+$/, ""));
-    return `${parts.join("; ")}.`;
+    if (a.description) parts.push(sentence(a.description));
+    return parts.join(" ");
   });
 }
 
 function refRows(refs: ProvenanceRefEntry[]): string[] {
   return refs.map((r) => {
-    const details = [`- \`${r.dst}\``, `kind: \`${r.kind}\``, `mode: \`${r.mode}\``];
-    if (r.purpose) details.push(stripWikiLinks(r.purpose).replace(/[.]+$/, ""));
-    if (r.trigger) details.push(`Trigger: ${stripWikiLinks(r.trigger).replace(/[.]+$/, "")}`);
-    return details.join("; ") + ".";
+    const packaging =
+      r.mode === "sidecar" ? "packaged as a sidecar" : "copied verbatim into the bundle";
+    const details = [`- \`${r.dst}\`: ${refKindLabel(r)} ${packaging}.`];
+    if (r.purpose) details.push(sentence(r.purpose));
+    if (r.trigger) details.push(triggerSentence(r.trigger));
+    return details.join(" ");
   });
 }
 
@@ -898,14 +928,15 @@ function schemaValidationRows(
     const target = resolveWikiLink(output.schema, slugMap);
     const meta = target ? metaByPath.get(target) : undefined;
     const validator = scalar(meta?.validator_bin);
+    const packageName = scalar(meta?.package);
     const schemaName = stripWikiLinks(output.schema);
     const file = output.default_filename
       ? `\`${output.default_filename}\``
       : "the emitted artifact";
     rows.push(
       validator
-        ? `- Validate ${file} for \`${output.id}\` with \`${validator}\`; schema: ${schemaName}.`
-        : `- Validate ${file} for \`${output.id}\` against schema ${schemaName} when a validator is available.`,
+        ? `- Validate ${file} before returning it: run \`${validator} ${output.default_filename ?? "<artifact-path>"}\`${packageName ? ` from \`${packageName}\`` : ""}. ${packageName ? `If the command is not on PATH, run \`npx --package ${packageName} ${validator} ${output.default_filename ?? "<artifact-path>"}\`. ` : ""}This checks artifact \`${output.id}\` against the ${schemaName} schema.`
+        : `- Validate ${file} for artifact \`${output.id}\` against the ${schemaName} schema when a validator is available.`,
     );
   }
   return rows;
@@ -944,10 +975,10 @@ function renderSkillMarkdown(args: {
     renderSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
     renderSection(
       "Inputs",
-      artifactRows(consumes),
+      artifactRows(consumes, "input"),
       "- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.",
     ),
-    renderSection("Outputs", artifactRows(produces)),
+    renderSection("Outputs", artifactRows(produces, "output")),
     renderSection("Load Upfront", refRows(upfront)),
     renderSection("Load On Demand", refRows(onDemand)),
     renderSection("Validation", validationRows),
