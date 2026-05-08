@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-05
-revision: 4
+revision: 5
 ai_generated: true
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 input_artifacts:
@@ -17,10 +17,18 @@ input_artifacts:
     description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence."
 output_artifacts:
   - id: galaxy-test-plan
-    kind: markdown
-    default_filename: galaxy-test-plan.md
-    description: "Reviewable Galaxy workflow test plan: profile, fixture, snapshot, ignored-file, expected-output, rationale provenance."
+    kind: json
+    default_filename: galaxy-workflow-test-plan.json
+    schema: "[[galaxy-workflow-test-plan]]"
+    description: "Schema-valid Galaxy workflow test plan: profile, fixture, snapshot, ignored-file, expected-output, rationale provenance."
 references:
+  - kind: schema
+    ref: "[[galaxy-workflow-test-plan]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Emit a schema-valid Galaxy workflow test-plan handoff for implement-galaxy-workflow-test."
   - kind: schema
     ref: "[[summary-nextflow]]"
     used_at: runtime
@@ -78,9 +86,10 @@ references:
     purpose: "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests."
     trigger: "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks."
 related_notes:
+  - "[[galaxy-workflow-test-plan]]"
   - "[[summary-nextflow]]"
   - "[[tests-format]]"
 ---
 # nextflow-test-to-galaxy-test-plan
 
-Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a reviewable handoff, not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact with the right labels and assertions.
+Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a schema-valid [[galaxy-workflow-test-plan]] handoff, not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact with the right labels and assertions.

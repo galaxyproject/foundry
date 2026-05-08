@@ -8,10 +8,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 5
+revised: 2026-05-08
+revision: 6
 ai_generated: true
 related_notes:
+  - "[[galaxy-workflow-test-plan]]"
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
@@ -20,7 +21,7 @@ related_notes:
 summary: "Assemble Galaxy workflow test fixtures and assertions."
 input_artifacts:
   - id: galaxy-test-plan
-    description: "Reviewable Galaxy test plan from a *-test-to-galaxy-test-plan Mold; profile, fixtures, snapshot/assertion provenance."
+    description: "Schema-valid [[galaxy-workflow-test-plan]] from a *-test-to-galaxy-test-plan Mold; profile, fixtures, snapshot/assertion provenance."
   - id: galaxy-workflow-draft
     description: "gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against."
   - id: test-data-refs
@@ -31,6 +32,13 @@ output_artifacts:
     default_filename: galaxy-workflow-tests.yml
     description: "Galaxy workflow test file (tests-format) with job inputs, expected outputs, assertions; passes static schema + label cross-check."
 references:
+  - kind: schema
+    ref: "[[galaxy-workflow-test-plan]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate and consume the intermediate Galaxy workflow test-plan handoff before writing tests-format YAML."
   - kind: cli-command
     ref: "[[validate-tests]]"
     used_at: runtime
@@ -90,5 +98,7 @@ references:
 # implement-galaxy-workflow-test
 
 Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+- **`validate-galaxy-workflow-test-plan <plan.json>`** — first gate for translated test plans; input must validate before authoring final `tests-format` YAML.
+- **`tests-format` conversion boundary** — consume [[galaxy-workflow-test-plan]] fields for job inputs, expected outputs, assertion intent, tolerances, omissions, unresolved mappings, and workflow-label assumptions; emit only the final Galaxy workflow test YAML that validates against [[tests-format]].
 - **`planemo workflow_test_init --from_invocation <id>`** — preferred bootstrap for new test files; reviewer convention. See [[planemo-asserts-idioms]] §7.
 - **`planemo workflow_test_on_invocation <tests.yml> <id>`** — fast assertion-iteration loop without re-running the workflow.

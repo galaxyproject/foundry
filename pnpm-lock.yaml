@@ -30,6 +30,9 @@ importers:
       '@galaxy-foundry/galaxy-tool-discovery-schema':
         specifier: workspace:*
         version: link:packages/galaxy-tool-discovery-schema
+      '@galaxy-foundry/galaxy-workflow-test-plan-schema':
+        specifier: workspace:*
+        version: link:packages/galaxy-workflow-test-plan-schema
       '@galaxy-foundry/summary-nextflow-schema':
         specifier: workspace:*
         version: link:packages/summary-nextflow-schema
@@ -122,6 +125,25 @@ importers:
       '@galaxy-tool-util/schema':
         specifier: ^1.2.0
         version: 1.2.0
+      ajv:
+        specifier: ^8.17.1
+        version: 8.20.0
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.20.0)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.17
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.17)
+
+  packages/galaxy-workflow-test-plan-schema:
+    dependencies:
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
