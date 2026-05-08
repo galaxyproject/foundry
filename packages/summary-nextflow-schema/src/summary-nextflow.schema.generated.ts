@@ -716,13 +716,16 @@ export const summaryNextflowSchema = {
     },
     "Channel": {
       "title": "Channel",
-      "description": "One top-level channel constructed in the workflow. Sources include `Channel.fromPath`, `Channel.fromFilePairs`, `Channel.fromSamplesheet`, and `params.*`.",
+      "description": "One top-level channel constructed in the workflow. Sources include `Channel.fromPath`, `Channel.fromFilePairs`, `samplesheetToList`-driven `Channel.fromList`, `splitCsv`, `file`/`files`, and plain `params.*` references.",
       "type": "object",
       "additionalProperties": false,
       "required": [
         "name",
         "source",
-        "shape"
+        "shape",
+        "construct",
+        "from_param",
+        "required_runtime"
       ],
       "properties": {
         "name": {
@@ -735,6 +738,35 @@ export const summaryNextflowSchema = {
         "shape": {
           "type": "string",
           "description": "String-encoded channel shape; same convention as ChannelIO."
+        },
+        "construct": {
+          "type": "string",
+          "enum": [
+            "fromPath",
+            "fromFilePairs",
+            "fromList",
+            "samplesheetToList",
+            "splitCsv",
+            "file",
+            "files",
+            "of",
+            "value",
+            "empty",
+            "topic",
+            "other"
+          ],
+          "description": "Classifies the channel's primary materialization factory or shape-determining operator. Selection precedence: (1) `samplesheetToList` when the chain contains `samplesheetToList(...)` (typically wrapped in `Channel.fromList`); (2) `splitCsv` when the chain ends in `.splitCsv(header: true)` over a path; (3) otherwise the outermost factory (`Channel.fromPath` → `fromPath`, `Channel.fromFilePairs` → `fromFilePairs`, `file(...)` → `file`, etc.); (4) `other` for unrecognized constructions. The verbatim `source` retains the full chain — `construct` is the typed lookup the converter would otherwise re-parse."
+        },
+        "from_param": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Foreign key into `params[].name` when the construction expression directly references `params.X` (e.g. `Channel.fromPath(params.reads)`, `samplesheetToList(params.input, ...)`, `file(params.fasta)`). Null for literal-glob construction, expressions that compose multiple params, and channels derived from other channels. v1 resolution is direct-only; one-hop Groovy bindings (`def reads = params.reads; Channel.fromPath(reads)`) are not chased — see jmchilton/foundry#211."
+        },
+        "required_runtime": {
+          "type": "boolean",
+          "description": "True when the construction chain ends in `.ifEmpty { error ... }` (or an equivalent imperative emptiness-throw guard). Captures runtime requiredness even when the param's nf-schema entry does not mark it required. Combine with `params[].required` and any imperative pre-construction `error` checks for the full requiredness picture."
         }
       }
     },

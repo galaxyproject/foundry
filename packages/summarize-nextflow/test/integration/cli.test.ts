@@ -387,7 +387,14 @@ workflow SYNTHETIC {
     };
     expect(data.workflow.name).toBe("SYNTHETIC");
     expect(data.workflow.channels).toEqual([
-      { name: "ch_extra", source: "Channel.empty()", shape: "channel" },
+      {
+        name: "ch_extra",
+        source: "Channel.empty()",
+        shape: "channel",
+        construct: "empty",
+        from_param: null,
+        required_runtime: false,
+      },
     ]);
     expect(data.workflow.edges).toEqual([{ from: "ch_reads", to: "PREP_READS", via: [] }]);
     const prep = data.subworkflows.find((workflow) => workflow.name === "PREP_READS");
@@ -517,13 +524,33 @@ workflow SYNTHETIC {
           source:
             "ch_reads.filter { meta, reads -> meta.keep }.map { meta, reads -> tuple(meta, reads) }",
           shape: "filter|map",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
         },
-        { name: "ch_joined", source: "ch_filtered.join(ch_reference)", shape: "join" },
-        { name: "ch_mixed", source: "ch_joined.mix(ch_extra)", shape: "mix" },
+        {
+          name: "ch_joined",
+          source: "ch_filtered.join(ch_reference)",
+          shape: "join",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
+        },
+        {
+          name: "ch_mixed",
+          source: "ch_joined.mix(ch_extra)",
+          shape: "mix",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
+        },
         {
           name: "ch_branched",
           source: "ch_mixed.branch { meta, reads -> pass: true }",
           shape: "branch",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
         },
       ]),
     );

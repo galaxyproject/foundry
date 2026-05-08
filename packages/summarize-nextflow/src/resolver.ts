@@ -55,10 +55,27 @@ interface ParsedWorkflow extends Subworkflow {
   body: string;
 }
 
+type ChannelConstruct =
+  | "fromPath"
+  | "fromFilePairs"
+  | "fromList"
+  | "samplesheetToList"
+  | "splitCsv"
+  | "file"
+  | "files"
+  | "of"
+  | "value"
+  | "empty"
+  | "topic"
+  | "other";
+
 interface Channel {
   name: string;
   source: string;
   shape: string;
+  construct: ChannelConstruct;
+  from_param: string | null;
+  required_runtime: boolean;
 }
 
 interface Edge {
@@ -868,11 +885,49 @@ function extractSetChains(body: string): { name: string; source: string }[] {
 
 function channelFromSource(name: string, source: string): Channel {
   const operators = parseOperators(source);
+  const construct = classifyChannelConstruct(source);
   return {
     name,
     source,
     shape: operators.length > 0 ? operators.join("|") : "channel",
+    construct,
+    from_param: resolveDirectFromParam(source, construct),
+    required_runtime: detectIfEmptyError(source),
   };
+}
+
+function classifyChannelConstruct(source: string): ChannelConstruct {
+  if (/\bsamplesheetToList\s*\(/u.test(source)) return "samplesheetToList";
+  if (/\bsplitCsv\s*\(/u.test(source)) return "splitCsv";
+  if (/\b[Cc]hannel\.fromPath\b/u.test(source)) return "fromPath";
+  if (/\b[Cc]hannel\.fromFilePairs\b/u.test(source)) return "fromFilePairs";
+  if (/\b[Cc]hannel\.fromList\b/u.test(source)) return "fromList";
+  if (/\b[Cc]hannel\.empty\b/u.test(source)) return "empty";
+  if (/\b[Cc]hannel\.of\b/u.test(source)) return "of";
+  if (/\b[Cc]hannel\.value\b/u.test(source)) return "value";
+  if (/\b[Cc]hannel\.topic\b/u.test(source)) return "topic";
+  if (/^\s*file\s*\(/u.test(source)) return "file";
+  if (/^\s*files\s*\(/u.test(source)) return "files";
+  return "other";
+}
+
+const DATA_BEARING_CONSTRUCTS = new Set<ChannelConstruct>([
+  "fromPath",
+  "fromFilePairs",
+  "fromList",
+  "samplesheetToList",
+  "file",
+  "files",
+]);
+
+function resolveDirectFromParam(source: string, construct: ChannelConstruct): string | null {
+  if (!DATA_BEARING_CONSTRUCTS.has(construct)) return null;
+  const match = /\bparams\.([A-Za-z_][A-Za-z_0-9]*)/u.exec(source);
+  return match ? match[1]! : null;
+}
+
+function detectIfEmptyError(source: string): boolean {
+  return /\.ifEmpty\s*\{[^{}]*\berror\b/u.test(source);
 }
 
 function parseOperators(source: string): string[] {
