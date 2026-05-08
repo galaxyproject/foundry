@@ -13,23 +13,24 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- `summary-nextflow`; schema: summary-nextflow; producer(s): `summarize-nextflow`; Structured Nextflow pipeline summary emitted by summarize-nextflow; the source-of-truth JSON for interface choices.
+- Read artifact `summary-nextflow`. Schema: summary-nextflow. Produced by `summarize-nextflow`. Structured Nextflow pipeline summary emitted by summarize-nextflow; the source-of-truth JSON for interface choices.
 
 ## Outputs
 
-- `nextflow-galaxy-interface`; kind: `markdown`; default filename: `nextflow-galaxy-interface.md`; Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance.
+- Write artifact `nextflow-galaxy-interface` as `nextflow-galaxy-interface.md`. Format: `markdown`. Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance.
 
 ## Load Upfront
 
-- `references/notes/nextflow-params-to-galaxy-inputs.md`; kind: `research`; mode: `verbatim`; Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs.
-- `references/notes/nextflow-path-glob-to-galaxy-datatype.md`; kind: `research`; mode: `verbatim`; Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs.
-- `references/notes/nextflow-to-galaxy-channel-shape-mapping.md`; kind: `research`; mode: `verbatim`; Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes.
-- `references/schemas/summary-nextflow.schema.json`; kind: `schema`; mode: `verbatim`; Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.
+- `references/notes/nextflow-params-to-galaxy-inputs.md`: Research note copied verbatim into the bundle. Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs.
+- `references/notes/nextflow-path-glob-to-galaxy-datatype.md`: Research note copied verbatim into the bundle. Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs.
+- `references/notes/nextflow-to-galaxy-channel-shape-mapping.md`: Research note copied verbatim into the bundle. Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes.
+- `references/schemas/summary-nextflow.schema.json`: Schema file copied verbatim into the bundle. Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.
 
 ## Load On Demand
 
-- `references/notes/galaxy-sample-sheet-collections.md`; kind: `research`; mode: `verbatim`; Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs; Trigger: When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.
-- `references/notes/galaxy-workflow-testability-design.md`; kind: `research`; mode: `verbatim`; Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address; Trigger: When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.
+- `references/notes/galaxy-sample-sheet-collections.md`: Research note copied verbatim into the bundle. Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs. Use when: the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.
+- `references/notes/galaxy-workflow-testability-design.md`: Research note copied verbatim into the bundle. Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address. Use when: deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.
+- `references/notes/nextflow-to-galaxy-reference-data-mapping.md`: Research note copied verbatim into the bundle. Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence. Use when: the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source.
 
 ## Validation
 

@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-interface",
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 2,
-    "content_hash": "08bce8071a41fb3101e7660f64c1cf26b9a1323a0fc1b77e29512af5a0ae7114",
-    "commit": "30c3ef064eb4217a5efecd0d55ab545629ea00dc"
+    "content_hash": "e067329c9b7cfba33c3ffb7e8ae1acd352117be483a16b0d2769eddeb5bd118b",
+    "commit": "2fcd66258b73bfcad4acaf26ae5b3150212c1d78"
   },
-  "cast_at": "2026-05-07T15:51:42.679Z",
+  "cast_at": "2026-05-08T20:59:42.933Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -102,6 +102,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-to-galaxy-reference-data-mapping]]",
+      "src": "content/research/nextflow-to-galaxy-reference-data-mapping.md",
+      "dst": "references/notes/nextflow-to-galaxy-reference-data-mapping.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence.",
+      "trigger": "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source.",
+      "src_hash": "4aa8e03247d773230bb9066f8e139450e0b29a863e5912f95c4cffdfeeef6cff",
+      "dst_hash": "4aa8e03247d773230bb9066f8e139450e0b29a863e5912f95c4cffdfeeef6cff",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
@@ -111,8 +126,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.",
-      "src_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
-      "dst_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
+      "src_hash": "72cd739c2647896473f41fdf149433dda10d7732fd2036b320c1c0dea2437a86",
+      "dst_hash": "72cd739c2647896473f41fdf149433dda10d7732fd2036b320c1c0dea2437a86",
       "source": "deterministic"
     }
   ],
