@@ -213,7 +213,7 @@ cast_mold(mold_name, target):
       schema       -> copy verbatim to references/schemas/<source-basename>
       research     -> copy verbatim or condense per mode
                       write to references/notes/<source-basename>
-      prompt       -> reject until first prompt ref establishes target convention
+      prompt       -> copy wrapper `prompt_file` sidecar verbatim to references/prompts/<slug>.md
       example      -> reject until first example ref establishes target convention
       eval         -> skip (never packaged)
 

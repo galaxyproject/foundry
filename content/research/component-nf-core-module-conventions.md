@@ -31,7 +31,7 @@ related_notes:
 Structured digest of the nf-core module specification — the conventions a module **MUST** or **SHOULD** follow to pass `nf-core modules lint`. Operational grounding for two Molds:
 
 - [[summarize-nextflow]] — when extracting tools/containers/IO from a real nf-core module, the conventions tell the cast skill what to *expect* and what to *flag as drift*.
-- [[author-galaxy-tool-wrapper]] — when translating an nf-core module into a Galaxy `<tool>` wrapper, the conventions are the contract the source-side has already enforced (versions are emitted, args go through `task.ext.args`, containers carry both branches, etc.).
+- [[author-galaxy-tool-wrapper]] — when translating an nf-core module into a Galaxy UDT, the conventions are the contract the source-side has already enforced (versions are emitted, args go through `task.ext.args`, containers carry both branches, etc.).
 
 Companion structured form: `component-nf-core-module-conventions.yml`. Per-rule entries with `id`, `level`, `description`, `lint_check`, `evidence`, `affects`. Cast skill consumes the YAML for confidence-checking and warning suppression.
 
