@@ -234,7 +234,7 @@ Walk per-process `container` and `conda` directives. **Container directives are 
 
 **Conda directives are usually file references** to `${moduleDir}/environment.yml`; read the file and extract its `dependencies:` list. Each `bioconda::<name>=<version>` entry becomes a `tools[]` entry with `tools[].bioconda` set to the original dependency string. Multi-tool environments are common (`minimap2` + `samtools` + `htslib`, `racon` + `multiqc`); keep every Bioconda dependency rather than selecting the first. Legacy literal-string directives (`conda "bioconda::<name>=<version>"`) feed the same field.
 
-Tool name and version are typically derivable from any of the resolved fields. Deduplicate by `(name, version)` across processes; one entry per tool. `processes[].tool` is a foreign key into `tools[].name`. This block is the bridge to author-galaxy-tool-wrapper — it consumes container/conda info to translate into Galaxy `<requirements>`.
+Tool name and version are typically derivable from any of the resolved fields. Deduplicate by `(name, version)` across processes; one entry per tool. `processes[].tool` is a foreign key into `tools[].name`. This block is the bridge to author-galaxy-tool-wrapper — it consumes container/conda info to choose or justify the UDT container.
 
 #### 6. Reconcile the workflow DAG
 

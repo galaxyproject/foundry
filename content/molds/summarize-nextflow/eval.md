@@ -162,22 +162,22 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
   consults that proves underspecified gets logged in `content/log.md`
   under `gap:` and triggers an Open-gaps note update.
 
-## Case: tool-wrapper Mold can resolve every tools row
+## Case: tool-authoring Mold can resolve every tools row
 
 - bucket: utility
 - check: llm-judged
 - fixture: same JSON.
-- expectation: `author-galaxy-tool-wrapper` can produce a Galaxy
-  `<requirements>` block for every `tools[]` row; rows that don't yield
-  a wrapper-shaped requirement are surfaced as evaluation gaps, not
+- expectation: `author-galaxy-tool-wrapper` can produce UDT container or
+  package-evidence decisions for every `tools[]` row; rows that don't yield
+  a UDT-safe container are surfaced as evaluation gaps, not
   silently dropped.
 
-## Case: tool-wrapper Mold can consume one process row standalone
+## Case: tool-authoring Mold can consume one process row standalone
 
 - bucket: utility
 - check: llm-judged
 - fixture: `processes[]` row for `MINIMAP2_ALIGN` from a bacass summary.
-- expectation: `author-galaxy-tool-wrapper` produces a Galaxy tool wrapper
+- expectation: `author-galaxy-tool-wrapper` produces a Galaxy UDT
   using only that process object (`meta`, `module_tests`, `container`,
   `conda`, declared IO); it does not consult summary-level `tools[]`,
   `workflow`, or `params`. Missing fields become logged gaps rather than

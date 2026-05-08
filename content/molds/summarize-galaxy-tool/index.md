@@ -14,7 +14,7 @@ ai_generated: true
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
 input_artifacts:
   - id: galaxy-tool-pin
-    description: "Pin from [[discover-shed-tool]] or [[author-galaxy-tool-wrapper]]; identifies which cached ParsedTool to summarize."
+    description: "Pin from [[discover-shed-tool]]; identifies which cached ParsedTool to summarize. Authored UDTs from [[author-galaxy-tool-wrapper]] bypass this Mold."
 output_artifacts:
   - id: galaxy-tool-summary
     kind: json
@@ -106,7 +106,7 @@ Keep both forms when they differ:
 
 Read `<requirements>` into structured package/container requirements. Preserve requirement `type`, `name`, `version`, and any container URI or resolver hints exposed by the cache.
 
-Do not invent Bioconda equivalences here. Equivalence inference belongs to [[author-galaxy-tool-wrapper]] when authoring a new XML wrapper. Existing wrapper summaries report what the wrapper declares.
+Do not invent Bioconda equivalences here. Equivalence inference belongs to [[author-galaxy-tool-wrapper]] when authoring a new UDT. Existing wrapper summaries report what the wrapper declares.
 
 ### 4. Summarize command and failure behavior
 

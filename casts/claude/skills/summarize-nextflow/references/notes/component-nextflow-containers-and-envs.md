@@ -242,53 +242,43 @@ These are not warnings to log; they are forms the bucketing rules above must con
 - **Multi-tool processes.** A single process running multiple binaries (e.g. `dragmap | samtools`) backed by a mulled-v2 container. The Mold notes `Process.tool` is nullable for these — populate by linking to the `tools[]` mulled entry, not by splitting one process across multiple `tools[]` entries.
 - **Mixed BioContainer + Wave in one pipeline.** Common in 2025 nf-core: fastqc still ships a quay BioContainer, multiqc has migrated to Wave. Both forms appear in the same pipeline's `tools[]`. No special handling required if URL-prefix bucketing is used.
 
-## Galaxy translation (handoff to `[[author-galaxy-tool-wrapper]]`)
+## Galaxy UDT translation (handoff to `[[author-galaxy-tool-wrapper]]`)
 
-The `tools[]` block this Mold produces is the input contract for Galaxy `<requirements>` translation. The mapping is:
+The `tools[]` block this Mold produces is the input contract for Galaxy user-defined tool dependency and container selection. The mapping is:
 
-- `tools[].bioconda` (`bioconda::<name>=<version>`) → `<requirement type="package" version="<version>">name</requirement>`. Galaxy resolves this through the same Bioconda → BioContainers chain documented above.
-- `tools[].biocontainer` / `tools[].singularity` → cross-validation that the Bioconda requirement resolves to a real BioContainer image. If `tools[].bioconda` is absent (Wave-only modules), the cast skill cannot emit a clean `<requirement>` and must fall back to the `environment.yml` deps.
-- `tools[].wave` alone → no Galaxy round-trip. The wrapper authoring Mold must surface this as an unresolved tool.
-- `tools[].docker` alone → no Galaxy round-trip; emit as a tool that requires a Galaxy `<container>` directive rather than `<requirement>`.
+- `tools[].bioconda` (`bioconda::<name>=<version>`) → package evidence for selecting a matching BioContainers image when available.
+- `tools[].biocontainer` / `tools[].singularity` → direct container evidence for the UDT `container` field when the registry, image, and tag are stable.
+- `tools[].wave` alone → no Galaxy round-trip. The UDT authoring Mold must surface this as an unresolved tool.
+- `tools[].docker` alone → direct container evidence only when the image is fully qualified and versioned; otherwise require review.
 
 The `[[author-galaxy-tool-wrapper]]` Mold owns this translation; this note documents the contract on the producer side.
 
-The safest default for newly authored Galaxy wrappers is:
+The safest default for newly authored Galaxy UDTs is a stable, fully qualified container image when one is directly evidenced:
 
-```xml
-<requirements>
-    <requirement type="package" version="0.12.1">fastp</requirement>
-</requirements>
+```yaml
+container: quay.io/biocontainers/fastp:0.12.1--h5e1937b_0
 ```
 
-Use an explicit container only when preserving the exact image matters:
-
-```xml
-<requirements>
-    <container type="docker">quay.io/biocontainers/fastp:0.12.1--h5e1937b_0</container>
-</requirements>
-```
-
-Galaxy treats package requirements as abstract dependencies that Conda, environment modules, or other resolvers can satisfy. Galaxy also has mulled container resolvers that derive BioContainers images from package requirements. An explicit `<container>` is narrower: it points Galaxy at one image and bypasses the package-to-container abstraction.
+If only package evidence exists, the UDT author should record uncertainty rather than inventing an image tag. Galaxy XML package-requirement translation is out of scope for the UDT authoring Mold.
 
 ## Evidence Classes
 
 ### Directly Emittable
 
-Emit Galaxy package requirements directly when evidence is one of:
+Treat package evidence as directly usable for container search or review when evidence is one of:
 
 - Nextflow `conda` directive with `bioconda::name=version`, `conda-forge::name=version`, or unqualified `name=version` for a known conda package.
 - `environment.yml` dependency entries with exact package pins from Bioconda or conda-forge.
 - nf-core module `environment.yml` with one primary tool package and exact version.
 - Existing Galaxy wrapper requirements from `[[summarize-galaxy-tool]]`; these should be reported as wrapper facts, not remapped.
 
-Emit explicit Galaxy container requirements directly when evidence is one of:
+Emit explicit UDT container values directly when evidence is one of:
 
 - Fully qualified Docker/OCI image with immutable or versioned tag, for example `quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0`.
 - `docker://quay.io/biocontainers/...` or `docker://docker.io/...` where the registry, image, and tag are present.
 - Singularity/Apptainer `docker://...` URI that points back to a Docker-compatible registry and tag.
 
-Preserve evidence in summaries even when not emitting it into authored XML. `summarize-nextflow` should keep the raw directive, resolved image, package list, source file, and confidence so `author-galaxy-tool-wrapper` can decide.
+Preserve evidence in summaries even when not emitting it into authored UDT YAML. `summarize-nextflow` should keep the raw directive, resolved image, package list, source file, and confidence so `author-galaxy-tool-wrapper` can decide.
 
 ### Review Required
 
@@ -344,15 +334,9 @@ dependencies:
   - fastqc=0.12.1
 ```
 
-Galaxy:
+Galaxy UDT:
 
-```xml
-<requirements>
-    <requirement type="package" version="0.12.1">fastqc</requirement>
-</requirements>
-```
-
-If the file includes interpreter/runtime libraries plus one command-line tool, emit the command-line tool and keep the supporting libraries as evidence. If the script imports Python/R libraries directly or runs package-provided scripts, emit those packages too.
+Use the package pin as evidence for choosing a stable BioContainers image or for review when no image is directly evidenced. If the file includes interpreter/runtime libraries plus one command-line tool, prioritize the command-line tool and keep supporting libraries as evidence. If the script imports Python/R libraries directly or runs package-provided scripts, preserve those packages in the review notes too.
 
 ### BioContainers URI
 
@@ -362,20 +346,10 @@ Nextflow:
 container 'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0'
 ```
 
-Galaxy package-first form:
+Galaxy UDT:
 
-```xml
-<requirements>
-    <requirement type="package" version="0.12.1">fastqc</requirement>
-</requirements>
-```
-
-Galaxy exact-container form:
-
-```xml
-<requirements>
-    <container type="docker">quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0</container>
-</requirements>
+```yaml
+container: quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0
 ```
 
 For `quay.io/biocontainers/<name>:<version>--<build>`, the package name is normally `<name>` and the package version is the tag prefix before `--`. This is strong evidence, but still verify against command usage when the image name is generic, multi-tool, or not the executable invoked by the process.
@@ -388,7 +362,7 @@ Nextflow:
 container 'biocontainers/fastqc:v0.11.9_cv8'
 ```
 
-Do not emit this directly as a Galaxy package requirement without review. Docker Hub BioContainers tags have historical naming conventions and may not map one-to-one to current Bioconda package pins. Prefer resolving to a current `quay.io/biocontainers/...` image or a Bioconda package pin before authoring XML.
+Do not emit this directly as a UDT container without review. Docker Hub BioContainers tags have historical naming conventions and may not map one-to-one to current Bioconda package pins. Prefer resolving to a current `quay.io/biocontainers/...` image or a Bioconda package pin before authoring UDT YAML.
 
 ### Singularity and Apptainer URIs
 
@@ -398,29 +372,19 @@ Nextflow:
 container 'docker://quay.io/biocontainers/multiqc:1.21--pyhdfd78af_0'
 ```
 
-Galaxy can express this as Docker or Singularity depending on the target runtime:
+Galaxy UDTs should use the Docker-compatible image reference when the target Galaxy runtime can pull it:
 
-```xml
-<requirements>
-    <container type="docker">quay.io/biocontainers/multiqc:1.21--pyhdfd78af_0</container>
-</requirements>
+```yaml
+container: quay.io/biocontainers/multiqc:1.21--pyhdfd78af_0
 ```
 
-or:
-
-```xml
-<requirements>
-    <container type="singularity">docker://quay.io/biocontainers/multiqc:1.21--pyhdfd78af_0</container>
-</requirements>
-```
-
-For authored wrappers, prefer package requirements unless the source specifically depends on Singularity behavior or an administrator has requested explicit Singularity images. Local `.sif` paths and site cache paths are not portable Galaxy wrapper requirements.
+For authored UDTs, prefer a stable pullable container when directly evidenced. Local `.sif` paths and site cache paths are not portable Galaxy UDT containers.
 
 ### Wave Images
 
 Wave can build or resolve images from process dependencies and can emit stable-looking image URIs. Treat a Wave URI as runtime evidence, not package-authoring evidence, unless accompanying metadata exposes the Conda packages or Dockerfile ingredients used to build the image.
 
-Direct use of a Wave image as `<container>` is acceptable only when exact runtime preservation matters and the image is externally pullable by the target Galaxy execution environment. Otherwise, ask for review and try to recover package requirements from the process `conda` directive, nf-core module `environment.yml`, or command invocation.
+Direct use of a Wave image as a UDT `container` is acceptable only when exact runtime preservation matters and the image is externally pullable by the target Galaxy execution environment. Otherwise, ask for review and try to recover package or BioContainers evidence from the process `conda` directive, nf-core module `environment.yml`, or command invocation.
 
 ### Existing Galaxy Wrapper Summaries
 
@@ -430,13 +394,13 @@ Direct use of a Wave image as `<container>` is acceptable only when exact runtim
 - Keep `<container>` entries as container facts.
 - Warn if the wrapper has only an explicit container and no package requirements, because downstream tooling may be less portable.
 
-Equivalence inference belongs to `[[author-galaxy-tool-wrapper]]`, where the Foundry is authoring new XML from source-process evidence.
+Equivalence inference belongs to `[[author-galaxy-tool-wrapper]]`, where the Foundry is authoring new UDT YAML from source-process evidence.
 
 ## Reliability Ladder
 
 Highest confidence:
 
-- Existing Galaxy XML requirements from a selected wrapper.
+- Existing Galaxy XML requirements from a selected wrapper, when available only as comparison evidence.
 - Pinned Bioconda/conda-forge package requirements in `conda` or `environment.yml`.
 - `quay.io/biocontainers/<package>:<version>--<build>` images whose package name matches the invoked command.
 
@@ -462,16 +426,16 @@ When summarizing Nextflow evidence, preserve:
 - Parsed conda packages with name, version, channel, and source file.
 - Confidence and review reason.
 
-When authoring Galaxy XML, emit:
+When authoring Galaxy UDT YAML, emit:
 
-- Package requirements for reliable conda package evidence.
-- Explicit container requirements only for exact stable images or non-conda runtimes.
+- Stable container values for exact, pullable, directly evidenced images.
+- Package evidence as review context when no stable container is directly evidenced.
 - A warning when dependency evidence is absent, floating, local, or inconsistent with command usage.
 
 Do not emit:
 
 - `latest` or unpinned package/container versions as if they were reproducible.
-- Local filesystem image paths into portable wrappers.
+- Local filesystem image paths into portable UDTs.
 - Transitive library packages unless the process directly invokes or imports them.
 - Package names guessed only from executable names without registry evidence.
 

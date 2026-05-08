@@ -12,7 +12,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Molds
 
-- [[author-galaxy-tool-wrapper]] — Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable.
+- [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable.
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
 - [[cwl-summary-to-galaxy-data-flow]] — Translate a CWL summary into a Galaxy data-flow design brief.
 - [[cwl-summary-to-galaxy-interface]] — Map a CWL summary into a Galaxy workflow interface design brief.
@@ -41,7 +41,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summarize-cwl]] — Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals.
 - [[summarize-cwl-tool]] — Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target.
 - [[summarize-galaxy-tool]] — Pull JSON schema, container, source, inputs/outputs for a Galaxy tool.
-- [[summarize-nextflow]] — Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to.
+- [[summarize-nextflow]] — Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds.
 - [[summarize-paper]] — Extract methods, tools, sample data, and references from a paper.
 - [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from source and design handoffs.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
@@ -167,3 +167,8 @@ Generated from content frontmatter. Do not edit by hand.
 - [[gxy-sketches-alignment]] — Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not.
 - [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
 - [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
+
+## Prompt
+
+- [[custom-tool-critic]] — Vendored Galaxy internal prompt for critiquing generated custom tool definitions.
+- [[custom-tool-structured]] — Vendored Galaxy internal prompt for generating structured custom tool definitions.

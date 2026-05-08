@@ -49,3 +49,13 @@
         && node packages/cli/dist/bin/gxwf.js structural-schema --format native \
              --output dist/structural-schemas/native-galaxy-workflow.schema.json
   framing: content/research/galaxy-native-workflow-schema.md
+
+- local: content/prompts/galaxy/custom-tool-critic.upstream.prompt
+  source: $GALAXY_DANNON/lib/galaxy/agents/prompts/custom_tool_critic.md
+  pinned_ref: 69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e
+  framing: content/prompts/galaxy/custom-tool-critic.md
+
+- local: content/prompts/galaxy/custom-tool-structured.upstream.prompt
+  source: $GALAXY_DANNON/lib/galaxy/agents/prompts/custom_tool_structured.md
+  pinned_ref: 69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e
+  framing: content/prompts/galaxy/custom-tool-structured.md

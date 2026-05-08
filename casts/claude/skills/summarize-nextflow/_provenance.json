@@ -5,14 +5,14 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 11,
-    "content_hash": "1c693a2013b67c7324508d19ad7b3023fc4b109b334bdc1dca9e4df9510b130e",
-    "commit": "30c3ef064eb4217a5efecd0d55ab545629ea00dc"
+    "content_hash": "b07458e2f5fc3dda1e189659e67d7116131c6e9870f9cc225cfcef39d49b003a",
+    "commit": "9fd80031b01aadd1e6e1b109b726643407edbe5f"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-07T15:51:42.716Z",
-  "cast_date": "2026-05-07",
-  "cast_revision": 10,
+  "cast_at": "2026-05-08T14:09:46.897Z",
+  "cast_date": "2026-05-08",
+  "cast_revision": 11,
   "cast_history": [
     {
       "rev": 1,
@@ -63,6 +63,11 @@
       "rev": 10,
       "date": "2026-05-07",
       "note": "runtime-facing deterministic skill render"
+    },
+    {
+      "rev": 11,
+      "date": "2026-05-08",
+      "note": "refresh UDT container guidance"
     }
   ],
   "refs": [
@@ -77,8 +82,8 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
       "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
-      "src_hash": "0db9a019da6ea6f05937c4bacf9da3bd43ec0bf8d909b874f3f789106098887a",
-      "dst_hash": "0db9a019da6ea6f05937c4bacf9da3bd43ec0bf8d909b874f3f789106098887a",
+      "src_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
+      "dst_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
       "source": "deterministic"
     },
     {

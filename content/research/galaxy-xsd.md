@@ -21,4 +21,4 @@ summary: "Vendored Galaxy tool XML schema for wrapper structure, parameters, out
 >
 > - `galaxy.xsd` — the structured source. **Agents and casting should consume this** when authoring or validating Galaxy tool wrapper XML, tool tests, output assertions, macros, inputs, outputs, help, citations, and configfile blocks. Sync is manual.
 >
-> **When to consult:** authoring `tool.xml` wrappers such as [[author-galaxy-tool-wrapper]], translating tool parameters into Galaxy XML, defining outputs or discovered datasets, writing wrapper tests, or choosing valid Galaxy assertion elements and attributes.
+> **When to consult:** authoring or validating `tool.xml` wrappers, translating tool parameters into Galaxy XML, defining outputs or discovered datasets, writing wrapper tests, or choosing valid Galaxy assertion elements and attributes. Do not use this for [[author-galaxy-tool-wrapper]], which emits UDT YAML.

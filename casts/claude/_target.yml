@@ -35,6 +35,10 @@ kinds:
     dst_dir: references/cli/
     dst_extension: .json
     modes: [sidecar]
+  prompt:
+    dst_dir: references/prompts/
+    dst_extension: .md
+    modes: [verbatim]
 
 # Default condensation prompts per reference kind.
 # Empty for v1 — Molds that need condense must declare a prompt

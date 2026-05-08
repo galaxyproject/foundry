@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,8 +23,8 @@ function runTsx(script: string, args: string[]): { code: number; stdout: string;
     const err = e as { status?: number; stdout?: Buffer | string; stderr?: Buffer | string };
     return {
       code: typeof err.status === "number" ? err.status : 1,
-      stdout: typeof err.stdout === "string" ? err.stdout : err.stdout?.toString() ?? "",
-      stderr: typeof err.stderr === "string" ? err.stderr : err.stderr?.toString() ?? "",
+      stdout: typeof err.stdout === "string" ? err.stdout : (err.stdout?.toString() ?? ""),
+      stderr: typeof err.stderr === "string" ? err.stderr : (err.stderr?.toString() ?? ""),
     };
   }
 }
@@ -43,10 +43,20 @@ describe("cast-mold (summarize-nextflow integration)", () => {
   });
 
   it("foundry-build cast --check catches stale _verify.json", () => {
-    const verifyPath = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "_verify.json");
+    const verifyPath = path.join(
+      repoRoot,
+      "casts",
+      "claude",
+      "skills",
+      "summarize-nextflow",
+      "_verify.json",
+    );
     const original = readFileSync(verifyPath, "utf8");
     try {
-      writeFileSync(verifyPath, JSON.stringify({ verify_schema_version: 1, entries: [] }, null, 2) + "\n");
+      writeFileSync(
+        verifyPath,
+        JSON.stringify({ verify_schema_version: 1, entries: [] }, null, 2) + "\n",
+      );
       const r = runTsx(foundryBuild, ["cast", "summarize-nextflow", "--target=claude", "--check"]);
       expect(r.code).not.toBe(0);
       expect(r.stderr).toContain("_verify.json");
@@ -56,7 +66,14 @@ describe("cast-mold (summarize-nextflow integration)", () => {
   });
 
   it("provenance is schema v2 and lists deterministic refs", () => {
-    const provPath = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "_provenance.json");
+    const provPath = path.join(
+      repoRoot,
+      "casts",
+      "claude",
+      "skills",
+      "summarize-nextflow",
+      "_provenance.json",
+    );
     const prov = JSON.parse(readFileSync(provPath, "utf8"));
     expect(prov.provenance_schema_version).toBe(2);
     expect(prov.cast_target).toBe("claude");
@@ -74,7 +91,14 @@ describe("cast-mold (summarize-nextflow integration)", () => {
   });
 
   it("dst paths use strict 1:1 source basename for verbatim refs", () => {
-    const provPath = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "_provenance.json");
+    const provPath = path.join(
+      repoRoot,
+      "casts",
+      "claude",
+      "skills",
+      "summarize-nextflow",
+      "_provenance.json",
+    );
     const prov = JSON.parse(readFileSync(provPath, "utf8"));
     for (const r of prov.refs) {
       if (r.mode !== "verbatim") continue;
@@ -101,7 +125,14 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
   });
 
   it("SKILL.md is rendered from Mold metadata, references, and body", () => {
-    const skillPath = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "SKILL.md");
+    const skillPath = path.join(
+      repoRoot,
+      "casts",
+      "claude",
+      "skills",
+      "summarize-nextflow",
+      "SKILL.md",
+    );
     const text = readFileSync(skillPath, "utf8");
     expect(text).toContain("Follow the procedure below");
     expect(text).toContain("## Inputs");
@@ -122,9 +153,8 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
 
 describe("artifact-contract inheritance", () => {
   it("consumer input inherits schema and producers from the producer's output_artifact", async () => {
-    const { buildProducerIndex, readArtifactContracts } = await import(
-      "../packages/build-cli/src/commands/cast-mold.js"
-    );
+    const { buildProducerIndex, readArtifactContracts } =
+      await import("../packages/build-cli/src/commands/cast-mold.js");
     const meta = new Map<string, any>([
       [
         "content/molds/producer/index.md",
@@ -145,17 +175,12 @@ describe("artifact-contract inheritance", () => {
         "content/molds/consumer/index.md",
         {
           type: "mold",
-          input_artifacts: [
-            { id: "summary-x", description: "Upstream summary used for binding." },
-          ],
+          input_artifacts: [{ id: "summary-x", description: "Upstream summary used for binding." }],
         },
       ],
     ]);
     const idx = buildProducerIndex(meta);
-    const contracts = readArtifactContracts(
-      meta.get("content/molds/consumer/index.md")!,
-      idx,
-    );
+    const contracts = readArtifactContracts(meta.get("content/molds/consumer/index.md")!, idx);
     expect(contracts).toBeDefined();
     expect(contracts!.consumes).toEqual([
       {
@@ -168,9 +193,8 @@ describe("artifact-contract inheritance", () => {
   });
 
   it("builds a process-based verify manifest for output and inherited input schemas", async () => {
-    const { buildProducerIndex, buildVerifyManifest } = await import(
-      "../packages/build-cli/src/commands/cast-mold.js"
-    );
+    const { buildProducerIndex, buildVerifyManifest } =
+      await import("../packages/build-cli/src/commands/cast-mold.js");
     const meta = new Map<string, any>([
       [
         "content/molds/producer/index.md",
@@ -248,9 +272,8 @@ describe("artifact-contract inheritance", () => {
   });
 
   it("drops inherited_schema when producers disagree on the schema", async () => {
-    const { buildProducerIndex, readArtifactContracts } = await import(
-      "../packages/build-cli/src/commands/cast-mold.js"
-    );
+    const { buildProducerIndex, readArtifactContracts } =
+      await import("../packages/build-cli/src/commands/cast-mold.js");
     const meta = new Map<string, any>([
       [
         "content/molds/producer-a/index.md",
@@ -291,20 +314,107 @@ describe("artifact-contract inheritance", () => {
       ],
     ]);
     const idx = buildProducerIndex(meta);
-    const contracts = readArtifactContracts(
-      meta.get("content/molds/consumer/index.md")!,
-      idx,
-    );
+    const contracts = readArtifactContracts(meta.get("content/molds/consumer/index.md")!, idx);
     expect(contracts!.consumes[0]?.inherited_schema).toBeUndefined();
     expect(contracts!.consumes[0]?.producers).toEqual(["producer-a", "producer-b"]);
   });
 });
 
+describe("cast-mold prompt refs", () => {
+  it("copies prompt_file sidecars using the prompt wrapper slug", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-prompt-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/prompts"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        [
+          "name: claude",
+          "provenance_schema_version: 2",
+          "required_outputs: [SKILL.md, _provenance.json]",
+          "kinds:",
+          "  prompt:",
+          "    dst_dir: references/prompts/",
+          "    dst_extension: .md",
+          "    modes: [verbatim]",
+          "condense_prompts: {}",
+          "skill_constraints:",
+          "  frontmatter_required: [name, description]",
+          "  forbidden_runtime_paths: []",
+          "  forbid_packaged_files: []",
+          "",
+        ].join("\n"),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: Prompt-copy cast test mold summary.
+references:
+  - kind: prompt
+    ref: "[[prompt-x]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+---
+
+# m
+
+Use the prompt reference.
+`,
+      );
+      writeFileSync(
+        path.join(dir, "content/prompts/prompt-x.md"),
+        `---
+type: prompt
+title: Prompt X
+tags: [prompt]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: Prompt wrapper summary for cast sidecar behavior.
+prompt_file: prompt-x.upstream.prompt
+---
+
+Wrapper body should not be copied.
+`,
+      );
+      writeFileSync(path.join(dir, "content/prompts/prompt-x.upstream.prompt"), "RAW PROMPT\n");
+
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+      const copied = readFileSync(
+        path.join(dir, "casts/claude/skills/m/references/prompts/prompt-x.md"),
+        "utf8",
+      );
+      expect(copied).toBe("RAW PROMPT\n");
+      const prov = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+      );
+      expect(prov.refs[0].src).toBe("content/prompts/prompt-x.upstream.prompt");
+      expect(prov.refs[0].dst).toBe("references/prompts/prompt-x.md");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("validate-artifact process runner", () => {
   it("uses exit code and captures stdout/stderr as opaque evidence", async () => {
-    const { runProcessValidation } = await import(
-      "../packages/build-cli/src/commands/validate-artifact.js"
-    );
+    const { runProcessValidation } =
+      await import("../packages/build-cli/src/commands/validate-artifact.js");
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-validate-"));
     const artifact = path.join(dir, "artifact.json");
     writeFileSync(artifact, "{}\n");
