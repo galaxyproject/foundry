@@ -524,27 +524,42 @@
       {
         "name": "ch_samplesheet",
         "source": "PIPELINE_INITIALISATION.out.samplesheet",
-        "shape": "tuple(val(meta), path(reads))"
+        "shape": "tuple(val(meta), path(reads))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_versions",
         "source": "channel.empty()",
-        "shape": "path"
+        "shape": "path",
+        "construct": "empty",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_multiqc_files",
         "source": "channel.empty() then accumulated via .mix(FASTQC.out.zip, ch_workflow_summary, ch_methods_description, ch_collated_versions)",
-        "shape": "path"
+        "shape": "path",
+        "construct": "empty",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_multiqc_config",
         "source": "channel.fromPath(\"$projectDir/assets/multiqc_config.yml\")",
-        "shape": "path"
+        "shape": "path",
+        "construct": "fromPath",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_collated_versions",
         "source": "softwareVersionsToYAML(ch_versions.mix(channel.topic('versions').versions_file)).mix(...).collectFile(...)",
-        "shape": "path"
+        "shape": "path",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       }
     ],
     "edges": [

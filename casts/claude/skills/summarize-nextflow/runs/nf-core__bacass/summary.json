@@ -2123,62 +2123,98 @@
       {
         "name": "ch_samplesheet",
         "source": "PIPELINE_INITIALISATION.out.samplesheet",
-        "shape": "tuple(val(meta), path(fastq_1), path(fastq_2), path(long_fastq), path(fast5))"
+        "shape": "tuple(val(meta), path(fastq_1), path(fastq_2), path(long_fastq), path(fast5))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_input",
         "source": "ch_samplesheet.multiMap(criteria) — splits into named branches: shortreads / longreads / fast5",
-        "shape": "multimap(shortreads: tuple(meta, fastqs), longreads: tuple(meta, lr), fast5: tuple(meta, fast5))"
+        "shape": "multimap(shortreads: tuple(meta, fastqs), longreads: tuple(meta, lr), fast5: tuple(meta, fast5))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_shortreads",
         "source": "ch_input.shortreads.filter{ it != null }",
-        "shape": "tuple(val(meta), path(fastqs))"
+        "shape": "tuple(val(meta), path(fastqs))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_longreads",
         "source": "ch_input.longreads.filter{ it != null }",
-        "shape": "tuple(val(meta), path(longreads))"
+        "shape": "tuple(val(meta), path(longreads))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_fast5",
         "source": "ch_input.fast5.filter{ it != null }",
-        "shape": "tuple(val(meta), path(fast5))"
+        "shape": "tuple(val(meta), path(fast5))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_proteins",
         "source": "params.prokka_proteins ? Channel.fromPath(params.prokka_proteins) : []",
-        "shape": "path | empty list literal"
+        "shape": "path | empty list literal",
+        "construct": "fromPath",
+        "from_param": "prokka_proteins",
+        "required_runtime": false
       },
       {
         "name": "ch_versions",
         "source": "Channel.empty() then accumulated via .mix(<every-process>.out.versions)",
-        "shape": "path"
+        "shape": "path",
+        "construct": "empty",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_multiqc_files",
         "source": "Channel.empty() then accumulated across QC outputs",
-        "shape": "path"
+        "shape": "path",
+        "construct": "empty",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_for_assembly",
         "source": "conditional on params.assembly_type — built from FASTQ_TRIM_FASTP_FASTQC.out.reads, filtered_long_reads via .cross/.map",
-        "shape": "tuple(val(meta), path(short_or_empty), path(long_or_empty))"
+        "shape": "tuple(val(meta), path(short_or_empty), path(long_or_empty))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_assembly",
         "source": "Channel.empty() then accumulated from UNICYCLER/CANU/MINIASM/RACON/DRAGONFLYE/MEDAKA/NANOPOLISH (one wins by params.assembler+polish)",
-        "shape": "tuple(val(meta), path(fasta))"
+        "shape": "tuple(val(meta), path(fasta))",
+        "construct": "empty",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_to_quast",
         "source": "ch_assembly.collect{it[1]}.map{ consensus -> tuple([id:'report'], consensus) }",
-        "shape": "tuple(val(meta), path(consensi))"
+        "shape": "tuple(val(meta), path(consensi))",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       },
       {
         "name": "ch_assembly_for_gunzip",
         "source": "ch_assembly.branch{ meta, fasta -> gzip: fasta.name.endsWith('.gz'); skip: true }",
-        "shape": "branch(gzip, skip)"
+        "shape": "branch(gzip, skip)",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
       }
     ],
     "edges": [

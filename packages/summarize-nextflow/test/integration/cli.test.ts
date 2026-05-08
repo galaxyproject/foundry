@@ -133,7 +133,7 @@ profiles { test {} }
     }
   });
 
-  itIfBuilt("extracts all bioconda dependencies from module environments", async () => {
+  itIfBuilt("extracts all conda dependencies from module environments", async () => {
     const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
     const moduleDir = join(root, "modules", "local", "align");
     mkdirSync(moduleDir, { recursive: true });
@@ -184,10 +184,70 @@ dependencies:
     const tools = (summary as { tools: { name: string; version: string; bioconda: string }[] })
       .tools;
     expect(tools.map((tool) => tool.name)).toEqual(
-      expect.arrayContaining(["minimap2", "samtools", "htslib"]),
+      expect.arrayContaining(["minimap2", "samtools", "htslib", "pigz"]),
     );
     expect(tools.find((tool) => tool.name === "htslib")?.bioconda).toBe("bioconda::htslib=1.18");
-    expect(tools.some((tool) => tool.name === "pigz")).toBe(false);
+    expect(tools.find((tool) => tool.name === "pigz")?.bioconda).toBe("conda-forge::pigz=2.6");
+  });
+
+  itIfBuilt("links processes[].tool to dashed and singleton tool names", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    const dashedDir = join(root, "modules", "nf-core", "ensemblvep", "vep");
+    const singletonDir = join(root, "modules", "nf-core", "tabix", "tabix");
+    const bareDir = join(root, "modules", "nf-core", "mosdepth");
+    mkdirSync(dashedDir, { recursive: true });
+    mkdirSync(singletonDir, { recursive: true });
+    mkdirSync(bareDir, { recursive: true });
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} }
+`,
+    );
+    const moduleStub = (name: string) =>
+      `process ${name} {
+  conda "\${moduleDir}/environment.yml"
+  output:
+  path "out", emit: out
+  script:
+  """
+  run
+  """
+}
+`;
+    writeFileSync(join(dashedDir, "main.nf"), moduleStub("ENSEMBLVEP_VEP"));
+    writeFileSync(
+      join(dashedDir, "environment.yml"),
+      `dependencies:\n  - bioconda::ensembl-vep=115.2\n  - bioconda::perl-math-cdf=0.1\n`,
+    );
+    writeFileSync(join(singletonDir, "main.nf"), moduleStub("TABIX_TABIX"));
+    writeFileSync(
+      join(singletonDir, "environment.yml"),
+      `dependencies:\n  - bioconda::htslib=1.21\n`,
+    );
+    writeFileSync(join(bareDir, "main.nf"), moduleStub("MOSDEPTH"));
+    writeFileSync(
+      join(bareDir, "environment.yml"),
+      `channels:\n  - bioconda\ndependencies:\n  - mosdepth=0.3.10\n`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = (await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as { tools: { name: string }[]; processes: { name: string; tool: string | null }[] };
+
+    const toolNames = summary.tools.map((tool) => tool.name);
+    expect(toolNames).toEqual(expect.arrayContaining(["ensembl-vep", "htslib", "mosdepth"]));
+    const fk = (name: string) =>
+      summary.processes.find((process) => process.name === name)?.tool ?? null;
+    expect(fk("ENSEMBLVEP_VEP")).toBe("ensembl-vep");
+    expect(fk("TABIX_TABIX")).toBe("htslib");
+    expect(fk("MOSDEPTH")).toBe("mosdepth");
   });
 
   itIfBuilt("extracts process aliases from include statements", async () => {
@@ -387,7 +447,14 @@ workflow SYNTHETIC {
     };
     expect(data.workflow.name).toBe("SYNTHETIC");
     expect(data.workflow.channels).toEqual([
-      { name: "ch_extra", source: "Channel.empty()", shape: "channel" },
+      {
+        name: "ch_extra",
+        source: "Channel.empty()",
+        shape: "channel",
+        construct: "empty",
+        from_param: null,
+        required_runtime: false,
+      },
     ]);
     expect(data.workflow.edges).toEqual([{ from: "ch_reads", to: "PREP_READS", via: [] }]);
     const prep = data.subworkflows.find((workflow) => workflow.name === "PREP_READS");
@@ -517,13 +584,33 @@ workflow SYNTHETIC {
           source:
             "ch_reads.filter { meta, reads -> meta.keep }.map { meta, reads -> tuple(meta, reads) }",
           shape: "filter|map",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
         },
-        { name: "ch_joined", source: "ch_filtered.join(ch_reference)", shape: "join" },
-        { name: "ch_mixed", source: "ch_joined.mix(ch_extra)", shape: "mix" },
+        {
+          name: "ch_joined",
+          source: "ch_filtered.join(ch_reference)",
+          shape: "join",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
+        },
+        {
+          name: "ch_mixed",
+          source: "ch_joined.mix(ch_extra)",
+          shape: "mix",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
+        },
         {
           name: "ch_branched",
           source: "ch_mixed.branch { meta, reads -> pass: true }",
           shape: "branch",
+          construct: "other",
+          from_param: null,
+          required_runtime: false,
         },
       ]),
     );
