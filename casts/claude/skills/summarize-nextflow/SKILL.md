@@ -17,24 +17,24 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- `summary-nextflow`; kind: `json`; default filename: `summary-nextflow.json`; schema: summary-nextflow; Structured summary of a Nextflow pipeline: processes, channels, params, containers, tools, test fixtures, nf-tests.
+- Write artifact `summary-nextflow` as `summary-nextflow.json`. Format: `json`. Schema: summary-nextflow. A structured JSON summary of a Nextflow pipeline, including its interface, processes, data flow, software environment, and test fixtures.
 
 ## Load Upfront
 
-- `references/schemas/nextflow-parameters-meta.schema.json`; kind: `schema`; mode: `verbatim`; Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[].
-- `references/schemas/nf-core-module-meta.schema.json`; kind: `schema`; mode: `verbatim`; Validate per-module meta.yml when walking nf-core modules; pins the channel IO `type` enum and tools/containers shape.
-- `references/schemas/nf-core-subworkflow-meta.schema.json`; kind: `schema`; mode: `verbatim`; Validate subworkflow meta.yml; backs Subworkflow.calls extraction via the components: declaration.
-- `references/schemas/summary-nextflow.schema.json`; kind: `schema`; mode: `verbatim`; Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.
+- `references/schemas/nextflow-parameters-meta.schema.json`: Schema file copied verbatim into the bundle. Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[].
+- `references/schemas/nf-core-module-meta.schema.json`: Schema file copied verbatim into the bundle. Validate per-module meta.yml when walking nf-core modules; pins the channel IO `type` enum and tools/containers shape.
+- `references/schemas/nf-core-subworkflow-meta.schema.json`: Schema file copied verbatim into the bundle. Validate subworkflow meta.yml; backs Subworkflow.calls extraction via the components: declaration.
+- `references/schemas/summary-nextflow.schema.json`: Schema file copied verbatim into the bundle. Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.
 
 ## Load On Demand
 
-- `references/notes/component-nextflow-containers-and-envs.md`; kind: `research`; mode: `verbatim`; Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence; Trigger: When extracting tools, versions, containers, conda directives, or environment equivalences.
-- `references/notes/component-nextflow-pipeline-anatomy.md`; kind: `research`; mode: `verbatim`; Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology; Trigger: When walking pipeline structure or resolving process aliases and channel flow.
-- `references/notes/component-nextflow-testing.md`; kind: `research`; mode: `verbatim`; Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions; Trigger: When filling test_fixtures or nf_tests sections of the summary.
+- `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence. Use when: extracting tools, versions, containers, conda directives, or environment equivalences.
+- `references/notes/component-nextflow-pipeline-anatomy.md`: Research note copied verbatim into the bundle. Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology. Use when: walking pipeline structure or resolving process aliases and channel flow.
+- `references/notes/component-nextflow-testing.md`: Research note copied verbatim into the bundle. Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions. Use when: filling test_fixtures or nf_tests sections of the summary.
 
 ## Validation
 
-- Validate `summary-nextflow.json` for `summary-nextflow` with `validate-summary-nextflow`; schema: summary-nextflow.
+- Validate `summary-nextflow.json` before returning it: run `validate-summary-nextflow summary-nextflow.json` from `@galaxy-foundry/summary-nextflow-schema`. If the command is not on PATH, run `npx --package @galaxy-foundry/summary-nextflow-schema validate-summary-nextflow summary-nextflow.json`. This checks artifact `summary-nextflow` against the summary-nextflow schema.
 
 ## Procedure
 
@@ -277,7 +277,7 @@ Consult component-nextflow-testing when fixtures use a layout outside `conf/test
 
 #### 8. Validate and emit
 
-Validate the assembled object with `validate-summary-nextflow` before emitting. On schema failure, the skill should fail loud — the downstream skills bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
+Validate the assembled object before emitting: run `validate-summary-nextflow summary-nextflow.json`. The command is shipped by `@galaxy-foundry/summary-nextflow-schema` and can be invoked from npm with `npx --package @galaxy-foundry/summary-nextflow-schema validate-summary-nextflow summary-nextflow.json`. On schema failure, the skill should fail loud — the downstream skills bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
 
 ### Caveats baked into the procedure
 

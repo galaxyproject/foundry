@@ -6,12 +6,12 @@ Source-specific (Nextflow), target-agnostic. The summary is the input to downstr
 
 ## Status
 
-`v0.0.0` — scaffolded. CLI surface is wired; resolution logic is not yet implemented. See `content/molds/summarize-nextflow/` and `content/research/external-tool-{nf-core-tools,nextflow-inspect}.md` for design context.
+`v0.0.0` — draft implementation. Local pipeline paths are supported; git URLs and `--pin` still exit with code `64` while remote checkout support is pending. See `content/molds/summarize-nextflow/` and the Nextflow component research notes for design context.
 
 ## Install
 
 ```sh
-npx @galaxy-foundry/summarize-nextflow <pipeline-path-or-url> [options]
+npx --package @galaxy-foundry/summarize-nextflow summarize-nextflow <pipeline-path-or-url> [options]
 ```
 
 ## Usage
@@ -23,6 +23,8 @@ summarize-nextflow <path-or-url> \
   [--out=summary.json] \
   [--no-with-nextflow] \
   [--fetch-test-data] \
+  [--test-data-dir=<dir>] \
+  [--mulled-index-path=<multi-package-containers.tsv>] \
   [--no-validate]
 ```
 

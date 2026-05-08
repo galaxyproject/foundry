@@ -8,15 +8,15 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-06
-revision: 11
+revised: 2026-05-08
+revision: 12
 ai_generated: true
 output_artifacts:
   - id: summary-nextflow
     kind: json
     default_filename: summary-nextflow.json
     schema: "[[summary-nextflow]]"
-    description: "Structured summary of a Nextflow pipeline: processes, channels, params, containers, tools, test fixtures, nf-tests."
+    description: "A structured JSON summary of a Nextflow pipeline, including its interface, processes, data flow, software environment, and test fixtures."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"
@@ -318,7 +318,7 @@ Consult [[component-nextflow-testing]] when fixtures use a layout outside `conf/
 
 ### 8. Validate and emit
 
-Validate the assembled object with `validate-summary-nextflow` before emitting. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
+Validate the assembled object before emitting: run `validate-summary-nextflow summary-nextflow.json`. The command is shipped by `@galaxy-foundry/summary-nextflow-schema` and can be invoked from npm with `npx --package @galaxy-foundry/summary-nextflow-schema validate-summary-nextflow summary-nextflow.json`. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
 
 ## Caveats baked into the procedure
 
