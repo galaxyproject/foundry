@@ -5,6 +5,8 @@
 
 import galaxyToolDiscoverySchema from '../../../packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json';
 import galaxyToolDiscoverySchemaPkg from '../../../packages/galaxy-tool-discovery-schema/package.json';
+import galaxyWorkflowTestPlanSchema from '../../../packages/galaxy-workflow-test-plan-schema/src/galaxy-workflow-test-plan.schema.json';
+import galaxyWorkflowTestPlanSchemaPkg from '../../../packages/galaxy-workflow-test-plan-schema/package.json';
 import summaryNextflowSchema from '../../../packages/summary-nextflow-schema/src/summary-nextflow.schema.json';
 import summaryNextflowSchemaPkg from '../../../packages/summary-nextflow-schema/package.json';
 import testsFormatSchema from '../../../packages/tests-format-schema/src/tests.schema.json';
@@ -27,5 +29,9 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   'galaxy-tool-discovery': {
     schema: galaxyToolDiscoverySchema as unknown as Record<string, unknown>,
     version: (galaxyToolDiscoverySchemaPkg as { version?: string }).version ?? '',
+  },
+  'galaxy-workflow-test-plan': {
+    schema: galaxyWorkflowTestPlanSchema as unknown as Record<string, unknown>,
+    version: (galaxyWorkflowTestPlanSchemaPkg as { version?: string }).version ?? '',
   },
 };

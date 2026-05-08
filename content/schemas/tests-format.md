@@ -17,6 +17,7 @@ revised: 2026-05-05
 revision: 4
 ai_generated: true
 related_notes:
+  - "[[galaxy-workflow-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[planemo-asserts-idioms]]"

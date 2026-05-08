@@ -6,6 +6,12 @@
 - fixture: Galaxy workflow test plan for an IWC-style workflow such as SARS-CoV-2 variant calling, ChIPseq-SR, or RNAseq.
 - expectation: authored `-tests.yml` validates against the tests-format schema before any Planemo invocation.
 
+## Case: galaxy-test-plan schema gate
+
+- check: deterministic
+- fixture: Galaxy workflow test plan emitted by [[nextflow-test-to-galaxy-test-plan]] or [[cwl-test-to-galaxy-test-plan]].
+- expectation: input validates against [[galaxy-workflow-test-plan]] before any final `tests-format` YAML is authored.
+
 ## Case: workflow/test cross-check gate
 
 - check: deterministic

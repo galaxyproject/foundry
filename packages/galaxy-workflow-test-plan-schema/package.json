@@ -1,0 +1,58 @@
+{
+  "name": "@galaxy-foundry/galaxy-workflow-test-plan-schema",
+  "version": "0.0.0",
+  "description": "JSON Schema for the Foundry's Galaxy workflow test-plan handoff format, plus AJV-based validator and CLI.",
+  "type": "module",
+  "bin": {
+    "validate-galaxy-workflow-test-plan": "dist/bin/validate-galaxy-workflow-test-plan.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema.json": "./dist/galaxy-workflow-test-plan.schema.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchilton/foundry.git",
+    "directory": "packages/galaxy-workflow-test-plan-schema"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-schema.mjs",
+    "prebuild": "pnpm sync",
+    "build": "tsc && node scripts/copy-schema-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "galaxy",
+    "foundry",
+    "workflow",
+    "tests",
+    "schema",
+    "json-schema"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

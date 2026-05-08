@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 12,
-    "content_hash": "a7bf4935f4b886e3488fc6d1be3d1f2a8850ee2507b192216f086688ad4a407d",
-    "commit": "9fd80031b01aadd1e6e1b109b726643407edbe5f"
+    "content_hash": "a9b40ce69650891ef8cd96935924165030e6ea7bc119332f939b497e1a0d0a3f",
+    "commit": "6f2a85f72032833c3be8db9bf8cabdb16fa1e234"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-08T14:47:51.905Z",
+  "cast_at": "2026-05-08T19:51:15.315Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -114,8 +114,8 @@
       "purpose": "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions.",
       "trigger": "When filling test_fixtures or nf_tests sections of the summary.",
       "verification": "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction.",
-      "src_hash": "033e438627faa56953f4d4fdc27f984e45761d409c4581fcd66040085a897507",
-      "dst_hash": "033e438627faa56953f4d4fdc27f984e45761d409c4581fcd66040085a897507",
+      "src_hash": "445acf56e8223350645a8502f0d2818eaa65bc2ef05c153ded88be9c5a39104f",
+      "dst_hash": "445acf56e8223350645a8502f0d2818eaa65bc2ef05c153ded88be9c5a39104f",
       "source": "deterministic"
     },
     {

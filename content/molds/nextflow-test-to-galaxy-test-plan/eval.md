@@ -4,7 +4,7 @@
 
 - check: deterministic
 - fixture: nf-core/bacass or minimal demo Nextflow summary containing nf-test profiles, params, input fixtures, expected outputs, and snapshot evidence.
-- expectation: emits a Galaxy workflow test plan that validates against the handoff schema selected for Galaxy workflow tests.
+- expectation: emits a Galaxy workflow test plan that validates against [[galaxy-workflow-test-plan]].
 
 ## Case: plan-not-final-tests boundary
 
