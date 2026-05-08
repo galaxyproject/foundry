@@ -26,6 +26,62 @@ export interface CastArtifact {
   description?: string;
 }
 
+export interface CastRef {
+  kind: string;
+  mode: string;
+  ref: string;
+  src: string;
+  dst: string;
+  used_at: string;
+  load: string;
+  evidence?: string;
+  purpose?: string;
+  trigger?: string;
+  verification?: string;
+  source?: string;
+  src_hash?: string;
+  dst_hash?: string;
+}
+
+export interface CastProvenance {
+  provenance_schema_version: number;
+  cast_target: CastTarget;
+  mold?: {
+    name?: string;
+    path?: string;
+    revision?: number;
+    content_hash?: string;
+    commit?: string;
+  };
+  cast_at?: string;
+  cast_date?: string;
+  cast_revision?: number;
+  refs?: CastRef[];
+  artifacts?: {
+    produces?: unknown[];
+    consumes?: unknown[];
+  };
+  validation_results?: unknown[];
+  open_questions?: string[];
+}
+
+export interface CastAttachedFile extends CastRef {
+  /** Path relative to the cast bundle root. */
+  bundlePath: string;
+  /** Repo-absolute path to the packaged file, if it exists and is inside the bundle. */
+  absPath: string | null;
+  exists: boolean;
+  sizeBytes: number | null;
+  extension: string;
+  anchor: string;
+}
+
+export interface ClaudeSkillBundle extends CastArtifact {
+  skillPath: string;
+  provenance: CastProvenance | null;
+  attachedFiles: CastAttachedFile[];
+}
+
 const TARGETS: CastTarget[] = ['claude', 'web', 'generic'];
 
 /** Repo root inferred relative to this file: site/src/lib → ../../.. */
@@ -55,6 +111,64 @@ function readSkillFrontmatter(skillPath: string): { name?: string; description?:
     out[k[1] as 'name' | 'description'] = v;
   }
   return out;
+}
+
+function readProvenance(provenancePath: string): CastProvenance | null {
+  if (!existsSync(provenancePath)) return null;
+  try {
+    return JSON.parse(readFileSync(provenancePath, 'utf8')) as CastProvenance;
+  } catch {
+    return null;
+  }
+}
+
+function anchorForPath(bundlePath: string): string {
+  return `ref-${bundlePath.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')}`;
+}
+
+function safeBundlePath(bundleRoot: string, bundlePath: string): string | null {
+  const abs = path.resolve(bundleRoot, bundlePath);
+  const rel = path.relative(bundleRoot, abs);
+  if (rel.startsWith('..') || path.isAbsolute(rel)) return null;
+  return abs;
+}
+
+function attachedFilesFor(dir: string, provenance: CastProvenance | null): CastAttachedFile[] {
+  if (!provenance?.refs) return [];
+  return provenance.refs.map(ref => {
+    const absPath = safeBundlePath(dir, ref.dst);
+    const exists = absPath ? existsSync(absPath) : false;
+    const stats = exists && absPath ? statSync(absPath) : null;
+    return {
+      ...ref,
+      bundlePath: ref.dst,
+      absPath: exists ? absPath : null,
+      exists,
+      sizeBytes: stats?.size ?? null,
+      extension: path.extname(ref.dst).replace(/^\./, ''),
+      anchor: anchorForPath(ref.dst),
+    };
+  });
+}
+
+export function loadClaudeSkillBundle(moldSlug: string, repoRoot: string = defaultRepoRoot()): ClaudeSkillBundle | null {
+  const dir = castDirFor('claude', moldSlug, repoRoot);
+  const skillPath = path.join(dir, 'SKILL.md');
+  if (!existsSync(dir) || !existsSync(skillPath)) return null;
+  const provenance = readProvenance(path.join(dir, '_provenance.json'));
+  const fm = readSkillFrontmatter(skillPath);
+  return {
+    target: 'claude',
+    moldSlug,
+    dir,
+    hasSkill: true,
+    ...fm,
+    skillPath,
+    provenance,
+    attachedFiles: attachedFilesFor(dir, provenance),
+  };
 }
 
 /** All cast artifacts for one mold, across targets. */

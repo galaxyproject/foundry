@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import Base from '../../../layouts/Base.astro';
-import { listAllCasts } from '../../../lib/casts';
+import { listAllCasts, loadClaudeSkillBundle, type CastAttachedFile } from '../../../lib/casts';
 
 export async function getStaticPaths() {
   const casts = listAllCasts().filter(c => c.target === 'claude' && c.hasSkill);
@@ -19,8 +19,126 @@ export async function getStaticPaths() {
 
 const { moldSlug, dir, name, description } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const bundle = loadClaudeSkillBundle(moldSlug);
 const skillText = readFileSync(path.join(dir, 'SKILL.md'), 'utf8');
 const body = skillText.replace(/^---\n[\s\S]*?\n---\n/, '');
+
+const attachedFiles = bundle?.attachedFiles ?? [];
+const upfrontRefs = attachedFiles.filter(ref => ref.load === 'upfront');
+const onDemandRefs = attachedFiles.filter(ref => ref.load !== 'upfront');
+const produces = bundle?.provenance?.artifacts?.produces ?? [];
+const consumes = bundle?.provenance?.artifacts?.consumes ?? [];
+const validationCount = bundle?.provenance?.validation_results?.length ?? 0;
+const openQuestions = bundle?.provenance?.open_questions ?? [];
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function formatBytes(value: number | null): string {
+  if (value === null) return 'missing';
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function labelFor(ref: CastAttachedFile): string {
+  const wiki = ref.ref.match(/^\[\[(.*)\]\]$/)?.[1];
+  return wiki ?? path.basename(ref.bundlePath);
+}
+
+function previewFor(ref: CastAttachedFile): string | null {
+  if (!ref.absPath) return null;
+  const text = readFileSync(ref.absPath, 'utf8');
+  const limit = ref.extension === 'json' ? 2400 : 1800;
+  return text.length > limit ? `${text.slice(0, limit)}\n...` : text;
+}
+
+function linkifiedSkillBody(raw: string, refs: CastAttachedFile[]): string {
+  let html = escapeHtml(raw);
+  const sorted = [...refs].sort((a, b) => b.bundlePath.length - a.bundlePath.length);
+  for (const ref of sorted) {
+    const label = escapeHtml(ref.bundlePath);
+    const href = `#${ref.anchor}`;
+    html = html.replace(
+      new RegExp(escapeRegExp(label), 'g'),
+      `<a class="skill-ref-link" href="${href}">${label}</a>`,
+    );
+  }
+  return html;
+}
+
+function renderRefGroup(title: string, refs: CastAttachedFile[]) {
+  if (refs.length === 0) return null;
+  return { title, refs };
+}
+
+const refGroups = [
+  renderRefGroup('Load upfront', upfrontRefs),
+  renderRefGroup('Load on demand', onDemandRefs),
+].filter(Boolean) as { title: string; refs: CastAttachedFile[] }[];
+
+const linkedBody = linkifiedSkillBody(body, attachedFiles);
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function asText(value: unknown): string | null {
+  return typeof value === 'string' && value.length > 0 ? value : null;
+}
+
+function compactJson(value: unknown): string {
+  return JSON.stringify(value, null, 2);
+}
+
+function artifactTitle(value: unknown): string {
+  const artifact = asRecord(value);
+  return asText(artifact.id) ?? asText(artifact.name) ?? asText(artifact.default_filename) ?? 'unnamed artifact';
+}
+
+function artifactDescription(value: unknown): string | null {
+  const artifact = asRecord(value);
+  return asText(artifact.description);
+}
+
+function artifactChips(value: unknown): string[] {
+  const artifact = asRecord(value);
+  return ['kind', 'default_filename', 'schema']
+    .map(key => asText(artifact[key]))
+    .filter(Boolean) as string[];
+}
+
+function validationTitle(value: unknown): string {
+  const validation = asRecord(value);
+  return asText(validation.artifact_id) ?? asText(validation.path) ?? 'validation result';
+}
+
+function validationStatus(value: unknown): string {
+  const validation = asRecord(value);
+  return asText(validation.status) ?? 'unknown';
+}
+
+function validationMeta(value: unknown): { label: string; value: string }[] {
+  const validation = asRecord(value);
+  return [
+    ['validator', validation.validator_bin],
+    ['path', validation.path],
+    ['exit', validation.exit_code],
+    ['artifact hash', validation.artifact_hash],
+  ]
+    .filter(([, value]) => value !== undefined && value !== null && value !== '')
+    .map(([label, value]) => ({ label: String(label), value: String(value) }));
+}
 ---
 <Base title={`${moldSlug} (Claude skill)`}>
   <section class="page-hero bg-grain" aria-labelledby="skill-heading">
@@ -42,8 +160,464 @@ const body = skillText.replace(/^---\n[\s\S]*?\n---\n/, '');
     <pre class="p-3 rounded bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/foundry-skills:{moldSlug}</code></pre>
   </section>
 
+  <section class="skill-bundle mb-8" aria-labelledby="bundle-heading">
+    <div class="section-rule">
+      <h2 id="bundle-heading">Skill Bundle</h2>
+      <span class="section-tail">/ packaged cast</span>
+    </div>
+    <dl class="bundle-stats">
+      <div>
+        <dt>attached files</dt>
+        <dd>{attachedFiles.length}</dd>
+      </div>
+      <div>
+        <dt>upfront</dt>
+        <dd>{upfrontRefs.length}</dd>
+      </div>
+      <div>
+        <dt>on demand</dt>
+        <dd>{onDemandRefs.length}</dd>
+      </div>
+      <div>
+        <dt>cast rev</dt>
+        <dd>{bundle?.provenance?.cast_revision ?? 'n/a'}</dd>
+      </div>
+      <div>
+        <dt>validated</dt>
+        <dd>{validationCount}</dd>
+      </div>
+    </dl>
+    {(produces.length > 0 || consumes.length > 0 || openQuestions.length > 0) && (
+      <div class="bundle-notes">
+        {produces.length > 0 && <p><strong>Produces:</strong> {produces.length} artifact{produces.length === 1 ? '' : 's'}.</p>}
+        {consumes.length > 0 && <p><strong>Consumes:</strong> {consumes.length} artifact{consumes.length === 1 ? '' : 's'}.</p>}
+        {openQuestions.length > 0 && <p><strong>Open questions:</strong> {openQuestions.length} recorded in provenance.</p>}
+      </div>
+    )}
+  </section>
+
+  {(produces.length > 0 || consumes.length > 0) && (
+    <section class="artifact-contract mb-10" aria-labelledby="artifact-contract-heading">
+      <div class="section-rule">
+        <h2 id="artifact-contract-heading">Artifact Contract</h2>
+        <span class="section-tail">/ skill handoff</span>
+      </div>
+      <div class="contract-grid">
+        {produces.length > 0 && (
+          <section class="contract-column" aria-labelledby="produces-heading">
+            <h3 id="produces-heading">Produces</h3>
+            {produces.map(artifact => (
+              <article class="contract-card">
+                <h4>{artifactTitle(artifact)}</h4>
+                {artifactDescription(artifact) && <p>{artifactDescription(artifact)}</p>}
+                {artifactChips(artifact).length > 0 && (
+                  <div class="ref-chips">
+                    {artifactChips(artifact).map(chip => <span>{chip}</span>)}
+                  </div>
+                )}
+                <details class="json-details">
+                  <summary>Raw artifact contract</summary>
+                  <pre><code>{compactJson(artifact)}</code></pre>
+                </details>
+              </article>
+            ))}
+          </section>
+        )}
+        {consumes.length > 0 && (
+          <section class="contract-column" aria-labelledby="consumes-heading">
+            <h3 id="consumes-heading">Consumes</h3>
+            {consumes.map(artifact => (
+              <article class="contract-card consume">
+                <h4>{artifactTitle(artifact)}</h4>
+                {artifactDescription(artifact) && <p>{artifactDescription(artifact)}</p>}
+                {artifactChips(artifact).length > 0 && (
+                  <div class="ref-chips">
+                    {artifactChips(artifact).map(chip => <span>{chip}</span>)}
+                  </div>
+                )}
+                <details class="json-details">
+                  <summary>Raw artifact contract</summary>
+                  <pre><code>{compactJson(artifact)}</code></pre>
+                </details>
+              </article>
+            ))}
+          </section>
+        )}
+      </div>
+    </section>
+  )}
+
+  {validationCount > 0 && (
+    <section class="validation-results mb-10" aria-labelledby="validation-heading">
+      <div class="section-rule">
+        <h2 id="validation-heading">Validation</h2>
+        <span class="section-tail">/ cast checks</span>
+      </div>
+      <div class="validation-list">
+        {bundle?.provenance?.validation_results?.map(result => (
+          <article class="validation-card">
+            <header class="validation-head">
+              <div>
+                <span class="ref-kind">{validationTitle(result)}</span>
+                <h3>{asText(asRecord(result).validator_bin) ?? 'validator'}</h3>
+              </div>
+              <span class={`validation-status status-${validationStatus(result)}`}>{validationStatus(result)}</span>
+            </header>
+            <dl class="validation-meta">
+              {validationMeta(result).map(item => (
+                <>
+                  <dt>{item.label}</dt>
+                  <dd><code>{item.value}</code></dd>
+                </>
+              ))}
+            </dl>
+            <details class="json-details">
+              <summary>Raw validation result</summary>
+              <pre><code>{compactJson(result)}</code></pre>
+            </details>
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {refGroups.length > 0 && (
+    <section class="attached-files mb-10" aria-labelledby="attached-heading">
+      <div class="section-rule">
+        <h2 id="attached-heading">Attached Files</h2>
+        <span class="section-tail">/ runtime references</span>
+      </div>
+      {refGroups.map(group => (
+        <section class="ref-group" aria-labelledby={`${group.title.toLowerCase().replace(/\s+/g, '-')}-heading`}>
+          <h3 id={`${group.title.toLowerCase().replace(/\s+/g, '-')}-heading`}>{group.title}</h3>
+          <div class="ref-grid">
+            {group.refs.map(ref => {
+              const preview = previewFor(ref);
+              return (
+                <article id={ref.anchor} class={`ref-card ref-kind-${ref.kind}`}>
+                  <header class="ref-card-head">
+                    <div>
+                      <span class="ref-kind">{ref.kind}</span>
+                      <h4>{labelFor(ref)}</h4>
+                    </div>
+                    <span class={ref.exists ? 'ref-status ok' : 'ref-status missing'}>{ref.exists ? 'packaged' : 'missing'}</span>
+                  </header>
+                  <p class="ref-purpose">{ref.purpose ?? ref.trigger ?? 'No purpose recorded.'}</p>
+                  {ref.trigger && <p class="ref-trigger"><strong>Trigger:</strong> {ref.trigger}</p>}
+                  <div class="ref-chips">
+                    <span>{ref.load}</span>
+                    <span>{ref.used_at}</span>
+                    <span>{ref.mode}</span>
+                    {ref.evidence && <span>{ref.evidence}</span>}
+                    {ref.source && <span>{ref.source}</span>}
+                    <span>{formatBytes(ref.sizeBytes)}</span>
+                  </div>
+                  <dl class="ref-paths">
+                    <dt>bundle</dt>
+                    <dd><code>{ref.bundlePath}</code></dd>
+                    <dt>source</dt>
+                    <dd><code>{ref.src}</code></dd>
+                  </dl>
+                  {preview && (
+                    <details class="ref-preview">
+                      <summary>Preview {ref.extension || 'file'}</summary>
+                      <pre><code>{preview}</code></pre>
+                    </details>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+    </section>
+  )}
+
   <article class="prose prose-slate max-w-none dark:prose-invert">
     <h2>SKILL.md</h2>
-    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm overflow-x-auto"><code>{body}</code></pre>
+    <pre class="skill-raw p-3 rounded-lg bg-(--color-surface-raised) text-sm overflow-x-auto"><code set:html={linkedBody}></code></pre>
   </article>
+
+  <style>
+    .bundle-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+      gap: 0;
+      margin: 0;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 0.8rem;
+      overflow: hidden;
+      background: var(--color-surface-raised);
+    }
+    .bundle-stats div {
+      padding: 0.8rem 0.95rem;
+      border-right: 1px solid var(--color-border-subtle);
+    }
+    .bundle-stats div:last-child { border-right: 0; }
+    .bundle-stats dt {
+      margin: 0 0 0.18rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .bundle-stats dd {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      color: var(--color-text-primary);
+    }
+    .bundle-notes {
+      margin-top: 0.75rem;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+    .bundle-notes p { margin: 0.2rem 0; }
+    .contract-grid,
+    .validation-list {
+      display: grid;
+      gap: 0.9rem;
+    }
+    .contract-grid {
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    }
+    .contract-column h3 {
+      margin: 0 0 0.7rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .contract-card,
+    .validation-card {
+      position: relative;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 0.85rem;
+      background: var(--color-surface-raised);
+      padding: 1rem;
+    }
+    .contract-card::before,
+    .validation-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      border-radius: 0.85rem 0 0 0.85rem;
+      background: var(--color-accent);
+      opacity: 0.7;
+    }
+    .contract-card.consume::before { background: var(--color-galaxy-primary); }
+    .validation-card::before { background: var(--color-badge-reviewed-text); }
+    .contract-card h4,
+    .validation-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.25;
+      color: var(--color-text-primary);
+      overflow-wrap: anywhere;
+    }
+    .contract-card p {
+      margin: 0.65rem 0 0;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--color-text-secondary);
+    }
+    .validation-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .validation-status {
+      flex: 0 0 auto;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 999px;
+      padding: 0.15rem 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+    }
+    .validation-status.status-passed {
+      color: var(--color-badge-reviewed-text);
+      background: var(--color-badge-reviewed-bg);
+    }
+    .validation-meta {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0.25rem 0.55rem;
+      margin: 0.8rem 0 0;
+      font-size: 0.76rem;
+    }
+    .validation-meta dt {
+      font-family: var(--font-mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .validation-meta dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+      color: var(--color-text-secondary);
+    }
+    .json-details {
+      margin-top: 0.85rem;
+      border-top: 1px dashed var(--color-border-subtle);
+      padding-top: 0.65rem;
+    }
+    .json-details summary {
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-link);
+    }
+    .json-details pre {
+      max-height: 18rem;
+      margin: 0.6rem 0 0;
+      padding: 0.85rem;
+      border-radius: 0.6rem;
+      overflow: auto;
+      background: var(--color-surface);
+      font-size: 0.78rem;
+    }
+    .ref-group { margin-bottom: 1.5rem; }
+    .ref-group h3 {
+      margin: 0 0 0.7rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .ref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+      gap: 0.9rem;
+    }
+    .ref-card {
+      position: relative;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 0.85rem;
+      background: var(--color-surface-raised);
+      padding: 1rem;
+      scroll-margin-top: 5rem;
+    }
+    .ref-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      border-radius: 0.85rem 0 0 0.85rem;
+      background: var(--color-galaxy-primary);
+      opacity: 0.65;
+    }
+    .ref-kind-schema::before { background: var(--color-accent); }
+    .ref-kind-research::before { background: var(--color-galaxy-primary); }
+    .ref-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .ref-kind,
+    .ref-status,
+    .ref-chips span {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .ref-kind { color: var(--color-text-muted); }
+    .ref-card h4 {
+      margin: 0.15rem 0 0;
+      font-size: 1rem;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+      color: var(--color-text-primary);
+    }
+    .ref-status {
+      flex: 0 0 auto;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 999px;
+      padding: 0.15rem 0.45rem;
+    }
+    .ref-status.ok {
+      color: var(--color-badge-reviewed-text);
+      background: var(--color-badge-reviewed-bg);
+    }
+    .ref-status.missing {
+      color: var(--color-badge-draft-text);
+      background: var(--color-badge-draft-bg);
+    }
+    .ref-purpose,
+    .ref-trigger {
+      margin: 0.65rem 0 0;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: var(--color-text-secondary);
+    }
+    .ref-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.75rem;
+    }
+    .ref-chips span {
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 0.35rem;
+      padding: 0.16rem 0.45rem;
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+    }
+    .ref-paths {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0.25rem 0.55rem;
+      margin: 0.8rem 0 0;
+      font-size: 0.76rem;
+    }
+    .ref-paths dt {
+      font-family: var(--font-mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .ref-paths dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+      color: var(--color-text-secondary);
+    }
+    .ref-preview {
+      margin-top: 0.85rem;
+      border-top: 1px dashed var(--color-border-subtle);
+      padding-top: 0.65rem;
+    }
+    .ref-preview summary {
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-link);
+    }
+    .ref-preview pre {
+      max-height: 24rem;
+      margin: 0.6rem 0 0;
+      padding: 0.85rem;
+      border-radius: 0.6rem;
+      overflow: auto;
+      background: var(--color-surface);
+      font-size: 0.78rem;
+    }
+    .skill-raw :global(.skill-ref-link) {
+      color: var(--color-link);
+      text-decoration: underline;
+      text-decoration-color: color-mix(in srgb, var(--color-link) 35%, transparent);
+      text-underline-offset: 0.18em;
+    }
+  </style>
 </Base>
