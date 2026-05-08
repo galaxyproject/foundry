@@ -130,8 +130,11 @@ A single JSON document conforming to summary-nextflow (`packages/summary-nextflo
     "name": "RNASEQ",
     "channels": [
       { "name": "ch_samplesheet",
-        "source": "Channel.fromSamplesheet('input')",
-        "shape": "tuple(meta, [path,path])" }
+        "source": "Channel.fromList(samplesheetToList(params.input, '...'))",
+        "shape": "tuple(meta, [path,path])",
+        "construct": "samplesheetToList",
+        "from_param": "input",
+        "required_runtime": false }
     ],
     "edges": [
       { "from": "ch_samplesheet", "to": "FASTP", "via": [] },
@@ -238,7 +241,15 @@ Tool name and version are typically derivable from any of the resolved fields. D
 
 #### 6. Reconcile the workflow DAG
 
-Enumerate the top-level workflow's `include` statements and channel construction (`Channel.fromPath`, `Channel.fromFilePairs`, `Channel.fromSamplesheet`, `params.*`, `channel.empty()`, `channel.topic('<name>')`). For operator chains, the deterministic parser records the *literal* chain (`["map", "join", "groupTuple"]` in `via`). Reconciling chained operators into a coherent `from → to` edge is the second LLM call: given the literal chain, the source channel shape, and the downstream process's declared input shape, emit the resolved edge.
+Enumerate the top-level workflow's `include` statements and channel construction (`Channel.fromPath`, `Channel.fromFilePairs`, `Channel.fromList(samplesheetToList(...))`, `splitCsv`, `file()`/`files()`, `params.*`, `channel.empty()`, `channel.topic('<name>')`). For operator chains, the deterministic parser records the *literal* chain (`["map", "join", "groupTuple"]` in `via`). Reconciling chained operators into a coherent `from → to` edge is the second LLM call: given the literal chain, the source channel shape, and the downstream process's declared input shape, emit the resolved edge.
+
+For each emitted `workflow.channels[]` entry, populate three classified fields alongside the verbatim `source`:
+
+- **`construct`** — typed enum reflecting the channel's primary materialization factory or shape-determining operator. Selection precedence: (1) `samplesheetToList` when the chain contains `samplesheetToList(...)`; (2) `splitCsv` when the chain ends in `.splitCsv(header: true)` over a path; (3) otherwise the outermost factory (`Channel.fromPath` → `fromPath`, `Channel.fromFilePairs` → `fromFilePairs`, `Channel.fromList` → `fromList`, `file(...)` → `file`, `files(...)` → `files`, `Channel.of` → `of`, `Channel.value` → `value`, `Channel.empty` → `empty`, `Channel.topic` → `topic`); (4) `other` for derived/operator-only constructions.
+- **`from_param`** — FK into `params[].name` when the construction expression directly references `params.X` (e.g. `Channel.fromPath(params.reads)`, `samplesheetToList(params.input, ...)`, `file(params.fasta)`). v1 is direct-only — one-hop Groovy bindings (`def reads = params.reads; Channel.fromPath(reads)`) are deferred to jmchilton/foundry#211. Null when no direct reference, or when `construct` is not data-bearing (`empty`, `of`, `value`, `topic`, `other`).
+- **`required_runtime`** — true when the construction chain ends in `.ifEmpty { error ... }` (or an equivalent imperative emptiness-throw guard). Captures runtime requiredness even when the param's nf-schema entry does not mark it required. False otherwise.
+
+All three fields are syntactic: regex-level extraction over the construction expression, no LLM call.
 
 Workflow-level conditionals (`if (params.skip_alignment) { ... }`) emit `conditionals[]` entries with the guard, the branch (`alternate` vs `default`), and the set of processes affected.
 
