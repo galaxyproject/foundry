@@ -131,6 +131,7 @@ interface ChannelIO {
 interface Process {
   name: string;
   aliases: string[];
+  in_subworkflows: string[];
   module_path: string;
   meta: ModuleMeta | null;
   module_tests: NfTest[];
@@ -258,6 +259,23 @@ export async function resolveNextflowSummary(
   );
   warnings.push(...buildWarnings(processes, workflows));
 
+  const aliasToCanonical = new Map<string, string>();
+  for (const [canonical, aliasList] of aliases.entries()) {
+    for (const alias of aliasList) aliasToCanonical.set(alias, canonical);
+  }
+  const processNameSet = new Set(processes.map((process) => process.name));
+  const inSubworkflows = new Map<string, string[]>();
+  for (const workflow of workflows) {
+    if (primaryWorkflow && workflow.name === primaryWorkflow.name) continue;
+    for (const call of workflow.calls) {
+      const canonical = aliasToCanonical.get(call) ?? call;
+      if (!processNameSet.has(canonical)) continue;
+      const list = inSubworkflows.get(canonical) ?? [];
+      if (!list.includes(workflow.name)) list.push(workflow.name);
+      inSubworkflows.set(canonical, list);
+    }
+  }
+
   const summary: Summary = {
     source: {
       ecosystem: workflowName.startsWith("nf-core/") ? "nf-core" : "nextflow",
@@ -277,6 +295,7 @@ export async function resolveNextflowSummary(
     processes: processes.map((process) => ({
       ...process,
       aliases: aliases.get(process.name) ?? [],
+      in_subworkflows: inSubworkflows.get(process.name) ?? [],
       tool: resolveProcessToolFk(process, tools, perProcessSingleton),
     })),
     subworkflows: workflows
@@ -633,6 +652,7 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
     return {
       name,
       aliases: [],
+      in_subworkflows: [],
       module_path: modulePath,
       meta: isLocalModule ? null : parseModuleMeta(join(moduleDir, "meta.yml")),
       module_tests: isLocalModule ? [] : parseNfTestsInDir(pipelineRoot, join(moduleDir, "tests")),
