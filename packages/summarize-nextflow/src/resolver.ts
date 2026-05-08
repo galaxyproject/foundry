@@ -243,7 +243,11 @@ export async function resolveNextflowSummary(
     options.mulledIndexPath && !existsSync(options.mulledIndexPath)
       ? [`mulled index path not found: ${options.mulledIndexPath}`]
       : [];
-  const tools = buildTools(pipelineRoot, processes, options.mulledIndexPath);
+  const { tools, perProcessSingleton } = buildTools(
+    pipelineRoot,
+    processes,
+    options.mulledIndexPath,
+  );
   const workflows = parseWorkflows(
     pipelineRoot,
     processes.map((process) => process.name),
@@ -273,8 +277,7 @@ export async function resolveNextflowSummary(
     processes: processes.map((process) => ({
       ...process,
       aliases: aliases.get(process.name) ?? [],
-      tool:
-        tools.find((tool) => process.name.toLowerCase().includes(tool.name))?.name ?? process.tool,
+      tool: resolveProcessToolFk(process, tools, perProcessSingleton),
     })),
     subworkflows: workflows
       .filter((workflow) => workflow.name !== primaryWorkflow?.name)
@@ -1090,8 +1093,36 @@ function parseIoName(line: string, blockName: "input" | "output"): string {
   );
 }
 
-function buildTools(pipelineRoot: string, processes: Process[], mulledIndexPath?: string): Tool[] {
+function normalizeToolToken(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/gu, "");
+}
+
+function resolveProcessToolFk(
+  process: Process,
+  tools: Tool[],
+  perProcessSingleton: Map<string, string>,
+): string | null {
+  const haystack = normalizeToolToken(process.name);
+  let best: Tool | undefined;
+  let bestLength = 0;
+  for (const tool of tools) {
+    const needle = normalizeToolToken(tool.name);
+    if (needle.length === 0 || !haystack.startsWith(needle)) continue;
+    if (needle.length > bestLength) {
+      best = tool;
+      bestLength = needle.length;
+    }
+  }
+  return best?.name ?? perProcessSingleton.get(process.name) ?? process.tool;
+}
+
+function buildTools(
+  pipelineRoot: string,
+  processes: Process[],
+  mulledIndexPath?: string,
+): { tools: Tool[]; perProcessSingleton: Map<string, string> } {
   const tools = new Map<string, Tool>();
+  const perProcessSingleton = new Map<string, string>();
   const mulledIndex = loadMulledIndex(
     mulledIndexPath ?? process.env.BIOCONTAINERS_MULTI_PACKAGE_TSV,
   );
@@ -1101,9 +1132,11 @@ function buildTools(pipelineRoot: string, processes: Process[], mulledIndexPath?
       .map((match) => match[1]!)
       .filter((value) => value.includes(":") || value.includes("/"));
     const mulledComponents = mulledComponentsForContainers(containerStrings, mulledIndex);
-    for (const dependency of existsSync(envPath)
-      ? parseBiocondaDependencies(readText(envPath))
-      : []) {
+    const dependencies = existsSync(envPath) ? parseBiocondaDependencies(readText(envPath)) : [];
+    if (dependencies.length === 1) {
+      perProcessSingleton.set(process.name, dependencies[0]!.name);
+    }
+    for (const dependency of dependencies) {
       tools.set(dependency.name, {
         name: dependency.name,
         version: dependency.version,
@@ -1121,7 +1154,7 @@ function buildTools(pipelineRoot: string, processes: Process[], mulledIndexPath?
       });
     }
   }
-  return [...tools.values()];
+  return { tools: [...tools.values()], perProcessSingleton };
 }
 
 function loadMulledIndex(path: string | undefined): Map<string, ToolSpec[]> {
@@ -1209,7 +1242,7 @@ function parseBiocondaDependencies(
 function parseBiocondaDependency(
   spec: string,
 ): { name: string; version: string; spec: string } | null {
-  const match = /^bioconda::([A-Za-z0-9_.-]+)(?:=([^=\s]+))?/u.exec(spec);
+  const match = /^(?:[A-Za-z0-9_-]+::)?([A-Za-z0-9_.-]+)(?:=([^=\s]+))?/u.exec(spec);
   if (!match) return null;
   return { name: match[1]!, version: match[2] ?? "unknown", spec };
 }
