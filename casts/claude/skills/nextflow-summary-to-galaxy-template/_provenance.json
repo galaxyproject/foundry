@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 2,
-    "content_hash": "bb11827969de07dff848e3c647986111d91d5c506f749d1b660e8761abbd6084",
-    "commit": "30c3ef064eb4217a5efecd0d55ab545629ea00dc"
+    "content_hash": "d79134dbfcf7e4d58b9dc5b9f963955f69eee5c5797290b8cbb44325236241ab",
+    "commit": "2fcd66258b73bfcad4acaf26ae5b3150212c1d78"
   },
-  "cast_at": "2026-05-07T15:51:42.679Z",
+  "cast_at": "2026-05-08T20:59:49.903Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -120,6 +120,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-conditional-to-galaxy-subworkflow-when]]",
+      "src": "content/research/nextflow-conditional-to-galaxy-subworkflow-when.md",
+      "dst": "references/notes/nextflow-conditional-to-galaxy-subworkflow-when.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Emit `when:` clauses on the right step type (subworkflow vs tool) and the right output fan-in primitive (`pick_value`, modes `first_non_null` / `first_or_skip` / `the_only_non_null`) when the data-flow brief carries a conditional disposition through to the skeleton.",
+      "trigger": "When the upstream data-flow brief assigns a source conditional to a subworkflow `when:` or inline `when:` shape, or when emitting the merge step for two or more `when:`-gated branches that produce the same logical output.",
+      "src_hash": "12c0d468e977f75856489d98ff7f1f1ac6b1317566a8e912bcb9b3556f14b03e",
+      "dst_hash": "12c0d468e977f75856489d98ff7f1f1ac6b1317566a8e912bcb9b3556f14b03e",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
@@ -129,8 +144,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context.",
-      "src_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
-      "dst_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
+      "src_hash": "72cd739c2647896473f41fdf149433dda10d7732fd2036b320c1c0dea2437a86",
+      "dst_hash": "72cd739c2647896473f41fdf149433dda10d7732fd2036b320c1c0dea2437a86",
       "source": "deterministic"
     }
   ],

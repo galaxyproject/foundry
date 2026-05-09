@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-data-flow",
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
-    "content_hash": "1e6bdb519efd14940703316ca081a9156e626eb66877c3ef18d123a8b54f0b4a",
-    "commit": "30c3ef064eb4217a5efecd0d55ab545629ea00dc"
+    "content_hash": "b175084cd1b21bf6b7ceda20f9b1d6954d949f48bb1e03247dbafcf18f217d2c",
+    "commit": "2fcd66258b73bfcad4acaf26ae5b3150212c1d78"
   },
-  "cast_at": "2026-05-07T15:51:42.679Z",
+  "cast_at": "2026-05-08T20:59:49.341Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -92,6 +92,21 @@
     {
       "kind": "research",
       "mode": "verbatim",
+      "ref": "[[nextflow-conditional-to-galaxy-subworkflow-when]]",
+      "src": "content/research/nextflow-conditional-to-galaxy-subworkflow-when.md",
+      "dst": "references/notes/nextflow-conditional-to-galaxy-subworkflow-when.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Decide between subworkflow `when:` and inline tool-step `when:` for each source conditional, and pick the right output fan-in primitive (`pick_value` vs twin-cascade) so the data-flow brief carries a coherent conditional disposition forward.",
+      "trigger": "When the Nextflow summary's `workflow.conditionals[]` is non-empty, or when subworkflow boundaries in the source align with parameter-driven branches (step, aligner, wes, tools, skip_*, use_*).",
+      "src_hash": "12c0d468e977f75856489d98ff7f1f1ac6b1317566a8e912bcb9b3556f14b03e",
+      "dst_hash": "12c0d468e977f75856489d98ff7f1f1ac6b1317566a8e912bcb9b3556f14b03e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
       "ref": "[[nextflow-operators-to-galaxy-collection-recipes]]",
       "src": "content/research/nextflow-operators-to-galaxy-collection-recipes.md",
       "dst": "references/notes/nextflow-operators-to-galaxy-collection-recipes.md",
@@ -133,6 +148,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-to-galaxy-reference-data-mapping]]",
+      "src": "content/research/nextflow-to-galaxy-reference-data-mapping.md",
+      "dst": "references/notes/nextflow-to-galaxy-reference-data-mapping.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Decide how reference assets and their indexes flow through the Galaxy data-flow draft (preserving dbkey through map-overs, deferring index-building to wrappers vs surfacing as workflow steps).",
+      "trigger": "When the upstream interface brief carries reference-data inputs (FASTA, fai, dict, indexes, known sites, intervals, PoN) or when the source pipeline's compute-if-missing branches imply rebuild semantics the data flow has to honor.",
+      "src_hash": "4aa8e03247d773230bb9066f8e139450e0b29a863e5912f95c4cffdfeeef6cff",
+      "dst_hash": "4aa8e03247d773230bb9066f8e139450e0b29a863e5912f95c4cffdfeeef6cff",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
@@ -142,8 +172,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure while drafting Galaxy-facing abstract data flow.",
-      "src_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
-      "dst_hash": "5b3615e4b2736d4cd1d392645f56b8f96f49c19da2cc5ec1d36c262bdb336d05",
+      "src_hash": "72cd739c2647896473f41fdf149433dda10d7732fd2036b320c1c0dea2437a86",
+      "dst_hash": "72cd739c2647896473f41fdf149433dda10d7732fd2036b320c1c0dea2437a86",
       "source": "deterministic"
     }
   ],

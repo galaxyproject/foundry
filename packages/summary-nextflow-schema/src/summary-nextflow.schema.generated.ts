@@ -484,6 +484,13 @@ export const summaryNextflowSchema = {
           },
           "description": "Alias names this process is imported as in workflow scopes via `include { <NAME> as <ALIAS> }`. Real nf-core pipelines re-import a single module multiple times under different aliases to invoke it with distinct runtime args (e.g. `MINIMAP2_ALIGN as MINIMAP2_CONSENSUS`, `MINIMAP2_ALIGN as MINIMAP2_POLISH`). Each alias appears in `workflow.edges[].from`/`.to` exactly as written; the canonical `name` does not appear in edges unless an unaliased import exists. Default `[]` when the process is only imported under its canonical name."
         },
+        "in_subworkflows": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Denormalized FK: names of `subworkflows[]` whose `calls[]` invoke this process (canonical name or any alias). Empty `[]` when the process is only invoked from the primary `workflow` body. Useful for grouping the flat process-tier DAG into a subworkflow-tier view client-side. Multi-entry when the same module is invoked from several subworkflows (typically via aliases)."
+        },
         "module_path": {
           "type": "string",
           "description": "Relative path from the pipeline root to the file declaring the process."
