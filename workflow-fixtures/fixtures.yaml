@@ -91,6 +91,112 @@ pipelines:
       branching, different domain from rnaseq/sarek — stresses the
       incompatibility report on parallel-tool patterns.
 
+  # ----- ref-data complexity bridge (nf-core) -----
+  # Small/medium pipelines staged on rungs of a reference-data
+  # complexity ladder. Used to scope which ref-data patterns the
+  # cast/emulation can handle and which need design work. See the
+  # bridge-walkthrough issue for per-rung open questions.
+
+  - name: nf-core/smrnaseq
+    flavor: nf-core
+    tier: small
+    repo: https://github.com/nf-core/smrnaseq.git
+    tag: 2.4.1
+    sha: cb0af579b24cb8d5a3accd87b2f14ea93fe04832
+    notes: >
+      Small-RNA seq. Bridge rung: small companion bundle (genome
+      FASTA + miRBase mature/hairpin + GTF). All paths user-supplied;
+      no key→bundle resolution. Useful step up from L1 (single ref)
+      to L2 (coordinated multi-file ref).
+
+  - name: nf-core/atacseq
+    flavor: nf-core
+    tier: small
+    repo: https://github.com/nf-core/atacseq.git
+    tag: 2.1.2
+    sha: 1a1dbe52ffbd82256c941a032b0e22abbd925b8a
+    notes: >
+      ATAC-seq. Bridge rung: iGenomes-keyed reference resolution
+      (--genome GRCh38 → bundle of FASTA/GTF/BED/blacklist/etc.).
+      Smaller and more focused than rnaseq; good for isolating the
+      genome-key→bundle pattern from aligner-choice sprawl.
+
+  - name: nf-core/funcscan
+    flavor: nf-core
+    tier: small
+    repo: https://github.com/nf-core/funcscan.git
+    tag: 3.0.0
+    sha: fa9db018e528ffb5149cdde928e2fa24e7c546fe
+    notes: >
+      Antimicrobial-resistance / biosynthetic-gene-cluster scanning
+      across multiple HMM and sequence DBs. Bridge rung: multi-DB
+      named-bundle pattern, smaller than taxprofiler. Stresses
+      "user supplies several named DBs" without taxprofiler's
+      profiler-tool branching.
+
+  # ----- nf-core, reference-data-light cluster -----
+  # Small/focused pipelines whose primary inputs are user files, not
+  # genome bundles. Useful for scoping summarize-nextflow / cast paths
+  # that don't need to resolve igenomes-style references.
+
+  - name: nf-core/multiplesequencealign
+    flavor: nf-core
+    tier: small
+    repo: https://github.com/nf-core/multiplesequencealign.git
+    tag: 1.1.1
+    sha: 79724dac3d240b9bb7684532d3fe238b42f6a4b4
+    notes: >
+      MSA + benchmarking across many aligners (T-Coffee, MAFFT, MUSCLE,
+      …). Inputs are user FASTA(s); no genome reference. Clean
+      many-tool fan-out for stress-testing parallel-tool patterns
+      without ref-data noise.
+
+  - name: nf-core/proteinfamilies
+    flavor: nf-core
+    tier: small
+    repo: https://github.com/nf-core/proteinfamilies.git
+    tag: 2.3.0
+    sha: db4b0aab636c47a3a8e5c769149d9a9fdfd670c2
+    notes: >
+      Protein FASTAs → clustered families. Self-contained, no genome
+      reference. Companion to multiplesequencealign for a second
+      no-ref protein-domain pipeline.
+
+  - name: nf-core/bamtofastq
+    flavor: nf-core
+    tier: tiny
+    repo: https://github.com/nf-core/bamtofastq.git
+    tag: 2.2.0
+    sha: 869832186b25d2ccbcd31d5f69edacc1ba32b718
+    notes: >
+      BAM/CRAM → FASTQ. Pure conversion. Optional fasta + fai params
+      (only required when input is CRAM); igenomes-aware. Good L1
+      ref-data example: a single small reference, sometimes optional.
+
+  - name: nf-core/createtaxdb
+    flavor: nf-core
+    tier: small
+    repo: https://github.com/nf-core/createtaxdb.git
+    tag: 3.0.0
+    sha: e561e64257492bb337a4ade1555ecb772156a0c2
+    notes: >
+      Builds taxonomic DBs (Kraken2, Centrifuge, KrakenUniq, …) from
+      input genome FASTAs. *Produces* reference data rather than
+      consuming it — natural counterpart to taxprofiler. Useful for
+      reasoning about ref-data lifecycle in Galaxy data managers.
+
+  - name: nf-core/references
+    flavor: nf-core
+    tier: small
+    repo: https://github.com/nf-core/references.git
+    tag: "0.1"
+    sha: 3ab25b0cdadc6a5440405ef20118e09e5f82dfa4
+    notes: >
+      Meta-pipeline that *generates* reference bundles (indexes,
+      annotations) from input genomes. Same nf-core skeleton as the
+      consumer pipelines but inverse data-flow direction. Good for
+      ref-data lifecycle scoping.
+
   # ----- ad-hoc DSL2 pipelines (non-nf-core) -----
   # Pinned to stress-test summarize-nextflow against pipelines that lack
   # nf-core conventions: no nextflow_schema.json, no per-module meta.yml,
@@ -188,6 +294,31 @@ pipelines:
       without subworkflows/nf-core/. No schema, no meta.yml, no
       nf-test. Stresses non-standard root layout from non-academic
       provenance.
+
+  - name: nextflow-io/rnaseq-nf
+    flavor: adhoc
+    tier: tiny
+    repo: https://github.com/nextflow-io/rnaseq-nf.git
+    tag: v1.2
+    sha: de77a134696b06b9833d8fffcbc68afebced3746
+    notes: >
+      Canonical Seqera RNA-seq training pipeline (Paolo Di Tommaso).
+      No nf-core template, no schema, no per-module meta.yml. Ships
+      its own tiny ggal transcriptome under data/, so technically L1
+      ref-data but bundled. Useful adhoc tiny baseline distinct from
+      CalliNGS-NF.
+
+  - name: seqeralabs/nf-canary
+    flavor: adhoc
+    tier: tiny
+    repo: https://github.com/seqeralabs/nf-canary.git
+    tag: 0.2.0
+    sha: cd458e9f13f3f38858ac54e880450392a6fab838
+    notes: >
+      Infrastructure-smoke pipeline. Pure language/feature exercises
+      (success, failure, file create, retry, …); no biology, no
+      reference data. Useful as a non-bio sanity baseline for
+      summarize-nextflow output shape.
 
 # IWC corpus — single rolling repo, no tag. Pin SHA from main.
 # Materialized into iwc-src/ then cleaned + converted to format2 under iwc-format2/
