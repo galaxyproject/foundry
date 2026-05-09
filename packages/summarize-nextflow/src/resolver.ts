@@ -788,24 +788,62 @@ function selectPrimaryWorkflow(
   workflows: ParsedWorkflow[],
   processNames: string[],
 ): ParsedWorkflow | null {
+  if (workflows.length === 0) return null;
   const knownProcesses = new Set(processNames);
-  return (
-    [...workflows].sort((left, right) => {
-      const pathDiff =
-        Number(right.path.startsWith("workflows/")) - Number(left.path.startsWith("workflows/"));
-      if (pathDiff !== 0) return pathDiff;
-      const processCallDiff =
-        countKnownCalls(right, knownProcesses) - countKnownCalls(left, knownProcesses);
-      if (processCallDiff !== 0) return processCallDiff;
-      const callDiff = right.calls.length - left.calls.length;
-      if (callDiff !== 0) return callDiff;
-      return left.name.localeCompare(right.name);
-    })[0] ?? null
-  );
-}
+  const byName = new Map(workflows.map((workflow) => [workflow.name, workflow]));
+  const reach = new Map<string, Set<string>>();
 
-function countKnownCalls(workflow: ParsedWorkflow, knownNames: Set<string>): number {
-  return workflow.calls.filter((call) => knownNames.has(call)).length;
+  function transitiveReach(name: string, visiting: Set<string>): Set<string> {
+    const cached = reach.get(name);
+    if (cached) return cached;
+    if (visiting.has(name)) return new Set();
+    visiting.add(name);
+    const result = new Set<string>();
+    const workflow = byName.get(name);
+    if (workflow) {
+      for (const call of workflow.calls) {
+        if (knownProcesses.has(call)) {
+          result.add(call);
+        } else if (byName.has(call)) {
+          for (const reached of transitiveReach(call, visiting)) result.add(reached);
+        }
+      }
+    }
+    visiting.delete(name);
+    reach.set(name, result);
+    return result;
+  }
+
+  for (const workflow of workflows) transitiveReach(workflow.name, new Set());
+
+  const tiebreak = (left: ParsedWorkflow, right: ParsedWorkflow): number => {
+    const pathDiff =
+      Number(right.path.startsWith("workflows/")) - Number(left.path.startsWith("workflows/"));
+    if (pathDiff !== 0) return pathDiff;
+    const callDiff = right.calls.length - left.calls.length;
+    if (callDiff !== 0) return callDiff;
+    return left.name.localeCompare(right.name);
+  };
+
+  const reachSizes = workflows.map((workflow) => reach.get(workflow.name)!.size);
+  const maxReach = Math.max(...reachSizes);
+  if (maxReach === 0) {
+    return [...workflows].sort(tiebreak)[0] ?? null;
+  }
+
+  const reachCandidates = workflows.filter(
+    (workflow) => reach.get(workflow.name)!.size === maxReach,
+  );
+  const workflowsPrefixed = reachCandidates.filter((candidate) =>
+    candidate.path.startsWith("workflows/"),
+  );
+  const candidates = workflowsPrefixed.length > 0 ? workflowsPrefixed : reachCandidates;
+  const candidateNames = new Set(candidates.map((candidate) => candidate.name));
+  const terminal = candidates.filter(
+    (candidate) => !candidate.calls.some((call) => candidateNames.has(call)),
+  );
+  const finalists = terminal.length > 0 ? terminal : candidates;
+  return [...finalists].sort(tiebreak)[0] ?? null;
 }
 
 function stripWorkflowBody(workflow: ParsedWorkflow): Subworkflow {
@@ -826,7 +864,10 @@ function extractWorkflowBlocks(text: string): { name: string | null; body: strin
 
 function parseWorkflowCalls(body: string, knownNames: Set<string>): string[] {
   const calls = new Set<string>();
-  for (const match of body.matchAll(/^\s*([A-Z][A-Z0-9_]+)\s*\(/gmu)) {
+  // Match call positions anywhere on a line (not just line-start) so that tuple
+  // destructures like `(a, b) = setup(reads)` register `setup` as a call. The
+  // knownNames filter keeps false positives (random `name(`) out.
+  for (const match of body.matchAll(/(?:^|[^A-Za-z0-9_.])([A-Za-z_][A-Za-z0-9_]*)\s*\(/gmu)) {
     const name = match[1]!;
     if (knownNames.has(name)) calls.add(name);
   }
@@ -835,13 +876,33 @@ function parseWorkflowCalls(body: string, knownNames: Set<string>): string[] {
 
 function parseWorkflowChannels(body: string): Channel[] {
   const channels = new Map<string, Channel>();
-  for (const assignment of extractChannelAssignments(body)) {
+  const mainBlock = extractMainBlock(body);
+  for (const assignment of extractChannelAssignments(mainBlock)) {
     setPreferredChannel(channels, channelFromSource(assignment.name, assignment.source));
+  }
+  for (const destructure of extractTupleDestructures(mainBlock)) {
+    setPreferredChannel(channels, channelFromSource(destructure.name, destructure.source));
   }
   for (const setChain of extractSetChains(body)) {
     setPreferredChannel(channels, channelFromSource(setChain.name, setChain.source));
   }
   return [...channels.values()].sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function extractMainBlock(body: string): string {
+  const mainMatch = /\bmain:\s*\n([\s\S]*?)(?=\n\s*emit:|$)/u.exec(body);
+  return mainMatch ? mainMatch[1]! : body;
+}
+
+const CHANNEL_OPERATOR_PATTERN =
+  /\.(?:branch|collect|combine|concat|cross|dump|filter|first|flatMap|flatten|groupTuple|ifEmpty|join|last|map|merge|mix|multiMap|set|spread|tap|toList|toSortedList|transpose|unique)\s*[({]/u;
+
+function isChannelShapedSource(source: string): boolean {
+  if (/^\s*[Cc]hannel\./u.test(source)) return true;
+  if (/^\s*files?\s*\(/u.test(source)) return true;
+  if (/\.out\.[A-Za-z_]/u.test(source)) return true;
+  if (CHANNEL_OPERATOR_PATTERN.test(source)) return true;
+  return false;
 }
 
 function setPreferredChannel(channels: Map<string, Channel>, candidate: Channel): void {
@@ -858,8 +919,9 @@ function extractChannelAssignments(body: string): { name: string; source: string
   const assignments: { name: string; source: string }[] = [];
   const lines = body.split("\n");
   for (let index = 0; index < lines.length; index += 1) {
-    const start = /^\s*(ch_[A-Za-z0-9_]+)\s*=\s*(.+)$/u.exec(lines[index]!);
+    const start = /^\s*(?:def\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/u.exec(lines[index]!);
     if (!start) continue;
+    const name = start[1]!;
     const sourceLines = [start[2]!];
     for (let next = index + 1; next < lines.length; next += 1) {
       const line = lines[next]!;
@@ -867,12 +929,30 @@ function extractChannelAssignments(body: string): { name: string; source: string
       sourceLines.push(line.trim());
       index = next;
     }
-    assignments.push({
-      name: start[1]!,
-      source: normalizeWorkflowExpression(sourceLines.join(" ")),
-    });
+    const source = normalizeWorkflowExpression(sourceLines.join(" "));
+    if (!name.startsWith("ch_") && !isChannelShapedSource(source)) continue;
+    assignments.push({ name, source });
   }
   return assignments;
+}
+
+function extractTupleDestructures(body: string): { name: string; source: string }[] {
+  const destructures: { name: string; source: string }[] = [];
+  for (const match of body.matchAll(
+    /^[ \t]*(?:def\s+)?\(\s*([A-Za-z_][A-Za-z0-9_, \t]*)\s*\)\s*=\s*([A-Za-z_][A-Za-z0-9_]*\s*\([^\n]*\))\s*$/gmu,
+  )) {
+    const names = match[1]!
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
+    if (names.length < 2) continue;
+    const source = normalizeWorkflowExpression(match[2]!);
+    if (!isChannelShapedSource(source) && !/^[A-Za-z_][A-Za-z0-9_]*\s*\(/u.test(source)) continue;
+    names.forEach((name, position) => {
+      destructures.push({ name, source: `${source}[${position}]` });
+    });
+  }
+  return destructures;
 }
 
 function extractSetChains(body: string): { name: string; source: string }[] {
@@ -1019,7 +1099,7 @@ function extractCallInvocations(body: string): { name: string; arguments: string
   const invocations: { name: string; arguments: string[] }[] = [];
   const lines = body.split("\n");
   for (let index = 0; index < lines.length; index += 1) {
-    const singleLine = /^\s*([A-Z][A-Z0-9_]+)\s*\(([^)]*)\)\s*$/u.exec(lines[index]!);
+    const singleLine = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*$/u.exec(lines[index]!);
     if (singleLine) {
       invocations.push({
         name: singleLine[1]!,
@@ -1027,7 +1107,7 @@ function extractCallInvocations(body: string): { name: string; arguments: string
       });
       continue;
     }
-    const start = /^\s*([A-Z][A-Z0-9_]+)\s*\(\s*$/u.exec(lines[index]!);
+    const start = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*$/u.exec(lines[index]!);
     if (!start) continue;
     const args: string[] = [];
     for (index += 1; index < lines.length; index += 1) {

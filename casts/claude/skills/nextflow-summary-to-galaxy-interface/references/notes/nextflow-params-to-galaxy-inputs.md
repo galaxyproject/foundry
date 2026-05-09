@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-06
-revised: 2026-05-06
-revision: 3
+revised: 2026-05-08
+revision: 4
 ai_generated: true
 related_notes:
   - "[[nextflow-workflow-io-semantics]]"
@@ -48,9 +48,9 @@ Evidence quality:
 
 ## Translation order
 
-1. Read `summary.params[]`, `summary.sample_sheets[]`, `summary.workflow.channels[]`, `summary.workflow.conditionals[]`, process and subworkflow `inputs[]`, and any warnings.
+1. Read `summary.params[]`, `summary.sample_sheets[]`, `summary.workflow.channels[]`, `summary.workflow.conditionals[]`, process and subworkflow `inputs[]`, and any warnings. Index `summary.workflow.channels[]` by `from_param` so each launch param can be looked up against its materialization channels in O(1).
 2. Classify each launch param as data-bearing, structured sample sheet, scalar workflow parameter, workflow-shape control, runtime/publish control, or reference/data-table selector.
-3. For data-bearing params, use materialization evidence (`fromPath`, `fromFilePairs`, `file`, `files`, `splitCsv`, `samplesheetToList`) before process inputs.
+3. For data-bearing params, use materialization evidence — read `workflow.channels[].construct` (typed enum: `fromPath` / `fromFilePairs` / `fromList` / `samplesheetToList` / `splitCsv` / `file` / `files`) joined to the param via `from_param`, before consulting process inputs. When `from_param` is null but a channel's verbatim `source` references the param, fall back to substring matching (covers one-hop Groovy bindings until jmchilton/foundry#211 is implemented).
 4. Use process and named-workflow inputs to refine shape and identifiers, not to invent top-level Galaxy inputs without upstream launch-param or external-source evidence.
 5. Decide gxformat2 type (`data`, `collection`, `string`, `int`, `float`, `boolean`), then separately decide `format`, `collection_type`, `optional`, `default`, and confidence.
 
@@ -62,9 +62,9 @@ Design inference: translate from launch params plus materialization evidence, no
 |---|---|---|---|---|
 | `sample_sheets[]` with `param = p` | Does launch param `p` describe row-structured datasets? | `type: collection` | `collection_type: sample_sheet*`, `column_definitions`, `optional` | High for `nf-schema` or `samplesheetToList`; lower for `splitCsv` or `ad-hoc`. |
 | `params[]` scalar type, not data/control | User-facing scalar? | `string`, `int`, `float`, `boolean` | `default`, `optional`, `restrictions` from enum | High when schema-backed. |
-| `params[]` path-like plus concrete `fromPath` / `file()` | Single dataset? | `type: data` | `format` only if [[nextflow-path-glob-to-galaxy-datatype]] is confident | Medium to high. |
-| `params[]` path-like plus glob/directory/list materialization | Collection? | `type: collection` | `collection_type: list` unless shape evidence says otherwise | Medium. |
-| `workflow.channels[].source` uses `fromFilePairs` | Paired files? | `type: collection` | `collection_type: paired` or `list:paired` | Medium; high when current source evidence pins sample cardinality. |
+| `params[]` path-like + `workflow.channels[]` entry with `from_param == p.name` and `construct in {"fromPath","file"}` over a concrete (non-glob) path | Single dataset? | `type: data` | `format` only if [[nextflow-path-glob-to-galaxy-datatype]] is confident | Medium to high. |
+| `params[]` path-like + `workflow.channels[]` entry with `from_param == p.name` and `construct in {"fromPath","fromList","files","splitCsv"}` over a glob/directory/list | Collection? | `type: collection` | `collection_type: list` unless shape evidence says otherwise | Medium. |
+| `workflow.channels[].construct == "fromFilePairs"` (and `from_param == p.name` when known) | Paired files? | `type: collection` | `collection_type: paired` or `list:paired` | Medium; high when current source evidence pins sample cardinality. |
 | Repeated `tuple val(meta), path(reads)` | Per-sample dataset list | `type: collection` | `collection_type: list`; use `meta` for identifiers | High. |
 | Repeated `tuple val(meta), path(reads)` where `reads` is `[R1, R2]` | Paired read collection | `type: collection` | `collection_type: list:paired` or `sample_sheet:paired` if sample-sheet-backed | High. |
 | `tuple val(meta), path(a), path(b)` | Heterogeneous record? | Usually parallel inputs or `sample_sheet:record` | Do not default to paired | Medium. |
@@ -164,7 +164,7 @@ Default to safe-exclude only after the agent has traced the param's references i
 | nf-schema root `required[]` includes param | Required launch param | High |
 | `Param.required: true` | Required, source-normalized | High |
 | Missing-default imperative `error` | Required | High |
-| `Channel.fromPath(...).ifEmpty { error ... }` | Materialized data required | High, but may be branch-conditional. |
+| `workflow.channels[].required_runtime == true` (channel construction guarded by `.ifEmpty { error ... }`) | Materialized data required | High, but may be branch-conditional. |
 | Sample-sheet column required | Required row column | High |
 | Default exists | Default value, not optionality | Medium to high |
 | Optional placeholder path or empty channel | Optional branch plumbing | Medium |

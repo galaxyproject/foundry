@@ -598,6 +598,161 @@ nextflow_pipeline {
     ]);
   });
 
+  test("selects ad-hoc DSL2 root composer with lowercase subworkflow plane calls", async () => {
+    // Repro of egapx-shape: anonymous workflow {} in entrypoint calls a single
+    // lowercase composer subworkflow that itself only calls other lowercase plane
+    // subworkflows (not processes directly). Plane subworkflows then call processes.
+    // Validates G-1 (root composer wins via transitive reach), G-2 (conditionals
+    // populate via lowercase calls), G-3 (composer's calls/kind are correct).
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/composer' }\n");
+    write(root, "modules/aligner.nf", "process align_reads {\n  script:\n  'align'\n}\n");
+    write(root, "modules/caller.nf", "process call_variants {\n  script:\n  'call'\n}\n");
+    write(
+      root,
+      "subworkflows/aln/main.nf",
+      `include { align_reads } from '../../modules/aligner'
+workflow aln_plane {
+  take:
+  reads
+  main:
+  align_reads(reads)
+}
+`,
+    );
+    write(
+      root,
+      "subworkflows/var/main.nf",
+      `include { call_variants } from '../../modules/caller'
+workflow var_plane {
+  take:
+  bam
+  main:
+  call_variants(bam)
+}
+`,
+    );
+    write(
+      root,
+      "subworkflows/composer/main.nf",
+      `include { aln_plane } from '../aln/main'
+include { var_plane } from '../var/main'
+workflow composer {
+  take:
+  reads
+  main:
+  aln_plane(reads)
+  if (params.call_variants) {
+    var_plane(aln_plane.out)
+  }
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { composer } from './subworkflows/composer/main'\nworkflow { composer(Channel.of('reads')) }\n",
+    );
+
+    const summary = await summarize(root);
+
+    expect(summary.workflow.name).toBe("composer");
+    expect(summary.workflow.conditionals).toEqual([
+      { guard: "params.call_variants", branch: "default", affects: ["var_plane"] },
+    ]);
+
+    const composer = summary.subworkflows.find((workflow) => workflow.name === "composer");
+    expect(composer).toBeUndefined(); // primary excluded from subworkflows[]
+
+    const aln = summary.subworkflows.find((workflow) => workflow.name === "aln_plane");
+    expect(aln?.kind).toBe("pipeline");
+    expect(aln?.calls).toEqual(["align_reads"]);
+
+    const varPlane = summary.subworkflows.find((workflow) => workflow.name === "var_plane");
+    expect(varPlane?.kind).toBe("pipeline");
+    expect(varPlane?.calls).toEqual(["call_variants"]);
+  });
+
+  test("captures Groovy-style channels: tuple destructure, .out access, operator chain", async () => {
+    // Repro of egapx-shape channel idioms inside a workflow body without ch_* naming:
+    // (a, b) = call(...), name = sub.out.X, name = a.combine(b).
+    // Lines outside main: are ignored; non-channel-shaped RHS (e.g. params.get())
+    // are filtered out so workflow.channels stays focused on data flow.
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/groovy-channels' }\n");
+    write(
+      root,
+      "modules/m.nf",
+      `process prepare_thing {\n  script:\n  'prepare'\n}\nprocess align_thing {\n  script:\n  'align'\n}\n`,
+    );
+    write(
+      root,
+      "subworkflows/setup/main.nf",
+      `include { prepare_thing } from '../../modules/m'
+workflow setup {
+  take:
+  raw
+  main:
+  prepare_thing(raw)
+  emit:
+  scaffolds = prepare_thing.out
+  index = prepare_thing.out
+}
+`,
+    );
+    write(
+      root,
+      "subworkflows/aln/main.nf",
+      `include { align_thing } from '../../modules/m'
+workflow aln_plane {
+  take:
+  reads
+  main:
+  align_thing(reads)
+  emit:
+  alignments = align_thing.out
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { setup } from './subworkflows/setup/main'
+include { aln_plane } from './subworkflows/aln/main'
+workflow root {
+  take:
+  reads
+  main:
+  def task_setting = task_params.get('mode', 'fast')
+  (scaffolds, index) = setup(reads)
+  aln_plane(scaffolds)
+  alignments = aln_plane.out.alignments
+  combined = alignments.combine(index)
+  emit:
+  out = combined
+}
+`,
+    );
+
+    const summary = await summarize(root);
+
+    expect(summary.workflow.name).toBe("root");
+    const channels = (
+      summary as unknown as { workflow: { channels: { name: string; source: string }[] } }
+    ).workflow.channels.map((channel) => channel.name);
+    // tuple destructure produces both names
+    expect(channels).toContain("scaffolds");
+    expect(channels).toContain("index");
+    // .out.X accesses captured
+    expect(channels).toContain("alignments");
+    // operator-chain RHS captured
+    expect(channels).toContain("combined");
+    // non-channel-shaped def is filtered out
+    expect(channels).not.toContain("task_setting");
+    // emit-block channel `out` is not double-counted as a workflow channel
+    expect(channels).not.toContain("out");
+  });
+
   test("warns when an explicit mulled index path is missing", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/missing-mulled-index' }\n");
