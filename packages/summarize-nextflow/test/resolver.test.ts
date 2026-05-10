@@ -830,6 +830,76 @@ workflow root {
     expect(fasta?.schema_group).toBe("Reference genome options");
   });
 
+  test("binds caller positional args to subworkflow take[] names", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/invocations' }\n");
+    write(
+      root,
+      "subworkflows/local/prepare_genome/main.nf",
+      `workflow PREPARE_GENOME {
+  take:
+  fasta            // FASTA file
+  fasta_fai_in     // optional pre-built FAI
+  dict_in
+  main:
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PREPARE_GENOME } from './subworkflows/local/prepare_genome/main'
+workflow PIPE {
+  main:
+  PREPARE_GENOME(
+    params.fasta,
+    params.fasta_fai,
+    params.dict
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      subworkflows: {
+        name: string;
+        inputs?: { name: string; description?: string }[];
+        invocations?: {
+          caller: string;
+          arguments: string[];
+          bindings: { take: string; argument: string }[];
+        }[];
+      }[];
+    };
+
+    const prep = summary.subworkflows.find((sw) => sw.name === "PREPARE_GENOME");
+    expect(prep).toBeDefined();
+    expect(prep!.inputs).toEqual([
+      { name: "fasta", shape: "fasta", topic: null, description: "FASTA file" },
+      {
+        name: "fasta_fai_in",
+        shape: "fasta_fai_in",
+        topic: null,
+        description: "optional pre-built FAI",
+      },
+      { name: "dict_in", shape: "dict_in", topic: null },
+    ]);
+    expect(prep!.invocations).toEqual([
+      {
+        caller: "PIPE",
+        caller_path: "main.nf",
+        arguments: ["params.fasta", "params.fasta_fai", "params.dict"],
+        bindings: [
+          { take: "fasta", argument: "params.fasta" },
+          { take: "fasta_fai_in", argument: "params.fasta_fai" },
+          { take: "dict_in", argument: "params.dict" },
+        ],
+      },
+    ]);
+  });
+
   test("warns when an explicit mulled index path is missing", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/missing-mulled-index' }\n");

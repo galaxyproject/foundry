@@ -41,6 +41,18 @@ interface Summary {
   warnings: string[];
 }
 
+interface InvocationBinding {
+  take: string;
+  argument: string;
+}
+
+interface SubworkflowInvocation {
+  caller: string;
+  caller_path: string | null;
+  arguments: string[];
+  bindings: InvocationBinding[];
+}
+
 interface Subworkflow {
   name: string;
   path: string;
@@ -48,6 +60,7 @@ interface Subworkflow {
   calls: string[];
   inputs?: ChannelIO[];
   outputs?: ChannelIO[];
+  invocations?: SubworkflowInvocation[];
   tests: NfTest[];
 }
 
@@ -274,6 +287,8 @@ export async function resolveNextflowSummary(
   for (const [canonical, aliasList] of aliases.entries()) {
     for (const alias of aliasList) aliasToCanonical.set(alias, canonical);
   }
+  const invocationsByCallee = buildSubworkflowInvocations(workflows);
+
   const processNameSet = new Set(processes.map((process) => process.name));
   const inSubworkflows = new Map<string, string[]>();
   for (const workflow of workflows) {
@@ -311,7 +326,12 @@ export async function resolveNextflowSummary(
     })),
     subworkflows: workflows
       .filter((workflow) => workflow.name !== primaryWorkflow?.name)
-      .map(stripWorkflowBody),
+      .map((workflow) => {
+        const stripped = stripWorkflowBody(workflow);
+        const invocations = invocationsByCallee.get(workflow.name);
+        if (invocations && invocations.length > 0) stripped.invocations = invocations;
+        return stripped;
+      }),
     workflow: {
       name: primaryWorkflow?.name ?? workflowName.split("/").at(-1)?.toUpperCase() ?? "WORKFLOW",
       channels: primaryWorkflow ? parseWorkflowChannels(primaryWorkflow.body) : [],
@@ -1165,6 +1185,35 @@ function extractIfBlocks(
   return blocks;
 }
 
+function buildSubworkflowInvocations(
+  workflows: ParsedWorkflow[],
+): Map<string, SubworkflowInvocation[]> {
+  const result = new Map<string, SubworkflowInvocation[]>();
+  const calleesByName = new Map(workflows.map((workflow) => [workflow.name, workflow]));
+  for (const caller of workflows) {
+    const mainBlock = extractMainBlock(caller.body);
+    for (const invocation of extractCallInvocations(mainBlock)) {
+      const callee = calleesByName.get(invocation.name);
+      if (!callee) continue;
+      const takes = callee.inputs ?? [];
+      const limit = Math.min(takes.length, invocation.arguments.length);
+      const bindings: InvocationBinding[] = [];
+      for (let index = 0; index < limit; index += 1) {
+        bindings.push({ take: takes[index]!.name, argument: invocation.arguments[index]! });
+      }
+      const list = result.get(callee.name) ?? [];
+      list.push({
+        caller: caller.name,
+        caller_path: caller.path ?? null,
+        arguments: invocation.arguments,
+        bindings,
+      });
+      result.set(callee.name, list);
+    }
+  }
+  return result;
+}
+
 function extractCallInvocations(body: string): { name: string; arguments: string[] }[] {
   const invocations: { name: string; arguments: string[] }[] = [];
   const lines = body.split("\n");
@@ -1208,14 +1257,21 @@ function parseWorkflowIoBlock(text: string, blockName: "take" | "emit"): Channel
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith("//"))
-    .map((line) => ({
-      name:
-        matchOne(line, /^([A-Za-z0-9_]+)\s*=/u) ??
-        matchOne(line, /^([A-Za-z0-9_]+)/u) ??
-        `io_${Math.abs(hash(line))}`,
-      shape: line.replace(/\s+/gu, " "),
-      topic: null,
-    }));
+    .map((line) => {
+      const commentMatch = /\s\/\/\s*(.*?)\s*$/u.exec(line);
+      const code = commentMatch ? line.slice(0, commentMatch.index).trim() : line;
+      const description = commentMatch ? commentMatch[1]! : undefined;
+      const io: ChannelIO = {
+        name:
+          matchOne(code, /^([A-Za-z0-9_]+)\s*=/u) ??
+          matchOne(code, /^([A-Za-z0-9_]+)/u) ??
+          `io_${Math.abs(hash(code))}`,
+        shape: code.replace(/\s+/gu, " "),
+        topic: null,
+      };
+      if (description) io.description = description;
+      return io;
+    });
 }
 
 function parseIncludeItems(text: string): { name: string; alias: string | null }[] {
