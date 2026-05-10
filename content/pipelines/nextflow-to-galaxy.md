@@ -7,12 +7,13 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+revised: 2026-05-10
+revision: 3
 ai_generated: true
 summary: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow."
 phases:
   - mold: "[[summarize-nextflow]]"
+  - mold: "[[nextflow-summary-to-galaxy-reference-data]]"
   - mold: "[[nextflow-summary-to-galaxy-interface]]"
   - mold: "[[nextflow-summary-to-galaxy-data-flow]]"
   - mold: "[[compare-against-iwc-exemplar]]"

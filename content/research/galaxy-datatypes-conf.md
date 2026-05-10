@@ -14,6 +14,7 @@ related_notes:
   - "[[galaxy-xsd]]"
   - "[[galaxy-collection-semantics]]"
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
+  - "[[nextflow-to-galaxy-reference-data-mapping]]"
 sources:
   - "https://github.com/galaxyproject/galaxy/blob/7765fae934fbfdee77e3be5f5b235e43735273ae/config/datatypes_conf.xml.sample"
 summary: "Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications."
