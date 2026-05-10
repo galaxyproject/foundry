@@ -29,6 +29,28 @@ output_artifacts:
     default_filename: galaxy-workflow-draft.gxwf.yml
     description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
 references:
+  - kind: schema
+    ref: "[[summary-cwl]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "Read CWL source graph, step ids, command surfaces, scatter, conditionals, requirements, and warnings while emitting placeholder steps."
+  - kind: research
+    ref: "[[component-cwl-workflow-anatomy]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Preserve the lightweight CWL boundary and avoid re-inferring structure already present in the summary."
+    verification: "Run after the first CWL interface/data-flow briefs and confirm gxformat2 placeholder steps preserve CWL step boundaries unless the data-flow brief explicitly asks to split them."
+  - kind: research
+    ref: "[[gxformat2-schema]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring."
   - kind: research
     ref: "[[galaxy-workflow-draft-format]]"
     used_at: runtime
@@ -79,8 +101,10 @@ references:
     purpose: "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps."
     trigger: "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges."
 related_notes:
+  - "[[summary-cwl]]"
   - "[[cwl-summary-to-galaxy-interface]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
+  - "[[component-cwl-workflow-anatomy]]"
 ---
 # cwl-summary-to-galaxy-template
 
@@ -93,3 +117,5 @@ Topology is this Mold's job to settle. The output must be concrete gxformat2: wo
 Defer thoughtfully. When research surfaces a Foundry pattern page that names the exact recipe — a [[galaxy-collection-patterns]] reshape, a [[conditional-run-optional-step]] gate, a [[galaxy-tabular-patterns]] filter — fill the step in as completely as the pattern allows: concrete `tool_id`, parameters, port names from the pattern's worked example. Pattern pages encode resolved choices; emitting `TODO` over a covered recipe discards real evidence the per-step Mold cannot recover. Defer only when the step is a domain-specific CWL `CommandLineTool` with no covering pattern, and pack `_plan_context` with the `baseCommand` / `arguments`, `DockerRequirement` URIs, `SoftwareRequirement` packages, and `EnvVarRequirement` / `ResourceRequirement` constraints the per-step Mold needs to pick a wrapper.
 
 Output shape is gxformat2 with wrapper-tier relaxations and `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` per tool step — see [[galaxy-workflow-draft-format]]. Refinement open work for those planning fields lives in `refinement.md`.
+
+Use CWL step ids as the first pass for placeholder labels, then revise labels only when the interface/data-flow briefs or IWC comparison notes give a clearer Galaxy convention. Preserve one placeholder per logical CWL step unless the data-flow brief explicitly asks to split an expression, nested workflow, or collection operation into Galaxy-native steps.

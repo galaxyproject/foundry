@@ -13,7 +13,11 @@ if (mode === "iwc") {
   for (const p of data.pipelines) {
     process.stdout.write([p.name, p.repo, p.sha, p.tag].join("\t") + "\n");
   }
+} else if (mode === "cwl") {
+  for (const p of data.cwl_repositories ?? []) {
+    process.stdout.write([p.name, p.repo, p.sha, p.tag].join("\t") + "\n");
+  }
 } else {
-  process.stderr.write("usage: read-fixture-manifest.mjs iwc <field>|pipelines\n");
+  process.stderr.write("usage: read-fixture-manifest.mjs iwc <field>|pipelines|cwl\n");
   process.exit(1);
 }

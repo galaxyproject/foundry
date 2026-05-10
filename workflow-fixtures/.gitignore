@@ -1,6 +1,9 @@
 # Cloned pipeline working trees — materialized by scripts/fetch.sh from fixtures.yaml.
 pipelines/
 
+# Cloned CWL working trees — materialized by scripts/fetch-cwl.sh from fixtures.yaml.
+cwl/
+
 # IWC working tree + intermediate + final format2 outputs (built by scripts/build-iwc.sh)
 iwc-src/
 iwc-cleaned/

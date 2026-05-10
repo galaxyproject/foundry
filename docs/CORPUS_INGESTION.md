@@ -2,7 +2,7 @@
 
 The Foundry has **no IWC ingestion pipeline, no exemplar mirror, and no `workflow-fixtures` runtime dependency**. It integrates the IWC corpus through citations, survey notes, optional inline excerpts, and Molds that can fetch live corpus evidence at runtime.
 
-`workflow-fixtures/` now lives as a top-level directory inside the Foundry checkout (Foundry support infrastructure, not a separate product). Generated corpora — `pipelines/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/` — are gitignored. The validator and site-content traversal stay scoped to `content/`; `workflow-fixtures/` is invisible to them. The directory is cited by `$IWC_FORMAT2/...` and `$IWC_SKELETONS/...` from authoring/survey notes; nothing in `casts/` or `content/` reads from it at build time.
+`workflow-fixtures/` now lives as a top-level directory inside the Foundry checkout (Foundry support infrastructure, not a separate product). Generated corpora — `pipelines/`, `cwl/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/` — are gitignored. The validator and site-content traversal stay scoped to `content/`; `workflow-fixtures/` is invisible to them. The directory is cited by `$IWC_FORMAT2/...` and `$IWC_SKELETONS/...` from authoring/survey notes; CWL research can cite `workflow-fixtures/cwl/<repo>/...` paths in ad-hoc notes, but polished content should prefer upstream URLs or abstract workflow IDs. Nothing in `casts/` or `content/` reads from it at build time.
 
 ## Skeleton tier
 

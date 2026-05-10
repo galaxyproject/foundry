@@ -50,6 +50,41 @@
              --output dist/structural-schemas/native-galaxy-workflow.schema.json
   framing: content/research/galaxy-native-workflow-schema.md
 
+- local: content/research/cwl-v1.2/cwl.yaml
+  source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/json-schema/cwl.yaml
+  pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+  framing: content/research/cwl-v1.2-schemas.md
+
+- local: content/research/cwl-v1.2/CommonWorkflowLanguage.yml
+  source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/CommonWorkflowLanguage.yml
+  pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+  framing: content/research/cwl-v1.2-schemas.md
+
+- local: content/research/cwl-v1.2/Process.yml
+  source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/Process.yml
+  pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+  framing: content/research/cwl-v1.2-schemas.md
+
+- local: content/research/cwl-v1.2/CommandLineTool.yml
+  source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/CommandLineTool.yml
+  pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+  framing: content/research/cwl-v1.2-schemas.md
+
+- local: content/research/cwl-v1.2/CommandLineTool-standalone.yml
+  source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/CommandLineTool-standalone.yml
+  pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+  framing: content/research/cwl-v1.2-schemas.md
+
+- local: content/research/cwl-v1.2/Workflow.yml
+  source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/Workflow.yml
+  pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+  framing: content/research/cwl-v1.2-schemas.md
+
+- local: content/research/cwl-v1.2/Operation.yml
+  source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/Operation.yml
+  pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+  framing: content/research/cwl-v1.2-schemas.md
+
 - local: content/prompts/galaxy/custom-tool-critic.upstream.prompt
   source: $GALAXY_DANNON/lib/galaxy/agents/prompts/custom_tool_critic.md
   pinned_ref: 69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e
