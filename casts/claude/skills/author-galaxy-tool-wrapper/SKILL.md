@@ -13,21 +13,25 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- `summary-nextflow`; schema: summary-nextflow; producer(s): `summarize-nextflow`; Source pipeline summary from summarize-nextflow; provides process command, inputs, outputs, and container or conda evidence for UDT authoring.
+- Read artifact `summary-nextflow`. Schema: summary-nextflow. Produced by `summarize-nextflow`. Source pipeline summary from summarize-nextflow; provides process command, inputs, outputs, and container or conda evidence for UDT authoring.
 
 ## Outputs
 
-- `galaxy-user-tool-definition`; kind: `yaml`; default filename: `galaxy-user-tool.yml`; Galaxy `GalaxyUserTool` YAML definition for a tool not present on the Tool Shed.
+- Write artifact `galaxy-user-tool-definition` as `galaxy-user-tool.yml`. Format: `yaml`. Galaxy `GalaxyUserTool` YAML definition for a tool not present on the Tool Shed.
+
+## Required Tools
+
+- None declared. Procedure should not assume external CLIs are present.
 
 ## Load Upfront
 
-- `references/prompts/custom-tool-structured.md`; kind: `prompt`; mode: `verbatim`; Generate a schema-shaped `GalaxyUserTool` YAML definition from missing-wrapper requirements and source-derived process evidence.
-- `references/schemas/summary-nextflow.schema.json`; kind: `schema`; mode: `verbatim`; Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.
+- `references/prompts/custom-tool-structured.md`: prompt reference copied verbatim into the bundle. Generate a schema-shaped `GalaxyUserTool` YAML definition from missing-wrapper requirements and source-derived process evidence.
+- `references/schemas/summary-nextflow.schema.json`: Schema file copied verbatim into the bundle. Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.
 
 ## Load On Demand
 
-- `references/prompts/custom-tool-critic.md`; kind: `prompt`; mode: `verbatim`; Run the mandatory fuzzy quality review after structural validation passes; Trigger: After the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.
-- `references/notes/component-nextflow-containers-and-envs.md`; kind: `research`; mode: `verbatim`; Map Nextflow container/conda evidence to Galaxy UDT container and package provenance; Trigger: When a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.
+- `references/prompts/custom-tool-critic.md`: prompt reference copied verbatim into the bundle. Run the mandatory fuzzy quality review after structural validation passes. Use when: after the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.
+- `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Map Nextflow container/conda evidence to Galaxy UDT container and package provenance. Use when: a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.
 
 ## Validation
 

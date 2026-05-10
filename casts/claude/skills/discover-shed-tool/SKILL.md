@@ -17,22 +17,29 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- `galaxy-tool-pin`; kind: `json`; default filename: `galaxy-tool-pin.json`; schema: galaxy-tool-discovery; (owner, repo, tool_id, version, changeset_revision) pin for a Tool Shed wrapper plus discovery classification.
+- Write artifact `galaxy-tool-pin` as `galaxy-tool-pin.json`. Format: `json`. Schema: galaxy-tool-discovery. (owner, repo, tool_id, version, changeset_revision) pin for a Tool Shed wrapper plus discovery classification.
+
+## Required Tools
+
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli` — @galaxy-tool-util/cli.
+  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
+  Check: `gxwf --version`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
 ## Load Upfront
 
-- `references/schemas/galaxy-tool-discovery.schema.json`; kind: `schema`; mode: `verbatim`; Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.
+- `references/schemas/galaxy-tool-discovery.schema.json`: Schema file copied verbatim into the bundle. Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.
 
 ## Load On Demand
 
-- `references/cli/tool-revisions.json`; kind: `cli-command`; mode: `sidecar`; Resolve a Tool Shed tool version to an installable changeset revision; Trigger: After selecting a candidate version that needs a reproducible changeset pin.
-- `references/cli/tool-search.json`; kind: `cli-command`; mode: `sidecar`; Search the Tool Shed for candidate wrappers matching a step's tool need; Trigger: When resolving a workflow step to an installable Galaxy tool wrapper.
-- `references/cli/tool-versions.json`; kind: `cli-command`; mode: `sidecar`; List available Tool Shed versions for a selected candidate; Trigger: After a Tool Shed search candidate is selected and before pinning a version.
-- `references/notes/component-tool-shed-search.md`; kind: `research`; mode: `verbatim`; Explain Tool Shed search/indexing limitations that affect hit scoring and fallthrough decisions; Trigger: When results are missing, weak, duplicated across owners, stale, or ambiguous.
+- `references/cli/tool-revisions.json`: CLI command reference packaged as a sidecar. Resolve a Tool Shed tool version to an installable changeset revision. Use when: after selecting a candidate version that needs a reproducible changeset pin.
+- `references/cli/tool-search.json`: CLI command reference packaged as a sidecar. Search the Tool Shed for candidate wrappers matching a step's tool need. Use when: resolving a workflow step to an installable Galaxy tool wrapper.
+- `references/cli/tool-versions.json`: CLI command reference packaged as a sidecar. List available Tool Shed versions for a selected candidate. Use when: after a Tool Shed search candidate is selected and before pinning a version.
+- `references/notes/component-tool-shed-search.md`: Research note copied verbatim into the bundle. Explain Tool Shed search/indexing limitations that affect hit scoring and fallthrough decisions. Use when: results are missing, weak, duplicated across owners, stale, or ambiguous.
 
 ## Validation
 
-- Validate `galaxy-tool-pin.json` for `galaxy-tool-pin` with `validate-galaxy-tool-discovery`; schema: galaxy-tool-discovery.
+- Validate `galaxy-tool-pin.json` before returning it: run `validate-galaxy-tool-discovery galaxy-tool-pin.json` from `@galaxy-foundry/galaxy-tool-discovery-schema`. If the command is not on PATH, run `npx --package @galaxy-foundry/galaxy-tool-discovery-schema validate-galaxy-tool-discovery galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
 
 ## Procedure
 

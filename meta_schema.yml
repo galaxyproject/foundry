@@ -10,7 +10,7 @@ required: [type, tags, status, created, revised, revision, ai_generated, summary
 properties:
   type:
     type: string
-    enum: [mold, pattern, source-pattern, cli-command, pipeline, research, schema, prompt]
+    enum: [mold, pattern, source-pattern, cli-tool, cli-command, pipeline, research, schema, prompt]
   tags:
     type: array
     items:
@@ -142,7 +142,8 @@ properties:
     enum: [galaxy, cwl, web, generic]
   tool:
     type: string
-    enum: [gxwf, planemo]
+    pattern: "^[a-z][a-z0-9-]*$"
+    description: "CLI tool slug. cli-tool and cli-command notes use this to link. Mold axis=tool-specific narrows to the same slug."
   # Typed artifact handoffs between Molds. Producer side: this Mold emits
   # `id` as one of its outputs. Consumer side (input_artifacts): this Mold
   # requires `id` to be supplied by a prior Mold in a Pipeline run. ids are
@@ -226,6 +227,30 @@ properties:
   # --- CLI command fields ---
   command:
     type: string
+
+  # --- CLI tool (install-metadata) fields ---
+  # Tool-level install metadata. cli-tool notes live at content/cli/<tool>/index.md
+  # and aggregate install instructions for every cli-command note under the same tool.
+  origin:
+    type: string
+    enum: [npm, pypi]
+    description: "Where the CLI is distributed. Drives the install command renderer."
+  package_version:
+    type: string
+    description: "Version range or pin for the upstream package (e.g. >=3.1.0)."
+  invoke:
+    type: string
+    pattern: "^[A-Za-z0-9._-]+$"
+    description: "Canonical bin name as it appears on PATH after install."
+  invoke_fallback:
+    type: string
+    description: "One-line ephemeral invocation when the bin is not on PATH (e.g. `uvx cwltool`, `npx --package <pkg> <bin>`)."
+  availability_check:
+    type: string
+    description: "One-line shell command that exits 0 when the tool is available (e.g. `cwltool --version`)."
+  docs_url:
+    type: string
+    description: "Link to upstream documentation; rendered into the SKILL.md Required Tools section."
 
   # --- Pipeline fields ---
   # `phases` shape is sketch-level; locked in after lifting first 2-3 pipelines.
@@ -340,6 +365,14 @@ allOf:
       required: [type]
     then:
       required: [tool, command]
+
+  # cli-tool requires tool + install metadata
+  - if:
+      properties:
+        type: { const: cli-tool }
+      required: [type]
+    then:
+      required: [tool, origin, package, invoke]
 
   # pipeline requires title + phases
   - if:

@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-interface",
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
-    "revision": 2,
-    "content_hash": "e067329c9b7cfba33c3ffb7e8ae1acd352117be483a16b0d2769eddeb5bd118b",
-    "commit": "11ab76e78908714f4b28e9bb803da206d2c01d37"
+    "revision": 4,
+    "content_hash": "ad8036eea3ea81f0798201ef75a6b0686b7bc1ba0c969aa8dab204f58b45fc3e",
+    "commit": "92d7b6b4d0a72df80193a4ca5cf6fc24c79027c2"
   },
-  "cast_at": "2026-05-09T01:25:09.283Z",
+  "cast_at": "2026-05-10T22:19:32.849Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -40,8 +40,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs.",
       "trigger": "When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.",
-      "src_hash": "acc585cf282252827c191dde13c2bac5710d2212e35dfce97b03f72b35d18c6b",
-      "dst_hash": "acc585cf282252827c191dde13c2bac5710d2212e35dfce97b03f72b35d18c6b",
+      "src_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
+      "dst_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
       "source": "deterministic"
     },
     {
@@ -90,6 +90,21 @@
     {
       "kind": "research",
       "mode": "verbatim",
+      "ref": "[[nextflow-reference-data-classification]]",
+      "src": "content/research/nextflow-reference-data-classification.md",
+      "dst": "references/notes/nextflow-reference-data-classification.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Cross-check source-side reference-data classifications before translating the reference-data brief into Galaxy workflow inputs.",
+      "trigger": "When the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
+      "src_hash": "af778e115bac0d363efba2855d2701a613fa5a3920b0eef132bdb6ca97669273",
+      "dst_hash": "af778e115bac0d363efba2855d2701a613fa5a3920b0eef132bdb6ca97669273",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
       "ref": "[[nextflow-to-galaxy-channel-shape-mapping]]",
       "src": "content/research/nextflow-to-galaxy-channel-shape-mapping.md",
       "dst": "references/notes/nextflow-to-galaxy-channel-shape-mapping.md",
@@ -112,8 +127,8 @@
       "evidence": "corpus-observed",
       "purpose": "Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence.",
       "trigger": "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source.",
-      "src_hash": "4aa8e03247d773230bb9066f8e139450e0b29a863e5912f95c4cffdfeeef6cff",
-      "dst_hash": "4aa8e03247d773230bb9066f8e139450e0b29a863e5912f95c4cffdfeeef6cff",
+      "src_hash": "656751cfdb3a0129aef6bfd00dec85da76a8c155720893be22307e0f56013732",
+      "dst_hash": "656751cfdb3a0129aef6bfd00dec85da76a8c155720893be22307e0f56013732",
       "source": "deterministic"
     },
     {
@@ -147,6 +162,13 @@
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "nextflow-galaxy-reference-data",
+        "description": "Reference-data shape brief from [[nextflow-summary-to-galaxy-reference-data]] that pins per-asset reference inputs and rebuild-on-absence behavior.",
+        "producers": [
+          "nextflow-summary-to-galaxy-reference-data"
         ]
       }
     ]

@@ -19,6 +19,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Write artifact `summary-nextflow` as `summary-nextflow.json`. Format: `json`. Schema: summary-nextflow. A structured JSON summary of a Nextflow pipeline, including its interface, processes, data flow, software environment, and test fixtures.
 
+## Required Tools
+
+- None declared. Procedure should not assume external CLIs are present.
+
 ## Load Upfront
 
 - `references/schemas/nextflow-parameters-meta.schema.json`: Schema file copied verbatim into the bundle. Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[].

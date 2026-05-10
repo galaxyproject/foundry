@@ -19,8 +19,29 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Write artifact `summary-cwl` as `summary-cwl.json`. Format: `json`. Schema: summary-cwl. Structured summary of a CWL Workflow + CommandLineTool tree: inputs, outputs, scatter, conditionals, requirements.
 
+## Required Tools
+
+- **`cwl-normalizer`** (cwl-utils). `uv tool install cwl-utils` (or `pip install cwl-utils`) — cwl-utils.
+  Ephemeral run: `uvx --from cwl-utils cwl-normalizer`.
+  Check: `cwl-normalizer --help`.
+  Docs: https://github.com/common-workflow-language/cwl-utils
+  Bundled reference: `references/cli/cwl-utils.md`.
+- **`cwltool`** (cwltool). `uv tool install cwltool` (or `pip install cwltool`) — cwltool.
+  Ephemeral run: `uvx cwltool`.
+  Check: `cwltool --version`.
+  Docs: https://cwltool.readthedocs.io/
+  Bundled reference: `references/cli/cwltool.md`.
+- **`validate-summary-cwl`** (validate-summary-cwl). `npm install -g @galaxy-foundry/summary-cwl-schema` — @galaxy-foundry/summary-cwl-schema.
+  Ephemeral run: `npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl`.
+  Check: `validate-summary-cwl --help`.
+  Docs: https://github.com/jmchilton/foundry/blob/main/packages/summary-cwl-schema/README.md
+  Bundled reference: `references/cli/validate-summary-cwl.md`.
+
 ## Load Upfront
 
+- `references/cli/cwl-utils.md`: CLI tool reference copied verbatim into the bundle. Normalize the CWL workflow (cwl-normalizer) into a single JSON document for extraction.
+- `references/cli/cwltool.md`: CLI tool reference copied verbatim into the bundle. Validate the CWL entrypoint before normalization.
+- `references/cli/validate-summary-cwl.md`: CLI tool reference copied verbatim into the bundle. Schema-check summary-cwl.json before returning it from the skill.
 - `references/notes/component-cwl-workflow-anatomy.md`: Research note copied verbatim into the bundle. Use CWL's native workflow, step, tool, scatter, conditional, and requirement structure without copying the heavier Nextflow inference pipeline.
 - `references/schemas/summary-cwl.schema.json`: Schema file copied verbatim into the bundle. Validate the emitted CWL summary JSON and provide downstream consumers the output contract.
 

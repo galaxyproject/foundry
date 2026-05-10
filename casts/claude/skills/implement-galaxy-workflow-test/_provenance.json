@@ -1,0 +1,156 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "implement-galaxy-workflow-test",
+    "path": "content/molds/implement-galaxy-workflow-test/index.md",
+    "revision": 5,
+    "content_hash": "426f7b4608b5dd1358ca7b9526a018e905b27b4eab867647dfb7e8731a61c49f",
+    "commit": "92d7b6b4d0a72df80193a4ca5cf6fc24c79027c2"
+  },
+  "cast_at": "2026-05-10T22:19:12.122Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[validate-tests]]",
+      "src": "content/cli/gxwf/validate-tests.md",
+      "dst": "references/cli/validate-tests.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution.",
+      "trigger": "After authoring or editing a Galaxy workflow test file and before Planemo invocation.",
+      "src_hash": "98bdbc75c14b520e6dd03da5b08488890bced76569a55d202bb8e807757cf1ed",
+      "dst_hash": "e7ed4915412a943bc7a7889011d3811ff1da55f7ed039264cea5de3f05c09345",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Revise workflow inputs, outputs, labels, checkpoints, and collection identifiers so meaningful tests can be authored.",
+      "trigger": "When test authoring reveals missing labels, omitted workflow-level outputs, unstable collection identifiers, weakly assertable final outputs, or fixture-shape pressure on workflow inputs.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-shortcuts-anti-patterns]]",
+      "src": "content/research/iwc-shortcuts-anti-patterns.md",
+      "dst": "references/notes/iwc-shortcuts-anti-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Flag assertion shortcuts that are acceptable in IWC versus shortcuts that should be avoided.",
+      "trigger": "When considering existence-only, size-only, image-only, checksum, output-label, or negative-test patterns.",
+      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style.",
+      "trigger": "When writing or revising the job/input side of a Galaxy workflow test file.",
+      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-asserts-idioms]]",
+      "src": "content/research/planemo-asserts-idioms.md",
+      "dst": "references/notes/planemo-asserts-idioms.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose assertion families, tolerance magnitudes, and the static/Planemo validation loop.",
+      "trigger": "When writing or revising output assertions for a Galaxy workflow test file.",
+      "src_hash": "4a972fdc5038e73105b02f95705434e61e8f73a35d112e59018468f4fd14d3d0",
+      "dst_hash": "4a972fdc5038e73105b02f95705434e61e8f73a35d112e59018468f4fd14d3d0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-workflow-test-architecture]]",
+      "src": "content/research/planemo-workflow-test-architecture.md",
+      "dst": "references/notes/planemo-workflow-test-architecture.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs.",
+      "trigger": "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations.",
+      "src_hash": "49d39a60def4e0fc731d384eeb1c5b747fe58ba23e362e48bd85ea1d85c6f98d",
+      "dst_hash": "49d39a60def4e0fc731d384eeb1c5b747fe58ba23e362e48bd85ea1d85c6f98d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[tests-format]]",
+      "src": "package://@galaxy-foundry/tests-format-schema#testsFormatSchema",
+      "dst": "references/schemas/tests-format.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.",
+      "src_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
+      "dst_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-test",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-tests.yml",
+        "description": "Galaxy workflow test file (tests-format) with job inputs, expected outputs, assertions; passes static schema + label cross-check."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "galaxy-test-plan",
+        "description": "Reviewable Galaxy test plan from a *-test-to-galaxy-test-plan Mold; profile, fixtures, snapshot/assertion provenance.",
+        "producers": [
+          "cwl-test-to-galaxy-test-plan",
+          "nextflow-test-to-galaxy-test-plan"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-draft",
+        "description": "gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against.",
+        "producers": [
+          "cwl-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-template",
+          "paper-summary-to-galaxy-template"
+        ]
+      },
+      {
+        "id": "test-data-refs",
+        "description": "Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.",
+        "producers": [
+          "find-test-data",
+          "paper-to-test-data"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "run-workflow-test",
+    "path": "content/molds/run-workflow-test/index.md",
+    "revision": 3,
+    "content_hash": "5a598f77f7fcc0b432da2e7b3f52835d4400056ef7e2aabf794fc0b7fafb0bc8",
+    "commit": "92d7b6b4d0a72df80193a4ca5cf6fc24c79027c2"
+  },
+  "cast_at": "2026-05-10T22:19:15.665Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[validate-tests]]",
+      "src": "content/cli/gxwf/validate-tests.md",
+      "dst": "references/cli/validate-tests.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Run static schema and workflow-label checks before expensive workflow execution.",
+      "trigger": "Before invoking Planemo when a Galaxy workflow test file is present.",
+      "src_hash": "98bdbc75c14b520e6dd03da5b08488890bced76569a55d202bb8e807757cf1ed",
+      "dst_hash": "e7ed4915412a943bc7a7889011d3811ff1da55f7ed039264cea5de3f05c09345",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-invocation-failure-reference]]",
+      "src": "content/research/galaxy-workflow-invocation-failure-reference.md",
+      "dst": "references/notes/galaxy-workflow-invocation-failure-reference.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve invocation identifiers and state summaries needed to inspect workflow-level runtime failures after Planemo returns.",
+      "trigger": "When Planemo reports a failed, cancelled, missing-output, or ambiguous workflow invocation result.",
+      "src_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
+      "dst_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-asserts-idioms]]",
+      "src": "content/research/planemo-asserts-idioms.md",
+      "dst": "references/notes/planemo-asserts-idioms.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Interpret assertion failures and choose the right fast inner-loop command before full reruns.",
+      "trigger": "When a workflow test file exists and the task is to run, iterate, or classify its test assertions.",
+      "src_hash": "4a972fdc5038e73105b02f95705434e61e8f73a35d112e59018468f4fd14d3d0",
+      "dst_hash": "4a972fdc5038e73105b02f95705434e61e8f73a35d112e59018468f4fd14d3d0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-workflow-test-architecture]]",
+      "src": "content/research/planemo-workflow-test-architecture.md",
+      "dst": "references/notes/planemo-workflow-test-architecture.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Run workflow tests while preserving Planemo structured artifacts, Galaxy mode, invocation id, history id, and API follow-up context.",
+      "trigger": "When choosing between managed Galaxy, external Galaxy, full test runs, existing invocation checks, or direct workflow runs.",
+      "src_hash": "49d39a60def4e0fc731d384eeb1c5b747fe58ba23e362e48bd85ea1d85c6f98d",
+      "dst_hash": "49d39a60def4e0fc731d384eeb1c5b747fe58ba23e362e48bd85ea1d85c6f98d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[tests-format]]",
+      "src": "package://@galaxy-foundry/tests-format-schema#testsFormatSchema",
+      "dst": "references/schemas/tests-format.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Validate Galaxy workflow test files before starting a Planemo or Galaxy-backed execution.",
+      "src_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
+      "dst_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
+      "source": "deterministic"
+    }
+  ]
+}

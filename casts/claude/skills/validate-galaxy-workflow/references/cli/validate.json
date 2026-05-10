@@ -1,0 +1,9 @@
+{
+  "type": "cli-command",
+  "tool": "gxwf",
+  "command": "validate",
+  "summary": "Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution.",
+  "source_path": "content/cli/gxwf/validate.md",
+  "source_revision": 3,
+  "body": "# `gxwf validate`\n\nValidate a Galaxy workflow source file before attempting runtime execution. Use this as the design-time guardrail after step implementation and again after final workflow assembly.\n\n## Output\n\nDefault output is human-readable diagnostics. JSON output should be treated as the preferred cast-skill interface; free-text diagnostics are a fallback for humans.\n\n## Examples\n\n```bash\ngxwf validate workflow.ga\ngxwf validate workflow.gxwf.yml --json\ngxwf validate workflow.gxwf.yml --json --connections --strict\ngxwf validate workflow.ga --mode json-schema --tool-schema-dir ./tool-schemas --json\n```\n\n## Gotchas\n\n- Validation is design-time structure checking. It does not prove that a workflow test will pass under Planemo.\n- Run after each generated Galaxy step when the harness can still attribute failures to the fresh step.\n- Run again after assembly to catch cross-step or workflow-level issues before runtime testing.\n- Prefer `--json` whenever a cast skill or harness needs to classify diagnostics.\n- Use `--connections` when tool cache metadata is available and data-shape compatibility matters, especially around collections and map-over.\n- `--no-tool-state` weakens validation. If used, record why tool metadata was unavailable and rerun without it before final runtime testing."
+}

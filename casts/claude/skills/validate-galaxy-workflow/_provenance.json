@@ -1,0 +1,60 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "validate-galaxy-workflow",
+    "path": "content/molds/validate-galaxy-workflow/index.md",
+    "revision": 3,
+    "content_hash": "710b9239387be85f0173c50d96ded014e4eb9f79b38366cdd83a6723834db36a",
+    "commit": "92d7b6b4d0a72df80193a4ca5cf6fc24c79027c2"
+  },
+  "cast_at": "2026-05-10T22:19:19.059Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[gxwf validate]]",
+      "src": "content/cli/gxwf/validate.md",
+      "dst": "references/cli/validate.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Validate the assembled gxformat2 workflow before runtime testing.",
+      "trigger": "After all Galaxy steps and workflow tests have been assembled.",
+      "verification": "Run the cast skill on a complete IWC-derived workflow and confirm terminal validation findings are separated from runtime test failures.",
+      "src_hash": "8fdf834e8b3bd2c70e9625c9148eb246855a40625510f0be5f6351885b057aa4",
+      "dst_hash": "37c935109f90bb1c151630b7b4a4c0f400eb927383c1083ef835639126f8a80f",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-invocation-failure-reference]]",
+      "src": "content/research/galaxy-workflow-invocation-failure-reference.md",
+      "dst": "references/notes/galaxy-workflow-invocation-failure-reference.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Keep static workflow validation findings distinct from Galaxy invocation/runtime failure surfaces.",
+      "trigger": "When a workflow passes gxwf validation but still has likely runtime risks around invocation scheduling, outputs, conditionals, or collection population.",
+      "src_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
+      "dst_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Classify validation or pre-test findings that indicate missing labels, omitted workflow outputs, or untestable checkpoint structure.",
+      "trigger": "When terminal validation passes but workflow-level outputs, labels, or collection shapes look likely to break future workflow tests.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    }
+  ]
+}

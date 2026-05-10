@@ -110,6 +110,38 @@ describe("cast-mold (summarize-nextflow integration)", () => {
   });
 });
 
+describe("required-tools manifest (summarize-cwl integration)", () => {
+  const bundle = path.join(repoRoot, "casts", "claude", "skills", "summarize-cwl");
+  const manifestPath = path.join(bundle, "_required_tools.json");
+
+  it("emits _required_tools.json with referenced and implied tools", () => {
+    expect(existsSync(manifestPath)).toBe(true);
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as Array<{
+      tool: string;
+      origin: string;
+      invoke: string;
+      source: string;
+    }>;
+    const slugs = manifest.map((t) => t.tool).sort();
+    expect(slugs).toContain("cwltool");
+    expect(slugs).toContain("cwl-utils");
+    expect(slugs).toContain("validate-summary-cwl");
+    for (const entry of manifest) {
+      expect(entry.invoke.length).toBeGreaterThan(0);
+      expect(["referenced", "implied"]).toContain(entry.source);
+      expect(["npm", "pypi"]).toContain(entry.origin);
+    }
+  });
+
+  it("SKILL.md Required Tools section renders install + ephemeral-run commands", () => {
+    const skill = readFileSync(path.join(bundle, "SKILL.md"), "utf8");
+    expect(skill).toContain("## Required Tools");
+    expect(skill).toContain("uv tool install cwltool");
+    expect(skill).toContain("uvx --from cwl-utils cwl-normalizer");
+    expect(skill).toContain("npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl");
+  });
+});
+
 describe("cast-skill-verify (summarize-nextflow integration)", () => {
   it("verifier passes against committed cast", () => {
     const r = runTsx(castVerify, ["summarize-nextflow", "--target=claude"]);
