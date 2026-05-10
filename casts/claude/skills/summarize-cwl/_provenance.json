@@ -5,11 +5,55 @@
     "name": "summarize-cwl",
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
-    "content_hash": "d129d443e881abc6ca5fe82b61d3f871bd3e6c85afcf7fc5a69f49591773ac21",
-    "commit": "4ad02623a67f1be0dd91c9e66503401f35c8b036"
+    "content_hash": "6321fe495f34e8f01fe69ffdd5f835d6e8cf6827d5a69414694843f0d5af2fc1",
+    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
   },
-  "cast_at": "2026-05-10T17:48:52.077Z",
+  "cast_at": "2026-05-10T22:31:13.705Z",
   "refs": [
+    {
+      "kind": "cli-tool",
+      "mode": "verbatim",
+      "ref": "[[cwl-utils]]",
+      "src": "content/cli/cwl-utils/index.md",
+      "dst": "references/cli/cwl-utils.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Normalize the CWL workflow (cwl-normalizer) into a single JSON document for extraction.",
+      "verification": "Run summarize-cwl against the cross-document-run-refs eval case; documents.normalized_path must be populated and tools[] must contain the referenced CommandLineTools.",
+      "src_hash": "aa2a242d31c7cf61e6d7dfa1b43a77271b1e3f9fb1a844e43982a7da55f9fd28",
+      "dst_hash": "aa2a242d31c7cf61e6d7dfa1b43a77271b1e3f9fb1a844e43982a7da55f9fd28",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-tool",
+      "mode": "verbatim",
+      "ref": "[[cwltool]]",
+      "src": "content/cli/cwltool/index.md",
+      "dst": "references/cli/cwltool.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Validate the CWL entrypoint before normalization.",
+      "verification": "Run summarize-cwl against one valid and one invalid CWL fixture; the invalid one must surface cwltool diagnostics in summary-cwl.json.",
+      "src_hash": "f330f8308b74a228f3d373aee74b20f62380812864b111fd39ed1b057a4bb08a",
+      "dst_hash": "f330f8308b74a228f3d373aee74b20f62380812864b111fd39ed1b057a4bb08a",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-tool",
+      "mode": "verbatim",
+      "ref": "[[validate-summary-cwl]]",
+      "src": "content/cli/validate-summary-cwl/index.md",
+      "dst": "references/cli/validate-summary-cwl.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Schema-check summary-cwl.json before returning it from the skill.",
+      "src_hash": "8a6fc1eec714eb45b2160eebab145a6da348682d3cafb2fdf9de81124f396e80",
+      "dst_hash": "8a6fc1eec714eb45b2160eebab145a6da348682d3cafb2fdf9de81124f396e80",
+      "source": "deterministic"
+    },
     {
       "kind": "research",
       "mode": "verbatim",

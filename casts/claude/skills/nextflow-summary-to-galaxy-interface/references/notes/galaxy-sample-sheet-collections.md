@@ -17,6 +17,7 @@ related_notes:
   - "[[nextflow-params-to-galaxy-inputs]]"
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
+  - "[[nextflow-to-galaxy-reference-data-mapping]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"

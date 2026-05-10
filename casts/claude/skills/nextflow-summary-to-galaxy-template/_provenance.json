@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
-    "revision": 2,
-    "content_hash": "d79134dbfcf7e4d58b9dc5b9f963955f69eee5c5797290b8cbb44325236241ab",
-    "commit": "11ab76e78908714f4b28e9bb803da206d2c01d37"
+    "revision": 6,
+    "content_hash": "3fc9a178ac3a349e3235e1c43aec98f9d50d8b011e8438ce39c70b620f9a880e",
+    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
   },
-  "cast_at": "2026-05-09T01:25:10.987Z",
+  "cast_at": "2026-05-10T22:31:11.783Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -70,8 +70,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
-      "src_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
-      "dst_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "src_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
+      "dst_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
       "source": "deterministic"
     },
     {
@@ -88,6 +88,21 @@
       "verification": "Promote after two worked Nextflow-to-Galaxy templates preserve the data-flow/template split without schema changes.",
       "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
       "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft-format]]",
+      "src": "content/research/galaxy-workflow-draft-format.md",
+      "dst": "references/notes/galaxy-workflow-draft-format.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
+      "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
+      "src_hash": "95019d71a09c3c8a153ed59e187827f1bab2b5c7f5d48a6fe9c582912e62264d",
+      "dst_hash": "95019d71a09c3c8a153ed59e187827f1bab2b5c7f5d48a6fe9c582912e62264d",
       "source": "deterministic"
     },
     {
@@ -135,6 +150,36 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-reference-data-classification]]",
+      "src": "content/research/nextflow-reference-data-classification.md",
+      "dst": "references/notes/nextflow-reference-data-classification.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Cross-check source-side reference-data classifications before committing reference assets, optional inputs, and rebuild behavior into the gxformat2 skeleton.",
+      "trigger": "When emitting workflow inputs or input-connection wiring for reference assets and the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
+      "src_hash": "af778e115bac0d363efba2855d2701a613fa5a3920b0eef132bdb6ca97669273",
+      "dst_hash": "af778e115bac0d363efba2855d2701a613fa5a3920b0eef132bdb6ca97669273",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-to-galaxy-reference-data-mapping]]",
+      "src": "content/research/nextflow-to-galaxy-reference-data-mapping.md",
+      "dst": "references/notes/nextflow-to-galaxy-reference-data-mapping.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Resolve reference-asset declarations into gxformat2 inputs with the right datatype, optionality, and rebuild-on-absence wiring; cross-check the upstream brief against the datatypes table and v1 posture when the brief is silent or low-confidence on a specific asset.",
+      "trigger": "When emitting workflow inputs or input-connection wiring for any reference asset flagged in the reference-data brief (FASTA, fai, dict, indexes, dbsnp, known_indels, intervals, PoN, …), or when the source pipeline declares iGenomes-derived params, per-asset reference path params, or any compute-if-missing index-building branch.",
+      "src_hash": "656751cfdb3a0129aef6bfd00dec85da76a8c155720893be22307e0f56013732",
+      "dst_hash": "656751cfdb3a0129aef6bfd00dec85da76a8c155720893be22307e0f56013732",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
@@ -155,7 +200,7 @@
         "id": "galaxy-workflow-draft",
         "kind": "yaml",
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
-        "description": "gxformat2 skeleton: workflow inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
+        "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
       }
     ],
     "consumes": [
@@ -165,6 +210,13 @@
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "nextflow-galaxy-reference-data",
+        "description": "Reference-data shape brief from [[nextflow-summary-to-galaxy-reference-data]] that pins per-asset reference inputs, optionality, datatype hints, and rebuild-on-absence behavior the skeleton must honor.",
+        "producers": [
+          "nextflow-summary-to-galaxy-reference-data"
         ]
       },
       {

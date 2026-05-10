@@ -31,6 +31,10 @@ kinds:
     dst_dir: references/patterns/
     dst_extension: .md
     modes: [verbatim, condense]
+  cli-tool:
+    dst_dir: references/cli/
+    dst_extension: .md
+    modes: [verbatim]
   cli-command:
     dst_dir: references/cli/
     dst_extension: .json

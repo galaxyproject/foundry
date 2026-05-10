@@ -23,6 +23,13 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Write artifact `iwc-comparison-notes` as `iwc-comparison-notes.md`. Format: `markdown`. Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring.
 
+## Required Tools
+
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
+  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
+  Check: `gxwf --version`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
+
 ## Load Upfront
 
 - None declared.

@@ -16,6 +16,7 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
@@ -139,7 +140,7 @@ function buildSlugMap(repoRoot: string): {
 // ---- ref resolution ----
 
 interface ResolvedRef {
-  kind: "schema" | "research" | "pattern" | "cli-command" | "prompt";
+  kind: "schema" | "research" | "pattern" | "cli-tool" | "cli-command" | "prompt";
   mode: "verbatim" | "condense" | "sidecar";
   ref: string;
   src: string;
@@ -154,7 +155,14 @@ interface ResolvedRef {
   package_source?: { spec: string; exportName: string };
 }
 
-const SUPPORTED_KINDS = new Set(["schema", "research", "pattern", "cli-command", "prompt"]);
+const SUPPORTED_KINDS = new Set([
+  "schema",
+  "research",
+  "pattern",
+  "cli-tool",
+  "cli-command",
+  "prompt",
+]);
 const NOT_IMPLEMENTED_KINDS = new Set(["example"]);
 
 function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
@@ -261,6 +269,16 @@ function resolveMoldRef(
         kindCfg.dst_dir,
         `${path.basename(tp, ".md")}${kindCfg.dst_extension}`,
       );
+    } else if (kind === "cli-tool") {
+      // cli-tool notes live at content/cli/<tool>/index.md. Use the parent dir
+      // slug (which equals the tool name) for the bundled filename so casts
+      // get readable filenames like references/cli/cwltool.md.
+      src = tp;
+      const toolSlug =
+        typeof metaByPath.get(tp)?.tool === "string"
+          ? (metaByPath.get(tp)!.tool as string)
+          : path.basename(path.posix.dirname(tp));
+      dstOverride = path.posix.join(kindCfg.dst_dir, `${toolSlug}${kindCfg.dst_extension}`);
     } else {
       src = tp;
     }
@@ -881,8 +899,115 @@ function refKindLabel(ref: ProvenanceRefEntry): string {
   if (ref.kind === "schema") return "Schema file";
   if (ref.kind === "research") return "Research note";
   if (ref.kind === "pattern") return "Pattern note";
+  if (ref.kind === "cli-tool") return "CLI tool reference";
   if (ref.kind === "cli-command") return "CLI command reference";
   return `${ref.kind} reference`;
+}
+
+interface RequiredTool {
+  tool: string;
+  origin: string;
+  package: string;
+  package_version?: string;
+  invoke: string;
+  invoke_fallback?: string;
+  availability_check?: string;
+  docs_url?: string;
+  /** Bundled markdown reference (relative to bundle root) when one was copied. */
+  reference?: string;
+  /** Why this tool is required: "referenced" (explicit) or "implied-by-command:<subcommand>". */
+  source: "referenced" | "implied";
+  /** For implied tools, the subcommand notes that pulled them in. */
+  implied_by?: string[];
+}
+
+function aggregateRequiredTools(
+  refs: ProvenanceRefEntry[],
+  metaByPath: Map<string, Frontmatter>,
+  slugMap: Map<string, string>,
+): RequiredTool[] {
+  const tools = new Map<string, RequiredTool>();
+
+  const intern = (
+    toolNotePath: string,
+    source: "referenced" | "implied",
+    impliedBy?: string,
+    reference?: string,
+  ): void => {
+    const meta = metaByPath.get(toolNotePath);
+    if (!meta || meta.type !== "cli-tool") return;
+    const slug = typeof meta.tool === "string" ? meta.tool : "";
+    if (!slug) return;
+    const existing = tools.get(slug);
+    if (existing) {
+      if (source === "referenced") existing.source = "referenced";
+      if (impliedBy && !existing.implied_by?.includes(impliedBy)) {
+        existing.implied_by = [...(existing.implied_by ?? []), impliedBy];
+      }
+      if (reference && !existing.reference) existing.reference = reference;
+      return;
+    }
+    tools.set(slug, {
+      tool: slug,
+      origin: typeof meta.origin === "string" ? meta.origin : "",
+      package: typeof meta.package === "string" ? meta.package : "",
+      package_version: typeof meta.package_version === "string" ? meta.package_version : undefined,
+      invoke: typeof meta.invoke === "string" ? meta.invoke : "",
+      invoke_fallback: typeof meta.invoke_fallback === "string" ? meta.invoke_fallback : undefined,
+      availability_check:
+        typeof meta.availability_check === "string" ? meta.availability_check : undefined,
+      docs_url: typeof meta.docs_url === "string" ? meta.docs_url : undefined,
+      reference,
+      source,
+      implied_by: impliedBy ? [impliedBy] : undefined,
+    });
+  };
+
+  for (const r of refs) {
+    if (r.kind === "cli-tool") {
+      intern(r.src, "referenced", undefined, r.dst);
+    } else if (r.kind === "cli-command") {
+      const cmdMeta = metaByPath.get(r.src);
+      const toolSlug = typeof cmdMeta?.tool === "string" ? cmdMeta.tool : "";
+      if (!toolSlug) continue;
+      const toolNotePath = slugMap.get(toolSlug);
+      const subSlug =
+        typeof cmdMeta?.command === "string" ? `${toolSlug} ${cmdMeta.command}` : toolSlug;
+      if (!toolNotePath || metaByPath.get(toolNotePath)?.type !== "cli-tool") {
+        console.warn(
+          `warn: cli-command ${subSlug} references tool=${toolSlug} but no content/cli/${toolSlug}/index.md cli-tool note exists; Required Tools entry will be missing.`,
+        );
+        continue;
+      }
+      intern(toolNotePath, "implied", subSlug);
+    }
+  }
+
+  return [...tools.values()].sort((a, b) => a.tool.localeCompare(b.tool));
+}
+
+function renderInstallCommand(tool: RequiredTool): string {
+  const versioned = tool.package_version;
+  if (tool.origin === "pypi") {
+    const spec = versioned ? `${tool.package}==${versioned}` : tool.package;
+    return `\`uv tool install ${spec}\` (or \`pip install ${spec}\`).`;
+  }
+  if (tool.origin === "npm") {
+    const spec = versioned ? `${tool.package}@${versioned}` : tool.package;
+    return `\`npm install -g ${spec}\`.`;
+  }
+  return `Install ${tool.package}${versioned ? `@${versioned}` : ""} from ${tool.origin}.`;
+}
+
+function requiredToolRows(tools: RequiredTool[]): string[] {
+  return tools.map((t) => {
+    const lines = [`- **\`${t.invoke}\`** (${t.tool}). ${renderInstallCommand(t)}`];
+    if (t.invoke_fallback) lines.push(`  Ephemeral run: \`${t.invoke_fallback}\`.`);
+    if (t.availability_check) lines.push(`  Check: \`${t.availability_check}\`.`);
+    if (t.docs_url) lines.push(`  Docs: ${t.docs_url}`);
+    if (t.reference) lines.push(`  Bundled reference: \`${t.reference}\`.`);
+    return lines.join("\n");
+  });
 }
 
 function artifactRows(
@@ -954,6 +1079,7 @@ function renderSkillMarkdown(args: {
   artifacts?: ProvenanceArtifacts;
   slugMap: Map<string, string>;
   metaByPath: Map<string, Frontmatter>;
+  requiredTools: RequiredTool[];
 }): string {
   const summary = scalar(args.meta.summary) ?? `Run the ${args.moldName} Mold.`;
   const consumes = args.artifacts?.consumes ?? [];
@@ -961,6 +1087,7 @@ function renderSkillMarkdown(args: {
   const upfront = args.refs.filter((r) => r.load === "upfront" && r.used_at !== "cast-time");
   const onDemand = args.refs.filter((r) => r.load === "on-demand" && r.used_at !== "cast-time");
   const validationRows = schemaValidationRows(produces, args.slugMap, args.metaByPath);
+  const toolRows = requiredToolRows(args.requiredTools);
   const body = runtimeProcedureBody(args.body, args.moldName);
   const lines = [
     "---",
@@ -979,6 +1106,11 @@ function renderSkillMarkdown(args: {
       "- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.",
     ),
     renderSection("Outputs", artifactRows(produces, "output")),
+    renderSection(
+      "Required Tools",
+      toolRows,
+      "- None declared. Procedure should not assume external CLIs are present.",
+    ),
     renderSection("Load Upfront", refRows(upfront)),
     renderSection("Load On Demand", refRows(onDemand)),
     renderSection("Validation", validationRows),
@@ -1074,6 +1206,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
 
   const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
+  const requiredTools = aggregateRequiredTools(refEntries, metaByPath, slugMap);
   const skillText = renderSkillMarkdown({
     moldName: args.moldName,
     meta: moldParsed.meta,
@@ -1082,9 +1215,34 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     artifacts: artifactContracts,
     slugMap,
     metaByPath,
+    requiredTools,
   });
   const skillResult = reconcileSkillMarkdown(bundleRoot, skillText, args.check);
   if (skillResult.drift) drift.push({ src: "SKILL.md", reason: skillResult.drift });
+
+  // Emit/reconcile _required_tools.json manifest at bundle root.
+  const requiredToolsPath = path.join(bundleRoot, "_required_tools.json");
+  if (requiredTools.length === 0) {
+    if (existsSync(requiredToolsPath)) {
+      if (args.check) {
+        drift.push({ src: "_required_tools.json", reason: "stale manifest (no tools required)" });
+      } else {
+        unlinkSync(requiredToolsPath);
+      }
+    }
+  } else {
+    const manifestText = JSON.stringify(requiredTools, null, 2) + "\n";
+    const expectedHash = sha256OfBuffer(manifestText);
+    const exists = existsSync(requiredToolsPath);
+    const currentHash = exists ? sha256(requiredToolsPath) : null;
+    if (currentHash !== expectedHash) {
+      drift.push({
+        src: "_required_tools.json",
+        reason: exists ? "manifest content drifted" : "manifest missing",
+      });
+      if (!args.check) writeFileSync(requiredToolsPath, manifestText);
+    }
+  }
 
   const verify = buildVerifyManifest(moldParsed.meta, producerIndex, slugMap, metaByPath);
   const verifyText = JSON.stringify(verify, null, 2) + "\n";

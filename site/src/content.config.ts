@@ -110,7 +110,7 @@ const moldSchema = z.object({
   axis: z.enum(['source-specific', 'target-specific', 'tool-specific', 'generic']),
   source: z.enum(['paper', 'nextflow', 'cwl', 'snakemake']).optional(),
   target: z.enum(['galaxy', 'cwl', 'web', 'generic']).optional(),
-  tool: z.enum(['gxwf', 'planemo']).optional(),
+  tool: z.string().regex(/^[a-z][a-z0-9-]*$/).optional(),
   output_artifacts: z.array(outputArtifact).optional(),
   input_artifacts: z.array(inputArtifact).optional(),
   references: z.array(typedReference).optional(),
@@ -139,12 +139,27 @@ const sourcePatternSchema = z.object({
   review_triggers: z.array(z.string().min(1)).optional(),
 }).strict();
 
+const toolSlug = z.string().regex(/^[a-z][a-z0-9-]*$/);
+
 const cliCommandSchema = z.object({
   type: z.literal('cli-command'),
-  tool: z.enum(['gxwf', 'planemo']),
+  tool: toolSlug,
   command: z.string(),
   package: z.string().optional(),
   upstream: z.string().optional(),
+  ...baseFields,
+}).strict();
+
+const cliToolSchema = z.object({
+  type: z.literal('cli-tool'),
+  tool: toolSlug,
+  origin: z.enum(['npm', 'pypi']),
+  package: z.string(),
+  package_version: z.string().optional(),
+  invoke: z.string().regex(/^[A-Za-z0-9._-]+$/),
+  invoke_fallback: z.string().optional(),
+  availability_check: z.string().optional(),
+  docs_url: z.string().optional(),
   ...baseFields,
 }).strict();
 
@@ -179,6 +194,7 @@ const noteSchema = z.discriminatedUnion('type', [
   moldSchema,
   patternSchema,
   sourcePatternSchema,
+  cliToolSchema,
   cliCommandSchema,
   pipelineSchema,
   researchSchema,

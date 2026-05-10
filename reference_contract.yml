@@ -4,6 +4,11 @@ kinds:
     description: Workflow-construction idiom. Usually condensed during casting.
     href: https://github.com/jmchilton/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
     ref_shape: wiki-link
+  cli-tool:
+    label: CLI Tool
+    description: Tool-level install metadata. Aggregated into the cast bundle's Required Tools section.
+    href: https://github.com/jmchilton/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    ref_shape: wiki-link
   cli-command:
     label: CLI Command
     description: Command reference. Usually cast to a sidecar and loaded only when invoked.

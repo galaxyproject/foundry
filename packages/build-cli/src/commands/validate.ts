@@ -1127,6 +1127,46 @@ function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
   return findings;
 }
 
+function validateCliTools(files: FileMeta[]): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const bySlug = new Map<string, FileMeta[]>();
+  for (const f of files) {
+    if (f.meta.type !== "cli-tool") continue;
+    const slug = typeof f.meta.tool === "string" ? f.meta.tool : "";
+    if (!slug) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: "cli-tool note must declare `tool`",
+      });
+      continue;
+    }
+    const expected = `content/cli/${slug}/index.md`;
+    if (!f.path.endsWith(expected)) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `cli-tool with tool=${slug} must live at ${expected}`,
+      });
+    }
+    bySlug.set(slug, [...(bySlug.get(slug) ?? []), f]);
+  }
+  for (const [slug, group] of bySlug) {
+    if (group.length <= 1) continue;
+    for (const f of group) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `duplicate cli-tool slug \`${slug}\` (also declared in: ${group
+          .filter((g) => g !== f)
+          .map((g) => g.path)
+          .join(", ")})`,
+      });
+    }
+  }
+  return findings;
+}
+
 function validatePromptFiles(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
@@ -1342,6 +1382,7 @@ export function validateDirectory(opts: ValidateOptions): {
     ),
   );
   crossFindings.push(...validateCliCommandDocs(validFiles));
+  crossFindings.push(...validateCliTools(validFiles));
   crossFindings.push(...validatePromptFiles(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
   crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));

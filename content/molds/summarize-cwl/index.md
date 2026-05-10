@@ -42,6 +42,29 @@ references:
     evidence: corpus-observed
     purpose: "Check official CWL v1.2 field names and source-language semantics when summarizing less-common features."
     trigger: "When the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure."
+  - kind: cli-tool
+    ref: "[[cwltool]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Validate the CWL entrypoint before normalization."
+    verification: "Run summarize-cwl against one valid and one invalid CWL fixture; the invalid one must surface cwltool diagnostics in summary-cwl.json."
+  - kind: cli-tool
+    ref: "[[cwl-utils]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Normalize the CWL workflow (cwl-normalizer) into a single JSON document for extraction."
+    verification: "Run summarize-cwl against the cross-document-run-refs eval case; documents.normalized_path must be populated and tools[] must contain the referenced CommandLineTools."
+  - kind: cli-tool
+    ref: "[[validate-summary-cwl]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "Schema-check summary-cwl.json before returning it from the skill."
 related_notes:
   - "[[summary-cwl]]"
   - "[[component-cwl-workflow-anatomy]]"
