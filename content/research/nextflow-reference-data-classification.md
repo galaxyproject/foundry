@@ -8,15 +8,21 @@ tags:
 status: draft
 created: 2026-05-10
 revised: 2026-05-10
-revision: 1
+revision: 2
 ai_generated: true
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-to-galaxy-reference-data-mapping]]"
   - "[[nextflow-summary-to-galaxy-reference-data]]"
+  - "[[nextflow-summary-to-galaxy-interface]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
 related_molds:
   - "[[summarize-nextflow]]"
   - "[[nextflow-summary-to-galaxy-reference-data]]"
+  - "[[nextflow-summary-to-galaxy-interface]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
 sources:
   - "https://nf-co.re/docs/usage/reference_genomes"
   - "https://github.com/nf-core/sarek/blob/master/conf/igenomes.config"
