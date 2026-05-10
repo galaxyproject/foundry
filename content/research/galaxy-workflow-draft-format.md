@@ -20,7 +20,7 @@ related_molds:
   - "[[paper-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
   - "[[implement-galaxy-tool-step]]"
-summary: "gxformat2 draft superset: wrapper-tier relaxations (tool_id, tool_state, port names) plus per-step _plan_state / _plan_context / _plan_in / _plan_out planning fields. Topology is settled upstream."
+summary: "gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step."
 ---
 
 # Galaxy workflow draft format
