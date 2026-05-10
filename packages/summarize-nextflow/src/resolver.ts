@@ -90,6 +90,8 @@ interface Conditional {
   affects: string[];
 }
 
+type ParamSourceKind = "nextflow_schema" | "params_block" | "getGenomeAttribute" | "computed";
+
 interface Param {
   name: string;
   type: string;
@@ -102,6 +104,15 @@ interface Param {
   mimetype?: string | null;
   schema_group?: string | null;
   fa_icon?: string | null;
+  source_kind?: ParamSourceKind | null;
+  source_expression?: string | null;
+  source_path?: string | null;
+}
+
+interface ParamProvenance {
+  source_kind: ParamSourceKind;
+  source_expression: string;
+  source_path: string;
 }
 
 interface Tool {
@@ -414,43 +425,102 @@ function parseProfiles(config: string): string[] {
 
 function parseParams(pipelineRoot: string): Param[] {
   const schemaPath = join(pipelineRoot, "nextflow_schema.json");
-  if (!existsSync(schemaPath)) return [];
-  const schema = JSON.parse(readText(schemaPath)) as {
-    $defs?: Record<
-      string,
-      {
-        title?: string;
-        fa_icon?: string;
-        required?: string[];
-        properties?: Record<string, Record<string, unknown>>;
-      }
-    >;
-  };
   const params = new Map<string, Param>();
-  for (const section of Object.values(schema.$defs ?? {})) {
-    const required = new Set(section.required ?? []);
-    const schema_group = typeof section.title === "string" ? section.title : null;
-    const fa_icon = typeof section.fa_icon === "string" ? section.fa_icon : null;
-    for (const [name, property] of Object.entries(section.properties ?? {})) {
-      const type = Array.isArray(property.type)
-        ? String(property.type[0])
-        : String(property.type ?? "string");
-      params.set(name, {
-        name,
-        type,
-        default: property.default ?? null,
-        description: typeof property.description === "string" ? property.description : undefined,
-        required: required.has(name),
-        enum: Array.isArray(property.enum) ? property.enum : undefined,
-        format: typeof property.format === "string" ? property.format : null,
-        hidden: typeof property.hidden === "boolean" ? property.hidden : null,
-        mimetype: typeof property.mimetype === "string" ? property.mimetype : null,
-        schema_group,
-        fa_icon,
+  if (existsSync(schemaPath)) {
+    const schema = JSON.parse(readText(schemaPath)) as {
+      $defs?: Record<
+        string,
+        {
+          title?: string;
+          fa_icon?: string;
+          required?: string[];
+          properties?: Record<string, Record<string, unknown>>;
+        }
+      >;
+    };
+    for (const section of Object.values(schema.$defs ?? {})) {
+      const required = new Set(section.required ?? []);
+      const schema_group = typeof section.title === "string" ? section.title : null;
+      const fa_icon = typeof section.fa_icon === "string" ? section.fa_icon : null;
+      for (const [name, property] of Object.entries(section.properties ?? {})) {
+        const type = Array.isArray(property.type)
+          ? String(property.type[0])
+          : String(property.type ?? "string");
+        params.set(name, {
+          name,
+          type,
+          default: property.default ?? null,
+          description: typeof property.description === "string" ? property.description : undefined,
+          required: required.has(name),
+          enum: Array.isArray(property.enum) ? property.enum : undefined,
+          format: typeof property.format === "string" ? property.format : null,
+          hidden: typeof property.hidden === "boolean" ? property.hidden : null,
+          mimetype: typeof property.mimetype === "string" ? property.mimetype : null,
+          schema_group,
+          fa_icon,
+          source_kind: "nextflow_schema",
+          source_expression: null,
+          source_path: "nextflow_schema.json",
+        });
+      }
+    }
+  }
+  for (const entry of parseGetGenomeAttributeAssignments(pipelineRoot)) {
+    const existing = params.get(entry.name);
+    if (existing) {
+      existing.source_kind = entry.provenance.source_kind;
+      existing.source_expression = entry.provenance.source_expression;
+      existing.source_path = entry.provenance.source_path;
+    } else {
+      params.set(entry.name, {
+        name: entry.name,
+        type: "string",
+        default: null,
+        required: false,
+        format: "file-path",
+        hidden: null,
+        mimetype: null,
+        schema_group: "Reference genome options",
+        fa_icon: null,
+        source_kind: entry.provenance.source_kind,
+        source_expression: entry.provenance.source_expression,
+        source_path: entry.provenance.source_path,
       });
     }
   }
   return [...params.values()];
+}
+
+const GENOME_ATTRIBUTE_CONFIG_CANDIDATES = [
+  "nextflow.config",
+  "conf/igenomes.config",
+  "conf/genomes.config",
+];
+
+function parseGetGenomeAttributeAssignments(
+  pipelineRoot: string,
+): { name: string; provenance: ParamProvenance }[] {
+  const results: { name: string; provenance: ParamProvenance }[] = [];
+  for (const relPath of GENOME_ATTRIBUTE_CONFIG_CANDIDATES) {
+    const fullPath = join(pipelineRoot, relPath);
+    if (!existsSync(fullPath)) continue;
+    const text = readText(fullPath);
+    const pattern =
+      /(?:params\s*\.\s*)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(getGenomeAttribute\s*\(\s*['"]([A-Za-z_][A-Za-z0-9_]*)['"]\s*\))/gu;
+    for (const match of text.matchAll(pattern)) {
+      const lhs = match[1]!;
+      const rhs = match[2]!.replace(/\s+/gu, "");
+      results.push({
+        name: lhs,
+        provenance: {
+          source_kind: "getGenomeAttribute",
+          source_expression: rhs,
+          source_path: relPath,
+        },
+      });
+    }
+  }
+  return results;
 }
 
 function parseSampleSheets(pipelineRoot: string): SampleSheet[] {

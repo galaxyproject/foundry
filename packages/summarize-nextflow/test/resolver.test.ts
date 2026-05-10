@@ -753,6 +753,83 @@ workflow root {
     expect(channels).not.toContain("out");
   });
 
+  test("promotes getGenomeAttribute assignments into params with provenance", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/keymap' }\nincludeConfig 'conf/igenomes.config'\n`,
+    );
+    write(
+      root,
+      "conf/igenomes.config",
+      `params {
+  fasta            = getGenomeAttribute('fasta')
+  fasta_fai        = getGenomeAttribute('fasta_fai')
+  dict             = getGenomeAttribute('dict')
+}
+`,
+    );
+    write(root, "main.nf", "workflow PIPE { }\n");
+
+    const summary = (await summarize(root)) as unknown as {
+      params: {
+        name: string;
+        source_kind?: string | null;
+        source_expression?: string | null;
+        source_path?: string | null;
+      }[];
+    };
+
+    const fasta = summary.params.find((p) => p.name === "fasta");
+    expect(fasta?.source_kind).toBe("getGenomeAttribute");
+    expect(fasta?.source_expression).toBe("getGenomeAttribute('fasta')");
+    expect(fasta?.source_path).toBe("conf/igenomes.config");
+
+    const fai = summary.params.find((p) => p.name === "fasta_fai");
+    expect(fai?.source_kind).toBe("getGenomeAttribute");
+    expect(fai?.source_expression).toBe("getGenomeAttribute('fasta_fai')");
+  });
+
+  test("getGenomeAttribute overrides nf-schema provenance when both declare the same param", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/keymap' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+            },
+          },
+        },
+      }),
+    );
+    write(root, "conf/igenomes.config", `params { fasta = getGenomeAttribute('fasta') }\n`);
+    write(root, "main.nf", "workflow PIPE { }\n");
+
+    const summary = (await summarize(root)) as unknown as {
+      params: {
+        name: string;
+        source_kind?: string | null;
+        source_expression?: string | null;
+        source_path?: string | null;
+        schema_group?: string | null;
+        format?: string | null;
+      }[];
+    };
+
+    const fasta = summary.params.find((p) => p.name === "fasta");
+    expect(fasta?.source_kind).toBe("getGenomeAttribute");
+    expect(fasta?.source_expression).toBe("getGenomeAttribute('fasta')");
+    // schema metadata preserved
+    expect(fasta?.format).toBe("file-path");
+    expect(fasta?.schema_group).toBe("Reference genome options");
+  });
+
   test("warns when an explicit mulled index path is missing", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/missing-mulled-index' }\n");
