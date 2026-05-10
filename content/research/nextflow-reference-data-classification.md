@@ -27,25 +27,25 @@ summary: "Source-side taxonomy of how Nextflow pipelines use reference data — 
 
 # Nextflow reference-data classification
 
-Source-side taxonomy of how a Nextflow pipeline uses reference data, written for an LLM working from a `summary-nextflow` artifact. The eight classifications below are flags, not buckets — a single pipeline often matches more than one (e.g. a key-expanded bundle with a compute-if-missing aspect plus cohort data on the side). Grounded in the complexity bridge fixtures from jmchilton/foundry#221.
+Reference-data shape varies along several roughly orthogonal dimensions: whether the pipeline consumes or produces reference data, the cardinality of the assets, whether they're keyed or per-asset, whether rebuild fallback exists, and whether multiple bundles run in parallel. The classifications below are flags an LLM can detect from a `summary-nextflow` artifact; a single pipeline often matches more than one. Grounded in the complexity bridge fixtures from jmchilton/foundry#221.
 
 For the Galaxy-side translation of these classifications, see [[nextflow-to-galaxy-reference-data-mapping]].
 
 ## None
 
-Pipeline consumes no reference data. Detection: `params[]` has no path-shaped reference asset; no `getGenomeAttribute` call in `nextflow.config`. Examples: `nf-core/multiplesequencealign`, `nf-core/proteinfamilies`, `seqeralabs/nf-canary`. No reference-data surface to design.
+Pipeline consumes no reference data. Detection: `params[]` has no path-shaped reference asset; no `getGenomeAttribute` call in `nextflow.config`. Examples: `nf-core/multiplesequencealign`, `nf-core/proteinfamilies`, `seqeralabs/nf-canary`. Galaxy translation has no reference-data surface to design.
 
 ## Reference-producing pipeline
 
-Pipeline output **is** the reference data — it builds a database, index, or bundle for downstream consumers. Examples: `nf-core/createtaxdb`, `nf-core/references`. Detection: pipeline has no major path-shaped input but advertises bundle outputs (`publishDir` patterns matching `kraken2_database/`, `*.fai`, `bwa-index/`, …); `meta.yml` for the top-level workflow describes outputs as databases or indexes.
+Pipeline output **is** the reference data — it builds a database, index, or bundle for downstream consumers. Examples: `nf-core/createtaxdb`, `nf-core/references`. Detection: pipeline has no major path-shaped input but advertises bundle outputs (`publishDir` patterns matching `kraken2_database/`, `*.fai`, `bwa-index/`, …); `meta.yml` for the top-level workflow describes outputs as databases or indexes. Galaxy translation question is whether the bundle output cleanly lands as a workflow output, given that data managers are off the table — the consumer pattern (next workflow takes the bundle as an input collection) is itself open.
 
 ## Single asset
 
-One reference asset, often optional. Examples: `nf-core/bamtofastq` (FASTA needed only when input is CRAM), `nextflow-io/rnaseq-nf` (a small bundled transcriptome). Detection: exactly one path-shaped reference param, sometimes guarded by a process-level `when:` or `if (params.X)` branch.
+One reference asset, often optional. Examples: `nf-core/bamtofastq` (FASTA needed only when input is CRAM), `nextflow-io/rnaseq-nf` (a small bundled transcriptome). Detection: exactly one path-shaped reference param, sometimes guarded by a process-level `when:` or `if (params.X)` branch. Easiest rung to test the v1 posture against — single optional Galaxy `data` input, conditional consumer.
 
 ## Coordinated bundle
 
-Several related assets that travel together as a logical unit. Example: `nf-core/smrnaseq` consumes `--genome` + miRBase mature + miRBase hairpin + GTF, and these four are coupled — switching genome means switching all four. Detection: multiple path-shaped reference params declared together in `nextflow_schema.json` under a shared section heading, or referenced together in a single subworkflow without per-param conditional branching.
+Several related assets that travel together as a logical unit. Example: `nf-core/smrnaseq` consumes `--genome` + miRBase mature + miRBase hairpin + GTF, and these four are coupled — switching genome means switching all four. Detection: multiple path-shaped reference params declared together in `nextflow_schema.json` under a shared section heading, or referenced together in a single subworkflow without per-param conditional branching. Translation strain: Galaxy v1 posture forces N separate optional `data` inputs, which can produce a workflow surface that's hard for users to fill out coherently.
 
 ## Key-expanded bundle (iGenomes-style)
 
@@ -66,7 +66,7 @@ params {
 }
 ```
 
-Examples: `nf-core/atacseq`, `nf-core/sarek`, `nf-core/rnaseq` (with `--genome` set). Detection: `nextflow.config` includes `conf/igenomes.config` or defines `getGenomeAttribute`; `params.genome` is declared. The derived params do **not** appear in `nextflow_schema.json` and won't show up in `summarize-nextflow`'s `params[]` unless the resolver special-cases them (today it captures them with a description noting the dynamic source — see `summarize-nextflow` index §3). The user-facing surface starts at the resolved per-asset paths, not the key.
+Examples: `nf-core/atacseq`, `nf-core/sarek`, `nf-core/rnaseq` (with `--genome` set). Detection: `nextflow.config` includes `conf/igenomes.config` or defines `getGenomeAttribute`; `params.genome` is declared. The derived params do **not** appear in `nextflow_schema.json` and won't show up in `summarize-nextflow`'s `params[]` unless the resolver special-cases them (today it captures them with a description noting the dynamic source — see `summarize-nextflow` index §3). The Galaxy workflow surface starts at the resolved per-asset paths, not the key.
 
 ## Indexes with rebuild fallback (compute-if-missing)
 
@@ -83,16 +83,8 @@ Examples: `nf-core/rnaseq` (STAR / salmon / hisat2 indexes), `nf-core/sarek` (BW
 
 ## Multi-DB pick-list
 
-Multiple independent reference databases, each enabling its own analysis branch — the user picks 0..N. Example: `nf-core/funcscan` lets a user enable any subset of AMR / BGC scanners (hamronization, AMRFinderPlus, DeepARG, hmmsearch, …), each with its own DB. Detection: several optional path or directory params named after distinct tools or analysis branches (`amrfinderplus_db`, `deeparg_db`, …), each guarded by a corresponding `skip_*` or `run_*` flag.
+Multiple independent reference databases, each enabling its own analysis branch — the user picks 0..N. Example: `nf-core/funcscan` lets a user enable any subset of AMR / BGC scanners (hamronization, AMRFinderPlus, DeepARG, hmmsearch, …), each with its own DB. Detection: several optional path or directory params named after distinct tools or analysis branches (`amrfinderplus_db`, `deeparg_db`, …), each guarded by a corresponding `skip_*` or `run_*` flag. Translation strain: Galaxy needs to surface "user picks 0..N of these DBs, and the workflow runs the scanners they picked" — conditional / optional-input territory, but no worked Galaxy example at this scale yet.
 
 ## Parallel bundles plus cohort data
 
 Several parallel reference bundles plus per-cohort or per-panel data the pipeline cannot rebuild. Example: `nf-core/sarek` consumes a genome bundle plus a panel-of-normals (PoN) plus germline-resource VCFs plus intervals BED. Detection: a *key-expanded* or *coordinated bundle* core, plus additional path-shaped params (`pon`, `germline_resource`, `intervals`) that have no compute-if-missing branch and represent cohort- or study-level data the user must supply. The cohort assets can't be rebuilt on absence — they're explicit user inputs no matter the rung.
-
-## Detection gaps
-
-Where `summary-nextflow` does not yet make the classification mechanical:
-
-- **Compute-if-missing tagging.** `summary-nextflow` emits `workflow.conditionals[]` but the schema does not specifically tag a guard as a "rebuild branch." Detection has to infer from guard text plus the gated process's output shape; flag low-confidence cases.
-- **Cohort vs reference distinction.** Cohort/panel params (`pon`, `germline_resource`, `intervals`) look like ordinary optional path params in `params[]`. Distinguishing them from rebuildable indexes requires reading the source for the absence of a compute-if-missing branch, plus context cues from param names and section headings.
-- **Key-expanded bundle visibility.** Derived per-asset paths (`fasta`, `fasta_fai`, `dict`, …) introduced by `getGenomeAttribute` calls in `nextflow.config` do not live in `nextflow_schema.json`. Today's `summarize-nextflow` captures them with a description noting the dynamic source, but downstream classification still needs to know to treat the resolved per-asset paths as the user-facing surface, not the `--genome` key.
