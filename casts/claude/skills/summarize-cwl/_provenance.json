@@ -1,0 +1,70 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "summarize-cwl",
+    "path": "content/molds/summarize-cwl/index.md",
+    "revision": 2,
+    "content_hash": "d129d443e881abc6ca5fe82b61d3f871bd3e6c85afcf7fc5a69f49591773ac21",
+    "commit": "4ad02623a67f1be0dd91c9e66503401f35c8b036"
+  },
+  "cast_at": "2026-05-10T17:48:52.077Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-cwl-workflow-anatomy]]",
+      "src": "content/research/component-cwl-workflow-anatomy.md",
+      "dst": "references/notes/component-cwl-workflow-anatomy.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Use CWL's native workflow, step, tool, scatter, conditional, and requirement structure without copying the heavier Nextflow inference pipeline.",
+      "verification": "Run the generated summarize-cwl skill against one simple normalized workflow, one scattered workflow, and one workflow with remote run references; confirm the summary validates and downstream CWL-to-Galaxy molds can consume it.",
+      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[cwl-v1.2-schemas]]",
+      "src": "content/research/cwl-v1.2-schemas.md",
+      "dst": "references/notes/cwl-v1.2-schemas.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Check official CWL v1.2 field names and source-language semantics when summarizing less-common features.",
+      "trigger": "When the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure.",
+      "src_hash": "ad847826f59dba599078fe1cc6750ffe131134966e7fefce5f81544b768153ed",
+      "dst_hash": "ad847826f59dba599078fe1cc6750ffe131134966e7fefce5f81544b768153ed",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-cwl]]",
+      "src": "package://@galaxy-foundry/summary-cwl-schema#summaryCwlSchema",
+      "dst": "references/schemas/summary-cwl.schema.json",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Validate the emitted CWL summary JSON and provide downstream consumers the output contract.",
+      "src_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "dst_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "summary-cwl",
+        "kind": "json",
+        "default_filename": "summary-cwl.json",
+        "schema": "[[summary-cwl]]",
+        "description": "Structured summary of a CWL Workflow + CommandLineTool tree: inputs, outputs, scatter, conditionals, requirements."
+      }
+    ],
+    "consumes": []
+  }
+}

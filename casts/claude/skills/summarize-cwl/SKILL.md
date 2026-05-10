@@ -1,70 +1,55 @@
 ---
-type: mold
 name: summarize-cwl
-axis: source-specific
-source: cwl
-tags:
-  - mold
-  - source/cwl
-status: draft
-created: 2026-04-30
-revised: 2026-05-10
-revision: 2
-ai_generated: true
-summary: "Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation."
-output_artifacts:
-  - id: summary-cwl
-    kind: json
-    default_filename: summary-cwl.json
-    schema: "[[summary-cwl]]"
-    description: "Structured summary of a CWL Workflow + CommandLineTool tree: inputs, outputs, scatter, conditionals, requirements."
-references:
-  - kind: schema
-    ref: "[[summary-cwl]]"
-    used_at: both
-    load: upfront
-    mode: verbatim
-    evidence: cast-validated
-    purpose: "Validate the emitted CWL summary JSON and provide downstream consumers the output contract."
-  - kind: research
-    ref: "[[component-cwl-workflow-anatomy]]"
-    used_at: runtime
-    load: upfront
-    mode: verbatim
-    evidence: hypothesis
-    purpose: "Use CWL's native workflow, step, tool, scatter, conditional, and requirement structure without copying the heavier Nextflow inference pipeline."
-    verification: "Run the generated summarize-cwl skill against one simple normalized workflow, one scattered workflow, and one workflow with remote run references; confirm the summary validates and downstream CWL-to-Galaxy molds can consume it."
-  - kind: research
-    ref: "[[cwl-v1.2-schemas]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Check official CWL v1.2 field names and source-language semantics when summarizing less-common features."
-    trigger: "When the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure."
-related_notes:
-  - "[[summary-cwl]]"
-  - "[[component-cwl-workflow-anatomy]]"
-  - "[[cwl-v1.2-schemas]]"
+description: "Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation."
 ---
+
 # summarize-cwl
 
-Read a CWL Workflow entrypoint, resolve referenced `Workflow`, `CommandLineTool`, `ExpressionTool`, and `Operation` documents, and emit `summary-cwl.json`. This Mold is source-specific and target-agnostic: it records what the CWL says, validates and normalizes references, and leaves Galaxy interface/data-flow choices to downstream molds.
+Follow the procedure below and use the artifact/reference sections as the runtime contract.
 
-CWL is already a structured workflow language. Do not imitate [[summarize-nextflow]]'s heavy inference machinery unless a real CWL fixture proves the need.
+## When To Use
+
+- Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation.
 
 ## Inputs
 
-The Mold expects:
+- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.
+
+## Outputs
+
+- Write artifact `summary-cwl` as `summary-cwl.json`. Format: `json`. Schema: summary-cwl. Structured summary of a CWL Workflow + CommandLineTool tree: inputs, outputs, scatter, conditionals, requirements.
+
+## Load Upfront
+
+- `references/notes/component-cwl-workflow-anatomy.md`: Research note copied verbatim into the bundle. Use CWL's native workflow, step, tool, scatter, conditional, and requirement structure without copying the heavier Nextflow inference pipeline.
+- `references/schemas/summary-cwl.schema.json`: Schema file copied verbatim into the bundle. Validate the emitted CWL summary JSON and provide downstream consumers the output contract.
+
+## Load On Demand
+
+- `references/notes/cwl-v1.2-schemas.md`: Research note copied verbatim into the bundle. Check official CWL v1.2 field names and source-language semantics when summarizing less-common features. Use when: the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure.
+
+## Validation
+
+- Validate `summary-cwl.json` before returning it: run `validate-summary-cwl summary-cwl.json` from `@galaxy-foundry/summary-cwl-schema`. If the command is not on PATH, run `npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
+
+## Procedure
+
+Read a CWL Workflow entrypoint, resolve referenced `Workflow`, `CommandLineTool`, `ExpressionTool`, and `Operation` documents, and emit `summary-cwl.json`. This skill is source-specific and target-agnostic: it records what the CWL says, validates and normalizes references, and leaves Galaxy interface/data-flow choices to downstream molds.
+
+CWL is already a structured workflow language. Do not imitate summarize-nextflow's heavy inference machinery unless a real CWL fixture proves the need.
+
+### Inputs
+
+The skill expects:
 
 - A local CWL entrypoint path or an HTTP(S) URL.
 - Optional pin/version metadata supplied by the harness or user.
 - Optional output directory/path for a normalized CWL document.
 - Optional test/job file hints. If no test files are supplied or discoverable, emit `tests: []`.
 
-## Outputs
+### Outputs
 
-A single JSON document conforming to [[summary-cwl]]. Sketch shape:
+A single JSON document conforming to summary-cwl. Sketch shape:
 
 ```jsonc
 {
@@ -156,7 +141,7 @@ A single JSON document conforming to [[summary-cwl]]. Sketch shape:
 }
 ```
 
-## Procedure
+### Procedure
 
 1. Validate the entrypoint with `cwltool --validate` or equivalent library validation. If invalid, emit source provenance, validation diagnostics, `warnings[]`, and do not invent graph structure.
 2. Normalize the workflow with `cwl-normalizer` from `cwl-utils` when possible. Use the normalized JSON document as the preferred extraction surface because referenced documents have been gathered, older CWL versions have been upgraded to v1.2 when needed, and the output is regular JSON.
@@ -166,7 +151,7 @@ A single JSON document conforming to [[summary-cwl]]. Sketch shape:
 6. Record test/job files only when supplied or discoverable by convention. Do not infer expected outputs from command names.
 7. Validate the assembled object with `validate-summary-cwl summary-cwl.json` before returning it.
 
-## Caveats Baked Into The Procedure
+### Caveats Baked Into The Procedure
 
 - **Expressions are preserved, not executed.** `valueFrom`, `when`, expression-based globs, and JavaScript-heavy tools should surface warnings when they affect data shape.
 - **Directory is a review trigger.** Preserve `Directory` types; downstream Galaxy molds decide whether to use directory-capable wrappers, explicit files, or collections.
@@ -174,13 +159,19 @@ A single JSON document conforming to [[summary-cwl]]. Sketch shape:
 - **Dependency solving is downstream.** Capture `DockerRequirement` and `SoftwareRequirement`, but do not resolve them into Tool Shed tools or new wrappers here.
 - **Remote document resolution is bounded.** Resolve referenced CWL documents and tool files; do not recursively download arbitrary input data.
 
-## Reference Dispatch
+### Reference Dispatch
 
-- [[summary-cwl]] — always validate output against this schema before emitting.
-- [[component-cwl-workflow-anatomy]] — use for normalization, graph extraction, scatter/conditionals, requirements, and known non-goals.
+- summary-cwl — always validate output against this schema before emitting.
+- component-cwl-workflow-anatomy — use for normalization, graph extraction, scatter/conditionals, requirements, and known non-goals.
 
-## Non-Goals
+### Non-Goals
 
 - **Translation to Galaxy.** Collection choice, datatype choice, data-flow reshaping, IWC comparison, and gxformat2 authoring belong downstream.
 - **Tool discovery or wrapper authoring.** Existing Galaxy wrapper search and new wrapper authoring are handled by the per-step Galaxy loop.
-- **Runtime execution.** This Mold summarizes and validates CWL structure; [[run-workflow-test]] owns execution.
+- **Runtime execution.** This skill summarizes and validates CWL structure; run-workflow-test owns execution.
+
+## Runtime Notes
+
+- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.
+- Preserve declared artifact filenames unless the user or harness supplies explicit paths.
+- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.

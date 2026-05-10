@@ -15,7 +15,7 @@ const MINIMAL_SUMMARY = {
   },
   documents: {
     entrypoint: "align.cwl",
-    packed_path: "packed.cwl",
+    normalized_path: "normalized/align.cwl.json",
     validation: { command: "cwltool --validate align.cwl", status: "valid", diagnostics: [] },
   },
   workflow_inputs: [
@@ -48,7 +48,16 @@ const MINIMAL_SUMMARY = {
       run_class: "CommandLineTool",
       label: "align",
       doc: null,
-      in: [{ id: "reads", source: ["reads"], value_from: null }],
+      in: [
+        {
+          id: "reads",
+          source: ["reads"],
+          default: null,
+          value_from: null,
+          link_merge: null,
+          pick_value: null,
+        },
+      ],
       out: ["bam"],
       scatter: ["reads"],
       scatter_method: "dotproduct",
@@ -115,5 +124,37 @@ describe("validateSummary", () => {
     const result = validateSummary({ ...MINIMAL_SUMMARY, bogus: true });
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.keyword === "additionalProperties")).toBe(true);
+  });
+
+  it("allows CWL step inputs without a source when a default drives the binding", () => {
+    const summary = structuredClone(MINIMAL_SUMMARY);
+    summary.steps[0].in = [
+      {
+        id: "threads",
+        source: null,
+        default: 4,
+        value_from: null,
+        link_merge: null,
+        pick_value: null,
+      },
+    ];
+
+    expect(validateSummary(summary).valid).toBe(true);
+  });
+
+  it("records linkMerge, pickValue, and valueFrom on step inputs", () => {
+    const summary = structuredClone(MINIMAL_SUMMARY);
+    summary.steps[0].in = [
+      {
+        id: "reads",
+        source: ["reads_1", "reads_2"],
+        default: null,
+        value_from: "$(self[0])",
+        link_merge: "merge_flattened",
+        pick_value: "first_non_null",
+      },
+    ];
+
+    expect(validateSummary(summary).valid).toBe(true);
   });
 });
