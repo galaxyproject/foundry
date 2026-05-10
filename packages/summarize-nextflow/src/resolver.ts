@@ -36,6 +36,8 @@ interface Summary {
   processes: Process[];
   subworkflows: Subworkflow[];
   workflow: { name: string; channels: Channel[]; edges: Edge[]; conditionals: Conditional[] };
+  reference_assets: ReferenceAsset[];
+  reference_rebuilds: ReferenceRebuildRule[];
   test_fixtures: { profile: string; inputs: TestDataRef[]; outputs: unknown[] };
   nf_tests: NfTest[];
   warnings: string[];
@@ -101,6 +103,34 @@ interface Conditional {
   guard: string;
   branch: "default" | "alternate";
   affects: string[];
+}
+
+interface Evidence {
+  source_path: string | null;
+  confidence: "high" | "medium" | "low";
+  evidence: string[];
+}
+
+interface ReferenceAsset {
+  param: string;
+  asset_kind: string;
+  format_hint?: string | null;
+  required: boolean;
+  source_kind?: ParamSourceKind | null;
+  source_expression?: string | null;
+  schema_group?: string | null;
+  used_by: string[];
+  evidence: Evidence;
+}
+
+interface ReferenceRebuildRule {
+  asset_param: string;
+  guard: string;
+  guard_params?: string[];
+  builder: string;
+  builder_outputs: string[];
+  fallback_for?: string | null;
+  evidence: Evidence;
 }
 
 type ParamSourceKind = "nextflow_schema" | "params_block" | "getGenomeAttribute" | "computed";
@@ -340,6 +370,8 @@ export async function resolveNextflowSummary(
         ? parseWorkflowConditionals(primaryWorkflow.body, primaryWorkflow.calls)
         : [],
     },
+    reference_assets: [],
+    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee, processNameSet),
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
     warnings: [...root.warnings, ...warnings],
@@ -1147,6 +1179,139 @@ function parseWorkflowEdges(body: string, calls: string[]): Edge[] {
     }
   }
   return edges;
+}
+
+function detectReferenceRebuilds(
+  workflows: ParsedWorkflow[],
+  invocationsByCallee: Map<string, SubworkflowInvocation[]>,
+  processNames: Set<string>,
+): ReferenceRebuildRule[] {
+  const rules: ReferenceRebuildRule[] = [];
+  for (const workflow of workflows) {
+    const takeNames = new Set((workflow.inputs ?? []).map((entry) => entry.name));
+    const invocations = invocationsByCallee.get(workflow.name) ?? [];
+    const mainBlock = extractMainBlock(workflow.body);
+    for (const block of extractIfBlocks(mainBlock)) {
+      const negation = /^\s*!\s*([A-Za-z_][A-Za-z0-9_]*)/u.exec(block.guard);
+      if (!negation) continue;
+      const negated = negation[1]!;
+      const rebuild = analyzeRebuildBody(block.defaultBody, processNames);
+      if (!rebuild) continue;
+      const assetParam = resolveAssetParam(rebuild.lhs, negated, takeNames, invocations);
+      const guardParams = collectGuardParams(block.guard, takeNames, invocations);
+      const confidence: Evidence["confidence"] =
+        assetParam.resolvedFromBinding && guardParams.allFromTakes ? "high" : "medium";
+      rules.push({
+        asset_param: assetParam.name,
+        guard: block.guard,
+        guard_params: guardParams.params,
+        builder: rebuild.builder,
+        builder_outputs: rebuild.builderOutputs,
+        fallback_for: resolveFallbackFor(negated, takeNames, invocations),
+        evidence: {
+          source_path: workflow.path ?? null,
+          confidence,
+          evidence: rebuild.snippets,
+        },
+      });
+    }
+  }
+  return rules;
+}
+
+function analyzeRebuildBody(
+  body: string,
+  processNames: Set<string>,
+): { builder: string; builderOutputs: string[]; lhs: string; snippets: string[] } | null {
+  const snippets: string[] = [];
+  let builder: string | null = null;
+  let lhs: string | null = null;
+  const outputs = new Set<string>();
+  for (const invocation of extractCallInvocations(body)) {
+    if (!/^[A-Z]/u.test(invocation.name)) continue;
+    if (processNames.size > 0 && !processNames.has(invocation.name)) continue;
+    builder = invocation.name;
+    snippets.push(`${invocation.name}(${invocation.arguments.join(", ")})`);
+    break;
+  }
+  if (!builder) return null;
+  const assignmentPattern = new RegExp(
+    `([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*${builder}\\s*\\.\\s*out(?:\\s*\\.\\s*([A-Za-z_][A-Za-z0-9_]*))?`,
+    "gu",
+  );
+  for (const match of body.matchAll(assignmentPattern)) {
+    lhs ??= match[1]!;
+    if (match[2]) outputs.add(match[2]);
+    snippets.push(match[0]);
+  }
+  if (!lhs) return null;
+  return { builder, builderOutputs: [...outputs], lhs, snippets };
+}
+
+function resolveAssetParam(
+  lhs: string,
+  negated: string,
+  takeNames: Set<string>,
+  invocations: SubworkflowInvocation[],
+): { name: string; resolvedFromBinding: boolean } {
+  const candidates = [`${lhs}_in`, lhs, negated];
+  for (const candidate of candidates) {
+    if (!takeNames.has(candidate)) continue;
+    for (const invocation of invocations) {
+      const binding = invocation.bindings.find((entry) => entry.take === candidate);
+      const paramName = binding ? paramNameFromArgument(binding.argument) : null;
+      if (paramName) return { name: paramName, resolvedFromBinding: true };
+    }
+  }
+  return { name: lhs, resolvedFromBinding: false };
+}
+
+function resolveFallbackFor(
+  negated: string,
+  takeNames: Set<string>,
+  invocations: SubworkflowInvocation[],
+): string | null {
+  if (!takeNames.has(negated)) return null;
+  for (const invocation of invocations) {
+    const binding = invocation.bindings.find((entry) => entry.take === negated);
+    const paramName = binding ? paramNameFromArgument(binding.argument) : null;
+    if (paramName) return paramName;
+  }
+  return null;
+}
+
+function collectGuardParams(
+  guard: string,
+  takeNames: Set<string>,
+  invocations: SubworkflowInvocation[],
+): { params: string[]; allFromTakes: boolean } {
+  const identifiers = [...guard.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\b/gu)].map((m) => m[1]!);
+  const reserved = new Set(["true", "false", "null", "params"]);
+  const params = new Set<string>();
+  let allFromTakes = true;
+  for (const match of guard.matchAll(/params\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)/gu)) {
+    params.add(match[1]!);
+  }
+  for (const id of identifiers) {
+    if (reserved.has(id) || /^[0-9]/u.test(id)) continue;
+    if (takeNames.has(id)) {
+      for (const invocation of invocations) {
+        const binding = invocation.bindings.find((entry) => entry.take === id);
+        const paramName = binding ? paramNameFromArgument(binding.argument) : null;
+        if (paramName) params.add(paramName);
+      }
+    } else if (!params.has(id)) {
+      // identifier was not a take-name and not a params.X access; treat as a
+      // non-param local (e.g. step / tools / aligner) — downgrade confidence.
+      allFromTakes = false;
+    }
+  }
+  return { params: [...params], allFromTakes };
+}
+
+function paramNameFromArgument(argument: string): string | null {
+  const match = /^params\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)\s*$/u.exec(argument);
+  return match ? match[1]! : null;
 }
 
 function parseWorkflowConditionals(body: string, calls: string[]): Conditional[] {

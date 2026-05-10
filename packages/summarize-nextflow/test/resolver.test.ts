@@ -900,6 +900,182 @@ workflow PIPE {
     ]);
   });
 
+  test("detects compute-if-missing rebuilds with high confidence when binding is clean", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/rebuild' }\n");
+    write(
+      root,
+      "modules/samtools.nf",
+      `process SAMTOOLS_FAIDX {\n  input:\n  path fasta\n  output:\n  path "*.fai", emit: fai\n  script:\n  "faidx"\n}\n`,
+    );
+    write(
+      root,
+      "subworkflows/local/prepare_genome/main.nf",
+      `include { SAMTOOLS_FAIDX } from '../../../modules/samtools'
+workflow PREPARE_GENOME {
+  take:
+  fasta
+  fasta_fai_in
+  main:
+  if (!fasta_fai_in) {
+    SAMTOOLS_FAIDX(fasta)
+    fasta_fai = SAMTOOLS_FAIDX.out.fai
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PREPARE_GENOME } from './subworkflows/local/prepare_genome/main'
+workflow PIPE {
+  main:
+  PREPARE_GENOME(
+    params.fasta,
+    params.fasta_fai
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: {
+        asset_param: string;
+        guard: string;
+        guard_params?: string[];
+        builder: string;
+        builder_outputs: string[];
+        fallback_for?: string | null;
+        evidence: { source_path: string | null; confidence: string; evidence: string[] };
+      }[];
+    };
+
+    expect(summary.reference_rebuilds).toHaveLength(1);
+    const rule = summary.reference_rebuilds[0]!;
+    expect(rule.asset_param).toBe("fasta_fai");
+    expect(rule.guard).toBe("!fasta_fai_in");
+    expect(rule.guard_params).toEqual(["fasta_fai"]);
+    expect(rule.builder).toBe("SAMTOOLS_FAIDX");
+    expect(rule.builder_outputs).toEqual(["fai"]);
+    expect(rule.fallback_for).toBe("fasta_fai");
+    expect(rule.evidence.confidence).toBe("high");
+    expect(rule.evidence.source_path).toBe("subworkflows/local/prepare_genome/main.nf");
+  });
+
+  test("downgrades rebuild confidence when guard mixes non-param locals", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/rebuild-mixed' }\n");
+    write(
+      root,
+      "modules/bwa.nf",
+      `process BWA_INDEX {\n  input:\n  path fasta\n  output:\n  path "bwa", emit: index\n  script:\n  "bwa"\n}\n`,
+    );
+    write(
+      root,
+      "subworkflows/local/prepare_genome/main.nf",
+      `include { BWA_INDEX } from '../../../modules/bwa'
+workflow PREPARE_GENOME {
+  take:
+  fasta
+  bwa_in
+  main:
+  if (!bwa_in && aligner == "bwa") {
+    BWA_INDEX(fasta)
+    bwa = BWA_INDEX.out.index
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PREPARE_GENOME } from './subworkflows/local/prepare_genome/main'
+workflow PIPE {
+  main:
+  PREPARE_GENOME(
+    params.fasta,
+    params.bwa
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: {
+        asset_param: string;
+        builder: string;
+        evidence: { confidence: string };
+      }[];
+    };
+
+    expect(summary.reference_rebuilds).toHaveLength(1);
+    expect(summary.reference_rebuilds[0]!.asset_param).toBe("bwa");
+    expect(summary.reference_rebuilds[0]!.builder).toBe("BWA_INDEX");
+    expect(summary.reference_rebuilds[0]!.evidence.confidence).toBe("medium");
+  });
+
+  test("rebuild detection is name-agnostic — works without a PREPARE_GENOME wrapper", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/rebuild-no-prepare' }\n");
+    write(
+      root,
+      "modules/dict.nf",
+      `process CREATE_DICT {\n  input:\n  path fasta\n  output:\n  path "*.dict", emit: dict\n  script:\n  "dict"\n}\n`,
+    );
+    write(
+      root,
+      "subworkflows/local/references/main.nf",
+      `include { CREATE_DICT } from '../../../modules/dict'
+workflow REFERENCES_HUB {
+  take:
+  fasta
+  dict_in
+  main:
+  if (!dict_in) {
+    CREATE_DICT(fasta)
+    dict = CREATE_DICT.out.dict
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { REFERENCES_HUB } from './subworkflows/local/references/main'
+workflow PIPE {
+  main:
+  REFERENCES_HUB(
+    params.fasta,
+    params.dict
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: { asset_param: string; builder: string }[];
+    };
+
+    expect(summary.reference_rebuilds.map((r) => r.builder)).toEqual(["CREATE_DICT"]);
+  });
+
+  test("emits no rebuilds for a pipeline without compute-if-missing branches", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/no-rebuild' }\n");
+    write(root, "modules/m.nf", "process M {\n  script:\n  'm'\n}\n");
+    write(root, "main.nf", "include { M } from './modules/m'\nworkflow PIPE { main: M() }\n");
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: unknown[];
+    };
+    expect(summary.reference_rebuilds).toEqual([]);
+  });
+
   test("warns when an explicit mulled index path is missing", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/missing-mulled-index' }\n");
