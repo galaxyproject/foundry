@@ -1287,12 +1287,22 @@ function detectReferenceRebuilds(
     const invocations = invocationsByCallee.get(workflow.name) ?? [];
     const mainBlock = extractMainBlock(workflow.body);
     for (const block of extractIfBlocks(mainBlock)) {
-      const negation = /^\s*!\s*([A-Za-z_][A-Za-z0-9_]*)/u.exec(block.guard);
+      const negation = /^\s*!\s*(?:[A-Za-z_][A-Za-z0-9_]*\s*\.\s*)*([A-Za-z_][A-Za-z0-9_]*)/u.exec(
+        block.guard,
+      );
       if (!negation) continue;
       const negated = negation[1]!;
       if (/^(skip|no|disable|disabled)_/u.test(negated)) continue;
       const rebuild = analyzeRebuildBody(block.defaultBody);
       if (!rebuild) continue;
+      // Compute-if-missing convention: the assignment LHS or the negated identifier
+      // must correspond to a workflow-level `take:` slot. Filters generic
+      // `if (!something) { LHS = BUILDER.out... }` shapes (e.g. nf-core/rnaseq's
+      // alignment branches in the primary workflow body).
+      const takeMatches = [`${rebuild.lhs}_in`, rebuild.lhs, negated, `${negated}_in`].some(
+        (candidate) => takeNames.has(candidate),
+      );
+      if (!takeMatches) continue;
       const assetParam = resolveAssetParam(rebuild.lhs, negated, takeNames, invocations);
       const guardParams = collectGuardParams(block.guard, takeNames, invocations);
       const confidence: Evidence["confidence"] =

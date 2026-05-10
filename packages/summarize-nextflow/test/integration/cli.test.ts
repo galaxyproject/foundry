@@ -773,6 +773,62 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
     expect(groups.size).toBeGreaterThan(3);
     expect(groups.has("Input/output options")).toBe(true);
   });
+
+  itIfRnaseqFixture("emits reference_assets[] for the flagship RNA-seq reference inventory", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const validation = validateSummary(data);
+    if (!validation.valid)
+      console.error("rnaseq validation errors:", validation.errors.slice(0, 10));
+    expect(validation.valid).toBe(true);
+
+    const assets = data.reference_assets as {
+      param: string;
+      asset_kind: string;
+      format_hint: string | null;
+      used_by: string[];
+    }[];
+    const byName = Object.fromEntries(assets.map((a) => [a.param, a]));
+
+    // Key-expanded bundle + tool-specific indexes that PREPARE_GENOME consumes.
+    for (const expected of [
+      "fasta",
+      "gtf",
+      "gff",
+      "transcript_fasta",
+      "star_index",
+      "salmon_index",
+      "hisat2_index",
+      "bbsplit_index",
+    ]) {
+      expect(byName[expected], `${expected} should appear in reference_assets[]`).toBeDefined();
+      expect(byName[expected]!.used_by).toContain("PREPARE_GENOME");
+    }
+    expect(byName.fasta!.asset_kind).toBe("fasta");
+    expect(byName.gtf!.asset_kind).toBe("gtf");
+    expect(byName.gff!.asset_kind).toBe("gff");
+  });
+
+  itIfRnaseqFixture(
+    "emits no reference_rebuilds[] for RNA-seq (positive-form idiom is a known gap)",
+    () => {
+      // RNA-seq uses `if (<asset>) { unpack } else if (fasta_provided) { lhs = BUILDER(...).chan }`
+      // — an inline positive-form pattern that the current negated-form detector
+      // does not match. reference_assets[] still attributes consumers correctly;
+      // adding positive-form rebuild detection is a follow-up.
+      const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+        encoding: "utf8",
+        maxBuffer: SPAWN_MAX_BUFFER,
+      });
+      expect(r.status).toBe(0);
+      const data = JSON.parse(r.stdout);
+      expect(data.reference_rebuilds).toEqual([]);
+    },
+  );
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () => {
