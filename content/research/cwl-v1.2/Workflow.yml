@@ -1,0 +1,978 @@
+saladVersion: v1.1
+$base: "https://w3id.org/cwl/cwl#"
+
+$namespaces:
+  cwl: "https://w3id.org/cwl/cwl#"
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+
+$graph:
+
+- name: "WorkflowDoc"
+  type: documentation
+  doc:
+    - |
+      # Common Workflow Language (CWL) Workflow Description, v1.2
+
+      This version:
+        * https://w3id.org/cwl/v1.2/
+
+      Latest stable version:
+        * https://w3id.org/cwl/
+    - "\n\n"
+    - {$include: contrib.md}
+    - "\n\n"
+    - |
+      # Abstract
+
+      This specification defines the Common Workflow Language (CWL)
+      Workflow description, a vendor-neutral standard for representing
+      analysis tasks where a sequence of operations are described
+      using a directed graph of operations to transform input to
+      output.  CWL is portable across a variety of computing
+      platforms.
+
+    - {$include: intro.md}
+
+    - |
+      ## Introduction to the CWL Workflow standard v1.2.1
+
+      There are no new features nor behavior changes in CWL v1.2.1
+      as compared to CWL v1.2.0. v1.2.1 fixes only typos, adds clarifications,
+      and adds additional conformance tests. Some changes to the schema defining
+      CWL have been made to aid the auto-generation of libraries for the reading
+      and writing of CWL documents.
+
+      Documents should continue to specify `cwlVersion: v1.2`. However, when
+      reporting results from running the CWL conformance tests, please do report
+      all three components; for example "99% of CWL v1.2.0 required tests" or
+      "100% of CWL v1.2.1 required tests".
+
+      See also the [CommandLineTool v1.2.1 changelog](CommandLineTool.html#Changelog_for_v1.2.1)
+      and the [Schema-Salad v1.2.1 changelog](SchemaSalad.html#Changelog_for_v1.2.1).
+
+      ## Changelog for v1.2.1
+
+      * CWL has been assigned an official IANA Media Type of [`application/cwl`](https://www.iana.org/assignments/media-types/application/cwl)
+        for either JSON or YAML format. For JSON formatted CWL documents, [`application/cwl+json`](https://www.iana.org/assignments/media-types/application/cwl+json)
+        has also been assigned and can be used. For specifying a YAML formatted
+        CWL document, one can use `application/cwl+yaml` but that is not an official
+        IANA media-type yet; as of 2023-07-23 the `+yaml` suffix has yet to be approved.
+        The above has been documented in the [Syntax](#Syntax) section.
+      * There is now an unofficial [JSON Schema for CWL documents](https://github.com/common-workflow-language/cwl-v1.2/blob/1.2.1_proposed/json-schema/cwl.yaml),
+        donated by Francis Charette-Migneault. This schema captures much, but not
+        all, of the potential complexity of CWL documents. It was created for
+        the [draft](https://docs.ogc.org/DRAFTS/20-044.html)
+        [OGC API - Processes - Part 2: Deploy, Replace, Undeploy](http://www.opengis.net/doc/IS/ogcapi-processes-2/1.0)
+        standard.
+        To support the testing of this unofficial JSON Schema for CWL, some of
+        the `should_fail: true` tests have had the label `json_schema_invalid`
+        added.
+      * For consistency, all references to `URI`s have been replaced with `IRI`s
+        (Internationalized Resource Identifiers).
+      * The [`WorkflowStep.run`](#WorkflowStep) field description now explicitly
+        states that it can be either a string referencing an external document
+        or an embedded Process. This was previously only stated indirectly.
+      * The `outputSource` field of [`WorkflowOutputParameter`](#WorkflowOutputParameter)
+        now explicitly states that workflow inputs can be referenced. The
+        mandatory conformance test `output_reference_workflow_input` has been
+        added to confirm this.
+      * The example list of [process requirements](#Requirements_and_hints) that
+        can be inherited from a parent `Workflow` by a `CommandLineTool` was
+        incomplete in CWL v1.2; `LoadListingRequirement`, `WorkReuse`,
+        `NetworkAccess`, `InplaceUpdateRequirement`, `ToolTimeLimit` are also
+        valid.
+      * The [BNF grammar description of CWL Parameter References](#Parameter_references)
+        has been reformatted so that symbols get `code formatting`.
+      * In CWL v1.2, the [outputs of `ExpressionTool`s](#ExpressionToolOutputParameter)
+        are never type-checked due to a long-standing bug in the CWL reference
+        implementation. This has been made explicit along with the plan to fix
+        this oversight in CWL v1.3.
+      * The purpose and valid circumstances for using `Workflow.id`, `ExpressionTool.id`,
+        or `Operation.id` have been made more explicit: It is a unique identifier
+        for that Process; Only useful for when those are in a `$graph`. This `id`
+        value should not be exposed to users in graphical or terminal user interfaces.
+
+      ### Clarifications to the schema in CWL v1.2.1 to aid autogenerated libraries
+      Many CWL parsing/generating libraries are autogenerated from the official schema
+      for various programming languages by using [`schema-salad --codegen`](https://schema-salad.readthedocs.io/en/latest/#codegen-examples).
+
+      In CWL v1.2.1 we made many clarifications to the schema to enable faster
+      parsing; or to produce better results for end users. These changes do not change
+      the CWL syntax or its meaning; we are just now modeling it better.
+
+      * The schema for `Requirement`s has changed to enable faster parsing by
+        autogenerated libraries. The `class` field is now a static enum with a
+        single permissible value instead of a generic string (for example:
+        `class: SubworkflowFeatureRequirement` for a `SubworkflowFeatureRequirement` hint or requirement.)
+        This allows for autogenerated CWL parsers to recognize any requirement
+        immediately instead of having to check for matching field names and
+        valid values, as was done previously.
+      * Likewise, the schema for `Workflow`, `ExpressionTool`, and `Operation`
+        has also been changed to enable faster parsing; the `class` field is now a
+        static enum with a single permissible value (`class: Workflow`,
+        `class: ExpressionTool`, `class: Operation`) instead of a generic string.
+      * The schema for the `hints` field of `Workflow`, `ExpressionTool`, and `Operation`
+        has been expanded from: `Any[]?` to `["null", { type: array, items: [ ProcessRequirement, Any] } ]`.
+        This allows autogenerated CWL parsers to deserialize any of the standard
+        CWL hints instead of forcing the users of those parsers to convert the
+        unserialized hints to normal objects themselves.
+      * The schema for [`WorkflowOutputParameter.outputSource`](#WorkflowOutputParameter)
+        had the wrong [`refScope`](SchemaSalad.html#JsonldPredicate) of `0` instead
+        of `1`; This will correctly remove the `id` of the workflow itself when
+        searching for the source of this output.
+      * Everywhere the schema allows a value of type `long` we also explicitly
+        allow a value of type `int`: [`File.size`](#File), [`ToolTimeLimit.timelimt`](#ToolTimeLimit).
+        By JSON rules this is implicit, but by making it explicit we aid
+        autogenerated CWL libraries especially in languages such as Java.
+      * The schema for the `default` field of [WorkflowInputParameter](#WorkflowInputParameter),
+        [WorkflowStepInput](#WorkflowStepInput), and [OperationInputParameter](#WorkflowStepInput)
+        has been expanded from `Any?` to `["null", File, Directory, Any]` so that
+        autogenerated CWL libraries will deserialize any `File` or `Directory`
+        objects automatically for the user.
+      * The schema for the `hints` field of `Workflow`, `ExpressionTool`, and `Operation`
+        has been expanded from: `Any[]?` to `["null", { type: array, items: [ ProcessRequirement, Any] } ]`.
+        This allows autogenerated CWL parsers to deserialize any of the standard
+        CWL hints instead of forcing the users of those parsers to convert the
+        unserialized hints to normal objects themselves.
+
+      ### Updated Conformance Tests for v1.2.1
+      * Conformance tests are now referred to by their textual identifiers (`id`).
+        Previously this was the `label` field. Tests without a `label`/`id` have
+        been given one.
+      * `direct_required`, `direct_required_nojs`, `conditionals_nested_cross_scatter`,
+        `conditionals_nested_cross_scatter_nojs`: Marked the workflow outputs as
+        optional to remove ambiguity for these conditional `when` tests;
+        allowing conformant CWL runners to be more strict in their interpretation
+        of the typing rules, if they choose so.
+      * `timelimit_basic_wf`: The timeout has been increased from three seconds
+        to eight seconds to accommodate some runners who count container startup
+        time in the total.
+      * `timelimit_invalid_wf`: The timing on this test was updated from shorter
+        values to accommodate the startup time of certain container runners, the
+        previous timelimit of 5 seconds was too short, which is why it is now
+        20 seconds.
+      * The file `tests/wc-tool.cwl` was adapted to produce the same results on
+        BSD systems (like macOS) as GNU/Linux systems. This improved
+        compatibility for the following tests:
+        `nested_workflow_noexp`, `wf_wc_parseInt`, `nested_workflow`, `embedded_subworkflow`,
+        `step_input_default_value_overriden_2nd_step_noexp`, `step_input_default_value_overriden_2nd_step`,
+        `step_input_default_value_overriden_2nd_step_null_noexp`, `step_input_default_value_overriden_2nd_step_null`,
+        `step_input_default_value_overriden_noexp`, `step_input_default_value_nosource`,
+        `step_input_default_value_nullsource`, `step_input_default_value_overriden`,
+        `scatter_multi_input_embedded_subworkflow`, `workflow_embedded_subworkflow_embedded_subsubworkflow`,
+        `workflow_embedded_subworkflow_with_tool_and_subsubworkflow`, `workflow_embedded_subworkflow_with_subsubworkflow_and_tool`,
+        `scatter_embedded_subworkflow`, `step_input_default_value_noexp`,
+        `step_input_default_value`, `valuefrom_wf_step`.
+
+      ### New Mandatory Conformance tests for v1.2.1
+      * `output_reference_workflow_input`: Test direct use of `Workflow` level
+        input fields in the outputs.
+
+      ### New Optional Conformance Tests for v1.2.1
+
+      #### `SchemaDefRequirement`
+      * `schemadef_types_with_import`: Test `SchemaDefRequirement` with a
+         workflow, with the `$import` under types. It is similar to `schemadef-wf`,
+         but the `$import` is different.
+
+      #### `ScatterFeatureRequirement`
+      * `simple_simple_scatter`: Two level nested scatter.
+      * `dotproduct_simple_scatter`: Two level nested scatter: external
+        dotproduct and internal simple.
+      * `simple_dotproduct_scatter`: Two level nested scatter: external simple
+        and internal dotproduct.
+      * `dotproduct_dotproduct_scatter`: Two level nested scatter: external
+        dotproduct and internal dotproduct.
+      * `flat_crossproduct_simple_scatter`: Two level nested scatter: external
+        flat_crossproduct and internal simple.
+      * `simple_flat_crossproduct_scatter`: Two level nested scatter: external
+        simple and internal flat_crossproduct.
+      * `flat_crossproduct_flat_crossproduct_scatter`: Two level nested scatter:
+        external flat_crossproduct and internal flat_crossproduct.
+      * `nested_crossproduct_simple_scatter`: Two level nested scatter: external
+        nested_crossproduct and internal simple.
+      * `simple_nested_crossproduct_scatter`: Two level nested scatter: external
+        simple and internal nested_crossproduct.
+      * `nested_crossproduct_nested_crossproduct_scatter`: Two level nested scatter:
+        external nested_crossproduct and internal nested_crossproduct.
+
+      #### `StepInputExpressionRequirement`
+      * `default_with_falsey_value`: Confirms that "false"-like (but not 'null')
+        values override any default.
+
+      ## Introduction to CWL Workflow standard v1.2
+
+      This specification represents the latest stable release from the
+      CWL group.  Since the v1.1 release, v1.2 introduces the
+      following updates to the CWL Workflow standard.
+      Documents should to use `cwlVersion: v1.2` to make use of new
+      syntax and features introduced in v1.2.  Existing v1.1 documents
+      should be trivially updatable by changing `cwlVersion`, however
+      CWL documents that relied on previously undefined or
+      underspecified behavior may have slightly different behavior in
+      v1.2.  See note about `cwl-upgrader` in the changelog.
+
+      ## Changelog
+
+        * Adds `when` field to [WorkflowStep](#WorkflowStep) for conditional
+          execution
+        * Adds `pickValue` field to [WorkflowStepInput](#WorkflowStepInput) and
+          [WorkflowOutputParameter](#WorkflowOutputParameter) for selecting among null and
+          non-null source values
+        * Add abstract [Operation](#Operation) that can be used as a
+          no-op stand-in to describe abstract workflows.
+        * [Workflow](#Workflow), [ExpressionTool](#ExpressionTool) and
+          [Operation](#Operation) can now express `intent` with an
+          identifier for the type of computational operation.
+        * Clarify there are no limits on the size of file literal `contents`.
+        * When using `loadContents` it now must fail when attempting to
+          load a file greater than 64 KiB instead of silently truncating
+          the data.
+        * Note that only enum and record types can be typedef-ed
+        * Escaping in [string interpolation](#String_Interpolation) has
+          been added to the specification along with conformance tests.
+        * Added discussion of [packed documents](#Packed_documents).
+        * Specify behavior when `source` is a single-item list and no
+          linkMerge is set.
+        * Added discussion about handling different document versions.
+        * Added definition of **data link**
+
+      See also the [CWL Command Line Tool Description, v1.2 changelog](CommandLineTool.html#Changelog).
+      For other changes since CWL v1.0, see the
+      [CWL Workflow Description, v1.1 changelog](https://www.commonwl.org/v1.1/Workflow.html#Changelog).
+
+      [`cwl-upgrader`](https://github.com/common-workflow-language/cwl-upgrader) can
+      be used for upgrading CWL documents from version `draft-3`, `v1.0`, and `v1.1` to `v1.2`.
+
+      ## Purpose
+
+      The Common Workflow Language Command Line Tool Description
+      express workflows for data-intensive science, such as
+      bioinformatics, physics, astronomy, geoscience, and machine
+      learning.  This specification is intended to define a data and
+      execution model for Workflows that can be implemented on top of
+      a variety of computing platforms, ranging from an individual
+      workstation to cluster, grid, cloud, and high performance
+      computing systems. Details related to execution of these
+      workflow not laid out in this specification are open to
+      interpretation by the computing platform implementing this
+      specification.
+
+    - {$include: concepts.md}
+
+- name: ExpressionToolOutputParameter
+  type: record
+  extends: OutputParameter
+  fields:
+    - name: type
+      type:
+        - CWLType
+        - OutputRecordSchema
+        - OutputEnumSchema
+        - OutputArraySchema
+        - string
+        - type: array
+          items:
+            - CWLType
+            - OutputRecordSchema
+            - OutputEnumSchema
+            - OutputArraySchema
+            - string
+      jsonldPredicate:
+        "_id": "sld:type"
+        "_type": "@vocab"
+        refScope: 2
+        typeDSL: True
+      doc: |
+        Specify valid types of data that may be assigned to this parameter.
+        Note that this field just acts as a hint, as the outputs of an
+        ExpressionTool process are always considered valid.
+
+
+- name: WorkflowInputParameter
+  type: record
+  extends: InputParameter
+  docParent: "#Workflow"
+  fields:
+    - name: type
+      type:
+        - CWLType
+        - InputRecordSchema
+        - InputEnumSchema
+        - InputArraySchema
+        - string
+        - type: array
+          items:
+            - CWLType
+            - InputRecordSchema
+            - InputEnumSchema
+            - InputArraySchema
+            - string
+      jsonldPredicate:
+        "_id": "sld:type"
+        "_type": "@vocab"
+        refScope: 2
+        typeDSL: True
+      doc: |
+        Specify valid types of data that may be assigned to this parameter.
+    - name: inputBinding
+      type: InputBinding?
+      doc: |
+        Deprecated.  Preserved for v1.0 backwards compatibility.  Will be removed in
+        CWL v2.0.  Use `WorkflowInputParameter.loadContents` instead.
+      jsonldPredicate: "cwl:inputBinding"
+
+
+- type: record
+  name: ExpressionTool
+  extends: Process
+  specialize:
+    - specializeFrom: InputParameter
+      specializeTo: WorkflowInputParameter
+    - specializeFrom: OutputParameter
+      specializeTo: ExpressionToolOutputParameter
+  documentRoot: true
+  doc: |
+    An ExpressionTool is a type of Process object that can be run by itself
+    or as a Workflow step. It executes a pure Javascript expression that has
+    access to the same input parameters as a workflow. It is meant to be used
+    sparingly as a way to isolate complex Javascript expressions that need to
+    operate on input data and produce some result; perhaps just a
+    rearrangement of the inputs. No Docker software container is required
+    or allowed.
+  fields:
+    - name: class
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+      type:
+        type: enum
+        name: ExpressionTool_class
+        symbols:
+          - cwl:ExpressionTool
+    - name: expression
+      type: Expression
+      doc: |
+        The expression to execute.  The expression must return a plain
+        Javascript object which matches the output parameters of the
+        ExpressionTool.
+
+- name: LinkMergeMethod
+  type: enum
+  docParent: "#WorkflowStepInput"
+  doc: The input link merge method, described in [WorkflowStepInput](#WorkflowStepInput).
+  symbols:
+    - merge_nested
+    - merge_flattened
+
+
+- name: PickValueMethod
+  type: enum
+  docParent: "#WorkflowStepInput"
+  doc: |
+    Picking non-null values among inbound data links, described in [WorkflowStepInput](#WorkflowStepInput).
+  symbols:
+    - first_non_null
+    - the_only_non_null
+    - all_non_null
+
+
+- name: WorkflowOutputParameter
+  type: record
+  extends: OutputParameter
+  docParent: "#Workflow"
+  doc: |
+    Describe an output parameter of a workflow.  The parameter must be
+    connected to one or more parameters defined in the workflow that
+    will provide the value of the output parameter. It is legal to
+    connect a WorkflowInputParameter to a WorkflowOutputParameter.
+
+    See [WorkflowStepInput](#WorkflowStepInput) for discussion of
+    `linkMerge` and `pickValue`.
+  fields:
+    - name: outputSource
+      doc: |
+        Specifies one or more names of an output from a workflow step (in the form
+        `step_name/output_name` with a `/` separator`), or a workflow input name,
+        that supply their value(s) to the output parameter.
+        the output parameter.  It is valid to reference workflow level inputs
+        here.
+      jsonldPredicate:
+        "_id": "cwl:outputSource"
+        "_type": "@id"
+        refScope: 1
+      type:
+        - string?
+        - string[]?
+    - name: linkMerge
+      type: ["null", LinkMergeMethod]
+      jsonldPredicate: "cwl:linkMerge"
+      default: merge_nested
+      doc: |
+        The method to use to merge multiple sources into a single array.
+        If not specified, the default method is "merge_nested".
+
+    - name: pickValue
+      type: ["null", PickValueMethod]
+      jsonldPredicate: "cwl:pickValue"
+      doc: |
+        The method to use to choose non-null elements among multiple sources.
+
+    - name: type
+      type:
+        - CWLType
+        - OutputRecordSchema
+        - OutputEnumSchema
+        - OutputArraySchema
+        - string
+        - type: array
+          items:
+            - CWLType
+            - OutputRecordSchema
+            - OutputEnumSchema
+            - OutputArraySchema
+            - string
+      jsonldPredicate:
+        "_id": "sld:type"
+        "_type": "@vocab"
+        refScope: 2
+        typeDSL: True
+      doc: |
+        Specify valid types of data that may be assigned to this parameter.
+
+
+- name: Sink
+  type: record
+  abstract: true
+  fields:
+    - name: source
+      doc: |
+        Specifies one or more workflow parameters that will provide input to
+        the underlying step parameter.
+      jsonldPredicate:
+        "_id": "cwl:source"
+        "_type": "@id"
+        refScope: 2
+      type:
+        - string?
+        - string[]?
+    - name: linkMerge
+      type: LinkMergeMethod?
+      jsonldPredicate: "cwl:linkMerge"
+      default: merge_nested
+      doc: |
+        The method to use to merge multiple inbound links into a single array.
+        If not specified, the default method is "merge_nested".
+    - name: pickValue
+      type: ["null", PickValueMethod]
+      jsonldPredicate: "cwl:pickValue"
+      doc: |
+        The method to use to choose non-null elements among multiple sources.
+
+
+- type: record
+  name: WorkflowStepInput
+  extends: [Identified, Sink, LoadContents, Labeled]
+  docParent: "#WorkflowStep"
+  doc: |
+    The input of a workflow step connects an upstream parameter (from the
+    workflow inputs, or the outputs of other workflows steps) with the input
+    parameters of the process specified by the `run` field. Only input parameters
+    declared by the target process will be passed through at runtime to the process
+    though additional parameters may be specified (for use within `valueFrom`
+    expressions for instance) - unconnected or unused parameters do not represent an
+    error condition.
+
+    # Input object
+
+    A WorkflowStepInput object must contain an `id` field in the form
+    `#fieldname` or `#prefix/fieldname`.  When the `id` field contains a slash
+    `/` the field name consists of the characters following the final slash
+    (the prefix portion may contain one or more slashes to indicate scope).
+    This defines a field of the workflow step input object with the value of
+    the `source` parameter(s).
+
+    # Merging multiple inbound data links
+
+    To merge multiple inbound data links,
+    [MultipleInputFeatureRequirement](#MultipleInputFeatureRequirement) must be specified
+    in the workflow or workflow step requirements.
+
+    If the sink parameter is an array, or named in a [workflow
+    scatter](#WorkflowStep) operation, there may be multiple inbound
+    data links listed in the `source` field.  The values from the
+    input links are merged depending on the method specified in the
+    `linkMerge` field.  If both `linkMerge` and `pickValue` are null
+    or not specified, and there is more than one element in the
+    `source` array, the default method is "merge_nested".
+
+    If both `linkMerge` and `pickValue` are null or not specified, and
+    there is only a single element in the `source`, then the input
+    parameter takes the scalar value from the single input link (it is
+    *not* wrapped in a single-list).
+
+    * **merge_nested**
+
+      The input must be an array consisting of exactly one entry for each
+      input link.  If "merge_nested" is specified with a single link, the value
+      from the link must be wrapped in a single-item list.
+
+    * **merge_flattened**
+
+      1. The source and sink parameters must be compatible types, or the source
+         type must be compatible with single element from the "items" type of
+         the destination array parameter.
+      2. Source parameters which are arrays are concatenated.
+         Source parameters which are single element types are appended as
+         single elements.
+
+    # Picking non-null values among inbound data links
+
+    If present, `pickValue` specifies how to pick non-null values among inbound data links.
+
+    `pickValue` is evaluated
+      1. Once all source values from upstream step or parameters are available.
+      2. After `linkMerge`.
+      3. Before `scatter` or `valueFrom`.
+
+    This is specifically intended to be useful in combination with
+    [conditional execution](#WorkflowStep), where several upstream
+    steps may be connected to a single input (`source` is a list), and
+    skipped steps produce null values.
+
+    Static type checkers should check for type consistency after inferring what the type
+    will be after `pickValue` is applied, just as they do currently for `linkMerge`.
+
+    * **first_non_null**
+
+      For the first level of a list input, pick the first non-null element.  The result is a scalar.
+      It is an error if there is no non-null element.  Examples:
+      * `[null, x, null, y] -> x`
+      * `[null, [null], null, y] -> [null]`
+      * `[null, null, null] -> Runtime Error`
+
+      *Intended use case*: If-else pattern where the
+      value comes either from a conditional step or from a default or
+      fallback value. The conditional step(s) should be placed first in
+      the list.
+
+    * **the_only_non_null**
+
+      For the first level of a list input, pick the single non-null element.  The result is a scalar.
+      It is an error if there is more than one non-null element.  Examples:
+
+      * `[null, x, null] -> x`
+      * `[null, x, null, y] -> Runtime Error`
+      * `[null, [null], null] -> [null]`
+      * `[null, null, null] -> Runtime Error`
+
+      *Intended use case*: Switch type patterns where developer considers
+      more than one active code path as a workflow error
+      (possibly indicating an error in writing `when` condition expressions).
+
+    * **all_non_null**
+
+      For the first level of a list input, pick all non-null values.
+      The result is a list, which may be empty.  Examples:
+
+      * `[null, x, null] -> [x]`
+      * `[x, null, y] -> [x, y]`
+      * `[null, [x], [null]] -> [[x], [null]]`
+      * `[null, null, null] -> []`
+
+      *Intended use case*: It is valid to have more than one source, but
+       sources are conditional, so null sources (from skipped steps)
+       should be filtered out.
+
+  fields:
+    - name: default
+      type: ["null", File, Directory, Any]
+      doc: |
+        The default value for this parameter to use if either there is no
+        `source` field, or the value produced by the `source` is `null`.  The
+        default must be applied prior to scattering or evaluating `valueFrom`.
+      jsonldPredicate:
+        _id: "sld:default"
+        noLinkCheck: true
+    - name: valueFrom
+      type:
+        - "null"
+        - string
+        - Expression
+      jsonldPredicate: "cwl:valueFrom"
+      doc: |
+        To use valueFrom, [StepInputExpressionRequirement](#StepInputExpressionRequirement) must
+        be specified in the workflow or workflow step requirements.
+
+        If `valueFrom` is a constant string value, use this as the value for
+        this input parameter.
+
+        If `valueFrom` is a parameter reference or expression, it must be
+        evaluated to yield the actual value to be assigned to the input field.
+
+        The `self` value in the parameter reference or expression must be
+        1. `null` if there is no `source` field
+        2. the value of the parameter(s) specified in the `source` field when this
+        workflow input parameter **is not** specified in this workflow step's `scatter` field.
+        3. an element of the parameter specified in the `source` field when this workflow input
+        parameter **is** specified in this workflow step's `scatter` field.
+
+        The value of `inputs` in the parameter reference or expression must be
+        the input object to the workflow step after assigning the `source`
+        values, applying `default`, and then scattering.  The order of
+        evaluating `valueFrom` among step input parameters is undefined and the
+        result of evaluating `valueFrom` on a parameter must not be visible to
+        evaluation of `valueFrom` on other parameters.
+
+
+- type: record
+  name: WorkflowStepOutput
+  docParent: "#WorkflowStep"
+  extends: Identified
+  doc: |
+    Associate an output parameter of the underlying process with a workflow
+    parameter.  The workflow parameter (given in the `id` field) be may be used
+    as a `source` to connect with input parameters of other workflow steps, or
+    with an output parameter of the process.
+
+    A unique identifier for this workflow output parameter.  This is
+    the identifier to use in the `source` field of `WorkflowStepInput`
+    to connect the output value to downstream parameters.
+
+
+- name: ScatterMethod
+  type: enum
+  docParent: "#WorkflowStep"
+  doc: The scatter method, as described in [workflow step scatter](#WorkflowStep).
+  symbols:
+    - dotproduct
+    - nested_crossproduct
+    - flat_crossproduct
+
+
+- name: WorkflowStep
+  type: record
+  extends: [Identified, Labeled, sld:Documented]
+  docParent: "#Workflow"
+  doc: |
+    A workflow step is an executable element of a workflow.  It specifies the
+    underlying process implementation (such as `CommandLineTool` or another
+    `Workflow`) in the `run` field and connects the input and output parameters
+    of the underlying process to workflow parameters.
+
+    # Scatter/gather
+
+    To use scatter/gather,
+    [ScatterFeatureRequirement](#ScatterFeatureRequirement) must be specified
+    in the workflow or workflow step requirements.
+
+    A "scatter" operation specifies that the associated workflow step or
+    subworkflow should execute separately over a list of input elements.  Each
+    job making up a scatter operation is independent and may be executed
+    concurrently.
+
+    The `scatter` field specifies one or more input parameters which will be
+    scattered.  An input parameter may be listed more than once.  The declared
+    type of each input parameter implicitly becomes an array of items of the
+    input parameter type.  If a parameter is listed more than once, it becomes
+    a nested array.  As a result, upstream parameters which are connected to
+    scattered parameters must be arrays.
+
+    All output parameter types are also implicitly wrapped in arrays.  Each job
+    in the scatter results in an entry in the output array.
+
+    If any scattered parameter runtime value is an empty array, all outputs are
+    set to empty arrays and no work is done for the step, according to
+    applicable scattering rules.
+
+    If `scatter` declares more than one input parameter, `scatterMethod`
+    describes how to decompose the input into a discrete set of jobs.
+
+      * **dotproduct** specifies that each of the input arrays are aligned and one
+          element taken from each array to construct each job.  It is an error
+          if all input arrays are not the same length.
+
+      * **nested_crossproduct** specifies the Cartesian product of the inputs,
+          producing a job for every combination of the scattered inputs.  The
+          output must be nested arrays for each level of scattering, in the
+          order that the input arrays are listed in the `scatter` field.
+
+      * **flat_crossproduct** specifies the Cartesian product of the inputs,
+          producing a job for every combination of the scattered inputs.  The
+          output arrays must be flattened to a single level, but otherwise listed in the
+          order that the input arrays are listed in the `scatter` field.
+
+    # Conditional execution (Optional)
+
+    Conditional execution makes execution of a step conditional on an
+    expression.  A step that is not executed is "skipped".  A skipped
+    step produces `null` for all output parameters.
+
+    The condition is evaluated after `scatter`, using the input object
+    of each individual scatter job.  This means over a set of scatter
+    jobs, some may be executed and some may be skipped.  When the
+    results are gathered, skipped steps must be `null` in the output
+    arrays.
+
+    The `when` field controls conditional execution.  This is an
+    expression that must be evaluated with `inputs` bound to the step
+    input object (or individual scatter job), and returns a boolean
+    value.  It is an error if this expression returns a value other
+    than `true` or `false`.
+
+    Conditionals in CWL are an optional feature and are not required
+    to be implemented by all consumers of CWL documents.  An
+    implementation that does not support conditionals must return a
+    fatal error when attempting to execute a workflow that uses
+    conditional constructs the implementation does not support.
+
+    # Subworkflows
+
+    To specify a nested workflow as part of a workflow step,
+    [SubworkflowFeatureRequirement](#SubworkflowFeatureRequirement) must be
+    specified in the workflow or workflow step requirements.
+
+    It is a fatal error if a workflow directly or indirectly invokes itself as
+    a subworkflow (recursive workflows are not allowed).
+
+  fields:
+    - name: in
+      type: WorkflowStepInput[]
+      jsonldPredicate:
+        _id: "cwl:in"
+        mapSubject: id
+        mapPredicate: source
+      doc: |
+        Defines the input parameters of the workflow step.  The process is ready to
+        run when all required input parameters are associated with concrete
+        values.  Input parameters include a schema for each parameter which is
+        used to validate the input object.  It may also be used build a user
+        interface for constructing the input object.
+    - name: out
+      type:
+        - type: array
+          items: [string, WorkflowStepOutput]
+      jsonldPredicate:
+        _id: "cwl:out"
+        _type: "@id"
+        identity: true
+      doc: |
+        Defines the parameters representing the output of the process.  May be
+        used to generate and/or validate the output object.
+    - name: requirements
+      type: ProcessRequirement[]?
+      jsonldPredicate:
+        _id: "cwl:requirements"
+        mapSubject: class
+      doc: |
+        Declares requirements that apply to either the runtime environment or the
+        workflow engine that must be met in order to execute this workflow step.  If
+        an implementation cannot satisfy all requirements, or a requirement is
+        listed which is not recognized by the implementation, it is a fatal
+        error and the implementation must not attempt to run the process,
+        unless overridden at user option.
+    - name: hints
+      type: Any[]?
+      jsonldPredicate:
+        _id: "cwl:hints"
+        noLinkCheck: true
+        mapSubject: class
+      doc: |
+        Declares hints applying to either the runtime environment or the
+        workflow engine that may be helpful in executing this workflow step.  It is
+        not an error if an implementation cannot satisfy all hints, however
+        the implementation may report a warning.
+    - name: run
+      type: [string, Process]
+      jsonldPredicate:
+        _id: "cwl:run"
+        _type: "@id"
+        subscope: run
+      doc: |
+        Specifies the process to run.  If `run` is a string, it must be an absolute IRI
+        or a relative path from the primary document.
+    - name: when
+      type:
+        - "null"
+        - Expression
+      jsonldPredicate: "cwl:when"
+      doc: |
+        If defined, only run the step when the expression evaluates to
+        `true`.  If `false` the step is skipped.  A skipped step
+        produces a `null` on each output.
+    - name: scatter
+      type:
+        - string?
+        - string[]?
+      jsonldPredicate:
+        "_id": "cwl:scatter"
+        "_type": "@id"
+        "_container": "@list"
+        refScope: 0
+    - name: scatterMethod
+      doc: |
+        Required if `scatter` is an array of more than one element.
+      type: ScatterMethod?
+      jsonldPredicate:
+        "_id": "cwl:scatterMethod"
+        "_type": "@vocab"
+
+
+- name: Workflow
+  type: record
+  extends: "#Process"
+  documentRoot: true
+  specialize:
+    - specializeFrom: InputParameter
+      specializeTo: WorkflowInputParameter
+    - specializeFrom: OutputParameter
+      specializeTo: WorkflowOutputParameter
+  doc: |
+    A workflow describes a set of **steps** and the **dependencies** between
+    those steps.  When a step produces output that will be consumed by a
+    second step, the first step is a dependency of the second step.
+
+    When there is a dependency, the workflow engine must execute the preceding
+    step and wait for it to successfully produce output before executing the
+    dependent step.  If two steps are defined in the workflow graph that
+    are not directly or indirectly dependent, these steps are **independent**,
+    and may execute in any order or execute concurrently.  A workflow is
+    complete when all steps have been executed.
+
+    Dependencies between parameters are expressed using the `source`
+    field on [workflow step input parameters](#WorkflowStepInput) and
+    `outputSource` field on [workflow output
+    parameters](#WorkflowOutputParameter).
+
+    The `source` field on each workflow step input parameter expresses
+    the data links that contribute to the value of the step input
+    parameter (the "sink").  A workflow step can only begin execution
+    when every data link connected to a step has been fulfilled.
+
+    The `outputSource` field on each workflow step input parameter
+    expresses the data links that contribute to the value of the
+    workflow output parameter (the "sink").  Workflow execution cannot
+    complete successfully until every data link connected to an output
+    parameter has been fulfilled.
+
+    ## Workflow success and failure
+
+    A completed step must result in one of `success`, `temporaryFailure` or
+    `permanentFailure` states.  An implementation may choose to retry a step
+    execution which resulted in `temporaryFailure`.  An implementation may
+    choose to either continue running other steps of a workflow, or terminate
+    immediately upon `permanentFailure`.
+
+    * If any step of a workflow execution results in `permanentFailure`, then
+    the workflow status is `permanentFailure`.
+
+    * If one or more steps result in `temporaryFailure` and all other steps
+    complete `success` or are not executed, then the workflow status is
+    `temporaryFailure`.
+
+    * If all workflow steps are executed and complete with `success`, then the
+    workflow status is `success`.
+
+    # Extensions
+
+    [ScatterFeatureRequirement](#ScatterFeatureRequirement) and
+    [SubworkflowFeatureRequirement](#SubworkflowFeatureRequirement) are
+    available as standard [extensions](#Extensions_and_Metadata) to core
+    workflow semantics.
+
+  fields:
+    - name: "class"
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+      type:
+        type: enum
+        name: Workflow_class
+        symbols:
+          - cwl:Workflow
+    - name: steps
+      doc: |
+        The individual steps that make up the workflow.  Each step is executed when all of its
+        input data links are fulfilled.  An implementation may choose to execute
+        the steps in a different order than listed and/or execute steps
+        concurrently, provided that dependencies between steps are met.
+      type:
+        - type: array
+          items: "#WorkflowStep"
+      jsonldPredicate:
+          mapSubject: id
+
+
+- type: record
+  name: SubworkflowFeatureRequirement
+  extends: ProcessRequirement
+  doc: |
+    Indicates that the workflow platform must support nested workflows in
+    the `run` field of [WorkflowStep](#WorkflowStep).
+  fields:
+    - name: "class"
+      type:
+        type: enum
+        name: SubworkflowFeatureRequirement_class
+        symbols:
+          - cwl:SubworkflowFeatureRequirement
+      doc: "Always 'SubworkflowFeatureRequirement'"
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+
+- name: ScatterFeatureRequirement
+  type: record
+  extends: ProcessRequirement
+  doc: |
+    Indicates that the workflow platform must support the `scatter` and
+    `scatterMethod` fields of [WorkflowStep](#WorkflowStep).
+  fields:
+    - name: "class"
+      type:
+        type: enum
+        name: ScatterFeatureRequirement_class
+        symbols:
+          - cwl:ScatterFeatureRequirement
+      doc: "Always 'ScatterFeatureRequirement'"
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+
+- name: MultipleInputFeatureRequirement
+  type: record
+  extends: ProcessRequirement
+  doc: |
+    Indicates that the workflow platform must support multiple inbound data links
+    listed in the `source` field of [WorkflowStepInput](#WorkflowStepInput).
+  fields:
+    - name: "class"
+      type:
+        type: enum
+        name: MultipleInputFeatureRequirement_class
+        symbols:
+          - cwl:MultipleInputFeatureRequirement
+      doc: "Always 'MultipleInputFeatureRequirement'"
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+
+- type: record
+  name: StepInputExpressionRequirement
+  extends: ProcessRequirement
+  doc: |
+    Indicate that the workflow platform must support the `valueFrom` field
+    of [WorkflowStepInput](#WorkflowStepInput).
+  fields:
+    - name: "class"
+      type:
+        type: enum
+        name: StepInputExpressionRequirement_class
+        symbols:
+          - cwl:StepInputExpressionRequirement
+      doc: "Always 'StepInputExpressionRequirement'"
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+
+- {$import: Operation.yml}

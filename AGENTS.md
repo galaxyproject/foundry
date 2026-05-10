@@ -53,6 +53,7 @@ make test              # npm run test
 make typecheck         # npm run typecheck
 make fixtures          # materialize Nextflow fixtures + IWC format2 + IWC skeletons
 make fixtures-nextflow # materialize workflow-fixtures/pipelines/
+make fixtures-cwl      # materialize workflow-fixtures/cwl/
 make fixtures-iwc      # materialize workflow-fixtures/iwc-src, iwc-cleaned, iwc-format2
 make fixtures-skeletons # materialize workflow-fixtures/iwc-skeletons from iwc-format2
 make fixtures-verify   # verify materialized fixture SHAs
@@ -64,6 +65,7 @@ make fixtures-clean    # remove generated fixture dirs
 `workflow-fixtures/` is the generated-corpus workspace used for research, not committed content. The generated directories are gitignored and may be absent in a fresh worktree:
 
 - `workflow-fixtures/pipelines/` — pinned Nextflow pipeline clones from `workflow-fixtures/fixtures.yaml`.
+- `workflow-fixtures/cwl/` — pinned CWL workflow/tool repository clones from `workflow-fixtures/fixtures.yaml`.
 - `workflow-fixtures/iwc-src/` — pinned IWC clone.
 - `workflow-fixtures/iwc-cleaned/` — intermediate cleaned Galaxy workflows.
 - `workflow-fixtures/iwc-format2/` — cleaned gxformat2 IWC corpus, cited as `$IWC_FORMAT2/...` in surveys and ad-hoc research only.
@@ -73,7 +75,7 @@ Before launching or acting as a research subagent that needs corpus evidence, ch
 
 When launching research subagents, ask for evidence quality explicitly. Reports should separate corpus-observed claims, architectural or design inferences, external-doc claims, and speculative or low-confidence claims. Do not let plausible mappings stand as corpus evidence unless they cite fixtures or existing Foundry notes.
 
-For IWC survey work, prefer `make fixtures-iwc fixtures-skeletons` before mining `$IWC_FORMAT2` or `$IWC_SKELETONS`. For Nextflow example work, prefer `make fixtures-nextflow` before reading `workflow-fixtures/pipelines/`.
+For IWC survey work, prefer `make fixtures-iwc fixtures-skeletons` before mining `$IWC_FORMAT2` or `$IWC_SKELETONS`. For Nextflow example work, prefer `make fixtures-nextflow` before reading `workflow-fixtures/pipelines/`. For CWL example work, prefer `make fixtures-cwl` before reading `workflow-fixtures/cwl/`.
 
 ## Package layout
 

@@ -1,0 +1,57 @@
+{
+  "name": "@galaxy-foundry/summary-cwl-schema",
+  "version": "0.0.0",
+  "description": "JSON Schema for the Foundry's CWL workflow summary format, plus AJV-based validator and CLI.",
+  "type": "module",
+  "bin": {
+    "validate-summary-cwl": "dist/bin/validate-summary-cwl.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema.json": "./dist/summary-cwl.schema.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchilton/foundry.git",
+    "directory": "packages/summary-cwl-schema"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-schema.mjs",
+    "prebuild": "pnpm sync",
+    "build": "tsc && node scripts/copy-schema-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "galaxy",
+    "foundry",
+    "cwl",
+    "schema",
+    "json-schema"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,4 +1,4 @@
-.PHONY: validate test typecheck generated check-generated check fixtures fixtures-nextflow fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean
+.PHONY: validate test typecheck generated check-generated check fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean
 
 validate:
 	npm run validate
@@ -24,6 +24,9 @@ fixtures:
 
 fixtures-nextflow:
 	$(MAKE) -C workflow-fixtures nextflow
+
+fixtures-cwl:
+	$(MAKE) -C workflow-fixtures cwl
 
 fixtures-iwc:
 	$(MAKE) -C workflow-fixtures iwc

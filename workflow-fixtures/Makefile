@@ -1,9 +1,12 @@
-.PHONY: all nextflow iwc skeletons verify clean
+.PHONY: all nextflow cwl iwc skeletons verify clean
 
-all: nextflow iwc skeletons
+all: nextflow cwl iwc skeletons
 
 nextflow:
 	scripts/fetch.sh
+
+cwl:
+	scripts/fetch-cwl.sh
 
 iwc:
 	scripts/build-iwc.sh
@@ -13,7 +16,8 @@ skeletons:
 
 verify:
 	VERIFY=1 scripts/fetch.sh
+	VERIFY=1 scripts/fetch-cwl.sh
 	VERIFY=1 scripts/build-iwc.sh
 
 clean:
-	rm -rf pipelines iwc-src iwc-cleaned iwc-format2 iwc-skeletons
+	rm -rf pipelines cwl iwc-src iwc-cleaned iwc-format2 iwc-skeletons

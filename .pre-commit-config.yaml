@@ -10,6 +10,7 @@
 exclude: |
   (?x)^(
     packages/tests-format-schema/src/tests\.schema\.|
+    content/research/cwl-v1\.2/|
     packages/.*/test/fixtures/|
     workflow-fixtures/|
     site/\.astro/|

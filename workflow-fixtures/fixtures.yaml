@@ -320,6 +320,92 @@ pipelines:
       reference data. Useful as a non-bio sanity baseline for
       summarize-nextflow output shape.
 
+# CWL fixture repositories for summarize-cwl / CWL -> Galaxy research.
+#
+# Materialized into cwl/<name>/ by scripts/fetch-cwl.sh. Entries pin whole
+# repositories because CWL workflows often use relative `run:` references to
+# sibling CommandLineTool and subworkflow files.
+#
+# Required fields: name, flavor, tier, repo, sha, entrypoints, notes.
+# Optional fields: tag (omit for HEAD-pinned repos).
+#
+# Flavors:
+#   user-guide   - small teaching examples from the official CWL User Guide.
+#   conformance  - official CWL specification / conformance-test examples.
+#   bio-workflow - real domain workflow repository.
+#   tool-library - reusable CommandLineTool library; useful for wrapper mapping.
+#
+# Tiers:
+#   tiny    - minimal workflow or small feature example.
+#   small   - small multi-step or feature-combination workflow.
+#   large   - real workflow corpus or broad tool/workflow collection.
+
+cwl_repositories:
+  - name: common-workflow-language/user_guide
+    flavor: user-guide
+    tier: tiny
+    repo: https://github.com/common-workflow-language/user_guide.git
+    sha: 546b3844c9e6ea0b2c4700a876e5f96c4de15480
+    entrypoints:
+      - src/_includes/cwl/workflows/1st-workflow.cwl
+      - src/_includes/cwl/workflows/scatter-workflow.cwl
+      - src/_includes/cwl/workflows/scatter-two-steps.cwl
+      - src/_includes/cwl/workflows/nestedworkflows.cwl
+    notes: >
+      Official CWL User Guide examples. Tiny, readable workflows for the
+      first summarize-cwl smoke tests: simple two-step wiring, scatter, and
+      nested workflow references.
+
+  - name: common-workflow-language/cwl-v1.2
+    flavor: conformance
+    tier: small
+    repo: https://github.com/common-workflow-language/cwl-v1.2.git
+    tag: v1.2.1
+    sha: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
+    entrypoints:
+      - tests/count-lines1-wf.cwl
+      - tests/count-lines6-wf.cwl
+      - tests/count-lines11-wf.cwl
+      - tests/conditionals/cond-wf-001.cwl
+      - tests/conditionals/cond-wf-003.cwl
+    notes: >
+      Official CWL v1.2.1 specification/conformance repository. Good for
+      source-language edge cases: workflow wiring, scatter-like feature tests,
+      conditionals, valueFrom, and expression-heavy examples.
+
+  - name: EBI-Metagenomics/pipeline-v5
+    flavor: bio-workflow
+    tier: large
+    repo: https://github.com/EBI-Metagenomics/pipeline-v5.git
+    tag: v5.0.7
+    sha: 981aafc0df341a2536ed5059695bb7c33af4d3ee
+    entrypoints:
+      - workflows/raw-reads-wf--v.5-cond.cwl
+      - workflows/assembly-wf--v.5-cond.cwl
+      - workflows/amplicon-wf--v.5-cond.cwl
+    notes: >
+      MGnify Pipeline v5 CWL representation for metagenomics analysis.
+      Real bioinformatics exemplar with conditionals, subworkflows, many
+      CommandLineTool references, and Galaxy-relevant collection/secondary
+      file pressure.
+
+  - name: common-workflow-library/bio-cwl-tools
+    flavor: tool-library
+    tier: large
+    repo: https://github.com/common-workflow-library/bio-cwl-tools.git
+    sha: 810495363e06f80529633389ec25f8bb6b961844
+    entrypoints:
+      - bwa/BWA-Mem2-paired.cwl
+      - fastp/fastp.cwl
+      - multiqc/multiqc.cwl
+      - samtools/samtools_sort.cwl
+      - GATK/GATK-HaplotypeCaller.cwl
+    notes: >
+      Common Workflow Library bioinformatics CommandLineTool collection.
+      Not a workflow exemplar, but valuable for summarizing CWL tool command
+      surfaces and comparing DockerRequirement/SoftwareRequirement evidence
+      with Galaxy Tool Shed wrapper discovery.
+
 # IWC corpus — single rolling repo, no tag. Pin SHA from main.
 # Materialized into iwc-src/ then cleaned + converted to format2 under iwc-format2/
 # by scripts/build-iwc.sh (uses gxwf via @galaxy-tool-util/cli).

@@ -78,6 +78,14 @@ export function resolveSource(
   };
 }
 
+function isUrl(source: string): boolean {
+  return /^https?:\/\//.test(source);
+}
+
+function fetchUrl(source: string): string {
+  return execFileSync("curl", ["-L", "--fail", "--silent", source], { encoding: "utf-8" });
+}
+
 export function findVendoredDrift(
   repoRoot: string,
   entries = loadVendoredUpstreams(repoRoot),
@@ -86,12 +94,17 @@ export function findVendoredDrift(
   const buildCache = new Set<string>();
   for (const entry of entries) {
     const localPath = path.join(repoRoot, entry.local);
-    const source = resolveSource(repoRoot, entry.source);
-    if (entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
+    const source = isUrl(entry.source) ? null : resolveSource(repoRoot, entry.source);
+    if (source && entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
     if (!fs.existsSync(localPath)) throw new Error(`Missing vendored file ${entry.local}`);
-    if (!fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
-    if (fs.readFileSync(localPath, "utf-8") !== fs.readFileSync(source.sourcePath, "utf-8")) {
-      drift.push({ entry, sourcePath: source.sourcePath, currentRef: source.currentRef });
+    if (source && !fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
+    const sourceText = source ? fs.readFileSync(source.sourcePath, "utf-8") : fetchUrl(entry.source);
+    if (fs.readFileSync(localPath, "utf-8") !== sourceText) {
+      drift.push({
+        entry,
+        sourcePath: source?.sourcePath ?? entry.source,
+        currentRef: source?.currentRef ?? entry.pinned_ref,
+      });
     }
   }
   return drift;
@@ -106,13 +119,21 @@ export function syncVendoredUpstreams(
   const buildCache = new Set<string>();
   for (const entry of entries) {
     const localPath = path.join(repoRoot, entry.local);
-    const source = resolveSource(repoRoot, entry.source);
-    if (entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
-    if (!fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
+    const source = isUrl(entry.source) ? null : resolveSource(repoRoot, entry.source);
+    if (source && entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
+    if (source && !fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
     fs.mkdirSync(path.dirname(localPath), { recursive: true });
-    fs.copyFileSync(source.sourcePath, localPath);
-    updated.push({ entry, sourcePath: source.sourcePath, currentRef: source.currentRef });
-    if (entry.framing) framingRefs.set(entry.framing, source.currentRef);
+    if (source) {
+      fs.copyFileSync(source.sourcePath, localPath);
+    } else {
+      fs.writeFileSync(localPath, fetchUrl(entry.source));
+    }
+    updated.push({
+      entry,
+      sourcePath: source?.sourcePath ?? entry.source,
+      currentRef: source?.currentRef ?? entry.pinned_ref,
+    });
+    if (entry.framing) framingRefs.set(entry.framing, source?.currentRef ?? entry.pinned_ref);
   }
   for (const [framing, ref] of framingRefs) updateFramingRef(path.join(repoRoot, framing), ref);
   return updated;
