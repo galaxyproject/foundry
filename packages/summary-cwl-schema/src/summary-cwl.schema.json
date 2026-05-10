@@ -3,7 +3,7 @@
   "$id": "https://galaxyproject.org/foundry/schemas/summary-cwl.schema.json",
   "$comment": "Canonical source: packages/summary-cwl-schema/src/summary-cwl.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[summary-cwl]] wiki-links; the cast pipeline imports the `summaryCwlSchema` runtime export and serializes it into cast bundles.",
   "title": "CWL Workflow Summary",
-  "description": "Structured per-source summary emitted by the summarize-cwl Mold. CWL is already a typed workflow language, so this schema records validated and packed workflow/tool structure rather than inferred pipeline semantics.",
+  "description": "Structured per-source summary emitted by the summarize-cwl Mold. CWL is already a typed workflow language, so this schema records validated and normalized workflow/tool structure rather than inferred pipeline semantics.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -96,15 +96,15 @@
     "DocumentSet": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["entrypoint", "packed_path", "validation"],
+      "required": ["entrypoint", "normalized_path", "validation"],
       "properties": {
         "entrypoint": {
           "type": "string",
-          "description": "Local path or URL passed to cwltool/cwl-utils."
+          "description": "Local path or URL passed to cwl-utils/cwltool."
         },
-        "packed_path": {
+        "normalized_path": {
           "type": ["string", "null"],
-          "description": "Path to the cwltool --pack output when packing was requested or possible."
+          "description": "Path to the cwl-utils cwl-normalizer JSON output when normalization was requested or possible."
         },
         "validation": { "$ref": "#/$defs/ValidationResult" }
       }
@@ -196,7 +196,7 @@
         "id": { "type": "string" },
         "run": {
           "type": "string",
-          "description": "Resolved run reference as it appears in the packed document, e.g. #tool_id."
+          "description": "Resolved run reference as it appears in the normalized document, e.g. #tool_id."
         },
         "run_class": {
           "type": "string",
@@ -237,16 +237,31 @@
     "StepInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "source", "value_from"],
+      "required": ["id", "source", "default", "value_from", "link_merge", "pick_value"],
       "properties": {
         "id": { "type": "string" },
         "source": {
-          "type": "array",
+          "type": ["array", "null"],
+          "description": "Normalized CWL source links. Null means the input has no source and is driven by default or runtime binding.",
           "items": { "type": "string" }
+        },
+        "default": {
+          "description": "Verbatim WorkflowStepInput default value when present.",
+          "type": ["string", "number", "integer", "boolean", "object", "array", "null"]
         },
         "value_from": {
           "type": ["string", "null"],
           "description": "Expression from valueFrom, preserved verbatim when present."
+        },
+        "link_merge": {
+          "type": ["string", "null"],
+          "enum": ["merge_nested", "merge_flattened", null],
+          "description": "CWL linkMerge setting for multiple inbound sources."
+        },
+        "pick_value": {
+          "type": ["string", "null"],
+          "enum": ["first_non_null", "the_only_non_null", "all_non_null", null],
+          "description": "CWL pickValue setting for choosing non-null values among multiple sources."
         }
       }
     },

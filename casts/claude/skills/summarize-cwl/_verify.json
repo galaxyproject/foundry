@@ -1,0 +1,16 @@
+{
+  "verify_schema_version": 1,
+  "entries": [
+    {
+      "artifact_id": "summary-cwl",
+      "direction": "output",
+      "kind": "json",
+      "default_filename": "summary-cwl.json",
+      "schema": "[[summary-cwl]]",
+      "validator_bin": "validate-summary-cwl",
+      "args": [
+        "{artifact_path}"
+      ]
+    }
+  ]
+}

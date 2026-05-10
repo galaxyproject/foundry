@@ -30,6 +30,9 @@ importers:
       '@galaxy-foundry/galaxy-tool-discovery-schema':
         specifier: workspace:*
         version: link:packages/galaxy-tool-discovery-schema
+      '@galaxy-foundry/summary-cwl-schema':
+        specifier: workspace:*
+        version: link:packages/summary-cwl-schema
       '@galaxy-foundry/summary-nextflow-schema':
         specifier: workspace:*
         version: link:packages/summary-nextflow-schema

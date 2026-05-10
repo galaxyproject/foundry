@@ -49,7 +49,7 @@ Nextflow summarization has to infer process graphs, channel shapes, sample-sheet
 The v1 summary contains:
 
 - `source` — `ecosystem: cwl`, workflow name, entrypoint, declared `cwlVersion`, URL/path, optional pin/license.
-- `documents` — entrypoint, optional `cwltool --pack` output path, and validation diagnostics.
+- `documents` — entrypoint, optional `cwl-utils` normalized JSON output path, and validation diagnostics.
 - `workflow_inputs` / `workflow_outputs` — CWL ids, compact type strings, formats, secondary files, defaults, labels, and docs.
 - `steps` — `run`, run class, input sources, outputs, scatter/scatterMethod, `when`, requirements, and hints.
 - `tools` — `CommandLineTool` command surface: base command, arguments, tool inputs/outputs, bindings, Docker/Software requirements, and hints.
