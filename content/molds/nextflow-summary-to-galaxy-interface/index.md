@@ -11,7 +11,7 @@ tags:
 status: draft
 created: 2026-05-05
 revised: 2026-05-10
-revision: 3
+revision: 4
 ai_generated: true
 summary: "Map a Nextflow summary into a Galaxy workflow interface design brief."
 input_artifacts:
@@ -70,6 +70,14 @@ references:
     purpose: "Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs."
     trigger: "When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input."
   - kind: research
+    ref: "[[nextflow-reference-data-classification]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Cross-check source-side reference-data classifications before translating the reference-data brief into Galaxy workflow inputs."
+    trigger: "When the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets."
+  - kind: research
     ref: "[[nextflow-to-galaxy-reference-data-mapping]]"
     used_at: runtime
     load: on-demand
@@ -79,6 +87,8 @@ references:
     trigger: "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source."
 related_notes:
   - "[[summary-nextflow]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
+  - "[[nextflow-reference-data-classification]]"
   - "[[nextflow-params-to-galaxy-inputs]]"
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
 ---

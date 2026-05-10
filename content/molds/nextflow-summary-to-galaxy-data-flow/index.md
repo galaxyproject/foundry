@@ -11,7 +11,7 @@ tags:
 status: draft
 created: 2026-05-05
 revised: 2026-05-10
-revision: 3
+revision: 4
 ai_generated: true
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
 input_artifacts:
@@ -89,6 +89,14 @@ references:
     purpose: "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it."
     trigger: "When the upstream interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or when the Nextflow summary shows tuple(meta, path...) channel shape originating from samplesheetToList or splitCsv(header: true)."
   - kind: research
+    ref: "[[nextflow-reference-data-classification]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Cross-check source-side reference-data classifications before deciding how reference assets and optional rebuild branches flow through the Galaxy data-flow draft."
+    trigger: "When the reference-data or interface brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets."
+  - kind: research
     ref: "[[nextflow-to-galaxy-reference-data-mapping]]"
     used_at: runtime
     load: on-demand
@@ -107,6 +115,8 @@ references:
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
+  - "[[nextflow-reference-data-classification]]"
   - "[[nextflow-params-to-galaxy-inputs]]"
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
 ---
