@@ -11,7 +11,7 @@ tags:
 status: draft
 created: 2026-05-05
 revised: 2026-05-10
-revision: 5
+revision: 6
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs."
 input_artifacts:
@@ -103,6 +103,14 @@ references:
     purpose: "Emit `when:` clauses on the right step type (subworkflow vs tool) and the right output fan-in primitive (`pick_value`, modes `first_non_null` / `first_or_skip` / `the_only_non_null`) when the data-flow brief carries a conditional disposition through to the skeleton."
     trigger: "When the upstream data-flow brief assigns a source conditional to a subworkflow `when:` or inline `when:` shape, or when emitting the merge step for two or more `when:`-gated branches that produce the same logical output."
   - kind: research
+    ref: "[[nextflow-reference-data-classification]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Cross-check source-side reference-data classifications before committing reference assets, optional inputs, and rebuild behavior into the gxformat2 skeleton."
+    trigger: "When emitting workflow inputs or input-connection wiring for reference assets and the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets."
+  - kind: research
     ref: "[[nextflow-to-galaxy-reference-data-mapping]]"
     used_at: runtime
     load: on-demand
@@ -115,6 +123,7 @@ related_notes:
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-galaxy-reference-data]]"
+  - "[[nextflow-reference-data-classification]]"
   - "[[nextflow-to-galaxy-reference-data-mapping]]"
 ---
 # nextflow-summary-to-galaxy-template
