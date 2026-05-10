@@ -6,9 +6,9 @@
     "path": "content/molds/validate-galaxy-step/index.md",
     "revision": 2,
     "content_hash": "c909ddba3fe174728b7381c96d8ff0e9f55467e72fbe7d4e3e19b7ea76b15a03",
-    "commit": "92d7b6b4d0a72df80193a4ca5cf6fc24c79027c2"
+    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
   },
-  "cast_at": "2026-05-10T22:19:18.230Z",
+  "cast_at": "2026-05-10T22:31:15.126Z",
   "refs": [
     {
       "kind": "cli-command",

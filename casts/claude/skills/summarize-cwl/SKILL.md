@@ -21,17 +21,17 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`cwl-normalizer`** (cwl-utils). `uv tool install cwl-utils` (or `pip install cwl-utils`) — cwl-utils.
+- **`cwl-normalizer`** (cwl-utils). `uv tool install cwl-utils` (or `pip install cwl-utils`).
   Ephemeral run: `uvx --from cwl-utils cwl-normalizer`.
   Check: `cwl-normalizer --help`.
   Docs: https://github.com/common-workflow-language/cwl-utils
   Bundled reference: `references/cli/cwl-utils.md`.
-- **`cwltool`** (cwltool). `uv tool install cwltool` (or `pip install cwltool`) — cwltool.
+- **`cwltool`** (cwltool). `uv tool install cwltool` (or `pip install cwltool`).
   Ephemeral run: `uvx cwltool`.
   Check: `cwltool --version`.
   Docs: https://cwltool.readthedocs.io/
   Bundled reference: `references/cli/cwltool.md`.
-- **`validate-summary-cwl`** (validate-summary-cwl). `npm install -g @galaxy-foundry/summary-cwl-schema` — @galaxy-foundry/summary-cwl-schema.
+- **`validate-summary-cwl`** (validate-summary-cwl). `npm install -g @galaxy-foundry/summary-cwl-schema`.
   Ephemeral run: `npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl`.
   Check: `validate-summary-cwl --help`.
   Docs: https://github.com/jmchilton/foundry/blob/main/packages/summary-cwl-schema/README.md

@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 5,
     "content_hash": "426f7b4608b5dd1358ca7b9526a018e905b27b4eab867647dfb7e8731a61c49f",
-    "commit": "92d7b6b4d0a72df80193a4ca5cf6fc24c79027c2"
+    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
   },
-  "cast_at": "2026-05-10T22:19:12.122Z",
+  "cast_at": "2026-05-10T22:31:09.689Z",
   "refs": [
     {
       "kind": "cli-command",

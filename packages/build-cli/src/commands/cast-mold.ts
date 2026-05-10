@@ -971,9 +971,14 @@ function aggregateRequiredTools(
       const toolSlug = typeof cmdMeta?.tool === "string" ? cmdMeta.tool : "";
       if (!toolSlug) continue;
       const toolNotePath = slugMap.get(toolSlug);
-      if (!toolNotePath) continue;
       const subSlug =
         typeof cmdMeta?.command === "string" ? `${toolSlug} ${cmdMeta.command}` : toolSlug;
+      if (!toolNotePath || metaByPath.get(toolNotePath)?.type !== "cli-tool") {
+        console.warn(
+          `warn: cli-command ${subSlug} references tool=${toolSlug} but no content/cli/${toolSlug}/index.md cli-tool note exists; Required Tools entry will be missing.`,
+        );
+        continue;
+      }
       intern(toolNotePath, "implied", subSlug);
     }
   }
@@ -982,16 +987,16 @@ function aggregateRequiredTools(
 }
 
 function renderInstallCommand(tool: RequiredTool): string {
-  const versionTail = tool.package_version
-    ? `${tool.package} (${tool.package_version})`
-    : tool.package;
+  const versioned = tool.package_version;
   if (tool.origin === "pypi") {
-    return `\`uv tool install ${tool.package}\` (or \`pip install ${tool.package}\`) — ${versionTail}.`;
+    const spec = versioned ? `${tool.package}==${versioned}` : tool.package;
+    return `\`uv tool install ${spec}\` (or \`pip install ${spec}\`).`;
   }
   if (tool.origin === "npm") {
-    return `\`npm install -g ${tool.package}\` — ${versionTail}.`;
+    const spec = versioned ? `${tool.package}@${versioned}` : tool.package;
+    return `\`npm install -g ${spec}\`.`;
   }
-  return `Install ${versionTail} from ${tool.origin || "upstream"}.`;
+  return `Install ${tool.package}${versioned ? `@${versioned}` : ""} from ${tool.origin}.`;
 }
 
 function requiredToolRows(tools: RequiredTool[]): string[] {
