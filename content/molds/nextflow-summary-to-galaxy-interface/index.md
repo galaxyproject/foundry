@@ -79,6 +79,7 @@ references:
     trigger: "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source."
 related_notes:
   - "[[summary-nextflow]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
   - "[[nextflow-params-to-galaxy-inputs]]"
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
 ---

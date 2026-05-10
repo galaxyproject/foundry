@@ -48,9 +48,11 @@ references:
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-to-galaxy-reference-data-mapping]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
 ---
 # nextflow-summary-to-galaxy-reference-data
 

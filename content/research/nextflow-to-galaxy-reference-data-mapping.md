@@ -16,6 +16,7 @@ related_notes:
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-reference-data]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
   - "[[galaxy-sample-sheet-collections]]"
   - "[[galaxy-datatypes-conf]]"
 related_molds:
@@ -23,6 +24,7 @@ related_molds:
   - "[[nextflow-summary-to-galaxy-reference-data]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
 sources:
   - "https://nf-co.re/docs/usage/reference_genomes"
   - "https://github.com/nf-core/sarek/blob/master/conf/igenomes.config"

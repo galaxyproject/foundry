@@ -23,6 +23,7 @@ related_notes:
   - "[[nextflow-summary-to-galaxy-reference-data]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
   - "[[nextflow-summary-to-cwl-interface]]"
   - "[[nextflow-summary-to-cwl-data-flow]]"
   - "[[author-galaxy-tool-wrapper]]"
