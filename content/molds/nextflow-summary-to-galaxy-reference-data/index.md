@@ -11,7 +11,7 @@ tags:
 status: draft
 created: 2026-05-10
 revised: 2026-05-10
-revision: 2
+revision: 3
 ai_generated: true
 summary: "Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline."
 input_artifacts:
@@ -29,7 +29,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Read params, channels, and compute-if-missing branches that determine which reference assets the source pipeline consumes."
+    purpose: "Read `reference_assets[]` (curated path-typed inputs with `used_by` attribution to consuming subworkflows), `reference_rebuilds[]` (compute-if-missing rebuild rules with builder process and guard), and `params[]` provenance (`source_kind`, including `getGenomeAttribute` for nf-core key-expanded bundles) to determine which reference assets the source pipeline consumes and how it rebuilds them when absent."
   - kind: research
     ref: "[[nextflow-reference-data-classification]]"
     used_at: runtime
@@ -65,3 +65,14 @@ related_molds:
 # nextflow-summary-to-galaxy-reference-data
 
 Classify the ways the Nextflow pipeline uses reference data using [[nextflow-reference-data-classification]], then use [[nextflow-to-galaxy-reference-data-mapping]] to determine and describe how each classified asset maps onto the target Galaxy workflow. Output is a reviewable Markdown brief consumed by [[nextflow-summary-to-galaxy-interface]], [[nextflow-summary-to-galaxy-data-flow]], and [[nextflow-summary-to-galaxy-template]] before they pin workflow inputs, data-flow edges, and the gxformat2 skeleton.
+
+## Reading the summary
+
+The [[summary-nextflow]] schema surfaces reference-data evidence directly — read these fields before falling back to raw `workflow.conditionals[]` or guard-text inference:
+
+- **`reference_assets[]`** — the curated asset inventory. Each entry has `param` (FK into `params[]`), `asset_kind` (`fasta`, `fasta_index`, `sequence_dictionary`, `bwa_index`, `tabix_index`, `gtf`, `gff`, `bed`, `vcf`, `database`, `other`), `required`, `source_kind`, `used_by` (consuming subworkflow/process names), and `evidence.confidence`. Use this as the primary input to classification — it already filters out non-asset path params and attributes callers.
+- **`reference_rebuilds[]`** — detected compute-if-missing branches. Each entry binds `asset_param` to a `builder` process plus its `builder_outputs`, the verbatim `guard`, resolved `guard_params`, and `fallback_for` (the `<asset>_in`-style take when paired). When `reference_rebuilds[]` is non-empty, the *compute-if-missing* classification applies to those `asset_param` values. Empty `reference_rebuilds[]` does NOT mean "no compute-if-missing" — some pipelines use positive-form idioms (`if (<asset>) { unpack } else { build }`) that the detector does not yet match (see jmchilton/foundry#229 follow-ups).
+- **`params[].source_kind == "getGenomeAttribute"`** plus `params[].source_expression` — the *key-expanded bundle* signal. A pipeline that synthesizes many path params via `getGenomeAttribute('attr')` is using the iGenomes pattern; classify the bundle accordingly.
+- **`subworkflows[].invocations[]`** — caller-side argument binding onto `take:` names. Use when `reference_assets[].used_by` is ambiguous or when verifying that the same param threads into multiple subworkflows.
+
+If a needed signal is missing from the summary (e.g. RNA-seq's positive-form rebuild idiom is not yet detected), say so in the brief and flag the asset as *rebuild-unverified* rather than re-parsing source files.

@@ -36,9 +36,23 @@ interface Summary {
   processes: Process[];
   subworkflows: Subworkflow[];
   workflow: { name: string; channels: Channel[]; edges: Edge[]; conditionals: Conditional[] };
+  reference_assets: ReferenceAsset[];
+  reference_rebuilds: ReferenceRebuildRule[];
   test_fixtures: { profile: string; inputs: TestDataRef[]; outputs: unknown[] };
   nf_tests: NfTest[];
   warnings: string[];
+}
+
+interface InvocationBinding {
+  take: string;
+  argument: string;
+}
+
+interface SubworkflowInvocation {
+  caller: string;
+  caller_path: string | null;
+  arguments: string[];
+  bindings: InvocationBinding[];
 }
 
 interface Subworkflow {
@@ -48,6 +62,7 @@ interface Subworkflow {
   calls: string[];
   inputs?: ChannelIO[];
   outputs?: ChannelIO[];
+  invocations?: SubworkflowInvocation[];
   tests: NfTest[];
 }
 
@@ -90,6 +105,36 @@ interface Conditional {
   affects: string[];
 }
 
+interface Evidence {
+  source_path: string | null;
+  confidence: "high" | "medium" | "low";
+  evidence: string[];
+}
+
+interface ReferenceAsset {
+  param: string;
+  asset_kind: string;
+  format_hint?: string | null;
+  required: boolean;
+  source_kind?: ParamSourceKind | null;
+  source_expression?: string | null;
+  schema_group?: string | null;
+  used_by: string[];
+  evidence: Evidence;
+}
+
+interface ReferenceRebuildRule {
+  asset_param: string;
+  guard: string;
+  guard_params?: string[];
+  builder: string;
+  builder_outputs: string[];
+  fallback_for?: string | null;
+  evidence: Evidence;
+}
+
+type ParamSourceKind = "nextflow_schema" | "params_block" | "getGenomeAttribute" | "computed";
+
 interface Param {
   name: string;
   type: string;
@@ -102,6 +147,15 @@ interface Param {
   mimetype?: string | null;
   schema_group?: string | null;
   fa_icon?: string | null;
+  source_kind?: ParamSourceKind | null;
+  source_expression?: string | null;
+  source_path?: string | null;
+}
+
+interface ParamProvenance {
+  source_kind: ParamSourceKind;
+  source_expression: string;
+  source_path: string;
 }
 
 interface Tool {
@@ -263,6 +317,8 @@ export async function resolveNextflowSummary(
   for (const [canonical, aliasList] of aliases.entries()) {
     for (const alias of aliasList) aliasToCanonical.set(alias, canonical);
   }
+  const invocationsByCallee = buildSubworkflowInvocations(workflows);
+
   const processNameSet = new Set(processes.map((process) => process.name));
   const inSubworkflows = new Map<string, string[]>();
   for (const workflow of workflows) {
@@ -300,7 +356,12 @@ export async function resolveNextflowSummary(
     })),
     subworkflows: workflows
       .filter((workflow) => workflow.name !== primaryWorkflow?.name)
-      .map(stripWorkflowBody),
+      .map((workflow) => {
+        const stripped = stripWorkflowBody(workflow);
+        const invocations = invocationsByCallee.get(workflow.name);
+        if (invocations && invocations.length > 0) stripped.invocations = invocations;
+        return stripped;
+      }),
     workflow: {
       name: primaryWorkflow?.name ?? workflowName.split("/").at(-1)?.toUpperCase() ?? "WORKFLOW",
       channels: primaryWorkflow ? parseWorkflowChannels(primaryWorkflow.body) : [],
@@ -309,10 +370,18 @@ export async function resolveNextflowSummary(
         ? parseWorkflowConditionals(primaryWorkflow.body, primaryWorkflow.calls)
         : [],
     },
+    reference_assets: [],
+    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee),
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
     warnings: [...root.warnings, ...warnings],
   };
+
+  summary.reference_assets = buildReferenceAssets(
+    summary.params,
+    workflows,
+    summary.reference_rebuilds,
+  );
 
   const entrypoint = selectEntrypoint(pipelineRoot);
   if (entrypoint) summary.warnings.push(`selected Nextflow entrypoint: ${entrypoint}`);
@@ -414,43 +483,102 @@ function parseProfiles(config: string): string[] {
 
 function parseParams(pipelineRoot: string): Param[] {
   const schemaPath = join(pipelineRoot, "nextflow_schema.json");
-  if (!existsSync(schemaPath)) return [];
-  const schema = JSON.parse(readText(schemaPath)) as {
-    $defs?: Record<
-      string,
-      {
-        title?: string;
-        fa_icon?: string;
-        required?: string[];
-        properties?: Record<string, Record<string, unknown>>;
-      }
-    >;
-  };
   const params = new Map<string, Param>();
-  for (const section of Object.values(schema.$defs ?? {})) {
-    const required = new Set(section.required ?? []);
-    const schema_group = typeof section.title === "string" ? section.title : null;
-    const fa_icon = typeof section.fa_icon === "string" ? section.fa_icon : null;
-    for (const [name, property] of Object.entries(section.properties ?? {})) {
-      const type = Array.isArray(property.type)
-        ? String(property.type[0])
-        : String(property.type ?? "string");
-      params.set(name, {
-        name,
-        type,
-        default: property.default ?? null,
-        description: typeof property.description === "string" ? property.description : undefined,
-        required: required.has(name),
-        enum: Array.isArray(property.enum) ? property.enum : undefined,
-        format: typeof property.format === "string" ? property.format : null,
-        hidden: typeof property.hidden === "boolean" ? property.hidden : null,
-        mimetype: typeof property.mimetype === "string" ? property.mimetype : null,
-        schema_group,
-        fa_icon,
+  if (existsSync(schemaPath)) {
+    const schema = JSON.parse(readText(schemaPath)) as {
+      $defs?: Record<
+        string,
+        {
+          title?: string;
+          fa_icon?: string;
+          required?: string[];
+          properties?: Record<string, Record<string, unknown>>;
+        }
+      >;
+    };
+    for (const section of Object.values(schema.$defs ?? {})) {
+      const required = new Set(section.required ?? []);
+      const schema_group = typeof section.title === "string" ? section.title : null;
+      const fa_icon = typeof section.fa_icon === "string" ? section.fa_icon : null;
+      for (const [name, property] of Object.entries(section.properties ?? {})) {
+        const type = Array.isArray(property.type)
+          ? String(property.type[0])
+          : String(property.type ?? "string");
+        params.set(name, {
+          name,
+          type,
+          default: property.default ?? null,
+          description: typeof property.description === "string" ? property.description : undefined,
+          required: required.has(name),
+          enum: Array.isArray(property.enum) ? property.enum : undefined,
+          format: typeof property.format === "string" ? property.format : null,
+          hidden: typeof property.hidden === "boolean" ? property.hidden : null,
+          mimetype: typeof property.mimetype === "string" ? property.mimetype : null,
+          schema_group,
+          fa_icon,
+          source_kind: "nextflow_schema",
+          source_expression: null,
+          source_path: "nextflow_schema.json",
+        });
+      }
+    }
+  }
+  for (const entry of parseGetGenomeAttributeAssignments(pipelineRoot)) {
+    const existing = params.get(entry.name);
+    if (existing) {
+      existing.source_kind = entry.provenance.source_kind;
+      existing.source_expression = entry.provenance.source_expression;
+      existing.source_path = entry.provenance.source_path;
+    } else {
+      params.set(entry.name, {
+        name: entry.name,
+        type: "string",
+        default: null,
+        required: false,
+        format: "file-path",
+        hidden: null,
+        mimetype: null,
+        schema_group: "Reference genome options",
+        fa_icon: null,
+        source_kind: entry.provenance.source_kind,
+        source_expression: entry.provenance.source_expression,
+        source_path: entry.provenance.source_path,
       });
     }
   }
   return [...params.values()];
+}
+
+const GENOME_ATTRIBUTE_CONFIG_CANDIDATES = [
+  "nextflow.config",
+  "conf/igenomes.config",
+  "conf/genomes.config",
+];
+
+function parseGetGenomeAttributeAssignments(
+  pipelineRoot: string,
+): { name: string; provenance: ParamProvenance }[] {
+  const results: { name: string; provenance: ParamProvenance }[] = [];
+  for (const relPath of GENOME_ATTRIBUTE_CONFIG_CANDIDATES) {
+    const fullPath = join(pipelineRoot, relPath);
+    if (!existsSync(fullPath)) continue;
+    const text = readText(fullPath);
+    const pattern =
+      /(?:params\s*\.\s*)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(getGenomeAttribute\s*\(\s*['"]([A-Za-z_][A-Za-z0-9_]*)['"]\s*\))/gu;
+    for (const match of text.matchAll(pattern)) {
+      const lhs = match[1]!;
+      const rhs = match[2]!.replace(/\s+/gu, "");
+      results.push({
+        name: lhs,
+        provenance: {
+          source_kind: "getGenomeAttribute",
+          source_expression: rhs,
+          source_path: relPath,
+        },
+      });
+    }
+  }
+  return results;
 }
 
 function parseSampleSheets(pipelineRoot: string): SampleSheet[] {
@@ -1059,6 +1187,237 @@ function parseWorkflowEdges(body: string, calls: string[]): Edge[] {
   return edges;
 }
 
+function buildReferenceAssets(
+  params: Param[],
+  workflows: ParsedWorkflow[],
+  rebuilds: ReferenceRebuildRule[],
+): ReferenceAsset[] {
+  const paramsByName = new Map(params.map((param) => [param.name, param]));
+  const usedBy = collectParamCallers(workflows);
+  const rebuildParams = new Set<string>();
+  for (const rule of rebuilds) {
+    rebuildParams.add(rule.asset_param);
+    if (rule.fallback_for) rebuildParams.add(rule.fallback_for);
+  }
+  const assets: ReferenceAsset[] = [];
+  const seen = new Set<string>();
+  const candidateNames = new Set<string>([
+    ...params.filter(isPathTypedParam).map((param) => param.name),
+    ...rebuildParams,
+  ]);
+  for (const name of candidateNames) {
+    if (seen.has(name)) continue;
+    seen.add(name);
+    const param = paramsByName.get(name);
+    if (!param) continue;
+    const callers = [...(usedBy.get(name) ?? [])].sort();
+    const hasRebuild = rebuildParams.has(name);
+    const sourcePath = param.source_path ?? null;
+    const confidence: Evidence["confidence"] =
+      callers.length > 0 && param.source_kind ? "high" : "medium";
+    assets.push({
+      param: name,
+      asset_kind: classifyAssetKind(name),
+      format_hint: param.format ?? null,
+      required: param.required && !hasRebuild,
+      source_kind: param.source_kind ?? null,
+      source_expression: param.source_expression ?? null,
+      schema_group: param.schema_group ?? null,
+      used_by: callers,
+      evidence: {
+        source_path: sourcePath,
+        confidence,
+        evidence: [],
+      },
+    });
+  }
+  return assets.sort((left, right) => left.param.localeCompare(right.param));
+}
+
+function isPathTypedParam(param: Param): boolean {
+  return (
+    param.format === "file-path" ||
+    param.format === "directory-path" ||
+    param.format === "path" ||
+    param.format === "file-path-pattern" ||
+    param.source_kind === "getGenomeAttribute"
+  );
+}
+
+function collectParamCallers(workflows: ParsedWorkflow[]): Map<string, Set<string>> {
+  const usedBy = new Map<string, Set<string>>();
+  for (const workflow of workflows) {
+    const mainBlock = extractMainBlock(workflow.body);
+    for (const invocation of extractCallInvocations(mainBlock)) {
+      for (const argument of invocation.arguments) {
+        const paramName = paramNameFromArgument(argument);
+        if (!paramName) continue;
+        const set = usedBy.get(paramName) ?? new Set<string>();
+        set.add(invocation.name);
+        usedBy.set(paramName, set);
+      }
+    }
+  }
+  return usedBy;
+}
+
+function classifyAssetKind(name: string): string {
+  const lower = name.toLowerCase();
+  if (/(^|_)fai($|_)/u.test(lower) || lower.endsWith("_fai")) return "fasta_index";
+  if (lower === "dict" || lower.endsWith("_dict")) return "sequence_dictionary";
+  if (/bwamem2/u.test(lower)) return "bwamem2_index";
+  if (/(^|_)bwa($|_)/u.test(lower)) return "bwa_index";
+  if (/(^|_)tbi($|_)/u.test(lower)) return "tabix_index";
+  if (lower === "fasta" || lower.endsWith("_fasta")) return "fasta";
+  if (lower === "gtf" || lower.endsWith("_gtf")) return "gtf";
+  if (lower === "gff" || lower.endsWith("_gff")) return "gff";
+  if (/(^|_)bed($|_)/u.test(lower)) return "bed";
+  if (/(^|_)vcf($|_)/u.test(lower) || lower.endsWith("_vcf")) return "vcf";
+  if (lower.endsWith("_db") || lower.endsWith("_database")) return "database";
+  return "other";
+}
+
+function detectReferenceRebuilds(
+  workflows: ParsedWorkflow[],
+  invocationsByCallee: Map<string, SubworkflowInvocation[]>,
+): ReferenceRebuildRule[] {
+  const rules: ReferenceRebuildRule[] = [];
+  for (const workflow of workflows) {
+    const takeNames = new Set((workflow.inputs ?? []).map((entry) => entry.name));
+    const invocations = invocationsByCallee.get(workflow.name) ?? [];
+    const mainBlock = extractMainBlock(workflow.body);
+    for (const block of extractIfBlocks(mainBlock)) {
+      const negation = /^\s*!\s*(?:[A-Za-z_][A-Za-z0-9_]*\s*\.\s*)*([A-Za-z_][A-Za-z0-9_]*)/u.exec(
+        block.guard,
+      );
+      if (!negation) continue;
+      const negated = negation[1]!;
+      if (/^(skip|no|disable|disabled)_/u.test(negated)) continue;
+      const rebuild = analyzeRebuildBody(block.defaultBody);
+      if (!rebuild) continue;
+      // Compute-if-missing convention: the assignment LHS or the negated identifier
+      // must correspond to a workflow-level `take:` slot. Filters generic
+      // `if (!something) { LHS = BUILDER.out... }` shapes (e.g. nf-core/rnaseq's
+      // alignment branches in the primary workflow body).
+      const takeMatches = [`${rebuild.lhs}_in`, rebuild.lhs, negated, `${negated}_in`].some(
+        (candidate) => takeNames.has(candidate),
+      );
+      if (!takeMatches) continue;
+      const assetParam = resolveAssetParam(rebuild.lhs, negated, takeNames, invocations);
+      const guardParams = collectGuardParams(block.guard, takeNames, invocations);
+      const confidence: Evidence["confidence"] =
+        assetParam.resolvedFromBinding && guardParams.allFromTakes ? "high" : "medium";
+      rules.push({
+        asset_param: assetParam.name,
+        guard: block.guard,
+        guard_params: guardParams.params,
+        builder: rebuild.builder,
+        builder_outputs: rebuild.builderOutputs,
+        fallback_for: resolveFallbackFor(negated, takeNames, invocations),
+        evidence: {
+          source_path: workflow.path ?? null,
+          confidence,
+          evidence: rebuild.snippets,
+        },
+      });
+    }
+  }
+  return rules;
+}
+
+function analyzeRebuildBody(
+  body: string,
+): { builder: string; builderOutputs: string[]; lhs: string; snippets: string[] } | null {
+  const snippets: string[] = [];
+  let builder: string | null = null;
+  let lhs: string | null = null;
+  const outputs = new Set<string>();
+  for (const invocation of extractCallInvocations(body)) {
+    if (!/^[A-Z]/u.test(invocation.name)) continue;
+    builder = invocation.name;
+    snippets.push(`${invocation.name}(${invocation.arguments.join(", ")})`);
+    break;
+  }
+  if (!builder) return null;
+  const assignmentPattern = new RegExp(
+    `([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*${builder}\\s*\\.\\s*out(?:\\s*\\.\\s*([A-Za-z_][A-Za-z0-9_]*))?`,
+    "gu",
+  );
+  for (const match of body.matchAll(assignmentPattern)) {
+    lhs ??= match[1]!;
+    if (match[2]) outputs.add(match[2]);
+    snippets.push(match[0]);
+  }
+  if (!lhs) return null;
+  return { builder, builderOutputs: [...outputs], lhs, snippets };
+}
+
+function resolveAssetParam(
+  lhs: string,
+  negated: string,
+  takeNames: Set<string>,
+  invocations: SubworkflowInvocation[],
+): { name: string; resolvedFromBinding: boolean } {
+  const candidates = [`${lhs}_in`, lhs, negated];
+  for (const candidate of candidates) {
+    if (!takeNames.has(candidate)) continue;
+    for (const invocation of invocations) {
+      const binding = invocation.bindings.find((entry) => entry.take === candidate);
+      const paramName = binding ? paramNameFromArgument(binding.argument) : null;
+      if (paramName) return { name: paramName, resolvedFromBinding: true };
+    }
+  }
+  return { name: lhs, resolvedFromBinding: false };
+}
+
+function resolveFallbackFor(
+  negated: string,
+  takeNames: Set<string>,
+  invocations: SubworkflowInvocation[],
+): string | null {
+  if (!takeNames.has(negated)) return null;
+  for (const invocation of invocations) {
+    const binding = invocation.bindings.find((entry) => entry.take === negated);
+    const paramName = binding ? paramNameFromArgument(binding.argument) : null;
+    if (paramName) return paramName;
+  }
+  return null;
+}
+
+function collectGuardParams(
+  guard: string,
+  takeNames: Set<string>,
+  invocations: SubworkflowInvocation[],
+): { params: string[]; allFromTakes: boolean } {
+  const identifiers = [...guard.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\b/gu)].map((m) => m[1]!);
+  const reserved = new Set(["true", "false", "null", "params"]);
+  const params = new Set<string>();
+  let allFromTakes = true;
+  for (const match of guard.matchAll(/params\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)/gu)) {
+    params.add(match[1]!);
+  }
+  for (const id of identifiers) {
+    if (reserved.has(id) || /^[0-9]/u.test(id)) continue;
+    if (takeNames.has(id)) {
+      for (const invocation of invocations) {
+        const binding = invocation.bindings.find((entry) => entry.take === id);
+        const paramName = binding ? paramNameFromArgument(binding.argument) : null;
+        if (paramName) params.add(paramName);
+      }
+    } else if (!params.has(id)) {
+      // identifier was not a take-name and not a params.X access; treat as a
+      // non-param local (e.g. step / tools / aligner) — downgrade confidence.
+      allFromTakes = false;
+    }
+  }
+  return { params: [...params], allFromTakes };
+}
+
+function paramNameFromArgument(argument: string): string | null {
+  const match = /^params\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)\s*$/u.exec(argument);
+  return match ? match[1]! : null;
+}
+
 function parseWorkflowConditionals(body: string, calls: string[]): Conditional[] {
   const conditionals: Conditional[] = [];
   const callNames = new Set(calls);
@@ -1081,8 +1440,15 @@ function extractIfBlocks(
   body: string,
 ): { guard: string; defaultBody: string; alternateBody: string | null }[] {
   const blocks: { guard: string; defaultBody: string; alternateBody: string | null }[] = [];
-  for (const match of body.matchAll(/\bif\s*\(([^\n)]+)\)\s*\{/gu)) {
-    const openIndex = match.index + match[0].lastIndexOf("{");
+  const pattern = /\bif\s*\(/gu;
+  for (const match of body.matchAll(pattern)) {
+    const guardStart = match.index + match[0].length;
+    const guardEnd = findMatchingParen(body, guardStart - 1);
+    if (guardEnd === -1) continue;
+    const guard = body.slice(guardStart, guardEnd);
+    const braceMatch = /^\s*\{/u.exec(body.slice(guardEnd + 1));
+    if (!braceMatch) continue;
+    const openIndex = guardEnd + 1 + braceMatch[0].length - 1;
     const defaultBody = extractBlockAt(body, openIndex);
     if (defaultBody === null) continue;
     const closeIndex = openIndex + defaultBody.length + 1;
@@ -1090,9 +1456,51 @@ function extractIfBlocks(
     const alternateBody = elseMatch
       ? extractBlockAt(body, closeIndex + 1 + elseMatch[0].lastIndexOf("{"))
       : null;
-    blocks.push({ guard: normalizeWorkflowExpression(match[1]!), defaultBody, alternateBody });
+    blocks.push({ guard: normalizeWorkflowExpression(guard), defaultBody, alternateBody });
   }
   return blocks;
+}
+
+function findMatchingParen(text: string, openIndex: number): number {
+  let depth = 0;
+  for (let index = openIndex; index < text.length; index += 1) {
+    const ch = text[index];
+    if (ch === "(") depth += 1;
+    else if (ch === ")") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return -1;
+}
+
+function buildSubworkflowInvocations(
+  workflows: ParsedWorkflow[],
+): Map<string, SubworkflowInvocation[]> {
+  const result = new Map<string, SubworkflowInvocation[]>();
+  const calleesByName = new Map(workflows.map((workflow) => [workflow.name, workflow]));
+  for (const caller of workflows) {
+    const mainBlock = extractMainBlock(caller.body);
+    for (const invocation of extractCallInvocations(mainBlock)) {
+      const callee = calleesByName.get(invocation.name);
+      if (!callee) continue;
+      const takes = callee.inputs ?? [];
+      const limit = Math.min(takes.length, invocation.arguments.length);
+      const bindings: InvocationBinding[] = [];
+      for (let index = 0; index < limit; index += 1) {
+        bindings.push({ take: takes[index]!.name, argument: invocation.arguments[index]! });
+      }
+      const list = result.get(callee.name) ?? [];
+      list.push({
+        caller: caller.name,
+        caller_path: caller.path ?? null,
+        arguments: invocation.arguments,
+        bindings,
+      });
+      result.set(callee.name, list);
+    }
+  }
+  return result;
 }
 
 function extractCallInvocations(body: string): { name: string; arguments: string[] }[] {
@@ -1138,14 +1546,21 @@ function parseWorkflowIoBlock(text: string, blockName: "take" | "emit"): Channel
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith("//"))
-    .map((line) => ({
-      name:
-        matchOne(line, /^([A-Za-z0-9_]+)\s*=/u) ??
-        matchOne(line, /^([A-Za-z0-9_]+)/u) ??
-        `io_${Math.abs(hash(line))}`,
-      shape: line.replace(/\s+/gu, " "),
-      topic: null,
-    }));
+    .map((line) => {
+      const commentMatch = /\s\/\/\s*(.*?)\s*$/u.exec(line);
+      const code = commentMatch ? line.slice(0, commentMatch.index).trim() : line;
+      const description = commentMatch ? commentMatch[1]! : undefined;
+      const io: ChannelIO = {
+        name:
+          matchOne(code, /^([A-Za-z0-9_]+)\s*=/u) ??
+          matchOne(code, /^([A-Za-z0-9_]+)/u) ??
+          `io_${Math.abs(hash(code))}`,
+        shape: code.replace(/\s+/gu, " "),
+        topic: null,
+      };
+      if (description) io.description = description;
+      return io;
+    });
 }
 
 function parseIncludeItems(text: string): { name: string; alias: string | null }[] {
