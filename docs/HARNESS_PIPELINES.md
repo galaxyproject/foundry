@@ -95,19 +95,20 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 ### NEXTFLOW → GALAXY
 
 1. `summarize-nextflow`
-2. `nextflow-summary-to-galaxy-interface`
-3. `nextflow-summary-to-galaxy-data-flow`
-4. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
-5. `nextflow-summary-to-galaxy-template`
-6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
-7. `[loop]` `summarize-galaxy-tool`
-8. `[loop]` `implement-galaxy-tool-step`
-9. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-10. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
-11. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
-12. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
-13. `run-workflow-test` — execute via Planemo.
-14. `debug-galaxy-workflow-output`
+2. `nextflow-summary-to-galaxy-reference-data` — decide Galaxy-side shape of external reference data (iGenomes key, per-asset, compute-if-missing) before interface and data-flow choices pin workflow inputs.
+3. `nextflow-summary-to-galaxy-interface`
+4. `nextflow-summary-to-galaxy-data-flow`
+5. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
+6. `nextflow-summary-to-galaxy-template`
+7. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
+8. `[loop]` `summarize-galaxy-tool`
+9. `[loop]` `implement-galaxy-tool-step`
+10. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
+11. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
+12. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
+13. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
+14. `run-workflow-test` — execute via Planemo.
+15. `debug-galaxy-workflow-output`
 
 ### CWL → GALAXY
 

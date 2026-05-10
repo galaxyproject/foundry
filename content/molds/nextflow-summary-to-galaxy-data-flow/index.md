@@ -10,13 +10,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-06
-revision: 2
+revised: 2026-05-10
+revision: 3
 ai_generated: true
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
 input_artifacts:
   - id: summary-nextflow
     description: "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the JSON the data-flow translation reads."
+  - id: nextflow-galaxy-reference-data
+    description: "Reference-data shape brief from [[nextflow-summary-to-galaxy-reference-data]] that pins per-asset reference inputs and rebuild-on-absence behavior."
   - id: nextflow-galaxy-interface
     description: "Preceding Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] that pins inputs, outputs, and labels."
 output_artifacts:
