@@ -54,4 +54,73 @@ describe("validateSummary", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.keyword === "additionalProperties")).toBe(true);
   });
+
+  it("requires reference_assets and reference_rebuilds top-level arrays", () => {
+    const data = JSON.parse(readFileSync(DEMO_SUMMARY, "utf8"));
+    delete data.reference_assets;
+    delete data.reference_rebuilds;
+    const result = validateSummary(data);
+    expect(result.valid).toBe(false);
+    const missing = result.errors
+      .filter((e) => e.keyword === "required")
+      .map((e) => (e.params as { missingProperty?: string }).missingProperty);
+    expect(missing).toContain("reference_assets");
+    expect(missing).toContain("reference_rebuilds");
+  });
+
+  it("accepts a populated ReferenceAsset and ReferenceRebuildRule", () => {
+    const data = JSON.parse(readFileSync(DEMO_SUMMARY, "utf8"));
+    data.reference_assets = [
+      {
+        param: "fasta_fai",
+        asset_kind: "fasta_index",
+        format_hint: "fai",
+        required: false,
+        source_kind: "getGenomeAttribute",
+        source_expression: "getGenomeAttribute('fasta_fai')",
+        schema_group: "Reference genome options",
+        used_by: ["PREPARE_GENOME"],
+        evidence: {
+          source_path: "conf/igenomes.config",
+          confidence: "high",
+          evidence: ["fasta_fai = getGenomeAttribute('fasta_fai')"],
+        },
+      },
+    ];
+    data.reference_rebuilds = [
+      {
+        asset_param: "fasta_fai",
+        guard: "!fasta_fai_in",
+        guard_params: ["fasta_fai_in"],
+        builder: "SAMTOOLS_FAIDX",
+        builder_outputs: ["fai"],
+        fallback_for: "fasta_fai_in",
+        evidence: {
+          source_path: "subworkflows/local/prepare_genome/main.nf",
+          confidence: "high",
+          evidence: ["if (!fasta_fai_in) { SAMTOOLS_FAIDX(...) }"],
+        },
+      },
+    ];
+    const result = validateSummary(data);
+    if (!result.valid) console.error("populated errors:", result.errors);
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects ReferenceAsset with an unknown field", () => {
+    const data = JSON.parse(readFileSync(DEMO_SUMMARY, "utf8"));
+    data.reference_assets = [
+      {
+        param: "fasta",
+        asset_kind: "fasta",
+        required: true,
+        used_by: [],
+        evidence: { source_path: null, confidence: "high", evidence: [] },
+        bogus_field: 1,
+      },
+    ];
+    const result = validateSummary(data);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.keyword === "additionalProperties")).toBe(true);
+  });
 });

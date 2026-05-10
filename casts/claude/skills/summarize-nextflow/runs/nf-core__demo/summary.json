@@ -663,5 +663,7 @@
   ],
   "warnings": [
     "MULTIQC.out.versions is intentionally NOT emitted to the 'versions' channel topic (the module would deadlock since multiqc consumes that topic). Topic field correctly null."
-  ]
+  ],
+  "reference_assets": [],
+  "reference_rebuilds": []
 }
