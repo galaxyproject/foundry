@@ -10,8 +10,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-06
-revision: 2
+revised: 2026-05-10
+revision: 4
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs."
 input_artifacts:
@@ -27,7 +27,7 @@ output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
-    description: "gxformat2 skeleton: workflow inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
+    description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"
@@ -43,6 +43,14 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and producer-side output actions while emitting the skeleton."
+  - kind: research
+    ref: "[[galaxy-workflow-draft-format]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields."
+    verification: "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
     used_at: runtime
@@ -102,3 +110,9 @@ related_notes:
 Read the original Nextflow source artifact, the `summary-nextflow.json` summary, the Nextflow-to-Galaxy interface brief, and the Nextflow-to-Galaxy data-flow brief. Emit a gxformat2 skeleton with workflow inputs, workflow outputs, placeholder steps, rough connections, and TODO slots for later implementation Molds.
 
 The interface and data-flow briefs guide the skeleton, but they do not replace source evidence. Treat the prior-step index as the working context: Nextflow source, source summary, interface brief, data-flow brief, and any open questions carried forward.
+
+Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. What is deferred to per-step authoring is strictly wrapper-tier: `tool_id`, `tool_version`, `tool_shed_repository`, `tool_state`, and the wrapper-determined port names that surface in `in:` / `out:` / `outputSource`. Capture deferred intent in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
+
+Defer thoughtfully. When research surfaces a Foundry pattern page that names the exact recipe — a [[galaxy-collection-patterns]] reshape, a [[conditional-run-optional-step]] gate, a [[galaxy-tabular-patterns]] filter — fill the step in as completely as the pattern allows: concrete `tool_id`, parameters, port names from the pattern's worked example. Pattern pages encode resolved choices; emitting `TODO` over a covered recipe discards real evidence the per-step Mold cannot recover. Defer only when the step is a domain-specific scientific tool with no covering pattern (alignment, variant calling, expression quantification, etc.), and pack `_plan_context` with the source command, conda specs, container tags, and pre/post conditions the per-step Mold will need to pick a wrapper.
+
+Output shape is gxformat2 with wrapper-tier relaxations and `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` per tool step — see [[galaxy-workflow-draft-format]]. Refinement open work for those planning fields lives in `refinement.md`.
