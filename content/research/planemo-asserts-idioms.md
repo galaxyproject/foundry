@@ -18,6 +18,7 @@ related_notes:
   - "[[planemo-workflow-test-architecture]]"
   - "[[validate-tests]]"
   - "[[iwc-tabular-operations-survey]]"
+  - "[[galaxy-discover-datasets]]"
 summary: "Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate."
 ---
 
