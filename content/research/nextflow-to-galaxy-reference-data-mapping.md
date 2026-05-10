@@ -9,9 +9,10 @@ tags:
 status: draft
 created: 2026-05-08
 revised: 2026-05-10
-revision: 3
+revision: 4
 ai_generated: true
 related_notes:
+  - "[[nextflow-reference-data-classification]]"
   - "[[nextflow-params-to-galaxy-inputs]]"
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
   - "[[summary-nextflow]]"
@@ -24,78 +25,13 @@ related_molds:
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
 sources:
-  - "https://nf-co.re/docs/usage/reference_genomes"
-  - "https://github.com/nf-core/sarek/blob/master/conf/igenomes.config"
-  - "https://github.com/nf-core/configs"
   - "https://github.com/jmchilton/foundry/issues/221"
-summary: "How nf-core pipelines resolve reference data; v1 Galaxy posture is explicit optional index inputs with in-tool rebuild on absence."
+summary: "Galaxy-side translation of Nextflow reference-data classifications: idioms available, the v1 posture, datatype defaults, and the in-tool rebuild trade-off."
 ---
 
 # Nextflow to Galaxy reference-data mapping
 
-Upfront research for [[nextflow-summary-to-galaxy-reference-data]]. Most nf-core pipelines lean on a reference-resolution pattern Galaxy has no direct analog for; this note captures the source-side options, pins the recommended Galaxy posture, and describes the brief the Mold writes so downstream interface and data-flow Molds inherit consistent decisions.
-
-## Nextflow side — how reference data shows up
-
-Reference-data shape varies along several roughly orthogonal dimensions: whether the pipeline consumes or produces reference data, the cardinality of the assets, whether they're keyed or per-asset, whether rebuild fallback exists, and whether multiple bundles run in parallel. The classifications below are flags an LLM can detect from a `summary-nextflow` artifact; a single pipeline often matches more than one. Grounded in the complexity bridge fixtures from jmchilton/foundry#221.
-
-### None
-
-Pipeline consumes no reference data. Detection: `params[]` has no path-shaped reference asset; no `getGenomeAttribute` call in `nextflow.config`. Examples: `nf-core/multiplesequencealign`, `nf-core/proteinfamilies`, `seqeralabs/nf-canary`. Galaxy translation has no reference-data surface to design.
-
-### Reference-producing pipeline
-
-Pipeline output **is** the reference data — it builds a database, index, or bundle for downstream consumers. Examples: `nf-core/createtaxdb`, `nf-core/references`. Detection: pipeline has no major path-shaped input but advertises bundle outputs (`publishDir` patterns matching `kraken2_database/`, `*.fai`, `bwa-index/`, …); `meta.yml` for the top-level workflow describes outputs as databases or indexes. Galaxy translation question is whether the bundle output cleanly lands as a workflow output, given that data managers are off the table — the consumer pattern (next workflow takes the bundle as an input collection) is itself open.
-
-### Single asset
-
-One reference asset, often optional. Examples: `nf-core/bamtofastq` (FASTA needed only when input is CRAM), `nextflow-io/rnaseq-nf` (a small bundled transcriptome). Detection: exactly one path-shaped reference param, sometimes guarded by a process-level `when:` or `if (params.X)` branch. Easiest rung to test the v1 posture against — single optional Galaxy `data` input, conditional consumer.
-
-### Coordinated bundle
-
-Several related assets that travel together as a logical unit. Example: `nf-core/smrnaseq` consumes `--genome` + miRBase mature + miRBase hairpin + GTF, and these four are coupled — switching genome means switching all four. Detection: multiple path-shaped reference params declared together in `nextflow_schema.json` under a shared section heading, or referenced together in a single subworkflow without per-param conditional branching. Translation strain: Galaxy v1 posture forces N separate optional `data` inputs, which can produce a workflow surface that's hard for users to fill out coherently.
-
-### Key-expanded bundle (iGenomes-style)
-
-A single user-facing key explodes into many derived path params at config-load time. nf-core's `params.genome = 'GATK.GRCh38'` resolves through `conf/igenomes.config` and a `getGenomeAttribute(attr)` helper:
-
-```groovy
-params {
-  fasta            = getGenomeAttribute('fasta')
-  fasta_fai        = getGenomeAttribute('fasta_fai')
-  dict             = getGenomeAttribute('dict')
-  bwa              = getGenomeAttribute('bwa')
-  bwamem2          = getGenomeAttribute('bwamem2')
-  dragmap          = getGenomeAttribute('dragmap')
-  dbsnp            = getGenomeAttribute('dbsnp')
-  dbsnp_tbi        = getGenomeAttribute('dbsnp_tbi')
-  known_indels     = getGenomeAttribute('known_indels')
-  // ...
-}
-```
-
-Examples: `nf-core/atacseq`, `nf-core/sarek`, `nf-core/rnaseq` (with `--genome` set). Detection: `nextflow.config` includes `conf/igenomes.config` or defines `getGenomeAttribute`; `params.genome` is declared. The derived params do **not** appear in `nextflow_schema.json` and won't show up in `summarize-nextflow`'s `params[]` unless the resolver special-cases them (today it captures them with a description noting the dynamic source — see `summarize-nextflow` index §3). The Galaxy workflow surface starts at the resolved per-asset paths, not the key.
-
-### Indexes with rebuild fallback (compute-if-missing)
-
-Pre-built indexes are optional; the pipeline rebuilds them on absence. Modern nf-core pipelines run a "build any missing index" step at the front. Sarek's `PREPARE_GENOME` subworkflow runs `samtools faidx`, `gatk4 CreateSequenceDictionary`, `bwa index`, `bwamem2 index`, etc., gated on whether the corresponding param was supplied:
-
-```groovy
-if (!params.fasta_fai) {
-  SAMTOOLS_FAIDX(fasta)
-  fasta_fai = SAMTOOLS_FAIDX.out.fai
-}
-```
-
-Examples: `nf-core/rnaseq` (STAR / salmon / hisat2 indexes), `nf-core/sarek` (BWA / dict / fai). Detection: source pipeline has `!params.<asset>` guards around index-building processes, often inside a `PREPARE_GENOME`-style subworkflow. Load-bearing — most users never supply pre-built indexes — but invisible to a user reading `nextflow_schema.json` because the index params just look optional. This pattern usually overlays *single asset*, *coordinated bundle*, or *key-expanded bundle*; it's an aspect, not a parallel kind.
-
-### Multi-DB pick-list
-
-Multiple independent reference databases, each enabling its own analysis branch — the user picks 0..N. Example: `nf-core/funcscan` lets a user enable any subset of AMR / BGC scanners (hamronization, AMRFinderPlus, DeepARG, hmmsearch, …), each with its own DB. Detection: several optional path or directory params named after distinct tools or analysis branches (`amrfinderplus_db`, `deeparg_db`, …), each guarded by a corresponding `skip_*` or `run_*` flag. Translation strain: Galaxy needs to surface "user picks 0..N of these DBs, and the workflow runs the scanners they picked" — conditional / optional-input territory, but no worked Galaxy example at this scale yet.
-
-### Parallel bundles plus cohort data
-
-Several parallel reference bundles plus per-cohort or per-panel data the pipeline cannot rebuild. Example: `nf-core/sarek` consumes a genome bundle plus a panel-of-normals (PoN) plus germline-resource VCFs plus intervals BED. Detection: a *key-expanded* or *coordinated bundle* core, plus additional path-shaped params (`pon`, `germline_resource`, `intervals`) that have no compute-if-missing branch and represent cohort- or study-level data the user must supply. The cohort assets can't be rebuilt on absence — they're explicit user inputs no matter the rung.
+Mapping research for [[nextflow-summary-to-galaxy-reference-data]]. Once a Nextflow pipeline's reference-data usage is classified per [[nextflow-reference-data-classification]], this note pins the Galaxy-side translation: idioms available, the v1 posture, datatype defaults, the in-tool rebuild trade-off, and known representation gaps the brief should flag.
 
 ## Galaxy side
 
@@ -162,11 +98,10 @@ Galaxy can also encode "if `fasta_fai` is absent, run `samtools faidx` as an exp
 
 ## Gaps in representation
 
-A self-check that an LLM working from the Nextflow classifications above plus the Galaxy idioms / recommendations above has what it needs to make the per-asset shape decision. Open gaps where it does not:
+A self-check that an LLM working from the [[nextflow-reference-data-classification]] taxonomy plus the Galaxy idioms / recommendations above has what it needs to make the per-asset shape decision. Open gaps where it does not:
 
 - **In-tool rebuild capability discovery.** The recommendation "wrapper rebuilds the index when absent" assumes the chosen Galaxy tool wrapper actually supports the `no index supplied → build one` branch. The note asserts this is common for BWA / BWA-MEM2 / GATK4 / Picard but does not give the LLM a way to verify it for any specific tool/version. Until [[discover-shed-tool]] surfaces wrapper rebuild capability, the brief has to flag rebuild assumptions as unverified.
 - **Bundle UX guidance for ≥4 coupled inputs.** The recommendations cover *why* coordinated bundles are awkward (smrnaseq four-input case, key-expanded ten-plus-input case) but do not give the LLM a concrete shape to default to. `sample_sheet:record` is suggested but not exemplified for reference data; no IWC exemplar is cited as ground truth.
-- **Detecting compute-if-missing in `summary-nextflow`.** The classifications above tell the LLM what to look for (`!params.<asset>` guard around an index-building process, often inside a `PREPARE_GENOME` subworkflow). `summary-nextflow` today emits `workflow.conditionals[]` but the schema does not specifically tag a guard as a "rebuild branch." The LLM will need to infer from the guard text plus the gated process's output shape; surface a confidence note when ambiguous.
 - **Multi-DB pick-list (funcscan-style) translation pattern.** No worked Galaxy exemplar for "user picks 0..N optional reference databases, each gating its own analysis branch." gxformat2 conditional + optional-input territory; the LLM can describe the choice but cannot anchor it to a known-good shape.
 - **Reference-producing pipeline downstream contract.** Reference-producing workflows (createtaxdb, references) output a bundle; whether downstream consumer workflows can take that bundle as a workflow input cleanly (single dataset, collection of files, collection of typed records) is unsettled. The brief should flag this as an open question per pipeline rather than picking unilaterally.
 - **Cohort / panel data without rebuild.** PoN, germline-resource, gnomAD-style large reference VCFs. The recommendations cover that they are explicit user inputs, but not how to surface "this is required only when somatic mode is enabled" — Galaxy's required-when-conditional input affordance is weak and worth noting on the brief.

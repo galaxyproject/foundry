@@ -20,6 +20,7 @@ related_notes:
   - "[[nextflow-workflow-io-semantics]]"
   - "[[nextflow-params-to-galaxy-inputs]]"
   - "[[nextflow-path-glob-to-galaxy-datatype]]"
+  - "[[nextflow-reference-data-classification]]"
   - "[[nextflow-summary-to-galaxy-reference-data]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
