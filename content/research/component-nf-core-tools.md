@@ -12,6 +12,10 @@ ai_generated: true
 summary: "White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision."
 related_molds:
   - "[[summarize-nextflow]]"
+  - "[[convert-nfcore-module-to-galaxy-tool]]"
+related_notes:
+  - "[[convert-nfcore-module-to-galaxy-tool]]"
+  - "[[component-nextflow-containers-and-envs]]"
 sources:
   - "https://github.com/nf-core/tools"
   - "https://nf-co.re/docs/nf-core-tools"
