@@ -1076,6 +1076,97 @@ workflow PIPE {
     expect(summary.reference_rebuilds).toEqual([]);
   });
 
+  test("builds reference_assets from path-typed params and rebuild references", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/assets' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              fasta_fai: { type: "string", format: "file-path" },
+              dict: { type: "string", format: "file-path" },
+              outdir: { type: "string", format: "directory-path" },
+              skip_qc: { type: "boolean" },
+            },
+          },
+        },
+      }),
+    );
+    write(
+      root,
+      "modules/samtools.nf",
+      `process SAMTOOLS_FAIDX {\n  input:\n  path fasta\n  output:\n  path "*.fai", emit: fai\n  script:\n  "x"\n}\n`,
+    );
+    write(
+      root,
+      "subworkflows/local/prepare_genome/main.nf",
+      `include { SAMTOOLS_FAIDX } from '../../../modules/samtools'
+workflow PREPARE_GENOME {
+  take:
+  fasta
+  fasta_fai_in
+  main:
+  if (!fasta_fai_in) {
+    SAMTOOLS_FAIDX(fasta)
+    fasta_fai = SAMTOOLS_FAIDX.out.fai
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PREPARE_GENOME } from './subworkflows/local/prepare_genome/main'
+workflow PIPE {
+  main:
+  PREPARE_GENOME(
+    params.fasta,
+    params.fasta_fai
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_assets: {
+        param: string;
+        asset_kind: string;
+        format_hint: string | null;
+        required: boolean;
+        source_kind: string | null;
+        used_by: string[];
+        evidence: { source_path: string | null; confidence: string };
+      }[];
+    };
+
+    const byName = Object.fromEntries(summary.reference_assets.map((a) => [a.param, a]));
+    expect(Object.keys(byName).sort()).toEqual(["dict", "fasta", "fasta_fai", "outdir"]);
+    expect(byName.fasta!.asset_kind).toBe("fasta");
+    expect(byName.fasta!.used_by).toEqual(["PREPARE_GENOME"]);
+    expect(byName.fasta!.required).toBe(false);
+    expect(byName.fasta_fai!.asset_kind).toBe("fasta_index");
+    expect(byName.fasta_fai!.used_by).toEqual(["PREPARE_GENOME"]);
+    expect(byName.dict!.asset_kind).toBe("sequence_dictionary");
+    expect(byName.dict!.used_by).toEqual([]);
+    expect(byName.outdir!.asset_kind).toBe("other");
+  });
+
+  test("emits empty reference_assets when no path-typed params or rebuilds exist", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/no-assets' }\n");
+    write(root, "modules/m.nf", "process M {\n  script:\n  'm'\n}\n");
+    write(root, "main.nf", "include { M } from './modules/m'\nworkflow PIPE { main: M() }\n");
+    const summary = (await summarize(root)) as unknown as { reference_assets: unknown[] };
+    expect(summary.reference_assets).toEqual([]);
+  });
+
   test("warns when an explicit mulled index path is missing", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/missing-mulled-index' }\n");

@@ -371,11 +371,17 @@ export async function resolveNextflowSummary(
         : [],
     },
     reference_assets: [],
-    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee, processNameSet),
+    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee),
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
     warnings: [...root.warnings, ...warnings],
   };
+
+  summary.reference_assets = buildReferenceAssets(
+    summary.params,
+    workflows,
+    summary.reference_rebuilds,
+  );
 
   const entrypoint = selectEntrypoint(pipelineRoot);
   if (entrypoint) summary.warnings.push(`selected Nextflow entrypoint: ${entrypoint}`);
@@ -1181,10 +1187,99 @@ function parseWorkflowEdges(body: string, calls: string[]): Edge[] {
   return edges;
 }
 
+function buildReferenceAssets(
+  params: Param[],
+  workflows: ParsedWorkflow[],
+  rebuilds: ReferenceRebuildRule[],
+): ReferenceAsset[] {
+  const paramsByName = new Map(params.map((param) => [param.name, param]));
+  const usedBy = collectParamCallers(workflows);
+  const rebuildParams = new Set<string>();
+  for (const rule of rebuilds) {
+    rebuildParams.add(rule.asset_param);
+    if (rule.fallback_for) rebuildParams.add(rule.fallback_for);
+  }
+  const assets: ReferenceAsset[] = [];
+  const seen = new Set<string>();
+  const candidateNames = new Set<string>([
+    ...params.filter(isPathTypedParam).map((param) => param.name),
+    ...rebuildParams,
+  ]);
+  for (const name of candidateNames) {
+    if (seen.has(name)) continue;
+    seen.add(name);
+    const param = paramsByName.get(name);
+    if (!param) continue;
+    const callers = [...(usedBy.get(name) ?? [])].sort();
+    const hasRebuild = rebuildParams.has(name);
+    const sourcePath = param.source_path ?? null;
+    const confidence: Evidence["confidence"] =
+      callers.length > 0 && param.source_kind ? "high" : "medium";
+    assets.push({
+      param: name,
+      asset_kind: classifyAssetKind(name),
+      format_hint: param.format ?? null,
+      required: param.required && !hasRebuild,
+      source_kind: param.source_kind ?? null,
+      source_expression: param.source_expression ?? null,
+      schema_group: param.schema_group ?? null,
+      used_by: callers,
+      evidence: {
+        source_path: sourcePath,
+        confidence,
+        evidence: [],
+      },
+    });
+  }
+  return assets.sort((left, right) => left.param.localeCompare(right.param));
+}
+
+function isPathTypedParam(param: Param): boolean {
+  return (
+    param.format === "file-path" ||
+    param.format === "directory-path" ||
+    param.format === "path" ||
+    param.format === "file-path-pattern" ||
+    param.source_kind === "getGenomeAttribute"
+  );
+}
+
+function collectParamCallers(workflows: ParsedWorkflow[]): Map<string, Set<string>> {
+  const usedBy = new Map<string, Set<string>>();
+  for (const workflow of workflows) {
+    const mainBlock = extractMainBlock(workflow.body);
+    for (const invocation of extractCallInvocations(mainBlock)) {
+      for (const argument of invocation.arguments) {
+        const paramName = paramNameFromArgument(argument);
+        if (!paramName) continue;
+        const set = usedBy.get(paramName) ?? new Set<string>();
+        set.add(invocation.name);
+        usedBy.set(paramName, set);
+      }
+    }
+  }
+  return usedBy;
+}
+
+function classifyAssetKind(name: string): string {
+  const lower = name.toLowerCase();
+  if (/(^|_)fai($|_)/u.test(lower) || lower.endsWith("_fai")) return "fasta_index";
+  if (lower === "dict" || lower.endsWith("_dict")) return "sequence_dictionary";
+  if (/bwamem2/u.test(lower)) return "bwamem2_index";
+  if (/(^|_)bwa($|_)/u.test(lower)) return "bwa_index";
+  if (/(^|_)tbi($|_)/u.test(lower)) return "tabix_index";
+  if (lower === "fasta" || lower.endsWith("_fasta")) return "fasta";
+  if (lower === "gtf" || lower.endsWith("_gtf")) return "gtf";
+  if (lower === "gff" || lower.endsWith("_gff")) return "gff";
+  if (/(^|_)bed($|_)/u.test(lower)) return "bed";
+  if (/(^|_)vcf($|_)/u.test(lower) || lower.endsWith("_vcf")) return "vcf";
+  if (lower.endsWith("_db") || lower.endsWith("_database")) return "database";
+  return "other";
+}
+
 function detectReferenceRebuilds(
   workflows: ParsedWorkflow[],
   invocationsByCallee: Map<string, SubworkflowInvocation[]>,
-  processNames: Set<string>,
 ): ReferenceRebuildRule[] {
   const rules: ReferenceRebuildRule[] = [];
   for (const workflow of workflows) {
@@ -1195,7 +1290,8 @@ function detectReferenceRebuilds(
       const negation = /^\s*!\s*([A-Za-z_][A-Za-z0-9_]*)/u.exec(block.guard);
       if (!negation) continue;
       const negated = negation[1]!;
-      const rebuild = analyzeRebuildBody(block.defaultBody, processNames);
+      if (/^(skip|no|disable|disabled)_/u.test(negated)) continue;
+      const rebuild = analyzeRebuildBody(block.defaultBody);
       if (!rebuild) continue;
       const assetParam = resolveAssetParam(rebuild.lhs, negated, takeNames, invocations);
       const guardParams = collectGuardParams(block.guard, takeNames, invocations);
@@ -1221,7 +1317,6 @@ function detectReferenceRebuilds(
 
 function analyzeRebuildBody(
   body: string,
-  processNames: Set<string>,
 ): { builder: string; builderOutputs: string[]; lhs: string; snippets: string[] } | null {
   const snippets: string[] = [];
   let builder: string | null = null;
@@ -1229,7 +1324,6 @@ function analyzeRebuildBody(
   const outputs = new Set<string>();
   for (const invocation of extractCallInvocations(body)) {
     if (!/^[A-Z]/u.test(invocation.name)) continue;
-    if (processNames.size > 0 && !processNames.has(invocation.name)) continue;
     builder = invocation.name;
     snippets.push(`${invocation.name}(${invocation.arguments.join(", ")})`);
     break;
@@ -1336,8 +1430,15 @@ function extractIfBlocks(
   body: string,
 ): { guard: string; defaultBody: string; alternateBody: string | null }[] {
   const blocks: { guard: string; defaultBody: string; alternateBody: string | null }[] = [];
-  for (const match of body.matchAll(/\bif\s*\(([^\n)]+)\)\s*\{/gu)) {
-    const openIndex = match.index + match[0].lastIndexOf("{");
+  const pattern = /\bif\s*\(/gu;
+  for (const match of body.matchAll(pattern)) {
+    const guardStart = match.index + match[0].length;
+    const guardEnd = findMatchingParen(body, guardStart - 1);
+    if (guardEnd === -1) continue;
+    const guard = body.slice(guardStart, guardEnd);
+    const braceMatch = /^\s*\{/u.exec(body.slice(guardEnd + 1));
+    if (!braceMatch) continue;
+    const openIndex = guardEnd + 1 + braceMatch[0].length - 1;
     const defaultBody = extractBlockAt(body, openIndex);
     if (defaultBody === null) continue;
     const closeIndex = openIndex + defaultBody.length + 1;
@@ -1345,9 +1446,22 @@ function extractIfBlocks(
     const alternateBody = elseMatch
       ? extractBlockAt(body, closeIndex + 1 + elseMatch[0].lastIndexOf("{"))
       : null;
-    blocks.push({ guard: normalizeWorkflowExpression(match[1]!), defaultBody, alternateBody });
+    blocks.push({ guard: normalizeWorkflowExpression(guard), defaultBody, alternateBody });
   }
   return blocks;
+}
+
+function findMatchingParen(text: string, openIndex: number): number {
+  let depth = 0;
+  for (let index = openIndex; index < text.length; index += 1) {
+    const ch = text[index];
+    if (ch === "(") depth += 1;
+    else if (ch === ")") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return -1;
 }
 
 function buildSubworkflowInvocations(

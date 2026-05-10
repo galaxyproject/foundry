@@ -35,6 +35,7 @@ const FIXTURES = (() => {
 const DEMO_PIPELINE = resolve(FIXTURES, "nf-core__demo");
 const BACASS_PIPELINE = resolve(FIXTURES, "nf-core__bacass");
 const RNASEQ_PIPELINE = resolve(FIXTURES, "nf-core__rnaseq");
+const SAREK_PIPELINE = resolve(FIXTURES, "nf-core__sarek");
 const SPAWN_MAX_BUFFER = 64 * 1024 * 1024;
 const DEMO_SUMMARY = resolve(
   FOUNDRY_ROOT,
@@ -57,6 +58,7 @@ const itIfBuilt = cliBuilt() ? it : it.skip;
 const itIfDemoFixture = cliBuilt() && fixturePresent(DEMO_PIPELINE) ? it : it.skip;
 const itIfBacassFixture = cliBuilt() && fixturePresent(BACASS_PIPELINE) ? it : it.skip;
 const itIfRnaseqFixture = cliBuilt() && fixturePresent(RNASEQ_PIPELINE) ? it : it.skip;
+const itIfSarekFixture = cliBuilt() && fixturePresent(SAREK_PIPELINE) ? it : it.skip;
 
 describe("summarize-nextflow CLI — built bin", () => {
   itIfBuilt("--version emits a semver", () => {
@@ -912,6 +914,46 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
       ]),
     );
   });
+});
+
+describe("summarize-nextflow CLI — real pipeline tree (nf-core/sarek)", () => {
+  itIfSarekFixture(
+    "emits reference_assets and reference_rebuilds for Sarek's PREPARE_GENOME",
+    () => {
+      const r = spawnSync("node", [CLI, SAREK_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+        encoding: "utf8",
+        maxBuffer: SPAWN_MAX_BUFFER,
+      });
+      expect(r.status).toBe(0);
+      const data = JSON.parse(r.stdout);
+      const validation = validateSummary(data);
+      if (!validation.valid)
+        console.error("sarek validation errors:", validation.errors.slice(0, 10));
+      expect(validation.valid).toBe(true);
+
+      const assetParams = (data.reference_assets as { param: string }[]).map((a) => a.param);
+      for (const expected of ["fasta", "fasta_fai", "dict", "bwa"]) {
+        expect(assetParams).toContain(expected);
+      }
+      const fasta = (data.reference_assets as { param: string; used_by: string[] }[]).find(
+        (a) => a.param === "fasta",
+      );
+      expect(fasta?.used_by).toContain("PREPARE_GENOME");
+
+      const rebuilds = data.reference_rebuilds as {
+        asset_param: string;
+        builder: string;
+        evidence: { source_path: string | null };
+      }[];
+      const byAsset = Object.fromEntries(rebuilds.map((r) => [r.asset_param, r]));
+      expect(byAsset.fasta_fai?.builder).toBe("SAMTOOLS_FAIDX");
+      expect(byAsset.dict?.builder).toBe("GATK4_CREATESEQUENCEDICTIONARY");
+      expect(byAsset.bwamem2?.builder).toBe("BWAMEM2_INDEX");
+      expect(byAsset.fasta_fai?.evidence.source_path).toBe(
+        "subworkflows/local/prepare_genome/main.nf",
+      );
+    },
+  );
 });
 
 describe("real cast artifact: nf-core/demo summary.json", () => {
