@@ -9,6 +9,7 @@ import type { ErrorObject } from "ajv";
 import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
 import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta";
+import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
@@ -45,7 +46,7 @@ const TYPE_TAG_MAP: Record<string, string> = {
 };
 
 const CLI_METADATA_KEYS = new Set(
-  [gxwfCliMeta, galaxyToolCacheCliMeta].flatMap((program) =>
+  [gxwfCliMeta, galaxyToolCacheCliMeta, foundryCliMeta].flatMap((program) =>
     program.commands.map((command) => `${program.name}/${command.name}`),
   ),
 );
@@ -1105,7 +1106,7 @@ function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
       findings.push({
         path: f.path,
         severity: "error",
-        message: `cli-command ${key} is absent from @galaxy-tool-util/cli metadata`,
+        message: `cli-command ${key} is absent from upstream CLI metadata`,
       });
     }
     if (typeof f.meta.package !== "string" || f.meta.package.length === 0) {

@@ -55,6 +55,10 @@ interface CliMetaModule {
   galaxyToolCacheCliMeta?: CliProgramView;
 }
 
+interface FoundryMetaModule {
+  foundryCliMeta?: CliProgramView;
+}
+
 export function indexProgram(
   program: CliProgramView,
   packageName: string,
@@ -73,7 +77,7 @@ export function indexProgram(
   return out;
 }
 
-export async function loadCliRegistry(): Promise<Record<string, CliRegistryEntry>> {
+async function loadGxwfRegistry(): Promise<Record<string, CliRegistryEntry>> {
   const packageName = '@galaxy-tool-util/cli';
   const packageVersion = readInstalledPackageVersion(packageName);
   try {
@@ -101,6 +105,30 @@ export async function loadCliRegistry(): Promise<Record<string, CliRegistryEntry
     // Defensive: meta subpath ships from @galaxy-tool-util/cli >=1.2.0; fall back to raw markdown if import fails.
     return {};
   }
+}
+
+async function loadFoundryRegistry(): Promise<Record<string, CliRegistryEntry>> {
+  const packageName = '@galaxy-foundry/foundry';
+  const packageVersion = readInstalledPackageVersion(packageName);
+  try {
+    const spec = `${packageName}/meta`;
+    const meta = (await import(/* @vite-ignore */ spec)) as FoundryMetaModule;
+    return meta.foundryCliMeta
+      ? indexProgram(
+          meta.foundryCliMeta,
+          packageName,
+          packageVersion,
+          'https://github.com/jmchilton/foundry/blob/main/packages/foundry/src/program.ts',
+        )
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function loadCliRegistry(): Promise<Record<string, CliRegistryEntry>> {
+  const [gxwf, foundry] = await Promise.all([loadGxwfRegistry(), loadFoundryRegistry()]);
+  return { ...gxwf, ...foundry };
 }
 
 export const cliRegistry: Record<string, CliRegistryEntry> = await loadCliRegistry();

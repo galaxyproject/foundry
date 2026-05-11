@@ -6,13 +6,19 @@ Source-specific (Nextflow), target-agnostic. The summary is the input to downstr
 
 ## Status
 
-`v0.0.0` — draft implementation. Local pipeline paths are supported; git URLs and `--pin` still exit with code `64` while remote checkout support is pending. See `content/molds/summarize-nextflow/` and the Nextflow component research notes for design context.
+`v0.1.0` — initial public release. Local pipeline paths are supported; git URLs and `--pin` still exit with code `64` while remote checkout support is pending. See `content/molds/summarize-nextflow/` and the Nextflow component research notes for design context.
+
+Most consumers should install [`@galaxy-foundry/foundry`](https://www.npmjs.com/package/@galaxy-foundry/foundry) instead, which ships `summarize-nextflow` as a subcommand alongside the validators.
 
 ## Install
 
 ```sh
+npm install -g @galaxy-foundry/summarize-nextflow
+# or, ephemeral:
 npx --package @galaxy-foundry/summarize-nextflow summarize-nextflow <pipeline-path-or-url> [options]
 ```
+
+Requires Node.js >= 20.
 
 ## Usage
 

@@ -4,13 +4,17 @@ Galaxy Workflow Foundry CLI. Produces and validates Mold IO artifacts (summaries
 
 ## Status
 
-`v0.0.0` — initial public surface.
+`v0.1.0` — initial public release.
 
 ## Install
 
 ```sh
 npm install -g @galaxy-foundry/foundry
+# or, ephemeral:
+npx --package @galaxy-foundry/foundry foundry --help
 ```
+
+Requires Node.js >= 20.
 
 ## Subcommands
 
@@ -36,6 +40,14 @@ const { valid, errors } = summaryCwlValidator.validate(data);
 ```
 
 Schema JSON is reachable via sub-path exports: `@galaxy-foundry/foundry/schemas/summary-cwl.json` etc.
+
+CLI metadata (program/command/option shape) is exported as static data from `@galaxy-foundry/foundry/meta`:
+
+```ts
+import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
+```
+
+Browser-safe; no commander or node-only deps.
 
 ## Schema sources
 
