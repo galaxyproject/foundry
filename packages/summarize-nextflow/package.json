@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-foundry/summarize-nextflow",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Statically introspect a Nextflow / nf-core pipeline tree and emit a structured JSON summary.",
   "type": "module",
   "bin": {

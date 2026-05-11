@@ -12,6 +12,7 @@
  */
 
 import type { CliProgramSpec } from "./types.js";
+import { FOUNDRY_VERSION } from "./version.generated.js";
 
 export type {
   CliProgramSpec,
@@ -24,7 +25,7 @@ export const foundryCliMeta: CliProgramSpec = {
   name: "foundry",
   description:
     "Galaxy Workflow Foundry CLI — produce and validate Mold IO artifacts (summaries, recommendations, test files).",
-  version: "0.1.0",
+  version: FOUNDRY_VERSION,
   commands: [
     {
       name: "summarize-nextflow",

@@ -2,6 +2,8 @@
 // the live commander program built by `buildProgram()`. Drift means the
 // site's per-subcommand pages will misrepresent the CLI; fail loudly.
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { Argument, Command, Option } from "commander";
 import { buildProgram } from "../src/program.js";
@@ -80,5 +82,11 @@ describe("foundryCliMeta", () => {
   it("matches the live commander program", () => {
     const derived = extractProgram(buildProgram());
     expect(derived).toEqual(foundryCliMeta);
+  });
+
+  it("declares the package.json version", () => {
+    const pkgUrl = new URL("../package.json", import.meta.url);
+    const pkg = JSON.parse(readFileSync(fileURLToPath(pkgUrl), "utf-8")) as { version: string };
+    expect(foundryCliMeta.version).toBe(pkg.version);
   });
 });
