@@ -58,7 +58,9 @@ jobs:
           # When pending changesets exist on main, opens "Version Packages" PR.
           # When that PR merges (no remaining changesets), `publish` ships
           # the bumped packages to npm and creates per-package git tags.
-          version: pnpm changeset version
+          # `pnpm -r sync` regenerates the foundry meta's version.generated.ts
+          # so the Version Packages PR commits a consistent meta version too.
+          version: pnpm changeset version && pnpm -r sync
           publish: pnpm changeset publish
           title: "chore(release): version packages"
           commit: "chore(release): version packages"
