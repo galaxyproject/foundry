@@ -16,7 +16,7 @@ Foundry-internal (in the `foundry/` repo):
 - **Research / reference notes** — background syntheses (e.g., Nextflow testing, CWL conformance) that aren't actions and aren't Galaxy patterns.
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
 - **Prompts** — wrapper notes under `content/prompts/` that add Foundry metadata and usage framing around raw prompt sidecars. Molds reference the wrapper via `kind: prompt`; casting copies the raw `prompt_file` verbatim.
-- **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Each has a `type: schema` content note under `content/schemas/<name>.md`; the JSON itself lives in its TypeScript package at `packages/<name>-schema/src/<name>.schema.json` or beside the content note when vendored as research/reference material. Two flavors: **Foundry-authored** (the JSON is hand-edited in the package, e.g. `packages/summary-nextflow-schema/src/summary-nextflow.schema.json`) and **vendored** (the JSON is synced from an upstream source, e.g. `tests-format` from `@galaxy-tool-util/schema`). Mold frontmatter cites schemas via `[[wiki-link]]` to the note; the note declares `package` + `package_export`, and cast imports the named runtime export at build time and serializes it into the cast bundle.
+- **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Each has a `type: schema` content note under `content/schemas/<name>.md`; the JSON itself lives with its producer (`@galaxy-foundry/summarize-nextflow` for `summary-nextflow` and the nf-core meta schemas) or in `@galaxy-foundry/foundry` (orphan schemas with no in-repo TS producer: `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary`, `tests-format`). The `tests-format` JSON is synced from upstream `@galaxy-tool-util/schema`. Mold frontmatter cites schemas via `[[wiki-link]]` to the note; the note declares `package` + `package_export` (cast imports the runtime export and serializes it) and `validator_bin` + `validator_subcommand` (skills validate via `foundry validate-<name>`). See `SCHEMA_PACKAGES.md`.
 - **Frontmatter schema** — `meta_schema.yml`, JSON Schema Draft 07 in YAML, contract for content notes. Distinct from the Mold IO schemas under `content/schemas/`.
 - **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the schema at validate time.
 - **Cast skills** — produced by casting from Molds. Per-target output layout under `casts/<target>/<name>/`.
@@ -473,12 +473,9 @@ foundry/
 │   ├── web/
 │   └── generic/
 ├── packages/                             # pnpm workspace packages
-│   ├── build-cli/                        # foundry-build CLI
-│   ├── summarize-nextflow/
-│   ├── summary-nextflow-schema/
-│   ├── galaxy-tool-discovery-schema/
-│   ├── galaxy-tool-summary-schema/
-│   └── tests-format-schema/
+│   ├── build-cli/                        # foundry-build CLI (repo-internal authoring)
+│   ├── summarize-nextflow/               # nf-core summarizer + summary-nextflow schema + nf-core meta schemas
+│   └── foundry/                          # foundry CLI: validate-* subcommands + summarize-nextflow wrapper + orphan schemas
 ├── scripts/
 │   ├── validate.ts                       # wrapper for foundry-build validate
 │   ├── generate-dashboard.ts             # wrapper for foundry-build generate-dashboard
@@ -486,7 +483,7 @@ foundry/
 │   ├── cast-mold.ts                      # wrapper for foundry-build cast
 │   ├── cast-skill-verify.ts              # cast verification helper
 │   ├── sync-vendored-upstreams.ts        # vendored schema/source sync
-│   ├── smoke-summary-nextflow-schema-package.mjs
+│   ├── smoke-packages.mjs                # tarball install + bin smoke for publishable packages
 │   ├── one-time/                         # retained maintenance scripts
 │   └── lib/
 │       ├── schema.ts                     # load + tag-enum injection

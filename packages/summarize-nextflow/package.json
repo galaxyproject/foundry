@@ -10,7 +10,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./schema.json": "./dist/schema/summary-nextflow.schema.json"
   },
   "files": [
     "dist",
@@ -26,14 +27,17 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc",
+    "sync": "node scripts/sync-schema.mjs",
+    "prebuild": "pnpm sync",
+    "build": "tsc && node scripts/copy-schema-assets.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "license": "MIT",
   "dependencies": {
-    "@galaxy-foundry/summary-nextflow-schema": "workspace:*",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "commander": "^12.1.0",
     "yaml": "^2.6.0"
   },

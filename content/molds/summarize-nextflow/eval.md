@@ -17,7 +17,7 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - check: deterministic
 - fixture: `workflow-fixtures/pipelines/nf-core__{demo,fetchngs,hlatyping,bacass,rnaseq,sarek,taxprofiler}`
 - expectation: CLI exits 0 and the emitted JSON validates against
-  [[summary-nextflow]] (`packages/summary-nextflow-schema/src/summary-nextflow.schema.json`) with `additionalProperties: false`.
+  [[summary-nextflow]] (`packages/summarize-nextflow/src/schema/summary-nextflow.schema.json`) with `additionalProperties: false`.
 
 ## Case: schema-validation failure surfaces, does not silently emit
 

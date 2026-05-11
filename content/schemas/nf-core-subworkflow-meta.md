@@ -2,7 +2,7 @@
 type: schema
 name: nf-core-subworkflow-meta
 title: nf-core subworkflow meta.yml schema
-package: "@galaxy-foundry/summary-nextflow-schema"
+package: "@galaxy-foundry/summarize-nextflow"
 package_export: "nfCoreSubworkflowMetaSchema"
 upstream: "https://github.com/nf-core/modules/blob/d8529909206a06d9ec73703ea07a533a511bb786/subworkflows/yaml-schema.json"
 license: MIT

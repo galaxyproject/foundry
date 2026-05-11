@@ -184,7 +184,7 @@ Casting policy for upstream-package schemas:
 - **Source of truth lives upstream.** The Foundry pins a version (in its toolchain `package.json` for npm, etc.) but does not edit the schema.
 - **Casting copies the schema verbatim into `references/schemas/`.** The generated skill's runtime loads it for AJV / equivalent validation; no Foundry round-trip needed.
 - **Bundle helper functions when applicable.** For test-format specifically, `@galaxy-tool-util/schema` also exports `validateTestsFile` and `checkTestsAgainstWorkflow` (label/type cross-check between a `.ga` and a tests file). When a cast's runtime is Node-capable, depending on the package directly is cleaner than vendoring just the JSON; the dependency is also recorded in `_provenance.json` so reviewers can see the version pin.
-- **Schema-page rendering in the Foundry uses the same vendored copy.** The Foundry syncs the vendored test schema to `packages/tests-format-schema/src/tests.schema.json` and renders it via `site/src/lib/schema-registry.ts` as a navigable schema note, so research notes and Mold bodies can deep-link individual `$defs` (e.g. `[[tests-format#has_text]]`). The vendored JSON is the single source for both casting output and site rendering.
+- **Schema-page rendering in the Foundry uses the same vendored copy.** The Foundry syncs the vendored test schema to `packages/foundry/src/schemas/tests-format/tests.schema.json` and renders it via `site/src/lib/schema-registry.ts` as a navigable schema note, so research notes and Mold bodies can deep-link individual `$defs` (e.g. `[[tests-format#has_text]]`). The vendored JSON is the single source for both casting output and site rendering.
 
 Other schemas that fall under this policy as they land:
 

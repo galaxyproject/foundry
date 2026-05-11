@@ -7,8 +7,9 @@
       "kind": "json",
       "default_filename": "galaxy-tool-pin.json",
       "schema": "[[galaxy-tool-discovery]]",
-      "validator_bin": "validate-galaxy-tool-discovery",
+      "validator_bin": "foundry",
       "args": [
+        "validate-galaxy-tool-discovery",
         "{artifact_path}"
       ]
     }

@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 4,
     "content_hash": "ad8036eea3ea81f0798201ef75a6b0686b7bc1ba0c969aa8dab204f58b45fc3e",
-    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
+    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
   },
-  "cast_at": "2026-05-10T22:31:11.069Z",
+  "cast_at": "2026-05-11T07:43:45.323Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -98,8 +98,8 @@
       "evidence": "corpus-observed",
       "purpose": "Cross-check source-side reference-data classifications before translating the reference-data brief into Galaxy workflow inputs.",
       "trigger": "When the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
-      "src_hash": "af778e115bac0d363efba2855d2701a613fa5a3920b0eef132bdb6ca97669273",
-      "dst_hash": "af778e115bac0d363efba2855d2701a613fa5a3920b0eef132bdb6ca97669273",
+      "src_hash": "3424cbc7257738d831e3c2996f2b20d12dda94ec93f8035e2f76f497e79647b1",
+      "dst_hash": "3424cbc7257738d831e3c2996f2b20d12dda94ec93f8035e2f76f497e79647b1",
       "source": "deterministic"
     },
     {
@@ -127,22 +127,22 @@
       "evidence": "corpus-observed",
       "purpose": "Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence.",
       "trigger": "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source.",
-      "src_hash": "656751cfdb3a0129aef6bfd00dec85da76a8c155720893be22307e0f56013732",
-      "dst_hash": "656751cfdb3a0129aef6bfd00dec85da76a8c155720893be22307e0f56013732",
+      "src_hash": "8e051a2c1faccd1c692e67c3304983d40db2ce6be0fc185baa250e41a0b7f398",
+      "dst_hash": "8e051a2c1faccd1c692e67c3304983d40db2ce6be0fc185baa250e41a0b7f398",
       "source": "deterministic"
     },
     {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
-      "src": "package://@galaxy-foundry/summary-nextflow-schema#summaryNextflowSchema",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
       "dst": "references/schemas/summary-nextflow.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.",
-      "src_hash": "3e9acdf91ede8aa37e8403be7c1bbc92c465889f37ec7133d2e8a64599b08c16",
-      "dst_hash": "3e9acdf91ede8aa37e8403be7c1bbc92c465889f37ec7133d2e8a64599b08c16",
+      "src_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
+      "dst_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
       "source": "deterministic"
     }
   ],

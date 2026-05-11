@@ -2,10 +2,11 @@
 type: schema
 name: galaxy-tool-summary
 title: Galaxy tool summary manifest
-package: "@galaxy-foundry/galaxy-tool-summary-schema"
+package: "@galaxy-foundry/foundry"
 package_export: "galaxyToolSummarySchema"
-validator_bin: validate-galaxy-tool-summary
-upstream: "https://github.com/jmchilton/foundry/blob/main/packages/galaxy-tool-summary-schema/src/galaxy-tool-summary.schema.json"
+validator_bin: foundry
+validator_subcommand: validate-galaxy-tool-summary
+upstream: "https://github.com/jmchilton/foundry/blob/main/packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json"
 tags:
   - schema
   - target/galaxy
@@ -27,14 +28,14 @@ This page is auto-rendered from the JSON Schema authored in this repo. Each `$de
 
 **Source-of-truth chain:**
 
-1. `packages/galaxy-tool-summary-schema/src/galaxy-tool-summary.schema.json` — the canonical JSON, hand-edited alongside the Mold/cast loop around [[summarize-galaxy-tool]]. Mold frontmatter still cites it as `content/schemas/galaxy-tool-summary.schema.json`; cast and Astro resolve that back to the package source.
-2. `packages/galaxy-tool-summary-schema/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `galaxy-tool-summary.schema.generated.ts` const wrapper from the canonical JSON.
-3. Published as `@galaxy-foundry/galaxy-tool-summary-schema` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateGalaxyToolSummary()` and ships a `validate-galaxy-tool-summary` CLI bin for cast skills and downstream consumers.
+1. `packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json` — the canonical JSON, hand-edited alongside the Mold/cast loop around [[summarize-galaxy-tool]]. Mold frontmatter still cites it as `content/schemas/galaxy-tool-summary.schema.json`; cast and Astro resolve that back to the package source.
+2. `packages/foundry/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `galaxy-tool-summary.schema.generated.ts` const wrapper from the canonical JSON.
+3. Published as part of `@galaxy-foundry/foundry` (orphan schema bundled in the unified CLI). Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published CLI also ships `foundry validate-galaxy-tool-summary` for cast skills and downstream consumers.
 
 **At runtime in cast skills:** validation should happen through the CLI command:
 
 ```sh
-validate-galaxy-tool-summary manifest.json
+foundry validate-galaxy-tool-summary manifest.json
 ```
 
 Library validation exists for TypeScript consumers, but generated skills should prefer command-shaped validation so failures are easy to reproduce outside the agent runtime.

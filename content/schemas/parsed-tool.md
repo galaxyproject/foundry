@@ -30,7 +30,7 @@ This page is auto-rendered from the JSON Schema vendored in `@galaxy-tool-util/s
 
 1. `lib/galaxy/tool_util/parser/yaml.py` and the `ParsedTool` Effect schema in `packages/schema/src/schema/parsed-tool.ts` of [jmchilton/galaxy-tool-util-ts](https://github.com/jmchilton/galaxy-tool-util-ts) — track upstream Galaxy's typed tool-source model.
 2. `parsedToolSchema = JSONSchema.make(ParsedTool, { target: "jsonSchema2020-12" })` exports the JSON Schema form alongside the Effect type.
-3. Published as `@galaxy-tool-util/schema` on npm; the Foundry pins a version in `packages/galaxy-tool-summary-schema/package.json` and consumes the export both for site rendering (via `site/src/lib/schema-registry.ts`) and for AJV validation of the `parsed_tool` subtree of a `[[galaxy-tool-summary]]` manifest.
+3. Published as `@galaxy-tool-util/schema` on npm; the Foundry pins a version in `packages/foundry/package.json` and consumes the export both for site rendering (via `site/src/lib/schema-registry.ts`) and for AJV validation of the `parsed_tool` subtree of a `[[galaxy-tool-summary]]` manifest.
 
 ## Foundry Coverage Today
 

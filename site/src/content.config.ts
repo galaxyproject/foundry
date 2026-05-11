@@ -186,6 +186,7 @@ const schemaNoteSchema = z.object({
   upstream: z.string().optional(),
   package_export: z.string().optional(),
   validator_bin: z.string().optional(),
+  validator_subcommand: z.string().optional(),
   license: z.string().optional(),
   license_file: z.string().optional(),
 }).strict();

@@ -27,18 +27,12 @@ importers:
       '@galaxy-foundry/build-cli':
         specifier: workspace:*
         version: link:packages/build-cli
-      '@galaxy-foundry/galaxy-tool-discovery-schema':
+      '@galaxy-foundry/foundry':
         specifier: workspace:*
-        version: link:packages/galaxy-tool-discovery-schema
-      '@galaxy-foundry/summary-cwl-schema':
+        version: link:packages/foundry
+      '@galaxy-foundry/summarize-nextflow':
         specifier: workspace:*
-        version: link:packages/summary-cwl-schema
-      '@galaxy-foundry/summary-nextflow-schema':
-        specifier: workspace:*
-        version: link:packages/summary-nextflow-schema
-      '@galaxy-foundry/tests-format-schema':
-        specifier: workspace:*
-        version: link:packages/tests-format-schema
+        version: link:packages/summarize-nextflow
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -101,27 +95,11 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
-  packages/galaxy-tool-discovery-schema:
+  packages/foundry:
     dependencies:
-      ajv:
-        specifier: ^8.17.1
-        version: 8.20.0
-      ajv-formats:
-        specifier: ^3.0.1
-        version: 3.0.1(ajv@8.20.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.10.0
-        version: 22.19.17
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.0
-        version: 2.1.9(@types/node@22.19.17)
-
-  packages/galaxy-tool-summary-schema:
-    dependencies:
+      '@galaxy-foundry/summarize-nextflow':
+        specifier: workspace:*
+        version: link:../summarize-nextflow
       '@galaxy-tool-util/schema':
         specifier: ^1.2.0
         version: 1.2.0
@@ -131,22 +109,6 @@ importers:
       ajv-formats:
         specifier: ^3.0.1
         version: 3.0.1(ajv@8.20.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.10.0
-        version: 22.19.17
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.0
-        version: 2.1.9(@types/node@22.19.17)
-
-  packages/summarize-nextflow:
-    dependencies:
-      '@galaxy-foundry/summary-nextflow-schema':
-        specifier: workspace:*
-        version: link:../summary-nextflow-schema
       commander:
         specifier: ^12.1.0
         version: 12.1.0
@@ -164,7 +126,7 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.17)
 
-  packages/summary-cwl-schema:
+  packages/summarize-nextflow:
     dependencies:
       ajv:
         specifier: ^8.17.1
@@ -172,43 +134,11 @@ importers:
       ajv-formats:
         specifier: ^3.0.1
         version: 3.0.1(ajv@8.20.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.10.0
-        version: 22.19.17
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.0
-        version: 2.1.9(@types/node@22.19.17)
-
-  packages/summary-nextflow-schema:
-    dependencies:
-      ajv:
-        specifier: ^8.17.1
-        version: 8.20.0
-      ajv-formats:
-        specifier: ^3.0.1
-        version: 3.0.1(ajv@8.20.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.10.0
-        version: 22.19.17
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.0
-        version: 2.1.9(@types/node@22.19.17)
-
-  packages/tests-format-schema:
-    dependencies:
-      '@galaxy-tool-util/schema':
-        specifier: ^1.1.0
-        version: 1.1.0
+      commander:
+        specifier: ^12.1.0
+        version: 12.1.0
       yaml:
-        specifier: ^2.8.3
+        specifier: ^2.6.0
         version: 2.8.3
     devDependencies:
       '@types/node':

@@ -524,15 +524,24 @@ export function buildProducerIndex(
   return idx;
 }
 
-function schemaValidatorBin(
+interface ValidatorInvocation {
+  bin: string;
+  args: string[];
+}
+
+function schemaValidatorInvocation(
   schemaRef: string,
   slugMap: Map<string, string>,
   metaByPath: Map<string, Frontmatter>,
-): string | undefined {
+): ValidatorInvocation | undefined {
   const target = resolveWikiLink(schemaRef, slugMap);
   if (!target) return undefined;
   const meta = metaByPath.get(target);
-  return typeof meta?.validator_bin === "string" ? meta.validator_bin : undefined;
+  const bin = typeof meta?.validator_bin === "string" ? meta.validator_bin : undefined;
+  if (!bin) return undefined;
+  const sub =
+    typeof meta?.validator_subcommand === "string" ? meta.validator_subcommand : undefined;
+  return { bin, args: sub ? [sub, "{artifact_path}"] : ["{artifact_path}"] };
 }
 
 export function buildVerifyManifest(
@@ -548,16 +557,16 @@ export function buildVerifyManifest(
       if (!a || typeof a !== "object") continue;
       const o = a as Record<string, unknown>;
       if (typeof o.id !== "string" || typeof o.schema !== "string") continue;
-      const validatorBin = schemaValidatorBin(o.schema, slugMap, metaByPath);
-      if (!validatorBin) continue;
+      const inv = schemaValidatorInvocation(o.schema, slugMap, metaByPath);
+      if (!inv) continue;
       entries.push({
         artifact_id: o.id,
         direction: "output",
         kind: typeof o.kind === "string" ? o.kind : undefined,
         default_filename: typeof o.default_filename === "string" ? o.default_filename : undefined,
         schema: o.schema,
-        validator_bin: validatorBin,
-        args: ["{artifact_path}"],
+        validator_bin: inv.bin,
+        args: inv.args,
       });
     }
   }
@@ -569,16 +578,16 @@ export function buildVerifyManifest(
       if (typeof o.id !== "string") continue;
       const producer = producerIndex.get(o.id);
       if (!producer?.schema) continue;
-      const validatorBin = schemaValidatorBin(producer.schema, slugMap, metaByPath);
-      if (!validatorBin) continue;
+      const inv = schemaValidatorInvocation(producer.schema, slugMap, metaByPath);
+      if (!inv) continue;
       entries.push({
         artifact_id: o.id,
         direction: "input",
         kind: producer.kind,
         default_filename: producer.default_filename,
         schema: producer.schema,
-        validator_bin: validatorBin,
-        args: ["{artifact_path}"],
+        validator_bin: inv.bin,
+        args: inv.args,
       });
     }
   }

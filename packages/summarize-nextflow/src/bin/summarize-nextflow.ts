@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { writeFileSync } from "node:fs";
-import { validateSummary } from "@galaxy-foundry/summary-nextflow-schema";
 import {
   buildSummary,
   SummarizeNextflowNotImplementedError,
+  validateSummary,
   type SummarizeNextflowOptions,
 } from "../index.js";
 import { VERSION } from "../version.js";

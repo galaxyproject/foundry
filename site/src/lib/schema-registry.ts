@@ -1,37 +1,43 @@
-// Registry of vendored JSON Schemas, keyed by note `name` field.
-// Add a new entry when a new schema-type note lands.
-//
-// Each entry: { schema: <JSON Schema object>, version: <package version string> }.
+// Registry of JSON Schemas, keyed by note `name` field.
+// All schemas come from two packages: producer-co-located
+// (@galaxy-foundry/summarize-nextflow) or foundry-bundled
+// (@galaxy-foundry/foundry).
 
-import galaxyToolDiscoverySchema from '../../../packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json';
-import galaxyToolDiscoverySchemaPkg from '../../../packages/galaxy-tool-discovery-schema/package.json';
-import summaryCwlSchema from '../../../packages/summary-cwl-schema/src/summary-cwl.schema.json';
-import summaryCwlSchemaPkg from '../../../packages/summary-cwl-schema/package.json';
-import summaryNextflowSchema from '../../../packages/summary-nextflow-schema/src/summary-nextflow.schema.json';
-import summaryNextflowSchemaPkg from '../../../packages/summary-nextflow-schema/package.json';
-import testsFormatSchema from '../../../packages/tests-format-schema/src/tests.schema.json';
-import testsFormatSchemaPkg from '../../../packages/tests-format-schema/package.json';
+import galaxyToolDiscoverySchema from '../../../packages/foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json';
+import galaxyToolSummarySchema from '../../../packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
+import summaryCwlSchema from '../../../packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json';
+import testsFormatSchema from '../../../packages/foundry/src/schemas/tests-format/tests.schema.json';
+import foundryPkg from '../../../packages/foundry/package.json';
+import summaryNextflowSchema from '../../../packages/summarize-nextflow/src/schema/summary-nextflow.schema.json';
+import summarizeNextflowPkg from '../../../packages/summarize-nextflow/package.json';
 
 export interface SchemaEntry {
   schema: Record<string, unknown>;
   version: string;
 }
 
+const foundryVersion = (foundryPkg as { version?: string }).version ?? '';
+const summarizeNextflowVersion = (summarizeNextflowPkg as { version?: string }).version ?? '';
+
 export const schemaRegistry: Record<string, SchemaEntry> = {
   'tests-format': {
     schema: testsFormatSchema as unknown as Record<string, unknown>,
-    version: (testsFormatSchemaPkg as { version?: string }).version ?? '',
+    version: foundryVersion,
   },
   'summary-nextflow': {
     schema: summaryNextflowSchema as unknown as Record<string, unknown>,
-    version: (summaryNextflowSchemaPkg as { version?: string }).version ?? '',
+    version: summarizeNextflowVersion,
   },
   'summary-cwl': {
     schema: summaryCwlSchema as unknown as Record<string, unknown>,
-    version: (summaryCwlSchemaPkg as { version?: string }).version ?? '',
+    version: foundryVersion,
   },
   'galaxy-tool-discovery': {
     schema: galaxyToolDiscoverySchema as unknown as Record<string, unknown>,
-    version: (galaxyToolDiscoverySchemaPkg as { version?: string }).version ?? '',
+    version: foundryVersion,
+  },
+  'galaxy-tool-summary': {
+    schema: galaxyToolSummarySchema as unknown as Record<string, unknown>,
+    version: foundryVersion,
   },
 };

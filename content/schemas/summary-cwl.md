@@ -2,10 +2,11 @@
 type: schema
 name: summary-cwl
 title: CWL workflow summary
-package: "@galaxy-foundry/summary-cwl-schema"
+package: "@galaxy-foundry/foundry"
 package_export: "summaryCwlSchema"
-validator_bin: validate-summary-cwl
-upstream: "https://github.com/jmchilton/foundry/blob/main/packages/summary-cwl-schema/src/summary-cwl.schema.json"
+validator_bin: foundry
+validator_subcommand: validate-summary-cwl
+upstream: "https://github.com/jmchilton/foundry/blob/main/packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json"
 license: MIT
 tags:
   - schema
@@ -26,18 +27,18 @@ related_notes:
 summary: "JSON Schema for the structured summary emitted by the summarize-cwl Mold."
 ---
 
-This page points to the JSON Schema authored in this repo and shipped as `@galaxy-foundry/summary-cwl-schema`. The schema is intentionally smaller than [[summary-nextflow]] because CWL already carries typed workflow and tool structure.
+This page points to the JSON Schema authored in this repo and shipped as part of `@galaxy-foundry/foundry` (orphan schema — no TypeScript producer Mold owns it). The schema is intentionally smaller than [[summary-nextflow]] because CWL already carries typed workflow and tool structure.
 
 **Source-of-truth chain:**
 
-1. `packages/summary-cwl-schema/src/summary-cwl.schema.json` — canonical JSON, hand-edited as part of the Mold/cast loop.
-2. `packages/summary-cwl-schema/scripts/sync-schema.mjs` regenerates the typed `summary-cwl.schema.generated.ts` const wrapper.
-3. Published as `@galaxy-foundry/summary-cwl-schema`, exporting `summaryCwlSchema`, `validateSummary()`, and the `validate-summary-cwl` CLI.
+1. `packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json` — canonical JSON, hand-edited as part of the Mold/cast loop.
+2. `packages/foundry/scripts/sync-schema.mjs` regenerates the typed `summary-cwl.schema.generated.ts` const wrapper at `prebuild`.
+3. Published as part of `@galaxy-foundry/foundry`, exporting `summaryCwlSchema` and the `foundry validate-summary-cwl` subcommand.
 
 Generated skills should validate emitted summaries with:
 
 ```sh
-validate-summary-cwl summary-cwl.json
+foundry validate-summary-cwl summary-cwl.json
 ```
 
 ## Why This Is Lighter Than Nextflow

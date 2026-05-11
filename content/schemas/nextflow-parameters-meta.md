@@ -2,7 +2,7 @@
 type: schema
 name: nextflow-parameters-meta
 title: Nextflow parameter schema (nf-schema meta-schema)
-package: "@galaxy-foundry/summary-nextflow-schema"
+package: "@galaxy-foundry/summarize-nextflow"
 package_export: "nextflowParametersMetaSchema"
 upstream: "https://github.com/nextflow-io/nf-schema/blob/bde406e81a4ac614650d73df6df6dcf793182929/parameters_meta_schema.json"
 license: Apache-2.0

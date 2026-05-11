@@ -724,7 +724,15 @@ function validateSchemaValidatorBins(files: FileMeta[], contentRoot: string): Cr
     if (f.meta.type !== "schema") continue;
     const validatorBin = typeof f.meta.validator_bin === "string" ? f.meta.validator_bin : "";
     if (!validatorBin) continue;
-    const packageName = typeof f.meta.package === "string" ? f.meta.package : "";
+    const validatorSubcommand =
+      typeof f.meta.validator_subcommand === "string" ? f.meta.validator_subcommand : "";
+    // When a subcommand is declared, the bin owner is the foundry CLI package,
+    // not the schema's `package` (which only points at the export source).
+    const packageName = validatorSubcommand
+      ? "@galaxy-foundry/foundry"
+      : typeof f.meta.package === "string"
+        ? f.meta.package
+        : "";
     if (!packageName) {
       findings.push({
         path: f.path,

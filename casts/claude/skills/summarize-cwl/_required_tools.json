@@ -22,14 +22,14 @@
     "source": "referenced"
   },
   {
-    "tool": "validate-summary-cwl",
+    "tool": "foundry",
     "origin": "npm",
-    "package": "@galaxy-foundry/summary-cwl-schema",
-    "invoke": "validate-summary-cwl",
-    "invoke_fallback": "npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl",
-    "availability_check": "validate-summary-cwl --help",
-    "docs_url": "https://github.com/jmchilton/foundry/blob/main/packages/summary-cwl-schema/README.md",
-    "reference": "references/cli/validate-summary-cwl.md",
+    "package": "@galaxy-foundry/foundry",
+    "invoke": "foundry",
+    "invoke_fallback": "npx --package @galaxy-foundry/foundry foundry",
+    "availability_check": "foundry --help",
+    "docs_url": "https://github.com/jmchilton/foundry/blob/main/packages/foundry/README.md",
+    "reference": "references/cli/foundry.md",
     "source": "referenced"
   }
 ]

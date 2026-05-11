@@ -73,7 +73,7 @@ CLI ran cleanly on `nf-core__sarek` (3.8.1). Schema validation passed.
   Suggest the Makefile guard against concurrent runs (file-based lock or
   explicit "already running" detection). Low-priority but bites integration
   tests.
-- The CLI built only after a `pnpm --filter @galaxy-foundry/summary-nextflow-schema build`
+- The CLI built only after a `pnpm --filter @galaxy-foundry/summarize-nextflow build`
   run because `dist/` was absent in the worktree. `npm run packages-build`
   would have done both in order; consider documenting "run packages-build
   before invoking the CLI" in the README, or have the CLI's `bin` script
