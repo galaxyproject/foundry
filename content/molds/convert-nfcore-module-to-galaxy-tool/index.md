@@ -9,8 +9,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-05-10
-revised: 2026-05-10
-revision: 1
+revised: 2026-05-11
+revision: 2
 ai_generated: true
 summary: "Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks)."
 references:
@@ -86,6 +86,42 @@ references:
     purpose: "Reference for the <discover_datasets> XML element: attributes, named/regex patterns, <data> vs <collection> contexts, test-side <discovered_dataset>."
     trigger: "When translating a Nextflow output: channel that uses a glob path or runtime-interpolated filenames into a Galaxy <collection> or multi-output <data>."
     verification: "Cast against a glob-output module (samtools/index); confirm the emitted <collection><discover_datasets pattern=...> shape resolves the glob correctly under planemo test."
+  - kind: cli-tool
+    ref: "[[planemo]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Install metadata + pin SHA for the planemo CLI invoked by the convergence loop."
+    trigger: "Always — the cast skill needs planemo on PATH before running lint/test."
+    verification: "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command."
+  - kind: cli-command
+    ref: "[[planemo-lint]]"
+    used_at: runtime
+    load: on-demand
+    mode: condense
+    evidence: hypothesis
+    purpose: "Reference for `planemo lint` flags and output classification; first gate in the convergence loop."
+    trigger: "Step 10.1 — after every <command>/<inputs>/<outputs> emission."
+    verification: "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses."
+  - kind: cli-command
+    ref: "[[planemo-test]]"
+    used_at: runtime
+    load: on-demand
+    mode: condense
+    evidence: hypothesis
+    purpose: "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path."
+    trigger: "Step 10.2 — after lint clears."
+    verification: "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout."
+  - kind: schema
+    ref: "[[planemo-test-report]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Validate `planemo test --test_output_json` output before classifying failures; the JSON gate that replaces free-text parsing."
+    trigger: "Step 10.2 — after every `planemo test` invocation."
+    verification: "Cast and confirm AJV-validation runs before the failure-classification branch."
 related_notes:
   - "[[component-nf-core-tools]]"
   - "[[galaxy-discover-datasets]]"
@@ -243,16 +279,31 @@ Collect: nf-core module source (repo, path, branch, git_sha), file hashes, test-
 
 ### 10. Convergence loop: lint, test, fix
 
-Iterate until clean:
+Iterate until clean. Both gates exit on structured signals — never free-text grep.
 
-1. `planemo lint <output_dir>`. XSD failures are hard — fix the XML and re-emit. Soft findings (missing `<help>`, missing `<citations>`) are fixed in place by the cast skill.
-2. `planemo test <output_dir>`. Test failures classify into:
-   - `<command>` mismatch with the upstream script — the LLM revises the Cheetah translation.
-   - Output discovery mismatch — adjust `<discover_datasets>` patterns.
-   - Fixture availability — verify the remote URL resolves; fall back to a local `test-data/` copy and document in `_provenance.yml.overrides`.
-3. Stop when both pass; emit the final files.
+#### 10.1 Lint
 
-The convergence loop is bounded (default 3 attempts). On exhaustion, the cast skill writes whatever it has and surfaces the final `planemo` output for human triage.
+`planemo lint <output_dir>` (see [[planemo-lint]]). Treat by exit code:
+
+- Exit 0 — proceed to 10.2.
+- Non-zero — read the diagnostic block. XSD failures are hard: fix the XML and re-emit. Soft findings (missing `<help>`, missing `<citations>`) are fixed in place by the cast skill, then loop.
+
+#### 10.2 Test
+
+`planemo test <output_dir> --test_output_json <output_dir>/_planemo_test_report.json` (see [[planemo-test]]). Always pass `--test_output_json`; planemo's stdout is for humans and intentionally not part of the cast skill's parsing surface.
+
+After the run:
+
+1. **Validate.** AJV-check the JSON against [[planemo-test-report]] (`validate-planemo-test-report` CLI from `@galaxy-foundry/planemo-test-report-schema`). A schema-invalid report means the pinned planemo SHA drifted or the run aborted before writing the report — escalate to human triage; do not classify.
+2. **Classify** from schema fields, not free-text. `tests[].data.job` is `dict[str, Any]` (extra-allow) — its inner keys come from the Galaxy job state and are not constrained by [[planemo-test-report]], so treat them as best-effort signals:
+   - `tests[].data.status == "success"` → pass.
+   - `tests[].data.status == "failure"` + `data.problem_log` matches an output-discovery pattern (`<discover_datasets>` mismatch, missing dataset name, format mismatch) → adjust the corresponding `<output>` / `<discover_datasets>` block.
+   - `tests[].data.status == "failure"`, and `data.job.stderr` (when present) carries upstream tool stderr → the `<command>` Cheetah translation is wrong; LLM revises.
+   - `tests[].data.status == "error"` with HTTP/URL signals → fixture-availability fault; verify the `nf-core/test-datasets` URL resolves and consider a local `test-data/` fallback, recording the divergence in `_provenance.yml.overrides`.
+   - Any other failure shape → human triage.
+3. **Stop** when lint and test both clear.
+
+The convergence loop is bounded (default 3 attempts). On exhaustion, the cast skill writes whatever it has and surfaces the final `_planemo_test_report.json` (plus the lint diagnostics) for human triage.
 
 ## Non-goals
 
@@ -272,10 +323,13 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the cast sk
 ## Reference dispatch (for casting)
 
 - `patterns` → 5 nf-core→Galaxy translation patterns (see frontmatter `references[]`). LLM-condensed into the cast skill.
-- planemo invocations (`planemo lint`, `planemo test`) are called as subprocesses by the cast skill; deferred Foundry CLI manpages for planemo until `@galaxy-tool-util/cli` metadata (or equivalent) carries planemo coverage.
+- `cli-tool` → [[planemo]] carries the pinned install metadata; flows into the cast bundle's `_required_tools.json` via the PR #235 mechanism.
+- `cli-command` → [[planemo-lint]] and [[planemo-test]] cast to JSON sidecars; consulted on-demand inside the §10 loop.
+- `schema` → [[planemo-test-report]] copied verbatim into the cast bundle; the convergence loop AJV-validates `--test_output_json` output against it before classifying failures.
 - `research` → `[[component-nf-core-tools]]`, `[[component-nextflow-containers-and-envs]]`, `[[galaxy-discover-datasets]]`. On-demand, condensed into runtime context when triggered.
 - `examples` — pending: 3 hand-picked Wave 1 modules (one trivial, one paired-aware, one with conditional). Used for round-trip smoke testing before this Mold ships.
 
 ## Revision history
 
 - **rev 1 (2026-05-10)** — initial draft. Procedure sketched against the trimmed plan; no cast runs yet. Pattern + CLI references all `evidence: hypothesis`.
+- **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against [[planemo-test-report]]; pulled in `cli-tool`/`cli-command`/`schema` references for [[planemo]], [[planemo-lint]], [[planemo-test]], [[planemo-test-report]]. Deferred-manpages caveat removed.

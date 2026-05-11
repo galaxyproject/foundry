@@ -60,6 +60,33 @@ make fixtures-verify   # verify materialized fixture SHAs
 make fixtures-clean    # remove generated fixture dirs
 ```
 
+## Vendored planemo artifacts
+
+Foundry vendors two planemo JSON artifacts so contributor laptops and CI don't need planemo installed:
+
+- `packages/planemo-test-report-schema/src/test-report.schema.json` — JSON Schema for `planemo test --test_output_json`. Powers the convergence-loop gate in [[convert-nfcore-module-to-galaxy-tool]].
+- `packages/planemo-cli-meta/src/cli-meta.json` — minimal command list feeding the validator's cli-command coverage check.
+
+The vendored artifacts pin to a planemo SHA recorded in `content/cli/planemo/index.md`. **planemo is only required when regenerating these artifacts.** Normal Foundry work — `npm run validate`, `npm run test`, `npm run packages-test`, `make validate`, `make test` — reads the checked-in JSON.
+
+Regenerate with:
+
+```sh
+make sync-planemo               # all vendored planemo artifacts
+make sync-planemo-cli           # CLI manual pages under content/cli/planemo/
+make sync-planemo-cli-meta      # packages/planemo-cli-meta/
+make sync-planemo-test-report-schema  # packages/planemo-test-report-schema/
+make check-planemo-cli          # fail on planemo CLI page drift (CI)
+```
+
+Install the pinned planemo via:
+
+```sh
+uvx --from git+https://github.com/jmchilton/planemo@<sha> planemo --version
+```
+
+Take the `<sha>` from `content/cli/planemo/index.md`'s `package_version`.
+
 ## Generated fixtures
 
 `workflow-fixtures/` is the generated-corpus workspace used for research, not committed content. The generated directories are gitignored and may be absent in a fresh worktree:

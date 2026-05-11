@@ -36,6 +36,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@galaxy-foundry/planemo-cli-meta": "workspace:*",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "gray-matter": "^4.0.3",

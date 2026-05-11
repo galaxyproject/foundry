@@ -1,0 +1,445 @@
+{
+  "aliases": {
+    "l": "lint",
+    "o": "open",
+    "s": "serve",
+    "t": "test"
+  },
+  "commands": [
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_autoupdate",
+      "name": "autoupdate"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_ci_find_repos",
+      "name": "ci_find_repos"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_ci_find_tools",
+      "name": "ci_find_tools"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_ci_setup",
+      "name": "ci_setup"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_cli_metadata",
+      "name": "cli_metadata"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_clone",
+      "name": "clone"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_conda_build",
+      "name": "conda_build"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_conda_env",
+      "name": "conda_env"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_conda_init",
+      "name": "conda_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_conda_install",
+      "name": "conda_install"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_conda_search",
+      "name": "conda_search"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_config_init",
+      "name": "config_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_container_register",
+      "name": "container_register"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_create_alias",
+      "name": "create_alias"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_database_create",
+      "name": "database_create"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_database_delete",
+      "name": "database_delete"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_database_list",
+      "name": "database_list"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_delete_alias",
+      "name": "delete_alias"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_docker_build",
+      "name": "docker_build"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_docker_shell",
+      "name": "docker_shell"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_dockstore_init",
+      "name": "dockstore_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_docs",
+      "name": "docs"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_format",
+      "name": "format"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_invocation_download",
+      "name": "invocation_download"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_invocation_export",
+      "name": "invocation_export"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_job_config_init",
+      "name": "job_config_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_lint",
+      "name": "lint"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_list_alias",
+      "name": "list_alias"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_list_invocations",
+      "name": "list_invocations"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_list_repos",
+      "name": "list_repos"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_merge_test_reports",
+      "name": "merge_test_reports"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_mull",
+      "name": "mull"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_mulled_init",
+      "name": "mulled_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_normalize",
+      "name": "normalize"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_open",
+      "name": "open"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_output_schema",
+      "name": "output_schema"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_profile_create",
+      "name": "profile_create"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_profile_delete",
+      "name": "profile_delete"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_profile_job_config_init",
+      "name": "profile_job_config_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_profile_list",
+      "name": "profile_list"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_project_init",
+      "name": "project_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_pull_request",
+      "name": "pull_request"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_rerun",
+      "name": "rerun"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_run",
+      "name": "run"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_serve",
+      "name": "serve"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_share_test",
+      "name": "share_test"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_build",
+      "name": "shed_build"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_create",
+      "name": "shed_create"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_diff",
+      "name": "shed_diff"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_init",
+      "name": "shed_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_lint",
+      "name": "shed_lint"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_serve",
+      "name": "shed_serve"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_test",
+      "name": "shed_test"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_update",
+      "name": "shed_update"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_shed_upload",
+      "name": "shed_upload"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_slurm_init",
+      "name": "slurm_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_syntax",
+      "name": "syntax"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_test",
+      "name": "test"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_test_reports",
+      "name": "test_reports"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_tool_init",
+      "name": "tool_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_training_fill_data_library",
+      "name": "training_fill_data_library"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_training_generate_from_wf",
+      "name": "training_generate_from_wf"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_training_init",
+      "name": "training_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_upload_data",
+      "name": "upload_data"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_convert",
+      "name": "workflow_convert"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_edit",
+      "name": "workflow_edit"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_job_init",
+      "name": "workflow_job_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_lint",
+      "name": "workflow_lint"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_test_init",
+      "name": "workflow_test_init"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_test_on_invocation",
+      "name": "workflow_test_on_invocation"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_track",
+      "name": "workflow_track"
+    },
+    {
+      "hidden": false,
+      "internal": false,
+      "module": "planemo.commands.cmd_workflow_upload",
+      "name": "workflow_upload"
+    }
+  ],
+  "planemo_version": "0.75.42.dev0",
+  "program": "planemo",
+  "schema_version": "0.1"
+}

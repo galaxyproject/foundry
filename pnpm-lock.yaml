@@ -30,6 +30,12 @@ importers:
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
+      '@galaxy-foundry/planemo-cli-meta':
+        specifier: workspace:*
+        version: link:packages/planemo-cli-meta
+      '@galaxy-foundry/planemo-test-report-schema':
+        specifier: workspace:*
+        version: link:packages/planemo-test-report-schema
       '@galaxy-foundry/summarize-nextflow':
         specifier: workspace:*
         version: link:packages/summarize-nextflow
@@ -72,6 +78,9 @@ importers:
 
   packages/build-cli:
     dependencies:
+      '@galaxy-foundry/planemo-cli-meta':
+        specifier: workspace:*
+        version: link:../planemo-cli-meta
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
@@ -115,6 +124,37 @@ importers:
       yaml:
         specifier: ^2.6.0
         version: 2.8.3
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.17
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.17)
+
+  packages/planemo-cli-meta:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.17
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.17)
+
+  packages/planemo-test-report-schema:
+    dependencies:
+      ajv:
+        specifier: ^8.17.1
+        version: 8.20.0
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.20.0)
     devDependencies:
       '@types/node':
         specifier: ^22.10.0

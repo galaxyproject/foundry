@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
+revised: 2026-05-11
+revision: 3
 ai_generated: true
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
@@ -37,11 +37,11 @@ This note describes Planemo architecture relevant to workflow tests and workflow
 
 | User action | Command | Core behavior |
 |---|---|---|
-| Full workflow test | `planemo test <workflow>` | Finds test definitions, starts or targets Galaxy, stages inputs, invokes workflow, checks assertions, writes reports. |
+| Full workflow test | `planemo test <workflow>` ([[planemo-test]]) | Finds test definitions, starts or targets Galaxy, stages inputs, invokes workflow, checks assertions, writes reports. |
 | Direct run | `planemo run <workflow> <job.yml>` | Runs one workflow/job pair and can download outputs without assertion checks. |
-| Recheck assertions | `planemo workflow_test_on_invocation <tests.yml> <invocation_id>` | Runs test assertions against an existing invocation without rerunning the workflow. |
+| Recheck assertions | `planemo workflow_test_on_invocation <tests.yml> <invocation_id>` ([[planemo-workflow_test_on_invocation]]) | Runs test assertions against an existing invocation without rerunning the workflow. |
 | Track invocation | `planemo workflow_track <invocation_id>` | Polls an existing invocation and displays progress. |
-| Generate test from invocation | `planemo workflow_test_init --from_invocation <id>` | Builds a test template from a completed invocation and its outputs. |
+| Generate test from invocation | `planemo workflow_test_init --from_invocation <id>` ([[planemo-workflow_test_init]]) | Builds a test template from a completed invocation and its outputs. |
 | Generate job template | `planemo workflow_job_init <workflow>` | Creates a job-input template for a workflow. |
 
 Observed code paths live under `~/projects/repositories/planemo/planemo/commands/`, `planemo/engine/`, and `planemo/galaxy/`.

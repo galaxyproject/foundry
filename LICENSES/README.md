@@ -23,3 +23,4 @@ validator (`npm run validate`) errors on:
 | `nf-core-modules.LICENSE` | MIT (Philip Ewels) | nf-core module `meta-schema.json` and subworkflow `yaml-schema.json` from [`nf-core/modules`](https://github.com/nf-core/modules). |
 | `nf-schema.LICENSE` | Apache-2.0 | `parameters_meta_schema.json` from [`nextflow-io/nf-schema`](https://github.com/nextflow-io/nf-schema). |
 | `galaxy-tool-util-ts.LICENSE` | MIT (John Chilton) | Test-format schema from [`@galaxy-tool-util/schema`](https://github.com/jmchilton/galaxy-tool-util-ts). |
+| `planemo.LICENSE` | MIT (Galaxy Contributors) | Planemo `test-report` JSON Schema (and follow-up planemo output schemas) from [`galaxyproject/planemo`](https://github.com/galaxyproject/planemo). |

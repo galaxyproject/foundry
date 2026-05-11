@@ -1,0 +1,59 @@
+{
+  "name": "@galaxy-foundry/planemo-test-report-schema",
+  "version": "0.0.0",
+  "description": "JSON Schema for `planemo test --test_output_json` reports, vendored from upstream planemo, plus an AJV-backed validator and CLI.",
+  "type": "module",
+  "bin": {
+    "validate-planemo-test-report": "dist/bin/validate-planemo-test-report.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema.json": "./dist/test-report.schema.json",
+    "./provenance.json": "./dist/test-report.provenance.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchilton/foundry.git",
+    "directory": "packages/planemo-test-report-schema"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-schema.mjs",
+    "sync:from-planemo": "node scripts/sync-from-planemo.mjs",
+    "prebuild": "pnpm sync",
+    "build": "tsc && node scripts/copy-schema-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "galaxy",
+    "foundry",
+    "planemo",
+    "schema",
+    "json-schema"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
