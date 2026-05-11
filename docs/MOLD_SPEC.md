@@ -120,6 +120,20 @@ Each eval file should include at least one case section:
 
 Use `deterministic` for checks that can be run mechanically, and `llm-judged` for qualitative review criteria.
 
+### What belongs in eval.md
+
+Eval cases earn their place by being **general** and **failure-shaped**. A few principles, learned the hard way:
+
+- **Prefer property checks over prescriptive solutions.** "secondaryFiles surface as an open question or composite-dataset note" is a property; "secondaryFiles must use Galaxy composite datatypes" is a mandate that locks in one answer. Eval should catch silent loss, not pre-decide the fix.
+- **Hallucination guardrails are first-class.** Cases that name a known fabrication source — invented Tool Shed IDs, dropped `pickValue` markers, evaporated `ExpressionTool` steps, fabricated step IDs — are some of the highest-value evals. Frame as "X must appear, or be flagged; it must not silently vanish."
+- **Don't over-constrain handoff fidelity.** "Every input from the upstream brief appears" is brittle: drafting legitimately adds and simplifies. Prefer "must not silently contradict a high-confidence upstream decision" — same intent, leaves room for honest drafting.
+- **For draft/stub Molds, state the validation philosophy explicitly.** A scaffold Mold may want its emitted artifact to either (a) validate clean with TODO sections skipped, or (b) deliberately fail validation/lint on TODO stubs because clean output suggests fabricated values. Same deterministic check, opposite expectation — decide per-Mold and write it down in the case.
+- **Handoff cases close the chain.** One case per Mold that asks "can the next Mold downstream consume this without re-deriving the source?" catches dropped context that property checks miss.
+
+### What doesn't belong
+
+- **Re-statements of the procedural body.** If `index.md` already says "produce X", an eval case "produce X" adds nothing. Eval should target failure modes the body alone won't prevent — usually hallucination, omission, or silent contradiction.
+
 ## Usage Contract
 
 `usage.md` is freeform markdown. No required structure. Suggested rhythm: one H2 per representative scenario, a short prose description, and a code block or transcript excerpt showing the invocation and a representative excerpt of output. No `expectation:` lines — that vocabulary is reserved for `eval.md`.

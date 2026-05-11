@@ -9,6 +9,7 @@
 - `README.md` — what this project is and why.
 - `docs/ARCHITECTURE.md` — directory layout, types, validation pipeline, site rendering. The structural authority.
 - `docs/MOLDS.md` — Mold inventory and bucketing axes.
+- `docs/MOLD_SPEC.md` — Mold authoring contract (frontmatter, references, eval/usage/refinement). Load when authoring or editing a Mold or its `eval.md`.
 - `docs/HARNESS_PIPELINES.md` — pipeline narrative behind `content/pipelines/`.
 - `docs/COMPILATION_PIPELINE.md` — casting design.
 - `docs/CORPUS_INGESTION.md` — IWC grounding; URL-not-mirror principle.
