@@ -24,14 +24,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate content
-        run: npm run validate
-
       - name: Typecheck packages
         run: npm run packages-typecheck
 
       - name: Build packages
         run: npm run packages-build
+
+      # Runs after build because the validator imports
+      # @galaxy-foundry/foundry/meta to enumerate known CLI commands; the
+      # `./meta` subpath only resolves once `dist/` exists.
+      - name: Validate content
+        run: npm run validate
 
       - name: Install site dependencies
         run: npm --prefix site install --no-audit --no-fund

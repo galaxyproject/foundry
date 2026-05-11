@@ -1,6 +1,7 @@
 {
   "name": "@galaxy-foundry/build-cli",
   "version": "0.0.0",
+  "private": true,
   "description": "Build and authoring CLI for Galaxy Workflow Foundry source trees.",
   "type": "module",
   "bin": {
@@ -21,9 +22,6 @@
     "type": "git",
     "url": "git+https://github.com/jmchilton/foundry.git",
     "directory": "packages/build-cli"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "scripts": {
     "build": "tsc",

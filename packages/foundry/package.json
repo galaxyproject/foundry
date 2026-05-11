@@ -11,6 +11,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./meta": {
+      "types": "./dist/meta/index.d.ts",
+      "import": "./dist/meta/index.js"
+    },
     "./schemas/summary-cwl.json": "./dist/schemas/summary-cwl/summary-cwl.schema.json",
     "./schemas/galaxy-tool-discovery.json": "./dist/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json",
     "./schemas/galaxy-tool-summary.json": "./dist/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json",

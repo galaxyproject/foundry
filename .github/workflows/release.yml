@@ -1,0 +1,71 @@
+name: Release
+
+# Changesets-driven flow:
+#   1. PRs land with `.changeset/*.md` entries describing their package impact.
+#   2. This workflow runs on `main`. If pending changesets exist, it opens (or
+#      updates) a "Version Packages" PR that bumps package.json versions and
+#      generates CHANGELOG.md entries.
+#   3. Merging the Version Packages PR triggers this workflow again with the
+#      versions already bumped and no remaining changesets. The publish step
+#      then ships the changed packages to npm with provenance.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # npm provenance
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck packages
+        run: npm run packages-typecheck
+
+      - name: Build packages
+        run: npm run packages-build
+
+      - name: Test packages
+        run: npm run packages-test
+
+      - name: Smoke-test package tarballs
+        run: npm run smoke:packages
+
+      - name: Create release PR or publish
+        uses: changesets/action@v1
+        with:
+          # When pending changesets exist on main, opens "Version Packages" PR.
+          # When that PR merges (no remaining changesets), `publish` ships
+          # the bumped packages to npm and creates per-package git tags.
+          # `pnpm -r sync` regenerates the foundry meta's version.generated.ts
+          # so the Version Packages PR commits a consistent meta version too.
+          version: pnpm changeset version && pnpm -r sync
+          publish: pnpm changeset publish
+          title: "chore(release): version packages"
+          commit: "chore(release): version packages"
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
