@@ -358,13 +358,13 @@ allOf:
     then:
       required: [title, source, target, source_pattern_kind, implemented_by_patterns]
 
-  # cli-command requires tool + command
+  # cli-command requires tool + command + package/upstream for metadata-backed rendering
   - if:
       properties:
         type: { const: cli-command }
       required: [type]
     then:
-      required: [tool, command]
+      required: [tool, command, package, upstream]
 
   # cli-tool requires tool + install metadata
   - if:

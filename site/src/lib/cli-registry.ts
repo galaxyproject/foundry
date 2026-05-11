@@ -98,7 +98,7 @@ export async function loadCliRegistry(): Promise<Record<string, CliRegistryEntry
         : {}),
     };
   } catch {
-    // Published 1.1.0 lacks the meta subpath; keep raw markdown pages rendering.
+    // Defensive: meta subpath ships from @galaxy-tool-util/cli >=1.2.0; fall back to raw markdown if import fails.
     return {};
   }
 }
