@@ -6,9 +6,9 @@
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 3,
     "content_hash": "17349c178341419cbf0a42e1ae1ccb9408c2c4d6f722d2c2b4122a2ca3b375db",
-    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
+    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
   },
-  "cast_at": "2026-05-10T22:31:07.056Z",
+  "cast_at": "2026-05-11T07:25:45.477Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -68,14 +68,14 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
-      "src": "package://@galaxy-foundry/summary-nextflow-schema#summaryNextflowSchema",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
       "dst": "references/schemas/summary-nextflow.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.",
-      "src_hash": "3e9acdf91ede8aa37e8403be7c1bbc92c465889f37ec7133d2e8a64599b08c16",
-      "dst_hash": "3e9acdf91ede8aa37e8403be7c1bbc92c465889f37ec7133d2e8a64599b08c16",
+      "src_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
+      "dst_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
       "source": "deterministic"
     }
   ],

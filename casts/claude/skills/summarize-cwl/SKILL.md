@@ -31,17 +31,17 @@ Follow the procedure below and use the artifact/reference sections as the runtim
   Check: `cwltool --version`.
   Docs: https://cwltool.readthedocs.io/
   Bundled reference: `references/cli/cwltool.md`.
-- **`validate-summary-cwl`** (validate-summary-cwl). `npm install -g @galaxy-foundry/summary-cwl-schema`.
-  Ephemeral run: `npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl`.
-  Check: `validate-summary-cwl --help`.
-  Docs: https://github.com/jmchilton/foundry/blob/main/packages/summary-cwl-schema/README.md
-  Bundled reference: `references/cli/validate-summary-cwl.md`.
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
+  Check: `foundry --help`.
+  Docs: https://github.com/jmchilton/foundry/blob/main/packages/foundry/README.md
+  Bundled reference: `references/cli/foundry.md`.
 
 ## Load Upfront
 
 - `references/cli/cwl-utils.md`: CLI tool reference copied verbatim into the bundle. Normalize the CWL workflow (cwl-normalizer) into a single JSON document for extraction.
 - `references/cli/cwltool.md`: CLI tool reference copied verbatim into the bundle. Validate the CWL entrypoint before normalization.
-- `references/cli/validate-summary-cwl.md`: CLI tool reference copied verbatim into the bundle. Schema-check summary-cwl.json before returning it from the skill.
+- `references/cli/foundry.md`: CLI tool reference copied verbatim into the bundle. Schema-check summary-cwl.json before returning it from the skill.
 - `references/notes/component-cwl-workflow-anatomy.md`: Research note copied verbatim into the bundle. Use CWL's native workflow, step, tool, scatter, conditional, and requirement structure without copying the heavier Nextflow inference pipeline.
 - `references/schemas/summary-cwl.schema.json`: Schema file copied verbatim into the bundle. Validate the emitted CWL summary JSON and provide downstream consumers the output contract.
 
@@ -51,7 +51,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-cwl.json` before returning it: run `validate-summary-cwl summary-cwl.json` from `@galaxy-foundry/summary-cwl-schema`. If the command is not on PATH, run `npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
+- Validate `summary-cwl.json` before returning it: run `foundry summary-cwl.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
 
 ## Procedure
 
@@ -170,7 +170,7 @@ A single JSON document conforming to summary-cwl. Sketch shape:
 4. Extract every referenced `CommandLineTool` command surface: `baseCommand`, `arguments`, input/output bindings, output globs, `DockerRequirement`, and `SoftwareRequirement`.
 5. Build a simple graph from workflow inputs to step inputs, step outputs to step inputs, and step outputs to workflow outputs. Add `via` markers for `scatter`, `linkMerge`, `pickValue`, `valueFrom`, and `secondaryFiles`.
 6. Record test/job files only when supplied or discoverable by convention. Do not infer expected outputs from command names.
-7. Validate the assembled object with `validate-summary-cwl summary-cwl.json` before returning it.
+7. Validate the assembled object with `foundry validate-summary-cwl summary-cwl.json` before returning it.
 
 ### Caveats Baked Into The Procedure
 

@@ -59,7 +59,7 @@ references:
     purpose: "Normalize the CWL workflow (cwl-normalizer) into a single JSON document for extraction."
     verification: "Run summarize-cwl against the cross-document-run-refs eval case; documents.normalized_path must be populated and tools[] must contain the referenced CommandLineTools."
   - kind: cli-tool
-    ref: "[[validate-summary-cwl]]"
+    ref: "[[foundry]]"
     used_at: runtime
     load: upfront
     mode: verbatim
@@ -187,7 +187,7 @@ A single JSON document conforming to [[summary-cwl]]. Sketch shape:
 4. Extract every referenced `CommandLineTool` command surface: `baseCommand`, `arguments`, input/output bindings, output globs, `DockerRequirement`, and `SoftwareRequirement`.
 5. Build a simple graph from workflow inputs to step inputs, step outputs to step inputs, and step outputs to workflow outputs. Add `via` markers for `scatter`, `linkMerge`, `pickValue`, `valueFrom`, and `secondaryFiles`.
 6. Record test/job files only when supplied or discoverable by convention. Do not infer expected outputs from command names.
-7. Validate the assembled object with `validate-summary-cwl summary-cwl.json` before returning it.
+7. Validate the assembled object with `foundry validate-summary-cwl summary-cwl.json` before returning it.
 
 ## Caveats Baked Into The Procedure
 

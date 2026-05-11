@@ -4,8 +4,7 @@
   "description": "Build and authoring CLI for Galaxy Workflow Foundry source trees.",
   "type": "module",
   "bin": {
-    "foundry-build": "dist/bin/foundry-build.js",
-    "foundry-validate": "dist/bin/foundry-validate.js"
+    "foundry-build": "dist/bin/foundry-build.js"
   },
   "exports": {
     ".": {

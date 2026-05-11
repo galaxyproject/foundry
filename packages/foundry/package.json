@@ -1,0 +1,64 @@
+{
+  "name": "@galaxy-foundry/foundry",
+  "version": "0.0.0",
+  "description": "Galaxy Workflow Foundry CLI — produce and validate Mold IO artifacts.",
+  "type": "module",
+  "bin": {
+    "foundry": "dist/bin/foundry.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schemas/summary-cwl.json": "./dist/schemas/summary-cwl/summary-cwl.schema.json",
+    "./schemas/galaxy-tool-discovery.json": "./dist/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json",
+    "./schemas/galaxy-tool-summary.json": "./dist/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json",
+    "./schemas/tests-format.json": "./dist/schemas/tests-format/tests.schema.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchilton/foundry.git",
+    "directory": "packages/foundry"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-schema.mjs",
+    "prebuild": "pnpm sync",
+    "build": "tsc && node scripts/copy-schema-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "galaxy",
+    "foundry",
+    "cli",
+    "validate",
+    "json-schema"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@galaxy-foundry/summarize-nextflow": "workspace:*",
+    "@galaxy-tool-util/schema": "^1.2.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "commander": "^12.1.0",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

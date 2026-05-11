@@ -2,7 +2,7 @@
 type: schema
 name: nf-core-module-meta
 title: nf-core module meta.yml schema
-package: "@galaxy-foundry/summary-nextflow-schema"
+package: "@galaxy-foundry/summarize-nextflow"
 package_export: "nfCoreModuleMetaSchema"
 upstream: "https://github.com/nf-core/modules/blob/d8529909206a06d9ec73703ea07a533a511bb786/modules/meta-schema.json"
 license: MIT

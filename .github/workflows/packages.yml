@@ -63,8 +63,8 @@ jobs:
       - name: Test packages
         run: npm run packages-test
 
-      - name: Smoke-test schema package tarball
-        run: npm run smoke:summary-nextflow-schema
+      - name: Smoke-test package tarballs
+        run: npm run smoke:packages
 
       - name: Check package formatting
         run: npm run packages-format

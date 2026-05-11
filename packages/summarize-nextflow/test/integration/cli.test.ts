@@ -14,7 +14,7 @@ import {
 import os from "node:os";
 import { isAbsolute, join, relative as relativePath, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { validateSummary } from "@galaxy-foundry/summary-nextflow-schema";
+import { validateSummary } from "../../src/index.js";
 
 const PKG_ROOT = resolve(__dirname, "..", "..");
 const FOUNDRY_ROOT = resolve(PKG_ROOT, "..", "..");

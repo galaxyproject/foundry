@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://galaxyproject.org/foundry/schemas/summary-nextflow.schema.json",
-  "$comment": "Canonical source: packages/summary-nextflow-schema/src/summary-nextflow.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[summary-nextflow]] wiki-links; the cast pipeline imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.",
+  "$comment": "Canonical source: packages/summarize-nextflow/src/schema/summary-nextflow.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[summary-nextflow]] wiki-links; the cast pipeline imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.",
   "title": "Nextflow Pipeline Summary",
   "description": "Structured per-source summary emitted by the summarize-nextflow Mold.\n\nPer-source schema by design — paper, Nextflow, and CWL each have their own summary shape; downstream Molds (data flow, templates, tool wrappers) consume any source's summary and handle the polymorphism.\n\nField names mirror gxy-sketches' SketchSource / ToolSpec / TestDataRef / ExpectedOutputRef where parity exists; see content/research/gxy-sketches-alignment.md.",
   "$ref": "#/$defs/Summary",
@@ -20,6 +20,8 @@
         "processes",
         "subworkflows",
         "workflow",
+        "reference_assets",
+        "reference_rebuilds",
         "test_fixtures",
         "nf_tests"
       ],
@@ -66,6 +68,20 @@
         },
         "workflow": {
           "$ref": "#/$defs/Workflow"
+        },
+        "reference_assets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ReferenceAsset"
+          },
+          "description": "Curated, target-agnostic view of reference-data inputs the source pipeline consumes (FASTAs, indexes, dictionaries, annotation tables, …). Each entry is a foreign-key projection onto `params[]` plus source-side metadata (asset kind, format hint, source expression, schema group, callers). Empty array when no reference assets are detected. Downstream Molds (e.g. nextflow-summary-to-galaxy-reference-data) classify these against Galaxy translation rungs; classification decisions are not encoded here."
+        },
+        "reference_rebuilds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ReferenceRebuildRule"
+          },
+          "description": "Compute-if-missing rebuild branches detected in workflow/subworkflow bodies. Each entry binds an asset param to the guard and builder process that recomputes it when absent. Empty when no rebuild idioms are found. Source evidence only — Galaxy in-tool-rebuild decisions live downstream."
         },
         "test_fixtures": {
           "$ref": "#/$defs/TestFixtures",
@@ -200,6 +216,34 @@
             "null"
           ],
           "description": "Font Awesome icon class from the parent `$defs` section's `fa_icon` (e.g. `fas fa-terminal`). Optional UI hint; null when undeclared."
+        },
+        "source_kind": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "nextflow_schema",
+            "params_block",
+            "getGenomeAttribute",
+            "computed",
+            null
+          ],
+          "description": "How this param entry was derived. `nextflow_schema`: declared in `nextflow_schema.json`. `params_block`: declared (or defaulted) in `nextflow.config`'s `params { ... }` block. `getGenomeAttribute`: synthesized from `params.X = getGenomeAttribute('X')` assignments in `nextflow.config` (nf-core key-expanded bundle pattern). `computed`: derived from another non-getGenomeAttribute expression. Null when provenance was not classified."
+        },
+        "source_expression": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Verbatim right-hand-side expression when the param was assigned in Groovy (e.g. `getGenomeAttribute('fasta_fai')`). Null when the param comes from a JSON Schema entry only."
+        },
+        "source_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative path of the source file where the assignment lives (e.g. `nextflow.config`, `conf/igenomes.config`). Null when undefined or when the param comes only from `nextflow_schema.json`."
         }
       }
     },
@@ -702,7 +746,8 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/ChannelIO"
-          }
+          },
+          "description": "Parsed entries of the subworkflow's `take:` block. `name` is the take name, `description` carries any adjacent `// ...` comment, `shape` carries the verbatim source line."
         },
         "outputs": {
           "type": "array",
@@ -710,12 +755,77 @@
             "$ref": "#/$defs/ChannelIO"
           }
         },
+        "invocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SubworkflowInvocation"
+          },
+          "description": "Call-sites where this subworkflow was invoked. Each entry records the calling workflow/subworkflow, the verbatim positional arguments, and a per-argument binding onto this subworkflow's `inputs[].name` (take names). Drives reference-asset attribution (`reference_assets[].used_by`) without re-parsing call sites. Empty when uncalled or when the call could not be positionally aligned."
+        },
         "tests": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/NfTest"
           },
           "description": "Subworkflow-scoped nf-test files under the subworkflow's `tests/` directory. Empty when absent."
+        }
+      }
+    },
+    "SubworkflowInvocation": {
+      "title": "SubworkflowInvocation",
+      "description": "One call-site of a subworkflow, with positional arguments bound to its `take:` names.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caller",
+        "arguments",
+        "bindings"
+      ],
+      "properties": {
+        "caller": {
+          "type": "string",
+          "description": "Name of the calling workflow or subworkflow."
+        },
+        "caller_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative path of the file the caller is defined in. Null when not resolvable."
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Verbatim positional argument expressions in source order (e.g. `params.fasta`, `PREPARE_GENOME.out.fai`)."
+        },
+        "bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InvocationBinding"
+          },
+          "description": "Per-argument binding onto the callee's `inputs[].name` (take names), in source order. Length matches `arguments[]` when the call positionally aligns to the callee's take block; shorter when only a prefix aligns."
+        }
+      }
+    },
+    "InvocationBinding": {
+      "title": "InvocationBinding",
+      "description": "Binding of one positional argument to a callee `take:` name.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "take",
+        "argument"
+      ],
+      "properties": {
+        "take": {
+          "type": "string",
+          "description": "Callee `take:` name (FK into the callee subworkflow's `inputs[].name`)."
+        },
+        "argument": {
+          "type": "string",
+          "description": "Verbatim caller-side argument expression."
         }
       }
     },
@@ -1192,6 +1302,165 @@
           "type": "array",
           "items": {},
           "description": "Non-file snapshot values preserved verbatim for consumers that need versions, counts, or scalar tuple emissions."
+        }
+      }
+    },
+    "Evidence": {
+      "title": "Evidence",
+      "description": "Shared provenance block for source-detected facts. `source_path` localizes the finding; `confidence` is a coarse self-assessment; `evidence[]` carries free-form snippets (matched lines, normalized expressions, detector notes). Reused by ReferenceAsset and ReferenceRebuildRule.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_path",
+        "confidence",
+        "evidence"
+      ],
+      "properties": {
+        "source_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative path of the source file where the finding was detected (e.g. `subworkflows/local/prepare_genome/main.nf`, `nextflow.config`). Null when the finding spans files or cannot be localized."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "Detector self-assessment. `high`: all signals match the expected idiom; `medium`: some signals match but the guard or builder is partial / mixes non-param locals; `low`: heuristic match, downstream should treat as a hint."
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Free-form evidence snippets (matched source lines, normalized expressions, detector notes). Empty when none."
+        }
+      }
+    },
+    "ReferenceAsset": {
+      "title": "ReferenceAsset",
+      "description": "Curated source-side view of one reference-data input the pipeline consumes. A foreign-key projection onto `params[].name` plus the metadata downstream classification Molds need. Target-agnostic: no Galaxy translation decisions are encoded here.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "param",
+        "asset_kind",
+        "required",
+        "used_by",
+        "evidence"
+      ],
+      "properties": {
+        "param": {
+          "type": "string",
+          "description": "FK into `params[].name`."
+        },
+        "asset_kind": {
+          "type": "string",
+          "description": "Coarse asset classification (e.g. `fasta`, `fasta_index`, `sequence_dictionary`, `bwa_index`, `bwamem2_index`, `tabix_index`, `gtf`, `gff`, `bed`, `vcf`, `database`, `other`). Free-form string; downstream Molds choose how to map onto target datatypes."
+        },
+        "format_hint": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Format hint, often the nf-schema `format` keyword (`file-path`, `directory-path`, `path`, `file-path-pattern`) or a domain hint like `fai`, `dict`. Null when undetermined."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "True when the source pipeline treats this asset as required (no compute-if-missing branch, no optional guard). When false, see `reference_rebuilds[]` for any rebuild branch covering this param."
+        },
+        "source_kind": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "nextflow_schema",
+            "params_block",
+            "getGenomeAttribute",
+            "computed",
+            null
+          ],
+          "description": "Mirrors `params[<this>].source_kind`. Duplicated here so reference-data consumers don't have to dereference."
+        },
+        "source_expression": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Mirrors `params[<this>].source_expression`. Duplicated for the same reason."
+        },
+        "schema_group": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Mirrors `params[<this>].schema_group`. Useful for grouping (`Reference genome options`)."
+        },
+        "used_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Names of processes / subworkflows that receive this param as an argument (via direct invocation binding or channel construction). Empty when no caller could be attributed."
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      }
+    },
+    "ReferenceRebuildRule": {
+      "title": "ReferenceRebuildRule",
+      "description": "One compute-if-missing rebuild branch detected in a workflow or subworkflow body. Binds an asset param to the guard expression and builder process that produces it when absent. Source evidence only; in-tool-rebuild decisions live downstream.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_param",
+        "guard",
+        "builder",
+        "builder_outputs",
+        "evidence"
+      ],
+      "properties": {
+        "asset_param": {
+          "type": "string",
+          "description": "FK into `params[].name` — the asset this branch reconstitutes when missing."
+        },
+        "guard": {
+          "type": "string",
+          "description": "Verbatim guard expression, e.g. `!fasta_fai_in && step != \"annotate\"`."
+        },
+        "guard_params": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Param names referenced by the guard. Empty when the guard binds only non-param locals."
+        },
+        "builder": {
+          "type": "string",
+          "description": "Builder process or subworkflow name invoked inside the branch (e.g. `SAMTOOLS_FAIDX`, `BWA_INDEX`)."
+        },
+        "builder_outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Output channel names from the builder that are assigned to the asset (e.g. `fai`, `dict`)."
+        },
+        "fallback_for": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Name of the `<asset>_in`-style param that, when present, supplies the asset directly and skips the rebuild. Null when no such pairing was detected."
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
         }
       }
     },

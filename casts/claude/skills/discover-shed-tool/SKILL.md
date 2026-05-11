@@ -39,7 +39,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `galaxy-tool-pin.json` before returning it: run `validate-galaxy-tool-discovery galaxy-tool-pin.json` from `@galaxy-foundry/galaxy-tool-discovery-schema`. If the command is not on PATH, run `npx --package @galaxy-foundry/galaxy-tool-discovery-schema validate-galaxy-tool-discovery galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
+- Validate `galaxy-tool-pin.json` before returning it: run `foundry galaxy-tool-pin.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
 
 ## Procedure
 

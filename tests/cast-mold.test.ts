@@ -125,7 +125,7 @@ describe("required-tools manifest (summarize-cwl integration)", () => {
     const slugs = manifest.map((t) => t.tool).sort();
     expect(slugs).toContain("cwltool");
     expect(slugs).toContain("cwl-utils");
-    expect(slugs).toContain("validate-summary-cwl");
+    expect(slugs).toContain("foundry");
     for (const entry of manifest) {
       expect(entry.invoke.length).toBeGreaterThan(0);
       expect(["referenced", "implied"]).toContain(entry.source);
@@ -138,7 +138,7 @@ describe("required-tools manifest (summarize-cwl integration)", () => {
     expect(skill).toContain("## Required Tools");
     expect(skill).toContain("uv tool install cwltool");
     expect(skill).toContain("uvx --from cwl-utils cwl-normalizer");
-    expect(skill).toContain("npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl");
+    expect(skill).toContain("npx --package @galaxy-foundry/foundry foundry");
   });
 });
 

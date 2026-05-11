@@ -284,6 +284,10 @@ properties:
     type: string
     pattern: "^[A-Za-z0-9._-]+$"
     description: "Optional package bin that validates files conforming to this schema. The validator checks it exists in the schema package's package.json bin map."
+  validator_subcommand:
+    type: string
+    pattern: "^[A-Za-z0-9._-]+$"
+    description: "Optional subcommand to invoke under `validator_bin` (e.g. `validate-summary-nextflow` under bin `foundry`). cast-mold prepends it to the spawn args."
 
   # --- Prompt fields ---
   prompt_file:

@@ -6,9 +6,9 @@
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 4,
     "content_hash": "11f14feec73b46215d5aafcd54b2ebae6dfad99538a60599a28a1e329a1f36d8",
-    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
+    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
   },
-  "cast_at": "2026-05-10T22:31:08.478Z",
+  "cast_at": "2026-05-11T07:43:44.707Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -103,15 +103,15 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-discovery]]",
-      "src": "package://@galaxy-foundry/galaxy-tool-discovery-schema#galaxyToolDiscoverySchema",
+      "src": "package://@galaxy-foundry/foundry#galaxyToolDiscoverySchema",
       "dst": "references/schemas/galaxy-tool-discovery.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.",
       "verification": "Run discover-shed-tool against known FastQC, ambiguous BWA-style, and no-hit queries and validate each emitted recommendation.",
-      "src_hash": "accd5ab7700937527bfefc54ab5de58a3171874c7810bef59c93d8d5e1847152",
-      "dst_hash": "accd5ab7700937527bfefc54ab5de58a3171874c7810bef59c93d8d5e1847152",
+      "src_hash": "8b02cd8f0583c6f4d25ed27a7a16ed3bb97bbec533f33806e81c45cf7ce1152d",
+      "dst_hash": "8b02cd8f0583c6f4d25ed27a7a16ed3bb97bbec533f33806e81c45cf7ce1152d",
       "source": "deterministic"
     }
   ],

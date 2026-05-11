@@ -8,7 +8,7 @@ tags:
 status: draft
 created: 2026-05-10
 revised: 2026-05-10
-revision: 2
+revision: 3
 ai_generated: true
 related_notes:
   - "[[summary-nextflow]]"
@@ -72,7 +72,7 @@ params {
 }
 ```
 
-Examples: `nf-core/atacseq`, `nf-core/sarek`, `nf-core/rnaseq` (with `--genome` set). Detection: `nextflow.config` includes `conf/igenomes.config` or defines `getGenomeAttribute`; `params.genome` is declared. The derived params do **not** appear in `nextflow_schema.json` and won't show up in `summarize-nextflow`'s `params[]` unless the resolver special-cases them (today it captures them with a description noting the dynamic source — see `summarize-nextflow` index §3). The Galaxy workflow surface starts at the resolved per-asset paths, not the key.
+Examples: `nf-core/atacseq`, `nf-core/sarek`, `nf-core/rnaseq` (with `--genome` set). Detection: any `params[]` entry with `source_kind: "getGenomeAttribute"` plus the verbatim `source_expression` (e.g. `getGenomeAttribute('fasta_fai')`) and `source_path` pointing at `conf/igenomes.config` or `conf/genomes.config`. The resolver scans these files explicitly (jmchilton/foundry#229); the derived params surface in `params[]` and `reference_assets[]` even when absent from `nextflow_schema.json`. The Galaxy workflow surface starts at the resolved per-asset paths, not the key.
 
 ## Indexes with rebuild fallback (compute-if-missing)
 
@@ -85,7 +85,7 @@ if (!params.fasta_fai) {
 }
 ```
 
-Examples: `nf-core/rnaseq` (STAR / salmon / hisat2 indexes), `nf-core/sarek` (BWA / dict / fai). Detection: source pipeline has `!params.<asset>` guards around index-building processes, often inside a `PREPARE_GENOME`-style subworkflow. Load-bearing — most users never supply pre-built indexes — but invisible to a user reading `nextflow_schema.json` because the index params just look optional. This pattern usually overlays *single asset*, *coordinated bundle*, or *key-expanded bundle*; it's an aspect, not a parallel kind.
+Examples: `nf-core/rnaseq` (STAR / salmon / hisat2 indexes), `nf-core/sarek` (BWA / dict / fai). Detection: any non-empty `reference_rebuilds[]` entry on the summary — each binds an `asset_param` to a `builder` process plus the verbatim `guard`, `guard_params`, `builder_outputs`, and `fallback_for` take-name. The negated-guard idiom (`if (!<x>_in) { BUILDER(...); <asset> = BUILDER.out.<chan> }`) used by Sarek is fully detected; the positive-form idiom used by `nf-core/rnaseq`'s `PREPARE_GENOME` (`if (<asset>) { unpack } else if (fasta_provided) { ch_<asset> = BUILDER(args).<chan> }`) is a known gap (see jmchilton/foundry#229 follow-ups) — for those pipelines `reference_rebuilds[]` is empty and the asset must be flagged *rebuild-unverified*. Load-bearing — most users never supply pre-built indexes — but invisible to a user reading `nextflow_schema.json` because the index params just look optional. This pattern usually overlays *single asset*, *coordinated bundle*, or *key-expanded bundle*; it's an aspect, not a parallel kind.
 
 ## Multi-DB pick-list
 

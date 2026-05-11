@@ -5,10 +5,10 @@
     "name": "summarize-cwl",
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
-    "content_hash": "6321fe495f34e8f01fe69ffdd5f835d6e8cf6827d5a69414694843f0d5af2fc1",
-    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
+    "content_hash": "fc96f678cb072237347f4990644a86c47d84f4fff303160fbb4ae3a92a55e1c5",
+    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
   },
-  "cast_at": "2026-05-10T22:31:13.705Z",
+  "cast_at": "2026-05-11T14:24:12.123Z",
   "refs": [
     {
       "kind": "cli-tool",
@@ -43,15 +43,15 @@
     {
       "kind": "cli-tool",
       "mode": "verbatim",
-      "ref": "[[validate-summary-cwl]]",
-      "src": "content/cli/validate-summary-cwl/index.md",
-      "dst": "references/cli/validate-summary-cwl.md",
+      "ref": "[[foundry]]",
+      "src": "content/cli/foundry/index.md",
+      "dst": "references/cli/foundry.md",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-cwl.json before returning it from the skill.",
-      "src_hash": "8a6fc1eec714eb45b2160eebab145a6da348682d3cafb2fdf9de81124f396e80",
-      "dst_hash": "8a6fc1eec714eb45b2160eebab145a6da348682d3cafb2fdf9de81124f396e80",
+      "src_hash": "10511e9fde995a675800000f4aff9ba6734c35f08cbb11311a7ce12167044851",
+      "dst_hash": "10511e9fde995a675800000f4aff9ba6734c35f08cbb11311a7ce12167044851",
       "source": "deterministic"
     },
     {
@@ -88,14 +88,14 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-cwl]]",
-      "src": "package://@galaxy-foundry/summary-cwl-schema#summaryCwlSchema",
+      "src": "package://@galaxy-foundry/foundry#summaryCwlSchema",
       "dst": "references/schemas/summary-cwl.schema.json",
       "used_at": "both",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted CWL summary JSON and provide downstream consumers the output contract.",
-      "src_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
-      "dst_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "src_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
+      "dst_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
       "source": "deterministic"
     }
   ],

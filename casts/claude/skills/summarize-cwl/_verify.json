@@ -7,8 +7,9 @@
       "kind": "json",
       "default_filename": "summary-cwl.json",
       "schema": "[[summary-cwl]]",
-      "validator_bin": "validate-summary-cwl",
+      "validator_bin": "foundry",
       "args": [
+        "validate-summary-cwl",
         "{artifact_path}"
       ]
     }
