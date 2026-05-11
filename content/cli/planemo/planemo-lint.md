@@ -54,16 +54,18 @@ planemo lint [OPTIONS] TOOL_PATH
 
 <!-- Hand-edited. Preserved across `tsx scripts/sync-planemo-cli.ts`. -->
 
-_Describe stdout/stderr shape, exit-code contract, and any JSON-report flags here._
+Console output is human-oriented; use the process exit status as the pass/fail gate.
 
 ## Examples
 
 <!-- Hand-edited. Preserved across `tsx scripts/sync-planemo-cli.ts`. -->
 
-_Add canonical invocations here._
+```sh
+planemo lint <tool_dir>
+```
 
 ## Gotchas
 
 <!-- Hand-edited. Preserved across `tsx scripts/sync-planemo-cli.ts`. -->
 
-_Document non-obvious behavior and common failure modes here._
+No Foundry-specific gotchas recorded yet.
