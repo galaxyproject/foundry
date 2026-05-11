@@ -1,0 +1,250 @@
+{
+  "summary_version": "1",
+  "source": {
+    "ecosystem": "cwl",
+    "workflow": "1st-workflow",
+    "url": "workflow-fixtures/cwl/common-workflow-language__user_guide/src/_includes/cwl/workflows/1st-workflow.cwl",
+    "version": "546b3844c9e6ea0b2c4700a876e5f96c4de15480",
+    "license": null,
+    "slug": "cwl-userguide-1st-workflow",
+    "cwl_version": "v1.2",
+    "entrypoint": "1st-workflow.cwl"
+  },
+  "documents": {
+    "entrypoint": "1st-workflow.cwl",
+    "normalized_path": null,
+    "validation": {
+      "command": "cwltool --validate 1st-workflow.cwl",
+      "status": "not-run",
+      "diagnostics": ["cwltool not installed in emulation environment"]
+    }
+  },
+  "workflow_inputs": [
+    {
+      "id": "tarball",
+      "label": null,
+      "type": "File",
+      "optional": false,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "name_of_file_to_extract",
+      "label": null,
+      "type": "string",
+      "optional": false,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    }
+  ],
+  "workflow_outputs": [
+    {
+      "id": "compiled_class",
+      "label": null,
+      "type": "File",
+      "output_source": ["compile/classfile"],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    }
+  ],
+  "steps": [
+    {
+      "id": "untar",
+      "run": "tar-param.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "tarfile",
+          "source": ["tarball"],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "extractfile",
+          "source": ["name_of_file_to_extract"],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": ["extracted_file"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "compile",
+      "run": "arguments.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "src",
+          "source": ["untar/extracted_file"],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": ["classfile"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    }
+  ],
+  "tools": [
+    {
+      "id": "tar-param.cwl",
+      "label": null,
+      "base_command": ["tar", "--extract"],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "tarfile",
+          "type": "File",
+          "input_binding": {
+            "position": null,
+            "prefix": "--file",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "extractfile",
+          "type": "string",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "extracted_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(inputs.extractfile)",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "arguments.cwl",
+      "label": "Example trivial wrapper for Java 9 compiler",
+      "base_command": ["javac"],
+      "arguments": ["-d", "$(runtime.outdir)"],
+      "inputs": [
+        {
+          "id": "src",
+          "type": "File",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "classfile",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "*.class",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [],
+      "hints": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "openjdk:9.0.1-11-slim",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": { "dockerPull": "openjdk:9.0.1-11-slim" }
+        }
+      ]
+    }
+  ],
+  "graph": {
+    "nodes": [
+      { "id": "tarball", "kind": "workflow-input", "label": null },
+      { "id": "name_of_file_to_extract", "kind": "workflow-input", "label": null },
+      { "id": "untar", "kind": "step", "label": null },
+      { "id": "compile", "kind": "step", "label": null },
+      { "id": "compiled_class", "kind": "workflow-output", "label": null }
+    ],
+    "edges": [
+      { "from": "tarball", "to": "untar/tarfile", "via": [] },
+      { "from": "name_of_file_to_extract", "to": "untar/extractfile", "via": [] },
+      { "from": "untar/extracted_file", "to": "compile/src", "via": [] },
+      { "from": "compile/classfile", "to": "compiled_class", "via": [] }
+    ]
+  },
+  "tests": [
+    {
+      "name": "1st-workflow-job",
+      "job_path": "1st-workflow-job.yml",
+      "expected_outputs": [],
+      "provenance": "Sibling job file 1st-workflow-job.yml in fixture; binds tarball=hello.tar and name_of_file_to_extract=Hello.java. No expected-outputs manifest in the fixture."
+    }
+  ],
+  "warnings": [
+    {
+      "code": "validation-not-run",
+      "message": "cwltool unavailable in emulation environment; structural extraction performed by hand-walking the YAML.",
+      "path": "1st-workflow.cwl"
+    },
+    {
+      "code": "expression-preserved",
+      "message": "tar-param.cwl extracted_file glob uses $(inputs.extractfile); preserved verbatim, not evaluated.",
+      "path": "tar-param.cwl#extracted_file"
+    },
+    {
+      "code": "expression-preserved",
+      "message": "arguments.cwl uses $(runtime.outdir) in arguments; preserved verbatim.",
+      "path": "arguments.cwl#arguments"
+    }
+  ]
+}

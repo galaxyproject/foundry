@@ -1,0 +1,96 @@
+class: GalaxyWorkflow
+name: cwl-userguide-1st-workflow
+doc: |
+  Draft gxformat2 skeleton for the CWL User Guide 1st-workflow example
+  (tar member extraction → javac compile). Translated from
+  workflow-fixtures/cwl/common-workflow-language__user_guide @
+  546b3844c9e6ea0b2c4700a876e5f96c4de15480.
+
+  Topology is fully resolved. Both steps defer the wrapper choice
+  (`tool_id: TODO`) and carry _plan_* fields for the per-step
+  implementation Mold. iwc-comparison-notes.md returned "no nearest
+  exemplar" — both steps will most likely flow through
+  author-galaxy-tool-wrapper rather than discover-shed-tool.
+
+inputs:
+  tarball:
+    type: data
+    format: tar
+    label: Tarball to extract
+  name_of_file_to_extract:
+    type: text
+    label: Name of file to extract
+
+outputs:
+  compiled_class:
+    label: Compiled .class file
+    outputSource: compile/TODO_classfile
+
+steps:
+  untar:
+    label: Extract a named member from a tar archive
+    tool_id: TODO
+    in:
+      TODO_tarfile: tarball
+      TODO_extractfile: name_of_file_to_extract
+    out:
+      - id: TODO_extracted_file
+    _plan_state: |
+      Single-member extraction: `tar --extract --file <tarball> <member-name>`.
+      The user-supplied `name_of_file_to_extract` becomes the positional
+      member-name argument; the file is the only thing extracted.
+      No compression flag in source CWL (raw tar).
+    _plan_context: |
+      Source CWL: tar-param.cwl (CommandLineTool, cwlVersion v1.2).
+        baseCommand: [tar, --extract]
+        inputs.tarfile        -> --file <File>
+        inputs.extractfile    -> positional (position 1)
+        outputs.extracted_file -> glob: $(inputs.extractfile)
+      No DockerRequirement / SoftwareRequirement declared (depends on
+      host tar). Galaxy wrapper picks: prefer member-selecting archive
+      tools if any exist in Tool Shed; otherwise author a custom
+      wrapper that invokes `tar --extract --file ... <name>` and
+      promotes the single named file as the output.
+    _plan_in: |
+      TODO_tarfile: tar archive dataset (Galaxy datatype `tar`).
+        Likely wrapper port name: `input` / `archive` / `tarball`.
+      TODO_extractfile: text parameter (name to extract).
+        Likely wrapper port name: `member` / `name` / `extract_file`.
+    _plan_out: |
+      TODO_extracted_file: single extracted file. Downstream `compile`
+      step consumes it as a `.java` source file, so the wrapper must
+      preserve / let-the-user-pin a datatype that downstream `javac`
+      can accept (typically `txt` or a Java-source datatype).
+
+  compile:
+    label: Compile a Java source file with javac
+    tool_id: TODO
+    in:
+      TODO_src: untar/TODO_extracted_file
+    out:
+      - id: TODO_classfile
+    _plan_state: |
+      Compile a single `.java` source file with `javac`, writing the
+      `.class` artifact into the tool's working directory.
+      Source command: `javac -d <outdir> <src>`.
+    _plan_context: |
+      Source CWL: arguments.cwl (CommandLineTool, cwlVersion v1.2).
+        baseCommand: javac
+        arguments:   ["-d", $(runtime.outdir)]
+        hints.DockerRequirement.dockerPull: openjdk:9.0.1-11-slim
+        inputs.src    -> positional (position 1)
+        outputs.classfile -> glob: "*.class"
+      Almost certainly no existing Galaxy Tool Shed wrapper — javac is
+      outside IWC's bioinformatics scope (iwc-comparison-notes verdict:
+      no nearest exemplar). Route to author-galaxy-tool-wrapper.
+      Recommended runtime: bioconda/biocontainers does not ship a JDK
+      directly; author the wrapper against a conda `openjdk` channel
+      or pin a Docker image equivalent to `openjdk:9.0.1-11-slim`.
+    _plan_in: |
+      TODO_src: Java source file (output of `untar`).
+        Likely wrapper port name: `input` / `source` / `java_source`.
+    _plan_out: |
+      TODO_classfile: compiled `.class` file (binary). Exposed as the
+      workflow's only output (`compiled_class`). Custom Galaxy
+      datatype `java_class` would be cleaner than `binary`; revisit
+      in the per-step authoring loop.

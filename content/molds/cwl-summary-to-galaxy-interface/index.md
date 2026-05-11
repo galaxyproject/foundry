@@ -54,9 +54,27 @@ references:
     evidence: corpus-observed
     purpose: "Choose Galaxy collection input shapes from CWL arrays, scatter inputs, records, Directory values, and secondary-file contracts."
     trigger: "When CWL types include arrays, records, Directory, secondaryFiles, or scatter over File-like inputs."
+  - kind: research
+    ref: "[[galaxy-paired-or-unpaired-collections]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Choose `paired_or_unpaired` (or `list:paired_or_unpaired`) shape when the CWL discriminator is paired-vs-single reads, instead of inventing a workflow-level `reads_mode` select parameter."
+    trigger: "When summary-cwl declares 2+ optional File? read-like inputs whose step bindings are gated by complementary `when:` predicates, OR workflow outputs use pickValue over branches keyed on input presence, OR an upstream `meta.single_end`-style discriminator surfaces in the summary."
+  - kind: research
+    ref: "[[cwl-when-pickvalue-to-galaxy-branching]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Pick among the three honest Galaxy branching translations (paired_or_unpaired input, native pick_value step, sibling workflows) before drafting the interface."
+    trigger: "When summary-cwl has any steps[].when non-null OR any workflow output uses pickValue."
 related_notes:
   - "[[summary-cwl]]"
   - "[[component-cwl-workflow-anatomy]]"
+  - "[[galaxy-paired-or-unpaired-collections]]"
+  - "[[cwl-when-pickvalue-to-galaxy-branching]]"
 ---
 # cwl-summary-to-galaxy-interface
 
