@@ -1,0 +1,123 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "cwl-summary-to-galaxy-interface",
+    "path": "content/molds/cwl-summary-to-galaxy-interface/index.md",
+    "revision": 2,
+    "content_hash": "62e3ac902a2416bc0c28b4c7577f845a1061e4abf05ae706d6c6952bd0e46fca",
+    "commit": "2cc40cf0b5be4a3d4858e017783df537cd39be01"
+  },
+  "cast_at": "2026-05-11T17:53:01.690Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-cwl-workflow-anatomy]]",
+      "src": "content/research/component-cwl-workflow-anatomy.md",
+      "dst": "references/notes/component-cwl-workflow-anatomy.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Keep source-faithful CWL facts separate from Galaxy-facing interface choices.",
+      "verification": "Run against the first representative CWL summaries and confirm workflow inputs/outputs map without re-parsing the original CWL.",
+      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[cwl-when-pickvalue-to-galaxy-branching]]",
+      "src": "content/research/cwl-when-pickvalue-to-galaxy-branching.md",
+      "dst": "references/notes/cwl-when-pickvalue-to-galaxy-branching.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Pick among the three honest Galaxy branching translations (paired_or_unpaired input, native pick_value step, sibling workflows) before drafting the interface.",
+      "trigger": "When summary-cwl has any steps[].when non-null OR any workflow output uses pickValue.",
+      "src_hash": "53f16a57324399c13549b2822ae267efb3eb2c34943cbda373e9a9b975bb0567",
+      "dst_hash": "53f16a57324399c13549b2822ae267efb3eb2c34943cbda373e9a9b975bb0567",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.md",
+      "dst": "references/notes/galaxy-collection-semantics.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose Galaxy collection input shapes from CWL arrays, scatter inputs, records, Directory values, and secondary-file contracts.",
+      "trigger": "When CWL types include arrays, records, Directory, secondaryFiles, or scatter over File-like inputs.",
+      "src_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "dst_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-paired-or-unpaired-collections]]",
+      "src": "content/research/galaxy-paired-or-unpaired-collections.md",
+      "dst": "references/notes/galaxy-paired-or-unpaired-collections.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose `paired_or_unpaired` (or `list:paired_or_unpaired`) shape when the CWL discriminator is paired-vs-single reads, instead of inventing a workflow-level `reads_mode` select parameter.",
+      "trigger": "When summary-cwl declares 2+ optional File? read-like inputs whose step bindings are gated by complementary `when:` predicates, OR workflow outputs use pickValue over branches keyed on input presence, OR an upstream `meta.single_end`-style discriminator surfaces in the summary.",
+      "src_hash": "9701e785b0841cd401ebb016b2894ffeef26e9e5b76be99073de3245d40ad685",
+      "dst_hash": "9701e785b0841cd401ebb016b2894ffeef26e9e5b76be99073de3245d40ad685",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose stable Galaxy workflow input/output labels and promoted checkpoint outputs.",
+      "trigger": "When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-cwl]]",
+      "src": "package://@galaxy-foundry/summary-cwl-schema#summaryCwlSchema",
+      "dst": "references/schemas/summary-cwl.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Read CWL workflow inputs, outputs, types, formats, secondary files, scatter, and requirement evidence before choosing the Galaxy interface.",
+      "src_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "dst_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-galaxy-interface",
+        "kind": "markdown",
+        "default_filename": "cwl-galaxy-interface.md",
+        "description": "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, exposed and checkpoint outputs, source provenance, confidence."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-cwl",
+        "description": "Structured CWL summary emitted by [[summarize-cwl]]; the source-of-truth JSON for Galaxy interface choices.",
+        "inherited_schema": "[[summary-cwl]]",
+        "producers": [
+          "summarize-cwl"
+        ]
+      }
+    ]
+  }
+}

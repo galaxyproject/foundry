@@ -1,0 +1,192 @@
+class: GalaxyWorkflow
+name: mgnify-seqprep-paired
+doc: |
+  Galaxy port of the paired-end branch of EBI-Metagenomics/pipeline-v5's
+  seqprep-subwf.cwl (FASTQ prep slice only, not the full amplicon QC).
+  iwc-comparison-notes recommended splitting paired vs single into two
+  sibling workflows (IWC convention); this is the paired flavor.
+  A sibling `mgnify-seqprep-single.gxwf.yml` would carry the single-end
+  branch — emitted separately, see refinement note.
+
+  Concrete tool_ids and tool_shed_repository blocks were lifted from the
+  IWC port `amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-quality-
+  control-paired-end.gxwf.yml`. The CWL count_submitted_reads step is
+  dropped per IWC convention (use MultiQC, not a scalar int output).
+
+  Source pin:
+    EBI-Metagenomics/pipeline-v5 @ 981aafc0df341a2536ed5059695bb7c33af4d3ee
+    workflows/subworkflows/seqprep-subwf.cwl
+
+inputs:
+  paired_reads:
+    type: collection
+    collection_type: list:paired
+    format: fastqsanger.gz
+    label: Paired-end FASTQ reads (gzipped)
+    doc: |
+      Galaxy list:paired collection. Replaces CWL's separate
+      forward_reads + reverse_reads File? inputs.
+  fastp_length_required:
+    type: int
+    label: fastp - minimum read length after trimming
+    optional: true
+    default: 50
+    doc: |
+      CWL `paired_reads_length_filter` (required int) relaxed to
+      optional with a default matching the fastp.cwl tool default,
+      per the IWC port convention.
+
+outputs:
+  trimmed_paired_reads:
+    label: fastp trimmed paired-end reads
+    outputSource: filter_paired/output_paired_coll
+  merged_reads:
+    label: SeqPrep merged reads (single FASTQ, unzipped)
+    outputSource: unzip_merged_reads/output
+  fastp_json_report:
+    label: fastp JSON report
+    outputSource: filter_paired/report_json
+
+steps:
+  filter_paired:
+    label: Trim + QC paired reads with fastp
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/fastp/fastp/0.24.1+galaxy0
+    tool_version: 0.24.1+galaxy0
+    tool_shed_repository:
+      changeset_revision: 25c59c0ceb55
+      name: fastp
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      TODO_paired_input: paired_reads
+      filter_options|length_filtering_options|length_required: fastp_length_required
+    out:
+      - id: TODO_output_paired_coll
+      - id: TODO_report_json
+      - id: TODO_report_html
+    _plan_state: |
+      Paired-end input mode. CWL fastp.cwl source defaults relevant
+      here:
+        threads = 8
+        qualified_phred_quality = 20
+        unqualified_phred_quality = 20  (mapped to --unqualified_percent_limit; odd name in CWL)
+        base_correction = false  (CWL subwf sets explicit false; tool default true)
+        disable_trim_poly_g = false  (CWL subwf sets explicit false; tool default true)
+        force_polyg_tail_trimming = false
+      IWC port exposes these as top-level workflow inputs; for this
+      slice-only draft they live inside tool_state once the wrapper is
+      resolved.
+    _plan_context: |
+      Source CWL: workflows/subworkflows/seqprep-subwf.cwl#filter_paired ->
+                  utils/fastp.cwl (CommandLineTool, cwlVersion v1.0)
+        baseCommand: [fastp]
+        InlineJavascriptRequirement; ResourceRequirement (coresMin 8).
+      IWC pin (from IWC mgnify-amplicon-pipeline-v5-quality-control-pe):
+        repo: bgruening's fastp 0.24.1+galaxy0
+      No `when:` needed at the Galaxy level: paired-only workflow.
+    _plan_in: |
+      TODO_paired_input: the `list:paired` collection. fastp Galaxy
+      wrapper conditional structure typically nests this under
+      single_paired_collection / paired_collection_input. Per-step
+      mold to collapse TODO_paired_input -> concrete wrapper path.
+    _plan_out: |
+      TODO_output_paired_coll: the trimmed paired collection consumed
+      by the next step's `__UNZIP_COLLECTION__`.
+      TODO_report_json: surface as the workflow's `fastp_json_report`.
+      TODO_report_html: drop (CWL didn't surface it; IWC port doesn't either).
+
+  unzip_collection:
+    label: Decompress the trimmed paired collection
+    tool_id: __UNZIP_COLLECTION__
+    in:
+      TODO_input: filter_paired/TODO_output_paired_coll
+    out:
+      - id: TODO_output
+    _plan_state: |
+      Galaxy built-in; no tool_state. Matches IWC port (built-in,
+      not a Tool Shed wrapper).
+    _plan_context: |
+      Source CWL: utils/multiple-gunzip.cwl wrapped a `gunzip -c` call
+      that reduced gzip to stdout. The Galaxy built-in operates on a
+      collection in-place and is the IWC convention here.
+    _plan_in: |
+      TODO_input: paired collection of *.fastq.gz datasets coming out
+      of fastp. Wrapper port name for the built-in: `input`.
+    _plan_out: |
+      TODO_output: paired collection of *.fastq (uncompressed). Feeds
+      mgnify_seqprep.
+
+  overlap_reads:
+    label: Merge overlapping paired reads with SeqPrep
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/mgnify_seqprep/mgnify_seqprep/1.2+galaxy0
+    tool_version: 1.2+galaxy0
+    tool_shed_repository:
+      changeset_revision: TODO_lookup_from_toolshed
+      name: mgnify_seqprep
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      TODO_paired_input: unzip_collection/TODO_output
+    out:
+      - id: TODO_merged_reads
+      - id: TODO_forward_unmerged
+      - id: TODO_reverse_unmerged
+    _plan_state: |
+      CWL source provides no parameter knobs to filter_paired beyond
+      defaults; `arguments:` block in seqprep.cwl hard-codes the
+      merged-output filename via:
+        `inputs.namefile.nameroot.split('_')[0] + '_MERGED.fastq.gz'`
+      The Galaxy `mgnify_seqprep` wrapper should already encode this
+      filename convention internally; per-step mold confirms.
+    _plan_context: |
+      Source CWL: tools/SeqPrep/seqprep.cwl (v1.0).
+        baseCommand: SeqPrep
+        hints.DockerRequirement.dockerPull: quay.io/biocontainers/seqprep:1.1--1
+        arguments include `-1`, `-2`, and a JS-derived `-s` filename.
+      IWC tool_id: bgruening/mgnify_seqprep/mgnify_seqprep/1.2+galaxy0.
+      changeset_revision still TODO — needs lookup against current
+      Tool Shed; IWC port snapshot in iwc-comparison-notes may carry
+      a stable pin but it wasn't captured here.
+    _plan_in: |
+      TODO_paired_input: the decompressed paired collection. Wrapper
+      port name likely `paired_input` (consistent with other paired
+      tools); per-step mold to pin.
+    _plan_out: |
+      TODO_merged_reads: surfaced as workflow output `merged_reads`
+      after the next decompression step.
+      TODO_forward_unmerged, TODO_reverse_unmerged: dropped (the CWL
+      surfaces them via the seqprep step but workflow-level only the
+      merged stream propagates).
+
+  unzip_merged_reads:
+    label: Decompress merged reads to FASTQ
+    tool_id: TODO
+    in:
+      TODO_input: overlap_reads/TODO_merged_reads
+    out:
+      - id: TODO_output
+    _plan_state: |
+      Single-dataset gunzip. CWL's multiple-gunzip.cwl wraps `gunzip
+      -c` to stdout. Galaxy alternatives: any gunzip tool in the Shed,
+      or the same `__UNZIP_COLLECTION__` if we promote merged_reads to
+      a tiny collection. For a single dataset, the simpler choice is a
+      `bgruening/text_processing` or generic `gzip` wrapper. Per-step
+      mold to pick.
+    _plan_context: |
+      Source CWL: utils/multiple-gunzip.cwl (v1.0, gunzip -c).
+      No exact analogue in IWC port — IWC keeps the result as
+      *.fastq.gz inside a collection. If we want a single decompressed
+      FASTQ workflow output, an explicit gunzip step is needed.
+    _plan_in: |
+      TODO_input: merged_reads.fastq.gz dataset from seqprep.
+    _plan_out: |
+      TODO_output: merged_reads.fastq dataset; the workflow's
+      `merged_reads` output.
+
+# Sibling-workflow note
+# A second skeleton `mgnify-seqprep-single.gxwf.yml` is required to
+# cover the CWL's single-end branch (unzip_single_reads +
+# count_submitted_reads_single). It is deferred to a separate
+# template-Mold invocation per the IWC convention of one-mode-per-
+# workflow-file. The CWL's `count_lines.py` step is dropped in both
+# Galaxy ports per IWC precedent.

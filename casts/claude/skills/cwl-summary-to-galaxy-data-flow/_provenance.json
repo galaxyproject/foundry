@@ -1,0 +1,159 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "cwl-summary-to-galaxy-data-flow",
+    "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
+    "revision": 2,
+    "content_hash": "34149e0dac3a2d6bfb0b6e9c4f8706320489f79e385b58c31e63d48c1e3d3c00",
+    "commit": "2cc40cf0b5be4a3d4858e017783df537cd39be01"
+  },
+  "cast_at": "2026-05-11T17:53:01.075Z",
+  "refs": [
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-patterns]]",
+      "src": "content/patterns/galaxy-collection-patterns.md",
+      "dst": "references/patterns/galaxy-collection-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground collection reshape, relabel, cleanup, and map-over choices in corpus-observed Galaxy recipes.",
+      "trigger": "When CWL scatter, arrays, nested arrays, records, or secondary-file contracts require explicit Galaxy collection operations.",
+      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-cwl-workflow-anatomy]]",
+      "src": "content/research/component-cwl-workflow-anatomy.md",
+      "dst": "references/notes/component-cwl-workflow-anatomy.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Use CWL's native graph and mark only the features that need Galaxy reinterpretation.",
+      "verification": "Run against representative CWL summaries with scatter, secondaryFiles, and valueFrom; confirm the brief starts from summary-cwl graph edges and only adds Galaxy-specific reshape decisions.",
+      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[cwl-pickvalue-to-galaxy]]",
+      "src": "content/research/cwl-pickvalue-to-galaxy.md",
+      "dst": "references/notes/cwl-pickvalue-to-galaxy.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Map CWL pickValue (first_non_null / the_only_non_null / all_non_null) on workflow outputs or step inputs into Galaxy's native `pick_value` workflow module added by galaxy#22222.",
+      "trigger": "When any summary-cwl edge `via` contains a `pickValue:*` marker, OR any workflow_outputs[].output_source is multi-valued with pickValue, OR any steps[].in[].pick_value is non-null in the source workflow or referenced subworkflows.",
+      "src_hash": "f5a68b0aaa03b3370eea66eb9ac96fcf18ee6cf646edbfb516d3a47cf7459221",
+      "dst_hash": "f5a68b0aaa03b3370eea66eb9ac96fcf18ee6cf646edbfb516d3a47cf7459221",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[cwl-when-pickvalue-to-galaxy-branching]]",
+      "src": "content/research/cwl-when-pickvalue-to-galaxy-branching.md",
+      "dst": "references/notes/cwl-when-pickvalue-to-galaxy-branching.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Default reference for translating CWL when:/pickValue branching: pick among `paired_or_unpaired` collection input, native `pick_value` workflow step, or sibling workflows per mode.",
+      "src_hash": "53f16a57324399c13549b2822ae267efb3eb2c34943cbda373e9a9b975bb0567",
+      "dst_hash": "53f16a57324399c13549b2822ae267efb3eb2c34943cbda373e9a9b975bb0567",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.md",
+      "dst": "references/notes/galaxy-collection-semantics.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Translate CWL arrays, records, scatter, and secondary-file shapes into Galaxy dataset and collection semantics.",
+      "trigger": "When CWL input/output or step wiring implies Galaxy collections, map-over, reduction, or shape changes.",
+      "src_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "dst_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-data-flow-draft-contract]]",
+      "src": "content/research/galaxy-data-flow-draft-contract.md",
+      "dst": "references/notes/galaxy-data-flow-draft-contract.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
+      "verification": "Promote after two worked CWL-to-Galaxy translations preserve this Mold boundary without moving fields.",
+      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-paired-or-unpaired-collections]]",
+      "src": "content/research/galaxy-paired-or-unpaired-collections.md",
+      "dst": "references/notes/galaxy-paired-or-unpaired-collections.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "When the interface brief adopted a `paired_or_unpaired` shape, model inner-tool branching via `has_single_item` semantics instead of a Galaxy-level mode switch.",
+      "trigger": "When the preceding cwl-galaxy-interface brief uses `paired_or_unpaired` (or `list:paired_or_unpaired`) as a workflow input, OR the data-flow brief is considering it as an option.",
+      "src_hash": "9701e785b0841cd401ebb016b2894ffeef26e9e5b76be99073de3245d40ad685",
+      "dst_hash": "9701e785b0841cd401ebb016b2894ffeef26e9e5b76be99073de3245d40ad685",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-cwl]]",
+      "src": "package://@galaxy-foundry/summary-cwl-schema#summaryCwlSchema",
+      "dst": "references/schemas/summary-cwl.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Read CWL step graph, edge markers, scatter, conditionals, secondary files, and tool requirements while drafting Galaxy-facing data flow.",
+      "src_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "dst_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-galaxy-data-flow",
+        "kind": "markdown",
+        "default_filename": "cwl-galaxy-data-flow.md",
+        "description": "Reviewable Markdown brief: abstract topology, Galaxy collection semantics, placeholder transformations, unresolved Galaxy tool needs."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-cwl",
+        "description": "Structured CWL summary emitted by [[summarize-cwl]]; consumed alongside the Galaxy interface brief.",
+        "inherited_schema": "[[summary-cwl]]",
+        "producers": [
+          "summarize-cwl"
+        ]
+      },
+      {
+        "id": "cwl-galaxy-interface",
+        "description": "Preceding Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] that pins inputs, outputs, and labels.",
+        "producers": [
+          "cwl-summary-to-galaxy-interface"
+        ]
+      }
+    ]
+  }
+}

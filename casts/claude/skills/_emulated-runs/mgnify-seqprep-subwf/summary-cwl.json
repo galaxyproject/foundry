@@ -1,0 +1,364 @@
+{
+  "summary_version": "1",
+  "source": {
+    "ecosystem": "cwl",
+    "workflow": "seqprep-subwf",
+    "url": "workflow-fixtures/cwl/EBI-Metagenomics__pipeline-v5/workflows/subworkflows/seqprep-subwf.cwl",
+    "version": "981aafc0df341a2536ed5059695bb7c33af4d3ee",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "slug": "mgnify-seqprep-subwf",
+    "cwl_version": "v1.2.0-dev2",
+    "entrypoint": "seqprep-subwf.cwl"
+  },
+  "documents": {
+    "entrypoint": "seqprep-subwf.cwl",
+    "normalized_path": null,
+    "validation": {
+      "command": "cwltool --validate seqprep-subwf.cwl",
+      "status": "not-run",
+      "diagnostics": ["cwltool not installed in emulation environment"]
+    }
+  },
+  "workflow_inputs": [
+    {
+      "id": "forward_reads",
+      "label": null,
+      "type": "File?",
+      "optional": true,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "reverse_reads",
+      "label": null,
+      "type": "File?",
+      "optional": true,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "single_reads",
+      "label": null,
+      "type": "File?",
+      "optional": true,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "paired_reads_length_filter",
+      "label": null,
+      "type": "int",
+      "optional": false,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    }
+  ],
+  "workflow_outputs": [
+    {
+      "id": "unzipped_single_reads",
+      "label": null,
+      "type": "File",
+      "output_source": ["unzip_merged_reads/unzipped_file", "unzip_single_reads/unzipped_file"],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "count_forward_submitted_reads",
+      "label": null,
+      "type": "int",
+      "output_source": ["count_submitted_reads/count", "count_submitted_reads_single/count"],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "fastp_report",
+      "label": null,
+      "type": "File?",
+      "output_source": ["filter_paired/json_report"],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    }
+  ],
+  "steps": [
+    {
+      "id": "count_submitted_reads",
+      "run": "../../utils/count_lines/count_lines.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {"id": "single", "source": ["single_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "sequences", "source": ["forward_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "number", "source": null, "default": 4, "value_from": null, "link_merge": null, "pick_value": null}
+      ],
+      "out": ["count"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": "$(inputs.single == undefined)",
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "filter_paired",
+      "run": "../../utils/fastp.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {"id": "single", "source": ["single_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "fastq1", "source": ["forward_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "fastq2", "source": ["reverse_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "min_length_required", "source": ["paired_reads_length_filter"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "base_correction", "source": null, "default": false, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "disable_trim_poly_g", "source": null, "default": false, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "force_polyg_tail_trimming", "source": null, "default": false, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "threads", "source": null, "default": 8, "value_from": null, "link_merge": null, "pick_value": null}
+      ],
+      "out": ["out_fastq1", "out_fastq2", "json_report"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": "$(inputs.single == undefined)",
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "overlap_reads",
+      "run": "../../tools/SeqPrep/seqprep.cwl",
+      "run_class": "CommandLineTool",
+      "label": "Paired-end overlapping reads are merged",
+      "doc": null,
+      "in": [
+        {"id": "single", "source": ["single_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "forward_reads", "source": ["filter_paired/out_fastq1"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "reverse_reads", "source": ["filter_paired/out_fastq2"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "namefile", "source": ["forward_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null}
+      ],
+      "out": ["merged_reads", "forward_unmerged_reads", "reverse_unmerged_reads"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": "$(inputs.single == undefined)",
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "unzip_merged_reads",
+      "run": "../../utils/multiple-gunzip.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {"id": "target_reads", "source": ["overlap_reads/merged_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "reads", "source": null, "default": true, "value_from": null, "link_merge": null, "pick_value": null}
+      ],
+      "out": ["unzipped_file"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": "$(inputs.target_reads != undefined)",
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "unzip_single_reads",
+      "run": "../../utils/multiple-gunzip.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {"id": "target_reads", "source": ["single_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "reads", "source": null, "default": true, "value_from": null, "link_merge": null, "pick_value": null}
+      ],
+      "out": ["unzipped_file"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": "$(inputs.target_reads != undefined)",
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "count_submitted_reads_single",
+      "run": "../../utils/count_lines/count_lines.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {"id": "target_reads", "source": ["single_reads"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "sequences", "source": ["unzip_single_reads/unzipped_file"], "default": null, "value_from": null, "link_merge": null, "pick_value": null},
+        {"id": "number", "source": null, "default": 4, "value_from": null, "link_merge": null, "pick_value": null}
+      ],
+      "out": ["count"],
+      "scatter": [],
+      "scatter_method": null,
+      "when": "$(inputs.target_reads != undefined)",
+      "requirements": [],
+      "hints": []
+    }
+  ],
+  "tools": [
+    {
+      "id": "../../utils/count_lines/count_lines.cwl",
+      "label": null,
+      "base_command": ["count_lines.py"],
+      "arguments": [],
+      "inputs": [
+        {"id": "sequences", "type": "File", "input_binding": {"position": null, "prefix": "-f", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "number", "type": "int", "input_binding": {"position": null, "prefix": "-n", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []}
+      ],
+      "outputs": [
+        {"id": "count", "type": "int", "output_binding": {"position": null, "prefix": null, "glob": "data.txt", "value_from": "$(parseInt(self[0].contents))"}, "doc": null, "format": null, "secondary_files": []}
+      ],
+      "requirements": [
+        {"class": "InlineJavascriptRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {}},
+        {"class": "ResourceRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {"coresMin": 2, "ramMin": 200}}
+      ],
+      "hints": [
+        {"class": "DockerRequirement", "docker_pull": "alpine:3.7", "docker_image_id": null, "packages": [], "raw": {"dockerPull": "alpine:3.7"}}
+      ]
+    },
+    {
+      "id": "../../utils/fastp.cwl",
+      "label": null,
+      "base_command": ["fastp"],
+      "arguments": [
+        "-o $(inputs.fastq1.nameroot).fastp.fastq",
+        "${ if (inputs.fastq2){ return '-O'; } else { return ''; } }",
+        "${ if (inputs.fastq2){ return inputs.fastq2.nameroot + '.fastp.fastq'; } else { return ''; } }"
+      ],
+      "inputs": [
+        {"id": "fastq1", "type": "File", "input_binding": {"position": null, "prefix": "-i", "glob": null, "value_from": null}, "doc": null, "format": ["edam:format_1930", "edam:format_1929"], "secondary_files": []},
+        {"id": "fastq2", "type": "File?", "input_binding": {"position": null, "prefix": "-I", "glob": null, "value_from": null}, "doc": null, "format": ["edam:format_1930", "edam:format_1929"], "secondary_files": []},
+        {"id": "threads", "type": "int?", "input_binding": {"position": null, "prefix": "--thread", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "qualified_phred_quality", "type": "int?", "input_binding": {"position": null, "prefix": "--qualified_quality_phred", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "unqualified_phred_quality", "type": "int?", "input_binding": {"position": null, "prefix": "--unqualified_percent_limit", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "min_length_required", "type": "int?", "input_binding": {"position": null, "prefix": "--length_required", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "force_polyg_tail_trimming", "type": "boolean?", "input_binding": {"position": null, "prefix": "--trim_poly_g", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "disable_trim_poly_g", "type": "boolean?", "input_binding": {"position": null, "prefix": "--disable_trim_poly_g", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "base_correction", "type": "boolean?", "input_binding": {"position": null, "prefix": "--correction", "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []}
+      ],
+      "outputs": [
+        {"id": "out_fastq1", "type": "File", "output_binding": {"position": null, "prefix": null, "glob": "$(inputs.fastq1.nameroot).fastp.fastq", "value_from": null}, "doc": null, "format": "$(inputs.fastq1.format)", "secondary_files": []},
+        {"id": "out_fastq2", "type": "File?", "output_binding": {"position": null, "prefix": null, "glob": "$(inputs.fastq2.nameroot).fastp.fastq", "value_from": null}, "doc": null, "format": "$(inputs.fastq2.format)", "secondary_files": []},
+        {"id": "html_report", "type": "File", "output_binding": {"position": null, "prefix": null, "glob": "fastp.html", "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "json_report", "type": "File", "output_binding": {"position": null, "prefix": null, "glob": "fastp.json", "value_from": null}, "doc": null, "format": null, "secondary_files": []}
+      ],
+      "requirements": [
+        {"class": "InlineJavascriptRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {}},
+        {"class": "ResourceRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {"coresMin": 8, "ramMin": 3800}}
+      ],
+      "hints": []
+    },
+    {
+      "id": "../../tools/SeqPrep/seqprep.cwl",
+      "label": "Tool for stripping adaptors and/or merging paired reads with overlap into single reads.",
+      "base_command": ["SeqPrep"],
+      "arguments": [
+        "-1",
+        "forward_unmerged.fastq.gz",
+        "-2",
+        "reverse_unmerged.fastq.gz",
+        "-s ${ return inputs.namefile.nameroot.split('_')[0] + '_MERGED.fastq.gz' }"
+      ],
+      "inputs": [
+        {"id": "forward_reads", "type": "File?", "input_binding": {"position": null, "prefix": "-f", "glob": null, "value_from": null}, "doc": null, "format": "edam:format_1930", "secondary_files": []},
+        {"id": "reverse_reads", "type": "File?", "input_binding": {"position": null, "prefix": "-r", "glob": null, "value_from": null}, "doc": null, "format": "edam:format_1930", "secondary_files": []},
+        {"id": "namefile", "type": "File?", "input_binding": null, "doc": null, "format": null, "secondary_files": []}
+      ],
+      "outputs": [
+        {"id": "merged_reads", "type": "File", "output_binding": {"position": null, "prefix": null, "glob": "*_MERGED*", "value_from": null}, "doc": null, "format": "$(inputs.forward_reads.format)", "secondary_files": []},
+        {"id": "forward_unmerged_reads", "type": "File", "output_binding": {"position": null, "prefix": null, "glob": "forward_unmerged.fastq.gz", "value_from": null}, "doc": null, "format": "$(inputs.forward_reads.format)", "secondary_files": []},
+        {"id": "reverse_unmerged_reads", "type": "File", "output_binding": {"position": null, "prefix": null, "glob": "reverse_unmerged.fastq.gz", "value_from": null}, "doc": null, "format": "$(inputs.forward_reads.format)", "secondary_files": []}
+      ],
+      "requirements": [
+        {"class": "InlineJavascriptRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {}},
+        {"class": "ResourceRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {"coresMin": 2, "ramMin": 500}}
+      ],
+      "hints": [
+        {"class": "DockerRequirement", "docker_pull": "quay.io/biocontainers/seqprep:1.1--1", "docker_image_id": null, "packages": [], "raw": {"dockerPull": "quay.io/biocontainers/seqprep:1.1--1"}}
+      ]
+    },
+    {
+      "id": "../../utils/multiple-gunzip.cwl",
+      "label": "unzip files",
+      "base_command": ["gunzip", "-c"],
+      "arguments": [],
+      "inputs": [
+        {"id": "target_reads", "type": "File", "input_binding": {"position": 1, "prefix": null, "glob": null, "value_from": null}, "doc": null, "format": null, "secondary_files": []},
+        {"id": "forward_unmerged_reads", "type": "File?", "input_binding": {"position": 2, "prefix": null, "glob": null, "value_from": null}, "doc": null, "format": "edam:format_1930", "secondary_files": []},
+        {"id": "reverse_unmerged_reads", "type": "File?", "input_binding": {"position": 3, "prefix": null, "glob": null, "value_from": null}, "doc": null, "format": "edam:format_1930", "secondary_files": []},
+        {"id": "assembly", "type": "boolean?", "input_binding": null, "doc": null, "format": null, "secondary_files": []},
+        {"id": "reads", "type": "boolean?", "input_binding": null, "doc": null, "format": null, "secondary_files": []}
+      ],
+      "outputs": [
+        {"id": "unzipped_file", "type": "stdout", "output_binding": null, "doc": null, "format": null, "secondary_files": []}
+      ],
+      "requirements": [
+        {"class": "ResourceRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {"coresMin": 1, "ramMin": 2000}},
+        {"class": "InlineJavascriptRequirement", "docker_pull": null, "docker_image_id": null, "packages": [], "raw": {}}
+      ],
+      "hints": [
+        {"class": "DockerRequirement", "docker_pull": "alpine:3.7", "docker_image_id": null, "packages": [], "raw": {"dockerPull": "alpine:3.7"}},
+        {"class": "SoftwareRequirement", "docker_pull": null, "docker_image_id": null, "packages": ["gunzip"], "raw": {"packages": {"gunzip": null}}}
+      ]
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {"id": "forward_reads", "kind": "workflow-input", "label": null},
+      {"id": "reverse_reads", "kind": "workflow-input", "label": null},
+      {"id": "single_reads", "kind": "workflow-input", "label": null},
+      {"id": "paired_reads_length_filter", "kind": "workflow-input", "label": null},
+      {"id": "count_submitted_reads", "kind": "step", "label": null},
+      {"id": "filter_paired", "kind": "step", "label": null},
+      {"id": "overlap_reads", "kind": "step", "label": "Paired-end overlapping reads are merged"},
+      {"id": "unzip_merged_reads", "kind": "step", "label": null},
+      {"id": "unzip_single_reads", "kind": "step", "label": null},
+      {"id": "count_submitted_reads_single", "kind": "step", "label": null},
+      {"id": "unzipped_single_reads", "kind": "workflow-output", "label": null},
+      {"id": "count_forward_submitted_reads", "kind": "workflow-output", "label": null},
+      {"id": "fastp_report", "kind": "workflow-output", "label": null}
+    ],
+    "edges": [
+      {"from": "single_reads", "to": "count_submitted_reads/single", "via": ["when-predicate"]},
+      {"from": "forward_reads", "to": "count_submitted_reads/sequences", "via": ["when:paired"]},
+      {"from": "single_reads", "to": "filter_paired/single", "via": ["when-predicate"]},
+      {"from": "forward_reads", "to": "filter_paired/fastq1", "via": ["when:paired"]},
+      {"from": "reverse_reads", "to": "filter_paired/fastq2", "via": ["when:paired"]},
+      {"from": "paired_reads_length_filter", "to": "filter_paired/min_length_required", "via": ["when:paired"]},
+      {"from": "single_reads", "to": "overlap_reads/single", "via": ["when-predicate"]},
+      {"from": "filter_paired/out_fastq1", "to": "overlap_reads/forward_reads", "via": ["when:paired"]},
+      {"from": "filter_paired/out_fastq2", "to": "overlap_reads/reverse_reads", "via": ["when:paired"]},
+      {"from": "forward_reads", "to": "overlap_reads/namefile", "via": ["when:paired"]},
+      {"from": "overlap_reads/merged_reads", "to": "unzip_merged_reads/target_reads", "via": ["when-predicate", "when:paired"]},
+      {"from": "single_reads", "to": "unzip_single_reads/target_reads", "via": ["when-predicate", "when:single"]},
+      {"from": "single_reads", "to": "count_submitted_reads_single/target_reads", "via": ["when-predicate"]},
+      {"from": "unzip_single_reads/unzipped_file", "to": "count_submitted_reads_single/sequences", "via": ["when:single"]},
+      {"from": "unzip_merged_reads/unzipped_file", "to": "unzipped_single_reads", "via": ["pickValue:first_non_null"]},
+      {"from": "unzip_single_reads/unzipped_file", "to": "unzipped_single_reads", "via": ["pickValue:first_non_null"]},
+      {"from": "count_submitted_reads/count", "to": "count_forward_submitted_reads", "via": ["pickValue:first_non_null"]},
+      {"from": "count_submitted_reads_single/count", "to": "count_forward_submitted_reads", "via": ["pickValue:first_non_null"]},
+      {"from": "filter_paired/json_report", "to": "fastp_report", "via": []}
+    ]
+  },
+  "tests": [],
+  "warnings": [
+    {"code": "validation-not-run", "message": "cwltool unavailable in emulation environment; structural extraction performed by hand-walking the YAML.", "path": "seqprep-subwf.cwl"},
+    {"code": "unusual-cwl-version", "message": "cwlVersion v1.2.0-dev2 declared (pre-release tag, not the canonical v1.2). Downstream tools may need accommodation.", "path": "seqprep-subwf.cwl"},
+    {"code": "when-predicate-inputs", "message": "Step inputs prefixed with `single` or `target_reads` exist solely to feed `when:` predicates; they are not declared inputs of the underlying CommandLineTool. Galaxy translation must drop them or translate the gating into Galaxy workflow-level conditionals.", "path": "seqprep-subwf.cwl#steps"},
+    {"code": "pickvalue-fan-in", "message": "Workflow outputs `unzipped_single_reads` and `count_forward_submitted_reads` use `pickValue: first_non_null` over two sources gated by complementary `when:` predicates. Galaxy has no direct pickValue; downstream needs explicit branch-and-merge or single-branch conditional outputs.", "path": "seqprep-subwf.cwl#outputs"},
+    {"code": "expression-preserved", "message": "fastp.cwl arguments include InlineJavascript expressions for output naming and presence-of-fastq2; preserved verbatim.", "path": "../../utils/fastp.cwl#arguments"},
+    {"code": "expression-preserved", "message": "seqprep.cwl arguments include a JS expression that derives the merged-output filename from `inputs.namefile.nameroot`; preserved verbatim.", "path": "../../tools/SeqPrep/seqprep.cwl#arguments"},
+    {"code": "expression-preserved", "message": "count_lines.cwl outputs.count uses outputEval `$(parseInt(self[0].contents))` to coerce the file contents to int; preserved verbatim.", "path": "../../utils/count_lines/count_lines.cwl#outputs"},
+    {"code": "no-test-fixture", "message": "No CWL job file or test manifest discoverable alongside this subworkflow.", "path": "seqprep-subwf.cwl"},
+    {"code": "tool-cwl-version-mismatch", "message": "Subworkflow declares v1.2.0-dev2 but referenced CommandLineTools declare v1.0; mixed-version document tree should be flagged for normalization.", "path": "seqprep-subwf.cwl"}
+  ]
+}

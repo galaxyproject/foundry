@@ -64,10 +64,36 @@ references:
     evidence: corpus-observed
     purpose: "Ground collection reshape, relabel, cleanup, and map-over choices in corpus-observed Galaxy recipes."
     trigger: "When CWL scatter, arrays, nested arrays, records, or secondary-file contracts require explicit Galaxy collection operations."
+  - kind: research
+    ref: "[[cwl-pickvalue-to-galaxy]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Map CWL pickValue (first_non_null / the_only_non_null / all_non_null) on workflow outputs or step inputs into Galaxy's native `pick_value` workflow module added by galaxy#22222."
+    trigger: "When any summary-cwl edge `via` contains a `pickValue:*` marker, OR any workflow_outputs[].output_source is multi-valued with pickValue, OR any steps[].in[].pick_value is non-null in the source workflow or referenced subworkflows."
+  - kind: research
+    ref: "[[cwl-when-pickvalue-to-galaxy-branching]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Default reference for translating CWL when:/pickValue branching: pick among `paired_or_unpaired` collection input, native `pick_value` workflow step, or sibling workflows per mode."
+  - kind: research
+    ref: "[[galaxy-paired-or-unpaired-collections]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "When the interface brief adopted a `paired_or_unpaired` shape, model inner-tool branching via `has_single_item` semantics instead of a Galaxy-level mode switch."
+    trigger: "When the preceding cwl-galaxy-interface brief uses `paired_or_unpaired` (or `list:paired_or_unpaired`) as a workflow input, OR the data-flow brief is considering it as an option."
 related_notes:
   - "[[summary-cwl]]"
   - "[[cwl-summary-to-galaxy-interface]]"
   - "[[component-cwl-workflow-anatomy]]"
+  - "[[cwl-pickvalue-to-galaxy]]"
+  - "[[cwl-when-pickvalue-to-galaxy-branching]]"
+  - "[[galaxy-paired-or-unpaired-collections]]"
 ---
 # cwl-summary-to-galaxy-data-flow
 
