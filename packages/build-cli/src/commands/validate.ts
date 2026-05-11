@@ -10,6 +10,7 @@ import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
 import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta";
 import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
+import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
@@ -45,11 +46,14 @@ const TYPE_TAG_MAP: Record<string, string> = {
   "prompt|": "prompt",
 };
 
-const CLI_METADATA_KEYS = new Set(
-  [gxwfCliMeta, galaxyToolCacheCliMeta, foundryCliMeta].flatMap((program) =>
+const CLI_METADATA_KEYS = new Set([
+  ...[gxwfCliMeta, galaxyToolCacheCliMeta, foundryCliMeta].flatMap((program) =>
     program.commands.map((command) => `${program.name}/${command.name}`),
   ),
-);
+  ...planemoCliMeta.commands
+    .filter((command) => !command.internal)
+    .map((command) => `${planemoCliMeta.program}/${command.name}`),
+]);
 
 /** Single-value vs array wiki-link fields. Schema's regex catches missing brackets; this catches whitespace-only inner text. */
 const WIKI_LINK_FIELDS: Record<string, "single" | "array"> = {

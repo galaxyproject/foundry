@@ -1,0 +1,51 @@
+{
+  "name": "@galaxy-foundry/planemo-cli-meta",
+  "version": "0.0.0",
+  "description": "Vendored `planemo cli_metadata` command list. Parallels `@galaxy-tool-util/cli/meta` and feeds the Foundry validator's cli-command coverage check.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./cli-meta.json": "./dist/cli-meta.json",
+    "./provenance.json": "./dist/cli-meta.provenance.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchilton/foundry.git",
+    "directory": "packages/planemo-cli-meta"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-meta.mjs",
+    "sync:from-planemo": "node scripts/sync-from-planemo.mjs",
+    "prebuild": "pnpm sync",
+    "build": "tsc && node scripts/copy-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "galaxy",
+    "foundry",
+    "planemo",
+    "cli-metadata"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

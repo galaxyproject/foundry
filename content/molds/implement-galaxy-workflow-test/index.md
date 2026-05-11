@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 5
+revised: 2026-05-11
+revision: 6
 ai_generated: true
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
@@ -90,5 +90,5 @@ references:
 # implement-galaxy-workflow-test
 
 Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
-- **`planemo workflow_test_init --from_invocation <id>`** — preferred bootstrap for new test files; reviewer convention. See [[planemo-asserts-idioms]] §7.
-- **`planemo workflow_test_on_invocation <tests.yml> <id>`** — fast assertion-iteration loop without re-running the workflow.
+- **`planemo workflow_test_init --from_invocation <id>`** ([[planemo-workflow_test_init]]) — preferred bootstrap for new test files; reviewer convention. See [[planemo-asserts-idioms]] §7.
+- **`planemo workflow_test_on_invocation <tests.yml> <id>`** ([[planemo-workflow_test_on_invocation]]) — fast assertion-iteration loop without re-running the workflow.
