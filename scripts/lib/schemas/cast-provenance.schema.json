@@ -127,7 +127,7 @@
       "additionalProperties": false,
       "required": ["kind", "mode", "src", "dst", "source", "used_at", "load"],
       "properties": {
-        "kind": { "enum": ["schema", "research", "pattern", "cli-command"] },
+        "kind": { "enum": ["schema", "research", "pattern", "cli-tool", "cli-command", "prompt"] },
         "mode": { "enum": ["verbatim", "condense", "sidecar"] },
         "ref": {
           "type": "string",
