@@ -127,16 +127,18 @@ planemo test [OPTIONS] TOOL_PATH
 
 <!-- Hand-edited. Preserved across `tsx scripts/sync-planemo-cli.ts`. -->
 
-_Describe stdout/stderr shape, exit-code contract, and any JSON-report flags here._
+Use `--test_output_json <path>` for machine-readable results; stdout and stderr are human-oriented.
 
 ## Examples
 
 <!-- Hand-edited. Preserved across `tsx scripts/sync-planemo-cli.ts`. -->
 
-_Add canonical invocations here._
+```sh
+planemo test <tool_dir> --test_output_json <tool_dir>/_planemo_test_report.json
+```
 
 ## Gotchas
 
 <!-- Hand-edited. Preserved across `tsx scripts/sync-planemo-cli.ts`. -->
 
-_Document non-obvious behavior and common failure modes here._
+No Foundry-specific gotchas recorded yet.

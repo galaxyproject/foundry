@@ -99,7 +99,7 @@ references:
     ref: "[[planemo-lint]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: sidecar
     evidence: hypothesis
     purpose: "Reference for `planemo lint` flags and output classification; first gate in the convergence loop."
     trigger: "Step 10.1 — after every <command>/<inputs>/<outputs> emission."
@@ -108,7 +108,7 @@ references:
     ref: "[[planemo-test]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: sidecar
     evidence: hypothesis
     purpose: "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path."
     trigger: "Step 10.2 — after lint clears."
