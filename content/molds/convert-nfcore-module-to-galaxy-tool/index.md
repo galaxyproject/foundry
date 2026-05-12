@@ -238,12 +238,15 @@ Emit a final `extra_args` text param per `[[nfcore-task-ext-args-to-galaxy-addit
 
 ### 4. Translate `<outputs>`
 
-For each `output:` channel that isn't the `versions` emit (per the four rules in `[[galaxy-discover-datasets]]` §*Convert Mold posture*):
+For each `output:` channel that isn't the `versions` emit, **decide cardinality first, then shape** (per `[[galaxy-discover-datasets]]` §*Convert Mold posture*). The Nextflow glob alone is not enough — `path('*.bam')` (N files, one per element of an upstream collection) and `path('*.{bai,csi,crai}')` (exactly one file, alternation across mutually-exclusive extensions) look the same but map to different Galaxy idioms.
 
-- `path('*.bam')` glob → `<collection type="list" name="..." format="bam">` with `<discover_datasets pattern="__name_and_ext__" visible="true"/>`.
-- `tuple val(meta), path("*_R{1,2}.fastp.fastq.gz")` paired → `<collection type="paired" ...>` with a custom `(?P<name>...)_R(?P<identifier_1>[12])...` regex.
-- Single `path("${prefix}.json")` deterministic → `<data name="..." format="json" from_work_dir="${prefix}.json"/>`, no discovery.
-- `versions` channel → drop; the `<version_command>` carries that load (per `[[nfcore-versions-emit-to-galaxy-version-command]]`).
+- **Single output, deterministic name** (`path("${prefix}.json")`) → `<data name="..." format="json" from_work_dir="${prefix}.json"/>`. No `<discover_datasets>`.
+- **Single output, variable extension** (alternation glob like `path("*.{bai,csi,crai}")`, or `path("${prefix}.${ext}")` where `ext` is computed): the channel emits **one** file whose extension depends on inputs or args. Map to a `<data>` with the most-common extension as `format=`, plus a `<change_format>` block that flips on the input ext or the responsible param. **Preserve the upstream invocation byte-for-byte** and capture the result with a tight `mv` — `ln -s '$input' 'input.${input.ext}'` to stage with the upstream-expected name, run the tool exactly as the nf-core `script:` body does, then `mv 'input.${input.ext}'.{bai,csi,crai} '$output_name'`. **Do not** use `<collection>` + `<discover_datasets>` for this shape — there is no list. Direct write to `'$output_name'` (instead of `mv`) is the secondary form, used only when the upstream `script:` body itself passes an output-path arg to the tool. See `[[galaxy-discover-datasets]]` §*Convert Mold posture* Rule 2 for the full pattern, including the variant and the `from_work_dir` callout.
+- **Multi-output, list cardinality** (true glob like `path('*.bam')` where the upstream process emits N files keyed by element identifier) → `<collection type="list" name="..." format="bam">` with `<discover_datasets pattern="__name_and_ext__" visible="true"/>`.
+- **Multi-output, paired cardinality** (`tuple val(meta), path("*_R{1,2}.fastp.fastq.gz")`) → `<collection type="paired" ...>` with a custom `(?P<name>...)_R(?P<identifier_1>[12])...` regex.
+- **`versions` channel** → drop; the `<version_command>` carries that load (per `[[nfcore-versions-emit-to-galaxy-version-command]]`).
+
+**Cardinality heuristic**: if the upstream `input:` channel is `tuple(meta, path)` (one item per process invocation) and `output:` emits one path per concept, the output is single — even when the path is glob-shaped. Process cardinality = output cardinality unless the script explicitly fans out.
 
 ### 5. Translate `script:` to `<command>`
 
