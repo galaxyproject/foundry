@@ -131,3 +131,7 @@ The resulting shape is intentional:
 - Harnesses own orchestration.
 
 Each layer has a job. The Foundry works when those jobs stay separate and the connections between them are explicit.
+
+## See Also
+
+[COMPARISONS.md](COMPARISONS.md) — how this shape contrasts with wikis and skill bundles, and where it sits in the wider knowledge-base-to-skill landscape (a dated snapshot).

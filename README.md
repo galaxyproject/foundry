@@ -61,8 +61,9 @@ Long-form design narrative under `docs/`:
 - `HARNESS_PIPELINES.md` — pipeline narrative behind `content/pipelines/`.
 - `MOLDS.md` — Mold inventory rationale and bucketing axes.
 - `COMPILATION_PIPELINE.md` — casting design.
-- `CORPUS_INGESTION.md` — IWC grounding; pattern-bodies-cite-by-URL principle.
+- `CORPUS_INGESTION.md` — IWC grounding; URL-not-mirror principle.
 - `SCHEMA_PACKAGES.md` — standard package shape for Foundry-authored JSON Schemas and CLI validators.
+- `COMPARISONS.md` — positioning vs wikis/skill bundles plus a dated KB-to-skill landscape snapshot.
 
 ## Status
 
