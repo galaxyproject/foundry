@@ -205,5 +205,6 @@ Append-only. One line per dated sweep of Part B. Mirrors the Mold
   Corpus2Skill (arXiv 2604.14572) confirmed against arXiv; Custom GPTs citation
   set to the OpenAI Help Center primary.
 - 2026-05 — Sweep: added Pinecone Nexus (first commercial compile-time entry;
-  early access, vendor benchmarks unverified). genio.co assessed and rejected —
-  off-topic EdTech, no KB→skill stance.
+  early access, vendor benchmarks unverified). Assessed and rejected — genio.co
+  (off-topic EdTech, no KB→skill stance) and Glean (enterprise knowledge-graph +
+  runtime retrieval; subsumed by RAG-as-knowledge-base).
