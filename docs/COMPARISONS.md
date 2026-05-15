@@ -114,6 +114,24 @@ deployed approaches are runtime.
   explicit per-kind dispatch and provenance — authority and traceability the
   automatic pipeline does not carry.
 
+### Pinecone Nexus
+
+- **What it is:** a managed knowledge-compilation layer on Pinecone's vector
+  DB — a "Context Compiler" pre-builds task-specific, versioned,
+  citation-bearing artifacts from enterprise data, served at runtime via the
+  KnowQL query language (whose primitives include `provenance`) — [Pinecone, "Knowledge Infrastructure for Agents," 4 May 2026](https://www.pinecone.io/blog/knowledge-infrastructure-for-agents/) (early access only as of 2026-05; vendor benchmark claims not independently verified).
+- **Shares with the Foundry:** the same core bet, from a major vendor — push
+  reasoning upstream from runtime retrieval to a deterministic compile step
+  that bakes selected KB slices into reusable, versioned, source-traceable
+  artifacts. The clearest commercial validation to date of
+  compile-time-with-provenance over runtime RAG.
+- **Diverges:** the compiled artifacts live in a proprietary, platform-bound
+  vector substrate the agent still queries at runtime through KnowQL, and they
+  are auto-derived from raw enterprise data. The Foundry casts curated,
+  human-authored, schema-typed knowledge into portable target-native artifacts
+  (`SKILL.md`) with file-level provenance, no platform lock-in, and no vector
+  index in the path.
+
 ### OpenAPI / schema → tool generators
 
 - **What it is:** deterministic generation of typed tool definitions (or
@@ -186,3 +204,6 @@ Append-only. One line per dated sweep of Part B. Mirrors the Mold
 - 2026-05 — Initial Part B from a KB→skills landscape survey (8 entries).
   Corpus2Skill (arXiv 2604.14572) confirmed against arXiv; Custom GPTs citation
   set to the OpenAI Help Center primary.
+- 2026-05 — Sweep: added Pinecone Nexus (first commercial compile-time entry;
+  early access, vendor benchmarks unverified). genio.co assessed and rejected —
+  off-topic EdTech, no KB→skill stance.
