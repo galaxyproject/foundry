@@ -56,6 +56,13 @@ export const DESIGN_DOCS: DesignDoc[] = [
     category: 'foundation',
   },
   {
+    slug: 'comparisons',
+    title: 'Comparisons',
+    source: 'COMPARISONS.md',
+    summary: 'Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) — a dated snapshot.',
+    category: 'infrastructure',
+  },
+  {
     slug: 'pattern-authorship',
     title: 'Pattern Authorship Policy',
     source: 'PATTERNS.md',

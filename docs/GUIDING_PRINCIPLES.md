@@ -1,5 +1,7 @@
 # Guiding Principles
 
+LLM-proposed Galaxy workflows fail in specific, detectable ways — hallucinated tool IDs, dropped conditional branches, fabricated parameters, `gxformat2` the parser rejects — and monolithic conversion skills decay because they answer those failures with prose caveats that neither compose nor scale. These principles are the design pressure behind the alternative.
+
 The Foundry is not just a glossary, a documentation site, or a pile of skills. It is an attempt to make workflow-construction knowledge durable, inspectable, and executable while the surrounding tooling keeps changing.
 
 These principles explain the design pressure behind the architecture: why the Foundry cites IWC instead of mirroring it, why Molds carry typed references instead of free-form prose, why casting creates frozen artifacts, and why CLI validation stays in the loop.
@@ -131,3 +133,7 @@ The resulting shape is intentional:
 - Harnesses own orchestration.
 
 Each layer has a job. The Foundry works when those jobs stay separate and the connections between them are explicit.
+
+## See Also
+
+[COMPARISONS.md](COMPARISONS.md) — how this shape contrasts with wikis and skill bundles, and where it sits in the wider knowledge-base-to-skill landscape (a dated snapshot).

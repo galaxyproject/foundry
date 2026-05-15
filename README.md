@@ -2,6 +2,8 @@
 
 Knowledge base + casting pipeline for building Galaxy workflows with `gxwf`.
 
+An LLM can read a paper or a Nextflow pipeline and propose a Galaxy workflow — and fail the same boring, detectable ways every time: hallucinated tool IDs, dropped `+galaxyN` revisions, fabricated parameter names, `gxformat2` the parser rejects on line one. Hand-authored "convert a workflow" skills paper over these with prose caveats that don't compose and rot on the next regression. The Foundry's bet: **a knowledge base becomes useful when its structure makes it executable, and a skill becomes trustworthy when its source stays inspectable.**
+
 Site: <https://jmchilton.github.io/foundry/>
 
 ## Goal
@@ -61,8 +63,9 @@ Long-form design narrative under `docs/`:
 - `HARNESS_PIPELINES.md` — pipeline narrative behind `content/pipelines/`.
 - `MOLDS.md` — Mold inventory rationale and bucketing axes.
 - `COMPILATION_PIPELINE.md` — casting design.
-- `CORPUS_INGESTION.md` — IWC grounding; pattern-bodies-cite-by-URL principle.
+- `CORPUS_INGESTION.md` — IWC grounding; URL-not-mirror principle.
 - `SCHEMA_PACKAGES.md` — standard package shape for Foundry-authored JSON Schemas and CLI validators.
+- `COMPARISONS.md` — positioning vs wikis/skill bundles plus a dated KB-to-skill landscape snapshot.
 
 ## Status
 
