@@ -2,6 +2,8 @@
 
 Knowledge base + casting pipeline for building Galaxy workflows with `gxwf`.
 
+An LLM can read a paper or a Nextflow pipeline and propose a Galaxy workflow — and fail the same boring, detectable ways every time: hallucinated tool IDs, dropped `+galaxyN` revisions, fabricated parameter names, `gxformat2` the parser rejects on line one. Hand-authored "convert a workflow" skills paper over these with prose caveats that don't compose and rot on the next regression. The Foundry's bet: **a knowledge base becomes useful when its structure makes it executable, and a skill becomes trustworthy when its source stays inspectable.**
+
 Site: <https://jmchilton.github.io/foundry/>
 
 ## Goal
