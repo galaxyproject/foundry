@@ -42,6 +42,13 @@ export const DESIGN_DOCS: DesignDoc[] = [
     category: 'foundation',
   },
   {
+    slug: 'cast-walkthrough',
+    title: 'Cast Walkthrough',
+    source: 'CAST_WALKTHROUGH.md',
+    summary: 'One real committed cast (discover-shed-tool) annotated end to end: every bundle file traced back through per-kind dispatch and _provenance.json.',
+    category: 'foundation',
+  },
+  {
     slug: 'corpus',
     title: 'Corpus Integration',
     source: 'CORPUS_INGESTION.md',
