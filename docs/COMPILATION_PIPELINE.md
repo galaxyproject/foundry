@@ -114,7 +114,7 @@ casts/web/<mold-name>/
 
 For **generic**: single self-contained markdown unless a richer consumer appears.
 
-`_provenance.json` is required for every cast. The contract is `scripts/lib/schemas/cast-provenance.schema.json` (schema version 2). Shape:
+`_provenance.json` is required for every cast. The contract of record is the [[cast-provenance]] schema note (rendered field-by-field from `scripts/lib/schemas/cast-provenance.schema.json`, schema version 2); the JSON below is an illustrative sketch, not the authority. Shape:
 
 ```json
 {
@@ -173,7 +173,7 @@ For **generic**: single self-contained markdown unless a richer consumer appears
 
 `refs[]` is sorted by `(kind, src)` for stable diffs. Each entry's `source` field records whether the dst was produced deterministically or by an LLM step. `artifacts` records the runtime handoff contract after producer inheritance. While a condense ref is awaiting LLM output, the entry carries `pending_llm: true` and the deterministic verifier rejects committed provenance with any unfilled entry.
 
-Provenance is the foundation for drift detection, reproducibility audits, and "why does this cast contain X" forensics.
+Provenance is the foundation for drift detection, reproducibility audits, and "why does this cast contain X" forensics. See [[cast-provenance]] for the per-field contract and stable anchors.
 
 ## Schema artifacts in casts
 
