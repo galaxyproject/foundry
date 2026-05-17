@@ -1,12 +1,14 @@
 // Registry of JSON Schemas, keyed by note `name` field.
-// All schemas come from two packages: producer-co-located
+// Most schemas come from two packages: producer-co-located
 // (@galaxy-foundry/summarize-nextflow) or foundry-bundled
-// (@galaxy-foundry/foundry).
+// (@galaxy-foundry/foundry). `cast-provenance` is Foundry-authored and
+// repo-local — its contract lives in scripts/lib/schemas/, not a package.
 
 import galaxyToolDiscoverySchema from '../../../packages/foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json';
 import galaxyToolSummarySchema from '../../../packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
 import summaryCwlSchema from '../../../packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json';
 import testsFormatSchema from '../../../packages/foundry/src/schemas/tests-format/tests.schema.json';
+import castProvenanceSchema from '../../../scripts/lib/schemas/cast-provenance.schema.json';
 import foundryPkg from '../../../packages/foundry/package.json';
 import summaryNextflowSchema from '../../../packages/summarize-nextflow/src/schema/summary-nextflow.schema.json';
 import summarizeNextflowPkg from '../../../packages/summarize-nextflow/package.json';
@@ -38,6 +40,10 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   },
   'galaxy-tool-summary': {
     schema: galaxyToolSummarySchema as unknown as Record<string, unknown>,
+    version: foundryVersion,
+  },
+  'cast-provenance': {
+    schema: castProvenanceSchema as unknown as Record<string, unknown>,
     version: foundryVersion,
   },
 };

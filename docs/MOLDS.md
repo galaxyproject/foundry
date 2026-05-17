@@ -116,6 +116,18 @@ Excluded from the inventory by design. Naming them keeps the boundary visible.
 
 **Wrapping a CLI is *not* a Mold disqualifier.** `discover-shed-tool`, `validate-galaxy-step`, `validate-galaxy-workflow`, and `run-workflow-test` all wrap CLIs and are Molds. The criterion is whether there is procedural content worth casting (when to run, how to interpret, when to loop back), not whether the underlying mechanism is a CLI.
 
+### Worked example: `compare-against-iwc-exemplar`
+
+A case that genuinely could have gone the other way. "Compare the design against the IWC corpus" sounds like *knowledge*: the corpus-first principle is already reference content (`CORPUS_INGESTION.md`, the IWC-grounding research notes). One plausible shape was a pattern page describing the corpus-first idiom, referenced by the template Mold — no separate Mold.
+
+It landed as an **action Mold** (`content/molds/compare-against-iwc-exemplar/`) because the deciding criterion from the rule above resolves the same way it does for the CLI wrappers — there is procedural content worth casting:
+
+- **When to run** — after the interface/data-flow (or combined paper) briefs, before the `*-summary-to-galaxy-template` Mold, so corpus divergence is caught before per-step authoring effort is spent.
+- **How to interpret** — rank candidates by the feature hierarchy (domain intent → input topology → tool families → DAG motifs), not by superficial similarity.
+- **What it hands off** — a structural-diff artifact (`iwc-comparison-notes`) the downstream template Mold consumes by shared `id`.
+
+The corpus-first *principle* it rests on stays reference content; the *act* of locating the nearest exemplar, ranking it, and gating the template step is procedure. Idiom that a Mold can simply cite is reference; a repeatable decision-and-handoff is a Mold. Same test, applied to a candidate where the answer was not obvious up front.
+
 ## Counts and reuse
 
 - 33 current candidate Molds total in `content/molds/` (Galaxy validation split into step/workflow Molds; interface/data-flow design is source-target specific; `find-test-data` included; corpus Mold renamed/reframed as `compare-against-iwc-exemplar`; `discover-shed-tool` graduated from "Not Molds"; whole-CLI catalogs are reference content, not Molds).

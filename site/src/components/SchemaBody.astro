@@ -44,45 +44,56 @@ function renderType(prop: any): string {
   return prop.type ?? 'any';
 }
 
+function viewFromNode(id: string, node: any): DefView | null {
+  if (!node || typeof node !== 'object') return null;
+  const required = Array.isArray(node.required) ? node.required : [];
+  const defProps = (node.properties ?? {}) as Record<string, any>;
+  const props: Property[] = Object.entries(defProps).map(([propName, propNode]) => ({
+    name: propName,
+    type: renderType(propNode),
+    description: (propNode as any)?.description,
+    required: required.includes(propName),
+    default: (propNode as any)?.default,
+    constValue: (propNode as any)?.const,
+  }));
+  // Sort: required first, then alphabetical by name (but keep `that` discriminator first if present).
+  props.sort((a, b) => {
+    if (a.name === 'that') return -1;
+    if (b.name === 'that') return 1;
+    if (a.required !== b.required) return a.required ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+  return { id, title: node.title ?? id, description: node.description, properties: props, required };
+}
+
 function buildDefViews(schema: Record<string, unknown> | undefined): DefView[] {
   if (!schema) return [];
-  const defs = (schema['$defs'] as Record<string, any>) ?? {};
+  // Support both draft 2019+ ($defs) and draft-07 (definitions).
+  const defs = {
+    ...((schema['$defs'] as Record<string, any>) ?? {}),
+    ...((schema['definitions'] as Record<string, any>) ?? {}),
+  };
   const views: DefView[] = [];
   for (const [defName, defNode] of Object.entries(defs)) {
-    if (!defNode || typeof defNode !== 'object') continue;
-    const required = Array.isArray(defNode.required) ? defNode.required : [];
-    const props: Property[] = [];
-    const defProps = (defNode.properties ?? {}) as Record<string, any>;
-    for (const [propName, propNode] of Object.entries(defProps)) {
-      props.push({
-        name: propName,
-        type: renderType(propNode),
-        description: propNode?.description,
-        required: required.includes(propName),
-        default: propNode?.default,
-        constValue: propNode?.const,
-      });
-    }
-    // Sort: required first, then alphabetical by name (but keep `that` discriminator first if present).
-    props.sort((a, b) => {
-      if (a.name === 'that') return -1;
-      if (b.name === 'that') return 1;
-      if (a.required !== b.required) return a.required ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-    views.push({
-      id: defName,
-      title: defNode.title ?? defName,
-      description: defNode.description,
-      properties: props,
-      required,
-    });
+    const v = viewFromNode(defName, defNode);
+    if (v) views.push(v);
   }
   views.sort((a, b) => a.id.localeCompare(b.id));
   return views;
 }
 
+// Object-root schemas (e.g. cast-provenance, summary-cwl) carry their main
+// shape in top-level `properties`; surface that as a stable `#root` section
+// ahead of the definitions. $ref-only or array roots contribute nothing.
+function buildRootView(schema: Record<string, unknown> | undefined): DefView | null {
+  const s = schema as any;
+  if (!s?.properties || Object.keys(s.properties).length === 0) return null;
+  return viewFromNode('root', s);
+}
+
 const defViews = reg ? buildDefViews(reg.schema) : [];
+const rootView = reg ? buildRootView(reg.schema) : null;
+const allViews = rootView ? [rootView, ...defViews] : defViews;
 const root = reg?.schema as any;
 const rootDescription = root?.description as string | undefined;
 const rootTitle = root?.title as string | undefined;
@@ -111,17 +122,17 @@ const rootTitle = root?.title as string | undefined;
     {rootTitle && <h2 class="not-prose text-lg font-semibold mb-2">{rootTitle}</h2>}
     {rootDescription && <p class="not-prose text-sm text-(--color-text-secondary) m-0">{rootDescription}</p>}
     <div class="mt-3 text-xs text-(--color-text-secondary)">
-      {defViews.length} definitions. Anchor links per definition (e.g. <code>#has_text_model</code>) are stable.
+      {allViews.length} sections. Anchor links per section (e.g. <code>#root</code>) are stable.
     </div>
   </section>
 )}
 
-{reg && defViews.length > 0 && (
+{reg && allViews.length > 0 && (
   <nav class="mb-8 p-3 rounded-lg border border-(--color-border) text-xs">
     <details>
-      <summary class="cursor-pointer font-semibold text-sm">All definitions ({defViews.length})</summary>
+      <summary class="cursor-pointer font-semibold text-sm">All sections ({allViews.length})</summary>
       <ul class="not-prose mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 list-none p-0">
-        {defViews.map(d => (
+        {allViews.map(d => (
           <li><a href={`#${d.id}`} class="text-(--color-link) hover:underline font-mono text-xs">{d.id}</a></li>
         ))}
       </ul>
@@ -130,7 +141,7 @@ const rootTitle = root?.title as string | undefined;
 )}
 
 <div class="space-y-6">
-  {defViews.map(d => (
+  {allViews.map(d => (
     <section id={d.id} class="not-prose p-4 rounded-lg border border-(--color-border) scroll-mt-20">
       <header class="flex flex-wrap items-baseline gap-2 mb-2">
         <h3 class="text-base font-semibold m-0">
