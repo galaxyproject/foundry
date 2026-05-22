@@ -21,8 +21,8 @@ input_artifacts:
     description: "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] when running the CWL → GALAXY pipeline."
   - id: cwl-galaxy-data-flow
     description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] when running the CWL → GALAXY pipeline."
-  - id: paper-galaxy-design
-    description: "Combined Galaxy interface + data-flow design brief from [[paper-summary-to-galaxy-design]] when running the PAPER → GALAXY pipeline."
+  - id: freeform-galaxy-design
+    description: "Combined Galaxy interface + data-flow design brief from [[freeform-summary-to-galaxy-design]] when running PAPER → GALAXY or INTERVIEW → WORKFLOW pipelines."
 output_artifacts:
   - id: iwc-comparison-notes
     kind: markdown
@@ -83,7 +83,7 @@ references:
 
 Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream `*-summary-to-galaxy-template` Mold before per-step authoring effort is spent.
 
-This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs (or the combined paper design brief) and before the gxformat2 template Mold. Discovery, ranking, and comparison are one action — there is no separate retrieval Mold.
+This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs (or the combined freeform design brief) and before the gxformat2 template Mold. Discovery, ranking, and comparison are one action — there is no separate retrieval Mold.
 
 ## Procedure
 

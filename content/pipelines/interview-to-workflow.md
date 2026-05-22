@@ -1,18 +1,18 @@
 ---
 type: pipeline
-title: PAPER → GALAXY
+title: INTERVIEW → WORKFLOW
 tags:
   - pipeline
-  - source/paper
+  - source/interview
   - target/galaxy
 status: draft
-created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+created: 2026-05-22
+revised: 2026-05-22
+revision: 1
 ai_generated: true
-summary: "Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate."
+summary: "Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff."
 phases:
-  - mold: "[[summarize-paper]]"
+  - mold: "[[interview-to-freeform-summary]]"
   - mold: "[[freeform-summary-to-galaxy-design]]"
   - mold: "[[compare-against-iwc-exemplar]]"
   - mold: "[[freeform-summary-to-galaxy-template]]"
@@ -29,7 +29,6 @@ phases:
     loop: true
   - branch: test-data-resolution
     chain:
-      - "[[paper-to-test-data]]"
       - "[[find-test-data]]"
       - user-supplied
   - mold: "[[implement-galaxy-workflow-test]]"
@@ -38,10 +37,8 @@ phases:
   - mold: "[[debug-galaxy-workflow-output]]"
 ---
 
-# PAPER → GALAXY
+# INTERVIEW → WORKFLOW
 
-Direct path. Lifted from `docs/HARNESS_PIPELINES.md` §"PAPER → GALAXY".
+Interview-driven Galaxy workflow path. The live interview mechanics are harness-owned; this pipeline records the Mold spine after an interview has been normalized into the shared `freeform-summary` handoff.
 
-`summarize-paper` now emits the shared `freeform-summary` handoff, so the design and template phases are shared with interview-sourced starts.
-
-The composed alternative `PAPER → CWL → GALAXY` is a runtime composition of `paper-to-cwl` followed by `cwl-to-galaxy` — open question whether to surface as a distinct pipeline note.
+For v1, "workflow" means a Galaxy `gxformat2` workflow because Galaxy is the Foundry's primary target. If interview-sourced CWL becomes a first-class path, add an `interview-to-cwl` pipeline that reuses [[interview-to-freeform-summary]] and [[freeform-summary-to-cwl-design]].

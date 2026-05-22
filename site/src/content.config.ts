@@ -90,6 +90,7 @@ const branchPhase = z.object({
 const phase = z.union([moldPhase, branchPhase]);
 
 const artifactId = z.string().regex(/^[a-z][a-z0-9-]*$/, { message: 'must be a kebab id' });
+const sourceKinds = ['paper', 'nextflow', 'cwl', 'snakemake', 'interview', 'freeform'] as const;
 
 const outputArtifact = z.object({
   id: artifactId,
@@ -108,7 +109,7 @@ const moldSchema = z.object({
   type: z.literal('mold'),
   name: z.string(),
   axis: z.enum(['source-specific', 'target-specific', 'tool-specific', 'generic']),
-  source: z.enum(['paper', 'nextflow', 'cwl', 'snakemake']).optional(),
+  source: z.enum(sourceKinds).optional(),
   target: z.enum(['galaxy', 'cwl', 'web', 'generic']).optional(),
   tool: z.string().regex(/^[a-z][a-z0-9-]*$/).optional(),
   output_artifacts: z.array(outputArtifact).optional(),
@@ -132,7 +133,7 @@ const sourcePatternSchema = z.object({
   ...baseFields,
   type: z.literal('source-pattern'),
   title: z.string(),
-  source: z.enum(['nextflow', 'cwl', 'snakemake']),
+  source: z.enum(sourceKinds),
   target: z.enum(['galaxy', 'cwl', 'web', 'generic']),
   source_pattern_kind: z.enum(['moc', 'channel-shape', 'operator', 'lifecycle', 'review-trigger']),
   implemented_by_patterns: z.array(wikiLink).min(1),

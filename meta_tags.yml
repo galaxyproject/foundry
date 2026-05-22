@@ -47,6 +47,10 @@ cli/foundry:
 # --- Mold axis tags (provisional — may graduate to typed fields) ---
 source/paper:
   description: "Mold consumes paper-shaped input"
+source/interview:
+  description: "Mold or pipeline starts from a free-form user interview"
+source/freeform:
+  description: "Mold consumes a normalized free-form source summary"
 source/nextflow:
   description: "Mold consumes Nextflow-shaped input"
 source/cwl:

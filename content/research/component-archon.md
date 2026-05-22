@@ -6,25 +6,32 @@ tags:
 component: "Archon harness substrate evaluation"
 status: draft
 created: 2026-04-29
-revised: 2026-05-06
-revision: 2
+revised: 2026-05-22
+revision: 3
 ai_generated: true
-summary: "Archon as a possible Foundry harness substrate; strong fit for heavy harnesses, with per-step sub-DAG looping as the main gap."
+summary: "Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap."
 sources:
   - "https://github.com/coleam00/Archon"
+  - "https://github.com/coleam00/Archon/blob/dev/CHANGELOG.md"
+  - "https://archon.diy/guides/authoring-workflows/"
+  - "https://archon.diy/guides/approval-nodes/"
+  - "https://archon.diy/guides/loop-nodes/"
+  - "https://archon.diy/reference/architecture/"
 ---
 
 # Archon evaluation
 
 Project-infrastructure research on Archon as a possible Foundry harness substrate. Reviewed against
-`https://github.com/coleam00/Archon` on 2026-04-29, `dev` branch at CHANGELOG `0.3.10`. Operational
-details are point-in-time evidence — re-check before adopting.
+`https://github.com/coleam00/Archon` on 2026-04-29, `dev` branch at CHANGELOG `0.3.10`. Refreshed
+2026-05-22 against the public docs site, GitHub `dev` branch, latest release tag `v0.3.12`
+(2026-05-14), and the unreleased changelog section. Operational details are point-in-time evidence —
+re-check before adopting.
 
 ## 1. What is it?
 
-**Tagline (verbatim from `README.md` line 8):** "The first open-source harness builder for AI coding. Make AI coding deterministic and repeatable."
+**Tagline (README):** "The first open-source harness builder for AI coding. Make AI coding deterministic and repeatable."
 
-**Elevator pitch (`README.md` line 23):** "Archon is a workflow engine for AI coding agents. Define your development processes as YAML workflows — planning, implementation, validation, code review, PR creation — and run them reliably across all your projects." It self-positions as "Like what Dockerfiles did for infrastructure and GitHub Actions did for CI/CD … Think n8n, but for software development."
+**Elevator pitch (README):** "Archon is a workflow engine for AI coding agents. Define your development processes as YAML workflows — planning, implementation, validation, code review, PR creation — and run them reliably across all your projects." It self-positions as "Like what Dockerfiles did for infrastructure and GitHub Actions did for CI/CD … Think n8n, but for software development."
 
 **Category.** A YAML-DAG **workflow engine that wraps coding-agent SDKs** (Claude Agent SDK, OpenAI Codex SDK, and a community Pi provider that fronts ~20 LLM backends). It is *not* a generic agent framework, *not* a multi-agent runtime, and *not* a RAG/KB system. It is closer in spirit to GitHub Actions for AI than to LangGraph or CrewAI. Platform adapters (Slack/Telegram/Discord/GitHub webhooks/Web/CLI) feed messages into a router that picks a workflow and runs it.
 
@@ -32,12 +39,13 @@ details are point-in-time evidence — re-check before adopting.
 
 **Maturity / activity.**
 - License: MIT (`LICENSE`).
-- Stars: ~20,200; forks: ~3,090; open issues: 191.
-- Last push: 2026-04-29 (the day this review was done). CHANGELOG shows roughly weekly patch releases through 0.3.x. Still pre-1.0; no compatibility promise.
-- Primary maintainer: Cole Medin (coleam00) plus contributors. Bus factor appears to be roughly 1 + a small contributor pool — issues #1428–#1497 in the last ~2 weeks are mostly authored or merged by a tight group.
-- Trendshift-listed; clearly still in marketing/growth phase.
+- GitHub snapshot on 2026-05-22: ~21,700 stars, ~3,300 forks, ~164 open issues, ~91 open PRs. This is growth, not a maturity signal.
+- Latest release tag found: `v0.3.12` on 2026-05-14. The `dev` changelog already has unreleased changes after that. Still pre-1.0; no compatibility promise.
+- Since the 0.3.10 review, the project has moved materially but not directionally: workflow marketplace, `archon setup` / `archon doctor`, `archon skill install`, Docker/home persistence, explicit resume semantics, provider/model fixes, prompt-cache fixes, and several workflow-engine correctness fixes. No new orchestration primitive removes the per-item sub-DAG gap.
+- Primary maintainer: Cole Medin (coleam00) plus contributors. Bus factor still appears concentrated, though marketplace and release PRs show a broader contributor surface than the first review captured.
+- Clearly still in marketing/growth phase.
 
-**Stated goals.** Determinism and repeatability ("same workflow, same sequence, every time"), portability (workflows committed to your repo, run identically from CLI/Web/Slack/Telegram/GitHub), team-shareable processes, and isolation-by-default (every run gets its own git worktree). **Stated non-goals** (from `CLAUDE.md`): not multi-tenant, single-developer tool, KISS/YAGNI/SRP enforced explicitly. No scheduling, no general task-graph compute, no agent-to-agent negotiation.
+**Stated goals.** Determinism and repeatability ("same workflow, same sequence, every time"), portability (workflows committed to your repo, run identically from CLI/Web/Slack/Telegram/GitHub/Discord), team-shareable processes, and isolation-by-default (every run gets its own git worktree). The current docs lean hard into "fire and forget" remote coding, but not into invisible automation only: human checkpoints are documented as explicit workflow constructs.
 
 ## 2. Core architecture and primitives
 
@@ -50,13 +58,20 @@ Archon's vocabulary is small and concrete. The primitives are: **workflow**, **n
 - `prompt:` — inline prompt string, sent to the AI provider.
 - `bash:` — shell script, no AI; stdout captured as `$nodeId.output`.
 - `script:` — inline TS/Python (`runtime: bun | uv`) with optional `deps:` and `timeout:`; stdout captured as `$nodeId.output`.
-- `loop:` — iterative AI prompt with `until:` completion-signal string, `max_iterations`, optional `fresh_context: true` (new session per iteration), `interactive: true` (pause for user via `/workflow approve`), and `until_bash:` for deterministic loop-exit checks.
+- `loop:` — iterative AI prompt with `until:` completion-signal string, `max_iterations`, optional `fresh_context: true` (new session per iteration), `interactive: true` + `gate_message` (pause between iterations for user feedback), and `until_bash:` for deterministic loop-exit checks.
 - `approval:` — pure human gate. `approval.message`, optional `capture_response: true` to store the user's reply as `$node.output`, optional `on_reject:` with its own redraft prompt and `max_attempts`.
 - `cancel:` — terminate the run with a reason string (think "abort branch" of a `when:` conditional).
 
+**Human interaction model.** This is no longer a minor side detail in the docs. Archon documents three explicit mid-pipeline interaction patterns:
+- `approval:` node — pause a DAG at a named checkpoint, notify the user, approve/reject from CLI/Web/chat platform, optionally capture the approval comment into downstream `$node.output`, and optionally run an AI redraft on rejection before pausing again.
+- `loop.interactive: true` — pause between loop iterations, inject the user's feedback into the next prompt via `$LOOP_USER_INPUT`, and continue until the loop's completion signal appears.
+- workflow-level `interactive: true` — for Web UI runs, force foreground execution so AI output and gate messages appear in the active chat. CLI, Slack, Telegram, and GitHub already run in foreground mode.
+
+So Archon is not only for unsupervised pipelines. Better description: **deterministic pipelines with opt-in human gates**. The default product posture is fire-and-forget background automation, but the architecture expects user interaction to be modeled explicitly as nodes or interactive loops, not as arbitrary interruption inside any node.
+
 **Per-node knobs** (also in `dagNodeBaseSchema`): `when:` JS-expression conditions, `trigger_rule:` for join semantics (`all_success | one_success | none_failed_min_one_success | all_done`), `context: fresh | shared`, `output_format:` (JSON-schema for structured output, SDK-enforced for Claude/Codex), `allowed_tools`/`denied_tools`, `hooks:` (per-node SDK hooks), `mcp:` (per-node MCP server config path), `skills:` (per-node Claude skill preload — directly relevant), `agents:` (inline Claude sub-agent definitions usable via the Task tool), `effort/thinking/maxBudgetUsd/systemPrompt/fallbackModel/betas/sandbox` (Claude SDK passthrough), `retry:` (with backoff), `idle_timeout:`, `model:`/`provider:` overrides.
 
-**Storage / state.** SQLite by default at `~/.archon/archon.db`; PostgreSQL via `DATABASE_URL`. 8 tables, `remote_agent_*` prefix: `codebases`, `conversations`, `sessions` (immutable, transition-linked), `messages`, `isolation_environments`, `workflow_runs` (with `working_path` for resume detection — migration `019_workflow_resume_path.sql`), `workflow_events` (step-level event log for observability), `codebase_env_vars`. Per-run artifacts live on disk under `~/.archon/workspaces/<owner>/<repo>/artifacts/runs/<id>/` and are reachable from inside nodes via `$ARTIFACTS_DIR`. Per-run logs go to `…/logs/`. Cross-run repo-scoped state lives at `<repo>/.archon/state/` (gitignored).
+**Storage / state.** SQLite by default at `~/.archon/archon.db`; PostgreSQL via `DATABASE_URL`. The current architecture docs present a `remote_agent_*` schema covering codebases, conversations, sessions, messages, isolation environments, workflow runs, and workflow events. Per-run artifacts live on disk under `~/.archon/workspaces/<owner>/<repo>/artifacts/runs/<id>/` and are reachable from inside nodes via `$ARTIFACTS_DIR`. Per-run logs go to `…/logs/`. Cross-run repo-scoped state lives at `<repo>/.archon/state/` (gitignored).
 
 **Execution model.** Async, in-process (Bun event loop), per-run path-exclusive lock (overridable via `mutates_checkout: false`). Node concurrency is per-DAG-layer. The DAG executor lives at `packages/workflows/src/dag-executor.ts`; the loader+validator at `loader.ts`; orchestration that maps platform messages to runs at `packages/core/src/orchestrator/`.
 
@@ -79,7 +94,7 @@ This is where Archon's fit with generated skills and other cast artifacts is clo
 
 - **Claude skills are first-class.** The `skills:` array on any AI node preloads Claude skill directories via SDK `AgentDefinition` wrapping. Skills live in the standard Claude location and are referenced by name. Per-node, not workflow-wide.
 - **Commands** (`.archon/commands/*.md`) are reusable prompt templates with `$1`/`$2`/`$ARGUMENTS`/`$ARTIFACTS_DIR`/`$WORKFLOW_ID`/`$BASE_BRANCH`/`$DOCS_DIR`/`$LOOP_USER_INPUT`/`$REJECTION_REASON`/`$LOOP_PREV_OUTPUT`/`$<nodeId>.output` substitution. They are *not* code — they are prompt fragments. This maps cleanly onto a prompt-shaped generated skill with a contract.
-- **MCP servers** are configured per-node via `mcp:` (path to a config JSON, env vars expanded at execution time). Claude-only. Useful if generated skills expose themselves as MCP tools.
+- **MCP servers** are configured per-node via `mcp:` (path to a config JSON, env vars expanded at execution time). Released docs still frame this mainly as Claude-node support; the unreleased changelog adds Codex-node MCP support through shared config loading. Useful if generated skills expose themselves as MCP tools.
 - **Inline `agents:`** define Claude sub-agents callable via the Task tool, scoped to the node — kebab-case IDs, optional model/tools/skills/maxTurns. This is the closest analog to dynamically composing generated skills inside a phase.
 - **External executables** are reached via `bash:` or `script:` nodes. There is no "tool registry" — you call `gxwf`, `planemo`, `gh`, etc. directly. `script:` nodes with `runtime: uv` and `deps: [...]` are particularly useful: a self-contained Python script with its own dependency set runs as a node and emits structured stdout. This is the integration point for `gxwf` lint/validate/roundtrip and Planemo CLI invocations.
 - **No Claude-skill-directory auto-discovery beyond what Claude Code itself does.** Archon doesn't have its own skill registry; it leans on Claude's. For non-Claude providers, `skills:` is ignored.
@@ -92,10 +107,10 @@ This is where Archon's fit with generated skills and other cast artifacts is clo
 | Sequencing / DAG | First-class. `nodes` with `depends_on`. Layer-parallel execution. |
 | Conditional branching | `when:` expression on nodes; `cancel:` node terminates a branch. |
 | Routing | The router (`packages/workflows/src/router.ts`) uses an LLM call to pick a workflow from descriptions, with a 4-tier name-resolution fallback (exact → case-insensitive → suffix → substring) and ambiguity detection. Within a workflow, branching is `when:`-based, not LLM-routed. |
-| Looping / per-item iteration | `loop:` with `until:` signal, `max_iterations`, `fresh_context`, `until_bash:`, `$LOOP_PREV_OUTPUT`. The looped unit is a single prompt — there is **no native "for each item in list, run this sub-DAG"** primitive. To loop over a list of steps, you either drive iteration from inside the prompt (the `archon-piv-loop` "Ralph pattern" reads a plan from disk and picks one task per iteration) or you author N copies of the layer. This is a real limitation for the Foundry's "loop over workflow steps" requirement. |
-| Approval gates / HITL | `approval:` nodes (pure gate, optional `capture_response`, optional `on_reject` redraft). `loop: { interactive: true, gate_message }` for iterative HITL. CLI/web/platform `/workflow approve <id> <text>` and `/workflow reject <id> <reason>`. |
+| Looping / per-item iteration | `loop:` with `until:` signal, `max_iterations`, `fresh_context`, `until_bash:`, `$LOOP_PREV_OUTPUT`, and optional `interactive` pause between iterations. The looped unit is a single prompt — there is **no native "for each item in list, run this sub-DAG"** primitive. To loop over a list of steps, you either drive iteration from inside the prompt (the "Ralph pattern" reads a plan from disk and picks one task per iteration) or you author N copies of the layer. This remains the main limitation for the Foundry's "loop over workflow steps" requirement. |
+| Approval gates / HITL | `approval:` nodes (pure gate, optional `capture_response`, optional `on_reject` redraft/re-pause). `loop: { interactive: true, gate_message }` for iterative HITL. CLI/web/chat-platform approval and rejection are first-class, and Web UI workflows with gates need workflow-level `interactive: true` so prompts appear in the active chat. |
 | Retry / failure | Per-node `retry:` with backoff (not on loop nodes — loops manage their own iteration). `trigger_rule` lets a join survive partial failures. Failures classified into structured error types (`dag.node_empty_output`, `codex_stream_incomplete`, etc.). |
-| State persistence and resumption | Yes. Workflow runs persist to DB; `working_path` lets a re-run on the same branch find prior failed runs. `cli workflow resume <run-id>` re-runs, *skipping completed nodes*. Approval gates pause the run and survive process restarts. `archon-piv-loop` after-resume semantics handled explicitly (e.g., `$LOOP_USER_INPUT` only populated on first iteration after resume). |
+| State persistence and resumption | Yes. Workflow runs persist to DB; `cli workflow resume <run-id>`, `archon workflow run --resume`, and Web UI resume paths re-run while skipping completed nodes. As of 0.3.11, plain `archon workflow run` no longer silently auto-resumes a prior failed run, which removes a cross-invocation state-leak hazard. Approval gates pause the run and survive process restarts. |
 | Observability / tracing | `workflow_events` table is a step-level event log (transitions, artifacts, errors). JSONL file logs per run under `…/logs/`. Web UI "Workflow Execution" view streams events. Pino structured logs with `{domain}.{action}_{state}` event naming. |
 | Cost tracking | Per-node `maxBudgetUsd:` cap (Claude only — SDK passthrough). No global cost dashboard. |
 | Concurrency | Per-DAG-layer parallelism inside a run. Multiple concurrent runs across worktrees. Same-checkout concurrency requires `mutates_checkout: false` (author asserts no race). |
@@ -122,20 +137,20 @@ For the Foundry's wish to host **patterns** and **IWC exemplars** in retrievable
 
 - **Per-iteration "for each step" is awkward.** As noted, loops iterate a single prompt; iterating a sub-DAG over N items requires either (a) the Ralph pattern (loop reads list from disk, picks one) or (b) static unrolling. Foundry's "loop over steps: discover-or-author tool → summarize → implement → validate" cannot be expressed as a sub-DAG-per-item natively.
 - **Single-developer tooling assumption.** No multi-tenancy, no auth model beyond per-adapter env-var allow-lists, no audit log targeted at compliance. Fine for a research foundry; not OK if you ever want a hosted multi-user Foundry.
-- **Pre-1.0, schema churn.** CHANGELOG 0.3.10 alone shows substantive engine semantics changes (e.g., `dag.node_empty_output` failure mode, provider/model resolution rewrite, `$LOOP_PREV_OUTPUT`). Lock-in via YAML is small (workflows are portable), but lock-in via runtime semantics is real.
+- **Pre-1.0, schema/runtime churn.** CHANGELOG 0.3.10 through 0.3.12 shows substantive semantics changes: provider/model resolution, `$LOOP_PREV_OUTPUT`, `mutates_checkout`, explicit resume, node-output structured parsing, skill tool defaults, setup/doctor behavior, and Docker persistence. Lock-in via YAML is small (workflows are portable), but lock-in via runtime semantics is real.
 - **Provider lock-in.** The whole engine assumes one of three provider SDKs. Not a generic "any LLM" engine. Pi (community) widens this via OpenRouter-style routing but it's `builtIn: false`.
 - **No native KB/retrieval** (see §6).
 - **Bus factor.** Effectively one primary maintainer with a contributor pool. Pace is fast but concentrated.
-- **Known recent bugs / open issues** (sample from issues 1485–1497): security CVEs in dev-chain deps (Discord adapter undici/lodash; vite/astro/postcss in dev), IME enter-key handling on web, release-workflow race conditions, GitHub App auth roadmap (#1495). Roadmap-pinned: setup overhaul to "binary-install primary + `archon doctor`" (#1494).
+- **Workflow-engine correctness is still moving.** The last two releases fixed real control-flow hazards: implicit auto-resume leaked prior outputs into new invocations, Pi structured JSON could fail downstream `$node.output.field` use, approval gates could be bypassed after reject-with-redraft on resume, and Claude stop-sequence / `output_format` terminations were misclassified.
 - **No autonomous lifecycle mutation across processes** is an explicit architectural rule (`CLAUDE.md`, citing #1216) — Archon will refuse to mark stale runs as failed. Pragmatic: requires user one-click action. Worth noting if you want "fully autonomous" harnesses.
-- **Lock-in on extraction.** Workflows are plain YAML referencing prompts in plain markdown. Easy to migrate. The DB schema (8 tables) is more entangled, but artifacts on disk and per-repo `.archon/` make extraction tractable.
+- **Lock-in on extraction.** Workflows are plain YAML referencing prompts in plain markdown. Easy to migrate. The DB schema is more entangled, but artifacts on disk and per-repo `.archon/` make extraction tractable.
 
 ## 9. Roadmap and trajectory
 
 - Cadence: weekly-ish patch releases through 0.3.x. CHANGELOG follows Keep a Changelog. SemVer.
-- Recent themes (0.3.10): maintainer-workflow suite (auto PR review, daily standup, contributor-reply triage), provider/model trust-the-SDK rewrite, looped-output passthrough (`$LOOP_PREV_OUTPUT`), `mutates_checkout` for same-checkout concurrency, autodetection of Claude/Codex binary paths.
-- Active roadmap items in issues: GitHub App auth (#1495), setup overhaul / `archon doctor` (#1494), security-dep churn for community adapters (#1485, #1486).
-- Direction: hardening for "fire-and-forget remote agentic coding" — Slack/Telegram/GitHub triggering, multi-platform unified inbox, more automation around PR review and triage. *Not* moving toward general orchestration, KB, or multi-agent.
+- Recent themes since 0.3.10: workflow marketplace, setup/doctor/install packaging, Docker persistence, explicit resume, provider/model trust-the-SDK behavior, structured-output reliability, skill loading fixes, prompt-cache fixes, and Codex parity work.
+- Docs now have dedicated pages for approval nodes, loop nodes, script nodes, per-node MCP, per-node skills, Web UI execution mode, and common authoring patterns. That is a meaningful documentation/product maturation step.
+- Direction: hardening for packaged "fire-and-forget" remote coding workflows with explicit gates where needed — Slack/Telegram/GitHub/Web triggering, workflow marketplace, unified UX, PR review/triage automation. *Not* moving toward general orchestration, KB, multi-agent negotiation, or native per-item sub-DAG loops.
 
 ## 10. Concrete fit assessment for harnesses
 
@@ -148,7 +163,8 @@ Re-read against Foundry harness requirements:
 - **CLI integration for `gxwf`/`planemo`.** `script:` nodes with `runtime: uv` + `deps:`, or `bash:` nodes. Stdout becomes `$node.output` for downstream nodes. `output_format:` JSON schema for Claude/Codex enforces structured outputs from validators.
 - **Observability.** `workflow_events` table + Web UI step viewer + JSONL logs. Probably exceeds what a hand-rolled harness would have.
 - **Concurrent runs.** Worktrees by default — useful if multiple Galaxy workflows are being foundry-cast at once.
-- **Cast skill loading.** Claude skills via per-node `skills:`; reusable prompt fragments via `command:` nodes; MCP servers via `mcp:`.
+- **Cast skill loading.** Claude skills via per-node `skills:`; reusable prompt fragments via `command:` nodes; MCP servers via `mcp:` where the selected provider supports them.
+- **Mid-pipeline user interaction.** Archon has explicit support for plan approval, rejection/redraft, captured user comments, and iteration-by-iteration feedback. This maps well to Foundry's harness-level gates, because gates can wrap Molds without contaminating Mold source with autonomy policy.
 
 **What requires non-trivial custom code on top of Archon:**
 - **Per-step looping over a sub-DAG.** The "[loop over steps] discover-or-author tool → summarize tool → implement step → validate-galaxy-step → translate tests → assemble tests" sub-DAG cannot be expressed as a native for-each. Workarounds: (a) Ralph pattern in a single big `loop:` (one iteration per step, fresh context, plan-on-disk); (b) flatten by writing a shell driver that calls `bun run cli workflow run <sub-workflow>` once per step and then synthesizes — feasible but adds an outer driver; (c) fork the engine to add `for_each:` (rejected by KISS/YAGNI culture, would diverge from upstream). The Ralph pattern is what the bundled `archon-piv-loop` and `archon-ralph-dag` workflows do, and it works, but each iteration is a single prompt — sub-DAG per iteration is not native.
@@ -156,13 +172,17 @@ Re-read against Foundry harness requirements:
 - **Foundry's casting step.** Archon doesn't compile or cast Molds — it consumes the generated skills or other cast artifacts. Casting lives outside Archon. Not a fit problem; just confirming the boundary.
 - **Pattern/IWC-exemplar retrieval.** Either keep them on the filesystem and grep from inside nodes, or pair with an external retriever. Not Archon's job.
 
+**Interactive vs. unsupervised posture.** The answer to "is Archon more for unsupervised pipelines?" is **mostly yes by default, but no by capability**. Its marketing and Web UI defaults favor background, fire-and-forget workflows. Its docs and architecture still make user interaction a first-class, explicit shape: `approval` nodes, interactive loops, foreground Web workflows, and chat/CLI/Web approval commands. What it does **not** offer is free-form, arbitrary user steering in the middle of any running node. If user involvement matters, the workflow author must model that point as an approval node, rejection-redraft gate, or interactive loop.
+
+**Foundry-specific read.** Foundry's own `docs/HARNESS_PIPELINES.md` already says approval gates, scope confirmation, plan presentation, state, and resumption are harness-level concerns, not Molds. Current `content/pipelines/*.md` files include `[loop]` and `[branch]`, but no inline `[gate]` phase yet; the docs only reserve `[gate]` for the first real approval/scope checkpoint. That means the current Foundry pipeline spine is closer to an unsupervised Mold sequence with harness-owned checkpoints layered around it than to a fully conversational workflow. Archon fits that posture: keep the same Mold pipeline and author separate interactive vs. batch Archon workflow variants by inserting or omitting `approval` nodes.
+
 **What Archon would actively get in the way of:** very little. The main friction is if you want a different runtime model (durable async like Temporal, externally-scheduled, or a different agent runtime than Claude/Codex/Pi). Archon assumes one in-process Bun event loop, one of three SDKs.
 
 **Lightweight harness end of the spectrum** (simple sequence of generated skills): **Archon is overkill.** A 10-line shell script or a small Python file calling the Anthropic SDK does this and incurs no DB, no daemon, no platform-adapter layer, no schema. *But:* if you're going to write more than two harnesses, the marginal cost of the second Archon workflow is much lower than the second hand-rolled harness, because you already have observability, resumption, and a UI. Verdict: lightweight harnesses *alone* don't justify Archon; lightweight + heavy mixed does.
 
 **Heavy harness end** (gated, resumable, multi-step, observability-equipped): **Archon is genuinely close to enough**, with the per-step-loop caveat. Concretely it covers ~80% of the heavy-harness requirements, and the missing 20% (per-item sub-DAGs, complex routing) is workable via Ralph + `when:` patterns. You would *not* need to compose Archon with LangGraph or Temporal for the Foundry's stated requirements. You might compose it with a small external retriever for patterns/IWC exemplars.
 
-**Concrete recommendation.** **Hybrid — lean on Archon as the harness substrate, but isolate the boundary.** Author Foundry harnesses as Archon workflows under `<repo>/.archon/workflows/`, generated skills as Claude skills + `.archon/commands/`, and call `gxwf`/`planemo` via `script:` and `bash:` nodes. Keep casting entirely outside Archon. Keep IWC/pattern retrieval outside Archon (filesystem or MCP). Do **not** build deep dependencies on Archon's DB schema or its TypeScript engine APIs — treat workflows-as-YAML as the only durable contract; that's where extraction cost is low. Accept the per-step-loop limitation up front and design the per-step pipeline around the Ralph pattern (single big loop reading the step list from disk). Revisit in 3–6 months: if Archon hits 1.0 with the loop-over-list primitive added, double down; if v2 churn continues, the YAML + commands are still portable to a hand-rolled runner.
+**Concrete recommendation.** **Hybrid — lean on Archon as the harness substrate for heavy flows, but isolate the boundary.** Author Foundry harnesses as Archon workflows under `<repo>/.archon/workflows/`, generated skills as Claude skills + `.archon/commands/`, and call `gxwf`/`planemo` via `script:` and `bash:` nodes. Keep casting entirely outside Archon. Keep IWC/pattern retrieval outside Archon (filesystem or MCP). Do **not** build deep dependencies on Archon's DB schema or its TypeScript engine APIs — treat workflows-as-YAML as the only durable contract; that's where extraction cost is low. Accept the per-step-loop limitation up front and design the per-step pipeline around the Ralph pattern (single big loop reading the step list from disk). For user interaction, make gates explicit harness variants: e.g. a batch workflow with no gates, an interactive workflow with approval after design/template phases, and a guided workflow with `loop.interactive` around risky per-step implementation.
 
 ## 11. Alternatives worth comparing
 
@@ -174,11 +194,12 @@ Re-read against Foundry harness requirements:
 
 ## Recommendation
 
-Adopt Archon as the substrate for **heavy** Foundry harnesses, treating workflow YAML and commands as the only durable contract. It gives you ~80% of the heavy-harness requirements off-the-shelf — sequencing, approval gates, retries, resumption, observability, parallel fan-out, worktree isolation, Claude-skill loading, MCP, structured outputs, and a usable Web UI — with the noteworthy limitation that "loop over a list of items, each running a sub-DAG" is not a native primitive (use the bundled Ralph pattern). Do not let it host pattern/IWC-exemplar retrieval; that's the wrong shape and v2 deliberately removed the KB. For **lightweight** harnesses (simple sequence of generated skills) Archon is overkill in isolation but cheap once you're already running it for the heavy end.
+Adopt Archon as the substrate for **heavy** Foundry harnesses, treating workflow YAML and commands as the only durable contract. The 2026-05 refresh strengthens, rather than weakens, that call: Archon has better docs, cleaner setup, explicit resume semantics, and first-class approval/interactive-loop guidance. It still does not solve native "loop over a list of items, each running a sub-DAG" (use Ralph-style plan-on-disk looping or an outer driver). Do not let it host pattern/IWC-exemplar retrieval; that's the wrong shape and v2 deliberately removed the KB. For **lightweight** harnesses (simple sequence of generated skills), Archon is overkill in isolation but cheap once you're already running it for the heavy end.
 
 **Next steps (prioritized):**
-1. Build a throwaway proof-of-concept harness in Archon that exercises (a) a `script: { runtime: uv }` node calling `gxwf validate`, (b) a Ralph-pattern loop over a fake step list, (c) one `approval:` gate, (d) a `cancel:` branch from a `when:` route. Goal: confirm the per-step-loop ergonomics are tolerable for the real pipeline.
+1. Build a throwaway proof-of-concept harness in Archon that exercises (a) a `script: { runtime: uv }` node calling `gxwf validate`, (b) a Ralph-pattern loop over a fake step list, (c) one `approval:` gate with `capture_response`, (d) one reject-with-redraft path, and (e) a `cancel:` branch from a `when:` route. Goal: confirm the per-step-loop and gate ergonomics are tolerable for the real pipeline.
 2. Decide where Mold compilation lives (outside Archon) and where pattern/IWC retrieval lives (outside Archon — pick filesystem grep vs. MCP server). Document the boundary so the Foundry doesn't drift Archon into KB territory.
-3. Pin to a specific Archon release in the Foundry's docs and re-evaluate at each minor bump until 1.0; v2 semantics are still moving (CHANGELOG 0.3.10 alone changed provider/model resolution).
-4. If the proof-of-concept exposes that per-step sub-DAGs are too painful: prototype the same flow in LangGraph as a head-to-head comparison before committing.
-5. Skip CrewAI/AutoGen/Temporal/Inngest for now — wrong shape or too heavy for a research foundry.
+3. Author two workflow variants for the same Foundry spine: `*-batch` with no user gates and `*-guided` with approval after source summary/design/template phases. That tests the autonomy-posture boundary the Foundry docs already assign to harnesses.
+4. Pin to a specific Archon release in the Foundry's docs and re-evaluate at each minor bump until 1.0; v2 semantics are still moving.
+5. If the proof-of-concept exposes that per-step sub-DAGs are too painful: prototype the same flow in LangGraph as a head-to-head comparison before committing.
+6. Skip CrewAI/AutoGen/Temporal/Inngest for now — wrong shape or too heavy for a research foundry.
