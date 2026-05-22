@@ -24,10 +24,10 @@ output_artifacts:
 related_notes:
   - "[[nextflow-summary-to-cwl-interface]]"
   - "[[nextflow-summary-to-cwl-data-flow]]"
-  - "[[paper-summary-to-cwl-design]]"
+  - "[[freeform-summary-to-cwl-design]]"
 ---
 # summary-to-cwl-template
 
 Read the original source artifact, the source summary, and all prior source-target design handoffs from the pipeline run. Emit a CWL Workflow skeleton with inputs, outputs, placeholder steps, rough connections, and TODO slots for later implementation Molds.
 
-The interface and data-flow briefs guide the skeleton, but they do not replace source evidence. Treat the prior-step index as the working context: source summary, interface brief, data-flow brief or paper design brief, and any open questions carried forward.
+The interface and data-flow briefs guide the skeleton, but they do not replace source evidence. Treat the prior-step index as the working context: source summary, interface brief, data-flow brief or freeform design brief, and any open questions carried forward.

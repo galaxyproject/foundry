@@ -34,6 +34,8 @@ Alphabetical.
 
 **Foundry** *(short for Galaxy Workflow Foundry)* — the standalone knowledge base where Pipelines, Molds, pattern pages, CLI manual pages, IO schemas, and IWC-citing content live. Renders as a navigable site; serves as the source of truth that casting reads.
 
+**Freeform summary** — Markdown source-summary handoff for narrative or interview-derived starts. Produced by `summarize-paper` and `interview-to-freeform-summary`; consumed by `freeform-summary-to-galaxy-design`, `freeform-summary-to-cwl-design`, and `freeform-summary-to-galaxy-template`. Deliberately not a rigid workflow schema: it records source evidence, uncertainty, open questions, methods, tools, sample data, parameters, and expected outputs.
+
 **Gate** *(`[gate]` annotation, phase kind — future)* — placeholder for a phase-level annotation marking an inline approval / scope-confirmation checkpoint. Coined when a real pipeline first needs an inline pause for user input; not used by any current pipeline. The phase-kind set is open and not pre-enumerated — `[branch]` and `[gate]` are unrelated behaviors and don't share an umbrella tag.
 
 **Galaxy Workflow Foundry** — the project's full name. See **Foundry**. Subtitle of choice for documents and presentations.
@@ -80,7 +82,7 @@ Alphabetical.
 
 **Subway map** — informal name for the visual rendering of a Pipeline as a vertical line of stops: Mold-shaped phases are linked stations, `[loop]` decorates per-step stations, `[branch]` stops are decision diamonds with their inner branches/chains expanded, future `[gate]` stops would render as checkpoint markers. Off-ramps per stop point to the patterns / CLI manpages / schemas the Mold references — the reference-surface drill-downs from a journey-surface point. Rendered by `pipelines/[slug].astro` (deferred until off-ramp content density justifies the visual).
 
-**Source-specific** *(Mold axis)* — a Mold whose content depends on the input format. Examples: `summarize-paper`, `summarize-nextflow`, `summarize-cwl`. Each emits its own schema by design — no shared summary schema.
+**Source-specific** *(Mold axis)* — a Mold whose content depends on the input format. Examples: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`. Structured sources emit their own schema by design; paper and interview starts share the `freeform-summary` handoff.
 
 **Target-specific** *(Mold axis)* — a Mold whose content depends on the output target. Examples: `summary-to-cwl-template`, `summarize-galaxy-tool`, `validate-cwl`.
 

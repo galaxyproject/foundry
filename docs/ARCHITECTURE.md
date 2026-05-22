@@ -138,7 +138,7 @@ Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (n
 
 **Foundry-specific field types**:
 - `axis`: enum `[source-specific, target-specific, tool-specific, generic]` (Mold).
-- `source`: enum `[paper, nextflow, cwl, snakemake]` (Mold, when `axis` includes source-specific; source-pattern source).
+- `source`: enum `[paper, nextflow, cwl, snakemake, interview, freeform]` (Mold, when `axis` includes source-specific; source-pattern source).
 - `target`: enum `[galaxy, cwl, web, generic]` (Mold or cast-related; when applicable).
 - `tool`: enum `[gxwf, planemo, ...]` (Mold when tool-specific; required on `cli-command`).
 - `command`: string (required on `cli-command`; may be dotted for subcommands, e.g., `tool-search` or `workflow.test`).
@@ -429,6 +429,7 @@ foundry/
 │   │   │   ├── eval.md                   # not packaged into cast
 │   │   │   └── examples/
 │   │   ├── summarize-paper/
+│   │   ├── interview-to-freeform-summary/
 │   │   ├── discover-shed-tool/
 │   │   ├── validate-galaxy-step/
 │   │   ├── validate-galaxy-workflow/
@@ -452,6 +453,7 @@ foundry/
 │   │       └── .gitkeep
 │   ├── pipelines/
 │   │   ├── paper-to-galaxy.md
+│   │   ├── interview-to-workflow.md
 │   │   ├── nextflow-to-galaxy.md
 │   │   ├── cwl-to-galaxy.md
 │   │   ├── paper-to-cwl.md

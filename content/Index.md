@@ -5,6 +5,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Pipelines
 
 - [[cwl-to-galaxy]] — Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction.
+- [[interview-to-workflow]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff.
 - [[nextflow-to-cwl]] — Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
 - [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow.
 - [[paper-to-cwl]] — Direct path from a paper to a CWL Workflow + CommandLineTool set.
@@ -14,6 +15,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 - [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable.
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
+- [[convert-nfcore-module-to-galaxy-tool]] — Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks).
 - [[cwl-summary-to-galaxy-data-flow]] — Translate a CWL summary into a Galaxy data-flow design brief.
 - [[cwl-summary-to-galaxy-interface]] — Map a CWL summary into a Galaxy workflow interface design brief.
 - [[cwl-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs.
@@ -22,23 +24,25 @@ Generated from content frontmatter. Do not edit by hand.
 - [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify failure modes; propose fixes.
 - [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
 - [[find-test-data]] — Search IWC fixtures and public sources for test data matching a data-flow shape.
+- [[freeform-summary-to-cwl-design]] — Translate a free-form source summary into a CWL workflow design brief.
+- [[freeform-summary-to-galaxy-design]] — Translate a free-form source summary into a Galaxy workflow design brief.
+- [[freeform-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary.
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions.
+- [[interview-to-freeform-summary]] — Normalize a free-form user interview into the shared freeform-summary workflow handoff.
 - [[nextflow-summary-to-cwl-data-flow]] — Translate a Nextflow summary into a CWL data-flow design brief.
 - [[nextflow-summary-to-cwl-interface]] — Map a Nextflow summary into a CWL Workflow interface design brief.
 - [[nextflow-summary-to-galaxy-data-flow]] — Translate a Nextflow summary into a Galaxy data-flow design brief.
 - [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief.
+- [[nextflow-summary-to-galaxy-reference-data]] — Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline.
 - [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan.
-- [[paper-summary-to-cwl-design]] — Translate a paper summary into a CWL workflow design brief.
-- [[paper-summary-to-galaxy-design]] — Translate a paper summary into a Galaxy workflow design brief.
-- [[paper-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a paper summary and the paper-to-Galaxy design brief.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
-- [[summarize-cwl]] — Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals.
+- [[summarize-cwl]] — Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation.
 - [[summarize-cwl-tool]] — Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target.
 - [[summarize-galaxy-tool]] — Pull JSON schema, container, source, inputs/outputs for a Galaxy tool.
 - [[summarize-nextflow]] — Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds.
@@ -71,6 +75,11 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-conditionals-patterns]] — Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns.
 - [[galaxy-tabular-patterns]] — Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns.
 - [[manifest-to-mapped-collection-lifecycle]] — Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs.
+- [[nfcore-channel-input-to-galaxy-collection]] — Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type="data"> or paired/list collection input.
+- [[nfcore-meta-map-to-galaxy-params]] — Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier.
+- [[nfcore-stub-block-to-galaxy-noop-test]] — nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml.
+- [[nfcore-task-ext-args-to-galaxy-additional-options]] — Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments.
+- [[nfcore-versions-emit-to-galaxy-version-command]] — Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel.
 - [[compose-runtime-text-parameter]] — Use compose_text_param to build connected text expressions from constants plus runtime scalar values.
 - [[derive-parameter-from-file]] — Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters.
 - [[map-workflow-enum-to-tool-parameter]] — Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets.
@@ -103,14 +112,28 @@ Generated from content frontmatter. Do not edit by hand.
 ## CLI Commands
 
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
+- [[planemo-cli_metadata]] — Export structured metadata for Planemo CLI commands.
+- [[planemo-lint]] — Check for common errors and best practices.
+- [[planemo-output_schema]] — Export JSON Schemas for Planemo machine-readable outputs.
+- [[planemo-test]] — Run specified tool or workflow tests within Galaxy.
+- [[planemo-workflow_test_init]] — Initialize a Galaxy workflow test description for supplied workflow.
+- [[planemo-workflow_test_on_invocation]] — Run defined tests against existing workflow invocation.
+- [[summarize-nextflow]] — Statically introspect a Nextflow / nf-core pipeline tree and emit a validated JSON summary.
 - [[tool-revisions]] — Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin.
 - [[tool-search]] — Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence.
 - [[tool-versions]] — List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence.
 - [[validate]] — Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution.
+- [[validate-galaxy-tool-discovery]] — AJV gate for discover-shed-tool recommendation documents.
+- [[validate-galaxy-tool-summary]] — AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree.
+- [[validate-summary-cwl]] — AJV gate for summarize-cwl JSON documents.
+- [[validate-summary-nextflow]] — AJV gate for summarize-nextflow JSON documents.
 - [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
+- [[validate-tests-format]] — AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check.
 
 ## Schemas
 
+- [[cast-provenance]] — _provenance.json contract beside every cast: Mold revision, per-ref deterministic-vs-LLM origin, src/dst hashes, artifact handoff. Schema v2.
+- [[summary-cwl]] — JSON Schema for the structured summary emitted by the summarize-cwl Mold.
 - [[parsed-tool]] — JSON Schema for the upstream Galaxy `ParsedTool` model, vendored from `@galaxy-tool-util/schema`.
 - [[galaxy-tool-discovery]] — JSON Schema for Tool Shed discovery hit, weak, and miss recommendations.
 - [[galaxy-tool-summary]] — JSON Schema for the deterministic per-tool manifest emitted by `galaxy-tool-cache summarize`.
@@ -119,10 +142,11 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summary-nextflow]] — JSON Schema for the structured summary emitted by the summarize-nextflow Mold.
 - [[nf-core-module-meta]] — JSON Schema (Draft-07) validating nf-core module meta.yml — channel IO, tools, containers, conda lockfiles. Upstream from nf-core/modules.
 - [[nf-core-subworkflow-meta]] — JSON Schema (Draft-07) validating nf-core subworkflow meta.yml — channel IO, components dependencies, authors. Upstream from nf-core/modules.
+- [[planemo-test-report]] — JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo.
 
 ## Component Research
 
-- [[component-archon]] — Archon as a possible Foundry harness substrate; strong fit for heavy harnesses, with per-step sub-DAG looping as the main gap.
+- [[component-archon]] — Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap.
 - [[component-nextflow-channel-operators]] — Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation.
 - [[component-nextflow-containers-and-envs]] — Container URL grammar (depot, BioContainers, mulled-v2, Wave, ORAS) and conda directive resolution rules backing summarize-nextflow §5.
 - [[component-nextflow-inspect]] — White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision.
@@ -131,11 +155,16 @@ Generated from content frontmatter. Do not edit by hand.
 - [[component-nf-core-module-conventions]] — RFC 2119 conventions enforced by nf-core/tools module lint, with lint-check pointers. Backs summarize-nextflow + author-galaxy-tool-wrapper.
 - [[component-nf-core-tools]] — White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision.
 - [[component-tool-shed-search]] — Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload
+- [[cwl-pickvalue-to-galaxy]] — CWL `pickValue` (first_non_null / the_only_non_null / all_non_null) → Galaxy's native `pick_value` workflow step added by galaxyproject/galaxy#22222.
+- [[cwl-v1.2-schemas]] — Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization.
+- [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
+- [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.
 - [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.
 - [[galaxy-collection-tools]] — Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics.
 - [[galaxy-datatypes-conf]] — Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications.
 - [[galaxy-native-workflow-schema]] — Vendored structural JSON Schema for Galaxy native workflow (.ga) format: vocabulary for the JSON shape Galaxy emits and consumes.
+- [[galaxy-paired-or-unpaired-collections]] — Galaxy's `paired_or_unpaired` collection type: discriminated-union shape for paired-or-single reads, no workflow-level mode switch needed. Galaxy PR #19377.
 - [[galaxy-sample-sheet-collections]] — Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist.
 - [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
 - [[galaxy-xsd]] — Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax.
@@ -152,10 +181,13 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-test-data-conventions]] — How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.
 - [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
+- [[nextflow-conditional-to-galaxy-subworkflow-when]] — Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule.
 - [[nextflow-snapshot-to-galaxy-assertions]] — Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape.
 - [[nextflow-operators-to-galaxy-collection-recipes]] — Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.
 - [[nextflow-params-to-galaxy-inputs]] — Rules for translating Nextflow params, sample sheets, channels, and control flags into gxformat2 inputs.
 - [[nextflow-path-glob-to-galaxy-datatype]] — Rules for mapping Nextflow path, glob, sample-sheet, and output filename evidence to Galaxy datatype extensions.
+- [[nextflow-reference-data-classification]] — Source-side taxonomy of how Nextflow pipelines use reference data — eight classifications detectable from a summary-nextflow artifact.
+- [[nextflow-to-galaxy-reference-data-mapping]] — Galaxy-side translation of Nextflow reference-data classifications: idioms available, the v1 posture, datatype defaults, and the in-tool rebuild trade-off.
 - [[nextflow-workflow-io-semantics]] — Defines Nextflow workflow inputs and outputs from docs plus observed fixture pipeline structures.
 - [[nextflow-to-galaxy-channel-shape-mapping]] — Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes.
 - [[nf-schema-samplesheet-galaxy-gaps]] — nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary.
@@ -165,8 +197,18 @@ Generated from content frontmatter. Do not edit by hand.
 ## Design Specs
 
 - [[gxy-sketches-alignment]] — Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not.
+- [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
 - [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
 - [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
+- [[galaxy-workflow-draft-format]] — gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step.
+
+## Cli Tool
+
+- [[cwl-utils]] — CWL document utilities. summarize-cwl uses cwl-normalizer to gather references and upgrade to v1.2 JSON.
+- [[cwltool]] — Reference CWL runner and validator. Used by summarize-cwl for entrypoint validation.
+- [[foundry]] — Foundry CLI: bundles all Mold IO validators and a summarize-nextflow subcommand.
+- [[gxwf]] — Galaxy workflow design-time CLI (validate, convert, lint, roundtrip, tool-cache discovery).
+- [[planemo]] — Galaxy tool/workflow runtime testing CLI; used by run-workflow-test and friends.
 
 ## Prompt
 

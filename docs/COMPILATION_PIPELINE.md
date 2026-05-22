@@ -189,7 +189,7 @@ Casting policy for upstream-package schemas:
 Other schemas that fall under this policy as they land:
 
 - **`gxformat2`** — workflow source format. Schema-Salad-derived; vendored similarly.
-- **Mold IO summary schemas** (`summarize-paper`, `summarize-nextflow`, `summarize-cwl` outputs) — Foundry-authored under `packages/<name>-schema/src/`, paired with a `<name>.md` schema note in `content/schemas/`; cast and site-rendered through the same machinery so consumers see one consistent surface.
+- **Mold IO summary schemas** (`summarize-nextflow`, `summarize-cwl`, and future structured summaries) — Foundry-authored under `packages/<name>-schema/src/`, paired with a `<name>.md` schema note in `content/schemas/`; cast and site-rendered through the same machinery so consumers see one consistent surface. Narrative starts (`summarize-paper`, `interview-to-freeform-summary`) currently emit Markdown `freeform-summary` rather than a rigid schema.
 
 The reference-kind `schema` does not distinguish between Foundry-authored and upstream-vendored at cast time — both are verbatim copies. The distinction matters only for sync/update flow: upstream schemas update via package bumps, Foundry-authored schemas update via direct edits.
 
@@ -268,7 +268,7 @@ To exercise the architecture without overbuilding:
 
 - One cast target: **Claude**. Web and generic stay out of scope until the Claude path is proven.
 - One casting model: pick one, pin in `casts/claude/_target.yml`.
-- Cast 3-4 Molds end-to-end: `summarize-paper` (exercises `schema` + `pattern`), `implement-galaxy-tool-step` (exercises `pattern` + `example`), `validate-galaxy-step` (exercises `cli-command` reference from an action Mold), `validate-galaxy-workflow` (exercises terminal validation posture). Diversity exercises the per-kind dispatch, not just the prompt.
+- Cast 3-4 Molds end-to-end: `summarize-paper` or `interview-to-freeform-summary` (exercises freeform Markdown handoff), `implement-galaxy-tool-step` (exercises `pattern` + `example`), `validate-galaxy-step` (exercises `cli-command` reference from an action Mold), `validate-galaxy-workflow` (exercises terminal validation posture). Diversity exercises the per-kind dispatch, not just the prompt.
 - Manual `foundry cast` only.
 - Commit casts to the repo so we can review the actual outputs.
 

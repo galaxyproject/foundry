@@ -10,4 +10,4 @@ The draft format (see [[galaxy-workflow-draft-format]]) currently emits free-tex
 - **Strip step** — specify the deterministic transform that drops all `_plan_*` and rejects any remaining `TODO` or `TODO_<hint>` sentinel in `tool_id`, `tool_version`, `out[].id`, `in[]` keys, or `outputSource` once a draft is promoted to a runnable gxformat2 workflow. Likely lives in a small `foundry-build` helper rather than a Mold.
 - **Schema strategy** — extend gxformat2 with `_plan_*` and the relaxed `tool_id` / `tool_state` / `tool_shed_repository` / port-name rules, or validate via a sibling wrapping schema. Either way, `gxwf validate --no-tool-state` should still apply to the gxformat2 portion.
 
-These same refinements apply to [[cwl-summary-to-galaxy-template]] and [[paper-summary-to-galaxy-template]], which share the draft format.
+These same refinements apply to [[cwl-summary-to-galaxy-template]] and [[freeform-summary-to-galaxy-template]], which share the draft format.

@@ -12,12 +12,12 @@ Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase cor
 
 CWL is unofficially positioned as a **low-level, high-structure interchange format** — suitable as an intermediate target between an unstructured/loosely-structured source (a paper, a Nextflow pipeline) and Galaxy. The Foundry must support **both direct and composed paths** as first-class options:
 
-- `PAPER → GALAXY` (direct) and `PAPER → CWL → GALAXY` (composed) are both valid.
+- `PAPER → GALAXY` (direct), `INTERVIEW → WORKFLOW` (interview-normalized direct Galaxy path), and `PAPER → CWL → GALAXY` (composed) are valid.
 - `NEXTFLOW → GALAXY` (direct) and `NEXTFLOW → CWL → GALAXY` (composed) are both valid.
 - Direct paths are simpler to run and debug. Composed paths buy a structured checkpoint (CWL) at the cost of running two harnesses.
 - Whether composition is reliable enough to *prefer* over direct is a longer-term research question. For now: both paths must be possible from the Mold inventory; the harness picks.
 
-**Mold-inventory parity.** Source summarizers emit per-source schemas (paper, NF, CWL each different by design). Interface and data-flow handoffs are source-target Molds that produce reviewable Markdown design briefs rather than rich workflow schemas. This avoids pushing all polymorphism into one target Mold while keeping direct/composed pipelines explicit.
+**Mold-inventory parity.** Structured source summarizers emit per-source schemas (NF, CWL each different by design). Paper and interview sources now converge on a shared `freeform-summary` Markdown handoff before source-target design. Interface and data-flow handoffs are source-target Molds that produce reviewable Markdown design briefs rather than rich workflow schemas. This avoids pushing all polymorphism into one target Mold while keeping direct/composed pipelines explicit.
 
 ## Harness-level concerns (not Molds)
 
@@ -48,10 +48,10 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 
 ### PAPER → GALAXY
 
-1. `summarize-paper` — extract methods, named tools/algorithms, sample data, metrics, references to existing pipelines.
-2. `paper-summary-to-galaxy-design` — combined Galaxy interface and abstract data-flow design brief.
+1. `summarize-paper` — extract methods, named tools/algorithms, sample data, metrics, references to existing pipelines; emit `freeform-summary`.
+2. `freeform-summary-to-galaxy-design` — combined Galaxy interface and abstract data-flow design brief.
 3. `compare-against-iwc-exemplar` — structural diff of the design brief against nearest IWC exemplar(s); guidance feeds template authoring.
-4. `paper-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from paper source evidence, the design brief, and exemplar comparison notes.
+4. `freeform-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from free-form source evidence, the design brief, and exemplar comparison notes.
 5. `[loop]` `[branch]` discover-or-author branch:
    - try `discover-shed-tool`.
    - on fallthrough, `author-galaxy-tool-wrapper`.
@@ -67,7 +67,7 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 ### PAPER → CWL
 
 1. `summarize-paper`
-2. `paper-summary-to-cwl-design`
+2. `freeform-summary-to-cwl-design`
 3. `summary-to-cwl-template` — CWL Workflow skeleton with per-step TODOs from source evidence and prior handoffs.
 4. `[loop]` `summarize-cwl-tool` — derive a `CommandLineTool` description for each candidate (container, baseCommand, inputs/outputs).
 5. `[loop]` `implement-cwl-tool-step` — concrete `CommandLineTool` and Workflow step.
@@ -129,11 +129,29 @@ CWL is already structured; the upstream extraction work is much lighter.
 13. `run-workflow-test` — execute via Planemo.
 14. `debug-galaxy-workflow-output`
 
+### INTERVIEW → WORKFLOW
+
+The interview path is a Galaxy-targeting pipeline for now. The title stays user-facing because the interview starts from workflow intent rather than an existing technical artifact.
+
+1. `interview-to-freeform-summary` — normalize a user interview transcript or interactive session into the shared `freeform-summary` handoff.
+2. `freeform-summary-to-galaxy-design`
+3. `compare-against-iwc-exemplar`
+4. `freeform-summary-to-galaxy-template`
+5. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
+6. `[loop]` `summarize-galaxy-tool`
+7. `[loop]` `implement-galaxy-tool-step`
+8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
+9. `[branch]` test-data resolution chain: try `find-test-data` → on failure, harness gates to user-supplied data.
+10. `implement-galaxy-workflow-test`
+11. `validate-galaxy-workflow`
+12. `run-workflow-test`
+13. `debug-galaxy-workflow-output`
+
 ## Cross-pipeline observations
 
-- **Source-specific (one per source)**: `summarize-paper`, `summarize-nextflow`, `summarize-cwl`. Each emits its own schema by design.
-- **Source × target interface/data-flow**: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`, plus combined paper design Molds until paper examples justify a split.
-- **Source × target template generation** (Galaxy): `nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `paper-summary-to-galaxy-template`. Each consumes its source-specific design briefs.
+- **Source-specific (one per source)**: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`. Paper and interview share the `freeform-summary` handoff; Nextflow and CWL keep structured source-specific schemas.
+- **Source × target interface/data-flow**: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`, plus combined `freeform-summary-*` design Molds until free-form examples justify a split.
+- **Source × target template generation** (Galaxy): `nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`. Each consumes its source-specific or freeform design briefs.
 - **Target-specific (one per target)**:
   - Templates: `summary-to-cwl-template`.
   - Per-step (Galaxy): `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`.
@@ -142,7 +160,7 @@ CWL is already structured; the upstream extraction work is much lighter.
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
-- **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` is its own thing because a paper rarely ships a test bundle the way NF/CWL pipelines do.
+- **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` derives fixtures from a paper-origin `freeform-summary`; interview starts skip directly to `find-test-data` / user-supplied data until a real interview-specific fixture derivation Mold exists.
 
 ## Pattern pages, not Molds
 

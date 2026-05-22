@@ -136,7 +136,7 @@ properties:
     enum: [source-specific, target-specific, tool-specific, generic]
   source:
     type: string
-    enum: [paper, nextflow, cwl, snakemake]
+    enum: [paper, nextflow, cwl, snakemake, interview, freeform]
   target:
     type: string
     enum: [galaxy, cwl, web, generic]

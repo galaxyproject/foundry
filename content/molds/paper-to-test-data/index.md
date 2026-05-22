@@ -13,8 +13,8 @@ revision: 1
 ai_generated: true
 summary: "Derive workflow test inputs and expected outputs from a paper."
 input_artifacts:
-  - id: summary-paper
-    description: "Paper summary from [[summarize-paper]]; sample data and reference evidence the test fixtures derive from."
+  - id: freeform-summary
+    description: "Free-form summary from [[summarize-paper]]; sample data and reference evidence the test fixtures derive from."
 output_artifacts:
   - id: test-data-refs
     kind: json
