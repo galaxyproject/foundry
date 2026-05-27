@@ -1,0 +1,367 @@
+[
+  {
+    "id": "average_tag_density",
+    "run": "atdp.cwl",
+    "in": [
+      {
+        "id": "average_tag_density/annotation_filename",
+        "source": "annotation_file",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/avd_heat_window_bp",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/avd_smooth_bp",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/avd_window_bp",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/double_chr",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/fragmentsize_bp",
+        "source": "macs2_callpeak/macs2_fragments_calculated",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/ignore_chr",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/input_file",
+        "source": "samtools_sort_index_after_rmdup/bam_bai_pair",
+        "valueFrom": null
+      },
+      {
+        "id": "average_tag_density/mapped_reads",
+        "source": "get_stat/mapped_reads",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "average_tag_density/result_file",
+      "average_tag_density/log_file"
+    ]
+  },
+  {
+    "id": "bam_to_bigwig",
+    "run": "bam-bedgraph-bigwig.cwl",
+    "in": [
+      {
+        "id": "bam_to_bigwig/bam_file",
+        "source": "samtools_sort_index_after_rmdup/bam_bai_pair",
+        "valueFrom": null
+      },
+      {
+        "id": "bam_to_bigwig/chrom_length_file",
+        "source": "chrom_length",
+        "valueFrom": null
+      },
+      {
+        "id": "bam_to_bigwig/fragment_size",
+        "source": "macs2_callpeak/macs2_fragments_calculated",
+        "valueFrom": null
+      },
+      {
+        "id": "bam_to_bigwig/mapped_reads_number",
+        "source": "get_stat/mapped_reads",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "bam_to_bigwig/bigwig_file"
+    ]
+  },
+  {
+    "id": "bowtie_aligner",
+    "run": "bowtie-alignreads.cwl",
+    "in": [
+      {
+        "id": "bowtie_aligner/best",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/clip_3p_end",
+        "source": "clip_3p_end",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/clip_5p_end",
+        "source": "clip_5p_end",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/indices_folder",
+        "source": "indices_folder",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/m",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/q",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/sam",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/strata",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/threads",
+        "source": "threads",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/upstream_filelist",
+        "source": "extract_fastq/fastq_file",
+        "valueFrom": null
+      },
+      {
+        "id": "bowtie_aligner/v",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "bowtie_aligner/sam_file",
+      "bowtie_aligner/log_file"
+    ]
+  },
+  {
+    "id": "extract_fastq",
+    "run": "extract-fastq.cwl",
+    "in": [
+      {
+        "id": "extract_fastq/compressed_file",
+        "source": "fastq_file",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "extract_fastq/fastq_file"
+    ]
+  },
+  {
+    "id": "fastx_quality_stats",
+    "run": "fastx-quality-stats.cwl",
+    "in": [
+      {
+        "id": "fastx_quality_stats/input_file",
+        "source": "extract_fastq/fastq_file",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "fastx_quality_stats/statistics_file"
+    ]
+  },
+  {
+    "id": "get_stat",
+    "run": "python-get-stat-chipseq.cwl",
+    "in": [
+      {
+        "id": "get_stat/bowtie_log",
+        "source": "bowtie_aligner/log_file",
+        "valueFrom": null
+      },
+      {
+        "id": "get_stat/rmdup_log",
+        "source": "samtools_rmdup/rmdup_log",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "get_stat/output_file",
+      "get_stat/mapped_reads"
+    ]
+  },
+  {
+    "id": "island_intersect",
+    "run": "iaintersect.cwl",
+    "in": [
+      {
+        "id": "island_intersect/annotation_filename",
+        "source": "annotation_file",
+        "valueFrom": null
+      },
+      {
+        "id": "island_intersect/input_filename",
+        "source": "macs2_callpeak/peak_xls_file",
+        "valueFrom": null
+      },
+      {
+        "id": "island_intersect/promoter_bp",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "island_intersect/result_file",
+      "island_intersect/log_file"
+    ]
+  },
+  {
+    "id": "macs2_callpeak",
+    "run": "macs2-callpeak-biowardrobe-only.cwl",
+    "in": [
+      {
+        "id": "macs2_callpeak/broad",
+        "source": "broad_peak",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/buffer_size",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/bw",
+        "source": "exp_fragment_size",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/call_summits",
+        "source": "broad_peak",
+        "valueFrom": "$(!self)"
+      },
+      {
+        "id": "macs2_callpeak/control_file",
+        "source": "control_file",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/extsize",
+        "source": "exp_fragment_size",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/format_mode",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/genome_size",
+        "source": "genome_size",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/keep_dup",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/mfold",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/nolambda",
+        "source": "control_file",
+        "valueFrom": "$(!self)"
+      },
+      {
+        "id": "macs2_callpeak/nomodel",
+        "source": "force_fragment_size",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/q_value",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/treatment_file",
+        "source": "samtools_sort_index_after_rmdup/bam_bai_pair",
+        "valueFrom": null
+      },
+      {
+        "id": "macs2_callpeak/verbose",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "macs2_callpeak/peak_xls_file",
+      "macs2_callpeak/narrow_peak_file",
+      "macs2_callpeak/peak_summits_file",
+      "macs2_callpeak/broad_peak_file",
+      "macs2_callpeak/moder_r_file",
+      "macs2_callpeak/gapped_peak_file",
+      "macs2_callpeak/treat_pileup_bdg_file",
+      "macs2_callpeak/control_lambda_bdg_file",
+      "macs2_callpeak/macs_log",
+      "macs2_callpeak/macs2_stat_file",
+      "macs2_callpeak/macs2_fragments_calculated"
+    ]
+  },
+  {
+    "id": "samtools_rmdup",
+    "run": "samtools-rmdup.cwl",
+    "in": [
+      {
+        "id": "samtools_rmdup/bam_file",
+        "source": "samtools_sort_index/bam_bai_pair",
+        "valueFrom": null
+      },
+      {
+        "id": "samtools_rmdup/single_end",
+        "valueFrom": null
+      },
+      {
+        "id": "samtools_rmdup/trigger",
+        "source": "remove_duplicates",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "samtools_rmdup/rmdup_output",
+      "samtools_rmdup/rmdup_log"
+    ]
+  },
+  {
+    "id": "samtools_sort_index",
+    "run": "samtools-sort-index.cwl",
+    "in": [
+      {
+        "id": "samtools_sort_index/sort_input",
+        "source": "bowtie_aligner/sam_file",
+        "valueFrom": null
+      },
+      {
+        "id": "samtools_sort_index/threads",
+        "source": "threads",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "samtools_sort_index/bam_bai_pair"
+    ]
+  },
+  {
+    "id": "samtools_sort_index_after_rmdup",
+    "run": "samtools-sort-index.cwl",
+    "in": [
+      {
+        "id": "samtools_sort_index_after_rmdup/sort_input",
+        "source": "samtools_rmdup/rmdup_output",
+        "valueFrom": null
+      },
+      {
+        "id": "samtools_sort_index_after_rmdup/threads",
+        "source": "threads",
+        "valueFrom": null
+      },
+      {
+        "id": "samtools_sort_index_after_rmdup/trigger",
+        "source": "remove_duplicates",
+        "valueFrom": null
+      }
+    ],
+    "out": [
+      "samtools_sort_index_after_rmdup/bam_bai_pair"
+    ]
+  }
+]

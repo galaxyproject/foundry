@@ -1,0 +1,339 @@
+class: GalaxyWorkflow
+label: "ChIP-seq SE (biowardrobe) — CWL→Galaxy draft"
+doc: |
+  Draft gxformat2 skeleton derived from Barski-Lab/ga4gh_challenge biowardrobe_chipseq_se.cwl
+  (cwlVersion v1.0, SHA f28d47b). Topology and edges are settled here; tool_ids and tool_state
+  are TODO and deferred to the per-step authoring Molds. Per IWC comparison notes, a faithful
+  conversion is the first-pass intent; IWC-alignment alternatives are recorded in _plan_context.
+
+inputs:
+  - id: fastq_file
+    type: data
+    optional: false
+    doc: "Single-end ChIP-seq FASTQ reads."
+    _plan_context: |
+      Source CWL: workflow_input fastq_file (File, format EDAM 1930).
+      Datatype: fastqsanger.
+      IWC-alignment note: IWC chipseq-sr uses a list collection. Faithful-to-source keeps a
+      single dataset; consider revising to `type: collection / collection_type: list` if the
+      consumer wants batch use.
+
+  - id: bowtie_indices
+    type: data
+    optional: false
+    doc: "Bowtie1 reference indices. CWL source is a Directory; in Galaxy expect a cached reference data table or a composite bowtie_index dataset."
+    _plan_context: |
+      Source CWL: workflow_input indices_folder (Directory).
+      Galaxy translation candidates:
+        (a) Replace with `type: string` + `restrictOnConnections: true`, resolved via a
+            bowtie_indices data table (IWC chipseq-sr pattern, but for bowtie2 — verify a
+            bowtie1 table exists).
+        (b) Composite datatype `bowtie_base_index`.
+      Keep as opaque `data` for the skeleton; the per-step authoring Mold will pick (a) or (b).
+
+  - id: control_bam
+    type: data
+    optional: true
+    doc: "Optional control BAM for MACS2."
+    _plan_context: "CWL source: control_file (File?, format EDAM 2572). Datatype: bam."
+
+  - id: annotation_file
+    type: data
+    optional: false
+    doc: "Tab-separated annotation for iaintersect."
+    _plan_context: "CWL source: annotation_file (File, format EDAM 3475). Datatype: tabular."
+
+  - id: chrom_length
+    type: data
+    optional: false
+    doc: "Chromosome sizes file for bedGraphToBigWig."
+    _plan_context: "CWL source: chrom_length (File, format EDAM 2330). Datatype: len (canonical for bedGraphToBigWig)."
+
+  - id: genome_size
+    type: string
+    optional: false
+    doc: "MACS2 effective genome size. e.g. hs, mm, ce, dm, or a number like 2.7e9."
+
+  - id: broad_peak
+    type: boolean
+    optional: false
+    doc: "Set to call broad peaks via MACS2 --broad."
+
+  - id: exp_fragment_size
+    type: int
+    optional: true
+    default: 150
+    doc: "Expected fragment size for MACS2."
+
+  - id: force_fragment_size
+    type: boolean
+    optional: true
+    default: false
+    doc: "Force MACS2 to use exp_fragment_size."
+
+  - id: clip_3p_end
+    type: int
+    optional: true
+    default: 0
+    doc: "Bases to clip from 3' end."
+
+  - id: clip_5p_end
+    type: int
+    optional: true
+    default: 0
+    doc: "Bases to clip from 5' end."
+
+  - id: remove_duplicates
+    type: boolean
+    optional: true
+    default: false
+    doc: "Run samtools rmdup."
+
+outputs:
+  - id: bigwig
+    outputSource: sorted_bedgraph_to_bigwig/TODO_bigwig
+  - id: bambai_pair
+    outputSource: samtools_sort_index_after_rmdup/TODO_bam_bai
+  - id: macs2_narrow_peaks
+    outputSource: macs2_callpeak/TODO_narrow_peaks
+  - id: macs2_broad_peaks
+    outputSource: macs2_callpeak/TODO_broad_peaks
+  - id: macs2_peak_summits
+    outputSource: macs2_callpeak/TODO_peak_summits
+  - id: macs2_gapped_peak
+    outputSource: macs2_callpeak/TODO_gapped_peak
+  - id: macs2_called_peaks
+    outputSource: macs2_callpeak/TODO_peak_xls
+  - id: macs2_fragment_stat
+    outputSource: macs2_callpeak/TODO_macs2_stat
+  - id: macs2_log
+    outputSource: macs2_callpeak/TODO_log
+  - id: iaintersect_result
+    outputSource: island_intersect/TODO_result
+  - id: iaintersect_log
+    outputSource: island_intersect/TODO_log
+  - id: atdp_result
+    outputSource: average_tag_density/TODO_result
+  - id: atdp_log
+    outputSource: average_tag_density/TODO_log
+  - id: fastx_statistics
+    outputSource: fastx_quality_stats/TODO_statistics
+  - id: bowtie_log
+    outputSource: bowtie_aligner/TODO_log
+  - id: samtools_rmdup_log
+    outputSource: samtools_rmdup/TODO_log
+  - id: get_stat_log
+    outputSource: get_stat/TODO_log
+
+steps:
+  - id: extract_fastq
+    label: "Extract FASTQ"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: fastq_file
+    out:
+      - id: TODO_fastq
+    _plan_state: "Concat/extract step from CWL; consider dropping if Galaxy datasets are pre-extracted."
+    _plan_context: |
+      Source CWL: extract-fastq.cwl, baseCommand: ["bash","-c"], docker: biowardrobe2/scidap:v0.0.3.
+      Likely replace with: built-in identity, or `Concatenate datasets` if multi-file input.
+
+  - id: fastx_quality_stats
+    label: "FASTQ quality statistics"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: extract_fastq/TODO_fastq
+    out:
+      - id: TODO_statistics
+    _plan_state: "fastx_toolkit quality stats on extracted FASTQ."
+    _plan_context: |
+      Source CWL: fastx-quality-stats.cwl, baseCommand: ["fastx_quality_stats"],
+      docker: biowardrobe2/fastx_toolkit:v0.0.14.
+      Tool Shed candidate: devteam/fastx_toolkit / fastx_quality_stats.
+      IWC-alignment alt: replace with fastp (IWC chipseq-sr idiom) which both trims and reports.
+
+  - id: bowtie_aligner
+    label: "Bowtie1 SE alignment"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_reads: extract_fastq/TODO_fastq
+      TODO_indices: bowtie_indices
+      TODO_clip_3p: clip_3p_end
+      TODO_clip_5p: clip_5p_end
+    out:
+      - id: TODO_sam
+      - id: TODO_log
+    _plan_state: "Bowtie1 SE alignment; clip_3p_end / clip_5p_end from workflow inputs."
+    _plan_context: |
+      Source CWL: bowtie-alignreads.cwl, baseCommand: ["bowtie"],
+      docker: biowardrobe2/bowtie:v1.2.0.
+      Tool Shed candidate: devteam/bowtie_wrappers (bowtie1) or alternative.
+      IWC-alignment alt: bowtie2 (devteam/bowtie2/2.5.4+galaxy0) — diverges from source.
+
+  - id: samtools_sort_index
+    label: "Sort + index BAM (pre-rmdup)"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: bowtie_aligner/TODO_sam
+    out:
+      - id: TODO_bam_bai
+    _plan_state: "samtools sort+index after bowtie alignment."
+    _plan_context: |
+      Source CWL: samtools-sort-index.cwl, docker: biowardrobe2/samtools:v1.4.
+      Tool Shed candidate: devteam/samtools_sort.
+
+  - id: samtools_rmdup
+    label: "samtools rmdup"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: samtools_sort_index/TODO_bam_bai
+      TODO_remove: remove_duplicates
+    out:
+      - id: TODO_bam
+      - id: TODO_log
+    _plan_state: |
+      Step always runs in this draft to keep topology static. The CWL source treats rmdup as
+      always-on with a remove_duplicates boolean threaded into the tool; if Galaxy convention
+      prefers a conditional, defer to per-step Mold or split into sibling workflows.
+    _plan_context: "Source CWL: samtools-rmdup.cwl, docker: biowardrobe2/samtools:v1.4."
+
+  - id: samtools_sort_index_after_rmdup
+    label: "Sort + index BAM (post-rmdup)"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: samtools_rmdup/TODO_bam
+    out:
+      - id: TODO_bam_bai
+    _plan_state: "Second samtools sort+index pass after rmdup."
+    _plan_context: "Same wrapper as samtools_sort_index step."
+
+  # --- nested workflow #bam-bedgraph-bigwig.cwl inlined as three steps ---
+
+  - id: bam_to_bedgraph
+    label: "bedtools genomecov → bedGraph"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: samtools_sort_index_after_rmdup/TODO_bam_bai
+      TODO_chrom_length: chrom_length
+    out:
+      - id: TODO_bedgraph
+    _plan_state: "bedtools genomecov, bedgraph output. Inlined from CWL nested workflow #bam-bedgraph-bigwig.cwl."
+    _plan_context: |
+      Source CWL: bedtools-genomecov.cwl, baseCommand: ["bedtools","genomecov"],
+      docker: biowardrobe2/bedtools2:v2.26.0.
+      Tool Shed candidate: iuc/bedtools / bedtools_genomecoveragebed.
+
+  - id: sort_bedgraph
+    label: "Sort bedGraph"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: bam_to_bedgraph/TODO_bedgraph
+    out:
+      - id: TODO_sorted_bedgraph
+    _plan_state: "GNU sort on bedgraph (chr, start). Inlined from nested CWL workflow."
+    _plan_context: |
+      Source CWL: linux-sort.cwl, baseCommand: ["sort"], docker: biowardrobe2/scidap:v0.0.2.
+      Tool Shed candidate: bgruening/text_processing / tp_sort.
+
+  - id: sorted_bedgraph_to_bigwig
+    label: "bedGraph → BigWig"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_input: sort_bedgraph/TODO_sorted_bedgraph
+      TODO_chrom_length: chrom_length
+    out:
+      - id: TODO_bigwig
+    _plan_state: "UCSC bedGraphToBigWig. Inlined from nested CWL workflow."
+    _plan_context: |
+      Source CWL: ucsc-bedgraphtobigwig.cwl, baseCommand: ["bedGraphToBigWig"],
+      docker: biowardrobe2/ucscuserapps:v358.
+      Tool Shed candidate: Galaxy built-in wig_to_bigWig or iuc/ucsc_bedgraphtobigwig.
+
+  # --- end nested-workflow inlining ---
+
+  - id: macs2_callpeak
+    label: "MACS2 callpeak"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_treatment: samtools_sort_index_after_rmdup/TODO_bam_bai
+      TODO_control: control_bam
+      TODO_genome_size: genome_size
+      TODO_broad: broad_peak
+      TODO_exp_fragment_size: exp_fragment_size
+      TODO_force_fragment_size: force_fragment_size
+    out:
+      - id: TODO_narrow_peaks
+      - id: TODO_broad_peaks
+      - id: TODO_peak_summits
+      - id: TODO_gapped_peak
+      - id: TODO_peak_xls
+      - id: TODO_macs2_stat
+      - id: TODO_log
+      - id: TODO_moder_r
+    _plan_state: "MACS2 callpeak; broad/narrow toggled by broad_peak input."
+    _plan_context: |
+      Source CWL: macs2-callpeak-biowardrobe-only.cwl, baseCommand: ["python","run.py","macs2 callpeak"],
+      docker: biowardrobe2/macs2:v2.1.1.
+      Tool Shed candidate: iuc/macs2 / macs2_callpeak/2.2.9.1+galaxy0 (IWC chipseq-sr pin).
+      Warning carried from summary-cwl: peak_xls_file is (null|File) but downstream get_stat
+      expects File. Accept downstream-may-fail or split workflows for broad/narrow.
+
+  - id: island_intersect
+    label: "iaintersect: annotate peaks"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_peaks: macs2_callpeak/TODO_peak_xls
+      TODO_annotation: annotation_file
+    out:
+      - id: TODO_result
+      - id: TODO_log
+    _plan_state: "Biowardrobe iaintersect; annotates MACS2 peaks against tab-separated annotation."
+    _plan_context: |
+      Source CWL: iaintersect.cwl, baseCommand: ["iaintersect"],
+      docker: biowardrobe2/iaintersect:v0.0.2.
+      No likely Tool Shed equivalent — expect to author via author-galaxy-tool-wrapper.
+
+  - id: average_tag_density
+    label: "Average tag density (atdp)"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_bam: samtools_sort_index_after_rmdup/TODO_bam_bai
+      TODO_annotation: annotation_file
+    out:
+      - id: TODO_result
+      - id: TODO_log
+    _plan_state: "Biowardrobe atdp; produces per-region tag density."
+    _plan_context: |
+      Source CWL: atdp.cwl, baseCommand: ["bash","-c"], docker: biowardrobe2/atdp:v0.0.1.
+      No likely Tool Shed equivalent — expect to author.
+
+  - id: get_stat
+    label: "Aggregate ChIP-seq stats"
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      TODO_bowtie_log: bowtie_aligner/TODO_log
+      TODO_rmdup_log: samtools_rmdup/TODO_log
+      TODO_peak_xls: macs2_callpeak/TODO_peak_xls
+    out:
+      - id: TODO_log
+    _plan_state: |
+      Biowardrobe python-get-stat-chipseq. Note: source CWL types TODO_peak_xls as (null|File)
+      flowing into File; expect step to fail or produce empty output when peaks are not called.
+      Tested-without-peaks behavior must be a workflow-test case.
+    _plan_context: |
+      Source CWL: python-get-stat-chipseq.cwl, baseCommand: ["python","-c"],
+      docker: biowardrobe2/scidap:v0.0.2.
+      IWC-alignment alt: replace with MultiQC (IWC chipseq-sr idiom).

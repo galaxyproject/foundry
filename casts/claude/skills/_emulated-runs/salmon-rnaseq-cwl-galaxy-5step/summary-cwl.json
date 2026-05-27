@@ -1,0 +1,2712 @@
+{
+  "summary_version": "1",
+  "source": {
+    "ecosystem": "cwl",
+    "workflow": "salmon-rnaseq",
+    "url": "https://github.com/hubmapconsortium/salmon-rnaseq/blob/2f77bcfe9d6eaccce04359ed110995de65d03422/pipeline.cwl",
+    "version": "2f77bcfe9d6eaccce04359ed110995de65d03422",
+    "license": null,
+    "slug": "hubmap-salmon-rnaseq",
+    "cwl_version": "v1.2",
+    "entrypoint": "pipeline.cwl"
+  },
+  "documents": {
+    "entrypoint": "workflow-fixtures/cwl/hubmapconsortium__salmon-rnaseq/pipeline.cwl",
+    "normalized_path": "normalized/pipeline.packed.json",
+    "validation": {
+      "command": "cwltool --validate pipeline.cwl",
+      "status": "valid",
+      "diagnostics": []
+    }
+  },
+  "workflow_inputs": [
+    {
+      "id": "assay",
+      "label": "scRNA-seq assay",
+      "type": "string",
+      "optional": false,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "expected_cell_count",
+      "label": "expected_cell_count",
+      "type": "null | int",
+      "optional": true,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "fastq_dir",
+      "label": "Directory containing FASTQ files",
+      "type": "array",
+      "optional": false,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "img_dir",
+      "label": "Directory containing TIFF image data (for Visium assay)",
+      "type": "null | Directory",
+      "optional": true,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "keep_all_barcodes",
+      "label": "keep_all_barcodes",
+      "type": "null | boolean",
+      "optional": true,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "metadata_dir",
+      "label": "Directory containing metadata, including gpr slide file (for Visium assay)",
+      "type": "null | Directory",
+      "optional": true,
+      "default": null,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "organism",
+      "label": "organism",
+      "type": "null | string",
+      "optional": true,
+      "default": "human",
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "threads",
+      "label": "Number of threads for Salmon",
+      "type": "int",
+      "optional": false,
+      "default": 1,
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    }
+  ],
+  "workflow_outputs": [
+    {
+      "id": "centrality_scores_plot",
+      "label": "centrality_scores_plot",
+      "type": "null | File",
+      "output_source": [
+        "squidpy_analysis/centrality_scores_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "co_occurrence_plot",
+      "label": "co_occurrence_plot",
+      "type": "null | File",
+      "output_source": [
+        "squidpy_analysis/co_occurrence_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "count_matrix_h5ad",
+      "label": "Unfiltered count matrix from Alevin, converted to H5AD, spliced and unspliced counts, scenesence scores",
+      "type": "File",
+      "output_source": [
+        "deepscence/h5ad_with_ds"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "deepscence_binary_plot",
+      "label": "Umap with coloring by DeepScence binary results",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/deepscence_binary_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "deepscence_continuous_plot",
+      "label": "Umap with coloring by DeepScence scores",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/deepscence_continuous_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "deepscence_plot",
+      "label": "deepscence_plot",
+      "type": "File",
+      "output_source": [
+        "deepscence/deepscence_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "dispersion_plot",
+      "label": "Gene expression dispersion plot",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/dispersion_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "fastqc_dir",
+      "label": "Directory of FastQC output files, mirroring input directory structure",
+      "type": "array",
+      "output_source": [
+        "fastqc/fastqc_dir"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "filtered_data_h5ad",
+      "label": "Full data set of filtered results",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/filtered_data_h5ad"
+      ],
+      "doc": "Full data set of filtered results: expression matrix, coordinates in dimensionality-reduced space (PCA and UMAP), cluster assignments via the Leiden algorithm, and marker genes for one cluster vs. rest",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "genome_build_json",
+      "label": "Genome build information in JSON format",
+      "type": "File",
+      "output_source": [
+        "salmon_quantification/genome_build_json"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "interaction_matrix_plot",
+      "label": "interaction_matrix_plot",
+      "type": "null | File",
+      "output_source": [
+        "squidpy_analysis/interaction_matrix_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "marker_gene_plot_logreg",
+      "label": "Cluster marker genes, logreg method",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/marker_gene_plot_logreg"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "marker_gene_plot_t_test",
+      "label": "Cluster marker genes, t-test",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/marker_gene_plot_t_test"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "neighborhood_enrichment_plot",
+      "label": "neighborhood_enrichment_plot",
+      "type": "null | File",
+      "output_source": [
+        "squidpy_analysis/neighborhood_enrichment_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "qc_report",
+      "label": "Quality control report in JSON format",
+      "type": "File",
+      "output_source": [
+        "compute_qc_results/qc_metrics"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "raw_count_matrix",
+      "label": "Unfiltered count matrix from Alevin, converted to H5AD, with intronic counts as separate columns",
+      "type": "null | File",
+      "output_source": [
+        "salmon_quantification/raw_count_matrix"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "ripley_plot",
+      "label": "ripley_plot",
+      "type": "null | File",
+      "output_source": [
+        "squidpy_analysis/ripley_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "salmon_output",
+      "label": "Full output of `salmon alevin`",
+      "type": "Directory",
+      "output_source": [
+        "salmon_quantification/salmon_output"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "scanpy_qc_results",
+      "label": "Quality control metrics from Scanpy",
+      "type": "File",
+      "output_source": [
+        "compute_qc_results/scanpy_qc_results"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "scvelo_annotated_h5ad",
+      "label": "scVelo-annotated h5ad file, including cell RNA velocity",
+      "type": "null | File",
+      "output_source": [
+        "scvelo_analysis/annotated_h5ad_file"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "scvelo_embedding_grid_plot",
+      "label": "scVelo velocity embedding grid plot",
+      "type": "null | File",
+      "output_source": [
+        "scvelo_analysis/embedding_grid_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "spatial_plot",
+      "label": "Slide-seq bead plot, colored by Leiden cluster",
+      "type": "null | File",
+      "output_source": [
+        "scanpy_analysis/spatial_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "squidpy_annotated_h5ad",
+      "label": "squidpy_annotated_h5ad",
+      "type": "null | File",
+      "output_source": [
+        "squidpy_analysis/squidpy_annotated_h5ad"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "squidpy_spatial_plot",
+      "label": "squidpy_spatial_plot",
+      "type": "null | File",
+      "output_source": [
+        "squidpy_analysis/spatial_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "umap_density_plot",
+      "label": "UMAP dimensionality reduction plot, colored by cell density",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/umap_density_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "umap_plot",
+      "label": "UMAP dimensionality reduction plot",
+      "type": "File",
+      "output_source": [
+        "scanpy_analysis/umap_plot"
+      ],
+      "doc": null,
+      "format": null,
+      "secondary_files": []
+    }
+  ],
+  "steps": [
+    {
+      "id": "compute_qc_results",
+      "run": "compute-qc-metrics.cwl",
+      "run_class": "CommandLineTool",
+      "label": "Compute QC metrics",
+      "doc": null,
+      "in": [
+        {
+          "id": "compute_qc_results/assay",
+          "source": [
+            "assay"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "compute_qc_results/primary_matrix_path",
+          "source": [
+            "deepscence/h5ad_with_ds"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "compute_qc_results/salmon_dir",
+          "source": [
+            "salmon_quantification/salmon_output"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "compute_qc_results/secondary_matrix_path",
+          "source": [
+            "scanpy_analysis/filtered_data_h5ad"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "scanpy_qc_results",
+        "qc_metrics"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "deepscence",
+      "run": "deepscence.cwl",
+      "run_class": "CommandLineTool",
+      "label": "Run DeepScence method to get cell scenesense scores",
+      "doc": null,
+      "in": [
+        {
+          "id": "deepscence/h5ad_file",
+          "source": [
+            "salmon_quantification/count_matrix_h5ad"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "h5ad_with_ds",
+        "deepscence_plot"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "fastqc",
+      "run": "fastqc.cwl",
+      "run_class": "CommandLineTool",
+      "label": "Run fastqc on all fastq files in fastq directory",
+      "doc": null,
+      "in": [
+        {
+          "id": "fastqc/fastq_dir",
+          "source": [
+            "fastq_dir"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "fastqc/threads",
+          "source": [
+            "threads"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "fastqc_dir"
+      ],
+      "scatter": [
+        "fastq_dir"
+      ],
+      "scatter_method": "dotproduct",
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "salmon_quantification",
+      "run": "salmon-quantification.cwl",
+      "run_class": "Workflow",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "salmon_quantification/assay",
+          "source": [
+            "assay"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "salmon_quantification/expected_cell_count",
+          "source": [
+            "expected_cell_count"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "salmon_quantification/fastq_dir",
+          "source": [
+            "fastq_dir"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "salmon_quantification/img_dir",
+          "source": [
+            "img_dir"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "salmon_quantification/keep_all_barcodes",
+          "source": [
+            "keep_all_barcodes"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "salmon_quantification/metadata_dir",
+          "source": [
+            "metadata_dir"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "salmon_quantification/organism",
+          "source": [
+            "organism"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "salmon_quantification/threads",
+          "source": [
+            "threads"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "salmon_output",
+        "count_matrix_h5ad",
+        "raw_count_matrix",
+        "genome_build_json"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "scanpy_analysis",
+      "run": "scanpy-analysis.cwl",
+      "run_class": "CommandLineTool",
+      "label": "Secondary analysis via ScanPy",
+      "doc": null,
+      "in": [
+        {
+          "id": "scanpy_analysis/assay",
+          "source": [
+            "assay"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "scanpy_analysis/h5ad_file",
+          "source": [
+            "deepscence/h5ad_with_ds"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "filtered_data_h5ad",
+        "umap_plot",
+        "marker_gene_plot_t_test",
+        "marker_gene_plot_logreg",
+        "dispersion_plot",
+        "umap_density_plot",
+        "spatial_plot",
+        "deepscence_continuous_plot",
+        "deepscence_binary_plot"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "scvelo_analysis",
+      "run": "scvelo-analysis.cwl",
+      "run_class": "CommandLineTool",
+      "label": "RNA velocity analysis via scVelo",
+      "doc": null,
+      "in": [
+        {
+          "id": "scvelo_analysis/assay_name",
+          "source": [
+            "assay"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "scvelo_analysis/spliced_h5ad_file",
+          "source": [
+            "deepscence/h5ad_with_ds"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "annotated_h5ad_file",
+        "embedding_grid_plot"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "squidpy_analysis",
+      "run": "squidpy-analysis.cwl",
+      "run_class": "CommandLineTool",
+      "label": "Spatial analysis via SquidPy",
+      "doc": null,
+      "in": [
+        {
+          "id": "squidpy_analysis/assay",
+          "source": [
+            "assay"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "squidpy_analysis/h5ad_file",
+          "source": [
+            "scanpy_analysis/filtered_data_h5ad"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "squidpy_analysis/img_dir",
+          "source": [
+            "img_dir"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "squidpy_annotated_h5ad",
+        "neighborhood_enrichment_plot",
+        "co_occurrence_plot",
+        "interaction_matrix_plot",
+        "ripley_plot",
+        "centrality_scores_plot",
+        "spatial_plot"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    }
+  ],
+  "tools": [
+    {
+      "id": "compute-qc-metrics.cwl",
+      "label": "Compute QC metrics",
+      "base_command": [
+        "/opt/compute_qc_metrics.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "primary_matrix_path",
+          "type": "File",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "salmon_dir",
+          "type": "Directory",
+          "input_binding": {
+            "position": 3,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "secondary_matrix_path",
+          "type": "File",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "qc_metrics",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "qc_results.json",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "scanpy_qc_results",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "qc_results.hdf5",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "deepscence.cwl",
+      "label": "Identify and score scenescent cells",
+      "base_command": [
+        "/opt/deepscence.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "h5ad_file",
+          "type": "File",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "deepscence_plot",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "deepscence.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "h5ad_with_ds",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "expr.h5ad",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "fastqc.cwl",
+      "label": "Runs fastQC on each fastq file in fastq directory",
+      "base_command": [
+        "/opt/fastqc_wrapper.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "fastq_dir",
+          "type": "Directory",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Directory containing fastq files to be evaluated",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "threads",
+          "type": "int",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The number of threads to use for fastqc",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "fastqc_dir",
+          "type": "Directory",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "fastqc_output",
+            "value_from": null
+          },
+          "doc": "Individual graph files and additional data files containing the raw data from which plots were drawn.",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "adjust-barcodes.cwl",
+      "label": "Assay-specific adjustment of cell barcodes",
+      "base_command": [
+        "/opt/adjust_barcodes.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fastq_dir",
+          "type": "array",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "adj_fastq_dir",
+          "type": "Directory",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "adj_fastq",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "metadata_json",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "metadata.json",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-barcode-adj:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-barcode-adj:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "alevin-to-anndata.cwl",
+      "label": "Convert Alevin sparse output to anndata.AnnData object, save as h5ad",
+      "base_command": [
+        "/opt/alevin_to_anndata.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "alevin_dir",
+          "type": "Directory",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "organism",
+          "type": "null | string",
+          "input_binding": {
+            "position": 2,
+            "prefix": "--organism",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "expr_h5ad",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "expr.h5ad",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "genome_build_json",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "genome_build.json",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "raw_expr_h5ad",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "raw_expr.h5ad",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        },
+        {
+          "class": "MultipleInputFeatureRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "MultipleInputFeatureRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "annotate-cells.cwl",
+      "label": "Assay-specific annotation of cell barcodes after quantification",
+      "base_command": [
+        "/opt/annotate_cells.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "h5ad_file",
+          "type": "File",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "img_dir",
+          "type": "null | Directory",
+          "input_binding": {
+            "position": 3,
+            "prefix": "--img_dir",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "metadata_dir",
+          "type": "null | Directory",
+          "input_binding": {
+            "position": 4,
+            "prefix": "--metadata_dir",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "metadata_json",
+          "type": "null | File",
+          "input_binding": {
+            "position": 5,
+            "prefix": "--metadata_json",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "orig_fastq_dirs",
+          "type": "array",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "annotated_h5ad_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "expr.h5ad",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "salmon-mouse.cwl",
+      "label": "Run Salmon Alevin tool on FASTQ input",
+      "base_command": [
+        "/opt/salmon_wrapper.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "expected_cell_count",
+          "type": "null | int",
+          "input_binding": {
+            "position": 4,
+            "prefix": "--expected-cell-count",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "keep_all_barcodes",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 5,
+            "prefix": "--keep-all-barcodes",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "organism",
+          "type": "null | string",
+          "input_binding": {
+            "position": 6,
+            "prefix": "--organism",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "orig_fastq_dirs",
+          "type": "array",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "threads",
+          "type": "int",
+          "input_binding": {
+            "position": 3,
+            "prefix": "--threads",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "trimmed_fastq_dir",
+          "type": "Directory",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output_dir",
+          "type": "Directory",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "salmon_out",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/salmon-grcm39:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/salmon-grcm39:latest",
+            "class": "DockerRequirement"
+          }
+        },
+        {
+          "class": "ResourceRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "ramMin": 28672,
+            "class": "ResourceRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "salmon.cwl",
+      "label": "Run Salmon Alevin tool on FASTQ input",
+      "base_command": [
+        "/opt/salmon_wrapper.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "expected_cell_count",
+          "type": "null | int",
+          "input_binding": {
+            "position": 4,
+            "prefix": "--expected-cell-count",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "keep_all_barcodes",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 5,
+            "prefix": "--keep-all-barcodes",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "orig_fastq_dirs",
+          "type": "array",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "threads",
+          "type": "int",
+          "input_binding": {
+            "position": 3,
+            "prefix": "--threads",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "trimmed_fastq_dir",
+          "type": "Directory",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output_dir",
+          "type": "Directory",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "salmon_out",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/salmon-grch38:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/salmon-grch38:latest",
+            "class": "DockerRequirement"
+          }
+        },
+        {
+          "class": "ResourceRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "ramMin": 28672,
+            "class": "ResourceRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "trim-reads.cwl",
+      "label": "Trim FASTQ files",
+      "base_command": [
+        "/opt/trim_reads.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "adj_fastq_dir",
+          "type": "Directory",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "orig_fastq_dirs",
+          "type": "array",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "threads",
+          "type": "int",
+          "input_binding": {
+            "position": 3,
+            "prefix": "--threads",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "trimmed_fastq_dir",
+          "type": "Directory",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "trimmed",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-trim-reads:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-trim-reads:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "scanpy-analysis.cwl",
+      "label": "Dimensionality reduction and clustering",
+      "base_command": [
+        "/opt/scanpy_entry_point.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "h5ad_file",
+          "type": "File",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "deepscence_binary_plot",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "umap_by_deepscence_binary.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "deepscence_continuous_plot",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "umap_by_deepscence_continuous.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "dispersion_plot",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "dispersion_plot.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "filtered_data_h5ad",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "secondary_analysis.h5ad",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "marker_gene_plot_logreg",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "marker_genes_by_cluster_logreg.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "marker_gene_plot_t_test",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "marker_genes_by_cluster_t_test.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "spatial_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "spatial_pos_by_leiden_cluster.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "umap_density_plot",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "umap_embedding_density.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "umap_plot",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "umap_by_leiden_cluster.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "scvelo-analysis.cwl",
+      "label": "RNA velocity analysis via scVelo",
+      "base_command": [
+        "/opt/scvelo_analysis.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay_name",
+          "type": "string",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "spliced_h5ad_file",
+          "type": "File",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "annotated_h5ad_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "scvelo_annotated.h5ad",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "embedding_grid_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "scvelo_embedding_grid.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/scrna-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/scrna-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        },
+        {
+          "class": "EnvVarRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "envDef": [
+              {
+                "envValue": "/tmp",
+                "envName": "TMPDIR"
+              }
+            ],
+            "class": "EnvVarRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "squidpy-analysis.cwl",
+      "label": "Dimensionality reduction and clustering",
+      "base_command": [
+        "/opt/squidpy_entry_point.py"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": {
+            "position": 0,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "h5ad_file",
+          "type": "File",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "img_dir",
+          "type": "null | Directory",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "centrality_scores_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "centrality_scores.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "co_occurrence_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "co_occurrence.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "interaction_matrix_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "interaction_matrix.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "neighborhood_enrichment_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "neighborhood_enrichment.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "ripley_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "ripley.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "spatial_plot",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "spatial_scatter.pdf",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "squidpy_annotated_h5ad",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "squidpy_annotated.h5ad",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "hubmap/squidpy-analysis:latest",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "dockerPull": "hubmap/squidpy-analysis:latest",
+            "class": "DockerRequirement"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "salmon-quantification.cwl",
+      "label": "Salmon quantification, FASTQ -> H5AD count matrix",
+      "base_command": [],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "assay",
+          "type": "string",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "expected_cell_count",
+          "type": "null | int",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fastq_dir",
+          "type": "array",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "img_dir",
+          "type": "null | Directory",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "keep_all_barcodes",
+          "type": "null | boolean",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "metadata_dir",
+          "type": "null | Directory",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "organism",
+          "type": "null | string",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "threads",
+          "type": "int",
+          "input_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "count_matrix_h5ad",
+          "type": "File",
+          "output_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "genome_build_json",
+          "type": "File",
+          "output_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "raw_count_matrix",
+          "type": "null | File",
+          "output_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "salmon_output",
+          "type": "Directory",
+          "output_binding": null,
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement"
+          }
+        },
+        {
+          "class": "MultipleInputFeatureRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "MultipleInputFeatureRequirement"
+          }
+        }
+      ],
+      "hints": [
+        {
+          "class": "_NestedWorkflow",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "steps": [
+              {
+                "id": "salmon-quantification.cwl/adjust_barcodes",
+                "run": "adjust-barcodes.cwl",
+                "scatter": null
+              },
+              {
+                "id": "salmon-quantification.cwl/alevin_to_anndata",
+                "run": "alevin-to-anndata.cwl",
+                "scatter": null
+              },
+              {
+                "id": "salmon-quantification.cwl/annotate_cells",
+                "run": "annotate-cells.cwl",
+                "scatter": null
+              },
+              {
+                "id": "salmon-quantification.cwl/salmon",
+                "run": "salmon.cwl",
+                "scatter": null
+              },
+              {
+                "id": "salmon-quantification.cwl/salmon-mouse",
+                "run": "salmon-mouse.cwl",
+                "scatter": null
+              },
+              {
+                "id": "salmon-quantification.cwl/trim_reads",
+                "run": "trim-reads.cwl",
+                "scatter": null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "assay",
+        "kind": "workflow-input",
+        "label": "scRNA-seq assay"
+      },
+      {
+        "id": "expected_cell_count",
+        "kind": "workflow-input",
+        "label": "expected_cell_count"
+      },
+      {
+        "id": "fastq_dir",
+        "kind": "workflow-input",
+        "label": "Directory containing FASTQ files"
+      },
+      {
+        "id": "img_dir",
+        "kind": "workflow-input",
+        "label": "Directory containing TIFF image data (for Visium assay)"
+      },
+      {
+        "id": "keep_all_barcodes",
+        "kind": "workflow-input",
+        "label": "keep_all_barcodes"
+      },
+      {
+        "id": "metadata_dir",
+        "kind": "workflow-input",
+        "label": "Directory containing metadata, including gpr slide file (for Visium assay)"
+      },
+      {
+        "id": "organism",
+        "kind": "workflow-input",
+        "label": "organism"
+      },
+      {
+        "id": "threads",
+        "kind": "workflow-input",
+        "label": "Number of threads for Salmon"
+      },
+      {
+        "id": "centrality_scores_plot",
+        "kind": "workflow-output",
+        "label": "centrality_scores_plot"
+      },
+      {
+        "id": "co_occurrence_plot",
+        "kind": "workflow-output",
+        "label": "co_occurrence_plot"
+      },
+      {
+        "id": "count_matrix_h5ad",
+        "kind": "workflow-output",
+        "label": "Unfiltered count matrix from Alevin, converted to H5AD, spliced and unspliced counts, scenesence scores"
+      },
+      {
+        "id": "deepscence_binary_plot",
+        "kind": "workflow-output",
+        "label": "Umap with coloring by DeepScence binary results"
+      },
+      {
+        "id": "deepscence_continuous_plot",
+        "kind": "workflow-output",
+        "label": "Umap with coloring by DeepScence scores"
+      },
+      {
+        "id": "deepscence_plot",
+        "kind": "workflow-output",
+        "label": "deepscence_plot"
+      },
+      {
+        "id": "dispersion_plot",
+        "kind": "workflow-output",
+        "label": "Gene expression dispersion plot"
+      },
+      {
+        "id": "fastqc_dir",
+        "kind": "workflow-output",
+        "label": "Directory of FastQC output files, mirroring input directory structure"
+      },
+      {
+        "id": "filtered_data_h5ad",
+        "kind": "workflow-output",
+        "label": "Full data set of filtered results"
+      },
+      {
+        "id": "genome_build_json",
+        "kind": "workflow-output",
+        "label": "Genome build information in JSON format"
+      },
+      {
+        "id": "interaction_matrix_plot",
+        "kind": "workflow-output",
+        "label": "interaction_matrix_plot"
+      },
+      {
+        "id": "marker_gene_plot_logreg",
+        "kind": "workflow-output",
+        "label": "Cluster marker genes, logreg method"
+      },
+      {
+        "id": "marker_gene_plot_t_test",
+        "kind": "workflow-output",
+        "label": "Cluster marker genes, t-test"
+      },
+      {
+        "id": "neighborhood_enrichment_plot",
+        "kind": "workflow-output",
+        "label": "neighborhood_enrichment_plot"
+      },
+      {
+        "id": "qc_report",
+        "kind": "workflow-output",
+        "label": "Quality control report in JSON format"
+      },
+      {
+        "id": "raw_count_matrix",
+        "kind": "workflow-output",
+        "label": "Unfiltered count matrix from Alevin, converted to H5AD, with intronic counts as separate columns"
+      },
+      {
+        "id": "ripley_plot",
+        "kind": "workflow-output",
+        "label": "ripley_plot"
+      },
+      {
+        "id": "salmon_output",
+        "kind": "workflow-output",
+        "label": "Full output of `salmon alevin`"
+      },
+      {
+        "id": "scanpy_qc_results",
+        "kind": "workflow-output",
+        "label": "Quality control metrics from Scanpy"
+      },
+      {
+        "id": "scvelo_annotated_h5ad",
+        "kind": "workflow-output",
+        "label": "scVelo-annotated h5ad file, including cell RNA velocity"
+      },
+      {
+        "id": "scvelo_embedding_grid_plot",
+        "kind": "workflow-output",
+        "label": "scVelo velocity embedding grid plot"
+      },
+      {
+        "id": "spatial_plot",
+        "kind": "workflow-output",
+        "label": "Slide-seq bead plot, colored by Leiden cluster"
+      },
+      {
+        "id": "squidpy_annotated_h5ad",
+        "kind": "workflow-output",
+        "label": "squidpy_annotated_h5ad"
+      },
+      {
+        "id": "squidpy_spatial_plot",
+        "kind": "workflow-output",
+        "label": "squidpy_spatial_plot"
+      },
+      {
+        "id": "umap_density_plot",
+        "kind": "workflow-output",
+        "label": "UMAP dimensionality reduction plot, colored by cell density"
+      },
+      {
+        "id": "umap_plot",
+        "kind": "workflow-output",
+        "label": "UMAP dimensionality reduction plot"
+      },
+      {
+        "id": "compute_qc_results",
+        "kind": "step",
+        "label": "compute_qc_results"
+      },
+      {
+        "id": "deepscence",
+        "kind": "step",
+        "label": "deepscence"
+      },
+      {
+        "id": "fastqc",
+        "kind": "step",
+        "label": "fastqc"
+      },
+      {
+        "id": "salmon_quantification",
+        "kind": "step",
+        "label": "salmon_quantification"
+      },
+      {
+        "id": "scanpy_analysis",
+        "kind": "step",
+        "label": "scanpy_analysis"
+      },
+      {
+        "id": "scvelo_analysis",
+        "kind": "step",
+        "label": "scvelo_analysis"
+      },
+      {
+        "id": "squidpy_analysis",
+        "kind": "step",
+        "label": "squidpy_analysis"
+      }
+    ],
+    "edges": [
+      {
+        "from": "assay",
+        "to": "compute_qc_results/assay",
+        "via": []
+      },
+      {
+        "from": "deepscence/h5ad_with_ds",
+        "to": "compute_qc_results/primary_matrix_path",
+        "via": []
+      },
+      {
+        "from": "salmon_quantification/salmon_output",
+        "to": "compute_qc_results/salmon_dir",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/filtered_data_h5ad",
+        "to": "compute_qc_results/secondary_matrix_path",
+        "via": []
+      },
+      {
+        "from": "salmon_quantification/count_matrix_h5ad",
+        "to": "deepscence/h5ad_file",
+        "via": []
+      },
+      {
+        "from": "fastq_dir",
+        "to": "fastqc/fastq_dir",
+        "via": [
+          "scatter"
+        ]
+      },
+      {
+        "from": "threads",
+        "to": "fastqc/threads",
+        "via": []
+      },
+      {
+        "from": "assay",
+        "to": "salmon_quantification/assay",
+        "via": []
+      },
+      {
+        "from": "expected_cell_count",
+        "to": "salmon_quantification/expected_cell_count",
+        "via": []
+      },
+      {
+        "from": "fastq_dir",
+        "to": "salmon_quantification/fastq_dir",
+        "via": []
+      },
+      {
+        "from": "img_dir",
+        "to": "salmon_quantification/img_dir",
+        "via": []
+      },
+      {
+        "from": "keep_all_barcodes",
+        "to": "salmon_quantification/keep_all_barcodes",
+        "via": []
+      },
+      {
+        "from": "metadata_dir",
+        "to": "salmon_quantification/metadata_dir",
+        "via": []
+      },
+      {
+        "from": "organism",
+        "to": "salmon_quantification/organism",
+        "via": []
+      },
+      {
+        "from": "threads",
+        "to": "salmon_quantification/threads",
+        "via": []
+      },
+      {
+        "from": "assay",
+        "to": "scanpy_analysis/assay",
+        "via": []
+      },
+      {
+        "from": "deepscence/h5ad_with_ds",
+        "to": "scanpy_analysis/h5ad_file",
+        "via": []
+      },
+      {
+        "from": "assay",
+        "to": "scvelo_analysis/assay_name",
+        "via": []
+      },
+      {
+        "from": "deepscence/h5ad_with_ds",
+        "to": "scvelo_analysis/spliced_h5ad_file",
+        "via": []
+      },
+      {
+        "from": "assay",
+        "to": "squidpy_analysis/assay",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/filtered_data_h5ad",
+        "to": "squidpy_analysis/h5ad_file",
+        "via": []
+      },
+      {
+        "from": "img_dir",
+        "to": "squidpy_analysis/img_dir",
+        "via": []
+      },
+      {
+        "from": "squidpy_analysis/centrality_scores_plot",
+        "to": "centrality_scores_plot",
+        "via": []
+      },
+      {
+        "from": "squidpy_analysis/co_occurrence_plot",
+        "to": "co_occurrence_plot",
+        "via": []
+      },
+      {
+        "from": "deepscence/h5ad_with_ds",
+        "to": "count_matrix_h5ad",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/deepscence_binary_plot",
+        "to": "deepscence_binary_plot",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/deepscence_continuous_plot",
+        "to": "deepscence_continuous_plot",
+        "via": []
+      },
+      {
+        "from": "deepscence/deepscence_plot",
+        "to": "deepscence_plot",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/dispersion_plot",
+        "to": "dispersion_plot",
+        "via": []
+      },
+      {
+        "from": "fastqc/fastqc_dir",
+        "to": "fastqc_dir",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/filtered_data_h5ad",
+        "to": "filtered_data_h5ad",
+        "via": []
+      },
+      {
+        "from": "salmon_quantification/genome_build_json",
+        "to": "genome_build_json",
+        "via": []
+      },
+      {
+        "from": "squidpy_analysis/interaction_matrix_plot",
+        "to": "interaction_matrix_plot",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/marker_gene_plot_logreg",
+        "to": "marker_gene_plot_logreg",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/marker_gene_plot_t_test",
+        "to": "marker_gene_plot_t_test",
+        "via": []
+      },
+      {
+        "from": "squidpy_analysis/neighborhood_enrichment_plot",
+        "to": "neighborhood_enrichment_plot",
+        "via": []
+      },
+      {
+        "from": "compute_qc_results/qc_metrics",
+        "to": "qc_report",
+        "via": []
+      },
+      {
+        "from": "salmon_quantification/raw_count_matrix",
+        "to": "raw_count_matrix",
+        "via": []
+      },
+      {
+        "from": "squidpy_analysis/ripley_plot",
+        "to": "ripley_plot",
+        "via": []
+      },
+      {
+        "from": "salmon_quantification/salmon_output",
+        "to": "salmon_output",
+        "via": []
+      },
+      {
+        "from": "compute_qc_results/scanpy_qc_results",
+        "to": "scanpy_qc_results",
+        "via": []
+      },
+      {
+        "from": "scvelo_analysis/annotated_h5ad_file",
+        "to": "scvelo_annotated_h5ad",
+        "via": []
+      },
+      {
+        "from": "scvelo_analysis/embedding_grid_plot",
+        "to": "scvelo_embedding_grid_plot",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/spatial_plot",
+        "to": "spatial_plot",
+        "via": []
+      },
+      {
+        "from": "squidpy_analysis/squidpy_annotated_h5ad",
+        "to": "squidpy_annotated_h5ad",
+        "via": []
+      },
+      {
+        "from": "squidpy_analysis/spatial_plot",
+        "to": "squidpy_spatial_plot",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/umap_density_plot",
+        "to": "umap_density_plot",
+        "via": []
+      },
+      {
+        "from": "scanpy_analysis/umap_plot",
+        "to": "umap_plot",
+        "via": []
+      }
+    ]
+  },
+  "tests": [],
+  "warnings": [
+    {
+      "code": "ref.directory",
+      "message": "fastq_dir, img_dir, metadata_dir are CWL Directory or Directory[] inputs; Galaxy needs a collection or wrapper-side directory handling strategy.",
+      "path": "workflow_inputs"
+    },
+    {
+      "code": "scatter",
+      "message": "fastqc step scatters over fastq_dir (dotproduct) — Galaxy will need a per-element collection mapping or an in-tool loop.",
+      "path": "steps/fastqc"
+    },
+    {
+      "code": "nested.workflow",
+      "message": "salmon_quantification calls a nested Workflow (#salmon-quantification.cwl, 9 inner steps including its own scatter over fastq_dir); downstream Galaxy may flatten or wrap.",
+      "path": "steps/salmon_quantification"
+    },
+    {
+      "code": "optional.outputs",
+      "message": "Several outputs are File? (spatial_plot, scvelo_*, squidpy_*); downstream Galaxy template must allow conditional/optional outputs.",
+      "path": "workflow_outputs"
+    },
+    {
+      "code": "tests.missing",
+      "message": "No CWL job file or sibling test inputs discoverable in repo at root; tests=[] emitted.",
+      "path": "tests"
+    }
+  ]
+}
