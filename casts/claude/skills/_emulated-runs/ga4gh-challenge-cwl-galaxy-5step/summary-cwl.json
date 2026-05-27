@@ -1,0 +1,5011 @@
+{
+  "summary_version": "1",
+  "source": {
+    "ecosystem": "cwl",
+    "workflow": "biowardrobe_chipseq_se",
+    "url": "https://github.com/Barski-Lab/ga4gh_challenge/blob/f28d47bd0911e5e7210c4dc83f75653a1e0297c9/biowardrobe_chipseq_se.cwl",
+    "version": "f28d47bd0911e5e7210c4dc83f75653a1e0297c9",
+    "license": null,
+    "slug": "biowardrobe-chipseq-se",
+    "cwl_version": "v1.0",
+    "entrypoint": "biowardrobe_chipseq_se.cwl"
+  },
+  "documents": {
+    "entrypoint": "workflow-fixtures/cwl/Barski-Lab__ga4gh_challenge/biowardrobe_chipseq_se.cwl",
+    "normalized_path": "normalized/biowardrobe_chipseq_se.packed.json",
+    "validation": {
+      "command": "cwltool --validate biowardrobe_chipseq_se.cwl",
+      "status": "valid",
+      "diagnostics": [
+        "warning biowardrobe_chipseq_se.cwl:341:9 — macs2_callpeak/peak_xls_file (null|File) may be incompatible with downstream sink input_filename (File)"
+      ]
+    }
+  },
+  "workflow_inputs": [
+    {
+      "id": "annotation_file",
+      "label": "Annotation file",
+      "type": "File",
+      "optional": false,
+      "default": null,
+      "doc": "Tab-separated input annotation file",
+      "format": "http://edamontology.org/format_3475",
+      "secondary_files": []
+    },
+    {
+      "id": "broad_peak",
+      "label": "Callpeak broad",
+      "type": "boolean",
+      "optional": false,
+      "default": null,
+      "doc": "Set to call broad peak for MACS2",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "chrom_length",
+      "label": "Chromosome length file",
+      "type": "File",
+      "optional": false,
+      "default": null,
+      "doc": "Chromosome length file",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    },
+    {
+      "id": "clip_3p_end",
+      "label": "Clip from 3p end",
+      "type": "null | int",
+      "optional": true,
+      "default": 0,
+      "doc": "Number of bases to clip from the 3p end",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "clip_5p_end",
+      "label": "Clip from 5p end",
+      "type": "null | int",
+      "optional": true,
+      "default": 0,
+      "doc": "Number of bases to clip from the 5p end",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "control_file",
+      "label": "Control BAM file",
+      "type": "null | File",
+      "optional": true,
+      "default": null,
+      "doc": "Control BAM file file for MACS2 peak calling",
+      "format": "http://edamontology.org/format_2572",
+      "secondary_files": []
+    },
+    {
+      "id": "exp_fragment_size",
+      "label": "Expected fragment size",
+      "type": "null | int",
+      "optional": true,
+      "default": 150,
+      "doc": "Expected fragment size for MACS2",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "fastq_file",
+      "label": "FASTQ input file",
+      "type": "File",
+      "optional": false,
+      "default": null,
+      "doc": "Reads data in a FASTQ format, received after single end sequencing",
+      "format": "http://edamontology.org/format_1930",
+      "secondary_files": []
+    },
+    {
+      "id": "force_fragment_size",
+      "label": "Force fragment size",
+      "type": "null | boolean",
+      "optional": true,
+      "default": false,
+      "doc": "Force MACS2 to use exp_fragment_size",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "genome_size",
+      "label": "Effective genome size",
+      "type": "string",
+      "optional": false,
+      "default": null,
+      "doc": "MACS2 effective genome size: hs, mm, ce, dm or number, for example 2.7e9",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "indices_folder",
+      "label": "BOWTIE indices folder",
+      "type": "Directory",
+      "optional": false,
+      "default": null,
+      "doc": "Path to BOWTIE generated indices folder",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "remove_duplicates",
+      "label": "Remove duplicates",
+      "type": "null | boolean",
+      "optional": true,
+      "default": false,
+      "doc": "Calls samtools rmdup to remove duplicates from sortesd BAM file",
+      "format": null,
+      "secondary_files": []
+    },
+    {
+      "id": "threads",
+      "label": "Number of threads",
+      "type": "null | int",
+      "optional": true,
+      "default": 2,
+      "doc": "Number of threads for those steps that support multithreading",
+      "format": null,
+      "secondary_files": []
+    }
+  ],
+  "workflow_outputs": [
+    {
+      "id": "atdp_log",
+      "label": "ATDP log",
+      "type": "File",
+      "output_source": [
+        "average_tag_density/log_file"
+      ],
+      "doc": "Average Tag Density generated log",
+      "format": "http://edamontology.org/format_3475",
+      "secondary_files": []
+    },
+    {
+      "id": "atdp_result",
+      "label": "ATDP results",
+      "type": "File",
+      "output_source": [
+        "average_tag_density/result_file"
+      ],
+      "doc": "Average Tag Density generated results",
+      "format": "http://edamontology.org/format_3475",
+      "secondary_files": []
+    },
+    {
+      "id": "bambai_pair",
+      "label": "Coordinate sorted BAM alignment file (+index BAI)",
+      "type": "File",
+      "output_source": [
+        "samtools_sort_index_after_rmdup/bam_bai_pair"
+      ],
+      "doc": "Coordinate sorted BAM file and BAI index file",
+      "format": "http://edamontology.org/format_2572",
+      "secondary_files": []
+    },
+    {
+      "id": "bigwig",
+      "label": "BigWig file",
+      "type": "File",
+      "output_source": [
+        "bam_to_bigwig/bigwig_file"
+      ],
+      "doc": "Generated BigWig file",
+      "format": "http://edamontology.org/format_3006",
+      "secondary_files": []
+    },
+    {
+      "id": "bowtie_log",
+      "label": "BOWTIE alignment log",
+      "type": "File",
+      "output_source": [
+        "bowtie_aligner/log_file"
+      ],
+      "doc": "BOWTIE generated alignment log",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    },
+    {
+      "id": "fastx_statistics",
+      "label": "FASTQ statistics",
+      "type": "File",
+      "output_source": [
+        "fastx_quality_stats/statistics_file"
+      ],
+      "doc": "fastx_quality_stats generated FASTQ file quality statistics file",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    },
+    {
+      "id": "get_stat_log",
+      "label": "Bowtie & Samtools Rmdup combined log",
+      "type": "null | File",
+      "output_source": [
+        "get_stat/output_file"
+      ],
+      "doc": "Processed and combined Bowtie aligner and Samtools rmdup log",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    },
+    {
+      "id": "iaintersect_log",
+      "label": "Island intersect log",
+      "type": "File",
+      "output_source": [
+        "island_intersect/log_file"
+      ],
+      "doc": "Iaintersect generated log",
+      "format": "http://edamontology.org/format_3475",
+      "secondary_files": []
+    },
+    {
+      "id": "iaintersect_result",
+      "label": "Island intersect results",
+      "type": "File",
+      "output_source": [
+        "island_intersect/result_file"
+      ],
+      "doc": "Iaintersect generated results",
+      "format": "http://edamontology.org/format_3475",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_broad_peaks",
+      "label": "Broad peaks",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/broad_peak_file"
+      ],
+      "doc": "Contains the peak locations together with peak summit, pvalue and qvalue",
+      "format": "http://edamontology.org/format_3614",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_called_peaks",
+      "label": "Called peaks",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/peak_xls_file"
+      ],
+      "doc": "XLS file to include information about called peaks",
+      "format": "http://edamontology.org/format_3468",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_fragment_stat",
+      "label": "FRAGMENT, FRAGMENTE, ISLANDS",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/macs2_stat_file"
+      ],
+      "doc": "fragment, calculated fragment, islands count from MACS2 results",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_gapped_peak",
+      "label": "Gapped peak",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/gapped_peak_file"
+      ],
+      "doc": "Contains both the broad region and narrow peaks",
+      "format": "http://edamontology.org/format_3586",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_log",
+      "label": "MACS2 log",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/macs_log"
+      ],
+      "doc": "MACS2 output log",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_moder_r",
+      "label": "MACS2 generated R script",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/moder_r_file"
+      ],
+      "doc": "R script to produce a PDF image about the model based on your data",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_narrow_peaks",
+      "label": "Narrow peaks",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/narrow_peak_file"
+      ],
+      "doc": "Contains the peak locations together with peak summit, pvalue and qvalue",
+      "format": "http://edamontology.org/format_3613",
+      "secondary_files": []
+    },
+    {
+      "id": "macs2_peak_summits",
+      "label": "Peak summits",
+      "type": "null | File",
+      "output_source": [
+        "macs2_callpeak/peak_summits_file"
+      ],
+      "doc": "Contains the peak summits locations for every peaks",
+      "format": "http://edamontology.org/format_3003",
+      "secondary_files": []
+    },
+    {
+      "id": "samtools_rmdup_log",
+      "label": "Remove duplicates log",
+      "type": "File",
+      "output_source": [
+        "samtools_rmdup/rmdup_log"
+      ],
+      "doc": "Samtools rmdup generated log",
+      "format": "http://edamontology.org/format_2330",
+      "secondary_files": []
+    }
+  ],
+  "steps": [
+    {
+      "id": "average_tag_density",
+      "run": "atdp.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "average_tag_density/annotation_filename",
+          "source": [
+            "annotation_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/avd_heat_window_bp",
+          "source": [],
+          "default": 200,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/avd_smooth_bp",
+          "source": [],
+          "default": 50,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/avd_window_bp",
+          "source": [],
+          "default": 5000,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/double_chr",
+          "source": [],
+          "default": "chrX chrY",
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/fragmentsize_bp",
+          "source": [
+            "macs2_callpeak/macs2_fragments_calculated"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/ignore_chr",
+          "source": [],
+          "default": "chrM",
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/input_file",
+          "source": [
+            "samtools_sort_index_after_rmdup/bam_bai_pair"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "average_tag_density/mapped_reads",
+          "source": [
+            "get_stat/mapped_reads"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "result_file",
+        "log_file"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "bam_to_bigwig",
+      "run": "bam-bedgraph-bigwig.cwl",
+      "run_class": "Workflow",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "bam_to_bigwig/bam_file",
+          "source": [
+            "samtools_sort_index_after_rmdup/bam_bai_pair"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bam_to_bigwig/chrom_length_file",
+          "source": [
+            "chrom_length"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bam_to_bigwig/fragment_size",
+          "source": [
+            "macs2_callpeak/macs2_fragments_calculated"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bam_to_bigwig/mapped_reads_number",
+          "source": [
+            "get_stat/mapped_reads"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "bigwig_file"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "bowtie_aligner",
+      "run": "bowtie-alignreads.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "bowtie_aligner/best",
+          "source": [],
+          "default": true,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/clip_3p_end",
+          "source": [
+            "clip_3p_end"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/clip_5p_end",
+          "source": [
+            "clip_5p_end"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/indices_folder",
+          "source": [
+            "indices_folder"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/m",
+          "source": [],
+          "default": 1,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/q",
+          "source": [],
+          "default": true,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/sam",
+          "source": [],
+          "default": true,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/strata",
+          "source": [],
+          "default": true,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/threads",
+          "source": [
+            "threads"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/upstream_filelist",
+          "source": [
+            "extract_fastq/fastq_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "bowtie_aligner/v",
+          "source": [],
+          "default": 3,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "sam_file",
+        "log_file"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "extract_fastq",
+      "run": "extract-fastq.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "extract_fastq/compressed_file",
+          "source": [
+            "fastq_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "fastq_file"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "fastx_quality_stats",
+      "run": "fastx-quality-stats.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "fastx_quality_stats/input_file",
+          "source": [
+            "extract_fastq/fastq_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "statistics_file"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "get_stat",
+      "run": "python-get-stat-chipseq.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "get_stat/bowtie_log",
+          "source": [
+            "bowtie_aligner/log_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "get_stat/rmdup_log",
+          "source": [
+            "samtools_rmdup/rmdup_log"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "output_file",
+        "mapped_reads"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "island_intersect",
+      "run": "iaintersect.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "island_intersect/annotation_filename",
+          "source": [
+            "annotation_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "island_intersect/input_filename",
+          "source": [
+            "macs2_callpeak/peak_xls_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "island_intersect/promoter_bp",
+          "source": [],
+          "default": 1000,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "result_file",
+        "log_file"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "macs2_callpeak",
+      "run": "macs2-callpeak-biowardrobe-only.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "macs2_callpeak/broad",
+          "source": [
+            "broad_peak"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/buffer_size",
+          "source": [],
+          "default": 10000,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/bw",
+          "source": [
+            "exp_fragment_size"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/call_summits",
+          "source": [
+            "broad_peak"
+          ],
+          "default": null,
+          "value_from": "$(!self)",
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/control_file",
+          "source": [
+            "control_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/extsize",
+          "source": [
+            "exp_fragment_size"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/format_mode",
+          "source": [],
+          "default": "BAM",
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/genome_size",
+          "source": [
+            "genome_size"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/keep_dup",
+          "source": [],
+          "default": "auto",
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/mfold",
+          "source": [],
+          "default": "4 40",
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/nolambda",
+          "source": [
+            "control_file"
+          ],
+          "default": null,
+          "value_from": "$(!self)",
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/nomodel",
+          "source": [
+            "force_fragment_size"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/q_value",
+          "source": [],
+          "default": 0.05,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/treatment_file",
+          "source": [
+            "samtools_sort_index_after_rmdup/bam_bai_pair"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "macs2_callpeak/verbose",
+          "source": [],
+          "default": 3,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "peak_xls_file",
+        "narrow_peak_file",
+        "peak_summits_file",
+        "broad_peak_file",
+        "moder_r_file",
+        "gapped_peak_file",
+        "treat_pileup_bdg_file",
+        "control_lambda_bdg_file",
+        "macs_log",
+        "macs2_stat_file",
+        "macs2_fragments_calculated"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "samtools_rmdup",
+      "run": "samtools-rmdup.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "samtools_rmdup/bam_file",
+          "source": [
+            "samtools_sort_index/bam_bai_pair"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "samtools_rmdup/single_end",
+          "source": [],
+          "default": true,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "samtools_rmdup/trigger",
+          "source": [
+            "remove_duplicates"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "rmdup_output",
+        "rmdup_log"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "samtools_sort_index",
+      "run": "samtools-sort-index.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "samtools_sort_index/sort_input",
+          "source": [
+            "bowtie_aligner/sam_file"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "samtools_sort_index/threads",
+          "source": [
+            "threads"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "bam_bai_pair"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    },
+    {
+      "id": "samtools_sort_index_after_rmdup",
+      "run": "samtools-sort-index.cwl",
+      "run_class": "CommandLineTool",
+      "label": null,
+      "doc": null,
+      "in": [
+        {
+          "id": "samtools_sort_index_after_rmdup/sort_input",
+          "source": [
+            "samtools_rmdup/rmdup_output"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "samtools_sort_index_after_rmdup/threads",
+          "source": [
+            "threads"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        },
+        {
+          "id": "samtools_sort_index_after_rmdup/trigger",
+          "source": [
+            "remove_duplicates"
+          ],
+          "default": null,
+          "value_from": null,
+          "link_merge": null,
+          "pick_value": null
+        }
+      ],
+      "out": [
+        "bam_bai_pair"
+      ],
+      "scatter": [],
+      "scatter_method": null,
+      "when": null,
+      "requirements": [],
+      "hints": []
+    }
+  ],
+  "tools": [
+    {
+      "id": "atdp.cwl",
+      "label": null,
+      "base_command": [
+        "bash",
+        "-c"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "annotation_filename",
+          "type": "File",
+          "input_binding": {
+            "position": 3,
+            "prefix": "--a=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Annotation file, tsv\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "avd_heat_window_bp",
+          "type": "null | int",
+          "input_binding": {
+            "position": 11,
+            "prefix": "--avd_heat_window=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Average tag density window for heatmap\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "avd_smooth_bp",
+          "type": "null | int",
+          "input_binding": {
+            "position": 8,
+            "prefix": "--avd_smooth=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Average smooth window (odd), int [0]\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "avd_window_bp",
+          "type": "null | int",
+          "input_binding": {
+            "position": 7,
+            "prefix": "--avd_window=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Average tag density window, int [5000]\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "double_chr",
+          "type": "null | string",
+          "input_binding": {
+            "position": 10,
+            "prefix": "--sam_twicechr=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The chromosomes to be doubled, string\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fragmentsize_bp",
+          "type": "null | int",
+          "input_binding": {
+            "position": 6,
+            "prefix": "--f=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Fragmentsize, int [150]\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "ignore_chr",
+          "type": "null | string",
+          "input_binding": {
+            "position": 9,
+            "prefix": "--sam_ignorechr=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The chromosomes to be ignored, string\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "index_file",
+          "type": "null | File",
+          "input_binding": {
+            "position": 13,
+            "prefix": "--index=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Index file\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "input_file",
+          "type": "File",
+          "input_binding": {
+            "position": 2,
+            "prefix": "--in=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Input indexed BAM file (optionally +BAI index file in secondaryFiles)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "log_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 5,
+            "prefix": "--log=",
+            "glob": null,
+            "value_from": "${\n    if (self == \"\"){\n      return default_output_filename('_atdp.log');\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "Log filename\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "mapped_reads",
+          "type": "null | int",
+          "input_binding": {
+            "position": 12,
+            "prefix": "--m=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Mapped reads number\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 4,
+            "prefix": "--out=",
+            "glob": null,
+            "value_from": "${\n    if (self == \"\"){\n      return default_output_filename('_atdp.tsv');\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "Base output file name, tsv\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "script",
+          "type": "null | string",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Bash function to run samtools sort with all input parameters or skip it if trigger is false\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "log_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n  if (inputs.log_filename == \"\"){\n    return default_output_filename('_atdp.log');\n  } else {\n    return inputs.log_filename;\n  }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "result_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n  if (inputs.output_filename == \"\"){\n    return default_output_filename('_atdp.tsv');\n  } else {\n    return inputs.output_filename;\n  }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function(ext) { let root = inputs.input_file.basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.input_file.basename+ext:root+ext; };"
+            ]
+          }
+        },
+        {
+          "class": "InitialWorkDirRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InitialWorkDirRequirement",
+            "listing": "${\n  return  [\n            {\n              \"entry\": inputs.annotation_filename,\n              \"entryname\": inputs.annotation_filename.basename,\n              \"writable\": true\n            }\n          ]\n}\n"
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/atdp:v0.0.1",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/atdp:v0.0.1"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "bedtools-genomecov.cwl",
+      "label": null,
+      "base_command": [
+        "bedtools",
+        "genomecov"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "chrom_length_file",
+          "type": "null | File",
+          "input_binding": {
+            "position": 17,
+            "prefix": "-g",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Input genome file. Needed only when -i flag. The genome file is tab delimited <chromName><TAB><chromSize>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "depth",
+          "type": "null | enum",
+          "input_binding": {
+            "position": 5,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Report the depth type. By default, bedtools genomecov will compute a histogram of coverage\nfor the genome file provided (intputs.chrom_length_file)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "du",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 11,
+            "prefix": "-du",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Change strand af the mate read (so both reads from the same strand) useful for strand specific.\nWorks for BAM files only\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fragment_size",
+          "type": "null | int",
+          "input_binding": {
+            "position": 12,
+            "prefix": "-fs",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Set fixed fragment size\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "input_file",
+          "type": "File",
+          "input_binding": {
+            "position": 16,
+            "prefix": null,
+            "glob": null,
+            "value_from": "${\n  var prefix = ((/.*\\.bam$/i).test(inputs.input_file.path))?'-ibam':'-i';\n  return [prefix, inputs.input_file.path];\n}\n"
+          },
+          "doc": "The input file can be in BAM format (Note: BAM must be sorted by position) or <bed/gff/vcf>.\nPrefix is selected on the base of input file extension\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "m3",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 15,
+            "prefix": "-3",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Calculate coverage of 3\" positions (instead of entire interval)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "m5",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 14,
+            "prefix": "-5",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Calculate coverage of 5\" positions (instead of entire interval)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "mapped_reads_number",
+          "type": "null | int",
+          "input_binding": {
+            "position": 7,
+            "prefix": "-scale",
+            "glob": null,
+            "value_from": "${\n  if (inputs.scale){\n    return null;\n  } else if (inputs.mapped_reads_number) {\n    return 1000000/inputs.mapped_reads_number;\n  } else {\n    return null;\n  }\n}\n"
+          },
+          "doc": "Optional parameter to calculate scale as 1000000/mapped_reads_number if inputs.scale is not provided\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "max",
+          "type": "null | int",
+          "input_binding": {
+            "position": 13,
+            "prefix": "-max",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Combine all positions with a depth >= max into\na single bin in the histogram. Irrelevant\nfor -d and -bedGraph\n- (INTEGER)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": null,
+          "doc": "Name for generated output file\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "pairchip",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 10,
+            "prefix": "-pc",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "pair-end chip seq experiment\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "scale",
+          "type": "null | float",
+          "input_binding": {
+            "position": 6,
+            "prefix": "-scale",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Scale the coverage by a constant factor.\nEach coverage value is multiplied by this factor before being reported.\nUseful for normalizing coverage by, e.g., reads per million (RPM).\n- Default is 1.0; i.e., unscaled.\n- (FLOAT)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "split",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 8,
+            "prefix": "-split",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "treat \"split\" BAM or BED12 entries as distinct BED intervals.\nwhen computing coverage.\nFor BAM files, this uses the CIGAR \"N\" and \"D\" operations\nto infer the blocks for computing coverage.\nFor BED12 files, this uses the BlockCount, BlockStarts, and BlockEnds\nfields (i.e., columns 10,11,12).\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "strand",
+          "type": "null | string",
+          "input_binding": {
+            "position": 9,
+            "prefix": "-strand",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Calculate coverage of intervals from a specific strand.\nWith BED files, requires at least 6 columns (strand is column 6).\n- (STRING): can be + or -\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "genome_coverage_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n  if (inputs.output_filename == null){\n    return default_output_filename();\n  } else {\n    return inputs.output_filename;\n  }\n}\n",
+            "value_from": null
+          },
+          "doc": "Generated genome coverage output file\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function() { let ext = (inputs.depth == \"-bg\" || inputs.depth == \"-bga\")?\".bedGraph\":\".tab\"; return inputs.input_file.location.split('/').slice(-1)[0].split('.').slice(0,-1).join('.') + ext; };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/bedtools2:v2.26.0",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/bedtools2:v2.26.0"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "bowtie-alignreads.cwl",
+      "label": null,
+      "base_command": [
+        "bowtie"
+      ],
+      "arguments": [
+        "{\"valueFrom\":\"${\\n  if (inputs.upstream_filelist && inputs.downstream_filelist){\\n    return \\\"-1\\\";\\n  }\\n  return null;\\n}\\n\",\"position\":82}",
+        "{\"valueFrom\":\"${\\n  if (inputs.upstream_filelist && inputs.downstream_filelist){\\n    return \\\"-2\\\";\\n  }\\n  return null;\\n}\\n\",\"position\":84}",
+        "{\"valueFrom\":\"${\\n  return ' 2> ' + default_output_filename(\\\".bw\\\");\\n}\\n\",\"position\":100000,\"shellQuote\":false}"
+      ],
+      "inputs": [
+        {
+          "id": "B",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-B",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--offbase <int> leftmost ref offset = <int> in bowtie output (default: 0)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "C",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-C",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "reads and index are in colorspace\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "I",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-I",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--minins <int>  minimum insert size for paired-end alignment (default: 0)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "M",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-M",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int> like -m, but reports 1 random hit (MAPQ=0)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "Q",
+          "type": "null | File",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-Q",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "QV file(s) corresponding to CSFASTA inputs; use with -f -C\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "Q1",
+          "type": "null | File",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--Q1",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--Q1/--Q2 <file>   same as -Q, but for mate files 1 and 2 respectively\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "Q2",
+          "type": "null | File",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--Q2",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--Q1/--Q2 <file>   same as -Q, but for mate files 1 and 2 respectively\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "X",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-X",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--maxins <int>  maximum insert size for paired-end alignment (default: 250)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "a",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-a",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--all           report all alignments per read (much slower than low -k)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "al",
+          "type": "null | string",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--al",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<fname>       write aligned reads/pairs to file(s) <fname>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "best",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--best",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "hits guaranteed best stratum; ties broken by quality\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "c",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-c",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "query sequences given on cmd line (as <mates>, <singles>)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "chunkmbs",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--chunkmbs",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>   max megabytes of RAM for best-first search frames (def: 64)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "clip_3p_end",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-3",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--trim3 <int>   trim <int> bases from 3' (right) end of reads\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "clip_5p_end",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-5",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--trim5 <int>   trim <int> bases from 5' (left) end of reads\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "col_cqual",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--col-cqual",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "print original colorspace quals, not decoded quals\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "col_cseq",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--col-cseq",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "print aligned colorspace seqs as colors, not decoded bases\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "col_keepends",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--col-keepends",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "keep nucleotides at extreme ends of decoded alignment\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "crossbow_filelist",
+          "type": "null | File | array",
+          "input_binding": {
+            "position": 86,
+            "prefix": "-12",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Comma-separated list of files containing Crossbow-style reads.\nCan be a mixture of paired and unpaired.  Specify \"-\"for stdin.\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "downstream_filelist",
+          "type": "null | File | array",
+          "input_binding": {
+            "position": 85,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Comma-separated list of files containing downstream mates (or the\nsequences themselves if -c is set) paired with mates in <m1>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "e",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-e",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--maqerr <int>  max sum of mismatch quals across alignment for -n (def: 70)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "f",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-f",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "query input files are (multi-)FASTA .fa/.mfa\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "ff",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--ff",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--fr/--rf/--ff     -1, -2 mates align fw/rev, rev/fw, fw/fw (default: --fr)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fr",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--fr",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--fr/--rf/--ff     -1, -2 mates align fw/rev, rev/fw, fw/fw (default: --fr)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fullref",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--fullref",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "write entire ref name (default: only up to 1st space)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "indices_folder",
+          "type": "Directory",
+          "input_binding": {
+            "position": 81,
+            "prefix": null,
+            "glob": null,
+            "value_from": "${\n    for (var i = 0; i < self.listing.length; i++) {\n        if (self.listing[i].path.split('.').slice(-3).join('.') == 'rev.1.ebwt' ||\n            self.listing[i].path.split('.').slice(-3).join('.') == 'rev.1.ebwtl'){\n          return self.listing[i].path.split('.').slice(0,-3).join('.');\n        }\n    }\n    return null;\n}\n"
+          },
+          "doc": "Folder with Bowtie indices\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "integer_quals",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--integer-quals",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "qualities are given as space-separated integers (not ASCII)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "k",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-k",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>           report up to <int> good alignments per read (default: 1)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "l",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-l",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--seedlen <int> seed length for -n (default: 28)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "large_index",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--large-index",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "force usage of a 'large' index, even if a small one is present\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "m",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-m",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>           suppress all alignments if > <int> exist (def: no limit)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "mapq",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--mapq",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>       default mapping quality (MAPQ) to print for SAM alignments\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "max",
+          "type": "null | string",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--max",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<fname>      write reads/pairs over -m limit to file(s) <fname>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "maxbts",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--maxbts",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>     max # backtracks for -n 2/3 (default: 125, 800 for --best)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "mm",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--mm",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "use memory-mapped I/O for index; many 'bowtie's can share\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "n",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-n",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--seedmms <int> max mismatches in seed (can be 0-3, default: -n 2)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "nofw",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--nofw",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--norc      do not align to forward/reverse-complement reference strand\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "nomaqround",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--nomaqround",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "disable Maq-like quality rounding for -n (nearest 10 <= 30)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "o",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-o",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--offrate <int> override offrate of index; must be >= index's offrate\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 90,
+            "prefix": null,
+            "glob": null,
+            "value_from": "$(default_output_filename())"
+          },
+          "doc": "Generates default output filename on the base of upstream_filelist/downstream_filelist files\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "pairtries",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--pairtries",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>  max # attempts to find mate for anchor hit (default: 100)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "phred33_quals",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--phred33-quals",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "input quals are Phred+33 (default)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "phred64_quals",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--phred64-quals",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "input quals are Phred+64 (same as --solexa1.3-quals)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "q",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-q",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "query input files are FASTQ .fq/.fastq (default)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "quiet",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--quiet",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "print nothing but the alignments\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "r",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-r",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "query input files are raw one-sequence-per-line\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "reads_per_batch",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--reads-per-batch",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "# of reads to read from input file at once (default: 16)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "refidx",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--refidx",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "refer to ref. seqs by 0-based index rather than name\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "refout",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--refout",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "write alignments to files refXXXXX.map, 1 map per reference\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "rf",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--rf",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--fr/--rf/--ff     -1, -2 mates align fw/rev, rev/fw, fw/fw (default: --fr)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "s",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-s",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--skip <int>    skip the first <int> reads/pairs in the input\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sam",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-S",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--sam write hits in SAM format\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sam_RG",
+          "type": "null | string",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--sam-RG",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<text>    add <text> (usually \"lab=value\") to @RG line of SAM header\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sam_nohead",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--sam-nohead",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "supppress header lines (starting with @) for SAM output\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sam_nosq",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--sam-nosq",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "supppress @SQ header lines for SAM output\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "seed",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--seed",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>       seed for random number generator\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "shmem",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--shmem",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "use shared mem for index\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "snpfrac",
+          "type": "null | float",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--snpfrac",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<dec>    approx. fraction of SNP bases (e.g. 0.001); sets --snpphred\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "snpphred",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--snpphred",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<int>   Phred penalty for SNP when decoding colorspace (def: 30)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "solexa1.3_quals",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--solexa1.3-quals",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "input quals are from GA Pipeline ver. >= 1.3\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "solexa_quals",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--solexa-quals",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "input quals are from GA Pipeline ver. < 1.3\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "strata",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--strata",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "hits in sub-optimal strata aren't reported (requires --best)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "suppress",
+          "type": "null | string",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--suppress",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<cols>  suppresses given columns (comma-delim'ed) in default output\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "t",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-t",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--time          print wall-clock time taken by search phases\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "threads",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-p",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--threads <int> number of alignment threads to launch (default: 1)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "u",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-u",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--qupto <int>   stop after first <int> reads/pairs (excl. skipped reads)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "un",
+          "type": "null | string",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--un",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "<fname>       write unaligned reads/pairs to file(s) <fname>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "upstream_filelist",
+          "type": "null | File | array",
+          "input_binding": {
+            "position": 83,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Comma-separated list of files containing upstream mates (or the\nsequences themselves, if -c is set) paired with mates in <m2>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "v",
+          "type": "null | int",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-v",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "report end-to-end hits w/ <=v mismatches; ignore qualities\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "verbose",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--verbose",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "verbose output (for debugging)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "y",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 1,
+            "prefix": "-y",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "--tryhard try hard to find valid alignments, at the expense of speed\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "aligned_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(inputs.al)",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "log_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(default_output_filename(\".bw\"))",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "mapped_reads_number",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(default_output_filename(\".bw\"))",
+            "value_from": "${\n  let mappedRegex = /alignment\\:.*/;\n  return parseInt(self[0].contents.match(mappedRegex)[0].split(\" \")[1]);\n}\n"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "multimapped_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(inputs.max)",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "refout_file",
+          "type": "null | array",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "*ref*.map*",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sam_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(default_output_filename())",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "total_reads_number",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(default_output_filename(\".bw\"))",
+            "value_from": "${\n  let totalRegex = /processed\\:.*/;\n  return parseInt(self[0].contents.match(totalRegex)[0].split(\" \")[1]);\n}\n"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "unaligned_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(inputs.un)",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "unmapped_reads_number",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(default_output_filename(\".bw\"))",
+            "value_from": "${\n  let unmappedRegex = /align\\:.*/;\n  return parseInt(self[0].contents.match(unmappedRegex)[0].split(\" \")[1]);\n}\n"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "ShellCommandRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "ShellCommandRequirement"
+          }
+        },
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function(ext) { if (inputs.output_filename != \"\" && !ext){ return inputs.output_filename; } ext = ext || \".sam\"; let root = \"\"; if (inputs.output_filename != \"\"){ root = inputs.output_filename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.output_filename+ext:root+ext; } else if (Array.isArray(inputs.upstream_filelist) && inputs.upstream_filelist.length > 0){ root = inputs.upstream_filelist[0].basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.upstream_filelist[0].basename+ext:root+ext; } else if (inputs.upstream_filelist != null){ root = inputs.upstream_filelist.basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.upstream_filelist.basename+ext:root+ext; } else if (Array.isArray(inputs.downstream_filelist) && inputs.downstream_filelist.length > 0){ root = inputs.downstream_filelist[0].basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.downstream_filelist[0].basename+ext:root+ext; } else if (inputs.downstream_filelist != null){ root = inputs.downstream_filelist.basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.downstream_filelist.basename+ext:root+ext; } else if (Array.isArray(inputs.crossbow_filelist) && inputs.crossbow_filelist.length > 0){ root = inputs.crossbow_filelist[0].basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.crossbow_filelist[0].basename+ext:root+ext; } else if (inputs.crossbow_filelist != null){ root = inputs.crossbow_filelist.basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.crossbow_filelist.basename+ext:root+ext; } else { return null; } };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/bowtie:v1.2.0",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/bowtie:v1.2.0"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "extract-fastq.cwl",
+      "label": null,
+      "base_command": [
+        "bash",
+        "-c"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "compressed_file",
+          "type": "File",
+          "input_binding": {
+            "position": 6,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Compressed or uncompressed FASTQ file\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_file_ext",
+          "type": "null | string",
+          "input_binding": {
+            "position": 7,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Default extension for the extracted file\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "script",
+          "type": "null | string",
+          "input_binding": {
+            "position": 5,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Bash script to extract compressed FASTQ file\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "fastq_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "*",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "ShellCommandRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "ShellCommandRequirement"
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/scidap:v0.0.3",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/scidap:v0.0.3"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "fastx-quality-stats.cwl",
+      "label": null,
+      "base_command": [
+        "fastx_quality_stats"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "input_file",
+          "type": "File",
+          "input_binding": {
+            "position": 10,
+            "prefix": "-i",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "FASTA/Q input file. If FASTA file is given, only nucleotides distribution is calculated (there's no quality info)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "new_output_format",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 5,
+            "prefix": "-N",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "New output format (with more information per nucleotide/cycle).\ncycle (previously called 'column') = cycle number\nmax-count\nFor each nucleotide in the cycle (ALL/A/C/G/T/N):\n    count   = number of bases found in this column.\n    min     = Lowest quality score value found in this column.\n    max     = Highest quality score value found in this column.\n    sum     = Sum of quality score values for this column.\n    mean    = Mean quality score value for this column.\n    Q1\t= 1st quartile quality score.\n    med\t= Median quality score.\n    Q3\t= 3rd quartile quality score.\n    IQR\t= Inter-Quartile range (Q3-Q1).\n    lW\t= 'Left-Whisker' value (for boxplotting).\n    rW\t= 'Right-Whisker' value (for boxplotting).\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 11,
+            "prefix": "-o",
+            "glob": null,
+            "value_from": "${\n    if (self == \"\"){\n      return default_output_filename();\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "Output file to store generated statistics. If not provided - return from default_output_filename function\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "statistics_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_filename == \"\"){\n      return default_output_filename();\n    } else {\n      return inputs.output_filename;\n    }\n}\n",
+            "value_from": null
+          },
+          "doc": "Generated statistics file",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function() { return inputs.input_file.location.split('/').slice(-1)[0].split('.').slice(0,-1).join('.') + \".fastxstat\" };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/fastx_toolkit:v0.0.14",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/fastx_toolkit:v0.0.14"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "iaintersect.cwl",
+      "label": null,
+      "base_command": [
+        "iaintersect"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "annotation_filename",
+          "type": "File",
+          "input_binding": {
+            "position": 2,
+            "prefix": "--a=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Annotation file, tsv\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "ignore_chr",
+          "type": "null | string",
+          "input_binding": {
+            "position": 7,
+            "prefix": "--sam_ignorechr=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The chromosome to be ignored, string\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "input_filename",
+          "type": "File",
+          "input_binding": {
+            "position": 1,
+            "prefix": "--in=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Input filename with MACS2 peak calling results, tsv\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "log_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 4,
+            "prefix": "--log=",
+            "glob": null,
+            "value_from": "${\n    if (self == \"\"){\n      return default_output_filename('_iaintersect.log');\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "Log filename\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 3,
+            "prefix": "--out=",
+            "glob": null,
+            "value_from": "${\n    if (self == \"\"){\n      return default_output_filename('_iaintersect.tsv');\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "Base output file name, tsv\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "promoter_bp",
+          "type": "null | int",
+          "input_binding": {
+            "position": 5,
+            "prefix": "--promoter=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Promoter region around TSS, base pairs\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "upstream_bp",
+          "type": "null | int",
+          "input_binding": {
+            "position": 6,
+            "prefix": "--upstream=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Upstream region before promoter, base pairs\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "log_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n  if (inputs.log_filename == \"\"){\n    return default_output_filename('_iaintersect.log');\n  } else {\n    return inputs.log_filename;\n  }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "result_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n  if (inputs.output_filename == \"\"){\n    return default_output_filename('_iaintersect.tsv');\n  } else {\n    return inputs.output_filename;\n  }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function(ext) { let root = inputs.input_filename.basename.split('.').slice(0,-1).join('.'); return (root == \"\")?inputs.input_filename.basename+ext:root+ext; };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/iaintersect:v0.0.2",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/iaintersect:v0.0.2"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "linux-sort.cwl",
+      "label": null,
+      "base_command": [
+        "sort"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "key",
+          "type": "array",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "-k, --key=POS1[,POS2]\nstart a key at POS1, end it at POS2 (origin 1)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": null,
+          "doc": "Name for generated output file\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "unsorted_file",
+          "type": "File",
+          "input_binding": {
+            "position": 4,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "sorted_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n  if (inputs.output_filename == null){\n    return default_output_filename();\n  } else {\n    return inputs.output_filename;\n  }\n}\n",
+            "value_from": null
+          },
+          "doc": "Sorted file\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function() { return inputs.unsorted_file.location.split('/').slice(-1)[0]; };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/scidap:v0.0.2",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/scidap:v0.0.2"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "macs2-callpeak-biowardrobe-only.cwl",
+      "label": null,
+      "base_command": [
+        "python",
+        "run.py",
+        "macs2 callpeak"
+      ],
+      "arguments": [
+        "{\"valueFrom\":\"${ if (inputs.output_prefix == \\\"\\\"){ return ' 2> ' + default_output_filename('_macs.log'); } else { return ' 2> ' + inputs.output_prefix + '.log'; } }\",\"position\":100000,\"shellQuote\":true}"
+      ],
+      "inputs": [
+        {
+          "id": "bdg",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 17,
+            "prefix": "--bdg",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "If this flag is on, MACS will store the fragment pileup, control lambda, -log10pvalue and -log10qvalue scores in bedGraph files.\nThe bedGraph files will be stored in current directory named NAME+’_treat_pileup.bdg’ for treatment data, NAME+’_control_lambda.bdg’\nfor local lambda values from control, NAME+’_treat_pvalue.bdg’ for Poisson pvalue scores (in -log10(pvalue) form),\nand NAME+’_treat_qvalue.bdg’ for q-value scores from\nBenjamini–Hochberg–Yekutieli procedure <http://en.wikipedia.org/wiki/False_discovery_rate#Dependent_tests>\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "broad",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 36,
+            "prefix": "--broad",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "If set, MACS will try to call broad peaks by linking nearby highly enriched\nregions. The linking region is controlled by another cutoff through --linking-cutoff.\nThe maximum linking region length is 4 times of d from MACS.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "broad_cutoff",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 37,
+            "prefix": "--broad-cutoff",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Cutoff for broad region. This option is not available\nunless --broad is set. If -p is set, this is a pvalue\ncutoff, otherwise, it's a qvalue cutoff.\nDEFAULT: 0.1\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "buffer_size",
+          "type": "null | int",
+          "input_binding": {
+            "position": 16,
+            "prefix": "--buffer-size",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Buffer size for incrementally increasing internal\narray size to store reads alignment information. In\nmost cases, you don't have to change this parameter.\nHowever, if there are large number of\nchromosomes/contigs/scaffolds in your alignment, it's\nrecommended to specify a smaller buffer size in order\nto decrease memory usage (but it will take longer time\nto read alignment files). Minimum memory requested for\nreading an alignment file is about # of CHROMOSOME *\nBUFFER_SIZE * 2 Bytes.\nDEFAULT: 100000\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "bw",
+          "type": "null | int",
+          "input_binding": {
+            "position": 21,
+            "prefix": "--bw",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Band width for picking regions to compute  fragment  size.  This\nvalue is only used while building the shifting model\nDEFAULT: 300\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "call_summits",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 39,
+            "prefix": "--call-summits",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "If set, MACS will use a more sophisticated signal processing approach to\nfind subpeak summits in each enriched peak region.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "control_file",
+          "type": "null | File | array",
+          "input_binding": {
+            "position": 12,
+            "prefix": "-c",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The control or mock data file. Please follow the same direction as for -t/–treatment.\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "cutoff_analysis",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 38,
+            "prefix": "--cutoff-analysis",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "While set, MACS2 will analyze number or total length of peaks that can be\ncalled by different p-value cutoff then output a summary table to help user\ndecide a better cutoff. The table will be saved in NAME_cutoff_analysis.txt\nfile. Note, minlen and maxgap may affect the results. WARNING: May take ~30\nfolds longer time to finish.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "down_sample",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 31,
+            "prefix": "--down-sample",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "When set, random sampling method will scale down the bigger sample. By default,\nMACS uses linear scaling. Warning: This option will make your result unstable\nand irreproducible since each time, random reads would be selected. Consider\nto use ''randsample'' script instead. <not implmented>If used together with\n--SPMR, 1 million unique reads will be randomly picked.</not implemented> Caution:\ndue to the implementation, the final number of selected reads may not be as\nyou expected!\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "extsize",
+          "type": "int",
+          "input_binding": {
+            "position": 26,
+            "prefix": "--extsize",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The arbitrary extension size in bp. When nomodel is  true, MACS will use\nthis value as fragment size to  extend each read towards 3'' end, then pile\nthem up.  It''s exactly twice the number of obsolete SHIFTSIZE.  In previous\nlanguage, each read is moved 5''->3''  direction to middle of fragment by 1/2\nd, then  extended to both direction with 1/2 d. This is  equivalent to say each\nread is extended towards 5''->3''  into a d size fragment.EXTSIZE\nand  SHIFT can be combined when necessary. Check SHIFT  option.\nDEFAULT: 200\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fe_cutoff",
+          "type": "null | float",
+          "input_binding": {
+            "position": 40,
+            "prefix": "--fe-cutoff",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "When set, the value will be used to filter out peaks\nwith low fold-enrichment. Note, MACS2 use 1.0 as\npseudocount while calculating fold-enrichment.\nDEFAULT: 1.0\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fix_bimodal",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 23,
+            "prefix": "--fix-bimodal",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Whether turn on the auto pair model process. If set, when MACS failed to\nbuild paired model, it will use the nomodel settings, the --exsize parameter\nto extend each tags towards 3'' direction. Not to use this automate fixation\nis a default behavior now.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "format_mode",
+          "type": "null | string",
+          "input_binding": {
+            "position": 13,
+            "prefix": "-f",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "{AUTO,BAM,SAM,BED,ELAND,ELANDMULTI,ELANDEXPORT,BOWTIE,BAMPE}, --format\n{AUTO,BAM,SAM,BED,ELAND,ELANDMULTI,ELANDEXPORT,BOWTIE,BAMPE} Format of tag file,\n\"AUTO\", \"BED\" or \"ELAND\" or \"ELANDMULTI\" or \"ELANDEXPORT\" or \"SAM\" or \"BAM\"\nor \"BOWTIE\" or \"BAMPE\". The default AUTO option will let MACS decide which format\nthe file is. Note that MACS can''t detect \"BAMPE\" or \"BEDPE\" format with \"AUTO\",\nand you have to implicitly specify the format for \"BAMPE\" and \"BEDPE\".\nDEFAULT: AUTO\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "genome_size",
+          "type": "null | string",
+          "input_binding": {
+            "position": 14,
+            "prefix": "-g",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "It’s the mappable genome size or effective genome size which is defined as the genome size which can be sequenced.\nBecause of the repetitive features on the chromsomes, the actual mappable genome size will be smaller than the\noriginal size, about 90% or 70% of the genome size. The default hs – 2.7e9 is recommended for UCSC human hg18\nassembly. Here are all precompiled parameters for effective genome size:\n  hs:\t2.7e9\n  mm:\t1.87e9\n  ce:\t9e7\n  dm:\t1.2e8\nDEFAULT: hs\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "keep_dup",
+          "type": "null | string",
+          "input_binding": {
+            "position": 15,
+            "prefix": "--keep-dup",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "It controls the MACS behavior towards duplicate tags\nat the exact same location -- the same coordination\nand the same strand. The 'auto' option makes MACS\ncalculate the maximum tags at the exact same location\nbased on binomal distribution using 1e-5 as pvalue\ncutoff; and the 'all' option keeps every tags. If an\ninteger is given, at most this number of tags will be\nkept at the same location. The default is to keep one\ntag at the same location.\nDEFAULT: 1\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "llocal",
+          "type": "null | int",
+          "input_binding": {
+            "position": 35,
+            "prefix": "--llocal",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The large nearby region in basepairs to calculate\ndynamic lambda. This is used to capture the surround\nbias. If you set this to 0, MACS will skip llocal\nlambda calculation. *Note* that MACS will always\nperform a d-size local lambda calculation. The final\nlocal bias should be the maximum of the lambda value\nfrom d, slocal, and llocal size windows.\nDEFAULT: 10000.\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "mfold",
+          "type": "null | string",
+          "input_binding": {
+            "position": 22,
+            "prefix": "-m",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Select the regions within MFOLD range of high-\nconfidence enrichment ratio against background to\nbuild model. Fold-enrichment in regions must be lower\nthan upper limit, and higher than the lower limit. Use\nas \"-m 10 30\"\nDEFAULT: 5 50\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "nolambda",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 33,
+            "prefix": "--nolambda",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "If True, MACS will use fixed background lambda as local lambda for every\npeak region. Normally, MACS calculates a dynamic local lambda to reflect the\nlocal bias due to potential chromatin structure.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "nomodel",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 24,
+            "prefix": "--nomodel",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Whether or not to build the shifting model. If True,  MACS will not build\nmodel. by default it means  shifting size = 100, try to set extsize to change it.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_prefix",
+          "type": "null | string",
+          "input_binding": {
+            "position": 999,
+            "prefix": "-n",
+            "glob": null,
+            "value_from": "${\n    if (self == \"\"){\n      return default_output_filename();\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "The name string of the experiment. MACS will use this string NAME to create output files like ‘NAME_peaks.xls’,\n‘NAME_negative_peaks.xls’, ‘NAME_peaks.bed’ , ‘NAME_summits.bed’, ‘NAME_model.r’ and so on.\nSo please avoid any confliction between these filenames and your existing files.\nDEFAULT: generated on the base of the treatment input\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "p_value",
+          "type": "null | float",
+          "input_binding": {
+            "position": 28,
+            "prefix": "-p",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Pvalue cutoff for peak detection. DEFAULT: not set.  -q, and -p are mutually\nexclusive. If pvalue cutoff is set, qvalue will not be calculated and reported\nas -1  in the final .xls file.\nDEFAULT: null\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "q_value",
+          "type": "null | float",
+          "input_binding": {
+            "position": 27,
+            "prefix": "-q",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Minimum FDR (q-value) cutoff for peak detection. -q, and\n-p are mutually exclusive.\nDEFAULT: 0.05\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "ratio",
+          "type": "null | float",
+          "input_binding": {
+            "position": 30,
+            "prefix": "--ratio",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "When set, use a custom scaling ratio of ChIP/control\n(e.g. calculated using NCIS) for linear scaling.\nDEFAULT: null\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "seed",
+          "type": "null | int",
+          "input_binding": {
+            "position": 32,
+            "prefix": "--seed",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Set the random seed while down sampling data. Must be\na non-negative integer in order to be effective.\nDEFAULT: null\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "shift",
+          "type": "null | int",
+          "input_binding": {
+            "position": 25,
+            "prefix": "--shift",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "(NOT the legacy --shiftsize option!) The arbitrary shift in bp. Use discretion\nwhile setting it other than default value. When NOMODEL is set, MACS will use\nthis value to move cutting ends (5'') towards 5''->3'' direction then apply\nEXTSIZE to extend them to fragments. When this value is negative, ends will\nbe moved toward 3''->5'' direction. Recommended to keep it as default 0 for\nChIP-Seq datasets, or -1 * half of EXTSIZE together with EXTSIZE option for\ndetecting enriched cutting loci such as certain DNAseI-Seq datasets. Note, you\ncan''t set values other than 0 if format is BAMPE for paired-end data.\nDEFAULT: 0\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "slocal",
+          "type": "null | int",
+          "input_binding": {
+            "position": 34,
+            "prefix": "--slocal",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "The small nearby region in basepairs to calculate\ndynamic lambda. This is used to capture the bias near\nthe peak summit region. Invalid if there is no control\ndata. If you set this to 0, MACS will skip slocal\nlambda calculation. *Note* that MACS will always\nperform a d-size local lambda calculation. The final\nlocal bias should be the maximum of the lambda value\nfrom d, slocal, and llocal size windows.\nDEFAULT: 1000\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "spmr",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 19,
+            "prefix": "--SPMR",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "If True, MACS will save signal per million reads for fragment pileup profiles.\nRequire --bdg to be set.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "to_large",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 29,
+            "prefix": "--to-large",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "When set, scale the small sample up to the bigger sample. By default, the\nbigger dataset will be scaled down towards the smaller dataset, which will lead\nto smaller p/qvalues and more specific results. Keep in mind that scaling down\nwill bring down background noise more.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "trackline",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 18,
+            "prefix": "--trackline",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Tells MACS to include trackline with bedGraph files. To include this trackline\nwhile displaying bedGraph at UCSC genome browser, can show name and description\nof the file as well. Require -B to be set.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "treatment_file",
+          "type": "File | array",
+          "input_binding": {
+            "position": 10,
+            "prefix": "-t",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "This is the only REQUIRED parameter for MACS. File can be in any supported format specified by –format option.\nCheck –format for detail. If you have more than one alignment files, you can specify them as `-t A B C`.\nMACS will pool up all these files together.\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "tsize",
+          "type": "null | int",
+          "input_binding": {
+            "position": 20,
+            "prefix": "--tsize",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Tag size. This will overide the auto detected tag size.\nDEFAULT: False\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "verbose",
+          "type": "null | int",
+          "input_binding": {
+            "position": 41,
+            "prefix": "--verbose",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Log level\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "broad_peak_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_peaks.broadPeak'); } else { return inputs.output_prefix + '_peaks.broadPeak'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "control_lambda_bdg_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_control_lambda.bdg'); } else { return inputs.output_prefix + '_control_lambda.bdg'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "gapped_peak_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_peaks.gappedPeak'); } else { return inputs.output_prefix + '_peaks.gappedPeak'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "macs2_fragments_calculated",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_prefix == \"\"){\n      return default_output_filename('_fragment_stat.tsv');\n    } else {\n      return inputs.output_prefix + '_fragment_stat.tsv';\n    }\n}\n",
+            "value_from": "$(parseInt(self[0].contents.split(' ')[0]))"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "macs2_fragments_expected",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_prefix == \"\"){\n      return default_output_filename('_fragment_stat.tsv');\n    } else {\n      return inputs.output_prefix + '_fragment_stat.tsv';\n    }\n}\n",
+            "value_from": "$(parseInt(self[0].contents.split(' ')[1]))"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "macs2_islands",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_prefix == \"\"){\n      return default_output_filename('_fragment_stat.tsv');\n    } else {\n      return inputs.output_prefix + '_fragment_stat.tsv';\n    }\n}\n",
+            "value_from": "$(parseInt(self[0].contents.split(' ')[2]))"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "macs2_stat_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_prefix == \"\"){\n      return default_output_filename('_fragment_stat.tsv');\n    } else {\n      return inputs.output_prefix + '_fragment_stat.tsv';\n    }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "macs_log",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_prefix == \"\"){\n      return default_output_filename('_macs.log');\n    } else {\n      return inputs.output_prefix + '.log';\n    }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "moder_r_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_model.r'); } else { return inputs.output_prefix + '_model.r'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "narrow_peak_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_peaks.narrowPeak'); } else { return inputs.output_prefix + '_peaks.narrowPeak'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "peak_summits_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_summits.bed'); } else { return inputs.output_prefix + '_summits.bed'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "peak_xls_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_peaks.xls'); } else { return inputs.output_prefix + '_peaks.xls'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "treat_pileup_bdg_file",
+          "type": "null | File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${ if (inputs.output_prefix == \"\"){ return default_output_filename('_macs_treat_pileup.bdg'); } else { return inputs.output_prefix + '_treat_pileup.bdg'; } }",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "ShellCommandRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "ShellCommandRequirement"
+          }
+        },
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function(sufix) { sufix = sufix || \"_macs\"; if (Object.prototype.toString.call(inputs.treatment_file) === '[object Array]'){ let basename = inputs.treatment_file[0].basename; let root = basename.split('.').slice(0,-1).join('.'); return (root == \"\")?basename+sufix:root+sufix; } else { let basename = inputs.treatment_file.basename; let root = basename.split('.').slice(0,-1).join('.'); return (root == \"\")?basename+sufix:root+sufix; } }"
+            ]
+          }
+        },
+        {
+          "class": "InitialWorkDirRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InitialWorkDirRequirement",
+            "listing": [
+              {
+                "entryname": "run.py",
+                "entry": "#!/usr/bin/env python\nimport subprocess\nimport sys\nimport argparse\nimport re\n\ndef arg_parser():\n    \"\"\"Returns argument parser. used only to get -n and --extsize values\"\"\"\n    parser = argparse.ArgumentParser(description='MACS2 Biowardrobe parser')\n    parser.add_argument(\"-n\", help=\"MACS2 string name of the experiment\")\n    parser.add_argument(\"--extsize\", help=\"MACS2 arbitrary extension size in bp\")\n    return parser\n\ndef get_info (name):\n    fragments, islands = 0, 0\n    with open(name+'_peaks.xls', 'r') as infile:\n        for line in infile:\n            if re.match('^# d = ', line):\n                fragments = int(line.split('d = ')[1])\n                continue\n            if re.match('^#', line):\n                continue\n            if line.strip() != \"\":\n                islands = islands + 1\n    islands = islands - 1\n    return fragments, islands\n\nargs, _ = arg_parser().parse_known_args()\nargv=' '.join(sys.argv[1:])\n\nextsize=args.extsize\nname=args.n\n\nruntime_error=False\ncalculated_fragment_size=0\nexpected_fragment_size=0\nisland_count=0\n\ntry:\n    subprocess.check_output(argv, shell=True)\nexcept subprocess.CalledProcessError as e:\n    if '--nomodel' in argv:\n        print \"MACS2 critical error: \", str(e)\n        sys.exit(1) # stop the whole workflow\n    print \"MACS2 will be rerun to fix not critical error: \", str(e)\n    runtime_error=True\n    expected_fragment_size=extsize\nelse:\n    calculated_fragment_size,island_count=get_info(name)\n    expected_fragment_size=calculated_fragment_size\n\nif runtime_error or (calculated_fragment_size < 80 and ('--nomodel' not in argv)):\n    try:\n        subprocess.check_output(argv+' --nomodel', shell=True)\n    except subprocess.CalledProcessError as e:\n        print \"MACS2 forced error: \", str(e)\n        sys.exit(1) # stop the whole workflow\n    else:\n        calculated_fragment_size,island_count=get_info(name)\n\nwith open(name.replace('_macs','')+'_fragment_stat.tsv', 'w') as output_file:\n    output_file.write(' '.join([str(calculated_fragment_size),str(expected_fragment_size),str(island_count)]))\n"
+              }
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/macs2:v2.1.1",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/macs2:v2.1.1"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "python-get-stat-chipseq.cwl",
+      "label": null,
+      "base_command": [
+        "python",
+        "-c"
+      ],
+      "arguments": [
+        "{\"valueFrom\":\"$(\\\" > \\\" + get_output_filename())\",\"position\":100000,\"shellQuote\":false}"
+      ],
+      "inputs": [
+        {
+          "id": "bowtie_log",
+          "type": "File",
+          "input_binding": {
+            "position": 6,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Log file from Bowtie\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": null,
+          "doc": "Name for generated output file\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "rmdup_log",
+          "type": "File",
+          "input_binding": {
+            "position": 7,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Log file from samtools rmdup\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "script",
+          "type": "null | string",
+          "input_binding": {
+            "position": 5,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Python script to get TOTAL, ALIGNED, SUPRESSED, USED values from log files\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "mapped_reads",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(get_output_filename())",
+            "value_from": "$(parseInt(self[0].contents.split(' ')[1]))"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(get_output_filename())",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "supressed_reads",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(get_output_filename())",
+            "value_from": "$(parseInt(self[0].contents.split(' ')[2]))"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "total_reads",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(get_output_filename())",
+            "value_from": "$(parseInt(self[0].contents.split(' ')[0]))"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "used_reads",
+          "type": "int",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "$(get_output_filename())",
+            "value_from": "$(parseInt(self[0].contents.split(' ')[3]))"
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "ShellCommandRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "ShellCommandRequirement"
+          }
+        },
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var get_output_filename = function() { if (inputs.output_filename == null){ let root = inputs.bowtie_log.basename.split('.').slice(0,-1).join('.'); let ext = \".stat\"; return (root == \"\")?inputs.bowtie_log.basename+ext:root+ext; } else { return inputs.output_filename; } };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/scidap:v0.0.2",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/scidap:v0.0.2"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "samtools-rmdup.cwl",
+      "label": null,
+      "base_command": [
+        "bash",
+        "-c"
+      ],
+      "arguments": [
+        "{\"valueFrom\":\"${\\n  if (inputs.output_filename == \\\"\\\" || inputs.trigger == false){\\n    return \\\" > \\\" + default_output_filename().split('.').slice(0,-1).join('.') + \\\".rmdup 2>&1\\\";\\n  } else {\\n    return \\\" > \\\" + inputs.output_filename.split('.').slice(0,-1).join('.') + \\\".rmdup 2>&1\\\";\\n  }\\n}\\n\",\"position\":100000,\"shellQuote\":false}"
+      ],
+      "inputs": [
+        {
+          "id": "bam_file",
+          "type": "File",
+          "input_binding": {
+            "position": 10,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Input sorted bam file (index file is optional)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "bash_script",
+          "type": "null | string",
+          "input_binding": {
+            "position": 1,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Bash function to run samtools rmdup with all input parameters or skip it if trigger is false\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "force_single_end",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 4,
+            "prefix": "-S",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "treat PE reads as SE in rmdup (force -s)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 11,
+            "prefix": null,
+            "glob": null,
+            "value_from": "${\n    if (self == \"\" || inputs.trigger == false){\n      return default_output_filename();\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "Writes the output bam file to output_filename if set,\notherwise generates output_filename on the base of bam_file\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "single_end",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 3,
+            "prefix": "-s",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "rmdup for SE reads\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "trigger",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 2,
+            "prefix": null,
+            "glob": null,
+            "value_from": "${ return self ? \"true\" : \"false\" }\n"
+          },
+          "doc": "If true - run samtools rmdup, if false - return bam_file, previously staged into output directory and optional index file\nUse valueFrom to return string instead of boolean, because if return boolean False, argument is not printed\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "rmdup_log",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n  if (inputs.output_filename == \"\" || inputs.trigger == false){\n    return default_output_filename().split('.').slice(0,-1).join('.') + '.rmdup';\n  } else {\n    return inputs.output_filename.split('.').slice(0,-1).join('.') + '.rmdup';\n  }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "rmdup_output",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_filename == \"\" || inputs.trigger == false){\n      return default_output_filename();\n    } else {\n      return inputs.output_filename;\n    }\n}\n",
+            "value_from": null
+          },
+          "doc": "File with removed duplicates or bam_file with optional secondaryFiles",
+          "format": null,
+          "secondary_files": [
+            "${\n    if (inputs.bam_file.secondaryFiles && inputs.trigger == false){\n      return inputs.bam_file.secondaryFiles;\n    } else {\n      return \"null\";\n    }\n  }\n"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "class": "ShellCommandRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "ShellCommandRequirement"
+          }
+        },
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function() { return inputs.bam_file.location.split('/').slice(-1)[0]; };"
+            ]
+          }
+        },
+        {
+          "class": "InitialWorkDirRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InitialWorkDirRequirement",
+            "listing": "${\n  return  [\n            {\n              \"entry\": inputs.bam_file,\n              \"entryname\": \"input_file_backup\",\n              \"writable\": true\n            }\n          ]\n}\n"
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/samtools:v1.4",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/samtools:v1.4"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "samtools-sort-index.cwl",
+      "label": null,
+      "base_command": [
+        "bash",
+        "-c"
+      ],
+      "arguments": [
+        "{\"valueFrom\":\"${ return inputs.trigger ? \\\"true\\\" : \\\"false\\\" }\\n\",\"position\":6}",
+        "{\"valueFrom\":\"bam\",\"position\":13,\"prefix\":\"-O\"}",
+        "{\"valueFrom\":\"$(inputs.threads?inputs.threads:1)\",\"position\":15,\"prefix\":\"-@\"}",
+        "{\"valueFrom\":\";\",\"position\":17,\"shellQuote\":false}",
+        "{\"valueFrom\":\"bash\",\"position\":18}",
+        "{\"valueFrom\":\"-c\",\"position\":19}",
+        "{\"valueFrom\":\"${ return inputs.trigger ? \\\"true\\\" : \\\"false\\\" }\\n\",\"position\":21}",
+        "{\"valueFrom\":\"$(inputs.bai?'-b':inputs.csi?'-c':[])\",\"position\":23}",
+        "{\"valueFrom\":\"$(inputs.threads?inputs.threads:1)\",\"position\":25,\"prefix\":\"-@\"}",
+        "{\"valueFrom\":\"${\\n    if (inputs.sort_output_filename == \\\"\\\" || inputs.trigger == false){\\n      return default_bam();\\n    } else {\\n      return inputs.sort_output_filename;\\n    }\\n}\\n\",\"position\":26}",
+        "{\"valueFrom\":\"${\\n    if (inputs.sort_output_filename == \\\"\\\" || inputs.trigger == false){\\n      return default_bam() + ext();\\n    } else {\\n      return inputs.sort_output_filename + ext();\\n    }\\n}\\n\",\"position\":27}"
+      ],
+      "inputs": [
+        {
+          "id": "bai",
+          "type": "null | boolean",
+          "input_binding": null,
+          "doc": "Generate BAI-format index for BAM files [default]. If input isn't cram.\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "bash_script_index",
+          "type": "null | string",
+          "input_binding": {
+            "position": 20,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Bash function to run samtools index with all input parameters or skip it if trigger is false\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "bash_script_sort",
+          "type": "null | string",
+          "input_binding": {
+            "position": 5,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Bash function to run samtools sort with all input parameters or skip it if trigger is false\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "csi",
+          "type": "null | boolean",
+          "input_binding": null,
+          "doc": "Generate CSI-format index for BAM files. If input isn't cram.\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "csi_interval",
+          "type": "null | int",
+          "input_binding": {
+            "position": 24,
+            "prefix": "-m",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Set minimum interval size for CSI indices to 2^INT [14]\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sort_compression_level",
+          "type": "null | int",
+          "input_binding": {
+            "position": 11,
+            "prefix": "-l",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "SORT: desired compression level for the final output file, ranging from 0 (uncompressed)\nor 1 (fastest but minimal compression) to 9 (best compression but slowest to write),\nsimilarly to gzip(1)'s compression level setting.\nIf -l is not used, the default compression level will apply.\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sort_input",
+          "type": "File",
+          "input_binding": {
+            "position": 16,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Input only in.sam|in.bam|in.cram. Optionally could be supplemented with index file in secondaryFiles\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "sort_output_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 12,
+            "prefix": "-o",
+            "glob": null,
+            "value_from": "${\n    if (self == \"\" || inputs.trigger == false){\n      return default_bam();\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "Write the final sorted output to FILE. Only out.bam|out.cram.\nIf output file extension is set to SAM, tool will fail on the index step\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "threads",
+          "type": "null | int",
+          "input_binding": null,
+          "doc": "Set number of sorting and compression threads [1] (Only for sorting)\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "trigger",
+          "type": "null | boolean",
+          "input_binding": null,
+          "doc": "If true - run samtools, if false - return sort_input and optional index file in secondaryFiles, previously staged\ninto output directory.\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "bam_bai_pair",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.sort_output_filename == \"\" || inputs.trigger == false){\n      return default_bam();\n    } else {\n      return inputs.sort_output_filename;\n    }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": [
+            "${ if (inputs.trigger == true){ return self.basename + ext(); } else { return inputs.sort_input.secondaryFiles?inputs.sort_input.secondaryFiles:\"null\"; } }"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "class": "ShellCommandRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "ShellCommandRequirement"
+          }
+        },
+        {
+          "class": "InitialWorkDirRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InitialWorkDirRequirement",
+            "listing": "${\n  return  [\n            {\n              \"entry\": inputs.sort_input,\n              \"entryname\": inputs.sort_input.basename,\n              \"writable\": true\n            }\n          ]\n}\n"
+          }
+        },
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var ext = function() { if (inputs.csi && !inputs.bai){ return '.csi'; } else { return '.bai'; } };",
+              "var default_bam = function() { if (inputs.trigger == true){ return inputs.sort_input.location.split('/').slice(-1)[0].split('.').slice(0,-1).join('.')+\".bam\"; } else { return inputs.sort_input.location.split('/').slice(-1)[0]; } };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/samtools:v1.4",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/samtools:v1.4"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "ucsc-bedgraphtobigwig.cwl",
+      "label": null,
+      "base_command": [
+        "bedGraphToBigWig"
+      ],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "bedgraph_file",
+          "type": "File",
+          "input_binding": {
+            "position": 10,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Four column bedGraph file: <chrom> <start> <end> <value>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "block_size",
+          "type": "null | int",
+          "input_binding": {
+            "position": 7,
+            "prefix": "-blockSize=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Number of items to bundle in r-tree.  Default 256\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "chrom_length_file",
+          "type": "File",
+          "input_binding": {
+            "position": 11,
+            "prefix": null,
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Two-column chromosome length file: <chromosome name> <size in bases>\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "items_per_slot",
+          "type": "null | int",
+          "input_binding": {
+            "position": 6,
+            "prefix": "-itemsPerSlot=",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Number of data points bundled at lowest level. Default 1024\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "output_filename",
+          "type": "null | string",
+          "input_binding": {
+            "position": 12,
+            "prefix": null,
+            "glob": null,
+            "value_from": "${\n    if (self == \"\"){\n      return default_output_filename();\n    } else {\n      return self;\n    }\n}\n"
+          },
+          "doc": "If set, writes the output bigWig file to output_filename,\notherwise generates filename from default_output_filename()\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "unc",
+          "type": "null | boolean",
+          "input_binding": {
+            "position": 5,
+            "prefix": "-unc",
+            "glob": null,
+            "value_from": null
+          },
+          "doc": "Disable compression\n",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "bigwig_file",
+          "type": "File",
+          "output_binding": {
+            "position": null,
+            "prefix": null,
+            "glob": "${\n    if (inputs.output_filename == \"\"){\n      return default_output_filename();\n    } else {\n      return inputs.output_filename;\n    }\n}\n",
+            "value_from": null
+          },
+          "doc": null,
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement",
+            "expressionLib": [
+              "var default_output_filename = function() { let basename = inputs.bedgraph_file.location.split('/').slice(-1)[0]; let root = basename.split('.').slice(0,-1).join('.'); let ext = \".bigWig\"; return (root == \"\")?basename+ext:root+ext; };"
+            ]
+          }
+        },
+        {
+          "class": "DockerRequirement",
+          "docker_pull": "biowardrobe2/ucscuserapps:v358",
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "DockerRequirement",
+            "dockerPull": "biowardrobe2/ucscuserapps:v358"
+          }
+        }
+      ],
+      "hints": []
+    },
+    {
+      "id": "bam-bedgraph-bigwig.cwl",
+      "label": null,
+      "base_command": [],
+      "arguments": [],
+      "inputs": [
+        {
+          "id": "bam_file",
+          "type": "File",
+          "input_binding": null,
+          "doc": "Input BAM file, sorted by coordinates",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "bedgraph_filename",
+          "type": "null | string",
+          "input_binding": null,
+          "doc": "Output filename for generated bedGraph",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "bigwig_filename",
+          "type": "null | string",
+          "input_binding": null,
+          "doc": "Output filename for generated bigWig",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "chrom_length_file",
+          "type": "File",
+          "input_binding": null,
+          "doc": "Tab delimited chromosome length file: <chromName><TAB><chromSize>",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "dutp",
+          "type": "null | boolean",
+          "input_binding": null,
+          "doc": "Change strand af the mate read, so both reads come from the same strand",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "fragment_size",
+          "type": "null | int",
+          "input_binding": null,
+          "doc": "Set fixed fragment size for genome coverage calculation",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "mapped_reads_number",
+          "type": "null | int",
+          "input_binding": null,
+          "doc": "Parameter to calculate scale as 1000000/mapped_reads_number. Ignored by bedtools-genomecov.cwl in\nbam_to_bedgraph step if scale is provided\n",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "pairchip",
+          "type": "null | boolean",
+          "input_binding": null,
+          "doc": "Enable paired-end genome coverage calculation",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "scale",
+          "type": "null | float",
+          "input_binding": null,
+          "doc": "Coefficient to scale the genome coverage by a constant factor",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "split",
+          "type": "null | boolean",
+          "input_binding": null,
+          "doc": "Calculate genome coverage for each part of the splitted by 'N' and 'D' read",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "strand",
+          "type": "null | string",
+          "input_binding": null,
+          "doc": "Calculate genome coverage of intervals from a specific strand",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "outputs": [
+        {
+          "id": "bedgraph_file",
+          "type": "File",
+          "output_binding": null,
+          "doc": "bedGraph output file",
+          "format": null,
+          "secondary_files": []
+        },
+        {
+          "id": "bigwig_file",
+          "type": "File",
+          "output_binding": null,
+          "doc": "bigWig output file",
+          "format": null,
+          "secondary_files": []
+        }
+      ],
+      "requirements": [
+        {
+          "class": "StepInputExpressionRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "StepInputExpressionRequirement"
+          }
+        },
+        {
+          "class": "InlineJavascriptRequirement",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "class": "InlineJavascriptRequirement"
+          }
+        }
+      ],
+      "hints": [
+        {
+          "class": "_NestedWorkflow",
+          "docker_pull": null,
+          "docker_image_id": null,
+          "packages": [],
+          "raw": {
+            "steps": [
+              {
+                "id": "bam-bedgraph-bigwig.cwl/bam_to_bedgraph",
+                "run": "bedtools-genomecov.cwl"
+              },
+              {
+                "id": "bam-bedgraph-bigwig.cwl/sort_bedgraph",
+                "run": "linux-sort.cwl"
+              },
+              {
+                "id": "bam-bedgraph-bigwig.cwl/sorted_bedgraph_to_bigwig",
+                "run": "ucsc-bedgraphtobigwig.cwl"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "annotation_file",
+        "kind": "workflow-input",
+        "label": "Annotation file"
+      },
+      {
+        "id": "broad_peak",
+        "kind": "workflow-input",
+        "label": "Callpeak broad"
+      },
+      {
+        "id": "chrom_length",
+        "kind": "workflow-input",
+        "label": "Chromosome length file"
+      },
+      {
+        "id": "clip_3p_end",
+        "kind": "workflow-input",
+        "label": "Clip from 3p end"
+      },
+      {
+        "id": "clip_5p_end",
+        "kind": "workflow-input",
+        "label": "Clip from 5p end"
+      },
+      {
+        "id": "control_file",
+        "kind": "workflow-input",
+        "label": "Control BAM file"
+      },
+      {
+        "id": "exp_fragment_size",
+        "kind": "workflow-input",
+        "label": "Expected fragment size"
+      },
+      {
+        "id": "fastq_file",
+        "kind": "workflow-input",
+        "label": "FASTQ input file"
+      },
+      {
+        "id": "force_fragment_size",
+        "kind": "workflow-input",
+        "label": "Force fragment size"
+      },
+      {
+        "id": "genome_size",
+        "kind": "workflow-input",
+        "label": "Effective genome size"
+      },
+      {
+        "id": "indices_folder",
+        "kind": "workflow-input",
+        "label": "BOWTIE indices folder"
+      },
+      {
+        "id": "remove_duplicates",
+        "kind": "workflow-input",
+        "label": "Remove duplicates"
+      },
+      {
+        "id": "threads",
+        "kind": "workflow-input",
+        "label": "Number of threads"
+      },
+      {
+        "id": "atdp_log",
+        "kind": "workflow-output",
+        "label": "ATDP log"
+      },
+      {
+        "id": "atdp_result",
+        "kind": "workflow-output",
+        "label": "ATDP results"
+      },
+      {
+        "id": "bambai_pair",
+        "kind": "workflow-output",
+        "label": "Coordinate sorted BAM alignment file (+index BAI)"
+      },
+      {
+        "id": "bigwig",
+        "kind": "workflow-output",
+        "label": "BigWig file"
+      },
+      {
+        "id": "bowtie_log",
+        "kind": "workflow-output",
+        "label": "BOWTIE alignment log"
+      },
+      {
+        "id": "fastx_statistics",
+        "kind": "workflow-output",
+        "label": "FASTQ statistics"
+      },
+      {
+        "id": "get_stat_log",
+        "kind": "workflow-output",
+        "label": "Bowtie & Samtools Rmdup combined log"
+      },
+      {
+        "id": "iaintersect_log",
+        "kind": "workflow-output",
+        "label": "Island intersect log"
+      },
+      {
+        "id": "iaintersect_result",
+        "kind": "workflow-output",
+        "label": "Island intersect results"
+      },
+      {
+        "id": "macs2_broad_peaks",
+        "kind": "workflow-output",
+        "label": "Broad peaks"
+      },
+      {
+        "id": "macs2_called_peaks",
+        "kind": "workflow-output",
+        "label": "Called peaks"
+      },
+      {
+        "id": "macs2_fragment_stat",
+        "kind": "workflow-output",
+        "label": "FRAGMENT, FRAGMENTE, ISLANDS"
+      },
+      {
+        "id": "macs2_gapped_peak",
+        "kind": "workflow-output",
+        "label": "Gapped peak"
+      },
+      {
+        "id": "macs2_log",
+        "kind": "workflow-output",
+        "label": "MACS2 log"
+      },
+      {
+        "id": "macs2_moder_r",
+        "kind": "workflow-output",
+        "label": "MACS2 generated R script"
+      },
+      {
+        "id": "macs2_narrow_peaks",
+        "kind": "workflow-output",
+        "label": "Narrow peaks"
+      },
+      {
+        "id": "macs2_peak_summits",
+        "kind": "workflow-output",
+        "label": "Peak summits"
+      },
+      {
+        "id": "samtools_rmdup_log",
+        "kind": "workflow-output",
+        "label": "Remove duplicates log"
+      },
+      {
+        "id": "average_tag_density",
+        "kind": "step",
+        "label": "average_tag_density"
+      },
+      {
+        "id": "bam_to_bigwig",
+        "kind": "step",
+        "label": "bam_to_bigwig"
+      },
+      {
+        "id": "bowtie_aligner",
+        "kind": "step",
+        "label": "bowtie_aligner"
+      },
+      {
+        "id": "extract_fastq",
+        "kind": "step",
+        "label": "extract_fastq"
+      },
+      {
+        "id": "fastx_quality_stats",
+        "kind": "step",
+        "label": "fastx_quality_stats"
+      },
+      {
+        "id": "get_stat",
+        "kind": "step",
+        "label": "get_stat"
+      },
+      {
+        "id": "island_intersect",
+        "kind": "step",
+        "label": "island_intersect"
+      },
+      {
+        "id": "macs2_callpeak",
+        "kind": "step",
+        "label": "macs2_callpeak"
+      },
+      {
+        "id": "samtools_rmdup",
+        "kind": "step",
+        "label": "samtools_rmdup"
+      },
+      {
+        "id": "samtools_sort_index",
+        "kind": "step",
+        "label": "samtools_sort_index"
+      },
+      {
+        "id": "samtools_sort_index_after_rmdup",
+        "kind": "step",
+        "label": "samtools_sort_index_after_rmdup"
+      }
+    ],
+    "edges": [
+      {
+        "from": "annotation_file",
+        "to": "average_tag_density/annotation_filename",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/macs2_fragments_calculated",
+        "to": "average_tag_density/fragmentsize_bp",
+        "via": []
+      },
+      {
+        "from": "samtools_sort_index_after_rmdup/bam_bai_pair",
+        "to": "average_tag_density/input_file",
+        "via": []
+      },
+      {
+        "from": "get_stat/mapped_reads",
+        "to": "average_tag_density/mapped_reads",
+        "via": []
+      },
+      {
+        "from": "samtools_sort_index_after_rmdup/bam_bai_pair",
+        "to": "bam_to_bigwig/bam_file",
+        "via": []
+      },
+      {
+        "from": "chrom_length",
+        "to": "bam_to_bigwig/chrom_length_file",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/macs2_fragments_calculated",
+        "to": "bam_to_bigwig/fragment_size",
+        "via": []
+      },
+      {
+        "from": "get_stat/mapped_reads",
+        "to": "bam_to_bigwig/mapped_reads_number",
+        "via": []
+      },
+      {
+        "from": "clip_3p_end",
+        "to": "bowtie_aligner/clip_3p_end",
+        "via": []
+      },
+      {
+        "from": "clip_5p_end",
+        "to": "bowtie_aligner/clip_5p_end",
+        "via": []
+      },
+      {
+        "from": "indices_folder",
+        "to": "bowtie_aligner/indices_folder",
+        "via": []
+      },
+      {
+        "from": "threads",
+        "to": "bowtie_aligner/threads",
+        "via": []
+      },
+      {
+        "from": "extract_fastq/fastq_file",
+        "to": "bowtie_aligner/upstream_filelist",
+        "via": []
+      },
+      {
+        "from": "fastq_file",
+        "to": "extract_fastq/compressed_file",
+        "via": []
+      },
+      {
+        "from": "extract_fastq/fastq_file",
+        "to": "fastx_quality_stats/input_file",
+        "via": []
+      },
+      {
+        "from": "bowtie_aligner/log_file",
+        "to": "get_stat/bowtie_log",
+        "via": []
+      },
+      {
+        "from": "samtools_rmdup/rmdup_log",
+        "to": "get_stat/rmdup_log",
+        "via": []
+      },
+      {
+        "from": "annotation_file",
+        "to": "island_intersect/annotation_filename",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/peak_xls_file",
+        "to": "island_intersect/input_filename",
+        "via": []
+      },
+      {
+        "from": "broad_peak",
+        "to": "macs2_callpeak/broad",
+        "via": []
+      },
+      {
+        "from": "exp_fragment_size",
+        "to": "macs2_callpeak/bw",
+        "via": []
+      },
+      {
+        "from": "broad_peak",
+        "to": "macs2_callpeak/call_summits",
+        "via": [
+          "valueFrom"
+        ]
+      },
+      {
+        "from": "control_file",
+        "to": "macs2_callpeak/control_file",
+        "via": []
+      },
+      {
+        "from": "exp_fragment_size",
+        "to": "macs2_callpeak/extsize",
+        "via": []
+      },
+      {
+        "from": "genome_size",
+        "to": "macs2_callpeak/genome_size",
+        "via": []
+      },
+      {
+        "from": "control_file",
+        "to": "macs2_callpeak/nolambda",
+        "via": [
+          "valueFrom"
+        ]
+      },
+      {
+        "from": "force_fragment_size",
+        "to": "macs2_callpeak/nomodel",
+        "via": []
+      },
+      {
+        "from": "samtools_sort_index_after_rmdup/bam_bai_pair",
+        "to": "macs2_callpeak/treatment_file",
+        "via": []
+      },
+      {
+        "from": "samtools_sort_index/bam_bai_pair",
+        "to": "samtools_rmdup/bam_file",
+        "via": []
+      },
+      {
+        "from": "remove_duplicates",
+        "to": "samtools_rmdup/trigger",
+        "via": []
+      },
+      {
+        "from": "bowtie_aligner/sam_file",
+        "to": "samtools_sort_index/sort_input",
+        "via": []
+      },
+      {
+        "from": "threads",
+        "to": "samtools_sort_index/threads",
+        "via": []
+      },
+      {
+        "from": "samtools_rmdup/rmdup_output",
+        "to": "samtools_sort_index_after_rmdup/sort_input",
+        "via": []
+      },
+      {
+        "from": "threads",
+        "to": "samtools_sort_index_after_rmdup/threads",
+        "via": []
+      },
+      {
+        "from": "remove_duplicates",
+        "to": "samtools_sort_index_after_rmdup/trigger",
+        "via": []
+      },
+      {
+        "from": "average_tag_density/log_file",
+        "to": "atdp_log",
+        "via": []
+      },
+      {
+        "from": "average_tag_density/result_file",
+        "to": "atdp_result",
+        "via": []
+      },
+      {
+        "from": "samtools_sort_index_after_rmdup/bam_bai_pair",
+        "to": "bambai_pair",
+        "via": []
+      },
+      {
+        "from": "bam_to_bigwig/bigwig_file",
+        "to": "bigwig",
+        "via": []
+      },
+      {
+        "from": "bowtie_aligner/log_file",
+        "to": "bowtie_log",
+        "via": []
+      },
+      {
+        "from": "fastx_quality_stats/statistics_file",
+        "to": "fastx_statistics",
+        "via": []
+      },
+      {
+        "from": "get_stat/output_file",
+        "to": "get_stat_log",
+        "via": []
+      },
+      {
+        "from": "island_intersect/log_file",
+        "to": "iaintersect_log",
+        "via": []
+      },
+      {
+        "from": "island_intersect/result_file",
+        "to": "iaintersect_result",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/broad_peak_file",
+        "to": "macs2_broad_peaks",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/peak_xls_file",
+        "to": "macs2_called_peaks",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/macs2_stat_file",
+        "to": "macs2_fragment_stat",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/gapped_peak_file",
+        "to": "macs2_gapped_peak",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/macs_log",
+        "to": "macs2_log",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/moder_r_file",
+        "to": "macs2_moder_r",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/narrow_peak_file",
+        "to": "macs2_narrow_peaks",
+        "via": []
+      },
+      {
+        "from": "macs2_callpeak/peak_summits_file",
+        "to": "macs2_peak_summits",
+        "via": []
+      },
+      {
+        "from": "samtools_rmdup/rmdup_log",
+        "to": "samtools_rmdup_log",
+        "via": []
+      }
+    ]
+  },
+  "tests": [
+    {
+      "name": "biowardrobe_chipseq_se",
+      "job_path": "biowardrobe_chipseq_se.yaml",
+      "expected_outputs": [],
+      "provenance": "sibling-yaml: biowardrobe_chipseq_se.yaml job file in repo; no asserted expected outputs"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "expression.javascript",
+      "message": "InlineJavascriptRequirement is active; expressions are preserved, not executed.",
+      "path": "requirements"
+    },
+    {
+      "code": "ref.directory",
+      "message": "indices_folder is a CWL Directory input; downstream Galaxy translation must choose between directory-capable wrappers, explicit files, or collections.",
+      "path": "workflow_inputs/indices_folder"
+    },
+    {
+      "code": "nested.workflow",
+      "message": "Nested workflow #bam-bedgraph-bigwig.cwl in step bam_to_bigwig is preserved as a step target; downstream may need expansion.",
+      "path": "steps/bam_to_bigwig"
+    },
+    {
+      "code": "type.compat",
+      "message": "macs2_callpeak/peak_xls_file is (null|File) but is fed to a sink expecting File; downstream needs null-handling.",
+      "path": "steps/macs2_callpeak"
+    }
+  ]
+}

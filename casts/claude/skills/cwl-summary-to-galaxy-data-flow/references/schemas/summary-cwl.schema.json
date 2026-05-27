@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://galaxyproject.org/foundry/schemas/summary-cwl.schema.json",
-  "$comment": "Canonical source: packages/summary-cwl-schema/src/summary-cwl.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[summary-cwl]] wiki-links; the cast pipeline imports the `summaryCwlSchema` runtime export and serializes it into cast bundles.",
+  "$comment": "Canonical source: packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[summary-cwl]] wiki-links; the cast pipeline imports the `summaryCwlSchema` runtime export and serializes it into cast bundles.",
   "title": "CWL Workflow Summary",
   "description": "Structured per-source summary emitted by the summarize-cwl Mold. CWL is already a typed workflow language, so this schema records validated and normalized workflow/tool structure rather than inferred pipeline semantics.",
   "type": "object",

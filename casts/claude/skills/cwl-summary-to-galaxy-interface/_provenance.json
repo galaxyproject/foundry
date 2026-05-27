@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-interface/index.md",
     "revision": 2,
     "content_hash": "62e3ac902a2416bc0c28b4c7577f845a1061e4abf05ae706d6c6952bd0e46fca",
-    "commit": "2cc40cf0b5be4a3d4858e017783df537cd39be01"
+    "commit": "97effead63ef05cbac9d7f7227d8695a9e571e79"
   },
-  "cast_at": "2026-05-11T17:53:01.690Z",
+  "cast_at": "2026-05-11T20:45:00.633Z",
   "refs": [
     {
       "kind": "research",
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose Galaxy collection input shapes from CWL arrays, scatter inputs, records, Directory values, and secondary-file contracts.",
       "trigger": "When CWL types include arrays, records, Directory, secondaryFiles, or scatter over File-like inputs.",
-      "src_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
-      "dst_hash": "7ab0d19256c0c547ea89ef6fe29bf1ad0689b266011d33bd5b1a7e76ebd945d4",
+      "src_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
+      "dst_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
       "source": "deterministic"
     },
     {
@@ -89,14 +89,14 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-cwl]]",
-      "src": "package://@galaxy-foundry/summary-cwl-schema#summaryCwlSchema",
+      "src": "package://@galaxy-foundry/foundry#summaryCwlSchema",
       "dst": "references/schemas/summary-cwl.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Read CWL workflow inputs, outputs, types, formats, secondary files, scatter, and requirement evidence before choosing the Galaxy interface.",
-      "src_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
-      "dst_hash": "fa129417d48b9d70ab6051e6e0dad8af2f5c5ff86932bde9ec8d8f384acab581",
+      "src_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
+      "dst_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
       "source": "deterministic"
     }
   ],

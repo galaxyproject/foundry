@@ -1,0 +1,341 @@
+class: GalaxyWorkflow
+label: "HuBMAP salmon-rnaseq — CWL→Galaxy draft"
+doc: |
+  Draft gxformat2 skeleton derived from hubmapconsortium/salmon-rnaseq pipeline.cwl
+  (cwlVersion v1.2, SHA 2f77bcf). Topology and edges are settled here; tool_ids and tool_state
+  are TODO and deferred to the per-step authoring Molds. Per the IWC comparison notes:
+    - the salmon vs salmon-mouse `when:` branch is collapsed into a single salmon-alevin step
+      with `organism` parameter (option (b) in the data-flow brief);
+    - the nested salmon-quantification.cwl subworkflow is flattened into main steps;
+    - the fastq input is modeled as a `list:paired` collection per IWC 10x convention,
+      with a TODO note for `list:list` if non-paired assays are required.
+
+inputs:
+  - id: fastq_pairs
+    type: collection
+    collection_type: list:paired
+    optional: false
+    doc: |
+      Per-sample paired FASTQ reads. CWL source `fastq_dir: Directory[]` — translated as
+      list-of-pairs per IWC scrna-seq 10x convention.
+    _plan_context: |
+      Source CWL: workflow_input fastq_dir (Directory[]).
+      IWC reference: scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-v3.gxwf.yml
+      uses `list:paired` named "fastq PE collection". Mirror that label/shape.
+      Fallback shape: `list:list` if downstream assay needs ≥3 reads per sample (Visium etc.).
+      Datatype: fastqsanger.gz (IWC convention).
+
+  - id: image_directory
+    type: collection
+    collection_type: list
+    optional: true
+    doc: "Optional TIFF image data (Visium assay only). CWL source: img_dir (Directory?)."
+    _plan_context: |
+      Source CWL: workflow_input img_dir (Directory?). Optional; gates the squidpy_analysis
+      step. Datatype: tiff. Galaxy mapping: optional `list` collection of TIFF images.
+
+  - id: metadata_directory
+    type: collection
+    collection_type: list
+    optional: true
+    doc: "Optional metadata (gpr slide file etc., Visium-only). CWL source: metadata_dir (Directory?)."
+    _plan_context: |
+      Source CWL: workflow_input metadata_dir (Directory?). Datatype mix (tabular/txt).
+
+  - id: assay
+    type: string
+    optional: false
+    restrictOnConnections: true
+    doc: "scRNA-seq assay type (e.g. 10x_v3, visium, slideseq). Enumerate at per-step authoring."
+    _plan_context: |
+      Source CWL: workflow_input assay (string, required). Enumeration must be discovered
+      from steps/salmon-quantification/salmon.cwl branches (open question, see interface brief).
+
+  - id: organism
+    type: string
+    optional: false
+    restrictOnConnections: true
+    default: human
+    doc: "human or mouse. Selects salmon-alevin reference index."
+    _plan_context: |
+      Source CWL: workflow_input organism (string?, default 'human'). In CWL this drives a
+      `when: $(inputs.organism == 'human')` / `'mouse'` branch over salmon vs salmon-mouse,
+      collapsed here into a single salmon-alevin step with this parameter.
+      Galaxy mapping: select param, restrictOnConnections=true, drives a cached index data-table
+      lookup inside the salmon-alevin wrapper. IWC scanpy-clustering uses `map_param_value`
+      for the analogous CellRanger v2/v3 switch.
+
+  - id: expected_cell_count
+    type: int
+    optional: true
+    doc: "Alevin --expectCells. CWL source: expected_cell_count (int?)."
+
+  - id: keep_all_barcodes
+    type: boolean
+    optional: true
+    doc: "Alevin --keepCBFraction-like flag. CWL source: keep_all_barcodes (boolean?)."
+
+  - id: threads
+    type: int
+    optional: true
+    default: 1
+    doc: "Per-tool thread count. CWL exposes this at workflow level; consider hiding."
+    _plan_context: |
+      Source CWL: workflow_input threads (int, default 1). IWC convention buries thread count
+      in tool config; keep exposed during draft, hide before publishing.
+
+outputs:
+  - id: salmon_output
+    outputSource: salmon_alevin/TODO_salmon_output
+  - id: count_matrix_h5ad
+    outputSource: annotate_cells/TODO_annotated_h5ad
+  - id: raw_count_matrix
+    outputSource: alevin_to_anndata/TODO_raw_expr_h5ad
+  - id: genome_build_json
+    outputSource: alevin_to_anndata/TODO_genome_build_json
+  - id: fastqc_reports
+    outputSource: fastqc/TODO_html
+  - id: fastqc_data
+    outputSource: fastqc/TODO_text
+  - id: deepscence_h5ad
+    outputSource: deepscence/TODO_h5ad_with_ds
+  - id: deepscence_plot
+    outputSource: deepscence/TODO_plot
+  - id: filtered_data_h5ad
+    outputSource: scanpy_analysis/TODO_filtered_h5ad
+  - id: umap_plot
+    outputSource: scanpy_analysis/TODO_umap_plot
+  - id: umap_density_plot
+    outputSource: scanpy_analysis/TODO_umap_density_plot
+  - id: dispersion_plot
+    outputSource: scanpy_analysis/TODO_dispersion_plot
+  - id: marker_gene_plot_t_test
+    outputSource: scanpy_analysis/TODO_marker_t_test
+  - id: marker_gene_plot_logreg
+    outputSource: scanpy_analysis/TODO_marker_logreg
+  - id: deepscence_continuous_plot
+    outputSource: scanpy_analysis/TODO_deepscence_continuous
+  - id: deepscence_binary_plot
+    outputSource: scanpy_analysis/TODO_deepscence_binary
+  - id: spatial_plot
+    outputSource: scanpy_analysis/TODO_spatial_plot
+  - id: scvelo_annotated_h5ad
+    outputSource: scvelo_analysis/TODO_annotated_h5ad
+  - id: scvelo_embedding_grid_plot
+    outputSource: scvelo_analysis/TODO_embedding_grid_plot
+  - id: squidpy_annotated_h5ad
+    outputSource: squidpy_analysis/TODO_squidpy_h5ad
+  - id: neighborhood_enrichment_plot
+    outputSource: squidpy_analysis/TODO_neighborhood_enrichment
+  - id: co_occurrence_plot
+    outputSource: squidpy_analysis/TODO_co_occurrence
+  - id: interaction_matrix_plot
+    outputSource: squidpy_analysis/TODO_interaction_matrix
+  - id: centrality_scores_plot
+    outputSource: squidpy_analysis/TODO_centrality_scores
+  - id: ripley_plot
+    outputSource: squidpy_analysis/TODO_ripley
+  - id: squidpy_spatial_plot
+    outputSource: squidpy_analysis/TODO_squidpy_spatial
+  - id: scanpy_qc_results
+    outputSource: compute_qc_results/TODO_scanpy_qc
+  - id: qc_report
+    outputSource: compute_qc_results/TODO_qc_metrics
+
+steps:
+  - id: fastqc
+    label: "FastQC over per-sample FASTQs"
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/fastqc/fastqc/TODO_version
+    tool_version: TODO
+    in:
+      TODO_input_file: fastq_pairs
+      TODO_threads: threads
+    out:
+      - id: TODO_html
+      - id: TODO_text
+    _plan_state: "IUC fastqc; map_over the list:paired collection. CWL source: fastqc.cwl (scatter on fastq_dir)."
+    _plan_context: |
+      Source CWL: steps/fastqc.cwl, baseCommand fastqc.
+      Docker: hubmap/fastqc (per workflow doc; check).
+      IWC convention: fastqc maps over list:paired transparently; no Apply Rules needed for
+      this output unless the data-flow brief restores Directory[] grouping (it does not).
+
+  - id: adjust_barcodes
+    label: "Adjust per-sample barcodes (HuBMAP)"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_fastq_pairs: fastq_pairs
+      TODO_assay: assay
+    out:
+      - id: TODO_adj_fastq_dir
+      - id: TODO_metadata_json
+    _plan_state: "Flattened from nested salmon-quantification.cwl; HuBMAP-specific. Likely author."
+    _plan_context: |
+      Source CWL: steps/salmon-quantification/adjust-barcodes.cwl. Per-assay barcode adjustment.
+      No IUC equivalent. SoftwareRequirement / DockerRequirement: check sibling Dockerfile.
+
+  - id: trim_reads
+    label: "Trim reads (HuBMAP per-assay)"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_orig_fastq_pairs: fastq_pairs
+      TODO_adj_fastq_dir: adjust_barcodes/TODO_adj_fastq_dir
+      TODO_assay: assay
+      TODO_threads: threads
+    out:
+      - id: TODO_trimmed_fastq_dir
+    _plan_state: "Flattened from nested salmon-quantification.cwl; HuBMAP-specific trim wrapper. Likely author."
+    _plan_context: |
+      Source CWL: steps/salmon-quantification/trim-reads.cwl.
+      Possible IUC overlap: cutadapt / trim-galore — but per-assay logic likely needs author.
+
+  - id: salmon_alevin
+    label: "Salmon Alevin quantification"
+    tool_id: TODO_author_or_iuc_salmon_alevin
+    tool_version: TODO
+    in:
+      TODO_orig_fastq_pairs: fastq_pairs
+      TODO_trimmed_fastq_dir: trim_reads/TODO_trimmed_fastq_dir
+      TODO_assay: assay
+      TODO_organism: organism
+      TODO_threads: threads
+      TODO_expected_cell_count: expected_cell_count
+      TODO_keep_all_barcodes: keep_all_barcodes
+    out:
+      - id: TODO_salmon_output
+    _plan_state: "Collapses CWL salmon + salmon-mouse `when:` branches into one step parameterized by `organism`."
+    _plan_context: |
+      Source CWL: steps/salmon-quantification/salmon.cwl AND salmon-mouse.cwl with complementary
+      `when:` predicates and a `pickValue: first_non_null` merge on output_dir. Galaxy translation
+      collapses both into one wrapper that resolves the index by `organism` data table.
+      Open question: confirm IUC salmon-alevin scRNA-seq wrapper availability; if absent, author.
+
+  - id: alevin_to_anndata
+    label: "Alevin output to AnnData"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_alevin_dir: salmon_alevin/TODO_salmon_output
+      TODO_assay: assay
+      TODO_organism: organism
+    out:
+      - id: TODO_expr_h5ad
+      - id: TODO_raw_expr_h5ad
+      - id: TODO_genome_build_json
+    _plan_state: "HuBMAP-specific; likely author. The `expr_h5ad` is the canonical handoff to annotate_cells."
+    _plan_context: |
+      Source CWL: steps/salmon-quantification/alevin-to-anndata.cwl. Receives the pickValue-merged
+      salmon output (now single-source under the collapsed salmon_alevin step).
+
+  - id: annotate_cells
+    label: "Annotate cells (HuBMAP)"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_orig_fastq_pairs: fastq_pairs
+      TODO_assay: assay
+      TODO_h5ad_file: alevin_to_anndata/TODO_expr_h5ad
+      TODO_img_dir: image_directory
+      TODO_metadata_dir: metadata_directory
+      TODO_metadata_json: adjust_barcodes/TODO_metadata_json
+    out:
+      - id: TODO_annotated_h5ad
+    _plan_state: "HuBMAP-specific cell annotation; likely author."
+    _plan_context: |
+      Source CWL: steps/salmon-quantification/annotate-cells.cwl. Note: optional img_dir /
+      metadata_dir are forwarded; wrapper must accept them as optional.
+
+  - id: deepscence
+    label: "DeepScence senescence scoring"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_h5ad_file: annotate_cells/TODO_annotated_h5ad
+    out:
+      - id: TODO_h5ad_with_ds
+      - id: TODO_plot
+    _plan_state: "Domain-novel; no IUC wrapper. Likely author."
+    _plan_context: |
+      Source CWL: steps/deepscence.cwl. Adds senescence scores to AnnData.
+
+  - id: scanpy_analysis
+    label: "Scanpy analysis (HuBMAP monolith)"
+    tool_id: TODO_author_or_iuc_decompose
+    tool_version: TODO
+    in:
+      TODO_assay: assay
+      TODO_h5ad_file: deepscence/TODO_h5ad_with_ds
+    out:
+      - id: TODO_filtered_h5ad
+      - id: TODO_umap_plot
+      - id: TODO_marker_t_test
+      - id: TODO_marker_logreg
+      - id: TODO_dispersion_plot
+      - id: TODO_umap_density_plot
+      - id: TODO_spatial_plot
+      - id: TODO_deepscence_continuous
+      - id: TODO_deepscence_binary
+    _plan_state: "HuBMAP packages many scanpy operations into one CommandLineTool. Author a single wrapper now; decompose later per IWC scanpy-clustering exemplar if review demands."
+    _plan_context: |
+      Source CWL: steps/scanpy-analysis.cwl. IWC reference: scRNAseq/scanpy-clustering provides
+      a fine-grained chain (anndata_import → scanpy_normalize → scanpy_filter_cells →
+      scanpy_filter_genes → scanpy_run_pca → scanpy_compute_neighbors → scanpy_run_umap →
+      scanpy_cluster → scanpy_run_rank_genes_groups → various plots). Decomposing yields ~12
+      Galaxy steps; the monolith keeps 1. Decision deferred to per-step authoring.
+
+  - id: scvelo_analysis
+    label: "scVelo RNA velocity"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_spliced_h5ad: deepscence/TODO_h5ad_with_ds
+      TODO_assay_name: assay
+    out:
+      - id: TODO_annotated_h5ad
+      - id: TODO_embedding_grid_plot
+    _plan_state: "Domain-novel; no IUC scVelo single-step. Likely author."
+    _plan_context: |
+      Source CWL: steps/scvelo-analysis.cwl. Outputs are typed File? — gate via optional output
+      handling at workflow level (no Galaxy `when:` needed; absent outputs are tolerated).
+
+  - id: squidpy_analysis
+    label: "SquidPy spatial analysis (Visium-gated)"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_assay: assay
+      TODO_h5ad_file: scanpy_analysis/TODO_filtered_h5ad
+      TODO_img_dir: image_directory
+    out:
+      - id: TODO_squidpy_h5ad
+      - id: TODO_neighborhood_enrichment
+      - id: TODO_co_occurrence
+      - id: TODO_interaction_matrix
+      - id: TODO_ripley
+      - id: TODO_centrality_scores
+      - id: TODO_squidpy_spatial
+    _plan_state: "Visium/spatial branch. Spaces with no image_directory get optional/empty outputs."
+    _plan_context: |
+      Source CWL: steps/squidpy-analysis.cwl. All declared outputs are File?; Galaxy gates on
+      presence of optional `image_directory` input through the wrapper's own assay-check
+      logic. No gxformat2 `when:` (Galaxy lacks step-level conditional execution; rely on
+      optional-output convention).
+
+  - id: compute_qc_results
+    label: "Compute QC metrics (HuBMAP)"
+    tool_id: TODO_author
+    tool_version: TODO
+    in:
+      TODO_assay: assay
+      TODO_primary_matrix: deepscence/TODO_h5ad_with_ds
+      TODO_secondary_matrix: scanpy_analysis/TODO_filtered_h5ad
+      TODO_salmon_dir: salmon_alevin/TODO_salmon_output
+    out:
+      - id: TODO_scanpy_qc
+      - id: TODO_qc_metrics
+    _plan_state: "HuBMAP-specific QC metrics. Likely author."
+    _plan_context: |
+      Source CWL: steps/compute-qc-metrics.cwl. Reads primary + secondary AnnData + Alevin
+      output directory.

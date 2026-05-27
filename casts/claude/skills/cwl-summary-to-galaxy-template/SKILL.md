@@ -22,6 +22,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. gxformat2 draft (see galaxy-workflow-draft-format): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds.
 
+## Required Tools
+
+- None declared. Procedure should not assume external CLIs are present.
+
 ## Load Upfront
 
 - `references/notes/component-cwl-workflow-anatomy.md`: Research note copied verbatim into the bundle. Preserve the lightweight CWL boundary and avoid re-inferring structure already present in the summary.

@@ -80,6 +80,11 @@ For each Mold the run exercised:
 - For cases tagged `bucket: schema`, run the deterministic check (e.g. `validate-summary-nextflow`) where applicable.
 - For cases tagged `bucket: utility` / `llm-judged`, score by inspection.
 
+In addition to Mold specific eval.md instructions, evaluate
+each skill run at a high-level. Does the Mold output seem appropriate for the job being done. Evaluate what research
+was used, whether it was useful, and what research was missing. Exposing gaps in research (missing/incorrect research within a document or missing documents) is an
+an important aspect of the evaluation step.
+
 Report eval results in a table; don't paper over misses. Misses are the point of the run.
 
 ## 6. Capture refinements
@@ -123,6 +128,9 @@ If the run surfaced concrete bugs in the Mold implementations or schemas (not ju
 - Summarize what changed on disk (run-dir contents + any refinement journal entries).
 - List the open questions in one place; concise, sacrifice grammar for brevity.
 - Suggest a follow-up: "run the next phase," "open issues for X / Y," "promote refinement entry → real schema change," "re-run after `/reload-plugins`."
+
+Follow-ups should most likely reflect generalizations of
+the lessons learned.
 
 ## Notes on emulation vs runtime invocation
 

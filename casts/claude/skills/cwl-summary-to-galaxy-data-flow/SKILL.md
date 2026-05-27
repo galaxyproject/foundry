@@ -20,6 +20,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Write artifact `cwl-galaxy-data-flow` as `cwl-galaxy-data-flow.md`. Format: `markdown`. Reviewable Markdown brief: abstract topology, Galaxy collection semantics, placeholder transformations, unresolved Galaxy tool needs.
 
+## Required Tools
+
+- None declared. Procedure should not assume external CLIs are present.
+
 ## Load Upfront
 
 - `references/notes/component-cwl-workflow-anatomy.md`: Research note copied verbatim into the bundle. Use CWL's native graph and mark only the features that need Galaxy reinterpretation.
