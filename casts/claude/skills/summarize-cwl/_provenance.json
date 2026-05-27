@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
     "content_hash": "fc96f678cb072237347f4990644a86c47d84f4fff303160fbb4ae3a92a55e1c5",
-    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
+    "commit": "97effead63ef05cbac9d7f7227d8695a9e571e79"
   },
-  "cast_at": "2026-05-11T14:24:12.123Z",
+  "cast_at": "2026-05-11T20:44:59.438Z",
   "refs": [
     {
       "kind": "cli-tool",
@@ -50,8 +50,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-cwl.json before returning it from the skill.",
-      "src_hash": "10511e9fde995a675800000f4aff9ba6734c35f08cbb11311a7ce12167044851",
-      "dst_hash": "10511e9fde995a675800000f4aff9ba6734c35f08cbb11311a7ce12167044851",
+      "src_hash": "4bdf7a69637c360258e86738aab65b946347629f84695f1c7e6bf7c49fc75b32",
+      "dst_hash": "4bdf7a69637c360258e86738aab65b946347629f84695f1c7e6bf7c49fc75b32",
       "source": "deterministic"
     },
     {

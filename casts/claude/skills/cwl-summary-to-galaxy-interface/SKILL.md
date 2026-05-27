@@ -19,6 +19,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Write artifact `cwl-galaxy-interface` as `cwl-galaxy-interface.md`. Format: `markdown`. Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, exposed and checkpoint outputs, source provenance, confidence.
 
+## Required Tools
+
+- None declared. Procedure should not assume external CLIs are present.
+
 ## Load Upfront
 
 - `references/notes/component-cwl-workflow-anatomy.md`: Research note copied verbatim into the bundle. Keep source-faithful CWL facts separate from Galaxy-facing interface choices.
