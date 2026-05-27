@@ -406,6 +406,122 @@ cwl_repositories:
       surfaces and comparing DockerRequirement/SoftwareRequirement evidence
       with Galaxy Tool Shed wrapper discovery.
 
+  - name: Barski-Lab/ga4gh_challenge
+    flavor: bio-workflow
+    tier: tiny
+    repo: https://github.com/Barski-Lab/ga4gh_challenge.git
+    sha: f28d47bd0911e5e7210c4dc83f75653a1e0297c9
+    entrypoints:
+      - biowardrobe_chipseq_se.cwl
+    notes: >
+      GA4GH workflow-execution challenge entry: a single SE ChIP-seq workflow
+      with one subworkflow. Small, self-contained, fully resolvable — good
+      baseline for end-to-end CWL→Galaxy conversion smoke tests.
+
+  - name: pitagora-network/pitagora-cwl
+    flavor: bio-workflow
+    tier: small
+    repo: https://github.com/pitagora-network/pitagora-cwl.git
+    sha: 4e84905f265e1db212c406d34ae4db2bf565e856
+    entrypoints:
+      - workflows/bwa/BwaWorkflow-pe.cwl
+      - workflows/bowtie2/Bowtie2Workflow-pe.cwl
+      - workflows/download-fastq/download-fastq.cwl
+      - workflows/download-fastq/download-fastq.packed.cwl
+      - workflows/hisat2-cufflinks/paired_end/hisat2-cufflinks_wf_pe.cwl
+    notes: >
+      Many small bio workflows (aligners + RNA-seq quantification) over a
+      shared tools/ library. Mostly linear, modest scatter usage. Includes a
+      `.packed.cwl` single-document variant for exercising the packed-workflow
+      parse path.
+
+  - name: Duke-GCB/GGR-cwl
+    flavor: bio-workflow
+    tier: small
+    repo: https://github.com/Duke-GCB/GGR-cwl.git
+    sha: 487af88ef0b971f76ecd1a215639bb47e3ee94e1
+    entrypoints:
+      - v1.0/ChIP-seq_pipeline/pipeline-se.cwl
+      - v1.0/ATAC-seq_pipeline/pipeline-pe.cwl
+      - v1.0/RNA-seq_pipeline/pipeline-pe-unstranded.cwl
+    notes: >
+      Duke GCB ChIP-seq / ATAC-seq / RNA-seq pipelines. Sibling v1.0 and
+      draft-3 trees in one repo — useful for CWL version diversity. Numbered
+      stage subworkflows wired by a top-level pipeline workflow; clean
+      mid-tier bio exemplar.
+
+  - name: h3abionet/h3agatk
+    flavor: bio-workflow
+    tier: small
+    repo: https://github.com/h3abionet/h3agatk.git
+    sha: d01ce5540114abba7b54fde0f865e5865c21dc64
+    entrypoints:
+      - workflows/GATK/GATK-complete-WES-Workflow-h3abionet.cwl
+      - workflows/GATK/GATK-complete-WGS-Workflow-h3abionet.cwl
+    notes: >
+      H3ABioNet GATK germline variant-calling workflow in CWL. Real
+      reference-data pressure (FASTA + multiple index secondaryFiles, dbSNP,
+      known indels) and large multi-step DAG — natural CWL counterpart to
+      nf-core/sarek.
+
+  - name: Barski-Lab/workflows
+    flavor: bio-workflow
+    tier: large
+    repo: https://github.com/Barski-Lab/workflows.git
+    sha: 4723ce567089dc9ee51e067b813c5b527a3da16a
+    entrypoints:
+      - workflows/chipseq-se.cwl
+      - workflows/chipseq-pe.cwl
+      - workflows/rnaseq-se.cwl
+      - workflows/rnaseq-pe.cwl
+    notes: >
+      BioWardrobe / SciDAP CWL workflow library. Heavy use of CWL extensions
+      (sd:* metadata hints), many sibling workflows over a shared tool tree.
+      Stresses extension handling and "ignore unknown hints" tolerance in
+      summarize-cwl.
+
+  - name: NCI-GDC/gdc-dnaseq-cwl
+    flavor: bio-workflow
+    tier: large
+    repo: https://github.com/NCI-GDC/gdc-dnaseq-cwl.git
+    sha: 65510af2ab705bfd3e9d4ca7281335de2adba2df
+    entrypoints:
+      - gdc-dnaseq-aln-cwl/gdc_dnaseq.bamfastq_align.workflow.cwl
+      - subworkflows/main/gdc_dnaseq_main_workflow.cwl
+    notes: >
+      NCI GDC production DNA-seq harmonization workflow. Deeply nested
+      subworkflow tree (extract / align / metrics / utils), conditional
+      markduplicates, custom `decider_*` tools. Hard mode for CWL→Galaxy
+      conversion — many subworkflow boundaries and decision points.
+
+  - name: NCI-GDC/gdc-rnaseq-cwl
+    flavor: bio-workflow
+    tier: large
+    repo: https://github.com/NCI-GDC/gdc-rnaseq-cwl.git
+    sha: 05460f7dfca5a900d7635ccae0e1b28cf764a02f
+    entrypoints:
+      - rnaseq-star-align/star2pass.rnaseq_harmonization.cwl
+      - rnaseq-star-align/subworkflows/gdc_rnaseq_main_workflow.cwl
+    notes: >
+      NCI GDC production RNA-seq harmonization workflow (STAR 2-pass).
+      Companion to gdc-dnaseq-cwl — same nested-subworkflow style, different
+      domain. Good for testing whether summarize-cwl output stays useful at
+      production scale.
+
+  - name: hubmapconsortium/salmon-rnaseq
+    flavor: bio-workflow
+    tier: small
+    repo: https://github.com/hubmapconsortium/salmon-rnaseq.git
+    sha: 2f77bcfe9d6eaccce04359ed110995de65d03422
+    entrypoints:
+      - pipeline.cwl
+      - bulk-pipeline.cwl
+    notes: >
+      HuBMAP single-cell + bulk RNA-seq via salmon/alevin. Modern Python-
+      analysis-heavy steps (scanpy, scvelo, squidpy). Both single-cell and
+      bulk entrypoints share a steps/ tree — useful for two-entrypoint
+      summary behavior.
+
 # IWC corpus — single rolling repo, no tag. Pin SHA from main.
 # Materialized into iwc-src/ then cleaned + converted to format2 under iwc-format2/
 # by scripts/build-iwc.sh (uses gxwf via @galaxy-tool-util/cli).
