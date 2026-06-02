@@ -44,7 +44,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 Validate the assembled Galaxy workflow before runtime testing. The skill owns the terminal validation pass: run gxwf validate, classify workflow-level diagnostics, and route failures back to the responsible authoring phase when possible.
 
-This is separate from validate-galaxy-step because terminal validation no longer has only one fresh step in scope and should reason over cross-step workflow structure.
+This is separate from advance-galaxy-draft-step (which runs `gxwf draft-validate --concrete` inside the per-step loop) because terminal validation no longer has only one fresh step in scope and should reason over cross-step workflow structure.
 
 ## Runtime Notes
 

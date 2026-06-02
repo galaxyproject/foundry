@@ -5,10 +5,10 @@
     "name": "validate-galaxy-workflow",
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 3,
-    "content_hash": "710b9239387be85f0173c50d96ded014e4eb9f79b38366cdd83a6723834db36a",
-    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
+    "content_hash": "58536625c371eed536f6c3f68cde6b4d425b051c8d1ed129e4c5b667a05a3135",
+    "commit": "33cab7a56f3ee8c76a65d7a0ed8357f70e4c954c"
   },
-  "cast_at": "2026-05-10T22:31:15.843Z",
+  "cast_at": "2026-06-02T17:59:53.199Z",
   "refs": [
     {
       "kind": "cli-command",
