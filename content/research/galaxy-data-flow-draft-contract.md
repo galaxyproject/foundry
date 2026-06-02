@@ -22,6 +22,7 @@ related_molds:
   - "[[cwl-summary-to-galaxy-template]]"
   - "[[freeform-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
+  - "[[advance-galaxy-draft-step]]"
 sources:
   - "https://github.com/jmchilton/foundry/issues/54"
 summary: "Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation."

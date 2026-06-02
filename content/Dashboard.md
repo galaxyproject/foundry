@@ -17,6 +17,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | draft | 2026-06-02 | 1 |
 | [[interview-to-freeform-summary]] | Normalize a free-form user interview into the shared freeform-summary workflow handoff. | draft | 2026-05-22 | 1 |
 | [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-05-11 | 2 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | draft | 2026-05-11 | 6 |
@@ -46,7 +47,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-05-03 | 1 |
 | [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | draft | 2026-05-03 | 3 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify failure modes; propose fixes. | draft | 2026-05-02 | 3 |
-| [[validate-galaxy-step]] | Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation. | draft | 2026-05-02 | 2 |
 | [[debug-cwl-workflow-output]] | Triage failing CWL run outputs; classify failure modes; propose fixes. | draft | 2026-04-30 | 1 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | draft | 2026-04-30 | 1 |
 | [[implement-cwl-tool-step]] | Convert an abstract step into a concrete CWL CommandLineTool + step. | draft | 2026-04-30 | 1 |
@@ -121,6 +121,9 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[draft-extract]] | Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved. | draft | 2026-05-27 | 1 |
+| [[draft-next-step]] | Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak. | draft | 2026-05-27 | 1 |
+| [[draft-validate]] | Validate a `class: GalaxyWorkflowDraft` workflow against draft-contract rules; with --concrete, also validate the extracted concrete subset. | draft | 2026-05-27 | 1 |
 | [[planemo-cli_metadata]] | Export structured metadata for Planemo CLI commands. | draft | 2026-05-11 | 1 |
 | [[planemo-lint]] | Check for common errors and best practices. | draft | 2026-05-11 | 1 |
 | [[planemo-output_schema]] | Export JSON Schemas for Planemo machine-readable outputs. | draft | 2026-05-11 | 1 |
@@ -144,6 +147,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-05-27 | 1 |
 | [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref deterministic-vs-LLM origin, src/dst hashes, artifact handoff. Schema v2. | draft | 2026-05-17 | 1 |
 | [[planemo-test-report]] | JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo. | draft | 2026-05-11 | 1 |
 | [[summary-cwl]] | JSON Schema for the structured summary emitted by the summarize-cwl Mold. | draft | 2026-05-10 | 1 |

@@ -16,16 +16,7 @@ phases:
   - mold: "[[freeform-summary-to-galaxy-design]]"
   - mold: "[[compare-against-iwc-exemplar]]"
   - mold: "[[freeform-summary-to-galaxy-template]]"
-  - branch: discover-or-author
-    loop: true
-    branches:
-      - "[[discover-shed-tool]]"
-      - fallthrough: "[[author-galaxy-tool-wrapper]]"
-  - mold: "[[summarize-galaxy-tool]]"
-    loop: true
-  - mold: "[[implement-galaxy-tool-step]]"
-    loop: true
-  - mold: "[[validate-galaxy-step]]"
+  - mold: "[[advance-galaxy-draft-step]]"
     loop: true
   - branch: test-data-resolution
     chain:
