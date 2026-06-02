@@ -17,10 +17,10 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
-  - "[[paper-summary-to-galaxy-design]]"
+  - "[[freeform-summary-to-galaxy-design]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[paper-summary-to-galaxy-template]]"
+  - "[[freeform-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 sources:
   - "https://github.com/jmchilton/foundry/issues/54"

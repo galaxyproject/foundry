@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 3,
     "content_hash": "c428f817f5f6707207e9d3df4c1a735c3ded34365716d9d96ee99342bb93a01d",
-    "commit": "10b87e9abef28fe236e5aa11c9a52d7521698cb1"
+    "commit": "006a5afad77f9b7f2a612b8638568795662f4e16"
   },
-  "cast_at": "2026-06-02T15:21:03.089Z",
+  "cast_at": "2026-06-02T16:56:58.446Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
-      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
-      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
-      "src_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
-      "dst_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
       "source": "deterministic"
     },
     {
@@ -98,8 +98,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "820b6909d9bffe5410cbfebe47a4b033b0fae4bb84cff6dc54f46825d72f2310",
-      "dst_hash": "820b6909d9bffe5410cbfebe47a4b033b0fae4bb84cff6dc54f46825d72f2310",
+      "src_hash": "ee7088159b1a4678bd8cded4d5f92b9882084a663472bfb0cc3d5ec62d6f5427",
+      "dst_hash": "ee7088159b1a4678bd8cded4d5f92b9882084a663472bfb0cc3d5ec62d6f5427",
       "source": "deterministic"
     },
     {
@@ -113,8 +113,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "1e8b7f9e9603506f1ea4eb66c512c31eef2d691624e61134445946d0c3339947",
-      "dst_hash": "1e8b7f9e9603506f1ea4eb66c512c31eef2d691624e61134445946d0c3339947",
+      "src_hash": "1a8cdc4912187eb8865741935c81ae50d719ad378b6b57541f76df096333dfc8",
+      "dst_hash": "1a8cdc4912187eb8865741935c81ae50d719ad378b6b57541f76df096333dfc8",
       "source": "deterministic"
     },
     {

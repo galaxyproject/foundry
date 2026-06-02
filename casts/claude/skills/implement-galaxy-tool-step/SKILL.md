@@ -14,7 +14,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `galaxy-tool-summary`. Schema: galaxy-tool-summary. Produced by `summarize-galaxy-tool`. Galaxy tool summary manifest from summarize-galaxy-tool conforming to galaxy-tool-summary; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`.
-- Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `cwl-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`, `paper-summary-to-galaxy-template`. gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft.
+- Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`. gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft.
 
 ## Outputs
 

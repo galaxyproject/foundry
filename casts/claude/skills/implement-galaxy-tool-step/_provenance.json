@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 5,
     "content_hash": "d18491b723bc5387c09fd7216226ea559834423de98018889533419fc6b023ee",
-    "commit": "10b87e9abef28fe236e5aa11c9a52d7521698cb1"
+    "commit": "006a5afad77f9b7f2a612b8638568795662f4e16"
   },
-  "cast_at": "2026-06-02T15:21:00.850Z",
+  "cast_at": "2026-06-02T16:57:00.335Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose corpus-attested collection recipes when implementing concrete Galaxy steps.",
       "trigger": "When implementation needs cleanup-after-fanout, sync-by-identifier, singleton unboxing, relabeling, collection reshaping, or collection-tabular bridges.",
-      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
-      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose corpus-attested tabular recipes when implementing concrete Galaxy steps.",
       "trigger": "When implementation needs row filtering, column projection, computed columns, joins, grouping, SQL, awk, text-processing wrappers, or tabular-collection bridges.",
-      "src_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
-      "dst_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
       "source": "deterministic"
     },
     {
@@ -201,9 +201,9 @@
         "inherited_schema": "[[galaxy-workflow-draft]]",
         "producers": [
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
-          "nextflow-summary-to-galaxy-template",
-          "paper-summary-to-galaxy-template"
+          "nextflow-summary-to-galaxy-template"
         ]
       }
     ]

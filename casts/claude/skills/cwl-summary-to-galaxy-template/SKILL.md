@@ -29,10 +29,6 @@ Follow the procedure below and use the artifact/reference sections as the runtim
   Check: `gxwf --version`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
-## Required Tools
-
-- None declared. Procedure should not assume external CLIs are present.
-
 ## Load Upfront
 
 - `references/notes/component-cwl-workflow-anatomy.md`: Research note copied verbatim into the bundle. Preserve the lightweight CWL boundary and avoid re-inferring structure already present in the summary.
