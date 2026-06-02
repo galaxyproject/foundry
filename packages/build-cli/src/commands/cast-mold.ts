@@ -709,7 +709,14 @@ async function castOneRef(
           error: `package ${resolved.package_source.spec} has no export '${resolved.package_source.exportName}'`,
         };
       }
-      json = JSON.stringify(exported, null, 2) + "\n";
+      const stringified = JSON.stringify(exported, null, 2);
+      if (stringified === undefined) {
+        return {
+          entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },
+          error: `package ${resolved.package_source.spec} export '${resolved.package_source.exportName}' is not JSON-serializable (typeof=${typeof exported}). The export must be a plain JSON Schema object; an Effect schema function needs upstream to publish a JSON-converted sibling.`,
+        };
+      }
+      json = stringified + "\n";
     } catch (e) {
       return {
         entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },

@@ -31,13 +31,6 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape."
-  - kind: schema
-    ref: "[[galaxy-workflow-draft]]"
-    used_at: runtime
-    load: upfront
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "JSON Schema contract for the gxformat2 draft superset; input and output of this Mold must conform."
   - kind: cli-command
     ref: "[[draft-validate]]"
     used_at: runtime

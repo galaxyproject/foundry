@@ -37,13 +37,6 @@ references:
     mode: verbatim
     evidence: cast-validated
     purpose: "Read CWL source graph, step ids, command surfaces, scatter, conditionals, requirements, and warnings while emitting placeholder steps."
-  - kind: schema
-    ref: "[[galaxy-workflow-draft]]"
-    used_at: runtime
-    load: upfront
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "JSON Schema contract for the gxformat2 draft superset; output of this Mold must conform."
   - kind: cli-command
     ref: "[[draft-validate]]"
     used_at: runtime
