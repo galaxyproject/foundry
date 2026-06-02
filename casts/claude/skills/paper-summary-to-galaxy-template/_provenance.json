@@ -2,13 +2,13 @@
   "provenance_schema_version": 2,
   "cast_target": "claude",
   "mold": {
-    "name": "cwl-summary-to-galaxy-template",
-    "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
+    "name": "paper-summary-to-galaxy-template",
+    "path": "content/molds/paper-summary-to-galaxy-template/index.md",
     "revision": 3,
-    "content_hash": "c428f817f5f6707207e9d3df4c1a735c3ded34365716d9d96ee99342bb93a01d",
+    "content_hash": "9e5d3ba6cd9f36a88df8dcd7c3080af1580c13c08b96c66650a7c1e01b0c62fa",
     "commit": "10b87e9abef28fe236e5aa11c9a52d7521698cb1"
   },
-  "cast_at": "2026-06-02T15:21:03.089Z",
+  "cast_at": "2026-06-02T15:21:03.837Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -21,7 +21,7 @@
       "evidence": "hypothesis",
       "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off.",
       "trigger": "After writing or modifying the draft workflow file.",
-      "verification": "Cast the skill, run on a representative CWL workflow, confirm draft-validate diagnostics route back.",
+      "verification": "Cast the skill, run on a representative paper-derived summary, confirm draft-validate diagnostics route back.",
       "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
       "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
       "source": "deterministic"
@@ -59,28 +59,13 @@
     {
       "kind": "research",
       "mode": "verbatim",
-      "ref": "[[component-cwl-workflow-anatomy]]",
-      "src": "content/research/component-cwl-workflow-anatomy.md",
-      "dst": "references/notes/component-cwl-workflow-anatomy.md",
-      "used_at": "runtime",
-      "load": "upfront",
-      "evidence": "hypothesis",
-      "purpose": "Preserve the lightweight CWL boundary and avoid re-inferring structure already present in the summary.",
-      "verification": "Run after the first CWL interface/data-flow briefs and confirm gxformat2 placeholder steps preserve CWL step boundaries unless the data-flow brief explicitly asks to split them.",
-      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
-      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
-      "source": "deterministic"
-    },
-    {
-      "kind": "research",
-      "mode": "verbatim",
       "ref": "[[galaxy-collection-semantics]]",
       "src": "content/research/galaxy-collection-semantics.md",
       "dst": "references/notes/galaxy-collection-semantics.md",
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Translate CWL arrays, records, scatter, and secondary-file shapes into Galaxy collection typing and map-over/reduction semantics.",
+      "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
       "src_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
       "dst_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
@@ -95,9 +80,9 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
+      "purpose": "Respect the handoff from the combined paper-to-Galaxy design brief to the gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
-      "verification": "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes.",
+      "verification": "Promote after two worked paper-to-Galaxy templates preserve the design-brief/template split without schema changes.",
       "src_hash": "820b6909d9bffe5410cbfebe47a4b033b0fae4bb84cff6dc54f46825d72f2310",
       "dst_hash": "820b6909d9bffe5410cbfebe47a4b033b0fae4bb84cff6dc54f46825d72f2310",
       "source": "deterministic"
@@ -131,34 +116,6 @@
       "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
       "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
       "source": "deterministic"
-    },
-    {
-      "kind": "research",
-      "mode": "verbatim",
-      "ref": "[[gxformat2-schema]]",
-      "src": "content/research/gxformat2-schema.md",
-      "dst": "references/notes/gxformat2-schema.md",
-      "used_at": "runtime",
-      "load": "upfront",
-      "evidence": "corpus-observed",
-      "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
-      "src_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
-      "dst_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
-      "source": "deterministic"
-    },
-    {
-      "kind": "schema",
-      "mode": "verbatim",
-      "ref": "[[summary-cwl]]",
-      "src": "package://@galaxy-foundry/foundry#summaryCwlSchema",
-      "dst": "references/schemas/summary-cwl.schema.json",
-      "used_at": "runtime",
-      "load": "upfront",
-      "evidence": "cast-validated",
-      "purpose": "Read CWL source graph, step ids, command surfaces, scatter, conditionals, requirements, and warnings while emitting placeholder steps.",
-      "src_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
-      "dst_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
-      "source": "deterministic"
     }
   ],
   "artifacts": {
@@ -173,30 +130,22 @@
     ],
     "consumes": [
       {
-        "id": "summary-cwl",
-        "description": "Structured CWL summary emitted by [[summarize-cwl]]; consulted while emitting placeholder steps.",
-        "inherited_schema": "[[summary-cwl]]",
+        "id": "summary-paper",
+        "description": "Paper summary emitted by [[summarize-paper]]; consulted while emitting placeholder steps.",
         "producers": [
-          "summarize-cwl"
+          "summarize-paper"
         ]
       },
       {
-        "id": "cwl-galaxy-interface",
-        "description": "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] that pins workflow inputs, outputs, labels.",
+        "id": "paper-galaxy-design",
+        "description": "Combined Galaxy design brief from [[paper-summary-to-galaxy-design]] that pins interface and data-flow choices.",
         "producers": [
-          "cwl-summary-to-galaxy-interface"
-        ]
-      },
-      {
-        "id": "cwl-galaxy-data-flow",
-        "description": "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices.",
-        "producers": [
-          "cwl-summary-to-galaxy-data-flow"
+          "paper-summary-to-galaxy-design"
         ]
       },
       {
         "id": "iwc-comparison-notes",
-        "description": "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design briefs); steers the skeleton toward IWC-aligned structure before per-step authoring.",
+        "description": "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design brief); steers the skeleton toward IWC-aligned structure before per-step authoring.",
         "producers": [
           "compare-against-iwc-exemplar"
         ]

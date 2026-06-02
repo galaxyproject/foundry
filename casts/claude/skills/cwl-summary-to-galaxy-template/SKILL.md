@@ -20,7 +20,14 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. gxformat2 draft (see galaxy-workflow-draft-format): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds.
+- Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. Schema: galaxy-workflow-draft. gxformat2 draft (see galaxy-workflow-draft-format): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds.
+
+## Required Tools
+
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
+  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
+  Check: `gxwf --version`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
 ## Required Tools
 
@@ -36,6 +43,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
+- `references/cli/draft-validate.json`: CLI command reference packaged as a sidecar. Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off. Use when: after writing or modifying the draft workflow file.
 - `references/patterns/galaxy-collection-patterns.md`: Pattern note copied verbatim into the bundle. Use corpus-grounded collection pattern guidance for unresolved skeleton steps. Use when: adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.
 - `references/patterns/galaxy-tabular-patterns.md`: Pattern note copied verbatim into the bundle. Use corpus-grounded tabular pattern guidance for unresolved skeleton steps. Use when: adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.
 - `references/notes/galaxy-collection-semantics.md`: Research note copied verbatim into the bundle. Translate CWL arrays, records, scatter, and secondary-file shapes into Galaxy collection typing and map-over/reduction semantics. Use when: creating workflow inputs, outputs, and placeholder connections involving collections.
@@ -43,7 +51,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- None declared.
+- Validate `galaxy-workflow-draft.gxwf.yml` for artifact `galaxy-workflow-draft` against the galaxy-workflow-draft schema when a validator is available.
 
 ## Procedure
 

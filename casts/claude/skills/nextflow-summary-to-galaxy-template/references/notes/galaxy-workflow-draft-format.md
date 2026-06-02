@@ -14,6 +14,7 @@ related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-data-flow-draft-contract]]"
   - "[[discover-shed-tool]]"
+  - "[[galaxy-workflow-draft]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"

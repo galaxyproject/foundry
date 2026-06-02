@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 6,
-    "content_hash": "3fc9a178ac3a349e3235e1c43aec98f9d50d8b011e8438ce39c70b620f9a880e",
-    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
+    "content_hash": "f3161b6df054b7ee9b5622ca6d65abb9d2d30473b5ea54e0322da0ae99262b7a",
+    "commit": "10b87e9abef28fe236e5aa11c9a52d7521698cb1"
   },
-  "cast_at": "2026-05-11T07:43:45.885Z",
+  "cast_at": "2026-06-02T15:21:01.729Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -29,6 +29,22 @@
     }
   ],
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[draft-validate]]",
+      "src": "content/cli/gxwf/draft-validate.md",
+      "dst": "references/cli/draft-validate.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off.",
+      "trigger": "After writing or modifying the draft workflow file.",
+      "verification": "Cast the skill, run on a representative Nextflow pipeline, confirm draft-validate diagnostics route back.",
+      "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
+      "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
+      "source": "deterministic"
+    },
     {
       "kind": "pattern",
       "mode": "verbatim",
@@ -86,8 +102,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked Nextflow-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
-      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "src_hash": "820b6909d9bffe5410cbfebe47a4b033b0fae4bb84cff6dc54f46825d72f2310",
+      "dst_hash": "820b6909d9bffe5410cbfebe47a4b033b0fae4bb84cff6dc54f46825d72f2310",
       "source": "deterministic"
     },
     {
@@ -101,8 +117,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "95019d71a09c3c8a153ed59e187827f1bab2b5c7f5d48a6fe9c582912e62264d",
-      "dst_hash": "95019d71a09c3c8a153ed59e187827f1bab2b5c7f5d48a6fe9c582912e62264d",
+      "src_hash": "1e8b7f9e9603506f1ea4eb66c512c31eef2d691624e61134445946d0c3339947",
+      "dst_hash": "1e8b7f9e9603506f1ea4eb66c512c31eef2d691624e61134445946d0c3339947",
       "source": "deterministic"
     },
     {
@@ -130,8 +146,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and producer-side output actions while emitting the skeleton.",
-      "src_hash": "2f35f0ca8cd4410736a595f2324274a883b5c42d79165156e15b2a75c3f1e359",
-      "dst_hash": "2f35f0ca8cd4410736a595f2324274a883b5c42d79165156e15b2a75c3f1e359",
+      "src_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
+      "dst_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
       "source": "deterministic"
     },
     {
@@ -200,6 +216,7 @@
         "id": "galaxy-workflow-draft",
         "kind": "yaml",
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
         "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
       }
     ],
