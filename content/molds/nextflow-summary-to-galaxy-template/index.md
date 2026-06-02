@@ -29,6 +29,7 @@ output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
+    schema: "[[galaxy-workflow-draft]]"
     description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
 references:
   - kind: schema
@@ -38,6 +39,22 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context."
+  - kind: schema
+    ref: "[[galaxy-workflow-draft]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "JSON Schema contract for the gxformat2 draft superset; output of this Mold must conform."
+  - kind: cli-command
+    ref: "[[draft-validate]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off."
+    trigger: "After writing or modifying the draft workflow file."
+    verification: "Cast the skill, run on a representative Nextflow pipeline, confirm draft-validate diagnostics route back."
   - kind: research
     ref: "[[gxformat2-schema]]"
     used_at: runtime

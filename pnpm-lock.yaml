@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@galaxy-tool-util/cli':
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: ^1.6.0
+        version: 1.6.0
       '@galaxy-tool-util/schema':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.6.0
+        version: 1.6.0
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.6.0
@@ -110,8 +110,8 @@ importers:
         specifier: workspace:*
         version: link:../summarize-nextflow
       '@galaxy-tool-util/schema':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.6.0
+        version: 1.6.0
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
@@ -591,24 +591,21 @@ packages:
     resolution: {integrity: sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@galaxy-tool-util/cli@1.4.0':
-    resolution: {integrity: sha512-H8jazKK0R/LJPOw0ek6d98pIKCJ6q56IxREd3C8AQ6RDmiQlFW0DDRpYATHifcPoNHMk4vLxbo2HgZJ0a508wA==}
+  '@galaxy-tool-util/cli@1.6.0':
+    resolution: {integrity: sha512-8kxDpJYQoSl9ZsoPxVr5m75si+PerwCSS2BOjteGiZbKTXbsjPdm1v+26j9D+WzD4B4WImXY0tcXth4JXUKOnA==}
     hasBin: true
 
-  '@galaxy-tool-util/connection-validation@1.2.0':
-    resolution: {integrity: sha512-LTDXriF6hcoTP889rU1wwDPwzc4+l5IuJVtHXLzWYR0pFJS2uTE1coov49G+HmX4pJXrqUeb3tFh0U4be7vqXQ==}
+  '@galaxy-tool-util/connection-validation@1.6.0':
+    resolution: {integrity: sha512-LrXSOYhbgE9ciCKUQc2GDceKVhWJsoVG/XHPwB3LVHRTfXrlqH6Z32uEPdfdTxBHYao8y8PYVo8OlDiiDz4kFA==}
 
-  '@galaxy-tool-util/core@1.2.0':
-    resolution: {integrity: sha512-TcX6vrtQX56Ra3ibbYi0R9kJ3C8jEFtz0DLalcve7KcM7ZGumwZbj9pZCD7andZHSe6L7ZEqQihc8HsCHvce8A==}
+  '@galaxy-tool-util/core@1.6.0':
+    resolution: {integrity: sha512-HiptAYy/PRQ1z1qy/xgELss6wnY16MXWvfgT5FNi8WLrDxfSPBFNDNis+/oxbFr0SmTIMCHe3BC9aCaBuJpR6g==}
 
-  '@galaxy-tool-util/schema@1.1.0':
-    resolution: {integrity: sha512-D0dMtBaTyRJhoAxH1Djx/42WnxQDAk3yuMhTd3k+MCez1jiGL1kFeYDQEk8yWSgY5Z4d+u24wbhaWG4Q2GTG1w==}
+  '@galaxy-tool-util/schema@1.6.0':
+    resolution: {integrity: sha512-ThEqtTYdHKy9vpKEBrDLbu5NHKz8sGy3UphmZQHXBnr/WUyjlq0Lu5YpVhvpNjaV/mqkIHa+CSlTQrDmi2u+BA==}
 
-  '@galaxy-tool-util/schema@1.2.0':
-    resolution: {integrity: sha512-0OOemrWHa/wGtxJZehCa4Y6D2thLxub1iAJ+Fmifj9TeRkTE0f1taZHAutwV4mJeBZ/xzgBgFUZu8ZWWzeKpPg==}
-
-  '@galaxy-tool-util/search@1.2.0':
-    resolution: {integrity: sha512-0nQe6/JBE0bIuQ138H5RqM1HlPaB3BfJYN89ka5OIaU/n8wsgm+ToQirUPfJLM8Ltv816l7Q59FnAdkhpLlEnw==}
+  '@galaxy-tool-util/search@1.6.0':
+    resolution: {integrity: sha512-7jjvG3jq4JlH4WtKhI5P77GbLsv/+yvkQUofH4iGINq1Dt6xLIAyXgHjhxCYfJgSUlZ47hhQnynIrtRGCR1TjA==}
 
   '@galaxy-tool-util/workflow-graph@1.2.0':
     resolution: {integrity: sha512-S3a/2lHaNcKoE9pYWSZXPL6DPFh+DXU5JhMdVMMzYRx4BHDbpK0aqVPcwyq+uAlNP+PqwmhD6WLgdsVwBSDotQ==}
@@ -2051,12 +2048,12 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@galaxy-tool-util/cli@1.4.0':
+  '@galaxy-tool-util/cli@1.6.0':
     dependencies:
-      '@galaxy-tool-util/connection-validation': 1.2.0
-      '@galaxy-tool-util/core': 1.2.0
-      '@galaxy-tool-util/schema': 1.2.0
-      '@galaxy-tool-util/search': 1.2.0
+      '@galaxy-tool-util/connection-validation': 1.6.0
+      '@galaxy-tool-util/core': 1.6.0
+      '@galaxy-tool-util/schema': 1.6.0
+      '@galaxy-tool-util/search': 1.6.0
       ajv: 8.20.0
       commander: 14.0.3
       effect: 3.21.2
@@ -2065,35 +2062,28 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@galaxy-tool-util/connection-validation@1.2.0':
+  '@galaxy-tool-util/connection-validation@1.6.0':
     dependencies:
-      '@galaxy-tool-util/schema': 1.2.0
+      '@galaxy-tool-util/schema': 1.6.0
       '@galaxy-tool-util/workflow-graph': 1.2.0
 
-  '@galaxy-tool-util/core@1.2.0':
+  '@galaxy-tool-util/core@1.6.0':
     dependencies:
-      '@galaxy-tool-util/schema': 1.2.0
+      '@galaxy-tool-util/schema': 1.6.0
       effect: 3.21.2
       yaml: 2.8.3
 
-  '@galaxy-tool-util/schema@1.1.0':
+  '@galaxy-tool-util/schema@1.6.0':
     dependencies:
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       effect: 3.21.2
       yaml: 2.8.3
 
-  '@galaxy-tool-util/schema@1.2.0':
+  '@galaxy-tool-util/search@1.6.0':
     dependencies:
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
-      effect: 3.21.2
-      yaml: 2.8.3
-
-  '@galaxy-tool-util/search@1.2.0':
-    dependencies:
-      '@galaxy-tool-util/core': 1.2.0
-      '@galaxy-tool-util/schema': 1.2.0
+      '@galaxy-tool-util/core': 1.6.0
+      '@galaxy-tool-util/schema': 1.6.0
 
   '@galaxy-tool-util/workflow-graph@1.2.0': {}
 
