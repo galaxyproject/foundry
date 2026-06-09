@@ -22,8 +22,8 @@ related_molds:
   - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
 sources:
-  - "https://github.com/jmchilton/foundry/issues/65"
-  - "https://github.com/jmchilton/foundry/issues/142"
+  - "https://github.com/galaxyproject/foundry/issues/65"
+  - "https://github.com/galaxyproject/foundry/issues/142"
 summary: "Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape."
 ---
 

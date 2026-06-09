@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://galaxyproject.org/foundry/schemas/galaxy-tool-summary.schema.json",
-  "$comment": "Canonical source: packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json in jmchilton/foundry. Mold frontmatter cites this as `content/schemas/galaxy-tool-summary.schema.json` for stability; the cast pipeline and Astro site resolve that ref back to this file at build time. The `$defs.ParsedTool` definition is a placeholder that the AJV validator replaces at compile time with the upstream `parsedToolSchema` from `@galaxy-tool-util/schema`. Static consumers that do not use the validator should consult `[[parsed-tool]]` for the upstream definition.",
+  "$comment": "Canonical source: packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json in galaxyproject/foundry. Mold frontmatter cites this as `content/schemas/galaxy-tool-summary.schema.json` for stability; the cast pipeline and Astro site resolve that ref back to this file at build time. The `$defs.ParsedTool` definition is a placeholder that the AJV validator replaces at compile time with the upstream `parsedToolSchema` from `@galaxy-tool-util/schema`. Static consumers that do not use the validator should consult `[[parsed-tool]]` for the upstream definition.",
   "title": "Galaxy Tool Summary",
   "description": "Deterministic per-tool manifest emitted by `galaxy-tool-cache summarize`. Bundles cache provenance, the upstream `ParsedTool` payload, and per-representation input JSON Schemas so downstream Molds can bind a single workflow step against a Galaxy tool wrapper without re-parsing XML.",
   "$ref": "#/$defs/GalaxyToolSummary",

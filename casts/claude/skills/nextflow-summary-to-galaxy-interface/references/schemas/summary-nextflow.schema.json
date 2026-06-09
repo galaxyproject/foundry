@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://galaxyproject.org/foundry/schemas/summary-nextflow.schema.json",
-  "$comment": "Canonical source: packages/summarize-nextflow/src/schema/summary-nextflow.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[summary-nextflow]] wiki-links; the cast pipeline imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.",
+  "$comment": "Canonical source: packages/summarize-nextflow/src/schema/summary-nextflow.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[summary-nextflow]] wiki-links; the cast pipeline imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.",
   "title": "Nextflow Pipeline Summary",
   "description": "Structured per-source summary emitted by the summarize-nextflow Mold.\n\nPer-source schema by design — paper, Nextflow, and CWL each have their own summary shape; downstream Molds (data flow, templates, tool wrappers) consume any source's summary and handle the polymorphism.\n\nField names mirror gxy-sketches' SketchSource / ToolSpec / TestDataRef / ExpectedOutputRef where parity exists; see content/research/gxy-sketches-alignment.md.",
   "$ref": "#/$defs/Summary",
@@ -877,7 +877,7 @@
             "string",
             "null"
           ],
-          "description": "Foreign key into `params[].name` when the construction expression directly references `params.X` (e.g. `Channel.fromPath(params.reads)`, `samplesheetToList(params.input, ...)`, `file(params.fasta)`). Null for literal-glob construction, expressions that compose multiple params, and channels derived from other channels. v1 resolution is direct-only; one-hop Groovy bindings (`def reads = params.reads; Channel.fromPath(reads)`) are not chased — see jmchilton/foundry#211."
+          "description": "Foreign key into `params[].name` when the construction expression directly references `params.X` (e.g. `Channel.fromPath(params.reads)`, `samplesheetToList(params.input, ...)`, `file(params.fasta)`). Null for literal-glob construction, expressions that compose multiple params, and channels derived from other channels. v1 resolution is direct-only; one-hop Groovy bindings (`def reads = params.reads; Channel.fromPath(reads)`) are not chased — see galaxyproject/foundry#211."
         },
         "required_runtime": {
           "type": "boolean",

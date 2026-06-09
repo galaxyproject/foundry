@@ -22,7 +22,7 @@ related_patterns:
   - "[[conditional-run-optional-step]]"
   - "[[tabular-compute-new-column]]"
 sources:
-  - "https://github.com/jmchilton/foundry/issues/93"
+  - "https://github.com/galaxyproject/foundry/issues/93"
 summary: "Focused survey of tiny IWC runtime parameter shims for flags, enums, counts, booleans, and composed text."
 ---
 

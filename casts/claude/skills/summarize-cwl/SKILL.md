@@ -34,7 +34,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
   Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
   Check: `foundry --help`.
-  Docs: https://github.com/jmchilton/foundry/blob/main/packages/foundry/README.md
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
   Bundled reference: `references/cli/foundry.md`.
 
 ## Load Upfront

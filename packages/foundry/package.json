@@ -27,7 +27,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jmchilton/foundry.git",
+    "url": "git+https://github.com/galaxyproject/foundry.git",
     "directory": "packages/foundry"
   },
   "publishConfig": {

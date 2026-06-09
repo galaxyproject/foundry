@@ -6,7 +6,7 @@ package: "@galaxy-foundry/summary-cwl-schema"
 invoke: validate-summary-cwl
 invoke_fallback: "npx --package @galaxy-foundry/summary-cwl-schema validate-summary-cwl"
 availability_check: "validate-summary-cwl --help"
-docs_url: "https://github.com/jmchilton/foundry/blob/main/packages/summary-cwl-schema/README.md"
+docs_url: "https://github.com/galaxyproject/foundry/blob/main/packages/summary-cwl-schema/README.md"
 tags:
   - cli-tool
   - cli/foundry

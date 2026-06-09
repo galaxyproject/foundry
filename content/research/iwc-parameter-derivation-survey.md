@@ -29,7 +29,7 @@ related_patterns:
   - "[[tabular-cut-and-reorder-columns]]"
   - "[[tabular-split-taxonomy-string]]"
 sources:
-  - "https://github.com/jmchilton/foundry/issues/89"
+  - "https://github.com/galaxyproject/foundry/issues/89"
 summary: "Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters."
 ---
 
@@ -188,7 +188,7 @@ Evidence:
 - VGP telomere text empty/non-empty mapping: `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3218`.
 - Gated downstream Pretext/Krona/BIOM outputs are already covered in [[iwc-conditionals-survey]].
 
-Call: **merge into [[conditional-gate-on-nonempty-result]]**. The boolean-derivation mechanics should be a major section of that pattern, not a separate sibling page. Verified-pattern workflow issue #84 should test this directly before recommending a shorter alternative over the MGnify four-step recipe: https://github.com/jmchilton/foundry/issues/84.
+Call: **merge into [[conditional-gate-on-nonempty-result]]**. The boolean-derivation mechanics should be a major section of that pattern, not a separate sibling page. Verified-pattern workflow issue #84 should test this directly before recommending a shorter alternative over the MGnify four-step recipe: https://github.com/galaxyproject/foundry/issues/84.
 
 ### Candidate D: `map-workflow-enum-to-tool-parameter`
 
@@ -252,7 +252,7 @@ Call: **drop from this survey's hierarchy**. It is parameter defaulting or condi
 
 The parameter-derivation and conditional surveys overlap at exactly one high-value seam: **derive a boolean from data, then use it as `when`**. The pattern page should be [[conditional-gate-on-nonempty-result]], not a separate parameter page, because the user story is "skip downstream work when upstream data is empty" rather than "read a boolean from a file".
 
-The MGnify recipe is corpus-backed but clunky: `collection_element_identifiers -> wc_gnu -> column_maker(c1 != 0) -> param_value_from_file`. Issue #84 should verify whether a smaller Galaxy-native workflow can replace it as the recommended authoring target while preserving the MGnify shape as IWC evidence: https://github.com/jmchilton/foundry/issues/84.
+The MGnify recipe is corpus-backed but clunky: `collection_element_identifiers -> wc_gnu -> column_maker(c1 != 0) -> param_value_from_file`. Issue #84 should verify whether a smaller Galaxy-native workflow can replace it as the recommended authoring target while preserving the MGnify shape as IWC evidence: https://github.com/galaxyproject/foundry/issues/84.
 
 ## 6. Open questions
 

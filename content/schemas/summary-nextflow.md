@@ -6,7 +6,7 @@ package: "@galaxy-foundry/summarize-nextflow"
 package_export: "summaryNextflowSchema"
 validator_bin: foundry
 validator_subcommand: validate-summary-nextflow
-upstream: "https://github.com/jmchilton/foundry/blob/main/packages/summarize-nextflow/src/schema/summary-nextflow.schema.json"
+upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/summarize-nextflow/src/schema/summary-nextflow.schema.json"
 license: MIT
 tags:
   - schema
@@ -111,7 +111,7 @@ Snapshot-sidecar parsing landed for module and subworkflow tests whose interesti
 
 ## Revision 7 — 2026-05-06
 
-Top-level `Param` entries gained the nf-schema metadata previously only available on sample-sheet columns. Resolves jmchilton/foundry#186.
+Top-level `Param` entries gained the nf-schema metadata previously only available on sample-sheet columns. Resolves galaxyproject/foundry#186.
 
 - **`Param.format` added** (string|null). nf-schema `format` keyword: `file-path`, `directory-path`, `path`, `file-path-pattern`. Disambiguates path-typed params from plain strings without re-reading `nextflow_schema.json`.
 - **`Param.hidden` added** (boolean|null). nf-schema `hidden` keyword. CLI-plumbing params (`validate_params`, `pipelines_testdata_base_path`, `version`, …) now drop out of user-facing target interfaces structurally.
@@ -123,7 +123,7 @@ Downstream Molds — [[nextflow-summary-to-galaxy-interface]], [[nextflow-summar
 
 ## Revision 6 — 2026-05-05
 
-Sample-sheet schemas became first-class structured inputs. Resolves the open question raised in [[nextflow-workflow-io-semantics]] §"Open questions" and tracked in jmchilton/foundry#177.
+Sample-sheet schemas became first-class structured inputs. Resolves the open question raised in [[nextflow-workflow-io-semantics]] §"Open questions" and tracked in galaxyproject/foundry#177.
 
 - **`Summary.sample_sheets: SampleSheet[]` added** (required; empty array when none). Promotes sample-sheet shape out of `params[].description` prose so downstream target Molds can pick collection variants without re-parsing the source pipeline.
 - **`SampleSheet` shape added.** Binds one `params[]` parameter (`param`) to a row schema (`columns`) plus discovery provenance (`discovered_via`: `nf-schema` | `samplesheetToList` | `splitCsv` | `ad-hoc`), optional `schema_path`, `format`, and `header`.

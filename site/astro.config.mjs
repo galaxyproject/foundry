@@ -7,7 +7,7 @@ import remarkCorpusCitations from './src/lib/remark-corpus-citations.ts';
 import remarkVendoredMyst from './src/lib/remark-vendored-myst.ts';
 
 export default defineConfig({
-  site: 'https://jmchilton.github.io',
+  site: 'https://galaxyproject.github.io',
   base: '/foundry',
   integrations: [pagefind()],
   markdown: {

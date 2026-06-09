@@ -827,7 +827,7 @@ describe("validateDirectory (cross-file)", () => {
         title: "X",
         package: "@galaxy-foundry/x-schema",
         upstream:
-          "https://github.com/jmchilton/foundry/blob/main/packages/x-schema/src/x.schema.json",
+          "https://github.com/galaxyproject/foundry/blob/main/packages/x-schema/src/x.schema.json",
         license: "MIT",
       }),
     });

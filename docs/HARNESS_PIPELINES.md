@@ -163,5 +163,5 @@ Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidanc
 
 ## Tracked Follow-Up
 
-- Composed paths (`PAPER -> CWL -> GALAXY`, `NEXTFLOW -> CWL -> GALAXY`) reuse the existing Mold inventory. Track whether they become distinct pipeline notes or remain runtime compositions in [issue #200](https://github.com/jmchilton/foundry/issues/200).
+- Composed paths (`PAPER -> CWL -> GALAXY`, `NEXTFLOW -> CWL -> GALAXY`) reuse the existing Mold inventory. Track whether they become distinct pipeline notes or remain runtime compositions in [issue #200](https://github.com/galaxyproject/foundry/issues/200).
 - Whether the CWL per-step loop should collapse into a parallel `advance-cwl-draft-step` orchestrator (mirroring Galaxy's `advance-galaxy-draft-step`) is open — wait for evidence from Galaxy orchestrator walkthroughs before extending the pattern.
