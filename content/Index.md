@@ -13,6 +13,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Molds
 
+- [[advance-galaxy-draft-step]] — Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate.
 - [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable.
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
 - [[convert-nfcore-module-to-galaxy-tool]] — Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks).
@@ -49,7 +50,6 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summarize-paper]] — Extract methods, tools, sample data, and references from a paper.
 - [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from source and design handoffs.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
-- [[validate-galaxy-step]] — Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation.
 - [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 
 ## Patterns
@@ -112,6 +112,9 @@ Generated from content frontmatter. Do not edit by hand.
 ## CLI Commands
 
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
+- [[draft-extract]] — Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved.
+- [[draft-next-step]] — Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak.
+- [[draft-validate]] — Validate a `class: GalaxyWorkflowDraft` workflow against draft-contract rules; with --concrete, also validate the extracted concrete subset.
 - [[planemo-cli_metadata]] — Export structured metadata for Planemo CLI commands.
 - [[planemo-lint]] — Check for common errors and best practices.
 - [[planemo-output_schema]] — Export JSON Schemas for Planemo machine-readable outputs.
@@ -137,6 +140,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[parsed-tool]] — JSON Schema for the upstream Galaxy `ParsedTool` model, vendored from `@galaxy-tool-util/schema`.
 - [[galaxy-tool-discovery]] — JSON Schema for Tool Shed discovery hit, weak, and miss recommendations.
 - [[galaxy-tool-summary]] — JSON Schema for the deterministic per-tool manifest emitted by `galaxy-tool-cache summarize`.
+- [[galaxy-workflow-draft]] — JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step.
 - [[tests-format]] — JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`.
 - [[nextflow-parameters-meta]] — JSON Schema (Draft 2020-12) meta-schema validating per-pipeline nextflow_schema.json files. Upstream from nextflow-io/nf-schema.
 - [[summary-nextflow]] — JSON Schema for the structured summary emitted by the summarize-nextflow Mold.

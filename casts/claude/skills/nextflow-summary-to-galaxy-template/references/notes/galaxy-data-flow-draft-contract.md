@@ -13,14 +13,16 @@ ai_generated: true
 related_notes:
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
+  - "[[galaxy-workflow-draft]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
-  - "[[paper-summary-to-galaxy-design]]"
+  - "[[freeform-summary-to-galaxy-design]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[paper-summary-to-galaxy-template]]"
+  - "[[freeform-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
+  - "[[advance-galaxy-draft-step]]"
 sources:
   - "https://github.com/jmchilton/foundry/issues/54"
 summary: "Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation."

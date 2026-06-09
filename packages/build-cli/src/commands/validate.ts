@@ -625,6 +625,16 @@ function validateArtifactGraph(
     if (f.meta.type !== "mold") continue;
     const out = f.meta.output_artifacts;
     if (Array.isArray(out)) {
+      const refs = Array.isArray(f.meta.references) ? f.meta.references : [];
+      const schemaRefs = new Set<string>(
+        refs
+          .map((r) =>
+            r && typeof r === "object" && (r as { kind?: unknown }).kind === "schema"
+              ? (r as { ref?: unknown }).ref
+              : null,
+          )
+          .filter((v): v is string => typeof v === "string"),
+      );
       out.forEach((a, i) => {
         if (!a || typeof a !== "object") return;
         const schema = (a as { schema?: unknown }).schema;
@@ -655,6 +665,13 @@ function validateArtifactGraph(
             path: f.path,
             severity: "error",
             message: `output_artifacts[${i}].schema: target schema note ${schema} must declare both 'package' and 'package_export' (got package=${pkg ?? "(none)"}, package_export=${exp ?? "(none)"})`,
+          });
+        }
+        if (!schemaRefs.has(schema)) {
+          findings.push({
+            path: f.path,
+            severity: "warning",
+            message: `output_artifacts[${i}].schema declares ${schema} but no matching references[] entry of kind=schema — the schema will be named in the cast contract but not packaged into the bundle. Add a 'kind: schema, ref: "${schema}"' entry to references.`,
           });
         }
       });

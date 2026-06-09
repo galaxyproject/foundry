@@ -5,11 +5,27 @@
     "name": "cwl-summary-to-galaxy-template",
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 3,
-    "content_hash": "c459c675508e1e9ad170fefa2de04054de97e74dcdedfd444f7f319f7e09f55b",
-    "commit": "97effead63ef05cbac9d7f7227d8695a9e571e79"
+    "content_hash": "b5a99fe78700030125e709d7509bf0290430eb18d82f329cebbfc0eb16f9c229",
+    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
   },
-  "cast_at": "2026-05-11T20:45:02.980Z",
+  "cast_at": "2026-06-09T17:17:31.375Z",
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[draft-validate]]",
+      "src": "content/cli/gxwf/draft-validate.md",
+      "dst": "references/cli/draft-validate.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off.",
+      "trigger": "After writing or modifying the draft workflow file.",
+      "verification": "Cast the skill, run on a representative CWL workflow, confirm draft-validate diagnostics route back.",
+      "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
+      "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
+      "source": "deterministic"
+    },
     {
       "kind": "pattern",
       "mode": "verbatim",
@@ -21,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
-      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
-      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "source": "deterministic"
     },
     {
@@ -36,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
-      "src_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
-      "dst_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
       "source": "deterministic"
     },
     {
@@ -82,8 +98,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
-      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "src_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
+      "dst_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
       "source": "deterministic"
     },
     {
@@ -97,8 +113,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "95019d71a09c3c8a153ed59e187827f1bab2b5c7f5d48a6fe9c582912e62264d",
-      "dst_hash": "95019d71a09c3c8a153ed59e187827f1bab2b5c7f5d48a6fe9c582912e62264d",
+      "src_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
+      "dst_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
       "source": "deterministic"
     },
     {
@@ -126,8 +142,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
-      "src_hash": "2f35f0ca8cd4410736a595f2324274a883b5c42d79165156e15b2a75c3f1e359",
-      "dst_hash": "2f35f0ca8cd4410736a595f2324274a883b5c42d79165156e15b2a75c3f1e359",
+      "src_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
+      "dst_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
       "source": "deterministic"
     },
     {
@@ -143,6 +159,20 @@
       "src_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
       "dst_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
       "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft]]",
+      "src": "package://@galaxy-tool-util/schema#galaxyWorkflowDraftJsonSchema",
+      "dst": "references/schemas/galaxy-workflow-draft.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Output contract: the emitted gxformat2 draft conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema so the skill carries its output shape alongside the [[draft-validate]] CLI checks.",
+      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "source": "deterministic"
     }
   ],
   "artifacts": {
@@ -151,6 +181,7 @@
         "id": "galaxy-workflow-draft",
         "kind": "yaml",
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
         "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
       }
     ],

@@ -80,9 +80,10 @@ The derivation/test-plan Molds and assembly Molds are complementary, not redunda
 
 Validate Molds describe the **step in the process** even where they wrap a static / structured CLI. The underlying validation is deterministic, but the generated skill is the Mold-shaped procedural description (when to run, how to interpret results, what to recommend on failure, when to loop back to authoring). Wraps gxwf / cwltool but is *not* a hand-authored CLI skill — it's a Mold that references the relevant CLI manual pages.
 
-- `validate-galaxy-step` — run gxwf validation inside the per-step Galaxy loop, classify failures local to the just-implemented step, and route back to step implementation or wrapper authoring.
 - `validate-galaxy-workflow` — run gxwf validation after workflow assembly, classify workflow-level failures, and route back to the responsible authoring phase when possible.
 - `validate-cwl` — analogous: `cwltool --validate` / schema lint, interpret, recommend/apply fixes.
+
+Per-step Galaxy validation is no longer a standalone Mold; `advance-galaxy-draft-step` (the per-step Galaxy orchestrator) runs `gxwf draft-validate --concrete` inline at the end of each iteration and routes failures locally. See `HARNESS_PIPELINES.md` § Orchestrator-as-contract.
 
 ### Run & debug (Planemo-backed runtime)
 
@@ -115,7 +116,7 @@ Excluded from the inventory by design. Naming them keeps the boundary visible.
 - **Approval gates / scope confirmation / plan presentation.** Harness-level concerns, not Molds. See `HARNESS_PIPELINES.md` for the rationale.
 - **Hand-authored prior-art skills (being replaced).** The current `~/.claude/skills/gxwf-cli` (help-text dump) and the `find-shed-tool` skill design (`old/PLAN_SEARCH_CLI.md`) are *not* Foundry artifacts; they are prior art. Their content feeds CLI manual pages and action Molds; their form does not.
 
-**Wrapping a CLI is *not* a Mold disqualifier.** `discover-shed-tool`, `validate-galaxy-step`, `validate-galaxy-workflow`, and `run-workflow-test` all wrap CLIs and are Molds. The criterion is whether there is procedural content worth casting (when to run, how to interpret, when to loop back), not whether the underlying mechanism is a CLI.
+**Wrapping a CLI is *not* a Mold disqualifier.** `discover-shed-tool`, `advance-galaxy-draft-step`, `validate-galaxy-workflow`, and `run-workflow-test` all wrap CLIs and are Molds. The criterion is whether there is procedural content worth casting (when to run, how to interpret, when to loop back), not whether the underlying mechanism is a CLI.
 
 ### Worked example: `compare-against-iwc-exemplar`
 
@@ -134,7 +135,7 @@ The corpus-first *principle* it rests on stays reference content; the *act* of l
 - 34 current candidate Molds total in `content/molds/` (Galaxy validation split into step/workflow Molds; interface/data-flow design is source-target specific; `find-test-data` included; corpus Mold renamed/reframed as `compare-against-iwc-exemplar`; `discover-shed-tool` graduated from "Not Molds"; whole-CLI catalogs are reference content, not Molds).
 - Source-summarization tier: 4 Molds. Paper and interview starts converge on `freeform-summary`; Nextflow and CWL keep their structured summaries.
 - Interface/data-flow tier: source-target Markdown design-brief Molds, currently split for Nextflow and CWL Galaxy paths and for Nextflow-to-CWL; paper paths stay combined until examples justify a split.
-- Galaxy-target tier: source-specific Galaxy template Molds (`nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`), `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`, `implement-galaxy-workflow-test`, `validate-galaxy-step`, `validate-galaxy-workflow`, `run-workflow-test`, `debug-galaxy-workflow-output`, `compare-against-iwc-exemplar` — used by all Galaxy-targeting pipelines.
+- Galaxy-target tier: source-specific Galaxy template Molds (`nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`), `advance-galaxy-draft-step` (per-step orchestrator wrapping `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step` as leaves), `implement-galaxy-workflow-test`, `validate-galaxy-workflow`, `run-workflow-test`, `debug-galaxy-workflow-output`, `compare-against-iwc-exemplar` — used by all Galaxy-targeting pipelines.
 - CWL-target tier: `summary-to-cwl-template`, `summarize-cwl-tool`, `implement-cwl-tool-step`, `implement-cwl-workflow-test`, `validate-cwl`, `run-workflow-test`, `debug-cwl-workflow-output` — used by 2 CWL-targeting pipelines.
 - CLI command tier: `content/cli/<tool>/<command>.md` — referenced by action Molds through typed references and cast as sidecars when needed.
 
@@ -144,7 +145,7 @@ This list exists to keep the Mold inventory and pipeline coverage understandable
 
 1. `summarize-paper` — most novel, most uncertain, exercises source-summarization shape and IO-schema reference.
 2. `implement-galaxy-tool-step` — runs in inner loop, pulls heavily from pattern pages and corpus, exercises wiki-link resolution and condensation.
-3. `validate-galaxy-step` — exercises CLI-manual-page reference, error-feedback loop; surfaces what a per-action Mold needs from a manpage cast.
+3. `advance-galaxy-draft-step` — exercises orchestrator-shaped Mold, CLI-manual-page reference, per-step loop oracle, and failure routing; surfaces what an orchestrator needs from its leaves and CLI sidecars.
 4. `validate-galaxy-workflow` — exercises terminal Galaxy validation separate from the per-step loop.
 
 After those four, the remaining work is not inventing the reference schema from scratch; it is tightening `MOLD_SPEC.md`, migrating legacy reference fields where useful, and verifying that the `references:` manifest gives generated skills enough progressive-disclosure and evidence metadata to behave well.

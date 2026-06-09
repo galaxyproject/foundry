@@ -25,8 +25,25 @@ output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
+    schema: "[[galaxy-workflow-draft]]"
     description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
 references:
+  - kind: schema
+    ref: "[[galaxy-workflow-draft]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "Output contract: the emitted gxformat2 draft conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema so the skill carries its output shape alongside the [[draft-validate]] CLI checks."
+  - kind: cli-command
+    ref: "[[draft-validate]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off."
+    trigger: "After writing or modifying the draft workflow file."
+    verification: "Cast the skill, run on a representative paper-derived summary, confirm draft-validate diagnostics route back."
   - kind: research
     ref: "[[galaxy-workflow-draft-format]]"
     used_at: runtime

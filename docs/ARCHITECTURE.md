@@ -12,7 +12,7 @@ External:
 Foundry-internal (in the `foundry/` repo):
 - **Pattern pages** — Foundry reference content (collection manipulation, tabular, conditional, custom-tool authoring, …). Hand-authored. Wiki-linked from Molds. **IWC is referenced by URL in pattern bodies**, not mirrored — see `CORPUS_INGESTION.md`.
 - **Source-pattern pages** — source-to-target mapping reference under `content/source-patterns/`, currently focused on Nextflow-to-Galaxy translation patterns.
-- **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds (e.g., `validate-galaxy-step` → `cli/gxwf/validate`). Cast to JSON sidecars, not inlined as prose.
+- **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds (e.g., `advance-galaxy-draft-step` → `cli/gxwf/draft-validate`). Cast to JSON sidecars, not inlined as prose.
 - **Research / reference notes** — background syntheses (e.g., Nextflow testing, CWL conformance) that aren't actions and aren't Galaxy patterns.
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
 - **Prompts** — wrapper notes under `content/prompts/` that add Foundry metadata and usage framing around raw prompt sidecars. Molds reference the wrapper via `kind: prompt`; casting copies the raw `prompt_file` verbatim.
@@ -431,7 +431,7 @@ foundry/
 │   │   ├── summarize-paper/
 │   │   ├── interview-to-freeform-summary/
 │   │   ├── discover-shed-tool/
-│   │   ├── validate-galaxy-step/
+│   │   ├── advance-galaxy-draft-step/
 │   │   ├── validate-galaxy-workflow/
 │   │   └── …
 │   ├── patterns/

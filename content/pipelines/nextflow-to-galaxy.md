@@ -18,16 +18,7 @@ phases:
   - mold: "[[nextflow-summary-to-galaxy-data-flow]]"
   - mold: "[[compare-against-iwc-exemplar]]"
   - mold: "[[nextflow-summary-to-galaxy-template]]"
-  - branch: discover-or-author
-    loop: true
-    branches:
-      - "[[discover-shed-tool]]"
-      - fallthrough: "[[author-galaxy-tool-wrapper]]"
-  - mold: "[[summarize-galaxy-tool]]"
-    loop: true
-  - mold: "[[implement-galaxy-tool-step]]"
-    loop: true
-  - mold: "[[validate-galaxy-step]]"
+  - mold: "[[advance-galaxy-draft-step]]"
     loop: true
   - mold: "[[nextflow-test-to-galaxy-test-plan]]"
   - mold: "[[implement-galaxy-workflow-test]]"

@@ -9,7 +9,8 @@
     "docs_url": "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli",
     "source": "implied",
     "implied_by": [
-      "gxwf validate"
+      "gxwf draft-next-step",
+      "gxwf draft-validate"
     ]
   }
 ]

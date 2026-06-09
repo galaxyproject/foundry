@@ -21,8 +21,16 @@ output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
+    schema: "[[galaxy-workflow-draft]]"
     description: "gxformat2 skeleton with one more abstract step replaced by a concrete tool step (loop iteration output)."
 references:
+  - kind: schema
+    ref: "[[galaxy-workflow-draft]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "In/out contract: the draft this Mold reads and mutates in place conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks."
   - kind: schema
     ref: "[[galaxy-tool-summary]]"
     used_at: runtime
@@ -30,6 +38,15 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape."
+  - kind: cli-command
+    ref: "[[draft-validate]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Validate the mutated draft against draft-contract rules; with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2."
+    trigger: "After implementing or modifying a concrete tool step in the draft."
+    verification: "Cast the skill, exercise on an IWC-derived draft with one drafty step, confirm both surfaces validate and diagnostics route back to the implemented step."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
     used_at: runtime

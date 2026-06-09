@@ -15,6 +15,7 @@ related_notes:
   - "[[galaxy-datatypes-conf]]"
   - "[[galaxy-workflow-testability-design]]"
   - "[[gxformat2-workflow-inputs]]"
+  - "[[galaxy-workflow-draft]]"
 sources:
   - "https://github.com/jmchilton/galaxy-tool-util-ts/blob/7ae4ecd0ba8d492225f58a6d455c4cc5317298f0/packages/schema/src/galaxy-workflow.ts"
 summary: "Vendored structural JSON Schema for gxformat2 workflows: vocabulary for inputs, outputs, steps, and step subtypes."

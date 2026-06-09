@@ -38,7 +38,13 @@ The Foundry distinguishes:
 
 gxwf provides **static schema validation** for `gxformat2` workflows and tool steps that catches the failure modes prior-art skills (e.g., the existing `nf-to-galaxy` skill in `SKILLS_NF.md`) had to enumerate as prose caveats — UUID validity, tool-ID/owner/+galaxyN suffix mismatches, `input_connections` parameter-name mismatches, conditional-selector branches in `tool_state`, etc. The Foundry does **not** maintain a parallel "caveat catalog" of these failure modes; gxwf's schema is the source of truth and the validation loop is the enforcement mechanism.
 
-This shifts the per-step loop from "author and hope" to **author → validate → fix** with validation running inline after each step is implemented, not only as a terminal phase. The pipelines below reflect this by invoking `validate-galaxy-step` (or `validate-cwl`) inside the per-step loop.
+This shifts the per-step loop from "author and hope" to **author → validate → fix** with validation running inline after each step is implemented, not only as a terminal phase. For Galaxy paths the orchestrator Mold `advance-galaxy-draft-step` owns one full iteration end-to-end (pick next drafty step → resolve a wrapper → summarize → implement → `gxwf draft-validate --concrete`); CWL paths keep `validate-cwl` inline inside the per-step loop.
+
+### Orchestrator-as-contract: per-step loop body
+
+Galaxy-targeting pipelines below use a single orchestrator Mold (`advance-galaxy-draft-step`) as the per-step loop body. The orchestrator owns the loop oracle (`gxwf draft-next-step`), the discover-or-author routing, the per-iteration sequencing of leaf Molds (`summarize-galaxy-tool`, `implement-galaxy-tool-step`), and the per-step validator (`gxwf draft-validate --concrete`). The harness loop reduces to `while draft: invoke skill`.
+
+Leaf Molds (`discover-shed-tool`, `author-galaxy-tool-wrapper`, `summarize-galaxy-tool`, `implement-galaxy-tool-step`) stay independently castable for ad-hoc invocation but no longer appear as pipeline phases. CWL-targeting pipelines retain the leaf-shaped per-step body until a parallel orchestrator emerges (see Tracked Follow-Up).
 
 ## Pipelines
 
@@ -52,17 +58,12 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 2. `freeform-summary-to-galaxy-design` — combined Galaxy interface and abstract data-flow design brief.
 3. `compare-against-iwc-exemplar` — structural diff of the design brief against nearest IWC exemplar(s); guidance feeds template authoring.
 4. `freeform-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from free-form source evidence, the design brief, and exemplar comparison notes.
-5. `[loop]` `[branch]` discover-or-author branch:
-   - try `discover-shed-tool`.
-   - on fallthrough, `author-galaxy-tool-wrapper`.
-6. `[loop]` `summarize-galaxy-tool` — pull JSON schema, containers, inputs/outputs for the resolved tool.
-7. `[loop]` `implement-galaxy-tool-step` — convert abstract step to concrete `gxformat2` step.
-8. `[loop]` `validate-galaxy-step` — schema-validate the just-implemented step; on red, the harness loops back to (7).
-9. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
-10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
-11. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
-12. `run-workflow-test` — execute via Planemo.
-13. `debug-galaxy-workflow-output` — triage failures, propose fixes.
+5. `[loop]` `advance-galaxy-draft-step` — one full iteration: pick next drafty step via `gxwf draft-next-step`, route through the discover-or-author branch (try `discover-shed-tool`, fall through to `author-galaxy-tool-wrapper`), summarize the wrapper, implement the step, validate via `gxwf draft-validate --concrete`. Loop terminates on `draft: false`.
+6. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
+7. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
+8. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
+9. `run-workflow-test` — execute via Planemo.
+10. `debug-galaxy-workflow-output` — triage failures, propose fixes.
 
 ### PAPER → CWL
 
@@ -100,15 +101,12 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 4. `nextflow-summary-to-galaxy-data-flow`
 5. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
 6. `nextflow-summary-to-galaxy-template`
-7. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
-8. `[loop]` `summarize-galaxy-tool`
-9. `[loop]` `implement-galaxy-tool-step`
-10. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-11. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
-12. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
-13. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
-14. `run-workflow-test` — execute via Planemo.
-15. `debug-galaxy-workflow-output`
+7. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
+8. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
+9. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
+10. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
+11. `run-workflow-test` — execute via Planemo.
+12. `debug-galaxy-workflow-output`
 
 ### CWL → GALAXY
 
@@ -119,15 +117,12 @@ CWL is already structured; the upstream extraction work is much lighter.
 3. `cwl-summary-to-galaxy-data-flow` — re-shape into Galaxy-shaped data-flow idioms from a CWL summary that's already nearly a DAG.
 4. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
 5. `cwl-summary-to-galaxy-template`
-6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
-7. `[loop]` `summarize-galaxy-tool`
-8. `[loop]` `implement-galaxy-tool-step`
-9. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-10. `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan.
-11. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
-12. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
-13. `run-workflow-test` — execute via Planemo.
-14. `debug-galaxy-workflow-output`
+6. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
+7. `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan.
+8. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
+9. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
+10. `run-workflow-test` — execute via Planemo.
+11. `debug-galaxy-workflow-output`
 
 ### INTERVIEW → WORKFLOW
 
@@ -137,15 +132,12 @@ The interview path is a Galaxy-targeting pipeline for now. The title stays user-
 2. `freeform-summary-to-galaxy-design`
 3. `compare-against-iwc-exemplar`
 4. `freeform-summary-to-galaxy-template`
-5. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
-6. `[loop]` `summarize-galaxy-tool`
-7. `[loop]` `implement-galaxy-tool-step`
-8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-9. `[branch]` test-data resolution chain: try `find-test-data` → on failure, harness gates to user-supplied data.
-10. `implement-galaxy-workflow-test`
-11. `validate-galaxy-workflow`
-12. `run-workflow-test`
-13. `debug-galaxy-workflow-output`
+5. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
+6. `[branch]` test-data resolution chain: try `find-test-data` → on failure, harness gates to user-supplied data.
+7. `implement-galaxy-workflow-test`
+8. `validate-galaxy-workflow`
+9. `run-workflow-test`
+10. `debug-galaxy-workflow-output`
 
 ## Cross-pipeline observations
 
@@ -154,9 +146,10 @@ The interview path is a Galaxy-targeting pipeline for now. The title stays user-
 - **Source × target template generation** (Galaxy): `nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`. Each consumes its source-specific or freeform design briefs.
 - **Target-specific (one per target)**:
   - Templates: `summary-to-cwl-template`.
-  - Per-step (Galaxy): `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`.
+  - Per-step orchestrator (Galaxy): `advance-galaxy-draft-step` — single entry in Galaxy pipelines' per-step loop; internally sequences the leaves below.
+  - Per-step leaves (Galaxy, no longer pipeline phases but still independently castable): `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`.
   - Per-step (CWL): `summarize-cwl-tool`, `implement-cwl-tool-step`.
-  - Validate: `validate-galaxy-step`, `validate-galaxy-workflow`, `validate-cwl`.
+  - Validate: `validate-galaxy-workflow`, `validate-cwl`. (Per-step Galaxy validation moved into `advance-galaxy-draft-step` via `gxwf draft-validate --concrete`.)
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
@@ -171,3 +164,4 @@ Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidanc
 ## Tracked Follow-Up
 
 - Composed paths (`PAPER -> CWL -> GALAXY`, `NEXTFLOW -> CWL -> GALAXY`) reuse the existing Mold inventory. Track whether they become distinct pipeline notes or remain runtime compositions in [issue #200](https://github.com/jmchilton/foundry/issues/200).
+- Whether the CWL per-step loop should collapse into a parallel `advance-cwl-draft-step` orchestrator (mirroring Galaxy's `advance-galaxy-draft-step`) is open — wait for evidence from Galaxy orchestrator walkthroughs before extending the pattern.

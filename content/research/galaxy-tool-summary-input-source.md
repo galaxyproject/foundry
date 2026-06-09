@@ -27,7 +27,7 @@ summary: "Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its
 The v1 handoff is:
 
 1. `discover-shed-tool` emits `(tool_shed_url, owner, repo, tool_id, version, changeset_revision)` plus confidence evidence.
-2. The harness or caller runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <version>` using the chosen pin.
+2. The harness or caller runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --tool-version <version>` using the chosen pin.
 3. `summarize-galaxy-tool` loads the cached ParsedTool JSON and emits the Foundry-owned Galaxy tool summary schema once that schema exists.
 
 ## Rationale

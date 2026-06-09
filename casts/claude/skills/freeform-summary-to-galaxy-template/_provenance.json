@@ -1,0 +1,170 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "freeform-summary-to-galaxy-template",
+    "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
+    "revision": 3,
+    "content_hash": "cbaf68f40fbc9a7808dfccc4b866a30fd8db779ab951235749fa28dc86907970",
+    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
+  },
+  "cast_at": "2026-06-09T17:17:33.886Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[draft-validate]]",
+      "src": "content/cli/gxwf/draft-validate.md",
+      "dst": "references/cli/draft-validate.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off.",
+      "trigger": "After writing or modifying the draft workflow file.",
+      "verification": "Cast the skill, run on a representative paper-derived summary, confirm draft-validate diagnostics route back.",
+      "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
+      "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-patterns]]",
+      "src": "content/patterns/galaxy-collection-patterns.md",
+      "dst": "references/patterns/galaxy-collection-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
+      "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tabular-patterns]]",
+      "src": "content/patterns/galaxy-tabular-patterns.md",
+      "dst": "references/patterns/galaxy-tabular-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
+      "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
+      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.md",
+      "dst": "references/notes/galaxy-collection-semantics.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
+      "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
+      "src_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
+      "dst_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-data-flow-draft-contract]]",
+      "src": "content/research/galaxy-data-flow-draft-contract.md",
+      "dst": "references/notes/galaxy-data-flow-draft-contract.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Respect the handoff from the combined freeform-to-Galaxy design brief to the gxformat2 skeleton.",
+      "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
+      "verification": "Promote after two worked freeform-to-Galaxy templates preserve the design-brief/template split without schema changes.",
+      "src_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
+      "dst_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft-format]]",
+      "src": "content/research/galaxy-workflow-draft-format.md",
+      "dst": "references/notes/galaxy-workflow-draft-format.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
+      "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
+      "src_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
+      "dst_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton.",
+      "trigger": "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft]]",
+      "src": "package://@galaxy-tool-util/schema#galaxyWorkflowDraftJsonSchema",
+      "dst": "references/schemas/galaxy-workflow-draft.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Output contract: the emitted gxformat2 draft conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema so the skill carries its output shape alongside the [[draft-validate]] CLI checks.",
+      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-draft",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-draft.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
+        "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "freeform-summary",
+        "description": "Free-form source summary emitted by [[summarize-paper]] or [[interview-to-freeform-summary]]; consulted while emitting placeholder steps.",
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-design",
+        "description": "Combined Galaxy design brief from [[freeform-summary-to-galaxy-design]] that pins interface and data-flow choices.",
+        "producers": [
+          "freeform-summary-to-galaxy-design"
+        ]
+      },
+      {
+        "id": "iwc-comparison-notes",
+        "description": "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design brief); steers the skeleton toward IWC-aligned structure before per-step authoring.",
+        "producers": [
+          "compare-against-iwc-exemplar"
+        ]
+      }
+    ]
+  }
+}

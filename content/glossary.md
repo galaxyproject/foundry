@@ -18,7 +18,7 @@ Alphabetical.
 
 **Casting skill** — the producer skill or tool that reads a Mold and emits a cast artifact. Distinct from a **generated skill**, which is one possible kind of cast artifact.
 
-**CLI reference content** — per-command CLI documentation under `content/cli/<tool>/<command>.md`. Action Molds (`discover-shed-tool`, `validate-galaxy-step`, `validate-galaxy-workflow`, `run-workflow-test`) reference individual manual pages directly; whole-CLI reference surfaces are not Molds unless a real action emerges.
+**CLI reference content** — per-command CLI documentation under `content/cli/<tool>/<command>.md`. Action Molds (`discover-shed-tool`, `advance-galaxy-draft-step`, `validate-galaxy-workflow`, `run-workflow-test`) reference individual manual pages directly; whole-CLI reference surfaces are not Molds unless a real action emerges.
 
 **CLI manual page** — a Foundry content note describing a single CLI command or subcommand (install/source, synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas). Lives at `content/cli/<tool>/<cmd>.md`. Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds. Cast to a structured sidecar by the casting pipeline; not inlined as prose.
 
@@ -54,13 +54,13 @@ Alphabetical.
 
 **IWC exemplar** — one workflow from the IWC corpus. The cleaned `gxformat2` versions live in `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-format2/`. Pattern pages cite exemplars; Molds reference them as ground truth; casting may inline references; evaluations exercise generated skills against them.
 
-**Loop** *(`[loop]` annotation)* — a phase-level flag (`loop: true` in frontmatter) marking a phase that runs once per step in the workflow being constructed. Applied to per-step authoring phases (`implement-galaxy-tool-step`, `validate-galaxy-step`, …) and to `[branch]` phases that route per-step (`discover-or-author`). Renders on a subway map as a decorated station.
+**Loop** *(`[loop]` annotation)* — a phase-level flag (`loop: true` in frontmatter) marking a phase that runs once per step in the workflow being constructed. Applied to orchestrator Molds that advance the workflow by one step (`advance-galaxy-draft-step`). Renders on a subway map as a decorated station.
 
 **Mold** — an abstract, structured template inside the Foundry that describes a workflow-construction action. Authored as a **typed reference manifest with a presentation layer**: a `.md` file whose frontmatter declares typed references to heterogeneous artifacts (pattern pages, CLI manual pages, IO schemas, prompt fragments, examples), and whose body is a procedural skeleton that ties them together. Rendered as a navigable Foundry page; cast into one or more cast artifacts via casting's per-kind dispatch over those references.
 
 **Mold (atomic, phase-sized)** — the granularity rule: each Mold is roughly the size of one Mold-shaped phase in a Pipeline. Not necessarily small; `summarize-nextflow` and `implement-galaxy-tool-step` are both atomic at this tier even though they differ in content size.
 
-**Not a Mold** — explicit boundary marker for things that are *not* cast from the Foundry. Includes harnesses, harness-level concerns (state, resumption, autonomy posture), Pipelines themselves, non-Mold phase kinds (`[branch]`, future `[gate]` — these reference Molds via embedded wiki-links but are not Molds), and pure reference content (pattern pages, CLI manual pages, IO schemas — these are *referenced by* Molds, not Molds themselves). Wrapping a CLI is *not* a disqualifier: see `validate-galaxy-step`, `discover-shed-tool`, `run-workflow-test`.
+**Not a Mold** — explicit boundary marker for things that are *not* cast from the Foundry. Includes harnesses, harness-level concerns (state, resumption, autonomy posture), Pipelines themselves, non-Mold phase kinds (`[branch]`, future `[gate]` — these reference Molds via embedded wiki-links but are not Molds), and pure reference content (pattern pages, CLI manual pages, IO schemas — these are *referenced by* Molds, not Molds themselves). Wrapping a CLI is *not* a disqualifier: see `discover-shed-tool`, `run-workflow-test`, `validate-galaxy-workflow`.
 
 **Pattern page** — a Foundry reference page describing a Galaxy workflow construction pattern (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring, …). Wiki-linked from action Molds; pulled into cast artifacts via casting's pattern-kind dispatch (LLM-condensed, mixed verbatim and summarization). Different from a Mold: a pattern page is reference, a Mold is action. Some patterns have a companion action Mold (e.g., custom-tool-authoring pattern + `author-galaxy-tool-wrapper` Mold).
 

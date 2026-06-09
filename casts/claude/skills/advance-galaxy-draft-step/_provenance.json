@@ -1,0 +1,115 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "advance-galaxy-draft-step",
+    "path": "content/molds/advance-galaxy-draft-step/index.md",
+    "revision": 1,
+    "content_hash": "47726f66d62c53ee1956222d9593808f52c75936341a0d026349684af4222883",
+    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
+  },
+  "cast_at": "2026-06-09T17:17:36.375Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[draft-next-step]]",
+      "src": "content/cli/gxwf/draft-next-step.md",
+      "dst": "references/cli/draft-next-step.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Deterministically pick the next drafty step (or report no remaining work). The orchestrator owns the loop oracle so the harness reduces to `while draft: invoke skill`.",
+      "trigger": "At the start of every iteration, before any per-step work.",
+      "verification": "Cast the skill, run on a multi-step IWC-derived draft, confirm the orchestrator picks one step per call and exits when draft: false.",
+      "src_hash": "fa5a7da3939964791f75897df46ddb9563b533c79d2162ee2c04b0cff9ca53c7",
+      "dst_hash": "7e3de5d81b2e8f43aa29b945712b96e4aa3b8f81e8e265ea72385784bd5fa325",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[draft-validate]]",
+      "src": "content/cli/gxwf/draft-validate.md",
+      "dst": "references/cli/draft-validate.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2.",
+      "trigger": "After implementing or modifying the chosen step in the draft.",
+      "verification": "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched.",
+      "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
+      "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tool-job-failure-reference]]",
+      "src": "content/research/galaxy-tool-job-failure-reference.md",
+      "dst": "references/notes/galaxy-tool-job-failure-reference.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Classify [[draft-validate]] diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice).",
+      "trigger": "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.",
+      "src_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
+      "dst_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tool-summary]]",
+      "src": "package://@galaxy-foundry/foundry#galaxyToolSummarySchema",
+      "dst": "references/schemas/galaxy-tool-summary.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Bind the chosen step against the deterministic tool summary manifest emitted by [[summarize-galaxy-tool]] — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape.",
+      "trigger": "After a wrapper has been resolved for the chosen step and before implementing it.",
+      "src_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
+      "dst_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft]]",
+      "src": "package://@galaxy-tool-util/schema#galaxyWorkflowDraftJsonSchema",
+      "dst": "references/schemas/galaxy-workflow-draft.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "In/out contract: the draft this Mold reads and mutates one step per iteration conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks.",
+      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-draft",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-draft.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
+        "description": "Same draft with one additional step concretized (one loop iteration). Once every step is concrete, [[draft-next-step]] reports `draft: false` and the harness exits the loop."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "galaxy-workflow-draft",
+        "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]) mutated in-place across iterations; topology is fully concrete, individual tool steps may still carry `TODO_*` sentinels and `_plan_*` planning fields.",
+        "inherited_schema": "[[galaxy-workflow-draft]]",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-template"
+        ]
+      }
+    ]
+  }
+}

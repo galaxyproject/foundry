@@ -14,12 +14,14 @@ related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-data-flow-draft-contract]]"
   - "[[discover-shed-tool]]"
+  - "[[galaxy-workflow-draft]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[paper-summary-to-galaxy-template]]"
+  - "[[freeform-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
   - "[[implement-galaxy-tool-step]]"
+  - "[[advance-galaxy-draft-step]]"
 summary: "gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step."
 ---
 
