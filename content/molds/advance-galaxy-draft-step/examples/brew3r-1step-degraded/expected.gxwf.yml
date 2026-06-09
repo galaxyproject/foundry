@@ -1,0 +1,242 @@
+class: GalaxyWorkflow
+label: BREW3R
+doc: Extends 3' ends of gene annotations using BAM files (from STAR alignments) and a reference GTF. Specifically designed for 3'-biased sequencing techniques like 10X scRNA-seq or BRB-seq that primarily capture transcript 3' ends. The BREW3R tool enhances annotations by using evidence from RNA-seq data to improve 3' UTR definitions, which is particularly important for accurate quantification in single-cell and bulk RNA-seq experiments.
+inputs:
+  - id: Input gtf
+    type: data
+    optional: false
+    format:
+      - gtf
+    position:
+      top: 0
+      left: 0
+  - id: BAM collection
+    type: collection
+    collection_type: list
+    optional: false
+    format:
+      - bam
+    doc: BAM collection for example output of STAR
+    position:
+      top: 92.84911999999173
+      left: 52
+  - id: strandedness
+    type: string
+    optional: false
+    restrictions:
+      - stranded - forward
+      - stranded - reverse
+      - unstranded
+    position:
+      top: 186.84911999999173
+      left: 122
+  - id: minimum coverage
+    type: int
+    optional: true
+    default: 10
+    position:
+      top: 269.84911999999173
+      left: 229
+  - id: minimum FPKM for merge
+    type: float
+    optional: true
+    default: 1
+    position:
+      top: 383.34911999999173
+      left: 278
+outputs:
+  - id: extended_gtf
+    outputSource: BREW3R.r
+steps:
+  - id: _unlabeled_step_5
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/map_param_value/map_param_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: 5ac8a4bf7a8d
+      name: map_param_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_param_type|input_param
+        source: strandedness
+    out:
+      - id: output_param_text
+        hide: true
+    tool_state:
+      input_param_type:
+        type: text
+        input_param:
+          __class__: ConnectedValue
+        mappings:
+          - from: stranded - forward
+            to: --fr
+          - from: stranded - reverse
+            to: --rf
+          - from: unstranded
+            to: ""
+      output_param_type: text
+      unmapped:
+        on_unmapped: fail
+    position:
+      top: 150.5
+      left: 437
+  - id: Unstranded
+    label: Unstranded
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/map_param_value/map_param_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: 5ac8a4bf7a8d
+      name: map_param_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_param_type|input_param
+        source: strandedness
+    out:
+      - id: output_param_boolean
+        hide: true
+    tool_state:
+      input_param_type:
+        type: text
+        input_param:
+          __class__: ConnectedValue
+        mappings:
+          - from: unstranded
+            to: "true"
+      output_param_type: boolean
+      unmapped:
+        on_unmapped: default
+        default_value: "false"
+    position:
+      top: 394.3499755859375
+      left: 882
+  - id: assembl with StringTie
+    label: assembl with StringTie
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/stringtie/stringtie/2.2.3+galaxy0
+    tool_version: 2.2.3+galaxy0
+    tool_shed_repository:
+      changeset_revision: cbf488da3b2c
+      name: stringtie
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: adv|min_anchor_cov
+        source: minimum coverage
+      - id: adv|min_bundle_cov
+        source: minimum coverage
+      - id: input_options|input_bam
+        source: BAM collection
+      - id: rna_strandness
+        source: _unlabeled_step_5/output_param_text
+    out:
+      - id: output_gtf
+        hide: true
+    tool_state:
+      adv:
+        abundance_estimation: false
+        omit_sequences: ""
+        name_prefix: ""
+        fraction: "0.01"
+        min_tlen: "200"
+        min_anchor_len: "10"
+        min_anchor_cov:
+          __class__: ConnectedValue
+        min_bundle_cov:
+          __class__: ConnectedValue
+        bdist: "50"
+        bundle_fraction: "1.0"
+        disable_trimming: false
+        multi_mapping: false
+        point_features:
+          __class__: RuntimeValue
+      guide:
+        use_guide: no
+      input_options:
+        input_mode: short_reads
+        input_bam:
+          __class__: ConnectedValue
+      rna_strandness:
+        __class__: ConnectedValue
+    position:
+      top: 38.850006103515625
+      left: 692
+  - id: merge assembled transcripts
+    label: merge assembled transcripts
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/stringtie/stringtie_merge/2.2.3+galaxy0
+    tool_version: 2.2.3+galaxy0
+    tool_shed_repository:
+      changeset_revision: cbf488da3b2c
+      name: stringtie
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_gtf
+        source: assembl with StringTie/output_gtf
+      - id: min_fpkm
+        source: minimum FPKM for merge
+    out:
+      - id: out_gtf
+        hide: true
+        rename: merged StringTie gtf
+    tool_state:
+      gap_len: "0"
+      guide_gff:
+        __class__: RuntimeValue
+      input_gtf:
+        __class__: ConnectedValue
+      keep_introns: false
+      min_cov: "0"
+      min_fpkm:
+        __class__: ConnectedValue
+      min_iso: "0.01"
+      min_len: "50"
+      min_tpm: "1.0"
+    position:
+      top: 108.85000610351562
+      left: 936
+  - id: BREW3R.r
+    label: BREW3R.r
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/brew3r_r/brew3r_r/1.0.2+galaxy1
+    tool_version: 1.0.2+galaxy1
+    tool_shed_repository:
+      changeset_revision: d3b0390f325f
+      name: brew3r_r
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: filter_unstranded
+        source: Unstranded/output_param_boolean
+      - id: gtf_to_extend
+        source: Input gtf
+      - id: gtf_to_overlap
+        source: merge assembled transcripts/out_gtf
+    out:
+      - id: output
+        rename: "#{gtf_to_extend} BREW3R extended"
+    tool_state:
+      exclude_pattern: ""
+      filter_unstranded:
+        __class__: ConnectedValue
+      gtf_to_extend:
+        __class__: ConnectedValue
+      gtf_to_overlap:
+        __class__: ConnectedValue
+      no_add: false
+      sup_output: false
+    position:
+      top: 115.3499755859375
+      left: 1243
+tags: []
+license: GPL-3.0-or-later
+release: "0.2"
+unique_tools:
+  - tool_id: toolshed.g2.bx.psu.edu/repos/iuc/map_param_value/map_param_value/0.2.0
+    tool_version: 0.2.0
+  - tool_id: toolshed.g2.bx.psu.edu/repos/iuc/map_param_value/map_param_value/0.2.0
+    tool_version: 0.2.0
+  - tool_id: toolshed.g2.bx.psu.edu/repos/iuc/stringtie/stringtie/2.2.3+galaxy0
+    tool_version: 2.2.3+galaxy0
+  - tool_id: toolshed.g2.bx.psu.edu/repos/iuc/stringtie/stringtie_merge/2.2.3+galaxy0
+    tool_version: 2.2.3+galaxy0
+  - tool_id: toolshed.g2.bx.psu.edu/repos/iuc/brew3r_r/brew3r_r/1.0.2+galaxy1
+    tool_version: 1.0.2+galaxy1
