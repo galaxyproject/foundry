@@ -22,7 +22,7 @@ input_artifacts:
   - id: cwl-galaxy-data-flow
     description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] when running the CWL → GALAXY pipeline."
   - id: freeform-galaxy-design
-    description: "Combined Galaxy interface + data-flow design brief from [[freeform-summary-to-galaxy-design]] when running PAPER → GALAXY or INTERVIEW → WORKFLOW pipelines."
+    description: "Combined Galaxy interface + data-flow design brief from [[freeform-summary-to-galaxy-design]] when running PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
 output_artifacts:
   - id: iwc-comparison-notes
     kind: markdown

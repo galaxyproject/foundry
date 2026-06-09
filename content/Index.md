@@ -5,7 +5,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Pipelines
 
 - [[cwl-to-galaxy]] — Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction.
-- [[interview-to-workflow]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff.
+- [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff.
 - [[nextflow-to-cwl]] — Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
 - [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow.
 - [[paper-to-cwl]] — Direct path from a paper to a CWL Workflow + CommandLineTool set.
