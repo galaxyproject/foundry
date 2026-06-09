@@ -453,7 +453,7 @@ foundry/
 │   │       └── .gitkeep
 │   ├── pipelines/
 │   │   ├── paper-to-galaxy.md
-│   │   ├── interview-to-workflow.md
+│   │   ├── interview-to-galaxy.md
 │   │   ├── nextflow-to-galaxy.md
 │   │   ├── cwl-to-galaxy.md
 │   │   ├── paper-to-cwl.md

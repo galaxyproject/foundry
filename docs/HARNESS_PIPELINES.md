@@ -12,7 +12,7 @@ Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase cor
 
 CWL is unofficially positioned as a **low-level, high-structure interchange format** — suitable as an intermediate target between an unstructured/loosely-structured source (a paper, a Nextflow pipeline) and Galaxy. The Foundry must support **both direct and composed paths** as first-class options:
 
-- `PAPER → GALAXY` (direct), `INTERVIEW → WORKFLOW` (interview-normalized direct Galaxy path), and `PAPER → CWL → GALAXY` (composed) are valid.
+- `PAPER → GALAXY` (direct), `INTERVIEW → GALAXY` (interview-normalized direct Galaxy path), and `PAPER → CWL → GALAXY` (composed) are valid.
 - `NEXTFLOW → GALAXY` (direct) and `NEXTFLOW → CWL → GALAXY` (composed) are both valid.
 - Direct paths are simpler to run and debug. Composed paths buy a structured checkpoint (CWL) at the cost of running two harnesses.
 - Whether composition is reliable enough to *prefer* over direct is a longer-term research question. For now: both paths must be possible from the Mold inventory; the harness picks.
@@ -124,9 +124,9 @@ CWL is already structured; the upstream extraction work is much lighter.
 10. `run-workflow-test` — execute via Planemo.
 11. `debug-galaxy-workflow-output`
 
-### INTERVIEW → WORKFLOW
+### INTERVIEW → GALAXY
 
-The interview path is a Galaxy-targeting pipeline for now. The title stays user-facing because the interview starts from workflow intent rather than an existing technical artifact.
+The interview path is a Galaxy-targeting pipeline, named to match the other `→ GALAXY` pipelines. Unlike them it starts from workflow intent gathered in an interview rather than an existing technical artifact, normalized into the shared `freeform-summary` handoff.
 
 1. `interview-to-freeform-summary` — normalize a user interview transcript or interactive session into the shared `freeform-summary` handoff.
 2. `freeform-summary-to-galaxy-design`

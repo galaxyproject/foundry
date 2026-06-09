@@ -1,6 +1,6 @@
 ---
 type: pipeline
-title: INTERVIEW → WORKFLOW
+title: INTERVIEW → GALAXY
 tags:
   - pipeline
   - source/interview
@@ -28,7 +28,7 @@ phases:
   - mold: "[[debug-galaxy-workflow-output]]"
 ---
 
-# INTERVIEW → WORKFLOW
+# INTERVIEW → GALAXY
 
 Interview-driven Galaxy workflow path. The live interview mechanics are harness-owned; this pipeline records the Mold spine after an interview has been normalized into the shared `freeform-summary` handoff.
 
