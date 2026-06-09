@@ -6,7 +6,7 @@ package: "@galaxy-foundry/foundry"
 invoke: foundry
 invoke_fallback: "npx --package @galaxy-foundry/foundry foundry"
 availability_check: "foundry --help"
-docs_url: "https://github.com/jmchilton/foundry/blob/main/packages/foundry/README.md"
+docs_url: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md"
 tags:
   - cli-tool
   - cli/foundry

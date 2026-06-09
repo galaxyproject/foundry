@@ -3,7 +3,7 @@ type: cli-command
 tool: foundry
 command: validate-galaxy-tool-discovery
 package: "@galaxy-foundry/foundry"
-upstream: "https://github.com/jmchilton/foundry/blob/main/packages/foundry/src/program.ts"
+upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/program.ts"
 tags:
   - cli-command
   - cli/foundry

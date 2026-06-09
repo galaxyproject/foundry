@@ -3,7 +3,7 @@
 export const galaxyToolDiscoverySchema = {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://galaxyproject.org/foundry/schemas/galaxy-tool-discovery.schema.json",
-  "$comment": "Canonical source: packages/foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[galaxy-tool-discovery]] wiki-links; the cast pipeline imports the `galaxyToolDiscoverySchema` runtime export and serializes it into cast bundles.",
+  "$comment": "Canonical source: packages/foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[galaxy-tool-discovery]] wiki-links; the cast pipeline imports the `galaxyToolDiscoverySchema` runtime export and serializes it into cast bundles.",
   "title": "Galaxy Tool Discovery Recommendation",
   "description": "Structured recommendation emitted by the discover-shed-tool Mold after searching the Galaxy Tool Shed and resolving any selected candidate to a pinnable Tool Shed version and changeset revision.",
   "$ref": "#/$defs/DiscoveryRecommendation",

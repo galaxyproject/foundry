@@ -118,7 +118,7 @@ async function loadFoundryRegistry(): Promise<Record<string, CliRegistryEntry>> 
           meta.foundryCliMeta,
           packageName,
           packageVersion,
-          'https://github.com/jmchilton/foundry/blob/main/packages/foundry/src/program.ts',
+          'https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/program.ts',
         )
       : {};
   } catch {

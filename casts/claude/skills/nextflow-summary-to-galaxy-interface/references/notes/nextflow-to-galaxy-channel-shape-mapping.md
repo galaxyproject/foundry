@@ -50,7 +50,7 @@ related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
 sources:
-  - "https://github.com/jmchilton/foundry/issues/52"
+  - "https://github.com/galaxyproject/foundry/issues/52"
 summary: "Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes."
 ---
 

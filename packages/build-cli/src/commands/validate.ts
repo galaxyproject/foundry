@@ -702,7 +702,7 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
   for (const f of files) {
     if (f.meta.type !== "schema") continue;
     const upstream = typeof f.meta.upstream === "string" ? f.meta.upstream : "";
-    if (!upstream || upstream.includes("github.com/jmchilton/foundry/")) continue;
+    if (!upstream || upstream.includes("github.com/galaxyproject/foundry/")) continue;
     if (typeof f.meta.license !== "string") {
       findings.push({
         path: f.path,

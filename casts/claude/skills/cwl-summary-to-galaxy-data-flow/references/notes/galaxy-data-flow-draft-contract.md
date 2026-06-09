@@ -22,7 +22,7 @@ related_molds:
   - "[[paper-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 sources:
-  - "https://github.com/jmchilton/foundry/issues/54"
+  - "https://github.com/galaxyproject/foundry/issues/54"
 summary: "Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation."
 ---
 

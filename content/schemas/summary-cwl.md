@@ -6,7 +6,7 @@ package: "@galaxy-foundry/foundry"
 package_export: "summaryCwlSchema"
 validator_bin: foundry
 validator_subcommand: validate-summary-cwl
-upstream: "https://github.com/jmchilton/foundry/blob/main/packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json"
+upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json"
 license: MIT
 tags:
   - schema

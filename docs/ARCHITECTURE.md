@@ -539,7 +539,7 @@ Key decisions reflected in the layout:
 
 ## 15. Tracked Follow-Up
 
-- **Composed pipelines (`PAPER -> CWL -> GALAXY`).** Track representation for composed paths in [issue #200](https://github.com/jmchilton/foundry/issues/200). The Mold inventory already supports the paths; the unresolved question is whether composed journeys get distinct `content/pipelines/*.md` notes or remain harness-level runtime compositions.
+- **Composed pipelines (`PAPER -> CWL -> GALAXY`).** Track representation for composed paths in [issue #200](https://github.com/galaxyproject/foundry/issues/200). The Mold inventory already supports the paths; the unresolved question is whether composed journeys get distinct `content/pipelines/*.md` notes or remain harness-level runtime compositions.
 
 ## 16. Resolved Contracts
 
@@ -555,7 +555,7 @@ Schema:
 - CLI command pages are reference content, and action Molds reference exact commands.
 
 Tooling:
-- **Compiled scripts vs `tsx`.** Track precompiled-bin migration in [issue #201](https://github.com/jmchilton/foundry/issues/201). Current root scripts use `tsx`.
+- **Compiled scripts vs `tsx`.** Track precompiled-bin migration in [issue #201](https://github.com/galaxyproject/foundry/issues/201). Current root scripts use `tsx`.
 
 Process:
 - Companion relationships between patterns and action Molds stay implicit through wiki links unless a real machine-checking need appears.

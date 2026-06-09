@@ -2,7 +2,7 @@
 type: schema
 name: cast-provenance
 title: "Cast provenance (_provenance.json, schema v2)"
-upstream: "https://github.com/jmchilton/foundry/blob/main/scripts/lib/schemas/cast-provenance.schema.json"
+upstream: "https://github.com/galaxyproject/foundry/blob/main/scripts/lib/schemas/cast-provenance.schema.json"
 tags:
   - schema
 status: draft
