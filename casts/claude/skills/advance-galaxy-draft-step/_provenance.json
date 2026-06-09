@@ -5,10 +5,10 @@
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 1,
-    "content_hash": "ef9938a0ae2b6fbe324f1e212c0297d17e980bd6bed3321d7eb07b8c64881c69",
-    "commit": "eabb998b9af1fccaacae7d2fbc5cb65a07722cf2"
+    "content_hash": "47726f66d62c53ee1956222d9593808f52c75936341a0d026349684af4222883",
+    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
   },
-  "cast_at": "2026-06-02T17:45:46.368Z",
+  "cast_at": "2026-06-09T17:17:36.375Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Deterministically pick the next drafty step (or report no remaining work). The orchestrator owns the loop oracle so the harness reduces to `while draft: invoke skill`.",
       "trigger": "At the start of every iteration, before any per-step work.",
       "verification": "Cast the skill, run on a multi-step IWC-derived draft, confirm the orchestrator picks one step per call and exits when draft: false.",
-      "src_hash": "bdc4a67a8ad2d08d08184309852391612e1da10c4bfabd941faeb42484c1a595",
-      "dst_hash": "565cc72cf5a8f8bedf8750e6ca61e2e8a83e1c1171b9b305c022ce8979c1c4b0",
+      "src_hash": "fa5a7da3939964791f75897df46ddb9563b533c79d2162ee2c04b0cff9ca53c7",
+      "dst_hash": "7e3de5d81b2e8f43aa29b945712b96e4aa3b8f81e8e265ea72385784bd5fa325",
       "source": "deterministic"
     },
     {
@@ -70,6 +70,20 @@
       "trigger": "After a wrapper has been resolved for the chosen step and before implementing it.",
       "src_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
       "dst_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft]]",
+      "src": "package://@galaxy-tool-util/schema#galaxyWorkflowDraftJsonSchema",
+      "dst": "references/schemas/galaxy-workflow-draft.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "In/out contract: the draft this Mold reads and mutates one step per iteration conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks.",
+      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
       "source": "deterministic"
     }
   ],

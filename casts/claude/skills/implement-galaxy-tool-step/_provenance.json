@@ -5,10 +5,10 @@
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 5,
-    "content_hash": "d18491b723bc5387c09fd7216226ea559834423de98018889533419fc6b023ee",
-    "commit": "006a5afad77f9b7f2a612b8638568795662f4e16"
+    "content_hash": "e6a2be91eec61b2228049273f77672ce15e62ab1651e641c424cec24bedf212b",
+    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
   },
-  "cast_at": "2026-06-02T16:57:00.335Z",
+  "cast_at": "2026-06-09T17:17:35.126Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -174,6 +174,20 @@
       "src_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
       "dst_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
       "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft]]",
+      "src": "package://@galaxy-tool-util/schema#galaxyWorkflowDraftJsonSchema",
+      "dst": "references/schemas/galaxy-workflow-draft.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "In/out contract: the draft this Mold reads and mutates in place conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks.",
+      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "source": "deterministic"
     }
   ],
   "artifacts": {
@@ -200,6 +214,7 @@
         "description": "gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft.",
         "inherited_schema": "[[galaxy-workflow-draft]]",
         "producers": [
+          "advance-galaxy-draft-step",
           "cwl-summary-to-galaxy-template",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",

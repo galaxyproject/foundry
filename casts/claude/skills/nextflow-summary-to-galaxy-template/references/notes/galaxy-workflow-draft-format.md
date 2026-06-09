@@ -21,6 +21,7 @@ related_molds:
   - "[[freeform-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
   - "[[implement-galaxy-tool-step]]"
+  - "[[advance-galaxy-draft-step]]"
 summary: "gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step."
 ---
 

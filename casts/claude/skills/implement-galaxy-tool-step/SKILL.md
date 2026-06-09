@@ -14,7 +14,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `galaxy-tool-summary`. Schema: galaxy-tool-summary. Produced by `summarize-galaxy-tool`. Galaxy tool summary manifest from summarize-galaxy-tool conforming to galaxy-tool-summary; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`.
-- Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`. gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft.
+- Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`. gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft.
 
 ## Outputs
 
@@ -30,6 +30,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/schemas/galaxy-tool-summary.schema.json`: Schema file copied verbatim into the bundle. Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape.
+- `references/schemas/galaxy-workflow-draft.schema.json`: Schema file copied verbatim into the bundle. In/out contract: the draft this Mold reads and mutates in place conforms to galaxy-workflow-draft. Cast bundles the JSON Schema alongside the draft-validate CLI checks.
 
 ## Load On Demand
 

@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 6,
-    "content_hash": "f3161b6df054b7ee9b5622ca6d65abb9d2d30473b5ea54e0322da0ae99262b7a",
-    "commit": "006a5afad77f9b7f2a612b8638568795662f4e16"
+    "content_hash": "d5843f5f9256334dd6f265e96cdf97812dcbcdb1c40060b62093eb22b1153cc2",
+    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
   },
-  "cast_at": "2026-06-02T16:56:59.020Z",
+  "cast_at": "2026-06-09T17:17:32.640Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -102,8 +102,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked Nextflow-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "ee7088159b1a4678bd8cded4d5f92b9882084a663472bfb0cc3d5ec62d6f5427",
-      "dst_hash": "ee7088159b1a4678bd8cded4d5f92b9882084a663472bfb0cc3d5ec62d6f5427",
+      "src_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
+      "dst_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
       "source": "deterministic"
     },
     {
@@ -117,8 +117,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "1a8cdc4912187eb8865741935c81ae50d719ad378b6b57541f76df096333dfc8",
-      "dst_hash": "1a8cdc4912187eb8865741935c81ae50d719ad378b6b57541f76df096333dfc8",
+      "src_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
+      "dst_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
       "source": "deterministic"
     },
     {
@@ -207,6 +207,20 @@
       "purpose": "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context.",
       "src_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
       "dst_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft]]",
+      "src": "package://@galaxy-tool-util/schema#galaxyWorkflowDraftJsonSchema",
+      "dst": "references/schemas/galaxy-workflow-draft.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Output contract: the emitted gxformat2 draft conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema so the skill carries its output shape alongside the [[draft-validate]] CLI checks.",
+      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
       "source": "deterministic"
     }
   ],

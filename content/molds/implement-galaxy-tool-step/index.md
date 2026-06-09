@@ -25,6 +25,13 @@ output_artifacts:
     description: "gxformat2 skeleton with one more abstract step replaced by a concrete tool step (loop iteration output)."
 references:
   - kind: schema
+    ref: "[[galaxy-workflow-draft]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "In/out contract: the draft this Mold reads and mutates in place conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks."
+  - kind: schema
     ref: "[[galaxy-tool-summary]]"
     used_at: runtime
     load: upfront

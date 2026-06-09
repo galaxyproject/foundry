@@ -22,6 +22,13 @@ output_artifacts:
     schema: "[[galaxy-workflow-draft]]"
     description: "Same draft with one additional step concretized (one loop iteration). Once every step is concrete, [[draft-next-step]] reports `draft: false` and the harness exits the loop."
 references:
+  - kind: schema
+    ref: "[[galaxy-workflow-draft]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "In/out contract: the draft this Mold reads and mutates one step per iteration conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks."
   - kind: cli-command
     ref: "[[draft-next-step]]"
     used_at: runtime
