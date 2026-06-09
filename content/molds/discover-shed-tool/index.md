@@ -174,6 +174,6 @@ The procedure assumes — and the cast skill must surface in its rationale when 
 ## Non-goals
 
 - **Authoring.** This Mold never produces a tool wrapper. On `miss`, the harness's `discover-or-author` branch fall-through invokes [[author-galaxy-tool-wrapper]].
-- **Caching.** This Mold emits a pin recommendation. The caller (or the next phase) runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` to populate the cache.
+- **Caching.** This Mold emits a pin recommendation. The caller (or the next phase) runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --tool-version <v>` to populate the cache.
 - **Galaxy-instance discovery.** Hitting a running Galaxy server's installed-tool index (EDAM-aware, panel-aware) is a different mechanism — the future `discover-tool-via-galaxy-api` Mold. The contrast is sketched in [[component-tool-shed-search]] §4.
 - **Test-data resolution.** Out of scope; handled by the `test-data-resolution` branch elsewhere in the pipeline.

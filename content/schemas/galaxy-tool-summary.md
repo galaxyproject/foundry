@@ -42,7 +42,7 @@ Library validation exists for TypeScript consumers, but generated skills should 
 
 ## Why manifest-shaped
 
-This schema describes the deterministic JSON emitted by `galaxy-tool-cache summarize <tool_id> --version <ver>` from [`@galaxy-tool-util/cli@1.3.x`](https://www.npmjs.com/package/@galaxy-tool-util/cli) — not a curated Foundry-flavored summary. The CLI handles the deterministic, side-effect-bearing work (cache lookup, source classification, `effect/JSONSchema` translation of the parameter bundle); the manifest is the contract Foundry consumers bind to.
+This schema describes the deterministic JSON emitted by `galaxy-tool-cache summarize <tool_id> --tool-version <ver>` from [`@galaxy-tool-util/cli@1.7.x`](https://www.npmjs.com/package/@galaxy-tool-util/cli) — not a curated Foundry-flavored summary. The CLI handles the deterministic, side-effect-bearing work (cache lookup, source classification, `effect/JSONSchema` translation of the parameter bundle); the manifest is the contract Foundry consumers bind to.
 
 The shape:
 

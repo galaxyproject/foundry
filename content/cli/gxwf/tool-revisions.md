@@ -68,4 +68,4 @@ echo "$REV"
 ## Pairs with
 
 - [[tool-search]] → [[tool-versions]] → [[tool-revisions]] is the canonical discover-and-pin chain.
-- `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` — caches the `ParsedTool` once a version is chosen; the changeset revision pin lands in the workflow file (`tool_shed_repository.changeset_revision`), not in the cache.
+- `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --tool-version <v>` — caches the `ParsedTool` once a version is chosen; the changeset revision pin lands in the workflow file (`tool_shed_repository.changeset_revision`), not in the cache.

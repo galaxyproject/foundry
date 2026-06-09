@@ -68,4 +68,4 @@ gxwf tool-versions devteam/fastqc/fastqc --json
 
 - [[tool-search]] — produces the `trsToolId` consumed here.
 - [[tool-revisions]] — drills from a `(trsToolId, version)` down to changeset revisions.
-- `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` — caches the picked version's `ParsedTool`.
+- `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --tool-version <v>` — caches the picked version's `ParsedTool`.
