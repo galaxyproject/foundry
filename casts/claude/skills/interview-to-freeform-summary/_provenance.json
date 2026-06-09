@@ -1,0 +1,24 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "interview-to-freeform-summary",
+    "path": "content/molds/interview-to-freeform-summary/index.md",
+    "revision": 1,
+    "content_hash": "3a854a39fed7bf6c87298296993f9b94fb4dcdbfc8c7360e25c2ef2f04b8c287",
+    "commit": "f145a47e491a27fb856ccb7992ee87c9eac04ffb"
+  },
+  "cast_at": "2026-06-09T21:13:12.606Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "freeform-summary",
+        "kind": "markdown",
+        "default_filename": "freeform-summary.md",
+        "description": "Methods, tools, sample data, references, constraints, open questions, and workflow intent gathered from a user interview."
+      }
+    ],
+    "consumes": []
+  }
+}
