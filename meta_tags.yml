@@ -80,3 +80,5 @@ topic/tabular-transform:
   description: "Galaxy tabular transformation pattern map"
 topic/interval-transform:
   description: "Galaxy genomic interval transformation pattern map"
+topic/sequence-transform:
+  description: "Galaxy sequence-record (FASTA) transformation pattern map"
