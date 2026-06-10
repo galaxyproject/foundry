@@ -5,10 +5,10 @@
     "name": "freeform-summary-to-galaxy-data-flow",
     "path": "content/molds/freeform-summary-to-galaxy-data-flow/index.md",
     "revision": 1,
-    "content_hash": "1dba729f264e7d49920cd97da439f5aa8f3c6e9989cf03b99a0a7392dac10ae0",
-    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
+    "content_hash": "0df46089cebecbea8611e06a5ea7a4235042ff6f2ef141eb8c333bd83e7f4ec8",
+    "commit": "613d9a59ab74fc752defd79cdd07fffa0c790591"
   },
-  "cast_at": "2026-06-10T13:59:47.386Z",
+  "cast_at": "2026-06-10T23:00:46.415Z",
   "refs": [
     {
       "kind": "pattern",
@@ -23,6 +23,36 @@
       "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
       "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-conditionals-patterns]]",
+      "src": "content/patterns/galaxy-conditionals-patterns.md",
+      "dst": "references/patterns/galaxy-conditionals-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
+      "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
+      "src_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "dst_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-interval-patterns]]",
+      "src": "content/patterns/galaxy-interval-patterns.md",
+      "dst": "references/patterns/galaxy-interval-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
+      "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
+      "src_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
+      "dst_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
       "source": "deterministic"
     },
     {
