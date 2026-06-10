@@ -157,6 +157,10 @@
           "type": "boolean",
           "description": "True when mode=condense and the LLM phase has not yet filled this entry. Verifier rejects committed provenance with any pending_llm=true."
         },
+        "companion_of": {
+          "type": "string",
+          "description": "Bundle-relative dst of the parent note when this ref is a sibling companion file copied alongside it."
+        },
         "prompt": {
           "type": "object",
           "description": "Required when source=llm. Identifies the prompt used so casts can be reproduced.",

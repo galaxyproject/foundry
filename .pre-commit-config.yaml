@@ -13,6 +13,7 @@ exclude: |
     content/research/cwl-v1\.2/|
     packages/.*/test/fixtures/|
     workflow-fixtures/|
+    casts/|
     site/\.astro/|
     site/dist/|
     pnpm-lock\.yaml$

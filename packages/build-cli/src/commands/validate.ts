@@ -1223,6 +1223,34 @@ function validatePromptFiles(files: FileMeta[]): CrossFileFinding[] {
   return findings;
 }
 
+function validateCompanionFiles(files: FileMeta[]): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    const companions = Array.isArray(f.meta.companions) ? f.meta.companions : [];
+    if (companions.length === 0) continue;
+    for (const c of companions) {
+      if (typeof c !== "string") continue;
+      const fullPath = path.resolve(path.dirname(f.path), c);
+      if (!existsSync(fullPath)) {
+        findings.push({
+          path: f.path,
+          severity: "error",
+          message: `companions: file does not exist: ${c}`,
+        });
+        continue;
+      }
+      if (!statSync(fullPath).isFile()) {
+        findings.push({
+          path: f.path,
+          severity: "error",
+          message: `companions: path is not a file: ${c}`,
+        });
+      }
+    }
+  }
+  return findings;
+}
+
 function validatePatternVerificationEvidence(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
@@ -1414,6 +1442,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateCliCommandDocs(validFiles));
   crossFindings.push(...validateCliTools(validFiles));
   crossFindings.push(...validatePromptFiles(validFiles));
+  crossFindings.push(...validateCompanionFiles(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
   crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));
   crossFindings.push(...validateMoldStubBody(validFiles));

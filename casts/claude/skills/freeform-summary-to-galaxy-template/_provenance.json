@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 3,
     "content_hash": "82ed61f28a1535d48682fc395519c386f3b44516f3a100401da65013b59217b0",
-    "commit": "d25bc6dde7c87b25fcff081eb08b7eb668996438"
+    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
   },
-  "cast_at": "2026-06-09T22:02:06.367Z",
+  "cast_at": "2026-06-10T16:51:07.724Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -67,8 +67,40 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
-      "src_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
-      "dst_hash": "4a4facb6a8a4498638e4c5af1314b83dde5d5481f1b89dee57b1efcaebfad45f",
+      "src_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
+      "dst_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.upstream.myst",
+      "dst": "references/notes/galaxy-collection-semantics.upstream.myst",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
+      "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
+      "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "src_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
+      "dst_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.yml",
+      "dst": "references/notes/galaxy-collection-semantics.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
+      "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
+      "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "src_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
+      "dst_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
       "source": "deterministic"
     },
     {

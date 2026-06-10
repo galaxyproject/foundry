@@ -1,0 +1,125 @@
+# Container & conda directive cheatsheet for summarize-nextflow §5.
+# Companion to component-nextflow-containers-and-envs.md.
+#
+# Matching contract: regexes match URL/string token *content* after the cast skill
+# has unwrapped the directive's outer "${ ... ? '<url>' : '<url>' }" GString.
+# The walker is responsible for extracting both ternary-branch strings before
+# applying these patterns.
+#
+# Bucketing rule: by URL prefix (NOT by ternary branch). See note §"Bucketing rule".
+
+ternary_predicate:
+  description: "Detect either form of the canonical nf-core ternary predicate."
+  patterns:
+    - "workflow\\.containerEngine\\s*==\\s*'singularity'"
+    - "workflow\\.containerEngine\\s+in\\s*\\[\\s*'singularity'(?:\\s*,\\s*'apptainer')?\\s*\\]"
+  also_typical: "&& !task.ext.singularity_pull_docker_container"
+
+container_forms:
+
+  - id: galaxy_singularity_simple
+    regex: "^https://depot\\.galaxyproject\\.org/singularity/(?P<name>[^:/]+):(?P<version>[^-][^-]*)--(?P<build>[^/]+)$"
+    example: "https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0"
+    source: "modules/nf-core/fastqc/main.nf"
+    resolves_to_field: "singularity"
+    derivation_rule: "name+version+build from path basename; Bioconda dual exists at quay.io/biocontainers/<name>:<version>--<build>."
+    notes: "BioContainers Singularity mirror; CVMFS-distributed; produced by singularity-build-bot from quay.io."
+
+  - id: galaxy_singularity_mulled
+    regex: "^https://depot\\.galaxyproject\\.org/singularity/mulled-v2-(?P<hash>[0-9a-f]+):(?P<verhash>[0-9a-f]+)-(?P<rev>\\d+)$"
+    example: "https://depot.galaxyproject.org/singularity/mulled-v2-580d344d9d4a496cd403932da8765f9e0187774d:df80ed8d23d0a2c43181a2b3dd1b39f2d00fab5c-0"
+    source: "modules/nf-core/dragmap/align/main.nf"
+    resolves_to_field: "singularity"
+    derivation_rule: "Hash and verhash are not reversible to package list; read sibling environment.yml dependencies[] for the canonical inventory. Use galaxy-tool-util mulled-hash to verify."
+    notes: "Multi-package container; one tools[] entry, dependencies[] is the source of truth."
+
+  - id: quay_biocontainer_simple
+    regex: "^quay\\.io/biocontainers/(?P<name>[^:/]+):(?P<version>[^-][^-]*)--(?P<build>[^/]+)$"
+    example: "quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0"
+    source: "modules/nf-core/fastqc/main.nf"
+    resolves_to_field: "biocontainer"
+    derivation_rule: "Same triple as galaxy_singularity_simple; pair when both URLs share <name>:<version>--<build>."
+
+  - id: quay_biocontainer_mulled
+    regex: "^quay\\.io/biocontainers/mulled-v2-(?P<hash>[0-9a-f]+):(?P<verhash>[0-9a-f]+)-(?P<rev>\\d+)$"
+    example: "quay.io/biocontainers/mulled-v2-580d344d9d4a496cd403932da8765f9e0187774d:df80ed8d23d0a2c43181a2b3dd1b39f2d00fab5c-0"
+    source: "modules/nf-core/dragmap/align/main.nf"
+    resolves_to_field: "biocontainer"
+    derivation_rule: "Same as galaxy_singularity_mulled; read sibling environment.yml."
+
+  - id: docker_io_biocontainer_alias
+    regex: "^(?:docker\\.io/)?biocontainers/(?P<name>[^:/]+):(?P<version>[^-][^-]*)--(?P<build>[^/]+)$"
+    example: "biocontainers/fastqc:0.12.1--hdfd78af_0"
+    source: "legacy modules; rare in current nf-core"
+    resolves_to_field: "biocontainer"
+    derivation_rule: "Same image as quay_biocontainer_simple; same derivation."
+    notes: "docker.io alias for the BioContainers org; identical content to quay form."
+
+  - id: wave_docker
+    regex: "^community\\.wave\\.seqera\\.io/library/(?P<name>[^:/]+):(?P<version>[^-]+)--(?P<digest>[0-9a-f]+)$"
+    example: "community.wave.seqera.io/library/multiqc:1.34--db7c73dae76bc9e6"
+    source: "modules/nf-core/multiqc/main.nf"
+    resolves_to_field: "wave"
+    derivation_rule: "name+version directly from URL path. Digest is content-addressed, not Bioconda build."
+    notes: "Seqera-built; no Bioconda/BioContainer dual. environment.yml remains the round-trippable source."
+
+  - id: wave_singularity_cr
+    regex: "^https://community-cr-prod\\.seqera\\.io/docker/registry/v2/blobs/sha256/[0-9a-f]{2}/(?P<digest>[0-9a-f]{64})/data$"
+    example: "https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/1b/1bef8af6be88c5733461959c46ac8ef73d18f65277f62a1695d0e1633054f9c2/data"
+    source: "modules/nf-core/multiqc/main.nf"
+    resolves_to_field: "wave"
+    derivation_rule: "name+version NOT recoverable from URL; resolve from sibling docker branch or environment.yml."
+
+  - id: wave_oras
+    regex: "^oras://community\\.wave\\.seqera\\.io/library/(?P<name>[^:/]+):(?P<version>[^-]+)--(?P<digest>[0-9a-f]+)$"
+    example: "oras://community.wave.seqera.io/library/seqkit:2.13.0--205358a3675c7775"
+    source: "modules/nf-core/seqkit/sample/main.nf"
+    resolves_to_field: "wave"
+    derivation_rule: "name+version directly from URL path."
+    notes: "Newer ORAS-based Singularity pull form; meta-schema declares ^oras://.*$ legal for the Singularity branch."
+
+  - id: generic_docker
+    regex: "^(?:(?P<registry>[^/]+)/)?(?P<path>[^:@]+)(?::(?P<tag>[^@]+))?(?:@(?P<digest>sha256:[0-9a-f]+))?$"
+    example: "docker.io/myorg/mytool:1.0"
+    source: "ad-hoc DSL2 pipelines; nf-core escape hatch"
+    resolves_to_field: "docker"
+    derivation_rule: "Best-effort path-basename split; surface to LLM prose pass for tool naming when other signal absent."
+    notes: "Apply only after the four canonical forms have been ruled out — this regex matches almost anything."
+
+conda_forms:
+
+  - id: file_reference_modern
+    regex: "^\\$\\{moduleDir\\}/environment\\.yml$"
+    example: "${moduleDir}/environment.yml"
+    source: "modules/nf-core/fastqc/main.nf"
+    resolution: "Read sibling environment.yml; parse dependencies[] for tools[].bioconda."
+    notes: "Dominant form in current nf-core. environment.yml schema requires channels, dependencies; forbids name; pins via '=' (not '>=')."
+
+  - id: literal_string_legacy
+    regex: "^bioconda::(?P<name>[^=]+)=(?P<version>.+)$"
+    example: 'conda "bioconda::fastqc=0.12.1"'
+    source: "legacy modules"
+    resolution: "Use match groups directly as tools[].bioconda."
+
+environment_yml:
+  schema_url: "https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json"
+  channel_order_convention: ["conda-forge", "bioconda"]  # lint-enforced, not schema-enforced
+  dependency_pin_pattern: "^.*[^><]=[^><].*$"            # schema-enforced: '=' required
+  forbidden: ["name", "default channel"]
+  dep_buckets:
+    - prefix: "bioconda::"
+      target_field: "bioconda"
+      galaxy_translation: "<requirement type=\"package\" version=\"<v>\"><n></requirement>"
+    - prefix: "conda-forge::"
+      target_field: null
+      galaxy_translation: "system-level dep; resolve case-by-case (pigz, openjdk, etc.)"
+
+bucketing_rule:
+  approach: "url_prefix"  # not "ternary_branch" — see note §"Bucketing rule"
+  fields:
+    singularity: ["galaxy_singularity_simple", "galaxy_singularity_mulled"]
+    biocontainer: ["quay_biocontainer_simple", "quay_biocontainer_mulled", "docker_io_biocontainer_alias"]
+    wave: ["wave_docker", "wave_singularity_cr", "wave_oras"]
+    docker: ["generic_docker"]
+    bioconda: ["file_reference_modern → dependencies[bioconda::]", "literal_string_legacy"]
+  hypothesis_status: "Foundry hypothesis; confirm with summarize-nextflow Mold author before encoding in the cast skill."

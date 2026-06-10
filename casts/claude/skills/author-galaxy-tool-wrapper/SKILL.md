@@ -32,6 +32,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - `references/prompts/custom-tool-critic.md`: prompt reference copied verbatim into the bundle. Run the mandatory fuzzy quality review after structural validation passes. Use when: after the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.
 - `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Map Nextflow container/conda evidence to Galaxy UDT container and package provenance. Use when: a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.
+- `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
 
 ## Validation
 

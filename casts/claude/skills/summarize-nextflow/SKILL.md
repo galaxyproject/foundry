@@ -33,8 +33,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load On Demand
 
 - `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence. Use when: extracting tools, versions, containers, conda directives, or environment equivalences.
+- `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
 - `references/notes/component-nextflow-pipeline-anatomy.md`: Research note copied verbatim into the bundle. Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology. Use when: walking pipeline structure or resolving process aliases and channel flow.
 - `references/notes/component-nextflow-testing.md`: Research note copied verbatim into the bundle. Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions. Use when: filling test_fixtures or nf_tests sections of the summary.
+- `references/notes/component-nextflow-testing.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-testing.md`; read it where that note directs.
 
 ## Validation
 

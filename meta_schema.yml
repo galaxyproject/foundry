@@ -309,6 +309,18 @@ properties:
     type: string
     pattern: "^LICENSES/[A-Za-z0-9._-]+(\\.LICENSE|\\.txt)?$"
     description: "Repo-relative path under LICENSES/ to the verbatim upstream LICENSE this note redistributes content under."
+  # Sibling files a multi-file note bundles alongside its `.md`. Casting copies
+  # each companion next to the note in the cast bundle so the note's body can
+  # reference them at runtime. Without this, only the `.md` is cast and any
+  # sibling it points at goes missing from the bundle.
+  companions:
+    type: array
+    items:
+      type: string
+      pattern: "^[A-Za-z0-9._-]+$"
+    minItems: 1
+    uniqueItems: true
+    description: "Sibling-relative filenames (same directory as the note) that casting copies alongside the note. The validator checks each exists; cast-mold copies them verbatim next to the note in the bundle."
 
 allOf:
   # mold requires name + axis

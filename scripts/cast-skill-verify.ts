@@ -22,7 +22,8 @@ import { readMarkdown } from "./lib/frontmatter.js";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Ajv = ((AjvImport as any).default ?? AjvImport) as typeof AjvImport;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addFormats = ((addFormatsImport as any).default ?? addFormatsImport) as typeof addFormatsImport;
+const addFormats = ((addFormatsImport as any).default ??
+  addFormatsImport) as typeof addFormatsImport;
 
 interface Args {
   moldName: string;
@@ -45,6 +46,10 @@ function parseArgs(argv: string[]): Args {
 
 function sha256(filePath: string): string {
   return createHash("sha256").update(readFileSync(filePath)).digest("hex");
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 interface TargetConfig {
@@ -71,6 +76,7 @@ interface ProvenanceRefEntry {
   source: "deterministic" | "llm";
   pending_llm?: boolean;
   prompt?: { origin: string; identity: string; hash?: string };
+  companion_of?: string;
 }
 
 interface Provenance {
@@ -100,9 +106,10 @@ function main(): void {
   const target = yaml.load(readFileSync(targetCfgPath, "utf8")) as TargetConfig;
 
   // Claude target casts live under skills/ (plugin layout).
-  const bundleRoot = args.target === "claude"
-    ? path.join(repoRoot, "casts", args.target, "skills", args.moldName)
-    : path.join(repoRoot, "casts", args.target, args.moldName);
+  const bundleRoot =
+    args.target === "claude"
+      ? path.join(repoRoot, "casts", args.target, "skills", args.moldName)
+      : path.join(repoRoot, "casts", args.target, args.moldName);
   if (!existsSync(bundleRoot)) fail(`missing bundle: ${bundleRoot}`);
 
   const errors: string[] = [];
@@ -113,7 +120,13 @@ function main(): void {
     fail(`missing _provenance.json in ${bundleRoot}`);
   }
   const prov = JSON.parse(readFileSync(provenancePath, "utf8")) as Provenance;
-  const schemaPath = path.join(repoRoot, "scripts", "lib", "schemas", "cast-provenance.schema.json");
+  const schemaPath = path.join(
+    repoRoot,
+    "scripts",
+    "lib",
+    "schemas",
+    "cast-provenance.schema.json",
+  );
   const ajv = new Ajv({ allErrors: true, strict: false });
   addFormats(ajv);
   const validateProv = ajv.compile(JSON.parse(readFileSync(schemaPath, "utf8")));
@@ -191,7 +204,9 @@ function main(): void {
   // Per-ref checks.
   for (const r of prov.refs ?? []) {
     if (r.pending_llm) {
-      errors.push(`ref ${r.src}: pending_llm — committed cast must not contain unfilled condense entries`);
+      errors.push(
+        `ref ${r.src}: pending_llm — committed cast must not contain unfilled condense entries`,
+      );
       continue;
     }
     const dstAbs = path.join(bundleRoot, r.dst);
@@ -201,7 +216,9 @@ function main(): void {
     }
     const dstHash = sha256(dstAbs);
     if (r.dst_hash && r.dst_hash !== dstHash) {
-      errors.push(`ref ${r.src}: dst hash drift (recorded ${r.dst_hash.slice(0, 12)}, actual ${dstHash.slice(0, 12)})`);
+      errors.push(
+        `ref ${r.src}: dst hash drift (recorded ${r.dst_hash.slice(0, 12)}, actual ${dstHash.slice(0, 12)})`,
+      );
     }
     // For verbatim deterministic refs, src and dst hashes must match.
     if (r.source === "deterministic" && r.mode === "verbatim" && r.src_hash !== r.dst_hash) {
@@ -227,7 +244,38 @@ function main(): void {
     if (r.load === "on-demand" && r.used_at !== "cast-time" && skillBody) {
       const dstBase = path.basename(r.dst);
       if (!skillBody.includes(dstBase) && !skillBody.includes(r.dst)) {
-        errors.push(`ref ${r.src}: on-demand runtime ref not referenced in SKILL.md (looked for '${dstBase}')`);
+        errors.push(
+          `ref ${r.src}: on-demand runtime ref not referenced in SKILL.md (looked for '${dstBase}')`,
+        );
+      }
+    }
+  }
+
+  // Backstop: a bundled note must not point at a sibling file (a `<stem>.*`
+  // companion) that isn't in the bundle. Catches multi-file notes whose
+  // companions weren't declared/copied — the class of bug where the cast `.md`
+  // tells the agent to read a sibling that never shipped.
+  for (const r of prov.refs ?? []) {
+    if (r.companion_of) continue;
+    if (r.kind !== "research" && r.kind !== "pattern") continue;
+    if (!r.dst.endsWith(".md")) continue;
+    const dstAbs = path.join(bundleRoot, r.dst);
+    if (!existsSync(dstAbs)) continue; // already reported above
+    const noteDir = path.dirname(dstAbs);
+    const selfBase = path.basename(r.dst);
+    const stem = selfBase.slice(0, -".md".length);
+    const body = readFileSync(dstAbs, "utf8");
+    const siblingRe = new RegExp(
+      `(?<![A-Za-z0-9._-])${escapeRegExp(stem)}(?:\\.[A-Za-z0-9]+)+`,
+      "g",
+    );
+    const referenced = new Set(body.match(siblingRe) ?? []);
+    for (const sibling of referenced) {
+      if (sibling === selfBase) continue;
+      if (!existsSync(path.join(noteDir, sibling))) {
+        errors.push(
+          `ref ${r.src}: bundled note ${r.dst} references sibling '${sibling}' not present in the bundle (declare it in the note's 'companions:' frontmatter)`,
+        );
       }
     }
   }
@@ -260,7 +308,11 @@ function walkAndFind(root: string, basename: string): string[] {
     for (const e of entries) {
       const full = path.join(dir, e);
       let st;
-      try { st = statSync(full); } catch { continue; }
+      try {
+        st = statSync(full);
+      } catch {
+        continue;
+      }
       if (st.isDirectory()) stack.push(full);
       else if (e === basename) out.push(full);
     }

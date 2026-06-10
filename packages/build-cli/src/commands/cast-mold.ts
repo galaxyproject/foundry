@@ -153,6 +153,8 @@ interface ResolvedRef {
   verification?: string;
   /** Set when src is an npm package export rather than a repo file. */
   package_source?: { spec: string; exportName: string };
+  /** Bundle-relative dst of the parent note when this ref is a copied companion file. */
+  companion_of?: string;
 }
 
 const SUPPORTED_KINDS = new Set([
@@ -309,6 +311,48 @@ function resolveMoldRef(
   };
 }
 
+// Expand companion files declared on a note's frontmatter into sibling refs.
+// A multi-file note (e.g. a vendored bundle) lists `companions:` filenames in
+// its `.md`; each is copied verbatim next to the note in the bundle so the
+// note body can reference it at runtime. Companions ship verbatim regardless
+// of the parent note's mode — a condensed note still points at its structured
+// sibling. They inherit the parent ref's load/used_at/trigger/purpose and
+// carry `companion_of` for provenance.
+function expandCompanions(
+  resolved: ResolvedRef[],
+  metaByPath: Map<string, Frontmatter>,
+  target: TargetConfig,
+): ResolvedRef[] {
+  const out: ResolvedRef[] = [];
+  for (const r of resolved) {
+    out.push(r);
+    if (r.kind !== "research" && r.kind !== "pattern") continue;
+    const rawCompanions = metaByPath.get(r.src)?.companions;
+    const companions = Array.isArray(rawCompanions) ? (rawCompanions as unknown[]) : [];
+    if (companions.length === 0) continue;
+    const kindCfg = target.kinds[r.kind];
+    if (!kindCfg) continue;
+    const srcDir = path.posix.dirname(r.src);
+    for (const c of companions) {
+      if (typeof c !== "string") continue;
+      out.push({
+        kind: r.kind,
+        mode: "verbatim",
+        ref: r.ref,
+        src: path.posix.join(srcDir, c),
+        dst: path.posix.join(kindCfg.dst_dir, c),
+        used_at: r.used_at,
+        load: r.load,
+        evidence: r.evidence,
+        purpose: r.purpose,
+        trigger: r.trigger,
+        companion_of: r.dst,
+      });
+    }
+  }
+  return out;
+}
+
 // ---- file ops ----
 
 function sha256(filePath: string): string {
@@ -407,6 +451,7 @@ interface ProvenanceRefEntry {
   pending_llm?: boolean;
   prompt?: { origin: string; identity: string; hash?: string };
   model?: { name: string; version?: string };
+  companion_of?: string;
 }
 
 interface ProvenanceArtifactOutput {
@@ -862,6 +907,7 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
     purpose: r.purpose,
     trigger: r.trigger,
     verification: r.verification,
+    companion_of: r.companion_of,
   };
 }
 
@@ -912,6 +958,7 @@ function triggerSentence(text: string): string {
 }
 
 function refKindLabel(ref: ProvenanceRefEntry): string {
+  if (ref.companion_of) return "Companion file";
   if (ref.kind === "schema") return "Schema file";
   if (ref.kind === "research") return "Research note";
   if (ref.kind === "pattern") return "Pattern note";
@@ -1052,6 +1099,11 @@ function refRows(refs: ProvenanceRefEntry[]): string[] {
     const packaging =
       r.mode === "sidecar" ? "packaged as a sidecar" : "copied verbatim into the bundle";
     const details = [`- \`${r.dst}\`: ${refKindLabel(r)} ${packaging}.`];
+    if (r.companion_of) {
+      // The parent note row already carries purpose/trigger; just point to it.
+      details.push(`Sibling of \`${r.companion_of}\`; read it where that note directs.`);
+      return details.join(" ");
+    }
     if (r.purpose) details.push(sentence(r.purpose));
     if (r.trigger) details.push(triggerSentence(r.trigger));
     return details.join(" ");
@@ -1205,6 +1257,11 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     if (out.error) errors.push(out.error);
     if (out.resolved) resolved.push(out.resolved);
   });
+
+  // Expand multi-file notes' declared companion files into sibling verbatim refs.
+  const expanded = expandCompanions(resolved, metaByPath, target);
+  resolved.length = 0;
+  resolved.push(...expanded);
 
   // Stable ordering: by (kind, src).
   resolved.sort((a, b) =>
