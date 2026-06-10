@@ -95,22 +95,6 @@ references:
     evidence: corpus-observed
     purpose: "Implement identifier-derived collection reshaping via Apply Rules."
     trigger: "When collection element identifiers need regex parsing, nesting-level swaps, regrouping, or paired identifier assignment."
-  - kind: pattern
-    ref: "[[galaxy-collection-patterns]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Choose corpus-attested collection recipes when implementing concrete Galaxy steps."
-    trigger: "When implementation needs cleanup-after-fanout, sync-by-identifier, singleton unboxing, relabeling, collection reshaping, or collection-tabular bridges."
-  - kind: pattern
-    ref: "[[galaxy-tabular-patterns]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Choose corpus-attested tabular recipes when implementing concrete Galaxy steps."
-    trigger: "When implementation needs row filtering, column projection, computed columns, joins, grouping, SQL, awk, text-processing wrappers, or tabular-collection bridges."
   - kind: research
     ref: "[[galaxy-tool-job-failure-reference]]"
     used_at: runtime

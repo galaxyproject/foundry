@@ -5,10 +5,10 @@
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 6,
-    "content_hash": "4d4d839a63d1e13846c43694d1301cc706ab81a4cd8ff6cfb72f36a809facdc6",
-    "commit": "d25bc6dde7c87b25fcff081eb08b7eb668996438"
+    "content_hash": "45938bb76109a84d50368f6c8ffde5bd61e6ad685f68a114f802fcd99ffa2e50",
+    "commit": "613d9a59ab74fc752defd79cdd07fffa0c790591"
   },
-  "cast_at": "2026-06-09T22:02:02.774Z",
+  "cast_at": "2026-06-10T23:36:00.175Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -42,36 +42,6 @@
       "trigger": "After fetching a candidate IWC workflow file and before structural comparison.",
       "src_hash": "24b91f53b0e7850d1dfc38df1074f2d4270c72f20778d0e4d710545bf64be3e0",
       "dst_hash": "fad8586b1d2afeed3ee70189fb7db7a8019c77e24cc4fd4697b2210d9bc3012c",
-      "source": "deterministic"
-    },
-    {
-      "kind": "pattern",
-      "mode": "verbatim",
-      "ref": "[[galaxy-collection-patterns]]",
-      "src": "content/patterns/galaxy-collection-patterns.md",
-      "dst": "references/patterns/galaxy-collection-patterns.md",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Compare proposed collection transformations against curated corpus-observed pattern guidance.",
-      "trigger": "When the data-flow brief proposes collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections.",
-      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
-      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
-      "source": "deterministic"
-    },
-    {
-      "kind": "pattern",
-      "mode": "verbatim",
-      "ref": "[[galaxy-tabular-patterns]]",
-      "src": "content/patterns/galaxy-tabular-patterns.md",
-      "dst": "references/patterns/galaxy-tabular-patterns.md",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Compare proposed tabular transformations against curated corpus-observed pattern guidance.",
-      "trigger": "When the data-flow brief proposes tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections.",
-      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
-      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
       "source": "deterministic"
     },
     {

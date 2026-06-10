@@ -48,22 +48,6 @@ references:
     purpose: "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution."
     trigger: "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details."
     verification: "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata."
-  - kind: pattern
-    ref: "[[galaxy-collection-patterns]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Compare proposed collection transformations against curated corpus-observed pattern guidance."
-    trigger: "When the data-flow brief proposes collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections."
-  - kind: pattern
-    ref: "[[galaxy-tabular-patterns]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Compare proposed tabular transformations against curated corpus-observed pattern guidance."
-    trigger: "When the data-flow brief proposes tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
