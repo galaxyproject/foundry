@@ -268,6 +268,17 @@ Pipelines lead the dashboard because they are the **primary task surface** of th
 
 **Drift detection**: `--check` flag on every generator reads the file and string-compares with re-generation; exit 1 on mismatch. Wired into `npm run check:dashboard` and `check:index`.
 
+**Cast-bundle payloads — how a note's non-`.md` payload reaches a bundle.** Casts live under `casts/` (§14), not `content/`. Several notes are render-wrappers: the `.md` is human-facing, but the consumable payload is a separate structured file that casting must copy into the bundle. Four frontmatter mechanisms carry such a payload, sharing one shape (frontmatter names the file → validator confirms it exists → caster lands it in the bundle) but differing in payload source and casting behavior:
+
+| Field | Payload source | Casting behavior | Note type |
+|---|---|---|---|
+| `prompt_file` | sibling `.md` sidecar | copied, inlined into SKILL prose | `prompt` |
+| `package_export` | npm runtime export | imported + serialized (schema-validated) | `schema` |
+| `companions` | sibling file(s) | copied verbatim (hash-parity) | `research` / `pattern` |
+| `license_file` | `LICENSES/<file>` | copied verbatim (redistribution) | any vendoring note |
+
+`package_export` and `companions` are the same *concept* — wrapper note + vendored structured payload — split only by where the payload lives (npm package vs. checked-in sibling). They stay separate fields because the casting behaviors genuinely differ: import-and-stringify with schema validation vs. verbatim bytes with hash parity. `companions` attaches to the **note**, not the consuming Mold, so a note referenced by many Molds declares its siblings once and every consumer inherits them; the caster desugars each into a synthetic verbatim ref through the normal copy/provenance path. Before adding a fifth payload mechanism, check whether one of these already fits.
+
 ## 9. Authoring flow
 
 Two authoring entry points:

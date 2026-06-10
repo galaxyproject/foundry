@@ -425,5 +425,16 @@ allOf:
     then:
       required: [title, prompt_file]
 
+  # companions only honored by the caster on research/pattern refs; gate the
+  # field to those note types so a misplaced declaration fails loudly here
+  # rather than being silently dropped at cast time.
+  - if:
+      required: [companions]
+    then:
+      required: [type]
+      properties:
+        type:
+          enum: [research, pattern]
+
 # Strict mode: unknown fields are rejected to catch typos and schema drift.
 additionalProperties: false
