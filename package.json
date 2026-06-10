@@ -28,7 +28,7 @@
     "packages-format-fix": "prettier --write 'packages/*/src/**/*.ts' 'packages/*/test/**/*.ts'",
     "smoke:packages": "node scripts/smoke-packages.mjs",
     "changeset": "changeset",
-    "version-packages": "changeset version",
+    "version-packages": "changeset version && pnpm -r sync",
     "release": "pnpm -r build && changeset publish",
     "site:dev": "npm --prefix site run dev",
     "site:build": "npm --prefix site run build",
