@@ -78,4 +78,6 @@ This is the runtime-facing map for Galaxy tabular transformation choices. Use it
 ## See also
 
 - [[iwc-tabular-operations-survey]] — tabular-operation survey and evidence trail.
+- [[galaxy-sequence-patterns]] — companion MOC for sequence-record operations; FASTA↔tabular is the dominant sequence seam.
+- [[galaxy-interval-patterns]] — companion MOC for coordinate-feature operations.
 - [[galaxy-collection-patterns]] — companion MOC for collection operations.

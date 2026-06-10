@@ -84,5 +84,6 @@ These are tracked as IWC-input-blocked candidates (GitHub `requires-iwc-inputs`)
 ## See also
 
 - [[iwc-interval-operations-survey]] — interval-operation survey and evidence trail.
+- [[galaxy-sequence-patterns]] — companion MOC for sequence-record operations; shares the extract/mask-by-region bridge (`getfasta`/`maskfasta` produce sequence from these intervals).
 - [[galaxy-tabular-patterns]] — companion MOC for opaque-column tabular operations.
 - [[galaxy-collection-patterns]] — companion MOC for collection-container operations.
