@@ -78,3 +78,5 @@ topic/collection-transform:
   description: "Galaxy collection transformation pattern map"
 topic/tabular-transform:
   description: "Galaxy tabular transformation pattern map"
+topic/interval-transform:
+  description: "Galaxy genomic interval transformation pattern map"
