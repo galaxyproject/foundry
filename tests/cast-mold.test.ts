@@ -443,6 +443,156 @@ Wrapper body should not be copied.
   });
 });
 
+describe("cast-mold companion files", () => {
+  function writeCompanionFixture(dir: string, opts: { declareCompanions: boolean }): void {
+    mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+    mkdirSync(path.join(dir, "content/research"), { recursive: true });
+    mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+    // The verifier loads the provenance schema relative to cwd; mirror it.
+    mkdirSync(path.join(dir, "scripts/lib/schemas"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "scripts/lib/schemas/cast-provenance.schema.json"),
+      readFileSync(path.join(repoRoot, "scripts/lib/schemas/cast-provenance.schema.json"), "utf8"),
+    );
+    writeFileSync(
+      path.join(dir, "casts/claude/_target.yml"),
+      [
+        "name: claude",
+        "provenance_schema_version: 2",
+        "required_outputs: [SKILL.md, _provenance.json]",
+        "kinds:",
+        "  research:",
+        "    dst_dir: references/notes/",
+        "    dst_extension: .md",
+        "    modes: [verbatim, condense]",
+        "condense_prompts: {}",
+        "skill_constraints:",
+        "  frontmatter_required: [name, description]",
+        "  forbidden_runtime_paths: []",
+        "  forbid_packaged_files: []",
+        "",
+      ].join("\n"),
+    );
+    writeFileSync(
+      path.join(dir, "content/molds/m/index.md"),
+      `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: Companion-copy cast test mold summary.
+references:
+  - kind: research
+    ref: "[[bundled-note]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    trigger: When reasoning about the bundled spec.
+---
+
+# m
+
+Use the bundled note reference.
+`,
+    );
+    const companionsFm = opts.declareCompanions ? "companions:\n  - bundled-note.spec.yml\n" : "";
+    writeFileSync(
+      path.join(dir, "content/research/bundled-note.md"),
+      `---
+type: research
+title: Bundled note
+tags: [research/component]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: A multi-file note; consume bundled-note.spec.yml for the structured spec.
+${companionsFm}---
+
+Consume \`bundled-note.spec.yml\` for the structured spec.
+`,
+    );
+    writeFileSync(path.join(dir, "content/research/bundled-note.spec.yml"), "spec: true\n");
+  }
+
+  it("copies declared companion files next to the note and records companion_of", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-companion-"));
+    try {
+      writeCompanionFixture(dir, { declareCompanions: true });
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+
+      const companionPath = path.join(
+        dir,
+        "casts/claude/skills/m/references/notes/bundled-note.spec.yml",
+      );
+      expect(existsSync(companionPath), "companion file should land in the bundle").toBe(true);
+      expect(readFileSync(companionPath, "utf8")).toBe("spec: true\n");
+
+      const prov = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+      );
+      const companion = prov.refs.find(
+        (ref: { dst: string }) => ref.dst === "references/notes/bundled-note.spec.yml",
+      );
+      expect(companion, "companion ref recorded in provenance").toBeTruthy();
+      expect(companion.companion_of).toBe("references/notes/bundled-note.md");
+      expect(companion.kind).toBe("research");
+      expect(companion.src_hash).toBe(companion.dst_hash);
+
+      const verify = execVerify(dir, "m");
+      expect(verify.code, `stderr: ${verify.stderr}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("verifier rejects a bundled note pointing at an undeclared sibling", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-companion-neg-"));
+    try {
+      writeCompanionFixture(dir, { declareCompanions: false });
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+      // The sibling is named in the note body but never declared/copied.
+      expect(
+        existsSync(path.join(dir, "casts/claude/skills/m/references/notes/bundled-note.spec.yml")),
+      ).toBe(false);
+
+      const verify = execVerify(dir, "m");
+      expect(verify.code).not.toBe(0);
+      expect(verify.stderr).toContain("bundled-note.spec.yml");
+      expect(verify.stderr).toContain("not present in the bundle");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+function execVerify(cwd: string, mold: string): { code: number; stdout: string; stderr: string } {
+  try {
+    const stdout = execFileSync("npx", ["tsx", castVerify, mold, "--target=claude"], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    return { code: 0, stdout, stderr: "" };
+  } catch (e) {
+    const err = e as { status?: number; stdout?: Buffer | string; stderr?: Buffer | string };
+    return {
+      code: typeof err.status === "number" ? err.status : 1,
+      stdout: typeof err.stdout === "string" ? err.stdout : (err.stdout?.toString() ?? ""),
+      stderr: typeof err.stderr === "string" ? err.stderr : (err.stderr?.toString() ?? ""),
+    };
+  }
+}
+
 describe("validate-artifact process runner", () => {
   it("uses exit code and captures stdout/stderr as opaque evidence", async () => {
     const { runProcessValidation } =

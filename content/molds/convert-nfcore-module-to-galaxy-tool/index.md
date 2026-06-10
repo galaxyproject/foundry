@@ -72,7 +72,7 @@ references:
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Resolve the container directive (mulled, biocontainer, Wave) and environment.yml into a Galaxy <requirements> block with matching bioconda pins."
     trigger: "When emitting <requirements> and the module's container directive is non-trivial (ternary or mulled)."

@@ -6,11 +6,11 @@
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 13,
     "content_hash": "dcfcf64472d7355c5859afa4b21ec76e75d995d8aff34e0cecffcd978128eae3",
-    "commit": "3079d47c6b9e016687ec99bb5f3d5cd6aa51a65a"
+    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-06-09T17:24:48.495Z",
+  "cast_at": "2026-06-10T16:53:00.579Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -82,8 +82,24 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
       "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
-      "src_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
-      "dst_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
+      "src_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "dst_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-containers-and-envs]]",
+      "src": "content/research/component-nextflow-containers-and-envs.yml",
+      "dst": "references/notes/component-nextflow-containers-and-envs.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
+      "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
+      "companion_of": "references/notes/component-nextflow-containers-and-envs.md",
+      "src_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
+      "dst_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
       "source": "deterministic"
     },
     {
@@ -114,8 +130,24 @@
       "purpose": "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions.",
       "trigger": "When filling test_fixtures or nf_tests sections of the summary.",
       "verification": "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction.",
-      "src_hash": "033e438627faa56953f4d4fdc27f984e45761d409c4581fcd66040085a897507",
-      "dst_hash": "033e438627faa56953f4d4fdc27f984e45761d409c4581fcd66040085a897507",
+      "src_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
+      "dst_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-testing]]",
+      "src": "content/research/component-nextflow-testing.yml",
+      "dst": "references/notes/component-nextflow-testing.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions.",
+      "trigger": "When filling test_fixtures or nf_tests sections of the summary.",
+      "companion_of": "references/notes/component-nextflow-testing.md",
+      "src_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
+      "dst_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
       "source": "deterministic"
     },
     {

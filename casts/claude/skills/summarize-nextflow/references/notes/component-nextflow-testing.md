@@ -11,6 +11,8 @@ revised: 2026-05-05
 revision: 2
 ai_generated: true
 summary: "nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs nextflow-test-to-target-tests Mold and summarize-nextflow §7."
+companions:
+  - "component-nextflow-testing.yml"
 sources:
   - "https://www.nf-test.com/"
   - "https://www.nf-test.com/docs/assertions/"

@@ -6,9 +6,9 @@
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 3,
     "content_hash": "17349c178341419cbf0a42e1ae1ccb9408c2c4d6f722d2c2b4122a2ca3b375db",
-    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
+    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
   },
-  "cast_at": "2026-05-11T07:25:45.477Z",
+  "cast_at": "2026-06-10T16:50:41.570Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -60,8 +60,24 @@
       "purpose": "Map Nextflow container/conda evidence to Galaxy UDT container and package provenance.",
       "trigger": "When a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.",
       "verification": "Author one UDT from nf-core/bacass or nf-core/rnaseq process evidence and confirm the note improves requirements/container extraction.",
-      "src_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
-      "dst_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
+      "src_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "dst_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-containers-and-envs]]",
+      "src": "content/research/component-nextflow-containers-and-envs.yml",
+      "dst": "references/notes/component-nextflow-containers-and-envs.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Map Nextflow container/conda evidence to Galaxy UDT container and package provenance.",
+      "trigger": "When a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.",
+      "companion_of": "references/notes/component-nextflow-containers-and-envs.md",
+      "src_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
+      "dst_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
       "source": "deterministic"
     },
     {
@@ -74,8 +90,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.",
-      "src_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
-      "dst_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
+      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"
     }
   ],

@@ -26,7 +26,7 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
   - "[[debug-galaxy-workflow-output]]"
 sources:
-  - "https://github.com/jmchilton/foundry/issues/53"
+  - "https://github.com/galaxyproject/foundry/issues/53"
 summary: "Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers."
 ---
 

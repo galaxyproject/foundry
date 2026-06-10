@@ -5,10 +5,10 @@
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 2,
-    "content_hash": "232555a672a2ef85c887e2a81121310366d187a42da9770431e4691584e2bbe7",
-    "commit": "a675a529215a4ec0bf3b5562b0c4ce66f6ea4c9c"
+    "content_hash": "b54721c00d1de560328ade8e270ca8ff91575c09161162e84835142bdfb4024d",
+    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
   },
-  "cast_at": "2026-05-12T03:05:37.262Z",
+  "cast_at": "2026-06-10T16:50:45.656Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -20,7 +20,7 @@
       "load": "on-demand",
       "evidence": "hypothesis",
       "purpose": "Reference for `planemo lint` flags and output classification; first gate in the convergence loop.",
-      "trigger": "Step 10.1 \u2014 after every <command>/<inputs>/<outputs> emission.",
+      "trigger": "Step 10.1 — after every <command>/<inputs>/<outputs> emission.",
       "verification": "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses.",
       "src_hash": "d041bdaa37cfdb85121e1066d9a198e6e5c33aa38c3c2d5847a5f06e5bd121d5",
       "dst_hash": "862d714fa6eb7d9233173948162ff880262e2c867394f1157d073a4ce8d81523",
@@ -36,7 +36,7 @@
       "load": "on-demand",
       "evidence": "hypothesis",
       "purpose": "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path.",
-      "trigger": "Step 10.2 \u2014 after lint clears.",
+      "trigger": "Step 10.2 — after lint clears.",
       "verification": "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout.",
       "src_hash": "ab0bb6afa8350bea11da5f2cfa646fd8c25fefc9afe20dbca3e68cffa4b53314",
       "dst_hash": "26b912fe63d0664841cd597437a221eee048e5098affada786a847e265ba1106",
@@ -52,7 +52,7 @@
       "load": "upfront",
       "evidence": "hypothesis",
       "purpose": "Install metadata + pin SHA for the planemo CLI invoked by the convergence loop.",
-      "trigger": "Always \u2014 the cast skill needs planemo on PATH before running lint/test.",
+      "trigger": "Always — the cast skill needs planemo on PATH before running lint/test.",
       "verification": "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command.",
       "src_hash": "4a8db8de6573428d2785824465f9ee7e75850bf786f9f469e68407699bf109f3",
       "dst_hash": "4a8db8de6573428d2785824465f9ee7e75850bf786f9f469e68407699bf109f3",
@@ -185,7 +185,7 @@
     },
     {
       "kind": "research",
-      "mode": "condense",
+      "mode": "verbatim",
       "ref": "[[component-nextflow-containers-and-envs]]",
       "src": "content/research/component-nextflow-containers-and-envs.md",
       "dst": "references/notes/component-nextflow-containers-and-envs.md",
@@ -195,18 +195,25 @@
       "purpose": "Resolve the container directive (mulled, biocontainer, Wave) and environment.yml into a Galaxy <requirements> block with matching bioconda pins.",
       "trigger": "When emitting <requirements> and the module's container directive is non-trivial (ternary or mulled).",
       "verification": "Cast against a mulled-container module (multiqc); confirm <requirements> declares all packages from environment.yml.",
-      "src_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
-      "dst_hash": "eb3d4a24c66dc49395b938ac75a00d35d3a7187162d21ac2bdc25092beefaa1b",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
+      "src_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "dst_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-containers-and-envs]]",
+      "src": "content/research/component-nextflow-containers-and-envs.yml",
+      "dst": "references/notes/component-nextflow-containers-and-envs.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Resolve the container directive (mulled, biocontainer, Wave) and environment.yml into a Galaxy <requirements> block with matching bioconda pins.",
+      "trigger": "When emitting <requirements> and the module's container directive is non-trivial (ternary or mulled).",
+      "companion_of": "references/notes/component-nextflow-containers-and-envs.md",
+      "src_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
+      "dst_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
+      "source": "deterministic"
     },
     {
       "kind": "research",
@@ -268,7 +275,7 @@
       "load": "on-demand",
       "evidence": "hypothesis",
       "purpose": "Validate `planemo test --test_output_json` output before classifying failures; the JSON gate that replaces free-text parsing.",
-      "trigger": "Step 10.2 \u2014 after every `planemo test` invocation.",
+      "trigger": "Step 10.2 — after every `planemo test` invocation.",
       "verification": "Cast and confirm AJV-validation runs before the failure-classification branch.",
       "src_hash": "6c6fe24c1615c7b12b843a8ce7a37483deb4e787f5b3e98862817f0125e9be4e",
       "dst_hash": "6c6fe24c1615c7b12b843a8ce7a37483deb4e787f5b3e98862817f0125e9be4e",

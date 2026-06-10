@@ -127,6 +127,7 @@ const patternSchema = z.object({
   parent_pattern: wikiLink.optional(),
   verification_paths: z.array(z.string()).optional(),
   iwc_exemplars: z.array(iwcExemplar).optional(),
+  companions: z.array(z.string()).min(1).optional(),
 }).strict();
 
 const sourcePatternSchema = z.object({
@@ -175,6 +176,7 @@ const researchSchema = z.object({
   type: z.literal('research'),
   subtype: z.enum(['component', 'design-problem', 'design-spec']),
   component: z.string().optional(),
+  companions: z.array(z.string()).min(1).optional(),
   ...baseFields,
 }).strict();
 
