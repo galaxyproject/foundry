@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
     "content_hash": "34149e0dac3a2d6bfb0b6e9c4f8706320489f79e385b58c31e63d48c1e3d3c00",
-    "commit": "97effead63ef05cbac9d7f7227d8695a9e571e79"
+    "commit": "d25bc6dde7c87b25fcff081eb08b7eb668996438"
   },
-  "cast_at": "2026-05-11T20:45:01.763Z",
+  "cast_at": "2026-06-09T22:02:03.971Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection reshape, relabel, cleanup, and map-over choices in corpus-observed Galaxy recipes.",
       "trigger": "When CWL scatter, arrays, nested arrays, records, or secondary-file contracts require explicit Galaxy collection operations.",
-      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
-      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "source": "deterministic"
     },
     {
@@ -95,8 +95,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked CWL-to-Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
-      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
       "source": "deterministic"
     },
     {
@@ -124,8 +124,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Read CWL step graph, edge markers, scatter, conditionals, secondary files, and tool requirements while drafting Galaxy-facing data flow.",
-      "src_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
-      "dst_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
+      "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
       "source": "deterministic"
     }
   ],

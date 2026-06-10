@@ -5,10 +5,10 @@
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 6,
-    "content_hash": "e810e04f7bb3fc0d5f5e2c26b0657dab886727933e1848882a5ca3af1eba8b36",
-    "commit": "13629c24a84ae10af5d54f6cd2adbabdf47a1e40"
+    "content_hash": "4d4d839a63d1e13846c43694d1301cc706ab81a4cd8ff6cfb72f36a809facdc6",
+    "commit": "d25bc6dde7c87b25fcff081eb08b7eb668996438"
   },
-  "cast_at": "2026-05-10T22:31:07.773Z",
+  "cast_at": "2026-06-09T22:02:02.774Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -55,8 +55,8 @@
       "evidence": "corpus-observed",
       "purpose": "Compare proposed collection transformations against curated corpus-observed pattern guidance.",
       "trigger": "When the data-flow brief proposes collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections.",
-      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
-      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "source": "deterministic"
     },
     {
@@ -70,8 +70,8 @@
       "evidence": "corpus-observed",
       "purpose": "Compare proposed tabular transformations against curated corpus-observed pattern guidance.",
       "trigger": "When the data-flow brief proposes tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections.",
-      "src_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
-      "dst_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
       "source": "deterministic"
     },
     {
@@ -86,8 +86,8 @@
       "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
       "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
       "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
-      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
-      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
       "source": "deterministic"
     },
     {
@@ -160,10 +160,17 @@
         ]
       },
       {
-        "id": "paper-galaxy-design",
-        "description": "Combined Galaxy interface + data-flow design brief from [[paper-summary-to-galaxy-design]] when running the PAPER → GALAXY pipeline.",
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
         "producers": [
-          "paper-summary-to-galaxy-design"
+          "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
+        "producers": [
+          "freeform-summary-to-galaxy-data-flow"
         ]
       }
     ]

@@ -17,14 +17,14 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
-  - "[[freeform-summary-to-galaxy-design]]"
+  - "[[freeform-summary-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
   - "[[freeform-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
   - "[[advance-galaxy-draft-step]]"
 sources:
-  - "https://github.com/jmchilton/foundry/issues/54"
+  - "https://github.com/galaxyproject/foundry/issues/54"
 summary: "Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation."
 ---
 

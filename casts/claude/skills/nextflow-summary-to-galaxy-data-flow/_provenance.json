@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 4,
     "content_hash": "41f08ec8e946eda3630193fb5a524f76a4fcc245ae0a3e8f9551690ffeba8181",
-    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
+    "commit": "d25bc6dde7c87b25fcff081eb08b7eb668996438"
   },
-  "cast_at": "2026-05-11T07:25:46.259Z",
+  "cast_at": "2026-06-09T22:02:07.002Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -40,8 +40,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
       "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
-      "src_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
-      "dst_hash": "613141012174e573ca7b7253224e3ed2f5345b76f63d46acd47e050db048bd93",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "source": "deterministic"
     },
     {
@@ -55,8 +55,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns.",
       "trigger": "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges.",
-      "src_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
-      "dst_hash": "1f793592f8c5ef293e14cfb8a775cbb661a541799d80d108b9b893a79598261f",
+      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
       "source": "deterministic"
     },
     {
@@ -70,8 +70,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
-      "dst_hash": "5279dbdaa6db192dd3b8e73d6a538c28ad4020799b08a0a8d5a9713953bddd39",
+      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
       "source": "deterministic"
     },
     {
@@ -114,8 +114,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Classify Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.",
-      "src_hash": "d46fdcbfac0b9219342bbb200a10a689e7ca6291e05488bb760fc39291fcb964",
-      "dst_hash": "d46fdcbfac0b9219342bbb200a10a689e7ca6291e05488bb760fc39291fcb964",
+      "src_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
+      "dst_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
       "source": "deterministic"
     },
     {
@@ -144,8 +144,8 @@
       "evidence": "corpus-observed",
       "purpose": "Cross-check source-side reference-data classifications before deciding how reference assets and optional rebuild branches flow through the Galaxy data-flow draft.",
       "trigger": "When the reference-data or interface brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
-      "src_hash": "3424cbc7257738d831e3c2996f2b20d12dda94ec93f8035e2f76f497e79647b1",
-      "dst_hash": "3424cbc7257738d831e3c2996f2b20d12dda94ec93f8035e2f76f497e79647b1",
+      "src_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
+      "dst_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
       "source": "deterministic"
     },
     {
@@ -158,8 +158,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Translate Nextflow channel, tuple, and path shapes into Galaxy dataset and collection shapes.",
-      "src_hash": "c709a5fcfa5b7fba62faafd7636d947981a2cacae12a71e15407245dc9cebd28",
-      "dst_hash": "c709a5fcfa5b7fba62faafd7636d947981a2cacae12a71e15407245dc9cebd28",
+      "src_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
+      "dst_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
       "source": "deterministic"
     },
     {
@@ -173,8 +173,8 @@
       "evidence": "corpus-observed",
       "purpose": "Decide how reference assets and their indexes flow through the Galaxy data-flow draft (preserving dbkey through map-overs, deferring index-building to wrappers vs surfacing as workflow steps).",
       "trigger": "When the upstream interface brief carries reference-data inputs (FASTA, fai, dict, indexes, known sites, intervals, PoN) or when the source pipeline's compute-if-missing branches imply rebuild semantics the data flow has to honor.",
-      "src_hash": "8e051a2c1faccd1c692e67c3304983d40db2ce6be0fc185baa250e41a0b7f398",
-      "dst_hash": "8e051a2c1faccd1c692e67c3304983d40db2ce6be0fc185baa250e41a0b7f398",
+      "src_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
+      "dst_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
       "source": "deterministic"
     },
     {
@@ -187,8 +187,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure while drafting Galaxy-facing abstract data flow.",
-      "src_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
-      "dst_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
+      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"
     }
   ],

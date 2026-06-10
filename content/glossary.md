@@ -34,7 +34,7 @@ Alphabetical.
 
 **Foundry** *(short for Galaxy Workflow Foundry)* — the standalone knowledge base where Pipelines, Molds, pattern pages, CLI manual pages, IO schemas, and IWC-citing content live. Renders as a navigable site; serves as the source of truth that casting reads.
 
-**Freeform summary** — Markdown source-summary handoff for narrative or interview-derived starts. Produced by `summarize-paper` and `interview-to-freeform-summary`; consumed by `freeform-summary-to-galaxy-design`, `freeform-summary-to-cwl-design`, and `freeform-summary-to-galaxy-template`. Deliberately not a rigid workflow schema: it records source evidence, uncertainty, open questions, methods, tools, sample data, parameters, and expected outputs.
+**Freeform summary** — Markdown source-summary handoff for narrative or interview-derived starts. Produced by `summarize-paper` and `interview-to-freeform-summary`; consumed by `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-cwl-design`, and `freeform-summary-to-galaxy-template`. Deliberately not a rigid workflow schema: it records source evidence, uncertainty, open questions, methods, tools, sample data, parameters, and expected outputs.
 
 **Gate** *(`[gate]` annotation, phase kind — future)* — placeholder for a phase-level annotation marking an inline approval / scope-confirmation checkpoint. Coined when a real pipeline first needs an inline pause for user input; not used by any current pipeline. The phase-kind set is open and not pre-enumerated — `[branch]` and `[gate]` are unrelated behaviors and don't share an umbrella tag.
 
