@@ -17,11 +17,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-06-10 | 3 |
 | [[freeform-summary-to-galaxy-data-flow]] | Translate a free-form source summary into a Galaxy data-flow design brief. | draft | 2026-06-09 | 1 |
 | [[freeform-summary-to-galaxy-interface]] | Map a free-form source summary into a Galaxy workflow interface design brief. | draft | 2026-06-09 | 1 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | draft | 2026-06-02 | 1 |
 | [[interview-to-freeform-summary]] | Normalize a free-form user interview into the shared freeform-summary workflow handoff. | draft | 2026-05-22 | 1 |
-| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-05-11 | 2 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | draft | 2026-05-11 | 6 |
 | [[cwl-summary-to-galaxy-data-flow]] | Translate a CWL summary into a Galaxy data-flow design brief. | draft | 2026-05-10 | 2 |
 | [[cwl-summary-to-galaxy-interface]] | Map a CWL summary into a Galaxy workflow interface design brief. | draft | 2026-05-10 | 2 |
@@ -61,11 +61,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[nfcore-channel-input-to-galaxy-collection]] | Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type="data"> or paired/list collection input. | draft | 2026-05-10 | 2 |
-| [[nfcore-meta-map-to-galaxy-params]] | Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier. | draft | 2026-05-10 | 2 |
-| [[nfcore-stub-block-to-galaxy-noop-test]] | nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml. | draft | 2026-05-10 | 2 |
-| [[nfcore-task-ext-args-to-galaxy-additional-options]] | Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments. | draft | 2026-05-10 | 2 |
-| [[nfcore-versions-emit-to-galaxy-version-command]] | Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel. | draft | 2026-05-10 | 2 |
 | [[cleanup-sync-and-publish-nonempty-results]] | Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results. | draft | 2026-05-04 | 1 |
 | [[fan-in-bundle-consume-and-flatten]] | Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing. | draft | 2026-05-04 | 1 |
 | [[manifest-to-mapped-collection-lifecycle]] | Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs. | draft | 2026-05-04 | 1 |
@@ -212,3 +207,13 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[component-nextflow-inspect]] | White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-05-01 | 1 |
 | [[component-nf-core-tools]] | White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision. | draft | 2026-05-01 | 1 |
+
+## Design Problems
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[nfcore-channel-input-to-galaxy-collection]] | Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type="data"> or paired/list collection input. | draft | 2026-06-10 | 3 |
+| [[nfcore-meta-map-to-galaxy-params]] | Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier. | draft | 2026-06-10 | 3 |
+| [[nfcore-stub-block-to-galaxy-noop-test]] | nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml. | draft | 2026-06-10 | 3 |
+| [[nfcore-task-ext-args-to-galaxy-additional-options]] | Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments. | draft | 2026-06-10 | 3 |
+| [[nfcore-versions-emit-to-galaxy-version-command]] | Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel. | draft | 2026-06-10 | 3 |

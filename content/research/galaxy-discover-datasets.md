@@ -8,14 +8,12 @@ tags:
 component: "Galaxy <discover_datasets> XML element"
 status: draft
 created: 2026-05-10
-revised: 2026-05-10
-revision: 1
+revised: 2026-06-10
+revision: 2
 ai_generated: true
 summary: "Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"
-related_patterns:
-  - "[[nfcore-channel-input-to-galaxy-collection]]"
 related_notes:
   - "[[convert-nfcore-module-to-galaxy-tool]]"
   - "[[nfcore-channel-input-to-galaxy-collection]]"

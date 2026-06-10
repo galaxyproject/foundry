@@ -9,12 +9,12 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-05-10
-revised: 2026-05-11
-revision: 2
+revised: 2026-06-10
+revision: 3
 ai_generated: true
 summary: "Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks)."
 references:
-  - kind: pattern
+  - kind: research
     ref: "[[nfcore-channel-input-to-galaxy-collection]]"
     used_at: both
     load: upfront
@@ -23,7 +23,7 @@ references:
     purpose: "Map process input channels (tuple(meta, path)) to Galaxy <param type=\"data\"> / <param type=\"data_collection\">."
     trigger: "When emitting <inputs> for a module."
     verification: "Cast and run against fastp (paired, tuple(meta, [path,path])) and seqkit/grep (single, tuple(meta, path)); confirm Galaxy <inputs> shape matches the channel cardinality."
-  - kind: pattern
+  - kind: research
     ref: "[[nfcore-meta-map-to-galaxy-params]]"
     used_at: both
     load: upfront
@@ -32,7 +32,7 @@ references:
     purpose: "Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped."
     trigger: "When a process consumes a meta-map and any meta keys influence the script: body."
     verification: "Cast against a paired-aware module (fastp); confirm meta.single_end becomes a <conditional>, meta.id is dropped."
-  - kind: pattern
+  - kind: research
     ref: "[[nfcore-task-ext-args-to-galaxy-additional-options]]"
     used_at: both
     load: upfront
@@ -41,7 +41,7 @@ references:
     purpose: "Surface task.ext.args as a single Galaxy text param; do not enumerate per-flag inputs."
     trigger: "When the upstream script: body interpolates ${task.ext.args} (or args2/args3)."
     verification: "Cast against a module with task.ext.args (samtools/sort); confirm a single extra_args text param is emitted with sane sanitization."
-  - kind: pattern
+  - kind: research
     ref: "[[nfcore-versions-emit-to-galaxy-version-command]]"
     used_at: both
     load: upfront
@@ -50,7 +50,7 @@ references:
     purpose: "Translate the versions.yml emit block (or topic: versions) into Galaxy's <version_command>."
     trigger: "When the script: body or output: declarations contain a versions emit."
     verification: "Cast against fastp; confirm <version_command> reproduces the upstream version string for the primary tool."
-  - kind: pattern
+  - kind: research
     ref: "[[nfcore-stub-block-to-galaxy-noop-test]]"
     used_at: both
     load: upfront

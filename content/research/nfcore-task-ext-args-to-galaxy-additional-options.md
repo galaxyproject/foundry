@@ -1,15 +1,15 @@
 ---
-type: pattern
-pattern_kind: operation
-evidence: hypothesis
+type: research
+subtype: design-problem
 title: "nf-core task.ext.args → Galaxy additional-options bag"
 tags:
-  - pattern
+  - research/design-problem
+  - source/nextflow
   - target/galaxy
 status: draft
 created: 2026-05-10
-revised: 2026-05-10
-revision: 2
+revised: 2026-06-10
+revision: 3
 ai_generated: true
 summary: "Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments."
 related_molds:
@@ -118,5 +118,5 @@ The convert Mold defaults to (1) because it preserves the rest of Galaxy's input
 ## See also
 
 - `[[nfcore-meta-map-to-galaxy-params]]` — sibling: handling identity vs behavior keys.
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this pattern.
+- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
 - `tools-iuc/tools/fastp/fastp.xml` — IUC's per-flag promotion choice (option 2 above).
