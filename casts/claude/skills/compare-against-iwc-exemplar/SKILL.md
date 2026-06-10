@@ -17,7 +17,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - Read artifact `nextflow-galaxy-data-flow`. Produced by `nextflow-summary-to-galaxy-data-flow`. Galaxy data-flow brief from nextflow-summary-to-galaxy-data-flow when running the NEXTFLOW → GALAXY pipeline.
 - Read artifact `cwl-galaxy-interface`. Produced by `cwl-summary-to-galaxy-interface`. Galaxy interface brief from cwl-summary-to-galaxy-interface when running the CWL → GALAXY pipeline.
 - Read artifact `cwl-galaxy-data-flow`. Produced by `cwl-summary-to-galaxy-data-flow`. Galaxy data-flow brief from cwl-summary-to-galaxy-data-flow when running the CWL → GALAXY pipeline.
-- Read artifact `paper-galaxy-design`. Produced by `paper-summary-to-galaxy-design`. Combined Galaxy interface + data-flow design brief from paper-summary-to-galaxy-design when running the PAPER → GALAXY pipeline.
+- Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.
+- Read artifact `freeform-galaxy-data-flow`. Produced by `freeform-summary-to-galaxy-data-flow`. Galaxy data-flow brief from freeform-summary-to-galaxy-data-flow when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.
 
 ## Outputs
 
@@ -51,7 +52,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream `*-summary-to-galaxy-template` skill before per-step authoring effort is spent.
 
-This skill is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs (or the combined paper design brief) and before the gxformat2 template skill. Discovery, ranking, and comparison are one action — there is no separate retrieval skill.
+This skill is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs and before the gxformat2 template skill. Discovery, ranking, and comparison are one action — there is no separate retrieval skill.
 
 ### Procedure
 

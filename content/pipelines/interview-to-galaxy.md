@@ -13,7 +13,8 @@ ai_generated: true
 summary: "Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff."
 phases:
   - mold: "[[interview-to-freeform-summary]]"
-  - mold: "[[freeform-summary-to-galaxy-design]]"
+  - mold: "[[freeform-summary-to-galaxy-interface]]"
+  - mold: "[[freeform-summary-to-galaxy-data-flow]]"
   - mold: "[[compare-against-iwc-exemplar]]"
   - mold: "[[freeform-summary-to-galaxy-template]]"
   - mold: "[[advance-galaxy-draft-step]]"

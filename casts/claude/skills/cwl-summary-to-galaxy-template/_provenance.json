@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 3,
     "content_hash": "b5a99fe78700030125e709d7509bf0290430eb18d82f329cebbfc0eb16f9c229",
-    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
+    "commit": "d25bc6dde7c87b25fcff081eb08b7eb668996438"
   },
-  "cast_at": "2026-06-09T17:17:31.375Z",
+  "cast_at": "2026-06-09T22:02:05.180Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -98,8 +98,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
-      "dst_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
+      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
       "source": "deterministic"
     },
     {
@@ -156,8 +156,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Read CWL source graph, step ids, command surfaces, scatter, conditionals, requirements, and warnings while emitting placeholder steps.",
-      "src_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
-      "dst_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
+      "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
       "source": "deterministic"
     },
     {

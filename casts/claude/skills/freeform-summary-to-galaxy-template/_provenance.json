@@ -5,10 +5,10 @@
     "name": "freeform-summary-to-galaxy-template",
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 3,
-    "content_hash": "cbaf68f40fbc9a7808dfccc4b866a30fd8db779ab951235749fa28dc86907970",
-    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
+    "content_hash": "82ed61f28a1535d48682fc395519c386f3b44516f3a100401da65013b59217b0",
+    "commit": "d25bc6dde7c87b25fcff081eb08b7eb668996438"
   },
-  "cast_at": "2026-06-09T17:17:33.886Z",
+  "cast_at": "2026-06-09T22:02:06.367Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -80,11 +80,11 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Respect the handoff from the combined freeform-to-Galaxy design brief to the gxformat2 skeleton.",
+      "purpose": "Respect the handoff from the freeform-to-Galaxy interface and data-flow briefs to the gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked freeform-to-Galaxy templates preserve the design-brief/template split without schema changes.",
-      "src_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
-      "dst_hash": "c8f43520fc761531981c585e5967c8cf00560a04809fb04b4c0a5d86111526ca",
+      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
       "source": "deterministic"
     },
     {
@@ -152,10 +152,17 @@
         ]
       },
       {
-        "id": "freeform-galaxy-design",
-        "description": "Combined Galaxy design brief from [[freeform-summary-to-galaxy-design]] that pins interface and data-flow choices.",
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] that pins workflow inputs, outputs, labels.",
         "producers": [
-          "freeform-summary-to-galaxy-design"
+          "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices.",
+        "producers": [
+          "freeform-summary-to-galaxy-data-flow"
         ]
       },
       {

@@ -26,7 +26,8 @@ Generated from content frontmatter. Do not edit by hand.
 - [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
 - [[find-test-data]] — Search IWC fixtures and public sources for test data matching a data-flow shape.
 - [[freeform-summary-to-cwl-design]] — Translate a free-form source summary into a CWL workflow design brief.
-- [[freeform-summary-to-galaxy-design]] — Translate a free-form source summary into a Galaxy workflow design brief.
+- [[freeform-summary-to-galaxy-data-flow]] — Translate a free-form source summary into a Galaxy data-flow design brief.
+- [[freeform-summary-to-galaxy-interface]] — Map a free-form source summary into a Galaxy workflow interface design brief.
 - [[freeform-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.

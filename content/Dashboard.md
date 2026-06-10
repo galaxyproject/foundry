@@ -17,6 +17,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[freeform-summary-to-galaxy-data-flow]] | Translate a free-form source summary into a Galaxy data-flow design brief. | draft | 2026-06-09 | 1 |
+| [[freeform-summary-to-galaxy-interface]] | Map a free-form source summary into a Galaxy workflow interface design brief. | draft | 2026-06-09 | 1 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | draft | 2026-06-02 | 1 |
 | [[interview-to-freeform-summary]] | Normalize a free-form user interview into the shared freeform-summary workflow handoff. | draft | 2026-05-22 | 1 |
 | [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-05-11 | 2 |
@@ -35,7 +37,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | draft | 2026-05-07 | 4 |
 | [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring. | draft | 2026-05-06 | 6 |
 | [[freeform-summary-to-cwl-design]] | Translate a free-form source summary into a CWL workflow design brief. | draft | 2026-05-05 | 1 |
-| [[freeform-summary-to-galaxy-design]] | Translate a free-form source summary into a Galaxy workflow design brief. | draft | 2026-05-05 | 1 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary. | draft | 2026-05-05 | 5 |
 | [[nextflow-summary-to-cwl-data-flow]] | Translate a Nextflow summary into a CWL data-flow design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-cwl-interface]] | Map a Nextflow summary into a CWL Workflow interface design brief. | draft | 2026-05-05 | 1 |

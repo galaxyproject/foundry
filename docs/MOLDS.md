@@ -36,7 +36,8 @@ Split by source and target where the handoff shape is specific enough to be usef
 - `cwl-summary-to-galaxy-data-flow` — Galaxy-facing abstract topology from a CWL summary plus interface brief.
 - `nextflow-summary-to-cwl-interface` — CWL Workflow interface design from a Nextflow summary.
 - `nextflow-summary-to-cwl-data-flow` — CWL-facing abstract topology, scatter/gather choices, and unresolved CommandLineTool needs from a Nextflow summary plus interface brief.
-- `freeform-summary-to-galaxy-design` — combined Galaxy interface and data-flow design brief from a free-form summary; split later if examples justify it.
+- `freeform-summary-to-galaxy-interface` — Galaxy workflow interface design brief from a free-form summary.
+- `freeform-summary-to-galaxy-data-flow` — Galaxy-facing abstract data-flow brief from a free-form summary plus interface brief.
 - `freeform-summary-to-cwl-design` — combined CWL interface and data-flow design brief from a free-form summary; split later if examples justify it.
 
 ### Template generation (source × target for Galaxy, target-specific for CWL)
