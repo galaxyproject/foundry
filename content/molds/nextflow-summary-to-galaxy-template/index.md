@@ -111,6 +111,22 @@ references:
     evidence: corpus-observed
     purpose: "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps."
     trigger: "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges."
+  - kind: pattern
+    ref: "[[galaxy-conditionals-patterns]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Use corpus-grounded conditional pattern guidance for unresolved skeleton steps."
+    trigger: "When adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches."
+  - kind: pattern
+    ref: "[[galaxy-interval-patterns]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Use corpus-grounded genomic-interval pattern guidance for unresolved skeleton steps."
+    trigger: "When adding TODO steps for interval overlap, merge, coverage, windowing, masking, or set-algebra on coordinate features."
   - kind: research
     ref: "[[nextflow-conditional-to-galaxy-subworkflow-when]]"
     used_at: runtime

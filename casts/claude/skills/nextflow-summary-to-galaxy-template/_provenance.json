@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 6,
-    "content_hash": "d5843f5f9256334dd6f265e96cdf97812dcbcdb1c40060b62093eb22b1153cc2",
-    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
+    "content_hash": "8de5feda177aa087a833bdbe415e681b9e0f2122c99847955cc519edf231569a",
+    "commit": "613d9a59ab74fc752defd79cdd07fffa0c790591"
   },
-  "cast_at": "2026-06-10T16:51:18.874Z",
+  "cast_at": "2026-06-10T23:00:57.406Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -58,6 +58,36 @@
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
       "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
       "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-conditionals-patterns]]",
+      "src": "content/patterns/galaxy-conditionals-patterns.md",
+      "dst": "references/patterns/galaxy-conditionals-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use corpus-grounded conditional pattern guidance for unresolved skeleton steps.",
+      "trigger": "When adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
+      "src_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "dst_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-interval-patterns]]",
+      "src": "content/patterns/galaxy-interval-patterns.md",
+      "dst": "references/patterns/galaxy-interval-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use corpus-grounded genomic-interval pattern guidance for unresolved skeleton steps.",
+      "trigger": "When adding TODO steps for interval overlap, merge, coverage, windowing, masking, or set-algebra on coordinate features.",
+      "src_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
+      "dst_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
       "source": "deterministic"
     },
     {

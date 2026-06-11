@@ -1,0 +1,131 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "freeform-summary-to-galaxy-data-flow",
+    "path": "content/molds/freeform-summary-to-galaxy-data-flow/index.md",
+    "revision": 1,
+    "content_hash": "0df46089cebecbea8611e06a5ea7a4235042ff6f2ef141eb8c333bd83e7f4ec8",
+    "commit": "613d9a59ab74fc752defd79cdd07fffa0c790591"
+  },
+  "cast_at": "2026-06-10T23:00:46.415Z",
+  "refs": [
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-patterns]]",
+      "src": "content/patterns/galaxy-collection-patterns.md",
+      "dst": "references/patterns/galaxy-collection-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
+      "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
+      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-conditionals-patterns]]",
+      "src": "content/patterns/galaxy-conditionals-patterns.md",
+      "dst": "references/patterns/galaxy-conditionals-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
+      "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
+      "src_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "dst_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-interval-patterns]]",
+      "src": "content/patterns/galaxy-interval-patterns.md",
+      "dst": "references/patterns/galaxy-interval-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
+      "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
+      "src_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
+      "dst_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tabular-patterns]]",
+      "src": "content/patterns/galaxy-tabular-patterns.md",
+      "dst": "references/patterns/galaxy-tabular-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns.",
+      "trigger": "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges.",
+      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-data-flow-draft-contract]]",
+      "src": "content/research/galaxy-data-flow-draft-contract.md",
+      "dst": "references/notes/galaxy-data-flow-draft-contract.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
+      "verification": "Promote after two worked freeform-to-Galaxy translations preserve this Mold boundary without moving fields.",
+      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-sample-sheet-collections]]",
+      "src": "content/research/galaxy-sample-sheet-collections.md",
+      "dst": "references/notes/galaxy-sample-sheet-collections.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it.",
+      "trigger": "When the interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or the free-form summary describes per-sample/per-record metadata that must survive map-over steps.",
+      "src_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
+      "dst_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "freeform-galaxy-data-flow",
+        "kind": "markdown",
+        "default_filename": "freeform-galaxy-data-flow.md",
+        "description": "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "freeform-summary",
+        "description": "Free-form source summary emitted by [[summarize-paper]] or [[interview-to-freeform-summary]]; consumed alongside the Galaxy interface brief.",
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-interface",
+        "description": "Preceding Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] that pins inputs, outputs, and labels.",
+        "producers": [
+          "freeform-summary-to-galaxy-interface"
+        ]
+      }
+    ]
+  }
+}

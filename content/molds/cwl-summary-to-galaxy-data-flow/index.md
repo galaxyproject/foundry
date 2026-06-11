@@ -64,6 +64,22 @@ references:
     evidence: corpus-observed
     purpose: "Ground collection reshape, relabel, cleanup, and map-over choices in corpus-observed Galaxy recipes."
     trigger: "When CWL scatter, arrays, nested arrays, records, or secondary-file contracts require explicit Galaxy collection operations."
+  - kind: pattern
+    ref: "[[galaxy-conditionals-patterns]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns."
+    trigger: "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches."
+  - kind: pattern
+    ref: "[[galaxy-interval-patterns]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes."
+    trigger: "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps."
   - kind: research
     ref: "[[cwl-pickvalue-to-galaxy]]"
     used_at: runtime

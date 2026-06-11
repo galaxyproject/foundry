@@ -5,10 +5,10 @@
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 5,
-    "content_hash": "e6a2be91eec61b2228049273f77672ce15e62ab1651e641c424cec24bedf212b",
-    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
+    "content_hash": "19a0ac796f370b77b60fd4f41c53c4c258e5db1086674da16e6b56e278b94191",
+    "commit": "613d9a59ab74fc752defd79cdd07fffa0c790591"
   },
-  "cast_at": "2026-06-10T16:51:13.319Z",
+  "cast_at": "2026-06-10T23:36:08.444Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -24,36 +24,6 @@
       "verification": "Cast the skill, exercise on an IWC-derived draft with one drafty step, confirm both surfaces validate and diagnostics route back to the implemented step.",
       "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
       "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
-      "source": "deterministic"
-    },
-    {
-      "kind": "pattern",
-      "mode": "verbatim",
-      "ref": "[[galaxy-collection-patterns]]",
-      "src": "content/patterns/galaxy-collection-patterns.md",
-      "dst": "references/patterns/galaxy-collection-patterns.md",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Choose corpus-attested collection recipes when implementing concrete Galaxy steps.",
-      "trigger": "When implementation needs cleanup-after-fanout, sync-by-identifier, singleton unboxing, relabeling, collection reshaping, or collection-tabular bridges.",
-      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
-      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
-      "source": "deterministic"
-    },
-    {
-      "kind": "pattern",
-      "mode": "verbatim",
-      "ref": "[[galaxy-tabular-patterns]]",
-      "src": "content/patterns/galaxy-tabular-patterns.md",
-      "dst": "references/patterns/galaxy-tabular-patterns.md",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Choose corpus-attested tabular recipes when implementing concrete Galaxy steps.",
-      "trigger": "When implementation needs row filtering, column projection, computed columns, joins, grouping, SQL, awk, text-processing wrappers, or tabular-collection bridges.",
-      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
-      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
       "source": "deterministic"
     },
     {
