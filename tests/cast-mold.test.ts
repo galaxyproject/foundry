@@ -10,10 +10,14 @@ const repoRoot = path.resolve(here, "..");
 const castMold = path.join(repoRoot, "scripts", "cast-mold.ts");
 const foundryBuild = path.join(repoRoot, "packages", "build-cli", "src", "bin", "foundry-build.ts");
 const castVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
+// Resolve the repo-local tsx binary by absolute path. Invoking `npx tsx` from a
+// temp-dir cwd can't see local node_modules and auto-installs tsx into the
+// shared npx cache; two such installs racing across test files corrupt it.
+const tsxBin = path.join(repoRoot, "node_modules", ".bin", process.platform === "win32" ? "tsx.cmd" : "tsx");
 
 function runTsx(script: string, args: string[]): { code: number; stdout: string; stderr: string } {
   try {
-    const stdout = execFileSync("npx", ["tsx", script, ...args], {
+    const stdout = execFileSync(tsxBin, [script, ...args], {
       cwd: repoRoot,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
@@ -577,7 +581,7 @@ Consume \`bundled-note.spec.yml\` for the structured spec.
 
 function execVerify(cwd: string, mold: string): { code: number; stdout: string; stderr: string } {
   try {
-    const stdout = execFileSync("npx", ["tsx", castVerify, mold, "--target=claude"], {
+    const stdout = execFileSync(tsxBin, [castVerify, mold, "--target=claude"], {
       cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],

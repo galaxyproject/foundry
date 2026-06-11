@@ -2,6 +2,7 @@
   "source_pipeline": "paper-to-cwl",
   "source_revision": 2,
   "harness_name": "pipeline-paper-to-cwl",
+  "options": ["use-subagents", "checkpoint"],
   "phases": [
     { "phase": 1, "kind": "mold", "skill": "summarize-paper", "cast_present": false, "loop": false },
     { "phase": 2, "kind": "mold", "skill": "freeform-summary-to-cwl-design", "cast_present": false, "loop": false },
