@@ -1,0 +1,53 @@
+---
+// Shared stop-gap framing for the pipeline-harness surfaces (run-a-pipeline
+// page, per-pipeline Run panel, harness sub-route). Single source for the
+// "these are deliberate in-repo stop-gaps" honesty wired to ARCHITECTURE §15.
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+const archHref = 'https://github.com/galaxyproject/foundry/blob/main/docs/ARCHITECTURE.md#15-tracked-follow-up';
+---
+<aside class:list={['stop-gap', compact && 'stop-gap-compact']} aria-label="Stop-gap notice">
+  <span class="badge badge-draft">stop-gap</span>
+  <p>
+    Pipeline harnesses are a deliberate in-repo <strong>stop-gap</strong>, not the production
+    harness surface. How a pipeline becomes an executable harness is open research
+    (<a href={archHref} rel="noreferrer">ARCHITECTURE §15</a>). Today each harness is a trivial
+    linear skill that runs its phase casts in order; expect <strong>manual checkpoints</strong>
+    where a phase isn't yet cast. If a run teaches you something, change the Mold and recast —
+    don't hand-edit the harness skill.
+  </p>
+</aside>
+
+<style>
+  .stop-gap {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: start;
+    gap: 0.6rem 0.8rem;
+    margin: 1.25rem 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 0.7rem;
+    background: var(--color-surface-raised);
+  }
+  .stop-gap-compact {
+    margin: 0.85rem 0;
+    padding: 0.7rem 0.85rem;
+  }
+  .stop-gap p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+  .stop-gap-compact p {
+    font-size: 0.82rem;
+  }
+  .stop-gap a {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+</style>

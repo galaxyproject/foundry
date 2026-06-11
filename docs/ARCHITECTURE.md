@@ -337,9 +337,11 @@ Routes:
 - `dashboard/index.astro` — dashboard driven by `dashboard_sections.json`. Pipeline section leads (journey surface); type sections follow (reference surface).
 - `index/index.astro` — full catalog page (mirrors `Index.md`).
 - `[...slug].astro` — note detail with metadata `<dl>`, wiki-link panels, body via `<Content />` (rendered through `remarkWikiLinks`), backlink panel, Pagefind annotations. For `type: mold` notes, an "Appears in pipelines" panel rolls up every `pipeline` note that references this Mold in its `phases` (computed from `validatePipelinePhases` reverse index).
-- `pipelines/index.astro` — pipeline index; individual pipeline notes render through `[...slug].astro` with `PipelineBody.astro`.
+- `pipelines/index.astro` — pipeline index; individual pipeline notes render through `[...slug].astro` with `PipelineBody.astro`. `PipelineBody` also surfaces a per-pipeline "Run this" panel from the harness `_assembly.json`.
+- `pipelines/run-a-pipeline.astro` — standalone "Run a pipeline" how-to-run surface (install pointer, working-dir convention, stop-gap framing).
+- `pipelines/[slug]/harness.astro` — per-pipeline stop-gap harness detail: `_assembly.json` phase-resolution table + raw harness `SKILL.md` + `StopGapBanner`.
 - `molds/index.astro`, `patterns/index.astro`, `source-patterns/nextflow/index.astro` — type and source-pattern browse pages.
-- `artifacts/index.astro`, `artifacts/[id].astro`, `usage/index.astro`, `usage/claude/[skill].astro` — cast artifact and usage surfaces.
+- `artifacts/index.astro`, `artifacts/[id].astro`, `usage/index.astro`, `usage/claude/[skill].astro` — cast artifact and usage surfaces. The `/usage/` surfaces exclude `pipeline-*` harness casts (`isHarnessSlug` in `lib/casts.ts`); harnesses render on the pipelines surface instead.
 - `design/index.astro`, `design/[slug].astro`, `story/index.astro`, `external.astro`, `log.astro`, `glossary.astro` — supporting public pages.
 - `tags/index.astro` — bucketed tag browser (note-type / `iwc/*` / other). New subject-area buckets get added as tag families bloom.
 - `tags/[...tag].astro` — per-tag filter.
