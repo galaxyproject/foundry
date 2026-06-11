@@ -1,0 +1,18 @@
+{
+  "source_pipeline": "paper-to-cwl",
+  "source_revision": 2,
+  "harness_name": "pipeline-paper-to-cwl",
+  "phases": [
+    { "phase": 1, "kind": "mold", "skill": "summarize-paper", "cast_present": false, "loop": false },
+    { "phase": 2, "kind": "mold", "skill": "freeform-summary-to-cwl-design", "cast_present": false, "loop": false },
+    { "phase": 3, "kind": "mold", "skill": "summary-to-cwl-template", "cast_present": false, "loop": false },
+    { "phase": 4, "kind": "mold", "skill": "summarize-cwl-tool", "cast_present": false, "loop": true },
+    { "phase": 5, "kind": "mold", "skill": "implement-cwl-tool-step", "cast_present": false, "loop": true },
+    { "phase": 6, "kind": "mold", "skill": "validate-cwl", "cast_present": false, "loop": true },
+    { "phase": 7, "kind": "branch", "pattern": "test-data-resolution", "chain": ["paper-to-test-data", "find-test-data", "user-supplied"], "cast_present": [false, false, null] },
+    { "phase": 8, "kind": "mold", "skill": "implement-cwl-workflow-test", "cast_present": false, "loop": false },
+    { "phase": 9, "kind": "mold", "skill": "validate-cwl", "cast_present": false, "loop": false },
+    { "phase": 10, "kind": "mold", "skill": "run-workflow-test", "cast_present": true, "loop": false },
+    { "phase": 11, "kind": "mold", "skill": "debug-cwl-workflow-output", "cast_present": false, "loop": false }
+  ]
+}

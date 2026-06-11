@@ -25,7 +25,7 @@ Foundry-internal (in the `foundry/` repo):
 - **Static site** — Astro renderer over the foundry's content collections, deployed to GitHub Pages.
 
 Consumers (external):
-- **Harnesses** — hand-authored orchestration that consumes generated skills or other cast artifacts. Live in their own repos. The Foundry produces the artifacts they load.
+- **Harnesses** — orchestration that consumes generated skills or other cast artifacts. What a *sophisticated* harness is — stateful, resumable, approval-gated, Archon-style — is an open research question (§15); those live in their own repos and the Foundry produces the artifacts they load. The only in-repo harnesses today are **stop-gaps**: a pipeline assembled into a trivial linear `pipeline-<slug>` skill that runs its phase casts in order. Trivial exercises of the pipeline spine, enough to test-drive the casts end-to-end — not the production harness surface.
 - **Web applications** — consume `web`-target casts.
 
 ## 2. Concepts and vocabulary
@@ -544,12 +544,13 @@ Key decisions reflected in the layout:
 - **`casts/` outside `content/`** — casts are not foundry notes. They have their own provenance shape and target-specific layouts; collapsing them into `content/` would muddy the validator and the site.
 - **`docs/` for Foundry-meta** — long-form design docs (architecture, MOLD_SPEC) live here, not as content notes.
 - **No `content/exemplars/` directory** — IWC is referenced by URL in pattern bodies, not mirrored. See `CORPUS_INGESTION.md`.
-- **No top-level `harnesses/`** — harnesses are downstream consumers, in their own repos. `content/pipelines/` is the Foundry's representation of the journey shape; harnesses (in their own repos) are the executable orchestration that consumes a pipeline + the cast Molds.
+- **No top-level `harnesses/`** — the Foundry doesn't host the production harness surface; sophisticated, stateful orchestration is an open research question (§15) that belongs in downstream repos consuming a pipeline + the cast Molds. `content/pipelines/` is the Foundry's representation of the journey shape. The one in-repo exception is a deliberate **stop-gap**: `/assemble-pipeline` compiles a pipeline into a trivial linear harness skill (`pipeline-<slug>` under `casts/claude/skills/`, namespaced by prefix) that runs its phase casts in order for end-to-end test-drives. A trivial exercise of the pipeline spine — not a commitment to in-repo orchestration, and not a `harnesses/` directory.
 - **`content/pipelines/` as primary IA** — pipelines are the journey surface (subway maps over the KB) and the source of truth for "what Molds compose into a buildable harness." Mold inventory invariant ("Molds = union of pipeline phases") is machine-checked in `validatePipelinePhases`.
 - **Single `package.json`, single `tsconfig.json`** — tooling and site share a dep tree. The wiki-link module under `scripts/lib/` is imported by both sides via path alias.
 
 ## 15. Tracked Follow-Up
 
+- **Harness execution strategy (open research question).** How a pipeline becomes an executable harness spans a spectrum. The current floor is a **stop-gap**: `/assemble-pipeline` compiles a pipeline into a trivial linear `pipeline-<slug>` skill that runs its phase casts in order, defers loop endstate detection to the looped Mold's own oracle (`advance-galaxy-draft-step` → `gxwf draft-next-step`), expands `[branch]` routing inline, and sets up a per-run working directory (foundry#282). The ceiling is heavyweight stateful orchestration — resumption, approval gates, autonomy posture, cross-step rework, routing the harness owns rather than the looped/branching Molds. Unresolved: where sophisticated harnesses live (downstream repos vs. a Foundry-blessed format), how much routing the harness owns vs. the Molds own, and whether the stop-gap assembler graduates into something durable or stays a test-drive convenience. See `docs/HARNESS_PIPELINES.md`.
 - **Composed pipelines (`PAPER -> CWL -> GALAXY`).** Track representation for composed paths in [issue #200](https://github.com/galaxyproject/foundry/issues/200). The Mold inventory already supports the paths; the unresolved question is whether composed journeys get distinct `content/pipelines/*.md` notes or remain harness-level runtime compositions.
 
 ## 16. Resolved Contracts
