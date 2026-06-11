@@ -8,6 +8,10 @@ import { describe, expect, it } from "vitest";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 const foundryBuild = path.join(repoRoot, "packages", "build-cli", "src", "bin", "foundry-build.ts");
+// Resolve the repo-local tsx binary by absolute path. Invoking `npx tsx` from a
+// temp-dir cwd can't see local node_modules and auto-installs tsx into the
+// shared npx cache; two such installs racing across test files corrupt it.
+const tsxBin = path.join(repoRoot, "node_modules", ".bin", process.platform === "win32" ? "tsx.cmd" : "tsx");
 
 const PIPELINES = [
   "cwl-to-galaxy",
@@ -24,7 +28,7 @@ function runTsx(
   cwd = repoRoot,
 ): { code: number; stdout: string; stderr: string } {
   try {
-    const stdout = execFileSync("npx", ["tsx", script, ...args], {
+    const stdout = execFileSync(tsxBin, [script, ...args], {
       cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
