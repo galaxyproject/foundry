@@ -98,6 +98,24 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(assembly.options).toEqual(["use-subagents", "checkpoint"]);
   });
 
+  it("rolls harness CLIs up into a deduped bootstrap manifest", () => {
+    const dir = "casts/claude/skills/pipeline-nextflow-to-galaxy";
+    const assembly = JSON.parse(readFileSync(path.join(repoRoot, dir, "_assembly.json"), "utf8"));
+    const tools = assembly.required_tools.map((t: { tool: string }) => t.tool);
+    // foundry (summarize-nextflow), gxwf (validate/draft/discover), planemo (run-workflow-test).
+    expect(tools).toEqual(["foundry", "gxwf", "planemo"]);
+    // planemo proves the run-workflow-test backfill flows into the pipeline manifest.
+    const planemo = assembly.required_tools.find((t: { tool: string }) => t.tool === "planemo");
+    expect(planemo.source).toBe("referenced");
+    // gxwf is implied by its subcommand notes, including the compound-slug ref.
+    const gxwf = assembly.required_tools.find((t: { tool: string }) => t.tool === "gxwf");
+    expect(gxwf.implied_by).toContain("gxwf validate");
+
+    const skill = readFileSync(path.join(repoRoot, dir, "SKILL.md"), "utf8");
+    expect(skill).toContain("## Bootstrap (install these CLIs first)");
+    expect(skill).toMatch(/\*\*`planemo`\*\* \(planemo\)/);
+  });
+
   it("--check catches a tampered SKILL.md", () => {
     const skillPath = path.join(repoRoot, "casts/claude/skills/pipeline-paper-to-galaxy/SKILL.md");
     const original = readFileSync(skillPath, "utf8");

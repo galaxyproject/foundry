@@ -13,6 +13,23 @@ Most of this pipeline's Molds are not yet cast, so this harness is mostly manual
 
 - Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
 
+## Bootstrap (install these CLIs first)
+
+Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
+
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
+  Check: `foundry --help`.
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
+  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
+  Check: `gxwf --version`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
+- **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).
+  Ephemeral run: `uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo`.
+  Check: `planemo --version`.
+  Docs: https://planemo.readthedocs.io/
+
 ## Run options
 
 Optional flags, given as leading arguments. Strip any you recognize; treat the remaining positional argument as the run slug. Both default off and compose.

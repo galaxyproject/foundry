@@ -25,9 +25,15 @@ Follow the procedure below and use the artifact/reference sections as the runtim
   Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
   Check: `gxwf --version`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
+- **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).
+  Ephemeral run: `uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo`.
+  Check: `planemo --version`.
+  Docs: https://planemo.readthedocs.io/
+  Bundled reference: `references/cli/planemo.md`.
 
 ## Load Upfront
 
+- `references/cli/planemo.md`: CLI tool reference copied verbatim into the bundle. Runtime that executes the Galaxy or CWL workflow test; install before driving the harness.
 - `references/schemas/tests-format.schema.json`: Schema file copied verbatim into the bundle. Validate Galaxy workflow test files before starting a Planemo or Galaxy-backed execution.
 
 ## Load On Demand

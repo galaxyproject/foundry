@@ -28,6 +28,13 @@ references:
     evidence: corpus-observed
     purpose: "Run static schema and workflow-label checks before expensive workflow execution."
     trigger: "Before invoking Planemo when a Galaxy workflow test file is present."
+  - kind: cli-tool
+    ref: "[[planemo]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Runtime that executes the Galaxy or CWL workflow test; install before driving the harness."
   - kind: research
     ref: "[[planemo-asserts-idioms]]"
     used_at: runtime

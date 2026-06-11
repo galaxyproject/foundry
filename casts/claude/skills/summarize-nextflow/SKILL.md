@@ -21,10 +21,15 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- None declared. Procedure should not assume external CLIs are present.
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
+  Check: `foundry --help`.
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
+  Bundled reference: `references/cli/foundry.md`.
 
 ## Load Upfront
 
+- `references/cli/foundry.md`: CLI tool reference copied verbatim into the bundle. Schema-check summary-nextflow.json before returning it from the skill.
 - `references/schemas/nextflow-parameters-meta.schema.json`: Schema file copied verbatim into the bundle. Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[].
 - `references/schemas/nf-core-module-meta.schema.json`: Schema file copied verbatim into the bundle. Validate per-module meta.yml when walking nf-core modules; pins the channel IO `type` enum and tools/containers shape.
 - `references/schemas/nf-core-subworkflow-meta.schema.json`: Schema file copied verbatim into the bundle. Validate subworkflow meta.yml; backs Subworkflow.calls extraction via the components: declaration.
