@@ -2,6 +2,8 @@
 import type { CollectionEntry } from 'astro:content';
 import type { WikiLinkTarget } from '../lib/wiki-links';
 import PhaseGraph from './PhaseGraph.astro';
+import StopGapBanner from './StopGapBanner.astro';
+import { loadAssembly, assemblyStats } from '../lib/casts';
 
 interface Props {
   entry: CollectionEntry<'content'>;
@@ -9,8 +11,15 @@ interface Props {
 }
 
 const { entry, linkMap } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const data = entry.data as any;
 const phaseCount = Array.isArray(data.phases) ? data.phases.length : 0;
+
+const slug = entry.id.split('/').pop()!;
+const assembly = loadAssembly(slug);
+const stats = assembly ? assemblyStats(assembly) : null;
+const harnessHref = `${base}/pipelines/${slug}/harness/`;
+const invoke = assembly ? `/foundry-skills:${assembly.harness_name}` : null;
 ---
 <section class="pipeline-body">
   <div class="section-rule">
@@ -21,10 +30,93 @@ const phaseCount = Array.isArray(data.phases) ? data.phases.length : 0;
     </span>
   </div>
   <PhaseGraph phases={data.phases} linkMap={linkMap} />
+
+  {assembly && stats && (
+    <section class="run-panel" aria-labelledby="run-heading">
+      <div class="section-rule">
+        <h2 id="run-heading">Run this pipeline</h2>
+        <span class="section-tail">/ stop-gap harness</span>
+      </div>
+      <p class="run-lede">
+        Run this pipeline today via its assembled harness skill
+        <a href={harnessHref} class="font-mono">{assembly.harness_name}</a> — install once
+        (<a href={`${base}/usage/#install`}>setup</a>), then in a Claude Code session:
+      </p>
+      <pre class="run-invoke"><code>{invoke}</code></pre>
+      <p class="run-note">
+        Each run gets its own <code>./&lt;run-slug&gt;/</code> working directory so artifacts stay
+        namespaced and a second run won't clobber the first — the harness sets this up first
+        (<a href={harnessHref}>phase detail</a>).
+      </p>
+      <dl class="run-stats">
+        <div><dt>phases</dt><dd>{stats.total}</dd></div>
+        <div><dt>auto casts</dt><dd>{stats.cast}</dd></div>
+        <div><dt>manual</dt><dd>{stats.manual}</dd></div>
+        <div><dt>loops</dt><dd>{stats.loops}</dd></div>
+      </dl>
+      <StopGapBanner compact />
+    </section>
+  )}
 </section>
 
 <style>
   .pipeline-body {
     margin-bottom: 1.5rem;
+  }
+  .run-panel {
+    margin-top: 2rem;
+  }
+  .run-lede {
+    margin: 0.4rem 0 0.8rem;
+  }
+  .run-invoke {
+    margin: 0 0 0.8rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.6rem;
+    background: var(--color-surface-raised);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    overflow-x: auto;
+  }
+  .run-note {
+    margin: 0 0 1rem;
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+  }
+  .run-note code,
+  .run-lede code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+  .run-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin: 0 0 0.4rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.7rem;
+    overflow: hidden;
+    background: var(--color-surface-raised);
+  }
+  .run-stats div {
+    padding: 0.75rem 0.9rem;
+    border-right: 1px solid var(--color-border-subtle);
+  }
+  .run-stats div:last-child {
+    border-right: 0;
+  }
+  .run-stats dt {
+    margin: 0 0 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+  .run-stats dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    color: var(--color-text-primary);
   }
 </style>

@@ -1,0 +1,112 @@
+---
+import { readFileSync } from 'node:fs';
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import StopGapBanner from '../../../components/StopGapBanner.astro';
+import {
+  loadAssembly,
+  loadClaudeSkillBundle,
+  assemblyStats,
+  type AssemblyPhase,
+} from '../../../lib/casts';
+
+export async function getStaticPaths() {
+  const pipelines = (await getCollection('content')).filter(e => e.data.type === 'pipeline');
+  return pipelines
+    .map(p => {
+      const slug = p.id.split('/').pop()!;
+      const assembly = loadAssembly(slug);
+      if (!assembly) return null;
+      return {
+        params: { slug },
+        props: { slug, title: (p.data as any).title as string },
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+}
+
+const { slug, title } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const assembly = loadAssembly(slug)!;
+const stats = assemblyStats(assembly);
+const bundle = loadClaudeSkillBundle(assembly.harness_name);
+
+const skillText = bundle ? readFileSync(bundle.skillPath, 'utf8') : '';
+const skillBody = skillText.replace(/^---\n[\s\S]*?\n---\n/, '');
+
+function phaseLabel(p: AssemblyPhase): string {
+  return p.skill ?? p.pattern ?? '—';
+}
+function isCast(p: AssemblyPhase): boolean {
+  return p.cast_present === true;
+}
+function branchChain(p: AssemblyPhase): string[] {
+  return Array.isArray(p.chain) ? p.chain : [];
+}
+---
+<Base title={`${assembly.harness_name} (harness)`}>
+  <section class="page-hero bg-grain" aria-labelledby="harness-heading">
+    <span class="eyebrow mb-3">Pipeline harness · stop-gap</span>
+    <h1 id="harness-heading" class="page-title text-balance font-mono">{assembly.harness_name}</h1>
+    <p class="page-lede text-pretty">
+      Assembled harness for the <strong>{title}</strong> pipeline — runs its phase casts in order
+      inside one per-run working directory.
+    </p>
+    <p class="text-sm">
+      <a href={`${base}/pipelines/${slug}/`} class="text-(--color-link) hover:underline">← {title} pipeline</a>
+      <span class="mx-2">·</span>
+      <a href={`${base}/pipelines/run-a-pipeline/`} class="text-(--color-link) hover:underline">Run a pipeline →</a>
+    </p>
+  </section>
+
+  <section class="mb-6 p-3 rounded-lg border border-(--color-border)">
+    <h2 class="text-sm font-semibold mb-2">Install &amp; invoke</h2>
+    <p class="text-sm mb-2">
+      Install the plugin once (<a href={`${base}/usage/#install`} class="text-(--color-link) hover:underline">setup</a>),
+      then invoke in a Claude Code session:
+    </p>
+    <pre class="p-3 rounded bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/foundry-skills:{assembly.harness_name}</code></pre>
+  </section>
+
+  <StopGapBanner />
+
+  <section class="mb-8" aria-labelledby="phases-heading">
+    <div class="section-rule">
+      <h2 id="phases-heading">Phase resolution</h2>
+      <span class="section-tail">/ {stats.cast} auto · {stats.manual} manual</span>
+    </div>
+    <p class="text-sm text-(--color-text-secondary) mb-3">
+      Source pipeline <code class="font-mono">{assembly.source_pipeline}</code> revision
+      {assembly.source_revision}. Phases marked <strong>manual</strong> — uncast Molds or branch
+      routing — are handled by hand; confirm before advancing.
+    </p>
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Phase</th><th>Kind</th><th>Resolves</th><th>Loop</th></tr></thead>
+      <tbody>
+        {assembly.phases.map(p => (
+          <tr>
+            <td class="font-mono text-(--color-text-muted)">{p.phase}</td>
+            <td>
+              <span class="font-mono">{phaseLabel(p)}</span>
+              {p.kind === 'branch' && branchChain(p).length > 0 && (
+                <span class="text-xs text-(--color-text-muted)"> — {branchChain(p).join(' → ')}</span>
+              )}
+            </td>
+            <td><span class="text-xs font-mono text-(--color-text-muted)">{p.kind}</span></td>
+            <td>
+              {isCast(p)
+                ? <span class="badge badge-reviewed">cast</span>
+                : <span class="badge badge-draft">manual</span>}
+            </td>
+            <td>{p.loop ? <span class="badge badge-draft">loop</span> : ''}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+
+  <article class="prose prose-slate max-w-none dark:prose-invert">
+    <h2>SKILL.md</h2>
+    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm overflow-x-auto"><code>{skillBody}</code></pre>
+  </article>
+</Base>

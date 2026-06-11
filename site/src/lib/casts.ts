@@ -84,6 +84,15 @@ export interface ClaudeSkillBundle extends CastArtifact {
 
 const TARGETS: CastTarget[] = ['claude', 'web', 'generic'];
 
+/**
+ * Pipeline harness casts (`pipeline-<slug>`, carrying `_assembly.json` not
+ * `_provenance.json`) are not Mold casts. They render on the pipelines surface,
+ * not in the `/usage/` cast inventory.
+ */
+export function isHarnessSlug(slug: string): boolean {
+  return slug.startsWith('pipeline-');
+}
+
 /** Repo root inferred relative to this file: site/src/lib → ../../.. */
 function defaultRepoRoot(): string {
   const here = path.dirname(fileURLToPath(import.meta.url));
@@ -199,6 +208,9 @@ export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact
       if (name.startsWith('.') || name.startsWith('_')) continue;
       const dir = path.join(root, name);
       if (!statSync(dir).isDirectory()) continue;
+      // Pipeline harnesses (prefix + an `_assembly.json` manifest) render on the
+      // pipelines surface, not the `/usage/` cast inventory.
+      if (isHarnessSlug(name) && existsSync(path.join(dir, '_assembly.json'))) continue;
       const skillPath = path.join(dir, 'SKILL.md');
       const hasSkill = existsSync(skillPath);
       const fm = hasSkill ? readSkillFrontmatter(skillPath) : {};
@@ -208,4 +220,61 @@ export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact
   return out.sort((a, b) =>
     a.target.localeCompare(b.target) || a.moldSlug.localeCompare(b.moldSlug),
   );
+}
+
+// ── Pipeline harness assemblies (`_assembly.json`) ──────────────────────────
+// Produced by `/assemble-pipeline`; the stop-gap harness manifest. One per
+// `pipeline-<slug>` cast. Shape mirrors scripts/assemble-pipeline output.
+
+export interface AssemblyPhase {
+  phase: number;
+  kind: 'mold' | 'branch' | string;
+  /** Present for `kind: mold`. */
+  skill?: string;
+  /** Boolean for mold phases; per-leg array for branch phases. */
+  cast_present: boolean | (boolean | null)[];
+  loop?: boolean;
+  /** Branch phases. */
+  pattern?: string;
+  chain?: string[];
+  branches?: unknown[];
+}
+
+export interface AssemblyManifest {
+  source_pipeline: string;
+  source_revision: number;
+  harness_name: string;
+  phases: AssemblyPhase[];
+}
+
+export interface AssemblyStats {
+  total: number;
+  /** Phases that resolve to a present cast and auto-run (`cast_present === true`). */
+  cast: number;
+  /** Everything else — uncast Molds and branch routing — handled by hand today. */
+  manual: number;
+  loops: number;
+}
+
+/** Load the harness assembly for a pipeline slug (e.g. `nextflow-to-galaxy`). */
+export function loadAssembly(pipelineSlug: string, repoRoot: string = defaultRepoRoot()): AssemblyManifest | null {
+  const file = path.join(repoRoot, 'casts', 'claude', 'skills', `pipeline-${pipelineSlug}`, '_assembly.json');
+  if (!existsSync(file)) return null;
+  try {
+    return JSON.parse(readFileSync(file, 'utf8')) as AssemblyManifest;
+  } catch {
+    return null;
+  }
+}
+
+export function assemblyStats(manifest: AssemblyManifest): AssemblyStats {
+  let cast = 0;
+  let manual = 0;
+  let loops = 0;
+  for (const p of manifest.phases) {
+    if (p.cast_present === true) cast += 1;
+    else manual += 1;
+    if (p.loop) loops += 1;
+  }
+  return { total: manifest.phases.length, cast, manual, loops };
 }

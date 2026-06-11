@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import StopGapBanner from '../../components/StopGapBanner.astro';
+import { loadAssembly, assemblyStats } from '../../lib/casts';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pipelines = (await getCollection('content'))
+  .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
+  .map(p => {
+    const slug = p.id.split('/').pop()!;
+    const assembly = loadAssembly(slug);
+    return {
+      slug,
+      title: (p.data as any).title as string,
+      summary: (p.data as any).summary as string | undefined,
+      assembly,
+      stats: assembly ? assemblyStats(assembly) : null,
+    };
+  })
+  .filter(p => p.assembly)
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+<Base title="Run a pipeline">
+  <section class="page-hero bg-grain" aria-labelledby="run-heading">
+    <span class="eyebrow mb-3">Harness Pipelines</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="run-heading" class="page-title text-balance">Run a pipeline.</h1>
+        <p class="page-lede text-pretty">
+          A Foundry pipeline is an ordered sequence of Molds that walks a source workflow to a target
+          workflow. You run one today via its assembled <code class="font-mono">pipeline-*</code>
+          harness skill — a stop-gap that invokes each phase's cast in order.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="Runnable pipelines">
+        <div>
+          <dt>Runnable</dt>
+          <dd>{pipelines.length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="mb-8" aria-labelledby="how-heading">
+    <div class="section-rule">
+      <h2 id="how-heading">How to run</h2>
+      <span class="section-tail">/ three steps</span>
+    </div>
+    <ol class="how-list">
+      <li>
+        <strong>Install the harness skills.</strong> They install like any Foundry cast skill —
+        via the Claude Code plugin marketplace or copied into <code class="font-mono">~/.claude/skills/</code>.
+        See <a href={`${base}/usage/#install`}>Install</a>.
+      </li>
+      <li>
+        <strong>Make the runtime available.</strong> Pipelines call out to <code class="font-mono">gxwf</code>
+        (schema/validation), Planemo (test execution), and the Foundry validators. Install these in the
+        environment before a run that reaches the validate/test phases.
+      </li>
+      <li>
+        <strong>Invoke the harness for the pipeline you want.</strong> Each run gets its own
+        <code class="font-mono">./&lt;run-slug&gt;/</code> working directory, so artifacts stay namespaced
+        and a second run won't clobber the first — the harness creates it before phase&nbsp;1. Pick a pipeline below.
+      </li>
+    </ol>
+  </section>
+
+  <StopGapBanner />
+
+  <section class="mb-10" aria-labelledby="pipelines-heading">
+    <div class="section-rule">
+      <h2 id="pipelines-heading">Pipelines</h2>
+      <span class="section-tail">/ {pipelines.length} runnable</span>
+    </div>
+    <ul class="run-grid list-none p-0 m-0">
+      {pipelines.map(p => (
+        <li class="run-card">
+          <div class="run-card-head">
+            <a href={`${base}/pipelines/${p.slug}/harness/`} class="font-mono font-semibold text-(--color-link) hover:underline">
+              pipeline-{p.slug}
+            </a>
+            <a href={`${base}/pipelines/${p.slug}/`} class="text-xs text-(--color-text-secondary) hover:underline">
+              {p.title} →
+            </a>
+          </div>
+          {p.summary && <p class="run-card-summary">{p.summary}</p>}
+          <pre class="run-card-invoke"><code>/foundry-skills:pipeline-{p.slug}</code></pre>
+          {p.stats && (
+            <p class="run-card-stats font-mono">
+              {p.stats.total} phases · {p.stats.cast} auto · {p.stats.manual} manual{p.stats.loops > 0 ? ` · ${p.stats.loops} loop${p.stats.loops === 1 ? '' : 's'}` : ''}
+            </p>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <style>
+    .how-list {
+      margin: 0;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.7rem;
+    }
+    .how-list li {
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .how-list code,
+    .run-card code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+    }
+    .run-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+      gap: 0.8rem;
+    }
+    .run-card {
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.7rem;
+    }
+    .run-card:hover {
+      border-color: var(--color-galaxy-primary);
+    }
+    .run-card-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .run-card-summary {
+      margin: 0 0 0.7rem;
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+    }
+    .run-card-invoke {
+      margin: 0 0 0.6rem;
+      padding: 0.55rem 0.7rem;
+      border-radius: 0.5rem;
+      background: var(--color-surface-raised);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      overflow-x: auto;
+    }
+    .run-card-stats {
+      margin: 0;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+    }
+  </style>
+</Base>
