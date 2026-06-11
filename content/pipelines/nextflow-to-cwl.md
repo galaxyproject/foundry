@@ -11,6 +11,8 @@ revised: 2026-04-30
 revision: 2
 ai_generated: true
 summary: "Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set."
+harness_notes:
+  - "NF brings real test fixtures, so `nextflow-test-to-cwl-test-plan` replaces the `test-data-resolution` chain that paper-sourced pipelines need."
 phases:
   - mold: "[[summarize-nextflow]]"
   - mold: "[[nextflow-summary-to-cwl-interface]]"

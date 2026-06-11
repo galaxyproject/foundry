@@ -11,6 +11,8 @@ revised: 2026-05-22
 revision: 1
 ai_generated: true
 summary: "Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff."
+harness_notes:
+  - 'v1 "workflow" means a Galaxy `gxformat2` workflow; the live interview mechanics are harness-owned and precede phase 1.'
 phases:
   - mold: "[[interview-to-freeform-summary]]"
   - mold: "[[freeform-summary-to-galaxy-interface]]"

@@ -12,6 +12,7 @@ revised: 2026-04-30
 revision: 1
 ai_generated: true
 summary: "Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target."
+loop_endstate: "No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand."
 output_artifacts:
   - id: cwl-tool-summary
     kind: json

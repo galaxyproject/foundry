@@ -11,6 +11,8 @@ revised: 2026-05-10
 revision: 3
 ai_generated: true
 summary: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow."
+harness_notes:
+  - "Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven."
 phases:
   - mold: "[[summarize-nextflow]]"
   - mold: "[[nextflow-summary-to-galaxy-reference-data]]"

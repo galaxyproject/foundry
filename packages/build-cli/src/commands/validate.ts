@@ -12,6 +12,7 @@ import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta"
 import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
 import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
@@ -457,101 +458,8 @@ function validatePathReference(
   }
 }
 
-interface PhaseRefs {
-  /** Mold paths referenced in a Mold-shaped phase. */
-  moldPaths: Set<string>;
-  /** Mold paths referenced via [branch] inner wiki-links. */
-  branchedMoldPaths: Set<string>;
-}
-
-function collectPhaseMoldRefs(
-  phases: unknown[],
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
-  filePath: string,
-): { findings: CrossFileFinding[]; refs: PhaseRefs } {
-  const findings: CrossFileFinding[] = [];
-  const refs: PhaseRefs = { moldPaths: new Set(), branchedMoldPaths: new Set() };
-
-  phases.forEach((phase, i) => {
-    if (typeof phase !== "object" || phase === null || Array.isArray(phase)) {
-      findings.push({
-        path: filePath,
-        severity: "error",
-        message: `phases[${i}]: must be an object`,
-      });
-      return;
-    }
-    const p = phase as Record<string, unknown>;
-
-    if ("mold" in p) {
-      const tp = resolveWikiLink(p.mold, slugMap);
-      if (!tp) {
-        findings.push({
-          path: filePath,
-          severity: "error",
-          message: `phases[${i}].mold: wiki link ${String(p.mold)} did not resolve`,
-        });
-      } else if (metaByPath.get(tp)?.type !== "mold") {
-        findings.push({
-          path: filePath,
-          severity: "error",
-          message: `phases[${i}].mold: ${String(p.mold)} resolves to type=${String(metaByPath.get(tp)?.type)}, expected mold`,
-        });
-      } else {
-        refs.moldPaths.add(tp);
-      }
-      return;
-    }
-
-    if ("branch" in p) {
-      // Walk `branches` array of wiki-link strings or { fallthrough: <wiki> } objects;
-      // and `chain` array of wiki-link strings or terminal sentinels (e.g. "user-supplied").
-      const collectFromList = (list: unknown, locTag: string): void => {
-        if (!Array.isArray(list)) return;
-        list.forEach((item, j) => {
-          let candidate: unknown = item;
-          if (typeof item === "object" && item !== null && !Array.isArray(item)) {
-            const obj = item as Record<string, unknown>;
-            if ("fallthrough" in obj) candidate = obj.fallthrough;
-            else return; // unknown shape — ignore for now (open-set)
-          }
-          if (typeof candidate !== "string") return;
-          if (!WIKI_LINK_RE.test(candidate)) return; // sentinels like "user-supplied"
-          const tp = resolveWikiLink(candidate, slugMap);
-          if (!tp) {
-            findings.push({
-              path: filePath,
-              severity: "error",
-              message: `phases[${i}].${locTag}[${j}]: wiki link ${candidate} did not resolve`,
-            });
-          } else if (metaByPath.get(tp)?.type !== "mold") {
-            findings.push({
-              path: filePath,
-              severity: "error",
-              message: `phases[${i}].${locTag}[${j}]: ${candidate} resolves to type=${String(metaByPath.get(tp)?.type)}, expected mold`,
-            });
-          } else {
-            refs.branchedMoldPaths.add(tp);
-          }
-        });
-      };
-      collectFromList(p.branches, "branches");
-      collectFromList(p.chain, "chain");
-      return;
-    }
-
-    // Open-set: unknown phase kind. Warn so we notice but don't fail.
-    const knownKeys = Object.keys(p);
-    findings.push({
-      path: filePath,
-      severity: "warning",
-      message: `phases[${i}]: unknown phase kind (keys: ${knownKeys.join(",")}) — coin a tag if this is intentional`,
-    });
-  });
-
-  return { findings, refs };
-}
+// Phase parsing lives in `lib/pipeline-phases.ts` (shared with the assembler).
+// `validatePipelinePhases` consumes its typed descriptors below.
 
 /**
  * Mold artifact handoff validation.
@@ -810,11 +718,12 @@ function validatePipelinePhases(
     if (f.meta.type !== "pipeline") continue;
     const phases = f.meta.phases;
     if (!Array.isArray(phases)) continue;
-    const r = collectPhaseMoldRefs(phases, slugMap, metaByPath, f.path);
-    findings.push(...r.findings);
-    for (const p of r.refs.moldPaths) moldsReferenced.add(p);
-    for (const p of r.refs.branchedMoldPaths) moldsReferenced.add(p);
-    findings.push(...validatePipelineArtifactBindings(f, phases, slugMap, metaByPath));
+    const parsed = parsePhases(phases, slugMap, metaByPath, f.path);
+    findings.push(...parsed.findings);
+    for (const phase of parsed.phases) {
+      for (const p of phaseMoldPaths(phase)) moldsReferenced.add(p);
+    }
+    findings.push(...validatePipelineArtifactBindings(f, parsed.phases, metaByPath));
   }
   // Inventory coverage warning: non-draft Molds should appear in at least one pipeline.
   const orphans: string[] = [];
@@ -842,38 +751,16 @@ function validatePipelinePhases(
  */
 function validatePipelineArtifactBindings(
   file: FileMeta,
-  phases: unknown[],
-  slugMap: Map<string, string>,
+  phases: ParsedPhase[],
   metaByPath: Map<string, Frontmatter>,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const phaseDecls: { out: Set<string>; in: { id: string; idx: number }[] }[] = [];
 
-  const collectMoldPathsFromPhase = (phase: unknown): string[] => {
-    const out: string[] = [];
-    const visit = (n: unknown) => {
-      if (typeof n === "string") {
-        if (WIKI_LINK_RE.test(n)) {
-          const tp = resolveWikiLink(n, slugMap);
-          if (tp && metaByPath.get(tp)?.type === "mold") out.push(tp);
-        }
-        return;
-      }
-      if (!n || typeof n !== "object") return;
-      const obj = n as Record<string, unknown>;
-      if (typeof obj.mold === "string") visit(obj.mold);
-      if (typeof obj.fallthrough === "string") visit(obj.fallthrough);
-      if (Array.isArray(obj.branches)) obj.branches.forEach(visit);
-      if (Array.isArray(obj.chain)) obj.chain.forEach(visit);
-    };
-    visit(phase);
-    return out;
-  };
-
   phases.forEach((phase, idx) => {
     const out = new Set<string>();
     const inputs: { id: string; idx: number }[] = [];
-    for (const moldPath of collectMoldPathsFromPhase(phase)) {
+    for (const moldPath of phaseMoldPaths(phase)) {
       const meta = metaByPath.get(moldPath);
       if (!meta) continue;
       const o = meta.output_artifacts;

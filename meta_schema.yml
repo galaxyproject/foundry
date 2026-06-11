@@ -189,6 +189,15 @@ properties:
         description:
           type: string
           minLength: 20
+  # Loop endstate prose for a Mold that a Pipeline runs with `loop: true`.
+  # One sentence describing how the loop terminates — whether the Mold owns its
+  # own endstate oracle (and what signal stops it) or the harness iterates a
+  # fixed set by hand. Copied verbatim into the assembled harness's loop phase
+  # line. Mold-intrinsic: the same prose holds in every pipeline that loops it.
+  loop_endstate:
+    type: string
+    minLength: 10
+    description: "One-sentence loop-termination prose for a looped Mold; the assembler appends it to the harness loop phase line."
   references:
     type: array
     items:
@@ -263,6 +272,17 @@ properties:
     minItems: 1
     items:
       type: object
+  # Bespoke, non-derivable harness notes for an assembled pipeline. Each entry
+  # is one bullet the assembler copies verbatim into the harness `## Notes`
+  # section. Reserve for prose that cannot be projected from the spine
+  # (prior-art replacement, source-specific test-data story, …); boilerplate
+  # and loop-endstate bullets are rendered from the template / `loop_endstate`.
+  harness_notes:
+    type: array
+    items:
+      type: string
+      minLength: 10
+    description: "Per-pipeline bespoke bullets copied verbatim into the assembled harness ## Notes section."
 
   # --- Research fields (narrowed to component / design-problem / design-spec) ---
   subtype:
