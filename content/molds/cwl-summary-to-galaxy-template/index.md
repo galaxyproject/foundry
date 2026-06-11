@@ -10,8 +10,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-10
-revision: 3
+revised: 2026-06-11
+revision: 4
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs."
 input_artifacts:
@@ -22,7 +22,9 @@ input_artifacts:
   - id: cwl-galaxy-data-flow
     description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices."
   - id: iwc-comparison-notes
-    description: "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design briefs); steers the skeleton toward IWC-aligned structure before per-step authoring."
+    description: "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design briefs); steers the skeleton toward IWC-aligned structure before per-step authoring. Carries an inline gxformat2 excerpt of the nearest exemplar."
+  - id: iwc-exemplar-gxformat2
+    description: "Cleaned gxformat2 view of the nearest IWC exemplar's relevant subgraph from [[compare-against-iwc-exemplar]]; pattern-match the draft's input/collection shapes, map-over wiring, output promotion, and post-job actions against this concrete idiom. Absent when no nearest exemplar was found."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml

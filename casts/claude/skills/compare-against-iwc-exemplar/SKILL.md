@@ -22,7 +22,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- Write artifact `iwc-comparison-notes` as `iwc-comparison-notes.md`. Format: `markdown`. Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring.
+- Write artifact `iwc-comparison-notes` as `iwc-comparison-notes.md`. Format: `markdown`. Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file.
+- Write artifact `iwc-exemplar-gxformat2` as `iwc-exemplar.gxwf.yml`. Format: `yaml`. Cleaned gxformat2 conversion (via convert --to format2 --compact) of the nearest IWC exemplar's relevant subgraph — the concrete idiom the downstream template draft pattern-matches against. Bounded to the relevant subgraph, not the whole workflow. Absent when no nearest exemplar is found.
 
 ## Required Tools
 
@@ -37,7 +38,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
-- `references/cli/convert.json`: CLI command reference packaged as a sidecar. Normalize fetched IWC workflows into a consistent representation for structural comparison. Use when: after fetching a candidate IWC workflow file and before structural comparison.
+- `references/cli/convert.json`: CLI command reference packaged as a sidecar. Normalize fetched IWC workflows into a consistent representation for structural comparison, and surface the nearest exemplar forward as a cleaned gxformat2 view (sibling file plus inline excerpt) for the downstream template Mold. Use when: after fetching a candidate IWC workflow file and before structural comparison; and again on the nearest exemplar after ranking to emit the iwc-exemplar-gxformat2 view.
 - `references/notes/galaxy-data-flow-draft-contract.md`: Research note copied verbatim into the bundle. Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution. Use when: deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.
 - `references/notes/iwc-shortcuts-anti-patterns.md`: Research note copied verbatim into the bundle. Flag proposed shortcuts that are accepted in IWC versus shortcuts that should be treated as smells. Use when: the design briefs propose tests, assertions, labels, or expected-output comparisons.
 - `references/notes/iwc-test-data-conventions.md`: Research note copied verbatim into the bundle. Compare proposed test-data placement and fixture shapes against IWC conventions. Use when: the design briefs hint at workflow tests or input fixture organization.
@@ -57,6 +58,7 @@ This skill is the corpus-first check in Galaxy-targeting pipelines. It runs afte
 - Clone or pull and merge the IWC `<url>` to `~/.foundry/iwc`.
 - Normalize candidate workflows with convert as needed for structural comparison.
 - Find the closest workflow and rank it.
+- Surface the nearest exemplar forward (skip when the result is "no nearest exemplar"): see *Nearest exemplar (gxformat2) view*.
 
 ### Feature Hierarchy
 
@@ -88,6 +90,18 @@ Each finding should name the authoring surface most likely to own the fix:
 - Test issue: defer to `*-test-to-galaxy-test-plan` or `implement-galaxy-workflow-test`.
 
 Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance for the template skill and the user.
+
+### Nearest exemplar (gxformat2) view
+
+The schema tells the template skill what is *legal* gxformat2; it does not show *idiom*. A real, domain-adjacent gxformat2 workflow is high-value signal for constructing the draft — input/collection shapes, map-over wiring, output promotion, post-job actions. Agents have seen far more legacy `.ga` JSON than gxformat2 YAML in training, so surface the converted view rather than leaving it as prose.
+
+Once the nearest exemplar is chosen (High or Medium confidence):
+
+- Convert it with convert (`--to format2 --compact`).
+- Write the cleaned gxformat2 of the **relevant subgraph** to the `iwc-exemplar.gxwf.yml` sibling artifact — the slice that matches the briefs' structure, not the whole workflow.
+- Inline a bounded excerpt (~10–40 lines) of that subgraph under a labeled section in `iwc-comparison-notes.md`, and cite the abstract IWC workflow ID (e.g. `transcriptomics/rnaseq-pe/rnaseq-pe`) plus the step labels it covers. Cross-reference the sibling file for the fuller view.
+
+Keep it size-bounded — a whole large workflow is noise; the relevant subgraph is the signal. When the result is "no nearest exemplar," emit neither the sibling file nor the excerpt. A Low-confidence cross-domain match may surface a short excerpt for pattern comparison but should be labeled as such, not as a domain exemplar.
 
 ### Non-goals
 

@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-06
-revision: 6
+revised: 2026-06-11
+revision: 7
 ai_generated: true
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring."
 input_artifacts:
@@ -29,7 +29,11 @@ output_artifacts:
   - id: iwc-comparison-notes
     kind: markdown
     default_filename: iwc-comparison-notes.md
-    description: "Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring."
+    description: "Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file."
+  - id: iwc-exemplar-gxformat2
+    kind: yaml
+    default_filename: iwc-exemplar.gxwf.yml
+    description: "Cleaned gxformat2 conversion (via [[convert]] --to format2 --compact) of the nearest IWC exemplar's relevant subgraph — the concrete idiom the downstream template draft pattern-matches against. Bounded to the relevant subgraph, not the whole workflow. Absent when no nearest exemplar is found."
 references:
   - kind: cli-command
     ref: "[[convert]]"
@@ -37,8 +41,8 @@ references:
     load: on-demand
     mode: sidecar
     evidence: corpus-observed
-    purpose: "Normalize fetched IWC workflows into a consistent representation for structural comparison."
-    trigger: "After fetching a candidate IWC workflow file and before structural comparison."
+    purpose: "Normalize fetched IWC workflows into a consistent representation for structural comparison, and surface the nearest exemplar forward as a cleaned gxformat2 view (sibling file plus inline excerpt) for the downstream template Mold."
+    trigger: "After fetching a candidate IWC workflow file and before structural comparison; and again on the nearest exemplar after ranking to emit the iwc-exemplar-gxformat2 view."
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"
     used_at: runtime
@@ -76,6 +80,7 @@ This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after
 - Clone or pull and merge the IWC `<url>` to `~/.foundry/iwc`.
 - Normalize candidate workflows with [[convert]] as needed for structural comparison.
 - Find the closest workflow and rank it.
+- Surface the nearest exemplar forward (skip when the result is "no nearest exemplar"): see *Nearest exemplar (gxformat2) view*.
 
 ## Feature Hierarchy
 
@@ -107,6 +112,18 @@ Each finding should name the authoring surface most likely to own the fix:
 - Test issue: defer to `*-test-to-galaxy-test-plan` or `implement-galaxy-workflow-test`.
 
 Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance for the template Mold and the user.
+
+## Nearest exemplar (gxformat2) view
+
+The schema tells the template Mold what is *legal* gxformat2; it does not show *idiom*. A real, domain-adjacent gxformat2 workflow is high-value signal for constructing the draft — input/collection shapes, map-over wiring, output promotion, post-job actions. Agents have seen far more legacy `.ga` JSON than gxformat2 YAML in training, so surface the converted view rather than leaving it as prose.
+
+Once the nearest exemplar is chosen (High or Medium confidence):
+
+- Convert it with [[convert]] (`--to format2 --compact`).
+- Write the cleaned gxformat2 of the **relevant subgraph** to the `iwc-exemplar.gxwf.yml` sibling artifact — the slice that matches the briefs' structure, not the whole workflow.
+- Inline a bounded excerpt (~10–40 lines) of that subgraph under a labeled section in `iwc-comparison-notes.md`, and cite the abstract IWC workflow ID (e.g. `transcriptomics/rnaseq-pe/rnaseq-pe`) plus the step labels it covers. Cross-reference the sibling file for the fuller view.
+
+Keep it size-bounded — a whole large workflow is noise; the relevant subgraph is the signal. When the result is "no nearest exemplar," emit neither the sibling file nor the excerpt. A Low-confidence cross-domain match may surface a short excerpt for pattern comparison but should be labeled as such, not as a domain exemplar.
 
 ## Non-goals
 
