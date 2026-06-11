@@ -114,6 +114,7 @@ const moldSchema = z.object({
   tool: z.string().regex(/^[a-z][a-z0-9-]*$/).optional(),
   output_artifacts: z.array(outputArtifact).optional(),
   input_artifacts: z.array(inputArtifact).optional(),
+  loop_endstate: z.string().min(10).optional(),
   references: z.array(typedReference).optional(),
   ...baseFields,
 }).strict();
@@ -170,6 +171,7 @@ const pipelineSchema = z.object({
   type: z.literal('pipeline'),
   title: z.string(),
   phases: z.array(phase).min(1),
+  harness_notes: z.array(z.string().min(10)).optional(),
 }).strict();
 
 const researchSchema = z.object({

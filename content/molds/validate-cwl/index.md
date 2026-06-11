@@ -12,6 +12,7 @@ revised: 2026-04-30
 revision: 1
 ai_generated: true
 summary: "Run cwltool --validate / schema lint, classify failures, recommend fixes."
+loop_endstate: "No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand."
 ---
 # validate-cwl
 

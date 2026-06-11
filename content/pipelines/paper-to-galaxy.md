@@ -11,6 +11,8 @@ revised: 2026-04-30
 revision: 2
 ai_generated: true
 summary: "Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate."
+harness_notes:
+  - "The composed alternative PAPER → CWL → GALAXY is a runtime composition of `pipeline-paper-to-cwl` followed by `pipeline-cwl-to-galaxy`."
 phases:
   - mold: "[[summarize-paper]]"
   - mold: "[[freeform-summary-to-galaxy-interface]]"

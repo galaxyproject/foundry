@@ -1,4 +1,7 @@
-.PHONY: validate test typecheck generated check-generated check fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli
+.PHONY: validate test typecheck generated check-generated check assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli
+
+FOUNDRY_BUILD := npx tsx packages/build-cli/src/bin/foundry-build.ts
+PIPELINE_SLUGS := $(patsubst content/pipelines/%.md,%,$(wildcard content/pipelines/*.md))
 
 validate:
 	npm run validate
@@ -17,7 +20,13 @@ check-generated:
 	npm run check:dashboard
 	npm run check:index
 
-check: validate check-generated test
+assemble-pipelines:
+	@for p in $(PIPELINE_SLUGS); do echo "assemble $$p"; $(FOUNDRY_BUILD) assemble-pipeline --root . $$p || exit 1; done
+
+check-assemble-pipelines:
+	@for p in $(PIPELINE_SLUGS); do $(FOUNDRY_BUILD) assemble-pipeline --root . $$p --check || exit 1; done
+
+check: validate check-generated check-assemble-pipelines test
 
 fixtures:
 	$(MAKE) -C workflow-fixtures all

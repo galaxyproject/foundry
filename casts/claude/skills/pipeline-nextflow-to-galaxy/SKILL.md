@@ -5,7 +5,7 @@ description: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflo
 
 # pipeline-nextflow-to-galaxy
 
-Harness for the **NEXTFLOW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-galaxy.md` (revision 3) — regenerate with `/assemble-pipeline nextflow-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **NEXTFLOW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-galaxy.md` (revision 3) — regenerate with `foundry-build assemble-pipeline nextflow-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -25,25 +25,25 @@ Announce the chosen directory before starting.
 
 Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
 
-1. **summarize-nextflow** — invoke the `summarize-nextflow` skill. Reads the Nextflow pipeline source tree and emits a structured JSON summary for downstream translation.
-2. **nextflow-summary-to-galaxy-reference-data** — MANUAL — `nextflow-summary-to-galaxy-reference-data` is not yet cast. It should decide the Galaxy-side shape of external reference data declared by the Nextflow pipeline. Do this by hand and confirm before continuing.
-3. **nextflow-summary-to-galaxy-interface** — invoke the `nextflow-summary-to-galaxy-interface` skill. Maps the Nextflow summary into a Galaxy workflow interface design brief.
-4. **nextflow-summary-to-galaxy-data-flow** — invoke the `nextflow-summary-to-galaxy-data-flow` skill. Translates the Nextflow summary into a Galaxy data-flow design brief.
-5. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Surfaces the nearest IWC exemplar(s) and a structural diff to guide template authoring.
-6. **nextflow-summary-to-galaxy-template** — invoke the `nextflow-summary-to-galaxy-template` skill. Emits the gxformat2 skeleton with per-step TODOs (`galaxy-workflow-draft.gxwf.yml`).
-7. **advance-galaxy-draft-step** (loop) — re-invoke the `advance-galaxy-draft-step` skill repeatedly. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; stop when it reports `draft: false` (no remaining drafty steps), then continue.
-8. **nextflow-test-to-galaxy-test-plan** — MANUAL — `nextflow-test-to-galaxy-test-plan` is not yet cast. It should translate Nextflow test evidence into a Galaxy workflow test plan. Do this by hand and confirm before continuing.
-9. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assembles the Galaxy workflow test fixtures and assertions.
-10. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Runs terminal gxwf validation on the assembled workflow and classifies failures.
-11. **run-workflow-test** — invoke the `run-workflow-test` skill. Executes the workflow's tests via Planemo; emits structured pass/fail and outputs.
-12. **debug-galaxy-workflow-output** — MANUAL — `debug-galaxy-workflow-output` is not yet cast. It should triage failing Galaxy run outputs, classify failure modes, and propose fixes. Do this by hand if `run-workflow-test` reported failures; otherwise skip.
+1. **summarize-nextflow** — invoke the `summarize-nextflow` skill. Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds.
+2. **nextflow-summary-to-galaxy-reference-data** — MANUAL — `nextflow-summary-to-galaxy-reference-data` is not yet cast. Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline. Do this by hand and confirm before continuing.
+3. **nextflow-summary-to-galaxy-interface** — invoke the `nextflow-summary-to-galaxy-interface` skill. Map a Nextflow summary into a Galaxy workflow interface design brief.
+4. **nextflow-summary-to-galaxy-data-flow** — invoke the `nextflow-summary-to-galaxy-data-flow` skill. Translate a Nextflow summary into a Galaxy data-flow design brief.
+5. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
+6. **nextflow-summary-to-galaxy-template** — invoke the `nextflow-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs.
+7. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then continue.
+8. **nextflow-test-to-galaxy-test-plan** — MANUAL — `nextflow-test-to-galaxy-test-plan` is not yet cast. Translate Nextflow test evidence into a Galaxy workflow test plan. Do this by hand and confirm before continuing.
+9. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
+10. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
+11. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
+12. **debug-galaxy-workflow-output** — MANUAL — `debug-galaxy-workflow-output` is not yet cast. Triage failing Galaxy run outputs; classify failure modes; propose fixes. Do this by hand and confirm before continuing.
 
 ## Done
 
-Report the final artifacts in `./<run-slug>/` (notably the concretized `galaxy-workflow-draft.gxwf.yml` and the test outputs) and any phases that were handled manually (`nextflow-summary-to-galaxy-reference-data`, `nextflow-test-to-galaxy-test-plan`, `debug-galaxy-workflow-output`).
+Report the final artifacts in `./<run-slug>/` and any phases handled manually (marked MANUAL above).
 
 ## Notes
 
-- Do not re-implement any skill's internal logic here; this harness only sequences and routes. Endstate detection for the per-step loop belongs to `advance-galaxy-draft-step`.
+- Do not re-implement any skill's internal logic here; this harness only sequences and routes.
 - Carry unresolved assumptions forward as notes rather than inventing missing inputs.
 - Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven.

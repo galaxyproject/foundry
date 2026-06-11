@@ -18,6 +18,7 @@
     "check:vendored": "tsx scripts/sync-vendored-upstreams.ts --check",
     "sync:vendored": "tsx scripts/sync-vendored-upstreams.ts --update",
     "cast": "tsx packages/build-cli/src/bin/foundry-build.ts cast --root .",
+    "assemble-pipeline": "tsx packages/build-cli/src/bin/foundry-build.ts assemble-pipeline --root .",
     "packages-build": "pnpm -r build",
     "packages-test": "pnpm -r test",
     "packages-typecheck": "pnpm --filter @galaxy-foundry/summarize-nextflow build && pnpm --filter @galaxy-foundry/foundry build && pnpm --filter @galaxy-foundry/planemo-test-report-schema build && pnpm --filter @galaxy-foundry/planemo-cli-meta build && pnpm -r typecheck",

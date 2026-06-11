@@ -107,6 +107,63 @@ describe("validateData (per-file)", () => {
     expect(r.errors).toEqual([]);
   });
 
+  it("accepts pipeline harness_notes array of strings", () => {
+    const r = validateData(
+      baseRequired({
+        type: "pipeline",
+        tags: ["pipeline"],
+        title: "X",
+        phases: [{ mold: "[[summarize-paper]]" }],
+        harness_notes: ["Replaces the prior-art hand-authored nf-to-galaxy skill."],
+      }),
+      schema,
+    );
+    expect(r.errors).toEqual([]);
+  });
+
+  it("rejects harness_notes that is not an array of strings", () => {
+    const r = validateData(
+      baseRequired({
+        type: "pipeline",
+        tags: ["pipeline"],
+        title: "X",
+        phases: [{ mold: "[[summarize-paper]]" }],
+        harness_notes: [{ note: "wrong shape" }],
+      }),
+      schema,
+    );
+    expect(r.errors.some((e) => /harness_notes/.test(e))).toBe(true);
+  });
+
+  it("accepts mold loop_endstate prose", () => {
+    const r = validateData(
+      baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "advance-galaxy-draft-step",
+        axis: "generic",
+        loop_endstate:
+          "It owns its own endstate oracle (`gxwf draft-next-step`); re-invoke until it reports `draft: false`.",
+      }),
+      schema,
+    );
+    expect(r.errors).toEqual([]);
+  });
+
+  it("rejects loop_endstate that is not a string", () => {
+    const r = validateData(
+      baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "x",
+        axis: "generic",
+        loop_endstate: ["not", "a", "string"],
+      }),
+      schema,
+    );
+    expect(r.errors.some((e) => /loop_endstate/.test(e))).toBe(true);
+  });
+
   it("rejects mold missing axis", () => {
     const r = validateData(baseRequired({ type: "mold", tags: ["mold"], name: "x" }), schema);
     expect(r.errors.some((e) => /axis/.test(e))).toBe(true);

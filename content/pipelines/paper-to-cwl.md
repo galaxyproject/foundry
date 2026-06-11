@@ -11,6 +11,8 @@ revised: 2026-04-30
 revision: 2
 ai_generated: true
 summary: "Direct path from a paper to a CWL Workflow + CommandLineTool set."
+harness_notes:
+  - "CWL targeting has no `discover-or-author` branch — CommandLineTool authoring is built into `implement-cwl-tool-step`, informed by `summarize-cwl-tool`."
 phases:
   - mold: "[[summarize-paper]]"
   - mold: "[[freeform-summary-to-cwl-design]]"

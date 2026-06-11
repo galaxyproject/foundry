@@ -5,7 +5,7 @@ description: "Direct path from a paper to a Galaxy gxformat2 workflow — orches
 
 # pipeline-paper-to-galaxy
 
-Harness for the **PAPER → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-galaxy.md` (revision 2) — regenerate with `/assemble-pipeline paper-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **PAPER → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-galaxy.md` (revision 2) — regenerate with `foundry-build assemble-pipeline paper-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -25,27 +25,27 @@ Announce the chosen directory before starting.
 
 Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
 
-1. **summarize-paper** — MANUAL — `summarize-paper` is not yet cast. It should extract methods, tools, sample data, and references from the paper into the shared `freeform-summary` handoff (`freeform-summary.md`). Do this by hand and confirm before continuing.
-2. **freeform-summary-to-galaxy-interface** — invoke the `freeform-summary-to-galaxy-interface` skill. Maps the summary into a Galaxy workflow interface design brief.
-3. **freeform-summary-to-galaxy-data-flow** — invoke the `freeform-summary-to-galaxy-data-flow` skill. Translates the summary into a Galaxy data-flow design brief.
-4. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Surfaces the nearest IWC exemplar(s) and a structural diff to guide template authoring.
-5. **freeform-summary-to-galaxy-template** — invoke the `freeform-summary-to-galaxy-template` skill. Emits the gxformat2 skeleton with per-step TODOs (`galaxy-workflow-draft.gxwf.yml`).
-6. **advance-galaxy-draft-step** (loop) — re-invoke the `advance-galaxy-draft-step` skill repeatedly. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; stop when it reports `draft: false` (no remaining drafty steps), then continue.
-7. **test-data-resolution** (branch) — resolve the test-data chain in order; stop at the first that yields acceptable test data:
-   - MANUAL — `paper-to-test-data` is not yet cast. It should derive workflow test inputs and expected outputs from the paper. Do this by hand first.
-   - MANUAL — `find-test-data` is not yet cast. It should search IWC fixtures and public sources for test data matching the data-flow shape. Try this if `paper-to-test-data` yields nothing usable.
-   - `user-supplied` — if neither yields acceptable data, ask the user to provide test data directly.
-8. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assembles the Galaxy workflow test fixtures and assertions.
-9. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Runs terminal gxwf validation on the assembled workflow and classifies failures.
-10. **run-workflow-test** — invoke the `run-workflow-test` skill. Executes the workflow's tests via Planemo; emits structured pass/fail and outputs.
-11. **debug-galaxy-workflow-output** — MANUAL — `debug-galaxy-workflow-output` is not yet cast. It should triage failing Galaxy run outputs, classify failure modes, and propose fixes. Do this by hand if `run-workflow-test` reported failures; otherwise skip.
+1. **summarize-paper** — MANUAL — `summarize-paper` is not yet cast. Extract methods, tools, sample data, and references from a paper. Do this by hand and confirm before continuing.
+2. **freeform-summary-to-galaxy-interface** — invoke the `freeform-summary-to-galaxy-interface` skill. Map a free-form source summary into a Galaxy workflow interface design brief.
+3. **freeform-summary-to-galaxy-data-flow** — invoke the `freeform-summary-to-galaxy-data-flow` skill. Translate a free-form source summary into a Galaxy data-flow design brief.
+4. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
+5. **freeform-summary-to-galaxy-template** — invoke the `freeform-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
+6. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then continue.
+7. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
+   - Try `paper-to-test-data` (MANUAL — not yet cast). Derive workflow test inputs and expected outputs from a paper. Do this by hand.
+   - Otherwise try `find-test-data` (MANUAL — not yet cast). Search IWC fixtures and public sources for test data matching a data-flow shape. Do this by hand.
+   - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
+8. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
+9. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
+10. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
+11. **debug-galaxy-workflow-output** — MANUAL — `debug-galaxy-workflow-output` is not yet cast. Triage failing Galaxy run outputs; classify failure modes; propose fixes. Do this by hand and confirm before continuing.
 
 ## Done
 
-Report the final artifacts in `./<run-slug>/` (notably the concretized `galaxy-workflow-draft.gxwf.yml` and the test outputs) and any phases that were handled manually (`summarize-paper`, the test-data branch, `debug-galaxy-workflow-output`).
+Report the final artifacts in `./<run-slug>/` and any phases handled manually (marked MANUAL above).
 
 ## Notes
 
-- Do not re-implement any skill's internal logic here; this harness only sequences and routes. Endstate detection for the per-step loop belongs to `advance-galaxy-draft-step`.
+- Do not re-implement any skill's internal logic here; this harness only sequences and routes.
 - Carry unresolved assumptions forward as notes rather than inventing missing inputs.
 - The composed alternative PAPER → CWL → GALAXY is a runtime composition of `pipeline-paper-to-cwl` followed by `pipeline-cwl-to-galaxy`.
