@@ -29,7 +29,17 @@ summary: "gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, por
 
 The output artifact `galaxy-workflow-draft` produced by the `*-summary-to-galaxy-template` Molds is **gxformat2 with wrapper-tier relaxations and free-text planning fields**, sized to the gap between data-flow design and tool-resolved implementation.
 
-Topology — workflow inputs and their collection shapes, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards — is **settled by the template Mold itself**, drawing on the upstream interface and data-flow briefs (see [[galaxy-data-flow-draft-contract]]). The output is concrete gxformat2 with no topology TODOs. Everything deferred to the per-step implementation Mold is wrapper-tier: which Tool Shed wrapper, what parameters, and the wrapper-determined port names that populate `in:` / `out:` / `outputSource`.
+Topology — workflow inputs and their collection shapes, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards — is **settled by the template Mold itself**, drawing on the upstream interface and data-flow briefs (see [[galaxy-data-flow-draft-contract]]). The output is concrete gxformat2 with no topology TODOs. Wrapper-tier resolution — which Tool Shed wrapper, what parameters, the wrapper-determined port names that populate `in:` / `out:` / `outputSource` — is **evidence-gated per step** (see Resolution tiers below): a step resolves fully when the evidence pins wrapper and parameters together, pins identity alone when the wrapper is named but its settings are not, and defers entirely when the evidence is weak.
+
+## Resolution tiers
+
+Each tool step is resolved to the tier its evidence supports — **evidence-gated, not source-gated**. The source kind (free-form, nf-core, CWL) shifts how often a step reaches each tier but never caps it; each `*-summary-to-galaxy-template` Mold records its own source tendency.
+
+- **Resolved** — concrete `tool_id`, `tool_shed_repository` / changeset (or a stable built-in id), and bound `tool_state`; no `_plan_*`. Use when the evidence pins wrapper *and* parameters jointly: a built-in Galaxy tool with brief-determined params (`Filter1`, `Cut1`, a collection operation), or a pattern page / IWC exemplar worked example that supplies `tool_id`, changeset, and parameter values together. `draft-validate` rejects `_plan_*` on a fully-resolved step.
+- **Identity-pinned** — concrete `tool_id` with `tool_version: TODO` (changeset deferred); `tool_state` and `tool_shed_repository` absent; `_plan_state` (and any other open `_plan_*`) kept. The `tool_version: TODO` sentinel is load-bearing: it keeps the step drafty for [[draft-next-step]] and not-fully-resolved for [[draft-validate]], so the retained `_plan_state` is legal rather than a `semanticError`. (A step is "fully-resolved" — and so forbidden from carrying `_plan_*` — exactly when it has *no* remaining TODO sentinel in `tool_id`, `tool_version`, or any `in:` / `out:` port; pinning identity without this sentinel would trip that gate.) Use when the evidence confidently names *which* wrapper but not its settings or exact changeset for this context: a portion of an IWC exemplar that [[compare-against-iwc-exemplar]] flags as a high-confidence match, a pattern page's worked example, or a source summary that names a specific `tool_id` with evidence.
+- **Deferred** — `tool_id: TODO`, full `_plan_*`. Use when the evidence is weak, multi-candidate, a domain-specific scientific tool with no covering pattern or exemplar, or a corpus gap.
+
+Pin identity only on strong evidence — a wrapper an exemplar actually uses for the same operation, a worked pattern example, or a tool the source names explicitly — never on plausibility: a wrong pinned `tool_id` lets [[discover-shed-tool]] resolve the wrong tool's changeset instead of searching afresh. Port names follow the wrapper: real on a Resolved step, `TODO_<hint>` sentinels until the step resolves.
 
 ## Relaxations vs. gxformat2
 
@@ -44,14 +54,14 @@ Workflow inputs (types, collection shapes, formats, optionality), workflow outpu
 
 ## Additions: `_plan_*` planning fields
 
-Free-text fields per tool step capture the template Mold's intent for the downstream per-step implementation Mold. All optional, but expected on any step where `tool_id` is `TODO` or `tool_state` is absent.
+Free-text fields per tool step capture the template Mold's intent for the downstream per-step implementation Mold. All optional, but expected on any Identity-pinned or Deferred step (`tool_id` is `TODO`, or `tool_id` is pinned but `tool_state` is absent); a Resolved step carries none.
 
 - `_plan_state` — parameter binding intent: which knobs matter, value or range, why. Read by the per-step Mold to bind real `tool_state` once a wrapper is selected.
 - `_plan_context` — extras the per-step Mold needs to pick a wrapper: source `command:` block, conda packages, Docker/Singularity images, environment variables, preconditions, postconditions, container entrypoints, scratch-disk needs.
 - `_plan_in` — wrapper input port mapping intent. The connection graph already says "this source feeds this step"; `_plan_in` records the semantic role of each port and likely wrapper-side names (`single_paired` vs `paired_input` vs `input`) so the per-step Mold can collapse `TODO_*` keys to the real ones.
 - `_plan_out` — wrapper output surface intent: which outputs downstream consumers depend on (with the existing edges as evidence) so the per-step Mold can pick a wrapper that exposes them, or insert a follow-up step if it does not.
 
-The `_plan_*` family is **wrapper-tier**: each entry exists because the tool wrapper is not yet picked and disappears the moment one is. Topology decisions do not belong here.
+The `_plan_*` family is **wrapper-tier**: each entry exists because the wrapper is not yet fully resolved and disappears the moment the step is. Topology decisions do not belong here.
 
 `_plan_*` fields are **draft-only**. They MUST be removed before the workflow is treated as a runnable gxformat2 document. Any remaining `TODO` / `TODO_*` sentinels MUST also be resolved at the same time.
 

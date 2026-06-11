@@ -48,13 +48,14 @@ Data-flow draft owns:
 The Galaxy template owns:
 
 - A `gxformat2` skeleton.
-- Ordered placeholder steps, labels, TODO slots, workflow inputs, workflow outputs, and rough connections.
+- Ordered steps, labels, workflow inputs, workflow outputs, and the producer→consumer connection graph.
+- Per-step wrapper resolution to the tier its evidence supports — **evidence-gated, not source-gated** (tiers defined in [[galaxy-workflow-draft-format]]): a fully **Resolved** step (concrete `tool_id`, changeset, `tool_state`) when wrapper and parameters are pinned jointly; **Identity-pinned** (`tool_id` only, `_plan_state` kept) when the wrapper is named but not its settings; **Deferred** (`tool_id: TODO`, full `_plan_*`) otherwise.
 - Placeholder collection-operation or Apply Rules steps only when the data-flow draft says they are necessary.
-- Handoff units for the per-step implementation loop.
+- `_plan_*` handoff units (intent, evidence, constraints) for every step left short of Resolved.
 
 Concrete step implementation owns:
 
-- Exact `tool_id`, version, owner/repository metadata, changeset, parameters, and `input_connections`.
+- For every step the template left short of **Resolved**: the changeset (`tool_version`, `tool_shed_repository` owner/repository metadata), bound `tool_state` parameters, and `input_connections` — resolving any `tool_id: TODO` and confirming or correcting any `tool_id` the template pinned. Steps the template already Resolved pass through — confirm, do not re-derive.
 - Concrete built-in collection-operation steps and parameters.
 - Validation with `gxwf` and repair after schema/lint failures.
 

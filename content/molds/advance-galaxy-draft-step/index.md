@@ -83,9 +83,13 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
 ## Sequence
 
 1. **Pick.** Run [[draft-next-step]]. If `draft: false`, return — the loop is done. Otherwise carry the chosen step id forward.
-2. **Resolve a wrapper.** Try [[discover-shed-tool]] against the step's `_plan_*` context; if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
+2. **Resolve a wrapper.** Branch on whether the template already pinned wrapper identity (see the tiers in [[galaxy-workflow-draft-format]]):
+   - **Identity-pinned** — `tool_id` is concrete and `tool_version` is `TODO`. Treat the pin as a strong seed: confirm it via [[discover-shed-tool]] and resolve the changeset, correcting the `tool_id` only if discovery contradicts the pin (a pinned id is high-confidence template evidence, not a guess to re-derive from scratch).
+   - **Deferred** — `tool_id` is `TODO`. Search fresh: run [[discover-shed-tool]] against the step's `_plan_*` context.
+
+   Either way, if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
 3. **Summarize the wrapper.** Invoke [[summarize-galaxy-tool]] on the resolved wrapper to produce a [[galaxy-tool-summary]] for the next phase.
-4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it replaces the chosen step's `TODO_*` / `_plan_*` slots with concrete `tool_id`, `tool_state`, and wrapper-determined port names.
+4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `tool_state`, and wrapper-determined port names.
 5. **Validate.** Run [[draft-validate]] `--concrete` over the mutated draft. On green, return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
 
 ## Failure routing
