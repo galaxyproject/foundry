@@ -63,6 +63,13 @@ const pipelines = (await getCollection('content'))
         <code class="font-mono">./&lt;run-slug&gt;/</code> working directory, so artifacts stay namespaced
         and a second run won't clobber the first — the harness creates it before phase&nbsp;1. Pick a pipeline below.
       </li>
+      <li>
+        <strong>Optional run flags.</strong> Pass <code class="font-mono">--use-subagents</code> to run each
+        cast phase in its own subagent (one per loop iteration) so the orchestrator's context stays small, and
+        <code class="font-mono">--checkpoint</code> to <code class="font-mono">git init</code> the run directory and
+        commit after every phase — a per-step history for workflow-implementation visualizations. Both default off
+        and compose.
+      </li>
     </ol>
   </section>
 

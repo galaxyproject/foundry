@@ -244,6 +244,8 @@ export interface AssemblyManifest {
   source_pipeline: string;
   source_revision: number;
   harness_name: string;
+  /** Runtime invocation flags the harness honors (e.g. `use-subagents`, `checkpoint`). */
+  options?: string[];
   phases: AssemblyPhase[];
 }
 

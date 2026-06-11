@@ -2,6 +2,7 @@
   "source_pipeline": "nextflow-to-galaxy",
   "source_revision": 3,
   "harness_name": "pipeline-nextflow-to-galaxy",
+  "options": ["use-subagents", "checkpoint"],
   "phases": [
     { "phase": 1, "kind": "mold", "skill": "summarize-nextflow", "cast_present": true, "loop": false },
     { "phase": 2, "kind": "mold", "skill": "nextflow-summary-to-galaxy-reference-data", "cast_present": false, "loop": false },

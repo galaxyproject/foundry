@@ -123,6 +123,21 @@ type AssemblyPhase = MoldPhaseEntry | BranchPhaseEntry;
 
 const SUPPORTED_BRANCH_PATTERNS = new Set(["test-data-resolution"]);
 
+// Runtime invocation options every assembled harness honors. Uniform across
+// pipelines (#291): documented as prose in `## Run options` and surfaced in
+// `_assembly.json` for the site / future visualization tooling.
+const HARNESS_OPTIONS = ["use-subagents", "checkpoint"] as const;
+
+const RUN_OPTIONS_SECTION: string[] = [
+  "## Run options",
+  "",
+  "Optional flags, given as leading arguments. Strip any you recognize; treat the remaining positional argument as the run slug. Both default off and compose.",
+  "",
+  "- `--use-subagents` — run each cast phase in its own subagent to keep this orchestrator's context small. For each phase whose skill is cast, spawn a subagent, tell it the run directory and to invoke the named skill with every default filename prefixed by `./<run-slug>/`, and have it return a short report (artifacts written, assumptions, status) rather than its full transcript; carry only that report forward. A cast loop phase runs **one subagent per iteration** — each advances a single step and returns its done-signal, and you inspect that signal to decide whether to spawn the next iteration. Branch phases run their whole fallback chain in one subagent. MANUAL (un-cast) phases are never delegated — including MANUAL loop phases — so handle those yourself regardless of the per-iteration rule above.",
+  "- `--checkpoint` — commit after every phase so the run directory's git history is a per-step record (a data source for workflow-implementation visualizations). When set, `git init ./<run-slug>/` during working-directory setup — this is a standalone per-run repo; do not add it to any surrounding repo you are working inside. Then after each phase's artifact is confirmed run `git -C ./<run-slug>/ add -A && git -C ./<run-slug>/ commit -m \"phase <n>: <skill>\"`. Loop phases commit **once per iteration** (`phase <n> step <k>: <skill>`); for a MANUAL loop, commit once per by-hand step. With `--use-subagents`, the subagent does the work and returns; you make the commit.",
+  "",
+];
+
 interface Assembled {
   skill: string;
   assemblyPhases: AssemblyPhase[];
@@ -310,12 +325,13 @@ function renderSkill(args: {
     "",
     `- ${args.summary}`,
     "",
+    ...RUN_OPTIONS_SECTION,
     "## Working directory (do this first)",
     "",
     "Every constituent skill writes fixed filenames to its working directory. To keep one run's artifacts namespaced and avoid clobbering a prior run (foundry#282):",
     "",
     `1. Pick a run slug — use the harness argument if given; else ask the user for a short project name up front (the directory must exist before phase 1 writes its first artifact, so don't wait for a source title); else default \`${args.slug}-run\`.`,
-    "2. Create `./<run-slug>/` in the current directory. If it exists, suffix `-2`, `-3`, … .",
+    "2. Create `./<run-slug>/` in the current directory. If it exists, suffix `-2`, `-3`, … . If invoked with `--checkpoint`, run `git init ./<run-slug>/` now (see Run options).",
     "3. Run **every** skill invocation below with `./<run-slug>/` as its working directory: **prefix every default input and output filename with `./<run-slug>/`** when you invoke the skill. The skills preserve their declared basenames and honor a harness-supplied directory; you supply the prefix on **both reads and writes**, so each phase finds the prior phase's output and nothing lands in the repo root.",
     "",
     "Announce the chosen directory before starting.",
@@ -361,6 +377,7 @@ function renderAssembly(
     `  "source_pipeline": ${JSON.stringify(slug)},`,
     `  "source_revision": ${revision},`,
     `  "harness_name": ${JSON.stringify(harnessName)},`,
+    `  "options": ${compactValue([...HARNESS_OPTIONS])},`,
     `  "phases": [`,
     ...phases.map((p, i) => `    ${compactValue(p)}${i < phases.length - 1 ? "," : ""}`),
     "  ]",

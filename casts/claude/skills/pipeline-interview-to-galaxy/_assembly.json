@@ -2,6 +2,7 @@
   "source_pipeline": "interview-to-galaxy",
   "source_revision": 1,
   "harness_name": "pipeline-interview-to-galaxy",
+  "options": ["use-subagents", "checkpoint"],
   "phases": [
     { "phase": 1, "kind": "mold", "skill": "interview-to-freeform-summary", "cast_present": true, "loop": false },
     { "phase": 2, "kind": "mold", "skill": "freeform-summary-to-galaxy-interface", "cast_present": true, "loop": false },

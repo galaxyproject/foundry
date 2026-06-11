@@ -67,6 +67,33 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(loop.skill).toBe("advance-galaxy-draft-step");
   });
 
+  it("documents the --use-subagents and --checkpoint run options", () => {
+    const skill = readFileSync(
+      path.join(repoRoot, "casts/claude/skills/pipeline-nextflow-to-galaxy/SKILL.md"),
+      "utf8",
+    );
+    expect(skill).toContain("## Run options");
+    expect(skill).toContain("`--use-subagents`");
+    expect(skill).toContain("one subagent per iteration");
+    expect(skill).toContain("`--checkpoint`");
+    expect(skill).toContain("git init ./<run-slug>/");
+    expect(skill).toContain("once per iteration");
+    // MANUAL precedence over the per-iteration rules (S1).
+    expect(skill).toContain("including MANUAL loop phases");
+    // Standalone per-run repo, not added to a surrounding repo (S2).
+    expect(skill).toContain("standalone per-run repo");
+  });
+
+  it("_assembly.json surfaces the uniform run options", () => {
+    const assembly = JSON.parse(
+      readFileSync(
+        path.join(repoRoot, "casts/claude/skills/pipeline-nextflow-to-galaxy/_assembly.json"),
+        "utf8",
+      ),
+    );
+    expect(assembly.options).toEqual(["use-subagents", "checkpoint"]);
+  });
+
   it("--check catches a tampered SKILL.md", () => {
     const skillPath = path.join(repoRoot, "casts/claude/skills/pipeline-paper-to-galaxy/SKILL.md");
     const original = readFileSync(skillPath, "utf8");
@@ -206,9 +233,12 @@ phases:
       // Un-cast loop phase: MANUAL marker + verbatim summary + loop_endstate prose.
       expect(skill).toContain("**looper** (loop) — MANUAL");
       expect(skill).toContain("Owns its own oracle; re-invoke until done, then continue.");
+      // Run options are uniform — present even on a minimal one-phase pipeline.
+      expect(skill).toContain("## Run options");
       const assembly = JSON.parse(
         readFileSync(path.join(dir, "casts/claude/skills/pipeline-mini/_assembly.json"), "utf8"),
       );
+      expect(assembly.options).toEqual(["use-subagents", "checkpoint"]);
       expect(assembly.phases[0]).toEqual({
         phase: 1,
         kind: "mold",

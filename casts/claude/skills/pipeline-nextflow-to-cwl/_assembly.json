@@ -2,6 +2,7 @@
   "source_pipeline": "nextflow-to-cwl",
   "source_revision": 2,
   "harness_name": "pipeline-nextflow-to-cwl",
+  "options": ["use-subagents", "checkpoint"],
   "phases": [
     { "phase": 1, "kind": "mold", "skill": "summarize-nextflow", "cast_present": true, "loop": false },
     { "phase": 2, "kind": "mold", "skill": "nextflow-summary-to-cwl-interface", "cast_present": false, "loop": false },
