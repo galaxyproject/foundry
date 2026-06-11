@@ -58,7 +58,7 @@ The `_plan_*` family is **wrapper-tier**: each entry exists because the tool wra
 ## Example (sketch)
 
 ```yaml
-class: GalaxyWorkflow
+class: GalaxyWorkflowDraft
 inputs:
   reads:
     type: collection

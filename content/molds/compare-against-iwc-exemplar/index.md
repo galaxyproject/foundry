@@ -77,7 +77,7 @@ This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after
 
 ## Procedure
 
-- Clone or pull and merge the IWC `<url>` to `~/.foundry/iwc`.
+- Clone or pull and merge the IWC corpus (`https://github.com/galaxyproject/iwc`) to `~/.foundry/iwc`.
 - Normalize candidate workflows with [[convert]] as needed for structural comparison.
 - Find the closest workflow and rank it.
 - Surface the nearest exemplar forward (skip when the result is "no nearest exemplar"): see *Nearest exemplar (gxformat2) view*.
