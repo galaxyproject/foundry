@@ -8,10 +8,18 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 3
+revised: 2026-06-12
+revision: 4
 ai_generated: true
-summary: "Triage failing Galaxy run outputs; classify failure modes; propose fixes."
+summary: "Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs."
+input_artifacts:
+  - id: workflow-test-result
+    description: "Structured run handoff from run-workflow-test: Planemo result, invocation/job/artifact context, and the observed failure modality."
+output_artifacts:
+  - id: workflow-debug-report
+    kind: markdown
+    default_filename: workflow-debug-report.md
+    description: "Failure-surface classification with captured job/invocation/collection/assertion evidence and a recommended next step or reference-gap follow-up."
 references:
   - kind: research
     ref: "[[planemo-asserts-idioms]]"
@@ -72,4 +80,15 @@ references:
 ---
 # debug-galaxy-workflow-output
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+Triage a failing Galaxy workflow test. Take the structured handoff from [[run-workflow-test]], classify the failure surface before proposing any repair, and capture the reference evidence the surface requires. When the failure cannot be classified from existing references, recommend a focused follow-up rather than converting uncertainty into a guessed fix.
+
+Classify before repairing. The same red output can be a tool/job failure, a workflow invocation failure, a collection-output mismatch, a missing workflow output, or an assertion mismatch — and each routes to a different reference surface and a different fix. Locate where the evidence lives first ([[planemo-workflow-test-architecture]]).
+
+## Sequence
+
+1. **Classify the first failure surface.** From the run's structured result, decide whether the first failure is a tool/job failure, a workflow invocation failure, a collection-output mismatch, a missing workflow output, or an assertion mismatch. Classify before proposing repairs.
+2. **Capture job-failure evidence.** When a job is in `error`/`failed`/`stopped`, record job id, tool id, exit code, job messages, the stdout/stderr distinction, and output dataset state per [[galaxy-tool-job-failure-reference]]; check whether the wrapper's failure semantics already explain it.
+3. **Capture invocation-failure evidence.** When the invocation state or messages indicate scheduling, materialization, cancellation, conditional, or output-resolution failure, record invocation state, the structured message reason, the affected step, any subworkflow path, and the jobs summary per [[galaxy-workflow-invocation-failure-reference]]; note whether Planemo surfaced or hid the relevant Galaxy API detail.
+4. **Trace collection mismatches.** When a failing output is a collection or mapped output, diagnose shape, mapping, reduction, and element-identifier mismatches with [[galaxy-collection-semantics]]; for workflows translated from Nextflow, trace wrong nesting / missing elements / bad joins back to possibly-lossy operator translations via [[nextflow-operators-to-galaxy-collection-recipes]].
+5. **Read assertion failures honestly.** When the failure is an assertion, use [[planemo-asserts-idioms]] to decide whether it is an assertion-choice/tolerance problem or a real output regression. Before weakening an assertion, widening a delta, or switching to an existence check, confirm against [[iwc-shortcuts-anti-patterns]] that the relaxation is an accepted IWC shortcut and not masking a real failure.
+6. **Discover reference gaps.** When the failure cannot be classified confidently from the references above, recommend a focused follow-up — reference documentation, pattern capture, API verification, or eval coverage — rather than emitting a repair recipe built on a guess.

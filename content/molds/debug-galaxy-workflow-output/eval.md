@@ -18,6 +18,12 @@
 - fixture: failed workflow test where the invocation state or invocation messages indicate scheduling, materialization, cancellation, conditional, or output-resolution failure.
 - expectation: records invocation state, structured message reason, affected step, subworkflow path if present, jobs summary, and whether Planemo surfaced or hid the relevant Galaxy API detail.
 
+## Case: collection output mismatch capture
+
+- check: llm-judged
+- fixture: failed workflow test where a collection or mapped output has wrong nesting, missing elements, or mismatched element identifiers.
+- expectation: diagnoses the collection shape / mapping / reduction / element-identifier mismatch as the failure surface — and for a Nextflow-translated workflow, traces it to a possibly-lossy operator translation — rather than relaxing the assertion to make the test pass.
+
 ## Case: reference gap discovery
 
 - check: llm-judged
