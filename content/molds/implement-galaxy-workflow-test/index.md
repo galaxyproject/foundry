@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-11
-revision: 6
+revised: 2026-06-12
+revision: 7
 ai_generated: true
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
@@ -96,6 +96,18 @@ references:
 ---
 # implement-galaxy-workflow-test
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
-- **`planemo workflow_test_init --from_invocation <id>`** ([[planemo-workflow_test_init]]) — preferred bootstrap for new test files; reviewer convention. See [[planemo-asserts-idioms]] §7.
-- **`planemo workflow_test_on_invocation <tests.yml> <id>`** ([[planemo-workflow_test_on_invocation]]) — fast assertion-iteration loop without re-running the workflow.
+Assemble a Galaxy workflow test file (`tests-format`) from the test plan, the gxformat2 draft, and the resolved test-data refs. One invocation produces a `*-tests.yml` whose job inputs come from the draft's workflow inputs and whose assertions come from the test plan's snapshots. The output must validate against [[tests-format]] and pass the workflow-label cross-check before any Planemo run.
+
+The draft is the contract: input and output labels in the test file must address real workflow input/output labels. When authoring reveals a missing label, an omitted workflow output, or an unstable collection identifier, treat it as testability pressure on the workflow itself — surface it per [[galaxy-workflow-testability-design]] rather than asserting around it.
+
+## Sequence
+
+1. **Bootstrap.** Prefer generating the test skeleton from a real invocation, not from scratch:
+   - **`planemo workflow_test_init --from_invocation <id>`** ([[planemo-workflow_test_init]]) — preferred bootstrap for new test files; reviewer convention. See [[planemo-asserts-idioms]] §7.
+   - **`planemo workflow_test_on_invocation <tests.yml> <id>`** ([[planemo-workflow_test_on_invocation]]) — fast assertion-iteration loop without re-running the workflow.
+2. **Author job inputs.** Wire each workflow input to a `test-data-refs` entry. Follow [[iwc-test-data-conventions]] for remote-URL-first fixtures, recorded hashes, and per-input collection layout. Inputs must match the draft's collection shapes and datatypes.
+3. **Author assertions.** Translate the test plan's snapshots into output assertions. Choose assertion families and tolerances per [[planemo-asserts-idioms]]; check each shortcut against [[iwc-shortcuts-anti-patterns]] so an existence-only or size-only assertion is a deliberate choice, not an evasion.
+4. **Validate static.** Run [[validate-tests]] for the schema gate, then the workflow-label cross-check (`checkTestsAgainstWorkflow`): zero missing input labels, zero missing output labels, no collection/datatype mismatches. Fix before spending a Planemo run.
+5. **Run green.** Drive [[planemo]] `test` on a managed Galaxy with the staged data and tools. On green, hand off the test file plus enough invocation/job/assertion context for [[run-workflow-test]] and [[debug-galaxy-workflow-output]] to use if a later run fails.
+
+Author tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs ([[planemo-workflow-test-architecture]]) — that traceability is what makes the downstream debug Mold able to locate failure evidence.

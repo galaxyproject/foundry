@@ -58,7 +58,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 8. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 9. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 10. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
-11. **debug-galaxy-workflow-output** — MANUAL — `debug-galaxy-workflow-output` is not yet cast. Triage failing Galaxy run outputs; classify failure modes; propose fixes. Do this by hand and confirm before continuing.
+11. **debug-galaxy-workflow-output** — MANUAL — `debug-galaxy-workflow-output` is not yet cast. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. Do this by hand and confirm before continuing.
 
 ## Done
 
