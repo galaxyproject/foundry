@@ -337,11 +337,11 @@ Routes:
 - `dashboard/index.astro` — dashboard driven by `dashboard_sections.json`. Pipeline section leads (journey surface); type sections follow (reference surface).
 - `index/index.astro` — full catalog page (mirrors `Index.md`).
 - `[...slug].astro` — note detail with metadata `<dl>`, wiki-link panels, body via `<Content />` (rendered through `remarkWikiLinks`), backlink panel, Pagefind annotations. For `type: mold` notes, an "Appears in pipelines" panel rolls up every `pipeline` note that references this Mold in its `phases` (computed from `validatePipelinePhases` reverse index).
-- `pipelines/index.astro` — pipeline index; individual pipeline notes render through `[...slug].astro` with `PipelineBody.astro`. `PipelineBody` also surfaces a per-pipeline "Run this" panel from the harness `_assembly.json`.
-- `pipelines/run-a-pipeline.astro` — standalone "Run a pipeline" how-to-run surface (install pointer, working-dir convention, stop-gap framing).
+- `pipelines/index.astro` — pipeline index; individual pipeline notes render through `[...slug].astro` with `PipelineBody.astro`. `PipelineBody` also surfaces a per-pipeline "Run this" panel from the harness `_assembly.json`. The index appends the shared `RunPipelines.astro` (text variant) below the catalog table.
 - `pipelines/[slug]/harness.astro` — per-pipeline stop-gap harness detail: `_assembly.json` phase-resolution table + raw harness `SKILL.md` + `StopGapBanner`.
+- `components/RunPipelines.astro` — shared "Run a pipeline" surface (how-to-run steps + `StopGapBanner` + runnable harness-card grid). Mounted full on `/usage/#run-pipelines` and text-only on the pipelines index. Single source for the run story.
 - `molds/index.astro`, `patterns/index.astro`, `source-patterns/nextflow/index.astro` — type and source-pattern browse pages.
-- `artifacts/index.astro`, `artifacts/[id].astro`, `usage/index.astro`, `usage/claude/[skill].astro` — cast artifact and usage surfaces. The `/usage/` surfaces exclude `pipeline-*` harness casts (`isHarnessSlug` in `lib/casts.ts`); harnesses render on the pipelines surface instead.
+- `artifacts/index.astro`, `artifacts/[id].astro`, `usage/index.astro`, `usage/claude/[skill].astro` — cast artifact and usage surfaces. The `/usage/` Mold-cast grid excludes `pipeline-*` harness casts (`isHarnessSlug` in `lib/casts.ts`); harnesses render as a dedicated "Run a pipeline" section (`RunPipelines.astro`) above the cast grid, sourced from each pipeline's `_assembly.json`.
 - `design/index.astro`, `design/[slug].astro`, `story/index.astro`, `external.astro`, `log.astro`, `glossary.astro` — supporting public pages.
 - `tags/index.astro` — bucketed tag browser (note-type / `iwc/*` / other). New subject-area buckets get added as tag families bloom.
 - `tags/[...tag].astro` — per-tag filter.

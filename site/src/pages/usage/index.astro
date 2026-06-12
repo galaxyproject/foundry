@@ -1,10 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { listAllCasts } from '../../lib/casts';
+import RunPipelines from '../../components/RunPipelines.astro';
+import { listAllCasts, loadAssembly } from '../../lib/casts';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const casts = listAllCasts();
+
+const runnablePipelines = (await getCollection('content'))
+  .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
+  .filter(p => loadAssembly(p.id.split('/').pop()!)).length;
 
 // Resolve mold backlinks by name → entry slug.
 const molds = (await getCollection('content')).filter(e => e.data.type === 'mold');
@@ -35,24 +40,25 @@ const claudeCount = (byTarget.get('claude') ?? []).length;
     <span class="eyebrow mb-3">Usage</span>
     <div class="page-hero-grid">
       <div>
-        <h1 id="usage-heading" class="page-title text-balance">Use cast Claude skills with Claude Code.</h1>
+        <h1 id="usage-heading" class="page-title text-balance">Install and run Foundry skills with Claude Code.</h1>
         <p class="page-lede text-pretty">
-          The Foundry casts each Mold into a self-contained skill. Casts are committed to this repo
-          under <code class="font-mono">casts/</code> and surfaced as a Claude Code plugin marketplace.
-          Install once; every cast skill becomes available to your agent.
+          The Foundry casts each Mold into a self-contained skill, and assembles each Pipeline into a
+          runnable harness. Both are committed under <code class="font-mono">casts/</code> and surfaced
+          as a Claude Code plugin marketplace. Install once; <a href="#run-pipelines">run a pipeline</a>
+          end-to-end or invoke any cast skill directly.
         </p>
       </div>
       <dl class="page-stats" aria-label="Cast inventory stats">
+        <div>
+          <dt>Pipelines</dt>
+          <dd>{runnablePipelines}</dd>
+        </div>
         <div>
           <dt>Claude</dt>
           <dd>{claudeCount}</dd>
         </div>
         <div>
-          <dt>Targets</dt>
-          <dd>{[...byTarget.values()].filter(l => l.length > 0).length}</dd>
-        </div>
-        <div>
-          <dt>Total</dt>
+          <dt>Casts</dt>
           <dd>{casts.length}</dd>
         </div>
       </dl>
@@ -85,6 +91,10 @@ cp -r foundry/casts/claude/skills/&lt;name&gt; ~/.claude/skills/&lt;name&gt;</co
     <p class="mt-4 text-sm text-(--color-text-secondary)">
       Update later with <code class="font-mono">/plugin update foundry-skills@galaxy-workflow-foundry</code>.
     </p>
+  </section>
+
+  <section id="run-pipelines" class="mb-10" aria-labelledby="run-heading" style="scroll-margin-top: 5rem;">
+    <RunPipelines variant="full" />
   </section>
 
   {TARGET_ORDER.map(target => {
