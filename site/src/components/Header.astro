@@ -4,16 +4,19 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 const navLinks = [
   { href: `${base}/story/`, label: 'Story', match: (p: string) => p.startsWith(`${base}/story`) },
-  { href: `${base}/dashboard/`, label: 'Dashboard', match: (p: string) => p.startsWith(`${base}/dashboard`) },
+  { href: `${base}/usage/`, label: 'Usage', match: (p: string) => p.startsWith(`${base}/usage`) },
   { href: `${base}/molds/`, label: 'Molds', match: (p: string) => p.startsWith(`${base}/molds`) },
   { href: `${base}/patterns/`, label: 'Patterns', match: (p: string) => p.startsWith(`${base}/patterns`) },
   { href: `${base}/pipelines/`, label: 'Pipelines', match: (p: string) => p.startsWith(`${base}/pipelines`) && !p.includes('/molds') },
-  { href: `${base}/usage/`, label: 'Usage', match: (p: string) => p.startsWith(`${base}/usage`) },
+];
+const moreLinks = [
+  { href: `${base}/dashboard/`, label: 'Dashboard', match: (p: string) => p.startsWith(`${base}/dashboard`) },
   { href: `${base}/index/`, label: 'Index', match: (p: string) => p.startsWith(`${base}/index`) },
   { href: `${base}/tags/`, label: 'Tags', match: (p: string) => p.startsWith(`${base}/tags`) },
   { href: `${base}/external/`, label: 'External', match: (p: string) => p.startsWith(`${base}/external`) },
   { href: `${base}/log/`, label: 'Log', match: (p: string) => p.startsWith(`${base}/log`) },
 ];
+const moreActive = moreLinks.some(link => link.match(pathname));
 ---
 <header class="bg-(--color-galaxy-dark) border-b-4 border-(--color-accent) relative">
   <div class="absolute inset-0 bg-grid-header pointer-events-none"></div>
@@ -38,6 +41,47 @@ const navLinks = [
             </a>
           );
         })}
+        <div class="nav-more relative">
+          <button
+            type="button"
+            id="nav-more-trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="nav-more-menu"
+            class:list={[
+              'flex items-center gap-1 text-(--color-text-on-dark) no-underline hover:text-(--color-accent) transition-colors opacity-80 hover:opacity-100 cursor-pointer',
+              moreActive && 'nav-link-active',
+            ]}
+          >
+            More
+            <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          <div
+            id="nav-more-menu"
+            role="menu"
+            aria-labelledby="nav-more-trigger"
+            class="nav-more-menu absolute left-0 top-full mt-2 min-w-40 rounded-md border border-(--color-accent) bg-(--color-galaxy-dark) shadow-lg py-1 z-50"
+          >
+            {moreLinks.map(link => {
+              const active = link.match(pathname);
+              return (
+                <a
+                  href={link.href}
+                  role="menuitem"
+                  aria-current={active ? 'page' : undefined}
+                  class:list={[
+                    'block px-4 py-1.5 text-sm text-(--color-text-on-dark) no-underline hover:text-(--color-accent) hover:bg-white/5 transition-colors opacity-80 hover:opacity-100',
+                    active && 'nav-link-active',
+                  ]}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
       </nav>
     </div>
     <div class="flex items-center gap-2">
@@ -99,6 +143,20 @@ const navLinks = [
       linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 24px 24px;
   }
+
+  .nav-more-menu {
+    display: none;
+  }
+  .nav-more:hover .nav-more-menu,
+  .nav-more:focus-within .nav-more-menu,
+  #nav-more-trigger[aria-expanded='true'] + .nav-more-menu {
+    display: block;
+  }
+  .nav-more:hover #nav-more-trigger svg,
+  .nav-more:focus-within #nav-more-trigger svg,
+  #nav-more-trigger[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
 </style>
 
 <script is:inline>
@@ -125,5 +183,22 @@ const navLinks = [
         input.focus();
       }
     }
+  });
+
+  const moreTrigger = document.getElementById('nav-more-trigger');
+  const moreWrap = moreTrigger?.closest('.nav-more');
+  function closeMore() {
+    moreTrigger?.setAttribute('aria-expanded', 'false');
+  }
+  moreTrigger?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = moreTrigger.getAttribute('aria-expanded') === 'true';
+    moreTrigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+  });
+  document.addEventListener('click', (e) => {
+    if (moreWrap && !moreWrap.contains(e.target)) closeMore();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMore();
   });
 </script>
