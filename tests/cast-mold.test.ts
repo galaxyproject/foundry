@@ -109,6 +109,9 @@ describe("cast-mold (summarize-nextflow integration)", () => {
       // Package-vendored schema refs use a `package://...#export` src marker; the
       // dst basename derives from the schema note slug, not the export name.
       if (typeof r.src === "string" && r.src.startsWith("package://")) continue;
+      // cli-tool notes live at content/cli/<tool>/index.md; their dst is renamed
+      // to references/cli/<tool>.md so tool notes don't all collide on index.md.
+      if (r.kind === "cli-tool") continue;
       expect(path.basename(r.dst)).toBe(path.basename(r.src));
     }
   });

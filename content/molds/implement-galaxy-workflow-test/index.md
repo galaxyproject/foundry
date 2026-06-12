@@ -39,6 +39,13 @@ references:
     evidence: corpus-observed
     purpose: "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution."
     trigger: "After authoring or editing a Galaxy workflow test file and before Planemo invocation."
+  - kind: cli-tool
+    ref: "[[planemo]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation."
   - kind: schema
     ref: "[[tests-format]]"
     used_at: runtime

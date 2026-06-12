@@ -46,6 +46,13 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[]."
+  - kind: cli-tool
+    ref: "[[foundry]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "Schema-check summary-nextflow.json before returning it from the skill."
   - kind: research
     ref: "[[component-nextflow-pipeline-anatomy]]"
     used_at: runtime

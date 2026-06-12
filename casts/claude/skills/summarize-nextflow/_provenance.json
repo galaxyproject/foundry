@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 13,
-    "content_hash": "dcfcf64472d7355c5859afa4b21ec76e75d995d8aff34e0cecffcd978128eae3",
-    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
+    "content_hash": "5c2eb98afb41c1cc58e3a22aedfe62fac75e6c6c93eb6eb6339aadda1ac7ebd0",
+    "commit": "e966a94f2a384913d0105082e8ccacd514e4937f"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-06-10T16:53:00.579Z",
+  "cast_at": "2026-06-11T22:20:41.363Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -71,6 +71,20 @@
     }
   ],
   "refs": [
+    {
+      "kind": "cli-tool",
+      "mode": "verbatim",
+      "ref": "[[foundry]]",
+      "src": "content/cli/foundry/index.md",
+      "dst": "references/cli/foundry.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Schema-check summary-nextflow.json before returning it from the skill.",
+      "src_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
+      "dst_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
+      "source": "deterministic"
+    },
     {
       "kind": "research",
       "mode": "verbatim",

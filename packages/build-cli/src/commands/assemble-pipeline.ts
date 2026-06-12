@@ -15,7 +15,14 @@ import path from "node:path";
 import process from "node:process";
 
 import { readMarkdown } from "../lib/frontmatter.js";
-import { parsePhases, type ParsedPhase } from "../lib/pipeline-phases.js";
+import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
+import {
+  aggregateRequiredTools,
+  moldCliRefs,
+  requiredToolRows,
+  type RequiredTool,
+  type RequiredToolRef,
+} from "../lib/required-tools.js";
 import type { Frontmatter } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
 import { slugify } from "../lib/wiki-links.js";
@@ -63,6 +70,15 @@ function buildContentIndex(repoRoot: string): {
     const rel = path.relative(repoRoot, abs);
     slugMap.set(slugify(fileSlug(rel)), rel);
     metaByPath.set(rel, parsed.meta);
+    // Compound `<tool> <command>` slug for cli-command notes (parity with cast's
+    // buildSlugMap) so `[[gxwf validate]]`-style refs resolve at assembly time.
+    if (
+      parsed.meta.type === "cli-command" &&
+      typeof parsed.meta.tool === "string" &&
+      typeof parsed.meta.command === "string"
+    ) {
+      slugMap.set(slugify(`${parsed.meta.tool} ${parsed.meta.command}`), rel);
+    }
   }
   return { slugMap, metaByPath };
 }
@@ -141,6 +157,7 @@ const RUN_OPTIONS_SECTION: string[] = [
 interface Assembled {
   skill: string;
   assemblyPhases: AssemblyPhase[];
+  requiredTools: RequiredTool[];
   errors: string[];
 }
 
@@ -150,6 +167,7 @@ function assemble(
   pipelineMeta: Frontmatter,
   parsed: ParsedPhase[],
   metaByPath: Map<string, Frontmatter>,
+  slugMap: Map<string, string>,
   repoRoot: string,
 ): Assembled {
   const errors: string[] = [];
@@ -213,6 +231,16 @@ function assemble(
     }
   });
 
+  // Bootstrap rollup: union every member Mold's cli-tool/cli-command refs
+  // (top-level + branch-inner), then aggregate to deduped install metadata.
+  const unionRefs: RequiredToolRef[] = [];
+  for (const p of parsed) {
+    for (const moldPath of phaseMoldPaths(p)) {
+      unionRefs.push(...moldCliRefs(metaByPath.get(moldPath), slugMap));
+    }
+  }
+  const requiredTools = aggregateRequiredTools(unionRefs, metaByPath, slugMap);
+
   const intro = moldManual > moldCast;
   const skill = renderSkill({
     harnessName,
@@ -224,9 +252,10 @@ function assemble(
     phaseLines,
     hasManual,
     harnessNotes,
+    requiredTools,
   });
 
-  return { skill, assemblyPhases, errors };
+  return { skill, assemblyPhases, requiredTools, errors };
 }
 
 // ---- SKILL.md rendering ----
@@ -294,6 +323,7 @@ function renderSkill(args: {
   phaseLines: string[];
   hasManual: boolean;
   harnessNotes: string[];
+  requiredTools: RequiredTool[];
 }): string {
   const description = `${firstSentence(args.summary)} — orchestrates the Foundry skills of the ${args.title} pipeline in order, in a per-run working directory.`;
   const doneTail = args.hasManual ? " and any phases handled manually (marked MANUAL above)" : "";
@@ -319,11 +349,18 @@ function renderSkill(args: {
       "Most of this pipeline's Molds are not yet cast, so this harness is mostly manual checkpoints today; it still fixes the phase order, the per-run working directory, and the few real casts. It strengthens as the remaining Molds are cast.",
     );
   }
+  blocks.push("", "## When To Use", "", `- ${args.summary}`);
+  if (args.requiredTools.length) {
+    blocks.push(
+      "",
+      "## Bootstrap (install these CLIs first)",
+      "",
+      "Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).",
+      "",
+      ...requiredToolRows(args.requiredTools),
+    );
+  }
   blocks.push(
-    "",
-    "## When To Use",
-    "",
-    `- ${args.summary}`,
     "",
     ...RUN_OPTIONS_SECTION,
     "## Working directory (do this first)",
@@ -371,13 +408,19 @@ function renderAssembly(
   harnessName: string,
   revision: number,
   phases: AssemblyPhase[],
+  requiredTools: RequiredTool[],
 ): string {
+  // JSON round-trip drops undefined-valued keys before the compact serializer.
+  const tools = JSON.parse(JSON.stringify(requiredTools)) as unknown[];
   const lines = [
     "{",
     `  "source_pipeline": ${JSON.stringify(slug)},`,
     `  "source_revision": ${revision},`,
     `  "harness_name": ${JSON.stringify(harnessName)},`,
     `  "options": ${compactValue([...HARNESS_OPTIONS])},`,
+    `  "required_tools": [`,
+    ...tools.map((t, i) => `    ${compactValue(t)}${i < tools.length - 1 ? "," : ""}`),
+    `  ],`,
     `  "phases": [`,
     ...phases.map((p, i) => `    ${compactValue(p)}${i < phases.length - 1 ? "," : ""}`),
     "  ]",
@@ -449,12 +492,19 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
     parsed.meta,
     parsedPhases.phases,
     metaByPath,
+    slugMap,
     repoRoot,
   );
   errors.push(...result.errors);
 
   const revision = typeof parsed.meta.revision === "number" ? parsed.meta.revision : 0;
-  const assemblyText = renderAssembly(args.slug, harnessName, revision, result.assemblyPhases);
+  const assemblyText = renderAssembly(
+    args.slug,
+    harnessName,
+    revision,
+    result.assemblyPhases,
+    result.requiredTools,
+  );
 
   for (const e of errors) console.error(`error: ${e}`);
   if (errors.length) {

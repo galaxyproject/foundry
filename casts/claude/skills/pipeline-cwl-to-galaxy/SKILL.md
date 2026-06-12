@@ -11,6 +11,31 @@ Harness for the **CWL → GALAXY** Foundry pipeline. Runs the constituent skills
 
 - Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction.
 
+## Bootstrap (install these CLIs first)
+
+Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
+
+- **`cwl-normalizer`** (cwl-utils). `uv tool install cwl-utils` (or `pip install cwl-utils`).
+  Ephemeral run: `uvx --from cwl-utils cwl-normalizer`.
+  Check: `cwl-normalizer --help`.
+  Docs: https://github.com/common-workflow-language/cwl-utils
+- **`cwltool`** (cwltool). `uv tool install cwltool` (or `pip install cwltool`).
+  Ephemeral run: `uvx cwltool`.
+  Check: `cwltool --version`.
+  Docs: https://cwltool.readthedocs.io/
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
+  Check: `foundry --help`.
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
+  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
+  Check: `gxwf --version`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
+- **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).
+  Ephemeral run: `uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo`.
+  Check: `planemo --version`.
+  Docs: https://planemo.readthedocs.io/
+
 ## Run options
 
 Optional flags, given as leading arguments. Strip any you recognize; treat the remaining positional argument as the run slug. Both default off and compose.

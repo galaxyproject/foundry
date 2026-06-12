@@ -14,7 +14,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `galaxy-test-plan`. Produced by `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`. Reviewable Galaxy test plan from a *-test-to-galaxy-test-plan Mold; profile, fixtures, snapshot/assertion provenance.
-- Read artifact `galaxy-workflow-draft`. Produced by `cwl-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`, `paper-summary-to-galaxy-template`. gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against.
+- Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`. gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against.
 - Read artifact `test-data-refs`. Produced by `find-test-data`, `paper-to-test-data`. Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.
 
 ## Outputs
@@ -27,9 +27,15 @@ Follow the procedure below and use the artifact/reference sections as the runtim
   Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
   Check: `gxwf --version`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
+- **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).
+  Ephemeral run: `uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo`.
+  Check: `planemo --version`.
+  Docs: https://planemo.readthedocs.io/
+  Bundled reference: `references/cli/planemo.md`.
 
 ## Load Upfront
 
+- `references/cli/planemo.md`: CLI tool reference copied verbatim into the bundle. Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation.
 - `references/schemas/tests-format.schema.json`: Schema file copied verbatim into the bundle. JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.
 
 ## Load On Demand
@@ -48,8 +54,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Procedure
 
 Stub. Replace with real skill content per MOLD_SPEC once first walks are done.
-- **`planemo workflow_test_init --from_invocation <id>`** — preferred bootstrap for new test files; reviewer convention. See planemo-asserts-idioms §7.
-- **`planemo workflow_test_on_invocation <tests.yml> <id>`** — fast assertion-iteration loop without re-running the workflow.
+- **`planemo workflow_test_init --from_invocation <id>`** (planemo-workflow_test_init) — preferred bootstrap for new test files; reviewer convention. See planemo-asserts-idioms §7.
+- **`planemo workflow_test_on_invocation <tests.yml> <id>`** (planemo-workflow_test_on_invocation) — fast assertion-iteration loop without re-running the workflow.
 
 ## Runtime Notes
 
