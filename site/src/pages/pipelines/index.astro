@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import RunPipelines from '../../components/RunPipelines.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const all = await getCollection('content');
@@ -23,7 +24,7 @@ function phaseCount(phases: unknown): number {
           Pipelines compose Molds into harness journeys and make the Foundry navigable from source to target.
         </p>
         <p class="mt-3 text-sm">
-          <a href={`${base}/pipelines/run-a-pipeline/`} class="text-(--color-link) hover:underline">
+          <a href={`${base}/usage/#run-pipelines`} class="text-(--color-link) hover:underline">
             Run a pipeline →
           </a>
           <span class="text-(--color-text-muted)"> — how to run one end-to-end today.</span>
@@ -58,4 +59,8 @@ function phaseCount(phases: unknown): number {
       })}
     </tbody>
   </table>
+
+  <section class="mt-12">
+    <RunPipelines variant="text" />
+  </section>
 </Base>
