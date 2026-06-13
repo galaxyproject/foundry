@@ -153,6 +153,14 @@ references:
     evidence: corpus-observed
     purpose: "Resolve reference-asset declarations into gxformat2 inputs with the right datatype, optionality, and rebuild-on-absence wiring; cross-check the upstream brief against the datatypes table and v1 posture when the brief is silent or low-confidence on a specific asset."
     trigger: "When emitting workflow inputs or input-connection wiring for any reference asset flagged in the reference-data brief (FASTA, fai, dict, indexes, dbsnp, known_indels, intervals, PoN, …), or when the source pipeline declares iGenomes-derived params, per-asset reference path params, or any compute-if-missing index-building branch."
+  - kind: research
+    ref: "[[galaxy-workflow-comments]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Group the settled step set into titled stage frames (the gxformat2 `comments:` array) so the skeleton carries the analysis-stage narrative IWC authors annotate by hand. Schema-legal and optional."
+    trigger: "After topology is settled and the skeleton can be partitioned into named analysis stages (inputs, per-stage step clusters, parameter-derivation knots, visualization/outputs)."
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
@@ -170,5 +178,7 @@ The reference-data, interface, and data-flow briefs guide the skeleton, but they
 Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. Wrapper resolution, by contrast, is **evidence-gated, not source-gated**: resolve each tool step to the tier its evidence supports — **Resolved** (fully concrete, no `_plan_*`), **Identity-pinned** (concrete `tool_id`, parameters and changeset left to the per-step Mold), or **Deferred** (`tool_id: TODO`) — as defined in [[galaxy-workflow-draft-format]]. Capture whatever you defer in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
 
 Source tendency: nf-core modules name their tool, pin a version, and carry the `command:` block, conda packages, and container tags — so steps reach **Resolved** when a pattern page or IWC exemplar covers the operation (fill `tool_id`, parameters, and port names from the worked example), and **Identity-pinned** when the module names the tool but its settings for this context stay open. **Deferred** is for domain-specific scientific tools with no covering pattern (alignment, variant calling, expression quantification, etc.) — pack `_plan_context` with the source command, conda specs, container tags, and pre/post conditions the per-step Mold needs to pick a wrapper. Emitting `TODO` over a pattern-covered recipe discards real evidence the per-step Mold cannot recover.
+
+Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see [[galaxy-workflow-comments]] for the convention.
 
 Output shape is gxformat2 with wrapper-tier relaxations and `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` per tool step — see [[galaxy-workflow-draft-format]]. Refinement open work for those planning fields lives in `refinement.md`.
