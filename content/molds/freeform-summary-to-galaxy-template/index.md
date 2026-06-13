@@ -113,6 +113,14 @@ references:
     evidence: corpus-observed
     purpose: "Use corpus-grounded genomic-interval pattern guidance for unresolved skeleton steps."
     trigger: "When adding TODO steps for interval overlap, merge, coverage, windowing, masking, or set-algebra on coordinate features."
+  - kind: research
+    ref: "[[galaxy-workflow-comments]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Group the settled step set into titled stage frames (the gxformat2 `comments:` array) so the skeleton carries the analysis-stage narrative IWC authors annotate by hand. Schema-legal and optional."
+    trigger: "After topology is settled and the skeleton can be partitioned into named analysis stages (inputs, per-stage step clusters, parameter-derivation knots, visualization/outputs)."
 related_notes:
   - "[[freeform-summary-to-galaxy-interface]]"
   - "[[freeform-summary-to-galaxy-data-flow]]"
@@ -126,5 +134,7 @@ The free-form summary does not have a concrete schema yet; treat it as Markdown.
 Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream freeform-to-Galaxy interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. Wrapper resolution, by contrast, is **evidence-gated, not source-gated**: resolve each tool step to the tier its evidence supports — **Resolved** (fully concrete, no `_plan_*`), **Identity-pinned** (concrete `tool_id`, parameters and changeset left to the per-step Mold), or **Deferred** (`tool_id: TODO`) — as defined in [[galaxy-workflow-draft-format]]. Capture whatever you defer in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
 
 Source tendency: free-form sources rarely name tools, so steps land in **Deferred** more often than nf-core or CWL — but a free-form source that *does* name a specific tool/version with evidence hardens to the matching tier, and a corpus-confirmed utility wrapper (interval/tabular/collection op) is not deferred just because the surrounding prose is informal. When deferring a domain tool, cite the originating paper section, interview answer, figure, or supplementary table in `_plan_context`, and record vague intent in `_plan_state` ("default settings", "stranded reverse if mentioned, else unstranded") so the per-step Mold knows the evidence ceiling.
+
+Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see [[galaxy-workflow-comments]] for the convention.
 
 Output shape is gxformat2 with wrapper-tier relaxations and `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` per tool step — see [[galaxy-workflow-draft-format]]. Refinement open work for those planning fields lives in `refinement.md`.
