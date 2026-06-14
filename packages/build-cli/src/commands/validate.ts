@@ -808,6 +808,7 @@ function validatePipelineArtifactBindings(
 const MOLD_TOP_FILES = new Set([
   "index.md",
   "eval.md",
+  "scenarios.md",
   "usage.md",
   "refinement.md",
   "casting.md",
@@ -816,6 +817,16 @@ const MOLD_TOP_FILES = new Set([
   "README.md",
 ]);
 const MOLD_TOP_DIRS = new Set(["examples", "refinements"]);
+
+// Allowlisted top-level entries inside a Pipeline directory note.
+// `eval.md` / `scenarios.md` are optional pipeline-level evaluation siblings.
+const PIPELINE_TOP_FILES = new Set([
+  "index.md",
+  "eval.md",
+  "scenarios.md",
+  "usage.md",
+  "README.md",
+]);
 
 const REFINEMENT_DECISION_VOCAB = new Set([
   "keep",
@@ -888,6 +899,24 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
       }
     }
 
+    const scenariosPath = path.join(moldDir, "scenarios.md");
+    if (existsSync(scenariosPath)) {
+      const scenariosBody = readMarkdown(scenariosPath).body;
+      if (!/^##\s+Case:/m.test(scenariosBody)) {
+        findings.push({
+          path: scenariosPath,
+          severity: "warning",
+          message: "scenarios.md should declare at least one '## Case:' section",
+        });
+      } else if (!/\bfixture\b/i.test(scenariosBody)) {
+        findings.push({
+          path: scenariosPath,
+          severity: "warning",
+          message: "scenarios.md cases should bind a fixture",
+        });
+      }
+    }
+
     if (!existsSync(evalPath)) {
       findings.push({
         path: moldDir,
@@ -898,11 +927,11 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
     }
 
     const evalBody = readMarkdown(evalPath).body;
-    if (!/^##\s+Case:/m.test(evalBody)) {
+    if (!/^##\s+(Property|Case):/m.test(evalBody)) {
       findings.push({
         path: evalPath,
         severity: "warning",
-        message: "eval.md should declare at least one '## Case:' section",
+        message: "eval.md should declare at least one '## Property:' section",
       });
     }
     if (!/\b(deterministic|llm-judged)\b/.test(evalBody)) {
@@ -910,6 +939,103 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
         path: evalPath,
         severity: "warning",
         message: "eval.md should identify deterministic or llm-judged checks",
+      });
+    }
+  }
+
+  return findings;
+}
+
+function validatePipelineSourceLayout(
+  contentRoot: string,
+  pipelineFiles: FileMeta[],
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const pipelinesRoot = path.join(contentRoot, "pipelines");
+  if (!existsSync(pipelinesRoot) || !statSync(pipelinesRoot).isDirectory()) return findings;
+
+  const seenDirs = new Set(pipelineFiles.map((f) => path.dirname(f.path)));
+  for (const entry of readdirSync(pipelinesRoot).sort()) {
+    const pdir = path.join(pipelinesRoot, entry);
+    if (!statSync(pdir).isDirectory()) {
+      if (entry.endsWith(".md")) {
+        findings.push({
+          path: pdir,
+          severity: "warning",
+          message:
+            "pipeline must be a directory note (content/pipelines/<slug>/index.md), not a flat file",
+        });
+      }
+      continue;
+    }
+
+    const indexPath = path.join(pdir, "index.md");
+    if (!existsSync(indexPath)) {
+      findings.push({
+        path: pdir,
+        severity: "error",
+        message: "pipeline source directory must contain index.md",
+      });
+    } else if (!seenDirs.has(pdir)) {
+      findings.push({
+        path: indexPath,
+        severity: "error",
+        message: "pipeline source index.md must validate as type=pipeline",
+      });
+    }
+
+    for (const child of readdirSync(pdir).sort()) {
+      const childPath = path.join(pdir, child);
+      if (statSync(childPath).isDirectory()) {
+        findings.push({
+          path: childPath,
+          severity: "warning",
+          message: `unexpected directory in pipeline source: ${child}`,
+        });
+      } else if (!PIPELINE_TOP_FILES.has(child)) {
+        findings.push({
+          path: childPath,
+          severity: "warning",
+          message: `unexpected file in pipeline source: ${child}`,
+        });
+      }
+    }
+
+    for (const mdPath of listMarkdownFiles(pdir)) {
+      if (path.basename(mdPath) === "index.md") continue;
+      if (readMarkdown(mdPath).hasFrontmatter) {
+        findings.push({
+          path: mdPath,
+          severity: "error",
+          message: "only pipeline index.md may have frontmatter",
+        });
+      }
+    }
+
+    const scenariosPath = path.join(pdir, "scenarios.md");
+    if (existsSync(scenariosPath)) {
+      const scenariosBody = readMarkdown(scenariosPath).body;
+      if (!/^##\s+Case:/m.test(scenariosBody)) {
+        findings.push({
+          path: scenariosPath,
+          severity: "warning",
+          message: "scenarios.md should declare at least one '## Case:' section",
+        });
+      } else if (!/\bfixture\b/i.test(scenariosBody)) {
+        findings.push({
+          path: scenariosPath,
+          severity: "warning",
+          message: "scenarios.md cases should bind a fixture",
+        });
+      }
+    }
+
+    const evalPath = path.join(pdir, "eval.md");
+    if (existsSync(evalPath) && !/^##\s+(Property|Case):/m.test(readMarkdown(evalPath).body)) {
+      findings.push({
+        path: evalPath,
+        severity: "warning",
+        message: "eval.md should declare at least one '## Property:' section",
       });
     }
   }
@@ -1324,6 +1450,12 @@ export function validateDirectory(opts: ValidateOptions): {
     ...validateMoldSourceLayout(
       opts.directory,
       validFiles.filter((f) => f.meta.type === "mold"),
+    ),
+  );
+  crossFindings.push(
+    ...validatePipelineSourceLayout(
+      opts.directory,
+      validFiles.filter((f) => f.meta.type === "pipeline"),
     ),
   );
   crossFindings.push(...validateCliCommandDocs(validFiles));

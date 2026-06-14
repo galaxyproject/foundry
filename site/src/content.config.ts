@@ -219,7 +219,7 @@ const content = defineCollection({
       'molds/**/index.md',
       'patterns/**/*.md',
       'source-patterns/**/*.md',
-      'pipelines/**/*.md',
+      'pipelines/**/index.md',
       'research/**/*.md',
       'schemas/**/*.md',
       '!Dashboard.md',

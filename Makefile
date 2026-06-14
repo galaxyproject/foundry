@@ -1,7 +1,7 @@
 .PHONY: validate test typecheck generated check-generated check assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli
 
 FOUNDRY_BUILD := npx tsx packages/build-cli/src/bin/foundry-build.ts
-PIPELINE_SLUGS := $(patsubst content/pipelines/%.md,%,$(wildcard content/pipelines/*.md))
+PIPELINE_SLUGS := $(patsubst content/pipelines/%/index.md,%,$(wildcard content/pipelines/*/index.md))
 
 validate:
 	npm run validate

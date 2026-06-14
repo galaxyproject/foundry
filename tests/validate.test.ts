@@ -501,7 +501,7 @@ describe("validateDirectory (cross-file)", () => {
 
   it("flags pipeline phase resolving to non-Mold", () => {
     // Pipeline references [[some-pattern]], but the file is a pattern, not a mold.
-    writeFm(path.join(dir, "pipelines/p.md"), {
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
         tags: ["pipeline"],
@@ -521,8 +521,67 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
+  it("accepts pipeline eval.md and scenarios.md siblings", () => {
+    writeFm(path.join(dir, "molds/mold-a/index.md"), {
+      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+    });
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
+      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+    });
+    writeFileSync(
+      path.join(dir, "pipelines/p/eval.md"),
+      "# P eval\n\n## Property: end to end\n\n- check: deterministic\n- assertion: final workflow validates\n",
+    );
+    writeFileSync(
+      path.join(dir, "pipelines/p/scenarios.md"),
+      "# P scenarios\n\n## Case: demo\n\n- fixture: nf-core/demo\n- expect: validates\n",
+    );
+    const r = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    expect(r.errors).toBe(0);
+  });
+
+  it("errors on frontmatter in a pipeline sibling", () => {
+    writeFm(path.join(dir, "molds/mold-a/index.md"), {
+      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+    });
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
+      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+    });
+    writeFileSync(path.join(dir, "pipelines/p/eval.md"), "---\ntype: junk\n---\n\nbad\n");
+    const r = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("warns on an unexpected file in a pipeline directory", () => {
+    writeFm(path.join(dir, "molds/mold-a/index.md"), {
+      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+    });
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
+      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+    });
+    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    writeFileSync(path.join(dir, "pipelines/p/notes.md"), "stray notes\n");
+    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    expect(after.errors).toBe(0);
+    expect(after.warnings).toBeGreaterThan(before);
+  });
+
+  it("warns on a flat .md file under content/pipelines/", () => {
+    writeFm(path.join(dir, "molds/mold-a/index.md"), {
+      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+    });
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
+      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+    });
+    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    writeFileSync(path.join(dir, "pipelines/stray.md"), "not a directory note\n");
+    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    expect(after.errors).toBe(0);
+    expect(after.warnings).toBeGreaterThan(before);
+  });
+
   it("resolves a pipeline's [branch] phase to molds", () => {
-    writeFm(path.join(dir, "pipelines/p.md"), {
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
         tags: ["pipeline"],
@@ -1029,6 +1088,104 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
+  });
+
+  it("allowlists scenarios.md and accepts Property sections in eval.md", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: holds for all inputs\n",
+    );
+    const withoutScenarios = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(withoutScenarios.errors).toBe(0);
+
+    writeFileSync(
+      path.join(dir, "molds/m/scenarios.md"),
+      "# m scenarios\n\n## Case: basic\n\n- fixture: synthetic\n- expect: 1\n",
+    );
+    const withScenarios = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(withScenarios.errors).toBe(0);
+    // valid scenarios.md is allowlisted and well-formed: adds no warning
+    expect(withScenarios.warnings).toBe(withoutScenarios.warnings);
+  });
+
+  it("warns when scenarios.md lacks a Case section", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: x\n",
+    );
+    const before = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    }).warnings;
+
+    writeFileSync(
+      path.join(dir, "molds/m/scenarios.md"),
+      "# m scenarios\n\nProse only, no case sections.\n",
+    );
+    const after = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(after.errors).toBe(0);
+    expect(after.warnings).toBeGreaterThan(before);
+  });
+
+  it("warns when a scenarios.md case binds no fixture", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: x\n",
+    );
+    const before = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    }).warnings;
+
+    writeFileSync(
+      path.join(dir, "molds/m/scenarios.md"),
+      "# m scenarios\n\n## Case: c\n\n- expect: something\n",
+    );
+    const after = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(after.errors).toBe(0);
+    expect(after.warnings).toBeGreaterThan(before);
   });
 
   it("warns on unexpected files in a Mold directory", () => {
@@ -1658,7 +1815,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     // Out-of-order pipeline: consumer first, producer second.
-    writeFm(path.join(dir, "pipelines/bad-order.md"), {
+    writeFm(path.join(dir, "pipelines/bad-order/index.md"), {
       ...baseRequired({
         type: "pipeline",
         tags: ["pipeline"],
