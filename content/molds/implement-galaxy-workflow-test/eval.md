@@ -1,25 +1,34 @@
 # implement-galaxy-workflow-test eval
 
-## Case: tests-format schema gate
+Evaluation plan for the `implement-galaxy-workflow-test` Mold. This file is the
+**abstract oracle**: properties any authored Galaxy workflow test must satisfy,
+independent of which workflow fixture it was authored against. Concrete fixtures
+and their expected values live in `scenarios.md`; the oracle here is applied to
+whatever a scenario produces. Every property is deterministic — each gate is
+mechanically checkable.
+
+## Property: tests-format schema gate
 
 - check: deterministic
-- fixture: Galaxy workflow test plan for an IWC-style workflow such as SARS-CoV-2 variant calling, ChIPseq-SR, or RNAseq.
-- expectation: authored `-tests.yml` validates against the tests-format schema before any Planemo invocation.
+- assertion: the authored `-tests.yml` validates against the tests-format schema
+  before any Planemo invocation.
 
-## Case: workflow/test cross-check gate
-
-- check: deterministic
-- fixture: authored `-tests.yml` plus the target Galaxy workflow in gxformat2 or native Galaxy workflow format.
-- expectation: `checkTestsAgainstWorkflow` reports zero missing input labels, zero missing output labels, and no collection/datatype mismatches.
-
-## Case: static CLI validation
+## Property: workflow/test cross-check gate
 
 - check: deterministic
-- fixture: authored `-tests.yml` and workflow fixture for a representative IWC workflow.
-- expectation: gxwf or Planemo static validation reaches a clean result, or emits only explicitly documented warnings that do not block runtime testing.
+- assertion: `checkTestsAgainstWorkflow` against the target Galaxy workflow (in
+  gxformat2 or native Galaxy workflow format) reports zero missing input labels,
+  zero missing output labels, and no collection/datatype mismatches.
 
-## Case: managed Galaxy runtime green
+## Property: static CLI validation
 
 - check: deterministic
-- fixture: authored workflow test for a representative IWC workflow with staged test data and tools available.
-- expectation: `planemo test` passes on a managed Galaxy, and the result preserves enough invocation, job, and assertion artifact context for debugging if the run fails.
+- assertion: gxwf or Planemo static validation reaches a clean result, or emits
+  only explicitly documented warnings that do not block runtime testing.
+
+## Property: managed Galaxy runtime green
+
+- check: deterministic
+- assertion: `planemo test` passes on a managed Galaxy with staged test data and
+  tools available, and the result preserves enough invocation, job, and
+  assertion artifact context for debugging if the run fails.

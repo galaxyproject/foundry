@@ -1,19 +1,29 @@
 # run-workflow-test eval
 
-## Case: structured Planemo artifact capture
+This file is the **abstract oracle** for the `run-workflow-test` Mold: properties
+any run must satisfy, independent of fixture. Concrete input conditions and their
+expected values live in `scenarios.md`; the oracle here is applied to whatever a
+scenario produces.
+
+## Property: structured Planemo artifact capture
 
 - check: deterministic
-- fixture: workflow test run with Planemo configured to emit structured test output.
-- expectation: preserves the invocation id, history id, workflow id, Planemo structured result, and any test output artifact paths needed by debug molds.
+- assertion: a run with Planemo configured to emit structured test output
+  preserves the invocation id, history id, workflow id, the Planemo structured
+  result, and any test-output artifact paths needed by debug molds.
 
-## Case: existing versus managed Galaxy mode
-
-- check: llm-judged
-- fixture: workflow test configuration that can run against either an existing Galaxy or a Planemo-managed Galaxy.
-- expectation: records which Galaxy mode was used, how tools/workflows/test data were staged, and which API credentials or URLs are needed for follow-up failure inspection.
-
-## Case: failure modality handoff
+## Property: existing versus managed Galaxy mode
 
 - check: llm-judged
-- fixture: workflow test run that exits non-zero or reports failed assertions, failed jobs, failed invocation, missing outputs, or upload/staging problems.
-- expectation: hands off a structured summary that identifies the observed failure modality and the next reference surface to inspect: Planemo result, Galaxy job API, Galaxy invocation API, history contents, or test assertion report.
+- assertion: the output records which Galaxy mode was used (existing/external
+  Galaxy or Planemo-managed Galaxy), how tools/workflows/test data were staged,
+  and which API credentials or URLs are needed for follow-up failure inspection.
+
+## Property: failure modality handoff
+
+- check: llm-judged
+- assertion: when a run exits non-zero or reports failed assertions, failed jobs,
+  a failed invocation, missing outputs, or upload/staging problems, the output
+  hands off a structured summary that identifies the observed failure modality
+  and the next reference surface to inspect: Planemo result, Galaxy job API,
+  Galaxy invocation API, history contents, or test assertion report.

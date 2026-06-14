@@ -1,19 +1,33 @@
 # summarize-galaxy-tool eval
 
-## Case: FastQC simple wrapper
+Evaluation plan for the `summarize-galaxy-tool` Mold. This file is the
+**abstract oracle**: properties any run must satisfy, independent of fixture.
+Concrete fixtures and their expected values live in `scenarios.md`; the oracle
+here is applied to whatever a scenario produces.
 
+## Property: simple wrapper emits a schema-valid, contract-complete summary
+
+- bucket: schema
 - check: deterministic
-- fixture: chosen Galaxy tool input source for FastQC after the input-source decision is resolved.
-- expectation: emits a Galaxy tool summary that validates against the future `summary-galaxy-tool` schema and includes tool id, version, owner/source context, command shape, inputs, outputs, requirements, citations, and tests when present.
+- assertion: a successful run emits a Galaxy tool summary that validates against
+  the `summary-galaxy-tool` schema ([[galaxy-tool-summary]]) and includes tool
+  id, version, owner/source context, command shape, inputs, outputs,
+  requirements, citations, and tests when present.
 
-## Case: bwa_mem2 conditional inputs
+## Property: conditional parameter structure survives without flattened branches
 
+- bucket: fidelity
 - check: llm-judged
-- fixture: chosen Galaxy tool input source for a bwa_mem2 wrapper with conditional `when` branches.
-- expectation: reconstructs conditional parameter structure clearly enough for downstream step implementation to bind the correct branch-specific inputs without flattening away branch ownership.
+- assertion: for a wrapper with conditional `when` branches, the summary
+  reconstructs conditional parameter structure clearly enough for downstream
+  step implementation to bind the correct branch-specific inputs without
+  flattening away branch ownership.
 
-## Case: samtools_sort data-table reference
+## Property: data-table references stay distinct from user parameters
 
+- bucket: fidelity
 - check: llm-judged
-- fixture: chosen Galaxy tool input source for a samtools_sort wrapper with data-table-backed parameters or reference-genome selection.
-- expectation: records data-table reference inputs, allowed fallback behavior, and unresolved runtime dependencies so downstream implementation can distinguish user parameters from Galaxy instance configuration.
+- assertion: for a wrapper with data-table-backed parameters or reference-genome
+  selection, the summary records data-table reference inputs, allowed fallback
+  behavior, and unresolved runtime dependencies so downstream implementation can
+  distinguish user parameters from Galaxy instance configuration.

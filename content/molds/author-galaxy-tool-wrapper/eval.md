@@ -1,19 +1,35 @@
 # author-galaxy-tool-wrapper eval
 
-## Case: conda-only Nextflow process
+This file is the **abstract oracle** for the `author-galaxy-tool-wrapper` Mold:
+properties any authored Galaxy user-defined tool (UDT) must satisfy, independent
+of fixture. Concrete fixtures and their expected values live in `scenarios.md`;
+the oracle here is applied to whatever a scenario produces.
 
+## Property: container or package evidence is faithfully carried
+
+- bucket: requirements-fidelity
 - check: deterministic
-- fixture: Nextflow process summary with a bioconda-only environment directive, explicit command, declared inputs, declared outputs, and minimal test fixture evidence.
-- expectation: authors a Galaxy `GalaxyUserTool` YAML definition whose container/package evidence matches the conda spec, whose `shell_command` preserves the process command intent, and whose UDT passes structural validation plus mandatory critic review.
+- assertion: when the source process summary carries container or conda
+  evidence, the authored `GalaxyUserTool` YAML's container/package evidence
+  matches that source spec; the `shell_command` preserves the source process
+  command intent; and the UDT passes structural validation plus mandatory critic
+  review.
 
-## Case: biocontainers Docker URI
+## Property: container-only evidence is mapped, not fabricated
 
+- bucket: requirements-fidelity
 - check: llm-judged
-- fixture: Nextflow process summary with a BioContainers Docker URI, command stanza, input/output declarations, and no acceptable Tool Shed discovery hit.
-- expectation: derives a plausible conda-equivalent requirement set, preserves command-stanza fidelity, and records uncertainty where container-to-conda mapping is not directly evidenced.
+- assertion: when only a container image is evidenced and no conda spec is given,
+  the UDT derives a plausible conda-equivalent requirement set, preserves
+  command-stanza fidelity, and records uncertainty where the container-to-conda
+  mapping is not directly evidenced rather than inventing a confident mapping.
 
-## Case: discovery fallthrough against IWC-wrapped tools
+## Property: authoring does not duplicate discoverable wrappers
 
+- bucket: discovery-guard
 - check: llm-judged
-- fixture: process needs corresponding to IWC-wrapped tools such as fastp and samtools where wrapper discovery should normally succeed.
-- expectation: does not author a duplicate UDT unless discovery evidence is unacceptable; explains why the fallthrough was justified and compares the authored UDT shape against the existing IWC wrapper's behavior.
+- assertion: when the process need corresponds to a tool that wrapper discovery
+  should normally satisfy, the Mold does not author a duplicate UDT unless the
+  discovery evidence is unacceptable; when it does fall through, it explains why
+  the fallthrough was justified and compares the authored UDT shape against the
+  existing wrapper's behavior.
