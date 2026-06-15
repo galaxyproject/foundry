@@ -1,0 +1,170 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "debug-galaxy-workflow-output",
+    "path": "content/molds/debug-galaxy-workflow-output/index.md",
+    "revision": 4,
+    "content_hash": "9d560d77fe14fb9c2ebee1a67b49370d2d1b080a6821835407c4b89877bf7fd4",
+    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+  },
+  "cast_at": "2026-06-15T13:53:42.883Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.md",
+      "dst": "references/notes/galaxy-collection-semantics.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs.",
+      "trigger": "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure.",
+      "src_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
+      "dst_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.upstream.myst",
+      "dst": "references/notes/galaxy-collection-semantics.upstream.myst",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs.",
+      "trigger": "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure.",
+      "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "src_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
+      "dst_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.yml",
+      "dst": "references/notes/galaxy-collection-semantics.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs.",
+      "trigger": "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure.",
+      "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "src_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
+      "dst_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tool-job-failure-reference]]",
+      "src": "content/research/galaxy-tool-job-failure-reference.md",
+      "dst": "references/notes/galaxy-tool-job-failure-reference.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Interpret Galaxy job-level failure evidence including stdio rules, exit code, job messages, and output dataset state.",
+      "trigger": "When a failed workflow test includes errored jobs, tool stderr/stdout, non-zero exit codes, or red output datasets.",
+      "src_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
+      "dst_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-invocation-failure-reference]]",
+      "src": "content/research/galaxy-workflow-invocation-failure-reference.md",
+      "dst": "references/notes/galaxy-workflow-invocation-failure-reference.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Interpret Galaxy invocation-level failure evidence including invocation state, structured messages, and step job summaries.",
+      "trigger": "When a failed workflow test has invocation failure, missing workflow outputs, cancelled/paused steps, subworkflow failures, or collection population errors.",
+      "src_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
+      "dst_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-shortcuts-anti-patterns]]",
+      "src": "content/research/iwc-shortcuts-anti-patterns.md",
+      "dst": "references/notes/iwc-shortcuts-anti-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Decide whether a proposed debug fix aligns with accepted IWC testing shortcuts or masks a real failure.",
+      "trigger": "When debugging suggests weakening assertions, widening deltas, switching to existence checks, or changing output labels.",
+      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-operators-to-galaxy-collection-recipes]]",
+      "src": "content/research/nextflow-operators-to-galaxy-collection-recipes.md",
+      "dst": "references/notes/nextflow-operators-to-galaxy-collection-recipes.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Trace collection output failures back to possibly lossy operator translations.",
+      "trigger": "When debugging wrong nesting, missing elements, branch merges, bad joins, or gather/reduction mismatches.",
+      "src_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
+      "dst_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-asserts-idioms]]",
+      "src": "content/research/planemo-asserts-idioms.md",
+      "dst": "references/notes/planemo-asserts-idioms.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Classify whether a failure is an assertion-choice problem, tolerance problem, or real workflow-output regression.",
+      "trigger": "When Planemo reports output assertion failures or generated tests are too strict/too weak.",
+      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-workflow-test-architecture]]",
+      "src": "content/research/planemo-workflow-test-architecture.md",
+      "dst": "references/notes/planemo-workflow-test-architecture.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Locate which Planemo artifact or Galaxy API surface preserves the failure evidence.",
+      "trigger": "When Planemo output is ambiguous, structured test JSON is available, or rerunning can be avoided by inspecting an existing invocation.",
+      "src_hash": "f66d053cf71c5d5aa4151e0b55719f9b200f5848e7dc69e0200d63d991a9dacf",
+      "dst_hash": "f66d053cf71c5d5aa4151e0b55719f9b200f5848e7dc69e0200d63d991a9dacf",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "workflow-debug-report",
+        "kind": "markdown",
+        "default_filename": "workflow-debug-report.md",
+        "description": "Failure-surface classification with captured job/invocation/collection/assertion evidence and a recommended next step or reference-gap follow-up."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "workflow-test-result",
+        "description": "Structured run handoff from run-workflow-test: Planemo result, invocation/job/artifact context, and the observed failure modality.",
+        "producers": [
+          "run-workflow-test"
+        ]
+      }
+    ]
+  }
+}

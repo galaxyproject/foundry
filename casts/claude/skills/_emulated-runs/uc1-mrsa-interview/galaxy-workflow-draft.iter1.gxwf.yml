@@ -1,0 +1,287 @@
+class: GalaxyWorkflowDraft
+label: MRSA mobile-AMR context across isolates
+doc: |
+  Comparative mobile-AMR analysis across 3-4 MRSA isolate assemblies. For each
+  isolate: call ARGs/plasmids/MLST (staramr) and mobile elements (ISEScan,
+  IntegronFinder), reshape calls to intervals, compute each ARG's nearest mobile
+  element + distance, classify mobile context, and collapse to a per-isolate ARG
+  matrix + heatmap. Topology settled here; wrapper-tier (tool_id/tool_state/port
+  names) deferred to the per-step loop. Nearest IWC exemplar:
+  bacterial_genomics/amr_gene_detection (staramr core reused; mobile-element and
+  interval-distance half has no IWC analog).
+inputs:
+  - id: MRSA isolate assemblies
+    label: MRSA isolate assemblies
+    type: collection
+    collection_type: list
+    optional: false
+    format:
+      - fasta
+    doc: "3-4 complete isolate assemblies (combined chromosome+plasmid FASTA), one per isolate. List element identifier = strain name; carried through every map-over step."
+  - id: StarAMR database
+    label: StarAMR database
+    type: string
+    optional: false
+    doc: "staramr database selection (ResFinder/PointFinder/PlasmidFinder). Surfaced as input because AMR calls are DB-version dependent (source constraint)."
+  - id: Species for point mutation analysis
+    label: Species for point mutation analysis
+    type: string
+    optional: true
+    doc: "PointFinder organism for staramr. Source did not pin a species; for MRSA this is Staphylococcus aureus, left as an explicit input rather than hard-coded."
+  - id: isolate metadata
+    label: isolate metadata
+    type: data
+    optional: true
+    format:
+      - tabular
+    doc: "Optional per-isolate metadata TSV (strain/year/source/accessions/genome size). Open question whether workflow input or hand-curated sidecar; modeled optional."
+outputs:
+  - id: staramr_summary
+    label: staramr_summary
+    outputSource: staramr/TODO_summary
+    doc: "Per-isolate ARG/plasmid/MLST summary collection. Primary comparison payload."
+  - id: staramr_resfinder
+    label: staramr_resfinder
+    outputSource: staramr/TODO_resfinder
+  - id: staramr_plasmidfinder
+    label: staramr_plasmidfinder
+    outputSource: staramr/TODO_plasmidfinder
+  - id: is_elements
+    label: is_elements
+    outputSource: isescan/TODO_is_table
+  - id: integrons
+    label: integrons
+    outputSource: integronfinder/integrons_table
+  - id: arg_mobile_context
+    label: arg_mobile_context
+    outputSource: classify_context/TODO_classified
+    doc: "Novel deliverable: per ARG, nearest mobile element, distance, and context class."
+  - id: arg_heatmap
+    label: arg_heatmap
+    outputSource: arg_heatmap/TODO_heatmap
+    doc: "ARG presence/abundance by isolate."
+steps:
+  - id: staramr
+    label: staramr
+    tool_id: TODO
+    tool_version: TODO
+    doc: "ARG + plasmid replicon + MLST calls, mapped over the isolate list collection."
+    in:
+      - id: TODO_genomes
+        source: MRSA isolate assemblies
+      - id: TODO_db
+        source: StarAMR database
+      - id: TODO_pointfinder_organism
+        source: Species for point mutation analysis
+    out:
+      - id: TODO_summary
+      - id: TODO_resfinder
+      - id: TODO_plasmidfinder
+      - id: TODO_mlst
+      - id: TODO_detailed_summary
+    _plan_state: |
+      Map over the list collection (one combined assembly per isolate). Database
+      version is the load-bearing parameter (source flags DB-version dependence);
+      bind staramr_db_select from the `StarAMR database` input and
+      pointfinder_organism from the `Species for point mutation analysis` input
+      (Staphylococcus aureus for MRSA). Pin expected-output snapshots.
+    _plan_context: |
+      STRONG corpus evidence: the nearest IWC exemplar
+      (bacterial_genomics/amr_gene_detection) uses
+      tool_id toolshed.g2.bx.psu.edu/repos/iuc/staramr/staramr_search/0.11.0+galaxy3
+      (owner iuc, changeset 6d5c8a6ceea0). Port names there: in `genomes`,
+      `staramr_db_select`, `pointfinder_organism`; out `summary`, `resfinder`,
+      `plasmidfinder`, `mlst`, `detailed_summary`. Discover/confirm this pin in
+      the per-step loop, then map it over the list.
+    _plan_in: |
+      genomes <- isolate list collection (map-over); staramr_db_select <- string
+      input; pointfinder_organism <- string input.
+    _plan_out: |
+      summary + resfinder + plasmidfinder are promoted outputs and feed the
+      reshape + matrix steps; mlst/detailed_summary are secondary.
+  - id: isescan
+    label: isescan
+    tool_id: TODO
+    tool_version: TODO
+    doc: "Insertion-sequence detection, mapped over the isolate list."
+    in:
+      - id: TODO_genome
+        source: MRSA isolate assemblies
+    out:
+      - id: TODO_is_table
+    _plan_state: |
+      Default IS detection per isolate. No non-default parameters given by source.
+      Output must carry coordinates so it can be reshaped to intervals downstream.
+    _plan_context: |
+      Tool named in source: ISEScan. No IWC exemplar contains it (the AMR exemplar
+      lacks mobile-element callers entirely). Discover a Tool Shed wrapper
+      (likely iuc) in the per-step loop; if none acceptable, author one.
+    _plan_in: "genome <- isolate list collection (map-over)."
+    _plan_out: "IS calls with coordinates -> reshaped to mobile-element BED."
+  - id: integronfinder
+    label: integronfinder
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/integron_finder/integron_finder/2.0.5+galaxy1
+    tool_version: 2.0.5+galaxy1
+    tool_shed_repository:
+      changeset_revision: 5429646e486d
+      name: integron_finder
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    doc: "Integron detection, mapped over the isolate list."
+    in:
+      - id: sequence
+        source: MRSA isolate assemblies
+    out:
+      - id: integrons_table
+        rename: integrons_table
+    tool_state:
+      sequence:
+        __class__: ConnectedValue
+  - id: arg_to_bed
+    label: arg_to_bed
+    tool_id: TODO
+    tool_version: TODO
+    doc: "Project staramr resfinder hits into a BED/interval table (coordinates) per isolate."
+    in:
+      - id: TODO_arg_table
+        source: staramr/TODO_resfinder
+    out:
+      - id: TODO_arg_bed
+    _plan_state: |
+      Extract contig/start/end/gene columns from resfinder output into BED-like
+      intervals. Source calls this 'existing GTN table-processing patterns' and
+      names no tool; likely awk / Text reformatting (galaxy-tabular-patterns
+      text-processing recipe). Must preserve the isolate identifier.
+    _plan_context: "table->interval bridge; no specific tool pinned by source."
+    _plan_in: "arg_table <- staramr resfinder collection (map-over)."
+    _plan_out: "ARG intervals -> coordinate sort -> nearest-feature."
+  - id: mobile_to_bed
+    label: mobile_to_bed
+    tool_id: TODO
+    tool_version: TODO
+    doc: "Combine ISEScan + IntegronFinder calls into one mobile-element BED per isolate."
+    in:
+      - id: TODO_is_table
+        source: isescan/TODO_is_table
+      - id: TODO_integron_table
+        source: integronfinder/integrons_table
+    out:
+      - id: TODO_mobile_bed
+    _plan_state: |
+      Concatenate IS + integron coordinates into a single mobile-element interval
+      set per isolate, tagging element type (IS vs integron) in a column so the
+      downstream classify step can distinguish IS-adjacent from
+      integron-associated. awk / Text reformatting + concatenate.
+    _plan_context: "tabular concat + projection; no tool pinned by source."
+    _plan_in: "is_table + integron_table (both map-over, same isolate key)."
+    _plan_out: "combined mobile-element BED -> coordinate sort -> nearest-feature."
+  - id: sort_arg_bed
+    label: sort_arg_bed
+    tool_id: TODO
+    tool_version: TODO
+    doc: "BED-aware coordinate sort of ARG intervals (precondition for closest)."
+    in:
+      - id: TODO_bed
+        source: arg_to_bed/TODO_arg_bed
+    out:
+      - id: TODO_sorted_bed
+    _plan_state: "Coordinate sort (chrom, start). bedtools SortBED-style."
+    _plan_context: |
+      Interval-algebra closest expects coordinate-sorted BED. Corpus note: IWC
+      sorts intervals with tabular sort1, but bedtools closest wants BED sort ->
+      use a BED-aware sort (e.g. iuc/bedtools SortBED).
+    _plan_in: "bed <- ARG intervals (map-over)."
+    _plan_out: "sorted ARG BED -> closest."
+  - id: sort_mobile_bed
+    label: sort_mobile_bed
+    tool_id: TODO
+    tool_version: TODO
+    doc: "BED-aware coordinate sort of mobile-element intervals."
+    in:
+      - id: TODO_bed
+        source: mobile_to_bed/TODO_mobile_bed
+    out:
+      - id: TODO_sorted_bed
+    _plan_state: "Coordinate sort (chrom, start). bedtools SortBED-style."
+    _plan_context: "Same as sort_arg_bed; sorted BED required by closest."
+    _plan_in: "bed <- mobile-element intervals (map-over)."
+    _plan_out: "sorted mobile BED -> closest."
+  - id: nearest_feature
+    label: nearest_feature
+    tool_id: TODO
+    tool_version: TODO
+    doc: "Per ARG interval, find nearest mobile-element interval and signed/absolute distance."
+    in:
+      - id: TODO_a
+        source: sort_arg_bed/TODO_sorted_bed
+      - id: TODO_b
+        source: sort_mobile_bed/TODO_sorted_bed
+    out:
+      - id: TODO_arg_with_nearest
+    _plan_state: |
+      Nearest-feature + distance: for each ARG, nearest IS/integron and base-pair
+      distance (-d). This is the mobile-context computation. Distance cutoff for
+      'IS-adjacent'/'integron-associated' is UNDEFINED by source -> do not invent;
+      emit raw distance and let classify (or a downstream/notebook step) threshold.
+    _plan_context: |
+      CORPUS GAP: 'nearest feature + distance' has no IWC exemplar and no Foundry
+      pattern page (interval-patterns note flags it explicitly). Natural tool:
+      iuc/bedtools bedtools_closestbed with -d. Reach for it directly in the
+      per-step loop; do not expect a pattern page.
+    _plan_in: "a <- sorted ARG BED; b <- sorted mobile-element BED (both map-over)."
+    _plan_out: "ARG rows + nearest mobile element + distance -> classify."
+  - id: classify_context
+    label: classify_context
+    tool_id: TODO
+    tool_version: TODO
+    doc: "Label each ARG: plasmid-located / IS-adjacent / integron-associated / SCCmec-candidate / unclassified."
+    in:
+      - id: TODO_arg_with_nearest
+        source: nearest_feature/TODO_arg_with_nearest
+      - id: TODO_plasmidfinder
+        source: staramr/TODO_plasmidfinder
+    out:
+      - id: TODO_classified
+    _plan_state: |
+      OPEN DESIGN QUESTION (low confidence): classification RULES are undefined by
+      the source. Defensible MVP = pass through nearest-element + distance +
+      plasmid-replicon membership as columns and mark context class only where
+      unambiguous (plasmid-located from plasmidfinder overlap); leave distance
+      thresholds for IS-adjacent/integron-associated as a parameter or downstream
+      decision rather than hard-coding. SCCmec-candidate needs a locus reference
+      not provided -> likely 'unclassified' for v1. Surface to user.
+    _plan_context: "No tool/rules in source. Likely awk / Filter+compute or a small tabular tool. Carry the open question forward."
+    _plan_in: "arg_with_nearest <- nearest_feature; plasmidfinder <- staramr (replicon membership)."
+    _plan_out: "classified ARG mobile-context table (promoted output)."
+  - id: collapse_to_matrix
+    label: collapse_to_matrix
+    tool_id: TODO
+    tool_version: TODO
+    doc: "Reduce the per-isolate ARG summary collection into one wide isolate-by-ARG matrix."
+    in:
+      - id: TODO_arg_summary_collection
+        source: staramr/TODO_summary
+    out:
+      - id: TODO_matrix
+    _plan_state: |
+      Reduction (collection -> single table) keyed by isolate identifier; isolate
+      column MUST survive. Pattern: tabular-pivot-collection-to-wide /
+      Collapse Collection.
+    _plan_context: "collection->tabular bridge; pattern-grounded (galaxy-tabular-patterns)."
+    _plan_in: "arg_summary_collection <- staramr summary collection (reduce)."
+    _plan_out: "wide ARG-by-isolate matrix -> heatmap."
+  - id: arg_heatmap
+    label: arg_heatmap
+    tool_id: TODO
+    tool_version: TODO
+    doc: "Render the ARG-by-isolate matrix as a heatmap image."
+    in:
+      - id: TODO_matrix
+        source: collapse_to_matrix/TODO_matrix
+    out:
+      - id: TODO_heatmap
+    _plan_state: "Heatmap of ARG presence/abundance by isolate. heatmap2-style plotting tool."
+    _plan_context: "Plotting tool unresolved; heatmap2 is a candidate (used in the unvalidated target .ga)."
+    _plan_in: "matrix <- collapse_to_matrix."
+    _plan_out: "heatmap image (promoted output)."
+tags: []
