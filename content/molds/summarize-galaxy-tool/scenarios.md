@@ -9,8 +9,8 @@ input source is cached ParsedTool JSON per [[galaxy-tool-summary-input-source]].
 
 - fixture: chosen Galaxy tool input source for FastQC after the input-source
   decision is resolved.
-- expect: emits a Galaxy tool summary that validates against the future
-  `summary-galaxy-tool` schema and includes tool id, version, owner/source
+- expect: emits a Galaxy tool summary that validates against the
+  `summary-galaxy-tool` schema ([[galaxy-tool-summary]]) and includes tool id, version, owner/source
   context, command shape, inputs, outputs, requirements, citations, and tests
   when present.
 

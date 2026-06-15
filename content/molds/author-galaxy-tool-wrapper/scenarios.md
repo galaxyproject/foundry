@@ -6,7 +6,6 @@ values; the `eval.md` oracle is applied to whatever the case produces.
 
 ## Case: conda-only Nextflow process
 
-- check: deterministic
 - fixture: Nextflow process summary with a bioconda-only environment directive,
   explicit command, declared inputs, declared outputs, and minimal test fixture
   evidence.
@@ -17,7 +16,6 @@ values; the `eval.md` oracle is applied to whatever the case produces.
 
 ## Case: biocontainers Docker URI
 
-- check: llm-judged
 - fixture: Nextflow process summary with a BioContainers Docker URI, command
   stanza, input/output declarations, and no acceptable Tool Shed discovery hit.
 - expect: derives a plausible conda-equivalent requirement set, preserves
@@ -26,7 +24,6 @@ values; the `eval.md` oracle is applied to whatever the case produces.
 
 ## Case: discovery fallthrough against IWC-wrapped tools
 
-- check: llm-judged
 - fixture: process needs corresponding to IWC-wrapped tools such as fastp and
   samtools where wrapper discovery should normally succeed.
 - expect: does not author a duplicate UDT unless discovery evidence is
