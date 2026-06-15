@@ -566,6 +566,22 @@ describe("validateDirectory (cross-file)", () => {
     expect(after.warnings).toBeGreaterThan(before);
   });
 
+  it("does not warn on an examples/ subdir of scenario fixtures in a pipeline directory", () => {
+    writeFm(path.join(dir, "molds/mold-a/index.md"), {
+      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+    });
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
+      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+    });
+    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    mkdirSync(path.join(dir, "pipelines/p/examples"), { recursive: true });
+    writeFileSync(path.join(dir, "pipelines/p/examples/UC_issue.md"), "# Interview input\n\nno frontmatter\n");
+    writeFileSync(path.join(dir, "pipelines/p/examples/UC_extracted.ga"), '{"a_galaxy_workflow":"true"}\n');
+    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    expect(after.errors).toBe(0);
+    expect(after.warnings).toBe(before);
+  });
+
   it("warns on a flat .md file under content/pipelines/", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
       ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),

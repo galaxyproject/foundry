@@ -1,0 +1,223 @@
+{
+    "a_galaxy_workflow": "true",
+    "annotation": "",
+    "comments": [],
+    "format-version": "0.1",
+    "name": "Differential ATAC-seq (extracted)",
+    "report": {
+        "markdown": "# Differential ATAC-seq accessibility\n\nThe existing Galaxy ATAC-seq tutorial calls peaks in *one* sample. This notebook makes the jump that matters for biology: **count fragments over a shared peak universe across biological replicates, then test which regions change accessibility between two conditions** \u2014 replicate-aware differential accessibility, not peak presence/absence.\n\nIt starts from a **precomputed count matrix** (the issue's preferred MVP): the **Corces et al. 2016 human hematopoiesis ATAC-seq** peak \u00d7 sample count matrix (GSE74912), **genome-wide**, contrasting **Erythroblast vs B-cell** (donors as replicates). Every analysis step is a real Galaxy tool \u2014 the per-sample counts go in as **one collection** with a donor-aware sample sheet, so the whole notebook **extracts to a reusable DESeq2 workflow**, and every figure below is a genuine tool output (no re-uploaded screenshots).\n\n## Design\n\n| | |\n|---|---|\n| Peak universe | **590,650 genome-wide peaks** (Corces union peak set) |\n| Conditions | Erythroblast (4) vs B-cell (4), donors as replicates |\n| Test | DESeq2 (`sample_sheet_contrasts`, `~ condition`, Erythroblast = reference) |\n| Significance | padj < 0.05 and \\|log2FC\\| \u2265 1 |\n\n## Replicate QC \u2014 the conditions separate cleanly\n\nDESeq2's diagnostic plots (PCA on the variance-stabilised counts, sample-distance, dispersion) come straight from the tool. PC1 carries essentially all the variance (**\u2248 98%**) on the Erythroblast\u2013B-cell axis, with each condition's replicates grouped:\n\n```galaxy\nhistory_dataset_as_image(output=\"DESeq2 plots\")\n```\n\nThis is the replicate-QC the issue asks for. Condition dominates PC1; `Eryth_1` is a mild PC2 outlier but does not cross the boundary \u2014 no samples are swapped, the contrast is safe to run.\n\n## Differential accessibility\n\nDESeq2 finds **45,620 significantly differential peaks** (padj < 0.05, \\|log2FC\\| \u2265 1): **34,873 more accessible in B-cell** and **10,747 more accessible in Erythroblast** \u2014 out of ~247,000 *testable* peaks (DESeq2 low-count-filtered the other 343,612 of 590,650 to NA). The volcano is the real `volcanoplot` tool output on the DESeq2 result (after dropping NA-padj rows):\n\n```galaxy\nhistory_dataset_as_image(output=\"Volcano Plot PDF\")\n```\n\n> **Direction:** DESeq2 used Erythroblast as the reference level, so **log2FC > 0 (red, \"Up\") = gained in B-cell** and **log2FC < 0 (blue, \"Down\") = gained in Erythroblast**. (The sign is reference-dependent and easy to flip.)\n\nThe full DESeq2 result table (every peak's log2FC, p-value, padj) is on-graph:\n\n```galaxy\nhistory_dataset_as_table(output=\"DESeq2 result\", title=\"DESeq2 result (peak, baseMean, log2FC, lfcSE, stat, pvalue, padj)\", compact=true)\n```\n\n## The differential map recovers the lineage master regulators\n\nGenome-wide, the test recovers the **master transcription factors that define the erythroid vs B-lymphoid split**, each accessible on exactly the expected side (hg19):\n\n| Direction | Locus | log2FC | padj | Role |\n|---|---|---|---|---|\n| **B-cell-gained** | **EBF1** (chr5) | **+8.0** | 4\u00d710\u207b\u00b9\u00b9 | B-cell master TF |\n| B-cell-gained | **MS4A1 / CD20** (chr11) | +7.3 | 1\u00d710\u207b\u00b9\u00b3 | B-cell surface marker |\n| B-cell-gained | **PAX5** (chr9) | +6.8 | 1\u00d710\u207b\u2077 | B-cell master TF |\n| B-cell-gained | **CD19** (chr16) | +4.0 | 5\u00d710\u207b\u00b3 | B-cell marker |\n| **Erythroblast-gained** | **HBB \u03b2-globin / LCR** (chr11) | **\u22126.6** | 6\u00d710\u207b\u00b3\u00b2 | erythroid globin |\n| Erythroblast-gained | **GATA1** (chrX) | \u22125.5 | 1\u00d710\u207b\u2079 | **erythroid master TF** |\n\n*(Each row is a representative significant peak; for genes with several peaks the most-significant peak may differ slightly in log2FC/padj. EBF1, MS4A1, HBB and GATA1 are unambiguous.)*\n\nThe payoff of going genome-wide: **GATA1** (erythroid master TF, chrX) sits among the strongest Erythroblast-gained peaks, opposite **PAX5/EBF1** (B-cell master TFs), with the surface markers (CD19, CD20) and the \u03b2-globin locus all where lineage biology predicts. The differential-accessibility map **recovers the lineage master-regulator program** \u2014 a chromatin correlate (accessibility is not expression; see caveats).\n\n## Why this extracts cleanly\n\n- **counts collection + sample sheet \u2192 DESeq2 \u2192 awk (NA filter) \u2192 volcanoplot** are all real tool jobs, so the analysis extracts as one reusable workflow with a single collection input.\n- **The displayed figures are the tools' own outputs** \u2014 the DESeq2 diagnostic-plots PDF and the volcanoplot PDF, referenced directly. (These tools emit PDF; the notebook renderer rasterizes the first page for display, so the real outputs can be shown without re-uploading screenshots \u2014 which is what lets extraction walk back from each figure to DESeq2.)\n\n## Method caveats\n\n- **Accessibility \u2260 expression / regulation.** A differential peak marks differential chromatin accessibility, not a proven regulatory change; recovering master-TF loci validates the test but is a correlate of the lineage program.\n- **Shared-donor pseudoreplication.** Two pairs share a donor (B-cell \u00d72 Donor5483; Erythroblast \u00d72 Donor6926), so effective replication is < 4/condition and significance is somewhat inflated. A donor-aware design (`~ donor + condition`) is preferable \u2014 the `donor` column is in the sample sheet. Conclusions are robust to it.\n- **Precomputed matrix, hg19.** Library sizes are imbalanced; DESeq2 estimates median-of-ratios size factors internally and the PCA confirms imbalance did not drive the separation.\n- **Reference-level direction** stated above; flipping the factor reference flips every sign.\n\n## Where this goes next\n\n1. Re-run with a **donor-aware design** (`~ donor + condition`); annotate top peaks to nearest genes (`bedtools closest`, as in the TAL1 use case).\n2. The issue's optional **BAM branch**: build the union peak set, convert to SAF, count with `featureCounts`.\n3. A **pyGenomeTracks/deepTools heatmap** over the top differential peaks (GATA1 vs PAX5 loci).\n",
+        "title": "Differential ATAC-seq accessibility"
+    },
+    "steps": {
+        "0": {
+            "annotation": "",
+            "content_id": null,
+            "errors": null,
+            "id": 0,
+            "input_connections": {},
+            "inputs": [
+                {
+                    "description": "",
+                    "name": "ATAC sample metadata"
+                }
+            ],
+            "label": "ATAC sample metadata",
+            "name": "Input dataset",
+            "outputs": [],
+            "position": {
+                "left": 10,
+                "top": 10
+            },
+            "tool_id": null,
+            "tool_state": "{\"optional\": false, \"tag\": null}",
+            "tool_version": null,
+            "type": "data_input",
+            "uuid": "bba7a389-04bd-4d7b-a445-8def86827286",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "1": {
+            "annotation": "",
+            "content_id": null,
+            "errors": null,
+            "id": 1,
+            "input_connections": {},
+            "inputs": [
+                {
+                    "description": "",
+                    "name": "ATAC counts"
+                }
+            ],
+            "label": "ATAC counts",
+            "name": "Input dataset collection",
+            "outputs": [],
+            "position": {
+                "left": 10,
+                "top": 130
+            },
+            "tool_id": null,
+            "tool_state": "{\"optional\": false, \"tag\": null, \"collection_type\": \"list\", \"fields\": null, \"column_definitions\": null}",
+            "tool_version": null,
+            "type": "data_collection_input",
+            "uuid": "29829486-8301-4629-9328-b5d42164569d",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "2": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/deseq2/deseq2/2.11.40.8+galaxy2",
+            "errors": null,
+            "id": 2,
+            "input_connections": {
+                "select_data|countsFile": {
+                    "id": 1,
+                    "output_name": "output"
+                },
+                "select_data|sample_sheet": {
+                    "id": 0,
+                    "output_name": "output"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "DESeq2",
+            "outputs": [
+                {
+                    "name": "deseq_out",
+                    "type": "tabular"
+                },
+                {
+                    "name": "plots",
+                    "type": "pdf"
+                },
+                {
+                    "name": "counts_out",
+                    "type": "tabular"
+                },
+                {
+                    "name": "vst_out",
+                    "type": "tabular"
+                }
+            ],
+            "position": {
+                "left": 230,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/deseq2/deseq2/2.11.40.8+galaxy2",
+            "tool_shed_repository": {
+                "changeset_revision": "6c363db8c702",
+                "name": "deseq2",
+                "owner": "iuc",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"advanced_options\": {\"esf_cond\": {\"esf\": \"\", \"__current_case__\": 0}, \"fit_type\": \"1\", \"outlier_replace_off\": false, \"outlier_filter_off\": false, \"auto_mean_filter_off\": false, \"prefilter_conditional\": {\"prefilter\": \"\", \"__current_case__\": 1}, \"use_beta_priors\": false}, \"batch_factors\": null, \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"header\": true, \"output_options\": {\"output_selector\": [\"pdf\", \"normCounts\", \"normVST\"], \"alpha_ma\": \"0.1\"}, \"select_data\": {\"how\": \"sample_sheet_contrasts\", \"__current_case__\": 2, \"countsFile\": null, \"sample_sheet\": null, \"design_formula_mode\": {\"mode\": \"automatic\", \"__current_case__\": 0, \"factor\": [\"2\"], \"reference_level\": \"Erythroblast\", \"target_level\": \"Bcell\"}}, \"tximport\": {\"tximport_selector\": \"count\", \"__current_case__\": 1}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "2.11.40.8+galaxy2",
+            "type": "tool",
+            "uuid": "a3b10ba7-caca-442b-899d-2f2eff2e36b7",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "DESeq2 result",
+                    "output_name": "deseq_out",
+                    "uuid": "c27add69-cb9b-4472-b134-c7e352411098"
+                },
+                {
+                    "label": "DESeq2 plots",
+                    "output_name": "plots",
+                    "uuid": "75f192fb-8abc-4e84-ba10-aa8b1e867585"
+                }
+            ]
+        },
+        "3": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+            "errors": null,
+            "id": 3,
+            "input_connections": {
+                "infile": {
+                    "id": 2,
+                    "output_name": "deseq_out"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Text reformatting",
+            "outputs": [
+                {
+                    "name": "outfile",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 450,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+            "tool_shed_repository": {
+                "changeset_revision": "ab83aa685821",
+                "name": "text_processing",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"$6!=\\\"NA\\\" && $7!=\\\"NA\\\"{print}\", \"infile\": null, \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "9.5+galaxy3",
+            "type": "tool",
+            "uuid": "1c407ea2-00fd-40de-a3b4-f22b3f25293c",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "4": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/volcanoplot/volcanoplot/4.0.3+galaxy0",
+            "errors": null,
+            "id": 4,
+            "input_connections": {
+                "input": {
+                    "id": 3,
+                    "output_name": "outfile"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Volcano Plot",
+            "outputs": [
+                {
+                    "name": "plot",
+                    "type": "pdf"
+                }
+            ],
+            "position": {
+                "left": 670,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/volcanoplot/volcanoplot/4.0.3+galaxy0",
+            "tool_shed_repository": {
+                "changeset_revision": "3d5b9e4df7ba",
+                "name": "volcanoplot",
+                "owner": "iuc",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"input\": null, \"labels\": {\"label_select\": \"none\", \"__current_case__\": 2}, \"lfc_thresh\": \"1.0\", \"out_options\": {\"rscript_out\": false}, \"plot_options\": {\"boxes\": false, \"title\": null, \"xlab\": null, \"ylab\": null, \"xmin\": null, \"xmax\": null, \"ymax\": null, \"legend\": null, \"legend_labs\": \"Down,Not Sig,Up\"}, \"shape_or_facet\": null, \"signif_thresh\": \"0.05\", \"with_header\": {\"header\": \"no\", \"__current_case__\": 2, \"fdr_col\": \"7\", \"pval_col\": \"6\", \"lfc_col\": \"3\", \"label_col\": \"1\", \"shape_col\": null}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "4.0.3+galaxy0",
+            "type": "tool",
+            "uuid": "cd7891a9-17fb-41aa-8b4f-5e8eaa04ae62",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "Volcano Plot PDF",
+                    "output_name": "plot",
+                    "uuid": "488eaafb-68c8-47a0-9345-bdd3c8b00b2d"
+                }
+            ]
+        }
+    },
+    "tags": [],
+    "uuid": "40f8a384-4f12-4cc6-8a43-085ec5a9fd63",
+    "version": 0
+}
