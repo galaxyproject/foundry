@@ -827,6 +827,8 @@ const PIPELINE_TOP_FILES = new Set([
   "usage.md",
   "README.md",
 ]);
+// Allowlisted subdirectory: local scenario fixtures referenced by scenarios.md.
+const PIPELINE_TOP_DIRS = new Set(["examples"]);
 
 const REFINEMENT_DECISION_VOCAB = new Set([
   "keep",
@@ -995,11 +997,13 @@ function validatePipelineSourceLayout(
     for (const child of readdirSync(pdir).sort()) {
       const childPath = path.join(pdir, child);
       if (statSync(childPath).isDirectory()) {
-        findings.push({
-          path: childPath,
-          severity: "warning",
-          message: `unexpected directory in pipeline source: ${child}`,
-        });
+        if (!PIPELINE_TOP_DIRS.has(child)) {
+          findings.push({
+            path: childPath,
+            severity: "warning",
+            message: `unexpected directory in pipeline source: ${child}`,
+          });
+        }
       } else if (!PIPELINE_TOP_FILES.has(child)) {
         findings.push({
           path: childPath,
