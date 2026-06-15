@@ -15,13 +15,24 @@ interface HealthItem {
   label: string;
   state: 'ok' | 'warn' | 'error';
   detail: string;
+  help?: string;
+  href?: string;
+  hrefLabel?: string;
 }
 
 const { entry, linkMap, entryById } = Astro.props;
 const data = entry.data as any;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const evalPath = fileURLToPath(new URL(`../../../content/${entry.id}/eval.md`, import.meta.url));
 const hasEval = existsSync(evalPath);
+const scenariosPath = fileURLToPath(new URL(`../../../content/${entry.id}/scenarios.md`, import.meta.url));
+const hasScenarios = existsSync(scenariosPath);
 const moldDir = fileURLToPath(new URL(`../../../content/${entry.id}/`, import.meta.url));
+
+const EVAL_HELP = 'Abstract oracle: fixture-independent property checks any run must satisfy.';
+const SCENARIOS_HELP = 'Concrete cases: fixtures bound to expected values, run against the eval properties.';
+const evalHref = `${base}/raw/${entry.id}/eval.md`;
+const scenariosHref = `${base}/raw/${entry.id}/scenarios.md`;
 
 function hasAxisSpecifier(): boolean {
   if (data.axis === 'source-specific') return Boolean(data.source);
@@ -83,14 +94,34 @@ function hasFrontmatter(filePath: string): boolean {
 }
 
 function evalDetail(): HealthItem {
+  const labelled = { label: 'Eval plan', help: EVAL_HELP } as const;
   if (!hasEval) {
-    return { label: 'Eval plan', state: 'warn', detail: 'eval.md not written yet.' };
+    return { ...labelled, state: 'warn', detail: 'eval.md not written yet.' };
   }
+  const item = { ...labelled, href: evalHref, hrefLabel: 'eval.md' };
   const body = readFileSync(evalPath, 'utf8');
+  const hasProperty = /^##\s+Property:/m.test(body);
   const hasCase = /^##\s+Case:/m.test(body);
   const hasCheck = /\b(deterministic|llm-judged)\b/.test(body);
-  if (hasCase && hasCheck) return { label: 'Eval plan', state: 'ok', detail: 'eval.md declares cases and check type.' };
-  return { label: 'Eval plan', state: 'warn', detail: 'eval.md should include a Case section and deterministic or llm-judged check.' };
+  if (hasCase) {
+    return { ...item, state: 'warn', detail: 'eval.md has a Case section — concrete cases belong in scenarios.md.' };
+  }
+  if (hasProperty && hasCheck) return { ...item, state: 'ok', detail: 'eval.md declares properties and check type.' };
+  return { ...item, state: 'warn', detail: 'eval.md should declare a Property section and a deterministic or llm-judged check.' };
+}
+
+function scenariosDetail(): HealthItem {
+  const labelled = { label: 'Scenarios', help: SCENARIOS_HELP } as const;
+  if (!hasScenarios) {
+    return { ...labelled, state: 'warn', detail: 'scenarios.md not written yet.' };
+  }
+  const item = { ...labelled, href: scenariosHref, hrefLabel: 'scenarios.md' };
+  const body = readFileSync(scenariosPath, 'utf8');
+  const hasCase = /^##\s+Case:/m.test(body);
+  const hasFixture = /\bfixture\b/i.test(body);
+  if (hasCase && hasFixture) return { ...item, state: 'ok', detail: 'scenarios.md declares cases bound to fixtures.' };
+  if (hasCase) return { ...item, state: 'warn', detail: 'scenarios.md cases should bind a fixture.' };
+  return { ...item, state: 'warn', detail: 'scenarios.md should declare at least one Case section.' };
 }
 
 const nonIndexFrontmatter = listMarkdownFiles(moldDir)
@@ -109,6 +140,7 @@ const items: HealthItem[] = [
     detail: hasAxisSpecifier() ? `${data.axis} fields are coherent.` : `${data.axis} Mold is missing its required specifier.`,
   },
   evalDetail(),
+  scenariosDetail(),
   ...referenceFindings(),
 ];
 
