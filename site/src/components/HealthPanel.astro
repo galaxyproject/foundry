@@ -3,6 +3,9 @@ interface HealthItem {
   label: string;
   state: 'ok' | 'warn' | 'error';
   detail: string;
+  help?: string;
+  href?: string;
+  hrefLabel?: string;
 }
 
 interface Props {
@@ -28,7 +31,9 @@ const maxColumnClass = maxColumns === 3 ? ' health-grid-max-3' : '';
         <span class="health-dot" aria-hidden="true"></span>
         <div>
           <strong>{item.label}</strong>
+          {item.help && <p class="health-help">{item.help}</p>}
           <p>{item.detail}</p>
+          {item.href && <a class="health-link" href={item.href}>{item.hrefLabel ?? 'View artifact'} ↗</a>}
         </div>
       </li>
     ))}
@@ -99,6 +104,15 @@ const maxColumnClass = maxColumns === 3 ? ' health-grid-max-3' : '';
     margin: 0.15rem 0 0;
     font-size: 0.78rem;
     color: var(--color-text-muted);
+  }
+  .health-help {
+    font-style: italic;
+  }
+  .health-link {
+    display: inline-block;
+    margin-top: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
   }
   .health-ok .health-dot,
   .health-pill.health-ok {
