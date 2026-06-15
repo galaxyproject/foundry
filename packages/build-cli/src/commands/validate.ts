@@ -927,11 +927,19 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
     }
 
     const evalBody = readMarkdown(evalPath).body;
-    if (!/^##\s+(Property|Case):/m.test(evalBody)) {
+    if (!/^##\s+Property:/m.test(evalBody)) {
       findings.push({
         path: evalPath,
         severity: "warning",
         message: "eval.md should declare at least one '## Property:' section",
+      });
+    }
+    if (/^##\s+Case:/m.test(evalBody)) {
+      findings.push({
+        path: evalPath,
+        severity: "warning",
+        message:
+          "eval.md should not use '## Case:' sections — concrete cases belong in scenarios.md",
       });
     }
     if (!/\b(deterministic|llm-judged)\b/.test(evalBody)) {
@@ -1031,12 +1039,23 @@ function validatePipelineSourceLayout(
     }
 
     const evalPath = path.join(pdir, "eval.md");
-    if (existsSync(evalPath) && !/^##\s+(Property|Case):/m.test(readMarkdown(evalPath).body)) {
-      findings.push({
-        path: evalPath,
-        severity: "warning",
-        message: "eval.md should declare at least one '## Property:' section",
-      });
+    if (existsSync(evalPath)) {
+      const evalBody = readMarkdown(evalPath).body;
+      if (!/^##\s+Property:/m.test(evalBody)) {
+        findings.push({
+          path: evalPath,
+          severity: "warning",
+          message: "eval.md should declare at least one '## Property:' section",
+        });
+      }
+      if (/^##\s+Case:/m.test(evalBody)) {
+        findings.push({
+          path: evalPath,
+          severity: "warning",
+          message:
+            "eval.md should not use '## Case:' sections — concrete cases belong in scenarios.md",
+        });
+      }
     }
   }
 

@@ -200,7 +200,8 @@ The validator should expose the same facts a UI Mold-health panel needs:
 - CLI command refs resolve to `type: cli-command` notes.
 - CLI command notes include install, synopsis, output, exit-code, example, and gotcha/failure guidance.
 - `eval.md` exists (warning-only).
-- `eval.md` declares at least one property section (warning-only).
+- `eval.md` declares at least one `## Property:` section (warning-only).
+- `eval.md` uses no `## Case:` sections — concrete cases belong in `scenarios.md` (warning-only).
 - eval properties identify deterministic vs LLM-judged checks.
 - `scenarios.md` exists (warning-only).
 - `scenarios.md` cases bind a fixture (warning-only).

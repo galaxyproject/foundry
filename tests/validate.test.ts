@@ -1052,7 +1052,7 @@ describe("validateDirectory (cross-file)", () => {
     });
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
-      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: synthetic\n",
+      "# m eval\n\n## Property: basic\n\n- check: deterministic\n- assertion: synthetic\n",
     );
 
     const r = validateDirectory({
@@ -1074,7 +1074,7 @@ describe("validateDirectory (cross-file)", () => {
     });
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
-      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+      "# m eval\n\n## Property: basic\n\n- check: deterministic\n- assertion: x\n",
     );
     writeFileSync(path.join(dir, "molds/m/usage.md"), "# m usage\n\nSample run.\n");
     writeFileSync(
@@ -1188,6 +1188,24 @@ describe("validateDirectory (cross-file)", () => {
     expect(after.warnings).toBeGreaterThan(before);
   });
 
+  it("warns when eval.md uses a Case section (oracle must stay abstract)", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({ type: "mold", tags: ["mold"], name: "m", axis: "generic" }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: holds for all inputs\n",
+    );
+    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: holds for all inputs\n\n## Case: concrete\n\n- fixture: y\n- expect: z\n",
+    );
+    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    expect(after.errors).toBe(0);
+    expect(after.warnings).toBeGreaterThan(before);
+  });
+
   it("warns on unexpected files in a Mold directory", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
@@ -1239,7 +1257,7 @@ describe("validateDirectory (cross-file)", () => {
     });
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
-      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+      "# m eval\n\n## Property: basic\n\n- check: deterministic\n- assertion: x\n",
     );
     mkdirSync(path.join(dir, "molds/m/refinements"), { recursive: true });
     writeFileSync(
@@ -1266,7 +1284,7 @@ describe("validateDirectory (cross-file)", () => {
     });
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
-      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+      "# m eval\n\n## Property: basic\n\n- check: deterministic\n- assertion: x\n",
     );
     mkdirSync(path.join(dir, "molds/m/refinements"), { recursive: true });
     writeFileSync(
@@ -1415,7 +1433,7 @@ describe("validateDirectory (cross-file)", () => {
     });
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
-      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+      "# m eval\n\n## Property: basic\n\n- check: deterministic\n- assertion: x\n",
     );
     mkdirSync(path.join(dir, "molds/m/refinements"), { recursive: true });
     writeFileSync(
