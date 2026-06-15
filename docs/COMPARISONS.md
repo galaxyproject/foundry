@@ -194,6 +194,11 @@ detectable. None of the individual ideas here are new; the combination — typed
 references, per-kind casting, content-hash identity, provenance as audit
 substrate, corpus-first authoring — is the Foundry's bet.
 
+This doc tracks one axis only — *when the KB meets the skill*. The adjacent
+question of *which harness runs the casts* (Archon, Claude Code dynamic
+workflows, LangGraph, …) is deliberately out of scope here and evaluated under
+`content/research/component-*` instead.
+
 ---
 
 ## Refresh log

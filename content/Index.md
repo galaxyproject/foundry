@@ -22,7 +22,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cwl-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs.
 - [[cwl-test-to-galaxy-test-plan]] — Translate CWL test fixtures into a Galaxy workflow test plan.
 - [[debug-cwl-workflow-output]] — Triage failing CWL run outputs; classify failure modes; propose fixes.
-- [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify failure modes; propose fixes.
+- [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
 - [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
 - [[find-test-data]] — Search IWC fixtures and public sources for test data matching a data-flow shape.
 - [[freeform-summary-to-cwl-design]] — Translate a free-form source summary into a CWL workflow design brief.
@@ -74,12 +74,27 @@ Generated from content frontmatter. Do not edit by hand.
 - [[fan-in-bundle-consume-and-flatten]] — Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing.
 - [[galaxy-collection-patterns]] — Use this MOC to choose corpus-grounded Galaxy collection transformation patterns.
 - [[galaxy-conditionals-patterns]] — Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns.
+- [[galaxy-interval-patterns]] — Use this MOC to choose corpus-grounded Galaxy genomic interval operations and recipes on coordinate features.
+- [[galaxy-sequence-patterns]] — Use this MOC to choose corpus-grounded Galaxy operations on sequence records (FASTA) — interconvert, reformat, merge, length, extract/mask by region.
 - [[galaxy-tabular-patterns]] — Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns.
+- [[interval-mask-by-set-algebra]] — Compute regions from regions: concatenate candidate intervals, merge into non-overlapping spans, then subtract the set to keep. The gops_* set-algebra recipe.
+- [[interval-coverage]] — Two coverage modes: genome-wide depth as a bedgraph (genomecoveragebed) and reads counted in given regions (coveragebed). Same family, different question.
+- [[interval-consensus-by-multi-intersect]] — Find features reproducible across replicates: multi-intersect per-replicate sets, threshold by replicate count, then intersect back against the merged call.
+- [[interval-overlap-filter]] — Keep, drop, or annotate coordinate features by overlap with a second feature set; bedtools intersect (BED) or vcfvcfintersect (VCF), mapped over a collection.
+- [[interval-merge-overlapping]] — Collapse overlapping or book-ended intervals within one set into single spans; bedtools mergebed or the gops_merge Operate-on-Genomic-Intervals tool.
+- [[interval-window-flank]] — Extend features by a fixed or fractional amount to build neighborhood windows, clamped to chromosome ends; bedtools slopbed with a genome file.
+- [[interval-windowed-coverage]] — Quantify signal in fixed neighborhoods around point features: window the features (slop), collapse overlaps (merge), then count reads in each window (coverage).
 - [[manifest-to-mapped-collection-lifecycle]] — Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs.
 - [[compose-runtime-text-parameter]] — Use compose_text_param to build connected text expressions from constants plus runtime scalar values.
 - [[derive-parameter-from-file]] — Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters.
 - [[map-workflow-enum-to-tool-parameter]] — Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets.
 - [[reshape-relabel-remap-by-collection-axis]] — Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis.
+- [[sequence-compute-length]] — Emit a (id, length) table from a FASTA so downstream tabular steps can filter, sort, or threshold records by length; fasta_compute_length.
+- [[sequence-extract-by-region]] — Turn coordinates into sequence: extract FASTA at BED intervals (getfasta), mask regions by BED (maskfasta), or extract transcripts from a GFF (gffread).
+- [[sequence-fasta-tabular-interconvert]] — Move sequence records between FASTA and a (header, sequence) table so tabular tools can edit them; fasta2tab one way, tab2fasta back.
+- [[sequence-merge-and-dedup]] — Concatenate several FASTA files into one and drop duplicate records by sequence identity in a single step; fasta_merge_files_and_filter_unique_sequences.
+- [[sequence-reformat-line-width]] — Rewrap FASTA records to a fixed sequence-line width so downstream tools and viewers get canonical 60/70/80-column output; cshl_fasta_formatter.
+- [[relabel-fasta-headers-via-tabular]] — Edit FASTA headers you cannot easily regex in place: fasta2tab, rewrite column 1 with find/replace, then tab2fasta back. The high-value sequence recipe.
 - [[tabular-compute-new-column]] — Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule.
 - [[tabular-concatenate-collection-to-table]] — Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe.
 - [[tabular-cut-and-reorder-columns]] — Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom.
@@ -168,14 +183,18 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-sample-sheet-collections]] — Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist.
 - [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
 - [[galaxy-xsd]] — Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax.
+- [[galaxy-workflow-comments]] — How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative.
 - [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
 - [[galaxy-workflow-testability-design]] — Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible.
 - [[gxformat2-schema]] — Vendored structural JSON Schema for gxformat2 workflows: vocabulary for inputs, outputs, steps, and step subtypes.
 - [[gxformat2-workflow-inputs]] — Conceptual model, current aliases, and schema gaps for gxformat2 workflow inputs.
+- [[iwc-comments-survey]] — How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
+- [[iwc-interval-operations-survey]] — IWC corpus survey of coordinate-aware genomic interval operations; sizing and candidate boundaries for a galaxy-interval-patterns MOC, with hold-if-thin gate.
 - [[iwc-map-over-lifecycle-survey]] — Survey of IWC map-over lifecycle recipes, with a Nextflow-to-Galaxy crosswalk for collection construction, cleanup, reshape, reduce, and publish phases.
 - [[iwc-parameter-derivation-survey]] — Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters.
 - [[iwc-runtime-parameter-shims-survey]] — Focused survey of tiny IWC runtime parameter shims for flags, enums, counts, booleans, and composed text.
+- [[iwc-sequence-operations-survey]] — IWC survey of record-level FASTA manipulation (interconversion, reformat, merge/dedup, subset, extract-at-intervals); sizes a galaxy-sequence-patterns MOC.
 - [[iwc-shortcuts-anti-patterns]] — What IWC test suites cut corners on (accepted) vs what's a code smell — existence-only probes, sim_size deltas, image dim checks, label coupling.
 - [[iwc-tabular-operations-survey]] — Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation.
 - [[iwc-test-data-conventions]] — How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas.

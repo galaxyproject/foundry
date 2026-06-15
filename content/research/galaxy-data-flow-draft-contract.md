@@ -41,7 +41,7 @@ Data-flow draft owns:
 - Galaxy-facing workflow inputs and outputs.
 - Abstract nodes, edges, branches, collection mapping, collection reduction, and placeholder transformations.
 - Input/output shape decisions such as `File`, `list`, `paired`, `list:paired`, or `list:list`.
-- Conceptual Galaxy idioms: map-over, reduction, Apply Rules, collection cleanup, identifier synchronization, tabular bridge.
+- Conceptual Galaxy idioms: map-over, reduction, Apply Rules, collection cleanup, identifier synchronization, tabular bridge, fan-in / combine (concatenate, merge, or union N sources into one — a distinct node, not a side-effect of a reshape).
 - Abstract unresolved tool needs with input and output shapes.
 - Confidence and rationale on inferred nodes, edges, transforms, and tool needs.
 
