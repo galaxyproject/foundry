@@ -4,11 +4,11 @@
   "mold": {
     "name": "freeform-summary-to-galaxy-template",
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
-    "revision": 3,
-    "content_hash": "91fc5f9a8367194669d20ef6b42f06d8fa09c2ba484fd54b4e17d2686cc7df9f",
-    "commit": "613d9a59ab74fc752defd79cdd07fffa0c790591"
+    "revision": 4,
+    "content_hash": "f5342381d5d9b488d2ecbc2783920b1bc9d19fddec76376857520283b6c123bd",
+    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
   },
-  "cast_at": "2026-06-10T23:00:56.081Z",
+  "cast_at": "2026-06-15T15:10:34.266Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
-      "src_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
-      "dst_hash": "6eaf018cdfe6d02cf835bc02e3be3ac5828d4fe097a102c846707b1e3c309f0b",
+      "src_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
+      "dst_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
       "source": "deterministic"
     },
     {
@@ -67,8 +67,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded genomic-interval pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for interval overlap, merge, coverage, windowing, masking, or set-algebra on coordinate features.",
-      "src_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
-      "dst_hash": "ae5f3c2a1c7329f1f97a9590b4c3a78603207f9c7ebbf4f2ad1f1d3538a2067e",
+      "src_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
+      "dst_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
       "source": "deterministic"
     },
     {
@@ -82,8 +82,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
-      "src_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
-      "dst_hash": "35242b7dfd2832f44102f33152e061ecb9bd63c002824b75938cf5593421d0d8",
+      "src_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
+      "dst_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
       "source": "deterministic"
     },
     {
@@ -145,8 +145,23 @@
       "purpose": "Respect the handoff from the freeform-to-Galaxy interface and data-flow briefs to the gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked freeform-to-Galaxy templates preserve the design-brief/template split without schema changes.",
-      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
-      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-comments]]",
+      "src": "content/research/galaxy-workflow-comments.md",
+      "dst": "references/notes/galaxy-workflow-comments.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Group the settled step set into titled stage frames (the gxformat2 `comments:` array) so the skeleton carries the analysis-stage narrative IWC authors annotate by hand. Schema-legal and optional.",
+      "trigger": "After topology is settled and the skeleton can be partitioned into named analysis stages (inputs, per-stage step clusters, parameter-derivation knots, visualization/outputs).",
+      "src_hash": "74e5217153f23b91f845dca8ed58c3639f8cdd10ef8e351b3b0a0d8422e19dc1",
+      "dst_hash": "74e5217153f23b91f845dca8ed58c3639f8cdd10ef8e351b3b0a0d8422e19dc1",
       "source": "deterministic"
     },
     {
@@ -160,8 +175,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
-      "dst_hash": "8bddf23fca3b3d1a5450858aa918ed9afd26d69ee9040c2a1438e82f4b9ebd04",
+      "src_hash": "01a6f2e00642c312e79ecd36619fd4eb15a26e3844536aba1d12d8cd46644904",
+      "dst_hash": "01a6f2e00642c312e79ecd36619fd4eb15a26e3844536aba1d12d8cd46644904",
       "source": "deterministic"
     },
     {
@@ -229,7 +244,14 @@
       },
       {
         "id": "iwc-comparison-notes",
-        "description": "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design brief); steers the skeleton toward IWC-aligned structure before per-step authoring.",
+        "description": "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design brief); steers the skeleton toward IWC-aligned structure before per-step authoring. Carries an inline gxformat2 excerpt of the nearest exemplar.",
+        "producers": [
+          "compare-against-iwc-exemplar"
+        ]
+      },
+      {
+        "id": "iwc-exemplar-gxformat2",
+        "description": "Cleaned gxformat2 view of the nearest IWC exemplar's relevant subgraph from [[compare-against-iwc-exemplar]]; pattern-match the draft's input/collection shapes, map-over wiring, output promotion, and post-job actions against this concrete idiom. Absent when no nearest exemplar was found.",
         "producers": [
           "compare-against-iwc-exemplar"
         ]
