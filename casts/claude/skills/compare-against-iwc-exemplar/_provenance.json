@@ -5,10 +5,10 @@
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 7,
-    "content_hash": "ba2f0742d39c52293e7c307ed4bdaa63994a017332de9915df3087835dff45a7",
-    "commit": "046ce4a6a63a0f125271d901af4470997073960c"
+    "content_hash": "ba3a1b13fdd21dd12ca552dd6e95e14e2a098e5ddc24c724cce07bf6fb448276",
+    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
   },
-  "cast_at": "2026-06-11T12:14:41.821Z",
+  "cast_at": "2026-06-15T15:02:56.699Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -56,8 +56,8 @@
       "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
       "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
       "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
-      "src_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
-      "dst_hash": "d81a05a886591589197def4911be68cc9d25bc5560a7f63d9807904f7f31d95c",
+      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
       "source": "deterministic"
     },
     {

@@ -88,3 +88,5 @@ This is the runtime-facing map for Galaxy collection transformation choices. Use
 
 - [[iwc-transformations-survey]] — collection-transform survey and evidence trail.
 - [[galaxy-tabular-patterns]] — companion MOC for tabular operations.
+- [[galaxy-interval-patterns]] — companion MOC for coordinate-feature operations.
+- [[galaxy-sequence-patterns]] — companion MOC for sequence-record operations.
