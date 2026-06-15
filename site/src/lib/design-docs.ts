@@ -49,6 +49,13 @@ export const DESIGN_DOCS: DesignDoc[] = [
     category: 'foundation',
   },
   {
+    slug: 'eval-philosophy',
+    title: 'Eval Philosophy',
+    source: 'EVAL_PHILOSOPHY.md',
+    summary: 'Why eval.md is an abstract oracle and scenarios.md holds the concrete cases — property checks, hallucination guardrails, and the eval/scenario/usage/refinement split.',
+    category: 'foundation',
+  },
+  {
     slug: 'corpus',
     title: 'Corpus Integration',
     source: 'CORPUS_INGESTION.md',

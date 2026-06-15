@@ -12,7 +12,8 @@ Required files:
 
 Strongly recommended (warning-only for now):
 
-- `eval.md` — Foundry-maintainer evaluation plan. Pass/fail or judge-able assertions about cast output. Never packaged into cast artifacts.
+- `eval.md` — Foundry-maintainer evaluation oracle: **abstract**, fixture-independent property checks and guardrails about cast output. The *how-to-judge*, never the concrete input/expected pair (those live in `scenarios.md`). Never packaged into cast artifacts.
+- `scenarios.md` — Foundry-maintainer test cases: concrete fixtures plus their expected values/assertions, exercised by the `eval.md` oracle. Holds all fixture-specific concreteness so `eval.md` stays pure. Never packaged into cast artifacts.
 
 Optional files:
 
@@ -39,7 +40,8 @@ The body of `index.md` is procedural content the cast skill renders into generat
 | File                          | Audience                          | Packaged into cast?            |
 | ----------------------------- | --------------------------------- | ------------------------------ |
 | `index.md`                    | Mold contract + casting manifest  | Body rendered into generated skills |
-| `eval.md`                     | Foundry maintainers               | Never                          |
+| `eval.md`                     | Foundry maintainers (abstract oracle) | Never                      |
+| `scenarios.md`                | Foundry maintainers (concrete cases)  | Never                      |
 | `usage.md`                    | Mold authors / readers            | Never (v1)                     |
 | `refinement.md`               | Mold authors / `/refine-mold`     | Never                          |
 | `refinements/`                | `/refine-mold` journal            | Never                          |
@@ -94,35 +96,35 @@ Conditional fields:
 
 `reference_contract.yml` owns labels, descriptions, and allowed values. Casting consumes the manifest by kind; see `COMPILATION_PIPELINE.md` for output layout and provenance.
 
-## Eval, Usage, Refinement: what goes where
+## Eval, Scenario, Usage, Refinement: what goes where
 
-Three sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences.
+Four sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences. The reasoning behind the split lives in `docs/EVAL_PHILOSOPHY.md`.
 
-- **`eval.md`** — assertions. A case is runnable: a fixture plus something that could fail. **If you can't sketch what failure looks like, it isn't eval.** Belongs in `usage.md` or `refinement.md` instead.
+- **`eval.md`** — the **abstract oracle**. Fixture-independent property checks: *how* you judge any output. Like a checker that asserts "a sort returns the same elements in nondecreasing order" — never the case "`sort([3,1,2]) == [1,2,3]`". No fixture paths, no magic values. **If you can't state it as a property that holds across inputs, it isn't eval.**
+- **`scenarios.md`** — the **concrete cases**. A fixture/input binding plus its expected values or assertions ("`sort([3,1,2]) == [1,2,3]`"; "CalliNGS-NF → 11 processes"). All fixture-specific concreteness lives here; the `eval.md` oracle is applied to whatever a scenario produces. This is the home for the case-shaped content agents used to misfile into `eval.md`.
 - **`usage.md`** — illustration. Representative invocations and example inputs/outputs, with no assertion attached. The "here's what running this Mold tends to look like" file. Optional; create only when narrative examples accumulate.
 - **`refinement.md`** — open design questions about the Mold. "Is field X pulling weight?" "Does reference Y change the cast output?" "Should this Mold split?" Free-form notes; the `/refine-mold` skill writes journal entries under `refinements/` that may resolve or accumulate against this file.
 
-The three are not interchangeable. Misfiling is the main failure mode: agents tend to write usage-shaped content as eval cases. When in doubt, ask whether the entry has a pass/fail edge — if not, it isn't eval.
+The four are not interchangeable. Misfiling is the main failure mode: agents tend to write concrete, fixture-bound cases into `eval.md` (they belong in `scenarios.md`) and usage-shaped illustration as eval cases (it belongs in `usage.md`). Two tests: does the entry name a specific fixture or magic value? → `scenarios.md`, not `eval.md`. Does the entry have a pass/fail edge at all? → if not, it's usage or refinement, not eval.
 
 ## Eval Contract
 
-`eval.md` describes how maintainers judge a cast artifact from the Mold. It is not runtime reference content.
+`eval.md` is the **abstract oracle**: it describes *how* maintainers judge any cast artifact from the Mold, independent of which input it ran on. It is not runtime reference content, and it names no fixtures or magic values — those live in `scenarios.md`.
 
-Each eval file should include at least one case section:
+Each eval file should include at least one property section:
 
 ```markdown
-## Case: short-name
+## Property: short-name
 
-- check: deterministic
-- fixture: path or corpus citation
-- expectation: observable pass/fail condition
+- check: deterministic | llm-judged
+- assertion: observable property every conforming output must satisfy
 ```
 
-Use `deterministic` for checks that can be run mechanically, and `llm-judged` for qualitative review criteria.
+Use `deterministic` for properties that can be checked mechanically (e.g. "emitted JSON validates against the schema"), and `llm-judged` for qualitative review criteria. A property must hold across inputs; if you can only phrase it against one fixture's expected value, it is a scenario, not eval.
 
 ### What belongs in eval.md
 
-Eval cases earn their place by being **general** and **failure-shaped**. A few principles, learned the hard way:
+Eval properties earn their place by being **general** and **failure-shaped**. A few principles, learned the hard way:
 
 - **Prefer property checks over prescriptive solutions.** "secondaryFiles surface as an open question or composite-dataset note" is a property; "secondaryFiles must use Galaxy composite datatypes" is a mandate that locks in one answer. Eval should catch silent loss, not pre-decide the fix.
 - **Hallucination guardrails are first-class.** Cases that name a known fabrication source — invented Tool Shed IDs, dropped `pickValue` markers, evaporated `ExpressionTool` steps, fabricated step IDs — are some of the highest-value evals. Frame as "X must appear, or be flagged; it must not silently vanish."
@@ -132,7 +134,29 @@ Eval cases earn their place by being **general** and **failure-shaped**. A few p
 
 ### What doesn't belong
 
-- **Re-statements of the procedural body.** If `index.md` already says "produce X", an eval case "produce X" adds nothing. Eval should target failure modes the body alone won't prevent — usually hallucination, omission, or silent contradiction.
+- **Re-statements of the procedural body.** If `index.md` already says "produce X", an eval property "produce X" adds nothing. Eval should target failure modes the body alone won't prevent — usually hallucination, omission, or silent contradiction.
+- **Fixtures and concrete expected values.** A named fixture path, a magic count ("11 processes"), a pinned-output diff — these are scenarios. Put them in `scenarios.md`; `eval.md` only states the property the scenario's output must satisfy.
+
+## Scenario Contract
+
+`scenarios.md` holds the **concrete test cases** the `eval.md` oracle is applied against. Where `eval.md` is the abstract checker, `scenarios.md` is the table of `(input, expected)` pairs — the sorting analogy: `eval.md` asserts "a sort returns the same elements in nondecreasing order"; `scenarios.md` carries "`sort([3,1,2]) == [1,2,3]`".
+
+Each scenario file should include at least one case section:
+
+```markdown
+## Case: short-name
+
+- fixture: path or corpus citation
+- expect: expected values / assertions for this fixture (free text is fine)
+```
+
+Guidance:
+
+- **All fixture-specific concreteness lives here.** Fixture paths, magic counts, pinned-output diffs, "this exact input should yield that exact field" — everything `eval.md` is forbidden from naming.
+- **Cases describe inputs abstractly, then bind a fixture.** "A summary with `sample_sheets[]` populated → `nf-core/sarek`" reads as a behavior-stressing shape plus a concrete binding, so the same case can later rebind to a different fixture.
+- **`expect:` may be free text.** Mechanizable expectations are welcome (a count, a `validate-*` exit code), but a prose assertion a reviewer checks by eye is a valid scenario too.
+- **The oracle applies to every scenario by default.** A run pairs a scenario's output with the full `eval.md` property set; a scenario adds its fixture-bound `expect:` on top and may mark a property `N/A`. Scenarios do not re-list the eval properties.
+- **Drive runs with `/test-drive`.** It binds a scenario, runs the cast artifact, applies `eval.md`, and harvests refinements.
 
 ## Usage Contract
 
@@ -176,8 +200,11 @@ The validator should expose the same facts a UI Mold-health panel needs:
 - CLI command refs resolve to `type: cli-command` notes.
 - CLI command notes include install, synopsis, output, exit-code, example, and gotcha/failure guidance.
 - `eval.md` exists (warning-only).
-- `eval.md` declares at least one evaluation case (warning-only).
-- eval cases identify deterministic vs LLM-judged checks.
+- `eval.md` declares at least one `## Property:` section (warning-only).
+- `eval.md` uses no `## Case:` sections — concrete cases belong in `scenarios.md` (warning-only).
+- eval properties identify deterministic vs LLM-judged checks.
+- `scenarios.md` exists (warning-only).
+- `scenarios.md` cases bind a fixture (warning-only).
 - Mold directory contains only allowlisted files / subdirectories (warning on unknown entries; catches typos and stray notes).
 - `refinements/*.md` entries carry `mold`, `date`, `intent`, `decision` frontmatter (warning-only).
 - referenced example files exist.

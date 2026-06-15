@@ -1,19 +1,24 @@
 # find-test-data eval
 
-## Case: no fabricated references
+Evaluation plan for the `find-test-data` Mold. This file is the **abstract
+oracle**: properties any run must satisfy, independent of fixture. Concrete
+fixtures and their expected values live in `scenarios.md`; the oracle here is
+applied to whatever a scenario produces.
 
+## Property: no fabricated references
+
+- bucket: fidelity
 - check: llm-judged
-- fixture: data-flow brief naming several workflow inputs where at least one has no obvious public test dataset.
-- expectation: every emitted `test-data-refs.json` entry points at a real URL/path, or the input is reported with `resolved: false` and a reason. No invented accessions, Zenodo ids, or paths appear as resolved.
+- assertion: every emitted `test-data-refs.json` entry points at a real URL/path, or the input is reported with `resolved: false` and a reason. No invented accessions, Zenodo ids, or paths appear as resolved.
 
-## Case: shape and datatype match
+## Property: shape and datatype match
 
+- bucket: fidelity
 - check: llm-judged
-- fixture: data-flow brief with a mix of File, paired, and list:paired collection inputs.
-- expectation: each resolved entry records the Galaxy collection shape and datatype matching the brief's input; a paired-end input does not resolve to a single unpaired file without flagging the mismatch.
+- assertion: each resolved entry records the Galaxy collection shape and datatype matching the brief's input; a paired-end input does not resolve to a single unpaired file without flagging the mismatch.
 
-## Case: full input coverage
+## Property: full input coverage
 
+- bucket: utility
 - check: deterministic
-- fixture: a `test-data-refs.json` emitted for an IWC-style workflow such as SARS-CoV-2 variant calling or RNAseq-PE.
-- expectation: every workflow input label has exactly one entry; each entry is either resolved (URL/path + shape + datatype) or marked `resolved: false` with a reason. No input is uncovered and none is silently absent, so [[implement-galaxy-workflow-test]] can stage from the refs without re-deriving input shapes.
+- assertion: every workflow input label has exactly one entry; each entry is either resolved (URL/path + shape + datatype) or marked `resolved: false` with a reason. No input is uncovered and none is silently absent, so [[implement-galaxy-workflow-test]] can stage from the refs without re-deriving input shapes.

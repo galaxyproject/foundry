@@ -5,7 +5,7 @@ description: "Path from a CWL Workflow to a Galaxy gxformat2 workflow — orches
 
 # pipeline-cwl-to-galaxy
 
-Harness for the **CWL → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/cwl-to-galaxy.md` (revision 2) — regenerate with `foundry-build assemble-pipeline cwl-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **CWL → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/cwl-to-galaxy/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline cwl-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 

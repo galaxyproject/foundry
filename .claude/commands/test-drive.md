@@ -21,7 +21,8 @@ The shape of "test-drive" is the same regardless: ensure inputs exist, run the r
 
 Parse `$1` and figure out:
 
-- Which Mold(s) are in scope. Cross-reference `docs/HARNESS_PIPELINES.md` and `content/pipelines/*.md` only as a lookup — don't force the run into a pipeline shape if the scenario is narrower.
+- Which Mold(s) are in scope. Cross-reference `docs/HARNESS_PIPELINES.md` and `content/pipelines/<slug>/index.md` only as a lookup — don't force the run into a pipeline shape if the scenario is narrower.
+- Whether `$1` names a `scenarios.md` case — a Mold's `content/molds/<mold>/scenarios.md` `## Case: <name>`, or a pipeline's `content/pipelines/<pipeline>/scenarios.md` case. If so, bind that case's fixture and carry its `expect:` assertions into step 5. Otherwise the scenario is ad-hoc and you pick the fixture.
 - What input artifacts each Mold needs and where they should come from — a fixture, a prior emulation run, a freshly-produced upstream artifact, or the user's hands.
 - What's already on disk vs what needs producing.
 
@@ -71,14 +72,16 @@ For each Mold in scope, in order:
 
 If a Mold's procedure depends on a decision that's not in the source evidence (scope cuts, sibling-vs-flag, narrow-the-DAG), make the decision honestly, surface it as a top-level "Scope decision" or "Open question" in the artifact, and continue. Do not ask the user mid-chain unless the decision is irreducible — collect questions, surface them at the end.
 
-## 5. Evaluate against `eval.md`
+## 5. Evaluate: apply `eval.md` properties to the scenario output
+
+Two files split the work (see `docs/EVAL_PHILOSOPHY.md`): `eval.md` is the **abstract oracle** (`## Property:` sections — how to judge any output), `scenarios.md` is the **concrete cases** (`## Case:` sections — fixture + expected values).
 
 For each Mold the run exercised:
 
-- Read `content/molds/<mold>/eval.md`.
-- For each case, decide whether the run satisfies it: ✅, ❌, or N/A (case targets a fixture or scope this run didn't exercise).
-- For cases tagged `bucket: schema`, run the deterministic check (e.g. `validate-summary-nextflow`) where applicable.
-- For cases tagged `bucket: utility` / `llm-judged`, score by inspection.
+- Read `content/molds/<mold>/eval.md` (properties) and `content/molds/<mold>/scenarios.md` (cases).
+- The run bound a scenario — either a named `scenarios.md` case or an ad-hoc one from `$1`. Apply **every** `eval.md` property to the produced output: ✅, ❌, or N/A (a property this scenario didn't exercise).
+- Also check the bound scenario's own `expect:` assertions — the fixture-specific expected values (e.g. "11 processes").
+- For `bucket: schema` properties, run the deterministic check (e.g. `validate-summary-nextflow`) where applicable. For `bucket: utility` / `llm-judged`, score by inspection.
 
 In addition to Mold specific eval.md instructions, evaluate
 each skill run at a high-level. Does the Mold output seem appropriate for the job being done. Evaluate what research
@@ -86,6 +89,17 @@ was used, whether it was useful, and what research was missing. Exposing gaps in
 an important aspect of the evaluation step.
 
 Report eval results in a table; don't paper over misses. Misses are the point of the run.
+
+### Pipeline runs: composition + a pipeline oracle
+
+When the scenario is a whole pipeline (driven by `/test-pipeline`), evaluation is two-layered:
+
+- **Composition — eval between each step.** As the journey advances phase by phase (per the pipeline `index.md` `phases:` spine), apply each member Mold's `eval.md` properties to *that step's* output, before feeding it downstream. A miss at step N is more valuable caught at step N than at the end.
+  - A `[loop]` phase (e.g. `advance-galaxy-draft-step`) is judged at its **endstate**, not per iteration: let the loop run until its own oracle (`gxwf draft-next-step`) reports no drafty steps remain, then evaluate the concretized result.
+  - A `[branch]` phase carries no `eval.md` of its own; evaluate the **chosen** Mold's `eval.md` for whichever branch was taken.
+- **Pipeline oracle — end to end.** After the journey completes, apply `content/pipelines/<pipeline>/eval.md` (the cross-step / end-to-end properties: final workflow validates and round-trips, source intent survived, etc.) and the bound `content/pipelines/<pipeline>/scenarios.md` case's `expect:` assertions.
+
+Report per-step eval results and the pipeline-level eval in the same table, grouped by phase.
 
 ## 6. Capture refinements
 

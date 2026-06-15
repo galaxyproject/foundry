@@ -146,7 +146,7 @@ describe("assemble-pipeline negative cases", () => {
   it("refuses to assemble an unsupported branch pattern", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-assemble-"));
     try {
-      mkdirSync(path.join(dir, "content/pipelines"), { recursive: true });
+      mkdirSync(path.join(dir, "content/pipelines/test-pipe"), { recursive: true });
       mkdirSync(path.join(dir, "content/molds/mold-a"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude/skills"), { recursive: true });
       writeFileSync(
@@ -168,7 +168,7 @@ summary: A minimal mold used by the unsupported-branch assemble test.
 `,
       );
       writeFileSync(
-        path.join(dir, "content/pipelines/test-pipe.md"),
+        path.join(dir, "content/pipelines/test-pipe/index.md"),
         `---
 type: pipeline
 title: TEST PIPE
@@ -204,7 +204,7 @@ phases:
   it("assembles a minimal pipeline and writes SKILL.md + _assembly.json", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-assemble-ok-"));
     try {
-      mkdirSync(path.join(dir, "content/pipelines"), { recursive: true });
+      mkdirSync(path.join(dir, "content/pipelines/mini"), { recursive: true });
       mkdirSync(path.join(dir, "content/molds/looper"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude/skills"), { recursive: true });
       writeFileSync(
@@ -227,7 +227,7 @@ loop_endstate: "Owns its own oracle; re-invoke until done, then continue."
 `,
       );
       writeFileSync(
-        path.join(dir, "content/pipelines/mini.md"),
+        path.join(dir, "content/pipelines/mini/index.md"),
         `---
 type: pipeline
 title: MINI

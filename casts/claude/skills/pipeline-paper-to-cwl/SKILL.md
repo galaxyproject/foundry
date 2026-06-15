@@ -5,7 +5,7 @@ description: "Direct path from a paper to a CWL Workflow + CommandLineTool set �
 
 # pipeline-paper-to-cwl
 
-Harness for the **PAPER → CWL** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-cwl.md` (revision 2) — regenerate with `foundry-build assemble-pipeline paper-to-cwl` if the pipeline changes; do not hand-edit.
+Harness for the **PAPER → CWL** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-cwl/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline paper-to-cwl` if the pipeline changes; do not hand-edit.
 
 Most of this pipeline's Molds are not yet cast, so this harness is mostly manual checkpoints today; it still fixes the phase order, the per-run working directory, and the few real casts. It strengthens as the remaining Molds are cast.
 

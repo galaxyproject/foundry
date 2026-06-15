@@ -5,7 +5,7 @@ description: "Interview-driven path to a Galaxy gxformat2 workflow through the s
 
 # pipeline-interview-to-galaxy
 
-Harness for the **INTERVIEW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/interview-to-galaxy.md` (revision 1) — regenerate with `foundry-build assemble-pipeline interview-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **INTERVIEW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/interview-to-galaxy/index.md` (revision 1) — regenerate with `foundry-build assemble-pipeline interview-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 

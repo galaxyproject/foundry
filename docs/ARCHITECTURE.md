@@ -40,7 +40,7 @@ Authoritative term definitions live in `content/glossary.md`; this section is th
 - **Pattern** — single `.md` under `content/patterns/`. Reference content. IWC citations live in the body as URLs; see `CORPUS_INGESTION.md`. Wiki-linked from Molds.
 - **Source-pattern** — single `.md` under `content/source-patterns/<source>/`. Reference content mapping source-system structures to target-system constructs, with `source_pattern_kind`, `source`, `target`, and `implemented_by_patterns` frontmatter.
 - **CLI command** — single `.md` under `content/cli/<tool>/<cmd>.md` (e.g., `content/cli/gxwf/tool-search.md`, `content/cli/gxwf/validate.md`). Reference content describing one CLI command/subcommand: synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas. Wiki-linked from Molds. Cast to a JSON sidecar (not inlined as prose) by casting's `cli-command`-kind dispatch.
-- **Pipeline** — single `.md` under `content/pipelines/`. Ordered sequence of phases that compose into a harness journey (e.g., `nextflow-to-galaxy.md`, `paper-to-galaxy.md`). **Dual purpose**: (a) build artifact — names the Molds a harness will orchestrate; (b) navigation primitive — renders as a "subway map" / journey index over the KB. Each phase is a `mold` reference, a `[loop]`-flagged Mold, or a `[branch]`-flagged routing step (not a Mold; harness-level orchestration — binary branches with fallthrough, or N-step fallback chains). Other inline harness annotations (e.g., `[gate]` for an approval / scope-confirmation checkpoint) will be coined when they first surface as inline phases; the set is open and not pre-enumerated. Pipelines are *not* cast; they are referenced content. The Mold inventory invariant — "Molds = union of pipeline phases" — is machine-checked: every phase resolves to a Mold (or is explicitly a non-Mold annotation like `[branch]`), and Molds with no pipeline membership stand out.
+- **Pipeline** — directory note under `content/pipelines/<slug>/` (`index.md` is the only frontmatter-bearing file; optional `eval.md` / `scenarios.md` siblings carry the pipeline-level oracle and end-to-end journeys). Ordered sequence of phases that compose into a harness journey (e.g., `nextflow-to-galaxy/`, `paper-to-galaxy/`). **Dual purpose**: (a) build artifact — names the Molds a harness will orchestrate; (b) navigation primitive — renders as a "subway map" / journey index over the KB. Each phase is a `mold` reference, a `[loop]`-flagged Mold, or a `[branch]`-flagged routing step (not a Mold; harness-level orchestration — binary branches with fallthrough, or N-step fallback chains). Other inline harness annotations (e.g., `[gate]` for an approval / scope-confirmation checkpoint) will be coined when they first surface as inline phases; the set is open and not pre-enumerated. Pipelines are *not* cast; they are referenced content. The Mold inventory invariant — "Molds = union of pipeline phases" — is machine-checked: every phase resolves to a Mold (or is explicitly a non-Mold annotation like `[branch]`), and Molds with no pipeline membership stand out.
 - **Schema** — single `.md` under `content/schemas/`. Renderable reference note for a JSON Schema package/export or vendored schema artifact.
 - **Prompt** — single `.md` wrapper under `content/prompts/`, plus a sibling raw `prompt_file` sidecar. The wrapper is human-facing and linkable; the raw sidecar is what casting packages.
 - **Cast** / **Casting** / **Cast skill** / **Cast target** — per `content/glossary.md`. The cast directory tree (`casts/<target>/<name>/`) is generated from Molds, committed to the repo, and skipped by the validator.
@@ -63,14 +63,14 @@ Source of truth: `meta_schema.yml` `type.enum` and the `allOf/if/then` block; `m
 | `pattern` | — | `title`, `pattern_kind`, `evidence` | `pattern` (+ optional `iwc/*`) | `content/patterns/` |
 | `source-pattern` | — | `title`, `source`, `target`, `source_pattern_kind`, `implemented_by_patterns` | `source-pattern` (+ source/target tags) | `content/source-patterns/<source>/` |
 | `cli-command` | — | `tool`, `command` | `cli-command` (+ `cli/<tool>`) | `content/cli/<tool>/` |
-| `pipeline` | — | `title`, `phases` | `pipeline` (+ optional `source/*`, `target/*`) | `content/pipelines/` |
+| `pipeline` | — | `title`, `phases` | `pipeline` (+ optional `source/*`, `target/*`) | `content/pipelines/<slug>/index.md` only |
 | `research` | `component` | (base + `subtype`) | `research/component` | `content/research/` |
 | `research` | `design-problem` | (base + `subtype`) | `research/design-problem` | `content/research/` |
 | `research` | `design-spec` | (base + `subtype`) | `research/design-spec` | `content/research/` |
 | `schema` | — | `name`, `title` | `schema` | `content/schemas/` |
 | `prompt` | — | `title`, `prompt_file` | `prompt` (+ optional `prompt/*`) | `content/prompts/` |
 
-`mold` has a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling `.md` files in `content/molds/<slug>/` are skipped). Mold is the only directory-note type; `docs/` holds long-form design docs.
+`mold` and `pipeline` have a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling `.md` files in `content/molds/<slug>/` and `content/pipelines/<slug>/` are skipped — only `index.md` is validated). They are the two directory-note types; `docs/` holds long-form design docs.
 
 `cli-command` notes are *not* directory-based — each command is a flat single file. The two-level `content/cli/<tool>/<cmd>.md` directory structure is for organization, not directory-note semantics.
 
@@ -205,7 +205,7 @@ Layered validation (`validateData` orchestrates):
 ```ts
 const SKIP_DIRS = new Set([".obsidian", "casts"]);
 const SKIP_FILES = new Set(["Dashboard.md", "Index.md", "log.md", "glossary.md"]);
-const DIR_NOTE_TYPES = new Set(["molds"]);
+const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
 ```
 
 Hidden directories skipped. Casts directory (`casts/`) is **always skipped** — it's generated content, validated by casting tooling separately.
@@ -298,29 +298,38 @@ The keystone agent shape — *classify → fetch → dedup → draft → cross-r
 
 ## 10. Directory-based note types
 
-One type uses the directory-note pattern: **Mold**.
+Two types use the directory-note pattern: **Mold** and **Pipeline**.
 
 **Mold** (`content/molds/<slug>/`):
 ```
-content/molds/implement-galaxy-tool-step/
+content/molds/summarize-nextflow/
   index.md           ← only file with frontmatter (the "mold.md" of casting)
-  eval.md            ← evaluation plan; never packaged into the cast
+  eval.md            ← abstract oracle (property checks); never packaged into the cast
+  scenarios.md       ← concrete cases (fixtures + expected values); never packaged
   examples/          ← optional walk-throughs
   casting.md         ← optional per-target / casting guidance
 ```
 
-`eval.md` co-locates evaluation with the Mold (improves discoverability and ownership) without bleeding it into cast artifacts. Casting reads `index.md` and refs; never reads `eval.md`.
+**Pipeline** (`content/pipelines/<slug>/`):
+```
+content/pipelines/nextflow-to-galaxy/
+  index.md           ← only file with frontmatter (phases spine + journey body)
+  eval.md            ← pipeline-level oracle (end-to-end / cross-step properties)
+  scenarios.md       ← whole-journey cases
+```
 
-`docs/` holds long-form Foundry-meta design narrative; the validator's directory-note rule applies only to Mold.
+`eval.md` / `scenarios.md` co-locate evaluation with the note (improves discoverability and ownership) without bleeding into cast artifacts or the assembled harness. Casting reads `index.md` and refs; never reads `eval.md` / `scenarios.md`.
+
+`docs/` holds long-form Foundry-meta design narrative; the validator's directory-note rule applies to Mold and Pipeline.
 
 Validator distinction:
 ```ts
-const DIR_NOTE_TYPES = new Set(["molds"]);
+const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
 if (parts.some(p => DIR_NOTE_TYPES.has(p)) && path.basename !== "index.md") continue;
 ```
 
 Astro content collection:
-- `content` — typed, explicit globs for `cli/**/*.md`, `molds/**/index.md`, `patterns/**/*.md`, `source-patterns/**/*.md`, `pipelines/**/*.md`, `research/**/*.md`, and `schemas/**/*.md`, with generated dashboard/index/log/glossary files excluded.
+- `content` — typed, explicit globs for `cli/**/*.md`, `molds/**/index.md`, `patterns/**/*.md`, `source-patterns/**/*.md`, `pipelines/**/index.md`, `research/**/*.md`, and `schemas/**/*.md`, with generated dashboard/index/log/glossary files excluded.
 
 Routes:
 - `[...slug].astro` renders content notes, including Mold `index.md` directory notes, through type-specific body components.
@@ -464,13 +473,16 @@ foundry/
 │   │   │   └── …
 │   │   └── planemo/
 │   │       └── .gitkeep
-│   ├── pipelines/
-│   │   ├── paper-to-galaxy.md
-│   │   ├── interview-to-galaxy.md
-│   │   ├── nextflow-to-galaxy.md
-│   │   ├── cwl-to-galaxy.md
-│   │   ├── paper-to-cwl.md
-│   │   └── nextflow-to-cwl.md
+│   ├── pipelines/                      # directory notes (index.md + optional eval.md/scenarios.md)
+│   │   ├── nextflow-to-galaxy/
+│   │   │   ├── index.md                # phases spine + journey body
+│   │   │   ├── eval.md                 # pipeline-level oracle
+│   │   │   └── scenarios.md            # whole-journey cases
+│   │   ├── paper-to-galaxy/
+│   │   ├── interview-to-galaxy/
+│   │   ├── cwl-to-galaxy/
+│   │   ├── paper-to-cwl/
+│   │   └── nextflow-to-cwl/
 │   ├── source-patterns/
 │   │   └── …
 │   └── research/
@@ -540,7 +552,7 @@ foundry/
 
 Key decisions reflected in the layout:
 - **`content/` content root** — Astro idiom. Reads accurately to a new contributor; the Foundry isn't an Obsidian vault by intent.
-- **`content/molds/<slug>/index.md` as directory note** — one validator rule (`DIR_NOTE_TYPES`) covers it.
+- **`content/molds/<slug>/index.md` and `content/pipelines/<slug>/index.md` as directory notes** — one validator rule (`DIR_NOTE_TYPES`) covers both; `eval.md` / `scenarios.md` siblings ride along.
 - **`content/schemas/` separate from `meta_schema.yml`** — `meta_schema.yml` is the frontmatter contract for content notes; `content/schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas live as content notes (renderable via `SchemaBody.astro`) so they show up in the dashboard, in the Index, and in tag/backlink browses; the actual JSON Schema lives in the schema's TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored: hand-edited there; vendored: synced from an upstream package). The note's frontmatter declares `package` + `package_export`; `site/src/lib/schema-registry.ts` imports each schema directly from its package, and casting imports the named runtime export and serializes it into cast bundles. Molds reference schemas via wiki-link frontmatter fields (`output_artifacts[].schema` on the producer side, `references[].ref` for `kind: schema`).
 - **`content/cli/<tool>/<cmd>.md` flat per tool** — CLI manual pages are organized two-deep for browsing, but each command is a single flat file; not directory-note semantics.
 - **`casts/` outside `content/`** — casts are not foundry notes. They have their own provenance shape and target-specific layouts; collapsing them into `content/` would muddy the validator and the site.
@@ -553,7 +565,7 @@ Key decisions reflected in the layout:
 ## 15. Tracked Follow-Up
 
 - **Harness execution strategy (open research question).** How a pipeline becomes an executable harness spans a spectrum. The current floor is a **stop-gap**: `/assemble-pipeline` compiles a pipeline into a trivial linear `pipeline-<slug>` skill that runs its phase casts in order, defers loop endstate detection to the looped Mold's own oracle (`advance-galaxy-draft-step` → `gxwf draft-next-step`), expands `[branch]` routing inline, and sets up a per-run working directory (foundry#282). The ceiling is heavyweight stateful orchestration — resumption, approval gates, autonomy posture, cross-step rework, routing the harness owns rather than the looped/branching Molds. Unresolved: where sophisticated harnesses live (downstream repos vs. a Foundry-blessed format), how much routing the harness owns vs. the Molds own, and whether the stop-gap assembler graduates into something durable or stays a test-drive convenience. See `docs/HARNESS_PIPELINES.md`.
-- **Composed pipelines (`PAPER -> CWL -> GALAXY`).** Track representation for composed paths in [issue #200](https://github.com/galaxyproject/foundry/issues/200). The Mold inventory already supports the paths; the unresolved question is whether composed journeys get distinct `content/pipelines/*.md` notes or remain harness-level runtime compositions.
+- **Composed pipelines (`PAPER -> CWL -> GALAXY`).** Track representation for composed paths in [issue #200](https://github.com/galaxyproject/foundry/issues/200). The Mold inventory already supports the paths; the unresolved question is whether composed journeys get distinct `content/pipelines/<slug>/` notes or remain harness-level runtime compositions.
 
 ## 16. Resolved Contracts
 

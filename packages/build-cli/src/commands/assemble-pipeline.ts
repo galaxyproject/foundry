@@ -87,8 +87,7 @@ function listPipelines(repoRoot: string): string[] {
   const dir = path.join(repoRoot, "content", "pipelines");
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => f.slice(0, -3))
+    .filter((f) => existsSync(path.join(dir, f, "index.md")))
     .sort();
 }
 
@@ -341,7 +340,7 @@ function renderSkill(args: {
     "",
     `# ${args.harnessName}`,
     "",
-    `Harness for the **${args.title}** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from \`content/pipelines/${args.slug}.md\` (revision ${args.revision}) — regenerate with \`foundry-build assemble-pipeline ${args.slug}\` if the pipeline changes; do not hand-edit.`,
+    `Harness for the **${args.title}** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from \`content/pipelines/${args.slug}/index.md\` (revision ${args.revision}) — regenerate with \`foundry-build assemble-pipeline ${args.slug}\` if the pipeline changes; do not hand-edit.`,
   ];
   if (args.intro) {
     blocks.push(
@@ -457,7 +456,7 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
   if (args.root) process.chdir(args.root);
   const repoRoot = process.cwd();
 
-  const pipelineRel = path.posix.join("content", "pipelines", `${args.slug}.md`);
+  const pipelineRel = path.posix.join("content", "pipelines", args.slug, "index.md");
   const pipelineAbs = path.join(repoRoot, pipelineRel);
   if (!existsSync(pipelineAbs)) {
     console.error(`pipeline source missing: ${pipelineRel}`);
