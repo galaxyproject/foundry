@@ -17,12 +17,26 @@ summary: "Map a CWL summary into a Galaxy workflow interface design brief."
 input_artifacts:
   - id: summary-cwl
     description: "Structured CWL summary emitted by [[summarize-cwl]]; the source-of-truth JSON for Galaxy interface choices."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
 output_artifacts:
   - id: cwl-galaxy-interface
     kind: markdown
     default_filename: cwl-galaxy-interface.md
     description: "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, exposed and checkpoint outputs, source provenance, confidence."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
 references:
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[summary-cwl]]"
     used_at: runtime
@@ -83,3 +97,5 @@ Read a CWL summary and emit a reviewable Markdown interface brief for a Galaxy w
 The output is a design handoff, not gxformat2 and not a rich workflow schema.
 
 Prefer direct mappings when they are honest: CWL scalar inputs become Galaxy parameter inputs, `File` inputs become dataset inputs, `File[]` plus scatter commonly becomes a `list` collection, and declared formats seed Galaxy datatype choices. Surface `Directory`, records, expression-shaped defaults, and secondary-file-heavy outputs as review notes rather than flattening them silently.
+
+Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.

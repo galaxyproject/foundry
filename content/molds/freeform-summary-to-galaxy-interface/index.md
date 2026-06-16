@@ -17,12 +17,26 @@ summary: "Map a free-form source summary into a Galaxy workflow interface design
 input_artifacts:
   - id: freeform-summary
     description: "Free-form source summary emitted by [[summarize-paper]] or [[interview-to-freeform-summary]]; methods, tools, sample data, references, and workflow intent with explicit uncertainty."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
 output_artifacts:
   - id: freeform-galaxy-interface
     kind: markdown
     default_filename: freeform-galaxy-interface.md
     description: "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source-summary provenance, confidence, open questions."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
 references:
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
     used_at: runtime
@@ -58,3 +72,5 @@ Read a free-form source summary and emit a reviewable Markdown interface brief f
 Free-form sources are narrative- or interview-derived and carry explicit uncertainty. Translate what the summary supports into interface decisions; carry unresolved interface choices forward as open questions rather than inventing precise inputs, outputs, or labels.
 
 The output is not a gxformat2 skeleton and not a workflow schema. It is a design handoff consumed by [[freeform-summary-to-galaxy-data-flow]], [[freeform-summary-to-galaxy-template]], and later test-plan work.
+
+Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.

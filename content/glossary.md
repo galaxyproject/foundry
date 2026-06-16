@@ -62,6 +62,8 @@ Alphabetical.
 
 **Not a Mold** — explicit boundary marker for things that are *not* cast from the Foundry. Includes harnesses, harness-level concerns (state, resumption, autonomy posture), Pipelines themselves, non-Mold phase kinds (`[branch]`, future `[gate]` — these reference Molds via embedded wiki-links but are not Molds), and pure reference content (pattern pages, CLI manual pages, IO schemas — these are *referenced by* Molds, not Molds themselves). Wrapping a CLI is *not* a disqualifier: see `discover-shed-tool`, `run-workflow-test`, `validate-galaxy-workflow`.
 
+**Open-requirements ledger** — a carried artifact (`open-requirements-ledger`) threaded through the source→Galaxy pipeline recording obligations the pipeline has taken on but not met: a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar. Molds **append**, **mark resolved**, or **surrender** entries; framed for autonomous runs (consumers are Molds and the loop's convergence gate, not a human). In the per-step loop it is the countable substrate for the topology-repair convergence invariant. See `content/research/open-requirements-ledger.md`. Reframes issue #281's "open-questions ledger" away from human-answered questions.
+
 **Pattern page** — a Foundry reference page describing a Galaxy workflow construction pattern (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring, …). Wiki-linked from action Molds; pulled into cast artifacts via casting's pattern-kind dispatch (LLM-condensed, mixed verbatim and summarization). Different from a Mold: a pattern page is reference, a Mold is action. Some patterns have a companion action Mold (e.g., custom-tool-authoring pattern + `author-galaxy-tool-wrapper` Mold).
 
 **Phase** — one atomic unit of a Pipeline's ordered `phases` array. Either Mold-shaped (`mold: [[...]]`, optionally `loop: true`) or a non-Mold annotation kind: `[branch]` today, future `[gate]` when needed. Open set — new phase kinds are coined when first surfaced inline rather than pre-enumerated. Validator resolves embedded wiki-links per kind (Mold-shaped phases must resolve to `type: mold`; `[branch]` inner items resolve to Molds or are terminal sentinels like `user-supplied`).
@@ -89,6 +91,8 @@ Alphabetical.
 **Target-specific** *(Mold axis)* — a Mold whose content depends on the output target. Examples: `summary-to-cwl-template`, `summarize-galaxy-tool`, `validate-cwl`.
 
 **Tool-specific** *(Mold axis)* — a provisional Mold axis for actions whose behavior depends on one external tool. Whole-CLI reference surfaces are reference content, not Molds.
+
+**Topology repair** — bounded re-wiring of a settled draft by `repair-galaxy-draft-topology`, the escalation target the per-step loop reaches when implementation proves a declared step output can't be computed from its wired inputs. Distinct from **settling** (the template Mold decides topology from the design briefs): repair is narrow (one named region), reactive (only a detected computability gap triggers it), bounded (decreasing open-blocker count under a hard escalation cap), and never decided *by* the loop — the loop escalates the decision back to the template tier. New steps land at draft tier and are realized by the existing discover-or-author → implement machinery. See `repair-galaxy-draft-topology` and the [[Open-requirements ledger]].
 
 **Generic** *(Mold axis)* — a Mold whose content depends on neither source nor target nor a single tool. Rare in the current inventory.
 

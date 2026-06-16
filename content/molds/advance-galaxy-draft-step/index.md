@@ -16,12 +16,18 @@ loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and con
 input_artifacts:
   - id: galaxy-workflow-draft
     description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]) mutated in-place across iterations; topology is fully concrete, individual tool steps may still carry `TODO_*` sentinels and `_plan_*` planning fields."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: after implementing the chosen step, read it for a new `open` blocking entry [[implement-galaxy-tool-step]] appended (the step's declared output can't be computed from its wired inputs), and count open blocking entries for the escalation convergence gate."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
     schema: "[[galaxy-workflow-draft]]"
     description: "Same draft with one additional step concretized (one loop iteration). Once every step is concrete, [[draft-next-step]] reports `draft: false` and the harness exits the loop."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Same ledger carried through the iteration: a blocking entry [[implement-galaxy-tool-step]] appended is routed to [[repair-galaxy-draft-topology]] and returns marked `resolved` or `surrendered`."
 references:
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -64,15 +70,25 @@ references:
     evidence: corpus-observed
     purpose: "Classify [[draft-validate]] diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice)."
     trigger: "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime."
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Recognize the blocking entry [[implement-galaxy-tool-step]] appends (its shape and `open | resolved | surrendered` status) so the orchestrator can detect the raised computability gap, count open blocking entries for the convergence gate, and escalate to [[repair-galaxy-draft-topology]]."
+    verification: "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that strictly reduces the open count."
 related_molds:
   - "[[discover-shed-tool]]"
   - "[[author-galaxy-tool-wrapper]]"
   - "[[summarize-galaxy-tool]]"
   - "[[implement-galaxy-tool-step]]"
+  - "[[repair-galaxy-draft-topology]]"
   - "[[validate-galaxy-workflow]]"
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
   - "[[galaxy-data-flow-draft-contract]]"
+  - "[[open-requirements-ledger]]"
 ---
 
 # advance-galaxy-draft-step
@@ -91,7 +107,8 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
    Either way, if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
 3. **Summarize the wrapper.** Invoke [[summarize-galaxy-tool]] on the resolved wrapper to produce a [[galaxy-tool-summary]] for the next phase.
 4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `tool_state`, and wrapper-determined port names.
-5. **Validate.** Run [[draft-validate]] `--concrete` over the mutated draft. On green, return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
+5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry [[implement-galaxy-tool-step]] appended against this step — a declared output that can't be computed from its wired inputs. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output); it marks the entry `resolved`, or `surrendered` when no producer is reachable. Each escalation must strictly reduce the open blocking-entry count, under a hard escalation cap; track both in the ledger's `topology_repair` block (increment `escalations`, append the post-repair open count to `open_history`, surrender once `escalations` reaches `cap`). A surrendered entry stays open and is written into the final draft as a labelled gap rather than fabricated. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
+6. **Validate.** Run [[draft-validate]] `--concrete` over the mutated draft. On green, return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
 
 ## Failure routing
 
@@ -100,6 +117,8 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
 - **Local to the just-implemented step** (sentinel violation, wrong port name, malformed `tool_state`) — re-enter [[implement-galaxy-tool-step]] with the diagnostic.
 - **Wrapper-choice mismatch** (selected wrapper cannot satisfy the step's `_plan_*` contract — wrong datatype, missing parameter, incompatible collection shape) — back out to step 2 and pick a different wrapper, either via [[discover-shed-tool]] with refined criteria or by escalating to [[author-galaxy-tool-wrapper]].
 - **Earlier-step defect surfaced by the growing concrete projection** (e.g. a connection that looked fine in isolation breaks once a downstream step pulls a previously-deferred port into scope) — flag to the user. The orchestrator does not unwind prior iterations on its own; cross-step rework belongs at the harness level. *Open question: at what threshold should this Mold attempt to re-enter [[implement-galaxy-tool-step]] for an earlier step versus always escalating?*
+
+These are red-`draft-validate` buckets. The fourth escalation path — a step output uncomputable from its wired inputs — is **not** one of them: the draft validates green there, so it is detected from the ledger in step 5 above, not from a validation failure.
 
 Consult [[galaxy-tool-job-failure-reference]] when the wrapper has explicit failure semantics that affect routing — strict-shell behavior, dynamic outputs, or non-default stdio rules can present as wrapper-choice mismatches even when the static shape validates.
 

@@ -44,6 +44,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
+- [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
 - [[summarize-cwl]] — Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation.
 - [[summarize-cwl-tool]] — Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target.
@@ -234,6 +235,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
 - [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
 - [[galaxy-workflow-draft-format]] — gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step.
+- [[open-requirements-ledger]] — Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously.
 
 ## Cli Tool
 

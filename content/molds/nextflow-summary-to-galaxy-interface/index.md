@@ -19,12 +19,26 @@ input_artifacts:
     description: "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the source-of-truth JSON for interface choices."
   - id: nextflow-galaxy-reference-data
     description: "Reference-data shape brief from [[nextflow-summary-to-galaxy-reference-data]] that pins per-asset reference inputs and rebuild-on-absence behavior."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
 output_artifacts:
   - id: nextflow-galaxy-interface
     kind: markdown
     default_filename: nextflow-galaxy-interface.md
     description: "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
 references:
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[summary-nextflow]]"
     used_at: runtime
@@ -97,3 +111,5 @@ related_notes:
 Read a Nextflow summary and emit a reviewable Markdown interface brief for a Galaxy workflow. Capture workflow inputs, workflow outputs, labels, Galaxy collection shapes, checkpoint outputs worth exposing for tests, source-summary provenance, confidence, and open questions.
 
 The output is not a gxformat2 skeleton and not a workflow schema. It is a design handoff consumed by [[nextflow-summary-to-galaxy-data-flow]], [[nextflow-summary-to-galaxy-template]], and later test-plan work.
+
+Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.

@@ -19,12 +19,26 @@ input_artifacts:
     description: "Free-form source summary emitted by [[summarize-paper]] or [[interview-to-freeform-summary]]; consumed alongside the Galaxy interface brief."
   - id: freeform-galaxy-interface
     description: "Preceding Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] that pins inputs, outputs, and labels."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
 output_artifacts:
   - id: freeform-galaxy-data-flow
     kind: markdown
     default_filename: freeform-galaxy-data-flow.md
     description: "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
 references:
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"
     used_at: runtime
@@ -84,3 +98,5 @@ Read a free-form source summary plus the preceding Galaxy interface brief and em
 Free-form sources rarely give enough to fix exact operations. Translate what the summary and interface brief support, classify the rest as unresolved tool needs or open questions, and do not present narrative intent as already-decided Galaxy wiring.
 
 The output is not gxformat2 and should not resolve exact Tool Shed tools. [[freeform-summary-to-galaxy-template]] turns this handoff and the interface brief into a skeleton.
+
+Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.
