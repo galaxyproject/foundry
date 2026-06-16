@@ -52,12 +52,12 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 5. **freeform-summary-to-galaxy-template** — invoke the `freeform-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
 6. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then continue.
 7. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
-   - Try `find-test-data` (MANUAL — not yet cast). Search IWC fixtures and public sources for test data matching a data-flow shape. Do this by hand.
+   - Try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
 8. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 9. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 10. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
-11. **debug-galaxy-workflow-output** — MANUAL — `debug-galaxy-workflow-output` is not yet cast. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. Do this by hand and confirm before continuing.
+11. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
 
 ## Done
 

@@ -1,0 +1,55 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "find-test-data",
+    "path": "content/molds/find-test-data/index.md",
+    "revision": 2,
+    "content_hash": "607db69e32896890701577c9f156be662cce1371ac915cbfeb7244c602836e75",
+    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+  },
+  "cast_at": "2026-06-15T13:53:32.337Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Confirm the collection shapes and labels the resolved data must populate so downstream tests can address them.",
+      "trigger": "When mapping an input label in the data-flow brief to a concrete file or collection of files.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Match IWC test-data conventions — Zenodo/remote-URL first, SHA-1 integrity, per-input collection layout — when selecting or describing candidate fixtures.",
+      "trigger": "When choosing where test data should come from or describing the shape a candidate file must have.",
+      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "test-data-refs",
+        "kind": "json",
+        "default_filename": "test-data-refs.json",
+        "description": "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring."
+      }
+    ],
+    "consumes": []
+  }
+}

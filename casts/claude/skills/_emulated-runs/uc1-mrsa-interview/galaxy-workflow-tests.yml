@@ -1,0 +1,57 @@
+- doc: |
+    MRSA mobile-AMR context across isolates — workflow test skeleton.
+    Test DATA is user-supplied (find-test-data did not resolve real FASTA URLs;
+    see test-data-refs.json). The `location:` values below are placeholders the
+    user must fill with verified isolate-assembly URLs before this test can run.
+    Parameter inputs are pinned. Output assertions are deliberately weak
+    (existence / non-empty) because the workflow is not yet fully concrete and no
+    expected-output snapshots are pinned.
+  job:
+    MRSA isolate assemblies:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: KUN1163
+          class: File
+          location: https://USER_SUPPLIED/KUN1163.fasta
+          filetype: fasta
+        - identifier: KUH140013
+          class: File
+          location: https://USER_SUPPLIED/KUH140013.fasta
+          filetype: fasta
+        - identifier: KUH140046
+          class: File
+          location: https://USER_SUPPLIED/KUH140046.fasta
+          filetype: fasta
+    StarAMR database: resfinder_db_USER_PINNED_VERSION
+    Species for point mutation analysis: Staphylococcus aureus
+  outputs:
+    staramr_summary:
+      asserts:
+        has_text_matching:
+          expression: ".+"
+    staramr_resfinder:
+      asserts:
+        has_text_matching:
+          expression: ".+"
+    staramr_plasmidfinder:
+      asserts:
+        has_text_matching:
+          expression: ".+"
+    is_elements:
+      asserts:
+        has_text_matching:
+          expression: ".+"
+    integrons:
+      asserts:
+        has_text_matching:
+          expression: ".+"
+    arg_mobile_context:
+      asserts:
+        has_text_matching:
+          expression: ".+"
+    arg_heatmap:
+      asserts:
+        has_size:
+          value: 1000
+          delta: 1000000

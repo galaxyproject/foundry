@@ -55,7 +55,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 6. **validate-cwl** (loop) — MANUAL — `validate-cwl` is not yet cast. Run cwltool --validate / schema lint, classify failures, recommend fixes. No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand.
 7. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
    - Try `paper-to-test-data` (MANUAL — not yet cast). Derive workflow test inputs and expected outputs from a paper. Do this by hand.
-   - Otherwise try `find-test-data` (MANUAL — not yet cast). Search IWC fixtures and public sources for test data matching a data-flow shape. Do this by hand.
+   - Otherwise try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
 8. **implement-cwl-workflow-test** — MANUAL — `implement-cwl-workflow-test` is not yet cast. Assemble CWL job file(s) and expected-output assertions. Do this by hand and confirm before continuing.
 9. **validate-cwl** — MANUAL — `validate-cwl` is not yet cast. Run cwltool --validate / schema lint, classify failures, recommend fixes. Do this by hand and confirm before continuing.
