@@ -5,10 +5,10 @@
     "name": "freeform-summary-to-galaxy-template",
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 4,
-    "content_hash": "f5342381d5d9b488d2ecbc2783920b1bc9d19fddec76376857520283b6c123bd",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "content_hash": "876776be67332be5a85d6e61802ab405f7aab95cf9cc76eb42af12bc6424b159",
+    "commit": "7060006e335027511b29dbf31415f625462a646a"
   },
-  "cast_at": "2026-06-15T15:10:34.266Z",
+  "cast_at": "2026-06-16T11:53:13.017Z",
   "refs": [
     {
       "kind": "cli-command",

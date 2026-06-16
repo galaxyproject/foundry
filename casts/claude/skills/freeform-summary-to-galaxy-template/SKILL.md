@@ -63,6 +63,17 @@ Topology is this skill's job to settle. The output must be concrete gxformat2: w
 
 Source tendency: free-form sources rarely name tools, so steps land in **Deferred** more often than nf-core or CWL — but a free-form source that *does* name a specific tool/version with evidence hardens to the matching tier, and a corpus-confirmed utility wrapper (interval/tabular/collection op) is not deferred just because the surrounding prose is informal. When deferring a domain tool, cite the originating paper section, interview answer, figure, or supplementary table in `_plan_context`, and record vague intent in `_plan_state` ("default settings", "stranded reverse if mentioned, else unstranded") so the per-step skill knows the evidence ceiling.
 
+Before handing off, sanity-check that each step is computable from what feeds it. Once the step set is settled, re-read it and ask, for each step, whether the operation its intent implies can actually be produced from the inputs you wired. The connection graph only knows that ports connect — not what each port is supposed to *contain* — so an output that needs evidence no input carries will validate fine and still be impossible to implement. Where you spot that gap, don't leave it implicit: wire (or add) the step that supplies the missing input, or record the unmet need plainly in `_plan_state` so the per-step skill or a reviewer can act on it rather than discover it late.
+
+Things worth a second look:
+
+- an output column or field that no wired input carries;
+- an aggregate or summary whose grouping key isn't present upstream;
+- a filter or threshold whose criterion isn't produced by any input;
+- a join whose key doesn't exist on both sides;
+- a step whose `_plan_*` promises more than its `in:` ports can supply;
+- if classification step, is that classification/enumeration possible only from inputs.
+
 Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see galaxy-workflow-comments for the convention.
 
 Output shape is gxformat2 with wrapper-tier relaxations and `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` per tool step — see galaxy-workflow-draft-format. Refinement open work for those planning fields lives in `refinement.md`.
