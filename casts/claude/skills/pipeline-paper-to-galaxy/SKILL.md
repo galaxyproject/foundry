@@ -55,7 +55,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
    - Try `paper-to-test-data` (MANUAL — not yet cast). Derive workflow test inputs and expected outputs from a paper. Do this by hand.
    - Otherwise try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
-8. **freeform-summary-to-galaxy-test-plan** — MANUAL — `freeform-summary-to-galaxy-test-plan` is not yet cast. Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs. Do this by hand and confirm before continuing.
+8. **freeform-summary-to-galaxy-test-plan** — invoke the `freeform-summary-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs.
 9. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 10. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 11. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
