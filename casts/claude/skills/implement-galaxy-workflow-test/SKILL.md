@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `galaxy-test-plan`. Produced by `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`. Reviewable Galaxy test plan from a *-test-to-galaxy-test-plan Mold; profile, fixtures, snapshot/assertion provenance.
+- Read artifact `galaxy-test-plan`. Schema: galaxy-workflow-test-plan. Produced by `cwl-test-to-galaxy-test-plan`, `freeform-summary-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`. Schema-valid Galaxy test plan (galaxy-workflow-test-plan) from a *-test-to-galaxy-test-plan Mold; carries job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.
 - Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`. gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against.
 - Read artifact `test-data-refs`. Produced by `find-test-data`, `paper-to-test-data`. Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.
 
@@ -36,6 +36,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/cli/planemo.md`: CLI tool reference copied verbatim into the bundle. Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation.
+- `references/schemas/galaxy-workflow-test-plan.schema.json`: Schema file copied verbatim into the bundle. Input contract: read the schema-valid Galaxy test plan (job inputs, expected outputs, assertion intent, tolerances, label assumptions, unresolved mappings, omissions) and convert it into tests-format output, reconciling assumed labels and fixtures against the real draft.
 - `references/schemas/tests-format.schema.json`: Schema file copied verbatim into the bundle. JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.
 
 ## Load On Demand
@@ -53,9 +54,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Assemble a Galaxy workflow test file (`tests-format`) from the test plan, the gxformat2 draft, and the resolved test-data refs. One invocation produces a `*-tests.yml` whose job inputs come from the draft's workflow inputs and whose assertions come from the test plan's snapshots. The output must validate against tests-format and pass the workflow-label cross-check before any Planemo run.
+Assemble a Galaxy workflow test file (`tests-format`) from the schema-valid Galaxy test plan (galaxy-workflow-test-plan), the gxformat2 draft, and the resolved test-data refs. One invocation produces a `*-tests.yml` whose job inputs come from the draft's workflow inputs and whose assertions come from the plan's assertion intent. The output must validate against tests-format and pass the workflow-label cross-check before any Planemo run.
 
-The draft is the contract: input and output labels in the test file must address real workflow input/output labels. When authoring reveals a missing label, an omitted workflow output, or an unstable collection identifier, treat it as testability pressure on the workflow itself — surface it per galaxy-workflow-testability-design rather than asserting around it.
+The draft is the contract: input and output labels in the test file must address real workflow input/output labels. The test plan's bindings may be `assumed` or `unresolved` — especially for synthesized (freeform-sourced) plans whose `workflow.label_source` is `interface-brief` — so reconcile each plan binding against the real draft labels here, and resolve `unresolved[]` entries and `storage: unresolved` fixtures against the draft and the resolved test-data refs. When authoring reveals a missing label, an omitted workflow output, or an unstable collection identifier, treat it as testability pressure on the workflow itself — surface it per galaxy-workflow-testability-design rather than asserting around it.
 
 ### Sequence
 
@@ -63,7 +64,7 @@ The draft is the contract: input and output labels in the test file must address
    - **`planemo workflow_test_init --from_invocation <id>`** (planemo-workflow_test_init) — preferred bootstrap for new test files; reviewer convention. See planemo-asserts-idioms §7.
    - **`planemo workflow_test_on_invocation <tests.yml> <id>`** (planemo-workflow_test_on_invocation) — fast assertion-iteration loop without re-running the workflow.
 2. **Author job inputs.** Wire each workflow input to a `test-data-refs` entry. Follow iwc-test-data-conventions for remote-URL-first fixtures, recorded hashes, and per-input collection layout. Inputs must match the draft's collection shapes and datatypes.
-3. **Author assertions.** Translate the test plan's snapshots into output assertions. Choose assertion families and tolerances per planemo-asserts-idioms; check each shortcut against iwc-shortcuts-anti-patterns so an existence-only or size-only assertion is a deliberate choice, not an evasion.
+3. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions. Choose assertion families and tolerances per planemo-asserts-idioms; check each shortcut against iwc-shortcuts-anti-patterns so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation.
 4. **Validate static.** Run validate-tests for the schema gate, then the workflow-label cross-check (`checkTestsAgainstWorkflow`): zero missing input labels, zero missing output labels, no collection/datatype mismatches. Fix before spending a Planemo run.
 5. **Run green.** Drive planemo `test` on a managed Galaxy with the staged data and tools. On green, hand off the test file plus enough invocation/job/assertion context for run-workflow-test and debug-galaxy-workflow-output to use if a later run fails.
 

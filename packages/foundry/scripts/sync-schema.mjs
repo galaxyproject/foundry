@@ -52,6 +52,7 @@ regenerateVersion();
 regenerateFromJson("summary-cwl", "summaryCwlSchema");
 regenerateFromJson("galaxy-tool-discovery", "galaxyToolDiscoverySchema");
 regenerateFromJson("galaxy-tool-summary", "galaxyToolSummarySchema");
+regenerateFromJson("galaxy-workflow-test-plan", "galaxyWorkflowTestPlanSchema");
 regenerateFromUpstream(
   "tests-format",
   "tests.schema",

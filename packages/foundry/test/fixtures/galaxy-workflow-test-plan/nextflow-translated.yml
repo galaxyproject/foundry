@@ -1,0 +1,68 @@
+# Concrete nextflow plan: translated from nf-test evidence, labels read from a
+# workflow draft, fixtures pinned with checksums, real tolerances, and a
+# collection element-level assertion. Exercises the schema's "fully resolved" end.
+plan_version: "1"
+source:
+  kind: nextflow
+  name: "nf-core/bacass"
+  derived_from: test-evidence
+  notes: "Translated from nf-test snapshots and the pipeline's test profile."
+workflow:
+  title: "Bacterial assembly and annotation"
+  label_source: draft
+  notes: "Labels read from the gxformat2 draft produced upstream in the spine."
+test_cases:
+  - id: bacass-test-profile
+    doc: "Run the bacass test profile inputs and assert the assembly and the MultiQC report."
+    derived_from: test-evidence
+    provenance: "nf-test: test('Run with profile test')"
+    job_inputs:
+      - workflow_label: "Raw reads"
+        label_status: resolved
+        description: "Paired short reads for one sample."
+        collection_shape: "list:paired"
+        datatype: "fastqsanger.gz"
+        fixture:
+          storage: remote-url
+          location: "https://zenodo.org/records/11484215/files/paired_r1.fastq.gz"
+          checksum: "SHA-1:927d0d00b7db6ad60524bb9e50d3ab41c4ac5ecf"
+          provenance: "Translated from the nf-core/bacass test-profile fastq URLs."
+    expected_outputs:
+      - workflow_label: "Assembly"
+        label_status: resolved
+        description: "Final polished assembly FASTA."
+        output_kind: dataset
+        collection_shape: null
+        assertion_intent:
+          - family: has_size
+            intent: "Assembly is produced and roughly the expected size."
+            expected_value: 4100000
+            tolerance:
+              kind: delta_frac
+              magnitude: 0.1
+              rationale: "Assembly size varies run-to-run; 10% band catches empty/oversized output."
+            element_identifier: null
+            evidence: test-evidence
+            confidence: medium
+      - workflow_label: "Per-sample QC reports"
+        label_status: resolved
+        description: "Collection of MultiQC text reports keyed by sample."
+        output_kind: collection
+        collection_shape: "list"
+        assertion_intent:
+          - family: has_text
+            intent: "The sample report names the expected sample and tool section."
+            expected_value: "sample1"
+            tolerance: null
+            element_identifier: "sample1"
+            evidence: test-evidence
+            confidence: high
+unresolved: []
+omissions:
+  - target: "Assembly graph (GFA)"
+    reason: "Graph ordering is nondeterministic; no stable assertion available."
+    category: nondeterministic
+warnings:
+  - code: untranslatable-snapshot
+    message: "nf-test snapshot for the annotation step embeds timestamps; not translated to an assertion."
+    path: "tests/main.nf.test.snap"

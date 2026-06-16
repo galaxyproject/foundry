@@ -18,6 +18,7 @@
     "./schemas/summary-cwl.json": "./dist/schemas/summary-cwl/summary-cwl.schema.json",
     "./schemas/galaxy-tool-discovery.json": "./dist/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json",
     "./schemas/galaxy-tool-summary.json": "./dist/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json",
+    "./schemas/galaxy-workflow-test-plan.json": "./dist/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json",
     "./schemas/tests-format.json": "./dist/schemas/tests-format/tests.schema.json"
   },
   "files": [

@@ -5,7 +5,7 @@ Concrete cases for `cwl-test-to-galaxy-test-plan`, exercised against the abstrac
 ## Case: schema-valid translated test plan
 
 - fixture: CWL workflow with job input object, expected outputs, secondary files, and collection-like array inputs.
-- expect: emits a Galaxy workflow test plan that validates against the handoff schema selected for Galaxy workflow tests.
+- expect: emits a YAML Galaxy workflow test plan that validates against the [[galaxy-workflow-test-plan]] schema via `foundry validate-galaxy-workflow-test-plan`.
 
 ## Case: plan-not-final-tests boundary
 
