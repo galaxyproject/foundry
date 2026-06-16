@@ -6,6 +6,7 @@
 
 import galaxyToolDiscoverySchema from '../../../packages/foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json';
 import galaxyToolSummarySchema from '../../../packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
+import galaxyWorkflowTestPlanSchema from '../../../packages/foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json';
 import summaryCwlSchema from '../../../packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json';
 import testsFormatSchema from '../../../packages/foundry/src/schemas/tests-format/tests.schema.json';
 import castProvenanceSchema from '../../../scripts/lib/schemas/cast-provenance.schema.json';
@@ -40,6 +41,10 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   },
   'galaxy-tool-summary': {
     schema: galaxyToolSummarySchema as unknown as Record<string, unknown>,
+    version: foundryVersion,
+  },
+  'galaxy-workflow-test-plan': {
+    schema: galaxyWorkflowTestPlanSchema as unknown as Record<string, unknown>,
     version: foundryVersion,
   },
   'cast-provenance': {

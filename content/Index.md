@@ -29,6 +29,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[freeform-summary-to-galaxy-data-flow]] — Translate a free-form source summary into a Galaxy data-flow design brief.
 - [[freeform-summary-to-galaxy-interface]] — Map a free-form source summary into a Galaxy workflow interface design brief.
 - [[freeform-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
+- [[freeform-summary-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs.
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary.
@@ -141,6 +142,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[validate]] — Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution.
 - [[validate-galaxy-tool-discovery]] — AJV gate for discover-shed-tool recommendation documents.
 - [[validate-galaxy-tool-summary]] — AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree.
+- [[validate-galaxy-workflow-test-plan]] — AJV gate for Galaxy workflow test-plan YAML documents.
 - [[validate-summary-cwl]] — AJV gate for summarize-cwl JSON documents.
 - [[validate-summary-nextflow]] — AJV gate for summarize-nextflow JSON documents.
 - [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
@@ -155,6 +157,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-tool-summary]] — JSON Schema for the deterministic per-tool manifest emitted by `galaxy-tool-cache summarize`.
 - [[galaxy-workflow-draft]] — JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step.
 - [[tests-format]] — JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`.
+- [[galaxy-workflow-test-plan]] — JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test.
 - [[nextflow-parameters-meta]] — JSON Schema (Draft 2020-12) meta-schema validating per-pipeline nextflow_schema.json files. Upstream from nextflow-io/nf-schema.
 - [[summary-nextflow]] — JSON Schema for the structured summary emitted by the summarize-nextflow Mold.
 - [[nf-core-module-meta]] — JSON Schema (Draft-07) validating nf-core module meta.yml — channel IO, tools, containers, conda lockfiles. Upstream from nf-core/modules.

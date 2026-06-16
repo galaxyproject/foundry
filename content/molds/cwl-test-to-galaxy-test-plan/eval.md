@@ -6,7 +6,7 @@ This file is the **abstract oracle** for the `cwl-test-to-galaxy-test-plan` Mold
 
 - bucket: schema
 - check: deterministic
-- assertion: the Mold emits a Galaxy workflow test plan that validates against the handoff schema selected for Galaxy workflow tests.
+- assertion: the Mold emits a YAML Galaxy workflow test plan that validates against the [[galaxy-workflow-test-plan]] schema via `foundry validate-galaxy-workflow-test-plan`.
 
 ## Property: plan-not-final-tests boundary
 
