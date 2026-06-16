@@ -37,8 +37,6 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load On Demand
 
 - `references/cli/add.json`: CLI command reference packaged as a sidecar. Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first. Use when: the requested pin is not yet present in the configured cache directory.
-- `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Classify wrapper package and container requirements consistently with Nextflow-derived requirement evidence. Use when: comparing an existing Galaxy wrapper's declared requirements against Nextflow container or conda evidence.
-- `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
 - `references/notes/component-tool-shed-search.md`: Research note copied verbatim into the bundle. Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper. Use when: a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object.
 - `references/schemas/parsed-tool.schema.json`: Schema file copied verbatim into the bundle. Resolve field-level questions about the upstream `ParsedTool` payload embedded under `parsed_tool`. Use when: a downstream Mold needs a specific input/output/help/citation field from the embedded `ParsedTool`.
 

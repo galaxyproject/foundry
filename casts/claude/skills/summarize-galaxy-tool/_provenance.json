@@ -5,10 +5,10 @@
     "name": "summarize-galaxy-tool",
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 6,
-    "content_hash": "cfc0b392413c446e219d9af4a6cb4a525facbb6c728822c3ea217afa9142103b",
-    "commit": "042a5219728e058b2d8a989875c0ac03a19dc592"
+    "content_hash": "09af5ad2de0e7ae787215f2ad748078b89a7fca596502baf375f3c121b77d458",
+    "commit": "f80374d58b0ca8dbd220a39255f33a81fc9b9436"
   },
-  "cast_at": "2026-06-16T18:15:00.126Z",
+  "cast_at": "2026-06-16T19:09:27.057Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -54,37 +54,6 @@
       "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
       "src_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
       "dst_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
-      "source": "deterministic"
-    },
-    {
-      "kind": "research",
-      "mode": "verbatim",
-      "ref": "[[component-nextflow-containers-and-envs]]",
-      "src": "content/research/component-nextflow-containers-and-envs.md",
-      "dst": "references/notes/component-nextflow-containers-and-envs.md",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Classify wrapper package and container requirements consistently with Nextflow-derived requirement evidence.",
-      "trigger": "When comparing an existing Galaxy wrapper's declared requirements against Nextflow container or conda evidence.",
-      "src_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
-      "dst_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
-      "source": "deterministic"
-    },
-    {
-      "kind": "research",
-      "mode": "verbatim",
-      "ref": "[[component-nextflow-containers-and-envs]]",
-      "src": "content/research/component-nextflow-containers-and-envs.yml",
-      "dst": "references/notes/component-nextflow-containers-and-envs.yml",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Classify wrapper package and container requirements consistently with Nextflow-derived requirement evidence.",
-      "trigger": "When comparing an existing Galaxy wrapper's declared requirements against Nextflow container or conda evidence.",
-      "companion_of": "references/notes/component-nextflow-containers-and-envs.md",
-      "src_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
-      "dst_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
       "source": "deterministic"
     },
     {

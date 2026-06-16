@@ -78,14 +78,6 @@ references:
     evidence: corpus-observed
     purpose: "Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper."
     trigger: "When a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object."
-  - kind: research
-    ref: "[[component-nextflow-containers-and-envs]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Classify wrapper package and container requirements consistently with Nextflow-derived requirement evidence."
-    trigger: "When comparing an existing Galaxy wrapper's declared requirements against Nextflow container or conda evidence."
 ---
 # summarize-galaxy-tool
 
