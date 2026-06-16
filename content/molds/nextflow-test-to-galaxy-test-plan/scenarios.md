@@ -7,7 +7,7 @@ expected values; the `eval.md` oracle is applied to whatever the case produces.
 ## Case: schema-valid translated test plan
 
 - fixture: nf-core/bacass or minimal demo Nextflow summary containing nf-test profiles, params, input fixtures, expected outputs, and snapshot evidence.
-- expect: emits a Galaxy workflow test plan that validates against the handoff schema selected for Galaxy workflow tests.
+- expect: emits a YAML Galaxy workflow test plan that validates against the [[galaxy-workflow-test-plan]] schema via `foundry validate-galaxy-workflow-test-plan`.
 
 ## Case: plan-not-final-tests boundary
 

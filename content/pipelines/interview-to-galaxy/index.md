@@ -25,6 +25,7 @@ phases:
     chain:
       - "[[find-test-data]]"
       - user-supplied
+  - mold: "[[freeform-summary-to-galaxy-test-plan]]"
   - mold: "[[implement-galaxy-workflow-test]]"
   - mold: "[[validate-galaxy-workflow]]"
   - mold: "[[run-workflow-test]]"

@@ -15,9 +15,10 @@
     { "phase": 5, "kind": "mold", "skill": "freeform-summary-to-galaxy-template", "cast_present": true, "loop": false },
     { "phase": 6, "kind": "mold", "skill": "advance-galaxy-draft-step", "cast_present": true, "loop": true },
     { "phase": 7, "kind": "branch", "pattern": "test-data-resolution", "chain": ["paper-to-test-data", "find-test-data", "user-supplied"], "cast_present": [false, true, null] },
-    { "phase": 8, "kind": "mold", "skill": "implement-galaxy-workflow-test", "cast_present": true, "loop": false },
-    { "phase": 9, "kind": "mold", "skill": "validate-galaxy-workflow", "cast_present": true, "loop": false },
-    { "phase": 10, "kind": "mold", "skill": "run-workflow-test", "cast_present": true, "loop": false },
-    { "phase": 11, "kind": "mold", "skill": "debug-galaxy-workflow-output", "cast_present": true, "loop": false }
+    { "phase": 8, "kind": "mold", "skill": "freeform-summary-to-galaxy-test-plan", "cast_present": true, "loop": false },
+    { "phase": 9, "kind": "mold", "skill": "implement-galaxy-workflow-test", "cast_present": true, "loop": false },
+    { "phase": 10, "kind": "mold", "skill": "validate-galaxy-workflow", "cast_present": true, "loop": false },
+    { "phase": 11, "kind": "mold", "skill": "run-workflow-test", "cast_present": true, "loop": false },
+    { "phase": 12, "kind": "mold", "skill": "debug-galaxy-workflow-output", "cast_present": true, "loop": false }
   ]
 }

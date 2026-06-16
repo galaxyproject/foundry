@@ -1,0 +1,168 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "freeform-summary-to-galaxy-test-plan",
+    "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
+    "revision": 1,
+    "content_hash": "37c8ad10dcf4ebaf9aefc132bd365b1172fbd1c00534893f52a53f65e99e0d9b",
+    "commit": "042a5219728e058b2d8a989875c0ac03a19dc592"
+  },
+  "cast_at": "2026-06-16T19:07:57.280Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose which workflow outputs and promoted checkpoints make meaningful assertions when no upstream test evidence exists.",
+      "trigger": "When deciding which outputs to assert, which checkpoints to promote, and which labels the plan should assume.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-shortcuts-anti-patterns]]",
+      "src": "content/research/iwc-shortcuts-anti-patterns.md",
+      "dst": "references/notes/iwc-shortcuts-anti-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while synthesizing assertions from intent.",
+      "trigger": "When considering existence-only, size-only, image-dimension, or tolerant output checks, or recording an omission.",
+      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Describe job-input fixtures, remote-URL-first locations, hashes, and collection input shapes the plan should record as fixture provenance.",
+      "trigger": "When recording job inputs or fixture provenance, or deciding whether a fixture belongs in test-data, Zenodo, ENA/SRA, or CVMFS.",
+      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-asserts-idioms]]",
+      "src": "content/research/planemo-asserts-idioms.md",
+      "dst": "references/notes/planemo-asserts-idioms.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Pick the assertion family and tolerance that fit each synthesized expected output by output type.",
+      "trigger": "When turning an expected output into assertion intent and a tolerance.",
+      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-workflow-test-architecture]]",
+      "src": "content/research/planemo-workflow-test-architecture.md",
+      "dst": "references/notes/planemo-workflow-test-architecture.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
+      "trigger": "When recording the labels and checkpoints the downstream test must address.",
+      "src_hash": "f66d053cf71c5d5aa4151e0b55719f9b200f5848e7dc69e0200d63d991a9dacf",
+      "dst_hash": "f66d053cf71c5d5aa4151e0b55719f9b200f5848e7dc69e0200d63d991a9dacf",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-test-plan]]",
+      "src": "package://@galaxy-foundry/foundry#galaxyWorkflowTestPlanSchema",
+      "dst": "references/schemas/galaxy-workflow-test-plan.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema so the skill carries its output shape; validate with `foundry validate-galaxy-workflow-test-plan`.",
+      "verification": "Cast the skill, run on a representative paper/interview-derived summary, confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it without re-reading the source summary.",
+      "src_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
+      "dst_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[tests-format]]",
+      "src": "package://@galaxy-foundry/foundry#testsFormatSchema",
+      "dst": "references/schemas/tests-format.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use the Galaxy workflow tests schema as the assertion-family vocabulary referenced by the plan's assertion intent.",
+      "trigger": "When naming an assertion family or compare operator for a synthesized expected output.",
+      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-test-plan",
+        "kind": "yaml",
+        "default_filename": "galaxy-test-plan.yml",
+        "schema": "[[galaxy-workflow-test-plan]]",
+        "description": "Reviewable Galaxy workflow test plan (see [[galaxy-workflow-test-plan]]): synthesized test cases with job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "freeform-summary",
+        "description": "Free-form source summary from [[summarize-paper]] or [[interview-to-freeform-summary]]; carries methods, sample data, parameters, and expected outputs that seed test intent.",
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] that pins workflow inputs, outputs, and labels the plan binds assertions to.",
+        "producers": [
+          "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices the plan must respect.",
+        "producers": [
+          "freeform-summary-to-galaxy-data-flow"
+        ]
+      },
+      {
+        "id": "iwc-comparison-notes",
+        "description": "Structural diff guidance from [[compare-against-iwc-exemplar]]; steers the plan toward IWC-aligned testable checkpoints and fixture shapes.",
+        "producers": [
+          "compare-against-iwc-exemplar"
+        ]
+      },
+      {
+        "id": "iwc-exemplar-gxformat2",
+        "description": "Cleaned gxformat2 view of the nearest IWC exemplar from [[compare-against-iwc-exemplar]]; pattern-match its labels, collection identifiers, and tested checkpoints. Absent when no nearest exemplar was found.",
+        "producers": [
+          "compare-against-iwc-exemplar"
+        ]
+      }
+    ]
+  }
+}

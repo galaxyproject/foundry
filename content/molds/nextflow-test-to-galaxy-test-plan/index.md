@@ -17,10 +17,19 @@ input_artifacts:
     description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence."
 output_artifacts:
   - id: galaxy-test-plan
-    kind: markdown
-    default_filename: galaxy-test-plan.md
-    description: "Reviewable Galaxy workflow test plan: profile, fixture, snapshot, ignored-file, expected-output, rationale provenance."
+    kind: yaml
+    default_filename: galaxy-test-plan.yml
+    schema: "[[galaxy-workflow-test-plan]]"
+    description: "Reviewable Galaxy workflow test plan (see [[galaxy-workflow-test-plan]]): profile, fixture, snapshot, ignored-file, expected-output, rationale provenance translated from nf-test evidence."
 references:
+  - kind: schema
+    ref: "[[galaxy-workflow-test-plan]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema; validate with `foundry validate-galaxy-workflow-test-plan`."
+    verification: "Cast the skill on an nf-core/bacass summary and confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it."
   - kind: schema
     ref: "[[summary-nextflow]]"
     used_at: runtime
@@ -78,9 +87,10 @@ references:
     purpose: "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests."
     trigger: "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks."
 related_notes:
+  - "[[galaxy-workflow-test-plan]]"
   - "[[summary-nextflow]]"
   - "[[tests-format]]"
 ---
 # nextflow-test-to-galaxy-test-plan
 
-Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a reviewable handoff, not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact with the right labels and assertions.
+Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a reviewable YAML handoff conforming to [[galaxy-workflow-test-plan]], not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact with the right labels and assertions. Because this plan is translated from real nf-test evidence, set `source.derived_from: test-evidence` and prefer `evidence: test-evidence` on the assertions it carries.

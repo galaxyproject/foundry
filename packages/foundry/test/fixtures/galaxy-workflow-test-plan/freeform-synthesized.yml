@@ -1,0 +1,63 @@
+# Maximally-unknown freeform plan: synthesized from intent, labels assumed,
+# fixtures unresolved, expected values unknown. Exercises the schema's ability
+# to express a plan that is almost entirely uncertain.
+plan_version: "1"
+source:
+  kind: freeform
+  name: "Single-cell clustering workflow (interview)"
+  derived_from: intent
+  notes: "No upstream test fixtures; plan synthesized from interview answers and scenario-level expected outputs."
+workflow:
+  title: null
+  label_source: interface-brief
+  notes: "Input/output labels taken from the Galaxy interface brief; not yet confirmed against a workflow draft."
+test_cases:
+  - id: smoke-clustering
+    doc: "End-to-end smoke test: clustered AnnData and a UMAP plot are produced from a small input matrix."
+    derived_from: intent
+    provenance: "Interview: 'we always check the UMAP looks right and clusters come out'."
+    job_inputs:
+      - workflow_label: "Input matrix"
+        label_status: assumed
+        description: "Count matrix the workflow clusters."
+        collection_shape: null
+        datatype: null
+        fixture:
+          storage: unresolved
+          location: null
+          checksum: null
+          provenance: "No fixture sourced yet; test-data-resolution must supply a small matrix."
+    expected_outputs:
+      - workflow_label: "Clustered AnnData"
+        label_status: assumed
+        description: "Final AnnData object carrying cluster assignments."
+        output_kind: dataset
+        collection_shape: null
+        assertion_intent:
+          - family: has_h5_keys
+            intent: "AnnData carries clustering results under an obs key."
+            expected_value: null
+            tolerance: null
+            element_identifier: null
+            evidence: intent
+            confidence: low
+      - workflow_label: "UMAP plot"
+        label_status: assumed
+        description: "UMAP scatter plot image."
+        output_kind: dataset
+        collection_shape: null
+        assertion_intent: []
+unresolved:
+  - kind: fixture
+    description: "No concrete input matrix fixture is available."
+    blocking: true
+    suggested_resolution: "Resolve via find-test-data or a user-supplied small matrix."
+  - kind: output-label
+    description: "Output labels are assumed from the interface brief and unconfirmed against the workflow draft."
+    blocking: false
+    suggested_resolution: "implement-galaxy-workflow-test reconciles against the real draft labels."
+omissions:
+  - target: "UMAP plot"
+    reason: "Plot is a smoke output; image content is nondeterministic and the matrix checkpoint is the stronger assertion."
+    category: weak-output
+warnings: []

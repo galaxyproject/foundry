@@ -181,6 +181,22 @@ export const foundryCliMeta: CliProgramSpec = {
       commands: [],
     },
     {
+      name: "validate-galaxy-workflow-test-plan",
+      fullName: "foundry validate-galaxy-workflow-test-plan",
+      description: "Validate a Galaxy workflow test-plan YAML document.",
+      synopsis: "foundry validate-galaxy-workflow-test-plan <test-plan.yml>",
+      args: [
+        {
+          raw: "test-plan.yml",
+          name: "test-plan.yml",
+          required: true,
+          variadic: false,
+        },
+      ],
+      options: [],
+      commands: [],
+    },
+    {
       name: "validate-tests-format",
       fullName: "foundry validate-tests-format",
       description:

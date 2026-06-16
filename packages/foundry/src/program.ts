@@ -4,6 +4,7 @@ import { runValidateSummaryNextflow } from "./commands/validate-summary-nextflow
 import { runValidateSummaryCwl } from "./commands/validate-summary-cwl.js";
 import { runValidateGalaxyToolDiscovery } from "./commands/validate-galaxy-tool-discovery.js";
 import { runValidateGalaxyToolSummary } from "./commands/validate-galaxy-tool-summary.js";
+import { runValidateGalaxyWorkflowTestPlan } from "./commands/validate-galaxy-workflow-test-plan.js";
 import {
   runValidateTestsFormat,
   type ValidateTestsOptions,
@@ -43,6 +44,12 @@ export function buildProgram(): Command {
     .description("Validate a galaxy-tool-cache summarize manifest.")
     .argument("<manifest.json>")
     .action((path: string) => runValidateGalaxyToolSummary(path));
+
+  program
+    .command("validate-galaxy-workflow-test-plan")
+    .description("Validate a Galaxy workflow test-plan YAML document.")
+    .argument("<test-plan.yml>")
+    .action((path: string) => runValidateGalaxyWorkflowTestPlan(path));
 
   program
     .command("validate-tests-format")

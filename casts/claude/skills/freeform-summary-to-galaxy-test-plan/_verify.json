@@ -3,7 +3,7 @@
   "entries": [
     {
       "artifact_id": "galaxy-test-plan",
-      "direction": "input",
+      "direction": "output",
       "kind": "yaml",
       "default_filename": "galaxy-test-plan.yml",
       "schema": "[[galaxy-workflow-test-plan]]",
