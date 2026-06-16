@@ -18,6 +18,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
 | [[freeform-summary-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs. | draft | 2026-06-16 | 1 |
+| [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | draft | 2026-06-16 | 6 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. | draft | 2026-06-12 | 4 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | draft | 2026-06-12 | 2 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary. | draft | 2026-06-12 | 6 |
@@ -45,7 +46,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-summary-to-cwl-data-flow]] | Translate a Nextflow summary into a CWL data-flow design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-cwl-interface]] | Map a Nextflow summary into a CWL Workflow interface design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | draft | 2026-05-05 | 4 |
-| [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | draft | 2026-05-05 | 5 |
 | [[summary-to-cwl-template]] | CWL Workflow skeleton with per-step TODOs from source and design handoffs. | draft | 2026-05-05 | 2 |
 | [[cwl-test-to-galaxy-test-plan]] | Translate CWL test fixtures into a Galaxy workflow test plan. | draft | 2026-05-03 | 2 |
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-05-03 | 1 |
@@ -133,6 +133,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[add]] | Fetch a tool from the Tool Shed (or a Galaxy instance) and cache its ParsedTool locally for later summarize/schema. | draft | 2026-06-16 | 1 |
+| [[summarize]] | Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool. | draft | 2026-06-16 | 1 |
 | [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-06-16 | 1 |
 | [[draft-extract]] | Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved. | draft | 2026-05-27 | 1 |
 | [[draft-next-step]] | Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak. | draft | 2026-05-27 | 1 |

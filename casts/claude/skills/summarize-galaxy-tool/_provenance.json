@@ -1,0 +1,140 @@
+{
+  "provenance_schema_version": 2,
+  "cast_target": "claude",
+  "mold": {
+    "name": "summarize-galaxy-tool",
+    "path": "content/molds/summarize-galaxy-tool/index.md",
+    "revision": 6,
+    "content_hash": "09af5ad2de0e7ae787215f2ad748078b89a7fca596502baf375f3c121b77d458",
+    "commit": "f80374d58b0ca8dbd220a39255f33a81fc9b9436"
+  },
+  "cast_at": "2026-06-16T19:09:27.057Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[add]]",
+      "src": "content/cli/galaxy-tool-cache/add.md",
+      "dst": "references/cli/add.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first.",
+      "trigger": "When the requested pin is not yet present in the configured cache directory.",
+      "verification": "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted.",
+      "src_hash": "22f932549b772d065ba33edcebe26e808ee67243217e2daee4dd64d613bff130",
+      "dst_hash": "8eb424265ccd1fad9bc03c070a904a448eaed9c139b77d89fa0b569082c8f141",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[summarize]]",
+      "src": "content/cli/galaxy-tool-cache/summarize.md",
+      "dst": "references/cli/summarize.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Emit the deterministic [[galaxy-tool-summary]] manifest for the cached pin; this Mold runs the command rather than hand-authoring the manifest.",
+      "trigger": "Once the pin is confirmed present in the cache.",
+      "verification": "Cast the skill, run `summarize` on a cached pin (e.g. staramr_search), confirm the emitted manifest validates against [[galaxy-tool-summary]].",
+      "src_hash": "8f264e9f870bd77fc8a5e536429d80a7593d18ddc64483b9467fe34391e93dd0",
+      "dst_hash": "2d1a7376fe8012504c0af39c8927c54372e6ea2314869787012967ccb2e4ed96",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-tool",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tool-cache]]",
+      "src": "content/cli/galaxy-tool-cache/index.md",
+      "dst": "references/cli/galaxy-tool-cache.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
+      "src_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
+      "dst_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-tool-shed-search]]",
+      "src": "content/research/component-tool-shed-search.md",
+      "dst": "references/notes/component-tool-shed-search.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper.",
+      "trigger": "When a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object.",
+      "src_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
+      "dst_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tool-summary-input-source]]",
+      "src": "content/research/galaxy-tool-summary-input-source.md",
+      "dst": "references/notes/galaxy-tool-summary-input-source.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Treat cached ParsedTool JSON from galaxy-tool-cache as the v1 input source for Galaxy tool summaries.",
+      "verification": "Summarize FastQC, bwa_mem2, and samtools_sort from cached ParsedTool JSON and confirm downstream step implementation can bind inputs and outputs.",
+      "src_hash": "0c5a2dab8fb3c0d9bfb9fcd1392511cd955c9a0fac672c1613f3ad5d016cca11",
+      "dst_hash": "0c5a2dab8fb3c0d9bfb9fcd1392511cd955c9a0fac672c1613f3ad5d016cca11",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tool-summary]]",
+      "src": "package://@galaxy-foundry/foundry#galaxyToolSummarySchema",
+      "dst": "references/schemas/galaxy-tool-summary.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Validate the manifest emitted by `galaxy-tool-cache summarize` before handing it to downstream step Molds.",
+      "src_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
+      "dst_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[parsed-tool]]",
+      "src": "package://@galaxy-tool-util/schema#parsedToolSchema",
+      "dst": "references/schemas/parsed-tool.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Resolve field-level questions about the upstream `ParsedTool` payload embedded under `parsed_tool`.",
+      "trigger": "When a downstream Mold needs a specific input/output/help/citation field from the embedded `ParsedTool`.",
+      "src_hash": "0f61d64b9f05f01513d25cddafbb05d3e39ecd3f3416d77f989246d52fffa665",
+      "dst_hash": "0f61d64b9f05f01513d25cddafbb05d3e39ecd3f3416d77f989246d52fffa665",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-tool-summary",
+        "kind": "json",
+        "default_filename": "galaxy-tool-summary.json",
+        "schema": "[[galaxy-tool-summary]]",
+        "description": "Deterministic Galaxy tool summary manifest emitted by `galaxy-tool-cache summarize`: cache provenance, embedded ParsedTool, generated input JSON Schemas."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "galaxy-tool-pin",
+        "description": "Pin from [[discover-shed-tool]]; identifies which cached ParsedTool to summarize. Authored UDTs from [[author-galaxy-tool-wrapper]] bypass this Mold.",
+        "inherited_schema": "[[galaxy-tool-discovery]]",
+        "producers": [
+          "discover-shed-tool"
+        ]
+      }
+    ]
+  }
+}

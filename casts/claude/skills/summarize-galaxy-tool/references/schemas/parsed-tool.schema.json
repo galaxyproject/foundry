@@ -1,0 +1,745 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "id",
+    "version",
+    "name",
+    "description",
+    "inputs",
+    "outputs",
+    "citations",
+    "license",
+    "profile",
+    "edam_operations",
+    "edam_topics",
+    "xrefs"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "hidden",
+              "type",
+              "format",
+              "format_source",
+              "metadata_source",
+              "discover_datasets",
+              "from_work_dir",
+              "precreate_directory"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "data"
+                ]
+              },
+              "format": {
+                "type": "string"
+              },
+              "format_source": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "metadata_source": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "discover_datasets": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "discover_via",
+                            "format",
+                            "visible",
+                            "assign_primary_output",
+                            "directory",
+                            "recurse",
+                            "match_relative_path",
+                            "sort_key",
+                            "sort_comp",
+                            "sort_reverse",
+                            "pattern"
+                          ],
+                          "properties": {
+                            "discover_via": {
+                              "type": "string",
+                              "enum": [
+                                "pattern"
+                              ]
+                            },
+                            "format": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "visible": {
+                              "type": "boolean"
+                            },
+                            "assign_primary_output": {
+                              "type": "boolean"
+                            },
+                            "directory": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "recurse": {
+                              "type": "boolean"
+                            },
+                            "match_relative_path": {
+                              "type": "boolean"
+                            },
+                            "sort_key": {
+                              "type": "string",
+                              "enum": [
+                                "filename",
+                                "name",
+                                "designation",
+                                "dbkey"
+                              ]
+                            },
+                            "sort_comp": {
+                              "type": "string",
+                              "enum": [
+                                "lexical",
+                                "numeric"
+                              ]
+                            },
+                            "sort_reverse": {
+                              "type": "boolean"
+                            },
+                            "pattern": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "discover_via",
+                            "format",
+                            "visible",
+                            "assign_primary_output",
+                            "directory",
+                            "recurse",
+                            "match_relative_path"
+                          ],
+                          "properties": {
+                            "discover_via": {
+                              "type": "string",
+                              "enum": [
+                                "tool_provided_metadata"
+                              ]
+                            },
+                            "format": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "visible": {
+                              "type": "boolean"
+                            },
+                            "assign_primary_output": {
+                              "type": "boolean"
+                            },
+                            "directory": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "recurse": {
+                              "type": "boolean"
+                            },
+                            "match_relative_path": {
+                              "type": "boolean"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "from_work_dir": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "precreate_directory": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "hidden",
+              "type",
+              "structure"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "collection"
+                ]
+              },
+              "structure": {
+                "type": "object",
+                "required": [
+                  "collection_type",
+                  "collection_type_source",
+                  "collection_type_from_rules",
+                  "structured_like",
+                  "discover_datasets"
+                ],
+                "properties": {
+                  "collection_type": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "collection_type_source": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "collection_type_from_rules": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "structured_like": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "discover_datasets": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "required": [
+                                "discover_via",
+                                "format",
+                                "visible",
+                                "assign_primary_output",
+                                "directory",
+                                "recurse",
+                                "match_relative_path",
+                                "sort_key",
+                                "sort_comp",
+                                "sort_reverse",
+                                "pattern"
+                              ],
+                              "properties": {
+                                "discover_via": {
+                                  "type": "string",
+                                  "enum": [
+                                    "pattern"
+                                  ]
+                                },
+                                "format": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "visible": {
+                                  "type": "boolean"
+                                },
+                                "assign_primary_output": {
+                                  "type": "boolean"
+                                },
+                                "directory": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "recurse": {
+                                  "type": "boolean"
+                                },
+                                "match_relative_path": {
+                                  "type": "boolean"
+                                },
+                                "sort_key": {
+                                  "type": "string",
+                                  "enum": [
+                                    "filename",
+                                    "name",
+                                    "designation",
+                                    "dbkey"
+                                  ]
+                                },
+                                "sort_comp": {
+                                  "type": "string",
+                                  "enum": [
+                                    "lexical",
+                                    "numeric"
+                                  ]
+                                },
+                                "sort_reverse": {
+                                  "type": "boolean"
+                                },
+                                "pattern": {
+                                  "type": "string"
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "required": [
+                                "discover_via",
+                                "format",
+                                "visible",
+                                "assign_primary_output",
+                                "directory",
+                                "recurse",
+                                "match_relative_path"
+                              ],
+                              "properties": {
+                                "discover_via": {
+                                  "type": "string",
+                                  "enum": [
+                                    "tool_provided_metadata"
+                                  ]
+                                },
+                                "format": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "visible": {
+                                  "type": "boolean"
+                                },
+                                "assign_primary_output": {
+                                  "type": "boolean"
+                                },
+                                "directory": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "recurse": {
+                                  "type": "boolean"
+                                },
+                                "match_relative_path": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "hidden",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "text"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "hidden",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "integer"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "hidden",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "float"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "hidden",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "boolean"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "content"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "license": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "edam_operations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "edam_topics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "xrefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "value",
+          "type"
+        ],
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "help": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "format",
+            "content"
+          ],
+          "properties": {
+            "format": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

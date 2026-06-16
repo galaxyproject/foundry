@@ -123,6 +123,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## CLI Commands
 
+- [[add]] — Fetch a tool from the Tool Shed (or a Galaxy instance) and cache its ParsedTool locally for later summarize/schema.
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
 - [[draft-extract]] — Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved.
 - [[draft-next-step]] — Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak.
@@ -133,6 +134,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[planemo-test]] — Run specified tool or workflow tests within Galaxy.
 - [[planemo-workflow_test_init]] — Initialize a Galaxy workflow test description for supplied workflow.
 - [[planemo-workflow_test_on_invocation]] — Run defined tests against existing workflow invocation.
+- [[summarize]] — Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool.
 - [[summarize-nextflow]] — Statically introspect a Nextflow / nf-core pipeline tree and emit a validated JSON summary.
 - [[tool-revisions]] — Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin.
 - [[tool-search]] — Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence.
@@ -238,6 +240,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cwl-utils]] — CWL document utilities. summarize-cwl uses cwl-normalizer to gather references and upgrade to v1.2 JSON.
 - [[cwltool]] — Reference CWL runner and validator. Used by summarize-cwl for entrypoint validation.
 - [[foundry]] — Foundry CLI: bundles all Mold IO validators and a summarize-nextflow subcommand.
+- [[galaxy-tool-cache]] — Cache and inspect Galaxy tool metadata (fetch from ToolShed, summarize ParsedTool, export input JSON Schema).
 - [[gxwf]] — Galaxy workflow design-time CLI (validate, convert, lint, roundtrip, tool-cache discovery).
 - [[planemo]] — Galaxy tool/workflow runtime testing CLI; used by run-workflow-test and friends.
 

@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-05
-revision: 5
+revised: 2026-06-16
+revision: 6
 ai_generated: true
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
 input_artifacts:
@@ -22,6 +22,31 @@ output_artifacts:
     schema: "[[galaxy-tool-summary]]"
     description: "Deterministic Galaxy tool summary manifest emitted by `galaxy-tool-cache summarize`: cache provenance, embedded ParsedTool, generated input JSON Schemas."
 references:
+  - kind: cli-tool
+    ref: "[[galaxy-tool-cache]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill."
+  - kind: cli-command
+    ref: "[[summarize]]"
+    used_at: runtime
+    load: upfront
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Emit the deterministic [[galaxy-tool-summary]] manifest for the cached pin; this Mold runs the command rather than hand-authoring the manifest."
+    trigger: "Once the pin is confirmed present in the cache."
+    verification: "Cast the skill, run `summarize` on a cached pin (e.g. staramr_search), confirm the emitted manifest validates against [[galaxy-tool-summary]]."
+  - kind: cli-command
+    ref: "[[add]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first."
+    trigger: "When the requested pin is not yet present in the configured cache directory."
+    verification: "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted."
   - kind: schema
     ref: "[[galaxy-tool-summary]]"
     used_at: runtime
@@ -53,14 +78,6 @@ references:
     evidence: corpus-observed
     purpose: "Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper."
     trigger: "When a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object."
-  - kind: research
-    ref: "[[component-nextflow-containers-and-envs]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Classify wrapper package and container requirements consistently with Nextflow-derived requirement evidence."
-    trigger: "When comparing an existing Galaxy wrapper's declared requirements against Nextflow container or conda evidence."
 ---
 # summarize-galaxy-tool
 
@@ -89,7 +106,7 @@ This Mold does not hand-author the manifest — it invokes `galaxy-tool-cache su
 
 ### 1. Load the cached wrapper
 
-Locate the ParsedTool JSON in the configured `galaxy-tool-cache` directory using the Tool Shed pin. Fail early if the cache entry is missing; do not silently re-search the Tool Shed.
+Locate the ParsedTool JSON in the configured `galaxy-tool-cache` directory using the Tool Shed pin. `galaxy-tool-cache summarize` reads an already-cached pin — it does not re-fetch — so the pin must be cached first via [[add]] (single pin) or `populate-workflow` (the loop driver's whole-draft form). If the cache entry is missing, run [[add]] for the pin rather than silently re-searching the Tool Shed; fail early if `add` cannot resolve it.
 
 Confirm the cached identity matches the requested pin. If the cache exposes a tool id or version that conflicts with the pin, emit a hard failure rather than summarizing the wrong wrapper.
 

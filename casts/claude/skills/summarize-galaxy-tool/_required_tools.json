@@ -1,0 +1,17 @@
+[
+  {
+    "tool": "galaxy-tool-cache",
+    "origin": "npm",
+    "package": "@galaxy-tool-util/cli",
+    "invoke": "galaxy-tool-cache",
+    "invoke_fallback": "npx --package @galaxy-tool-util/cli galaxy-tool-cache",
+    "availability_check": "galaxy-tool-cache --version",
+    "docs_url": "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli",
+    "reference": "references/cli/galaxy-tool-cache.md",
+    "source": "referenced",
+    "implied_by": [
+      "galaxy-tool-cache add",
+      "galaxy-tool-cache summarize"
+    ]
+  }
+]

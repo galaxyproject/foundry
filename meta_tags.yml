@@ -35,6 +35,8 @@ prompt/galaxy-internal:
 # --- CLI affiliation (for cli-tool and cli-command notes) ---
 cli/gxwf:
   description: "gxwf CLI (Galaxy workflow design-time tooling)"
+cli/galaxy-tool-cache:
+  description: "galaxy-tool-cache CLI (fetch/cache/inspect Galaxy tool metadata)"
 cli/planemo:
   description: "Planemo CLI (Galaxy workflow runtime testing)"
 cli/cwltool:
