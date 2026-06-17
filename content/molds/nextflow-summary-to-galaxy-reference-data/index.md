@@ -17,12 +17,26 @@ summary: "Decide the Galaxy-side shape of external reference data declared by a 
 input_artifacts:
   - id: summary-nextflow
     description: "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the source for reference-data param evidence."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
 output_artifacts:
   - id: nextflow-galaxy-reference-data
     kind: markdown
     default_filename: nextflow-galaxy-reference-data.md
     description: "Reviewable Markdown brief: per-asset reference inputs, requiredness, rebuild-on-absence behavior, iGenomes key disposition, open questions."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
 references:
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[summary-nextflow]]"
     used_at: runtime
@@ -76,3 +90,5 @@ The [[summary-nextflow]] schema surfaces reference-data evidence directly — re
 - **`subworkflows[].invocations[]`** — caller-side argument binding onto `take:` names. Use when `reference_assets[].used_by` is ambiguous or when verifying that the same param threads into multiple subworkflows.
 
 If a needed signal is missing from the summary (e.g. RNA-seq's positive-form rebuild idiom is not yet detected), say so in the brief and flag the asset as *rebuild-unverified* rather than re-parsing source files.
+
+Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.

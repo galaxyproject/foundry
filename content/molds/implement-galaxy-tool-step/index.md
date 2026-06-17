@@ -17,13 +17,27 @@ input_artifacts:
     description: "Galaxy tool summary manifest from [[summarize-galaxy-tool]] conforming to [[galaxy-tool-summary]]; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`."
   - id: galaxy-workflow-draft
     description: "gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: read entries the design tier recorded against this step before implementing; append a blocking entry if its output can't be computed."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
     schema: "[[galaxy-workflow-draft]]"
     description: "gxformat2 skeleton with one more abstract step replaced by a concrete tool step (loop iteration output)."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Ledger ([[open-requirements-ledger]]) with a blocking entry appended when a step's declared output can't be computed from its wired inputs; drives the fall-through to topology repair."
 references:
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
     used_at: runtime
@@ -122,3 +136,5 @@ Single step in scope. This Mold owns the chosen step and the wiring that connect
 ## Failure ownership
 
 When the wrapper can't cleanly carry what the plan needs — wrong datatype, missing parameter, unsupported collection shape — record where a later failure should be investigated: tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue. Consult [[galaxy-tool-job-failure-reference]] when the selected wrapper has explicit failure semantics (exit-code rules, stdio regex, strict-shell, dynamic outputs); implement the step's labels and wiring so that evidence survives to runtime rather than being erased by the concretization.
+
+When the step's declared output cannot be computed from the inputs wired to it — the connection graph says the ports connect, but no wired input carries the evidence the output needs — do not fabricate it. Append a blocking entry to the [[open-requirements-ledger]] naming the step, the uncomputable output, and the missing evidence, and fall through to [[repair-galaxy-draft-topology]] rather than emitting a step that validates but can't run. A missing Tool Shed wrapper is not this case; that gap routes through the discover-or-author branch.

@@ -25,6 +25,8 @@ input_artifacts:
     description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
   - id: freeform-galaxy-data-flow
     description: "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
+  - id: open-requirements-ledger
+    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
 output_artifacts:
   - id: iwc-comparison-notes
     kind: markdown
@@ -34,7 +36,19 @@ output_artifacts:
     kind: yaml
     default_filename: iwc-exemplar.gxwf.yml
     description: "Cleaned gxformat2 conversion (via [[convert]] --to format2 --compact) of the nearest IWC exemplar's relevant subgraph — the concrete idiom the downstream template draft pattern-matches against. Bounded to the relevant subgraph, not the whole workflow. Absent when no nearest exemplar is found."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
 references:
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: cli-command
     ref: "[[convert]]"
     used_at: runtime
@@ -130,3 +144,5 @@ Keep it size-bounded — a whole large workflow is noise; the relevant subgraph 
 - **No tool discovery.** Do not replace [[discover-shed-tool]].
 - **No automatic rewrite.** This Mold emits structural diff guidance; the harness or user decides which changes to apply.
 - **No forced nearest.** A no-match result is valid when IWC lacks a close exemplar.
+
+Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.
