@@ -5,10 +5,10 @@
     "name": "cwl-summary-to-galaxy-template",
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 4,
-    "content_hash": "996dbd865a613743321854d721a61b07658f546512a5511d4374ac90f5f99aac",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "content_hash": "3300502c66f2db1a9b499e7f9c8f8b73939680d6bf7bfe0016c6af9ad7a741d4",
+    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
   },
-  "cast_at": "2026-06-15T15:10:31.767Z",
+  "cast_at": "2026-06-17T19:52:15.808Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -190,8 +190,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "01a6f2e00642c312e79ecd36619fd4eb15a26e3844536aba1d12d8cd46644904",
-      "dst_hash": "01a6f2e00642c312e79ecd36619fd4eb15a26e3844536aba1d12d8cd46644904",
+      "src_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "dst_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
       "source": "deterministic"
     },
     {
@@ -221,6 +221,21 @@
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
       "src_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
       "dst_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
       "source": "deterministic"
     },
     {
@@ -260,6 +275,12 @@
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
         "schema": "[[galaxy-workflow-draft]]",
         "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
       }
     ],
     "consumes": [
@@ -297,6 +318,26 @@
         "description": "Cleaned gxformat2 view of the nearest IWC exemplar's relevant subgraph from [[compare-against-iwc-exemplar]]; pattern-match the draft's input/collection shapes, map-over wiring, output promotion, and post-job actions against this concrete idiom. Absent when no nearest exemplar was found.",
         "producers": [
           "compare-against-iwc-exemplar"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]

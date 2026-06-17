@@ -5,10 +5,10 @@
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 7,
-    "content_hash": "ba3a1b13fdd21dd12ca552dd6e95e14e2a098e5ddc24c724cce07bf6fb448276",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "content_hash": "d01ad92af0e843f07beeb5adbde46f32127529acd64fabbc4796417d420d99a0",
+    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
   },
-  "cast_at": "2026-06-15T15:02:56.699Z",
+  "cast_at": "2026-06-17T19:52:14.560Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -89,6 +89,21 @@
       "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
       "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
       "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
     }
   ],
   "artifacts": {
@@ -104,6 +119,12 @@
         "kind": "yaml",
         "default_filename": "iwc-exemplar.gxwf.yml",
         "description": "Cleaned gxformat2 conversion (via [[convert]] --to format2 --compact) of the nearest IWC exemplar's relevant subgraph — the concrete idiom the downstream template draft pattern-matches against. Bounded to the relevant subgraph, not the whole workflow. Absent when no nearest exemplar is found."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
       }
     ],
     "consumes": [
@@ -147,6 +168,26 @@
         "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
         "producers": [
           "freeform-summary-to-galaxy-data-flow"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]

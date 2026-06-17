@@ -17,13 +17,13 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- None declared.
+- Write artifact `workflow-test-result` as `workflow-test-result.json`. Format: `json`. Structured pass/fail plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output.
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
-  Check: `gxwf --version`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@1.7.2`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.7.2 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 - **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).
   Ephemeral run: `uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo`.
@@ -49,7 +49,17 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Stub. Replace with real skill content per MOLD_SPEC once first walks are done.
+Execute an assembled workflow's test file via planemo and emit a structured pass/fail with the artifacts a debug pass needs. One invocation runs the test once, captures the evidence, and — on failure — classifies the failure modality and names the next reference surface to inspect. It does not repair anything; that is debug-galaxy-workflow-output's job.
+
+### Sequence
+
+1. **Validate before running.** When a test file is present, run validate-tests for the static schema and workflow-label checks first. A run is expensive; do not spend one on a test file that fails static validation.
+2. **Pick the Galaxy mode.** Run against a Planemo-managed Galaxy or an existing/external Galaxy. Record which mode was used, how tools, workflows, and test data were staged, and the URLs or API credentials a follow-up inspection would need. The choice and its consequences are guided by planemo-workflow-test-architecture.
+3. **Run and capture.** Drive `planemo test` with structured output enabled. Preserve the invocation id, history id, workflow id, the Planemo structured result, and any test-output artifact paths — these are the inputs the debug skill consumes.
+4. **Classify on failure.** When the run exits non-zero or reports failed assertions, failed jobs, a failed invocation, missing outputs, or upload/staging problems, identify the observed failure modality and the single next reference surface to open: Planemo result, Galaxy job API, Galaxy invocation API, history contents, or the test assertion report. Use planemo-asserts-idioms to read assertion failures and galaxy-workflow-invocation-failure-reference to preserve invocation identifiers and state.
+5. **Hand off.** Emit the structured summary — green, or red with modality + captured artifacts + the named next surface — for debug-galaxy-workflow-output.
+
+Keep this skill's output a faithful record of what happened, not a diagnosis. Mislabeling a staging failure as an assertion failure here sends the debug pass to the wrong reference surface.
 
 ## Runtime Notes
 

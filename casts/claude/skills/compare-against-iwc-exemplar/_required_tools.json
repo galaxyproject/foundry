@@ -3,9 +3,10 @@
     "tool": "gxwf",
     "origin": "npm",
     "package": "@galaxy-tool-util/cli",
+    "package_version": "1.7.2",
     "invoke": "gxwf",
-    "invoke_fallback": "npx --package @galaxy-tool-util/cli gxwf",
-    "availability_check": "gxwf --version",
+    "invoke_fallback": "npx --yes --package @galaxy-tool-util/cli@1.7.2 gxwf",
+    "availability_check": "gxwf --help | grep -q draft-validate",
     "docs_url": "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli",
     "source": "implied",
     "implied_by": [

@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 7,
-    "content_hash": "26190d29faacc3c9f07c7a266113a56feefe27cbea7b78cb67680c23fb018846",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "content_hash": "6ecc9ff513ecf5f7fd17f402fb8e99621c0474d1d64cac4bfe9bc15b5d99c164",
+    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
   },
-  "cast_at": "2026-06-15T15:10:33.027Z",
+  "cast_at": "2026-06-17T19:52:22.014Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -194,8 +194,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "01a6f2e00642c312e79ecd36619fd4eb15a26e3844536aba1d12d8cd46644904",
-      "dst_hash": "01a6f2e00642c312e79ecd36619fd4eb15a26e3844536aba1d12d8cd46644904",
+      "src_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "dst_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
       "source": "deterministic"
     },
     {
@@ -273,6 +273,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
@@ -309,6 +324,12 @@
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
         "schema": "[[galaxy-workflow-draft]]",
         "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
       }
     ],
     "consumes": [
@@ -353,6 +374,26 @@
         "description": "Cleaned gxformat2 view of the nearest IWC exemplar's relevant subgraph from [[compare-against-iwc-exemplar]]; pattern-match the draft's input/collection shapes, map-over wiring, output promotion, and post-job actions against this concrete idiom. Absent when no nearest exemplar was found.",
         "producers": [
           "compare-against-iwc-exemplar"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]

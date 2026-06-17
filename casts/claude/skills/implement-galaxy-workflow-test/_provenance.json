@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 7,
     "content_hash": "34328572486dd07baeda8335cac1884e405e3c14af2f275f4ced700576a85bb5",
-    "commit": "042a5219728e058b2d8a989875c0ac03a19dc592"
+    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
   },
-  "cast_at": "2026-06-16T18:54:05.273Z",
+  "cast_at": "2026-06-17T19:52:20.696Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -139,8 +139,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.",
-      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "src_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
+      "dst_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
       "source": "deterministic"
     }
   ],
@@ -173,7 +173,8 @@
           "cwl-summary-to-galaxy-template",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
-          "nextflow-summary-to-galaxy-template"
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       },
       {

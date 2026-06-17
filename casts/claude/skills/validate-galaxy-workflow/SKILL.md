@@ -21,9 +21,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
-  Check: `gxwf --version`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@1.7.2`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.7.2 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
 ## Load Upfront

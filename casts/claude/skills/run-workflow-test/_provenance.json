@@ -4,11 +4,11 @@
   "mold": {
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
-    "revision": 3,
-    "content_hash": "57cd9ce7c631b55c071a25c7869a20237216e4dbbb5eb86f45dcfd5064404c77",
-    "commit": "e966a94f2a384913d0105082e8ccacd514e4937f"
+    "revision": 4,
+    "content_hash": "b44dcd245568ea0d4ab25de9752c4819c02e18e8ff1b4fe68befee16aa3966aa",
+    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
   },
-  "cast_at": "2026-06-11T22:20:44.320Z",
+  "cast_at": "2026-06-17T19:52:23.280Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -94,9 +94,20 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Validate Galaxy workflow test files before starting a Planemo or Galaxy-backed execution.",
-      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "src_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
+      "dst_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
       "source": "deterministic"
     }
-  ]
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "workflow-test-result",
+        "kind": "json",
+        "default_filename": "workflow-test-result.json",
+        "description": "Structured pass/fail plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output."
+      }
+    ],
+    "consumes": []
+  }
 }
