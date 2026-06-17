@@ -5,10 +5,10 @@
     "name": "discover-shed-tool",
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 4,
-    "content_hash": "256e3861e4fd54e5afe1db0cb99954523faea71c06d46b32b2442d39fb646056",
-    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
+    "content_hash": "2e5fa1f8b22f1f9c984fa4c4dc05999294de5db706a9c1691d3af7b3459cbecb",
+    "commit": "80a19256fffab433c59f19940f1464d2e7a8779b"
   },
-  "cast_at": "2026-06-17T19:52:17.013Z",
+  "cast_at": "2026-06-17T21:07:28.232Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
