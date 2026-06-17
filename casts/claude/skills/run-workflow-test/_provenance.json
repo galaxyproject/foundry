@@ -35,8 +35,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that executes the Galaxy or CWL workflow test; install before driving the harness.",
-      "src_hash": "4a8db8de6573428d2785824465f9ee7e75850bf786f9f469e68407699bf109f3",
-      "dst_hash": "4a8db8de6573428d2785824465f9ee7e75850bf786f9f469e68407699bf109f3",
+      "src_hash": "65f313bdbf97b85939db5d8de6627635aa5182a2440bac259427126dad902365",
+      "dst_hash": "65f313bdbf97b85939db5d8de6627635aa5182a2440bac259427126dad902365",
       "source": "deterministic"
     },
     {
