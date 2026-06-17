@@ -19,16 +19,18 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - Read artifact `nextflow-galaxy-data-flow`. Produced by `nextflow-summary-to-galaxy-data-flow`. Galaxy data-flow brief from nextflow-summary-to-galaxy-data-flow that pins abstract operations and collection choices.
 - Read artifact `iwc-comparison-notes`. Produced by `compare-against-iwc-exemplar`. Structural diff guidance from compare-against-iwc-exemplar (run on the design briefs); steers the skeleton toward IWC-aligned structure before per-step authoring. Carries an inline gxformat2 excerpt of the nearest exemplar.
 - Read artifact `iwc-exemplar-gxformat2`. Produced by `compare-against-iwc-exemplar`. Cleaned gxformat2 view of the nearest IWC exemplar's relevant subgraph from compare-against-iwc-exemplar; pattern-match the draft's input/collection shapes, map-over wiring, output promotion, and post-job actions against this concrete idiom. Absent when no nearest exemplar was found.
+- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.
 
 ## Outputs
 
 - Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. Schema: galaxy-workflow-draft. gxformat2 draft (see galaxy-workflow-draft-format): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds.
+- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved.
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
-  Check: `gxwf --version`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@1.7.2`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.7.2 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
 ## Load Upfront
@@ -36,6 +38,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/notes/galaxy-data-flow-draft-contract.md`: Research note copied verbatim into the bundle. Respect the handoff from abstract data-flow draft to gxformat2 skeleton. Use when: translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.
 - `references/notes/galaxy-workflow-draft-format.md`: Research note copied verbatim into the bundle. Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.
 - `references/notes/gxformat2-schema.md`: Research note copied verbatim into the bundle. Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and producer-side output actions while emitting the skeleton.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.
 - `references/schemas/summary-nextflow.schema.json`: Schema file copied verbatim into the bundle. Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context.
 - `references/schemas/galaxy-workflow-draft.schema.json`: Schema file copied verbatim into the bundle. Output contract: the emitted gxformat2 draft conforms to galaxy-workflow-draft. Cast bundles the JSON Schema so the skill carries its output shape alongside the draft-validate CLI checks.
 
@@ -70,6 +73,8 @@ Topology is this skill's job to settle. The output must be concrete gxformat2: w
 Source tendency: nf-core modules name their tool, pin a version, and carry the `command:` block, conda packages, and container tags — so steps reach **Resolved** when a pattern page or IWC exemplar covers the operation (fill `tool_id`, parameters, and port names from the worked example), and **Identity-pinned** when the module names the tool but its settings for this context stay open. **Deferred** is for domain-specific scientific tools with no covering pattern (alignment, variant calling, expression quantification, etc.) — pack `_plan_context` with the source command, conda specs, container tags, and pre/post conditions the per-step skill needs to pick a wrapper. Emitting `TODO` over a pattern-covered recipe discards real evidence the per-step skill cannot recover.
 
 Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see galaxy-workflow-comments for the convention.
+
+Before handing off, check each settled step is computable from what feeds it. The connection graph knows that ports connect, not what they carry — so a declared output that needs evidence no wired input supplies will validate yet can't be implemented. Where you find that gap, wire (or add) the producer; if you can't, append a blocking entry to the open-requirements-ledger naming the step, the uncomputable output, and the missing evidence (and record vague intent in `_plan_state`) so the per-step loop or repair-galaxy-draft-topology acts on it rather than discovering it late. More generally, carry the ledger: read the entries bearing on your topology decisions and mark resolved the ones you close.
 
 Output shape is gxformat2 with wrapper-tier relaxations and `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` per tool step — see galaxy-workflow-draft-format. Refinement open work for those planning fields lives in `refinement.md`.
 

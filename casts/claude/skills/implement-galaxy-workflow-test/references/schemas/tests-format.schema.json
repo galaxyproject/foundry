@@ -1114,23 +1114,14 @@
           "anyOf": [
             {
               "additionalProperties": {
-                "else": {
-                  "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
-                },
-                "if": {
-                  "properties": {
-                    "class": {
-                      "const": "Collection"
-                    }
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
                   },
-                  "required": [
-                    "class"
-                  ],
-                  "type": "object"
-                },
-                "then": {
-                  "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
-                }
+                  {
+                    "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
+                  }
+                ]
               },
               "type": "object"
             },
@@ -1145,23 +1136,14 @@
           "anyOf": [
             {
               "additionalProperties": {
-                "else": {
-                  "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
-                },
-                "if": {
-                  "properties": {
-                    "class": {
-                      "const": "Collection"
-                    }
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
                   },
-                  "required": [
-                    "class"
-                  ],
-                  "type": "object"
-                },
-                "then": {
-                  "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
-                }
+                  {
+                    "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
+                  }
+                ]
               },
               "type": "object"
             },
@@ -1427,23 +1409,14 @@
           "anyOf": [
             {
               "additionalProperties": {
-                "else": {
-                  "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
-                },
-                "if": {
-                  "properties": {
-                    "class": {
-                      "const": "Collection"
-                    }
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
                   },
-                  "required": [
-                    "class"
-                  ],
-                  "type": "object"
-                },
-                "then": {
-                  "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
-                }
+                  {
+                    "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
+                  }
+                ]
               },
               "type": "object"
             },
@@ -1458,23 +1431,14 @@
           "anyOf": [
             {
               "additionalProperties": {
-                "else": {
-                  "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
-                },
-                "if": {
-                  "properties": {
-                    "class": {
-                      "const": "Collection"
-                    }
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/TestCollectionDatasetElementAssertions"
                   },
-                  "required": [
-                    "class"
-                  ],
-                  "type": "object"
-                },
-                "then": {
-                  "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
-                }
+                  {
+                    "$ref": "#/$defs/TestCollectionCollectionElementAssertions"
+                  }
+                ]
               },
               "type": "object"
             },
@@ -1719,8 +1683,14 @@
         },
         "outputs": {
           "additionalProperties": {
-            "else": {
-              "else": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TestCollectionOutputAssertions"
+              },
+              {
+                "$ref": "#/$defs/TestDataOutputAssertions"
+              },
+              {
                 "anyOf": [
                   {
                     "type": "boolean"
@@ -1735,28 +1705,8 @@
                     "type": "string"
                   }
                 ]
-              },
-              "if": {
-                "type": "object"
-              },
-              "then": {
-                "$ref": "#/$defs/TestDataOutputAssertions"
               }
-            },
-            "if": {
-              "properties": {
-                "class": {
-                  "const": "Collection"
-                }
-              },
-              "required": [
-                "class"
-              ],
-              "type": "object"
-            },
-            "then": {
-              "$ref": "#/$defs/TestCollectionOutputAssertions"
-            }
+            ]
           },
           "description": "Defines assertions about outputs (datasets, collections or parameters). Each key corresponds to a labeled output; values are dictionaries describing the expected output.",
           "title": "Outputs",

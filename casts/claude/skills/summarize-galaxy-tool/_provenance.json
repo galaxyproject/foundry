@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 6,
     "content_hash": "09af5ad2de0e7ae787215f2ad748078b89a7fca596502baf375f3c121b77d458",
-    "commit": "f80374d58b0ca8dbd220a39255f33a81fc9b9436"
+    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
   },
-  "cast_at": "2026-06-16T19:09:27.057Z",
+  "cast_at": "2026-06-17T19:52:24.455Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -52,8 +52,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
-      "src_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
-      "dst_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
+      "src_hash": "5efe87273b0ff284e6896cdafdbc1cc1b8a4e27d9d0fdce490ad33da7bd1a0d4",
+      "dst_hash": "5efe87273b0ff284e6896cdafdbc1cc1b8a4e27d9d0fdce490ad33da7bd1a0d4",
       "source": "deterministic"
     },
     {

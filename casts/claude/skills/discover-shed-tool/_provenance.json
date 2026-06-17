@@ -5,10 +5,10 @@
     "name": "discover-shed-tool",
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 4,
-    "content_hash": "11f14feec73b46215d5aafcd54b2ebae6dfad99538a60599a28a1e329a1f36d8",
-    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
+    "content_hash": "256e3861e4fd54e5afe1db0cb99954523faea71c06d46b32b2442d39fb646056",
+    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
   },
-  "cast_at": "2026-05-11T07:43:44.707Z",
+  "cast_at": "2026-06-17T19:52:17.013Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -50,8 +50,8 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve a Tool Shed tool version to an installable changeset revision.",
       "trigger": "After selecting a candidate version that needs a reproducible changeset pin.",
-      "src_hash": "3c99dbb676a8eba33bcdef384e1a7769a0a0922d415bdb399dcfa7d6f09803cd",
-      "dst_hash": "d3a840cf573c652362b05529085676e71834cf2a361f1a61b135274b840e1385",
+      "src_hash": "4a2e231e4f71ccfc93bee17daf234f46ce9fa93a45c9ae2798c06fd703835c1a",
+      "dst_hash": "4c2d6dc1f03c1cc1573657903206ff540a20ba0cbd65d7851062700ca71e8166",
       "source": "deterministic"
     },
     {
@@ -80,8 +80,8 @@
       "evidence": "corpus-observed",
       "purpose": "List available Tool Shed versions for a selected candidate.",
       "trigger": "After a Tool Shed search candidate is selected and before pinning a version.",
-      "src_hash": "5d483359d00a33acd46f19405ebe987ee1d230cdaf78a4932aab2406a188991a",
-      "dst_hash": "651d0232db163f1ae0e7499ab7a56be3fa478f093dca68527a9c7a2930e43ef8",
+      "src_hash": "597997fe54c620832c1d94f752a0dfaf6352bb7d58646e4378f6d75de5e61cab",
+      "dst_hash": "8456fce6f7f17b318526311c8156a510c882661a3987b3fd71d80c6795c95a19",
       "source": "deterministic"
     },
     {
@@ -110,8 +110,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.",
       "verification": "Run discover-shed-tool against known FastQC, ambiguous BWA-style, and no-hit queries and validate each emitted recommendation.",
-      "src_hash": "8b02cd8f0583c6f4d25ed27a7a16ed3bb97bbec533f33806e81c45cf7ce1152d",
-      "dst_hash": "8b02cd8f0583c6f4d25ed27a7a16ed3bb97bbec533f33806e81c45cf7ce1152d",
+      "src_hash": "38f28eab43c399a1d4bfd6a0477d1ee8458b9fee7eaa37de92e33dc12bf5a040",
+      "dst_hash": "38f28eab43c399a1d4bfd6a0477d1ee8458b9fee7eaa37de92e33dc12bf5a040",
       "source": "deterministic"
     }
   ],

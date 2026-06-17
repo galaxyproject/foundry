@@ -21,9 +21,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
-  Check: `gxwf --version`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@1.7.2`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.7.2 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
 ## Load Upfront
@@ -152,7 +152,7 @@ The procedure assumes — and the skill must surface in its rationale when relev
 ### Non-goals
 
 - **Authoring.** This skill never produces a tool wrapper. On `miss`, the harness's `discover-or-author` branch fall-through invokes author-galaxy-tool-wrapper.
-- **Caching.** This skill emits a pin recommendation. The caller (or the next phase) runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` to populate the cache.
+- **Caching.** This skill emits a pin recommendation. The caller (or the next phase) runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --tool-version <v>` to populate the cache.
 - **Galaxy-instance discovery.** Hitting a running Galaxy server's installed-tool index (EDAM-aware, panel-aware) is a different mechanism — the future `discover-tool-via-galaxy-api` skill. The contrast is sketched in component-tool-shed-search §4.
 - **Test-data resolution.** Out of scope; handled by the `test-data-resolution` branch elsewhere in the pipeline.
 
