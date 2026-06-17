@@ -3,7 +3,7 @@
 > Pulled-down GitHub issue used as the **effective result of the INTERVIEW → GALAXY interview**
 > (the live interview mechanics are harness-owned and precede pipeline phase 1).
 > Source: galaxy-brain issue #14 (captured).
-> Paired aspirational target: `UC3_ATAC_extracted.ga` (extracted from a Galaxy history; **not human-validated**).
+> Paired reference target: `UC3_ATAC_extracted_figures.ga` (extracted from a Galaxy history; re-runs to identical numbers, published as SI Workflow S5 — a compare reference, not a hard oracle).
 
 ---
 

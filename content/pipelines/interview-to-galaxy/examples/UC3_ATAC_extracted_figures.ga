@@ -1,0 +1,558 @@
+{
+    "a_galaxy_workflow": "true",
+    "annotation": "",
+    "comments": [],
+    "format-version": "0.1",
+    "name": "Differential ATAC-seq accessibility (Eryth vs B-cell)",
+    "report": {
+        "markdown": "# Differential ATAC-seq Accessibility \u2014 Erythroblast vs B-cell\n\nGenome-wide differential chromatin accessibility from the Corces 2016 human\nhematopoiesis ATAC-seq count matrix (GSE74912, hg19). Per-sample read counts over\na shared **590,650-peak** universe are tested with DESeq2 (`~ condition`,\nErythroblast as reference), then NA-filtered, significance-filtered, and ranked.\n\nEvery figure and table below references a **real on-graph tool output**, so this\nnotebook extracts to a complete, re-runnable workflow.\n\n## Sample-level QC \u2014 PCA\n\nPC1 (\u2248 98% variance) cleanly separates Erythroblast from B-cell samples.\n\n```galaxy\nhistory_dataset_as_image(output=\"Sample PCA plot\")\n```\n\n## Differential accessibility \u2014 volcano\n\n**45,620** of ~247,038 testable peaks are significant (padj < 0.05, |log2FC| \u2265 1).\n\n```galaxy\nhistory_dataset_as_image(output=\"Volcano plot\")\n```\n\n## DESeq2 result table\n\nDirection: reference level = Erythroblast, so **log2FC > 0 = B-cell-gained**,\n**log2FC < 0 = Erythroblast-gained**. Columns: peak_id, baseMean, log2FC, lfcSE,\nstat, pvalue, padj.\n\n```galaxy\nhistory_dataset_as_table(output=\"DESeq2 result file on dataset 1-8 and 10 and collection 9\", title=\"DESeq2 result (peak, baseMean, log2FC, lfcSE, stat, pvalue, padj)\", compact=true)\n```\n\n## Significant differential peaks\n\n45,620 significant peaks: **34,873 B-cell-gained** (log2FC > 0) and\n**10,747 Erythroblast-gained** (log2FC < 0).\n\n```galaxy\nhistory_dataset_as_table(output=\"Significant differential peaks (padj<0.05, abs LFC>=1)\", title=\"Significant differential peaks (padj<0.05, |log2FC|>=1)\", compact=true)\n```\n\n## Top condition-gained regions\n\nLineage master regulators land on the expected sides \u2014 B-cell-gained includes\nEBF1/PAX5/MS4A1/CD19; Erythroblast-gained includes GATA1/HBB.\n\n```galaxy\nhistory_dataset_as_table(output=\"Top 50 B-cell-gained peaks\", title=\"Top 50 B-cell-gained peaks (highest log2FC)\", compact=true)\n```\n\n```galaxy\nhistory_dataset_as_table(output=\"Top 50 Erythroblast-gained peaks\", title=\"Top 50 Erythroblast-gained peaks (lowest log2FC)\", compact=true)\n```\n",
+        "title": "Differential ATAC-seq Accessibility \u2014 Erythroblast vs B-cell"
+    },
+    "steps": {
+        "0": {
+            "annotation": "",
+            "content_id": null,
+            "errors": null,
+            "id": 0,
+            "input_connections": {},
+            "inputs": [
+                {
+                    "description": "",
+                    "name": "Input Dataset"
+                }
+            ],
+            "label": "Input Dataset",
+            "name": "Input dataset",
+            "outputs": [],
+            "position": {
+                "left": 10,
+                "top": 10
+            },
+            "tool_id": null,
+            "tool_state": "{\"optional\": false, \"tag\": null}",
+            "tool_version": null,
+            "type": "data_input",
+            "uuid": "3ad2bc42-71d5-4d00-8be6-4605692911b1",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "1": {
+            "annotation": "",
+            "content_id": null,
+            "errors": null,
+            "id": 1,
+            "input_connections": {},
+            "inputs": [
+                {
+                    "description": "",
+                    "name": "Input Dataset Collection"
+                }
+            ],
+            "label": "Input Dataset Collection",
+            "name": "Input dataset collection",
+            "outputs": [],
+            "position": {
+                "left": 10,
+                "top": 130
+            },
+            "tool_id": null,
+            "tool_state": "{\"optional\": false, \"tag\": null, \"collection_type\": \"list\", \"fields\": null, \"column_definitions\": null}",
+            "tool_version": null,
+            "type": "data_collection_input",
+            "uuid": "e9d19e6d-4374-4a92-906a-148750cbd88e",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "2": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/deseq2/deseq2/2.11.40.8+galaxy2",
+            "errors": null,
+            "id": 2,
+            "input_connections": {
+                "select_data|countsFile": {
+                    "id": 1,
+                    "output_name": "output"
+                },
+                "select_data|sample_sheet": {
+                    "id": 0,
+                    "output_name": "output"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "DESeq2",
+            "outputs": [
+                {
+                    "name": "deseq_out",
+                    "type": "tabular"
+                },
+                {
+                    "name": "plots",
+                    "type": "pdf"
+                },
+                {
+                    "name": "counts_out",
+                    "type": "tabular"
+                },
+                {
+                    "name": "vst_out",
+                    "type": "tabular"
+                }
+            ],
+            "position": {
+                "left": 230,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/deseq2/deseq2/2.11.40.8+galaxy2",
+            "tool_shed_repository": {
+                "changeset_revision": "6c363db8c702",
+                "name": "deseq2",
+                "owner": "iuc",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"advanced_options\": {\"esf_cond\": {\"esf\": \"\", \"__current_case__\": 0}, \"fit_type\": \"1\", \"outlier_replace_off\": false, \"outlier_filter_off\": false, \"auto_mean_filter_off\": false, \"prefilter_conditional\": {\"prefilter\": \"\", \"__current_case__\": 1}, \"use_beta_priors\": false}, \"batch_factors\": null, \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"header\": true, \"output_options\": {\"output_selector\": [\"pdf\", \"normCounts\", \"normVST\"], \"alpha_ma\": \"0.1\"}, \"select_data\": {\"how\": \"sample_sheet_contrasts\", \"__current_case__\": 2, \"countsFile\": null, \"sample_sheet\": null, \"design_formula_mode\": {\"mode\": \"automatic\", \"__current_case__\": 0, \"factor\": [\"2\"], \"reference_level\": \"Erythroblast\", \"target_level\": \"Bcell\"}}, \"tximport\": {\"tximport_selector\": \"count\", \"__current_case__\": 1}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "2.11.40.8+galaxy2",
+            "type": "tool",
+            "uuid": "29d53567-67bd-4c7b-8fa6-abc8282e6a9f",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "DESeq2 result file on dataset 1-8 and 10 and collection 9",
+                    "output_name": "deseq_out",
+                    "uuid": "262f9f7b-5ebe-4d29-9309-4808ed5129d8"
+                }
+            ]
+        },
+        "3": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+            "errors": null,
+            "id": 3,
+            "input_connections": {
+                "infile": {
+                    "id": 2,
+                    "output_name": "deseq_out"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Text reformatting",
+            "outputs": [
+                {
+                    "name": "outfile",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 450,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+            "tool_shed_repository": {
+                "changeset_revision": "ab83aa685821",
+                "name": "text_processing",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"$6!=\\\"NA\\\" && $7!=\\\"NA\\\"{print}\", \"infile\": null, \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "9.5+galaxy3",
+            "type": "tool",
+            "uuid": "e498338d-176a-4d88-a703-cc4cb59f68c3",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "4": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/graphicsmagick_image_convert/graphicsmagick_image_convert/1.3.46+galaxy0",
+            "errors": null,
+            "id": 4,
+            "input_connections": {
+                "input": {
+                    "id": 2,
+                    "output_name": "plots"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Convert image format",
+            "outputs": [
+                {
+                    "name": "splitted_pdf",
+                    "type": "input"
+                },
+                {
+                    "name": "output",
+                    "type": "png"
+                }
+            ],
+            "position": {
+                "left": 450,
+                "top": 130
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/graphicsmagick_image_convert/graphicsmagick_image_convert/1.3.46+galaxy0",
+            "tool_shed_repository": {
+                "changeset_revision": "54c9a136e24f",
+                "name": "graphicsmagick_image_convert",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"input\": null, \"output_format\": \"png\", \"palette\": {\"palette_select\": \"no\", \"__current_case__\": 2}, \"resize\": \"100.0\", \"transformations\": null, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "1.3.46+galaxy0",
+            "type": "tool",
+            "uuid": "8a42464a-89d4-4b71-81e2-e3cbc1999f29",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "5": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/volcanoplot/volcanoplot/4.0.3+galaxy0",
+            "errors": null,
+            "id": 5,
+            "input_connections": {
+                "input": {
+                    "id": 3,
+                    "output_name": "outfile"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Volcano Plot",
+            "outputs": [
+                {
+                    "name": "plot",
+                    "type": "pdf"
+                }
+            ],
+            "position": {
+                "left": 670,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/volcanoplot/volcanoplot/4.0.3+galaxy0",
+            "tool_shed_repository": {
+                "changeset_revision": "3d5b9e4df7ba",
+                "name": "volcanoplot",
+                "owner": "iuc",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"input\": null, \"labels\": {\"label_select\": \"none\", \"__current_case__\": 2}, \"lfc_thresh\": \"1.0\", \"out_options\": {\"rscript_out\": false}, \"plot_options\": {\"boxes\": false, \"title\": null, \"xlab\": null, \"ylab\": null, \"xmin\": null, \"xmax\": null, \"ymax\": null, \"legend\": null, \"legend_labs\": \"Down,Not Sig,Up\"}, \"shape_or_facet\": null, \"signif_thresh\": \"0.05\", \"with_header\": {\"header\": \"no\", \"__current_case__\": 2, \"fdr_col\": \"7\", \"pval_col\": \"6\", \"lfc_col\": \"3\", \"label_col\": \"1\", \"shape_col\": null}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "4.0.3+galaxy0",
+            "type": "tool",
+            "uuid": "535dbb7f-7b8d-4f9f-b603-f236c42408d2",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "6": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+            "errors": null,
+            "id": 6,
+            "input_connections": {
+                "infile": {
+                    "id": 3,
+                    "output_name": "outfile"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Text reformatting",
+            "outputs": [
+                {
+                    "name": "outfile",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 670,
+                "top": 130
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+            "tool_shed_repository": {
+                "changeset_revision": "ab83aa685821",
+                "name": "text_processing",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"$7+0 < 0.05 && ($3+0 >= 1 || $3+0 <= -1){print}\", \"infile\": null, \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "9.5+galaxy3",
+            "type": "tool",
+            "uuid": "7e1d674d-ecfe-427e-9b6f-1d2dda87422a",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "Significant differential peaks (padj<0.05, abs LFC>=1)",
+                    "output_name": "outfile",
+                    "uuid": "151662a0-0687-4d72-b98d-f6ceacae3077"
+                }
+            ]
+        },
+        "7": {
+            "annotation": "",
+            "content_id": "__EXTRACT_DATASET__",
+            "errors": null,
+            "id": 7,
+            "input_connections": {
+                "input": {
+                    "id": 4,
+                    "output_name": "splitted_pdf"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Extract dataset",
+            "outputs": [
+                {
+                    "name": "output",
+                    "type": "data"
+                }
+            ],
+            "position": {
+                "left": 670,
+                "top": 250
+            },
+            "post_job_actions": {},
+            "tool_id": "__EXTRACT_DATASET__",
+            "tool_state": "{\"input\": null, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"temp_000\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "1.0.2",
+            "type": "tool",
+            "uuid": "e11a52fb-e4ad-427d-adf3-82a7b77e6ff1",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "Sample PCA plot",
+                    "output_name": "output",
+                    "uuid": "3b828410-1e7f-4388-9bde-841d2dd49db5"
+                }
+            ]
+        },
+        "8": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/graphicsmagick_image_convert/graphicsmagick_image_convert/1.3.46+galaxy0",
+            "errors": null,
+            "id": 8,
+            "input_connections": {
+                "input": {
+                    "id": 5,
+                    "output_name": "plot"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Convert image format",
+            "outputs": [
+                {
+                    "name": "splitted_pdf",
+                    "type": "input"
+                },
+                {
+                    "name": "output",
+                    "type": "png"
+                }
+            ],
+            "position": {
+                "left": 890,
+                "top": 130
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/graphicsmagick_image_convert/graphicsmagick_image_convert/1.3.46+galaxy0",
+            "tool_shed_repository": {
+                "changeset_revision": "54c9a136e24f",
+                "name": "graphicsmagick_image_convert",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"input\": null, \"output_format\": \"png\", \"palette\": {\"palette_select\": \"no\", \"__current_case__\": 2}, \"resize\": \"100.0\", \"transformations\": null, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "1.3.46+galaxy0",
+            "type": "tool",
+            "uuid": "71152028-4b19-4069-959e-0021fdca29f9",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "9": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sort_header_tool/9.5+galaxy3",
+            "errors": null,
+            "id": 9,
+            "input_connections": {
+                "infile": {
+                    "id": 6,
+                    "output_name": "outfile"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Sort",
+            "outputs": [
+                {
+                    "name": "outfile",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 890,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sort_header_tool/9.5+galaxy3",
+            "tool_shed_repository": {
+                "changeset_revision": "ab83aa685821",
+                "name": "text_processing",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"header\": \"0\", \"infile\": null, \"sortkeys\": [{\"__index__\": 0, \"column\": \"3\", \"start_charpos\": null, \"end_charpos\": null, \"order\": \"r\", \"style\": \"g\", \"ignore_case\": false, \"ignore_leading_blanks\": false}], \"unique\": false, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "9.5+galaxy3",
+            "type": "tool",
+            "uuid": "dbc3cbb3-c4cb-487b-a652-05a7e42cfe65",
+            "when": null,
+            "workflow_outputs": []
+        },
+        "10": {
+            "annotation": "",
+            "content_id": "__EXTRACT_DATASET__",
+            "errors": null,
+            "id": 10,
+            "input_connections": {
+                "input": {
+                    "id": 8,
+                    "output_name": "splitted_pdf"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Extract dataset",
+            "outputs": [
+                {
+                    "name": "output",
+                    "type": "data"
+                }
+            ],
+            "position": {
+                "left": 1110,
+                "top": 250
+            },
+            "post_job_actions": {},
+            "tool_id": "__EXTRACT_DATASET__",
+            "tool_state": "{\"input\": null, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"temp_000\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "1.0.2",
+            "type": "tool",
+            "uuid": "22925fdb-e843-4701-9bb2-2faba228c15d",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "Volcano plot",
+                    "output_name": "output",
+                    "uuid": "48628758-2864-4849-bd92-3ff7bb8caae3"
+                }
+            ]
+        },
+        "11": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_head_tool/9.5+galaxy3",
+            "errors": null,
+            "id": 11,
+            "input_connections": {
+                "infile": {
+                    "id": 9,
+                    "output_name": "outfile"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Select first",
+            "outputs": [
+                {
+                    "name": "outfile",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 1110,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_head_tool/9.5+galaxy3",
+            "tool_shed_repository": {
+                "changeset_revision": "ab83aa685821",
+                "name": "text_processing",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"complement\": \"\", \"count\": \"50\", \"infile\": null, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "9.5+galaxy3",
+            "type": "tool",
+            "uuid": "ba999e45-c51d-46ab-b8cb-724175846cd5",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "Top 50 B-cell-gained peaks",
+                    "output_name": "outfile",
+                    "uuid": "e7d3de87-1bc0-4328-871f-f04e961c4e4b"
+                }
+            ]
+        },
+        "12": {
+            "annotation": "",
+            "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_tail_tool/9.5+galaxy3",
+            "errors": null,
+            "id": 12,
+            "input_connections": {
+                "infile": {
+                    "id": 9,
+                    "output_name": "outfile"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Select last",
+            "outputs": [
+                {
+                    "name": "outfile",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 1110,
+                "top": 130
+            },
+            "post_job_actions": {},
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_tail_tool/9.5+galaxy3",
+            "tool_shed_repository": {
+                "changeset_revision": "ab83aa685821",
+                "name": "text_processing",
+                "owner": "bgruening",
+                "tool_shed": "toolshed.g2.bx.psu.edu"
+            },
+            "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"complement\": \"\", \"infile\": null, \"num_lines\": \"50\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_uuid": null,
+            "tool_version": "9.5+galaxy3",
+            "type": "tool",
+            "uuid": "7f11b328-9e0a-4c60-8737-6d206244cc63",
+            "when": null,
+            "workflow_outputs": [
+                {
+                    "label": "Top 50 Erythroblast-gained peaks",
+                    "output_name": "outfile",
+                    "uuid": "75b3e8cd-a755-46b8-99ac-a42f9da68beb"
+                }
+            ]
+        }
+    },
+    "tags": [],
+    "uuid": "538df3f5-2daf-4d08-91fe-c8e2fdbe4c51",
+    "version": 0
+}
