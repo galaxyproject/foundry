@@ -6,9 +6,18 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 6,
     "content_hash": "09af5ad2de0e7ae787215f2ad748078b89a7fca596502baf375f3c121b77d458",
-    "commit": "f80374d58b0ca8dbd220a39255f33a81fc9b9436"
+    "commit": "7aa94dbcc744132dd80663efc48ef21610fe3669"
   },
-  "cast_at": "2026-06-16T19:09:27.057Z",
+  "cast_at": "2026-06-18T23:20:54.756Z",
+  "cast_date": "2026-06-18",
+  "cast_revision": 1,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-06-18",
+      "note": "refresh galaxy-tool-cache stock-tool framing + 1.8.1 pin"
+    }
+  ],
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +31,8 @@
       "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first.",
       "trigger": "When the requested pin is not yet present in the configured cache directory.",
       "verification": "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted.",
-      "src_hash": "22f932549b772d065ba33edcebe26e808ee67243217e2daee4dd64d613bff130",
-      "dst_hash": "8eb424265ccd1fad9bc03c070a904a448eaed9c139b77d89fa0b569082c8f141",
+      "src_hash": "3785380be28bc9e44e9770c72c38147bcb09ea166c44d5836d772cd8aa5fd0bc",
+      "dst_hash": "d6cbe1d266c2d26f62c9e42b7c73e3c26abd8c68d270eed54806b310ab59facd",
       "source": "deterministic"
     },
     {
@@ -38,8 +47,8 @@
       "purpose": "Emit the deterministic [[galaxy-tool-summary]] manifest for the cached pin; this Mold runs the command rather than hand-authoring the manifest.",
       "trigger": "Once the pin is confirmed present in the cache.",
       "verification": "Cast the skill, run `summarize` on a cached pin (e.g. staramr_search), confirm the emitted manifest validates against [[galaxy-tool-summary]].",
-      "src_hash": "8f264e9f870bd77fc8a5e536429d80a7593d18ddc64483b9467fe34391e93dd0",
-      "dst_hash": "2d1a7376fe8012504c0af39c8927c54372e6ea2314869787012967ccb2e4ed96",
+      "src_hash": "d7ddae5d1b4167c509ecf010d38822cb11cafbc818bfe3361a8f99fb21686433",
+      "dst_hash": "6d32cf3a754dfdbcb0d5722ed7d00442f5d5c50486096aa51540984f4bfe09cb",
       "source": "deterministic"
     },
     {
@@ -52,8 +61,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
-      "src_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
-      "dst_hash": "f6a0b9c7f8c9ffb99279b00781b0c7399913bc7b4ac5ff45c2116ecd5eea124b",
+      "src_hash": "1358e0b5952b78cd607637172216d66c5f830f99ff7f9f087279e322a9e446ca",
+      "dst_hash": "1358e0b5952b78cd607637172216d66c5f830f99ff7f9f087279e322a9e446ca",
       "source": "deterministic"
     },
     {

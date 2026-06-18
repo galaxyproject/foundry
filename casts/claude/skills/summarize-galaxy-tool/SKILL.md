@@ -21,8 +21,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli galaxy-tool-cache`.
+- **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g @galaxy-tool-util/cli@^1.8.1`.
+  Ephemeral run: `npx --package @galaxy-tool-util/cli@1.8.1 galaxy-tool-cache`.
   Check: `galaxy-tool-cache --version`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
   Bundled reference: `references/cli/galaxy-tool-cache.md`.
