@@ -6,16 +6,21 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 2,
     "content_hash": "bb854b2f4e8faf55fb43e623f6c392af1f6e46b1a6aecf4015e402ea2ebcd59a",
-    "commit": "a74657a18c0a80c31c64c4ec52111e6b06e6d35d"
+    "commit": "e8124f91ad22ca9da7ed5d3474e5b91b335358d8"
   },
-  "cast_at": "2026-06-18T23:28:09.711Z",
+  "cast_at": "2026-06-18T23:46:52.813Z",
   "cast_date": "2026-06-18",
-  "cast_revision": 1,
+  "cast_revision": 2,
   "cast_history": [
     {
       "rev": 1,
       "date": "2026-06-18",
       "note": "built-in/stock tool branch via galaxy-tool-cache bare-id flow"
+    },
+    {
+      "rev": 2,
+      "date": "2026-06-18",
+      "note": "gxwf pinned to @galaxy-tool-util/cli ^1.8.1"
     }
   ],
   "refs": [

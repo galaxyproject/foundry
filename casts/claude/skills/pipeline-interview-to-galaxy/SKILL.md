@@ -15,8 +15,8 @@ Harness for the **INTERVIEW → GALAXY** Foundry pipeline. Runs the constituent 
 
 Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@^1.8.1`.
+  Ephemeral run: `npx --package @galaxy-tool-util/cli@1.8.1 gxwf`.
   Check: `gxwf --version`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 - **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).

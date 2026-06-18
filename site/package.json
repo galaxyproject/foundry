@@ -13,7 +13,7 @@
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
     "@galaxy-foundry/foundry": "file:../packages/foundry",
-    "@galaxy-tool-util/cli": "^1.7.2",
+    "@galaxy-tool-util/cli": "^1.8.1",
     "@galaxy-tool-util/schema": "^1.7.2",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "4.1.18",
