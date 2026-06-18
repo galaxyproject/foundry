@@ -12,6 +12,7 @@
     "source": "referenced",
     "implied_by": [
       "galaxy-tool-cache add",
+      "galaxy-tool-cache list",
       "galaxy-tool-cache summarize"
     ]
   }

@@ -4,11 +4,20 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 5,
-    "content_hash": "19a0ac796f370b77b60fd4f41c53c4c258e5db1086674da16e6b56e278b94191",
-    "commit": "613d9a59ab74fc752defd79cdd07fffa0c790591"
+    "revision": 7,
+    "content_hash": "dfc08f79ea9b4893bbfb0712e99c78ab973c5f4b449745c661d5e16522b61f9c",
+    "commit": "a74657a18c0a80c31c64c4ec52111e6b06e6d35d"
   },
-  "cast_at": "2026-06-10T23:36:08.444Z",
+  "cast_at": "2026-06-18T23:28:11.067Z",
+  "cast_date": "2026-06-18",
+  "cast_revision": 1,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-06-18",
+      "note": "built-in/stock tool branch via galaxy-tool-cache bare-id flow"
+    }
+  ],
   "refs": [
     {
       "kind": "cli-command",
@@ -164,6 +173,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-summary]]",
@@ -200,6 +224,12 @@
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
         "schema": "[[galaxy-workflow-draft]]",
         "description": "gxformat2 skeleton with one more abstract step replaced by a concrete tool step (loop iteration output)."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Ledger ([[open-requirements-ledger]]) with a blocking entry appended when a step's declared output can't be computed from its wired inputs; drives the fall-through to topology repair."
       }
     ],
     "consumes": [
@@ -220,7 +250,28 @@
           "cwl-summary-to-galaxy-template",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
-          "nextflow-summary-to-galaxy-template"
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read entries the design tier recorded against this step before implementing; append a blocking entry if its output can't be computed.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]

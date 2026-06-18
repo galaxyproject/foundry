@@ -8,13 +8,13 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-06-16
-revision: 6
+revised: 2026-06-18
+revision: 7
 ai_generated: true
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
 input_artifacts:
   - id: galaxy-tool-pin
-    description: "Pin from [[discover-shed-tool]]; identifies which cached ParsedTool to summarize. Authored UDTs from [[author-galaxy-tool-wrapper]] bypass this Mold."
+    description: "Pin identifying which cached ParsedTool to summarize: a Tool Shed pin from [[discover-shed-tool]] (owner/repo/tool + version), or a bare/stock id for a built-in Galaxy tool (e.g. `Filter1`, `Cut1`, collection ops) that resolves against the shed by the bare id. Authored UDTs from [[author-galaxy-tool-wrapper]] bypass this Mold."
 output_artifacts:
   - id: galaxy-tool-summary
     kind: json
@@ -44,9 +44,18 @@ references:
     load: on-demand
     mode: sidecar
     evidence: corpus-observed
-    purpose: "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first."
+    purpose: "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first. Stock/built-in bare ids resolve against the shed but need an explicit `--tool-version`."
     trigger: "When the requested pin is not yet present in the configured cache directory."
     verification: "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted."
+  - kind: cli-command
+    ref: "[[list]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Discover the concrete cached version of a stock/built-in bare id before `add`/`summarize`, since the shed's TRS version-list endpoint can't auto-resolve it; never hand-guess a stock version."
+    trigger: "When the pin is a bare/stock id (no owner/repo) and its concrete version isn't already known."
+    verification: "Cast the skill, populate a cache with a stock tool, run `list --json`, confirm the reported version feeds `add`/`summarize` for that bare id."
   - kind: schema
     ref: "[[galaxy-tool-summary]]"
     used_at: runtime
@@ -91,7 +100,7 @@ The v1 input-source decision is [[galaxy-tool-summary-input-source]]: read cache
 
 The Mold expects:
 
-- A Tool Shed pin from [[discover-shed-tool]]: `tool_shed_url`, `owner`, `repo`, `tool_id`, `version`, and `changeset_revision`.
+- A Tool Shed pin from [[discover-shed-tool]]: `tool_shed_url`, `owner`, `repo`, `tool_id`, `version`, and `changeset_revision`; **or** a bare/stock id for a built-in tool (`Filter1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`) plus a concrete version.
 - A `galaxy-tool-cache` directory containing the cached ParsedTool JSON for that pin.
 - Optional raw XML source for ambiguity checks, normally fetched through cache metadata rather than treated as the primary input.
 - Optional step intent from the caller, used only to prioritize which wrapper details to explain; it must not change the wrapper facts.
@@ -109,6 +118,8 @@ This Mold does not hand-author the manifest — it invokes `galaxy-tool-cache su
 Locate the ParsedTool JSON in the configured `galaxy-tool-cache` directory using the Tool Shed pin. `galaxy-tool-cache summarize` reads an already-cached pin — it does not re-fetch — so the pin must be cached first via [[add]] (single pin) or `populate-workflow` (the loop driver's whole-draft form). If the cache entry is missing, run [[add]] for the pin rather than silently re-searching the Tool Shed; fail early if `add` cannot resolve it.
 
 Confirm the cached identity matches the requested pin. If the cache exposes a tool id or version that conflicts with the pin, emit a hard failure rather than summarizing the wrong wrapper.
+
+**Built-in / stock tools.** When the pin is a bare/stock id (no `owner/repo` — `Filter1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`), the same cache flow applies with the bare id: [[add]] fetches it from the Tool Shed by the bare id and [[summarize]] reads it back. The shed's TRS version-list endpoint can't auto-resolve a stock version, so pass an explicit `--tool-version` to both. Discover that concrete version from a populated cache via [[list]] (or a known pin carried in the step plan) — **never hand-guess a stock version**. If no concrete version can be resolved from the cache or a known pin, surface it as an unmet requirement rather than inventing one.
 
 ### 2. Capture identity and provenance
 

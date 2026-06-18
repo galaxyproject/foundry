@@ -4,11 +4,20 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 1,
-    "content_hash": "47726f66d62c53ee1956222d9593808f52c75936341a0d026349684af4222883",
-    "commit": "4d536bf73c0ce9f7a52047cefc82ed6dc6bb6db1"
+    "revision": 2,
+    "content_hash": "bb854b2f4e8faf55fb43e623f6c392af1f6e46b1a6aecf4015e402ea2ebcd59a",
+    "commit": "a74657a18c0a80c31c64c4ec52111e6b06e6d35d"
   },
-  "cast_at": "2026-06-09T17:17:36.375Z",
+  "cast_at": "2026-06-18T23:28:09.711Z",
+  "cast_date": "2026-06-18",
+  "cast_revision": 1,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-06-18",
+      "note": "built-in/stock tool branch via galaxy-tool-cache bare-id flow"
+    }
+  ],
   "refs": [
     {
       "kind": "cli-command",
@@ -58,6 +67,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Recognize the blocking entry [[implement-galaxy-tool-step]] appends (its shape and `open | resolved | surrendered` status) so the orchestrator can detect the raised computability gap, count open blocking entries for the convergence gate, and escalate to [[repair-galaxy-draft-topology]].",
+      "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that strictly reduces the open count.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-summary]]",
@@ -68,8 +92,8 @@
       "evidence": "corpus-observed",
       "purpose": "Bind the chosen step against the deterministic tool summary manifest emitted by [[summarize-galaxy-tool]] — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape.",
       "trigger": "After a wrapper has been resolved for the chosen step and before implementing it.",
-      "src_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
-      "dst_hash": "3fe2004c7d321600f5587fce2c224deb3e29c9148bb5b3e916257089a92be151",
+      "src_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
+      "dst_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
       "source": "deterministic"
     },
     {
@@ -95,6 +119,12 @@
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
         "schema": "[[galaxy-workflow-draft]]",
         "description": "Same draft with one additional step concretized (one loop iteration). Once every step is concrete, [[draft-next-step]] reports `draft: false` and the harness exits the loop."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Same ledger carried through the iteration: a blocking entry [[implement-galaxy-tool-step]] appended is routed to [[repair-galaxy-draft-topology]] and returns marked `resolved` or `surrendered`."
       }
     ],
     "consumes": [
@@ -107,7 +137,28 @@
           "cwl-summary-to-galaxy-template",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
-          "nextflow-summary-to-galaxy-template"
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: after implementing the chosen step, read it for a new `open` blocking entry [[implement-galaxy-tool-step]] appended (the step's declared output can't be computed from its wired inputs), and count open blocking entries for the escalation convergence gate.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]
