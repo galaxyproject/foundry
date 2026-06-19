@@ -12,7 +12,7 @@ revised: 2026-06-18
 revision: 2
 ai_generated: true
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
-loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then continue."
+loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
   - id: galaxy-workflow-draft
     description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]) mutated in-place across iterations; topology is fully concrete, individual tool steps may still carry `TODO_*` sentinels and `_plan_*` planning fields."
@@ -24,6 +24,10 @@ output_artifacts:
     default_filename: galaxy-workflow-draft.gxwf.yml
     schema: "[[galaxy-workflow-draft]]"
     description: "Same draft with one additional step concretized (one loop iteration). Once every step is concrete, [[draft-next-step]] reports `draft: false` and the harness exits the loop."
+  - id: galaxy-workflow
+    kind: yaml
+    default_filename: galaxy-workflow.gxwf.yml
+    description: "Concrete gxformat2 workflow (`class: GalaxyWorkflow`) extracted from the fully-concretized draft at loop endstate via [[draft-extract]]: drafty steps dropped, `_plan_*` planning fields stripped, class promoted. The runnable, testable artifact that downstream Molds ([[implement-galaxy-workflow-test]], [[validate-galaxy-workflow]], [[run-workflow-test]]) consume."
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
@@ -54,6 +58,15 @@ references:
     purpose: "Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2."
     trigger: "After implementing or modifying the chosen step in the draft."
     verification: "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched."
+  - kind: cli-command
+    ref: "[[draft-extract]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "At loop endstate, extract the concrete gxformat2 workflow from the fully-concretized draft — drop drafty steps, strip `_plan_*` fields, promote `class` to `GalaxyWorkflow` — and write it as the runnable `galaxy-workflow.gxwf.yml`."
+    trigger: "When [[draft-next-step]] reports `draft: false` (no remaining drafty steps)."
+    verification: "Cast the skill, run the loop to endstate on an IWC-derived draft, confirm draft-extract emits a `class: GalaxyWorkflow` file that passes terminal `gxwf validate` with no `_plan_*` fields or drafty steps."
   - kind: schema
     ref: "[[galaxy-tool-summary]]"
     used_at: runtime
@@ -95,11 +108,11 @@ related_notes:
 
 Orchestrator Mold for the per-step Galaxy authoring loop. One invocation advances the gxformat2 draft by **one** step: pick → resolve a wrapper → summarize the wrapper → implement the step → validate. The harness loop reduces to `while (gxwf draft-next-step <wf>).draft: invoke skill`.
 
-This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-next-step]]) and the per-step validator ([[draft-validate]] `--concrete`). Iterations terminate when the draft has no remaining drafty steps; the harness then drops out of the loop and proceeds to terminal validation via [[validate-galaxy-workflow]].
+This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-next-step]]) and the per-step validator ([[draft-validate]] `--concrete`). Iterations terminate when the draft has no remaining drafty steps; on that terminal call the Mold extracts the concrete `galaxy-workflow.gxwf.yml` (via [[draft-extract]]) — that promoted-class workflow, not the `-draft` file, is what downstream Molds test and run — and the harness then drops out of the loop and proceeds to terminal validation via [[validate-galaxy-workflow]].
 
 ## Sequence
 
-1. **Pick.** Run [[draft-next-step]]. If `draft: false`, return — the loop is done. Otherwise carry the chosen step id forward.
+1. **Pick.** Run [[draft-next-step]]. If `draft: false`, the loop is done: run [[draft-extract]] to emit the concrete `galaxy-workflow.gxwf.yml` (drafty steps dropped, `_plan_*` stripped, `class` promoted to `GalaxyWorkflow`), then return. Otherwise carry the chosen step id forward.
 2. **Resolve a wrapper.** First split on whether the step's tool is a **built-in / stock** Galaxy tool — a bare id with no `owner/repo` path (`Filter1`, `sort1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`):
    - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through [[discover-shed-tool]] (Tool Shed search) or [[author-galaxy-tool-wrapper]]. Only its concrete version needs resolving: the shed serves stock tools by bare id, but its TRS version-list endpoint can't auto-resolve the version, so read it from a populated cache via `galaxy-tool-cache list` or take a known pin from the step plan — never hand-guess a stock version. [[summarize-galaxy-tool]] then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
    - **Tool Shed wrapper** — branch on whether the template already pinned wrapper identity (see the tiers in [[galaxy-workflow-draft-format]]):

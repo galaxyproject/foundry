@@ -62,7 +62,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 3. **cwl-summary-to-galaxy-data-flow** — invoke the `cwl-summary-to-galaxy-data-flow` skill. Translate a CWL summary into a Galaxy data-flow design brief.
 4. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
 5. **cwl-summary-to-galaxy-template** — invoke the `cwl-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs.
-6. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then continue.
+6. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
 7. **cwl-test-to-galaxy-test-plan** — MANUAL — `cwl-test-to-galaxy-test-plan` is not yet cast. Translate CWL test fixtures into a Galaxy workflow test plan. Do this by hand and confirm before continuing.
 8. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 9. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.

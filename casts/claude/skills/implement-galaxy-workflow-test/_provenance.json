@@ -5,10 +5,10 @@
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 7,
-    "content_hash": "5764ff31611d8f262ad86a67a13169edccccda0b33baee580bfdd6e27d188fd4",
-    "commit": "20cc47e729875eadbea7d72770069026168de713"
+    "content_hash": "7f68fe27b39a85abaf6c15f1647809b0d28c71753a7de463a52ffcd5e440f82a",
+    "commit": "c89111a46fa95ce38733879c8cdb91621ff19005"
   },
-  "cast_at": "2026-06-19T16:52:57.288Z",
+  "cast_at": "2026-06-19T21:23:37.474Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -149,8 +149,8 @@
       {
         "id": "galaxy-workflow-test",
         "kind": "yaml",
-        "default_filename": "galaxy-workflow-tests.yml",
-        "description": "Galaxy workflow test file (tests-format) with job inputs, expected outputs, assertions; passes static schema + label cross-check."
+        "default_filename": "galaxy-workflow.gxwf-tests.yml",
+        "description": "Galaxy workflow test file (tests-format) with job inputs, expected outputs, assertions; passes static schema + label cross-check. Named as the workflow basename + `-tests.yml` so Planemo discovers it as the companion of `galaxy-workflow.gxwf.yml`."
       }
     ],
     "consumes": [
@@ -165,16 +165,10 @@
         ]
       },
       {
-        "id": "galaxy-workflow-draft",
-        "description": "gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against.",
-        "inherited_schema": "[[galaxy-workflow-draft]]",
+        "id": "galaxy-workflow",
+        "description": "Concrete gxformat2 workflow being tested — the loop-endstate `galaxy-workflow.gxwf.yml` from [[advance-galaxy-draft-step]] (`class: GalaxyWorkflow`); provides the real input/output labels, outputs, and collection shapes the test must assert against.",
         "producers": [
-          "advance-galaxy-draft-step",
-          "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-template",
-          "implement-galaxy-tool-step",
-          "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "advance-galaxy-draft-step"
         ]
       },
       {
