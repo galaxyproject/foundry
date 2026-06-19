@@ -1,10 +1,9 @@
 {
-  "planemo_version": "0.75.42.dev0",
+  "planemo_version": "0.75.44",
   "schema_version": "0.1",
   "source": {
-    "branch": "workflow_work",
-    "note": "Pre-merge of upstream PR galaxyproject/planemo#1636. Unpin once upstream merges + releases.",
-    "repo": "jmchilton/planemo",
-    "sha": "a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3"
+    "note": "Released on PyPI; includes merged PR galaxyproject/planemo#1636.",
+    "release": "0.75.44",
+    "repo": "galaxyproject/planemo"
   }
 }

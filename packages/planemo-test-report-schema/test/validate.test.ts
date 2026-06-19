@@ -32,8 +32,8 @@ describe("planemoTestReportSchema", () => {
 describe("planemoTestReportProvenance", () => {
   it("records the upstream planemo source pin", () => {
     expect(planemoTestReportProvenance.schema_name).toBe("test-report");
-    expect(planemoTestReportProvenance.source.repo).toBe("jmchilton/planemo");
-    expect(planemoTestReportProvenance.source.sha).toMatch(/^[0-9a-f]{7,40}$/);
+    expect(planemoTestReportProvenance.source.repo).toBe("galaxyproject/planemo");
+    expect(planemoTestReportProvenance.source.release).toMatch(/^\d+\.\d+\.\d+/);
   });
 });
 

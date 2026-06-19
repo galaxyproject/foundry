@@ -44,19 +44,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Read pinned planemo SHA
+      - name: Read pinned planemo version
         id: pin
         run: |
           set -euo pipefail
-          sha=$(grep -E '^package_version:' content/cli/planemo/index.md | sed -E 's/.*planemo@([0-9a-f]+).*/\1/')
-          if [ -z "$sha" ]; then
-            echo "No SHA found in content/cli/planemo/index.md package_version" >&2
+          version=$(grep -E '^package_version:' content/cli/planemo/index.md | sed -E 's/^package_version:[[:space:]]*"?([^"]+)"?.*/\1/')
+          if [ -z "$version" ]; then
+            echo "No version found in content/cli/planemo/index.md package_version" >&2
             exit 1
           fi
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Install pinned planemo
-        run: python -m pip install "planemo @ git+https://github.com/jmchilton/planemo@${{ steps.pin.outputs.sha }}"
+        run: python -m pip install "planemo==${{ steps.pin.outputs.version }}"
 
       - name: Check planemo CLI page drift
         run: npm run check:planemo-cli
