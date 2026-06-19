@@ -100,6 +100,8 @@ gxwf tool-search "<keywords>" --json --max-results 10
 
 If an owner hint is present, add `--owner <owner>`. If an exact-name hint is present, add `--match-name`. Lowercase the query (the tool index does not lowercase, see component-tool-shed-search §6).
 
+**Normalize a tool-id-shaped need before searching.** A caller (e.g. a template `_plan_context` that guessed a candidate) may hand this skill an XML-id token rather than a human name — `iuc/integron_finder`, `integron_finder`. The lexical index does **not** reliably match the underscored token: `tool-search integron_finder` returns no hits while `integron finder` and `integron` both score. So derive query variants instead of feeding the token verbatim: strip any `owner/` prefix, split on `_` / `-` into space-separated words, and also try the bare significant word. A `miss` is only honest after the name variants have been tried — a no-hit on the raw underscored token alone is a search artifact, not evidence the tool is absent.
+
 #### 2. Triage hits
 
 For each hit, score on:
@@ -144,7 +146,7 @@ Validate the recommendation with `validate-galaxy-tool-discovery` before returni
 The procedure assumes — and the skill must surface in its rationale when relevant — the following Tool Shed realities (full detail in component-tool-shed-search §6):
 
 - **Indexes are stale by design.** A freshly published tool may not appear; a deprecated tool may still appear. Treat absence as soft evidence, not proof.
-- **Wildcard `*term*` wrapping** disables stemming; spelling matters. Try alternate phrasings before declaring `miss`.
+- **Wildcard `*term*` wrapping** disables stemming; spelling matters. Try alternate phrasings before declaring `miss`. In particular an underscored or owner-prefixed **tool-id token** (`integron_finder`, `iuc/integron_finder`) can score zero where the **human name** (`integron finder`) hits — never declare `miss` on a single id-token query (see §1 normalization).
 - **No EDAM in shed search** — semantic queries that work in Galaxy's installed-toolbox search will not work here. Stick to lexical name/keyword queries.
 - **Same XML id across repos.** Hits collapse only on `(repoName, owner)`; expect duplicates that need triage.
 - **Repo-level discovery is a different surface.** For "find me the *package* that contains a tool about X" with server-side `owner:` / `category:` keywords, `gxwf repo-search` is the right command — out of scope for this skill but a known sibling.
