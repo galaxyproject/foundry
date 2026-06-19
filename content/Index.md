@@ -124,11 +124,12 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## CLI Commands
 
-- [[add]] — Fetch a tool from the Tool Shed (or a Galaxy instance) and cache its ParsedTool locally for later summarize/schema.
+- [[add]] — Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema.
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
 - [[draft-extract]] — Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved.
 - [[draft-next-step]] — Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak.
 - [[draft-validate]] — Validate a `class: GalaxyWorkflowDraft` workflow against draft-contract rules; with --concrete, also validate the extracted concrete subset.
+- [[list]] — Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached.
 - [[planemo-cli_metadata]] — Export structured metadata for Planemo CLI commands.
 - [[planemo-lint]] — Check for common errors and best practices.
 - [[planemo-output_schema]] — Export JSON Schemas for Planemo machine-readable outputs.

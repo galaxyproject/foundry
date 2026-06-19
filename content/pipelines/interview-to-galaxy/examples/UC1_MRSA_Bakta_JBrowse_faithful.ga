@@ -1,0 +1,1477 @@
+{
+  "a_galaxy_workflow": "true",
+  "annotation": "",
+  "comments": [],
+  "format-version": "0.1",
+  "name": "UC1 MRSA Bakta JBrowse (clean extract)",
+  "report": {
+    "markdown": "# MRSA mobile-AMR context with structural annotation\n\nFour complete *Staphylococcus aureus* isolates from Hikichi et al. 2019 (BioProject `PRJDB8599`) were imported as combined chromosome + plasmid FASTA into **one collection** and scanned \u2014 **all steps mapped over that collection** \u2014 with **staramr** (ResFinder + PlasmidFinder + MLST), **ISEScan** + **Integron Finder** for mobile elements, **bedtools closest** for ARG\u2194IS distances, and now **Bakta** whole-genome annotation for the flanking-gene context plus per-isolate **JBrowse** genome browsers. The comparative question: **which resistance genes sit in mobile genomic contexts, how does that context differ between related isolates, and what genes flank each mobile-AMR locus?**\n\nBecause every step is a collection map-over and every displayed figure is a real tool output, this whole notebook **extracts to a single reusable workflow**.\n\n## Isolates\n\n| Strain | MLST | Chromosome | Plasmid | Genome (bp) |\n|---|---|---|---|---|\n| KUH140013 | ST8 | AP020311 | AP020312 | 2,837,394 |\n| KUH140046 | ST8 | AP020313 | AP020314 | 2,859,431 |\n| KUH180129 | ST6313 | AP020322 | AP020323 | 2,897,282 |\n| KUN1163 | ST764 | AP020324 | AP020325 | 2,944,787 |\n\nThree distinct sequence types (ST8 \u00d72, ST6313, ST764), so differences below are between *related but non-clonal* backgrounds. The two ST8 isolates are the natural clonal pair to contrast.\n\n## AMR gene presence / absence\n\nPresence/absence matrix, annotated with genomic location (**P** = plasmid, **C** = chromosome):\n\n| Gene | Class | KUH140013 | KUH140046 | KUH180129 | KUN1163 |\n|---|---|---|---|---|---|\n| `mecA` | methicillin (SCC*mec*) | C | C | **\u2013** | C |\n| `blaZ` | \u03b2-lactam | C | C | **P** | \u2013 |\n| `aac(6')-aph(2'')` | aminoglycoside | \u2013 | **P** | C | **P** |\n| `ant(9)-Ia` | spectinomycin | \u2013 | C | C | C |\n| `erm(A)` | MLS_B | \u2013 | C | C | C |\n| `tet(M)` | tetracycline | \u2013 | \u2013 | C | C |\n| `fosD` | fosfomycin | \u2013 | **P** | \u2013 | \u2013 |\n| `aadD` | aminoglycoside | \u2013 | \u2013 | \u2013 | C |\n| `bleO` | bleomycin | \u2013 | \u2013 | \u2013 | C |\n\nThe same data as a heatmap (0 = absent, 1 = chromosome, 2 = plasmid) \u2014 built from the pipeline, not pasted. The teal (plasmid) cells carry the comparative story:\n\n```galaxy\nhistory_dataset_as_image(output=\"heatmap2 on dataset 260\")\n```\n\nTwo findings stand out:\n\n1. **KUH180129 carries no `mecA`** \u2014 genotypically MSSA, an outlier in a set otherwise defined by methicillin resistance. Its \u03b2-lactam resistance rests on `blaZ` alone, and that `blaZ` is plasmid-borne.\n2. **The resistome scales with, but is not explained by, lineage.** The two ST8 isolates are far apart: KUH140013 carries only `blaZ`+`mecA`, while its clonemate KUH140046 adds an aminoglycoside / MLS_B / fosfomycin load. Within one ST, almost the entire difference is mobile-element cargo.\n\n> staramr flags all four genomes as *quality-failed* only because the expected genome-size window (4\u20136 Mb) is set for larger organisms; *S. aureus* genomes are ~2.8\u20132.9 Mb. The ResFinder / PlasmidFinder calls are unaffected.\n\n## Mobile elements: insertion sequences and integrons\n\n**Integron Finder detected zero integrons in any isolate** \u2014 expected for *S. aureus*: resistance mobility here is insertion-sequence / transposon / plasmid-driven, not integron-driven.\n\n```galaxy\nhistory_dataset_as_table(output=\"Collapse Collection on dataset 77, 80, and others and collection 74\")\n```\n\n**ISEScan** (complete elements only, `remove_short_is=true`) finds insertion sequences everywhere \u2014 the IS6 family disproportionately on the plasmids (IS6/IS257 drives staphylococcal resistance-plasmid mosaicism), and an **IS256 expansion on KUH180129's chromosome** (the basis of Tn4001).\n\n### ARG \u2192 nearest insertion sequence (bedtools closest)\n\nEach isolate's ResFinder hits and ISEScan elements are converted to BED, sorted, and run through **bedtools `closest -d`**, **mapped over the collection** \u2014 so the distance computation is a reusable part of the history graph. The combined per-isolate result:\n\n```galaxy\nhistory_dataset_as_table(output=\"Collapse Collection on dataset 249-252 and collection 248\")\n```\n\n| Isolate | Gene | Location | Nearest IS | Distance |\n|---|---|---|---|---|\n| KUN1163 | `aac(6')-aph(2'')` | plasmid AP020325 | **IS6** | **80 bp** |\n| KUH140046 | `aac(6')-aph(2'')` | plasmid AP020314 | **IS6** | 467 bp |\n| KUH180129 | `aac(6')-aph(2'')` | **chromosome** AP020322 | **IS256** | **84 bp** |\n\n**This is the demo's headline.** The same gene, **`aac(6')-aph(2'')`, sits in a different mobile context depending on location** \u2014 adjacent to an **IS6** element on the plasmids of KUN1163 (80 bp) and KUH140046 (467 bp), but adjacent to an **IS256** element on the chromosome of KUH180129 (84 bp). Same resistance gene, different mobilizing-element family \u2014 the IS6/IS257 plasmid pool vs the IS256/Tn4001 chromosomal route.\n\nCounting every ARG by mobile context (plasmid / chromosomal IS-adjacent <1 kb / chromosomal distal) shows the comparative burden composition:\n\n```galaxy\nhistory_dataset_as_image(output=\"heatmap2 on dataset 261\")\n```\n\n## Structural gene context (Bakta)\n\n`bedtools closest` reports the nearest IS regardless of biological relationship. To confirm the mobile context **structurally**, every isolate's genome was annotated with **Bakta** (mapped over the collection), and each ResFinder hit was matched to its **nearest flanking annotated gene** (`bedtools closest -io` of the ARG BED against the Bakta CDS features, mapped). This recovers the genomic *neighbourhood* of each resistance locus:\n\n```galaxy\nhistory_dataset_as_table(output=\"Text reformatting on dataset 259\")\n```\n\nThe flanking genes confirm the composite-transposon / operon structure the proximity analysis implied:\n\n- **`blaZ` \u2192 `blaR1`** (65 bp): the \u03b2-lactamase regulator, the canonical *blaZ\u2013blaR1\u2013blaI* operon.\n- **`erm(A)` \u2194 `ant(9)-Ia`** (126 bp, reciprocal): the gene content of the **Tn554** transposon (MLS_B + spectinomycin), recurring at multiple chromosomal loci.\n- **`tet(M)` \u2192 IS256 family transposase** (KUH180129): tet(M) sitting in the IS256-dense chromosomal region.\n- **`aac(6')-aph(2'')` \u2192 N-acetyltransferase-domain protein** (1 bp): the nearest Bakta CDS is the acetyltransferase domain of the bifunctional AAC(6')-APH(2'') locus itself \u2014 so the flanking-gene table is uninformative here. The IS256 element that places this gene in a **Tn4001**-like context sits ~84 bp away (the ISEScan/`closest` result above) and is visible beside it in the KUH180129 browser below \u2014 the genomic-context view, not the nearest-gene table, is where that adjacency reads.\n\n## Genome browsers (per isolate)\n\nEach isolate's assembly is rendered as an interactive **JBrowse** browser (mapped over the collection \u2192 one browser per isolate), with three tracks: **resistance genes** (ResFinder), **insertion sequences** (ISEScan), and the full **Bakta annotation**. Navigate any browser to a resistance locus to see the ARG, its flanking IS element, and the Bakta gene context together. The headline locus to inspect: on **KUH180129**, `aac(6')-aph(2'')` on the chromosome (`ENA|AP020322|AP020322.1` ~2,084 kb) with **IS256** 84 bp downstream and a Bakta-annotated *IS256 family transposase* alongside.\n\n**KUH140013** (ST8, minimal resistome):\n\n```galaxy\nhistory_dataset_embedded(output=\"KUH140013\")\n```\n\n**KUH140046** (ST8, plasmid `aac(6')-aph(2'')`+`fosD`+IS6):\n\n```galaxy\nhistory_dataset_embedded(output=\"KUH140046\")\n```\n\n**KUH180129** (MSSA, chromosomal `aac(6')-aph(2'')`+IS256 \u2014 the headline contrast):\n\n```galaxy\nhistory_dataset_embedded(output=\"KUH180129\")\n```\n\n**KUN1163** (ST764, plasmid `aac(6')-aph(2'')`+IS6):\n\n```galaxy\nhistory_dataset_embedded(output=\"KUN1163\")\n```\n\n## Pipeline (structured for workflow extraction)\n\nEvery tool step runs **mapped over the `MRSA isolate assemblies` collection**. The two `bedtools closest` steps each take their multi-input `-b` side through a **mapped `Build list`** (one singleton list per isolate \u2192 `list:list`), so the per-isolate pairing survives extraction and the workflow re-runs faithfully; each per-isolate browser is pulled out with **`Extract Dataset`** so the embed is a real workflow node. The whole analysis \u2014 spine, Bakta enrichment, and JBrowse \u2014 extracts as a single reusable, sample-agnostic workflow:\n\n```\nassemblies (collection)\n  \u251c\u2500 staramr \u2500\u2500\u2500\u2500 resfinder.tsv \u2500 awk\u2192BED \u2500 SortBED \u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n  \u2502                                                  \u2502  (inputA)                        \u2502\n  \u251c\u2500 ISEScan \u2500\u2500\u2500\u2500 results.gff \u2500\u2500\u2500 awk\u2192BED \u2500 SortBED \u2500\u2534 Build list\u2192list:list \u2500 closest -d \u2500 Collapse \u2500 awk \u2192 matrices \u2192 heatmaps\n  \u2502               tabular \u2500\u2500\u2500\u2500\u2500\u2500\u2500 awk\u2192BED \u2500 tbl2gff3 \u2192 IS GFF3 \u2500\u2500\u2500\u2500\u2500\u2500\u2510         (inputB, mapped/reduced)\n  \u251c\u2500 Integron Finder \u2500\u2500\u2500\u2500 (zero integrons)                          \u2502\n  \u2514\u2500 Bakta \u2500\u2500\u2500\u2500\u2500\u2500 GFF3 \u2500\u2500\u252c\u2500 awk\u2192CDS BED \u2500 SortBED \u2500 Build list \u2500 closest -io (vs ARG) \u2192 flanking-gene table\n                         \u2502  resfinder BED \u2500 tbl2gff3 \u2192 ARG GFF3 \u2500\u2500\u2500\u2500\u2500\u2524\n                         \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500 JBrowse (ref + ARG/IS/Bakta tracks) \u2192 per-isolate browsers \u2500 Extract Dataset \u2192 embeds\n```\n\n## Method caveats\n\n- **Single-database, single-version calls.** ResFinder / PlasmidFinder / ISEScan / Integron Finder / Bakta results are database-version-dependent; treat as a snapshot.\n- **Adjacency vs mobilization.** `bedtools closest` distances are descriptive; the firm comparative call (`aac(6')-aph(2'')`'s IS6\u2194IS256 flip) rests on three isolates agreeing, and is shown in genomic context by the per-isolate browsers (the IS256 element beside `aac` on the KUH180129 chromosome). The Bakta flanking-gene table independently corroborates the *operon/transposon* structure of the other loci (Tn554 for erm(A)+ant(9)-Ia, the blaZ operon).\n- **No SCC*mec* typing tool** was run; **PointFinder disabled**, so chromosomal point-mutation resistance was not assessed.\n",
+    "title": "UC1 MRSA Bakta JBrowse (clean extract)"
+  },
+  "steps": {
+    "0": {
+      "annotation": "",
+      "content_id": null,
+      "errors": null,
+      "id": 0,
+      "input_connections": {},
+      "inputs": [
+        {
+          "description": "",
+          "name": "Input Dataset Collection"
+        }
+      ],
+      "label": "Input Dataset Collection",
+      "name": "Input dataset collection",
+      "outputs": [],
+      "position": {
+        "left": 10,
+        "top": 10
+      },
+      "tool_id": null,
+      "tool_state": "{\"optional\": false, \"tag\": null, \"collection_type\": \"list\", \"fields\": null, \"column_definitions\": null}",
+      "tool_version": null,
+      "type": "data_collection_input",
+      "uuid": "74df2c28-c959-4f14-93bf-0c7385e7c20f",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "1": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/nml/staramr/staramr_search/0.12.3+galaxy0",
+      "errors": null,
+      "id": 1,
+      "input_connections": {
+        "genomes": {
+          "id": 31,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "staramr",
+      "outputs": [
+        {
+          "name": "blast_hits",
+          "type": "input"
+        },
+        {
+          "name": "mlst",
+          "type": "tabular"
+        },
+        {
+          "name": "summary",
+          "type": "tabular"
+        },
+        {
+          "name": "detailed_summary",
+          "type": "tabular"
+        },
+        {
+          "name": "resfinder",
+          "type": "tabular"
+        },
+        {
+          "name": "plasmidfinder",
+          "type": "tabular"
+        },
+        {
+          "name": "settings",
+          "type": "txt"
+        },
+        {
+          "name": "excel",
+          "type": "xlsx"
+        }
+      ],
+      "position": {
+        "left": 230,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/nml/staramr/staramr_search/0.12.3+galaxy0",
+      "tool_shed_repository": {
+        "changeset_revision": "15a4fff208e4",
+        "name": "staramr",
+        "owner": "nml",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__use_cached_job__\": \"true\", \"advanced\": {\"pid_threshold\": \"98.0\", \"plength_resfinder\": \"60.0\", \"plength_pointfinder\": \"95.0\", \"plength_plasmidfinder\": \"60.0\", \"genome_size_lower_bound\": \"4000000\", \"genome_size_upper_bound\": \"6000000\", \"minimum_N50_value\": \"10000\", \"minimum_contig_length\": \"300\", \"unacceptable_number_contigs\": \"1000\", \"report_all_blast\": false, \"exclude_negatives\": false, \"exclude_resistance_phenotypes\": false, \"mlst_scheme\": \"auto\", \"exclude_genes\": {\"exclude_genes_condition\": \"default\", \"__current_case__\": 0}, \"complex_mutations\": {\"complex_mutations_condition\": \"default\", \"__current_case__\": 0}, \"plasmidfinder_type\": \"include_all\"}, \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"genomes\": null, \"genomes1|__identifier__\": \"KUH140013\", \"genomes|__identifier__\": \"KUH140013\", \"pointfinder_db\": {\"use_pointfinder\": \"disabled\", \"__current_case__\": 0}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "0.12.3+galaxy0",
+      "type": "tool",
+      "uuid": "98025e19-04a8-4daa-aded-5ca17af5d06a",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "2": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/isescan/isescan/1.7.3+galaxy0",
+      "errors": null,
+      "id": 2,
+      "input_connections": {
+        "input_file": {
+          "id": 0,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "ISEScan",
+      "outputs": [
+        {
+          "name": "summary",
+          "type": "tabular"
+        },
+        {
+          "name": "all_results",
+          "type": "tabular"
+        },
+        {
+          "name": "annotation",
+          "type": "gff"
+        },
+        {
+          "name": "is_fasta",
+          "type": "fasta"
+        },
+        {
+          "name": "orf_fna",
+          "type": "fasta"
+        },
+        {
+          "name": "orf_faa",
+          "type": "fasta"
+        }
+      ],
+      "position": {
+        "left": 230,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/isescan/isescan/1.7.3+galaxy0",
+      "tool_shed_repository": {
+        "changeset_revision": "81539b9ae80a",
+        "name": "isescan",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__use_cached_job__\": \"true\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"input_file\": null, \"input_file|__identifier__\": \"KUH140013\", \"log_activate\": false, \"remove_short_is\": true, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.7.3+galaxy0",
+      "type": "tool",
+      "uuid": "c05a808b-3cee-4994-873a-f2b931b01022",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "3": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/integron_finder/integron_finder/2.0.5+galaxy1",
+      "errors": null,
+      "id": 3,
+      "input_connections": {
+        "sequence": {
+          "id": 0,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Integron Finder",
+      "outputs": [
+        {
+          "name": "integron_log",
+          "type": "txt"
+        },
+        {
+          "name": "integrons_table",
+          "type": "tsv"
+        },
+        {
+          "name": "summary",
+          "type": "tsv"
+        }
+      ],
+      "position": {
+        "left": 230,
+        "top": 250
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/integron_finder/integron_finder/2.0.5+galaxy1",
+      "tool_shed_repository": {
+        "changeset_revision": "5429646e486d",
+        "name": "integron_finder",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__use_cached_job__\": \"true\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"gbk\": false, \"local_max\": false, \"no_logfile\": false, \"pdf\": false, \"promoter_attI\": false, \"sequence\": null, \"sequence|__identifier__\": \"KUH140013\", \"settings\": {\"attc_settings\": {\"dist_thresh\": \"4000\", \"calin_threshold\": \"2\", \"max_attc_size\": \"200\", \"min_attc_size\": \"40\", \"keep_palindromes\": false, \"covar_matrix\": null}, \"protein_settings\": {\"no_proteins\": false, \"union_integrases\": false, \"func_annot\": false}}, \"topology_file\": null, \"type_replicon\": \"--circ\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "2.0.5+galaxy1",
+      "type": "tool",
+      "uuid": "3831a3fd-335c-4f0d-9428-4df174b33e54",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "4": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/bakta/bakta/1.9.4+galaxy1",
+      "errors": null,
+      "id": 4,
+      "input_connections": {
+        "input_option|input_file": {
+          "id": 0,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Bakta",
+      "outputs": [
+        {
+          "name": "annotation_tsv",
+          "type": "tabular"
+        },
+        {
+          "name": "annotation_gff3",
+          "type": "gff3"
+        }
+      ],
+      "position": {
+        "left": 230,
+        "top": 370
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/bakta/bakta/1.9.4+galaxy1",
+      "tool_shed_repository": {
+        "changeset_revision": "1942e86e2ee1",
+        "name": "bakta",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"annotation\": {\"complete\": false, \"prodigal\": null, \"translation_table\": \"11\", \"keep_contig_headers\": true, \"replicons\": null, \"compliant\": false, \"proteins\": null, \"meta\": false, \"regions\": null}, \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"input_option\": {\"input_file\": null, \"min_contig_length\": \"200\", \"bakta_db_select\": \"V5.1_light_2024-01-19\", \"amrfinder_db_select\": \"amrfinderplus_V3.12_2024-07-22.1\"}, \"input_option|input_file|__identifier__\": \"KUH140013\", \"organism\": {\"genus\": \"Staphylococcus\", \"species\": \"aureus\", \"strain\": null, \"plasmid\": null}, \"output_files\": {\"output_selection\": [\"file_tsv\", \"file_gff3\"]}, \"workflow\": {\"skip_analysis\": null}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.9.4+galaxy1",
+      "type": "tool",
+      "uuid": "2c039fdb-2b28-4f9e-adad-d231a82068a3",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "5": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "errors": null,
+      "id": 5,
+      "input_connections": {
+        "infile": {
+          "id": 1,
+          "output_name": "resfinder"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Text reformatting",
+      "outputs": [
+        {
+          "name": "outfile",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 450,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "tool_shed_repository": {
+        "changeset_revision": "ab83aa685821",
+        "name": "text_processing",
+        "owner": "bgruening",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"NR>1 { s=$9; e=$10; if (s>e) { t=s; s=e; e=t } print $8\\\"\\\\t\\\"(s-1)\\\"\\\\t\\\"e\\\"\\\\t\\\"$2 }\\n\", \"infile\": null, \"infile|__identifier__\": \"KUH140013\", \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "9.5+galaxy3",
+      "type": "tool",
+      "uuid": "a2757b38-498a-4253-8bc9-7c30a4b020e4",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "6": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "errors": null,
+      "id": 6,
+      "input_connections": {
+        "infile": {
+          "id": 2,
+          "output_name": "annotation"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Text reformatting",
+      "outputs": [
+        {
+          "name": "outfile",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 450,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "tool_shed_repository": {
+        "changeset_revision": "ab83aa685821",
+        "name": "text_processing",
+        "owner": "bgruening",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"/family=/ { fam=\\\"IS\\\"; if (match($9, /family=[^;]+/)) fam=substr($9, RSTART+7, RLENGTH-7); print $1\\\"\\\\t\\\"($4-1)\\\"\\\\t\\\"$5\\\"\\\\t\\\"fam }\\n\", \"infile\": null, \"infile|__identifier__\": \"KUH140013\", \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "9.5+galaxy3",
+      "type": "tool",
+      "uuid": "6414598f-fb5f-4b54-9ef2-da0067f7e4a3",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "7": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "errors": null,
+      "id": 7,
+      "input_connections": {
+        "infile": {
+          "id": 2,
+          "output_name": "all_results"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Text reformatting",
+      "outputs": [
+        {
+          "name": "outfile",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 450,
+        "top": 370
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "tool_shed_repository": {
+        "changeset_revision": "ab83aa685821",
+        "name": "text_processing",
+        "owner": "bgruening",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"BEGIN{FS=OFS=\\\"\\\\t\\\"}\\nNR>1 && $1!=\\\"\\\" { print $1, ($4-1), $5, $2 }\\n\", \"infile\": null, \"infile|__identifier__\": \"KUH140013\", \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "9.5+galaxy3",
+      "type": "tool",
+      "uuid": "1f598b5e-aba4-41d4-98f3-c32f474e122a",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "8": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0",
+      "errors": null,
+      "id": 8,
+      "input_connections": {
+        "input_list": {
+          "id": 3,
+          "output_name": "summary"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Collapse Collection",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 450,
+        "top": 490
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0",
+      "tool_shed_repository": {
+        "changeset_revision": "90981f86000f",
+        "name": "collapse_collections",
+        "owner": "nml",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"filename\": {\"add_name\": true, \"__current_case__\": 0, \"place_name\": \"same_multiple\"}, \"input_list\": null, \"one_header\": true, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "5.1.0",
+      "type": "tool",
+      "uuid": "9902693f-7f2f-4eef-89a5-55981051351a",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "Collapse Collection on dataset 77, 80, and others and collection 74",
+          "output_name": "output",
+          "uuid": "26bc0096-520e-4e81-9b96-1a2882764cf6"
+        }
+      ]
+    },
+    "9": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "errors": null,
+      "id": 9,
+      "input_connections": {
+        "infile": {
+          "id": 4,
+          "output_name": "annotation_gff3"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Text reformatting",
+      "outputs": [
+        {
+          "name": "outfile",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 450,
+        "top": 250
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "tool_shed_repository": {
+        "changeset_revision": "ab83aa685821",
+        "name": "text_processing",
+        "owner": "bgruening",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"BEGIN{FS=OFS=\\\"\\\\t\\\"}\\n/^##FASTA/{exit}\\n/^#/{next}\\n$3==\\\"CDS\\\"{\\n  g=\\\"\\\";p=\\\"\\\";lt=\\\"\\\";\\n  if(match($9,/gene=[^;]+/)) g=substr($9,RSTART+5,RLENGTH-5);\\n  if(match($9,/product=[^;]+/)) p=substr($9,RSTART+8,RLENGTH-8);\\n  if(match($9,/locus_tag=[^;]+/)) lt=substr($9,RSTART+10,RLENGTH-10);\\n  name = (g!=\\\"\\\") ? g : ((p!=\\\"\\\") ? p : ((lt!=\\\"\\\") ? lt : \\\"CDS\\\"));\\n  gsub(/[ \\\\t]+/,\\\"_\\\",name);\\n  print $1,($4-1),$5,name;\\n}\\n\", \"infile\": null, \"infile|__identifier__\": \"KUH140013\", \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "9.5+galaxy3",
+      "type": "tool",
+      "uuid": "ff40bb02-b94e-4950-adac-77a4605061a1",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "10": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_sortbed/2.31.1+galaxy0",
+      "errors": null,
+      "id": 10,
+      "input_connections": {
+        "input": {
+          "id": 5,
+          "output_name": "outfile"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "bedtools SortBED",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 670,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_sortbed/2.31.1+galaxy0",
+      "tool_shed_repository": {
+        "changeset_revision": "2892111d91f8",
+        "name": "bedtools",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"genome_file_opts\": {\"genome_file_opts_selector\": \"loc\", \"__current_case__\": 0, \"genome\": null}, \"input\": null, \"input|__identifier__\": \"KUH140013\", \"option\": \"\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "2.31.1+galaxy0",
+      "type": "tool",
+      "uuid": "1a0bd720-acba-4b06-87de-9be03f97f0b9",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "11": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_sortbed/2.31.1+galaxy0",
+      "errors": null,
+      "id": 11,
+      "input_connections": {
+        "input": {
+          "id": 6,
+          "output_name": "outfile"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "bedtools SortBED",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 670,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_sortbed/2.31.1+galaxy0",
+      "tool_shed_repository": {
+        "changeset_revision": "2892111d91f8",
+        "name": "bedtools",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"genome_file_opts\": {\"genome_file_opts_selector\": \"loc\", \"__current_case__\": 0, \"genome\": null}, \"input\": null, \"input|__identifier__\": \"KUH140013\", \"option\": \"\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "2.31.1+galaxy0",
+      "type": "tool",
+      "uuid": "8d116037-578a-4ce0-b60d-c80e6c67d727",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "12": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/tbl2gff3/tbl2gff3/1.2",
+      "errors": null,
+      "id": 12,
+      "input_connections": {
+        "table": {
+          "id": 7,
+          "output_name": "outfile"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Table to GFF3",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "gff3"
+        }
+      ],
+      "position": {
+        "left": 670,
+        "top": 370
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/tbl2gff3/tbl2gff3/1.2",
+      "tool_shed_repository": {
+        "changeset_revision": "4a7f4b0cc0a3",
+        "name": "tbl2gff3",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"tabular\", \"attributes\": [{\"__index__\": 0, \"key\": \"Name\", \"val\": \"4\"}], \"begin\": \"2\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"end\": \"3\", \"rid\": \"1\", \"score\": \"\", \"source\": \"ISEScan\", \"strand\": {\"strand_select\": \"infer\", \"__current_case__\": 1}, \"table\": null, \"table|__identifier__\": \"KUH140013\", \"type\": \"mobile_genetic_element\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2",
+      "type": "tool",
+      "uuid": "e6cbfb22-35fa-4f66-85ce-1242e4947c03",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "13": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_sortbed/2.31.1+galaxy0",
+      "errors": null,
+      "id": 13,
+      "input_connections": {
+        "input": {
+          "id": 9,
+          "output_name": "outfile"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "bedtools SortBED",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 670,
+        "top": 250
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_sortbed/2.31.1+galaxy0",
+      "tool_shed_repository": {
+        "changeset_revision": "2892111d91f8",
+        "name": "bedtools",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"genome_file_opts\": {\"genome_file_opts_selector\": \"loc\", \"__current_case__\": 0, \"genome\": null}, \"input\": null, \"input|__identifier__\": \"KUH140013\", \"option\": \"\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "2.31.1+galaxy0",
+      "type": "tool",
+      "uuid": "f1f2ae0a-986b-4c80-9ce6-0c662227b72e",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "14": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/tbl2gff3/tbl2gff3/1.2",
+      "errors": null,
+      "id": 14,
+      "input_connections": {
+        "table": {
+          "id": 10,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Table to GFF3",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "gff3"
+        }
+      ],
+      "position": {
+        "left": 890,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/tbl2gff3/tbl2gff3/1.2",
+      "tool_shed_repository": {
+        "changeset_revision": "4a7f4b0cc0a3",
+        "name": "tbl2gff3",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"tabular\", \"attributes\": [{\"__index__\": 0, \"key\": \"Name\", \"val\": \"4\"}], \"begin\": \"2\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"end\": \"3\", \"rid\": \"1\", \"score\": \"\", \"source\": \"staramr\", \"strand\": {\"strand_select\": \"infer\", \"__current_case__\": 1}, \"table\": null, \"table|__identifier__\": \"KUH140013\", \"type\": \"gene\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2",
+      "type": "tool",
+      "uuid": "2d480ba2-8116-4883-9071-5a1fc587cb3b",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "15": {
+      "annotation": "",
+      "content_id": "__BUILD_LIST__",
+      "errors": null,
+      "id": 15,
+      "input_connections": {
+        "datasets_0|input": {
+          "id": 11,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Build list",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 890,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "__BUILD_LIST__",
+      "tool_state": "{\"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"datasets\": [{\"__index__\": 0, \"input\": null, \"id_cond\": {\"id_select\": \"idx\", \"__current_case__\": 0}}], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2.0",
+      "type": "tool",
+      "uuid": "fcc802d2-976a-4bfd-a638-4b43586f8fe4",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "16": {
+      "annotation": "",
+      "content_id": "__BUILD_LIST__",
+      "errors": null,
+      "id": 16,
+      "input_connections": {
+        "datasets_0|input": {
+          "id": 13,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Build list",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 890,
+        "top": 250
+      },
+      "post_job_actions": {},
+      "tool_id": "__BUILD_LIST__",
+      "tool_state": "{\"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"datasets\": [{\"__index__\": 0, \"input\": null, \"id_cond\": {\"id_select\": \"idx\", \"__current_case__\": 0}}], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2.0",
+      "type": "tool",
+      "uuid": "e87d19ae-6cb5-4425-895c-b9c30fc57cf9",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "17": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy1",
+      "errors": null,
+      "id": 17,
+      "input_connections": {
+        "reference_genome|genome": {
+          "id": 0,
+          "output_name": "output"
+        },
+        "track_groups_0|data_tracks_0|data_format|annotation": {
+          "id": 32,
+          "output_name": "output"
+        },
+        "track_groups_0|data_tracks_1|data_format|annotation": {
+          "id": 33,
+          "output_name": "output"
+        },
+        "track_groups_0|data_tracks_2|data_format|annotation": {
+          "id": 34,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "JBrowse",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "html"
+        }
+      ],
+      "position": {
+        "left": 1110,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy1",
+      "tool_shed_repository": {
+        "changeset_revision": "a6e57ff585c0",
+        "name": "jbrowse",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"fasta\", \"action\": {\"action_select\": \"create\", \"__current_case__\": 0}, \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"gencode\": \"1\", \"jbgen\": {\"defaultLocation\": \"\", \"trackPadding\": \"20\", \"shareLink\": true, \"aboutDescription\": \"\", \"show_tracklist\": true, \"show_nav\": true, \"show_overview\": true, \"show_menu\": true, \"hideGenomeOptions\": false}, \"plugins\": {\"BlastView\": true, \"ComboTrackSelector\": false, \"GCContent\": false}, \"reference_genome\": {\"genome_type_select\": \"history\", \"__current_case__\": 1, \"genome\": null}, \"reference_genome|genome|__identifier__\": \"KUH140013\", \"standalone\": \"minimal\", \"track_groups\": [{\"__index__\": 0, \"category\": \"MRSA mobile-AMR\", \"data_tracks\": [{\"__index__\": 0, \"data_format\": {\"data_format_select\": \"gene_calls\", \"__current_case__\": 2, \"annotation\": null, \"match_part\": {\"match_part_select\": false, \"__current_case__\": 1}, \"index\": false, \"track_config\": {\"track_class\": \"NeatHTMLFeatures/View/Track/NeatFeatures\", \"__current_case__\": 3, \"html_options\": {\"topLevelFeatures\": null}}, \"jbstyle\": {\"style_classname\": \"feature\", \"style_label\": \"product,name,id\", \"style_description\": \"note,description\", \"style_height\": \"10px\", \"max_height\": \"600\"}, \"jbcolor_scale\": {\"color_score\": {\"color_score_select\": \"none\", \"__current_case__\": 0, \"color\": {\"color_select\": \"automatic\", \"__current_case__\": 0}}}, \"jb_custom_config\": {\"option\": []}, \"jbmenu\": {\"track_menu\": []}, \"track_visibility\": \"default_off\", \"override_apollo_plugins\": \"False\", \"override_apollo_drag\": \"False\"}}, {\"__index__\": 1, \"data_format\": {\"data_format_select\": \"gene_calls\", \"__current_case__\": 2, \"annotation\": null, \"match_part\": {\"match_part_select\": false, \"__current_case__\": 1}, \"index\": false, \"track_config\": {\"track_class\": \"NeatHTMLFeatures/View/Track/NeatFeatures\", \"__current_case__\": 3, \"html_options\": {\"topLevelFeatures\": null}}, \"jbstyle\": {\"style_classname\": \"feature\", \"style_label\": \"product,name,id\", \"style_description\": \"note,description\", \"style_height\": \"10px\", \"max_height\": \"600\"}, \"jbcolor_scale\": {\"color_score\": {\"color_score_select\": \"none\", \"__current_case__\": 0, \"color\": {\"color_select\": \"automatic\", \"__current_case__\": 0}}}, \"jb_custom_config\": {\"option\": []}, \"jbmenu\": {\"track_menu\": []}, \"track_visibility\": \"default_off\", \"override_apollo_plugins\": \"False\", \"override_apollo_drag\": \"False\"}}, {\"__index__\": 2, \"data_format\": {\"data_format_select\": \"gene_calls\", \"__current_case__\": 2, \"annotation\": null, \"match_part\": {\"match_part_select\": false, \"__current_case__\": 1}, \"index\": false, \"track_config\": {\"track_class\": \"NeatHTMLFeatures/View/Track/NeatFeatures\", \"__current_case__\": 3, \"html_options\": {\"topLevelFeatures\": null}}, \"jbstyle\": {\"style_classname\": \"feature\", \"style_label\": \"product,name,id\", \"style_description\": \"note,description\", \"style_height\": \"10px\", \"max_height\": \"600\"}, \"jbcolor_scale\": {\"color_score\": {\"color_score_select\": \"none\", \"__current_case__\": 0, \"color\": {\"color_select\": \"automatic\", \"__current_case__\": 0}}}, \"jb_custom_config\": {\"option\": []}, \"jbmenu\": {\"track_menu\": []}, \"track_visibility\": \"default_off\", \"override_apollo_plugins\": \"False\", \"override_apollo_drag\": \"False\"}}]}], \"track_groups_0|data_tracks_0|data_format|annotation1|__identifier__\": \"KUH140013\", \"track_groups_0|data_tracks_0|data_format|annotation|__identifier__\": \"KUH140013\", \"track_groups_0|data_tracks_1|data_format|annotation1|__identifier__\": \"KUH140013\", \"track_groups_0|data_tracks_1|data_format|annotation|__identifier__\": \"KUH140013\", \"track_groups_0|data_tracks_2|data_format|annotation1|__identifier__\": \"KUH140013\", \"track_groups_0|data_tracks_2|data_format|annotation|__identifier__\": \"KUH140013\", \"uglyTestingHack\": \"\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.16.11+galaxy1",
+      "type": "tool",
+      "uuid": "2d4e5340-487d-4e2c-9aef-eb62b2b717ab",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "18": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_closestbed/2.31.1+galaxy1",
+      "errors": null,
+      "id": 18,
+      "input_connections": {
+        "inputA": {
+          "id": 10,
+          "output_name": "output"
+        },
+        "overlap_with|inputB": {
+          "id": 15,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "bedtools ClosestBed",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 1110,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_closestbed/2.31.1+galaxy1",
+      "tool_shed_repository": {
+        "changeset_revision": "2892111d91f8",
+        "name": "bedtools",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"addition\": true, \"addition2\": {\"addition2_select\": \"\", \"__current_case__\": 0}, \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"inputA\": null, \"io\": false, \"k\": \"1\", \"mdb\": \"each\", \"overlap_with\": {\"source\": \"history\", \"__current_case__\": 1, \"inputB\": null}, \"strand\": \"\", \"ties\": \"all\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "2.31.1+galaxy1",
+      "type": "tool",
+      "uuid": "82f88de2-a3a5-4569-b706-b65d7411b93d",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "19": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_closestbed/2.31.1+galaxy1",
+      "errors": null,
+      "id": 19,
+      "input_connections": {
+        "inputA": {
+          "id": 10,
+          "output_name": "output"
+        },
+        "overlap_with|inputB": {
+          "id": 16,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "bedtools ClosestBed",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 1110,
+        "top": 250
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/bedtools/bedtools_closestbed/2.31.1+galaxy1",
+      "tool_shed_repository": {
+        "changeset_revision": "2892111d91f8",
+        "name": "bedtools",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"addition\": true, \"addition2\": {\"addition2_select\": \"\", \"__current_case__\": 0}, \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"inputA\": null, \"io\": true, \"k\": \"1\", \"mdb\": \"each\", \"overlap_with\": {\"source\": \"history\", \"__current_case__\": 1, \"inputB\": null}, \"strand\": \"\", \"ties\": \"all\", \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "2.31.1+galaxy1",
+      "type": "tool",
+      "uuid": "2133bdd4-7e36-43b1-a530-97ab93c097fe",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "20": {
+      "annotation": "",
+      "content_id": "__EXTRACT_DATASET__",
+      "errors": null,
+      "id": 20,
+      "input_connections": {
+        "input": {
+          "id": 17,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Extract dataset",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "data"
+        }
+      ],
+      "position": {
+        "left": 1330,
+        "top": 250
+      },
+      "post_job_actions": {},
+      "tool_id": "__EXTRACT_DATASET__",
+      "tool_state": "{\"input\": null, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"KUH140013\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.0.2",
+      "type": "tool",
+      "uuid": "8dbb425b-9912-4b64-b797-8db84de4b6ae",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "KUH140013",
+          "output_name": "output",
+          "uuid": "17a2d471-7c7a-4bf5-bc4d-04dfef578406"
+        }
+      ]
+    },
+    "21": {
+      "annotation": "",
+      "content_id": "__EXTRACT_DATASET__",
+      "errors": null,
+      "id": 21,
+      "input_connections": {
+        "input": {
+          "id": 17,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Extract dataset",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "data"
+        }
+      ],
+      "position": {
+        "left": 1330,
+        "top": 370
+      },
+      "post_job_actions": {},
+      "tool_id": "__EXTRACT_DATASET__",
+      "tool_state": "{\"input\": null, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"KUH140046\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.0.2",
+      "type": "tool",
+      "uuid": "413b98eb-850b-4fd6-b656-630f7f538d30",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "KUH140046",
+          "output_name": "output",
+          "uuid": "6d0702a6-e123-4f3d-ad72-58e330e63c63"
+        }
+      ]
+    },
+    "22": {
+      "annotation": "",
+      "content_id": "__EXTRACT_DATASET__",
+      "errors": null,
+      "id": 22,
+      "input_connections": {
+        "input": {
+          "id": 17,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Extract dataset",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "data"
+        }
+      ],
+      "position": {
+        "left": 1330,
+        "top": 490
+      },
+      "post_job_actions": {},
+      "tool_id": "__EXTRACT_DATASET__",
+      "tool_state": "{\"input\": null, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"KUH180129\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.0.2",
+      "type": "tool",
+      "uuid": "2ab2edda-8284-439b-ad5f-9faf9f64f517",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "KUH180129",
+          "output_name": "output",
+          "uuid": "3f55d488-e13f-4736-9dbc-d7d827289454"
+        }
+      ]
+    },
+    "23": {
+      "annotation": "",
+      "content_id": "__EXTRACT_DATASET__",
+      "errors": null,
+      "id": 23,
+      "input_connections": {
+        "input": {
+          "id": 17,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Extract dataset",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "data"
+        }
+      ],
+      "position": {
+        "left": 1330,
+        "top": 610
+      },
+      "post_job_actions": {},
+      "tool_id": "__EXTRACT_DATASET__",
+      "tool_state": "{\"input\": null, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"KUN1163\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.0.2",
+      "type": "tool",
+      "uuid": "fa3d1bdc-c357-4056-8420-b8eca92efc94",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "KUN1163",
+          "output_name": "output",
+          "uuid": "1b6dd4a7-0212-4150-9957-206eb0bea311"
+        }
+      ]
+    },
+    "24": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0",
+      "errors": null,
+      "id": 24,
+      "input_connections": {
+        "input_list": {
+          "id": 18,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Collapse Collection",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 1330,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0",
+      "tool_shed_repository": {
+        "changeset_revision": "90981f86000f",
+        "name": "collapse_collections",
+        "owner": "nml",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"filename\": {\"add_name\": true, \"__current_case__\": 0, \"place_name\": \"same_multiple\"}, \"input_list\": null, \"one_header\": false, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "5.1.0",
+      "type": "tool",
+      "uuid": "76ffd7f5-1da8-4af5-b4b3-1f7d9d9fe9a6",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "Collapse Collection on dataset 249-252 and collection 248",
+          "output_name": "output",
+          "uuid": "bd337a88-f3cf-45ad-a1a4-3bfeb189dea3"
+        }
+      ]
+    },
+    "25": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0",
+      "errors": null,
+      "id": 25,
+      "input_connections": {
+        "input_list": {
+          "id": 19,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Collapse Collection",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 1330,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0",
+      "tool_shed_repository": {
+        "changeset_revision": "90981f86000f",
+        "name": "collapse_collections",
+        "owner": "nml",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"filename\": {\"add_name\": true, \"__current_case__\": 0, \"place_name\": \"same_multiple\"}, \"input_list\": null, \"one_header\": false, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "5.1.0",
+      "type": "tool",
+      "uuid": "c5908123-c40b-4794-980c-c03a41f0f0c8",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "26": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "errors": null,
+      "id": 26,
+      "input_connections": {
+        "infile": {
+          "id": 24,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Text reformatting",
+      "outputs": [
+        {
+          "name": "outfile",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 1550,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "tool_shed_repository": {
+        "changeset_revision": "ab83aa685821",
+        "name": "text_processing",
+        "owner": "bgruening",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"BEGIN{FS=OFS=\\\"\\\\t\\\"}\\n{ iso[NR]=$1; con[NR]=$2; gene[NR]=$5; n=NR; if($4+0>mx[$2]) mx[$2]=$4+0; isos[$1]=1 }\\nEND{\\n  for(k=1;k<=n;k++){\\n    code=(mx[con[k]]<200000)?2:1; g=gene[k]; ix=iso[k];\\n    if(!((g SUBSEP ix) in L) || code==2) L[g,ix]=code; genes[g]=1;\\n  }\\n  ni=0; for(s in isos){ni++; A[ni]=s}\\n  for(a=1;a<=ni;a++)for(b=a+1;b<=ni;b++)if(A[b]<A[a]){t=A[a];A[a]=A[b];A[b]=t}\\n  ng=0; for(g in genes){ng++; GN[ng]=g}\\n  for(a=1;a<=ng;a++)for(b=a+1;b<=ng;b++)if(GN[b]<GN[a]){t=GN[a];GN[a]=GN[b];GN[b]=t}\\n  printf \\\"Gene\\\"; for(a=1;a<=ni;a++) printf \\\"%s%s\\\",OFS,A[a]; printf \\\"\\\\n\\\";\\n  for(r=1;r<=ng;r++){ printf \\\"%s\\\",GN[r]; for(a=1;a<=ni;a++) printf \\\"%s%d\\\",OFS,(L[GN[r],A[a]]+0); printf \\\"\\\\n\\\"; }\\n}\\n\", \"infile\": null, \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "9.5+galaxy3",
+      "type": "tool",
+      "uuid": "817094e8-4e87-4c44-9f6e-9331d5ff26df",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "27": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "errors": null,
+      "id": 27,
+      "input_connections": {
+        "infile": {
+          "id": 24,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Text reformatting",
+      "outputs": [
+        {
+          "name": "outfile",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 1550,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "tool_shed_repository": {
+        "changeset_revision": "ab83aa685821",
+        "name": "text_processing",
+        "owner": "bgruening",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"BEGIN{FS=OFS=\\\"\\\\t\\\"}\\n{ iso[NR]=$1; con[NR]=$2; di[NR]=$10; n=NR; if($4+0>mx[$2]) mx[$2]=$4+0; isos[$1]=1 }\\nEND{\\n  for(k=1;k<=n;k++){\\n    code=(mx[con[k]]<200000)?2:1;\\n    if(code==2) ctx=\\\"Plasmid-borne\\\";\\n    else if(di[k]+0<1000) ctx=\\\"Chromosomal IS-adjacent (<1kb)\\\";\\n    else ctx=\\\"Chromosomal distal\\\";\\n    M[ctx,iso[k]]++;\\n  }\\n  ni=0; for(s in isos){ni++; A[ni]=s}\\n  for(a=1;a<=ni;a++)for(b=a+1;b<=ni;b++)if(A[b]<A[a]){t=A[a];A[a]=A[b];A[b]=t}\\n  split(\\\"Plasmid-borne|Chromosomal IS-adjacent (<1kb)|Chromosomal distal\\\",CTX,\\\"|\\\");\\n  printf \\\"Context\\\"; for(a=1;a<=ni;a++) printf \\\"%s%s\\\",OFS,A[a]; printf \\\"\\\\n\\\";\\n  for(r=1;r<=3;r++){ printf \\\"%s\\\",CTX[r]; for(a=1;a<=ni;a++) printf \\\"%s%d\\\",OFS,(M[CTX[r],A[a]]+0); printf \\\"\\\\n\\\"; }\\n}\\n\", \"infile\": null, \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "9.5+galaxy3",
+      "type": "tool",
+      "uuid": "415a595e-51fe-497c-9bc0-a74e050e54a6",
+      "when": null,
+      "workflow_outputs": []
+    },
+    "28": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "errors": null,
+      "id": 28,
+      "input_connections": {
+        "infile": {
+          "id": 25,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Text reformatting",
+      "outputs": [
+        {
+          "name": "outfile",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 1550,
+        "top": 250
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3",
+      "tool_shed_repository": {
+        "changeset_revision": "ab83aa685821",
+        "name": "text_processing",
+        "owner": "bgruening",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"code\": \"BEGIN{FS=OFS=\\\"\\\\t\\\"; print \\\"Isolate\\\",\\\"ARG\\\",\\\"Nearest_flanking_gene\\\",\\\"Distance_bp\\\"}\\n{ print $1,$5,$9,$10 }\\n\", \"infile\": null, \"variables\": [], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "9.5+galaxy3",
+      "type": "tool",
+      "uuid": "0e2c07b4-fa6d-48ef-b9a5-1f9db88b7f98",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "Text reformatting on dataset 259",
+          "output_name": "outfile",
+          "uuid": "9a3e7b3b-9c5c-4c5a-918e-223af894d1f5"
+        }
+      ]
+    },
+    "29": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/ggplot2_heatmap2/ggplot2_heatmap2/3.3.0+galaxy0",
+      "errors": null,
+      "id": 29,
+      "input_connections": {
+        "input1": {
+          "id": 26,
+          "output_name": "outfile"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "heatmap2",
+      "outputs": [
+        {
+          "name": "output1",
+          "type": "pdf"
+        }
+      ],
+      "position": {
+        "left": 1770,
+        "top": 10
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/ggplot2_heatmap2/ggplot2_heatmap2/3.3.0+galaxy0",
+      "tool_shed_repository": {
+        "changeset_revision": "6a097d09fca3",
+        "name": "ggplot2_heatmap2",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"cluster_cond\": {\"cluster\": \"no\", \"__current_case__\": 1}, \"colorchoice\": {\"type\": \"palettes\", \"__current_case__\": 0, \"name\": \"BrBG\"}, \"image_file_format\": \"png\", \"input1\": null, \"key\": null, \"labels\": \"both\", \"title\": \"ARG genomic location (0=absent, 1=chromosome, 2=plasmid)\", \"transform\": \"none\", \"zscore_cond\": {\"zscore\": \"none\", \"__current_case__\": 0, \"scale\": \"none\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "3.3.0+galaxy0",
+      "type": "tool",
+      "uuid": "342040ce-adc6-410d-8ac5-db82108eb23e",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "heatmap2 on dataset 260",
+          "output_name": "output1",
+          "uuid": "c1bb1dc3-a74a-4f1a-b926-899fcc83163e"
+        }
+      ]
+    },
+    "30": {
+      "annotation": "",
+      "content_id": "toolshed.g2.bx.psu.edu/repos/iuc/ggplot2_heatmap2/ggplot2_heatmap2/3.3.0+galaxy0",
+      "errors": null,
+      "id": 30,
+      "input_connections": {
+        "input1": {
+          "id": 27,
+          "output_name": "outfile"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "heatmap2",
+      "outputs": [
+        {
+          "name": "output1",
+          "type": "pdf"
+        }
+      ],
+      "position": {
+        "left": 1770,
+        "top": 130
+      },
+      "post_job_actions": {},
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/ggplot2_heatmap2/ggplot2_heatmap2/3.3.0+galaxy0",
+      "tool_shed_repository": {
+        "changeset_revision": "6a097d09fca3",
+        "name": "ggplot2_heatmap2",
+        "owner": "iuc",
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": "{\"__input_ext\": \"input\", \"__workflow_invocation_uuid__\": \"229eb02e690e11f1a12a1f8674e7b016\", \"chromInfo\": \"/Users/jxc755/projects/worktrees/galaxy/branch/history_pages/tool-data/shared/ucsc/chrom/?.len\", \"cluster_cond\": {\"cluster\": \"no\", \"__current_case__\": 1}, \"colorchoice\": {\"type\": \"palettes\", \"__current_case__\": 0, \"name\": \"BrBG\"}, \"image_file_format\": \"png\", \"input1\": null, \"key\": null, \"labels\": \"both\", \"title\": \"ARG counts by mobile context\", \"transform\": \"none\", \"zscore_cond\": {\"zscore\": \"none\", \"__current_case__\": 0, \"scale\": \"none\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "3.3.0+galaxy0",
+      "type": "tool",
+      "uuid": "6986ce72-a941-4fdb-9f15-994358045735",
+      "when": null,
+      "workflow_outputs": [
+        {
+          "label": "heatmap2 on dataset 261",
+          "output_name": "output1",
+          "uuid": "8c2cd999-33cc-4ae0-8842-78c2b2889e4a"
+        }
+      ]
+    },
+    "31": {
+      "annotation": "",
+      "content_id": "__BUILD_LIST__",
+      "errors": null,
+      "id": 31,
+      "input_connections": {
+        "datasets_0|input": {
+          "id": 0,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": "build_list_for_staramr",
+      "name": "Build list",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 200,
+        "top": 600
+      },
+      "post_job_actions": {},
+      "tool_id": "__BUILD_LIST__",
+      "tool_state": "{\"datasets\": [{\"__index__\": 0, \"input\": null, \"id_cond\": {\"id_select\": \"idx\", \"__current_case__\": 0}}], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2.0",
+      "type": "tool",
+      "uuid": null,
+      "when": null,
+      "workflow_outputs": []
+    },
+    "32": {
+      "annotation": "",
+      "content_id": "__BUILD_LIST__",
+      "errors": null,
+      "id": 32,
+      "input_connections": {
+        "datasets_0|input": {
+          "id": 14,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Build list",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 700,
+        "top": 300
+      },
+      "post_job_actions": {},
+      "tool_id": "__BUILD_LIST__",
+      "tool_state": "{\"datasets\": [{\"__index__\": 0, \"input\": null, \"id_cond\": {\"id_select\": \"idx\", \"__current_case__\": 0}}], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2.0",
+      "type": "tool",
+      "uuid": null,
+      "when": null,
+      "workflow_outputs": []
+    },
+    "33": {
+      "annotation": "",
+      "content_id": "__BUILD_LIST__",
+      "errors": null,
+      "id": 33,
+      "input_connections": {
+        "datasets_0|input": {
+          "id": 12,
+          "output_name": "output"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Build list",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 700,
+        "top": 420
+      },
+      "post_job_actions": {},
+      "tool_id": "__BUILD_LIST__",
+      "tool_state": "{\"datasets\": [{\"__index__\": 0, \"input\": null, \"id_cond\": {\"id_select\": \"idx\", \"__current_case__\": 0}}], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2.0",
+      "type": "tool",
+      "uuid": null,
+      "when": null,
+      "workflow_outputs": []
+    },
+    "34": {
+      "annotation": "",
+      "content_id": "__BUILD_LIST__",
+      "errors": null,
+      "id": 34,
+      "input_connections": {
+        "datasets_0|input": {
+          "id": 4,
+          "output_name": "annotation_gff3"
+        }
+      },
+      "inputs": [],
+      "label": null,
+      "name": "Build list",
+      "outputs": [
+        {
+          "name": "output",
+          "type": "input"
+        }
+      ],
+      "position": {
+        "left": 700,
+        "top": 540
+      },
+      "post_job_actions": {},
+      "tool_id": "__BUILD_LIST__",
+      "tool_state": "{\"datasets\": [{\"__index__\": 0, \"input\": null, \"id_cond\": {\"id_select\": \"idx\", \"__current_case__\": 0}}], \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+      "tool_uuid": null,
+      "tool_version": "1.2.0",
+      "type": "tool",
+      "uuid": null,
+      "when": null,
+      "workflow_outputs": []
+    }
+  },
+  "tags": [],
+  "uuid": "992c4cc3-7d9e-49ec-8e60-64ee399ea9c2",
+  "version": 0
+}

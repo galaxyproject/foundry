@@ -6,28 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 2,
     "content_hash": "bb854b2f4e8faf55fb43e623f6c392af1f6e46b1a6aecf4015e402ea2ebcd59a",
-    "commit": "770df68989726630336c6cfb3a8d4b69d41b60c0"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-19T00:00:49.684Z",
-  "cast_date": "2026-06-19",
-  "cast_revision": 3,
-  "cast_history": [
-    {
-      "rev": 1,
-      "date": "2026-06-18",
-      "note": "built-in/stock tool branch via galaxy-tool-cache bare-id flow"
-    },
-    {
-      "rev": 2,
-      "date": "2026-06-18",
-      "note": "gxwf pinned to @galaxy-tool-util/cli ^1.8.1"
-    },
-    {
-      "rev": 3,
-      "date": "2026-06-19",
-      "note": "cli sidecars now carry args/options from @galaxy-tool-util/cli/meta; note bodies drop redundant flag lists"
-    }
-  ],
+  "cast_at": "2026-06-19T00:20:04.173Z",
   "refs": [
     {
       "kind": "cli-command",

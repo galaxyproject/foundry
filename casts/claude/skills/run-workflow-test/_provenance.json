@@ -4,11 +4,11 @@
   "mold": {
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
-    "revision": 3,
-    "content_hash": "57cd9ce7c631b55c071a25c7869a20237216e4dbbb5eb86f45dcfd5064404c77",
-    "commit": "e966a94f2a384913d0105082e8ccacd514e4937f"
+    "revision": 4,
+    "content_hash": "b44dcd245568ea0d4ab25de9752c4819c02e18e8ff1b4fe68befee16aa3966aa",
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-11T22:20:44.320Z",
+  "cast_at": "2026-06-19T00:21:44.379Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Run static schema and workflow-label checks before expensive workflow execution.",
       "trigger": "Before invoking Planemo when a Galaxy workflow test file is present.",
       "src_hash": "98bdbc75c14b520e6dd03da5b08488890bced76569a55d202bb8e807757cf1ed",
-      "dst_hash": "e7ed4915412a943bc7a7889011d3811ff1da55f7ed039264cea5de3f05c09345",
+      "dst_hash": "973184698733ffb86bb5a15781902846afec311047f5684f779f8ad023e5d24c",
       "source": "deterministic"
     },
     {
@@ -98,5 +98,16 @@
       "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
       "source": "deterministic"
     }
-  ]
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "workflow-test-result",
+        "kind": "json",
+        "default_filename": "workflow-test-result.json",
+        "description": "Structured pass/fail plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output."
+      }
+    ],
+    "consumes": []
+  }
 }

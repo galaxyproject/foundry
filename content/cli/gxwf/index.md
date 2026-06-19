@@ -5,8 +5,8 @@ origin: npm
 package: "@galaxy-tool-util/cli"
 package_version: "^1.8.1"
 invoke: gxwf
-invoke_fallback: "npx --package @galaxy-tool-util/cli@1.8.1 gxwf"
-availability_check: "gxwf --version"
+invoke_fallback: "npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf"
+availability_check: "gxwf --help | grep -q draft-validate"
 docs_url: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli"
 tags:
   - cli-tool
@@ -25,4 +25,8 @@ Foundry's primary design-time CLI for Galaxy workflow validation and conversion.
 
 ## Install
 
-`npx --package @galaxy-tool-util/cli@1.8.1 gxwf <subcommand>` runs without a global install. For repeat use, `npm install -g @galaxy-tool-util/cli@1.8.1`.
+`npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf <subcommand>` runs without a global install. For repeat use, `npm install -g @galaxy-tool-util/cli@1.8.1`.
+
+The pin is load-bearing: the draft-tier subcommands (`draft-validate`, `draft-next-step`, `draft-extract`) the per-step authoring loop depends on first shipped in `1.7.2`, and the floor tracks `1.8.1` to stay in lockstep with [[galaxy-tool-cache]] (same npm package) where stock/built-in tool resolution lands. Pinning the `npx --package` spec forces resolution past any stale install. Tracks the `^1.8.1` devDependency in the repo `package.json` / `pnpm-lock.yaml`.
+
+`availability_check` is a **capability probe, not a version check**: `gxwf --version` reports a hardcoded `1.0.0` regardless of the published package version, so a version-number gate would reject the correct CLI. `gxwf --help | grep -q draft-validate` instead asserts the actual draft-tier capability the pin exists for — it passes on a CLI that has the subcommands and fails on a genuinely older one, independent of the bogus version string.

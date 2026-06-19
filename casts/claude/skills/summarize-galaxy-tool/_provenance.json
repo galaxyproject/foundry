@@ -6,28 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 7,
     "content_hash": "f02491928ff799d2ce8ed27d84da66f90bbde8b18b71bdbb2c2e07f2221beb46",
-    "commit": "770df68989726630336c6cfb3a8d4b69d41b60c0"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-19T00:00:48.390Z",
-  "cast_date": "2026-06-19",
-  "cast_revision": 3,
-  "cast_history": [
-    {
-      "rev": 1,
-      "date": "2026-06-18",
-      "note": "refresh galaxy-tool-cache stock-tool framing + 1.8.1 pin"
-    },
-    {
-      "rev": 2,
-      "date": "2026-06-18",
-      "note": "built-in/stock tool branch via galaxy-tool-cache bare-id flow"
-    },
-    {
-      "rev": 3,
-      "date": "2026-06-19",
-      "note": "cli sidecars now carry args/options from @galaxy-tool-util/cli/meta; note bodies drop redundant flag lists"
-    }
-  ],
+  "cast_at": "2026-06-19T00:20:02.876Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -87,8 +68,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
-      "src_hash": "1358e0b5952b78cd607637172216d66c5f830f99ff7f9f087279e322a9e446ca",
-      "dst_hash": "1358e0b5952b78cd607637172216d66c5f830f99ff7f9f087279e322a9e446ca",
+      "src_hash": "885515a63ddbfe1c68182ce24bd88e27e7a8db0aa381dcd98e86c59fd62b3636",
+      "dst_hash": "885515a63ddbfe1c68182ce24bd88e27e7a8db0aa381dcd98e86c59fd62b3636",
       "source": "deterministic"
     },
     {

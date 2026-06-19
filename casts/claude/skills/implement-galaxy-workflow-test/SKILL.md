@@ -14,7 +14,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `galaxy-test-plan`. Schema: galaxy-workflow-test-plan. Produced by `cwl-test-to-galaxy-test-plan`, `freeform-summary-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`. Schema-valid Galaxy test plan (galaxy-workflow-test-plan) from a *-test-to-galaxy-test-plan Mold; carries job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.
-- Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`. gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against.
+- Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against.
 - Read artifact `test-data-refs`. Produced by `find-test-data`, `paper-to-test-data`. Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.
 
 ## Outputs
@@ -23,9 +23,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
-  Check: `gxwf --version`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@^1.8.1`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 - **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).
   Ephemeral run: `uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo`.

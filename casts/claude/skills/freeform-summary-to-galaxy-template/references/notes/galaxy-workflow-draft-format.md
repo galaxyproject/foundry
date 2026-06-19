@@ -15,6 +15,7 @@ related_notes:
   - "[[galaxy-data-flow-draft-contract]]"
   - "[[discover-shed-tool]]"
   - "[[galaxy-workflow-draft]]"
+  - "[[open-requirements-ledger]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
@@ -22,6 +23,7 @@ related_molds:
   - "[[compare-against-iwc-exemplar]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[advance-galaxy-draft-step]]"
+  - "[[repair-galaxy-draft-topology]]"
 summary: "gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step."
 ---
 
@@ -42,6 +44,8 @@ Each tool step is resolved to the tier its evidence supports — **evidence-gate
 - **Deferred** — `tool_id: TODO`, full `_plan_*`. Use when the evidence is weak, multi-candidate, a domain-specific scientific tool with no covering pattern or exemplar, or a corpus gap.
 
 Pin identity only on strong evidence — a wrapper an exemplar actually uses for the same operation, a worked pattern example, or a tool the source names explicitly — never on plausibility: a wrong pinned `tool_id` lets [[discover-shed-tool]] resolve the wrong tool's changeset instead of searching afresh. Port names follow the wrapper: real on a Resolved step, `TODO_<hint>` sentinels until the step resolves.
+
+The per-step loop does not edit topology — but it may **escalate back to a template-tier Mold** when implementation proves the settled topology can't support a declared step (see "Topology repair escalation" below). Wiring authority stays in the template tier; the loop only gains a path back to it.
 
 ## Relaxations vs. gxformat2
 
@@ -112,6 +116,17 @@ steps:
 - Carves a stable handoff between the template Mold and the per-step implementation Mold without sneaking tool resolution into either side.
 - Makes the boundary between topology (settled upstream) and wrapper-tier (deferred) explicit — the `_plan_*` family lives squarely on the deferred side.
 - Free-text `_plan_*` is intentional for v1: it lets the templating agent record intent without a contract pretending to be parameterizable yet. Structuring those fields is open work — see each template Mold's `refinement.md`.
+
+## Topology repair escalation
+
+The template Mold settles topology, but it can miss a **computability** gap: a step whose declared output needs evidence no wired input carries. The connection graph validates — ports connect — yet the step can't be implemented. The template's computability review pass catches most of these and either wires the producer or records the gap in the [[open-requirements-ledger]]; the rest surface in the per-step loop.
+
+When one surfaces, the per-step loop does not author topology to fix it. It **escalates**:
+
+- [[implement-galaxy-tool-step]] detects, while implementing, that the declared output can't be computed from the wired inputs. It appends a blocking entry to the [[open-requirements-ledger]] and falls through rather than fabricating the output.
+- [[repair-galaxy-draft-topology]] — a template-tier Mold sharing the template's reference set — reads the blocking entries and re-wires the affected region: one producer step, a small sub-path, or honest narrowing of the output. New steps land at draft (wrapper-tier `TODO`) tier, so the existing discover-or-author → implement machinery realizes them.
+
+This is **repair**, distinct from **settling**: it is narrow (one named region), reactive (only a detected computability gap triggers it), and bounded. The loop's convergence gate counts open blocking entries in the ledger; each escalation must strictly reduce that count, under a hard cap on escalations. When the cap is reached with entries still open, they are **surrendered** — written into the final draft as labelled gaps — the clean terminal that replaces spin-or-fabricate. So the boundary "topology decisions do not belong in the per-step loop" still holds: the loop never decides topology, it returns the decision to the template tier.
 
 ## Open work
 

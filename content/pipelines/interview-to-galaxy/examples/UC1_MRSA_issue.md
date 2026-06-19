@@ -3,7 +3,7 @@
 > Pulled-down GitHub issue used as the **effective result of the INTERVIEW → GALAXY interview**
 > (the live interview mechanics are harness-owned and precede pipeline phase 1).
 > Source: galaxy-brain issue #12 (captured).
-> Paired aspirational target: `UC1_MRSA_extracted.ga` (extracted from a Galaxy history; **not human-validated**).
+> Paired reference target: `UC1_MRSA_Bakta_JBrowse_faithful.ga` (extracted from a Galaxy history; re-runs byte-identical to the validated golden — a compare reference, not a hard oracle).
 
 ---
 

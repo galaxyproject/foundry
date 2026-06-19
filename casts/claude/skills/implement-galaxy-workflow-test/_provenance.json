@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 7,
     "content_hash": "34328572486dd07baeda8335cac1884e405e3c14af2f275f4ced700576a85bb5",
-    "commit": "042a5219728e058b2d8a989875c0ac03a19dc592"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-16T18:54:05.273Z",
+  "cast_at": "2026-06-19T00:21:42.027Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution.",
       "trigger": "After authoring or editing a Galaxy workflow test file and before Planemo invocation.",
       "src_hash": "98bdbc75c14b520e6dd03da5b08488890bced76569a55d202bb8e807757cf1ed",
-      "dst_hash": "e7ed4915412a943bc7a7889011d3811ff1da55f7ed039264cea5de3f05c09345",
+      "dst_hash": "973184698733ffb86bb5a15781902846afec311047f5684f779f8ad023e5d24c",
       "source": "deterministic"
     },
     {
@@ -173,7 +173,8 @@
           "cwl-summary-to-galaxy-template",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
-          "nextflow-summary-to-galaxy-template"
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       },
       {

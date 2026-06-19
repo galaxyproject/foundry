@@ -19,22 +19,24 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - Read artifact `cwl-galaxy-data-flow`. Produced by `cwl-summary-to-galaxy-data-flow`. Galaxy data-flow brief from cwl-summary-to-galaxy-data-flow when running the CWL → GALAXY pipeline.
 - Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.
 - Read artifact `freeform-galaxy-data-flow`. Produced by `freeform-summary-to-galaxy-data-flow`. Galaxy data-flow brief from freeform-summary-to-galaxy-data-flow when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.
+- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.
 
 ## Outputs
 
 - Write artifact `iwc-comparison-notes` as `iwc-comparison-notes.md`. Format: `markdown`. Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file.
 - Write artifact `iwc-exemplar-gxformat2` as `iwc-exemplar.gxwf.yml`. Format: `yaml`. Cleaned gxformat2 conversion (via convert --to format2 --compact) of the nearest IWC exemplar's relevant subgraph — the concrete idiom the downstream template draft pattern-matches against. Bounded to the relevant subgraph, not the whole workflow. Absent when no nearest exemplar is found.
+- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved.
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli`.
-  Ephemeral run: `npx --package @galaxy-tool-util/cli gxwf`.
-  Check: `gxwf --version`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@^1.8.1`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
 ## Load Upfront
 
-- None declared.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.
 
 ## Load On Demand
 
@@ -108,6 +110,8 @@ Keep it size-bounded — a whole large workflow is noise; the relevant subgraph 
 - **No tool discovery.** Do not replace discover-shed-tool.
 - **No automatic rewrite.** This skill emits structural diff guidance; the harness or user decides which changes to apply.
 - **No forced nearest.** A no-match result is valid when IWC lacks a close exemplar.
+
+Carry the open-requirements-ledger through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later skill inherits it instead of re-deriving it.
 
 ## Runtime Notes
 
