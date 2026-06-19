@@ -33,12 +33,13 @@ Consumers (external):
 Authoritative term definitions live in `content/glossary.md`; this section is the architectural picture.
 
 - **Note** — a single `.md` file with frontmatter under the foundry's content root. Identity = filename stem, used as the wiki-link target.
-- **Type** — top-level kind of note (`type:` in frontmatter): `mold | pattern | source-pattern | cli-command | pipeline | research | schema | prompt`.
+- **Type** — top-level kind of note (`type:` in frontmatter): `mold | pattern | source-pattern | cli-tool | cli-command | pipeline | research | schema | prompt`.
 - **Subtype** — second-level discriminator. Used for `research` (`component | design-problem | design-spec`). Molds use `axis`, `source`, `target`, and `tool` instead of `subtype`.
 - **Tag** — controlled hierarchical label declared in `meta_tags.yml`. Two roles: classify the note's kind (note-type tags like `mold`, `pattern`, `research/component`) and classify subject area (e.g., `iwc/<category>` for IWC domain coverage; further subject-area families bloom as content lands — see §4).
 - **Mold** — `content/molds/<slug>/index.md`. Directory-based note: `index.md` is the only top-level frontmatter-bearing file; siblings (`eval.md`, `usage.md`, `refinement.md`, `refinements/`, `examples/`, optional `casting.md` / `cast-skill-verification.md` / `changes.md`) ride along verbatim. Files under `refinements/` are the one carve-out: each refinement-journal entry carries small structured frontmatter. Content shape: typed reference manifest in frontmatter + procedural body skeleton.
 - **Pattern** — single `.md` under `content/patterns/`. Reference content. IWC citations live in the body as URLs; see `CORPUS_INGESTION.md`. Wiki-linked from Molds.
 - **Source-pattern** — single `.md` under `content/source-patterns/<source>/`. Reference content mapping source-system structures to target-system constructs, with `source_pattern_kind`, `source`, `target`, and `implemented_by_patterns` frontmatter.
+- **CLI tool** — single `.md` at `content/cli/<tool>/index.md` (e.g., `content/cli/gxwf/index.md`, `content/cli/planemo/index.md`). Tool-level install metadata (`origin`, `package`, `package_version`, `invoke`, `invoke_fallback`, `availability_check`, `docs_url`) aggregating install instructions for every CLI command note under the same tool. Wiki-linked from Molds; aggregated into the cast bundle's Required Tools section.
 - **CLI command** — single `.md` under `content/cli/<tool>/<cmd>.md` (e.g., `content/cli/gxwf/tool-search.md`, `content/cli/gxwf/validate.md`). Reference content describing one CLI command/subcommand: synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas. Wiki-linked from Molds. Cast to a JSON sidecar (not inlined as prose) by casting's `cli-command`-kind dispatch.
 - **Pipeline** — directory note under `content/pipelines/<slug>/` (`index.md` is the only frontmatter-bearing file; optional `eval.md` / `scenarios.md` siblings carry the pipeline-level oracle and end-to-end journeys). Ordered sequence of phases that compose into a harness journey (e.g., `nextflow-to-galaxy/`, `paper-to-galaxy/`). **Dual purpose**: (a) build artifact — names the Molds a harness will orchestrate; (b) navigation primitive — renders as a "subway map" / journey index over the KB. Each phase is a `mold` reference, a `[loop]`-flagged Mold, or a `[branch]`-flagged routing step (not a Mold; harness-level orchestration — binary branches with fallthrough, or N-step fallback chains). Other inline harness annotations (e.g., `[gate]` for an approval / scope-confirmation checkpoint) will be coined when they first surface as inline phases; the set is open and not pre-enumerated. Pipelines are *not* cast; they are referenced content. The Mold inventory invariant — "Molds = union of pipeline phases" — is machine-checked: every phase resolves to a Mold (or is explicitly a non-Mold annotation like `[branch]`), and Molds with no pipeline membership stand out.
 - **Schema** — single `.md` under `content/schemas/`. Renderable reference note for a JSON Schema package/export or vendored schema artifact.
@@ -62,6 +63,7 @@ Source of truth: `meta_schema.yml` `type.enum` and the `allOf/if/then` block; `m
 | `mold` | — | `name`, `axis` | `mold` | `content/molds/<slug>/index.md` only |
 | `pattern` | — | `title`, `pattern_kind`, `evidence` | `pattern` (+ optional `iwc/*`) | `content/patterns/` |
 | `source-pattern` | — | `title`, `source`, `target`, `source_pattern_kind`, `implemented_by_patterns` | `source-pattern` (+ source/target tags) | `content/source-patterns/<source>/` |
+| `cli-tool` | — | `tool`, `origin`, `package`, `invoke` | `cli-tool` (+ `cli/<tool>`) | `content/cli/<tool>/index.md` |
 | `cli-command` | — | `tool`, `command` | `cli-command` (+ `cli/<tool>`) | `content/cli/<tool>/` |
 | `pipeline` | — | `title`, `phases` | `pipeline` (+ optional `source/*`, `target/*`) | `content/pipelines/<slug>/index.md` only |
 | `research` | `component` | (base + `subtype`) | `research/component` | `content/research/` |
@@ -94,10 +96,10 @@ iwc/rna-seq:
 Validation injects the registry keys into the schema at runtime (`scripts/lib/schema.ts:loadTags` / `loadSchema`), so `meta_schema.yml`'s tag enum stays empty on disk. Vocabulary changes touch one file; the schema stays static. The separation is load-bearing.
 
 Tag families:
-- **Note-type tags** (`mold`, `pattern`, `source-pattern`, `cli-command`, `pipeline`, `research/*`, `schema`, `prompt`) — every note carries exactly one. Coherence-checked.
+- **Note-type tags** (`mold`, `pattern`, `source-pattern`, `cli-tool`, `cli-command`, `pipeline`, `research/*`, `schema`, `prompt`) — every note carries exactly one. Coherence-checked.
 - **Prompt tags** (`prompt/*`) — classify reusable upstream or Foundry-authored prompt families, e.g. `prompt/galaxy-internal` for prompts sourced from Galaxy's internal agent prompt library.
 - **`iwc/*` (IWC domain coverage)** — not used as an aggregation surface. Pattern work relies on corpus citations in bodies.
-- **`cli/*` (CLI affiliation)** — every `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and action-Mold reference surfaces.
+- **`cli/*` (CLI affiliation)** — every `cli-tool` and `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and action-Mold reference surfaces.
 - **Source/target/tool axis tags** (`source/paper`, `source/nextflow`, `source/cwl`, `target/galaxy`, `target/cwl`, `tool/gxwf`, `tool/planemo`) — complement typed Mold and source-pattern fields and drive browse surfaces.
 
 **Subject-area tags beyond `iwc/*` are demand-driven.** A general Galaxy code/feature taxonomy (collections, tools, conditionals, ...) is not committed up front. Tag families bloom as patterns surface real cross-cutting needs.
@@ -126,6 +128,8 @@ Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (n
   then: { required: [title, pattern_kind, evidence] }
 - if: { properties: { type: { const: source-pattern } }, required: [type] }
   then: { required: [title, source, target, source_pattern_kind, implemented_by_patterns] }
+- if: { properties: { type: { const: cli-tool } }, required: [type] }
+  then: { required: [tool, origin, package, invoke] }
 - if: { properties: { type: { const: cli-command } }, required: [type] }
   then: { required: [tool, command] }
 - if: { properties: { type: { const: pipeline } }, required: [type] }
