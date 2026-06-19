@@ -6,11 +6,11 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 2,
     "content_hash": "bb854b2f4e8faf55fb43e623f6c392af1f6e46b1a6aecf4015e402ea2ebcd59a",
-    "commit": "e8124f91ad22ca9da7ed5d3474e5b91b335358d8"
+    "commit": "770df68989726630336c6cfb3a8d4b69d41b60c0"
   },
-  "cast_at": "2026-06-18T23:46:52.813Z",
-  "cast_date": "2026-06-18",
-  "cast_revision": 2,
+  "cast_at": "2026-06-19T00:00:49.684Z",
+  "cast_date": "2026-06-19",
+  "cast_revision": 3,
   "cast_history": [
     {
       "rev": 1,
@@ -21,6 +21,11 @@
       "rev": 2,
       "date": "2026-06-18",
       "note": "gxwf pinned to @galaxy-tool-util/cli ^1.8.1"
+    },
+    {
+      "rev": 3,
+      "date": "2026-06-19",
+      "note": "cli sidecars now carry args/options from @galaxy-tool-util/cli/meta; note bodies drop redundant flag lists"
     }
   ],
   "refs": [
@@ -37,7 +42,7 @@
       "trigger": "At the start of every iteration, before any per-step work.",
       "verification": "Cast the skill, run on a multi-step IWC-derived draft, confirm the orchestrator picks one step per call and exits when draft: false.",
       "src_hash": "fa5a7da3939964791f75897df46ddb9563b533c79d2162ee2c04b0cff9ca53c7",
-      "dst_hash": "7e3de5d81b2e8f43aa29b945712b96e4aa3b8f81e8e265ea72385784bd5fa325",
+      "dst_hash": "8638645f5974d8072dc3c63e522b7ab25d562f8d6217ea93b61f0a29f371d6f7",
       "source": "deterministic"
     },
     {
@@ -53,7 +58,7 @@
       "trigger": "After implementing or modifying the chosen step in the draft.",
       "verification": "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched.",
       "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
-      "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
+      "dst_hash": "77e2efef3176ce4b4ea6fb3b0bbc4821b3dbf2e6678e8c20f943586791163b02",
       "source": "deterministic"
     },
     {

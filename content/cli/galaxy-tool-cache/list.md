@@ -25,11 +25,6 @@ This is the version-confirmation surface for the cache: after `add` resolves a p
 
 Human-readable rows by default; `--json` emits an array of cache entries. Per-entry JSON fields: `cache_key`, `tool_id`, `tool_version`, `source` (`api` for shed-fetched, `local` for a pre-seeded tree), `source_url`, `cached_at`. For a stock tool the `tool_id` carries the shed `readableId` form (e.g. `toolshed.g2.bx.psu.edu/repos/Filter1`) while the bare id still selects it in `summarize` / `schema`.
 
-## Flags
-
-- `--json` — emit the entry array as JSON instead of human-readable rows; use this when a Mold consumes the version programmatically.
-- `--cache-dir <dir>` — cache directory to enumerate; pass the same path used at `add` time.
-
 ## Examples
 
 ```bash

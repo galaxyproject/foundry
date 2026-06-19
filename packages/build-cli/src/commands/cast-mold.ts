@@ -388,18 +388,81 @@ interface CliSidecar {
   summary?: string;
   source_path: string;
   source_revision?: number;
+  package?: string;
+  description?: string;
+  synopsis?: string;
+  args?: unknown[];
+  options?: unknown[];
   body: string;
 }
 
-function buildCliSidecar(srcAbs: string, srcRel: string, meta: Frontmatter): CliSidecar {
+interface CliCommandMeta {
+  name: string;
+  description?: string;
+  synopsis?: string;
+  args?: unknown[];
+  options?: unknown[];
+}
+
+// Resolve a command's args/options/synopsis from the package's `meta` subpath
+// (the same browser-safe spec the CLI's commander program and --help are built
+// from). Mirrors the schema package-import path: the package is the single
+// source of CLI surface text, so the note body never restates it. Returns null
+// when the package ships no `meta` subpath or doesn't carry this command, in
+// which case the sidecar falls back to body-only (e.g. planemo).
+async function resolveCliCommandMeta(
+  pkg: string,
+  tool: string,
+  command: string,
+): Promise<CliCommandMeta | null> {
+  let mod: Record<string, unknown>;
+  try {
+    mod = (await import(`${pkg}/meta`)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  for (const value of Object.values(mod)) {
+    if (
+      value &&
+      typeof value === "object" &&
+      (value as { name?: unknown }).name === tool &&
+      Array.isArray((value as { commands?: unknown }).commands)
+    ) {
+      const cmd = (value as { commands: CliCommandMeta[] }).commands.find(
+        (c) => c.name === command,
+      );
+      if (cmd) return cmd;
+    }
+  }
+  return null;
+}
+
+async function buildCliSidecar(
+  srcAbs: string,
+  srcRel: string,
+  meta: Frontmatter,
+): Promise<CliSidecar> {
   const parsed = readMarkdown(srcAbs);
+  const tool = typeof meta.tool === "string" ? meta.tool : "";
+  const command = typeof meta.command === "string" ? meta.command : "";
+  const pkg = typeof meta.package === "string" ? meta.package : undefined;
+  const cmd = pkg ? await resolveCliCommandMeta(pkg, tool, command) : null;
   const sidecar: CliSidecar = {
     type: "cli-command",
-    tool: typeof meta.tool === "string" ? meta.tool : "",
-    command: typeof meta.command === "string" ? meta.command : "",
+    tool,
+    command,
     summary: typeof meta.summary === "string" ? meta.summary : undefined,
     source_path: srcRel,
     source_revision: typeof meta.revision === "number" ? meta.revision : undefined,
+    ...(cmd
+      ? {
+          package: pkg,
+          description: cmd.description,
+          synopsis: cmd.synopsis,
+          args: cmd.args ?? [],
+          options: cmd.options ?? [],
+        }
+      : {}),
     body: parsed.body.trim(),
   };
   return sidecar;
@@ -825,7 +888,7 @@ async function castOneRef(
 
   if (resolved.mode === "sidecar" && resolved.kind === "cli-command") {
     const parsed = readMarkdown(srcAbs);
-    const sidecar = buildCliSidecar(srcAbs, resolved.src, parsed.meta);
+    const sidecar = await buildCliSidecar(srcAbs, resolved.src, parsed.meta);
     const text = JSON.stringify(sidecar, null, 2) + "\n";
     const expectedHash = sha256OfBuffer(text);
     const dstExists = existsSync(dstAbs);

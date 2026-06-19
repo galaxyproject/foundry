@@ -25,12 +25,6 @@ Emit a deterministic summary manifest for a tool already in the cache. This is t
 
 A single JSON document conforming to [[galaxy-tool-summary]]. Top-level fields: `schema_version`, `tool_id`, `tool_version`, `cache_key`, `source`, `artifacts`, `parsed_tool`, `input_schemas`, `warnings`. The `parsed_tool` subtree is the upstream [[parsed-tool]] payload verbatim; `input_schemas.workflow_step` / `input_schemas.workflow_step_linked` carry generated JSON Schemas describing the tool's inputs at workflow-step authoring time. Default sink is stdout; `--output` writes a file.
 
-## Flags
-
-- `--tool-version <ver>` — select the cached wrapper version. Pass the discovery pin's version.
-- `--output <file>` — write the manifest to a file instead of stdout (default `galaxy-tool-summary.json` per the consuming Mold).
-- `--cache-dir <dir>` — cache directory; pass the same path used at `add` time.
-
 ## Examples
 
 ```bash
