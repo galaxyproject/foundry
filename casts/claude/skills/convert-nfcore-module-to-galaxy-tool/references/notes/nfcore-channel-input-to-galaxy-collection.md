@@ -1,22 +1,21 @@
 ---
-type: pattern
-pattern_kind: operation
-evidence: hypothesis
+type: research
+subtype: design-problem
 title: "nf-core channel input → Galaxy data / collection"
 tags:
-  - pattern
+  - research/design-problem
+  - source/nextflow
   - target/galaxy
 status: draft
 created: 2026-05-10
-revised: 2026-05-10
-revision: 2
+revised: 2026-06-10
+revision: 3
 ai_generated: true
 summary: "Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type=\"data\"> or paired/list collection input."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"
-related_patterns:
-  - "[[nfcore-meta-map-to-galaxy-params]]"
 related_notes:
+  - "[[nfcore-meta-map-to-galaxy-params]]"
   - "[[galaxy-discover-datasets]]"
 sources:
   - "https://github.com/nf-core/modules/tree/9b261a459473bc8e2d830bfc626f480c0733f4fe"
@@ -154,5 +153,5 @@ The convert Mold's posture should match IUC: emit `single` + `paired_collection`
 
 - `[[nfcore-meta-map-to-galaxy-params]]` — sibling: how to handle the `meta` map keys that travel with the data path.
 - `[[galaxy-discover-datasets]]` — reference for the `<discover_datasets>` element used in the glob-input mapping.
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this pattern.
+- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
 - `tools-iuc/tools/fastp/fastp.xml` — canonical IUC paired/single conditional shape.

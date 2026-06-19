@@ -4,11 +4,20 @@
   "mold": {
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
-    "revision": 2,
-    "content_hash": "b54721c00d1de560328ade8e270ca8ff91575c09161162e84835142bdfb4024d",
-    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
+    "revision": 4,
+    "content_hash": "b620de36e245302737d9a82171fb2847ee214466915dbb28392a0ac02bc6df68",
+    "commit": "37056dffed79293923554402b52369c393436602"
   },
-  "cast_at": "2026-06-10T16:50:45.656Z",
+  "cast_at": "2026-06-19T12:32:44.265Z",
+  "cast_date": "2026-06-19",
+  "cast_revision": 1,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-06-19",
+      "note": "condense→verbatim; planemo 0.75.44 (fork retired)"
+    }
+  ],
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +31,7 @@
       "purpose": "Reference for `planemo lint` flags and output classification; first gate in the convergence loop.",
       "trigger": "Step 10.1 — after every <command>/<inputs>/<outputs> emission.",
       "verification": "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses.",
-      "src_hash": "d041bdaa37cfdb85121e1066d9a198e6e5c33aa38c3c2d5847a5f06e5bd121d5",
+      "src_hash": "0bdc37ac4d67d672ee7245e5e98323d157ab106efe41b609eef1a08067febbc2",
       "dst_hash": "862d714fa6eb7d9233173948162ff880262e2c867394f1157d073a4ce8d81523",
       "source": "deterministic"
     },
@@ -38,7 +47,7 @@
       "purpose": "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path.",
       "trigger": "Step 10.2 — after lint clears.",
       "verification": "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout.",
-      "src_hash": "ab0bb6afa8350bea11da5f2cfa646fd8c25fefc9afe20dbca3e68cffa4b53314",
+      "src_hash": "4482cb70268a92da6015d90ed4f40c60085f94a649621a052025427607b7472e",
       "dst_hash": "26b912fe63d0664841cd597437a221eee048e5098affada786a847e265ba1106",
       "source": "deterministic"
     },
@@ -51,137 +60,12 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Install metadata + pin SHA for the planemo CLI invoked by the convergence loop.",
+      "purpose": "Install metadata for the planemo CLI invoked by the convergence loop.",
       "trigger": "Always — the cast skill needs planemo on PATH before running lint/test.",
       "verification": "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command.",
-      "src_hash": "4a8db8de6573428d2785824465f9ee7e75850bf786f9f469e68407699bf109f3",
-      "dst_hash": "4a8db8de6573428d2785824465f9ee7e75850bf786f9f469e68407699bf109f3",
+      "src_hash": "ffd4938907b27307e05fb6b44a76a29c2a111e5b51072ec51442b17865cfffaf",
+      "dst_hash": "ffd4938907b27307e05fb6b44a76a29c2a111e5b51072ec51442b17865cfffaf",
       "source": "deterministic"
-    },
-    {
-      "kind": "pattern",
-      "mode": "condense",
-      "ref": "[[nfcore-channel-input-to-galaxy-collection]]",
-      "src": "content/patterns/nfcore-channel-input-to-galaxy-collection.md",
-      "dst": "references/patterns/nfcore-channel-input-to-galaxy-collection.md",
-      "used_at": "both",
-      "load": "upfront",
-      "evidence": "hypothesis",
-      "purpose": "Map process input channels (tuple(meta, path)) to Galaxy <param type=\"data\"> / <param type=\"data_collection\">.",
-      "trigger": "When emitting <inputs> for a module.",
-      "verification": "Cast and run against fastp (paired, tuple(meta, [path,path])) and seqkit/grep (single, tuple(meta, path)); confirm Galaxy <inputs> shape matches the channel cardinality.",
-      "src_hash": "e97a83310d11f2aeebcbee8416a53d73a13c5b42649d907b7ae3d7504f524913",
-      "dst_hash": "e97a83310d11f2aeebcbee8416a53d73a13c5b42649d907b7ae3d7504f524913",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
-    },
-    {
-      "kind": "pattern",
-      "mode": "condense",
-      "ref": "[[nfcore-meta-map-to-galaxy-params]]",
-      "src": "content/patterns/nfcore-meta-map-to-galaxy-params.md",
-      "dst": "references/patterns/nfcore-meta-map-to-galaxy-params.md",
-      "used_at": "both",
-      "load": "upfront",
-      "evidence": "hypothesis",
-      "purpose": "Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped.",
-      "trigger": "When a process consumes a meta-map and any meta keys influence the script: body.",
-      "verification": "Cast against a paired-aware module (fastp); confirm meta.single_end becomes a <conditional>, meta.id is dropped.",
-      "src_hash": "f44e15f6c13dd9f0407646c04b67cdcc2bf1531156e8237ac0bacf8a60f4020b",
-      "dst_hash": "f44e15f6c13dd9f0407646c04b67cdcc2bf1531156e8237ac0bacf8a60f4020b",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
-    },
-    {
-      "kind": "pattern",
-      "mode": "condense",
-      "ref": "[[nfcore-stub-block-to-galaxy-noop-test]]",
-      "src": "content/patterns/nfcore-stub-block-to-galaxy-noop-test.md",
-      "dst": "references/patterns/nfcore-stub-block-to-galaxy-noop-test.md",
-      "used_at": "both",
-      "load": "upfront",
-      "evidence": "hypothesis",
-      "purpose": "Document the intentional drop of stub: blocks; rely on planemo test for fixture coverage.",
-      "trigger": "When the module's main.nf contains a stub: block.",
-      "verification": "Confirm _provenance.yml.overrides records the dropped stub: block with reason.",
-      "src_hash": "b4086bd5e65eada8daed91241a3b351e6b23b65d2e51fa860b6fe5163e5780e3",
-      "dst_hash": "b4086bd5e65eada8daed91241a3b351e6b23b65d2e51fa860b6fe5163e5780e3",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
-    },
-    {
-      "kind": "pattern",
-      "mode": "condense",
-      "ref": "[[nfcore-task-ext-args-to-galaxy-additional-options]]",
-      "src": "content/patterns/nfcore-task-ext-args-to-galaxy-additional-options.md",
-      "dst": "references/patterns/nfcore-task-ext-args-to-galaxy-additional-options.md",
-      "used_at": "both",
-      "load": "upfront",
-      "evidence": "hypothesis",
-      "purpose": "Surface task.ext.args as a single Galaxy text param; do not enumerate per-flag inputs.",
-      "trigger": "When the upstream script: body interpolates ${task.ext.args} (or args2/args3).",
-      "verification": "Cast against a module with task.ext.args (samtools/sort); confirm a single extra_args text param is emitted with sane sanitization.",
-      "src_hash": "f53176f5798e9bb09ff4426ca997e4dbe4be028b1d0fd5e0d0be331f7f952a19",
-      "dst_hash": "f53176f5798e9bb09ff4426ca997e4dbe4be028b1d0fd5e0d0be331f7f952a19",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
-    },
-    {
-      "kind": "pattern",
-      "mode": "condense",
-      "ref": "[[nfcore-versions-emit-to-galaxy-version-command]]",
-      "src": "content/patterns/nfcore-versions-emit-to-galaxy-version-command.md",
-      "dst": "references/patterns/nfcore-versions-emit-to-galaxy-version-command.md",
-      "used_at": "both",
-      "load": "upfront",
-      "evidence": "hypothesis",
-      "purpose": "Translate the versions.yml emit block (or topic: versions) into Galaxy's <version_command>.",
-      "trigger": "When the script: body or output: declarations contain a versions emit.",
-      "verification": "Cast against fastp; confirm <version_command> reproduces the upstream version string for the primary tool.",
-      "src_hash": "fc2bd9f96cdd555a28969deea14dc7854df6fc75a225d4789c3e3fcbd9048c01",
-      "dst_hash": "fc2bd9f96cdd555a28969deea14dc7854df6fc75a225d4789c3e3fcbd9048c01",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
     },
     {
       "kind": "research",
@@ -217,7 +101,7 @@
     },
     {
       "kind": "research",
-      "mode": "condense",
+      "mode": "verbatim",
       "ref": "[[component-nf-core-tools]]",
       "src": "content/research/component-nf-core-tools.md",
       "dst": "references/notes/component-nf-core-tools.md",
@@ -229,20 +113,11 @@
       "verification": "Cast and verify _provenance.yml.nfcore_source.git_sha resolution and meta.yml DOI extraction work for fastp.",
       "src_hash": "5147b7148fe43a1d271bbae7c854a868be951855b6aac454d0ea72620d50de6c",
       "dst_hash": "5147b7148fe43a1d271bbae7c854a868be951855b6aac454d0ea72620d50de6c",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
+      "source": "deterministic"
     },
     {
       "kind": "research",
-      "mode": "condense",
+      "mode": "verbatim",
       "ref": "[[galaxy-discover-datasets]]",
       "src": "content/research/galaxy-discover-datasets.md",
       "dst": "references/notes/galaxy-discover-datasets.md",
@@ -252,18 +127,89 @@
       "purpose": "Reference for the <discover_datasets> XML element: attributes, named/regex patterns, <data> vs <collection> contexts, test-side <discovered_dataset>.",
       "trigger": "When translating a Nextflow output: channel that uses a glob path or runtime-interpolated filenames into a Galaxy <collection> or multi-output <data>.",
       "verification": "Cast against a glob-output module (samtools/index); confirm the emitted <collection><discover_datasets pattern=...> shape resolves the glob correctly under planemo test.",
-      "src_hash": "e867df935f22d26d487ef8489694109670dd7b17dee2476429fe5a8252d4eda4",
-      "dst_hash": "e867df935f22d26d487ef8489694109670dd7b17dee2476429fe5a8252d4eda4",
-      "source": "llm",
-      "prompt": {
-        "origin": "casting_md",
-        "identity": "verbatim-condense-passthrough",
-        "hash": "992d1b3b92ee543690569dcfc6bba3d20a24deaa27d88a2eb4eacbe562ccc9bb"
-      },
-      "model": {
-        "name": "claude-opus-4-7",
-        "version": "1m"
-      }
+      "src_hash": "9d91ad0bd1dee8373157491a9e3c662bb3ab97adc2db3be0dd8fadea3cfd6026",
+      "dst_hash": "9d91ad0bd1dee8373157491a9e3c662bb3ab97adc2db3be0dd8fadea3cfd6026",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nfcore-channel-input-to-galaxy-collection]]",
+      "src": "content/research/nfcore-channel-input-to-galaxy-collection.md",
+      "dst": "references/notes/nfcore-channel-input-to-galaxy-collection.md",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Map process input channels (tuple(meta, path)) to Galaxy <param type=\"data\"> / <param type=\"data_collection\">.",
+      "trigger": "When emitting <inputs> for a module.",
+      "verification": "Cast and run against fastp (paired, tuple(meta, [path,path])) and seqkit/grep (single, tuple(meta, path)); confirm Galaxy <inputs> shape matches the channel cardinality.",
+      "src_hash": "99a980281fd90c95216e0e0a39fa79ec505acc874c18c2c0f358795374292e37",
+      "dst_hash": "99a980281fd90c95216e0e0a39fa79ec505acc874c18c2c0f358795374292e37",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nfcore-meta-map-to-galaxy-params]]",
+      "src": "content/research/nfcore-meta-map-to-galaxy-params.md",
+      "dst": "references/notes/nfcore-meta-map-to-galaxy-params.md",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped.",
+      "trigger": "When a process consumes a meta-map and any meta keys influence the script: body.",
+      "verification": "Cast against a paired-aware module (fastp); confirm meta.single_end becomes a <conditional>, meta.id is dropped.",
+      "src_hash": "ad9adb5be21948f9843eea6126f071b5376edb3d2b385cd4498a5325492a16a3",
+      "dst_hash": "ad9adb5be21948f9843eea6126f071b5376edb3d2b385cd4498a5325492a16a3",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nfcore-stub-block-to-galaxy-noop-test]]",
+      "src": "content/research/nfcore-stub-block-to-galaxy-noop-test.md",
+      "dst": "references/notes/nfcore-stub-block-to-galaxy-noop-test.md",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Document the intentional drop of stub: blocks; rely on planemo test for fixture coverage.",
+      "trigger": "When the module's main.nf contains a stub: block.",
+      "verification": "Confirm _provenance.yml.overrides records the dropped stub: block with reason.",
+      "src_hash": "fd32e88774b41a5a9b16b3d96694612bce03953448e9b5b0a723409e0eb22a49",
+      "dst_hash": "fd32e88774b41a5a9b16b3d96694612bce03953448e9b5b0a723409e0eb22a49",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nfcore-task-ext-args-to-galaxy-additional-options]]",
+      "src": "content/research/nfcore-task-ext-args-to-galaxy-additional-options.md",
+      "dst": "references/notes/nfcore-task-ext-args-to-galaxy-additional-options.md",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Surface task.ext.args as a single Galaxy text param; do not enumerate per-flag inputs.",
+      "trigger": "When the upstream script: body interpolates ${task.ext.args} (or args2/args3).",
+      "verification": "Cast against a module with task.ext.args (samtools/sort); confirm a single extra_args text param is emitted with sane sanitization.",
+      "src_hash": "df34b232629a1ffc46b655b82c0e1a677d2d201a1883667fc066dd79ae9acc24",
+      "dst_hash": "df34b232629a1ffc46b655b82c0e1a677d2d201a1883667fc066dd79ae9acc24",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nfcore-versions-emit-to-galaxy-version-command]]",
+      "src": "content/research/nfcore-versions-emit-to-galaxy-version-command.md",
+      "dst": "references/notes/nfcore-versions-emit-to-galaxy-version-command.md",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Translate the versions.yml emit block (or topic: versions) into Galaxy's <version_command>.",
+      "trigger": "When the script: body or output: declarations contain a versions emit.",
+      "verification": "Cast against fastp; confirm <version_command> reproduces the upstream version string for the primary tool.",
+      "src_hash": "8b96ee8347a6044d5333a9596e5b8746a7c88be580a7313c413c2bd21a9c401b",
+      "dst_hash": "8b96ee8347a6044d5333a9596e5b8746a7c88be580a7313c413c2bd21a9c401b",
+      "source": "deterministic"
     },
     {
       "kind": "schema",

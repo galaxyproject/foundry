@@ -1,15 +1,15 @@
 ---
-type: pattern
-pattern_kind: operation
-evidence: hypothesis
+type: research
+subtype: design-problem
 title: "nf-core versions emit → Galaxy <version_command>"
 tags:
-  - pattern
+  - research/design-problem
+  - source/nextflow
   - target/galaxy
 status: draft
 created: 2026-05-10
-revised: 2026-05-10
-revision: 2
+revised: 2026-06-10
+revision: 3
 ai_generated: true
 summary: "Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel."
 related_molds:
@@ -111,5 +111,5 @@ Translation is identical: extract the `eval(...)` argument; emit one `<version_c
 
 ## See also
 
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this pattern.
+- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
 - `tools-iuc/tools/fastp/fastp.xml` — IUC's `<version_command>` posture (often shorter than nf-core's because IUC wraps a single tool).

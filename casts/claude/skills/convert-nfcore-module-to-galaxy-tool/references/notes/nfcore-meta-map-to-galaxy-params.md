@@ -1,20 +1,20 @@
 ---
-type: pattern
-pattern_kind: operation
-evidence: hypothesis
+type: research
+subtype: design-problem
 title: "nf-core meta-map → Galaxy params"
 tags:
-  - pattern
+  - research/design-problem
+  - source/nextflow
   - target/galaxy
 status: draft
 created: 2026-05-10
-revised: 2026-05-10
-revision: 2
+revised: 2026-06-10
+revision: 3
 ai_generated: true
 summary: "Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"
-related_patterns:
+related_notes:
   - "[[nfcore-channel-input-to-galaxy-collection]]"
 sources:
   - "https://github.com/nf-core/modules/tree/9b261a459473bc8e2d830bfc626f480c0733f4fe"
@@ -115,5 +115,5 @@ Option 1 is right unless the upstream tool genuinely supports two distinct ident
 
 ## See also
 
-- `[[nfcore-channel-input-to-galaxy-collection]]` — sibling pattern: meta-driven input shape decisions.
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this pattern.
+- `[[nfcore-channel-input-to-galaxy-collection]]` — sibling note: meta-driven input shape decisions.
+- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
