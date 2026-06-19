@@ -5,10 +5,10 @@
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
     "revision": 2,
-    "content_hash": "607db69e32896890701577c9f156be662cce1371ac915cbfeb7244c602836e75",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "content_hash": "51697d0a76f73ecd17a93bcaf50f21bcd7311ed98de122c2790ac997c8acd44e",
+    "commit": "72b20f2ba4575f1414f2a083aab683e6147e5dcc"
   },
-  "cast_at": "2026-06-15T13:53:32.337Z",
+  "cast_at": "2026-06-19T15:13:10.016Z",
   "refs": [
     {
       "kind": "research",
@@ -50,6 +50,52 @@
         "description": "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring."
       }
     ],
-    "consumes": []
+    "consumes": [
+      {
+        "id": "freeform-summary",
+        "description": "Source summary from [[summarize-paper]] / [[interview-to-freeform-summary]]; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it).",
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      },
+      {
+        "id": "summary-nextflow",
+        "description": "Source summary from [[summarize-nextflow]]; mine its test_fixtures / sample-data evidence when running the NEXTFLOW → GALAXY pipeline.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "summary-cwl",
+        "description": "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline.",
+        "inherited_schema": "[[summary-cwl]]",
+        "producers": [
+          "summarize-cwl"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines.",
+        "producers": [
+          "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "nextflow-galaxy-interface",
+        "description": "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the NEXTFLOW → GALAXY pipeline.",
+        "producers": [
+          "nextflow-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "cwl-galaxy-interface",
+        "description": "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the CWL → GALAXY pipeline.",
+        "producers": [
+          "cwl-summary-to-galaxy-interface"
+        ]
+      }
+    ]
   }
 }
