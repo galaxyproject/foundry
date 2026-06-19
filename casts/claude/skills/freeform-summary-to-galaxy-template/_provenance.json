@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 4,
     "content_hash": "e7577e6c69141297f675ba72ace41575d8bc3c60065a6b23d059806dacaacd63",
-    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-17T19:52:18.259Z",
+  "cast_at": "2026-06-19T00:21:40.706Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -23,7 +23,7 @@
       "trigger": "After writing or modifying the draft workflow file.",
       "verification": "Cast the skill, run on a representative paper-derived summary, confirm draft-validate diagnostics route back.",
       "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
-      "dst_hash": "8dcdb3e205225eda05238c2c0d217084af0fca8f14897a6c0fd14a6ed6cecde1",
+      "dst_hash": "77e2efef3176ce4b4ea6fb3b0bbc4821b3dbf2e6678e8c20f943586791163b02",
       "source": "deterministic"
     },
     {

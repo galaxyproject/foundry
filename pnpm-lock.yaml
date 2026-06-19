@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@galaxy-tool-util/cli':
-        specifier: ^1.7.2
-        version: 1.7.2
+        specifier: ^1.8.1
+        version: 1.8.1
       '@galaxy-tool-util/schema':
         specifier: ^1.7.2
         version: 1.7.2
@@ -591,21 +591,24 @@ packages:
     resolution: {integrity: sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@galaxy-tool-util/cli@1.7.2':
-    resolution: {integrity: sha512-gNEDPi5J3QqNd27nWO583ev/+uuI/a3rUSMHQV137n1KZsFh2DEiGdHP7NUKjk7+HpsvTMZ1iA3HqytFEB8n/Q==}
+  '@galaxy-tool-util/cli@1.8.1':
+    resolution: {integrity: sha512-nfxOyGmkLzLRfp+hS0F+lT34GXUFrqjAv0ZMOIoXqoMxDwRlALXFTipcqdARY6+7HkNUsTQ41+igzCLt+dFV3w==}
     hasBin: true
 
-  '@galaxy-tool-util/connection-validation@1.7.2':
-    resolution: {integrity: sha512-Rc87P9LHp+UN6oD79kRXh8iZ9GvqhYngTku6KgT71R3MwRwJUWLQoRQkwaOFtFItQQFeGxmRxTKceh5/r8E86A==}
+  '@galaxy-tool-util/connection-validation@1.8.0':
+    resolution: {integrity: sha512-kJWC9/yPBrX155HwzbztKUPAmHHX6T9ZUM0rtfEr9fXc0bKHEih+py4q/1GCbx3IIGvJCzVVrvp/Phh4HzZWvg==}
 
-  '@galaxy-tool-util/core@1.7.2':
-    resolution: {integrity: sha512-I8gZ9i5nINyAjkVyrajCGv4GAuLxveczawEa/q+Xy2NXxNqE/mOzg3mZRTikB1HoMrRRH9YeFpmmX33Mtt/CRA==}
+  '@galaxy-tool-util/core@1.8.1':
+    resolution: {integrity: sha512-BL5gYFHszeUIe7iC+uQVcEerwdN2eZl6RpoXMOnTrTj4sZ5K31eAs9u4gkGyuMH0L0Xg70EnTzsgezgqU892hw==}
 
   '@galaxy-tool-util/schema@1.7.2':
     resolution: {integrity: sha512-9udM+HHHg3jhly6dQ2FfZNg8Z8Ydi6fObFG9/Ff6OxSt1zmtieTmOFAB9YfdhlOLDuBp3qFfcvv+su5wqZD/Ww==}
 
-  '@galaxy-tool-util/search@1.7.2':
-    resolution: {integrity: sha512-kxIaG25/9UayDeNJCgA09OrWc40b4AbXXbkdSc+nGSrb5PE7fsoWzQnIYVZSsUdTHIZvo7I8HoOsLWEdwuKeYQ==}
+  '@galaxy-tool-util/schema@1.8.0':
+    resolution: {integrity: sha512-aFkaG/tde24nfY7XgjHouSGHwdi2wGlOuGNoIdxWssxbDwqkCg902DabkL8L4fVnj3JKjrduGz/FzgE/t66p+A==}
+
+  '@galaxy-tool-util/search@1.8.1':
+    resolution: {integrity: sha512-R/qxwzPK/a99rof8ZtNFKvHVZtcOo6Z3Tw+d4JRCD2nf2hmW40Q/wCQsXnZQL5K8xcWJAh1AWNfVGZihrqeOvQ==}
 
   '@galaxy-tool-util/workflow-graph@1.2.0':
     resolution: {integrity: sha512-S3a/2lHaNcKoE9pYWSZXPL6DPFh+DXU5JhMdVMMzYRx4BHDbpK0aqVPcwyq+uAlNP+PqwmhD6WLgdsVwBSDotQ==}
@@ -2048,12 +2051,12 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@galaxy-tool-util/cli@1.7.2':
+  '@galaxy-tool-util/cli@1.8.1':
     dependencies:
-      '@galaxy-tool-util/connection-validation': 1.7.2
-      '@galaxy-tool-util/core': 1.7.2
-      '@galaxy-tool-util/schema': 1.7.2
-      '@galaxy-tool-util/search': 1.7.2
+      '@galaxy-tool-util/connection-validation': 1.8.0
+      '@galaxy-tool-util/core': 1.8.1
+      '@galaxy-tool-util/schema': 1.8.0
+      '@galaxy-tool-util/search': 1.8.1
       ajv: 8.20.0
       commander: 14.0.3
       effect: 3.21.2
@@ -2062,14 +2065,14 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@galaxy-tool-util/connection-validation@1.7.2':
+  '@galaxy-tool-util/connection-validation@1.8.0':
     dependencies:
-      '@galaxy-tool-util/schema': 1.7.2
+      '@galaxy-tool-util/schema': 1.8.0
       '@galaxy-tool-util/workflow-graph': 1.2.0
 
-  '@galaxy-tool-util/core@1.7.2':
+  '@galaxy-tool-util/core@1.8.1':
     dependencies:
-      '@galaxy-tool-util/schema': 1.7.2
+      '@galaxy-tool-util/schema': 1.8.0
       effect: 3.21.2
       yaml: 2.8.3
 
@@ -2080,10 +2083,17 @@ snapshots:
       effect: 3.21.2
       yaml: 2.8.3
 
-  '@galaxy-tool-util/search@1.7.2':
+  '@galaxy-tool-util/schema@1.8.0':
     dependencies:
-      '@galaxy-tool-util/core': 1.7.2
-      '@galaxy-tool-util/schema': 1.7.2
+      ajv: 8.20.0
+      ajv-formats: 3.0.1(ajv@8.20.0)
+      effect: 3.21.2
+      yaml: 2.8.3
+
+  '@galaxy-tool-util/search@1.8.1':
+    dependencies:
+      '@galaxy-tool-util/core': 1.8.1
+      '@galaxy-tool-util/schema': 1.8.0
 
   '@galaxy-tool-util/workflow-graph@1.2.0': {}
 

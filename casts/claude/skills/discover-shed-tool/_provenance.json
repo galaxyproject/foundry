@@ -6,9 +6,9 @@
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 4,
     "content_hash": "256e3861e4fd54e5afe1db0cb99954523faea71c06d46b32b2442d39fb646056",
-    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-17T19:52:17.013Z",
+  "cast_at": "2026-06-19T00:21:39.434Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -51,7 +51,7 @@
       "purpose": "Resolve a Tool Shed tool version to an installable changeset revision.",
       "trigger": "After selecting a candidate version that needs a reproducible changeset pin.",
       "src_hash": "4a2e231e4f71ccfc93bee17daf234f46ce9fa93a45c9ae2798c06fd703835c1a",
-      "dst_hash": "4c2d6dc1f03c1cc1573657903206ff540a20ba0cbd65d7851062700ca71e8166",
+      "dst_hash": "db0b13f2b92593c9cd3bf5a80276a31e537c07caff76786167ebe9f7feac5938",
       "source": "deterministic"
     },
     {
@@ -66,7 +66,7 @@
       "purpose": "Search the Tool Shed for candidate wrappers matching a step's tool need.",
       "trigger": "When resolving a workflow step to an installable Galaxy tool wrapper.",
       "src_hash": "e3bfd60c1c4f4e64c7a625b1ae5123d297002aa24cc86b53a72a1365cb707bb8",
-      "dst_hash": "7663cae2ce953e5a9750c6d5c9f23d298c32814a9aeff13500921c389035d668",
+      "dst_hash": "72f5f7cc0cd5ed40038af89e6041c7916d65c51ba1c7bc7b2c46ba64c51d9359",
       "source": "deterministic"
     },
     {
@@ -81,7 +81,7 @@
       "purpose": "List available Tool Shed versions for a selected candidate.",
       "trigger": "After a Tool Shed search candidate is selected and before pinning a version.",
       "src_hash": "597997fe54c620832c1d94f752a0dfaf6352bb7d58646e4378f6d75de5e61cab",
-      "dst_hash": "8456fce6f7f17b318526311c8156a510c882661a3987b3fd71d80c6795c95a19",
+      "dst_hash": "90f35a407af778a1a1c714f79ceb8dc3559523964175e734b565eed8b9aeb6a5",
       "source": "deterministic"
     },
     {

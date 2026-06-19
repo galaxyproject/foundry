@@ -450,6 +450,98 @@ Wrapper body should not be copied.
   });
 });
 
+describe("cast-mold cli-command meta injection", () => {
+  it("embeds args/options from the package meta subpath and leaves the body flag-free", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-cli-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/cli/galaxy-tool-cache"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        [
+          "name: claude",
+          "provenance_schema_version: 2",
+          "required_outputs: [SKILL.md, _provenance.json]",
+          "kinds:",
+          "  cli-command:",
+          "    dst_dir: references/cli/",
+          "    dst_extension: .json",
+          "    modes: [sidecar]",
+          "condense_prompts: {}",
+          "skill_constraints:",
+          "  frontmatter_required: [name, description]",
+          "  forbidden_runtime_paths: []",
+          "  forbid_packaged_files: []",
+          "",
+        ].join("\n"),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-06-18
+revised: 2026-06-18
+revision: 1
+ai_generated: false
+summary: CLI meta-injection cast test mold summary.
+references:
+  - kind: cli-command
+    ref: "[[add]]"
+    used_at: runtime
+    load: upfront
+    mode: sidecar
+    evidence: corpus-observed
+---
+
+# m
+
+Use the cli-command reference.
+`,
+      );
+      writeFileSync(
+        path.join(dir, "content/cli/galaxy-tool-cache/add.md"),
+        `---
+type: cli-command
+tool: galaxy-tool-cache
+command: add
+package: "@galaxy-tool-util/cli"
+tags: [cli-command]
+status: draft
+created: 2026-06-18
+revised: 2026-06-18
+revision: 1
+ai_generated: false
+summary: Fetch a tool and cache it.
+---
+
+# \`galaxy-tool-cache add\`
+
+Body prose only — no flag list; options come from the package meta.
+`,
+      );
+
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+      const sidecar = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/references/cli/add.json"), "utf8"),
+      );
+      expect(sidecar.package).toBe("@galaxy-tool-util/cli");
+      expect(sidecar.description).toMatch(/Fetch a tool/i);
+      expect(Array.isArray(sidecar.options)).toBe(true);
+      const galaxyUrl = sidecar.options.find((o: { flags: string }) => o.flags.includes("--galaxy-url"));
+      expect(galaxyUrl?.description).toMatch(/after the ToolShed/i);
+      expect(sidecar.body).not.toContain("## Flags");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("cast-mold companion files", () => {
   function writeCompanionFixture(dir: string, opts: { declareCompanions: boolean }): void {
     mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });

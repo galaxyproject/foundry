@@ -24,8 +24,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@1.7.2`.
-  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.7.2 gxwf`.
+- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@^1.8.1`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
@@ -61,9 +61,9 @@ Single step in scope. This skill owns the chosen step and the wiring that connec
 ### Sequence
 
 1. **Read the step's plan.** From the galaxy-workflow-draft, take the chosen step's deferred evidence: `_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`, and any `TODO_*` slots the template or data-flow brief left for this phase.
-2. **Bind to the tool summary.** Read the galaxy-tool-summary manifest: `parsed_tool` gives concrete input/output port names and datatypes; shape the step's `tool_state` against `input_schemas.workflow_step_linked`. Set `tool_version`, and set `tool_id` — confirming or correcting an identity-pinned id rather than re-deriving a good pin from scratch. If `input_schemas` is `null`, consult `warnings[]` for why before binding by hand.
+2. **Bind to the tool summary.** Read the galaxy-tool-summary manifest: `parsed_tool` gives concrete input/output port names and datatypes; shape the step's `tool_state` against `input_schemas.workflow_step_linked`. Set `tool_version`, and set `tool_id` — confirming or correcting an identity-pinned id rather than re-deriving a good pin from scratch. For a built-in/stock tool the `tool_id` is the bare id (`Filter1`, `Cut1`, collection ops) and `tool_version` must come from the summary's cached pin — never invent a stock version; the summary already resolved it against the shed via summarize-galaxy-tool. If `input_schemas` is `null`, consult `warnings[]` for why before binding by hand.
 3. **Wire ports.** Connect the step's inputs to their upstream producers and its outputs to downstream consumers per the `_plan_in` / `_plan_out` intent, using real wrapper port names. Preserve collection mapping and reduction semantics (galaxy-collection-semantics); for a source-derived shape, check the chosen input/output can actually carry the intended File / list / paired / list:paired shape (nextflow-to-galaxy-channel-shape-mapping).
-4. **Close shape gaps.** When a direct tool connection cannot express the needed shape, insert a built-in collection-operation step (galaxy-collection-tools); for identifier-derived reshaping — regex parsing, nesting swaps, paired assignment — use Apply Rules (galaxy-apply-rules-dsl); for a transform traced to a Nextflow operator (map, join, groupTuple, branch, mix, combine, multiMap), turn it into concrete wiring or a review request via nextflow-operators-to-galaxy-collection-recipes.
+4. **Close shape gaps.** When a direct tool connection cannot express the needed shape, insert a built-in collection-operation step (galaxy-collection-tools); for identifier-derived reshaping — regex parsing, nesting swaps, paired assignment — use Apply Rules (galaxy-apply-rules-dsl); for a transform traced to a Nextflow operator (map, join, groupTuple, branch, mix, combine, multiMap), turn it into concrete wiring or a review request via nextflow-operators-to-galaxy-collection-recipes. A built-in step inserted here is itself a stock tool: resolve its concrete `tool_version` through the galaxy-tool-cache flow (summarize-galaxy-tool on the bare id) rather than guessing — or leave it draft-tier for the next loop iteration to realize.
 5. **Preserve testability.** Keep output labels and collection element identifiers stable and addressable (galaxy-workflow-testability-design). Do not rename a labeled output, drop a checkpoint, or make a final output too weakly assertable just to satisfy this step's wiring.
 6. **Validate.** Run draft-validate `--concrete` over the mutated draft: it checks draft-contract rules and gates the extracted concrete subset — including the step just implemented — against full gxformat2. On green, return the draft for the next loop iteration; on red, route the diagnostic back to whichever decision above it implicates.
 

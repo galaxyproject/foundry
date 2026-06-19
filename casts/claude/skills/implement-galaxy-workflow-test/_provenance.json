@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 7,
     "content_hash": "34328572486dd07baeda8335cac1884e405e3c14af2f275f4ced700576a85bb5",
-    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-17T19:52:20.696Z",
+  "cast_at": "2026-06-19T00:21:42.027Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution.",
       "trigger": "After authoring or editing a Galaxy workflow test file and before Planemo invocation.",
       "src_hash": "98bdbc75c14b520e6dd03da5b08488890bced76569a55d202bb8e807757cf1ed",
-      "dst_hash": "e7ed4915412a943bc7a7889011d3811ff1da55f7ed039264cea5de3f05c09345",
+      "dst_hash": "973184698733ffb86bb5a15781902846afec311047f5684f779f8ad023e5d24c",
       "source": "deterministic"
     },
     {
@@ -139,8 +139,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.",
-      "src_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
-      "dst_hash": "5b640f383f848e3a7b2cacac2fbd7f96ef1a04cca1283b237b772edc142bf066",
+      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
       "source": "deterministic"
     }
   ],

@@ -5,7 +5,7 @@
   "options": ["use-subagents", "checkpoint"],
   "required_tools": [
     { "tool": "foundry", "origin": "npm", "package": "@galaxy-foundry/foundry", "invoke": "foundry", "invoke_fallback": "npx --package @galaxy-foundry/foundry foundry", "availability_check": "foundry --help", "docs_url": "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md", "source": "referenced" },
-    { "tool": "gxwf", "origin": "npm", "package": "@galaxy-tool-util/cli", "package_version": "1.7.2", "invoke": "gxwf", "invoke_fallback": "npx --yes --package @galaxy-tool-util/cli@1.7.2 gxwf", "availability_check": "gxwf --help | grep -q draft-validate", "docs_url": "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli", "source": "implied", "implied_by": ["gxwf validate-tests"] },
+    { "tool": "gxwf", "origin": "npm", "package": "@galaxy-tool-util/cli", "package_version": "^1.8.1", "invoke": "gxwf", "invoke_fallback": "npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf", "availability_check": "gxwf --help | grep -q draft-validate", "docs_url": "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli", "source": "implied", "implied_by": ["gxwf validate-tests"] },
     { "tool": "planemo", "origin": "pypi", "package": "planemo", "package_version": "git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3", "invoke": "planemo", "invoke_fallback": "uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo", "availability_check": "planemo --version", "docs_url": "https://planemo.readthedocs.io/", "source": "referenced" }
   ],
   "phases": [

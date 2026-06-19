@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-02
-revised: 2026-06-02
-revision: 1
+revised: 2026-06-18
+revision: 2
 ai_generated: true
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then continue."
@@ -100,11 +100,13 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
 ## Sequence
 
 1. **Pick.** Run [[draft-next-step]]. If `draft: false`, return — the loop is done. Otherwise carry the chosen step id forward.
-2. **Resolve a wrapper.** Branch on whether the template already pinned wrapper identity (see the tiers in [[galaxy-workflow-draft-format]]):
-   - **Identity-pinned** — `tool_id` is concrete and `tool_version` is `TODO`. Treat the pin as a strong seed: confirm it via [[discover-shed-tool]] and resolve the changeset, correcting the `tool_id` only if discovery contradicts the pin (a pinned id is high-confidence template evidence, not a guess to re-derive from scratch).
-   - **Deferred** — `tool_id` is `TODO`. Search fresh: run [[discover-shed-tool]] against the step's `_plan_*` context.
+2. **Resolve a wrapper.** First split on whether the step's tool is a **built-in / stock** Galaxy tool — a bare id with no `owner/repo` path (`Filter1`, `sort1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`):
+   - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through [[discover-shed-tool]] (Tool Shed search) or [[author-galaxy-tool-wrapper]]. Only its concrete version needs resolving: the shed serves stock tools by bare id, but its TRS version-list endpoint can't auto-resolve the version, so read it from a populated cache via `galaxy-tool-cache list` or take a known pin from the step plan — never hand-guess a stock version. [[summarize-galaxy-tool]] then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
+   - **Tool Shed wrapper** — branch on whether the template already pinned wrapper identity (see the tiers in [[galaxy-workflow-draft-format]]):
+     - **Identity-pinned** — `tool_id` is concrete and `tool_version` is `TODO`. Treat the pin as a strong seed: confirm it via [[discover-shed-tool]] and resolve the changeset, correcting the `tool_id` only if discovery contradicts the pin (a pinned id is high-confidence template evidence, not a guess to re-derive from scratch).
+     - **Deferred** — `tool_id` is `TODO`. Search fresh: run [[discover-shed-tool]] against the step's `_plan_*` context.
 
-   Either way, if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
+     Either way, if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
 3. **Summarize the wrapper.** Invoke [[summarize-galaxy-tool]] on the resolved wrapper to produce a [[galaxy-tool-summary]] for the next phase.
 4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `tool_state`, and wrapper-determined port names.
 5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry [[implement-galaxy-tool-step]] appended against this step — a declared output that can't be computed from its wired inputs. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output); it marks the entry `resolved`, or `surrendered` when no producer is reachable. Each escalation must strictly reduce the open blocking-entry count, under a hard escalation cap; track both in the ledger's `topology_repair` block (increment `escalations`, append the post-repair open count to `open_history`, surrender once `escalations` reaches `cap`). A surrendered entry stays open and is written into the final draft as a labelled gap rather than fabricated. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.

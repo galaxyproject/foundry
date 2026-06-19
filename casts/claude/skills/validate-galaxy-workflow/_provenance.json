@@ -6,9 +6,9 @@
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 3,
     "content_hash": "58536625c371eed536f6c3f68cde6b4d425b051c8d1ed129e4c5b667a05a3135",
-    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-17T19:52:25.043Z",
+  "cast_at": "2026-06-19T00:21:44.942Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -23,7 +23,7 @@
       "trigger": "After all Galaxy steps and workflow tests have been assembled.",
       "verification": "Run the cast skill on a complete IWC-derived workflow and confirm terminal validation findings are separated from runtime test failures.",
       "src_hash": "8fdf834e8b3bd2c70e9625c9148eb246855a40625510f0be5f6351885b057aa4",
-      "dst_hash": "37c935109f90bb1c151630b7b4a4c0f400eb927383c1083ef835639126f8a80f",
+      "dst_hash": "caec1f5cc5a69b56f2a033f8e96a5330a8393b76ff606d3ea7468b1eb7922de6",
       "source": "deterministic"
     },
     {

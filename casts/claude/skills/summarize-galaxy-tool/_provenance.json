@@ -4,11 +4,11 @@
   "mold": {
     "name": "summarize-galaxy-tool",
     "path": "content/molds/summarize-galaxy-tool/index.md",
-    "revision": 6,
-    "content_hash": "09af5ad2de0e7ae787215f2ad748078b89a7fca596502baf375f3c121b77d458",
-    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
+    "revision": 7,
+    "content_hash": "f02491928ff799d2ce8ed27d84da66f90bbde8b18b71bdbb2c2e07f2221beb46",
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-17T19:52:24.455Z",
+  "cast_at": "2026-06-19T00:20:02.876Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -19,11 +19,27 @@
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first.",
+      "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first. Stock/built-in bare ids resolve against the shed but need an explicit `--tool-version`.",
       "trigger": "When the requested pin is not yet present in the configured cache directory.",
       "verification": "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted.",
-      "src_hash": "22f932549b772d065ba33edcebe26e808ee67243217e2daee4dd64d613bff130",
-      "dst_hash": "8eb424265ccd1fad9bc03c070a904a448eaed9c139b77d89fa0b569082c8f141",
+      "src_hash": "e74adaca552b055d80c0c607f40b6e5b2363a1c14112ac21a474f73c0d06aed4",
+      "dst_hash": "85e3bb884171beb69631186ca6f0f7552e6c6d0721383ab6653e7a32c84a1b71",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[list]]",
+      "src": "content/cli/galaxy-tool-cache/list.md",
+      "dst": "references/cli/list.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Discover the concrete cached version of a stock/built-in bare id before `add`/`summarize`, since the shed's TRS version-list endpoint can't auto-resolve it; never hand-guess a stock version.",
+      "trigger": "When the pin is a bare/stock id (no owner/repo) and its concrete version isn't already known.",
+      "verification": "Cast the skill, populate a cache with a stock tool, run `list --json`, confirm the reported version feeds `add`/`summarize` for that bare id.",
+      "src_hash": "bb5d17bf18c799776ae493452429cc0b0cfac45315422bfe79efe3404b03a5d6",
+      "dst_hash": "92d336667531c34180db6f75b9fdf87261923c1e85567dce3b21a6d87d9543bd",
       "source": "deterministic"
     },
     {
@@ -38,8 +54,8 @@
       "purpose": "Emit the deterministic [[galaxy-tool-summary]] manifest for the cached pin; this Mold runs the command rather than hand-authoring the manifest.",
       "trigger": "Once the pin is confirmed present in the cache.",
       "verification": "Cast the skill, run `summarize` on a cached pin (e.g. staramr_search), confirm the emitted manifest validates against [[galaxy-tool-summary]].",
-      "src_hash": "8f264e9f870bd77fc8a5e536429d80a7593d18ddc64483b9467fe34391e93dd0",
-      "dst_hash": "2d1a7376fe8012504c0af39c8927c54372e6ea2314869787012967ccb2e4ed96",
+      "src_hash": "b467b1fcc0d63576fa6db55e6cd37f6af6b78014886bf0c5b63c4864781d25a0",
+      "dst_hash": "b51364ad4d415f6047e3cf3d3052dea1598cd2197595be66697c9777918b2de7",
       "source": "deterministic"
     },
     {
@@ -52,8 +68,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
-      "src_hash": "5efe87273b0ff284e6896cdafdbc1cc1b8a4e27d9d0fdce490ad33da7bd1a0d4",
-      "dst_hash": "5efe87273b0ff284e6896cdafdbc1cc1b8a4e27d9d0fdce490ad33da7bd1a0d4",
+      "src_hash": "885515a63ddbfe1c68182ce24bd88e27e7a8db0aa381dcd98e86c59fd62b3636",
+      "dst_hash": "885515a63ddbfe1c68182ce24bd88e27e7a8db0aa381dcd98e86c59fd62b3636",
       "source": "deterministic"
     },
     {
@@ -129,7 +145,7 @@
     "consumes": [
       {
         "id": "galaxy-tool-pin",
-        "description": "Pin from [[discover-shed-tool]]; identifies which cached ParsedTool to summarize. Authored UDTs from [[author-galaxy-tool-wrapper]] bypass this Mold.",
+        "description": "Pin identifying which cached ParsedTool to summarize: a Tool Shed pin from [[discover-shed-tool]] (owner/repo/tool + version), or a bare/stock id for a built-in Galaxy tool (e.g. `Filter1`, `Cut1`, collection ops) that resolves against the shed by the bare id. Authored UDTs from [[author-galaxy-tool-wrapper]] bypass this Mold.",
         "inherited_schema": "[[galaxy-tool-discovery]]",
         "producers": [
           "discover-shed-tool"

@@ -4,6 +4,47 @@
   "command": "summarize",
   "summary": "Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool.",
   "source_path": "content/cli/galaxy-tool-cache/summarize.md",
-  "source_revision": 1,
-  "body": "# `galaxy-tool-cache summarize`\n\nEmit a deterministic summary manifest for a tool already in the cache. This is the command [[summarize-galaxy-tool]] invokes: it does not hand-author the manifest, it runs `summarize` against a cache populated for the Tool Shed pin (see `add`). The cache entry must exist — `summarize` does not re-fetch; cache the pin with `add` first.\n\n`<tool_id>` plus `--tool-version` select the cached entry; they must match the pin used at `add` time and the cache key, or the wrong wrapper is summarized.\n\n## Output\n\nA single JSON document conforming to [[galaxy-tool-summary]]. Top-level fields: `schema_version`, `tool_id`, `tool_version`, `cache_key`, `source`, `artifacts`, `parsed_tool`, `input_schemas`, `warnings`. The `parsed_tool` subtree is the upstream [[parsed-tool]] payload verbatim; `input_schemas.workflow_step` / `input_schemas.workflow_step_linked` carry generated JSON Schemas describing the tool's inputs at workflow-step authoring time. Default sink is stdout; `--output` writes a file.\n\n## Flags\n\n- `--tool-version <ver>` — select the cached wrapper version. Pass the discovery pin's version.\n- `--output <file>` — write the manifest to a file instead of stdout (default `galaxy-tool-summary.json` per the consuming Mold).\n- `--cache-dir <dir>` — cache directory; pass the same path used at `add` time.\n\n## Examples\n\n```bash\ngalaxy-tool-cache summarize toolshed.g2.bx.psu.edu/repos/iuc/staramr/staramr_search \\\n  --tool-version 0.11.0+galaxy3 --cache-dir ~/.cache/gxwf \\\n  --output galaxy-tool-summary.json\n```\n\n## Gotchas\n\n- Deterministic by design: same cached pin → byte-identical manifest. Re-run after re-`add`ing if the wrapper revision changed.\n- Wrapper facts not yet exposed by the upstream `ParsedTool` (requirements, containers, stdio) surface additively as Galaxy extends `ParsedTool`; absence is a coverage gap, not a wrapper without those declarations — cross-check against raw XML when the manifest's `warnings` flag a lossy surface.\n- For just the input JSON Schema (not the full manifest), use the `schema` subcommand instead; `summarize` already embeds it under `input_schemas`."
+  "source_revision": 2,
+  "package": "@galaxy-tool-util/cli",
+  "description": "Emit a deterministic summary manifest for a cached Galaxy tool",
+  "synopsis": "galaxy-tool-cache summarize [options] <tool_id>",
+  "args": [
+    {
+      "raw": "tool_id",
+      "name": "tool_id",
+      "required": true,
+      "variadic": false,
+      "description": "Tool ID"
+    }
+  ],
+  "options": [
+    {
+      "flags": "--tool-version <ver>",
+      "name": "toolVersion",
+      "description": "Tool version",
+      "takesArgument": true,
+      "argumentPlaceholder": "<ver>",
+      "optionalArgument": false,
+      "negatable": false
+    },
+    {
+      "flags": "--output <file>",
+      "name": "output",
+      "description": "Output file (default: stdout)",
+      "takesArgument": true,
+      "argumentPlaceholder": "<file>",
+      "optionalArgument": false,
+      "negatable": false
+    },
+    {
+      "flags": "--cache-dir <dir>",
+      "name": "cacheDir",
+      "description": "Cache directory",
+      "takesArgument": true,
+      "argumentPlaceholder": "<dir>",
+      "optionalArgument": false,
+      "negatable": false
+    }
+  ],
+  "body": "# `galaxy-tool-cache summarize`\n\nEmit a deterministic summary manifest for a tool already in the cache. This is the command [[summarize-galaxy-tool]] invokes: it does not hand-author the manifest, it runs `summarize` against a cache populated for the pin (see `add`). The cache entry must exist — `summarize` does not re-fetch; cache the pin with `add` first.\n\n`<tool_id>` plus `--tool-version` select the cached entry; they must match the pin used at `add` time and the cache key, or the wrong wrapper is summarized. `<tool_id>` accepts a full Tool Shed path, a TRS id, or a **bare/stock id** for built-in tools (`Show beginning1`, `Cut1`, …) — the same id form used at `add` time. A cache miss reports `Tool not found in cache: <id>. Run 'galaxy-tool-cache add' first.`\n\n## Output\n\nA single JSON document conforming to [[galaxy-tool-summary]]. Top-level fields: `schema_version`, `tool_id`, `tool_version`, `cache_key`, `source`, `artifacts`, `parsed_tool`, `input_schemas`, `warnings`. The `parsed_tool` subtree is the upstream [[parsed-tool]] payload verbatim; `input_schemas.workflow_step` / `input_schemas.workflow_step_linked` carry generated JSON Schemas describing the tool's inputs at workflow-step authoring time. Default sink is stdout; `--output` writes a file.\n\n## Examples\n\n```bash\ngalaxy-tool-cache summarize toolshed.g2.bx.psu.edu/repos/iuc/staramr/staramr_search \\\n  --tool-version 0.11.0+galaxy3 --cache-dir ~/.cache/gxwf \\\n  --output galaxy-tool-summary.json\n\n# Stock/built-in tool by bare id (must be added with the same pin first)\ngalaxy-tool-cache summarize \"Show beginning1\" --tool-version 1.0.2 --cache-dir ~/.cache/gxwf\n```\n\n## Gotchas\n\n- Deterministic by design: same cached pin → byte-identical manifest. Re-run after re-`add`ing if the wrapper revision changed.\n- Wrapper facts not yet exposed by the upstream `ParsedTool` (requirements, containers, stdio) surface additively as Galaxy extends `ParsedTool`; absence is a coverage gap, not a wrapper without those declarations — cross-check against raw XML when the manifest's `warnings` flag a lossy surface.\n- For just the input JSON Schema (not the full manifest), use the `schema` subcommand instead; `summarize` already embeds it under `input_schemas`."
 }

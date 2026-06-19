@@ -6,9 +6,9 @@
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 7,
     "content_hash": "d01ad92af0e843f07beeb5adbde46f32127529acd64fabbc4796417d420d99a0",
-    "commit": "4e21bc4ffe429471256a2d268127e2a807769fa8"
+    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
   },
-  "cast_at": "2026-06-17T19:52:14.560Z",
+  "cast_at": "2026-06-19T00:21:36.830Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -41,7 +41,7 @@
       "purpose": "Normalize fetched IWC workflows into a consistent representation for structural comparison, and surface the nearest exemplar forward as a cleaned gxformat2 view (sibling file plus inline excerpt) for the downstream template Mold.",
       "trigger": "After fetching a candidate IWC workflow file and before structural comparison; and again on the nearest exemplar after ranking to emit the iwc-exemplar-gxformat2 view.",
       "src_hash": "24b91f53b0e7850d1dfc38df1074f2d4270c72f20778d0e4d710545bf64be3e0",
-      "dst_hash": "fad8586b1d2afeed3ee70189fb7db7a8019c77e24cc4fd4697b2210d9bc3012c",
+      "dst_hash": "1cdf49f10f77039af6efc5b82fe79720bb18e50d1f57d653670697f7262c7640",
       "source": "deterministic"
     },
     {
