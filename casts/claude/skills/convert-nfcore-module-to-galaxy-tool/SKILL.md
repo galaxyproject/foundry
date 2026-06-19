@@ -21,20 +21,20 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`planemo`** (planemo). `uv tool install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3` (or `pip install planemo==git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3`).
-  Ephemeral run: `uvx --from git+https://github.com/jmchilton/planemo@a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3 planemo`.
+- **`planemo`** (planemo). `uv tool install planemo==0.75.44` (or `pip install planemo==0.75.44`).
+  Ephemeral run: `uvx --from planemo==0.75.44 planemo`.
   Check: `planemo --version`.
   Docs: https://planemo.readthedocs.io/
   Bundled reference: `references/cli/planemo.md`.
 
 ## Load Upfront
 
-- `references/cli/planemo.md`: CLI tool reference copied verbatim into the bundle. Install metadata + pin SHA for the planemo CLI invoked by the convergence loop. Use when: always — the cast skill needs planemo on PATH before running lint/test.
-- `references/patterns/nfcore-channel-input-to-galaxy-collection.md`: Pattern note copied verbatim into the bundle. Map process input channels (tuple(meta, path)) to Galaxy <param type="data"> / <param type="data_collection">. Use when: emitting <inputs> for a module.
-- `references/patterns/nfcore-meta-map-to-galaxy-params.md`: Pattern note copied verbatim into the bundle. Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped. Use when: a process consumes a meta-map and any meta keys influence the script: body.
-- `references/patterns/nfcore-stub-block-to-galaxy-noop-test.md`: Pattern note copied verbatim into the bundle. Document the intentional drop of stub: blocks; rely on planemo test for fixture coverage. Use when: the module's main.nf contains a stub: block.
-- `references/patterns/nfcore-task-ext-args-to-galaxy-additional-options.md`: Pattern note copied verbatim into the bundle. Surface task.ext.args as a single Galaxy text param; do not enumerate per-flag inputs. Use when: the upstream script: body interpolates ${task.ext.args} (or args2/args3).
-- `references/patterns/nfcore-versions-emit-to-galaxy-version-command.md`: Pattern note copied verbatim into the bundle. Translate the versions.yml emit block (or topic: versions) into Galaxy's <version_command>. Use when: the script: body or output: declarations contain a versions emit.
+- `references/cli/planemo.md`: CLI tool reference copied verbatim into the bundle. Install metadata for the planemo CLI invoked by the convergence loop. Use when: always — the cast skill needs planemo on PATH before running lint/test.
+- `references/notes/nfcore-channel-input-to-galaxy-collection.md`: Research note copied verbatim into the bundle. Map process input channels (tuple(meta, path)) to Galaxy <param type="data"> / <param type="data_collection">. Use when: emitting <inputs> for a module.
+- `references/notes/nfcore-meta-map-to-galaxy-params.md`: Research note copied verbatim into the bundle. Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped. Use when: a process consumes a meta-map and any meta keys influence the script: body.
+- `references/notes/nfcore-stub-block-to-galaxy-noop-test.md`: Research note copied verbatim into the bundle. Document the intentional drop of stub: blocks; rely on planemo test for fixture coverage. Use when: the module's main.nf contains a stub: block.
+- `references/notes/nfcore-task-ext-args-to-galaxy-additional-options.md`: Research note copied verbatim into the bundle. Surface task.ext.args as a single Galaxy text param; do not enumerate per-flag inputs. Use when: the upstream script: body interpolates ${task.ext.args} (or args2/args3).
+- `references/notes/nfcore-versions-emit-to-galaxy-version-command.md`: Research note copied verbatim into the bundle. Translate the versions.yml emit block (or topic: versions) into Galaxy's <version_command>. Use when: the script: body or output: declarations contain a versions emit.
 
 ## Load On Demand
 
@@ -248,17 +248,17 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the skill w
 
 ### Reference dispatch (for casting)
 
-- `patterns` → 5 nf-core→Galaxy translation patterns (see frontmatter `references[]`). LLM-condensed into the skill.
+- `research` → the 5 nf-core→Galaxy translation notes (`nfcore-channel-input-to-galaxy-collection`, `nfcore-meta-map-to-galaxy-params`, `nfcore-task-ext-args-to-galaxy-additional-options`, `nfcore-versions-emit-to-galaxy-version-command`, `nfcore-stub-block-to-galaxy-noop-test`) plus `component-nf-core-tools`, `component-nextflow-containers-and-envs`, `galaxy-discover-datasets`. All copied verbatim into the cast bundle under `references/notes/`, loaded per each ref's `used_at`/`load`.
 - `cli-tool` → planemo carries the pinned install metadata; flows into the cast bundle's `_required_tools.json` via the PR #235 mechanism.
 - `cli-command` → planemo-lint and planemo-test cast to JSON sidecars; consulted on-demand inside the §10 loop.
 - `schema` → planemo-test-report copied verbatim into the cast bundle; the convergence loop AJV-validates `--test_output_json` output against it before classifying failures.
-- `research` → `component-nf-core-tools`, `component-nextflow-containers-and-envs`, `galaxy-discover-datasets`. On-demand, condensed into runtime context when triggered.
 - `examples` — pending: 3 hand-picked Wave 1 modules (one trivial, one paired-aware, one with conditional). Used for round-trip smoke testing before this skill ships.
 
 ### Revision history
 
 - **rev 1 (2026-05-10)** — initial draft. Procedure sketched against the trimmed plan; no cast runs yet. Pattern + CLI references all `evidence: hypothesis`.
 - **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against planemo-test-report; pulled in `cli-tool`/`cli-command`/`schema` references for planemo, planemo-lint, planemo-test, planemo-test-report. Deferred-manpages caveat removed.
+- **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other skill; the prior condense was always a verbatim passthrough), so the cast is fully deterministic and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
 
 ## Runtime Notes
 

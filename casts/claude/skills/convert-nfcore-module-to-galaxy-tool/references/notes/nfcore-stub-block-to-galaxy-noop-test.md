@@ -1,15 +1,15 @@
 ---
-type: pattern
-pattern_kind: operation
-evidence: hypothesis
+type: research
+subtype: design-problem
 title: "nf-core stub: block → Galaxy (intentional drop)"
 tags:
-  - pattern
+  - research/design-problem
+  - source/nextflow
   - target/galaxy
 status: draft
 created: 2026-05-10
-revised: 2026-05-10
-revision: 2
+revised: 2026-06-10
+revision: 3
 ai_generated: true
 summary: "nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml."
 related_molds:
@@ -90,6 +90,6 @@ In all three the convert Mold's deliverable is identical: tool.xml + macros.xml 
 
 ## See also
 
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this pattern.
+- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
 - `planemo test` — the runtime sink that makes the drop safe.
 - `planemo lint` — the XML-shape gate that fills in for the DAG-resolution part of `-stub-run`.

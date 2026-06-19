@@ -9,8 +9,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-05-10
-revised: 2026-06-10
-revision: 3
+revised: 2026-06-19
+revision: 4
 ai_generated: true
 summary: "Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks)."
 references:
@@ -18,7 +18,7 @@ references:
     ref: "[[nfcore-channel-input-to-galaxy-collection]]"
     used_at: both
     load: upfront
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Map process input channels (tuple(meta, path)) to Galaxy <param type=\"data\"> / <param type=\"data_collection\">."
     trigger: "When emitting <inputs> for a module."
@@ -27,7 +27,7 @@ references:
     ref: "[[nfcore-meta-map-to-galaxy-params]]"
     used_at: both
     load: upfront
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped."
     trigger: "When a process consumes a meta-map and any meta keys influence the script: body."
@@ -36,7 +36,7 @@ references:
     ref: "[[nfcore-task-ext-args-to-galaxy-additional-options]]"
     used_at: both
     load: upfront
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Surface task.ext.args as a single Galaxy text param; do not enumerate per-flag inputs."
     trigger: "When the upstream script: body interpolates ${task.ext.args} (or args2/args3)."
@@ -45,7 +45,7 @@ references:
     ref: "[[nfcore-versions-emit-to-galaxy-version-command]]"
     used_at: both
     load: upfront
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Translate the versions.yml emit block (or topic: versions) into Galaxy's <version_command>."
     trigger: "When the script: body or output: declarations contain a versions emit."
@@ -54,7 +54,7 @@ references:
     ref: "[[nfcore-stub-block-to-galaxy-noop-test]]"
     used_at: both
     load: upfront
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Document the intentional drop of stub: blocks; rely on planemo test for fixture coverage."
     trigger: "When the module's main.nf contains a stub: block."
@@ -63,7 +63,7 @@ references:
     ref: "[[component-nf-core-tools]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Reference for nf-core module conventions: meta.yml shape, modules.json, environment.yml posture, test layout, container directive idioms."
     trigger: "When parsing meta.yml, environment.yml, or main.nf and a convention is unclear; when populating _provenance.yml."
@@ -81,7 +81,7 @@ references:
     ref: "[[galaxy-discover-datasets]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Reference for the <discover_datasets> XML element: attributes, named/regex patterns, <data> vs <collection> contexts, test-side <discovered_dataset>."
     trigger: "When translating a Nextflow output: channel that uses a glob path or runtime-interpolated filenames into a Galaxy <collection> or multi-output <data>."
@@ -92,7 +92,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Install metadata + pin SHA for the planemo CLI invoked by the convergence loop."
+    purpose: "Install metadata for the planemo CLI invoked by the convergence loop."
     trigger: "Always — the cast skill needs planemo on PATH before running lint/test."
     verification: "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command."
   - kind: cli-command
@@ -325,14 +325,14 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the cast sk
 
 ## Reference dispatch (for casting)
 
-- `patterns` → 5 nf-core→Galaxy translation patterns (see frontmatter `references[]`). LLM-condensed into the cast skill.
+- `research` → the 5 nf-core→Galaxy translation notes (`[[nfcore-channel-input-to-galaxy-collection]]`, `[[nfcore-meta-map-to-galaxy-params]]`, `[[nfcore-task-ext-args-to-galaxy-additional-options]]`, `[[nfcore-versions-emit-to-galaxy-version-command]]`, `[[nfcore-stub-block-to-galaxy-noop-test]]`) plus `[[component-nf-core-tools]]`, `[[component-nextflow-containers-and-envs]]`, `[[galaxy-discover-datasets]]`. All copied verbatim into the cast bundle under `references/notes/`, loaded per each ref's `used_at`/`load`.
 - `cli-tool` → [[planemo]] carries the pinned install metadata; flows into the cast bundle's `_required_tools.json` via the PR #235 mechanism.
 - `cli-command` → [[planemo-lint]] and [[planemo-test]] cast to JSON sidecars; consulted on-demand inside the §10 loop.
 - `schema` → [[planemo-test-report]] copied verbatim into the cast bundle; the convergence loop AJV-validates `--test_output_json` output against it before classifying failures.
-- `research` → `[[component-nf-core-tools]]`, `[[component-nextflow-containers-and-envs]]`, `[[galaxy-discover-datasets]]`. On-demand, condensed into runtime context when triggered.
 - `examples` — pending: 3 hand-picked Wave 1 modules (one trivial, one paired-aware, one with conditional). Used for round-trip smoke testing before this Mold ships.
 
 ## Revision history
 
 - **rev 1 (2026-05-10)** — initial draft. Procedure sketched against the trimmed plan; no cast runs yet. Pattern + CLI references all `evidence: hypothesis`.
 - **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against [[planemo-test-report]]; pulled in `cli-tool`/`cli-command`/`schema` references for [[planemo]], [[planemo-lint]], [[planemo-test]], [[planemo-test-report]]. Deferred-manpages caveat removed.
+- **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other Mold; the prior condense was always a verbatim passthrough), so the cast is fully deterministic and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
