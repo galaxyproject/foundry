@@ -13,8 +13,8 @@ tags:
   - cli/planemo
 status: draft
 created: 2026-05-10
-revised: 2026-06-17
-revision: 3
+revised: 2026-06-18
+revision: 4
 ai_generated: true
 summary: "Galaxy tool/workflow runtime testing CLI; used by run-workflow-test and friends."
 ---
@@ -25,9 +25,9 @@ Galaxy's runtime testing and authoring CLI. Foundry Molds invoke `planemo test`,
 
 ## Pin
 
-`package_version` pins to the released `planemo==0.75.44` from PyPI — base upstream planemo, no fork. The workflow-test phases ([[run-workflow-test]], [[implement-galaxy-workflow-test]]) need only `planemo test --test_output_json`, which base planemo has.
+`package_version` pins to the released `planemo==0.75.44` from PyPI — base upstream planemo, no fork.
 
-The fork-only subcommands `planemo cli_metadata` and `planemo output_schema` ([galaxyproject/planemo#1636](https://github.com/galaxyproject/planemo/pull/1636)) are **not** in this release. The vendored-artifact regeneration story (`packages/planemo-cli-meta/`, `packages/planemo-test-report-schema/`) and the convergence loop in [[convert-nfcore-module-to-galaxy-tool]] still reference those subcommands and the `jmchilton/planemo` SHA; they need a planemo release carrying #1636 before they run off this base pin. Bump `package_version` to that release when it publishes.
+Released 0.75.44 carries the merged [galaxyproject/planemo#1636](https://github.com/galaxyproject/planemo/pull/1636), so `planemo cli_metadata` and `planemo output_schema` ship in the base release. Every Foundry consumer now runs off this base pin: the workflow-test phases ([[run-workflow-test]], [[implement-galaxy-workflow-test]]) which need only `planemo test --test_output_json`, the convergence loop in [[convert-nfcore-module-to-galaxy-tool]], and the vendored-artifact regeneration story (`packages/planemo-cli-meta/`, `packages/planemo-test-report-schema/`). No fork pin is required.
 
 ## Install
 

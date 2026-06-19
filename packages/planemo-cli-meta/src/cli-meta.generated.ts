@@ -442,7 +442,7 @@ export const planemoCliMeta = {
       "name": "workflow_upload"
     }
   ],
-  "planemo_version": "0.75.42.dev0",
+  "planemo_version": "0.75.44",
   "program": "planemo",
   "schema_version": "0.1"
 } as const;

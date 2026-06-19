@@ -22,8 +22,8 @@ describe("planemoCliMeta", () => {
 });
 
 describe("planemoCliMetaProvenance", () => {
-  it("pins to a jmchilton/planemo SHA", () => {
-    expect(planemoCliMetaProvenance.source.repo).toBe("jmchilton/planemo");
-    expect(planemoCliMetaProvenance.source.sha).toMatch(/^[0-9a-f]{40}$/);
+  it("pins to a galaxyproject/planemo release", () => {
+    expect(planemoCliMetaProvenance.source.repo).toBe("galaxyproject/planemo");
+    expect(planemoCliMetaProvenance.source.release).toMatch(/^\d+\.\d+\.\d+/);
   });
 });

@@ -2,10 +2,10 @@
 // Shell out to `planemo cli_metadata` (no --command, whole tree), strip
 // param/help bloat, and write src/cli-meta.json + src/cli-meta.provenance.json.
 //
-// Requires `planemo` on PATH (or PLANEMO_BIN env). The pinned planemo SHA is
+// Requires `planemo` on PATH (or PLANEMO_BIN env). The pinned planemo version is
 // recorded in content/cli/planemo/index.md; install it with:
 //
-//   uvx --from git+https://github.com/jmchilton/planemo@<sha> planemo --version
+//   uvx --from planemo==0.75.44 planemo --version
 //
 // This script is NOT run on every build — it is opt-in regeneration. The .ts
 // mirror is produced from the JSON by scripts/sync-meta.mjs, which runs in
@@ -26,10 +26,9 @@ const DST_META = resolve(PKG_ROOT, "src/cli-meta.json");
 const DST_PROVENANCE = resolve(PKG_ROOT, "src/cli-meta.provenance.json");
 
 const PIN = {
-  repo: "jmchilton/planemo",
-  branch: "workflow_work",
-  sha: "a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3",
-  note: "Pre-merge of upstream PR galaxyproject/planemo#1636. Unpin once upstream merges + releases.",
+  repo: "galaxyproject/planemo",
+  release: "0.75.44",
+  note: "Released on PyPI; includes merged PR galaxyproject/planemo#1636.",
 };
 
 const result = spawnSync(PLANEMO_BIN, ["cli_metadata"], {
@@ -41,7 +40,7 @@ if (result.error) {
   process.stderr.write(
     `error: failed to invoke '${PLANEMO_BIN}': ${result.error.message}\n` +
       `Install the pinned planemo:\n` +
-      `  uvx --from git+https://github.com/${PIN.repo}@${PIN.sha} planemo --version\n`,
+      `  uvx --from planemo==${PIN.release} planemo --version\n`,
   );
   process.exit(1);
 }
@@ -77,10 +76,9 @@ const provenance = {
   planemo_version: minimal.planemo_version,
   schema_version: minimal.schema_version,
   source: {
-    branch: PIN.branch,
     note: PIN.note,
+    release: PIN.release,
     repo: PIN.repo,
-    sha: PIN.sha,
   },
 };
 

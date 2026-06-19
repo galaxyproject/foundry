@@ -3,7 +3,7 @@ type: cli-command
 tool: planemo
 command: lint
 package: "planemo"
-upstream: "https://github.com/galaxyproject/planemo/blob/a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3/planemo/commands/cmd_lint.py"
+upstream: "https://github.com/galaxyproject/planemo/blob/0.75.44/planemo/commands/cmd_lint.py"
 tags:
   - cli-command
   - cli/planemo

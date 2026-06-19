@@ -50,8 +50,8 @@ fixtures-clean:
 	$(MAKE) -C workflow-fixtures clean
 
 # --- Planemo vendored artifacts ---
-# Requires `planemo` on PATH. Pin SHA lives in content/cli/planemo/index.md.
-# Install with: uvx --from git+https://github.com/jmchilton/planemo@<sha> planemo --version
+# Requires `planemo` on PATH. Pin version lives in content/cli/planemo/index.md.
+# Install with: uvx --from planemo==<version> planemo --version
 
 sync-planemo: sync-planemo-cli-meta sync-planemo-test-report-schema sync-planemo-cli
 

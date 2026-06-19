@@ -37,8 +37,8 @@ const SEED_COMMANDS = [
 ];
 
 const PIN = {
-  repo: "jmchilton/planemo",
-  sha: "a9b8b8bc7ab3b12035d53bdb5383fe450413d9f3",
+  repo: "galaxyproject/planemo",
+  ref: "0.75.44",
 };
 
 const AUTO_BEGIN = "<!-- planemo-cli-meta: BEGIN auto-generated -->";
@@ -122,7 +122,7 @@ function fetchCliMetadata(bin: string, command: string): CliMetadata {
     if (e.code === "ENOENT") {
       throw new Error(
         `failed to invoke '${bin}': not found. Install pinned planemo:\n` +
-          `  uvx --from git+https://github.com/${PIN.repo}@${PIN.sha} planemo --version`,
+          `  uvx --from planemo==${PIN.ref} planemo --version`,
       );
     }
     const msg = e.stderr || e.message;
@@ -198,7 +198,7 @@ function renderFrontmatter(meta: CliMetadata, summary: string): string {
     "tool: planemo",
     `command: ${meta.name}`,
     'package: "planemo"',
-    `upstream: "https://github.com/galaxyproject/planemo/blob/${PIN.sha}/${meta.module.replace(/\./g, "/")}.py"`,
+    `upstream: "https://github.com/galaxyproject/planemo/blob/${PIN.ref}/${meta.module.replace(/\./g, "/")}.py"`,
     "tags:",
     "  - cli-command",
     "  - cli/planemo",
