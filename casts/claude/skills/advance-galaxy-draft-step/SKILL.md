@@ -19,6 +19,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Outputs
 
 - Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. Schema: galaxy-workflow-draft. Same draft with one additional step concretized (one loop iteration). Once every step is concrete, draft-next-step reports `draft: false` and the harness exits the loop.
+- Write artifact `galaxy-workflow` as `galaxy-workflow.gxwf.yml`. Format: `yaml`. Concrete gxformat2 workflow (`class: GalaxyWorkflow`) extracted from the fully-concretized draft at loop endstate via draft-extract: drafty steps dropped, `_plan_*` planning fields stripped, class promoted. The runnable, testable artifact that downstream Molds (implement-galaxy-workflow-test, validate-galaxy-workflow, run-workflow-test) consume.
 - Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Same ledger carried through the iteration: a blocking entry implement-galaxy-tool-step appended is routed to repair-galaxy-draft-topology and returns marked `resolved` or `surrendered`.
 
 ## Required Tools
@@ -36,6 +37,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
+- `references/cli/draft-extract.json`: CLI command reference packaged as a sidecar. At loop endstate, extract the concrete gxformat2 workflow from the fully-concretized draft — drop drafty steps, strip `_plan_*` fields, promote `class` to `GalaxyWorkflow` — and write it as the runnable `galaxy-workflow.gxwf.yml`. Use when: draft-next-step reports `draft: false` (no remaining drafty steps).
 - `references/cli/draft-validate.json`: CLI command reference packaged as a sidecar. Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2. Use when: after implementing or modifying the chosen step in the draft.
 - `references/notes/galaxy-tool-job-failure-reference.md`: Research note copied verbatim into the bundle. Classify draft-validate diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice). Use when: draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.
 - `references/schemas/galaxy-tool-summary.schema.json`: Schema file copied verbatim into the bundle. Bind the chosen step against the deterministic tool summary manifest emitted by summarize-galaxy-tool — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape. Use when: after a wrapper has been resolved for the chosen step and before implementing it.
@@ -48,11 +50,11 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 Orchestrator skill for the per-step Galaxy authoring loop. One invocation advances the gxformat2 draft by **one** step: pick → resolve a wrapper → summarize the wrapper → implement the step → validate. The harness loop reduces to `while (gxwf draft-next-step <wf>).draft: invoke skill`.
 
-This skill is **single-entry, single-exit**: it owns the loop oracle (draft-next-step) and the per-step validator (draft-validate `--concrete`). Iterations terminate when the draft has no remaining drafty steps; the harness then drops out of the loop and proceeds to terminal validation via validate-galaxy-workflow.
+This skill is **single-entry, single-exit**: it owns the loop oracle (draft-next-step) and the per-step validator (draft-validate `--concrete`). Iterations terminate when the draft has no remaining drafty steps; on that terminal call the skill extracts the concrete `galaxy-workflow.gxwf.yml` (via draft-extract) — that promoted-class workflow, not the `-draft` file, is what downstream skills test and run — and the harness then drops out of the loop and proceeds to terminal validation via validate-galaxy-workflow.
 
 ### Sequence
 
-1. **Pick.** Run draft-next-step. If `draft: false`, return — the loop is done. Otherwise carry the chosen step id forward.
+1. **Pick.** Run draft-next-step. If `draft: false`, the loop is done: run draft-extract to emit the concrete `galaxy-workflow.gxwf.yml` (drafty steps dropped, `_plan_*` stripped, `class` promoted to `GalaxyWorkflow`), then return. Otherwise carry the chosen step id forward.
 2. **Resolve a wrapper.** First split on whether the step's tool is a **built-in / stock** Galaxy tool — a bare id with no `owner/repo` path (`Filter1`, `sort1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`):
    - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through discover-shed-tool (Tool Shed search) or author-galaxy-tool-wrapper. Only its concrete version needs resolving: the shed serves stock tools by bare id, but its TRS version-list endpoint can't auto-resolve the version, so read it from a populated cache via `galaxy-tool-cache list` or take a known pin from the step plan — never hand-guess a stock version. summarize-galaxy-tool then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
    - **Tool Shed wrapper** — branch on whether the template already pinned wrapper identity (see the tiers in galaxy-workflow-draft-format):
