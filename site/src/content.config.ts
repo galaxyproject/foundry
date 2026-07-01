@@ -1,8 +1,15 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { contractKeys, loadReferenceContract } from './lib/reference-contract';
+import { isValidLicenseId } from './lib/license-policy';
 
 const referenceContract = loadReferenceContract();
+
+// SPDX id from license-policy.yml, or a LicenseRef-<slug> escape hatch.
+// Mirrors the anyOf grammar in meta_schema.yml.
+const licenseId = z.string().refine(isValidLicenseId, {
+  message: 'must be an SPDX id from license-policy.yml or a LicenseRef-<slug>',
+});
 
 function registryEnum(group: keyof typeof referenceContract) {
   const values = contractKeys(referenceContract, group);
@@ -192,7 +199,7 @@ const schemaNoteSchema = z.object({
   package_export: z.string().optional(),
   validator_bin: z.string().optional(),
   validator_subcommand: z.string().optional(),
-  license: z.string().optional(),
+  license: licenseId.optional(),
   license_file: z.string().optional(),
 }).strict();
 

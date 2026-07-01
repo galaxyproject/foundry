@@ -1,0 +1,165 @@
+# License → redistribution-policy table.
+#
+# SOURCE OF TRUTH: galaxyproject/foundry-pattern#4. This file is a hand-copied
+# materialization of that shared decision, backing the guiding principle
+# "Redistributed Content Carries Its License". The statistical-genomics-foundry
+# instance keeps an identical copy — any change here is a CROSS-REPO change and
+# must be mirrored there (foundry-pattern#4 open question 4 tracks the eventual
+# shared-package/sync mechanism; until then, edit both by hand).
+#
+# Engineering policy, not legal advice. The rows encode the discipline this
+# project chooses; genuinely novel or high-stakes licenses get real review
+# before verbatim redistribution.
+#
+# A note's `license` frontmatter is either an SPDX id listed under `licenses:`
+# below, or a `LicenseRef-<slug>` custom ref. An id absent from this table (or
+# a missing license) resolves to the `default` row: own-words-only + defect.
+#
+# `allowed_modes` are the casting transform modes (the Mold ref `mode` field:
+# verbatim | condense | sidecar) a ref under this license may use:
+#   - verbatim-ok (permissive):  verbatim, condense, sidecar
+#   - verbatim-ok (copyleft):    verbatim, sidecar   (no own-words launder)
+#   - own-words-only:            condense            (no verbatim carry)
+
+version: 1
+
+# Global rules that apply across every row (foundry-pattern#4).
+global_rules:
+  functional_strings_verbatim: >-
+    Equations, parameter/API/function/package names, numeric thresholds, and
+    enum values are reproduced verbatim as facts regardless of a row's policy —
+    facts and short functional identifiers are not copyrightable expression.
+    own-words-only constrains prose, never facts.
+  default_deny: >-
+    A source with no resolved license id is treated as own-words-only; asking
+    casting to carry a verbatim/redistributed ref without a license id is a
+    build error, not a warning.
+  own_words_not_copyleft_launder: >-
+    Paraphrasing covers expression, not the underlying ideas/facts. Do not use
+    own-words to sidestep copyleft — for GPL/LGPL carry verbatim-with-license or
+    do not carry it.
+  license_file_tracks_verbatim: >-
+    license_file is required whenever content is carried verbatim; not required
+    for own-words-only sources (no text is redistributed), which instead carry a
+    citation/attribution.
+  foundry_content_out_of_scope: >-
+    This table governs third-party pass-through content only. Foundry-authored
+    notes are covered by the root LICENSE and are never conflated with it.
+
+# policy:        verbatim-ok | own-words-only
+# allowed_modes: casting transform modes permitted for this license
+# license_file:  true when a verbatim LICENSES/ copy must accompany the carry
+# copyleft:      true when the isolate-in-its-own-file obligation applies
+licenses:
+  MIT:
+    name: MIT
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution + license notice
+
+  Apache-2.0:
+    name: Apache 2.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution + notice + preserve NOTICE
+
+  BSD-2-Clause:
+    name: BSD 2-Clause
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution + notice
+
+  BSD-3-Clause:
+    name: BSD 3-Clause
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution + notice + no-endorsement
+
+  AFL-3.0:
+    name: Academic Free License 3.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution + notice
+
+  CC-BY-4.0:
+    name: CC BY 4.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution (title/author/source/license/changes)
+
+  GPL-2.0-only:
+    name: GPL 2.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, sidecar]
+    license_file: true
+    copyleft: true
+    obligations: >-
+      notice + same-license + source availability; isolate in its own file, do
+      not blend into permissively-licensed prose
+
+  GPL-3.0-only:
+    name: GPL 3.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, sidecar]
+    license_file: true
+    copyleft: true
+    obligations: >-
+      notice + same-license + source availability; isolate in its own file, do
+      not blend into permissively-licensed prose
+
+  LGPL-3.0-or-later:
+    name: LGPL 3.0 or later
+    policy: verbatim-ok
+    allowed_modes: [verbatim, sidecar]
+    license_file: true
+    copyleft: true
+    obligations: notice + LGPL terms; isolate in its own file
+
+  CC-BY-NC-SA-2.0:
+    name: CC BY-NC-SA 2.0
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: >-
+      attribution + citation; verbatim carry avoided so NC + share-alike do not
+      propagate into the KB
+
+  LicenseRef-arXiv-nonexclusive-distrib-1.0:
+    name: arXiv non-exclusive distribution 1.0
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: >-
+      citation; arXiv's grant does not give third parties a redistribution right
+
+  LicenseRef-all-rights-reserved:
+    name: All rights reserved / read-only manuscript
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: citation only
+
+# Applied to any license id not listed above, and to a missing license.
+default:
+  name: unresolved / missing
+  policy: own-words-only
+  allowed_modes: [condense]
+  license_file: false
+  copyleft: false
+  defect: true
+  obligations: must be resolved to a real id before any verbatim carry
