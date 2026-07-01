@@ -25,6 +25,15 @@ Structured sources emit their **own schema** by design — Nextflow and CWL are 
 - `interview-to-freeform-summary` — normalize a user interview transcript or interactive session into `freeform-summary`.
 - `summarize-nextflow` — enumerate processes, channels, conditionals, containers (biocontainers / Docker / Singularity refs and their bioconda equivalents), test fixtures from an NF source tree. Container-and-env info is structured output, consumed downstream by `author-galaxy-tool-wrapper` when discovery fails.
 - `summarize-cwl` — read CWL Workflow + referenced `CommandLineTool`s; surface inputs/outputs, scatter, conditional logic, and `DockerRequirement` / `SoftwareRequirement` blocks. Container-and-env info structured for downstream consumption analogous to `summarize-nextflow`.
+- `summarize-galaxy-workflow` — read an existing Galaxy workflow (converting `.ga` → gxformat2 first if needed); emit a `summary-galaxy-workflow` recording inputs, outputs, per-step `tool_id`/`tool_version`/`tool_state`, the edge graph, and any existing tests as a regression baseline. Galaxy-as-source, target-agnostic; mirrors `summarize-cwl`. Feeds the edit pipeline and `compare-against-iwc-exemplar`.
+
+### Edit-in-place modification (Galaxy → Galaxy)
+
+The `UPDATE-INTERVIEW → GALAXY` pipeline modifies an existing workflow rather than generating one. Two front-half Molds turn interview intent into edits and a dedicated test-plan Mold carries the shipped tests forward as a regression baseline; everything else downstream reuses the per-step loop and test/validate/run tail. Key insight: *an edit is a drafty region*, so tool-introducing edits are drained by the existing `advance-galaxy-draft-step` loop.
+
+- `interview-to-galaxy-workflow-changeset` — interview a user against a `summary-galaxy-workflow` and emit a reviewable, step-anchored change-set (edit kinds: `add-step`, `replace-tool`, `remove-step`, `change-parameter`, `add/remove-input`, `add/expose-output`, `rewire`, `relabel`). The human approval gate; unsupported requests go to the open-requirements ledger.
+- `apply-galaxy-workflow-changeset` — apply the change-set to the concrete workflow: direct edits inline, tool-introducing/replacing edits injected as drafty steps with `_plan_*`; emit a `galaxy-workflow-draft` with untouched regions byte-stable.
+- `changeset-to-galaxy-test-plan` — carry the existing workflow's tests forward as a regression baseline (`source.derived_from: mixed`) and augment them for the change-set's behavioral deltas, emitting the `galaxy-test-plan` that `implement-galaxy-workflow-test` authors. The update pipeline's dedicated test-plan producer, analogous to `nextflow-test-to-galaxy-test-plan` but translate-and-augment rather than translate-only.
 
 ### Interface and data-flow design (source × target)
 

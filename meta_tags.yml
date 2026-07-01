@@ -57,6 +57,8 @@ source/nextflow:
   description: "Mold consumes Nextflow-shaped input"
 source/cwl:
   description: "Mold consumes CWL-shaped input"
+source/galaxy:
+  description: "Mold consumes an existing Galaxy gxformat2/.ga workflow as its source"
 source/snakemake:
   description: "Source-pattern or Mold consumes Snakemake-shaped input"
 target/galaxy:

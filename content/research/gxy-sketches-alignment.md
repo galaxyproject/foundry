@@ -92,9 +92,11 @@ The Foundry's `ecosystem` vocabulary should be a superset: gxy-sketches has `nf-
 
 gxy-sketches' fixed `domain` enum overlaps heavily with Foundry's `iwc/*` tag family (`iwc/variant-calling`, `iwc/rna-seq`, …). They will not be identical — gxy-sketches' `domain` is a single value chosen by the LLM; the Foundry's `iwc/*` is a multi-tag classification seeded from IWC directory layout (see `CORPUS_INGESTION.md`). Document the mapping in `meta_tags.yml` descriptions for `iwc/*` keys; do not force a merge.
 
-### 5. Inventory gap surfaced by alignment: `summarize-galaxy-workflow`
+### 5. Inventory gap surfaced by alignment: `summarize-galaxy-workflow` — **CLOSED**
 
-gxy-sketches treats IWC (gxformat2 `.ga` files + planemo `*-tests.yml`) as a first-class source. The Foundry has **no** `summarize-galaxy-workflow` Mold — its source axis is paper/nextflow/cwl only. Worth adding to the inventory:
+**Resolved (2026-07): [[summarize-galaxy-workflow]] now exists**, added with the `UPDATE-INTERVIEW → GALAXY` edit pipeline. It reads an existing Galaxy workflow (converting `.ga` → gxformat2 first if needed), emits a schema-backed [[summary-galaxy-workflow]], and the source axis now includes `galaxy`. It serves the edit pipeline and `compare-against-iwc-exemplar` as anticipated below. The original gap analysis is retained for context.
+
+gxy-sketches treats IWC (gxformat2 `.ga` files + planemo `*-tests.yml`) as a first-class source. The Foundry had **no** `summarize-galaxy-workflow` Mold — its source axis was paper/nextflow/cwl only. Worth adding to the inventory:
 
 - It would serve `compare-against-iwc-exemplar` directly (the structural diff Mold needs a structured view of the exemplar workflow it compares against — currently unspecified).
 - It would let a future `sketch` cast target be populated from IWC workflows entirely inside the Foundry pipeline, without re-implementing gxy-sketches' IWC ingestor.

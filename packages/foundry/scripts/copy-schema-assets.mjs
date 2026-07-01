@@ -12,6 +12,10 @@ const PKG_ROOT = resolve(__dirname, "..");
 const ASSETS = [
   ["src/schemas/summary-cwl/summary-cwl.schema.json", "dist/schemas/summary-cwl/summary-cwl.schema.json"],
   [
+    "src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json",
+    "dist/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json",
+  ],
+  [
     "src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json",
     "dist/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json",
   ],

@@ -21,6 +21,7 @@ related_notes:
   - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[cwl-test-to-galaxy-test-plan]]"
   - "[[freeform-summary-to-galaxy-test-plan]]"
+  - "[[changeset-to-galaxy-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
 summary: "JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test."
 ---

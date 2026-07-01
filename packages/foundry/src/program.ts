@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { attachSummarizeNextflow } from "./commands/summarize-nextflow.js";
 import { runValidateSummaryNextflow } from "./commands/validate-summary-nextflow.js";
 import { runValidateSummaryCwl } from "./commands/validate-summary-cwl.js";
+import { runValidateSummaryGalaxyWorkflow } from "./commands/validate-summary-galaxy-workflow.js";
 import { runValidateGalaxyToolDiscovery } from "./commands/validate-galaxy-tool-discovery.js";
 import { runValidateGalaxyToolSummary } from "./commands/validate-galaxy-tool-summary.js";
 import { runValidateGalaxyWorkflowTestPlan } from "./commands/validate-galaxy-workflow-test-plan.js";
@@ -32,6 +33,12 @@ export function buildProgram(): Command {
     .description("Validate a summarize-cwl JSON document.")
     .argument("<summary.json>")
     .action((path: string) => runValidateSummaryCwl(path));
+
+  program
+    .command("validate-summary-galaxy-workflow")
+    .description("Validate a summarize-galaxy-workflow JSON document.")
+    .argument("<summary.json>")
+    .action((path: string) => runValidateSummaryGalaxyWorkflow(path));
 
   program
     .command("validate-galaxy-tool-discovery")
