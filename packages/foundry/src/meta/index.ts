@@ -149,6 +149,22 @@ export const foundryCliMeta: CliProgramSpec = {
       commands: [],
     },
     {
+      name: "validate-summary-galaxy-workflow",
+      fullName: "foundry validate-summary-galaxy-workflow",
+      description: "Validate a summarize-galaxy-workflow JSON document.",
+      synopsis: "foundry validate-summary-galaxy-workflow <summary.json>",
+      args: [
+        {
+          raw: "summary.json",
+          name: "summary.json",
+          required: true,
+          variadic: false,
+        },
+      ],
+      options: [],
+      commands: [],
+    },
+    {
       name: "validate-galaxy-tool-discovery",
       fullName: "foundry validate-galaxy-tool-discovery",
       description: "Validate a discover-shed-tool recommendation document.",

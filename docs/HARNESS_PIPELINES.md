@@ -141,9 +141,28 @@ The interview path is a Galaxy-targeting pipeline, named to match the other `→
 10. `run-workflow-test`
 11. `debug-galaxy-workflow-output`
 
+### UPDATE-INTERVIEW → GALAXY
+
+The Foundry's first `GALAXY → GALAXY` (edit) pipeline: it consumes an existing Galaxy `gxformat2` workflow and modifies it according to interview intent, rather than generating one from a non-Galaxy source. The workflow is both an input and the output. The approach is diff-and-patch: the workflow enters already concrete, untouched regions stay byte-stable, and only the regions the change-set names change. Its key reuse insight — *an edit is a drafty region* — lets it inject tool-introducing edits as drafty steps and drain them with the existing per-step loop, so it needs only four new Molds: three front-half plus a dedicated test-plan producer for the tail.
+
+1. `summarize-galaxy-workflow` — read the existing workflow (convert `.ga` → gxformat2 first if needed), emit a structured `summary-galaxy-workflow` that anchors the interview.
+2. `interview-to-galaxy-workflow-changeset` — turn the interview into a reviewable, step-anchored change-set (the human approval gate).
+3. `apply-galaxy-workflow-changeset` — apply the change-set to the concrete workflow: direct edits inline, tool-introducing/replacing edits injected as drafty steps; emit a `galaxy-workflow-draft`.
+4. `[loop]` `advance-galaxy-draft-step` — drains any injected drafty steps and extracts the concrete workflow. A change-set of purely direct edits leaves the draft concrete, so the loop is a no-op.
+5. `changeset-to-galaxy-test-plan` — carry the existing tests (the regression baseline captured in the phase-1 summary) forward and augment them for the change-set's behavioral deltas, emitting the `galaxy-test-plan`.
+6. `implement-galaxy-workflow-test` — author the final tests from that plan.
+7. `validate-galaxy-workflow`
+8. `run-workflow-test` — runs the carried-forward tests as the regression check.
+9. `debug-galaxy-workflow-output`
+
+`summarize-galaxy-workflow` also serves `compare-against-iwc-exemplar`, which previously lacked a structured view of the exemplar it diffs against — closing the Galaxy-as-source summarizer gap tracked in `content/research/gxy-sketches-alignment.md §5`.
+
+Test-plan handoff: like every Galaxy-targeting pipeline, this one places a dedicated `*-to-galaxy-test-plan` producer before `implement-galaxy-workflow-test`. The update case gets its own — `changeset-to-galaxy-test-plan` — rather than reusing the freeform one, because its inputs and semantics are update-specific: it carries the existing workflow's tests forward as a regression baseline (`source.derived_from: mixed`) and only augments for the change-set's deltas, where the freeform Mold synthesizes a plan from scratch. `test-data-refs` come from the baseline's existing fixtures, with `find-test-data` reached only when a change-set-added input needs new data.
+
 ## Cross-pipeline observations
 
-- **Source-specific (one per source)**: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`. Paper and interview share the `freeform-summary` handoff; Nextflow and CWL keep structured source-specific schemas.
+- **Source-specific (one per source)**: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`, `summarize-galaxy-workflow`. Paper and interview share the `freeform-summary` handoff; Nextflow, CWL, and Galaxy-as-source keep structured source-specific schemas (`summarize-galaxy-workflow` reads an existing Galaxy workflow for the edit pipeline).
+- **Edit-in-place (Galaxy → Galaxy)**: `interview-to-galaxy-workflow-changeset` (interview → reviewable change-set anchored to existing steps), `apply-galaxy-workflow-changeset` (change-set → `galaxy-workflow-draft`, direct edits inline, tool edits as drafty steps), and `changeset-to-galaxy-test-plan` (existing tests carried forward as a regression baseline + change-set deltas → `galaxy-test-plan`). Downstream reuses the per-step loop and test/validate/run tail unchanged.
 - **Source × target interface/data-flow**: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`. The free-form Galaxy path is split to match the Nextflow/CWL pairs; the CWL target keeps a combined `freeform-summary-to-cwl-design` Mold until free-form examples justify a split.
 - **Source × target template generation** (Galaxy): `nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`. Each consumes its source-specific or freeform design briefs.
 - **Target-specific (one per target)**:
