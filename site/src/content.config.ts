@@ -186,6 +186,8 @@ const researchSchema = z.object({
   subtype: z.enum(['component', 'design-problem', 'design-spec']),
   component: z.string().optional(),
   companions: z.array(z.string()).min(1).optional(),
+  license: licenseId.optional(),
+  license_file: z.string().optional(),
   ...baseFields,
 }).strict();
 
