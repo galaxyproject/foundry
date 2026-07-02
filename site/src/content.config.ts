@@ -1,7 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { contractKeys, loadReferenceContract } from './lib/reference-contract';
-import { isValidLicenseId } from './lib/license-policy';
+import { isValidLicenseId, resolveLicenseRow } from './lib/license-policy';
 
 const referenceContract = loadReferenceContract();
 
@@ -213,10 +213,26 @@ const noteSchema = z.discriminatedUnion('type', [
   researchSchema,
   schemaNoteSchema,
 ]).superRefine((d, ctx) => {
-  if (d.type !== 'mold') return;
-  if (d.axis === 'source-specific' && !d.source) ctx.addIssue({ code: 'custom', message: 'source-specific mold requires `source`' });
-  if (d.axis === 'target-specific' && !d.target) ctx.addIssue({ code: 'custom', message: 'target-specific mold requires `target`' });
-  if (d.axis === 'tool-specific' && !d.tool) ctx.addIssue({ code: 'custom', message: 'tool-specific mold requires `tool`' });
+  if (d.type === 'mold') {
+    if (d.axis === 'source-specific' && !d.source) ctx.addIssue({ code: 'custom', message: 'source-specific mold requires `source`' });
+    if (d.axis === 'target-specific' && !d.target) ctx.addIssue({ code: 'custom', message: 'target-specific mold requires `target`' });
+    if (d.axis === 'tool-specific' && !d.tool) ctx.addIssue({ code: 'custom', message: 'tool-specific mold requires `tool`' });
+    return;
+  }
+  // Schema notes redistributing external upstream content must carry a license,
+  // and (for verbatim-carry licenses) a license_file. Mirrors the validator.
+  if (d.type === 'schema') {
+    const upstream = d.upstream ?? '';
+    const external = upstream && !upstream.includes('github.com/galaxyproject/foundry/');
+    if (!external) return;
+    if (!d.license) {
+      ctx.addIssue({ code: 'custom', message: 'vendored schema with external upstream requires `license`' });
+      return;
+    }
+    if (resolveLicenseRow(d.license).license_file && !d.license_file) {
+      ctx.addIssue({ code: 'custom', message: `license ${d.license} requires a \`license_file\`` });
+    }
+  }
 });
 
 const content = defineCollection({

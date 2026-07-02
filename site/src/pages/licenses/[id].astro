@@ -1,0 +1,72 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getLicenses, licenseIdFromFile } from '../../lib/licenses';
+import { resolveLicenseRow } from '../../lib/license-policy';
+
+export async function getStaticPaths() {
+  return getLicenses().map(license => ({
+    params: { id: license.id },
+    props: { license },
+  }));
+}
+
+const { license } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Notes that redistribute content under this LICENSES/ file, with their SPDX id.
+const entries = await getCollection('content');
+const users = entries
+  .filter(e => {
+    const lf = (e.data as any).license_file;
+    return typeof lf === 'string' && licenseIdFromFile(lf) === license.id;
+  })
+  .map(e => ({ id: e.id, spdx: (e.data as any).license as string | undefined }))
+  .sort((a, b) => a.id.localeCompare(b.id));
+
+// Distinct SPDX ids carried under this file, and their policy rows.
+const spdxIds = [...new Set(users.map(u => u.spdx).filter(Boolean) as string[])];
+const rows = spdxIds.map(id => ({ id, row: resolveLicenseRow(id) }));
+---
+<Base title={`license: ${license.id}`}>
+  <header class="mb-4">
+    <p class="text-xs font-mono uppercase tracking-widest text-(--color-text-muted) mb-1">license</p>
+    <h1 class="text-2xl font-mono font-semibold m-0">{license.filename}</h1>
+  </header>
+
+  {rows.length > 0 && (
+    <section class="mb-5 grid gap-2">
+      {rows.map(({ id, row }) => (
+        <div class="p-3 rounded-lg border border-(--color-border)">
+          <p class="m-0 mb-1">
+            <code class="mr-2">{id}</code>
+            <span class="text-sm text-(--color-text-secondary)">
+              {row.policy === 'own-words-only' ? 'own-words only' : 'verbatim OK'}
+              {row.copyleft ? ' · copyleft' : ''}
+            </span>
+          </p>
+          <p class="m-0 text-sm text-(--color-text-secondary)">{row.obligations}</p>
+        </div>
+      ))}
+    </section>
+  )}
+
+  {users.length > 0 && (
+    <section class="mb-5">
+      <h2 class="text-base font-semibold m-0 mb-2">Redistributed by <span class="text-sm font-normal text-(--color-text-secondary)">({users.length})</span></h2>
+      <ul class="list-none p-0 m-0 grid gap-1">
+        {users.map(u => (
+          <li>
+            <a href={`${base}/${u.id}/`} class="text-(--color-link) hover:underline font-mono text-sm">{u.id}</a>
+            {u.spdx && <span class="ml-2 text-xs text-(--color-text-muted) font-mono">{u.spdx}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section>
+    <h2 class="text-base font-semibold m-0 mb-2">License text</h2>
+    <pre class="p-3 rounded-lg border border-(--color-border) overflow-x-auto text-xs leading-relaxed whitespace-pre-wrap">{license.text}</pre>
+  </section>
+</Base>
