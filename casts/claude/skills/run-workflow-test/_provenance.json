@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 4,
     "content_hash": "c0c514b739c85722cb89c69cbceb0080ca16833a7f19a6c7aa5555968acd3eca",
-    "commit": "20cc47e729875eadbea7d72770069026168de713"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T16:56:10.109Z",
+  "cast_at": "2026-07-01T23:46:03.464Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -94,9 +94,12 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Validate Galaxy workflow test files before starting a Planemo or Galaxy-backed execution.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
       "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
   ],
   "artifacts": {

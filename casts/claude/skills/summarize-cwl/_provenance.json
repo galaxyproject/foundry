@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "summarize-cwl",
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
     "content_hash": "fc96f678cb072237347f4990644a86c47d84f4fff303160fbb4ae3a92a55e1c5",
-    "commit": "97effead63ef05cbac9d7f7227d8695a9e571e79"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-05-11T20:44:59.438Z",
+  "cast_at": "2026-07-01T23:46:04.640Z",
   "refs": [
     {
       "kind": "cli-tool",
@@ -50,8 +50,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-cwl.json before returning it from the skill.",
-      "src_hash": "4bdf7a69637c360258e86738aab65b946347629f84695f1c7e6bf7c49fc75b32",
-      "dst_hash": "4bdf7a69637c360258e86738aab65b946347629f84695f1c7e6bf7c49fc75b32",
+      "src_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
+      "dst_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
       "source": "deterministic"
     },
     {
@@ -94,8 +94,9 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted CWL summary JSON and provide downstream consumers the output contract.",
-      "src_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
-      "dst_hash": "0f2afd3d103658dcbcbb4416d803e8d81d02aa749d1c9c98d72d5abe7f34ccd5",
+      "license": "MIT",
+      "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
       "source": "deterministic"
     }
   ],

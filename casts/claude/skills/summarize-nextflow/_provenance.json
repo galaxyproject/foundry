@@ -1,16 +1,16 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 13,
     "content_hash": "5c2eb98afb41c1cc58e3a22aedfe62fac75e6c6c93eb6eb6339aadda1ac7ebd0",
-    "commit": "e966a94f2a384913d0105082e8ccacd514e4937f"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-06-11T22:20:41.363Z",
+  "cast_at": "2026-07-01T23:46:06.523Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -174,9 +174,12 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[].",
+      "license": "Apache-2.0",
+      "license_file": "LICENSES/nf-schema.LICENSE",
       "src_hash": "4259c7beaf2b7d7279c7bf9025d0936cb65ee123f0d10433f3b0f5006f85ccad",
       "dst_hash": "4259c7beaf2b7d7279c7bf9025d0936cb65ee123f0d10433f3b0f5006f85ccad",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     {
       "kind": "schema",
@@ -188,9 +191,12 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Validate per-module meta.yml when walking nf-core modules; pins the channel IO `type` enum and tools/containers shape.",
+      "license": "MIT",
+      "license_file": "LICENSES/nf-core-modules.LICENSE",
       "src_hash": "b825d8666a3c6793c9e9590deecb1e77d2b3bc411c4f13d1bc22e633412f09ca",
       "dst_hash": "b825d8666a3c6793c9e9590deecb1e77d2b3bc411c4f13d1bc22e633412f09ca",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "0227425f8337b6dd85ddeb2de77d1a028dc0df4ca213dd1bdc8abd4f455fba7c"
     },
     {
       "kind": "schema",
@@ -202,9 +208,12 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Validate subworkflow meta.yml; backs Subworkflow.calls extraction via the components: declaration.",
+      "license": "MIT",
+      "license_file": "LICENSES/nf-core-modules.LICENSE",
       "src_hash": "7b3759473b2f9da76aa7efa98511a87ca7d50b28847e6c223af116ad06a6335b",
       "dst_hash": "7b3759473b2f9da76aa7efa98511a87ca7d50b28847e6c223af116ad06a6335b",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "0227425f8337b6dd85ddeb2de77d1a028dc0df4ca213dd1bdc8abd4f455fba7c"
     },
     {
       "kind": "schema",
@@ -216,6 +225,7 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
+      "license": "MIT",
       "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"

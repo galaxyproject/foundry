@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "nextflow-summary-to-galaxy-data-flow",
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 4,
-    "content_hash": "f9b067363b87cbcfe895c473ada65dfc713a3d1cdf425345c6d241be231bc63c",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "content_hash": "a30f0654eb7a4235647ced2d96777704d3024c95608c3fb514a9bd91f6fc94a0",
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-15T15:02:53.140Z",
+  "cast_at": "2026-07-01T23:46:00.366Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -208,6 +208,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
@@ -217,6 +232,7 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure while drafting Galaxy-facing abstract data flow.",
+      "license": "MIT",
       "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"
@@ -229,6 +245,12 @@
         "kind": "markdown",
         "default_filename": "nextflow-galaxy-data-flow.md",
         "description": "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
       }
     ],
     "consumes": [
@@ -252,6 +274,28 @@
         "description": "Preceding Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] that pins inputs, outputs, and labels.",
         "producers": [
           "nextflow-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]

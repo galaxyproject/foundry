@@ -7,7 +7,7 @@
   "additionalProperties": false,
   "required": ["provenance_schema_version", "cast_target", "mold", "refs"],
   "properties": {
-    "provenance_schema_version": { "type": "integer", "const": 2 },
+    "provenance_schema_version": { "type": "integer", "const": 3 },
     "cast_target": { "type": "string" },
     "mold": {
       "type": "object",
@@ -160,6 +160,18 @@
         "companion_of": {
           "type": "string",
           "description": "Bundle-relative dst of the parent note when this ref is a sibling companion file copied alongside it."
+        },
+        "license": {
+          "type": "string",
+          "description": "License id of redistributed third-party content, from the source note's frontmatter. Absent for Foundry-authored refs (root LICENSE, out of policy scope)."
+        },
+        "license_file": {
+          "type": "string",
+          "description": "Repo-relative LICENSES/ path this ref redistributes under (verbatim-carry licenses only)."
+        },
+        "license_file_hash": {
+          "type": "string",
+          "description": "sha256 of the license_file at cast time, making the license of every redistributed byte part of the lineage."
         },
         "prompt": {
           "type": "object",

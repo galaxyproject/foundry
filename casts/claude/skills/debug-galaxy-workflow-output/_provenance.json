@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "debug-galaxy-workflow-output",
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
     "revision": 4,
     "content_hash": "9d560d77fe14fb9c2ebee1a67b49370d2d1b080a6821835407c4b89877bf7fd4",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-15T13:53:42.883Z",
+  "cast_at": "2026-07-01T23:45:51.380Z",
   "refs": [
     {
       "kind": "research",

@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 7,
     "content_hash": "d01ad92af0e843f07beeb5adbde46f32127529acd64fabbc4796417d420d99a0",
-    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T00:21:36.830Z",
+  "cast_at": "2026-07-01T23:45:46.474Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -175,6 +175,7 @@
         "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
         "producers": [
           "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
@@ -183,6 +184,7 @@
           "freeform-summary-to-galaxy-interface",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
           "nextflow-summary-to-galaxy-data-flow",
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",

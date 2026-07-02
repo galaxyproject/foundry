@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "validate-galaxy-workflow",
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 3,
     "content_hash": "58536625c371eed536f6c3f68cde6b4d425b051c8d1ed129e4c5b667a05a3135",
-    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T00:21:44.942Z",
+  "cast_at": "2026-07-01T23:46:07.138Z",
   "refs": [
     {
       "kind": "cli-command",

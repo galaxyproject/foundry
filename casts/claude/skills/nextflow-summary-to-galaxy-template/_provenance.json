@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "6ecc9ff513ecf5f7fd17f402fb8e99621c0474d1d64cac4bfe9bc15b5d99c164",
-    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T00:21:43.199Z",
+  "cast_at": "2026-07-01T23:46:02.229Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -297,6 +297,7 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context.",
+      "license": "MIT",
       "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"
@@ -311,9 +312,12 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Output contract: the emitted gxformat2 draft conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema so the skill carries its output shape alongside the [[draft-validate]] CLI checks.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
       "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
   ],
   "artifacts": {
@@ -381,6 +385,7 @@
         "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
         "producers": [
           "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
@@ -389,6 +394,7 @@
           "freeform-summary-to-galaxy-interface",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
           "nextflow-summary-to-galaxy-data-flow",
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",

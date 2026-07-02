@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 4,
     "content_hash": "b620de36e245302737d9a82171fb2847ee214466915dbb28392a0ac02bc6df68",
-    "commit": "37056dffed79293923554402b52369c393436602"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T12:32:44.265Z",
+  "cast_at": "2026-07-01T23:45:47.085Z",
   "cast_date": "2026-06-19",
   "cast_revision": 1,
   "cast_history": [
@@ -223,9 +223,12 @@
       "purpose": "Validate `planemo test --test_output_json` output before classifying failures; the JSON gate that replaces free-text parsing.",
       "trigger": "Step 10.2 — after every `planemo test` invocation.",
       "verification": "Cast and confirm AJV-validation runs before the failure-classification branch.",
+      "license": "MIT",
+      "license_file": "LICENSES/planemo.LICENSE",
       "src_hash": "6c6fe24c1615c7b12b843a8ce7a37483deb4e787f5b3e98862817f0125e9be4e",
       "dst_hash": "6c6fe24c1615c7b12b843a8ce7a37483deb4e787f5b3e98862817f0125e9be4e",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "c4da7f2ad8a3dba26b8292ac27b1f66764550d8143265a74cddfeeaf35823842"
     }
   ]
 }

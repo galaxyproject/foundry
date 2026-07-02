@@ -12,6 +12,7 @@ import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta"
 import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
 import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { loadLicensePolicy, resolveLicenseRow } from "../lib/license-policy.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
@@ -607,6 +608,30 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
   const findings: CrossFileFinding[] = [];
   const repoRoot =
     path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
+  // Load the policy table only when a note carries a license, so minimal content
+  // trees without the root license-policy.yml still validate.
+  if (!files.some((f) => typeof f.meta.license === "string")) return findings;
+  const policy = loadLicensePolicy(repoRoot);
+
+  // Reconcile with the license → redistribution-policy table (foundry-pattern#4):
+  // an own-words-only license redistributes nothing verbatim, so it must NOT ship
+  // a license_file. Applies to every note type that carries a license.
+  for (const f of files) {
+    const license = typeof f.meta.license === "string" ? f.meta.license : "";
+    if (!license) continue;
+    const row = resolveLicenseRow(policy, license);
+    const licenseFile = typeof f.meta.license_file === "string" ? f.meta.license_file : "";
+    if (row.policy === "own-words-only" && licenseFile) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `license ${license} is own-words-only; drop license_file (nothing is redistributed verbatim)`,
+      });
+    }
+  }
+
+  // External-upstream schema notes redistribute third-party content: they must
+  // declare a license, and (for verbatim-carry licenses) a license_file that exists.
   for (const f of files) {
     if (f.meta.type !== "schema") continue;
     const upstream = typeof f.meta.upstream === "string" ? f.meta.upstream : "";
@@ -617,7 +642,10 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
         severity: "error",
         message: "vendored schema with external upstream must declare license",
       });
+      continue;
     }
+    const row = resolveLicenseRow(policy, f.meta.license);
+    if (!row.license_file) continue; // own-words-only carry needs no license_file
     const licenseFile = typeof f.meta.license_file === "string" ? f.meta.license_file : "";
     if (!licenseFile) {
       findings.push({

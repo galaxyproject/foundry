@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "freeform-summary-to-galaxy-test-plan",
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 1,
     "content_hash": "37c8ad10dcf4ebaf9aefc132bd365b1172fbd1c00534893f52a53f65e99e0d9b",
-    "commit": "042a5219728e058b2d8a989875c0ac03a19dc592"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-16T19:07:57.280Z",
+  "cast_at": "2026-07-01T23:45:56.653Z",
   "refs": [
     {
       "kind": "research",
@@ -96,6 +96,7 @@
       "evidence": "hypothesis",
       "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema so the skill carries its output shape; validate with `foundry validate-galaxy-workflow-test-plan`.",
       "verification": "Cast the skill, run on a representative paper/interview-derived summary, confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it without re-reading the source summary.",
+      "license": "MIT",
       "src_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
       "dst_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
       "source": "deterministic"
@@ -111,9 +112,12 @@
       "evidence": "corpus-observed",
       "purpose": "Use the Galaxy workflow tests schema as the assertion-family vocabulary referenced by the plan's assertion intent.",
       "trigger": "When naming an assertion family or compare operator for a synthesized expected output.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
       "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
   ],
   "artifacts": {

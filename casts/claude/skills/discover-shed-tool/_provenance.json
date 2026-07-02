@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "discover-shed-tool",
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 4,
     "content_hash": "2e5fa1f8b22f1f9c984fa4c4dc05999294de5db706a9c1691d3af7b3459cbecb",
-    "commit": "aa9b9425f1ffd90465c9c3b422a0be1810c273ee"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T00:55:16.942Z",
+  "cast_at": "2026-07-01T23:45:52.578Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [

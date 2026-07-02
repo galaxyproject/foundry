@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `galaxy-test-plan`. Schema: galaxy-workflow-test-plan. Produced by `cwl-test-to-galaxy-test-plan`, `freeform-summary-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`. Schema-valid Galaxy test plan (galaxy-workflow-test-plan) from a *-test-to-galaxy-test-plan Mold; carries job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.
+- Read artifact `galaxy-test-plan`. Schema: galaxy-workflow-test-plan. Produced by `changeset-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `freeform-summary-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`. Schema-valid Galaxy test plan (galaxy-workflow-test-plan) from a *-test-to-galaxy-test-plan Mold; carries job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.
 - Read artifact `galaxy-workflow`. Produced by `advance-galaxy-draft-step`. Concrete gxformat2 workflow being tested — the loop-endstate `galaxy-workflow.gxwf.yml` from advance-galaxy-draft-step (`class: GalaxyWorkflow`); provides the real input/output labels, outputs, and collection shapes the test must assert against.
 - Read artifact `test-data-refs`. Produced by `find-test-data`, `paper-to-test-data`. Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.
 
