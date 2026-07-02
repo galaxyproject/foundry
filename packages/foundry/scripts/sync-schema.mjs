@@ -50,6 +50,7 @@ function regenerateVersion() {
 
 regenerateVersion();
 regenerateFromJson("summary-cwl", "summaryCwlSchema");
+regenerateFromJson("summary-galaxy-workflow", "summaryGalaxyWorkflowSchema");
 regenerateFromJson("galaxy-tool-discovery", "galaxyToolDiscoverySchema");
 regenerateFromJson("galaxy-tool-summary", "galaxyToolSummarySchema");
 regenerateFromJson("galaxy-workflow-test-plan", "galaxyWorkflowTestPlanSchema");

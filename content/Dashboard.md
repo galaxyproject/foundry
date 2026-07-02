@@ -6,6 +6,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[update-interview-to-galaxy]] | Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. | draft | 2026-07-01 | 1 |
 | [[interview-to-galaxy]] | Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. | draft | 2026-05-22 | 1 |
 | [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | draft | 2026-05-10 | 3 |
 | [[cwl-to-galaxy]] | Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction. | draft | 2026-04-30 | 2 |
@@ -17,6 +18,10 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[apply-galaxy-workflow-changeset]] | Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps. | draft | 2026-07-01 | 1 |
+| [[interview-to-galaxy-workflow-changeset]] | Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. | draft | 2026-07-01 | 1 |
+| [[summarize-galaxy-workflow]] | Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps. | draft | 2026-07-01 | 1 |
+| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-06-19 | 4 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | draft | 2026-06-18 | 2 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary. | draft | 2026-06-18 | 7 |
 | [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | draft | 2026-06-18 | 7 |
@@ -31,7 +36,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[cwl-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs. | draft | 2026-06-11 | 4 |
 | [[freeform-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. | draft | 2026-06-11 | 4 |
 | [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | draft | 2026-06-11 | 7 |
-| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-06-10 | 3 |
 | [[freeform-summary-to-galaxy-data-flow]] | Translate a free-form source summary into a Galaxy data-flow design brief. | draft | 2026-06-09 | 1 |
 | [[freeform-summary-to-galaxy-interface]] | Map a free-form source summary into a Galaxy workflow interface design brief. | draft | 2026-06-09 | 1 |
 | [[cwl-summary-to-galaxy-data-flow]] | Translate a CWL summary into a Galaxy data-flow design brief. | draft | 2026-05-10 | 2 |
@@ -134,6 +138,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[validate-summary-galaxy-workflow]] | AJV gate for summarize-galaxy-workflow JSON documents. | draft | 2026-07-01 | 1 |
 | [[add]] | Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema. | draft | 2026-06-18 | 2 |
 | [[list]] | Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached. | draft | 2026-06-18 | 1 |
 | [[summarize]] | Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool. | draft | 2026-06-18 | 2 |
@@ -164,10 +169,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[summary-galaxy-workflow]] | JSON Schema for the structured summary emitted by the summarize-galaxy-workflow Mold. | draft | 2026-07-01 | 1 |
+| [[planemo-test-report]] | JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo. | draft | 2026-06-18 | 2 |
 | [[galaxy-workflow-test-plan]] | JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test. | draft | 2026-06-16 | 1 |
 | [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-05-27 | 1 |
 | [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref deterministic-vs-LLM origin, src/dst hashes, artifact handoff. Schema v2. | draft | 2026-05-17 | 1 |
-| [[planemo-test-report]] | JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo. | draft | 2026-05-11 | 1 |
 | [[summary-cwl]] | JSON Schema for the structured summary emitted by the summarize-cwl Mold. | draft | 2026-05-10 | 1 |
 | [[summary-nextflow]] | JSON Schema for the structured summary emitted by the summarize-nextflow Mold. | draft | 2026-05-06 | 8 |
 | [[galaxy-tool-summary]] | JSON Schema for the deterministic per-tool manifest emitted by `galaxy-tool-cache summarize`. | draft | 2026-05-05 | 1 |
