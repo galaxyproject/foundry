@@ -608,10 +608,10 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
   const findings: CrossFileFinding[] = [];
   const repoRoot =
     path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
-  // Load the policy table only when a note carries a license, so minimal content
-  // trees without the root license-policy.yml still validate.
-  if (!files.some((f) => typeof f.meta.license === "string")) return findings;
-  const policy = loadLicensePolicy(repoRoot);
+  // Load the policy table lazily, only when a check actually needs to resolve a
+  // license row, so license-free content trees validate without it.
+  let policy: ReturnType<typeof loadLicensePolicy> | undefined;
+  const getPolicy = () => (policy ??= loadLicensePolicy(repoRoot));
 
   // Reconcile with the license → redistribution-policy table (foundry-pattern#4):
   // an own-words-only license redistributes nothing verbatim, so it must NOT ship
@@ -619,7 +619,7 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
   for (const f of files) {
     const license = typeof f.meta.license === "string" ? f.meta.license : "";
     if (!license) continue;
-    const row = resolveLicenseRow(policy, license);
+    const row = resolveLicenseRow(getPolicy(), license);
     const licenseFile = typeof f.meta.license_file === "string" ? f.meta.license_file : "";
     if (row.policy === "own-words-only" && licenseFile) {
       findings.push({
@@ -644,7 +644,7 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
       });
       continue;
     }
-    const row = resolveLicenseRow(policy, f.meta.license);
+    const row = resolveLicenseRow(getPolicy(), f.meta.license);
     if (!row.license_file) continue; // own-words-only carry needs no license_file
     const licenseFile = typeof f.meta.license_file === "string" ? f.meta.license_file : "";
     if (!licenseFile) {

@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -346,6 +346,8 @@ describe("validateDirectory (cross-file)", () => {
     dir = path.join(repoRoot, `.tmp-test-vault-${safe}`);
     rmSync(dir, { recursive: true, force: true });
     mkdirSync(dir, { recursive: true });
+    // Seed the license-policy table so license-aware vendoring checks resolve.
+    copyFileSync(path.join(repoRoot, "license-policy.yml"), path.join(dir, "license-policy.yml"));
   });
 
   afterEach(() => {

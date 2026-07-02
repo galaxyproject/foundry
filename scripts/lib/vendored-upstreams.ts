@@ -14,6 +14,8 @@ export interface VendoredUpstreamEntry {
   pinned_ref: string;
   framing?: string;
   build?: VendoredBuildStep;
+  license?: string;
+  license_file?: string;
 }
 
 export interface VendoredDrift {
@@ -36,6 +38,20 @@ export function loadVendoredUpstreams(
     if (!value.local || !value.source || !value.pinned_ref) {
       throw new Error(`vendored entry ${i + 1} requires local, source, and pinned_ref`);
     }
+    if (!value.license || !value.license_file) {
+      throw new Error(
+        `vendored entry ${i + 1} (${value.local}) requires license and license_file`,
+      );
+    }
+    // Assert the referenced LICENSES/ file exists at sync/check time, so a
+    // license attaches at the point of sync rather than only when a downstream
+    // note remembers to declare it.
+    const licenseAbs = path.join(repoRoot, value.license_file);
+    if (!fs.existsSync(licenseAbs) || fs.statSync(licenseAbs).size === 0) {
+      throw new Error(
+        `vendored entry ${i + 1} (${value.local}) license_file does not exist or is empty: ${value.license_file}`,
+      );
+    }
     let build: VendoredBuildStep | undefined;
     if (value.build !== undefined) {
       const b = value.build as Partial<VendoredBuildStep>;
@@ -48,6 +64,8 @@ export function loadVendoredUpstreams(
       pinned_ref: value.pinned_ref,
       framing: value.framing,
       build,
+      license: value.license,
+      license_file: value.license_file,
     };
   });
 }
