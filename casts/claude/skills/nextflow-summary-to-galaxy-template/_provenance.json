@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "6ecc9ff513ecf5f7fd17f402fb8e99621c0474d1d64cac4bfe9bc15b5d99c164",
-    "commit": "8d6e79cb766b3fd3574f34569645f5d7ff5db2ce"
+    "commit": "4fa83bcea5c2823574416d0ab0b054f387d22141"
   },
-  "cast_at": "2026-06-19T00:21:43.199Z",
+  "cast_at": "2026-07-02T15:08:35.946Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -116,9 +116,12 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
-      "src_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
-      "dst_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
-      "source": "deterministic"
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
+      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -132,9 +135,12 @@
       "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
       "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
       "dst_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -148,9 +154,12 @@
       "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
       "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
       "dst_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -297,6 +306,7 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context.",
+      "license": "MIT",
       "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"
@@ -311,9 +321,12 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Output contract: the emitted gxformat2 draft conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema so the skill carries its output shape alongside the [[draft-validate]] CLI checks.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
       "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
   ],
   "artifacts": {
@@ -381,6 +394,7 @@
         "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
         "producers": [
           "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
@@ -389,6 +403,7 @@
           "freeform-summary-to-galaxy-interface",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
           "nextflow-summary-to-galaxy-data-flow",
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",

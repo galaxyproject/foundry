@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
     "revision": 2,
     "content_hash": "51697d0a76f73ecd17a93bcaf50f21bcd7311ed98de122c2790ac997c8acd44e",
-    "commit": "72b20f2ba4575f1414f2a083aab683e6147e5dcc"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T15:13:10.016Z",
+  "cast_at": "2026-07-01T23:45:53.191Z",
   "refs": [
     {
       "kind": "research",

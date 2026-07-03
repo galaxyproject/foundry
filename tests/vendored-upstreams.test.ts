@@ -5,6 +5,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   findVendoredDrift,
+  loadVendoredUpstreams,
   syncVendoredUpstreams,
   updateVendoredManifestRefs,
 } from "../scripts/lib/vendored-upstreams";
@@ -60,6 +61,34 @@ describe("vendored upstream sync", () => {
     const synced = syncVendoredUpstreams(dir, [entry]);
     expect(synced).toHaveLength(1);
     expect(findVendoredDrift(dir, [entry])).toHaveLength(0);
+  });
+
+  it("requires license and license_file on every entry", () => {
+    writeFileSync(
+      path.join(dir, "vendored_upstreams.yml"),
+      "- local: content/vendored.txt\n  source: $UPSTREAM/docs/source.txt\n  pinned_ref: abc\n",
+    );
+    expect(() => loadVendoredUpstreams(dir)).toThrow(/requires license and license_file/);
+  });
+
+  it("asserts the referenced license_file exists at load time", () => {
+    writeFileSync(
+      path.join(dir, "vendored_upstreams.yml"),
+      "- local: content/vendored.txt\n  source: $UPSTREAM/docs/source.txt\n  pinned_ref: abc\n  license: MIT\n  license_file: LICENSES/missing.LICENSE\n",
+    );
+    expect(() => loadVendoredUpstreams(dir)).toThrow(/license_file does not exist or is empty/);
+  });
+
+  it("loads license fields when the license_file exists", () => {
+    mkdirSync(path.join(dir, "LICENSES"), { recursive: true });
+    writeFileSync(path.join(dir, "LICENSES", "test.LICENSE"), "MIT text\n");
+    writeFileSync(
+      path.join(dir, "vendored_upstreams.yml"),
+      "- local: content/vendored.txt\n  source: $UPSTREAM/docs/source.txt\n  pinned_ref: abc\n  license: MIT\n  license_file: LICENSES/test.LICENSE\n",
+    );
+    const entries = loadVendoredUpstreams(dir);
+    expect(entries[0]!.license).toBe("MIT");
+    expect(entries[0]!.license_file).toBe("LICENSES/test.LICENSE");
   });
 
   it("updates manifest pins without losing comments", () => {

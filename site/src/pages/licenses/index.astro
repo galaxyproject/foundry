@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getLicenses, licenseIdFromFile } from '../../lib/licenses';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const licenses = getLicenses();
+
+// Count redistributing notes per license file.
+const entries = await getCollection('content');
+const counts = new Map<string, number>();
+for (const e of entries) {
+  const lf = (e.data as any).license_file;
+  if (typeof lf === 'string') {
+    const id = licenseIdFromFile(lf);
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+}
+---
+<Base title="Licenses">
+  <header class="mb-4">
+    <p class="text-xs font-mono uppercase tracking-widest text-(--color-text-muted) mb-1">licenses</p>
+    <h1 class="text-2xl font-semibold m-0">Redistributed upstream licenses</h1>
+    <p class="text-sm text-(--color-text-secondary) mt-2">
+      Verbatim copies of upstream LICENSE files for third-party content the Foundry
+      redistributes. Redistribution policy is governed by the root
+      <code>license-policy.yml</code> table.
+    </p>
+  </header>
+
+  <ul class="list-none p-0 m-0 grid gap-2">
+    {licenses.map(l => (
+      <li class="p-3 rounded-lg border border-(--color-border)">
+        <a href={`${base}/licenses/${l.id}/`} class="text-(--color-link) hover:underline font-mono font-semibold">{l.filename}</a>
+        <span class="ml-2 text-xs text-(--color-text-muted)">{counts.get(l.id) ?? 0} note(s)</span>
+      </li>
+    ))}
+  </ul>
+</Base>

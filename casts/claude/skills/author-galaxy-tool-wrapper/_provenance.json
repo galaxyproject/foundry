@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 3,
     "content_hash": "17349c178341419cbf0a42e1ae1ccb9408c2c4d6f722d2c2b4122a2ca3b375db",
-    "commit": "da114c5a60452122585a332bd084a5a76f49f158"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-10T16:50:41.570Z",
+  "cast_at": "2026-07-01T23:45:45.963Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -30,9 +30,12 @@
       "evidence": "corpus-observed",
       "purpose": "Run the mandatory fuzzy quality review after structural validation passes.",
       "trigger": "After the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "37060b2b3c751f3fc9f2b5fd77879471f86592ab95085aeeb68165d58c968a54",
       "dst_hash": "37060b2b3c751f3fc9f2b5fd77879471f86592ab95085aeeb68165d58c968a54",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "prompt",
@@ -44,9 +47,12 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Generate a schema-shaped `GalaxyUserTool` YAML definition from missing-wrapper requirements and source-derived process evidence.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "4472436028751e661d7ea2d160b6efdd268848909a459173476020a4bd368da5",
       "dst_hash": "4472436028751e661d7ea2d160b6efdd268848909a459173476020a4bd368da5",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -90,6 +96,7 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.",
+      "license": "MIT",
       "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"

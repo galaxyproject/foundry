@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "cwl-summary-to-galaxy-data-flow",
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
-    "content_hash": "802c6e3f4f4ae358f59a6d9b55796abee1bf702ee72c6eba08dbef4760ca5925",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "content_hash": "da48c5f55fae6a8d1a07f60b95a1b467cb3bc64aa341018e092b7d526baafc97",
+    "commit": "4fa83bcea5c2823574416d0ab0b054f387d22141"
   },
-  "cast_at": "2026-06-15T15:02:52.496Z",
+  "cast_at": "2026-07-02T15:08:28.709Z",
   "refs": [
     {
       "kind": "pattern",
@@ -110,9 +110,12 @@
       "evidence": "corpus-observed",
       "purpose": "Translate CWL arrays, records, scatter, and secondary-file shapes into Galaxy dataset and collection semantics.",
       "trigger": "When CWL input/output or step wiring implies Galaxy collections, map-over, reduction, or shape changes.",
-      "src_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
-      "dst_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
-      "source": "deterministic"
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
+      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -126,9 +129,12 @@
       "purpose": "Translate CWL arrays, records, scatter, and secondary-file shapes into Galaxy dataset and collection semantics.",
       "trigger": "When CWL input/output or step wiring implies Galaxy collections, map-over, reduction, or shape changes.",
       "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
       "dst_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -142,9 +148,12 @@
       "purpose": "Translate CWL arrays, records, scatter, and secondary-file shapes into Galaxy dataset and collection semantics.",
       "trigger": "When CWL input/output or step wiring implies Galaxy collections, map-over, reduction, or shape changes.",
       "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
       "dst_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -177,6 +186,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-cwl]]",
@@ -186,6 +210,7 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Read CWL step graph, edge markers, scatter, conditionals, secondary files, and tool requirements while drafting Galaxy-facing data flow.",
+      "license": "MIT",
       "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
       "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
       "source": "deterministic"
@@ -198,6 +223,12 @@
         "kind": "markdown",
         "default_filename": "cwl-galaxy-data-flow.md",
         "description": "Reviewable Markdown brief: abstract topology, Galaxy collection semantics, placeholder transformations, unresolved Galaxy tool needs."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
       }
     ],
     "consumes": [
@@ -214,6 +245,28 @@
         "description": "Preceding Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] that pins inputs, outputs, and labels.",
         "producers": [
           "cwl-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]

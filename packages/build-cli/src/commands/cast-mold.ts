@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 // Deterministic cast assembly. Reads the Mold's `index.md` frontmatter as the
 // source of truth for `references:` and resolves each ref to a concrete file
-// op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v2)
+// op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v3)
 // recording every resolved ref, its hash, and whether it was produced
 // deterministically or is pending an LLM step.
 //
@@ -28,6 +28,7 @@ import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
 import { readMarkdown } from "../lib/frontmatter.js";
+import { loadLicensePolicy, resolveLicenseRow, type LicensePolicy } from "../lib/license-policy.js";
 import {
   aggregateRequiredTools,
   requiredToolRows,
@@ -160,6 +161,10 @@ interface ResolvedRef {
   package_source?: { spec: string; exportName: string };
   /** Bundle-relative dst of the parent note when this ref is a copied companion file. */
   companion_of?: string;
+  /** License of redistributed third-party content, from the source note's frontmatter. */
+  license?: string;
+  /** Repo-relative LICENSES/ path this ref redistributes under. */
+  license_file?: string;
 }
 
 const SUPPORTED_KINDS = new Set([
@@ -226,6 +231,8 @@ function resolveMoldRef(
   let src: string;
   let dstOverride: string | undefined;
   let packageSource: { spec: string; exportName: string } | undefined;
+  // Frontmatter of the note this ref resolves to; source of its license fields.
+  let noteMeta: Frontmatter | undefined;
   if (kind === "schema") {
     // Schema refs are wiki-links to a `type: schema` note. The note declares
     // `package` + `package_export`; cast imports the runtime export,
@@ -237,7 +244,7 @@ function resolveMoldRef(
     }
     const tp = resolveWikiLink(refStr, slugMap);
     if (!tp) return { error: `references[${index}]: schema ref ${refStr} did not resolve` };
-    const noteMeta = metaByPath.get(tp);
+    noteMeta = metaByPath.get(tp);
     if (noteMeta?.type !== "schema") {
       return {
         error: `references[${index}]: schema ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
@@ -257,8 +264,9 @@ function resolveMoldRef(
   } else {
     const tp = resolveWikiLink(refStr, slugMap);
     if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
+    noteMeta = metaByPath.get(tp);
     const expected = kind === "cli-command" ? "cli-command" : kind;
-    const targetType = metaByPath.get(tp)?.type;
+    const targetType = noteMeta?.type;
     if (targetType !== expected) {
       return {
         error: `references[${index}]: ${kind} ref ${refStr} resolves to type=${targetType ?? "(none)"}, expected ${expected}`,
@@ -312,6 +320,8 @@ function resolveMoldRef(
       trigger: typeof ref.trigger === "string" ? ref.trigger : undefined,
       verification: typeof ref.verification === "string" ? ref.verification : undefined,
       package_source: packageSource,
+      license: typeof noteMeta?.license === "string" ? noteMeta.license : undefined,
+      license_file: typeof noteMeta?.license_file === "string" ? noteMeta.license_file : undefined,
     },
   };
 }
@@ -352,6 +362,8 @@ function expandCompanions(
         purpose: r.purpose,
         trigger: r.trigger,
         companion_of: r.dst,
+        license: r.license,
+        license_file: r.license_file,
       });
     }
   }
@@ -520,6 +532,11 @@ interface ProvenanceRefEntry {
   prompt?: { origin: string; identity: string; hash?: string };
   model?: { name: string; version?: string };
   companion_of?: string;
+  // License lineage of redistributed third-party content (foundry-pattern#4).
+  // Absent for Foundry-authored refs (root LICENSE, out of policy scope).
+  license?: string;
+  license_file?: string;
+  license_file_hash?: string;
 }
 
 interface ProvenanceArtifactOutput {
@@ -781,8 +798,13 @@ function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOv
       ? (data.validation_results as ValidationResult[])
       : undefined,
   };
-  // For schema v2 provenance, capture prior refs by src so condense LLM output and prompt provenance carry over.
-  if (data.provenance_schema_version === 2 && Array.isArray(data.refs)) {
+  // Capture prior refs by src so condense LLM output and prompt provenance carry
+  // over across re-casts. Accept v2 and v3 so a v2 bundle still seeds a v3 re-cast.
+  if (
+    typeof data.provenance_schema_version === "number" &&
+    data.provenance_schema_version >= 2 &&
+    Array.isArray(data.refs)
+  ) {
     const prior = new Map<string, ProvenanceRefEntry>();
     for (const r of data.refs as ProvenanceRefEntry[]) {
       if (typeof r?.src === "string") prior.set(`${r.kind}:${r.src}`, r);
@@ -976,7 +998,43 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
     trigger: r.trigger,
     verification: r.verification,
     companion_of: r.companion_of,
+    license: r.license,
+    license_file: r.license_file,
   };
+}
+
+// Enforce the license → redistribution-policy table (foundry-pattern#4) over the
+// assembled refs, and stamp each redistributed ref's license_file content hash
+// into provenance. Refs with no `license` are Foundry-authored (root LICENSE) and
+// out of policy scope. The transform-mode check is the enforcement hook: an
+// own-words-only license may not be carried verbatim/sidecar. The license_file
+// *presence* rules live in the validator, where `upstream` scoping distinguishes
+// Foundry-authored license annotations from genuine third-party redistribution.
+// Returns error strings for any policy violation.
+function applyLicensePolicy(entries: ProvenanceRefEntry[], repoRoot: string): string[] {
+  // Load the policy table only when a ref actually redistributes licensed content,
+  // so bundles/casts with no third-party refs don't require the table to exist.
+  if (!entries.some((e) => e.license)) return [];
+  const policy: LicensePolicy = loadLicensePolicy(repoRoot);
+  const errors: string[] = [];
+  for (const e of entries) {
+    if (!e.license) continue;
+    const row = resolveLicenseRow(policy, e.license);
+    if (!row.allowed_modes.includes(e.mode as (typeof row.allowed_modes)[number])) {
+      errors.push(
+        `${e.src}: license ${e.license} (${row.policy}) forbids mode=${e.mode} (allowed: ${row.allowed_modes.join(", ")})`,
+      );
+    }
+    if (e.license_file) {
+      const abs = path.join(repoRoot, e.license_file);
+      if (existsSync(abs)) {
+        e.license_file_hash = sha256(abs);
+      } else {
+        errors.push(`${e.src}: license_file missing: ${e.license_file}`);
+      }
+    }
+  }
+  return errors;
 }
 
 // ---- deterministic SKILL.md assembly ----
@@ -1239,6 +1297,9 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     if (result.error) errors.push(result.error);
     if (result.drift) drift.push({ src: r.src, reason: result.drift });
   }
+
+  // License → redistribution-policy enforcement + license_file hashing.
+  errors.push(...applyLicensePolicy(refEntries, repoRoot));
 
   const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
   const requiredTools = aggregateRequiredTools(refEntries, metaByPath, slugMap);

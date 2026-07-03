@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "debug-galaxy-workflow-output",
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
     "revision": 4,
     "content_hash": "9d560d77fe14fb9c2ebee1a67b49370d2d1b080a6821835407c4b89877bf7fd4",
-    "commit": "64a340bb8e24e9949be9cbd6678a51da42d14203"
+    "commit": "4fa83bcea5c2823574416d0ab0b054f387d22141"
   },
-  "cast_at": "2026-06-15T13:53:42.883Z",
+  "cast_at": "2026-07-02T15:08:31.741Z",
   "refs": [
     {
       "kind": "research",
@@ -21,9 +21,12 @@
       "evidence": "corpus-observed",
       "purpose": "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs.",
       "trigger": "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure.",
-      "src_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
-      "dst_hash": "42d416765af0e91a48509cc37c09cfd69eaf9f724aa06c08e393b014c02b142e",
-      "source": "deterministic"
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
+      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -37,9 +40,12 @@
       "purpose": "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs.",
       "trigger": "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure.",
       "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
       "dst_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",
@@ -53,9 +59,12 @@
       "purpose": "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs.",
       "trigger": "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure.",
       "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
       "src_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
       "dst_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
     {
       "kind": "research",

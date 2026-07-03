@@ -321,8 +321,23 @@ properties:
   # structured upstream artifact alongside their prose.
   license:
     type: string
-    enum: [MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, AFL-3.0, GPL-2.0-only, GPL-3.0-only]
-    description: "SPDX license identifier for the note's vendored content. The Foundry's own content is covered by the root LICENSE; this field annotates third-party redistributions."
+    # SPDX id from the license-policy.yml table, or a LicenseRef-<slug> escape
+    # hatch for anything not in SPDX. The enum mirrors license-policy.yml's
+    # `licenses:` keys (a test enforces they stay in lockstep).
+    anyOf:
+      - enum:
+          - MIT
+          - Apache-2.0
+          - BSD-2-Clause
+          - BSD-3-Clause
+          - AFL-3.0
+          - CC-BY-4.0
+          - GPL-2.0-only
+          - GPL-3.0-only
+          - LGPL-3.0-or-later
+          - CC-BY-NC-SA-2.0
+      - pattern: "^LicenseRef-[A-Za-z0-9.-]+$"
+    description: "SPDX license identifier (or LicenseRef-<slug>) for the note's vendored content, resolved against license-policy.yml. The Foundry's own content is covered by the root LICENSE; this field annotates third-party redistributions."
   # Repo-relative path to the upstream LICENSE under LICENSES/. The validator
   # confirms the file exists and is non-empty.
   license_file:

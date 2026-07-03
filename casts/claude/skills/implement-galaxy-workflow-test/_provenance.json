@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 7,
     "content_hash": "7f68fe27b39a85abaf6c15f1647809b0d28c71753a7de463a52ffcd5e440f82a",
-    "commit": "c89111a46fa95ce38733879c8cdb91621ff19005"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T21:23:37.474Z",
+  "cast_at": "2026-07-01T23:45:59.070Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -125,6 +125,7 @@
       "evidence": "hypothesis",
       "purpose": "Input contract: read the schema-valid Galaxy test plan (job inputs, expected outputs, assertion intent, tolerances, label assumptions, unresolved mappings, omissions) and convert it into tests-format output, reconciling assumed labels and fixtures against the real draft.",
       "verification": "Consume a cast test plan from a *-test-to-galaxy-test-plan Mold and confirm tests-format output can be authored from it without re-reading the source summary.",
+      "license": "MIT",
       "src_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
       "dst_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
       "source": "deterministic"
@@ -139,9 +140,12 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
       "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
   ],
   "artifacts": {
@@ -159,6 +163,7 @@
         "description": "Schema-valid Galaxy test plan ([[galaxy-workflow-test-plan]]) from a *-test-to-galaxy-test-plan Mold; carries job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.",
         "inherited_schema": "[[galaxy-workflow-test-plan]]",
         "producers": [
+          "changeset-to-galaxy-test-plan",
           "cwl-test-to-galaxy-test-plan",
           "freeform-summary-to-galaxy-test-plan",
           "nextflow-test-to-galaxy-test-plan"

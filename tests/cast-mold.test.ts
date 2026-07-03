@@ -69,7 +69,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     }
   });
 
-  it("provenance is schema v2 and lists deterministic refs", () => {
+  it("provenance is schema v3 and lists deterministic refs", () => {
     const provPath = path.join(
       repoRoot,
       "casts",
@@ -79,7 +79,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
       "_provenance.json",
     );
     const prov = JSON.parse(readFileSync(provPath, "utf8"));
-    expect(prov.provenance_schema_version).toBe(2);
+    expect(prov.provenance_schema_version).toBe(3);
     expect(prov.cast_target).toBe("claude");
     expect(Array.isArray(prov.refs)).toBe(true);
     expect(prov.refs.length).toBeGreaterThan(0);
@@ -92,6 +92,17 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     const keys = prov.refs.map((r: { kind: string; src: string }) => `${r.kind}:${r.src}`);
     const sorted = [...keys].sort();
     expect(keys).toEqual(sorted);
+    // v3 license lineage: this mold vendors third-party schemas (nf-core MIT,
+    // nf-schema Apache-2.0), so at least one ref carries license + hashed file.
+    const licensed = prov.refs.filter(
+      (r: { license?: string; license_file?: string; license_file_hash?: string }) =>
+        r.license && r.license_file,
+    );
+    expect(licensed.length).toBeGreaterThan(0);
+    for (const r of licensed) {
+      expect(r.license_file).toMatch(/^LICENSES\//);
+      expect(r.license_file_hash).toMatch(/^[0-9a-f]{64}$/);
+    }
   });
 
   it("dst paths use strict 1:1 source basename for verbatim refs", () => {
@@ -370,7 +381,7 @@ describe("cast-mold prompt refs", () => {
         path.join(dir, "casts/claude/_target.yml"),
         [
           "name: claude",
-          "provenance_schema_version: 2",
+          "provenance_schema_version: 3",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds:",
           "  prompt:",
@@ -461,7 +472,7 @@ describe("cast-mold cli-command meta injection", () => {
         path.join(dir, "casts/claude/_target.yml"),
         [
           "name: claude",
-          "provenance_schema_version: 2",
+          "provenance_schema_version: 3",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds:",
           "  cli-command:",
@@ -557,7 +568,7 @@ describe("cast-mold companion files", () => {
       path.join(dir, "casts/claude/_target.yml"),
       [
         "name: claude",
-        "provenance_schema_version: 2",
+        "provenance_schema_version: 3",
         "required_outputs: [SKILL.md, _provenance.json]",
         "kinds:",
         "  research:",
@@ -843,5 +854,133 @@ describe("cast-mold negative cases", () => {
     const r = runTsx(castMold, ["does-not-exist", "--target=claude", "--check"]);
     expect(r.code).not.toBe(0);
     expect(r.stderr).toContain("mold source missing");
+  });
+});
+
+describe("cast-mold license → redistribution-policy enforcement", () => {
+  // Temp repo: one mold referencing one research note (verbatim), plus a copy of
+  // the real license-policy.yml so enforcement resolves against the true table.
+  function scaffold(dir: string, noteFrontmatter: string, extraLicenseFile?: string): void {
+    mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+    mkdirSync(path.join(dir, "content/research"), { recursive: true });
+    mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "license-policy.yml"),
+      readFileSync(path.join(repoRoot, "license-policy.yml"), "utf8"),
+    );
+    if (extraLicenseFile) {
+      mkdirSync(path.join(dir, "LICENSES"), { recursive: true });
+      writeFileSync(path.join(dir, extraLicenseFile), "TEST LICENSE TEXT\n");
+    }
+    writeFileSync(
+      path.join(dir, "casts/claude/_target.yml"),
+      [
+        "name: claude",
+        "provenance_schema_version: 3",
+        "required_outputs: [SKILL.md, _provenance.json]",
+        "kinds:",
+        "  research:",
+        "    dst_dir: references/notes/",
+        "    dst_extension: .md",
+        "    modes: [verbatim, condense]",
+        "condense_prompts: {}",
+        "skill_constraints:",
+        "  frontmatter_required: [name, description]",
+        "  forbidden_runtime_paths: []",
+        "  forbid_packaged_files: []",
+        "",
+      ].join("\n"),
+    );
+    writeFileSync(
+      path.join(dir, "content/molds/m/index.md"),
+      `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: License enforcement cast test mold summary.
+references:
+  - kind: research
+    ref: "[[note-x]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+---
+
+# m
+
+Use the research reference.
+`,
+    );
+    writeFileSync(path.join(dir, "content/research/note-x.md"), noteFrontmatter);
+  }
+
+  const noteBody = "\n\n# Note X\n\nThird-party prose.\n";
+
+  it("refuses verbatim carry of an own-words-only license", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-owf-"));
+    try {
+      scaffold(
+        dir,
+        `---
+type: research
+title: Note X
+tags: [research]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: Own-words-only note that must not be carried verbatim.
+license: CC-BY-NC-SA-2.0
+---${noteBody}`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("own-words-only");
+      expect(r.stderr).toContain("forbids mode=verbatim");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("carries a verbatim-ok license and hashes its license_file into provenance", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-ok-"));
+    try {
+      scaffold(
+        dir,
+        `---
+type: research
+title: Note X
+tags: [research]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: Verbatim-ok note carried under MIT with a license file.
+license: MIT
+license_file: LICENSES/test.LICENSE
+---${noteBody}`,
+        "LICENSES/test.LICENSE",
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+      const prov = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+      );
+      const ref = prov.refs.find((x: { kind: string }) => x.kind === "research");
+      expect(ref.license).toBe("MIT");
+      expect(ref.license_file).toBe("LICENSES/test.LICENSE");
+      expect(ref.license_file_hash).toMatch(/^[0-9a-f]{64}$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

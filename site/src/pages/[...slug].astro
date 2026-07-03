@@ -12,6 +12,7 @@ import PatternBody from '../components/PatternBody.astro';
 import CliCommandBody from '../components/CliCommandBody.astro';
 import ResearchBody from '../components/ResearchBody.astro';
 import SchemaBody from '../components/SchemaBody.astro';
+import LicenseBox from '../components/LicenseBox.astro';
 import { buildWikiLinkMap, buildBacklinkMap } from '../lib/wiki-links';
 import { buildArtifactGraph } from '../lib/artifacts';
 
@@ -77,6 +78,7 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
   <div data-pagefind-body>
     <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} eyebrow={eyebrow} showActions={showActions} />
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
+    {data.license && <LicenseBox entry={entry} />}
 
     {data.type === 'mold' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
     {data.type === 'pattern' && data.pattern_kind !== 'moc' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}

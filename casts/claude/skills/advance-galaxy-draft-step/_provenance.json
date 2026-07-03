@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 2,
     "content_hash": "9acaa43167eb3af4aff128dc31b1947e3fc24291140b7e8586518a9e0cc9ed85",
-    "commit": "c89111a46fa95ce38733879c8cdb91621ff19005"
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-06-19T21:23:35.132Z",
+  "cast_at": "2026-07-01T23:45:45.347Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -113,9 +113,12 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "In/out contract: the draft this Mold reads and mutates one step per iteration conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
       "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
-      "source": "deterministic"
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
   ],
   "artifacts": {
@@ -147,6 +150,7 @@
         "inherited_schema": "[[galaxy-workflow-draft]]",
         "producers": [
           "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
           "cwl-summary-to-galaxy-template",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
@@ -159,6 +163,7 @@
         "description": "Carried obligations ledger [[open-requirements-ledger]]: after implementing the chosen step, read it for a new `open` blocking entry [[implement-galaxy-tool-step]] appended (the step's declared output can't be computed from its wired inputs), and count open blocking entries for the escalation convergence gate.",
         "producers": [
           "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
@@ -167,6 +172,7 @@
           "freeform-summary-to-galaxy-interface",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
           "nextflow-summary-to-galaxy-data-flow",
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",

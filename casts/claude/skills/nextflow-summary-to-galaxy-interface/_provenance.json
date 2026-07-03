@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 3,
   "cast_target": "claude",
   "mold": {
     "name": "nextflow-summary-to-galaxy-interface",
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 4,
-    "content_hash": "ad8036eea3ea81f0798201ef75a6b0686b7bc1ba0c969aa8dab204f58b45fc3e",
-    "commit": "8fed7f97a38f7fdd34a8d173a6a11177404091b0"
+    "content_hash": "b3409db8beb544396ee0fcc281ce2a9fa59ae81a9e46f54ff55c84ed7785780c",
+    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
   },
-  "cast_at": "2026-05-11T07:43:45.323Z",
+  "cast_at": "2026-07-01T23:46:01.035Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -69,8 +69,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs.",
-      "src_hash": "4e226130a07e38678a2523a978ffbadeca603e19b588d4232518e817fce4d60b",
-      "dst_hash": "4e226130a07e38678a2523a978ffbadeca603e19b588d4232518e817fce4d60b",
+      "src_hash": "772799f4b51a83a774437c06e482ddb694d653e17183cc50bdb7f8324faab620",
+      "dst_hash": "772799f4b51a83a774437c06e482ddb694d653e17183cc50bdb7f8324faab620",
       "source": "deterministic"
     },
     {
@@ -98,8 +98,8 @@
       "evidence": "corpus-observed",
       "purpose": "Cross-check source-side reference-data classifications before translating the reference-data brief into Galaxy workflow inputs.",
       "trigger": "When the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
-      "src_hash": "3424cbc7257738d831e3c2996f2b20d12dda94ec93f8035e2f76f497e79647b1",
-      "dst_hash": "3424cbc7257738d831e3c2996f2b20d12dda94ec93f8035e2f76f497e79647b1",
+      "src_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
+      "dst_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
       "source": "deterministic"
     },
     {
@@ -112,8 +112,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes.",
-      "src_hash": "c709a5fcfa5b7fba62faafd7636d947981a2cacae12a71e15407245dc9cebd28",
-      "dst_hash": "c709a5fcfa5b7fba62faafd7636d947981a2cacae12a71e15407245dc9cebd28",
+      "src_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
+      "dst_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
       "source": "deterministic"
     },
     {
@@ -127,8 +127,23 @@
       "evidence": "corpus-observed",
       "purpose": "Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence.",
       "trigger": "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source.",
-      "src_hash": "8e051a2c1faccd1c692e67c3304983d40db2ce6be0fc185baa250e41a0b7f398",
-      "dst_hash": "8e051a2c1faccd1c692e67c3304983d40db2ce6be0fc185baa250e41a0b7f398",
+      "src_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
+      "dst_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
       "source": "deterministic"
     },
     {
@@ -141,8 +156,9 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.",
-      "src_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
-      "dst_hash": "8ed1da25847700eca5109fc455845663d2dbb0ab6f04cbf17a564ae469ae0c32",
+      "license": "MIT",
+      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
       "source": "deterministic"
     }
   ],
@@ -153,6 +169,12 @@
         "kind": "markdown",
         "default_filename": "nextflow-galaxy-interface.md",
         "description": "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
       }
     ],
     "consumes": [
@@ -169,6 +191,28 @@
         "description": "Reference-data shape brief from [[nextflow-summary-to-galaxy-reference-data]] that pins per-asset reference inputs and rebuild-on-absence behavior.",
         "producers": [
           "nextflow-summary-to-galaxy-reference-data"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
         ]
       }
     ]

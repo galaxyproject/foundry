@@ -1,0 +1,106 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { licenseIdFromFile } from '../lib/licenses';
+import { resolveLicenseRow } from '../lib/license-policy';
+
+interface Props {
+  entry: CollectionEntry<'content'>;
+}
+
+const { entry } = Astro.props;
+const data = entry.data as any;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const license: string | undefined = data.license;
+const licenseFile: string | undefined = data.license_file;
+const upstream: string | undefined = data.upstream;
+
+// Only rendered for notes that carry a license (third-party redistribution).
+const row = license ? resolveLicenseRow(license) : undefined;
+const licenseHref = licenseFile ? `${base}/licenses/${licenseIdFromFile(licenseFile)}/` : undefined;
+const policyLabel = row?.policy === 'own-words-only' ? 'own-words only' : 'verbatim OK';
+---
+{license && row && (
+  <aside class="license-box not-prose">
+    <div class="license-tags">
+      <span class="license-chip license-id">{license}</span>
+      <span class={`license-chip license-policy ${row.policy}`}>{policyLabel}</span>
+      {row.copyleft && <span class="license-chip license-copyleft">copyleft</span>}
+    </div>
+    <p class="license-obligations">{row.obligations}</p>
+    <p class="license-links">
+      {upstream && (
+        <a href={upstream} class="license-link">Original source ↗</a>
+      )}
+      {upstream && licenseHref && <span aria-hidden="true"> · </span>}
+      {licenseHref ? (
+        <a href={licenseHref} class="license-link">License terms</a>
+      ) : (
+        <span class="license-muted">No text redistributed — cited only.</span>
+      )}
+    </p>
+  </aside>
+)}
+
+<style>
+  .license-box {
+    margin: 0 0 1.75rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.6rem;
+    background: var(--color-surface-raised);
+    font-size: 0.85rem;
+  }
+  .license-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .license-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+  .license-id {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-text-secondary);
+  }
+  .license-policy.verbatim-ok {
+    background: color-mix(in srgb, #16a34a 16%, transparent);
+    color: var(--color-text-secondary);
+  }
+  .license-policy.own-words-only {
+    background: color-mix(in srgb, #d97706 18%, transparent);
+    color: var(--color-text-secondary);
+  }
+  .license-copyleft {
+    background: color-mix(in srgb, #dc2626 16%, transparent);
+    color: var(--color-text-secondary);
+  }
+  .license-obligations {
+    margin: 0 0 0.5rem;
+    color: var(--color-text-secondary);
+  }
+  .license-links {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+  .license-link {
+    color: var(--color-link);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-link) 30%, transparent);
+  }
+  .license-link:hover {
+    color: var(--color-link-hover);
+    border-color: var(--color-accent);
+  }
+  .license-muted {
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+</style>
