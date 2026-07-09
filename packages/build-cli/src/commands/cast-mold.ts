@@ -1141,14 +1141,18 @@ function schemaValidationRows(
     const target = resolveWikiLink(output.schema, slugMap);
     const meta = target ? metaByPath.get(target) : undefined;
     const validator = scalar(meta?.validator_bin);
-    const packageName = scalar(meta?.package);
+    const subcommand = scalar(meta?.validator_subcommand);
+    const command = validator && subcommand ? `${validator} ${subcommand}` : validator;
+    // A declared subcommand means the bin ships in the foundry CLI package; the
+    // schema's `package` only names the export source (mirrors validate.ts).
+    const validatorPackage = subcommand ? "@galaxy-foundry/foundry" : scalar(meta?.package);
     const schemaName = stripWikiLinks(output.schema);
     const file = output.default_filename
       ? `\`${output.default_filename}\``
       : "the emitted artifact";
     rows.push(
       validator
-        ? `- Validate ${file} before returning it: run \`${validator} ${output.default_filename ?? "<artifact-path>"}\`${packageName ? ` from \`${packageName}\`` : ""}. ${packageName ? `If the command is not on PATH, run \`npx --package ${packageName} ${validator} ${output.default_filename ?? "<artifact-path>"}\`. ` : ""}This checks artifact \`${output.id}\` against the ${schemaName} schema.`
+        ? `- Validate ${file} before returning it: run \`${command} ${output.default_filename ?? "<artifact-path>"}\`${validatorPackage ? ` from \`${validatorPackage}\`` : ""}. ${validatorPackage ? `If the command is not on PATH, run \`npx --package ${validatorPackage} ${command} ${output.default_filename ?? "<artifact-path>"}\`. ` : ""}This checks artifact \`${output.id}\` against the ${schemaName} schema.`
         : `- Validate ${file} for artifact \`${output.id}\` against the ${schemaName} schema when a validator is available.`,
     );
   }

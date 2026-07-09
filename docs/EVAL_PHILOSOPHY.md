@@ -55,6 +55,12 @@ Every eval property must have a pass/fail edge — an output you can imagine tha
 
 The four maintainer-facing files decay differently and serve different readers; keeping them separate is what lets each stay honest. `MOLD_SPEC.md` has the per-file contract.
 
+## A deterministic check is run, not emulated
+
+`eval.md` marks each property `check: deterministic` or `check: llm-judged`, and the two are scored differently. A deterministic check names a mechanical oracle — a schema validator, a structural diff, `gxwf validate` / `roundtrip`, a `planemo test` run — and it earns its verdict only by **executing that oracle**. Emulating it (describing what the validator would say, or marking it "not run" because the tool looks expensive) is not a weaker pass; it is no evaluation at all. A deterministic property is precisely the one an LLM cannot satisfy by inspection — that is why it was written deterministic rather than llm-judged. When a trial reaches a deterministic gate it genuinely cannot run, that is a *blocked* trial to report, not a property to wave through. (`llm-judged` properties are the ones scored by reasoned inspection; the split mirrors the eval/scenario split — mechanical where it can be, judgment only where it must be.)
+
+This is the rule a test-drive most easily violates: an executable Mold like `run-workflow-test` is self-bootstrapping (`planemo test` launches its own Galaxy), so "no running Galaxy" never justifies skipping its deterministic gate. See `/test-drive` step 4.
+
 ## Pipelines evaluate by composition plus a thin oracle
 
 A Pipeline is judged two ways at once:

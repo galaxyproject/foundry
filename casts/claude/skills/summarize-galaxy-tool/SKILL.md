@@ -43,7 +43,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `galaxy-tool-summary.json` before returning it: run `foundry galaxy-tool-summary.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry galaxy-tool-summary.json`. This checks artifact `galaxy-tool-summary` against the galaxy-tool-summary schema.
+- Validate `galaxy-tool-summary.json` before returning it: run `foundry validate-galaxy-tool-summary galaxy-tool-summary.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry validate-galaxy-tool-summary galaxy-tool-summary.json`. This checks artifact `galaxy-tool-summary` against the galaxy-tool-summary schema.
 
 ## Procedure
 

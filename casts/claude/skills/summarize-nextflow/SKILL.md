@@ -45,7 +45,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-nextflow.json` before returning it: run `foundry summary-nextflow.json` from `@galaxy-foundry/summarize-nextflow`. If the command is not on PATH, run `npx --package @galaxy-foundry/summarize-nextflow foundry summary-nextflow.json`. This checks artifact `summary-nextflow` against the summary-nextflow schema.
+- Validate `summary-nextflow.json` before returning it: run `foundry validate-summary-nextflow summary-nextflow.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry validate-summary-nextflow summary-nextflow.json`. This checks artifact `summary-nextflow` against the summary-nextflow schema.
 
 ## Procedure
 
