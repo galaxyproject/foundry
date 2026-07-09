@@ -65,7 +65,14 @@ const MINIMAL_SUMMARY = {
           value_from: null,
         },
       ],
-      out: ["output_paired_coll", "report_json", "report_html"],
+      out: [
+        {
+          id: "output_paired_coll",
+          actions: { rename: "Trimmed reads", add_tags: ["name:Reads"] },
+        },
+        { id: "report_json", actions: { rename: "fastp JSON report" } },
+        { id: "report_html", actions: { hide: true } },
+      ],
       when: null,
       annotation: null,
     },
@@ -85,7 +92,7 @@ const MINIMAL_SUMMARY = {
           value_from: null,
         },
       ],
-      out: ["html_report"],
+      out: [{ id: "html_report", actions: null }],
       when: null,
       annotation: null,
     },
@@ -165,6 +172,21 @@ describe("validateSummary", () => {
       },
     ];
     expect(validateSummary(summary).valid).toBe(true);
+  });
+
+  it("captures a hidden step output's post-job actions in out[].actions", () => {
+    const summary = structuredClone(MINIMAL_SUMMARY);
+    const hidden = summary.steps[0].out.find((o) => o.id === "report_html");
+    expect(hidden?.actions).toEqual({ hide: true });
+    expect(validateSummary(summary).valid).toBe(true);
+  });
+
+  it("rejects the legacy out-as-string-array shape", () => {
+    const summary = structuredClone(MINIMAL_SUMMARY);
+    // @ts-expect-error legacy shape: out was array<string> before PJA capture
+    summary.steps[1].out = ["html_report"];
+    const result = validateSummary(summary);
+    expect(result.valid).toBe(false);
   });
 
   it("rejects an unknown workflow input class", () => {

@@ -5,10 +5,10 @@
     "name": "summarize-galaxy-workflow",
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 1,
-    "content_hash": "510c980436c2687312af52625201020019572924f11912b29977c55aef2a5865",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "content_hash": "cab9ecc87d41e9b2c7eb14dda29ecb8d57d716b41b6df458310c3c928bf7321a",
+    "commit": "84f533a4bcc0f0253161516a3426c15cab8f0ba4"
   },
-  "cast_at": "2026-07-09T14:32:49.290Z",
+  "cast_at": "2026-07-09T19:50:32.752Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -67,8 +67,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Galaxy workflow summary JSON and provide downstream consumers the output contract.",
       "license": "MIT",
-      "src_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
-      "dst_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
+      "src_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
+      "dst_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
       "source": "deterministic"
     }
   ],
