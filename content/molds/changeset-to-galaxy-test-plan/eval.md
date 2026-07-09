@@ -19,7 +19,7 @@ applied to whatever a scenario produces.
 ## Property: mixed provenance marked honestly
 
 - check: llm-judged
-- assertion: the plan sets `source.derived_from: mixed`; carried-forward baseline cases and their assertions read `test-evidence`, while change-set-driven cases/assertions read `evidence: intent` unless the change-set pinned a concrete `expected_value` (then `test-evidence`). Provenance is not flattened to a single basis.
+- assertion: the plan stamps `source.kind: galaxy` and `source.derived_from: test-evidence` (the plan-level field names the dominant basis — the carried-forward baseline — never `mixed`, which is a case-level-only value). The mix is expressed at the finer grains: carried-forward baseline cases and their assertions read `test-evidence`, while change-set-driven cases read `test_cases[].derived_from: intent` (or `mixed`) and their assertions read `evidence: intent` unless the change-set pinned a concrete `expected_value` (then `test-evidence`). Provenance is not flattened to a single basis at the case/assertion levels, and `source.derived_from` is not set to the invalid `mixed`.
 
 ## Property: change coverage without over-reach
 
