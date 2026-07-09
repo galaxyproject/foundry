@@ -1,0 +1,87 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "summarize-galaxy-workflow",
+    "path": "content/molds/summarize-galaxy-workflow/index.md",
+    "revision": 1,
+    "content_hash": "510c980436c2687312af52625201020019572924f11912b29977c55aef2a5865",
+    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+  },
+  "cast_at": "2026-07-09T14:32:49.290Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[convert]]",
+      "src": "content/cli/gxwf/convert.md",
+      "dst": "references/cli/convert.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Convert a legacy `.ga` workflow to gxformat2 before summarizing, and record the conversion under documents.converted_path.",
+      "trigger": "When the supplied workflow is native `.ga` rather than gxformat2.",
+      "verification": "Cast the skill, run on one `.ga` and one gxformat2 fixture; confirm the `.ga` case populates documents.converted_path and both summaries validate.",
+      "src_hash": "24b91f53b0e7850d1dfc38df1074f2d4270c72f20778d0e4d710545bf64be3e0",
+      "dst_hash": "1cdf49f10f77039af6efc5b82fe79720bb18e50d1f57d653670697f7262c7640",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[gxwf validate]]",
+      "src": "content/cli/gxwf/validate.md",
+      "dst": "references/cli/validate.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Validate the gxformat2 workflow before extraction and record diagnostics under documents.validation.",
+      "trigger": "Before extracting structure from the workflow document.",
+      "verification": "Cast the skill, run on one valid and one malformed workflow; the malformed one surfaces gxwf validate diagnostics in the summary.",
+      "src_hash": "8fdf834e8b3bd2c70e9625c9148eb246855a40625510f0be5f6351885b057aa4",
+      "dst_hash": "caec1f5cc5a69b56f2a033f8e96a5330a8393b76ff606d3ea7468b1eb7922de6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-tool",
+      "mode": "verbatim",
+      "ref": "[[foundry]]",
+      "src": "content/cli/foundry/index.md",
+      "dst": "references/cli/foundry.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Schema-check summary-galaxy-workflow.json with `foundry validate-summary-galaxy-workflow` before returning it from the skill.",
+      "src_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
+      "dst_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-galaxy-workflow]]",
+      "src": "package://@galaxy-foundry/foundry#summaryGalaxyWorkflowSchema",
+      "dst": "references/schemas/summary-galaxy-workflow.schema.json",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Validate the emitted Galaxy workflow summary JSON and provide downstream consumers the output contract.",
+      "license": "MIT",
+      "src_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
+      "dst_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "summary-galaxy-workflow",
+        "kind": "json",
+        "default_filename": "summary-galaxy-workflow.json",
+        "schema": "[[summary-galaxy-workflow]]",
+        "description": "Structured summary of an existing Galaxy workflow: source/format provenance, inputs, outputs, per-step tool_id/version/tool_state, edge graph, and any existing tests as a regression baseline."
+      }
+    ],
+    "consumes": []
+  }
+}

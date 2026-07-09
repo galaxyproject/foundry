@@ -51,7 +51,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-cwl.json` before returning it: run `foundry summary-cwl.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
+- Validate `summary-cwl.json` before returning it: run `foundry validate-summary-cwl summary-cwl.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry validate-summary-cwl summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
 
 ## Procedure
 

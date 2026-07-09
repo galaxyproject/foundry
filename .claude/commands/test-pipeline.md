@@ -22,6 +22,7 @@ Walk the `phases:` spine in order, in a single per-run working directory (see `/
 - **Mold-shaped phase** — drive the Mold's cast (step 4), then immediately apply that Mold's `eval.md` to the step output *before* feeding it downstream (step 5 → "Pipeline runs"). Catch a miss at the step that produced it, not three phases later.
 - **`[loop]` phase** — run the looped Mold until its own oracle reports done (e.g. `advance-galaxy-draft-step` → `gxwf draft-next-step`); evaluate at the **endstate**, not per iteration.
 - **`[branch]` phase** — route per the named pattern (e.g. `discover-or-author`); evaluate the **chosen** Mold's `eval.md`.
+- **Executable phase** — a validate/run/debug Mold (`validate-galaxy-workflow`, `run-workflow-test`, `debug-galaxy-workflow-output`) is *run*, not emulated: execute its tool (`gxwf validate`, `planemo test`) and score off the real result (see `/test-drive` step 4; planemo is self-bootstrapping — no external Galaxy needed). Reaching `run-workflow-test` without a green planemo result — or a specifically-justified, recorded deferral — means the journey **did not complete**; report it as incomplete rather than done.
 - **End of journey** — apply the pipeline `eval.md` end-to-end properties + the bound case's `expect:` assertions.
 
 ## Report

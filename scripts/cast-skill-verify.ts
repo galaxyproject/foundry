@@ -136,6 +136,7 @@ function main(): void {
     }
   }
 
+  const verifyOutputCommands: string[] = [];
   const verifyPath = path.join(bundleRoot, "_verify.json");
   if (!existsSync(verifyPath)) {
     errors.push("missing _verify.json in cast bundle");
@@ -163,6 +164,9 @@ function main(): void {
           }
           if (!Array.isArray(entry.args) || !entry.args.every((arg) => typeof arg === "string")) {
             errors.push(`_verify.json: entries[${index}].args must be a string array`);
+          } else if (entry.direction === "output" && typeof entry.validator_bin === "string") {
+            const sub = entry.args.filter((arg) => arg !== "{artifact_path}").join(" ");
+            if (sub) verifyOutputCommands.push(`${entry.validator_bin} ${sub}`);
           }
         });
       }
@@ -198,6 +202,16 @@ function main(): void {
     // Forbid raw wiki-links in SKILL.md.
     if (/\[\[[^\]]+\]\]/.test(skillBody)) {
       errors.push("SKILL.md: contains raw [[wiki-link]] (must be resolved or stripped)");
+    }
+  }
+
+  // The Validation section must name each output validator's full `bin subcommand`
+  // invocation, so the human-facing SKILL text can't drift from the machine-facing
+  // _verify.json contract (F1: the renderer once dropped the subcommand).
+  const validationSection = (skillBody.match(/## Validation[\s\S]*?(?=\n## |$)/) ?? [""])[0];
+  for (const cmd of verifyOutputCommands) {
+    if (!validationSection.includes(cmd)) {
+      errors.push(`SKILL.md: Validation section omits '${cmd}' from _verify.json (renderer dropped the validator subcommand)`);
     }
   }
 
