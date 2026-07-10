@@ -59,6 +59,26 @@ describe("galaxyWorkflowTestPlanValidator", () => {
     expect(result.errors.some((e) => e.keyword === "additionalProperties")).toBe(true);
   });
 
+  it("accepts source.kind galaxy (Galaxy→Galaxy update plan) with dominant test-evidence basis", () => {
+    const plan = loadPlan("nextflow-translated") as {
+      source: { kind: string; derived_from: string };
+    };
+    plan.source.kind = "galaxy";
+    plan.source.derived_from = "test-evidence";
+    const result = galaxyWorkflowTestPlanValidator.validate(plan);
+    if (!result.valid) console.error("galaxy errors:", result.errors);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("rejects source.derived_from mixed (mixed is case-level only, never plan-level)", () => {
+    const plan = loadPlan("nextflow-translated") as { source: { derived_from: string } };
+    plan.source.derived_from = "mixed";
+    const result = galaxyWorkflowTestPlanValidator.validate(plan);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.keyword === "enum")).toBe(true);
+  });
+
   it("rejects an invalid label_status enum value", () => {
     const plan = loadPlan("nextflow-translated") as {
       test_cases: { job_inputs: { label_status: string }[] }[];

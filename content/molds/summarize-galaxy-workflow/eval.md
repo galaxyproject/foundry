@@ -22,6 +22,11 @@ Abstract oracle for the summary emitted from an existing Galaxy workflow. Fixtur
 - check: llm-judged
 - assertion: each tool step's `tool_id`, `tool_version`, and `tool_state` reflect the source verbatim; `tool_state` is not summarized away or normalized in a way that loses a parameter an edit might target. Invented Tool Shed ids or versions are a failure.
 
+## Property: output post-job actions survive, not just names
+
+- check: llm-judged
+- assertion: each step output is recorded as `out[].{id, actions}` with the source's gxformat2 post-job actions (`hide`, `rename`, `add_tags`, …) preserved verbatim in `actions` (`null` only when the output truly has none). A hidden output whose only signal is a `hide` action — one not promoted to `workflow_outputs` — is still visible in the summary; flattening `out` to bare names, or dropping a `hide`/`rename`, is a failure because an expose/rename change-set would lose its anchor.
+
 ## Property: `.ga` conversion is recorded and flagged when lossy
 
 - check: deterministic

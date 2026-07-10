@@ -18,80 +18,73 @@ don't have:
   output. [[implement-galaxy-workflow-test]] augments the baseline with assertions
   for the new behavior; it does not silently discard the old ones.
 
-Both starting workflows below are the same small, legible IWC anchor —
-`read-preprocessing/short-read-qc-trimming/short-read-quality-control-and-trimming`
-(a two-step `fastp` → `MultiQC` paired-end QC/trimming workflow). Grounding the
-pair on one fixture is deliberate: the two cases exercise the pipeline's two
-structural halves — a change-set with no tool introduction (the per-step loop is
-a no-op) versus one that introduces a tool (the loop runs) — on a workflow small
-enough that "what changed vs. what stayed" is inspectable by eye.
+The grounded case below uses a small, legible IWC anchor —
+`transcriptomics/brew3r/BREW3R` (a five-step workflow that extends 3′
+gene-annotation ends from STAR BAM evidence: two `map_param_value` steps
+translate strandedness, `StringTie` assembles transcripts, `stringtie_merge`
+merges them, and `BREW3R.r` extends the reference GTF). It exercises the
+pipeline's no-tool-introduction half — a change-set that only retunes a default
+and exposes an already-computed output, so the per-step loop is a no-op and "what
+changed vs. what stayed" is inspectable by eye. The tool-introduction half — a
+change-set that adds a step and runs the loop — is parked under *Further cases*
+until it is grounded on an anchor whose shipped test validates cleanly and whose
+graph naturally hosts an added upstream step.
 
 The `.ga` → `.gxwf.yml` conversion is out of frame here: the anchor is already
 gxformat2. A `.ga`-input case belongs in a later expansion of the
 [[summarize-galaxy-workflow]] convert step.
 
-## Case: retune a parameter default and expose a hidden report (no-loop path)
+## Case: retune a parameter default and expose a hidden intermediate (no-loop path)
 
-- starting workflow: `short-read-quality-control-and-trimming` — `fastp`
-  (trimming) → `MultiQC` (aggregation). The `fastp` step already emits
-  `report_html` but hides it and it is not a workflow output; the qualified
-  quality-score parameter defaults to `15`.
+- starting workflow: `BREW3R` — two `map_param_value` steps translate
+  `strandedness`, `assembl with StringTie` assembles transcripts from the `BAM
+  collection`, `merge assembled transcripts` (`stringtie_merge`) merges them, and
+  `BREW3R.r` extends the reference `Input gtf`. The `minimum coverage` input
+  defaults to `10` and reaches StringTie's `min_anchor_cov`/`min_bundle_cov` as a
+  `ConnectedValue`; the merge step emits `out_gtf` (renamed "merged StringTie
+  gtf") but **hides** it — only `extended_gtf` is a workflow output.
 - interview result (fixture, stands in for a normalized transcript): "Make the
-  default quality filtering a bit stricter — Q20 instead of Q15 — and surface the
-  fastp per-sample HTML report as an actual workflow output so reviewers can open
-  it, alongside the JSON and the MultiQC report."
+  assembly a bit stricter — require minimum coverage 20 instead of 10 — and
+  surface the merged StringTie GTF as an actual workflow output so I can inspect
+  what StringTie assembled before BREW3R extended it, alongside the extended GTF."
 - change-set (expected): two entries, both **direct edits**, no tool introduced —
-  `change-parameter` on the qualified quality-score default (`15 → 20`) and
-  `expose-output` promoting `fastp/report_html` (unhide, add a workflow output,
-  e.g. `fastp HTML report`).
-- expect: the emitted workflow validates and round-trips; the `fastp` and
-  `MultiQC` steps are otherwise **byte-stable** — same `tool_id`, `tool_version`,
-  and the rest of the `fastp` `tool_state` (adapter options, length filtering, the
-  `MultiQC` `results` block) untouched. The per-step loop
+  `change-parameter` on the `minimum coverage` default (`10 → 20`) and
+  `expose-output` promoting `merge assembled transcripts/out_gtf` (unhide, add a
+  workflow output, e.g. `merged transcripts GTF`).
+- expect: the emitted workflow validates and round-trips; the two `map_param_value`
+  steps, `assembl with StringTie`, and `BREW3R.r` are otherwise **byte-stable** —
+  same `tool_id`, `tool_version`, and the rest of the `tool_state` (the StringTie
+  `adv` block beyond the connected coverage inputs, the `minimum FPKM for merge`
+  wiring) untouched. Because `minimum coverage` reaches StringTie as a
+  `ConnectedValue`, retuning it is a change to the **input default**, not the step
+  — StringTie's `tool_state` does not move. The per-step loop
   ([[advance-galaxy-draft-step]]) runs **zero iterations** because nothing is
-  drafty. The existing `fastp JSON report`, `fastp trimmed reads`, and `MultiQC
-  HTML report` outputs all survive; exactly one new output appears.
-- regression: the shipped workflow test still passes on trimmed-reads and JSON
-  outputs; the new HTML output gets an added presence/format assertion.
+  drafty. The existing `extended_gtf` output survives; exactly one new output
+  appears.
+- regression: the shipped workflow test still passes on `extended_gtf` — its job
+  sets `minimum coverage: 10` explicitly, so raising the *default* to 20 does not
+  perturb the regression run; the new merged-GTF output gets an added
+  presence/format assertion.
 - spec check: the request is honored **narrowly** — the run must not also "tidy"
-  unrelated defaults, rename existing outputs, or reorder steps. Stricter-quality
-  is a default change, not a hard-wired constant that removes the input's override.
-
-## Case: add a FastQC step upstream and aggregate it in MultiQC (loop path)
-
-- starting workflow: same anchor. `MultiQC` currently aggregates only the `fastp`
-  JSON (its `results` has a single `software_cond` for `fastp`).
-- interview result (fixture): "Add a FastQC pass on the raw reads before trimming,
-  and roll the FastQC results into the existing MultiQC report so the one report
-  covers both raw-read QC and the fastp trimming stats."
-- change-set (expected): `add-step` (a `FastQC` step consuming the `Raw reads`
-  collection, mapping over the `list:paired` structure) plus a `rewire` /
-  `change-parameter` on the **existing** `MultiQC` step — add a second
-  `software_cond` (`fastqc`) to its `results` block and connect FastQC's output
-  to it.
-- expect: the emitted workflow validates and round-trips. FastQC lands first as a
-  **drafty** step (`_plan_*`), and [[advance-galaxy-draft-step]] resolves it — the
-  discover-or-author branch finds the `devteam/fastqc` wrapper via
-  [[discover-shed-tool]] (no authoring needed), [[summarize-galaxy-tool]] +
-  [[implement-galaxy-tool-step]] concretize it. The `fastp` step is **untouched**.
-  The `MultiQC` step *is* touched — but only its `results` list and its input
-  connections; its `tool_id`/`tool_version` and unrelated `tool_state` stay put.
-- regression: the shipped test still passes on the trimmed-reads / fastp-JSON
-  outputs; the MultiQC HTML output remains present (its content changes — now
-  covers FastQC too — so a content assertion may loosen while presence holds); a
-  new FastQC-output assertion is added if FastQC's report is exposed.
-- spec check: this case stresses the hard part of edit-in-place — **editing a
-  settled step's `tool_state`** (MultiQC's `results`) rather than only appending a
-  fresh step. Watch for two failure modes: (a) FastQC introduced but never wired
-  into MultiQC (the "roll into the report" intent silently dropped), and (b) the
-  collection map-over on `Raw reads` collapsed to a single-sample FastQC. If wiring
-  FastQC into MultiQC proves to create a computability gap, the loop should
-  escalate to [[repair-galaxy-draft-topology]], not silently rewire.
+  unrelated defaults (the StringTie `adv` block, `minimum FPKM for merge`), rename
+  `extended_gtf`, or reorder steps. Stricter coverage is a default change, not a
+  hard-wired constant that removes the input's override.
 
 ## Further cases to add (directions, not yet grounded here)
 
 Deliberately left as pointers so this file starts small and honest, not padded:
 
+- **`add-step` + aggregator edit (loop path)** — introduce an upstream step and
+  wire its output into an existing aggregator step, so a step lands **drafty**
+  (`_plan_*`) and [[advance-galaxy-draft-step]] resolves it via the
+  discover-or-author branch (finding a Tool Shed wrapper with [[discover-shed-tool]]
+  rather than authoring). The hard part is **editing a settled step's `tool_state`
+  in place** — adding a source to the aggregator's inputs — not just appending a
+  fresh step; watch for the added step being introduced but never wired into the
+  aggregator (intent silently dropped) and for a collection map-over collapsed to a
+  single sample. Needs an anchor whose shipped test validates cleanly *and* whose
+  graph naturally hosts an added upstream tool feeding an aggregator. The retired
+  `fastp` → `MultiQC` "add FastQC, roll into MultiQC" sketch is the model.
 - **`replace-tool` / version bump** on a second, different-domain anchor (e.g. a
   taxonomy-profiling or assembly workflow) — swap one tool for a newer revision or
   a sibling tool and confirm compatible wiring is preserved while incompatible

@@ -5,10 +5,10 @@
     "name": "summarize-galaxy-workflow",
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 1,
-    "content_hash": "510c980436c2687312af52625201020019572924f11912b29977c55aef2a5865",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "content_hash": "557ba0f649698476dab3b52b9aab4ee7aa6b5e0c8657bfcfdf8f3d05461d9418",
+    "commit": "6c6c45591c6caf42b0af3e065bc4167de9c0626d"
   },
-  "cast_at": "2026-07-09T14:32:49.290Z",
+  "cast_at": "2026-07-10T18:29:24.488Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -67,8 +67,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Galaxy workflow summary JSON and provide downstream consumers the output contract.",
       "license": "MIT",
-      "src_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
-      "dst_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
+      "src_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
+      "dst_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
       "source": "deterministic"
     }
   ],
@@ -80,6 +80,12 @@
         "default_filename": "summary-galaxy-workflow.json",
         "schema": "[[summary-galaxy-workflow]]",
         "description": "Structured summary of an existing Galaxy workflow: source/format provenance, inputs, outputs, per-step tool_id/version/tool_state, edge graph, and any existing tests as a regression baseline."
+      },
+      {
+        "id": "starting-galaxy-workflow",
+        "kind": "yaml",
+        "default_filename": "starting-galaxy-workflow.gxwf.yml",
+        "description": "The normalized concrete gxformat2 workflow this summary describes — passthrough when the input was already gxformat2, the `.ga`→gxformat2 conversion otherwise. The substrate [[apply-galaxy-workflow-changeset]] edits; distinct from the summary JSON, which is only context."
       }
     ],
     "consumes": []

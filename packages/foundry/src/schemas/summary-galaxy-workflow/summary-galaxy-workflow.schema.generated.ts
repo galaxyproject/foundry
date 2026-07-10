@@ -426,9 +426,9 @@ export const summaryGalaxyWorkflowSchema = {
         },
         "out": {
           "type": "array",
-          "description": "Declared output names this step produces.",
+          "description": "Declared outputs this step produces, each with any gxformat2 post-job actions preserved verbatim so a downstream change-set can address a hidden/renamed/tagged output.",
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/StepOutput"
           }
         },
         "when": {
@@ -485,6 +485,28 @@ export const summaryGalaxyWorkflowSchema = {
             "null"
           ],
           "description": "Runtime/expression source preserved verbatim when present."
+        }
+      }
+    },
+    "StepOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "actions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Declared output name this step produces; the anchor edits and workflow outputs address."
+        },
+        "actions": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true,
+          "description": "Verbatim gxformat2 post-job actions on this output (e.g. hide, rename, add_tags, remove_tags, change_datatype, delete_intermediate), preserved uninterpreted like tool_state. Null when the output carries no actions."
         }
       }
     },

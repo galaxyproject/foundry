@@ -5,7 +5,7 @@ export const galaxyWorkflowTestPlanSchema = {
   "$id": "https://galaxyproject.org/foundry/schemas/galaxy-workflow-test-plan.schema.json",
   "$comment": "Canonical source: packages/foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[galaxy-workflow-test-plan]] wiki-links; the cast pipeline imports the `galaxyWorkflowTestPlanSchema` runtime export and serializes it into cast bundles. The on-disk artifact is YAML; validate it with `foundry validate-galaxy-workflow-test-plan`.",
   "title": "Galaxy Workflow Test Plan",
-  "description": "Intermediate, reviewable Galaxy workflow test-plan handoff produced by a *-test-to-galaxy-test-plan Mold (nextflow, cwl, or freeform) and consumed by implement-galaxy-workflow-test. It preserves test intent, fixture provenance, assertion intent, tolerances, label assumptions, unresolved mappings, and intentional omissions before any concrete tests-format `*-tests.yml` is authored. It is NOT the final test artifact: assertion vocabulary is referenced by family name from the tests-format schema, not duplicated here.",
+  "description": "Intermediate, reviewable Galaxy workflow test-plan handoff produced by a *-test-to-galaxy-test-plan Mold (nextflow, cwl, freeform, or galaxy) and consumed by implement-galaxy-workflow-test. It preserves test intent, fixture provenance, assertion intent, tolerances, label assumptions, unresolved mappings, and intentional omissions before any concrete tests-format `*-tests.yml` is authored. It is NOT the final test artifact: assertion vocabulary is referenced by family name from the tests-format schema, not duplicated here.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -76,9 +76,10 @@ export const galaxyWorkflowTestPlanSchema = {
           "enum": [
             "nextflow",
             "cwl",
-            "freeform"
+            "freeform",
+            "galaxy"
           ],
-          "description": "Source family of the Galaxy-targeting translator that produced this plan."
+          "description": "Source family of the Galaxy-targeting translator that produced this plan. galaxy denotes a Galaxy→Galaxy update plan carried forward from an existing Galaxy workflow's own tests (the changeset-to-galaxy-test-plan case)."
         },
         "name": {
           "type": "string",
