@@ -34,8 +34,9 @@ if [ "${VERIFY:-0}" = "1" ]; then
   [ "$head" = "$sha" ] || { echo "!! HEAD $head != pinned $sha" >&2; exit 1; }
 fi
 
-# gxwf via npx (cached after first run). Pin to a major.
-GXWF=(npx --yes -p '@galaxy-tool-util/cli' gxwf)
+# gxwf from the workspace install, so the version tracks the pin in the repo
+# root package.json + pnpm-lock.yaml (bump there, run pnpm install, no edit here).
+GXWF=(pnpm exec gxwf)
 
 echo ">> cleaning workflows -> $cleaned"
 rm -rf "$cleaned"

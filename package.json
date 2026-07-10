@@ -59,7 +59,7 @@
     "vitest": "^2.1.0"
   },
   "dependencies": {
-    "@galaxy-tool-util/cli": "^1.8.1",
+    "@galaxy-tool-util/cli": "^1.10.0",
     "@galaxy-tool-util/schema": "^1.7.2"
   }
 }
