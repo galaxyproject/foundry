@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `galaxy-workflow`. Produced by `advance-galaxy-draft-step`. The concrete gxformat2 workflow being modified (already converted from .ga if needed). The substrate edits apply to — untouched regions must survive byte-for-byte.
+- Read artifact `starting-galaxy-workflow`. Produced by `summarize-galaxy-workflow`. The normalized concrete gxformat2 workflow being modified, emitted by summarize-galaxy-workflow (passthrough when already gxformat2, the `.ga`→gxformat2 conversion otherwise). The substrate edits apply to — untouched regions must survive byte-for-byte.
 - Read artifact `galaxy-workflow-changeset`. Produced by `interview-to-galaxy-workflow-changeset`. Reviewed, step-anchored change-set from interview-to-galaxy-workflow-changeset; the edit intents to realize.
 - Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: read open entries bearing on the edits; append any an edit cannot satisfy and mark resolved the ones it closes.
 

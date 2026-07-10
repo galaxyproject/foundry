@@ -5,10 +5,10 @@
     "name": "apply-galaxy-workflow-changeset",
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 1,
-    "content_hash": "dbd3d8a2ba31fbe7b5b40111a79c6355b9fcb177ad69227cf850e585fbbf4bdf",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "content_hash": "e0e9d243f5b44fe0f6945307cef13b9ad4683bc314cf9cc6ab48abee8277d820",
+    "commit": "6c6c45591c6caf42b0af3e065bc4167de9c0626d"
   },
-  "cast_at": "2026-07-07T19:12:26.678Z",
+  "cast_at": "2026-07-10T18:29:26.038Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -92,10 +92,10 @@
     ],
     "consumes": [
       {
-        "id": "galaxy-workflow",
-        "description": "The concrete gxformat2 workflow being modified (already converted from .ga if needed). The substrate edits apply to — untouched regions must survive byte-for-byte.",
+        "id": "starting-galaxy-workflow",
+        "description": "The normalized concrete gxformat2 workflow being modified, emitted by [[summarize-galaxy-workflow]] (passthrough when already gxformat2, the `.ga`→gxformat2 conversion otherwise). The substrate edits apply to — untouched regions must survive byte-for-byte.",
         "producers": [
-          "advance-galaxy-draft-step"
+          "summarize-galaxy-workflow"
         ]
       },
       {

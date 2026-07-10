@@ -13,8 +13,8 @@ revision: 1
 ai_generated: true
 summary: "Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps."
 input_artifacts:
-  - id: galaxy-workflow
-    description: "The concrete gxformat2 workflow being modified (already converted from .ga if needed). The substrate edits apply to — untouched regions must survive byte-for-byte."
+  - id: starting-galaxy-workflow
+    description: "The normalized concrete gxformat2 workflow being modified, emitted by [[summarize-galaxy-workflow]] (passthrough when already gxformat2, the `.ga`→gxformat2 conversion otherwise). The substrate edits apply to — untouched regions must survive byte-for-byte."
   - id: galaxy-workflow-changeset
     description: "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]]; the edit intents to realize."
   - id: open-requirements-ledger
