@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 7,
     "content_hash": "7f68fe27b39a85abaf6c15f1647809b0d28c71753a7de463a52ffcd5e440f82a",
-    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
+    "commit": "2e8ea5a6363235576bacfa5defd11492bbab6f94"
   },
-  "cast_at": "2026-07-01T23:45:59.070Z",
+  "cast_at": "2026-07-10T18:51:40.524Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -126,8 +126,8 @@
       "purpose": "Input contract: read the schema-valid Galaxy test plan (job inputs, expected outputs, assertion intent, tolerances, label assumptions, unresolved mappings, omissions) and convert it into tests-format output, reconciling assumed labels and fixtures against the real draft.",
       "verification": "Consume a cast test plan from a *-test-to-galaxy-test-plan Mold and confirm tests-format output can be authored from it without re-reading the source summary.",
       "license": "MIT",
-      "src_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
-      "dst_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
+      "src_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "dst_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
       "source": "deterministic"
     },
     {
