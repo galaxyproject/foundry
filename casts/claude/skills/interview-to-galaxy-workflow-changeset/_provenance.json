@@ -6,9 +6,9 @@
     "path": "content/molds/interview-to-galaxy-workflow-changeset/index.md",
     "revision": 1,
     "content_hash": "3d6d8fc9dd09c98125a3ab4c0f7ae5972e85b5afc1707e2922c2e4132d2871a3",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "commit": "2e8ea5a6363235576bacfa5defd11492bbab6f94"
   },
-  "cast_at": "2026-07-07T19:12:25.508Z",
+  "cast_at": "2026-07-10T18:51:37.939Z",
   "refs": [
     {
       "kind": "research",
@@ -36,8 +36,8 @@
       "evidence": "cast-validated",
       "purpose": "Input contract: read the existing-workflow summary to anchor every change-set entry to a real step/input/output.",
       "license": "MIT",
-      "src_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
-      "dst_hash": "bc083ab266392f2c6659cfc78d74364fb5552a3d262c9f274bfb487857895ee3",
+      "src_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
+      "dst_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
       "source": "deterministic"
     }
   ],
