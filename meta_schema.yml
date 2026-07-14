@@ -332,7 +332,11 @@ properties:
           - BSD-3-Clause
           - AFL-3.0
           - CC-BY-4.0
+          - CC-BY-2.5
+          - CC-BY-2.0
+          - Artistic-2.0
           - GPL-2.0-only
+          - GPL-2.0-or-later
           - GPL-3.0-only
           - LGPL-3.0-or-later
           - CC-BY-NC-SA-2.0
