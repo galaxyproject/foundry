@@ -99,8 +99,42 @@ licenses:
     copyleft: false
     obligations: attribution (title/author/source/license/changes)
 
+  CC-BY-2.5:
+    name: CC BY 2.5
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution (title/author/source/license/changes)
+
+  CC-BY-2.0:
+    name: CC BY 2.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution (title/author/source/license/changes)
+
+  Artistic-2.0:
+    name: Artistic License 2.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution + license notice; state changes to modified content
+
   GPL-2.0-only:
     name: GPL 2.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, sidecar]
+    license_file: true
+    copyleft: true
+    obligations: >-
+      notice + same-license + source availability; isolate in its own file, do
+      not blend into permissively-licensed prose
+
+  GPL-2.0-or-later:
+    name: GPL 2.0 or later
     policy: verbatim-ok
     allowed_modes: [verbatim, sidecar]
     license_file: true
