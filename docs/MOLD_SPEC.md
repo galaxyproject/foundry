@@ -1,6 +1,6 @@
 # Mold Spec
 
-This document is the source-layout contract for Mold authoring. `meta_schema.yml` remains the frontmatter schema, and `reference_contract.yml` remains the controlled vocabulary for typed references.
+This document is the source-layout contract for Mold authoring. The shared zod schema in `@galaxy-foundry/note-schema` (`buildNoteSchema`) is the frontmatter contract, and `reference_contract.yml` remains the controlled vocabulary for typed references.
 
 ## Source Layout
 

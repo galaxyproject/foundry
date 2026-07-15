@@ -151,7 +151,7 @@ The corpus-first *principle* it rests on stays reference content; the *act* of l
 
 ## What this list is for
 
-This list exists to keep the Mold inventory and pipeline coverage understandable. The metadata schema is carried by `meta_schema.yml` plus the `reference_contract.yml` registry; `MOLD_SPEC.md` is the Mold authoring contract, and `COMPILATION_PIPELINE.md` is the design narrative for casting and reference dispatch. Suggested first walks, in priority order:
+This list exists to keep the Mold inventory and pipeline coverage understandable. The metadata schema is carried by the shared `@galaxy-foundry/note-schema` zod contract plus the `reference_contract.yml` registry; `MOLD_SPEC.md` is the Mold authoring contract, and `COMPILATION_PIPELINE.md` is the design narrative for casting and reference dispatch. Suggested first walks, in priority order:
 
 1. `summarize-paper` — most novel, most uncertain, exercises source-summarization shape and IO-schema reference.
 2. `implement-galaxy-tool-step` — runs in inner loop, pulls heavily from pattern pages and corpus, exercises wiki-link resolution and condensation.

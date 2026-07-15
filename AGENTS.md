@@ -16,7 +16,7 @@
 
 ## Authoring rules
 
-- **Frontmatter is contract.** `meta_schema.yml` is JSON Schema Draft 07 with `additionalProperties: false`. Unknown fields are rejected. Add a property declaration in the schema before adding a frontmatter field anywhere.
+- **Frontmatter is contract.** The single source of truth is the zod schema in `@galaxy-foundry/note-schema` (`buildNoteSchema`, `packages/note-schema/src/note-schema.ts`), shared by the validator and the Astro site — there is no separate JSON-Schema mirror. Per-type members are `.strict()`, so unknown fields are rejected. Add a field to the relevant member before using it in frontmatter anywhere.
 - **Tags must be registered.** Every tag a note uses lives in `meta_tags.yml`. Vocabulary changes touch one file.
 - **Wiki-link fields use `[[Target]]`.** Single-value fields (`parent_pattern`) and array fields (`related_notes`, `related_patterns`, `related_molds`, `patterns`, `cli_commands`, `prompts`).
 - **Polished IWC references should survive corpus churn.** Pattern pages, Mold pages, and other polished content should cite abstract IWC workflow IDs without generated extensions or fixture roots, e.g. `transcriptomics/rnaseq-pe/rnaseq-pe`, plus step labels or step IDs when needed. Do not cite generated `.ga`/`.gxwf.yml` paths or line numbers in polished pages; reserve those for surveys, ad-hoc research notes, and local debugging evidence.

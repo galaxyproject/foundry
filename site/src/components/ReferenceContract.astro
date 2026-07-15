@@ -1,6 +1,7 @@
 ---
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
-import { loadReferenceContract, type ReferenceContractTerm } from '../lib/reference-contract';
+import type { ReferenceContractTerm } from '@galaxy-foundry/note-schema';
+import { referenceContract } from '../lib/registries';
 
 interface TypedReference {
   kind: string;
@@ -21,7 +22,7 @@ interface Props {
 
 const { references = [], linkMap } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const contract = loadReferenceContract();
+const contract = referenceContract;
 
 function linkFor(ref: string) {
   if (!/^\[\[.+\]\]$/.test(ref)) return null;

@@ -1,7 +1,8 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { licenseIdFromFile } from '../lib/licenses';
-import { resolveLicenseRow } from '../lib/license-policy';
+import { resolveLicenseRow } from '@galaxy-foundry/note-schema';
+import { licensePolicy } from '../lib/registries';
 
 interface Props {
   entry: CollectionEntry<'content'>;
@@ -16,7 +17,7 @@ const licenseFile: string | undefined = data.license_file;
 const upstream: string | undefined = data.upstream;
 
 // Only rendered for notes that carry a license (third-party redistribution).
-const row = license ? resolveLicenseRow(license) : undefined;
+const row = license ? resolveLicenseRow(licensePolicy, license) : undefined;
 const licenseHref = licenseFile ? `${base}/licenses/${licenseIdFromFile(licenseFile)}/` : undefined;
 const policyLabel = row?.policy === 'own-words-only' ? 'own-words only' : 'verbatim OK';
 ---

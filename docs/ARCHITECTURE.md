@@ -17,8 +17,8 @@ Foundry-internal (in the `foundry/` repo):
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
 - **Prompts** — wrapper notes under `content/prompts/` that add Foundry metadata and usage framing around raw prompt sidecars. Molds reference the wrapper via `kind: prompt`; casting copies the raw `prompt_file` verbatim.
 - **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Each has a `type: schema` content note under `content/schemas/<name>.md`; the JSON itself lives with its producer (`@galaxy-foundry/summarize-nextflow` for `summary-nextflow` and the nf-core meta schemas) or in `@galaxy-foundry/foundry` (orphan schemas with no in-repo TS producer: `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary`, `tests-format`). The `tests-format` JSON is synced from upstream `@galaxy-tool-util/schema`. Mold frontmatter cites schemas via `[[wiki-link]]` to the note; the note declares `package` + `package_export` (cast imports the runtime export and serializes it) and `validator_bin` + `validator_subcommand` (skills validate via `foundry validate-<name>`). See `SCHEMA_PACKAGES.md`.
-- **Frontmatter schema** — `meta_schema.yml`, JSON Schema Draft 07 in YAML, contract for content notes. Distinct from the Mold IO schemas under `content/schemas/`.
-- **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the schema at validate time.
+- **Frontmatter schema** — the zod contract in `@galaxy-foundry/note-schema` (`buildNoteSchema`), the single source of truth shared by the validator and the Astro site. Distinct from the Mold IO schemas under `content/schemas/`.
+- **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the note-schema factory at build time.
 - **Cast skills** — produced by casting from Molds. Per-target output layout under `casts/<target>/<name>/`.
 - **Tooling** — TypeScript build/authoring commands ship as `@galaxy-foundry/build-cli` (`foundry-build`). Root `scripts/` files provide repo-local wrappers, vendored-upstream sync, smoke checks, and one-time maintenance utilities. No Python in the toolchain.
 - **Slash commands** — `.claude/commands/*.md`, checked into the repo, codify the agent workflows.
@@ -56,7 +56,7 @@ The content root is `content/` — the Astro idiom, and accurate to a new contri
 
 ## 3. Note types and subtypes
 
-Source of truth: `meta_schema.yml` `type.enum` and the `allOf/if/then` block; `meta_tags.yml` for the matching tag.
+Source of truth: the `buildNoteSchema` discriminated union in `@galaxy-foundry/note-schema` (per-type `.strict()` members + cross-field `superRefine`s); `meta_tags.yml` for the matching tag.
 
 | `type` | `subtype` | Required-extra | Tag(s) | Directory |
 |---|---|---|---|---|
@@ -93,7 +93,7 @@ iwc/rna-seq:
   description: "RNA-seq quantification, splicing, differential expression"
 ```
 
-Validation injects the registry keys into the schema at runtime (`scripts/lib/schema.ts:loadTags` / `loadSchema`), so `meta_schema.yml`'s tag enum stays empty on disk. Vocabulary changes touch one file; the schema stays static. The separation is load-bearing.
+`buildNoteSchema` takes the registry keys (`loadTags` from `@galaxy-foundry/note-schema`) and enforces tag membership in the zod schema it builds, so there is no static tag enum to maintain. Vocabulary changes touch one file; the schema code stays static. The separation is load-bearing.
 
 Tag families:
 - **Note-type tags** (`mold`, `pattern`, `source-pattern`, `cli-tool`, `cli-command`, `pipeline`, `research/*`, `schema`, `prompt`) — every note carries exactly one. Coherence-checked.
@@ -108,37 +108,29 @@ Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (n
 
 ## 5. Frontmatter schema
 
-`meta_schema.yml` is JSON Schema Draft 07 written in YAML.
+The frontmatter contract is the zod schema built by `buildNoteSchema` in `@galaxy-foundry/note-schema`.
 
 **Base required (everywhere)**: `type`, `tags`, `status`, `created`, `revised`, `revision`, `ai_generated`, `summary`.
 
 - `status` enum: `draft | reviewed | revised | stale | archived`. Drives badge rendering and `archived` filtering throughout the site.
 - `summary`: `string`, `minLength: 20`, `maxLength: 160` — forced compression. Powers `Index.md`, dashboard tooltips, and link previews.
 - `revision`: `integer >= 1`; bumped by hand on every edit.
-- `created` / `revised`: ISO date strings (advisory `format: date`; real validation in a separate date pass).
-- `tags`: array, `minItems: 1`, items enum injected at runtime.
+- `created` / `revised`: ISO date strings (`z.coerce.date()` in the schema; the validator adds a separate `YYYY-MM-DD` format pass).
+- `tags`: array, `minItems: 1`, items checked for membership in `meta_tags.yml`.
 - `ai_generated`: boolean.
 
-**Conditional fields** declared at top level (must be, due to `additionalProperties: false`) and gated by `allOf/if/then`:
+**Per-type required fields** are expressed as a zod `discriminatedUnion("type", …)`: each note type is its own `.strict()` member that declares exactly the fields it requires. Cross-field rules that a single member can't express (a `source-specific` mold requires `source`; an external-upstream `schema` note requires `license`) live in a `superRefine` on the union.
 
-```yaml
-- if: { properties: { type: { const: mold } }, required: [type] }
-  then: { required: [name, axis] }
-- if: { properties: { type: { const: pattern } }, required: [type] }
-  then: { required: [title, pattern_kind, evidence] }
-- if: { properties: { type: { const: source-pattern } }, required: [type] }
-  then: { required: [title, source, target, source_pattern_kind, implemented_by_patterns] }
-- if: { properties: { type: { const: cli-tool } }, required: [type] }
-  then: { required: [tool, origin, package, invoke] }
-- if: { properties: { type: { const: cli-command } }, required: [type] }
-  then: { required: [tool, command] }
-- if: { properties: { type: { const: pipeline } }, required: [type] }
-  then: { required: [title, phases] }
-- if: { properties: { type: { const: schema } }, required: [type] }
-  then: { required: [name, title] }
-- if: { properties: { type: { const: prompt } }, required: [type] }
-  then: { required: [title, prompt_file] }
-```
+| `type` | required beyond the base |
+|---|---|
+| `mold` | `name`, `axis` (+ `source`/`target`/`tool` per axis) |
+| `pattern` | `title`, `pattern_kind`, `evidence` |
+| `source-pattern` | `title`, `source`, `target`, `source_pattern_kind`, `implemented_by_patterns` |
+| `cli-tool` | `tool`, `origin`, `package`, `invoke` |
+| `cli-command` | `tool`, `command` |
+| `pipeline` | `title`, `phases` |
+| `schema` | `name`, `title` |
+| `prompt` | `title`, `prompt_file` |
 
 **Foundry-specific field types**:
 - `axis`: enum `[source-specific, target-specific, tool-specific, generic]` (Mold).
@@ -182,7 +174,7 @@ Pattern notes can declare `iwc_exemplars` metadata with abstract IWC workflow ID
 
 ## 6. Validation pipeline
 
-`foundry-build validate` is the validator entry point. `scripts/validate.ts` is a root-level wrapper around the package CLI. Dependencies: **Ajv** (JSON Schema Draft 07), **gray-matter** (frontmatter parse), **js-yaml** (load schema + tag registry).
+`foundry-build validate` is the validator entry point. `scripts/validate.ts` is a root-level wrapper around the package CLI. Dependencies: **`@galaxy-foundry/note-schema`** (the shared zod frontmatter contract + registry loaders), **gray-matter** (frontmatter parse), **js-yaml** (load the tag registry).
 
 Layered validation (`validateData` orchestrates):
 1. **`preprocessFrontmatter`** — normalize parsed dates (gray-matter / js-yaml may produce `Date` objects) to ISO strings before schema check.
@@ -214,9 +206,9 @@ const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
 
 Hidden directories skipped. Casts directory (`casts/`) is **always skipped** — it's generated content, validated by casting tooling separately.
 
-**One slug-resolver.** Because everything is TS, the wiki-link slug + resolver lives in **one shared module** (`scripts/lib/wiki-links.ts`) imported by both the validator and the Astro site (`site/src/lib/wiki-links.ts` re-exports from it, or the site imports directly via path alias). No parallel implementations, no drift risk.
+**One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver lives in `scripts/lib/wiki-links.ts` (the site re-exports from it or imports via path alias). The **frontmatter schema, reference contract, and license policy** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
 
-`tests/validate.test.ts` (Vitest) loads the *real* `meta_schema.yml` and `meta_tags.yml` and exercises `validateData` (unit) and `validateFile` (integration with `tmp` directories).
+`tests/validate.test.ts` (Vitest) builds the *real* shared schema (from `meta_tags.yml` + `reference_contract.yml` + `license-policy.yml`) and exercises `validateData` (unit) and `validateDirectory` (integration with `tmp` directories).
 
 ## 7. Wiki links
 
@@ -421,7 +413,6 @@ foundry/
 ├── README.md
 ├── CLAUDE.md
 ├── Makefile
-├── meta_schema.yml                       # JSON Schema Draft 07 in YAML
 ├── meta_tags.yml                         # tag registry (incl. iwc/*)
 ├── reference_contract.yml                # Mold reference-kind contract
 ├── vendored_upstreams.yml                # synced upstream artifact registry
@@ -557,7 +548,7 @@ foundry/
 Key decisions reflected in the layout:
 - **`content/` content root** — Astro idiom. Reads accurately to a new contributor; the Foundry isn't an Obsidian vault by intent.
 - **`content/molds/<slug>/index.md` and `content/pipelines/<slug>/index.md` as directory notes** — one validator rule (`DIR_NOTE_TYPES`) covers both; `eval.md` / `scenarios.md` siblings ride along.
-- **`content/schemas/` separate from `meta_schema.yml`** — `meta_schema.yml` is the frontmatter contract for content notes; `content/schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas live as content notes (renderable via `SchemaBody.astro`) so they show up in the dashboard, in the Index, and in tag/backlink browses; the actual JSON Schema lives in the schema's TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored: hand-edited there; vendored: synced from an upstream package). The note's frontmatter declares `package` + `package_export`; `site/src/lib/schema-registry.ts` imports each schema directly from its package, and casting imports the named runtime export and serializes it into cast bundles. Molds reference schemas via wiki-link frontmatter fields (`output_artifacts[].schema` on the producer side, `references[].ref` for `kind: schema`).
+- **`content/schemas/` separate from the frontmatter contract** — the frontmatter contract (`@galaxy-foundry/note-schema`) governs content-note frontmatter; `content/schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas live as content notes (renderable via `SchemaBody.astro`) so they show up in the dashboard, in the Index, and in tag/backlink browses; the actual JSON Schema lives in the schema's TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored: hand-edited there; vendored: synced from an upstream package). The note's frontmatter declares `package` + `package_export`; `site/src/lib/schema-registry.ts` imports each schema directly from its package, and casting imports the named runtime export and serializes it into cast bundles. Molds reference schemas via wiki-link frontmatter fields (`output_artifacts[].schema` on the producer side, `references[].ref` for `kind: schema`).
 - **`content/cli/<tool>/<cmd>.md` flat per tool** — CLI manual pages are organized two-deep for browsing, but each command is a single flat file; not directory-note semantics.
 - **`casts/` outside `content/`** — casts are not foundry notes. They have their own provenance shape and target-specific layouts; collapsing them into `content/` would muddy the validator and the site.
 - **`docs/` for Foundry-meta** — long-form design docs (architecture, MOLD_SPEC) live here, not as content notes.

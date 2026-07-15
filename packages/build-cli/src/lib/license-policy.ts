@@ -1,58 +1,16 @@
-// Loader for the canonical license → redistribution-policy table
-// (`license-policy.yml` at the repo root). Source of truth is
-// galaxyproject/foundry-pattern#4; see the file header for the cross-repo
-// sync obligation. Consumed by the validator and the caster.
-
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
-
-import yaml from "js-yaml";
-
-export type CastMode = "verbatim" | "condense" | "sidecar";
-export type RedistributionPolicy = "verbatim-ok" | "own-words-only";
-
-export interface LicenseRow {
-  name: string;
-  policy: RedistributionPolicy;
-  allowed_modes: CastMode[];
-  license_file: boolean;
-  copyleft: boolean;
-  defect?: boolean;
-  obligations: string;
-}
-
-export interface LicensePolicy {
-  version: number;
-  global_rules: Record<string, string>;
-  licenses: Record<string, LicenseRow>;
-  default: LicenseRow;
-}
-
-export const LICENSE_POLICY_FILE = "license-policy.yml";
-
-export function loadLicensePolicy(repoRoot: string): LicensePolicy {
-  const p = path.join(repoRoot, LICENSE_POLICY_FILE);
-  if (!existsSync(p)) throw new Error(`missing license policy table: ${p}`);
-  const data = yaml.load(readFileSync(p, "utf8")) as LicensePolicy;
-  if (!data || typeof data !== "object" || !data.licenses || !data.default) {
-    throw new Error(`invalid license policy table: ${p}`);
-  }
-  return data;
-}
-
-// Curated SPDX ids the table names explicitly (drives the schema enum).
-export function licenseIds(policy: LicensePolicy): string[] {
-  return Object.keys(policy.licenses);
-}
-
-// Resolve a note's `license` id to its row. Unknown ids and a missing license
-// fall through to the default row (own-words-only + defect) per default-deny.
-export function resolveLicenseRow(
-  policy: LicensePolicy,
-  licenseId: string | undefined | null,
-): LicenseRow {
-  if (typeof licenseId === "string" && policy.licenses[licenseId]) {
-    return policy.licenses[licenseId]!;
-  }
-  return policy.default;
-}
+// Re-export shim: the canonical license-policy loader lives in the shared
+// @galaxy-foundry/note-schema package. Kept so existing `../lib/license-policy.js`
+// importers (validate, cast-mold, the scripts/lib alias) resolve without churn.
+export {
+  loadLicensePolicy,
+  findLicensePolicyPath,
+  licenseIds,
+  isValidLicenseId,
+  resolveLicenseRow,
+  LICENSE_POLICY_FILE,
+  LICENSE_REF_RE,
+  type LicensePolicy,
+  type LicenseRow,
+  type CastMode,
+  type RedistributionPolicy,
+} from "@galaxy-foundry/note-schema";

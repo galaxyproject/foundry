@@ -5,32 +5,24 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import type { ErrorObject } from "ajv";
-import AjvImport from "ajv";
-import addFormatsImport from "ajv-formats";
 import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta";
 import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
 import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
+import {
+  buildNoteSchema,
+  loadReferenceContract,
+  type NoteSchema,
+} from "@galaxy-foundry/note-schema";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { loadLicensePolicy, resolveLicenseRow } from "../lib/license-policy.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
-import { loadSchema, loadTags } from "../lib/schema.js";
-import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
+import { loadTags } from "../lib/schema.js";
+import type { FileMeta, Frontmatter, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
 import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
 
-type AjvValidator = {
-  compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
-};
-const Ajv = AjvImport as unknown as new (opts: {
-  allErrors: boolean;
-  strict: boolean;
-}) => AjvValidator;
-const addFormats = addFormatsImport as unknown as (ajv: AjvValidator) => unknown;
-
 interface CliArgs {
   directory: string;
-  schemaPath: string;
   tagsPath: string;
   root: string | null;
 }
@@ -68,7 +60,7 @@ const WIKI_LINK_FIELDS: Record<string, "single" | "array"> = {
 
 // ---- per-file validation ----
 
-export function validateData(data: Frontmatter, schema: JsonSchema): ValidationResult {
+export function validateData(data: Frontmatter, schema: NoteSchema): ValidationResult {
   const result: ValidationResult = { errors: [], warnings: [] };
   result.errors.push(...validateSchema(data, schema));
   result.errors.push(...validateDates(data));
@@ -79,27 +71,24 @@ export function validateData(data: Frontmatter, schema: JsonSchema): ValidationR
   return result;
 }
 
-function validateSchema(data: Frontmatter, schema: JsonSchema): string[] {
-  const ajv = new Ajv({ allErrors: true, strict: false });
-  addFormats(ajv);
-  const validate = ajv.compile(schema);
-  if (validate(data)) return [];
-  const errors = (validate.errors ?? []).slice().sort((a: ErrorObject, b: ErrorObject) => {
-    return (a.instancePath || "").localeCompare(b.instancePath || "");
-  });
-  return errors.map((e: ErrorObject) => {
-    const loc = e.instancePath.replace(/^\//, "").replace(/\//g, ".") || "(root)";
-    const params = e.params as Record<string, unknown> | undefined;
-    const extra = params?.additionalProperty ? ` ('${String(params.additionalProperty)}')` : "";
-    if (
-      e.keyword === "additionalProperties" &&
-      params?.additionalProperty === "schema" &&
-      /^input_artifacts\.\d+$/.test(loc)
-    ) {
-      return `${loc}: 'schema' is producer-owned — declare it on the producer Mold's output_artifacts[].schema (consumers inherit via id).`;
+function validateSchema(data: Frontmatter, schema: NoteSchema): string[] {
+  const parsed = schema.safeParse(data);
+  if (parsed.success) return [];
+  const messages = parsed.error.issues.map((issue) => {
+    const loc = issue.path.join(".") || "(root)";
+    if (issue.code === "unrecognized_keys") {
+      // `.strict()` rejected extra keys. Preserve the producer-owned-schema hint
+      // and otherwise mirror the old ajv additionalProperties wording.
+      if (issue.keys.includes("schema") && /^input_artifacts\.\d+$/.test(loc)) {
+        return `${loc}: 'schema' is producer-owned — declare it on the producer Mold's output_artifacts[].schema (consumers inherit via id).`;
+      }
+      const key = issue.keys[0] ?? "";
+      const at = loc === "(root)" ? key : `${loc}.${key}`;
+      return `${at}: must NOT have additional properties ('${key}')`;
     }
-    return `${loc}: ${e.message ?? "validation failed"}${extra}`;
+    return `${loc}: ${issue.message}`;
   });
+  return messages.sort((a, b) => a.localeCompare(b));
 }
 
 function validateDates(data: Frontmatter): string[] {
@@ -1414,14 +1403,12 @@ function listMarkdownFiles(dir: string): string[] {
 function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     directory: "content",
-    schemaPath: "meta_schema.yml",
     tagsPath: "meta_tags.yml",
     root: null,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--schema") args.schemaPath = argv[++i] ?? args.schemaPath;
-    else if (a === "--tags") args.tagsPath = argv[++i] ?? args.tagsPath;
+    if (a === "--tags") args.tagsPath = argv[++i] ?? args.tagsPath;
     else if (a === "--root") args.root = argv[++i] ?? ".";
     else if (a?.startsWith("--root=")) args.root = a.slice("--root=".length);
     else if (a && !a.startsWith("--")) args.directory = a;
@@ -1431,7 +1418,6 @@ function parseArgs(argv: string[]): CliArgs {
 
 export interface ValidateOptions {
   directory: string;
-  schemaPath: string;
   tagsPath: string;
 }
 
@@ -1440,8 +1426,13 @@ export function validateDirectory(opts: ValidateOptions): {
   warnings: number;
   filesChecked: number;
 } {
-  const tags = loadTags(opts.tagsPath);
-  const schema = loadSchema(opts.schemaPath, tags);
+  const repoRoot =
+    path.basename(opts.directory) === "content" ? path.dirname(opts.directory) : opts.directory;
+  const schema = buildNoteSchema({
+    tags: loadTags(opts.tagsPath),
+    contract: loadReferenceContract(),
+    licensePolicy: loadLicensePolicy(repoRoot),
+  });
 
   let errorCount = 0;
   let warningCount = 0;
