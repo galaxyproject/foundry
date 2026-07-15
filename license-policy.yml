@@ -91,8 +91,27 @@ licenses:
     copyleft: false
     obligations: attribution + notice
 
+  CC0-1.0:
+    name: CC0 1.0 (public domain dedication)
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: >-
+      none legally — public-domain dedication, no attribution or notice term. The
+      CC0 legalcode is still vendored on verbatim carry (uniform with every other
+      verbatim-ok row; license_file_tracks_verbatim); a citation is kept as courtesy
+
   CC-BY-4.0:
     name: CC BY 4.0
+    policy: verbatim-ok
+    allowed_modes: [verbatim, condense, sidecar]
+    license_file: true
+    copyleft: false
+    obligations: attribution (title/author/source/license/changes)
+
+  CC-BY-3.0:
+    name: CC BY 3.0
     policy: verbatim-ok
     allowed_modes: [verbatim, condense, sidecar]
     license_file: true
@@ -170,6 +189,56 @@ licenses:
     obligations: >-
       attribution + citation; verbatim carry avoided so NC + share-alike do not
       propagate into the KB
+
+  # CC BY-NC* family (any version): the license PERMITS non-commercial verbatim
+  # reproduction, but the NC condition travels with the text — a cast that embeds
+  # NC prose becomes an NC-encumbered cast, unusable commercially. We take
+  # own-words instead (functional strings stay verbatim as facts, per global
+  # rules). Same reasoning the CC-BY-NC-SA-2.0 row already applies to NC.
+  # ND ("NoDerivatives") is treated identically: a summary is itself a derivative,
+  # so short quotation rides on the quotation right (outside the license) — no
+  # reason to carry NC-encumbered prose.
+  CC-BY-NC-4.0:
+    name: CC BY-NC 4.0
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: attribution + citation; NC condition kept out of casts (own-words)
+
+  CC-BY-NC-3.0:
+    name: CC BY-NC 3.0
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: attribution + citation; NC condition kept out of casts (own-words)
+
+  CC-BY-NC-2.5:
+    name: CC BY-NC 2.5
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: attribution + citation; NC condition kept out of casts (own-words)
+
+  CC-BY-NC-2.0-UK:
+    name: CC BY-NC 2.0 England & Wales
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: attribution + citation; NC condition kept out of casts (own-words)
+
+  CC-BY-NC-ND-4.0:
+    name: CC BY-NC-ND 4.0
+    policy: own-words-only
+    allowed_modes: [condense]
+    license_file: false
+    copyleft: false
+    obligations: >-
+      attribution + citation; NC + ND kept out of casts (own-words). A summary is
+      a derivative, so no verbatim prose is carried under the ND term.
 
   LicenseRef-arXiv-nonexclusive-distrib-1.0:
     name: arXiv non-exclusive distribution 1.0

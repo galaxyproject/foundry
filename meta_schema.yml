@@ -331,7 +331,9 @@ properties:
           - BSD-2-Clause
           - BSD-3-Clause
           - AFL-3.0
+          - CC0-1.0
           - CC-BY-4.0
+          - CC-BY-3.0
           - CC-BY-2.5
           - CC-BY-2.0
           - Artistic-2.0
@@ -340,6 +342,11 @@ properties:
           - GPL-3.0-only
           - LGPL-3.0-or-later
           - CC-BY-NC-SA-2.0
+          - CC-BY-NC-4.0
+          - CC-BY-NC-3.0
+          - CC-BY-NC-2.5
+          - CC-BY-NC-2.0-UK
+          - CC-BY-NC-ND-4.0
       - pattern: "^LicenseRef-[A-Za-z0-9.-]+$"
     description: "SPDX license identifier (or LicenseRef-<slug>) for the note's vendored content, resolved against license-policy.yml. The Foundry's own content is covered by the root LICENSE; this field annotates third-party redistributions."
   # Repo-relative path to the upstream LICENSE under LICENSES/. The validator
