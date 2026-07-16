@@ -91,6 +91,22 @@ pipelines:
       branching, different domain from rnaseq/sarek — stresses the
       incompatibility report on parallel-tool patterns.
 
+  - name: nf-core/eager
+    flavor: nf-core
+    tier: large
+    repo: https://github.com/nf-core/eager.git
+    sha: f77d2464a7c6fe06b67ce1832f2fe72ba21c8fde
+    notes: >
+      Ancient DNA (aDNA) analysis. Pinned to the DSL2 rewrite on `dev`
+      (eager 3.x), NOT to a release: the latest tag (2.5.3) is DSL1
+      (`nextflow.enable.dsl=1`, monolithic main.nf), which
+      summarize-nextflow short-circuits by design. Bump the SHA rather
+      than adding a `tag` until 3.0 ships. Large: ~110 .nf files, ~45
+      nf-core modules, ~23 local subworkflows; damage-profiling and
+      metagenomics branches on top of a preprocess/map/dedup spine.
+      Backs the compare-and-contrast case in the NEXTFLOW → GALAXY
+      pipeline scenarios against galaxyproject/iwc#1234.
+
   # ----- ref-data complexity bridge (nf-core) -----
   # Small/medium pipelines staged on rungs of a reference-data
   # complexity ladder. Used to scope which ref-data patterns the
