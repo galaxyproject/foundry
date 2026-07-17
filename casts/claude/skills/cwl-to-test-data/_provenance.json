@@ -1,0 +1,101 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "cwl-to-test-data",
+    "path": "content/molds/cwl-to-test-data/index.md",
+    "revision": 1,
+    "content_hash": "7db8792d2766ea34a221a86b22f17a3e3bd167118c8e0e380d738935d639a791",
+    "commit": "c29a96b7c4d124bdad3c081ae5ece79a3d03cf22"
+  },
+  "cast_at": "2026-07-17T23:04:07.740Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-cwl-workflow-anatomy]]",
+      "src": "content/research/component-cwl-workflow-anatomy.md",
+      "dst": "references/notes/component-cwl-workflow-anatomy.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Interpret a CWL job file's input objects (File/Directory, secondaryFiles, arrays, inline literals) before mapping them onto Galaxy inputs.",
+      "trigger": "When reading a `job_path`'s declared inputs to decide their Galaxy shape.",
+      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Map each declared job input to an addressable Galaxy input label and the collection shape it must populate.",
+      "trigger": "When mapping a CWL File-array or secondaryFiles input onto a Galaxy collection shape.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Express each ref remote-URL-first with SHA-1 integrity and per-input collection layout when recording resolved fixtures.",
+      "trigger": "When writing each `test-data-refs` entry.",
+      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-cwl]]",
+      "src": "package://@galaxy-foundry/foundry#summaryCwlSchema",
+      "dst": "references/schemas/summary-cwl.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Input contract: read `tests[]` — each case's `job_path` inputs and `expected_outputs` — as the declared source of test data.",
+      "license": "MIT",
+      "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "test-data-refs",
+        "kind": "json",
+        "default_filename": "test-data-refs.json",
+        "description": "Test data resolved from the CWL source's declared test cases, expressed as URLs/paths plus expected shapes for downstream test authoring. Shared id with [[find-test-data]] — the branch's search fallback fills only the inputs this Mold leaves unresolved."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-cwl",
+        "description": "Structured CWL summary from [[summarize-cwl]]; carries the source's test cases (`tests[]`) — each a `job_path` (a CWL job file naming the test inputs) plus `expected_outputs`.",
+        "inherited_schema": "[[summary-cwl]]",
+        "producers": [
+          "summarize-cwl"
+        ]
+      },
+      {
+        "id": "cwl-galaxy-interface",
+        "description": "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each resolved fixture must map onto.",
+        "producers": [
+          "cwl-summary-to-galaxy-interface"
+        ]
+      }
+    ]
+  }
+}

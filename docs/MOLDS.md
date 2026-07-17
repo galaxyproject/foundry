@@ -75,6 +75,8 @@ Two-step shape (translation/derivation, then assembly):
 
 **Derivation** (gets the raw fixtures):
 - `paper-to-test-data` — derive workflow test inputs from a paper (sample data, expected outputs, parameter values). Source-specific (paper), target-agnostic. Fails often because papers rarely ship usable fixtures; falls through to `find-test-data`.
+- `nextflow-to-test-data` — resolve the Nextflow pipeline's own declared `test_fixtures` / `nf_tests` (role, url, sha1, filetype) into Galaxy `test-data-refs`. Source-specific (nextflow), target-agnostic. First leg of the chain; falls through to `find-test-data` for inputs it can't resolve.
+- `cwl-to-test-data` — resolve the CWL source's own declared `tests[]` (job-file inputs, expected outputs) into Galaxy `test-data-refs`. Source-specific (cwl), target-agnostic. First leg of the chain; falls through to `find-test-data`.
 - `find-test-data` — fallback when derivation from a source fails. Search IWC test fixtures, public databases, sibling workflows for usable test data matching a data-flow description (input shapes, expected output shapes, organism / data type). Source-agnostic, target-agnostic. The harness escalates to a user-supplied-data gate if `find-test-data` also fails.
 - `nextflow-test-to-galaxy-test-plan` — translate NF test fixtures, profiles, params, expected outputs, and snapshot evidence into a Galaxy workflow test plan. Source × target.
 - `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan. Source × target.

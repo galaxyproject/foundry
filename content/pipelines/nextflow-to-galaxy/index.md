@@ -24,6 +24,7 @@ phases:
     loop: true
   - branch: test-data-resolution
     chain:
+      - "[[nextflow-to-test-data]]"
       - "[[find-test-data]]"
       - user-supplied
   - mold: "[[nextflow-test-to-galaxy-test-plan]]"

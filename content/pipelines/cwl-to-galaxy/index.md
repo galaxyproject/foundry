@@ -21,6 +21,7 @@ phases:
     loop: true
   - branch: test-data-resolution
     chain:
+      - "[[cwl-to-test-data]]"
       - "[[find-test-data]]"
       - user-supplied
   - mold: "[[cwl-test-to-galaxy-test-plan]]"

@@ -17,7 +17,7 @@
     { "phase": 4, "kind": "mold", "skill": "compare-against-iwc-exemplar", "cast_present": true, "loop": false },
     { "phase": 5, "kind": "mold", "skill": "cwl-summary-to-galaxy-template", "cast_present": true, "loop": false },
     { "phase": 6, "kind": "mold", "skill": "advance-galaxy-draft-step", "cast_present": true, "loop": true },
-    { "phase": 7, "kind": "branch", "pattern": "test-data-resolution", "chain": ["find-test-data", "user-supplied"], "cast_present": [true, null] },
+    { "phase": 7, "kind": "branch", "pattern": "test-data-resolution", "chain": ["cwl-to-test-data", "find-test-data", "user-supplied"], "cast_present": [true, true, null] },
     { "phase": 8, "kind": "mold", "skill": "cwl-test-to-galaxy-test-plan", "cast_present": false, "loop": false },
     { "phase": 9, "kind": "mold", "skill": "implement-galaxy-workflow-test", "cast_present": true, "loop": false },
     { "phase": 10, "kind": "mold", "skill": "validate-galaxy-workflow", "cast_present": true, "loop": false },
