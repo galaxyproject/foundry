@@ -22,10 +22,10 @@ Hand-authored, monolithic conversion skills are brittle, hard to test, and don't
 
 ## What's here
 
-- **Pipelines** (`content/pipelines/`) — ordered Mold sequences composing into an end-to-end conversion (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`). Build artifact and primary navigation surface.
+- **Pipelines** (`content/pipelines/`) — ordered Mold sequences composing into an end-to-end conversion (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `interview-to-galaxy`, `update-interview-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`). Build artifact and primary navigation surface.
 - **Molds** (`content/molds/`) — abstract templates describing a workflow-construction action. Each Mold is a typed reference manifest: it declares the patterns, CLI manual pages, schemas, prompts, and examples it depends on, and casts into one or more skill artifacts.
 - **Patterns** (`content/patterns/`) — Galaxy workflow construction reference (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring). Wiki-linked from action Molds; pulled into cast skills via casting's pattern-kind dispatch.
-- **CLI manual pages** (`content/cli/<tool>/`) — one note per command or subcommand for `gxwf` and `planemo`. Cast to JSON sidecars by action Molds that reference exact commands.
+- **CLI manual pages** (`content/cli/<tool>/`) — one note per command or subcommand, covering `gxwf`, `planemo`, `cwltool`, `cwl-utils`, `foundry`, and `galaxy-tool-cache`. Cast to JSON sidecars by action Molds that reference exact commands.
 - **Schemas** (`content/schemas/`) — `<name>.md` schema notes only; the JSON Schema itself lives in its TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored) or is synced there from an upstream npm package (vendored). The note's frontmatter declares `package` + `package_export`. `site/src/lib/schema-registry.ts` imports each schema directly from the package; Mold frontmatter cites schemas via `[[wiki-link]]` and cast imports the named runtime export at build time, serializing it verbatim into cast bundles.
 - **Casts** (`casts/<target>/<name>/`) — generated artifacts, one per (Mold, target) pair. Frozen, condensed, no links back.
 
@@ -69,4 +69,6 @@ Long-form design narrative under `docs/`:
 
 ## Status
 
-Skeleton plus scaffolding. The spine is in place: content types, validator, pipeline lifting, Mold inventory stubs. Real Mold authoring, pattern pages, CLI manual pages, casting tooling, and the Astro site are all forward work.
+Working system, pre-review. All seven pipelines cast end-to-end into Claude skills: 45 Molds, 54 pattern pages, CLI manual pages for six tools, `foundry-build cast` + `assemble-pipeline`, and the live Astro site.
+
+Forward work is quality and reach rather than existence. Every Mold is still `status: draft` — none have passed a review gate. The `generic` and `web` cast targets are scaffolded but empty; only Claude casts today. Eval coverage is partial: 33 of 45 Molds have an `eval.md`, 27 have `scenarios.md`.
