@@ -56,11 +56,14 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 5. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
 6. **nextflow-summary-to-galaxy-template** — invoke the `nextflow-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs.
 7. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
-8. **nextflow-test-to-galaxy-test-plan** — MANUAL — `nextflow-test-to-galaxy-test-plan` is not yet cast. Translate Nextflow test evidence into a Galaxy workflow test plan. Do this by hand and confirm before continuing.
-9. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
-10. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
-11. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
-12. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
+8. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
+   - Try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
+   - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
+9. **nextflow-test-to-galaxy-test-plan** — MANUAL — `nextflow-test-to-galaxy-test-plan` is not yet cast. Translate Nextflow test evidence into a Galaxy workflow test plan. Do this by hand and confirm before continuing.
+10. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
+11. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
+12. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
+13. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
 
 ## Done
 

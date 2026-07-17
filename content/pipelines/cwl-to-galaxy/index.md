@@ -19,6 +19,10 @@ phases:
   - mold: "[[cwl-summary-to-galaxy-template]]"
   - mold: "[[advance-galaxy-draft-step]]"
     loop: true
+  - branch: test-data-resolution
+    chain:
+      - "[[find-test-data]]"
+      - user-supplied
   - mold: "[[cwl-test-to-galaxy-test-plan]]"
   - mold: "[[implement-galaxy-workflow-test]]"
   - mold: "[[validate-galaxy-workflow]]"
