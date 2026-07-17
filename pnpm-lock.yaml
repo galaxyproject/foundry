@@ -282,6 +282,9 @@ importers:
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: 6.4.2
         version: 6.4.2(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3)

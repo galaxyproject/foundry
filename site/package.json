@@ -33,6 +33,7 @@
     "astro-pagefind": "^1.8.6",
     "pagefind": "^1.5.2",
     "typescript": "^5.7.0",
+    "vfile": "^6.0.3",
     "vite": "6.4.2"
   }
 }
