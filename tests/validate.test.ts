@@ -2,16 +2,24 @@ import { copyFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { loadSchema, loadTags } from "../packages/build-cli/src/lib/schema.js";
+import {
+  buildNoteSchema,
+  loadLicensePolicy,
+  loadReferenceContract,
+  loadTags,
+} from "@galaxy-foundry/note-schema";
 import { validateData, validateDirectory } from "../packages/build-cli/src/commands/validate.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
-const SCHEMA_PATH = path.join(repoRoot, "meta_schema.yml");
 const TAGS_PATH = path.join(repoRoot, "meta_tags.yml");
 
 function loadRealSchema() {
-  return loadSchema(SCHEMA_PATH, loadTags(TAGS_PATH));
+  return buildNoteSchema({
+    tags: loadTags(TAGS_PATH),
+    contract: loadReferenceContract(path.join(repoRoot, "reference_contract.yml")),
+    licensePolicy: loadLicensePolicy(repoRoot),
+  });
 }
 
 const baseRequired = (overrides: Record<string, unknown> = {}) => ({
@@ -359,7 +367,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -381,7 +388,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -399,7 +405,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -416,7 +421,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -436,7 +440,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -460,7 +463,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -483,7 +485,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -494,7 +495,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -517,7 +517,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -538,7 +537,7 @@ describe("validateDirectory (cross-file)", () => {
       path.join(dir, "pipelines/p/scenarios.md"),
       "# P scenarios\n\n## Case: demo\n\n- fixture: nf-core/demo\n- expect: validates\n",
     );
-    const r = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(r.errors).toBe(0);
   });
 
@@ -550,7 +549,7 @@ describe("validateDirectory (cross-file)", () => {
       ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
     writeFileSync(path.join(dir, "pipelines/p/eval.md"), "---\ntype: junk\n---\n\nbad\n");
-    const r = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
@@ -561,9 +560,9 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
-    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     writeFileSync(path.join(dir, "pipelines/p/notes.md"), "stray notes\n");
-    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    const after = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(after.errors).toBe(0);
     expect(after.warnings).toBeGreaterThan(before);
   });
@@ -575,11 +574,11 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
-    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     mkdirSync(path.join(dir, "pipelines/p/examples"), { recursive: true });
     writeFileSync(path.join(dir, "pipelines/p/examples/UC_issue.md"), "# Interview input\n\nno frontmatter\n");
     writeFileSync(path.join(dir, "pipelines/p/examples/UC_extracted.ga"), '{"a_galaxy_workflow":"true"}\n');
-    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    const after = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(after.errors).toBe(0);
     expect(after.warnings).toBe(before);
   });
@@ -591,9 +590,9 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
-    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     writeFileSync(path.join(dir, "pipelines/stray.md"), "not a directory note\n");
-    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    const after = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(after.errors).toBe(0);
     expect(after.warnings).toBeGreaterThan(before);
   });
@@ -633,7 +632,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -710,7 +708,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -728,7 +725,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -768,7 +764,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -789,7 +784,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -820,7 +814,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -837,7 +830,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -853,7 +845,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -872,7 +863,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -894,7 +884,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -920,7 +909,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -944,7 +932,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -968,7 +955,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -999,7 +985,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -1030,7 +1015,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1052,7 +1036,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -1075,7 +1058,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1102,7 +1084,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1123,7 +1104,6 @@ describe("validateDirectory (cross-file)", () => {
     );
     const withoutScenarios = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(withoutScenarios.errors).toBe(0);
@@ -1134,7 +1114,6 @@ describe("validateDirectory (cross-file)", () => {
     );
     const withScenarios = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(withScenarios.errors).toBe(0);
@@ -1157,7 +1136,6 @@ describe("validateDirectory (cross-file)", () => {
     );
     const before = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     }).warnings;
 
@@ -1167,7 +1145,6 @@ describe("validateDirectory (cross-file)", () => {
     );
     const after = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(after.errors).toBe(0);
@@ -1189,7 +1166,6 @@ describe("validateDirectory (cross-file)", () => {
     );
     const before = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     }).warnings;
 
@@ -1199,7 +1175,6 @@ describe("validateDirectory (cross-file)", () => {
     );
     const after = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(after.errors).toBe(0);
@@ -1214,12 +1189,12 @@ describe("validateDirectory (cross-file)", () => {
       path.join(dir, "molds/m/eval.md"),
       "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: holds for all inputs\n",
     );
-    const before = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH }).warnings;
+    const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
       "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: holds for all inputs\n\n## Case: concrete\n\n- fixture: y\n- expect: z\n",
     );
-    const after = validateDirectory({ directory: dir, schemaPath: SCHEMA_PATH, tagsPath: TAGS_PATH });
+    const after = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(after.errors).toBe(0);
     expect(after.warnings).toBeGreaterThan(before);
   });
@@ -1237,7 +1212,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1257,7 +1231,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1285,7 +1258,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1312,7 +1284,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1330,7 +1301,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1355,7 +1325,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1395,7 +1364,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1433,7 +1401,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1461,7 +1428,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1502,7 +1468,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1526,7 +1491,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -1556,7 +1520,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -1593,7 +1556,6 @@ describe("validateDirectory (cross-file)", () => {
 
     const r = validateDirectory({
       directory: dir,
-      schemaPath: SCHEMA_PATH,
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
@@ -1664,7 +1626,6 @@ describe("validateDirectory (cross-file)", () => {
     try {
       const r = validateDirectory({
         directory: dir,
-        schemaPath: SCHEMA_PATH,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -1728,7 +1689,6 @@ describe("validateDirectory (cross-file)", () => {
     try {
       const r = validateDirectory({
         directory: dir,
-        schemaPath: SCHEMA_PATH,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBe(0);
@@ -1776,7 +1736,6 @@ describe("validateDirectory (cross-file)", () => {
     try {
       const r = validateDirectory({
         directory: dir,
-        schemaPath: SCHEMA_PATH,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -1813,7 +1772,6 @@ describe("validateDirectory (cross-file)", () => {
     try {
       const r = validateDirectory({
         directory: dir,
-        schemaPath: SCHEMA_PATH,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBeGreaterThanOrEqual(1);
@@ -1869,7 +1827,6 @@ describe("validateDirectory (cross-file)", () => {
     try {
       const r = validateDirectory({
         directory: dir,
-        schemaPath: SCHEMA_PATH,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBe(0);

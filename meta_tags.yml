@@ -1,5 +1,5 @@
 # meta_tags.yml — controlled tag vocabulary.
-# Validator injects keys into meta_schema.yml at runtime.
+# Validator + site inject these keys into the shared note-schema zod contract at build time.
 # Hierarchy is purely textual (slash-delimited).
 # See INITIAL_ARCHITECTURE.md §4.
 

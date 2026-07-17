@@ -11,9 +11,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: withastro/action@v3
+
+      - uses: actions/setup-node@v4
         with:
-          path: site
+          node-version: 20
+
+      - name: Enable corepack
+        run: corepack enable
+
+      # site is a pnpm workspace member; its @galaxy-foundry/* deps resolve to
+      # sibling packages that must be built to dist before Astro imports them.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: npm run packages-build
+
+      - name: Build site
+        run: npm run site:build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
   deploy:
     needs: build
     runs-on: ubuntu-latest

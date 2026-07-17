@@ -13,7 +13,7 @@ Produce or refresh `content/research/iwc-$1-survey.md`. The survey **proposes ca
 2. **`CLAUDE.md`** — authoring rules.
 3. **`docs/PATTERNS.md`** — pattern-authorship policy. **Operation-anchored naming** is mandatory in candidate-pattern proposals; do not surface tool-anchored names. Corpus-first applies — no speculative candidates.
 4. **`docs/ARCHITECTURE.md`** §3 (note types), §5 (frontmatter), §6 (validation).
-5. **`meta_schema.yml`** + **`meta_tags.yml`**.
+5. **`packages/note-schema/src/note-schema.ts`** + **`meta_tags.yml`**.
 6. **`common_paths.yml.sample`** — `$IWC_FORMAT2` is the cleaned `gxformat2` corpus root for grep work and full-workflow reads; `$IWC_SKELETONS` mirrors that tree with non-structural fields stripped (tool_ids + topology + control flow only) — cheap structural scans for step-pair / step-sequence patterns; `$IWC` is the upstream `.ga` source for permalinks. Write citations as `` `$IWC_FORMAT2/path:line` `` (or `` `$IWC_SKELETONS/path:line` `` when the structural view is what's evidenced).
 7. **`content/research/iwc-shortcuts-anti-patterns.md`** — already-pinned "don't endorse" calls. Do not re-surface anything covered here as a recommendation.
 8. **Existing surveys** under `content/research/iwc-*-survey.md` — for shape and tone, and to detect topic overlap.

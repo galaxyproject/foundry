@@ -20,6 +20,6 @@ export {
   type ParsedPhases,
   type PhaseFinding,
 } from "./lib/pipeline-phases.js";
-export { loadSchema, loadTags } from "./lib/schema.js";
+export { loadTags } from "./lib/schema.js";
 export { fileSlug, findMdFiles } from "./lib/walk.js";
 export { resolveWikiLink, slugify, stripBrackets, WIKI_LINK_RE } from "./lib/wiki-links.js";

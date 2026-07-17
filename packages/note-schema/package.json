@@ -1,12 +1,8 @@
 {
-  "name": "@galaxy-foundry/build-cli",
+  "name": "@galaxy-foundry/note-schema",
   "version": "0.0.0",
-  "private": true,
-  "description": "Build and authoring CLI for Galaxy Workflow Foundry source trees.",
+  "description": "Single source of truth for Galaxy Workflow Foundry note frontmatter — one zod contract shared by the validator and the site.",
   "type": "module",
-  "bin": {
-    "foundry-build": "dist/bin/foundry-build.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -21,32 +17,34 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/galaxyproject/foundry.git",
-    "directory": "packages/build-cli"
+    "directory": "packages/note-schema"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "tsc --noEmit"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "galaxy",
     "foundry",
-    "build",
-    "cli"
+    "frontmatter",
+    "zod",
+    "schema"
   ],
   "license": "MIT",
   "dependencies": {
-    "@galaxy-foundry/note-schema": "workspace:*",
-    "@galaxy-foundry/planemo-cli-meta": "workspace:*",
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
-    "gray-matter": "^4.0.3",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
   },
   "engines": {
     "node": ">=20"

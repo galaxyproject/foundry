@@ -1,5 +1,10 @@
+// Loader for reference_contract.yml — the controlled vocabulary behind a note's
+// `references[]` entries (kinds, used_at, load, modes, evidence). Canonical
+// source of truth; the validator, the caster, and the site all import it here.
+
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+
 import yaml from "js-yaml";
 
 export interface ReferenceContractTerm {
@@ -28,12 +33,17 @@ export function findReferenceContractPath(startDir = process.cwd()): string {
   }
 }
 
-export function loadReferenceContract(contractPath = findReferenceContractPath()): ReferenceContract {
+export function loadReferenceContract(
+  contractPath = findReferenceContractPath(),
+): ReferenceContract {
   const data = yaml.load(readFileSync(contractPath, "utf8")) as ReferenceContract | null;
   if (!data) throw new Error(`empty reference contract: ${contractPath}`);
   return data;
 }
 
-export function contractKeys(contract: ReferenceContract, group: keyof ReferenceContract): string[] {
+export function contractKeys(
+  contract: ReferenceContract,
+  group: keyof ReferenceContract,
+): string[] {
   return Object.keys(contract[group]);
 }

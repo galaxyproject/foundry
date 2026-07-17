@@ -1,13 +1,12 @@
-import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 import {
   loadLicensePolicy,
   licenseIds,
+  isValidLicenseId,
   resolveLicenseRow,
   type CastMode,
 } from "../packages/build-cli/src/lib/license-policy.js";
@@ -17,25 +16,18 @@ const repoRoot = path.resolve(here, "..");
 
 const CAST_MODES: CastMode[] = ["verbatim", "condense", "sidecar"];
 
-function metaSchemaLicenseEnum(): string[] {
-  const schema = yaml.load(readFileSync(path.join(repoRoot, "meta_schema.yml"), "utf8")) as {
-    properties: { license: { anyOf: Array<{ enum?: string[] }> } };
-  };
-  const enumBranch = schema.properties.license.anyOf.find((b) => Array.isArray(b.enum));
-  if (!enumBranch?.enum) throw new Error("meta_schema license has no enum branch");
-  return enumBranch.enum;
-}
-
 describe("license-policy table", () => {
   const policy = loadLicensePolicy(repoRoot);
 
-  it("meta_schema license enum matches the table's SPDX ids", () => {
-    // The enum carries only SPDX ids; LicenseRef-* ids are covered by the
-    // anyOf pattern branch, so they are excluded from the enum comparison.
-    const spdxIds = licenseIds(policy)
-      .filter((id) => !id.startsWith("LicenseRef-"))
-      .sort();
-    expect([...metaSchemaLicenseEnum()].sort()).toEqual(spdxIds);
+  it("the schema license grammar accepts exactly the table's ids (plus LicenseRef)", () => {
+    // The frontmatter contract derives its `license` grammar from this table via
+    // isValidLicenseId (no separate hand-written enum to keep in lockstep). Every
+    // table id must be accepted; a LicenseRef-<slug> escape hatch too; nothing else.
+    for (const id of licenseIds(policy)) {
+      expect(isValidLicenseId(policy, id), id).toBe(true);
+    }
+    expect(isValidLicenseId(policy, "LicenseRef-example-thing")).toBe(true);
+    expect(isValidLicenseId(policy, "Not-A-Real-License")).toBe(false);
   });
 
   it("every row's allowed_modes are valid cast modes", () => {

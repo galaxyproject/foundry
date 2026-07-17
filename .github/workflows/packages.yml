@@ -36,9 +36,6 @@ jobs:
       - name: Validate content
         run: npm run validate
 
-      - name: Install site dependencies
-        run: npm --prefix site install --no-audit --no-fund
-
       - name: Typecheck root and site
         run: npm run typecheck
 

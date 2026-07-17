@@ -29,7 +29,7 @@ Run it once and trust it. Do **not** re-derive these checks by hand — spend to
 2. **`CLAUDE.md`** / **`AGENTS.md`** — authoring rules.
 3. **`docs/MOLD_SPEC.md`** — Mold source layout and the eval/usage/refinement contract; reference-kind taxonomy; `load`/`mode`/`used_at` semantics.
 4. **`docs/COMPILATION_PIPELINE.md`** — what Cast does with each reference kind; `mode: verbatim` vs LLM-condensed.
-5. **`meta_schema.yml`** — only the Mold-specific shapes (`references[]` schema). Skim, don't memorize.
+5. **`packages/note-schema/src/note-schema.ts`** — only the Mold-specific shapes (`references[]` schema). Skim, don't memorize.
 6. **`common_paths.yml.sample`** — citation-prefix vocabulary for resolving inline `$NAME/...` corpus references.
 7. **The Mold itself** — `content/molds/$1/`:
    - `index.md` (frontmatter + body)
