@@ -70,7 +70,7 @@ To cast a Mold, the casting process consumes:
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
   - Other Molds (`related_molds`) — flagged as a smell; shared operational content should move to a pattern page, CLI manual page, schema, prompt, example, or research note.
-- **The cast target spec** — a per-target adapter (prompt templates per kind + output structure) declared in `casts/<target>/_target.yml`.
+- **The cast bundle spec** — the deterministic Agent Skills assembly and reference layout declared in `casts/claude/_target.yml`. The historical target name remains for provenance compatibility; Claude Code and Codex package the resulting tree through separate thin manifests.
 - **A casting model and prompt version** — recorded in provenance.
 
 Resolution policy is per-kind, not a single rule:
@@ -82,11 +82,9 @@ Resolution policy is per-kind, not a single rule:
 
 ## Output contract
 
-Per cast: `casts/<target>/<mold-name>/`. Layout depends on target.
-
-For the **Claude target**:
+Per cast: `casts/claude/skills/<mold-name>/`. The directory uses the portable Agent Skills core shared by Claude Code and Codex:
 ```
-casts/claude/<mold-name>/
+casts/claude/skills/<mold-name>/
 ├── SKILL.md                  # deterministic render of Mold body + artifacts + refs
 ├── references/               # supporting content, organized by kind
 │   ├── schemas/              # verbatim *.schema.json
@@ -98,11 +96,13 @@ casts/claude/<mold-name>/
 └── _provenance.json          # required, not part of the skill (schema v2 — see below)
 ```
 
-Per-kind dst conventions are declared in `casts/<target>/_target.yml` (`kinds.<kind>.dst_dir` + `dst_extension` + allowed `modes`). For verbatim modes the dst basename matches the source 1:1; for sidecars it's `<source-slug><dst_extension>`.
+Per-kind dst conventions are declared in `casts/claude/_target.yml` (`kinds.<kind>.dst_dir` + `dst_extension` + allowed `modes`). For verbatim modes the dst basename matches the source 1:1; for sidecars it's `<source-slug><dst_extension>`.
 
 Per-kind subdirectories under `references/` mirror the casting dispatch and let the generated skill's runtime locate any artifact deterministically.
 
-For Claude, `SKILL.md` contains deterministic sections for when to use the skill, upstream artifact inputs, produced artifacts, upfront references, on-demand references and triggers, validation hints, the Mold procedure, and runtime notes. Raw Foundry wiki-links are stripped or resolved to packaged reference paths so the skill is self-contained.
+`SKILL.md` contains deterministic sections for when to use the skill, upstream artifact inputs, produced artifacts, upfront references, on-demand references and triggers, validation hints, the Mold procedure, and runtime notes. Raw Foundry wiki-links are stripped or resolved to packaged reference paths so the skill is self-contained. Its frontmatter stays in the shared `name`/`description` core; runtime-specific invocation syntax belongs in manifests and usage documentation.
+
+The plugin root carries both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`, each pointing to the same `skills/` directory. Repo marketplace metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, while Codex reads `.agents/plugins/marketplace.json`. Neither duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
 
 For the **web target**:
 ```

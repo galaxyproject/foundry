@@ -1,6 +1,6 @@
 {
   "name": "foundry-skills",
-  "description": "Cast Claude skills produced by the Galaxy Workflow Foundry — corpus-grounded, schema-validated workflow construction actions for Galaxy and friends.",
+  "description": "Cast skills produced by the Galaxy Workflow Foundry — corpus-grounded, schema-validated workflow construction actions for Galaxy and friends.",
   "version": "0.1.0",
   "author": {
     "name": "John Chilton",

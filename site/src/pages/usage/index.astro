@@ -21,7 +21,7 @@ for (const m of molds) {
 
 const TARGET_ORDER: Array<'claude' | 'web' | 'generic'> = ['claude', 'web', 'generic'];
 const TARGET_LABEL: Record<string, string> = {
-  claude: 'Claude skills',
+  claude: 'Shared Agent Skills',
   web: 'Web skills',
   generic: 'Generic skills',
 };
@@ -33,19 +33,20 @@ for (const c of casts) {
   byTarget.set(c.target, list);
 }
 
-const claudeCount = (byTarget.get('claude') ?? []).length;
+const sharedSkillCount = (byTarget.get('claude') ?? []).length;
 ---
 <Base title="Usage">
   <section class="page-hero bg-grain" aria-labelledby="usage-heading">
     <span class="eyebrow mb-3">Usage</span>
     <div class="page-hero-grid">
       <div>
-        <h1 id="usage-heading" class="page-title text-balance">Install and run Foundry skills with Claude Code.</h1>
+        <h1 id="usage-heading" class="page-title text-balance">Install and run Foundry skills with Claude Code or Codex.</h1>
         <p class="page-lede text-pretty">
           The Foundry casts each Mold into a self-contained skill, and assembles each Pipeline into a
           runnable harness. Both are committed under <code class="font-mono">casts/</code> and surfaced
-          as a Claude Code plugin marketplace. Install once; <a href="#run-pipelines">run a pipeline</a>
-          end-to-end or invoke any cast skill directly.
+          as one shared Agent Skills bundle with thin Claude Code and Codex plugin metadata. Install
+          once in your runtime; <a href="#run-pipelines">run a pipeline</a> end-to-end or invoke any
+          cast skill directly.
         </p>
       </div>
       <dl class="page-stats" aria-label="Cast inventory stats">
@@ -54,8 +55,8 @@ const claudeCount = (byTarget.get('claude') ?? []).length;
           <dd>{runnablePipelines}</dd>
         </div>
         <div>
-          <dt>Claude</dt>
-          <dd>{claudeCount}</dd>
+          <dt>Shared skills</dt>
+          <dd>{sharedSkillCount}</dd>
         </div>
         <div>
           <dt>Casts</dt>
@@ -68,11 +69,11 @@ const claudeCount = (byTarget.get('claude') ?? []).length;
   <section id="install" class="mb-10" aria-labelledby="install-heading" style="scroll-margin-top: 5rem;">
     <div class="section-rule">
       <h2 id="install-heading">Install</h2>
-      <span class="section-tail">/ Claude Code plugin marketplace</span>
+      <span class="section-tail">/ one bundle, two runtimes</span>
     </div>
 
     <p class="mb-3">
-      In Claude Code, add the marketplace and install the plugin:
+      <strong>Claude Code.</strong> Add the marketplace and install the plugin:
     </p>
     <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/plugin marketplace add galaxyproject/foundry
 /plugin install foundry-skills@galaxy-workflow-foundry</code></pre>
@@ -82,14 +83,32 @@ const claudeCount = (byTarget.get('claude') ?? []).length;
     </p>
     <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/foundry-skills:summarize-nextflow</code></pre>
 
+    <p class="mt-6 mb-3">
+      <strong>Codex.</strong> Add the same repository marketplace and install the same plugin:
+    </p>
+    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>codex plugin marketplace add galaxyproject/foundry
+codex plugin add foundry-skills@galaxy-workflow-foundry</code></pre>
+
+    <p class="mt-4 mb-2">
+      In Codex CLI or the IDE, run <code class="font-mono">/skills</code> or type <code class="font-mono">$</code>
+      to select a skill explicitly:
+    </p>
+    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>$summarize-nextflow</code></pre>
+    <p class="mt-3 text-sm text-(--color-text-secondary)">
+      Codex may also select a skill implicitly when your task matches its description.
+    </p>
+
     <p class="mt-4 mb-2 text-sm text-(--color-text-secondary)">
-      Or skip the marketplace and copy a single skill into <code class="font-mono">~/.claude/skills/</code>:
+      Or skip plugin installation and copy a single skill into the runtime's user skill directory:
     </p>
     <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>git clone https://github.com/galaxyproject/foundry
-cp -r foundry/casts/claude/skills/&lt;name&gt; ~/.claude/skills/&lt;name&gt;</code></pre>
+cp -r foundry/casts/claude/skills/&lt;name&gt; ~/.claude/skills/&lt;name&gt;  # Claude Code
+cp -r foundry/casts/claude/skills/&lt;name&gt; ~/.agents/skills/&lt;name&gt;  # Codex</code></pre>
 
     <p class="mt-4 text-sm text-(--color-text-secondary)">
-      Update later with <code class="font-mono">/plugin update foundry-skills@galaxy-workflow-foundry</code>.
+      Update Claude Code with <code class="font-mono">/plugin update foundry-skills@galaxy-workflow-foundry</code>.
+      Refresh the Codex marketplace with <code class="font-mono">codex plugin marketplace upgrade galaxy-workflow-foundry</code>.
+      Restart the runtime if updated skills do not appear.
     </p>
   </section>
 

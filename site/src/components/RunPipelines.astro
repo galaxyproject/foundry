@@ -41,8 +41,8 @@ const pipelines = (await getCollection('content'))
   </p>
   <ol class="how-list">
     <li>
-      <strong>Install the harness skills.</strong> They install like any Foundry cast skill —
-      via the Claude Code plugin marketplace or copied into <code class="font-mono">~/.claude/skills/</code>.
+      <strong>Install the harness skills.</strong> They install like any Foundry cast skill through
+      the Claude Code or Codex plugin metadata around the same shared bundle.
       See <a href={`${base}/usage/#install`}>Install</a>.
     </li>
     <li>
@@ -83,7 +83,8 @@ const pipelines = (await getCollection('content'))
               </a>
             </div>
             {p.summary && <p class="run-card-summary">{p.summary}</p>}
-            <pre class="run-card-invoke"><code>/foundry-skills:pipeline-{p.slug}</code></pre>
+            <pre class="run-card-invoke"><code>Claude: /foundry-skills:pipeline-{p.slug}
+Codex:  $pipeline-{p.slug}</code></pre>
             {p.stats && (
               <p class="run-card-stats font-mono">
                 {p.stats.total} phases · {p.stats.cast} auto · {p.stats.manual} manual{p.stats.loops > 0 ? ` · ${p.stats.loops} loop${p.stats.loops === 1 ? '' : 's'}` : ''}

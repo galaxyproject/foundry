@@ -27,16 +27,37 @@ Hand-authored, monolithic conversion skills are brittle, hard to test, and don't
 - **Patterns** (`content/patterns/`) — Galaxy workflow construction reference (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring). Wiki-linked from action Molds; pulled into cast skills via casting's pattern-kind dispatch.
 - **CLI manual pages** (`content/cli/<tool>/`) — one note per command or subcommand, covering `gxwf`, `planemo`, `cwltool`, `cwl-utils`, `foundry`, and `galaxy-tool-cache`. Cast to JSON sidecars by action Molds that reference exact commands.
 - **Schemas** (`content/schemas/`) — `<name>.md` schema notes only; the JSON Schema itself lives in its TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored) or is synced there from an upstream npm package (vendored). The note's frontmatter declares `package` + `package_export`. `site/src/lib/schema-registry.ts` imports each schema directly from the package; Mold frontmatter cites schemas via `[[wiki-link]]` and cast imports the named runtime export at build time, serializing it verbatim into cast bundles.
-- **Casts** (`casts/<target>/<name>/`) — generated artifacts, one per (Mold, target) pair. Frozen, condensed, no links back.
+- **Casts** (`casts/claude/skills/<name>/`) — generated Agent Skills shared by Claude Code and Codex. The historical target path remains while thin runtime manifests package the same tree for both products.
+
+## Install generated skills
+
+The committed `casts/claude/` plugin root is dual-runtime: `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` both expose the same `skills/` directory.
+
+Claude Code:
+
+```text
+/plugin marketplace add galaxyproject/foundry
+/plugin install foundry-skills@galaxy-workflow-foundry
+/foundry-skills:discover-shed-tool
+```
+
+Codex CLI:
+
+```sh
+codex plugin marketplace add galaxyproject/foundry
+codex plugin add foundry-skills@galaxy-workflow-foundry
+```
+
+Then run `/skills` or type `$` to select a skill such as `$discover-shed-tool`. Codex can also select a skill implicitly from its description. Restart Codex after installing or refreshing the plugin if the skills do not appear.
 
 ## Authoring
 
 Two flows feed the Foundry:
 
-- **Slash commands** (`.claude/commands/`) — agent-driven scaffold-prompt-validate. Primary.
+- **Claude slash commands** (`.claude/commands/`) — current contributor workflows for agent-driven scaffold-prompt-validate.
 - **Hand edits** + `npm run validate` — small fixes.
 
-Casting produces skill artifacts: `npm run cast -- --mold=<slug> --target=<target>`.
+Casting produces skill artifacts: `npm run cast -- <slug> --target=claude`.
 
 Frontmatter is contract-enforced by the shared zod schema in `@galaxy-foundry/note-schema` (used by both the validator and the site); every note carries a registered tag from `meta_tags.yml`. Validate before commit.
 
