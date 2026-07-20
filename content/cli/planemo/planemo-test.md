@@ -3,7 +3,7 @@ type: cli-command
 tool: planemo
 command: test
 package: "planemo"
-upstream: "https://github.com/galaxyproject/planemo/blob/0.75.44/planemo/commands/cmd_test.py"
+upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_test.py"
 tags:
   - cli-command
   - cli/planemo
@@ -38,7 +38,8 @@ planemo test [OPTIONS] TOOL_PATH
 
 | Option | Type | Default | Required | Help |
 |---|---|---|---|---|
-| --failed | flag | false | — | Re-run only failed tests. This command will read tool_test_output.json to determine which tests failed so this file must have been produced with the same set of tool ids previously. |
+| --failed, --lf | flag | false | — | Re-run only failed tests from the previous run. Reads from --failed_json (or --test_output_json if not set) to determine which tests failed. |
+| --failed_json | path | — | — | JSON file from a previous planemo test run to read failed test IDs from when using --failed/--lf. Defaults to --test_output_json. |
 | --test_index | integer | [] | — | Index(es) of specific test(s) to run (1-based). Can be specified multiple times (e.g., --test_index 1 --test_index 3) to run specific tests. If not specified, all tests are run. |
 | --polling_backoff | integer | 0 | — | Poll resources with an increasing interval between requests. Useful when testing against remote and/or production instances to limit generated traffic. |
 | --galaxy_root | directory | — | — | Root of development galaxy directory to execute command with. |
@@ -89,6 +90,9 @@ planemo test [OPTIONS] TOOL_PATH
 | --postgres-storage-location | text | — | — | storage path for postgres database, used for local singularity postgres. |
 | --shed_tool_conf | text | — | — | Location of shed tools conf file for Galaxy. |
 | --shed_tool_path | text | — | — | Location of shed tools directory for Galaxy. |
+| --shed_tool_data_table_config | text | — | — | Location of the shed tool data table config file for Galaxy (records data tables registered by shed-installed repositories). |
+| --shed_data_manager_config | text | — | — | Location of the shed data manager config file for Galaxy. |
+| --shed_data_dir | directory | — | — | Persistent base directory for shed-install state (local Galaxy engine). Seeds defaults for --shed_tool_conf, --shed_tool_path, --shed_tool_data_table_config and --shed_data_manager_config so shed installs (tools and their data tables) survive Galaxy restarts. Individual options still override. |
 | --galaxy_single_user, --no_galaxy_single_user | flag | true | — | By default Planemo will configure Galaxy to run in single-user mode where there is just one user and this user is automatically logged it. Use --no_galaxy_single_user to prevent Galaxy from running this way. |
 | --tool_evaluation_strategy | choice | — | — | Determines which process will evaluate the tool command line. If set to 'local' the tool command line will be templated in the job handler process. If set to 'remote' the tool command line will be built as part of the submitted job (beta). Setting this to 'remote' will also implicitly set metadata_strategy to 'extended', which is required for remote tool evaluation. |
 | --paste_test_data_paths, --no_paste_test_data_paths | flag | — | — | By default Planemo will use or not use Galaxy's path paste option to load test data into a history based on the engine type it is targeting. This can override the logic to explicitly enable or disable path pasting. |

@@ -6,9 +6,18 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 7,
     "content_hash": "7f68fe27b39a85abaf6c15f1647809b0d28c71753a7de463a52ffcd5e440f82a",
-    "commit": "2e8ea5a6363235576bacfa5defd11492bbab6f94"
+    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
   },
-  "cast_at": "2026-07-10T18:51:40.524Z",
+  "cast_at": "2026-07-20T18:41:10.395Z",
+  "cast_date": "2026-07-20",
+  "cast_revision": 1,
+  "cast_history": [
+    {
+      "rev": 1,
+      "date": "2026-07-20",
+      "note": "planemo 0.75.45"
+    }
+  ],
   "refs": [
     {
       "kind": "cli-command",
@@ -35,8 +44,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation.",
-      "src_hash": "ffd4938907b27307e05fb6b44a76a29c2a111e5b51072ec51442b17865cfffaf",
-      "dst_hash": "ffd4938907b27307e05fb6b44a76a29c2a111e5b51072ec51442b17865cfffaf",
+      "src_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
+      "dst_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
       "source": "deterministic"
     },
     {
@@ -180,7 +189,9 @@
         "id": "test-data-refs",
         "description": "Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.",
         "producers": [
+          "cwl-to-test-data",
           "find-test-data",
+          "nextflow-to-test-data",
           "paper-to-test-data"
         ]
       }

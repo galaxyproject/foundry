@@ -6,16 +6,21 @@
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 4,
     "content_hash": "b620de36e245302737d9a82171fb2847ee214466915dbb28392a0ac02bc6df68",
-    "commit": "dca2ac888332ee86d0cdcb5aabef94804fa16c54"
+    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
   },
-  "cast_at": "2026-07-20T16:07:57.008Z",
-  "cast_date": "2026-06-19",
-  "cast_revision": 1,
+  "cast_at": "2026-07-20T18:41:11.132Z",
+  "cast_date": "2026-07-20",
+  "cast_revision": 2,
   "cast_history": [
     {
       "rev": 1,
       "date": "2026-06-19",
       "note": "condense→verbatim; planemo 0.75.44 (fork retired)"
+    },
+    {
+      "rev": 2,
+      "date": "2026-07-20",
+      "note": "planemo 0.75.45"
     }
   ],
   "refs": [
@@ -31,7 +36,7 @@
       "purpose": "Reference for `planemo lint` flags and output classification; first gate in the convergence loop.",
       "trigger": "Step 10.1 — after every <command>/<inputs>/<outputs> emission.",
       "verification": "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses.",
-      "src_hash": "0bdc37ac4d67d672ee7245e5e98323d157ab106efe41b609eef1a08067febbc2",
+      "src_hash": "658bedace8f94b4f88299ecf60b542f670a892c634d2bb602546aae50d7dc5a4",
       "dst_hash": "862d714fa6eb7d9233173948162ff880262e2c867394f1157d073a4ce8d81523",
       "source": "deterministic"
     },
@@ -47,8 +52,8 @@
       "purpose": "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path.",
       "trigger": "Step 10.2 — after lint clears.",
       "verification": "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout.",
-      "src_hash": "4482cb70268a92da6015d90ed4f40c60085f94a649621a052025427607b7472e",
-      "dst_hash": "26b912fe63d0664841cd597437a221eee048e5098affada786a847e265ba1106",
+      "src_hash": "708692af91e36e4bf5b317509df8dee19e4e15617aeaa53a7ddcbfde18b41f74",
+      "dst_hash": "f4698abd6b129048befaa3e335010d99c2748a3a4a5334b90584ce5b9ee913e6",
       "source": "deterministic"
     },
     {
@@ -63,8 +68,8 @@
       "purpose": "Install metadata for the planemo CLI invoked by the convergence loop.",
       "trigger": "Always — the cast skill needs planemo on PATH before running lint/test.",
       "verification": "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command.",
-      "src_hash": "ffd4938907b27307e05fb6b44a76a29c2a111e5b51072ec51442b17865cfffaf",
-      "dst_hash": "ffd4938907b27307e05fb6b44a76a29c2a111e5b51072ec51442b17865cfffaf",
+      "src_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
+      "dst_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
       "source": "deterministic"
     },
     {

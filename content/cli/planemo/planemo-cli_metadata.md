@@ -3,7 +3,7 @@ type: cli-command
 tool: planemo
 command: cli_metadata
 package: "planemo"
-upstream: "https://github.com/galaxyproject/planemo/blob/0.75.44/planemo/commands/cmd_cli_metadata.py"
+upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_cli_metadata.py"
 tags:
   - cli-command
   - cli/planemo

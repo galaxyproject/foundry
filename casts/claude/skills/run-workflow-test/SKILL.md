@@ -21,12 +21,12 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@^1.8.1`.
+- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
-- **`planemo`** (planemo). `uv tool install planemo==0.75.44` (or `pip install planemo==0.75.44`).
-  Ephemeral run: `uvx --from planemo==0.75.44 planemo`.
+- **`planemo`** (planemo). `uv tool install planemo==0.75.45` (or `pip install planemo==0.75.45`).
+  Ephemeral run: `uvx --from planemo==0.75.45 planemo`.
   Check: `planemo --version`.
   Docs: https://planemo.readthedocs.io/
   Bundled reference: `references/cli/planemo.md`.
