@@ -17,12 +17,14 @@ Generated from content frontmatter. Do not edit by hand.
 - [[advance-galaxy-draft-step]] — Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate.
 - [[apply-galaxy-workflow-changeset]] — Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps.
 - [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable.
+- [[changeset-to-galaxy-test-plan]] — Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan.
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
 - [[convert-nfcore-module-to-galaxy-tool]] — Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks).
 - [[cwl-summary-to-galaxy-data-flow]] — Translate a CWL summary into a Galaxy data-flow design brief.
 - [[cwl-summary-to-galaxy-interface]] — Map a CWL summary into a Galaxy workflow interface design brief.
 - [[cwl-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs.
 - [[cwl-test-to-galaxy-test-plan]] — Translate CWL test fixtures into a Galaxy workflow test plan.
+- [[cwl-to-test-data]] — Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs.
 - [[debug-cwl-workflow-output]] — Triage failing CWL run outputs; classify failure modes; propose fixes.
 - [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
 - [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
@@ -46,6 +48,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan.
+- [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.

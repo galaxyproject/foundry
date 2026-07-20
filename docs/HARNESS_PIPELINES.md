@@ -103,11 +103,12 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 5. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
 6. `nextflow-summary-to-galaxy-template`
 7. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
-8. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
-9. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
-10. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
-11. `run-workflow-test` — execute via Planemo.
-12. `debug-galaxy-workflow-output`
+8. `[branch]` test-data resolution chain: try `nextflow-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
+9. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
+10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
+11. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
+12. `run-workflow-test` — execute via Planemo.
+13. `debug-galaxy-workflow-output`
 
 ### CWL → GALAXY
 
@@ -119,11 +120,12 @@ CWL is already structured; the upstream extraction work is much lighter.
 4. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
 5. `cwl-summary-to-galaxy-template`
 6. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
-7. `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan.
-8. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
-9. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
-10. `run-workflow-test` — execute via Planemo.
-11. `debug-galaxy-workflow-output`
+7. `[branch]` test-data resolution chain: try `cwl-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
+8. `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan.
+9. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
+10. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
+11. `run-workflow-test` — execute via Planemo.
+12. `debug-galaxy-workflow-output`
 
 ### INTERVIEW → GALAXY
 
@@ -174,7 +176,7 @@ Test-plan handoff: like every Galaxy-targeting pipeline, this one places a dedic
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
-- **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` derives fixtures from a paper-origin `freeform-summary`; interview starts skip directly to `find-test-data` / user-supplied data until a real interview-specific fixture derivation Mold exists.
+- **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` derives fixtures from a paper-origin `freeform-summary`; `nextflow-to-test-data` and `cwl-to-test-data` resolve the source's own declared fixtures (`test_fixtures` / `tests[]`) into `test-data-refs`. Each is the first leg of its pipeline's `test-data-resolution` chain, falling through to `find-test-data` (search) then user-supplied data. Interview starts skip directly to `find-test-data` / user-supplied data until a real interview-specific fixture derivation Mold exists.
 
 ## Pattern pages, not Molds
 
