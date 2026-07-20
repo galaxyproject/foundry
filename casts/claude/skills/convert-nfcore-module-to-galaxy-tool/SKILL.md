@@ -21,8 +21,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`planemo`** (planemo). `uv tool install planemo==0.75.44` (or `pip install planemo==0.75.44`).
-  Ephemeral run: `uvx --from planemo==0.75.44 planemo`.
+- **`planemo`** (planemo). `uv tool install planemo==0.75.45` (or `pip install planemo==0.75.45`).
+  Ephemeral run: `uvx --from planemo==0.75.45 planemo`.
   Check: `planemo --version`.
   Docs: https://planemo.readthedocs.io/
   Bundled reference: `references/cli/planemo.md`.

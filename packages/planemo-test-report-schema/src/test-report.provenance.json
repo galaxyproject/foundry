@@ -1,10 +1,10 @@
 {
-  "planemo_version": "0.75.44",
+  "planemo_version": "0.75.45",
   "schema_name": "test-report",
   "schema_version": "0.1",
   "source": {
     "note": "Released on PyPI; includes merged PR galaxyproject/planemo#1636.",
-    "release": "0.75.44",
+    "release": "0.75.45",
     "repo": "galaxyproject/planemo"
   }
 }

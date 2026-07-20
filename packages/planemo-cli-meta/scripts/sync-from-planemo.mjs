@@ -5,7 +5,7 @@
 // Requires `planemo` on PATH (or PLANEMO_BIN env). The pinned planemo version is
 // recorded in content/cli/planemo/index.md; install it with:
 //
-//   uvx --from planemo==0.75.44 planemo --version
+//   uvx --from planemo==0.75.45 planemo --version
 //
 // This script is NOT run on every build — it is opt-in regeneration. The .ts
 // mirror is produced from the JSON by scripts/sync-meta.mjs, which runs in
@@ -27,7 +27,7 @@ const DST_PROVENANCE = resolve(PKG_ROOT, "src/cli-meta.provenance.json");
 
 const PIN = {
   repo: "galaxyproject/planemo",
-  release: "0.75.44",
+  release: "0.75.45",
   note: "Released on PyPI; includes merged PR galaxyproject/planemo#1636.",
 };
 

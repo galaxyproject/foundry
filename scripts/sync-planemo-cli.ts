@@ -38,7 +38,7 @@ const SEED_COMMANDS = [
 
 const PIN = {
   repo: "galaxyproject/planemo",
-  ref: "0.75.44",
+  ref: "0.75.45",
 };
 
 const AUTO_BEGIN = "<!-- planemo-cli-meta: BEGIN auto-generated -->";
