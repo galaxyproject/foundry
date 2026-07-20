@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 1,
     "content_hash": "37c8ad10dcf4ebaf9aefc132bd365b1172fbd1c00534893f52a53f65e99e0d9b",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "commit": "1081b3c161c8a6d3a88828fd667d047f46db226c"
   },
-  "cast_at": "2026-07-09T14:20:24.299Z",
+  "cast_at": "2026-07-20T19:35:12.808Z",
   "refs": [
     {
       "kind": "research",
@@ -81,8 +81,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
       "trigger": "When recording the labels and checkpoints the downstream test must address.",
-      "src_hash": "f66d053cf71c5d5aa4151e0b55719f9b200f5848e7dc69e0200d63d991a9dacf",
-      "dst_hash": "f66d053cf71c5d5aa4151e0b55719f9b200f5848e7dc69e0200d63d991a9dacf",
+      "src_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
+      "dst_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
       "source": "deterministic"
     },
     {
@@ -97,8 +97,8 @@
       "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema so the skill carries its output shape; validate with `foundry validate-galaxy-workflow-test-plan`.",
       "verification": "Cast the skill, run on a representative paper/interview-derived summary, confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it without re-reading the source summary.",
       "license": "MIT",
-      "src_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
-      "dst_hash": "7bf899c777cb2757cbde359e86c481ef4b1a35b6a8270ed9f678c461226fd96b",
+      "src_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "dst_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
       "source": "deterministic"
     },
     {

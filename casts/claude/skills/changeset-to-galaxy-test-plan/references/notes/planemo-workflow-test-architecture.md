@@ -70,6 +70,7 @@ For managed Galaxy, Planemo builds a temporary configuration directory and gener
 Important managed-mode behavior:
 
 - Planemo may find a local Galaxy root or install/use a cached Galaxy source tree.
+- `--galaxy_branch` selects which Galaxy branch is cloned when no Galaxy root is supplied; it defaults to `master`. Omitting it therefore tests against the newest Galaxy. Naming an older `release_*` branch narrows what workflow syntax Galaxy will accept, and the resulting rejection surfaces as an invocation-time error rather than as a version mismatch.
 - Managed Galaxy defaults are convenient but may not match production Galaxy behavior.
 - Planemo can install workflow tool dependencies through Tool Shed metadata when configured.
 - Test histories are created automatically unless a history id is supplied.
