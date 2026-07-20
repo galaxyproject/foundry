@@ -81,6 +81,9 @@ importers:
 
   packages/build-cli:
     dependencies:
+      '@galaxy-foundry/foundry':
+        specifier: workspace:*
+        version: link:../foundry
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../note-schema
