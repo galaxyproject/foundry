@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import YAML from "yaml";
+import { normalizeGitUrl } from "./source.js";
 
 interface SampleSheetColumn {
   name: string;
@@ -464,12 +465,6 @@ function mergeNextflowInspect(summary: Summary, pipelineRoot: string, profile: s
     );
     if (process) process.container = inspectedProcess.container;
   }
-}
-
-function normalizeGitUrl(url: string): string {
-  const scpStyle = /^([^@]+@[^:]+):(.+)$/u.exec(url);
-  if (scpStyle) return `ssh://${scpStyle[1]}/${scpStyle[2]}`;
-  return url;
 }
 
 function parseWorkflowName(config: string): string {

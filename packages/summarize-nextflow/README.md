@@ -6,7 +6,7 @@ Source-specific (Nextflow), target-agnostic. The summary is the input to downstr
 
 ## Status
 
-`v0.1.0` — initial public release. Local pipeline paths are supported; git URLs and `--pin` still exit with code `64` while remote checkout support is pending. See `content/molds/summarize-nextflow/` and the Nextflow component research notes for design context.
+`v0.1.0` — initial public release. Local pipeline paths, remote git URLs, and `--pin <tag|branch|sha>` are all supported. A pinned or remote source is inspected from a detached temporary checkout outside the caller's repository; a caller-supplied checkout is never switched or reset, and `source.url` / `source.version` record the normalized remote and the resolved full commit SHA. See `content/molds/summarize-nextflow/` and the Nextflow component research notes for design context.
 
 Most consumers should install [`@galaxy-foundry/foundry`](https://www.npmjs.com/package/@galaxy-foundry/foundry) instead, which ships `summarize-nextflow` as a subcommand alongside the validators.
 
@@ -46,7 +46,7 @@ JSON to stdout (or `--out=`). Stderr is human-readable progress. Exit codes:
 - `1` — input error (missing path, bad URL)
 - `2` — resolution failure (network, missing dependency)
 - `3` — schema validation failure
-- `64` — not yet implemented
+- `64` — not yet implemented (no input reaches this today)
 
 ## License
 

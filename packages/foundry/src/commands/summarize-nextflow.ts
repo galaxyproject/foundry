@@ -7,7 +7,9 @@ import type { Command } from "commander";
 import { writeFileSync } from "node:fs";
 import {
   buildSummary,
+  SummarizeNextflowInputError,
   SummarizeNextflowNotImplementedError,
+  SummarizeNextflowResolutionError,
   validateSummary,
   type SummarizeNextflowOptions,
 } from "@galaxy-foundry/summarize-nextflow";
@@ -47,6 +49,13 @@ export function attachSummarizeNextflow(parent: Command): void {
         if (err instanceof SummarizeNextflowNotImplementedError) {
           process.stderr.write(`summarize-nextflow: not yet implemented\n`);
           process.stderr.write(`  target: ${err.target}\n`);
+          process.exit(err.exitCode);
+        }
+        if (
+          err instanceof SummarizeNextflowInputError ||
+          err instanceof SummarizeNextflowResolutionError
+        ) {
+          process.stderr.write(`summarize-nextflow: ${err.message}\n`);
           process.exit(err.exitCode);
         }
         throw err;

@@ -1,6 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { resolveNextflowSummary } from "./resolver.js";
+import { resolveSource } from "./source.js";
+
+export {
+  resolveSource,
+  isRemoteSource,
+  SummarizeNextflowInputError,
+  SummarizeNextflowResolutionError,
+  type ResolvedSource,
+} from "./source.js";
 
 export { VERSION } from "./version.js";
 export { summaryNextflowSchema } from "./schema/summary-nextflow.schema.generated.js";
@@ -52,14 +61,21 @@ export async function buildSummary(
   pathOrUrl: string,
   options: SummarizeNextflowOptions,
 ): Promise<unknown> {
-  if (/^https?:\/\//u.test(pathOrUrl) || options.pin) {
-    throw new SummarizeNextflowNotImplementedError(pathOrUrl);
+  const source = resolveSource(pathOrUrl, options.pin);
+  try {
+    const summary = (await resolveNextflowSummary(source.root, {
+      profile: options.profile,
+      withNextflow: options.withNextflow,
+      fetchTestData: options.fetchTestData,
+      testDataDir: options.testDataDir,
+      mulledIndexPath: options.mulledIndexPath,
+    })) as { source: Record<string, unknown> };
+    // Provenance must name the remote and immutable commit actually inspected,
+    // not the temporary checkout the resolver saw.
+    if (source.url) summary.source.url = source.url;
+    if (source.version) summary.source.version = source.version;
+    return summary;
+  } finally {
+    source.cleanup();
   }
-  return resolveNextflowSummary(pathOrUrl, {
-    profile: options.profile,
-    withNextflow: options.withNextflow,
-    fetchTestData: options.fetchTestData,
-    testDataDir: options.testDataDir,
-    mulledIndexPath: options.mulledIndexPath,
-  });
 }

@@ -3,7 +3,9 @@ import { Command } from "commander";
 import { writeFileSync } from "node:fs";
 import {
   buildSummary,
+  SummarizeNextflowInputError,
   SummarizeNextflowNotImplementedError,
+  SummarizeNextflowResolutionError,
   validateSummary,
   type SummarizeNextflowOptions,
 } from "../index.js";
@@ -44,6 +46,13 @@ program
       if (err instanceof SummarizeNextflowNotImplementedError) {
         process.stderr.write(`summarize-nextflow ${VERSION}: not yet implemented\n`);
         process.stderr.write(`  target: ${err.target}\n`);
+        process.exit(err.exitCode);
+      }
+      if (
+        err instanceof SummarizeNextflowInputError ||
+        err instanceof SummarizeNextflowResolutionError
+      ) {
+        process.stderr.write(`summarize-nextflow ${VERSION}: ${err.message}\n`);
         process.exit(err.exitCode);
       }
       throw err;
