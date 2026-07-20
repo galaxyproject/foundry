@@ -49,11 +49,11 @@ Announce the chosen directory before starting.
 
 Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
 
-1. **summarize-galaxy-workflow** — MANUAL — `summarize-galaxy-workflow` is not yet cast. Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps. Do this by hand and confirm before continuing.
-2. **interview-to-galaxy-workflow-changeset** — MANUAL — `interview-to-galaxy-workflow-changeset` is not yet cast. Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. Do this by hand and confirm before continuing.
-3. **apply-galaxy-workflow-changeset** — MANUAL — `apply-galaxy-workflow-changeset` is not yet cast. Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps. Do this by hand and confirm before continuing.
+1. **summarize-galaxy-workflow** — invoke the `summarize-galaxy-workflow` skill. Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps.
+2. **interview-to-galaxy-workflow-changeset** — invoke the `interview-to-galaxy-workflow-changeset` skill. Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set.
+3. **apply-galaxy-workflow-changeset** — invoke the `apply-galaxy-workflow-changeset` skill. Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps.
 4. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
-5. **changeset-to-galaxy-test-plan** — MANUAL — `changeset-to-galaxy-test-plan` is not yet cast. Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan. Do this by hand and confirm before continuing.
+5. **changeset-to-galaxy-test-plan** — invoke the `changeset-to-galaxy-test-plan` skill. Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan.
 6. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 7. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 8. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
@@ -61,7 +61,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 
 ## Done
 
-Report the final artifacts in `./<run-slug>/` and any phases handled manually (marked MANUAL above).
+Report the final artifacts in `./<run-slug>/`.
 
 ## Notes
 

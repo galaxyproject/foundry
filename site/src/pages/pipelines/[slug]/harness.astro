@@ -63,9 +63,10 @@ function branchChain(p: AssemblyPhase): string[] {
     <h2 class="text-sm font-semibold mb-2">Install &amp; invoke</h2>
     <p class="text-sm mb-2">
       Install the plugin once (<a href={`${base}/usage/#install`} class="text-(--color-link) hover:underline">setup</a>),
-      then invoke in a Claude Code session:
+      then invoke in either runtime:
     </p>
-    <pre class="p-3 rounded bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/foundry-skills:{assembly.harness_name}</code></pre>
+    <pre class="p-3 rounded bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>Claude: /foundry-skills:{assembly.harness_name}
+Codex:  ${assembly.harness_name}</code></pre>
     {assembly.options && assembly.options.length > 0 && (
       <p class="text-sm mt-2">
         Optional flags:

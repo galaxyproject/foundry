@@ -71,20 +71,20 @@ The goal is not minimalism for its own sake. The goal is navigable depth: humans
 
 ## Portable Artifacts Over Platform Fashion
 
-Claude skills are useful. Other orchestration systems are useful. The agentic-coding landscape will keep changing.
+Agent skills are useful. Orchestration systems are useful. The agentic-coding landscape will keep changing.
 
 The Foundry should not bind its core knowledge to one agent runtime, editor, model vendor, or orchestration framework. Its source artifacts should be abstract enough to cast into several targets and explicit enough that each target can be audited.
 
-This is why Molds are not written as Claude-specific skills. A Mold is a typed reference manifest plus a procedural skeleton. Casting turns that source artifact into a target-specific skill, but the Foundry remains the source of truth.
+This is why Molds are not written as runtime-specific skills. A Mold is a typed reference manifest plus a procedural skeleton. Casting turns that source artifact into a portable Agent Skill, while thin manifests and usage views adapt packaging and invocation for Claude Code and Codex. The Foundry remains the source of truth.
 
 The boundary matters:
 
 - Molds are durable source artifacts.
-- Cast skills are generated target artifacts.
+- Cast skills are generated portable artifacts.
 - Pipelines describe journeys; harnesses execute them.
 - Reference content stays reusable across targets.
 
-This separation lets the Foundry adapt as orchestration changes. A new target should require a new cast target or harness, not a rewrite of the knowledge base.
+This separation lets the Foundry adapt as orchestration changes. Prefer a shared skill-directory superset plus small packaging overlays; add a separate rendered target only when a concrete loader or semantic incompatibility cannot be represented that way.
 
 ## Actionable Knowledge, Not Passive Notes
 

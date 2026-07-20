@@ -19,7 +19,8 @@ const slug = entry.id.split('/').pop()!;
 const assembly = loadAssembly(slug);
 const stats = assembly ? assemblyStats(assembly) : null;
 const harnessHref = `${base}/pipelines/${slug}/harness/`;
-const invoke = assembly ? `/foundry-skills:${assembly.harness_name}` : null;
+const claudeInvoke = assembly ? `/foundry-skills:${assembly.harness_name}` : null;
+const codexInvoke = assembly ? `$${assembly.harness_name}` : null;
 ---
 <section class="pipeline-body">
   <div class="section-rule">
@@ -40,9 +41,10 @@ const invoke = assembly ? `/foundry-skills:${assembly.harness_name}` : null;
       <p class="run-lede">
         Run this pipeline today via its assembled harness skill
         <a href={harnessHref} class="font-mono">{assembly.harness_name}</a> — install once
-        (<a href={`${base}/usage/#run-pipelines`}>run guide</a>), then in a Claude Code session:
+        (<a href={`${base}/usage/#run-pipelines`}>run guide</a>), then select it in either runtime:
       </p>
-      <pre class="run-invoke"><code>{invoke}</code></pre>
+      <pre class="run-invoke"><code>Claude: {claudeInvoke}
+Codex:  {codexInvoke}</code></pre>
       <p class="run-note">
         Each run gets its own <code>./&lt;run-slug&gt;/</code> working directory so artifacts stay
         namespaced and a second run won't clobber the first — the harness sets this up first

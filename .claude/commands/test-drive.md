@@ -36,7 +36,7 @@ For each input the scenario needs, check it's materialized:
 
 - Nextflow source trees: `workflow-fixtures/pipelines/<owner>__<repo>/main.nf`. Run `make fixtures-nextflow` if absent. Don't run it twice in parallel — there's a known git-lock collision when concurrent runs hit the same checkout.
 - IWC corpus: `~/projects/repositories/workflow-fixtures/iwc-format2/` (shared mirror) or `workflow-fixtures/iwc-format2/` (local). Run `make fixtures-iwc fixtures-skeletons` if absent.
-- Prior emulation outputs: `casts/claude/skills/_emulated-runs/<run-id>/`. If the scenario refers to one and it's missing, surface the gap and stop — don't fabricate an upstream brief.
+- Prior emulation outputs: `casts/claude/_emulated-runs/<run-id>/`. If the scenario refers to one and it's missing, surface the gap and stop — don't fabricate an upstream brief.
 
 If a fixture target fails (e.g. the `summarize-nextflow` package CLI hasn't been built), build what's needed first: `pnpm --filter @galaxy-foundry/summary-nextflow-schema build && pnpm --filter @galaxy-foundry/summarize-nextflow build`. Surface failures explicitly; don't paper over them.
 
@@ -57,7 +57,7 @@ If casts changed in a way that would matter to runtime skill invocation (i.e., t
 Pick a scenario slug — e.g. `nf-core-sarek`, `nf-core-rnaseq-summary-only`, `bwa-mem-tool-step`. Create:
 
 ```
-casts/claude/skills/_emulated-runs/<scenario-slug>/
+casts/claude/_emulated-runs/<scenario-slug>/
 ```
 
 Run-dir contents are **not committed**. They're research artifacts. `_emulated-runs/` is gitignored or treated as such; if the user wants a baseline pinned for regression checks, they pass `--commit` (not implemented today; surface as future work if a regression-check use case arises).
@@ -130,7 +130,7 @@ Body covers: what worked, what gaps surfaced (concrete, with examples), open que
 
 ## 7. Run summary
 
-Write `casts/claude/skills/_emulated-runs/<scenario-slug>/run-summary.md` capturing:
+Write `casts/claude/_emulated-runs/<scenario-slug>/run-summary.md` capturing:
 
 - Scenario as run (parsed from `$1`).
 - Molds exercised, in order; CLI vs emulation per Mold.

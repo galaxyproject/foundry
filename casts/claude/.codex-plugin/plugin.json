@@ -1,0 +1,29 @@
+{
+  "name": "foundry-skills",
+  "version": "0.1.0",
+  "description": "Corpus-grounded, schema-validated skills for constructing Galaxy workflows.",
+  "author": {
+    "name": "John Chilton",
+    "email": "jmchilton@gmail.com",
+    "url": "https://github.com/jmchilton"
+  },
+  "homepage": "https://galaxyproject.github.io/foundry/usage/",
+  "repository": "https://github.com/galaxyproject/foundry",
+  "license": "MIT",
+  "keywords": ["galaxy", "workflows", "bioinformatics", "agent-skills"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Galaxy Workflow Foundry",
+    "shortDescription": "Build validated Galaxy workflows",
+    "longDescription": "Use corpus-grounded skills and pipeline harnesses to translate computational workflows into validated Galaxy gxformat2 artifacts.",
+    "developerName": "Galaxy Workflow Foundry",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://galaxyproject.github.io/foundry/",
+    "defaultPrompt": [
+      "Build a Galaxy workflow from this Nextflow pipeline.",
+      "Find and pin a Galaxy Tool Shed wrapper.",
+      "Validate this Galaxy gxformat2 workflow."
+    ]
+  }
+}

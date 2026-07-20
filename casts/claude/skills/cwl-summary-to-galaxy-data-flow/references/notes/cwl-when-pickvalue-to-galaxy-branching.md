@@ -100,7 +100,7 @@ Translation B (native `pick_value`) requires Galaxy ≥ `main` 2026-03-31 (galax
 - `[[cwl-pickvalue-to-galaxy]]` — full PR analysis of galaxy#22222 (the native `pick_value` module).
 - `[[galaxy-paired-or-unpaired-collections]]` — the discriminated-union collection type and the `paired ⊏ paired_or_unpaired` subtyping lattice.
 - IWC sibling-workflows convention: `amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-quality-control-paired-end` and `…-single-end` in the IWC corpus.
-- Run-dir evidence for the discriminator-classification trap: `casts/claude/skills/_emulated-runs/mgnify-seqprep-subwf/cwl-galaxy-interface.md` (the under-read Option A) vs the now-recommended translation A.
+- Run-dir evidence for the discriminator-classification trap: `casts/claude/_emulated-runs/mgnify-seqprep-subwf/cwl-galaxy-interface.md` (the under-read Option A) vs the now-recommended translation A.
 
 ## Evidence quality
 
