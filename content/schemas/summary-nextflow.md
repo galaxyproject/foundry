@@ -14,7 +14,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-06
-revision: 9
+revision: 10
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
@@ -108,6 +108,16 @@ Snapshot-sidecar parsing landed for module and subworkflow tests whose interesti
 - **`SnapshotFixture.parsed_content: SnapshotContent[]` added.** Each parsed sidecar entry preserves the snapshot name plus channel-keyed `SnapshotChannel` values.
 - **`SnapshotFile` added.** `<path>:md5,<hex>` strings become file digest assertions with `path`, `basename`, `md5`, and a `stub` flag for empty-file md5s.
 - **Non-file values preserved.** Version tuples, counts, and other scalar snapshot values remain in `SnapshotChannel.values` so downstream test-plan Molds do not re-read `.snap` files.
+
+## Revision 10 — 2026-07-20
+
+Conda-spec parsing fidelity: a partially-resolved directive is now either fully read or flagged. Resolves galaxyproject/foundry#356.
+
+- **`Tool.version_constraint` added** (string|null, optional — matching its sibling nullable fields, so cast artifacts emitted before this revision still validate). Verbatim inexact version constraint (`>=1.17`, `>=1.0,<2.0`) when the spec declares one; null when the spec pins exactly or names no version. Previously such a constraint was dropped and the tool collapsed to `version: "unknown"` alongside genuinely-unpinned tools.
+- **`Tool.version` now reads `==` pins.** The old pattern excluded `=` from the version group, so `coreutils==9.4` fell through to `"unknown"`. Corpus effect: `findutils==4.6.0` in `nf-core/createtaxdb` and `nf-core/proteinfamilies` now records `4.6.0`.
+- **`Tool.versions[]` no longer contains the `unknown` sentinel.** A tool pinned by some processes and left unpinned by others listed the sentinel as though it were a version. Corpus effect: nine tools across four pipelines cleaned; `coreutils` in `nf-core/createtaxdb` and `nf-core/proteinfamilies` now reads `["9.4", "9.5"]`, a real divergence the sentinel had masked.
+
+Resolver-side changes with no schema surface: the pre-`environment.yml` ternary directive form `conda (params.enable_conda ? "<spec>" : null)` is now captured (previously invisible — it produced neither tools nor a warning); a conda spec that resolves in part now warns per unread spec rather than silently dropping it; and the null `processes[].tool` FK on genuinely multi-package processes is now a tested, documented decision rather than an untested silence.
 
 ## Revision 9 — 2026-07-20
 

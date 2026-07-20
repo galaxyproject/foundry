@@ -162,6 +162,7 @@ interface ParamProvenance {
 interface Tool {
   name: string;
   version: string;
+  version_constraint: string | null;
   biocontainer: string | null;
   bioconda: string | null;
   docker: string | null;
@@ -776,7 +777,12 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
         /container\s+"([\s\S]*?)"\s*(?:\n\s*input:|\n\s*output:|\n\s*when:|\n\s*script:)/u,
       ) ?? matchOne(body, /container\s+([^\n]+)/u),
     );
-    const conda = normalizeDirective(matchOne(body, /conda\s+"([\s\S]*?)"/u));
+    // Modern form is `conda "<spec>"`; the pre-environment.yml idiom wrapped it
+    // in a ternary, `conda (params.enable_conda ? "<spec>" : null)`.
+    const conda = normalizeDirective(
+      matchOne(body, /conda\s+"([\s\S]*?)"/u) ??
+        matchOne(body, /conda\s*\([^)\n]*?\?\s*"([\s\S]*?)"/u),
+    );
     return {
       name,
       aliases: [],
@@ -1717,6 +1723,21 @@ function parseIoName(line: string, blockName: "input" | "output"): string {
   );
 }
 
+const UNKNOWN_VERSION = "unknown";
+
+interface CondaDependency {
+  name: string;
+  version: string;
+  version_constraint: string | null;
+  spec: string;
+}
+
+interface CondaResolution {
+  dependencies: CondaDependency[];
+  /** Specs the parser could not read, kept so a partial resolution can be flagged. */
+  unresolved: string[];
+}
+
 function normalizeToolToken(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/gu, "");
 }
@@ -1758,11 +1779,20 @@ function buildTools(
       .map((match) => match[1]!)
       .filter((value) => value.includes(":") || value.includes("/"));
     const mulledComponents = mulledComponentsForContainers(containerStrings, mulledIndex);
-    const dependencies = existsSync(envPath)
+    const { dependencies, unresolved } = existsSync(envPath)
       ? parseBiocondaDependencies(readText(envPath))
       : parseLiteralCondaDirective(process.conda);
     if (process.conda && dependencies.length === 0) {
       warnings.push(`unresolved conda directive in ${process.name}: ${process.conda}`);
+    }
+    // A directive that resolves in part is neither resolved nor flagged by the
+    // check above, so name each spec that was dropped.
+    if (dependencies.length > 0) {
+      for (const spec of unresolved) {
+        warnings.push(
+          `unparsed conda spec in ${process.name}: ${spec} (directive: ${process.conda})`,
+        );
+      }
     }
     if (dependencies.length === 1) {
       perProcessSingleton.set(process.name, dependencies[0]!.name);
@@ -1777,6 +1807,7 @@ function buildTools(
       tools.set(dependency.name, {
         name: dependency.name,
         version: dependency.version,
+        version_constraint: dependency.version_constraint,
         biocontainer: containerStrings.find((value) => value.includes("biocontainers/")) ?? null,
         bioconda: dependency.spec,
         docker: containerStrings.find((value) => !isKnownContainer(value)) ?? null,
@@ -1792,27 +1823,24 @@ function buildTools(
     }
   }
   for (const tool of tools.values()) {
-    const declared = declaredVersions.get(tool.name);
-    if (declared && declared.size > 1) tool.versions = [...declared].sort();
+    // The sentinel is the absence of a version, not a version, so it must not
+    // sort into the authoritative set alongside real ones.
+    const declared = [...(declaredVersions.get(tool.name) ?? [])].filter(
+      (version) => version !== UNKNOWN_VERSION,
+    );
+    if (declared.length > 1) tool.versions = declared.sort();
   }
   return { tools: [...tools.values()], perProcessSingleton, warnings };
 }
 
 // Legacy literal form: conda "bioconda::malt=0.61 bioconda::hops=0.35".
 // A path-shaped directive is the modern environment.yml reference, handled above.
-function parseLiteralCondaDirective(
-  directive: string | null,
-): { name: string; version: string; spec: string }[] {
-  if (!directive) return [];
+function parseLiteralCondaDirective(directive: string | null): CondaResolution {
+  if (!directive) return { dependencies: [], unresolved: [] };
   const trimmed = directive.trim();
-  if (trimmed.length === 0 || /\.ya?ml$/u.test(trimmed) || trimmed.includes("/")) return [];
-  return trimmed
-    .split(/\s+/u)
-    .filter((token) => token.length > 0)
-    .map(parseBiocondaDependency)
-    .filter((dependency): dependency is { name: string; version: string; spec: string } =>
-      Boolean(dependency),
-    );
+  if (trimmed.length === 0 || /\.ya?ml$/u.test(trimmed) || trimmed.includes("/"))
+    return { dependencies: [], unresolved: [] };
+  return resolveCondaSpecs(trimmed.split(/\s+/u).filter((token) => token.length > 0));
 }
 
 function loadMulledIndex(path: string | undefined): Map<string, ToolSpec[]> {
@@ -1885,24 +1913,40 @@ function mulledComponentsForContainers(
   return [];
 }
 
-function parseBiocondaDependencies(
-  text: string,
-): { name: string; version: string; spec: string }[] {
+function parseBiocondaDependencies(text: string): CondaResolution {
   const data = YAML.parse(text) as { dependencies?: unknown[] } | null;
-  return (data?.dependencies ?? [])
-    .filter((dependency): dependency is string => typeof dependency === "string")
-    .map(parseBiocondaDependency)
-    .filter((dependency): dependency is { name: string; version: string; spec: string } =>
-      Boolean(dependency),
-    );
+  const specs = (data?.dependencies ?? []).filter(
+    (dependency): dependency is string => typeof dependency === "string",
+  );
+  return resolveCondaSpecs(specs);
 }
 
-function parseBiocondaDependency(
-  spec: string,
-): { name: string; version: string; spec: string } | null {
-  const match = /^(?:[A-Za-z0-9_-]+::)?([A-Za-z0-9_.-]+)(?:=([^=\s]+))?/u.exec(spec);
+function resolveCondaSpecs(specs: string[]): CondaResolution {
+  const dependencies: CondaDependency[] = [];
+  const unresolved: string[] = [];
+  for (const spec of specs) {
+    const dependency = parseBiocondaDependency(spec);
+    if (dependency) dependencies.push(dependency);
+    else unresolved.push(spec);
+  }
+  return { dependencies, unresolved };
+}
+
+function parseBiocondaDependency(spec: string): CondaDependency | null {
+  const match = /^(?:[A-Za-z0-9_-]+::)?([A-Za-z0-9_.-]+)(.*)$/u.exec(spec.trim());
   if (!match) return null;
-  return { name: match[1]!, version: match[2] ?? "unknown", spec };
+  const name = match[1]!;
+  const rest = match[2]!.trim();
+  if (rest.length === 0) return { name, version: UNKNOWN_VERSION, version_constraint: null, spec };
+  // `=1.0` and `==1.0` pin exactly; a trailing `=<build>` is a conda build
+  // string, not part of the version. `name 1.0` is the space-separated form.
+  const exact = /^(?:={1,2}\s*|\s*)([^=\s<>!~,|]+)(?:=[^\s]+)?$/u.exec(rest);
+  if (exact) return { name, version: exact[1]!, version_constraint: null, spec };
+  // A range or inequality declares no single version; keep it verbatim so the
+  // constraint is not silently flattened into the unknown sentinel.
+  if (/^[<>!~]=?/u.test(rest))
+    return { name, version: UNKNOWN_VERSION, version_constraint: rest, spec };
+  return null;
 }
 
 function isKnownContainer(value: string): boolean {
