@@ -14,6 +14,7 @@ interface SummaryLike {
   processes: {
     name: string;
     module_path: string;
+    tool: string | null;
     meta: {
       description?: string;
       keywords: string[];
@@ -596,6 +597,102 @@ nextflow_pipeline {
       { name: "minimap2", version: "2.28", bioconda: "bioconda::minimap2=2.28" },
       { name: "samtools", version: "1.20", bioconda: "bioconda::samtools=1.20" },
     ]);
+  });
+
+  test("lifts legacy literal-string conda directives into the tool registry", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/legacy' }\n");
+    write(
+      root,
+      "modules/local/malt_run.nf",
+      `process MALT_RUN {
+  conda "bioconda::malt=0.61"
+  script:
+  'malt-run'
+}
+`,
+    );
+    write(
+      root,
+      "modules/local/host_removal.nf",
+      `process HOST_REMOVAL {
+  conda "bioconda::xopen=1.1.0 bioconda::pysam=0.16.0"
+  script:
+  'host-removal'
+}
+`,
+    );
+    write(
+      root,
+      "modules/local/build_intervals.nf",
+      `process BUILD_INTERVALS {
+  conda "anaconda::gawk=5.1.0"
+  script:
+  'build-intervals'
+}
+`,
+    );
+    write(root, "main.nf", "workflow LEGACY { MALT_RUN(); HOST_REMOVAL(); BUILD_INTERVALS() }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.tools.map((tool) => [tool.name, tool]));
+
+    expect(byName.get("malt")).toMatchObject({ version: "0.61", bioconda: "bioconda::malt=0.61" });
+    expect(byName.get("xopen")).toMatchObject({
+      version: "1.1.0",
+      bioconda: "bioconda::xopen=1.1.0",
+    });
+    expect(byName.get("pysam")).toMatchObject({
+      version: "0.16.0",
+      bioconda: "bioconda::pysam=0.16.0",
+    });
+    expect(byName.get("gawk")).toMatchObject({
+      version: "5.1.0",
+      bioconda: "anaconda::gawk=5.1.0",
+    });
+
+    const processByName = new Map(summary.processes.map((process) => [process.name, process]));
+    expect(processByName.get("MALT_RUN")?.tool).toBe("malt");
+    expect(processByName.get("BUILD_INTERVALS")?.tool).toBe("gawk");
+    expect(summary.warnings.filter((warning) => warning.includes("conda directive"))).toEqual([]);
+  });
+
+  test("prefers environment.yml over a literal conda directive and warns when neither resolves", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/mixed' }\n");
+    write(
+      root,
+      "modules/nf-core/fastqc/main.nf",
+      `process FASTQC {
+  conda "\${moduleDir}/environment.yml"
+  script:
+  'fastqc'
+}
+`,
+    );
+    write(
+      root,
+      "modules/nf-core/fastqc/environment.yml",
+      "dependencies:\n  - bioconda::fastqc=0.12.1\n",
+    );
+    write(
+      root,
+      "modules/local/dangling.nf",
+      `process DANGLING {
+  conda "\${moduleDir}/environment.yml"
+  script:
+  'dangling'
+}
+`,
+    );
+    write(root, "main.nf", "workflow MIXED { FASTQC(); DANGLING() }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.tools.map((tool) => tool.name)).toEqual(["fastqc"]);
+    expect(summary.warnings).toContain(
+      "unresolved conda directive in DANGLING: ${moduleDir}/environment.yml",
+    );
   });
 
   test("selects ad-hoc DSL2 root composer with lowercase subworkflow plane calls", async () => {

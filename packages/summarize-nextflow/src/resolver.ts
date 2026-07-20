@@ -298,11 +298,12 @@ export async function resolveNextflowSummary(
     options.mulledIndexPath && !existsSync(options.mulledIndexPath)
       ? [`mulled index path not found: ${options.mulledIndexPath}`]
       : [];
-  const { tools, perProcessSingleton } = buildTools(
-    pipelineRoot,
-    processes,
-    options.mulledIndexPath,
-  );
+  const {
+    tools,
+    perProcessSingleton,
+    warnings: toolWarnings,
+  } = buildTools(pipelineRoot, processes, options.mulledIndexPath);
+  warnings.push(...toolWarnings);
   const workflows = parseWorkflows(
     pipelineRoot,
     processes.map((process) => process.name),
@@ -1635,9 +1636,10 @@ function buildTools(
   pipelineRoot: string,
   processes: Process[],
   mulledIndexPath?: string,
-): { tools: Tool[]; perProcessSingleton: Map<string, string> } {
+): { tools: Tool[]; perProcessSingleton: Map<string, string>; warnings: string[] } {
   const tools = new Map<string, Tool>();
   const perProcessSingleton = new Map<string, string>();
+  const warnings: string[] = [];
   const mulledIndex = loadMulledIndex(
     mulledIndexPath ?? process.env.BIOCONTAINERS_MULTI_PACKAGE_TSV,
   );
@@ -1647,7 +1649,12 @@ function buildTools(
       .map((match) => match[1]!)
       .filter((value) => value.includes(":") || value.includes("/"));
     const mulledComponents = mulledComponentsForContainers(containerStrings, mulledIndex);
-    const dependencies = existsSync(envPath) ? parseBiocondaDependencies(readText(envPath)) : [];
+    const dependencies = existsSync(envPath)
+      ? parseBiocondaDependencies(readText(envPath))
+      : parseLiteralCondaDirective(process.conda);
+    if (process.conda && dependencies.length === 0) {
+      warnings.push(`unresolved conda directive in ${process.name}: ${process.conda}`);
+    }
     if (dependencies.length === 1) {
       perProcessSingleton.set(process.name, dependencies[0]!.name);
     }
@@ -1669,7 +1676,24 @@ function buildTools(
       });
     }
   }
-  return { tools: [...tools.values()], perProcessSingleton };
+  return { tools: [...tools.values()], perProcessSingleton, warnings };
+}
+
+// Legacy literal form: conda "bioconda::malt=0.61 bioconda::hops=0.35".
+// A path-shaped directive is the modern environment.yml reference, handled above.
+function parseLiteralCondaDirective(
+  directive: string | null,
+): { name: string; version: string; spec: string }[] {
+  if (!directive) return [];
+  const trimmed = directive.trim();
+  if (trimmed.length === 0 || /\.ya?ml$/u.test(trimmed) || trimmed.includes("/")) return [];
+  return trimmed
+    .split(/\s+/u)
+    .filter((token) => token.length > 0)
+    .map(parseBiocondaDependency)
+    .filter((dependency): dependency is { name: string; version: string; spec: string } =>
+      Boolean(dependency),
+    );
 }
 
 function loadMulledIndex(path: string | undefined): Map<string, ToolSpec[]> {
