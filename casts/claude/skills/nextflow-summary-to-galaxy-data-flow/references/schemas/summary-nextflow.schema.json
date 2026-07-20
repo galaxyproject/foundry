@@ -446,6 +446,13 @@
             "$ref": "#/$defs/ToolSpec"
           },
           "description": "Constituent Bioconda packages for an opaque `mulled-v2-*` multi-package container when resolved from a cached BioContainers multi-package-containers TSV. Omitted when no matching cached row is available."
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every distinct version of this tool declared anywhere in the pipeline, sorted, when processes disagree. nf-core modules pin independently, so one pipeline routinely runs several versions of a shared dependency (e.g. `samtools` at 1.17, 1.18, 1.19.2, 1.20). The sibling `version`, `biocontainer`, `docker`, `singularity`, and `wave` fields all come from whichever declaration was read last, so on a divergent tool they describe one arbitrary process rather than the pipeline as a whole — treat this array as the authoritative version set and read `processes[].conda` / `processes[].container` for what a given process actually runs. Omitted when every declaration agrees."
         }
       }
     },
@@ -1360,7 +1367,7 @@
         },
         "asset_kind": {
           "type": "string",
-          "description": "Coarse asset classification (e.g. `fasta`, `fasta_index`, `sequence_dictionary`, `bwa_index`, `bwamem2_index`, `tabix_index`, `gtf`, `gff`, `bed`, `vcf`, `database`, `other`). Free-form string; downstream Molds choose how to map onto target datatypes."
+          "description": "Coarse asset classification (e.g. `fasta`, `fasta_index`, `sequence_dictionary`, `bwa_index`, `bwamem2_index`, `tabix_index`, `gtf`, `gff`, `bed`, `vcf`, `database`, `reference_sheet`, `other`). Free-form string; downstream Molds choose how to map onto target datatypes."
         },
         "format_hint": {
           "type": [

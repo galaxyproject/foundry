@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import YAML from "yaml";
+import { normalizeGitUrl } from "./git-url.js";
 
 interface SampleSheetColumn {
   name: string;
@@ -167,6 +168,7 @@ interface Tool {
   singularity: string | null;
   wave: string | null;
   mulled_components?: ToolSpec[];
+  versions?: string[];
 }
 
 interface ToolSpec {
@@ -298,11 +300,12 @@ export async function resolveNextflowSummary(
     options.mulledIndexPath && !existsSync(options.mulledIndexPath)
       ? [`mulled index path not found: ${options.mulledIndexPath}`]
       : [];
-  const { tools, perProcessSingleton } = buildTools(
-    pipelineRoot,
-    processes,
-    options.mulledIndexPath,
-  );
+  const {
+    tools,
+    perProcessSingleton,
+    warnings: toolWarnings,
+  } = buildTools(pipelineRoot, processes, options.mulledIndexPath);
+  warnings.push(...toolWarnings);
   const workflows = parseWorkflows(
     pipelineRoot,
     processes.map((process) => process.name),
@@ -332,6 +335,9 @@ export async function resolveNextflowSummary(
     }
   }
 
+  const params = parseParams(pipelineRoot);
+  const paramNames = new Set(params.map((param) => param.name));
+
   const summary: Summary = {
     source: {
       ecosystem: workflowName.startsWith("nf-core/") ? "nf-core" : "nextflow",
@@ -344,7 +350,7 @@ export async function resolveNextflowSummary(
       license: existsSync(join(pipelineRoot, "LICENSE")) ? "MIT" : null,
       slug: workflowName.replace("/", "-"),
     },
-    params: parseParams(pipelineRoot),
+    params,
     sample_sheets: parseSampleSheets(pipelineRoot),
     profiles: parseProfiles(config),
     tools,
@@ -371,7 +377,7 @@ export async function resolveNextflowSummary(
         : [],
     },
     reference_assets: [],
-    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee),
+    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee, paramNames),
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
     warnings: [...root.warnings, ...warnings],
@@ -459,12 +465,6 @@ function mergeNextflowInspect(summary: Summary, pipelineRoot: string, profile: s
     );
     if (process) process.container = inspectedProcess.container;
   }
-}
-
-function normalizeGitUrl(url: string): string {
-  const scpStyle = /^([^@]+@[^:]+):(.+)$/u.exec(url);
-  if (scpStyle) return `ssh://${scpStyle[1]}/${scpStyle[2]}`;
-  return url;
 }
 
 function parseWorkflowName(config: string): string {
@@ -1208,6 +1208,7 @@ function buildReferenceAssets(
   for (const name of candidateNames) {
     if (seen.has(name)) continue;
     seen.add(name);
+    if (!rebuildParams.has(name) && isNonReferenceParam(name)) continue;
     const param = paramsByName.get(name);
     if (!param) continue;
     const callers = [...(usedBy.get(name) ?? [])].sort();
@@ -1234,6 +1235,28 @@ function buildReferenceAssets(
   return assets.sort((left, right) => left.param.localeCompare(right.param));
 }
 
+// nf-core convention: path-typed params that drive execution, reporting, or
+// registry lookup rather than naming a reference asset.
+const NON_REFERENCE_PARAMS = new Set([
+  "input",
+  "samplesheet",
+  "outdir",
+  "tracedir",
+  "multiqc_config",
+  "multiqc_logo",
+  "multiqc_methods_description",
+  "email",
+  "email_on_fail",
+  "plaintext_email",
+  "hook_url",
+  "custom_config_base",
+  "igenomes_base",
+]);
+
+function isNonReferenceParam(name: string): boolean {
+  return NON_REFERENCE_PARAMS.has(name);
+}
+
 function isPathTypedParam(param: Param): boolean {
   return (
     param.format === "file-path" ||
@@ -1248,14 +1271,27 @@ function collectParamCallers(workflows: ParsedWorkflow[]): Map<string, Set<strin
   const usedBy = new Map<string, Set<string>>();
   for (const workflow of workflows) {
     const mainBlock = extractMainBlock(workflow.body);
+    const boundHere = new Set<string>();
     for (const invocation of extractCallInvocations(mainBlock)) {
       for (const argument of invocation.arguments) {
         const paramName = paramNameFromArgument(argument);
         if (!paramName) continue;
+        boundHere.add(paramName);
         const set = usedBy.get(paramName) ?? new Set<string>();
         set.add(invocation.name);
         usedBy.set(paramName, set);
       }
+    }
+    // Pipelines commonly thread reference params into a channel inside the body
+    // rather than passing them as call arguments; attribute those to the
+    // enclosing workflow so the asset is not left unattributed. Params already
+    // bound to a callee here keep that more precise attribution instead.
+    for (const match of mainBlock.matchAll(/\bparams\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)/gu)) {
+      const paramName = match[1]!;
+      if (boundHere.has(paramName)) continue;
+      const set = usedBy.get(paramName) ?? new Set<string>();
+      set.add(workflow.name);
+      usedBy.set(paramName, set);
     }
   }
   return usedBy;
@@ -1263,6 +1299,9 @@ function collectParamCallers(workflows: ParsedWorkflow[]): Map<string, Set<strin
 
 function classifyAssetKind(name: string): string {
   const lower = name.toLowerCase();
+  // Checked first: a sheet naming many references would otherwise match on the
+  // asset token it carries (e.g. `fasta_sheet` -> fasta).
+  if (lower.endsWith("_sheet") || lower.endsWith("_sheets")) return "reference_sheet";
   if (/(^|_)fai($|_)/u.test(lower) || lower.endsWith("_fai")) return "fasta_index";
   if (lower === "dict" || lower.endsWith("_dict")) return "sequence_dictionary";
   if (/bwamem2/u.test(lower)) return "bwamem2_index";
@@ -1280,6 +1319,7 @@ function classifyAssetKind(name: string): string {
 function detectReferenceRebuilds(
   workflows: ParsedWorkflow[],
   invocationsByCallee: Map<string, SubworkflowInvocation[]>,
+  paramNames: Set<string>,
 ): ReferenceRebuildRule[] {
   const rules: ReferenceRebuildRule[] = [];
   for (const workflow of workflows) {
@@ -1293,7 +1333,7 @@ function detectReferenceRebuilds(
       if (!negation) continue;
       const negated = negation[1]!;
       if (/^(skip|no|disable|disabled)_/u.test(negated)) continue;
-      const rebuild = analyzeRebuildBody(block.defaultBody);
+      const rebuild = analyzeRebuildBody(block.defaultBody, negated);
       if (!rebuild) continue;
       // Compute-if-missing convention: the assignment LHS or the negated identifier
       // must correspond to a workflow-level `take:` slot. Filters generic
@@ -1303,7 +1343,13 @@ function detectReferenceRebuilds(
         (candidate) => takeNames.has(candidate),
       );
       if (!takeMatches) continue;
-      const assetParam = resolveAssetParam(rebuild.lhs, negated, takeNames, invocations);
+      const assetParam = resolveAssetParam(
+        rebuild.lhs,
+        negated,
+        takeNames,
+        invocations,
+        paramNames,
+      );
       const guardParams = collectGuardParams(block.guard, takeNames, invocations);
       const confidence: Evidence["confidence"] =
         assetParam.resolvedFromBinding && guardParams.allFromTakes ? "high" : "medium";
@@ -1327,7 +1373,16 @@ function detectReferenceRebuilds(
 
 function analyzeRebuildBody(
   body: string,
+  negated: string,
 ): { builder: string; builderOutputs: string[]; lhs: string; snippets: string[] } | null {
+  // A guard body may both prepare an input and build the asset. Prefer the
+  // fused assignment that names the guarded asset; otherwise let the
+  // standalone-call form below answer, since a prep call is the more likely
+  // first fused assignment.
+  const fused = collectAssignedCalls(body);
+  const related = fused.find((call) => namesAsset(call.lhs, negated));
+  if (related) return asRebuild(related);
+
   const snippets: string[] = [];
   let builder: string | null = null;
   let lhs: string | null = null;
@@ -1338,7 +1393,7 @@ function analyzeRebuildBody(
     snippets.push(`${invocation.name}(${invocation.arguments.join(", ")})`);
     break;
   }
-  if (!builder) return null;
+  if (!builder) return fused.length === 1 ? asRebuild(fused[0]!) : null;
   const assignmentPattern = new RegExp(
     `([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*${builder}\\s*\\.\\s*out(?:\\s*\\.\\s*([A-Za-z_][A-Za-z0-9_]*))?`,
     "gu",
@@ -1348,8 +1403,56 @@ function analyzeRebuildBody(
     if (match[2]) outputs.add(match[2]);
     snippets.push(match[0]);
   }
-  if (!lhs) return null;
+  if (!lhs) return fused.length === 1 ? asRebuild(fused[0]!) : null;
   return { builder, builderOutputs: [...outputs], lhs, snippets };
+}
+
+interface AssignedCall {
+  builder: string;
+  output: string | null;
+  lhs: string;
+  snippet: string;
+}
+
+// Fused form: `ch_fai = SAMTOOLS_FAIDX ( ch_ref, [[], []] ).fai.map{ ... }`,
+// which extractCallInvocations skips because the call is not the whole line.
+function collectAssignedCalls(body: string): AssignedCall[] {
+  const calls: AssignedCall[] = [];
+  const opener = /([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([A-Z][A-Za-z0-9_]*)\s*\(/gu;
+  for (const match of body.matchAll(opener)) {
+    const end = findMatchingParen(body, match.index + match[0].length - 1);
+    if (end < 0) continue;
+    const output = /^\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)/u.exec(body.slice(end + 1));
+    calls.push({
+      builder: match[2]!,
+      output: output?.[1] ?? null,
+      lhs: match[1]!,
+      snippet: `${body.slice(match.index, end + 1)}${output ? `.${output[1]!}` : ""}`,
+    });
+  }
+  return calls;
+}
+
+function asRebuild(call: AssignedCall): {
+  builder: string;
+  builderOutputs: string[];
+  lhs: string;
+  snippets: string[];
+} {
+  return {
+    builder: call.builder,
+    builderOutputs: call.output ? [call.output] : [],
+    lhs: call.lhs,
+    snippets: [call.snippet],
+  };
+}
+
+// Channel locals conventionally carry a `ch_` prefix, and take slots holding a
+// caller-supplied asset conventionally carry an `_in` suffix.
+function namesAsset(lhs: string, negated: string): boolean {
+  const local = lhs.replace(/^ch_/u, "");
+  const asset = negated.replace(/_in$/u, "");
+  return local === asset || lhs === negated || local === negated;
 }
 
 function resolveAssetParam(
@@ -1357,6 +1460,7 @@ function resolveAssetParam(
   negated: string,
   takeNames: Set<string>,
   invocations: SubworkflowInvocation[],
+  paramNames: Set<string>,
 ): { name: string; resolvedFromBinding: boolean } {
   const candidates = [`${lhs}_in`, lhs, negated];
   for (const candidate of candidates) {
@@ -1366,6 +1470,11 @@ function resolveAssetParam(
       const paramName = binding ? paramNameFromArgument(binding.argument) : null;
       if (paramName) return { name: paramName, resolvedFromBinding: true };
     }
+  }
+  // Callers often forward their own take slots rather than `params.x`, so no
+  // binding resolves. Fall back to whichever local name is itself a param.
+  for (const candidate of [negated, lhs.replace(/^ch_/u, ""), lhs]) {
+    if (paramNames.has(candidate)) return { name: candidate, resolvedFromBinding: false };
   }
   return { name: lhs, resolvedFromBinding: false };
 }
@@ -1635,9 +1744,11 @@ function buildTools(
   pipelineRoot: string,
   processes: Process[],
   mulledIndexPath?: string,
-): { tools: Tool[]; perProcessSingleton: Map<string, string> } {
+): { tools: Tool[]; perProcessSingleton: Map<string, string>; warnings: string[] } {
   const tools = new Map<string, Tool>();
   const perProcessSingleton = new Map<string, string>();
+  const declaredVersions = new Map<string, Set<string>>();
+  const warnings: string[] = [];
   const mulledIndex = loadMulledIndex(
     mulledIndexPath ?? process.env.BIOCONTAINERS_MULTI_PACKAGE_TSV,
   );
@@ -1647,11 +1758,22 @@ function buildTools(
       .map((match) => match[1]!)
       .filter((value) => value.includes(":") || value.includes("/"));
     const mulledComponents = mulledComponentsForContainers(containerStrings, mulledIndex);
-    const dependencies = existsSync(envPath) ? parseBiocondaDependencies(readText(envPath)) : [];
+    const dependencies = existsSync(envPath)
+      ? parseBiocondaDependencies(readText(envPath))
+      : parseLiteralCondaDirective(process.conda);
+    if (process.conda && dependencies.length === 0) {
+      warnings.push(`unresolved conda directive in ${process.name}: ${process.conda}`);
+    }
     if (dependencies.length === 1) {
       perProcessSingleton.set(process.name, dependencies[0]!.name);
     }
     for (const dependency of dependencies) {
+      // tools[].name is the processes[].tool foreign key, so the registry holds
+      // one entry per name and a later process overwrites the record. nf-core
+      // modules pin independently, so keep every declared version alongside it.
+      const declared = declaredVersions.get(dependency.name) ?? new Set<string>();
+      declared.add(dependency.version);
+      declaredVersions.set(dependency.name, declared);
       tools.set(dependency.name, {
         name: dependency.name,
         version: dependency.version,
@@ -1669,7 +1791,28 @@ function buildTools(
       });
     }
   }
-  return { tools: [...tools.values()], perProcessSingleton };
+  for (const tool of tools.values()) {
+    const declared = declaredVersions.get(tool.name);
+    if (declared && declared.size > 1) tool.versions = [...declared].sort();
+  }
+  return { tools: [...tools.values()], perProcessSingleton, warnings };
+}
+
+// Legacy literal form: conda "bioconda::malt=0.61 bioconda::hops=0.35".
+// A path-shaped directive is the modern environment.yml reference, handled above.
+function parseLiteralCondaDirective(
+  directive: string | null,
+): { name: string; version: string; spec: string }[] {
+  if (!directive) return [];
+  const trimmed = directive.trim();
+  if (trimmed.length === 0 || /\.ya?ml$/u.test(trimmed) || trimmed.includes("/")) return [];
+  return trimmed
+    .split(/\s+/u)
+    .filter((token) => token.length > 0)
+    .map(parseBiocondaDependency)
+    .filter((dependency): dependency is { name: string; version: string; spec: string } =>
+      Boolean(dependency),
+    );
 }
 
 function loadMulledIndex(path: string | undefined): Map<string, ToolSpec[]> {
