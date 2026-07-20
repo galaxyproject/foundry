@@ -37,6 +37,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@galaxy-foundry/foundry": "workspace:*",
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-foundry/planemo-cli-meta": "workspace:*",
     "ajv": "^8.17.1",
