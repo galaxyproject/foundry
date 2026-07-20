@@ -1,0 +1,176 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-test-to-galaxy-test-plan",
+    "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
+    "revision": 4,
+    "content_hash": "1d9701f6f4cc323ff19131f81343301fcf7e81c43712155ff5cf54eccc0a292e",
+    "commit": "dc2d4abb465f978c9aba1e8c12a2c46c48a1bf2a"
+  },
+  "cast_at": "2026-07-17T14:36:34.156Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-testing]]",
+      "src": "content/research/component-nextflow-testing.md",
+      "dst": "references/notes/component-nextflow-testing.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them.",
+      "trigger": "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan.",
+      "verification": "Translate nf-core/bacass nf-test snapshots into a Galaxy test plan and confirm this note improves profile/snapshot extraction.",
+      "src_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
+      "dst_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-testing]]",
+      "src": "content/research/component-nextflow-testing.yml",
+      "dst": "references/notes/component-nextflow-testing.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them.",
+      "trigger": "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan.",
+      "companion_of": "references/notes/component-nextflow-testing.md",
+      "src_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
+      "dst_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-shortcuts-anti-patterns]]",
+      "src": "content/research/iwc-shortcuts-anti-patterns.md",
+      "dst": "references/notes/iwc-shortcuts-anti-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests.",
+      "trigger": "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.",
+      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes.",
+      "trigger": "When writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS.",
+      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-snapshot-to-galaxy-assertions]]",
+      "src": "content/research/nextflow-snapshot-to-galaxy-assertions.md",
+      "dst": "references/notes/nextflow-snapshot-to-galaxy-assertions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Translate nf-test snapshot captures, helper-pruned file lists, and snapshot checksums into Galaxy workflow-test assertion intent.",
+      "trigger": "When converting nf-test snapshot fixtures, .snap sidecars, ignore files, ignore globs, or pipeline-level stable path/name captures.",
+      "src_hash": "01da02f8669bd267b962d49b9c62e86b31ff7b72bf69627a3ead5db4cba9ae32",
+      "dst_hash": "01da02f8669bd267b962d49b9c62e86b31ff7b72bf69627a3ead5db4cba9ae32",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-asserts-idioms]]",
+      "src": "content/research/planemo-asserts-idioms.md",
+      "dst": "references/notes/planemo-asserts-idioms.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs.",
+      "trigger": "When turning Nextflow expected outputs or snapshots into Galaxy test-plan assertions.",
+      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-test-plan]]",
+      "src": "package://@galaxy-foundry/foundry#galaxyWorkflowTestPlanSchema",
+      "dst": "references/schemas/galaxy-workflow-test-plan.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema; validate with `foundry validate-galaxy-workflow-test-plan`.",
+      "verification": "Cast the skill on an nf-core/bacass summary and confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it.",
+      "license": "MIT",
+      "src_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "dst_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[tests-format]]",
+      "src": "package://@galaxy-foundry/foundry#testsFormatSchema",
+      "dst": "references/schemas/tests-format.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use the Galaxy workflow tests schema as the assertion vocabulary when translating Nextflow test evidence into a Galaxy test plan.",
+      "trigger": "When mapping expected outputs, tolerances, snapshots, or fixture assertions into Galaxy workflow-test assertion intent.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read summarized nf-test profiles, snapshot fixtures, selected test data, params, and expected outputs.",
+      "license": "MIT",
+      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-test-plan",
+        "kind": "yaml",
+        "default_filename": "galaxy-test-plan.yml",
+        "schema": "[[galaxy-workflow-test-plan]]",
+        "description": "Reviewable Galaxy workflow test plan (see [[galaxy-workflow-test-plan]]): profile, fixture, snapshot, ignored-file, expected-output, rationale provenance translated from nf-test evidence."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      }
+    ]
+  }
+}

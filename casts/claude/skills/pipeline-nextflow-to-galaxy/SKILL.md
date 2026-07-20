@@ -50,7 +50,7 @@ Announce the chosen directory before starting.
 Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
 
 1. **summarize-nextflow** — invoke the `summarize-nextflow` skill. Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds.
-2. **nextflow-summary-to-galaxy-reference-data** — MANUAL — `nextflow-summary-to-galaxy-reference-data` is not yet cast. Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline. Do this by hand and confirm before continuing.
+2. **nextflow-summary-to-galaxy-reference-data** — invoke the `nextflow-summary-to-galaxy-reference-data` skill. Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline.
 3. **nextflow-summary-to-galaxy-interface** — invoke the `nextflow-summary-to-galaxy-interface` skill. Map a Nextflow summary into a Galaxy workflow interface design brief.
 4. **nextflow-summary-to-galaxy-data-flow** — invoke the `nextflow-summary-to-galaxy-data-flow` skill. Translate a Nextflow summary into a Galaxy data-flow design brief.
 5. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
@@ -60,7 +60,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
    - Try `nextflow-to-test-data` — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs.
    - Otherwise try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
-9. **nextflow-test-to-galaxy-test-plan** — MANUAL — `nextflow-test-to-galaxy-test-plan` is not yet cast. Translate Nextflow test evidence into a Galaxy workflow test plan. Do this by hand and confirm before continuing.
+9. **nextflow-test-to-galaxy-test-plan** — invoke the `nextflow-test-to-galaxy-test-plan` skill. Translate Nextflow test evidence into a Galaxy workflow test plan.
 10. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 11. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 12. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
