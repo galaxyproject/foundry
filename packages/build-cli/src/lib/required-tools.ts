@@ -119,17 +119,45 @@ export function aggregateRequiredTools(
   return [...tools.values()].sort((a, b) => a.tool.localeCompare(b.tool));
 }
 
+const VCS_OR_URL_RE = /^(?:(?:git|hg|svn|bzr)\+|(?:https?|file):\/\/)/i;
+const PEP440_OPERATOR_RE = /^(?:===|==|!=|~=|<=|>=|<|>)/;
+const SHELL_SAFE_RE = /^[A-Za-z0-9._@/+=-]+$/;
+
+function shellQuote(spec: string): string {
+  if (SHELL_SAFE_RE.test(spec)) return spec;
+  return `'${spec.replace(/'/g, `'\\''`)}'`;
+}
+
+/**
+ * Join a package name and `package_version` into an installable spec. `package_version`
+ * may be a bare version (`1.2.3`), a PEP 440 range (`>=1.2`), or a VCS/URL pin
+ * (`git+https://...`); only the bare case gets an `==` inserted.
+ */
+export function renderPackageSpec(
+  pkg: string,
+  version: string | undefined,
+  origin: string,
+): string {
+  if (!version) return pkg;
+  if (VCS_OR_URL_RE.test(version)) {
+    // PEP 508 / npm both accept a direct reference, keeping the package name attached.
+    return origin === "npm" ? `${pkg}@${version}` : `${pkg} @ ${version}`;
+  }
+  if (PEP440_OPERATOR_RE.test(version)) {
+    return origin === "npm" ? `${pkg}@${version}` : `${pkg}${version}`;
+  }
+  return origin === "npm" ? `${pkg}@${version}` : `${pkg}==${version}`;
+}
+
 export function renderInstallCommand(tool: RequiredTool): string {
-  const versioned = tool.package_version;
+  const spec = shellQuote(renderPackageSpec(tool.package, tool.package_version, tool.origin));
   if (tool.origin === "pypi") {
-    const spec = versioned ? `${tool.package}==${versioned}` : tool.package;
     return `\`uv tool install ${spec}\` (or \`pip install ${spec}\`).`;
   }
   if (tool.origin === "npm") {
-    const spec = versioned ? `${tool.package}@${versioned}` : tool.package;
     return `\`npm install -g ${spec}\`.`;
   }
-  return `Install ${tool.package}${versioned ? `@${versioned}` : ""} from ${tool.origin}.`;
+  return `Install ${spec} from ${tool.origin}.`;
 }
 
 export function requiredToolRows(tools: RequiredTool[]): string[] {
