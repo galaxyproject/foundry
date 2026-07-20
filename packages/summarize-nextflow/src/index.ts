@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { resolveNextflowSummary } from "./resolver.js";
 import { resolveSource } from "./source.js";
 
+export { normalizeGitUrl } from "./git-url.js";
 export {
   resolveSource,
   isRemoteSource,

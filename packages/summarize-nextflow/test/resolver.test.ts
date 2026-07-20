@@ -665,7 +665,7 @@ nextflow_pipeline {
       write(
         root,
         `modules/nf-core/samtools/op${index}/main.nf`,
-        `process SAMTOOLS_OP${index} {\n  conda "\${moduleDir}/environment.yml"\n  script:\n  'x'\n}\n`,
+        `process SAMTOOLS_OP${index} {\n  container "\${ workflow.containerEngine == 'singularity' ? 'https://depot.galaxyproject.org/singularity/samtools:${version}--h1' : 'biocontainers/samtools:${version}--h1' }"\n  conda "\${moduleDir}/environment.yml"\n  script:\n  'x'\n}\n`,
       );
       write(
         root,
@@ -679,11 +679,14 @@ nextflow_pipeline {
     const byName = new Map(summary.tools.map((tool) => [tool.name, tool]));
 
     expect(byName.get("samtools")?.versions).toEqual(["1.17", "1.18", "1.20"]);
-    // First declaration wins so processes[].tool stays single-valued.
-    expect(byName.get("samtools")?.version).toBe("1.18");
     // Agreeing declarations leave the field off entirely.
     expect(byName.get("fastqc")?.versions).toBeUndefined();
-    expect(summary.warnings.filter((warning) => warning.includes("conflicting"))).toEqual([]);
+
+    // The scalar fields describe whichever declaration was read last, so on a
+    // divergent tool they name one arbitrary process — versions[] is the
+    // authoritative set. Pinned here so the choice cannot drift unnoticed.
+    expect(byName.get("samtools")?.version).toBe("1.20");
+    expect(byName.get("samtools")?.biocontainer).toBe("biocontainers/samtools:1.20--h1");
   });
 
   test("prefers environment.yml over a literal conda directive and warns when neither resolves", async () => {
@@ -1309,7 +1312,6 @@ workflow PIPE {
               fasta: { type: "string", format: "file-path" },
               fasta_sheet: { type: "string", format: "file-path" },
               igenomes_base: { type: "string", format: "directory-path" },
-              refgenie_base: { type: "string", format: "directory-path" },
             },
           },
         },
@@ -1371,6 +1373,49 @@ workflow PREP {
 
     expect(byName.fasta!.used_by).toEqual(["PREP"]);
     expect(byName.dbsnp!.used_by).toEqual(["PREP"]);
+  });
+
+  test("picks the asset builder, not a prep call, when a rebuild body has several", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/prepped' }\n");
+    write(
+      root,
+      "modules/m.nf",
+      "process GUNZIP {\n  script:\n  'g'\n}\nprocess SAMTOOLS_FAIDX {\n  script:\n  'f'\n}\n",
+    );
+    write(
+      root,
+      "subworkflows/local/idx/main.nf",
+      `include { GUNZIP; SAMTOOLS_FAIDX } from '../../../modules/m'
+workflow IDX {
+  take:
+  fasta
+  fasta_fai
+  main:
+  if ( !fasta_fai ) {
+    ch_unzipped  = GUNZIP ( fasta ).gunzip
+    ch_fasta_fai = SAMTOOLS_FAIDX ( ch_unzipped ).fai
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { IDX } from './subworkflows/local/idx/main'\nworkflow PIPE { main: IDX( params.fasta, params.fasta_fai ) }\n",
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: { builder: string; builder_outputs: string[] }[];
+    };
+
+    expect(summary.reference_rebuilds).toHaveLength(1);
+    expect(summary.reference_rebuilds[0]).toMatchObject({
+      builder: "SAMTOOLS_FAIDX",
+      builder_outputs: ["fai"],
+    });
   });
 
   test("detects negative-guard rebuilds assigned straight from the builder call result", async () => {

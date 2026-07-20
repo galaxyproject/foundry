@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 7,
     "content_hash": "dfc08f79ea9b4893bbfb0712e99c78ab973c5f4b449745c661d5e16522b61f9c",
-    "commit": "c653b1bba020e84c6d2b7d1eeb95867187bae852"
+    "commit": "dca2ac888332ee86d0cdcb5aabef94804fa16c54"
   },
-  "cast_at": "2026-07-20T15:11:59.995Z",
+  "cast_at": "2026-07-20T16:08:02.483Z",
   "refs": [
     {
       "kind": "cli-command",

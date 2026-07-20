@@ -14,7 +14,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-06
-revision: 8
+revision: 9
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
@@ -108,6 +108,15 @@ Snapshot-sidecar parsing landed for module and subworkflow tests whose interesti
 - **`SnapshotFixture.parsed_content: SnapshotContent[]` added.** Each parsed sidecar entry preserves the snapshot name plus channel-keyed `SnapshotChannel` values.
 - **`SnapshotFile` added.** `<path>:md5,<hex>` strings become file digest assertions with `path`, `basename`, `md5`, and a `stub` flag for empty-file md5s.
 - **Non-file values preserved.** Version tuples, counts, and other scalar snapshot values remain in `SnapshotChannel.values` so downstream test-plan Molds do not re-read `.snap` files.
+
+## Revision 9 — 2026-07-20
+
+Reference-data extraction fidelity and tool-registry completeness, from a `nf-core/eager` cast. Resolves galaxyproject/foundry#349.
+
+- **`Tool.versions[]` added** (string[], optional). nf-core modules pin independently, so one pipeline routinely declares several versions of a shared dependency (`nf-core/eager` declares four `samtools` and six `htslib` versions). `tools[].name` is the `processes[].tool` foreign key, so the registry keeps one entry per name; the scalar `version`, `biocontainer`, `docker`, `singularity`, and `wave` fields all reflect whichever declaration was read last and therefore describe one arbitrary process on a divergent tool. `versions[]` is the authoritative version set; omitted when every declaration agrees. Purely additive — no existing field changed value.
+- **`ReferenceAsset.asset_kind` gained `reference_sheet`** for params naming a multi-reference sheet (`nf-core/eager`'s `fasta_sheet`), previously kinded `other`.
+
+Resolver-side changes with no schema surface: legacy literal-string `conda` directives now populate `tools[]`; execution and registry params (`input`, `outdir`, `multiqc_config`, `igenomes_base`) no longer appear in `reference_assets[]`; `used_by` attributes params consumed via channel construction; and negative-guard rebuild detection covers the fused `ch_x = BUILDER(args).chan` assignment form.
 
 ## Revision 7 — 2026-05-06
 

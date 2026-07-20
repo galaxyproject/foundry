@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { normalizeGitUrl } from "./git-url.js";
 
 export class SummarizeNextflowInputError extends Error {
   readonly exitCode = 1;
@@ -33,12 +34,6 @@ export interface ResolvedSource {
 
 export function isRemoteSource(pathOrUrl: string): boolean {
   return /^https?:\/\//u.test(pathOrUrl);
-}
-
-export function normalizeGitUrl(url: string): string {
-  const scpStyle = /^([^@]+@[^:]+):(.+)$/u.exec(url);
-  if (scpStyle) return `ssh://${scpStyle[1]}/${scpStyle[2]}`;
-  return url;
 }
 
 // Refs reach git as an argument-array element, never a shell string, but a ref

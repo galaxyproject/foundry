@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import YAML from "yaml";
-import { normalizeGitUrl } from "./source.js";
+import { normalizeGitUrl } from "./git-url.js";
 
 interface SampleSheetColumn {
   name: string;
@@ -1208,7 +1208,7 @@ function buildReferenceAssets(
   for (const name of candidateNames) {
     if (seen.has(name)) continue;
     seen.add(name);
-    if (!rebuildParams.has(name) && isNonReferenceParam(name, paramsByName.get(name))) continue;
+    if (!rebuildParams.has(name) && isNonReferenceParam(name)) continue;
     const param = paramsByName.get(name);
     if (!param) continue;
     const callers = [...(usedBy.get(name) ?? [])].sort();
@@ -1253,10 +1253,8 @@ const NON_REFERENCE_PARAMS = new Set([
   "igenomes_base",
 ]);
 
-function isNonReferenceParam(name: string, param: Param | undefined): boolean {
-  if (NON_REFERENCE_PARAMS.has(name)) return true;
-  // Registry roots (`<registry>_base`) point at a lookup tree, not one asset.
-  return name.endsWith("_base") && param?.format === "directory-path";
+function isNonReferenceParam(name: string): boolean {
+  return NON_REFERENCE_PARAMS.has(name);
 }
 
 function isPathTypedParam(param: Param): boolean {
@@ -1335,7 +1333,7 @@ function detectReferenceRebuilds(
       if (!negation) continue;
       const negated = negation[1]!;
       if (/^(skip|no|disable|disabled)_/u.test(negated)) continue;
-      const rebuild = analyzeRebuildBody(block.defaultBody);
+      const rebuild = analyzeRebuildBody(block.defaultBody, negated);
       if (!rebuild) continue;
       // Compute-if-missing convention: the assignment LHS or the negated identifier
       // must correspond to a workflow-level `take:` slot. Filters generic
@@ -1375,16 +1373,16 @@ function detectReferenceRebuilds(
 
 function analyzeRebuildBody(
   body: string,
+  negated: string,
 ): { builder: string; builderOutputs: string[]; lhs: string; snippets: string[] } | null {
-  const direct = extractAssignedCallResult(body);
-  if (direct) {
-    return {
-      builder: direct.builder,
-      builderOutputs: direct.output ? [direct.output] : [],
-      lhs: direct.lhs,
-      snippets: [direct.snippet],
-    };
-  }
+  // A guard body may both prepare an input and build the asset. Prefer the
+  // fused assignment that names the guarded asset; otherwise let the
+  // standalone-call form below answer, since a prep call is the more likely
+  // first fused assignment.
+  const fused = collectAssignedCalls(body);
+  const related = fused.find((call) => namesAsset(call.lhs, negated));
+  if (related) return asRebuild(related);
+
   const snippets: string[] = [];
   let builder: string | null = null;
   let lhs: string | null = null;
@@ -1395,7 +1393,7 @@ function analyzeRebuildBody(
     snippets.push(`${invocation.name}(${invocation.arguments.join(", ")})`);
     break;
   }
-  if (!builder) return null;
+  if (!builder) return fused.length === 1 ? asRebuild(fused[0]!) : null;
   const assignmentPattern = new RegExp(
     `([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*${builder}\\s*\\.\\s*out(?:\\s*\\.\\s*([A-Za-z_][A-Za-z0-9_]*))?`,
     "gu",
@@ -1405,41 +1403,56 @@ function analyzeRebuildBody(
     if (match[2]) outputs.add(match[2]);
     snippets.push(match[0]);
   }
-  if (!lhs) return null;
+  if (!lhs) return fused.length === 1 ? asRebuild(fused[0]!) : null;
   return { builder, builderOutputs: [...outputs], lhs, snippets };
 }
 
-// Fused form: `ch_fai = SAMTOOLS_FAIDX ( ch_ref, [[], []] ).fai.map{ ... }`.
-// The `.out`-based pattern below only sees builders assigned on a later line.
-function extractAssignedCallResult(
-  body: string,
-): { builder: string; output: string | null; lhs: string; snippet: string } | null {
+interface AssignedCall {
+  builder: string;
+  output: string | null;
+  lhs: string;
+  snippet: string;
+}
+
+// Fused form: `ch_fai = SAMTOOLS_FAIDX ( ch_ref, [[], []] ).fai.map{ ... }`,
+// which extractCallInvocations skips because the call is not the whole line.
+function collectAssignedCalls(body: string): AssignedCall[] {
+  const calls: AssignedCall[] = [];
   const opener = /([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([A-Z][A-Za-z0-9_]*)\s*\(/gu;
   for (const match of body.matchAll(opener)) {
-    const end = matchingParen(body, match.index + match[0].length - 1);
+    const end = findMatchingParen(body, match.index + match[0].length - 1);
     if (end < 0) continue;
     const output = /^\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)/u.exec(body.slice(end + 1));
-    return {
+    calls.push({
       builder: match[2]!,
       output: output?.[1] ?? null,
       lhs: match[1]!,
       snippet: `${body.slice(match.index, end + 1)}${output ? `.${output[1]!}` : ""}`,
-    };
+    });
   }
-  return null;
+  return calls;
 }
 
-function matchingParen(text: string, openIndex: number): number {
-  let depth = 0;
-  for (let index = openIndex; index < text.length; index += 1) {
-    const char = text[index];
-    if (char === "(") depth += 1;
-    else if (char === ")") {
-      depth -= 1;
-      if (depth === 0) return index;
-    }
-  }
-  return -1;
+function asRebuild(call: AssignedCall): {
+  builder: string;
+  builderOutputs: string[];
+  lhs: string;
+  snippets: string[];
+} {
+  return {
+    builder: call.builder,
+    builderOutputs: call.output ? [call.output] : [],
+    lhs: call.lhs,
+    snippets: [call.snippet],
+  };
+}
+
+// Channel locals conventionally carry a `ch_` prefix, and take slots holding a
+// caller-supplied asset conventionally carry an `_in` suffix.
+function namesAsset(lhs: string, negated: string): boolean {
+  const local = lhs.replace(/^ch_/u, "");
+  const asset = negated.replace(/_in$/u, "");
+  return local === asset || lhs === negated || local === negated;
 }
 
 function resolveAssetParam(
@@ -1756,12 +1769,11 @@ function buildTools(
     }
     for (const dependency of dependencies) {
       // tools[].name is the processes[].tool foreign key, so the registry holds
-      // one entry per name. nf-core modules pin independently, so record every
-      // declared version instead of letting a later process overwrite silently.
+      // one entry per name and a later process overwrites the record. nf-core
+      // modules pin independently, so keep every declared version alongside it.
       const declared = declaredVersions.get(dependency.name) ?? new Set<string>();
       declared.add(dependency.version);
       declaredVersions.set(dependency.name, declared);
-      if (tools.has(dependency.name)) continue;
       tools.set(dependency.name, {
         name: dependency.name,
         version: dependency.version,
