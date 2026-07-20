@@ -403,7 +403,15 @@
           "description": "Canonical tool name (e.g. `fastp`, `samtools`). Used as the foreign key from `processes[].tool`."
         },
         "version": {
-          "type": "string"
+          "type": "string",
+          "description": "Exact version when the conda spec pins one (`name=1.0`, `name==1.0`, or the space-separated `name 1.0`; a trailing `=<build>` is a conda build string and is not part of the version). The literal `unknown` when no exact pin was declared — either because the spec names no version at all (a legitimate authoring choice, e.g. `conda-forge::r-base`) or because it declares an inexact constraint, in which case `version_constraint` carries it. A spec the parser cannot read at all is reported in `warnings[]` rather than landing here as `unknown`."
+        },
+        "version_constraint": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Verbatim version constraint when the conda spec declares an inexact one (e.g. `>=1.17`, `>=1.0,<2.0`). Null when the spec pins exactly or names no version. Present so a range is preserved rather than flattened into the `unknown` sentinel; a consumer that needs an exact version should read a non-null constraint as \"the pipeline constrains this tool, but not to a single version\"."
         },
         "biocontainer": {
           "type": [
@@ -452,7 +460,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Every distinct version of this tool declared anywhere in the pipeline, sorted, when processes disagree. nf-core modules pin independently, so one pipeline routinely runs several versions of a shared dependency (e.g. `samtools` at 1.17, 1.18, 1.19.2, 1.20). The sibling `version`, `biocontainer`, `docker`, `singularity`, and `wave` fields all come from whichever declaration was read last, so on a divergent tool they describe one arbitrary process rather than the pipeline as a whole — treat this array as the authoritative version set and read `processes[].conda` / `processes[].container` for what a given process actually runs. Omitted when every declaration agrees."
+          "description": "Every distinct version of this tool declared anywhere in the pipeline, sorted, when processes disagree. nf-core modules pin independently, so one pipeline routinely runs several versions of a shared dependency (e.g. `samtools` at 1.17, 1.18, 1.19.2, 1.20). The sibling `version`, `biocontainer`, `docker`, `singularity`, and `wave` fields all come from whichever declaration was read last, so on a divergent tool they describe one arbitrary process rather than the pipeline as a whole — treat this array as the authoritative version set and read `processes[].conda` / `processes[].container` for what a given process actually runs. Declarations that name no version contribute nothing here, so a tool pinned by some processes and left unpinned by others lists only its real versions. Omitted when fewer than two distinct versions were declared."
         }
       }
     },

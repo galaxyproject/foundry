@@ -9,6 +9,7 @@ interface SummaryLike {
     name: string;
     version: string;
     bioconda: string | null;
+    version_constraint: string | null;
     versions?: string[];
     mulled_components?: { name: string; version: string; bioconda: string }[];
   }[];
@@ -725,6 +726,177 @@ nextflow_pipeline {
     expect(summary.warnings).toContain(
       "unresolved conda directive in DANGLING: ${moduleDir}/environment.yml",
     );
+  });
+
+  test("reads == pins and keeps a build string out of the version", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/pins' }\n");
+    write(root, "modules/nf-core/coreutils/main.nf", condaProcess("COREUTILS"));
+    write(
+      root,
+      "modules/nf-core/coreutils/environment.yml",
+      "dependencies:\n  - coreutils==9.4\n  - bioconda::strelka=2.9.10=h9ee0642_1\n",
+    );
+    write(root, "main.nf", "workflow PINS { COREUTILS() }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.tools.map((tool) => [tool.name, tool]));
+
+    expect(byName.get("coreutils")).toMatchObject({
+      version: "9.4",
+      version_constraint: null,
+      bioconda: "coreutils==9.4",
+    });
+    // The trailing `=h9ee0642_1` is a conda build string, not part of the version.
+    expect(byName.get("strelka")).toMatchObject({ version: "2.9.10", version_constraint: null });
+    expect(summary.warnings.filter((warning) => warning.includes("conda"))).toEqual([]);
+  });
+
+  test("preserves an inexact version constraint instead of dropping it", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/ranged' }\n");
+    write(root, "modules/nf-core/ranged/main.nf", condaProcess("RANGED"));
+    write(
+      root,
+      "modules/nf-core/ranged/environment.yml",
+      "dependencies:\n  - bioconda::samtools>=1.17\n  - bioconda::bcftools>=1.0,<2.0\n",
+    );
+    write(root, "main.nf", "workflow RANGED_WF { RANGED() }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.tools.map((tool) => [tool.name, tool]));
+
+    // No exact pin exists, so version stays unknown, but the constraint that
+    // explains why is carried rather than discarded.
+    expect(byName.get("samtools")).toMatchObject({
+      version: "unknown",
+      version_constraint: ">=1.17",
+    });
+    expect(byName.get("bcftools")).toMatchObject({
+      version: "unknown",
+      version_constraint: ">=1.0,<2.0",
+    });
+  });
+
+  test("treats a version-less spec as unpinned without warning", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/unpinned' }\n");
+    write(
+      root,
+      "modules/local/plot.nf",
+      `process PLOT {
+  conda "conda-forge::r-base conda-forge::r-optparse"
+  script:
+  'plot'
+}
+`,
+    );
+    write(root, "main.nf", "workflow UNPINNED { PLOT() }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.tools.map((tool) => [tool.name, tool]));
+
+    // Declaring no version is a legitimate authoring choice, not a parse failure.
+    expect(byName.get("r-base")).toMatchObject({ version: "unknown", version_constraint: null });
+    expect(summary.warnings.filter((warning) => warning.includes("conda"))).toEqual([]);
+  });
+
+  test("keeps the unknown sentinel out of versions[]", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/mixedpins' }\n");
+    write(
+      root,
+      "modules/local/pinned.nf",
+      `process PINNED_STEP {\n  conda "conda-forge::r-optparse=1.7.1"\n  script:\n  'x'\n}\n`,
+    );
+    write(
+      root,
+      "modules/local/loose.nf",
+      `process LOOSE_STEP {\n  conda "conda-forge::r-optparse"\n  script:\n  'x'\n}\n`,
+    );
+    write(
+      root,
+      "modules/local/other.nf",
+      `process OTHER_STEP {\n  conda "conda-forge::r-optparse=1.6.6"\n  script:\n  'x'\n}\n`,
+    );
+    write(root, "main.nf", "workflow MIXEDPINS { PINNED_STEP(); LOOSE_STEP(); OTHER_STEP() }\n");
+
+    const summary = await summarize(root);
+    const optparse = summary.tools.find((tool) => tool.name === "r-optparse");
+
+    // versions[] is the authoritative version set, so a sentinel must not sort
+    // into it alongside real versions.
+    expect(optparse?.versions).toEqual(["1.6.6", "1.7.1"]);
+  });
+
+  test("warns when only part of a literal conda directive resolves", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/partial' }\n");
+    write(
+      root,
+      "modules/local/partial.nf",
+      `process PARTIAL_STEP {
+  conda "bioconda::malt=0.61 %%%bogus%%%"
+  script:
+  'x'
+}
+`,
+    );
+    write(root, "main.nf", "workflow PARTIAL { PARTIAL_STEP() }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.tools.map((tool) => tool.name)).toEqual(["malt"]);
+    expect(summary.warnings).toContain(
+      "unparsed conda spec in PARTIAL_STEP: %%%bogus%%% (directive: bioconda::malt=0.61 %%%bogus%%%)",
+    );
+  });
+
+  test("resolves the legacy ternary conda directive form", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/ternary' }\n");
+    write(
+      root,
+      "modules/local/legacy.nf",
+      `process LEGACY_STEP {
+  conda (params.enable_conda ? "bioconda::malt=0.61" : null)
+  script:
+  'x'
+}
+`,
+    );
+    write(root, "main.nf", "workflow TERNARY { LEGACY_STEP() }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.tools.map((tool) => [tool.name, tool]));
+
+    expect(byName.get("malt")).toMatchObject({ version: "0.61", bioconda: "bioconda::malt=0.61" });
+    expect(summary.warnings.filter((warning) => warning.includes("conda"))).toEqual([]);
+  });
+
+  test("leaves the tool FK null for a genuinely multi-package process", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/multi' }\n");
+    write(
+      root,
+      "modules/local/host_removal.nf",
+      `process HOST_REMOVAL {
+  conda "bioconda::xopen=1.1.0 bioconda::pysam=0.16.0"
+  script:
+  'x'
+}
+`,
+    );
+    write(root, "main.nf", "workflow MULTI { HOST_REMOVAL() }\n");
+
+    const summary = await summarize(root);
+
+    // Both packages are real dependencies and neither is "the" tool, so the FK
+    // stays null rather than picking one arbitrarily. Asserted so the deliberate
+    // silence here cannot be mistaken for an unhandled case.
+    expect(summary.tools.map((tool) => tool.name).sort()).toEqual(["pysam", "xopen"]);
+    expect(summary.processes.find((process) => process.name === "HOST_REMOVAL")?.tool).toBeNull();
+    expect(summary.warnings.filter((warning) => warning.includes("conda"))).toEqual([]);
   });
 
   test("selects ad-hoc DSL2 root composer with lowercase subworkflow plane calls", async () => {
@@ -1523,6 +1695,10 @@ function tempPipelineRoot(): string {
   const root = mkdtempSync(join(tmpdir(), "summarize-nextflow-"));
   roots.push(root);
   return root;
+}
+
+function condaProcess(name: string): string {
+  return `process ${name} {\n  conda "\${moduleDir}/environment.yml"\n  script:\n  'x'\n}\n`;
 }
 
 function write(root: string, path: string, content: string): void {

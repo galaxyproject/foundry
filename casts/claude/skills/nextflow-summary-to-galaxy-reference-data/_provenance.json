@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
     "revision": 3,
     "content_hash": "35ed639de1c20861fd3fb5cd87016798a248d291bd7d58e3a3411ab67143b24a",
-    "commit": "dc2d4abb465f978c9aba1e8c12a2c46c48a1bf2a"
+    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
   },
-  "cast_at": "2026-07-17T14:35:37.005Z",
+  "cast_at": "2026-07-20T18:35:00.838Z",
   "refs": [
     {
       "kind": "research",
@@ -35,8 +35,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Classify the source pipeline's reference-data usage against the eight Nextflow-side classifications (none, reference-producing, single asset, coordinated bundle, key-expanded bundle, compute-if-missing, multi-DB pick-list, parallel bundles plus cohort data).",
-      "src_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
-      "dst_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
+      "src_hash": "e31459b8a8edc6ad1de5e79cdf7ddc03d8ebd4267f605b037e9aa88f981af1cb",
+      "dst_hash": "e31459b8a8edc6ad1de5e79cdf7ddc03d8ebd4267f605b037e9aa88f981af1cb",
       "source": "deterministic"
     },
     {
@@ -49,8 +49,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Apply the v1 Galaxy posture (explicit optional inputs + in-tool rebuild) and datatype defaults when translating each classified asset into the brief.",
-      "src_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
-      "dst_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
+      "src_hash": "e0504e8133aac9fb09bbed861c4f92b29cb32a6756d11ea5d86ad9e4fe788f4b",
+      "dst_hash": "e0504e8133aac9fb09bbed861c4f92b29cb32a6756d11ea5d86ad9e4fe788f4b",
       "source": "deterministic"
     },
     {
@@ -79,8 +79,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read `reference_assets[]` (curated path-typed inputs with `used_by` attribution to consuming subworkflows), `reference_rebuilds[]` (compute-if-missing rebuild rules with builder process and guard), and `params[]` provenance (`source_kind`, including `getGenomeAttribute` for nf-core key-expanded bundles) to determine which reference assets the source pipeline consumes and how it rebuilds them when absent.",
       "license": "MIT",
-      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
-      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "src_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "dst_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
       "source": "deterministic"
     }
   ],
