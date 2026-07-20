@@ -333,6 +333,9 @@ export async function resolveNextflowSummary(
     }
   }
 
+  const params = parseParams(pipelineRoot);
+  const paramNames = new Set(params.map((param) => param.name));
+
   const summary: Summary = {
     source: {
       ecosystem: workflowName.startsWith("nf-core/") ? "nf-core" : "nextflow",
@@ -345,7 +348,7 @@ export async function resolveNextflowSummary(
       license: existsSync(join(pipelineRoot, "LICENSE")) ? "MIT" : null,
       slug: workflowName.replace("/", "-"),
     },
-    params: parseParams(pipelineRoot),
+    params,
     sample_sheets: parseSampleSheets(pipelineRoot),
     profiles: parseProfiles(config),
     tools,
@@ -372,7 +375,7 @@ export async function resolveNextflowSummary(
         : [],
     },
     reference_assets: [],
-    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee),
+    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee, paramNames),
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
     warnings: [...root.warnings, ...warnings],
@@ -1209,6 +1212,7 @@ function buildReferenceAssets(
   for (const name of candidateNames) {
     if (seen.has(name)) continue;
     seen.add(name);
+    if (!rebuildParams.has(name) && isNonReferenceParam(name, paramsByName.get(name))) continue;
     const param = paramsByName.get(name);
     if (!param) continue;
     const callers = [...(usedBy.get(name) ?? [])].sort();
@@ -1235,6 +1239,30 @@ function buildReferenceAssets(
   return assets.sort((left, right) => left.param.localeCompare(right.param));
 }
 
+// nf-core convention: path-typed params that drive execution, reporting, or
+// registry lookup rather than naming a reference asset.
+const NON_REFERENCE_PARAMS = new Set([
+  "input",
+  "samplesheet",
+  "outdir",
+  "tracedir",
+  "multiqc_config",
+  "multiqc_logo",
+  "multiqc_methods_description",
+  "email",
+  "email_on_fail",
+  "plaintext_email",
+  "hook_url",
+  "custom_config_base",
+  "igenomes_base",
+]);
+
+function isNonReferenceParam(name: string, param: Param | undefined): boolean {
+  if (NON_REFERENCE_PARAMS.has(name)) return true;
+  // Registry roots (`<registry>_base`) point at a lookup tree, not one asset.
+  return name.endsWith("_base") && param?.format === "directory-path";
+}
+
 function isPathTypedParam(param: Param): boolean {
   return (
     param.format === "file-path" ||
@@ -1249,14 +1277,27 @@ function collectParamCallers(workflows: ParsedWorkflow[]): Map<string, Set<strin
   const usedBy = new Map<string, Set<string>>();
   for (const workflow of workflows) {
     const mainBlock = extractMainBlock(workflow.body);
+    const boundHere = new Set<string>();
     for (const invocation of extractCallInvocations(mainBlock)) {
       for (const argument of invocation.arguments) {
         const paramName = paramNameFromArgument(argument);
         if (!paramName) continue;
+        boundHere.add(paramName);
         const set = usedBy.get(paramName) ?? new Set<string>();
         set.add(invocation.name);
         usedBy.set(paramName, set);
       }
+    }
+    // Pipelines commonly thread reference params into a channel inside the body
+    // rather than passing them as call arguments; attribute those to the
+    // enclosing workflow so the asset is not left unattributed. Params already
+    // bound to a callee here keep that more precise attribution instead.
+    for (const match of mainBlock.matchAll(/\bparams\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)/gu)) {
+      const paramName = match[1]!;
+      if (boundHere.has(paramName)) continue;
+      const set = usedBy.get(paramName) ?? new Set<string>();
+      set.add(workflow.name);
+      usedBy.set(paramName, set);
     }
   }
   return usedBy;
@@ -1264,6 +1305,9 @@ function collectParamCallers(workflows: ParsedWorkflow[]): Map<string, Set<strin
 
 function classifyAssetKind(name: string): string {
   const lower = name.toLowerCase();
+  // Checked first: a sheet naming many references would otherwise match on the
+  // asset token it carries (e.g. `fasta_sheet` -> fasta).
+  if (lower.endsWith("_sheet") || lower.endsWith("_sheets")) return "reference_sheet";
   if (/(^|_)fai($|_)/u.test(lower) || lower.endsWith("_fai")) return "fasta_index";
   if (lower === "dict" || lower.endsWith("_dict")) return "sequence_dictionary";
   if (/bwamem2/u.test(lower)) return "bwamem2_index";
@@ -1281,6 +1325,7 @@ function classifyAssetKind(name: string): string {
 function detectReferenceRebuilds(
   workflows: ParsedWorkflow[],
   invocationsByCallee: Map<string, SubworkflowInvocation[]>,
+  paramNames: Set<string>,
 ): ReferenceRebuildRule[] {
   const rules: ReferenceRebuildRule[] = [];
   for (const workflow of workflows) {
@@ -1304,7 +1349,13 @@ function detectReferenceRebuilds(
         (candidate) => takeNames.has(candidate),
       );
       if (!takeMatches) continue;
-      const assetParam = resolveAssetParam(rebuild.lhs, negated, takeNames, invocations);
+      const assetParam = resolveAssetParam(
+        rebuild.lhs,
+        negated,
+        takeNames,
+        invocations,
+        paramNames,
+      );
       const guardParams = collectGuardParams(block.guard, takeNames, invocations);
       const confidence: Evidence["confidence"] =
         assetParam.resolvedFromBinding && guardParams.allFromTakes ? "high" : "medium";
@@ -1329,6 +1380,15 @@ function detectReferenceRebuilds(
 function analyzeRebuildBody(
   body: string,
 ): { builder: string; builderOutputs: string[]; lhs: string; snippets: string[] } | null {
+  const direct = extractAssignedCallResult(body);
+  if (direct) {
+    return {
+      builder: direct.builder,
+      builderOutputs: direct.output ? [direct.output] : [],
+      lhs: direct.lhs,
+      snippets: [direct.snippet],
+    };
+  }
   const snippets: string[] = [];
   let builder: string | null = null;
   let lhs: string | null = null;
@@ -1353,11 +1413,45 @@ function analyzeRebuildBody(
   return { builder, builderOutputs: [...outputs], lhs, snippets };
 }
 
+// Fused form: `ch_fai = SAMTOOLS_FAIDX ( ch_ref, [[], []] ).fai.map{ ... }`.
+// The `.out`-based pattern below only sees builders assigned on a later line.
+function extractAssignedCallResult(
+  body: string,
+): { builder: string; output: string | null; lhs: string; snippet: string } | null {
+  const opener = /([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([A-Z][A-Za-z0-9_]*)\s*\(/gu;
+  for (const match of body.matchAll(opener)) {
+    const end = matchingParen(body, match.index + match[0].length - 1);
+    if (end < 0) continue;
+    const output = /^\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)/u.exec(body.slice(end + 1));
+    return {
+      builder: match[2]!,
+      output: output?.[1] ?? null,
+      lhs: match[1]!,
+      snippet: `${body.slice(match.index, end + 1)}${output ? `.${output[1]!}` : ""}`,
+    };
+  }
+  return null;
+}
+
+function matchingParen(text: string, openIndex: number): number {
+  let depth = 0;
+  for (let index = openIndex; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === "(") depth += 1;
+    else if (char === ")") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return -1;
+}
+
 function resolveAssetParam(
   lhs: string,
   negated: string,
   takeNames: Set<string>,
   invocations: SubworkflowInvocation[],
+  paramNames: Set<string>,
 ): { name: string; resolvedFromBinding: boolean } {
   const candidates = [`${lhs}_in`, lhs, negated];
   for (const candidate of candidates) {
@@ -1367,6 +1461,11 @@ function resolveAssetParam(
       const paramName = binding ? paramNameFromArgument(binding.argument) : null;
       if (paramName) return { name: paramName, resolvedFromBinding: true };
     }
+  }
+  // Callers often forward their own take slots rather than `params.x`, so no
+  // binding resolves. Fall back to whichever local name is itself a param.
+  for (const candidate of [negated, lhs.replace(/^ch_/u, ""), lhs]) {
+    if (paramNames.has(candidate)) return { name: candidate, resolvedFromBinding: false };
   }
   return { name: lhs, resolvedFromBinding: false };
 }

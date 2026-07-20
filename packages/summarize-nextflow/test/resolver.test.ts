@@ -1244,7 +1244,7 @@ workflow PIPE {
     };
 
     const byName = Object.fromEntries(summary.reference_assets.map((a) => [a.param, a]));
-    expect(Object.keys(byName).sort()).toEqual(["dict", "fasta", "fasta_fai", "outdir"]);
+    expect(Object.keys(byName).sort()).toEqual(["dict", "fasta", "fasta_fai"]);
     expect(byName.fasta!.asset_kind).toBe("fasta");
     expect(byName.fasta!.used_by).toEqual(["PREPARE_GENOME"]);
     expect(byName.fasta!.required).toBe(false);
@@ -1252,7 +1252,167 @@ workflow PIPE {
     expect(byName.fasta_fai!.used_by).toEqual(["PREPARE_GENOME"]);
     expect(byName.dict!.asset_kind).toBe("sequence_dictionary");
     expect(byName.dict!.used_by).toEqual([]);
-    expect(byName.outdir!.asset_kind).toBe("other");
+    expect(byName.outdir).toBeUndefined();
+  });
+
+  test("excludes execution and registry params from reference_assets and kinds reference sheets", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/filtered' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          io: {
+            title: "Input/output options",
+            properties: {
+              input: { type: "string", format: "file-path" },
+              outdir: { type: "string", format: "directory-path" },
+            },
+          },
+          generic: {
+            title: "Generic options",
+            properties: { multiqc_config: { type: "string", format: "file-path" } },
+          },
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              fasta_sheet: { type: "string", format: "file-path" },
+              igenomes_base: { type: "string", format: "directory-path" },
+              refgenie_base: { type: "string", format: "directory-path" },
+            },
+          },
+        },
+      }),
+    );
+    write(root, "modules/m.nf", "process M {\n  script:\n  'm'\n}\n");
+    write(root, "main.nf", "include { M } from './modules/m'\nworkflow PIPE { main: M() }\n");
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_assets: { param: string; asset_kind: string }[];
+    };
+    const byName = Object.fromEntries(summary.reference_assets.map((a) => [a.param, a]));
+
+    expect(Object.keys(byName).sort()).toEqual(["fasta", "fasta_sheet"]);
+    expect(byName.fasta_sheet!.asset_kind).toBe("reference_sheet");
+  });
+
+  test("attributes reference params consumed via channel construction to the enclosing workflow", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/channelised' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              dbsnp: { type: "string", format: "file-path" },
+            },
+          },
+        },
+      }),
+    );
+    write(root, "modules/m.nf", "process ALIGN {\n  script:\n  'align'\n}\n");
+    write(
+      root,
+      "subworkflows/local/prep/main.nf",
+      `include { ALIGN } from '../../../modules/m'
+workflow PREP {
+  main:
+  ch_fasta = Channel.fromPath(params.fasta).map{ [[id: 'ref'], it] }
+  ch_dbsnp = params.dbsnp ? Channel.fromPath(params.dbsnp) : Channel.empty()
+  ALIGN(ch_fasta)
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { PREP } from './subworkflows/local/prep/main'\nworkflow PIPE { main: PREP() }\n",
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_assets: { param: string; used_by: string[] }[];
+    };
+    const byName = Object.fromEntries(summary.reference_assets.map((a) => [a.param, a]));
+
+    expect(byName.fasta!.used_by).toEqual(["PREP"]);
+    expect(byName.dbsnp!.used_by).toEqual(["PREP"]);
+  });
+
+  test("detects negative-guard rebuilds assigned straight from the builder call result", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/fused' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              fasta_fai: { type: "string", format: "file-path" },
+            },
+          },
+        },
+      }),
+    );
+    write(
+      root,
+      "modules/samtools.nf",
+      `process SAMTOOLS_FAIDX {\n  input:\n  path fasta\n  output:\n  path "*.fai", emit: fai\n  script:\n  "x"\n}\n`,
+    );
+    write(
+      root,
+      "subworkflows/local/indexing/main.nf",
+      `include { SAMTOOLS_FAIDX } from '../../../modules/samtools'
+workflow INDEXING {
+  take:
+  fasta
+  fasta_fai
+  main:
+  if ( !fasta_fai ) {
+    ch_fasta_fai = SAMTOOLS_FAIDX ( ch_ungz_ref, [ [], [] ] ).fai.map{ [ [id: 'ref'], it[1] ] }
+  } else {
+    ch_fasta_fai = Channel.fromPath(fasta_fai)
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { INDEXING } from './subworkflows/local/indexing/main'
+workflow PIPE {
+  main:
+  INDEXING( fasta, fasta_fai )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: {
+        asset_param: string;
+        guard: string;
+        builder: string;
+        builder_outputs: string[];
+      }[];
+    };
+
+    expect(summary.reference_rebuilds).toHaveLength(1);
+    expect(summary.reference_rebuilds[0]).toMatchObject({
+      asset_param: "fasta_fai",
+      guard: "!fasta_fai",
+      builder: "SAMTOOLS_FAIDX",
+      builder_outputs: ["fai"],
+    });
   });
 
   test("emits empty reference_assets when no path-typed params or rebuilds exist", async () => {
