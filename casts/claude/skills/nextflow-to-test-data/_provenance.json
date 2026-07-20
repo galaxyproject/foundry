@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-to-test-data/index.md",
     "revision": 1,
     "content_hash": "d87e5f46e5680184cc586b97c946b7ee82e71b3ab85dfc9cf1b964960553e8bc",
-    "commit": "c29a96b7c4d124bdad3c081ae5ece79a3d03cf22"
+    "commit": "c653b1bba020e84c6d2b7d1eeb95867187bae852"
   },
-  "cast_at": "2026-07-17T23:03:53.481Z",
+  "cast_at": "2026-07-20T15:12:04.241Z",
   "refs": [
     {
       "kind": "research",
@@ -83,8 +83,8 @@
       "evidence": "corpus-observed",
       "purpose": "Input contract: read the selected profile's `test_fixtures.inputs[]` and the `nf_tests[]` enumeration — role, url/path, sha1, filetype — as the declared source of test data.",
       "license": "MIT",
-      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
-      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "src_hash": "ec4290769e89ab6af2268f1466b39089dca308642a106a2d77515861fdc26933",
+      "dst_hash": "ec4290769e89ab6af2268f1466b39089dca308642a106a2d77515861fdc26933",
       "source": "deterministic"
     }
   ],

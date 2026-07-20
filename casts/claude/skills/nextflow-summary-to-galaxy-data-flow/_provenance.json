@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 4,
     "content_hash": "a30f0654eb7a4235647ced2d96777704d3024c95608c3fb514a9bd91f6fc94a0",
-    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
+    "commit": "c653b1bba020e84c6d2b7d1eeb95867187bae852"
   },
-  "cast_at": "2026-07-01T23:46:00.366Z",
+  "cast_at": "2026-07-20T15:12:00.849Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -174,8 +174,8 @@
       "evidence": "corpus-observed",
       "purpose": "Cross-check source-side reference-data classifications before deciding how reference assets and optional rebuild branches flow through the Galaxy data-flow draft.",
       "trigger": "When the reference-data or interface brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
-      "src_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
-      "dst_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
+      "src_hash": "e31459b8a8edc6ad1de5e79cdf7ddc03d8ebd4267f605b037e9aa88f981af1cb",
+      "dst_hash": "e31459b8a8edc6ad1de5e79cdf7ddc03d8ebd4267f605b037e9aa88f981af1cb",
       "source": "deterministic"
     },
     {
@@ -203,8 +203,8 @@
       "evidence": "corpus-observed",
       "purpose": "Decide how reference assets and their indexes flow through the Galaxy data-flow draft (preserving dbkey through map-overs, deferring index-building to wrappers vs surfacing as workflow steps).",
       "trigger": "When the upstream interface brief carries reference-data inputs (FASTA, fai, dict, indexes, known sites, intervals, PoN) or when the source pipeline's compute-if-missing branches imply rebuild semantics the data flow has to honor.",
-      "src_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
-      "dst_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
+      "src_hash": "e0504e8133aac9fb09bbed861c4f92b29cb32a6756d11ea5d86ad9e4fe788f4b",
+      "dst_hash": "e0504e8133aac9fb09bbed861c4f92b29cb32a6756d11ea5d86ad9e4fe788f4b",
       "source": "deterministic"
     },
     {
@@ -233,8 +233,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure while drafting Galaxy-facing abstract data flow.",
       "license": "MIT",
-      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
-      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "src_hash": "ec4290769e89ab6af2268f1466b39089dca308642a106a2d77515861fdc26933",
+      "dst_hash": "ec4290769e89ab6af2268f1466b39089dca308642a106a2d77515861fdc26933",
       "source": "deterministic"
     }
   ],

@@ -448,6 +448,13 @@ export const summaryNextflowSchema = {
             "$ref": "#/$defs/ToolSpec"
           },
           "description": "Constituent Bioconda packages for an opaque `mulled-v2-*` multi-package container when resolved from a cached BioContainers multi-package-containers TSV. Omitted when no matching cached row is available."
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every distinct version of this tool declared anywhere in the pipeline, sorted, when processes disagree. nf-core modules pin independently, so one pipeline routinely runs several versions of a shared dependency (e.g. `samtools` at 1.17, 1.18, 1.19.2, 1.20). `version` carries the first one seen so `processes[].tool` stays a single-valued foreign key; consult `processes[].conda` / `processes[].container` for the exact version a given process runs. Omitted when every declaration agrees."
         }
       }
     },

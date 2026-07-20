@@ -9,6 +9,7 @@ interface SummaryLike {
     name: string;
     version: string;
     bioconda: string | null;
+    versions?: string[];
     mulled_components?: { name: string; version: string; bioconda: string }[];
   }[];
   processes: {
@@ -655,6 +656,34 @@ nextflow_pipeline {
     expect(processByName.get("MALT_RUN")?.tool).toBe("malt");
     expect(processByName.get("BUILD_INTERVALS")?.tool).toBe("gawk");
     expect(summary.warnings.filter((warning) => warning.includes("conda directive"))).toEqual([]);
+  });
+
+  test("records every declared version when processes pin a shared tool differently", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/pinned' }\n");
+    for (const [index, version] of ["1.18", "1.17", "1.20"].entries()) {
+      write(
+        root,
+        `modules/nf-core/samtools/op${index}/main.nf`,
+        `process SAMTOOLS_OP${index} {\n  conda "\${moduleDir}/environment.yml"\n  script:\n  'x'\n}\n`,
+      );
+      write(
+        root,
+        `modules/nf-core/samtools/op${index}/environment.yml`,
+        `dependencies:\n  - bioconda::samtools=${version}\n  - bioconda::fastqc=0.12.1\n`,
+      );
+    }
+    write(root, "main.nf", "workflow PINNED { SAMTOOLS_OP0(); SAMTOOLS_OP1(); SAMTOOLS_OP2() }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.tools.map((tool) => [tool.name, tool]));
+
+    expect(byName.get("samtools")?.versions).toEqual(["1.17", "1.18", "1.20"]);
+    // First declaration wins so processes[].tool stays single-valued.
+    expect(byName.get("samtools")?.version).toBe("1.18");
+    // Agreeing declarations leave the field off entirely.
+    expect(byName.get("fastqc")?.versions).toBeUndefined();
+    expect(summary.warnings.filter((warning) => warning.includes("conflicting"))).toEqual([]);
   });
 
   test("prefers environment.yml over a literal conda directive and warns when neither resolves", async () => {

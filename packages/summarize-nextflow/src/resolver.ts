@@ -167,6 +167,7 @@ interface Tool {
   singularity: string | null;
   wave: string | null;
   mulled_components?: ToolSpec[];
+  versions?: string[];
 }
 
 interface ToolSpec {
@@ -1738,6 +1739,7 @@ function buildTools(
 ): { tools: Tool[]; perProcessSingleton: Map<string, string>; warnings: string[] } {
   const tools = new Map<string, Tool>();
   const perProcessSingleton = new Map<string, string>();
+  const declaredVersions = new Map<string, Set<string>>();
   const warnings: string[] = [];
   const mulledIndex = loadMulledIndex(
     mulledIndexPath ?? process.env.BIOCONTAINERS_MULTI_PACKAGE_TSV,
@@ -1758,6 +1760,13 @@ function buildTools(
       perProcessSingleton.set(process.name, dependencies[0]!.name);
     }
     for (const dependency of dependencies) {
+      // tools[].name is the processes[].tool foreign key, so the registry holds
+      // one entry per name. nf-core modules pin independently, so record every
+      // declared version instead of letting a later process overwrite silently.
+      const declared = declaredVersions.get(dependency.name) ?? new Set<string>();
+      declared.add(dependency.version);
+      declaredVersions.set(dependency.name, declared);
+      if (tools.has(dependency.name)) continue;
       tools.set(dependency.name, {
         name: dependency.name,
         version: dependency.version,
@@ -1774,6 +1783,10 @@ function buildTools(
         mulled_components: mulledComponents.length > 0 ? mulledComponents : undefined,
       });
     }
+  }
+  for (const tool of tools.values()) {
+    const declared = declaredVersions.get(tool.name);
+    if (declared && declared.size > 1) tool.versions = [...declared].sort();
   }
   return { tools: [...tools.values()], perProcessSingleton, warnings };
 }
