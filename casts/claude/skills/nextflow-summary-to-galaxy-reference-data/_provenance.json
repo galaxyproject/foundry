@@ -1,0 +1,135 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-summary-to-galaxy-reference-data",
+    "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
+    "revision": 3,
+    "content_hash": "35ed639de1c20861fd3fb5cd87016798a248d291bd7d58e3a3411ab67143b24a",
+    "commit": "dc2d4abb465f978c9aba1e8c12a2c46c48a1bf2a"
+  },
+  "cast_at": "2026-07-17T14:35:37.005Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-params-to-galaxy-inputs]]",
+      "src": "content/research/nextflow-params-to-galaxy-inputs.md",
+      "dst": "references/notes/nextflow-params-to-galaxy-inputs.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Cross-check reference selectors against the broader params translation rules — curated string enums, do-not-introduce-new-data-tables, runtime-control exclusion.",
+      "trigger": "When a reference param looks like a curated selector (closed enum, .loc-keyed) rather than a data-bearing path.",
+      "src_hash": "772799f4b51a83a774437c06e482ddb694d653e17183cc50bdb7f8324faab620",
+      "dst_hash": "772799f4b51a83a774437c06e482ddb694d653e17183cc50bdb7f8324faab620",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-reference-data-classification]]",
+      "src": "content/research/nextflow-reference-data-classification.md",
+      "dst": "references/notes/nextflow-reference-data-classification.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Classify the source pipeline's reference-data usage against the eight Nextflow-side classifications (none, reference-producing, single asset, coordinated bundle, key-expanded bundle, compute-if-missing, multi-DB pick-list, parallel bundles plus cohort data).",
+      "src_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
+      "dst_hash": "818d58ce5b22b3753271f1686a98cbf2cd2f29b01947809e5dd0ae063a519a51",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-to-galaxy-reference-data-mapping]]",
+      "src": "content/research/nextflow-to-galaxy-reference-data-mapping.md",
+      "dst": "references/notes/nextflow-to-galaxy-reference-data-mapping.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Apply the v1 Galaxy posture (explicit optional inputs + in-tool rebuild) and datatype defaults when translating each classified asset into the brief.",
+      "src_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
+      "dst_hash": "5a9d1a95403a8796c45363f1384947f8578e5fde397f8e3f8670a54a3b0ebf43",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read `reference_assets[]` (curated path-typed inputs with `used_by` attribution to consuming subworkflows), `reference_rebuilds[]` (compute-if-missing rebuild rules with builder process and guard), and `params[]` provenance (`source_kind`, including `getGenomeAttribute` for nf-core key-expanded bundles) to determine which reference assets the source pipeline consumes and how it rebuilds them when absent.",
+      "license": "MIT",
+      "src_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "dst_hash": "a8d622803e5bbfd66340a1463da80ae5d1195a898411bb39cc690019d964c03b",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "nextflow-galaxy-reference-data",
+        "kind": "markdown",
+        "default_filename": "nextflow-galaxy-reference-data.md",
+        "description": "Reviewable Markdown brief: per-asset reference inputs, requiredness, rebuild-on-absence behavior, iGenomes key disposition, open questions."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the source for reference-data param evidence.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
+        ]
+      }
+    ]
+  }
+}

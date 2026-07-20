@@ -1,0 +1,197 @@
+# nf-test patterns → Galaxy / CWL test equivalents.
+# Companion to component-nextflow-testing.md.
+#
+# Rows ordered by frequency in real nf-core pipelines (snapshot block first).
+
+mappings:
+
+  # ---- Snapshot block (nf-core canonical idiom) ----
+
+  - id: snapshot.match
+    nf_test_pattern: "assert snapshot(...).match()"
+    description: "Top-level snapshot assertion comparing serialized form of N captured values to a stored .nf.test.snap file."
+    galaxy_equivalent: "Per-output assertion block in <workflow>-tests.yml; no single-line analog. Decompose into per-capture assertions (rows below)."
+    cwl_equivalent: "cwltest expected_outputs entries per output; no single-line analog. Decompose."
+    target_link: "[[tests-format]]"
+    notes: "The whole-snapshot idiom is lossy on translation; explode into N per-capture assertions and accept the surface-area increase."
+
+  - id: snapshot.succeeded_task_count
+    nf_test_pattern: "workflow.trace.succeeded().size()"
+    description: "Count of successfully completed tasks. nf-core canonical first capture; brittle across pipeline versions but stable per release."
+    galaxy_equivalent: "Implicit in workflow execution success. Galaxy workflow tests pass iff the workflow completes; per-step success surfaces via has_text on log outputs."
+    cwl_equivalent: "Implicit in cwltest's `should_succeed` / `should_fail` boolean. No per-task count."
+    target_link: "[[planemo-asserts-idioms]] §1 (Plain text reports / logs)"
+    notes: "Drop on translation; targets verify success implicitly."
+
+  - id: snapshot.versions_yml
+    nf_test_pattern: "ch_versions or path('versions.yml')"
+    description: "The `versions` topic channel collected per process and dumped to versions.yml at workflow end. nf-core canonical second capture."
+    galaxy_equivalent: "has_text on the workflow's versions output (or the multiqc report's software-versions section). Galaxy versions surface via tool-shed metadata, not a unified versions.yml."
+    cwl_equivalent: "has_text or contains_string on the versions.yml output if produced; CWL doesn't enforce a versions topic."
+    target_link: "[[tests-format#has_text_model]]"
+    notes: "Galaxy assertion targets stable tool-name strings rather than version numbers (versions drift across Bioconda releases)."
+
+  - id: snapshot.stable_names
+    nf_test_pattern: "getAllFilesFromDir(params.outdir).list().sort()"
+    description: "Sorted list of file names produced under outdir; ignores content. nf-core canonical third capture."
+    galaxy_equivalent: "Tabular has_n_lines + has_text per known canonical filename; or a directory-listing collection with element_identifiers asserted."
+    cwl_equivalent: "expected_outputs with explicit listing on the output directory (Directory type)."
+    target_link: "[[tests-format#has_text_model]]"
+    notes: "nf-test's stable_names is a list comparison; Galaxy/CWL comparable via per-name has_text."
+
+  - id: snapshot.stable_paths
+    nf_test_pattern: "getAllFilesFromDir(...) with md5 hashing or path tuples"
+    description: "Per-file fingerprint (md5 or path tuple) of files under outdir. nf-core canonical fourth capture."
+    galaxy_equivalent: "Per-output `compare: diff` for byte-stable outputs; `compare: sim_size` for non-deterministic; has_text or has_archive_member for binary archives. See planemo-asserts-idioms by output type."
+    cwl_equivalent: "expected_outputs with `checksum` field (sha1 or sha256) per file."
+    target_link: "[[planemo-asserts-idioms]] §1 (decision table by output type)"
+    notes: "The richest translation surface; per-file decisions required. Cast skill should consult planemo-asserts-idioms for the right Galaxy assertion per file format."
+
+  - id: snapshot.helpers.getAllFilesFromDir
+    nf_test_pattern: "getAllFilesFromDir(<dir>, ignoreFile: <path>, ignore: [<globs>])"
+    description: "nf-test helper that recursively lists files, applying .nftignore / inline glob filters."
+    galaxy_equivalent: "No single-helper analog. Galaxy tests assert on individual outputs; the ignore pattern is implicit (tests don't reference filtered files)."
+    cwl_equivalent: "expected_outputs by file path; CWL has no `ignore` analog."
+    notes: "On translation, the cast skill records ignore_files/ignore_globs in summary-nextflow's SnapshotFixture but doesn't propagate them to the target test (the target is per-file, not per-tree)."
+
+  - id: snapshot.helpers.removeNextflowVersion
+    nf_test_pattern: "removeNextflowVersion(<file>)"
+    description: "nf-test helper that strips the Nextflow version line from a file before snapshotting."
+    galaxy_equivalent: "compare: diff with lines_diff: 1-2 (header tolerance); or has_text on stable rows only."
+    cwl_equivalent: "checksum on a sed-postprocessed copy."
+    target_link: "[[planemo-asserts-idioms]] §2 (compare operators)"
+
+  # ---- Workflow / process success assertions ----
+
+  - id: assert.workflow_success
+    nf_test_pattern: "assert workflow.success"
+    description: "Workflow completed without error."
+    galaxy_equivalent: "Implicit. planemo workflow test fails if any step errors."
+    cwl_equivalent: "should_succeed: true (default)."
+    notes: "Drop on translation."
+
+  - id: assert.workflow_failed
+    nf_test_pattern: "assert workflow.failed"
+    description: "Workflow expected to fail (negative test)."
+    galaxy_equivalent: "Galaxy workflow tests don't directly support expected-failure; encode as a separate negative test or skip."
+    cwl_equivalent: "should_fail: true."
+    notes: "Galaxy translation requires either skipping or reframing as a non-test (unusual)."
+
+  - id: assert.process_succeeded
+    nf_test_pattern: "assert process.success"
+    description: "Module-level test: the wrapped process succeeded."
+    galaxy_equivalent: "Implicit (process is a tool; tool failure → test failure)."
+    cwl_equivalent: "Implicit (CommandLineTool zero-exit)."
+    notes: "Module tests translate to Galaxy <tests> blocks (single-tool tests), not workflow tests."
+
+  - id: assert.process_failed
+    nf_test_pattern: "assert process.failed"
+    description: "Module-level test: process expected to fail."
+    galaxy_equivalent: "Galaxy <test expect_failure='true'>."
+    cwl_equivalent: "should_fail at job level."
+
+  # ---- Output assertions (file/channel) ----
+
+  - id: assert.output_path_equals
+    nf_test_pattern: "assert path(process.out.<name>[0]).equals(...)"
+    description: "Byte-exact file equality."
+    galaxy_equivalent: "compare: diff with file: fixture path."
+    cwl_equivalent: "expected_outputs with checksum (sha1 of fixture)."
+    target_link: "[[tests-format]]"
+
+  - id: assert.output_path_md5
+    nf_test_pattern: "assert path(process.out.<name>[0]).md5 == '<hash>'"
+    description: "MD5-pinned file equality."
+    galaxy_equivalent: "compare: diff with sim_size fallback if upstream tool is non-deterministic."
+    cwl_equivalent: "expected_outputs checksum: 'sha1$<hash>' (CWL prefers sha1; conversion needed)."
+    notes: "CWL conversion lossy: nf-test md5 must be re-derived as sha1 over the same fixture."
+
+  - id: assert.output_text_contains
+    nf_test_pattern: "assert path(out).text.contains('substring')"
+    description: "Substring match on file content."
+    galaxy_equivalent: "has_text: text: 'substring'."
+    cwl_equivalent: "expected_outputs partial-content match (cwltest doesn't support substring directly; checksum a normalized form or use a wrapper)."
+    target_link: "[[tests-format#has_text_model]]"
+
+  - id: assert.output_text_matches_regex
+    nf_test_pattern: "assert path(out).text =~ /<regex>/"
+    description: "Regex match on file content."
+    galaxy_equivalent: "has_text_matching: expression: '<regex>'."
+    cwl_equivalent: "Not supported natively; checksum a normalized form."
+    target_link: "[[tests-format#has_text_matching_model]]"
+
+  - id: assert.output_lines_count
+    nf_test_pattern: "assert path(out).readLines().size() == N"
+    description: "Line count equality."
+    galaxy_equivalent: "has_n_lines: n: N (with optional delta:)."
+    cwl_equivalent: "Not supported natively."
+    target_link: "[[tests-format#has_n_lines_model]]"
+
+  - id: assert.output_size
+    nf_test_pattern: "assert path(out).size() in <range>"
+    description: "File size assertion."
+    galaxy_equivalent: "has_size: value: <bytes> with delta: or delta_frac:."
+    cwl_equivalent: "Not supported natively; check via wrapper."
+    target_link: "[[tests-format#has_size_model]]"
+
+  - id: assert.output_channel_size
+    nf_test_pattern: "assert process.out.<name>.size() == N"
+    description: "Number of items in an output channel (e.g., scatter results)."
+    galaxy_equivalent: "Galaxy collection element count via element_count or has_collection_element."
+    cwl_equivalent: "expected_outputs array length on a Directory listing or output array."
+    notes: "Cardinality assertion translates to collection-shape tests in Galaxy; CWL needs an explicit listing."
+
+  # ---- File comparison via cmp/diff ----
+
+  - id: assert.cmp_files
+    nf_test_pattern: "assert path(out).bytes == path(fixture).bytes"
+    description: "Byte-exact comparison via Path API."
+    galaxy_equivalent: "compare: diff."
+    cwl_equivalent: "checksum match."
+
+  - id: assert.snapshot_file_md5
+    nf_test_pattern: "assert snapshot(path(out)).match() (single-file snapshot, md5 fingerprint)"
+    description: "Single-file snapshot. nf-test fingerprints by md5; the .snap file stores the hash."
+    galaxy_equivalent: "compare: diff or has_text per output type (per planemo-asserts-idioms decision table)."
+    cwl_equivalent: "expected_outputs checksum."
+    target_link: "[[planemo-asserts-idioms]] §1"
+
+  # ---- Workflow-level assertions ----
+
+  - id: workflow.trace_outputs
+    nf_test_pattern: "workflow.out.<name>"
+    description: "Reference a published-via-emit channel from a workflow."
+    galaxy_equivalent: "Galaxy workflow output dataset (named by output_name in <output>)."
+    cwl_equivalent: "Workflow output port with explicit type."
+    notes: "Map nf-test output names to Galaxy output_name 1:1; CWL output ports get the same names."
+
+  - id: workflow.publishDir_outputs
+    nf_test_pattern: "Files under params.outdir checked via getAllFilesFromDir"
+    description: "Files written by publishDir directives, asserted via tree walk."
+    galaxy_equivalent: "Galaxy History / collection assertions per output dataset."
+    cwl_equivalent: "Directory output with explicit listing."
+    notes: "publishDir is pipeline-level; module tests typically don't use this idiom."
+
+  # ---- Setup / teardown ----
+
+  - id: setup.test_data_path
+    nf_test_pattern: "setup { ... } block with file fetch from nf-core/test-datasets"
+    description: "Test fixture preparation; pulls files from a versioned test-datasets branch."
+    galaxy_equivalent: "Test fixtures under test_data/ in the workflow repo, or referenced by URL."
+    cwl_equivalent: "Job file referencing fixtures with location: URLs or relative paths."
+    target_link: "[[iwc-test-data-conventions]]"
+    notes: "Translation requires resolving the runtime URL (params.pipelines_testdata_base_path + ...) into a static fixture reference."
+
+  # ---- Configuration ----
+
+  - id: config.profile_test
+    nf_test_pattern: "-profile test (or test_full, test_dfast, ...)"
+    description: "Activates a conf/<profile>.config selecting test-sized inputs."
+    galaxy_equivalent: "Galaxy workflow tests have a single fixture set per test; multi-profile equivalent is multiple test entries."
+    cwl_equivalent: "Multiple cwltest test entries with different job files."
+
+  - id: config.params_file
+    nf_test_pattern: "-params-file <yaml>"
+    description: "Override params.* from a YAML file."
+    galaxy_equivalent: "<test><param name='X' value='Y'/></test> entries."
+    cwl_equivalent: "Job file in YAML; same as default."
