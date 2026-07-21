@@ -855,6 +855,57 @@ describe("cast-mold negative cases", () => {
     expect(r.code).not.toBe(0);
     expect(r.stderr).toContain("mold source missing");
   });
+
+  it("--check on a never-cast mold leaves no bundle directory behind", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-check-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        [
+          "name: claude",
+          "provenance_schema_version: 3",
+          "required_outputs: [SKILL.md, _provenance.json]",
+          "kinds: {}",
+          "condense_prompts: {}",
+          "skill_constraints:",
+          "  frontmatter_required: [name, description]",
+          "  forbidden_runtime_paths: []",
+          "  forbid_packaged_files: []",
+          "",
+        ].join("\n"),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+ai_generated: false
+summary: Never-cast mold used to check that --check stays read-only.
+references: []
+---
+
+# m
+
+Body.
+`,
+      );
+
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir, "--check"]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("SKILL.md");
+      expect(existsSync(path.join(dir, "casts/claude/skills/m"))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("cast-mold license → redistribution-policy enforcement", () => {

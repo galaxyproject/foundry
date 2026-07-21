@@ -1264,7 +1264,8 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     args.target === "claude"
       ? path.join(repoRoot, "casts", args.target, "skills", args.moldName)
       : path.join(repoRoot, "casts", args.target, args.moldName);
-  mkdirSync(bundleRoot, { recursive: true });
+  // --check is read-only: never materialize the bundle dir for a never-cast Mold.
+  if (!args.check) mkdirSync(bundleRoot, { recursive: true });
   const provenancePath = path.join(bundleRoot, "_provenance.json");
   const carry = readExistingProvenance(provenancePath);
 
