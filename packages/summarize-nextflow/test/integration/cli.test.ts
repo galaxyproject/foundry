@@ -902,6 +902,21 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     );
   });
 
+  itIfBacassFixture("rebuilds only the Bakta database, not the FASTQC/FASTP skip flags", () => {
+    const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const rebuilds = data.reference_rebuilds as { asset_param: string; builder: string }[];
+    expect(rebuilds.map((rule) => [rule.asset_param, rule.builder])).toEqual([
+      ["baktadb", "BAKTA_BAKTADBDOWNLOAD"],
+    ]);
+    expect((data.reference_assets as { param: string }[]).map((a) => a.param)).toEqual(["baktadb"]);
+  });
+
   itIfBacassFixture("extracts repeated module aliases from bacass includes", () => {
     const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
       encoding: "utf8",

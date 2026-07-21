@@ -337,7 +337,6 @@ export async function resolveNextflowSummary(
   }
 
   const params = parseParams(pipelineRoot);
-  const paramNames = new Set(params.map((param) => param.name));
 
   const summary: Summary = {
     source: {
@@ -378,7 +377,7 @@ export async function resolveNextflowSummary(
         : [],
     },
     reference_assets: [],
-    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee, paramNames),
+    reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee, params),
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
     warnings: [...root.warnings, ...warnings],
@@ -1217,6 +1216,9 @@ function buildReferenceAssets(
     if (!rebuildParams.has(name) && isNonReferenceParam(name)) continue;
     const param = paramsByName.get(name);
     if (!param) continue;
+    // A switch is never an asset, however it was nominated — the rebuild path
+    // must not smuggle one past the candidate filters above.
+    if (isToggleParam(name, paramsByName)) continue;
     const callers = [...(usedBy.get(name) ?? [])].sort();
     const hasRebuild = rebuildParams.has(name);
     const sourcePath = param.source_path ?? null;
@@ -1261,6 +1263,17 @@ const NON_REFERENCE_PARAMS = new Set([
 
 function isNonReferenceParam(name: string): boolean {
   return NON_REFERENCE_PARAMS.has(name);
+}
+
+function isToggleName(name: string): boolean {
+  return /^(skip|no|disable|disabled)_/u.test(name);
+}
+
+// nf-core subworkflows rename take slots (`val_skip_fastqc`), so a name test on
+// the raw guard identifier misses these; the declared type is the reliable
+// signal, with the name test covering params absent from nextflow_schema.json.
+function isToggleParam(name: string, paramsByName: Map<string, Param>): boolean {
+  return paramsByName.get(name)?.type === "boolean" || isToggleName(name);
 }
 
 function isPathTypedParam(param: Param): boolean {
@@ -1325,8 +1338,10 @@ function classifyAssetKind(name: string): string {
 function detectReferenceRebuilds(
   workflows: ParsedWorkflow[],
   invocationsByCallee: Map<string, SubworkflowInvocation[]>,
-  paramNames: Set<string>,
+  params: Param[],
 ): ReferenceRebuildRule[] {
+  const paramsByName = new Map(params.map((param) => [param.name, param]));
+  const paramNames = new Set(paramsByName.keys());
   const rules: ReferenceRebuildRule[] = [];
   for (const workflow of workflows) {
     const takeNames = new Set((workflow.inputs ?? []).map((entry) => entry.name));
@@ -1338,7 +1353,7 @@ function detectReferenceRebuilds(
       );
       if (!negation) continue;
       const negated = negation[1]!;
-      if (/^(skip|no|disable|disabled)_/u.test(negated)) continue;
+      if (isToggleName(negated)) continue;
       const rebuild = analyzeRebuildBody(block.defaultBody, negated);
       if (!rebuild) continue;
       // Compute-if-missing convention: the assignment LHS or the negated identifier
@@ -1356,6 +1371,7 @@ function detectReferenceRebuilds(
         invocations,
         paramNames,
       );
+      if (isToggleParam(assetParam.name, paramsByName)) continue;
       const guardParams = collectGuardParams(block.guard, takeNames, invocations);
       const confidence: Evidence["confidence"] =
         assetParam.resolvedFromBinding && guardParams.allFromTakes ? "high" : "medium";
