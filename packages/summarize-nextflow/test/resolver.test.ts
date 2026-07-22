@@ -1366,6 +1366,174 @@ workflow PIPE {
     expect(summary.reference_rebuilds.map((r) => r.builder)).toEqual(["CREATE_DICT"]);
   });
 
+  test("skips skip-flag guards renamed by a subworkflow take slot", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/toggle' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              fasta_fai: { type: "string", format: "file-path" },
+              skip_fastqc: { type: "boolean" },
+            },
+          },
+        },
+      }),
+    );
+    write(
+      root,
+      "modules/tools.nf",
+      `process FASTQC_RAW {\n  input:\n  path reads\n  output:\n  path "*.zip", emit: zip\n  script:\n  "x"\n}
+process SAMTOOLS_FAIDX {\n  input:\n  path fasta\n  output:\n  path "*.fai", emit: fai\n  script:\n  "x"\n}
+`,
+    );
+    // Take slot renamed `val_skip_fastqc`, as nf-core subworkflows conventionally do.
+    write(
+      root,
+      "subworkflows/nf-core/trim_qc/main.nf",
+      `include { FASTQC_RAW } from '../../../modules/tools'
+workflow TRIM_QC {
+  take:
+  ch_reads
+  val_skip_fastqc
+  main:
+  if (!val_skip_fastqc) {
+    FASTQC_RAW (
+      ch_reads
+    )
+    ch_fastqc_raw_zip = FASTQC_RAW.out.zip
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "subworkflows/local/prepare_genome/main.nf",
+      `include { SAMTOOLS_FAIDX } from '../../../modules/tools'
+workflow PREPARE_GENOME {
+  take:
+  fasta
+  fasta_fai_in
+  main:
+  if (!fasta_fai_in) {
+    SAMTOOLS_FAIDX(fasta)
+    fasta_fai = SAMTOOLS_FAIDX.out.fai
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { TRIM_QC } from './subworkflows/nf-core/trim_qc/main'
+include { PREPARE_GENOME } from './subworkflows/local/prepare_genome/main'
+workflow PIPE {
+  main:
+  TRIM_QC (
+    ch_reads,
+    params.skip_fastqc
+  )
+  PREPARE_GENOME(
+    params.fasta,
+    params.fasta_fai
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: { asset_param: string; builder: string }[];
+      reference_assets: { param: string }[];
+    };
+
+    expect(summary.reference_rebuilds.map((r) => [r.asset_param, r.builder])).toEqual([
+      ["fasta_fai", "SAMTOOLS_FAIDX"],
+    ]);
+    expect(summary.reference_assets.map((a) => a.param).sort()).toEqual(["fasta", "fasta_fai"]);
+  });
+
+  test("keeps a boolean param out of reference_assets when a rebuild nominates it", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/toggle-fallback' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              fasta_fai: { type: "string", format: "file-path" },
+              build_index: { type: "boolean" },
+            },
+          },
+        },
+      }),
+    );
+    write(
+      root,
+      "modules/tools.nf",
+      `process SAMTOOLS_FAIDX {\n  input:\n  path fasta\n  output:\n  path "*.fai", emit: fai\n  script:\n  "x"\n}\n`,
+    );
+    // Guard negates a boolean take slot while the built asset is a real path param,
+    // so the boolean reaches reference_assets only via the rule's fallback_for.
+    write(
+      root,
+      "subworkflows/local/prepare_genome/main.nf",
+      `include { SAMTOOLS_FAIDX } from '../../../modules/tools'
+workflow PREPARE_GENOME {
+  take:
+  fasta
+  fasta_fai_in
+  val_build_index
+  main:
+  if (!val_build_index) {
+    SAMTOOLS_FAIDX(fasta)
+    fasta_fai = SAMTOOLS_FAIDX.out.fai
+  }
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PREPARE_GENOME } from './subworkflows/local/prepare_genome/main'
+workflow PIPE {
+  main:
+  PREPARE_GENOME(
+    params.fasta,
+    params.fasta_fai,
+    params.build_index
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      reference_rebuilds: { asset_param: string; fallback_for: string | null }[];
+      reference_assets: { param: string }[];
+    };
+
+    // The rule stands and still names the boolean as its fallback...
+    expect(summary.reference_rebuilds.map((r) => [r.asset_param, r.fallback_for])).toEqual([
+      ["fasta_fai", "build_index"],
+    ]);
+    // ...but the asset inventory must not pick it up from there.
+    expect(summary.reference_assets.map((a) => a.param)).not.toContain("build_index");
+  });
+
   test("emits no rebuilds for a pipeline without compute-if-missing branches", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'adhoc/no-rebuild' }\n");
