@@ -7,7 +7,7 @@ import { renderContentDoc } from '../lib/render-vault-doc';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allEntries = await getCollection('content');
 const linkMap = buildWikiLinkMap(allEntries);
-const html = renderContentDoc('glossary.md', linkMap, base);
+const html = renderContentDoc('meta/glossary.md', linkMap, base);
 ---
 <Base title="Glossary">
   <article class="prose prose-slate max-w-none dark:prose-invert" set:html={html} />

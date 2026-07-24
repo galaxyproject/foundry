@@ -30,7 +30,7 @@ Consumers (external):
 
 ## 2. Concepts and vocabulary
 
-Authoritative term definitions live in `content/glossary.md`; this section is the architectural picture.
+Authoritative term definitions live in `content/meta/glossary.md`; this section is the architectural picture.
 
 - **Note** — a single `.md` file with frontmatter under the foundry's content root. Identity = filename stem, used as the wiki-link target.
 - **Type** — top-level kind of note (`type:` in frontmatter): `mold | pattern | source-pattern | cli-tool | cli-command | pipeline | research | schema | prompt`.
@@ -44,7 +44,7 @@ Authoritative term definitions live in `content/glossary.md`; this section is th
 - **Pipeline** — directory note under `content/pipelines/<slug>/` (`index.md` is the only frontmatter-bearing file; optional `eval.md` / `scenarios.md` siblings carry the pipeline-level oracle and end-to-end journeys). Ordered sequence of phases that compose into a harness journey (e.g., `nextflow-to-galaxy/`, `paper-to-galaxy/`). **Dual purpose**: (a) build artifact — names the Molds a harness will orchestrate; (b) navigation primitive — renders as a "subway map" / journey index over the KB. Each phase is a `mold` reference, a `[loop]`-flagged Mold, or a `[branch]`-flagged routing step (not a Mold; harness-level orchestration — binary branches with fallthrough, or N-step fallback chains). Other inline harness annotations (e.g., `[gate]` for an approval / scope-confirmation checkpoint) will be coined when they first surface as inline phases; the set is open and not pre-enumerated. Pipelines are *not* cast; they are referenced content. Machine-checked: every phase resolves to a Mold (or is explicitly a non-Mold annotation like `[branch]`). A Mold need not belong to any pipeline — standalone and indirectly-invoked Molds are first-class.
 - **Schema** — single `.md` under `content/schemas/`. Renderable reference note for a JSON Schema package/export or vendored schema artifact.
 - **Prompt** — single `.md` wrapper under `content/prompts/`, plus a sibling raw `prompt_file` sidecar. The wrapper is human-facing and linkable; the raw sidecar is what casting packages.
-- **Cast** / **Casting** / **Cast skill** / **Cast target** — per `content/glossary.md`. The cast directory tree (`casts/<target>/<name>/`) is generated from Molds, committed to the repo, and skipped by the validator.
+- **Cast** / **Casting** / **Cast skill** / **Cast target** — per `content/meta/glossary.md`. The cast directory tree (`casts/<target>/<name>/`) is generated from Molds, committed to the repo, and skipped by the validator.
 - **Wiki link** — Obsidian-flavored `[[Target]]`. First-class in both frontmatter (typed fields like `parent_pattern`, `related_patterns`, `related_notes`) and body prose (resolved by a remark plugin in the site).
 - **Log** — `content/log.md`, append-only journal of foundry operations (`cast`, `lint`, `query`). Excluded from validator and site collection.
 

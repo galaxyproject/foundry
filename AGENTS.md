@@ -2,7 +2,7 @@
 
 ## Read first
 
-**Read `content/glossary.md` immediately at session start.** The Foundry uses domain-specific terminology — Mold, Pipeline, Phase, Branch, Cast, Pattern, CLI Mold, Foundry, axis, … — that isn't standard Galaxy or workflow vocabulary. The glossary is small, alphabetical, and worth loading in full before reasoning about anything else here. Misreading a Mold note without knowing what "Mold" means leads nowhere good.
+**Read `content/meta/glossary.md` immediately at session start.** The Foundry uses domain-specific terminology — Mold, Pipeline, Phase, Branch, Cast, Pattern, CLI Mold, Foundry, axis, … — that isn't standard Galaxy or workflow vocabulary. The glossary is small, alphabetical, and worth loading in full before reasoning about anything else here. Misreading a Mold note without knowing what "Mold" means leads nowhere good.
 
 ## Then orient
 
