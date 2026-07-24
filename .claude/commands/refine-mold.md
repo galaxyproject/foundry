@@ -18,7 +18,7 @@ You decide what kind of investigation the intent calls for. There is no fixed mo
 
 Read these before doing anything else. They are cheap and the skill won't make sense without them.
 
-1. `content/glossary.md` — pinned vocabulary (Mold, Cast, reference kind, evaluation plan, refinement journal, …). Misreading these breaks the refinement.
+1. `content/meta/glossary.md` — pinned vocabulary (Mold, Cast, reference kind, evaluation plan, refinement journal, …). Misreading these breaks the refinement.
 2. `docs/MOLD_SPEC.md` — Mold source layout. Pay attention to **Eval, Usage, Refinement: what goes where** and the **Refinement Contract**. The journal entry shape is contractual.
 3. The Mold itself — `content/molds/$1/`:
    - `index.md` (full body and frontmatter)

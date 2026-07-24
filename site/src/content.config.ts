@@ -28,7 +28,7 @@ const content = defineCollection({
       '!Dashboard.md',
       '!Index.md',
       '!log.md',
-      '!glossary.md',
+      '!meta/glossary.md',
     ],
     base: '../content',
     generateId({ entry }) {

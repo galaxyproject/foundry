@@ -9,7 +9,7 @@ Produce or refresh `content/research/iwc-$1-survey.md`. The survey **proposes ca
 
 ## Load context first (in order)
 
-1. **`content/glossary.md`** — pinned vocabulary.
+1. **`content/meta/glossary.md`** — pinned vocabulary.
 2. **`CLAUDE.md`** — authoring rules.
 3. **`docs/PATTERNS.md`** — pattern-authorship policy. **Operation-anchored naming** is mandatory in candidate-pattern proposals; do not surface tool-anchored names. Corpus-first applies — no speculative candidates.
 4. **`docs/ARCHITECTURE.md`** §3 (note types), §5 (frontmatter), §6 (validation).

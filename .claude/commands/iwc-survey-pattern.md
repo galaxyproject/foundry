@@ -9,7 +9,7 @@ Write or refine exactly one pattern page under `content/patterns/` from a survey
 
 ## Load context first
 
-1. **`content/glossary.md`** — pinned Foundry vocabulary.
+1. **`content/meta/glossary.md`** — pinned Foundry vocabulary.
 2. **`CLAUDE.md`** — local authoring rules.
 3. **`docs/PATTERNS.md`** — operation-anchored naming, corpus-first rule, legacy-tool posture.
 4. **`docs/ARCHITECTURE.md`** §3, §5, §6 — note types, frontmatter, validation.

@@ -9,7 +9,7 @@ Review the note at `$1` and return a structured report. Do **not** edit files �
 
 ## Load context first (in order)
 
-1. **`content/glossary.md`** — pinned vocabulary (Mold, Pipeline, Pattern, Cast, axis, …). Misreading these terms breaks the review.
+1. **`content/meta/glossary.md`** — pinned vocabulary (Mold, Pipeline, Pattern, Cast, axis, …). Misreading these terms breaks the review.
 2. **`CLAUDE.md`** — authoring rules (`additionalProperties: false`, registered tags, wiki-link conventions, "don't weaken the schema").
 3. **`docs/ARCHITECTURE.md`** §3 (note types), §5 (frontmatter contract), §6 (validation pipeline). Skim the rest only if needed.
 4. **`packages/note-schema/src/note-schema.ts`** + **`meta_tags.yml`** — frontmatter and tag enums.

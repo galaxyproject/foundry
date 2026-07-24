@@ -15,7 +15,7 @@ Default posture:
 
 ## Load context first (in order)
 
-1. **`content/glossary.md`** — pinned vocabulary.
+1. **`content/meta/glossary.md`** — pinned vocabulary.
 2. **`docs/PATTERNS.md`** — authorship policy. Operation-anchored naming is mandatory; corpus-first is mandatory; legacy-tool footnote convention is mandatory.
 3. **`docs/ARCHITECTURE.md`** §3 (note types).
 4. **`common_paths.yml.sample`** — citation prefix vocabulary for any new entries you write.
