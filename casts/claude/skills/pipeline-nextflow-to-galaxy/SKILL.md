@@ -5,7 +5,7 @@ description: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflo
 
 # pipeline-nextflow-to-galaxy
 
-Harness for the **NEXTFLOW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-galaxy/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline nextflow-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **NEXTFLOW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-galaxy/index.md` (revision 4) — regenerate with `foundry-build assemble-pipeline nextflow-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 

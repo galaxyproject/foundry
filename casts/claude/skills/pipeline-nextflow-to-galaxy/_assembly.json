@@ -1,6 +1,6 @@
 {
   "source_pipeline": "nextflow-to-galaxy",
-  "source_revision": 3,
+  "source_revision": 4,
   "harness_name": "pipeline-nextflow-to-galaxy",
   "options": ["use-subagents", "checkpoint"],
   "required_tools": [
