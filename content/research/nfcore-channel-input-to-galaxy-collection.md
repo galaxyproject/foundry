@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-problem
 title: "nf-core channel input → Galaxy data / collection"
 tags:
   - research/design-problem

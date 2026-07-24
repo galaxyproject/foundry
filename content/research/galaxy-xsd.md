@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy tool XML schema"
 tags:
   - research/component

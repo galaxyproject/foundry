@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Planemo workflow-test architecture"
 tags:
   - research/component

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy paired_or_unpaired collection type"
 tags:
   - research/component

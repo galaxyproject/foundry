@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Nextflow to Galaxy reference-data mapping"
 tags:
   - research/component

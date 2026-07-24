@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 tags:
   - research/component
 component: "Archon harness substrate evaluation"

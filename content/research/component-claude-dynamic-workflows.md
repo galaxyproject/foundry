@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 tags:
   - research/component
 component: "Claude Code dynamic workflows harness substrate evaluation"

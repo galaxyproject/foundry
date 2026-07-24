@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 tags:
   - research/component
 component: "Nextflow static-introspection CLI (`inspect`, `config`)"

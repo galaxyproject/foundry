@@ -4,11 +4,11 @@
   "mold": {
     "name": "freeform-summary-to-galaxy-template",
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
-    "revision": 4,
-    "content_hash": "e7577e6c69141297f675ba72ace41575d8bc3c60065a6b23d059806dacaacd63",
-    "commit": "4fa83bcea5c2823574416d0ab0b054f387d22141"
+    "revision": 5,
+    "content_hash": "1bd6cee77ca296492caba269b57156b3f77eef65be394aabc000174e0e2fbbf6",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-02T15:08:33.522Z",
+  "cast_at": "2026-07-24T14:40:47.981Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -23,7 +23,7 @@
       "trigger": "After writing or modifying the draft workflow file.",
       "verification": "Cast the skill, run on a representative paper-derived summary, confirm draft-validate diagnostics route back.",
       "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
-      "dst_hash": "77e2efef3176ce4b4ea6fb3b0bbc4821b3dbf2e6678e8c20f943586791163b02",
+      "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
       "source": "deterministic"
     },
     {
@@ -99,8 +99,8 @@
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
-      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "src_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
+      "dst_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -154,8 +154,8 @@
       "purpose": "Respect the handoff from the freeform-to-Galaxy interface and data-flow briefs to the gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked freeform-to-Galaxy templates preserve the design-brief/template split without schema changes.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
+      "dst_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
       "source": "deterministic"
     },
     {
@@ -169,8 +169,8 @@
       "evidence": "corpus-observed",
       "purpose": "Group the settled step set into titled stage frames (the gxformat2 `comments:` array) so the skeleton carries the analysis-stage narrative IWC authors annotate by hand. Schema-legal and optional.",
       "trigger": "After topology is settled and the skeleton can be partitioned into named analysis stages (inputs, per-stage step clusters, parameter-derivation knots, visualization/outputs).",
-      "src_hash": "74e5217153f23b91f845dca8ed58c3639f8cdd10ef8e351b3b0a0d8422e19dc1",
-      "dst_hash": "74e5217153f23b91f845dca8ed58c3639f8cdd10ef8e351b3b0a0d8422e19dc1",
+      "src_hash": "7d6c1c696291bc882dc5ba80cbef70dac457b6991c3de16d744dacccb23f48b7",
+      "dst_hash": "7d6c1c696291bc882dc5ba80cbef70dac457b6991c3de16d744dacccb23f48b7",
       "source": "deterministic"
     },
     {
@@ -184,8 +184,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
-      "dst_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "src_hash": "db6841d17bb08a3ed5d353b097a53da6976eb817a2ceb3dabd20c80798eaa58f",
+      "dst_hash": "db6841d17bb08a3ed5d353b097a53da6976eb817a2ceb3dabd20c80798eaa58f",
       "source": "deterministic"
     },
     {
@@ -199,8 +199,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton.",
       "trigger": "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
+      "dst_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
       "source": "deterministic"
     },
     {
@@ -214,8 +214,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
       "source": "deterministic"
     },
     {

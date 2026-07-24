@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-spec
 title: "Galaxy workflow draft format"
 tags:
   - research/design-spec

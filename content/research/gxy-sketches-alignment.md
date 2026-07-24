@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-spec
 title: "Alignment: gxy-sketches ↔ Galaxy Workflow Foundry"
 tags:
   - research/design-spec

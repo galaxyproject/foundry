@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-spec
 title: "CWL when:/pickValue → Galaxy branching translation"
 tags:
   - research/design-spec

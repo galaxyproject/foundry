@@ -13,7 +13,6 @@ export interface ContentNote {
   revised: string;
   revision: number;
   type: string;
-  subtype?: string;
   tags: string[];
 }
 
@@ -42,7 +41,6 @@ export function loadContentNotes(contentRoot = "content"): ContentNote[] {
       revised: stringValue(meta.revised) || "0000-00-00",
       revision: numberValue(meta.revision) ?? 1,
       type,
-      subtype: stringValue(meta.subtype) || undefined,
       tags,
     });
   }

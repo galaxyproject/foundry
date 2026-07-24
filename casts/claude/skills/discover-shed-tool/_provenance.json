@@ -4,11 +4,11 @@
   "mold": {
     "name": "discover-shed-tool",
     "path": "content/molds/discover-shed-tool/index.md",
-    "revision": 4,
-    "content_hash": "2e5fa1f8b22f1f9c984fa4c4dc05999294de5db706a9c1691d3af7b3459cbecb",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "revision": 5,
+    "content_hash": "648cb2501e8cf2035700a59fa843fe1176b94bc5afd862fa9368630fcc1faa92",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-09T14:20:22.945Z",
+  "cast_at": "2026-07-24T14:40:45.792Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -95,8 +95,8 @@
       "evidence": "corpus-observed",
       "purpose": "Explain Tool Shed search/indexing limitations that affect hit scoring and fallthrough decisions.",
       "trigger": "When results are missing, weak, duplicated across owners, stale, or ambiguous.",
-      "src_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
-      "dst_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
+      "src_hash": "1a7a06e11fad9872e8544b5c336832edca5b556adc141ef8120583677aee1cfa",
+      "dst_hash": "1a7a06e11fad9872e8544b5c336832edca5b556adc141ef8120583677aee1cfa",
       "source": "deterministic"
     },
     {

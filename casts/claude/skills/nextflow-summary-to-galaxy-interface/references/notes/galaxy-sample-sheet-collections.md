@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy sample_sheet collection types"
 tags:
   - research/component

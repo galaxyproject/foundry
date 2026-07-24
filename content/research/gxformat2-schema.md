@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "gxformat2 structural JSON Schema"
 tags:
   - research/component

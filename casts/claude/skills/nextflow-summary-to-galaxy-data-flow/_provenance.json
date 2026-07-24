@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-data-flow",
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
-    "revision": 4,
-    "content_hash": "a30f0654eb7a4235647ced2d96777704d3024c95608c3fb514a9bd91f6fc94a0",
-    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
+    "revision": 5,
+    "content_hash": "f9cc722e378c0c5f664b6d8baf67dba039d5820766ea3da3127e1838545013ee",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-20T18:34:59.676Z",
+  "cast_at": "2026-07-24T14:40:51.441Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -100,8 +100,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
+      "dst_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
       "source": "deterministic"
     },
     {
@@ -115,8 +115,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it.",
       "trigger": "When the upstream interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or when the Nextflow summary shows tuple(meta, path...) channel shape originating from samplesheetToList or splitCsv(header: true).",
-      "src_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
-      "dst_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
+      "src_hash": "708f78c6e48f0a4ab7e8de6ad917f7e540b6a6c794b9e3c9959a763c01ab2887",
+      "dst_hash": "708f78c6e48f0a4ab7e8de6ad917f7e540b6a6c794b9e3c9959a763c01ab2887",
       "source": "deterministic"
     },
     {
@@ -130,8 +130,8 @@
       "evidence": "corpus-observed",
       "purpose": "Decide between subworkflow `when:` and inline tool-step `when:` for each source conditional, and pick the right output fan-in primitive (`pick_value` vs twin-cascade) so the data-flow brief carries a coherent conditional disposition forward.",
       "trigger": "When the Nextflow summary's `workflow.conditionals[]` is non-empty, or when subworkflow boundaries in the source align with parameter-driven branches (step, aligner, wes, tools, skip_*, use_*).",
-      "src_hash": "12c0d468e977f75856489d98ff7f1f1ac6b1317566a8e912bcb9b3556f14b03e",
-      "dst_hash": "12c0d468e977f75856489d98ff7f1f1ac6b1317566a8e912bcb9b3556f14b03e",
+      "src_hash": "300802b1d2dde82ae62519801d4812769031d58b32847fc30c3e8927482cd520",
+      "dst_hash": "300802b1d2dde82ae62519801d4812769031d58b32847fc30c3e8927482cd520",
       "source": "deterministic"
     },
     {
@@ -144,8 +144,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Classify Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.",
-      "src_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
-      "dst_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
+      "src_hash": "97359d0d4f5def7813b004b629c785916ac57d02fb4017e48396bee8904d06e4",
+      "dst_hash": "97359d0d4f5def7813b004b629c785916ac57d02fb4017e48396bee8904d06e4",
       "source": "deterministic"
     },
     {
@@ -159,8 +159,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve datatype confidence while translating path-like data-flow edges, process output patterns, and published outputs.",
       "trigger": "When choosing or reviewing Galaxy datatype extensions for data-flow edges, collection elements, or output datasets.",
-      "src_hash": "5d1073c20db944b31f2cd15701ab271493999a3c32c85c7bf5498e84f1c2470c",
-      "dst_hash": "5d1073c20db944b31f2cd15701ab271493999a3c32c85c7bf5498e84f1c2470c",
+      "src_hash": "85ba1dcb8126658b5588fabe94a1a5ba9e6eaa8bf56faf5f511ee881b5d8a25b",
+      "dst_hash": "85ba1dcb8126658b5588fabe94a1a5ba9e6eaa8bf56faf5f511ee881b5d8a25b",
       "source": "deterministic"
     },
     {
@@ -174,8 +174,8 @@
       "evidence": "corpus-observed",
       "purpose": "Cross-check source-side reference-data classifications before deciding how reference assets and optional rebuild branches flow through the Galaxy data-flow draft.",
       "trigger": "When the reference-data or interface brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
-      "src_hash": "e31459b8a8edc6ad1de5e79cdf7ddc03d8ebd4267f605b037e9aa88f981af1cb",
-      "dst_hash": "e31459b8a8edc6ad1de5e79cdf7ddc03d8ebd4267f605b037e9aa88f981af1cb",
+      "src_hash": "5ab96fba21fc41cbf79905b13b32efd436ab7daf5b633fd65f402615646389e0",
+      "dst_hash": "5ab96fba21fc41cbf79905b13b32efd436ab7daf5b633fd65f402615646389e0",
       "source": "deterministic"
     },
     {
@@ -188,8 +188,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Translate Nextflow channel, tuple, and path shapes into Galaxy dataset and collection shapes.",
-      "src_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
-      "dst_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
+      "src_hash": "d136f4321a1af11c289762259f8efe3b51b85298bf7df6505718a3664fc1e924",
+      "dst_hash": "d136f4321a1af11c289762259f8efe3b51b85298bf7df6505718a3664fc1e924",
       "source": "deterministic"
     },
     {
@@ -203,8 +203,8 @@
       "evidence": "corpus-observed",
       "purpose": "Decide how reference assets and their indexes flow through the Galaxy data-flow draft (preserving dbkey through map-overs, deferring index-building to wrappers vs surfacing as workflow steps).",
       "trigger": "When the upstream interface brief carries reference-data inputs (FASTA, fai, dict, indexes, known sites, intervals, PoN) or when the source pipeline's compute-if-missing branches imply rebuild semantics the data flow has to honor.",
-      "src_hash": "e0504e8133aac9fb09bbed861c4f92b29cb32a6756d11ea5d86ad9e4fe788f4b",
-      "dst_hash": "e0504e8133aac9fb09bbed861c4f92b29cb32a6756d11ea5d86ad9e4fe788f4b",
+      "src_hash": "67b1ecbec0f3a9b55073fcf7df405ca5e2d0ca183fc0b44ff45b81913e33ae3c",
+      "dst_hash": "67b1ecbec0f3a9b55073fcf7df405ca5e2d0ca183fc0b44ff45b81913e33ae3c",
       "source": "deterministic"
     },
     {
@@ -218,8 +218,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
       "source": "deterministic"
     },
     {

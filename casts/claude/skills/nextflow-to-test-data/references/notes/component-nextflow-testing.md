@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 tags:
   - research/component
   - source/nextflow

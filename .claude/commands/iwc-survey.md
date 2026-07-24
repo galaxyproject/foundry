@@ -47,7 +47,7 @@ Once scope is confirmed, work through the techniques you committed to:
 
 ## Step 3 — Write the survey
 
-Write `content/research/iwc-$1-survey.md` with frontmatter matching the existing surveys (`type: research`, `subtype: component`, `tags: [research/component, target/galaxy]`, `ai_generated: true`, `status: draft`, `created`/`revised` set, `summary` line).
+Write `content/research/iwc-$1-survey.md` with frontmatter matching the existing surveys (`type: research`, `tags: [research/component, target/galaxy]`, `ai_generated: true`, `status: draft`, `created`/`revised` set, `summary` line).
 
 ### Required moves (rubric, not section layout)
 

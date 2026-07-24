@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "CWL v1.2 schema documents"
 tags:
   - research/component

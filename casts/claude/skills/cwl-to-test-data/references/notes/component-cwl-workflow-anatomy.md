@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "CWL workflow anatomy"
 tags:
   - research/component

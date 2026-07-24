@@ -4,11 +4,11 @@
   "mold": {
     "name": "freeform-summary-to-galaxy-test-plan",
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
-    "revision": 1,
-    "content_hash": "37c8ad10dcf4ebaf9aefc132bd365b1172fbd1c00534893f52a53f65e99e0d9b",
-    "commit": "1081b3c161c8a6d3a88828fd667d047f46db226c"
+    "revision": 2,
+    "content_hash": "aea6a5ae08ed005e4223735a4a80a5f1fc48b3d5109d7126058e45b43a2cec7b",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-20T19:35:12.808Z",
+  "cast_at": "2026-07-24T14:40:48.981Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose which workflow outputs and promoted checkpoints make meaningful assertions when no upstream test evidence exists.",
       "trigger": "When deciding which outputs to assert, which checkpoints to promote, and which labels the plan should assume.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
+      "dst_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while synthesizing assertions from intent.",
       "trigger": "When considering existence-only, size-only, image-dimension, or tolerant output checks, or recording an omission.",
-      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
-      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "src_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
+      "dst_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Describe job-input fixtures, remote-URL-first locations, hashes, and collection input shapes the plan should record as fixture provenance.",
       "trigger": "When recording job inputs or fixture provenance, or deciding whether a fixture belongs in test-data, Zenodo, ENA/SRA, or CVMFS.",
-      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
-      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "src_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
+      "dst_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the assertion family and tolerance that fit each synthesized expected output by output type.",
       "trigger": "When turning an expected output into assertion intent and a tolerance.",
-      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
-      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "src_hash": "358bef5e2895998094e6c714d4a3a556f86184fb3a797ffbfe98d5a57cdf4db3",
+      "dst_hash": "358bef5e2895998094e6c714d4a3a556f86184fb3a797ffbfe98d5a57cdf4db3",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
       "trigger": "When recording the labels and checkpoints the downstream test must address.",
-      "src_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
-      "dst_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
+      "src_hash": "262538786989e6e9dbef6bf92aed2a526bd870134b15e2649a4372ae7e19320e",
+      "dst_hash": "262538786989e6e9dbef6bf92aed2a526bd870134b15e2649a4372ae7e19320e",
       "source": "deterministic"
     },
     {

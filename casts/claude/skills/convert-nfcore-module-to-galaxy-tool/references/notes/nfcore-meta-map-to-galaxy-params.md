@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-problem
 title: "nf-core meta-map → Galaxy params"
 tags:
   - research/design-problem

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "nf-schema sample sheet validation gaps in Galaxy"
 tags:
   - research/component

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy collection semantics"
 tags:
   - research/component

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Nextflow params to Galaxy workflow inputs"
 tags:
   - research/component

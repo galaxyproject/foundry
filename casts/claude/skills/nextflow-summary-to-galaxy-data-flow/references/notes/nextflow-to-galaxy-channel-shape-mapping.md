@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Nextflow-to-Galaxy channel shape mapping"
 tags:
   - research/component

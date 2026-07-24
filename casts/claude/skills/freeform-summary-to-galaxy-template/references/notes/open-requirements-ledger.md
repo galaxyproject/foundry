@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-spec
 title: "Open-requirements ledger"
 tags:
   - research/design-spec

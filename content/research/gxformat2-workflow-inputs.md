@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "gxformat2 workflow inputs"
 tags:
   - research/component

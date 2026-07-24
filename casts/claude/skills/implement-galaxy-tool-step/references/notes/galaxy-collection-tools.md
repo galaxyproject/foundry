@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy collection-operation tools"
 tags:
   - research/component

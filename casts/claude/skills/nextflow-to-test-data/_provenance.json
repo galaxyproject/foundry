@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-to-test-data",
     "path": "content/molds/nextflow-to-test-data/index.md",
-    "revision": 1,
-    "content_hash": "d87e5f46e5680184cc586b97c946b7ee82e71b3ab85dfc9cf1b964960553e8bc",
-    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
+    "revision": 2,
+    "content_hash": "50b7c0cc57162b04cdf89d75c3cc79cc0f5e772d781bf38ebe549bd2804dc438",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-20T18:35:06.334Z",
+  "cast_at": "2026-07-24T14:40:54.738Z",
   "refs": [
     {
       "kind": "research",
@@ -22,8 +22,8 @@
       "purpose": "Interpret nf-test profiles and fixture conventions before mapping declared fixtures onto Galaxy inputs.",
       "trigger": "When reading `test_fixtures` / `nf_tests` to decide which profile's fixtures best cover the workflow inputs.",
       "verification": "Map nf-core/bacass declared fixtures onto its Galaxy interface and confirm this note improves profile/fixture selection.",
-      "src_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
-      "dst_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
+      "src_hash": "2e2d045bd021529ca823908beccd28db45dd95db4bef37dc4f20cb06705126e1",
+      "dst_hash": "2e2d045bd021529ca823908beccd28db45dd95db4bef37dc4f20cb06705126e1",
       "source": "deterministic"
     },
     {
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Map each declared fixture to an addressable Galaxy input label and the collection shape it must populate.",
       "trigger": "When mapping a declared fixture (often a samplesheet-driven input) onto a Galaxy input's collection shape.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
+      "dst_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
       "source": "deterministic"
     },
     {
@@ -68,8 +68,8 @@
       "evidence": "corpus-observed",
       "purpose": "Express each ref remote-URL-first with SHA-1 integrity and per-input collection layout when recording resolved fixtures.",
       "trigger": "When writing each `test-data-refs` entry.",
-      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
-      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "src_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
+      "dst_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
       "source": "deterministic"
     },
     {

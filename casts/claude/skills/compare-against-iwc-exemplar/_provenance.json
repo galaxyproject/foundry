@@ -4,11 +4,11 @@
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
-    "revision": 7,
-    "content_hash": "d01ad92af0e843f07beeb5adbde46f32127529acd64fabbc4796417d420d99a0",
-    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
+    "revision": 8,
+    "content_hash": "708b68f156bd414fca7449debfd2f85a10b9fda3e21ca3f5cbd6715fd5b3e9b3",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-01T23:45:46.474Z",
+  "cast_at": "2026-07-24T14:40:38.613Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -56,8 +56,8 @@
       "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
       "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
       "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
+      "dst_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
       "source": "deterministic"
     },
     {
@@ -71,8 +71,8 @@
       "evidence": "corpus-observed",
       "purpose": "Flag proposed shortcuts that are accepted in IWC versus shortcuts that should be treated as smells.",
       "trigger": "When the design briefs propose tests, assertions, labels, or expected-output comparisons.",
-      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
-      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "src_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
+      "dst_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
       "source": "deterministic"
     },
     {
@@ -86,8 +86,8 @@
       "evidence": "corpus-observed",
       "purpose": "Compare proposed test-data placement and fixture shapes against IWC conventions.",
       "trigger": "When the design briefs hint at workflow tests or input fixture organization.",
-      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
-      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "src_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
+      "dst_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
       "source": "deterministic"
     },
     {
@@ -101,8 +101,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
       "source": "deterministic"
     }
   ],

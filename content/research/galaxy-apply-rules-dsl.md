@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy Apply Rules DSL"
 tags:
   - research/component

@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 1,
     "content_hash": "d31030715b0bec833af6fc568afa88ca90972f189caf33c58c3a7677fba8caf4",
-    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-24T13:51:17.496Z",
+  "cast_at": "2026-07-24T14:40:55.745Z",
   "refs": [
     {
       "kind": "pattern",
@@ -53,8 +53,8 @@
       "trigger": "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
-      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "src_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
+      "dst_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -107,8 +107,8 @@
       "evidence": "hypothesis",
       "purpose": "Re-wire the affected region consistently with the data-flow design that settled the surrounding topology.",
       "verification": "Promote after two repairs preserve the surrounding data-flow design without re-deriving it from the source.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
+      "dst_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
       "source": "deterministic"
     },
     {
@@ -122,8 +122,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit re-wired steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
       "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
-      "src_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
-      "dst_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "src_hash": "db6841d17bb08a3ed5d353b097a53da6976eb817a2ceb3dabd20c80798eaa58f",
+      "dst_hash": "db6841d17bb08a3ed5d353b097a53da6976eb817a2ceb3dabd20c80798eaa58f",
       "source": "deterministic"
     },
     {
@@ -137,8 +137,8 @@
       "evidence": "hypothesis",
       "purpose": "Read open blocking entries to scope the repair; mark each resolved or surrender it, feeding the loop's decreasing-blocker convergence gate.",
       "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
       "source": "deterministic"
     },
     {

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Nextflow workflow I/O semantics"
 tags:
   - research/component

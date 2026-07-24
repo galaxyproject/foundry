@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy native workflow (.ga) structural JSON Schema"
 tags:
   - research/component

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Nextflow reference-data classification"
 tags:
   - research/component

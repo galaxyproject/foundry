@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
     "content_hash": "fc96f678cb072237347f4990644a86c47d84f4fff303160fbb4ae3a92a55e1c5",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-09T14:32:48.116Z",
+  "cast_at": "2026-07-24T14:40:57.869Z",
   "refs": [
     {
       "kind": "cli-tool",
@@ -65,8 +65,8 @@
       "evidence": "hypothesis",
       "purpose": "Use CWL's native workflow, step, tool, scatter, conditional, and requirement structure without copying the heavier Nextflow inference pipeline.",
       "verification": "Run the generated summarize-cwl skill against one simple normalized workflow, one scattered workflow, and one workflow with remote run references; confirm the summary validates and downstream CWL-to-Galaxy molds can consume it.",
-      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
-      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "src_hash": "9a9868761a1d5f262f4abb1e42d7ba02815122adda85c1c80286bd51f3e46b04",
+      "dst_hash": "9a9868761a1d5f262f4abb1e42d7ba02815122adda85c1c80286bd51f3e46b04",
       "source": "deterministic"
     },
     {
@@ -80,8 +80,8 @@
       "evidence": "corpus-observed",
       "purpose": "Check official CWL v1.2 field names and source-language semantics when summarizing less-common features.",
       "trigger": "When the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure.",
-      "src_hash": "ad847826f59dba599078fe1cc6750ffe131134966e7fefce5f81544b768153ed",
-      "dst_hash": "ad847826f59dba599078fe1cc6750ffe131134966e7fefce5f81544b768153ed",
+      "src_hash": "89fcd78f8b9a50a20e366704b926c451b75cd7eb6288ce4c7f12f474669712ff",
+      "dst_hash": "89fcd78f8b9a50a20e366704b926c451b75cd7eb6288ce4c7f12f474669712ff",
       "source": "deterministic"
     },
     {

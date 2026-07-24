@@ -4,11 +4,11 @@
   "mold": {
     "name": "summarize-galaxy-tool",
     "path": "content/molds/summarize-galaxy-tool/index.md",
-    "revision": 7,
-    "content_hash": "f02491928ff799d2ce8ed27d84da66f90bbde8b18b71bdbb2c2e07f2221beb46",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "revision": 8,
+    "content_hash": "49593311007504265cec8bca52784a2c9418a57ef1045ea7fcad6ddc25f15d26",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-09T14:20:26.879Z",
+  "cast_at": "2026-07-24T14:40:58.904Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -83,8 +83,8 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper.",
       "trigger": "When a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object.",
-      "src_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
-      "dst_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
+      "src_hash": "1a7a06e11fad9872e8544b5c336832edca5b556adc141ef8120583677aee1cfa",
+      "dst_hash": "1a7a06e11fad9872e8544b5c336832edca5b556adc141ef8120583677aee1cfa",
       "source": "deterministic"
     },
     {
@@ -98,8 +98,8 @@
       "evidence": "hypothesis",
       "purpose": "Treat cached ParsedTool JSON from galaxy-tool-cache as the v1 input source for Galaxy tool summaries.",
       "verification": "Summarize FastQC, bwa_mem2, and samtools_sort from cached ParsedTool JSON and confirm downstream step implementation can bind inputs and outputs.",
-      "src_hash": "0c5a2dab8fb3c0d9bfb9fcd1392511cd955c9a0fac672c1613f3ad5d016cca11",
-      "dst_hash": "0c5a2dab8fb3c0d9bfb9fcd1392511cd955c9a0fac672c1613f3ad5d016cca11",
+      "src_hash": "e75d5a57492fc6d0a079ba86e95f54d634498f843d3c1d52349903859599d717",
+      "dst_hash": "e75d5a57492fc6d0a079ba86e95f54d634498f843d3c1d52349903859599d717",
       "source": "deterministic"
     },
     {

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 tags:
   - research/component
 component: "Nextflow Pipeline Anatomy (DSL2)"

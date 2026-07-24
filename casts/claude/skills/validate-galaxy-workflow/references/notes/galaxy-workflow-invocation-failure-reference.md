@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy workflow invocation failure reference"
 tags:
   - research/component

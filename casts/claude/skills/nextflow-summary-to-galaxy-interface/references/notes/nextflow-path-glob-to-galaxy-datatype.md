@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Nextflow path/glob to Galaxy datatype mapping"
 tags:
   - research/component

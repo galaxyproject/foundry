@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy datatypes registry sample"
 tags:
   - research/component

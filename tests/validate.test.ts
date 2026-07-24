@@ -681,7 +681,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+      ...baseRequired({ type: "research", tags: ["research/component"] }),
     });
     writeFm(path.join(dir, "patterns/pattern-x.md"), {
       ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Pattern X" }),
@@ -858,7 +858,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     );
     writeFm(path.join(dir, "research/not-a-pattern.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+      ...baseRequired({ type: "research", tags: ["research/component"] }),
     });
 
     const r = validateDirectory({
@@ -980,7 +980,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+      ...baseRequired({ type: "research", tags: ["research/component"] }),
     });
 
     const r = validateDirectory({
@@ -1010,7 +1010,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+      ...baseRequired({ type: "research", tags: ["research/component"] }),
     });
 
     const r = validateDirectory({
@@ -1311,7 +1311,6 @@ describe("validateDirectory (cross-file)", () => {
     const fm = baseRequired({
       type: "research",
       tags: ["research/component"],
-      subtype: "component",
     });
     mkdirSync(path.dirname(path.join(dir, "research/component-x.md")), { recursive: true });
     writeFileSync(
@@ -1396,7 +1395,7 @@ describe("validateDirectory (cross-file)", () => {
         .join("\n")}\n---\n\n# m\n\nStub. Replace with real content later.\n`,
     );
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+      ...baseRequired({ type: "research", tags: ["research/component"] }),
     });
 
     const r = validateDirectory({

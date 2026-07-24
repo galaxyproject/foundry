@@ -4,11 +4,11 @@
   "mold": {
     "name": "freeform-summary-to-galaxy-data-flow",
     "path": "content/molds/freeform-summary-to-galaxy-data-flow/index.md",
-    "revision": 1,
-    "content_hash": "6efaac78027083ba93caf8f89514396639f9522597dd0356c4cb58d28d5c1a2c",
-    "commit": "dca2ac888332ee86d0cdcb5aabef94804fa16c54"
+    "revision": 2,
+    "content_hash": "6a85026f0563a2febc0227175acdf72a40d510ebb641e9e8d2d2ab735a7e2c09",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-20T16:07:58.590Z",
+  "cast_at": "2026-07-24T14:40:46.605Z",
   "refs": [
     {
       "kind": "pattern",
@@ -81,8 +81,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked freeform-to-Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
+      "dst_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
       "source": "deterministic"
     },
     {
@@ -96,8 +96,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it.",
       "trigger": "When the interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or the free-form summary describes per-sample/per-record metadata that must survive map-over steps.",
-      "src_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
-      "dst_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
+      "src_hash": "708f78c6e48f0a4ab7e8de6ad917f7e540b6a6c794b9e3c9959a763c01ab2887",
+      "dst_hash": "708f78c6e48f0a4ab7e8de6ad917f7e540b6a6c794b9e3c9959a763c01ab2887",
       "source": "deterministic"
     },
     {
@@ -111,8 +111,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
       "source": "deterministic"
     }
   ],

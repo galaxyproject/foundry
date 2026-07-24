@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Nextflow operators to Galaxy collection recipes"
 tags:
   - research/component

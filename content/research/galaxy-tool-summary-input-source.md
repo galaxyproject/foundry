@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-spec
 title: "Galaxy tool summary input source"
 tags:
   - research/design-spec

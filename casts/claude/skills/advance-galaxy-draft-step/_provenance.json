@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 2,
-    "content_hash": "9acaa43167eb3af4aff128dc31b1947e3fc24291140b7e8586518a9e0cc9ed85",
-    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
+    "revision": 3,
+    "content_hash": "3bc7d9bd4c6acb9c1ed02dad2a5a246658bd23bb091bc344a618b770fcbd6a45",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-01T23:45:45.347Z",
+  "cast_at": "2026-07-24T14:40:35.428Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -55,7 +55,7 @@
       "trigger": "After implementing or modifying the chosen step in the draft.",
       "verification": "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched.",
       "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
-      "dst_hash": "77e2efef3176ce4b4ea6fb3b0bbc4821b3dbf2e6678e8c20f943586791163b02",
+      "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
       "source": "deterministic"
     },
     {
@@ -69,8 +69,8 @@
       "evidence": "corpus-observed",
       "purpose": "Classify [[draft-validate]] diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice).",
       "trigger": "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.",
-      "src_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
-      "dst_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
+      "src_hash": "1475e364cf4bd26a017c35e2a7e389c8d3ad7f6b6abb21780f971cbd943c21b7",
+      "dst_hash": "1475e364cf4bd26a017c35e2a7e389c8d3ad7f6b6abb21780f971cbd943c21b7",
       "source": "deterministic"
     },
     {
@@ -84,8 +84,8 @@
       "evidence": "hypothesis",
       "purpose": "Recognize the blocking entry [[implement-galaxy-tool-step]] appends (its shape and `open | resolved | surrendered` status) so the orchestrator can detect the raised computability gap, count open blocking entries for the convergence gate, and escalate to [[repair-galaxy-draft-topology]].",
       "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that strictly reduces the open count.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
       "source": "deterministic"
     },
     {

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-spec
 title: "Galaxy data-flow draft contract"
 tags:
   - research/design-spec

@@ -54,7 +54,7 @@ Run it once and trust it. Do **not** re-derive these checks by hand — spend to
 For each on-demand reference, open the target note and check:
 
 - **Trigger / body duplication.** The note must not re-state the manifest's load condition in its own body (it's loaded *because* the trigger fired — the consumer doesn't need to re-read it). If a note has a "Mold loading guidance" or "When to use this" section that mirrors the manifest, flag for removal.
-- **Author-meta in runtime body.** Sections addressing the Foundry author ("Do not turn this into a pattern page," "Keep the Mold body thin") are noise at runtime. The note is loaded into the consuming LLM's context, not read by humans deciding how to organize the corpus. Flag for removal; if the author-meta encodes a real corpus-organization decision, push it to frontmatter (`subtype`, `type`) or a meta-note instead of the runtime body.
+- **Author-meta in runtime body.** Sections addressing the Foundry author ("Do not turn this into a pattern page," "Keep the Mold body thin") are noise at runtime. The note is loaded into the consuming LLM's context, not read by humans deciding how to organize the corpus. Flag for removal; if the author-meta encodes a real corpus-organization decision, push it to frontmatter (`type`) or a meta-note instead of the runtime body.
 - **Reverse-dependency naming.** Research / pattern notes that name the consuming Mold in their body create a cycle. The manifest is one-way: Mold → note. Flag.
 - **Body duplication across references.** Two referenced notes saying the same thing in the same load slice is token waste. Suggest consolidation.
 

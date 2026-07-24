@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-problem
 title: "nf-core versions emit → Galaxy <version_command>"
 tags:
   - research/design-problem

@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy <discover_datasets>"
 tags:
   - research/component

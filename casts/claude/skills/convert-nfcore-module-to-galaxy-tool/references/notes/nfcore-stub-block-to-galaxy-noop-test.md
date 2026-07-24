@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: design-problem
 title: "nf-core stub: block → Galaxy (intentional drop)"
 tags:
   - research/design-problem

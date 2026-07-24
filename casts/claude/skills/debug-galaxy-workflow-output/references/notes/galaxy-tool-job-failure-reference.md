@@ -1,6 +1,5 @@
 ---
 type: research
-subtype: component
 title: "Galaxy tool and job failure reference"
 tags:
   - research/component

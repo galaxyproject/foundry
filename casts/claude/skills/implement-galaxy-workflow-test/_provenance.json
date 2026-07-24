@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
-    "revision": 7,
-    "content_hash": "7f68fe27b39a85abaf6c15f1647809b0d28c71753a7de463a52ffcd5e440f82a",
-    "commit": "1081b3c161c8a6d3a88828fd667d047f46db226c"
+    "revision": 8,
+    "content_hash": "329a22759bcdd92146b75e0c09dbd6bdbec7965a75e88296799aec0c01f96f56",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-20T19:35:13.703Z",
+  "cast_at": "2026-07-24T14:40:49.982Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -59,8 +59,8 @@
       "evidence": "corpus-observed",
       "purpose": "Revise workflow inputs, outputs, labels, checkpoints, and collection identifiers so meaningful tests can be authored.",
       "trigger": "When test authoring reveals missing labels, omitted workflow-level outputs, unstable collection identifiers, weakly assertable final outputs, or fixture-shape pressure on workflow inputs.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
+      "dst_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
       "source": "deterministic"
     },
     {
@@ -74,8 +74,8 @@
       "evidence": "corpus-observed",
       "purpose": "Flag assertion shortcuts that are acceptable in IWC versus shortcuts that should be avoided.",
       "trigger": "When considering existence-only, size-only, image-only, checksum, output-label, or negative-test patterns.",
-      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
-      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "src_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
+      "dst_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
       "source": "deterministic"
     },
     {
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style.",
       "trigger": "When writing or revising the job/input side of a Galaxy workflow test file.",
-      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
-      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "src_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
+      "dst_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
       "source": "deterministic"
     },
     {
@@ -104,8 +104,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose assertion families, tolerance magnitudes, and the static/Planemo validation loop.",
       "trigger": "When writing or revising output assertions for a Galaxy workflow test file.",
-      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
-      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "src_hash": "358bef5e2895998094e6c714d4a3a556f86184fb3a797ffbfe98d5a57cdf4db3",
+      "dst_hash": "358bef5e2895998094e6c714d4a3a556f86184fb3a797ffbfe98d5a57cdf4db3",
       "source": "deterministic"
     },
     {
@@ -119,8 +119,8 @@
       "evidence": "corpus-observed",
       "purpose": "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs.",
       "trigger": "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations.",
-      "src_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
-      "dst_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
+      "src_hash": "262538786989e6e9dbef6bf92aed2a526bd870134b15e2649a4372ae7e19320e",
+      "dst_hash": "262538786989e6e9dbef6bf92aed2a526bd870134b15e2649a4372ae7e19320e",
       "source": "deterministic"
     },
     {

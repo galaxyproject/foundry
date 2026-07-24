@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 7,
-    "content_hash": "dfc08f79ea9b4893bbfb0712e99c78ab973c5f4b449745c661d5e16522b61f9c",
-    "commit": "dca2ac888332ee86d0cdcb5aabef94804fa16c54"
+    "revision": 8,
+    "content_hash": "7366a9358c7bcb049cfc99211edb789c18c30a9c804f8c16de48338a58c5265c",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-20T16:08:02.483Z",
+  "cast_at": "2026-07-24T14:40:06.499Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Implement identifier-derived collection reshaping via Apply Rules.",
       "trigger": "When collection element identifiers need regex parsing, nesting-level swaps, regrouping, or paired identifier assignment.",
-      "src_hash": "336d2a22bb191fe79fc34f9ff42d2bc87bb3f7afa6e066cac6f98c66ae8fb53f",
-      "dst_hash": "336d2a22bb191fe79fc34f9ff42d2bc87bb3f7afa6e066cac6f98c66ae8fb53f",
+      "src_hash": "42caa1241ddb8b2a6e2ad25c1f53a3c1aeb92e9704db95168824f6b19d30f75e",
+      "dst_hash": "42caa1241ddb8b2a6e2ad25c1f53a3c1aeb92e9704db95168824f6b19d30f75e",
       "source": "deterministic"
     },
     {
@@ -54,8 +54,8 @@
       "trigger": "When implementing a step with data_collection inputs, mapped outputs, reductions, or nested collection wiring.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
-      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "src_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
+      "dst_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -108,8 +108,8 @@
       "evidence": "corpus-observed",
       "purpose": "Insert built-in Galaxy collection-operation steps when a direct tool connection cannot express the needed shape.",
       "trigger": "When a step needs collection construction, filtering, extraction, zipping, unzipping, flattening, merging, or relabeling.",
-      "src_hash": "ab4cbc99ce12b352807b17aa8784f755050c4b73d00bcaaddf799d769a818e39",
-      "dst_hash": "ab4cbc99ce12b352807b17aa8784f755050c4b73d00bcaaddf799d769a818e39",
+      "src_hash": "4328758627306b96ce2c8814913a991c735e83c0d987785de389b05b793ac718",
+      "dst_hash": "4328758627306b96ce2c8814913a991c735e83c0d987785de389b05b793ac718",
       "source": "deterministic"
     },
     {
@@ -123,8 +123,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve concrete tool/job failure evidence while implementing step labels, tool ids, output labels, and collection wiring.",
       "trigger": "When a selected wrapper has explicit failure semantics, dynamic outputs, non-default stdio rules, strict-shell behavior, or runtime-only failure risk.",
-      "src_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
-      "dst_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
+      "src_hash": "1475e364cf4bd26a017c35e2a7e389c8d3ad7f6b6abb21780f971cbd943c21b7",
+      "dst_hash": "1475e364cf4bd26a017c35e2a7e389c8d3ad7f6b6abb21780f971cbd943c21b7",
       "source": "deterministic"
     },
     {
@@ -138,8 +138,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve testable output labels and collection element identifiers while replacing abstract steps with concrete gxformat2 steps.",
       "trigger": "When a concrete step changes output labels, emits collection outputs, creates a diagnostic checkpoint, or makes a final output too weakly assertable.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
+      "dst_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
       "source": "deterministic"
     },
     {
@@ -153,8 +153,8 @@
       "evidence": "corpus-observed",
       "purpose": "Turn operator-derived abstract transforms into concrete Galaxy wiring, collection operations, or review requests.",
       "trigger": "When a concrete step implements behavior traced to map, join, groupTuple, branch, mix, combine, or multiMap.",
-      "src_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
-      "dst_hash": "d583e8f902dd236d021dedad83bd8dff7350cfed5935c0ecd5734c90b98d69f6",
+      "src_hash": "97359d0d4f5def7813b004b629c785916ac57d02fb4017e48396bee8904d06e4",
+      "dst_hash": "97359d0d4f5def7813b004b629c785916ac57d02fb4017e48396bee8904d06e4",
       "source": "deterministic"
     },
     {
@@ -168,8 +168,8 @@
       "evidence": "corpus-observed",
       "purpose": "Check whether a concrete tool input/output can preserve the intended source-derived Galaxy collection shape.",
       "trigger": "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs.",
-      "src_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
-      "dst_hash": "d59fbe5346567460ba4f1a50bcf40411a7617502a5bc8649c3ce9b169838d24a",
+      "src_hash": "d136f4321a1af11c289762259f8efe3b51b85298bf7df6505718a3664fc1e924",
+      "dst_hash": "d136f4321a1af11c289762259f8efe3b51b85298bf7df6505718a3664fc1e924",
       "source": "deterministic"
     },
     {
@@ -183,8 +183,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
       "source": "deterministic"
     },
     {
