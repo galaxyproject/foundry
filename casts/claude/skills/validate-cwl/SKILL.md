@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.
+- Read artifact `cwl-workflow-draft`. Produced by `implement-cwl-tool-step`, `summary-to-cwl-template`. Assembled CWL Workflow to validate — the `cwl-workflow-draft.cwl` from implement-cwl-tool-step (`class: Workflow`); the build result `cwltool --validate` and schema lint run against.
 
 ## Outputs
 

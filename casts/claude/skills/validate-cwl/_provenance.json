@@ -4,10 +4,23 @@
   "mold": {
     "name": "validate-cwl",
     "path": "content/molds/validate-cwl/index.md",
-    "revision": 2,
-    "content_hash": "9b74a3cba42368aa4e32f205294ad860a8df3c3c868ed6a3dcd34d78a9613e5d",
-    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+    "revision": 3,
+    "content_hash": "a5ce29374816394f67661d637605401d0f164ef5d93db344a73f5b6f19702c78",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-24T13:51:20.266Z",
-  "refs": []
+  "cast_at": "2026-07-24T14:19:42.025Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [],
+    "consumes": [
+      {
+        "id": "cwl-workflow-draft",
+        "description": "Assembled CWL Workflow to validate — the `cwl-workflow-draft.cwl` from [[implement-cwl-tool-step]] (`class: Workflow`); the build result `cwltool --validate` and schema lint run against.",
+        "producers": [
+          "implement-cwl-tool-step",
+          "summary-to-cwl-template"
+        ]
+      }
+    ]
+  }
 }
