@@ -8,8 +8,8 @@ tags:
   - target/cwl
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Assemble CWL job file(s) and expected-output assertions."
 input_artifacts:
@@ -25,4 +25,4 @@ output_artifacts:
 ---
 # implement-cwl-workflow-test
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+Assemble the CWL job file(s) and expected-output assertions for the drafted workflow from its reviewed [[nextflow-test-to-cwl-test-plan]] test plan and the workflow's input/output ports.

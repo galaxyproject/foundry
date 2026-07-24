@@ -66,7 +66,8 @@ describe("assemble-pipeline (committed harnesses)", () => {
     const branch = assembly.phases.find((p: { kind: string }) => p.kind === "branch");
     expect(branch.pattern).toBe("test-data-resolution");
     expect(branch.chain).toEqual(["paper-to-test-data", "find-test-data", "user-supplied"]);
-    expect(branch.cast_present).toEqual([false, true, null]);
+    // Both chain molds are cast; the terminal free-text branch (`user-supplied`) projects null.
+    expect(branch.cast_present).toEqual([true, true, null]);
     const loop = assembly.phases.find((p: { loop?: boolean }) => p.loop === true);
     expect(loop.skill).toBe("advance-galaxy-draft-step");
   });

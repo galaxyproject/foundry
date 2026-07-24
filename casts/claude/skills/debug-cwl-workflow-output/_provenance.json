@@ -1,0 +1,13 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "debug-cwl-workflow-output",
+    "path": "content/molds/debug-cwl-workflow-output/index.md",
+    "revision": 2,
+    "content_hash": "dd86078aac141070bbd438dd5eaab775c880515996d2e336131d4b80522dbc83",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:12.321Z",
+  "refs": []
+}

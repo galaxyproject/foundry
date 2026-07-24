@@ -1,0 +1,40 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "implement-cwl-workflow-test",
+    "path": "content/molds/implement-cwl-workflow-test/index.md",
+    "revision": 2,
+    "content_hash": "030e46e888bcb9edc55041bd7fb99739676b2ae985581ca0f2e119d7795d323e",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:13.993Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-workflow-test",
+        "kind": "yaml",
+        "default_filename": "cwl-job.yml",
+        "description": "CWL job file(s) with inputs and expected-output assertions for the implemented workflow."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "cwl-test-plan",
+        "description": "Reviewable CWL test plan from [[nextflow-test-to-cwl-test-plan]] (or future CWL test-plan producers); job, fixture, assertion provenance.",
+        "producers": [
+          "nextflow-test-to-cwl-test-plan"
+        ]
+      },
+      {
+        "id": "cwl-workflow-draft",
+        "description": "CWL Workflow being tested; provides input/output ports and shapes the job + assertions must match.",
+        "producers": [
+          "implement-cwl-tool-step",
+          "summary-to-cwl-template"
+        ]
+      }
+    ]
+  }
+}

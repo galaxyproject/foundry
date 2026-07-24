@@ -1,0 +1,33 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "paper-to-test-data",
+    "path": "content/molds/paper-to-test-data/index.md",
+    "revision": 2,
+    "content_hash": "39fbe4c3e624f0b2ef1242d8bc25a453210b8623097ed24044d2407792738ed3",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:16.344Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "test-data-refs",
+        "kind": "json",
+        "default_filename": "test-data-refs.json",
+        "description": "Resolved workflow test inputs and expected outputs derived from paper evidence (URLs, file shapes, expected hashes)."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "freeform-summary",
+        "description": "Free-form summary from [[summarize-paper]]; sample data and reference evidence the test fixtures derive from.",
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "summary-to-cwl-template",
+    "path": "content/molds/summary-to-cwl-template/index.md",
+    "revision": 2,
+    "content_hash": "a2ab7a1706812d8501af7f65334002f292d5c762178a07bd9145ab2bfee4714e",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:19.347Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-workflow-draft",
+        "kind": "yaml",
+        "default_filename": "cwl-workflow-draft.cwl",
+        "description": "CWL Workflow skeleton: inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
+      }
+    ],
+    "consumes": []
+  }
+}

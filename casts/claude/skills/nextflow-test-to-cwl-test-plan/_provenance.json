@@ -1,0 +1,49 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-test-to-cwl-test-plan",
+    "path": "content/molds/nextflow-test-to-cwl-test-plan/index.md",
+    "revision": 1,
+    "content_hash": "c71fe933917ad6429721aa69a4fc4f5f470d4a945251855cc1034fbb80637754",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:15.802Z",
+  "refs": [
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read summarized nf-test profiles, snapshot fixtures, selected test data, params, and expected outputs.",
+      "license": "MIT",
+      "src_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "dst_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-test-plan",
+        "kind": "markdown",
+        "default_filename": "cwl-test-plan.md",
+        "description": "Reviewable CWL workflow test plan: job inputs, expected outputs, assertions, fixtures, rationale provenance."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      }
+    ]
+  }
+}

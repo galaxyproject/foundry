@@ -1,0 +1,159 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "cwl-test-to-galaxy-test-plan",
+    "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
+    "revision": 2,
+    "content_hash": "274a902cb9327e4d0a88ee73485d9e7950400f8ec668b7bca7fd0561776af0d1",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:11.720Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose which workflow outputs and promoted checkpoints make meaningful assertions.",
+      "trigger": "When deciding which outputs to assert and which labels the plan should bind to.",
+      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-shortcuts-anti-patterns]]",
+      "src": "content/research/iwc-shortcuts-anti-patterns.md",
+      "dst": "references/notes/iwc-shortcuts-anti-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests.",
+      "trigger": "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.",
+      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes.",
+      "trigger": "When writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS.",
+      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-asserts-idioms]]",
+      "src": "content/research/planemo-asserts-idioms.md",
+      "dst": "references/notes/planemo-asserts-idioms.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs.",
+      "trigger": "When turning CWL expected outputs into Galaxy test-plan assertions.",
+      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-workflow-test-architecture]]",
+      "src": "content/research/planemo-workflow-test-architecture.md",
+      "dst": "references/notes/planemo-workflow-test-architecture.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
+      "trigger": "When recording the labels and checkpoints the downstream test must address.",
+      "src_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
+      "dst_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-test-plan]]",
+      "src": "package://@galaxy-foundry/foundry#galaxyWorkflowTestPlanSchema",
+      "dst": "references/schemas/galaxy-workflow-test-plan.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema; validate with `foundry validate-galaxy-workflow-test-plan`.",
+      "verification": "Cast the skill on a CWL summary carrying tests and confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it.",
+      "license": "MIT",
+      "src_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "dst_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-cwl]]",
+      "src": "package://@galaxy-foundry/foundry#summaryCwlSchema",
+      "dst": "references/schemas/summary-cwl.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read the CWL summary's test cases, job inputs, expected outputs, and assertion evidence.",
+      "license": "MIT",
+      "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[tests-format]]",
+      "src": "package://@galaxy-foundry/foundry#testsFormatSchema",
+      "dst": "references/schemas/tests-format.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Use the Galaxy workflow tests schema as the assertion-family vocabulary when translating CWL test evidence into a Galaxy test plan.",
+      "trigger": "When mapping expected outputs, tolerances, or fixture assertions into Galaxy workflow-test assertion intent.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-test-plan",
+        "kind": "yaml",
+        "default_filename": "galaxy-test-plan.yml",
+        "schema": "[[galaxy-workflow-test-plan]]",
+        "description": "Reviewable Galaxy workflow test plan (see [[galaxy-workflow-test-plan]]) derived from CWL test fixtures, job inputs, expected outputs, and assertion evidence."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-cwl",
+        "description": "Structured CWL summary from [[summarize-cwl]]; carries test fixtures, job inputs, expected outputs.",
+        "inherited_schema": "[[summary-cwl]]",
+        "producers": [
+          "summarize-cwl"
+        ]
+      }
+    ]
+  }
+}

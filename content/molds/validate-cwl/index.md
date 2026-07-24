@@ -8,12 +8,12 @@ tags:
   - target/cwl
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Run cwltool --validate / schema lint, classify failures, recommend fixes."
 loop_endstate: "No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand."
 ---
 # validate-cwl
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+Run `cwltool --validate` and schema lint over the assembled CWL workflow, classify each diagnostic, and recommend a concrete fix — routing failures back to the authoring step that owns them.

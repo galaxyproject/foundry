@@ -1,0 +1,40 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "implement-cwl-tool-step",
+    "path": "content/molds/implement-cwl-tool-step/index.md",
+    "revision": 2,
+    "content_hash": "44c99d56127b03301120403a8244fca7486e900c79bcd26617a873da7be1ac17",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:13.428Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-workflow-draft",
+        "kind": "yaml",
+        "default_filename": "cwl-workflow-draft.cwl",
+        "description": "CWL Workflow skeleton with one more abstract step replaced by a concrete CommandLineTool step (loop iteration output)."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "cwl-tool-summary",
+        "description": "Compact CWL tool summary from [[summarize-cwl-tool]]; binds the abstract step to a concrete CommandLineTool.",
+        "producers": [
+          "summarize-cwl-tool"
+        ]
+      },
+      {
+        "id": "cwl-workflow-draft",
+        "description": "CWL Workflow skeleton being filled in step by step; the step replaces a placeholder in this draft.",
+        "producers": [
+          "implement-cwl-tool-step",
+          "summary-to-cwl-template"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-summary-to-cwl-interface",
+    "path": "content/molds/nextflow-summary-to-cwl-interface/index.md",
+    "revision": 1,
+    "content_hash": "dafc465608018eb5b0dc68f168632465aa5062f3e64b9d4bb3754a6024d92ef7",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:15.200Z",
+  "refs": [
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing CWL Workflow inputs and outputs.",
+      "license": "MIT",
+      "src_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "dst_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "nextflow-cwl-interface",
+        "kind": "markdown",
+        "default_filename": "nextflow-cwl-interface.md",
+        "description": "Reviewable Markdown brief: CWL Workflow inputs, outputs, labels, array/record/File shapes, checkpoint outputs, source provenance."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the source-of-truth JSON for CWL interface choices.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      }
+    ]
+  }
+}

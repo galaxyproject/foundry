@@ -67,7 +67,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
    - Try `cwl-to-test-data` — Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs.
    - Otherwise try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
-8. **cwl-test-to-galaxy-test-plan** — MANUAL — `cwl-test-to-galaxy-test-plan` is not yet cast. Translate CWL test fixtures into a Galaxy workflow test plan. Do this by hand and confirm before continuing.
+8. **cwl-test-to-galaxy-test-plan** — invoke the `cwl-test-to-galaxy-test-plan` skill. Translate CWL test fixtures into a Galaxy workflow test plan.
 9. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 10. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 11. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
