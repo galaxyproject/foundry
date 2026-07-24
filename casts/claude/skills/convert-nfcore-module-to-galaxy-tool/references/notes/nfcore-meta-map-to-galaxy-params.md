@@ -2,7 +2,6 @@
 type: research
 title: "nf-core meta-map → Galaxy params"
 tags:
-  - research/design-problem
   - source/nextflow
   - target/galaxy
 status: draft

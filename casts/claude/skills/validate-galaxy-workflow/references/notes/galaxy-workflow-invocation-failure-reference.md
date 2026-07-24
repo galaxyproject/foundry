@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy workflow invocation failure reference"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-05-02

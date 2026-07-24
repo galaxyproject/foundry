@@ -2,7 +2,7 @@
 type: research
 title: "Alignment: gxy-sketches ↔ Galaxy Workflow Foundry"
 tags:
-  - research/design-spec
+  - meta
 status: draft
 created: 2026-04-30
 revised: 2026-05-05

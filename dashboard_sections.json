@@ -1,11 +1,9 @@
 [
-  { "label": "Pipelines", "tag": "pipeline" },
-  { "label": "Molds", "tag": "mold" },
-  { "label": "Patterns", "tag": "pattern" },
-  { "label": "Source Patterns", "tag": "source-pattern" },
-  { "label": "CLI Commands", "tag": "cli-command" },
-  { "label": "Schemas", "tag": "schema" },
-  { "label": "Project Infrastructure Research", "tag": "research/infrastructure" },
-  { "label": "Component Research", "tag": "research/component" },
-  { "label": "Design Problems", "tag": "research/design-problem" }
+  { "label": "Pipelines", "type": "pipeline" },
+  { "label": "Molds", "type": "mold" },
+  { "label": "Patterns", "type": "pattern" },
+  { "label": "Source Patterns", "type": "source-pattern" },
+  { "label": "CLI Commands", "type": "cli-command" },
+  { "label": "Schemas", "type": "schema" },
+  { "label": "Research", "type": "research" }
 ]

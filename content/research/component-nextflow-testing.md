@@ -1,7 +1,6 @@
 ---
 type: research
 tags:
-  - research/component
   - source/nextflow
 component: "Nextflow Testing and Test Fixtures"
 status: draft

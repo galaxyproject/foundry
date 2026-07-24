@@ -1,7 +1,7 @@
 ---
 type: research
 tags:
-  - research/component
+  - source/nextflow
 component: "Nextflow Pipeline Anatomy (DSL2)"
 status: draft
 created: 2026-05-01

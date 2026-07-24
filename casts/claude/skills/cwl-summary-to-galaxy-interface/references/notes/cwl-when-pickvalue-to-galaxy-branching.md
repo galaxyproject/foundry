@@ -2,7 +2,6 @@
 type: research
 title: "CWL when:/pickValue → Galaxy branching translation"
 tags:
-  - research/design-spec
   - source/cwl
   - target/galaxy
 status: draft

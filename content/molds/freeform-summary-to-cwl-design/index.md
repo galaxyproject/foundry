@@ -5,7 +5,6 @@ axis: source-specific
 source: freeform
 target: cwl
 tags:
-  - mold
   - source/freeform
   - target/cwl
 status: draft

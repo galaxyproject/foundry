@@ -1,7 +1,7 @@
 ---
 type: research
 tags:
-  - research/component
+  - target/galaxy
 component: "Tool Shed Search and Indexing"
 status: draft
 created: 2026-04-30

@@ -2,7 +2,6 @@
 type: research
 title: "Nextflow params to Galaxy workflow inputs"
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 status: draft

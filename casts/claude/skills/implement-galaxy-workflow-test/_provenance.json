@@ -5,10 +5,10 @@
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
-    "content_hash": "329a22759bcdd92146b75e0c09dbd6bdbec7965a75e88296799aec0c01f96f56",
-    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
+    "content_hash": "17c725ab64f9a481378a2c4ecedf394ccc934bf98a73ff17984f5918a4b8ee9d",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-24T14:40:49.982Z",
+  "cast_at": "2026-07-24T14:50:10.497Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -30,7 +30,7 @@
       "evidence": "corpus-observed",
       "purpose": "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution.",
       "trigger": "After authoring or editing a Galaxy workflow test file and before Planemo invocation.",
-      "src_hash": "98bdbc75c14b520e6dd03da5b08488890bced76569a55d202bb8e807757cf1ed",
+      "src_hash": "2bb112ae7b79471b316428e8c3e4957932093c853332fd6eec8542ce76f3a5a6",
       "dst_hash": "973184698733ffb86bb5a15781902846afec311047f5684f779f8ad023e5d24c",
       "source": "deterministic"
     },
@@ -44,8 +44,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation.",
-      "src_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
-      "dst_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
+      "src_hash": "09b47f6f70d15c711f01b0c970c8668cb4fec7b17d90b22204dfbbb5f6c75a30",
+      "dst_hash": "09b47f6f70d15c711f01b0c970c8668cb4fec7b17d90b22204dfbbb5f6c75a30",
       "source": "deterministic"
     },
     {
@@ -59,8 +59,8 @@
       "evidence": "corpus-observed",
       "purpose": "Revise workflow inputs, outputs, labels, checkpoints, and collection identifiers so meaningful tests can be authored.",
       "trigger": "When test authoring reveals missing labels, omitted workflow-level outputs, unstable collection identifiers, weakly assertable final outputs, or fixture-shape pressure on workflow inputs.",
-      "src_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
-      "dst_hash": "80c8764651e936332c05919c8ad110458138c439cb87e19bf280262572e1127d",
+      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
       "source": "deterministic"
     },
     {
@@ -74,8 +74,8 @@
       "evidence": "corpus-observed",
       "purpose": "Flag assertion shortcuts that are acceptable in IWC versus shortcuts that should be avoided.",
       "trigger": "When considering existence-only, size-only, image-only, checksum, output-label, or negative-test patterns.",
-      "src_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
-      "dst_hash": "87d14c4eecc1d8e846dbbd76f4b440de949a0114d60b7991bc107201d982956c",
+      "src_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
+      "dst_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
       "source": "deterministic"
     },
     {
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style.",
       "trigger": "When writing or revising the job/input side of a Galaxy workflow test file.",
-      "src_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
-      "dst_hash": "46f7ab05beae52c0cb0cd29a764084e014d3561c4b24298586ca5721a6b64ec3",
+      "src_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
+      "dst_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
       "source": "deterministic"
     },
     {
@@ -104,8 +104,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose assertion families, tolerance magnitudes, and the static/Planemo validation loop.",
       "trigger": "When writing or revising output assertions for a Galaxy workflow test file.",
-      "src_hash": "358bef5e2895998094e6c714d4a3a556f86184fb3a797ffbfe98d5a57cdf4db3",
-      "dst_hash": "358bef5e2895998094e6c714d4a3a556f86184fb3a797ffbfe98d5a57cdf4db3",
+      "src_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
+      "dst_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
       "source": "deterministic"
     },
     {
@@ -119,8 +119,8 @@
       "evidence": "corpus-observed",
       "purpose": "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs.",
       "trigger": "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations.",
-      "src_hash": "262538786989e6e9dbef6bf92aed2a526bd870134b15e2649a4372ae7e19320e",
-      "dst_hash": "262538786989e6e9dbef6bf92aed2a526bd870134b15e2649a4372ae7e19320e",
+      "src_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
+      "dst_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
       "source": "deterministic"
     },
     {

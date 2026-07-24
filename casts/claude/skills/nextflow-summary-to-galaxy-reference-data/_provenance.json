@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-reference-data",
     "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
     "revision": 4,
-    "content_hash": "45a643b565788eab9eac228be44fe2568b1f3b6100a58606fe741e5389b84cb8",
-    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
+    "content_hash": "037f90f30a9a00ec26c4dffea36682ad88ffd712002e26a53b8948007aa20a80",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-24T14:40:52.315Z",
+  "cast_at": "2026-07-24T14:50:13.056Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Cross-check reference selectors against the broader params translation rules — curated string enums, do-not-introduce-new-data-tables, runtime-control exclusion.",
       "trigger": "When a reference param looks like a curated selector (closed enum, .loc-keyed) rather than a data-bearing path.",
-      "src_hash": "d5b3a913a358e718447f6fdefbc4d136590fc1bc9da43c42d0e79946d132a43d",
-      "dst_hash": "d5b3a913a358e718447f6fdefbc4d136590fc1bc9da43c42d0e79946d132a43d",
+      "src_hash": "9a2e314ea6c2c374c1866efbd5faac7eeb5d275695943e9a70d3cc98268e847e",
+      "dst_hash": "9a2e314ea6c2c374c1866efbd5faac7eeb5d275695943e9a70d3cc98268e847e",
       "source": "deterministic"
     },
     {
@@ -35,8 +35,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Classify the source pipeline's reference-data usage against the eight Nextflow-side classifications (none, reference-producing, single asset, coordinated bundle, key-expanded bundle, compute-if-missing, multi-DB pick-list, parallel bundles plus cohort data).",
-      "src_hash": "5ab96fba21fc41cbf79905b13b32efd436ab7daf5b633fd65f402615646389e0",
-      "dst_hash": "5ab96fba21fc41cbf79905b13b32efd436ab7daf5b633fd65f402615646389e0",
+      "src_hash": "d5d7ffc8b0d14b8b7f3225c647c14525f9b9cfcf9f6399d03ed92d7f0cddc9ff",
+      "dst_hash": "d5d7ffc8b0d14b8b7f3225c647c14525f9b9cfcf9f6399d03ed92d7f0cddc9ff",
       "source": "deterministic"
     },
     {
@@ -49,8 +49,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Apply the v1 Galaxy posture (explicit optional inputs + in-tool rebuild) and datatype defaults when translating each classified asset into the brief.",
-      "src_hash": "67b1ecbec0f3a9b55073fcf7df405ca5e2d0ca183fc0b44ff45b81913e33ae3c",
-      "dst_hash": "67b1ecbec0f3a9b55073fcf7df405ca5e2d0ca183fc0b44ff45b81913e33ae3c",
+      "src_hash": "6c4bb70660c29a3b655c09d1f78a90201f12ef88d3c27d62ea708ea94a536bcc",
+      "dst_hash": "6c4bb70660c29a3b655c09d1f78a90201f12ef88d3c27d62ea708ea94a536bcc",
       "source": "deterministic"
     },
     {
@@ -64,8 +64,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
-      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     },
     {

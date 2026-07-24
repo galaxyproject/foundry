@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy Apply Rules DSL"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-04-30

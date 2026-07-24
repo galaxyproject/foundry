@@ -2,7 +2,6 @@
 type: prompt
 title: "Galaxy custom tool critic"
 tags:
-  - prompt
   - prompt/galaxy-internal
   - target/galaxy
 status: draft

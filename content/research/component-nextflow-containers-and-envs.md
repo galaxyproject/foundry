@@ -1,7 +1,6 @@
 ---
 type: research
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 component: "Nextflow Containers and Environments"

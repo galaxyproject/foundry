@@ -9,7 +9,6 @@ validator_subcommand: validate-summary-cwl
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json"
 license: MIT
 tags:
-  - schema
   - source/cwl
 status: draft
 created: 2026-05-10

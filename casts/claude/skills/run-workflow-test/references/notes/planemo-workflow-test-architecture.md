@@ -2,7 +2,6 @@
 type: research
 title: "Planemo workflow-test architecture"
 tags:
-  - research/component
   - tool/planemo
   - target/galaxy
 status: draft

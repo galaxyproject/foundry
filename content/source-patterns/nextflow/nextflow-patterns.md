@@ -9,7 +9,6 @@ implemented_by_patterns:
   - "[[galaxy-conditionals-patterns]]"
   - "[[galaxy-tabular-patterns]]"
 tags:
-  - source-pattern
   - source/nextflow
   - target/galaxy
 status: draft

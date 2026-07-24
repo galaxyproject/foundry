@@ -4,7 +4,6 @@ name: repair-galaxy-draft-topology
 axis: target-specific
 target: galaxy
 tags:
-  - mold
   - target/galaxy
 status: draft
 created: 2026-06-16

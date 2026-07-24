@@ -2,7 +2,6 @@
 type: pipeline
 title: PAPER → GALAXY
 tags:
-  - pipeline
   - source/paper
   - target/galaxy
 status: draft

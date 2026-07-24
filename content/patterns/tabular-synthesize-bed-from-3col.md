@@ -4,7 +4,6 @@ pattern_kind: operation
 evidence: corpus-observed
 title: "Tabular: synthesize BED from 3-column input"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

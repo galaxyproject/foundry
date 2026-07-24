@@ -2,7 +2,6 @@
 type: research
 title: "nf-schema sample sheet validation gaps in Galaxy"
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 status: draft

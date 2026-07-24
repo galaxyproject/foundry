@@ -2,7 +2,6 @@
 type: research
 title: "nf-core versions emit → Galaxy <version_command>"
 tags:
-  - research/design-problem
   - source/nextflow
   - target/galaxy
 status: draft

@@ -5,10 +5,10 @@
     "name": "cwl-summary-to-galaxy-data-flow",
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
-    "content_hash": "da48c5f55fae6a8d1a07f60b95a1b467cb3bc64aa341018e092b7d526baafc97",
-    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
+    "content_hash": "390a704aa29b7ed17f49d0204d4a770ad7146cfeaa682b7ceb6ecf34e64184b0",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-24T14:40:40.313Z",
+  "cast_at": "2026-07-24T14:49:58.588Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection reshape, relabel, cleanup, and map-over choices in corpus-observed Galaxy recipes.",
       "trigger": "When CWL scatter, arrays, nested arrays, records, or secondary-file contracts require explicit Galaxy collection operations.",
-      "src_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
-      "dst_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
+      "src_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
+      "dst_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
       "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
-      "dst_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "src_hash": "8cf7ac6c34d98764fb564973e84800d188e47f131cf7b23f6fdfffe4cd518e25",
+      "dst_hash": "8cf7ac6c34d98764fb564973e84800d188e47f131cf7b23f6fdfffe4cd518e25",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
       "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
-      "src_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
-      "dst_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
+      "src_hash": "55a74e2e229bbbe699e73206b7de6caf2752a5cc143bae9f2097b194bde77117",
+      "dst_hash": "55a74e2e229bbbe699e73206b7de6caf2752a5cc143bae9f2097b194bde77117",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "hypothesis",
       "purpose": "Use CWL's native graph and mark only the features that need Galaxy reinterpretation.",
       "verification": "Run against representative CWL summaries with scatter, secondaryFiles, and valueFrom; confirm the brief starts from summary-cwl graph edges and only adds Galaxy-specific reshape decisions.",
-      "src_hash": "9a9868761a1d5f262f4abb1e42d7ba02815122adda85c1c80286bd51f3e46b04",
-      "dst_hash": "9a9868761a1d5f262f4abb1e42d7ba02815122adda85c1c80286bd51f3e46b04",
+      "src_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
+      "dst_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "corpus-observed",
       "purpose": "Map CWL pickValue (first_non_null / the_only_non_null / all_non_null) on workflow outputs or step inputs into Galaxy's native `pick_value` workflow module added by galaxy#22222.",
       "trigger": "When any summary-cwl edge `via` contains a `pickValue:*` marker, OR any workflow_outputs[].output_source is multi-valued with pickValue, OR any steps[].in[].pick_value is non-null in the source workflow or referenced subworkflows.",
-      "src_hash": "a16bbc35e9ddbcae67147aefa5e578fb6045d72825c0a5fc3e5da597f098eba5",
-      "dst_hash": "a16bbc35e9ddbcae67147aefa5e578fb6045d72825c0a5fc3e5da597f098eba5",
+      "src_hash": "a7b71ee2bc45e2380fd3978483f3a96ec87ebed871092aeda55d413693e7a741",
+      "dst_hash": "a7b71ee2bc45e2380fd3978483f3a96ec87ebed871092aeda55d413693e7a741",
       "source": "deterministic"
     },
     {
@@ -95,8 +95,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Default reference for translating CWL when:/pickValue branching: pick among `paired_or_unpaired` collection input, native `pick_value` workflow step, or sibling workflows per mode.",
-      "src_hash": "1311bce2293e2240c9b5a285f15e3e9ce4959d7570403fb12473296cddcbc7be",
-      "dst_hash": "1311bce2293e2240c9b5a285f15e3e9ce4959d7570403fb12473296cddcbc7be",
+      "src_hash": "9194d5f0f0851ba2f3dece053d8a71cc53c9bdbdaa747b79528b34f770764ba4",
+      "dst_hash": "9194d5f0f0851ba2f3dece053d8a71cc53c9bdbdaa747b79528b34f770764ba4",
       "source": "deterministic"
     },
     {
@@ -112,8 +112,8 @@
       "trigger": "When CWL input/output or step wiring implies Galaxy collections, map-over, reduction, or shape changes.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
-      "dst_hash": "3b321777197beed34598a6bf89e58424e7134abffbc708b19eed9a73804a2c59",
+      "src_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
+      "dst_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -166,8 +166,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked CWL-to-Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
-      "dst_hash": "d67d25ac804bce21e786f5a503454cf05c4aa26152bdb5cbe31c9f7eb85eb150",
+      "src_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
+      "dst_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
       "source": "deterministic"
     },
     {
@@ -181,8 +181,8 @@
       "evidence": "corpus-observed",
       "purpose": "When the interface brief adopted a `paired_or_unpaired` shape, model inner-tool branching via `has_single_item` semantics instead of a Galaxy-level mode switch.",
       "trigger": "When the preceding cwl-galaxy-interface brief uses `paired_or_unpaired` (or `list:paired_or_unpaired`) as a workflow input, OR the data-flow brief is considering it as an option.",
-      "src_hash": "768fda615846897f1683048fdaa43a668a374ee9e940d70406e49af416d9d2bc",
-      "dst_hash": "768fda615846897f1683048fdaa43a668a374ee9e940d70406e49af416d9d2bc",
+      "src_hash": "ec41b6f362edd06d0303d190ea9108174c4645b27d6f3eca1bc653f6b21a2f71",
+      "dst_hash": "ec41b6f362edd06d0303d190ea9108174c4645b27d6f3eca1bc653f6b21a2f71",
       "source": "deterministic"
     },
     {
@@ -196,8 +196,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
-      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     },
     {

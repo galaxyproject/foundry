@@ -9,7 +9,6 @@ aliases:
   - "gffread extract transcripts"
   - "intervals to sequence"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/sequence-transform

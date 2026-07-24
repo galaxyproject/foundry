@@ -5,10 +5,10 @@
     "name": "summarize-galaxy-tool",
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 8,
-    "content_hash": "49593311007504265cec8bca52784a2c9418a57ef1045ea7fcad6ddc25f15d26",
-    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
+    "content_hash": "134786c1d73ac6751e72557fe299d0358d92fb401de1a2eabd1a3a83071d9093",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-24T14:40:58.904Z",
+  "cast_at": "2026-07-24T14:50:20.100Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first. Stock/built-in bare ids resolve against the shed but need an explicit `--tool-version`.",
       "trigger": "When the requested pin is not yet present in the configured cache directory.",
       "verification": "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted.",
-      "src_hash": "e74adaca552b055d80c0c607f40b6e5b2363a1c14112ac21a474f73c0d06aed4",
+      "src_hash": "3bd2555566349ee646b2d1a24df98127324913ccda3e3d8a5c9aeeac32ae3dbb",
       "dst_hash": "85e3bb884171beb69631186ca6f0f7552e6c6d0721383ab6653e7a32c84a1b71",
       "source": "deterministic"
     },
@@ -38,7 +38,7 @@
       "purpose": "Discover the concrete cached version of a stock/built-in bare id before `add`/`summarize`, since the shed's TRS version-list endpoint can't auto-resolve it; never hand-guess a stock version.",
       "trigger": "When the pin is a bare/stock id (no owner/repo) and its concrete version isn't already known.",
       "verification": "Cast the skill, populate a cache with a stock tool, run `list --json`, confirm the reported version feeds `add`/`summarize` for that bare id.",
-      "src_hash": "bb5d17bf18c799776ae493452429cc0b0cfac45315422bfe79efe3404b03a5d6",
+      "src_hash": "58212c38f5bffc3ff48a185938044f1a3d748bee0757b53a9af7bddb9c746758",
       "dst_hash": "92d336667531c34180db6f75b9fdf87261923c1e85567dce3b21a6d87d9543bd",
       "source": "deterministic"
     },
@@ -54,7 +54,7 @@
       "purpose": "Emit the deterministic [[galaxy-tool-summary]] manifest for the cached pin; this Mold runs the command rather than hand-authoring the manifest.",
       "trigger": "Once the pin is confirmed present in the cache.",
       "verification": "Cast the skill, run `summarize` on a cached pin (e.g. staramr_search), confirm the emitted manifest validates against [[galaxy-tool-summary]].",
-      "src_hash": "b467b1fcc0d63576fa6db55e6cd37f6af6b78014886bf0c5b63c4864781d25a0",
+      "src_hash": "4614f29a6140d23420d7a77d4fa2439e46c1e99c2bd86d3897418afc9694f15c",
       "dst_hash": "b51364ad4d415f6047e3cf3d3052dea1598cd2197595be66697c9777918b2de7",
       "source": "deterministic"
     },
@@ -68,8 +68,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
-      "src_hash": "885515a63ddbfe1c68182ce24bd88e27e7a8db0aa381dcd98e86c59fd62b3636",
-      "dst_hash": "885515a63ddbfe1c68182ce24bd88e27e7a8db0aa381dcd98e86c59fd62b3636",
+      "src_hash": "62d4170c6635dcebfd2300fc4adf6f5d84fa7514fbd1809854cc96a872b10904",
+      "dst_hash": "62d4170c6635dcebfd2300fc4adf6f5d84fa7514fbd1809854cc96a872b10904",
       "source": "deterministic"
     },
     {
@@ -83,8 +83,8 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper.",
       "trigger": "When a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object.",
-      "src_hash": "1a7a06e11fad9872e8544b5c336832edca5b556adc141ef8120583677aee1cfa",
-      "dst_hash": "1a7a06e11fad9872e8544b5c336832edca5b556adc141ef8120583677aee1cfa",
+      "src_hash": "232e96bb6685c1719b662437e6191c97ccae14fa574bb1bee6b774f8d483aa08",
+      "dst_hash": "232e96bb6685c1719b662437e6191c97ccae14fa574bb1bee6b774f8d483aa08",
       "source": "deterministic"
     },
     {
@@ -98,8 +98,8 @@
       "evidence": "hypothesis",
       "purpose": "Treat cached ParsedTool JSON from galaxy-tool-cache as the v1 input source for Galaxy tool summaries.",
       "verification": "Summarize FastQC, bwa_mem2, and samtools_sort from cached ParsedTool JSON and confirm downstream step implementation can bind inputs and outputs.",
-      "src_hash": "e75d5a57492fc6d0a079ba86e95f54d634498f843d3c1d52349903859599d717",
-      "dst_hash": "e75d5a57492fc6d0a079ba86e95f54d634498f843d3c1d52349903859599d717",
+      "src_hash": "2be51c383668f61d2b653f18aeb5ad3fa64ce4554b1ca7c28ac80b5b221f29c6",
+      "dst_hash": "2be51c383668f61d2b653f18aeb5ad3fa64ce4554b1ca7c28ac80b5b221f29c6",
       "source": "deterministic"
     },
     {

@@ -8,7 +8,6 @@ aliases:
   - "genomic interval transformation patterns"
   - "IWC interval pattern map"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform

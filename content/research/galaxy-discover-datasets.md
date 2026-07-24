@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy <discover_datasets>"
 tags:
-  - research/component
   - target/galaxy
 component: "Galaxy <discover_datasets> XML element"
 status: draft

@@ -9,7 +9,6 @@ validator_subcommand: validate-galaxy-workflow-test-plan
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json"
 license: MIT
 tags:
-  - schema
   - target/galaxy
 status: draft
 created: 2026-06-16

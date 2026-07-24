@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy datatypes registry sample"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-05-05

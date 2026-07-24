@@ -1,33 +1,12 @@
 # meta_tags.yml — controlled tag vocabulary.
 # Validator + site inject these keys into the shared note-schema zod contract at build time.
-# Hierarchy is purely textual (slash-delimited).
+# Tags are cross-cutting facets only; note-kind is the `type:` discriminator, not a tag.
+# Hierarchy is purely textual (slash-delimited); a bare key (no slash) is a flat flag.
 # See INITIAL_ARCHITECTURE.md §4.
 
-# --- Note-type tags (every note carries exactly one) ---
-mold:
-  description: "Mold note (source artifact for casting)"
-pattern:
-  description: "Pattern reference page (Galaxy workflow construction patterns)"
-source-pattern:
-  description: "Source-system pattern page that maps an input workflow idiom to target implementation patterns"
-cli-tool:
-  description: "CLI tool index page (install metadata for a tool, aggregating its cli-command subcommand notes)"
-cli-command:
-  description: "CLI command reference page (one note per command/subcommand)"
-pipeline:
-  description: "Pipeline note — ordered Mold sequence composing a harness journey"
-research/component:
-  description: "Background synthesis on an external component or topic"
-research/infrastructure:
-  description: "Project-infrastructure research for developer-facing systems, integrations, and adjacent tools"
-research/design-problem:
-  description: "Identified design problem awaiting resolution"
-research/design-spec:
-  description: "Design specification for a Foundry component"
-schema:
-  description: "Schema note (renderable JSON Schema reference, vendored or Foundry-authored)"
-prompt:
-  description: "Prompt wrapper note (metadata and human framing for raw prompt sidecars)"
+# --- meta (flat flag) ---
+meta:
+  description: "Foundry-meta note — about the Foundry's own tooling, casting system, or an external harness/tool it evaluates"
 
 # --- Prompt classifications ---
 prompt/galaxy-internal:

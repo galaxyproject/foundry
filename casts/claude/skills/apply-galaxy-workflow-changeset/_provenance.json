@@ -5,10 +5,10 @@
     "name": "apply-galaxy-workflow-changeset",
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 2,
-    "content_hash": "cf2eeab7451d97e892197d2e612fd08f0acbd950f52acb7969b35ad3f4aa93ce",
-    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
+    "content_hash": "580b8bd6c36ad2ac98835525a0455a4ac2135eefd9c5c218db6c89103911fe3b",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-24T14:40:36.500Z",
+  "cast_at": "2026-07-24T14:49:54.890Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off to the per-step loop.",
       "trigger": "After writing the modified draft workflow file.",
       "verification": "Cast the skill, run on a representative workflow + change-set, confirm draft-validate diagnostics route back.",
-      "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
+      "src_hash": "23d17ddff3fa875677fdab6f603ebce5c907223a3fd1acb359f26d9fc9963e2c",
       "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
       "source": "deterministic"
     },
@@ -37,8 +37,8 @@
       "evidence": "hypothesis",
       "purpose": "Represent the whole workflow as a draft: carry untouched steps at Resolved tier, inject tool-introducing/replacing edits as drafty steps with _plan_state / _plan_context / _plan_in / _plan_out.",
       "verification": "Promote after a downstream advance-galaxy-draft-step run drains the injected drafty steps without round-tripping back through the change-set.",
-      "src_hash": "db6841d17bb08a3ed5d353b097a53da6976eb817a2ceb3dabd20c80798eaa58f",
-      "dst_hash": "db6841d17bb08a3ed5d353b097a53da6976eb817a2ceb3dabd20c80798eaa58f",
+      "src_hash": "c44ec53ecb85fd287f959d78a34c150f71b3e44550d43d634c260a9ba5787552",
+      "dst_hash": "c44ec53ecb85fd287f959d78a34c150f71b3e44550d43d634c260a9ba5787552",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: append an edit's unmet need (e.g. a rewire with no reachable producer) rather than fabricating a connection, and mark resolved the ones its edits close.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
-      "dst_hash": "22c2ee44cb7118ef66cd0374a1d737660f76a9e6425fc8bb8a0aa7e0a76628fe",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     },
     {

@@ -1,7 +1,7 @@
 ---
 type: research
 tags:
-  - research/component
+  - meta
 component: "Claude Code dynamic workflows harness substrate evaluation"
 status: draft
 created: 2026-06-15

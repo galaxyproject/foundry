@@ -3,7 +3,8 @@ type: mold
 name: run-workflow-test
 axis: generic
 tags:
-  - mold
+  - target/galaxy
+  - tool/planemo
 status: reviewed
 created: 2026-04-30
 revised: 2026-07-24

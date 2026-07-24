@@ -8,7 +8,9 @@ aliases:
   - "collection_element_identifiers to FILTER_FROM_FILE"
   - "filter sibling collection by identifiers"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

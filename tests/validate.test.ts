@@ -24,7 +24,7 @@ function loadRealSchema() {
 
 const baseRequired = (overrides: Record<string, unknown> = {}) => ({
   type: "pattern",
-  tags: ["pattern"],
+  tags: ["target/galaxy"],
   status: "draft",
   created: "2026-04-30",
   revised: "2026-04-30",
@@ -45,7 +45,7 @@ const patternRequired = (overrides: Record<string, unknown> = {}) =>
 const sourcePatternRequired = (overrides: Record<string, unknown> = {}) =>
   baseRequired({
     type: "source-pattern",
-    tags: ["source-pattern", "source/nextflow", "target/galaxy"],
+    tags: ["source/nextflow", "target/galaxy"],
     source: "nextflow",
     target: "galaxy",
     source_pattern_kind: "operator",
@@ -76,7 +76,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "consumer",
         axis: "generic",
         input_artifacts: [
@@ -96,7 +96,7 @@ describe("validateData (per-file)", () => {
 
   it("rejects pipeline missing phases", () => {
     const r = validateData(
-      baseRequired({ type: "pipeline", tags: ["pipeline"], title: "X" }),
+      baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "X" }),
       schema,
     );
     expect(r.errors.some((e) => /phases/.test(e))).toBe(true);
@@ -106,7 +106,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "pipeline",
-        tags: ["pipeline"],
+        tags: ["target/galaxy"],
         title: "X",
         phases: [{ mold: "[[summarize-paper]]" }],
       }),
@@ -119,7 +119,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "pipeline",
-        tags: ["pipeline"],
+        tags: ["target/galaxy"],
         title: "X",
         phases: [{ mold: "[[summarize-paper]]" }],
         harness_notes: ["Replaces the prior-art hand-authored nf-to-galaxy skill."],
@@ -133,7 +133,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "pipeline",
-        tags: ["pipeline"],
+        tags: ["target/galaxy"],
         title: "X",
         phases: [{ mold: "[[summarize-paper]]" }],
         harness_notes: [{ note: "wrong shape" }],
@@ -147,7 +147,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "advance-galaxy-draft-step",
         axis: "generic",
         loop_endstate:
@@ -162,7 +162,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "x",
         axis: "generic",
         loop_endstate: ["not", "a", "string"],
@@ -173,13 +173,13 @@ describe("validateData (per-file)", () => {
   });
 
   it("rejects mold missing axis", () => {
-    const r = validateData(baseRequired({ type: "mold", tags: ["mold"], name: "x" }), schema);
+    const r = validateData(baseRequired({ type: "mold", tags: ["target/galaxy"], name: "x" }), schema);
     expect(r.errors.some((e) => /axis/.test(e))).toBe(true);
   });
 
   it("source-specific mold requires source", () => {
     const r = validateData(
-      baseRequired({ type: "mold", tags: ["mold"], name: "x", axis: "source-specific" }),
+      baseRequired({ type: "mold", tags: ["target/galaxy"], name: "x", axis: "source-specific" }),
       schema,
     );
     expect(r.errors.some((e) => /source/.test(e))).toBe(true);
@@ -189,7 +189,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "x",
         axis: "generic",
         references: [
@@ -216,7 +216,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "x",
         axis: "generic",
         references: [
@@ -240,7 +240,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "x",
         axis: "generic",
         references: [
@@ -268,11 +268,6 @@ describe("validateData (per-file)", () => {
     expect(r.errors.some((e) => /whitespace-only/.test(e))).toBe(true);
   });
 
-  it("warns on tag coherence drift", () => {
-    const r = validateData(patternRequired({ tags: ["mold"] }), schema);
-    expect(r.warnings.some((w) => /expected 'pattern'/.test(w))).toBe(true);
-  });
-
   it("accepts source-pattern metadata", () => {
     const r = validateData(
       sourcePatternRequired({
@@ -287,7 +282,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "prompt",
-        tags: ["prompt", "prompt/galaxy-internal", "target/galaxy"],
+        tags: ["prompt/galaxy-internal", "target/galaxy"],
         title: "Galaxy Prompt",
         prompt_file: "galaxy-prompt.upstream.prompt",
       }),
@@ -506,13 +501,13 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["pipeline"],
+        tags: ["target/galaxy"],
         title: "P",
         phases: [{ mold: "[[some-pattern]]" }],
       }),
     });
     writeFm(path.join(dir, "patterns/some-pattern.md"), {
-      ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Some Pattern" }),
+      ...patternRequired({ type: "pattern", tags: ["target/galaxy"], title: "Some Pattern" }),
     });
 
     const r = validateDirectory({
@@ -524,10 +519,10 @@ describe("validateDirectory (cross-file)", () => {
 
   it("accepts pipeline eval.md and scenarios.md siblings", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
-      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+      ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
     writeFileSync(
       path.join(dir, "pipelines/p/eval.md"),
@@ -543,10 +538,10 @@ describe("validateDirectory (cross-file)", () => {
 
   it("errors on frontmatter in a pipeline sibling", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
-      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+      ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
     writeFileSync(path.join(dir, "pipelines/p/eval.md"), "---\ntype: junk\n---\n\nbad\n");
     const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
@@ -555,10 +550,10 @@ describe("validateDirectory (cross-file)", () => {
 
   it("warns on an unexpected file in a pipeline directory", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
-      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+      ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
     const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     writeFileSync(path.join(dir, "pipelines/p/notes.md"), "stray notes\n");
@@ -569,10 +564,10 @@ describe("validateDirectory (cross-file)", () => {
 
   it("does not warn on an examples/ subdir of scenario fixtures in a pipeline directory", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
-      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+      ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
     const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     mkdirSync(path.join(dir, "pipelines/p/examples"), { recursive: true });
@@ -585,10 +580,10 @@ describe("validateDirectory (cross-file)", () => {
 
   it("warns on a flat .md file under content/pipelines/", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
-      ...baseRequired({ type: "mold", tags: ["mold"], name: "mold-a", axis: "generic" }),
+      ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["pipeline"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
     const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     writeFileSync(path.join(dir, "pipelines/stray.md"), "not a directory note\n");
@@ -601,7 +596,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["pipeline"],
+        tags: ["target/galaxy"],
         title: "P",
         phases: [
           {
@@ -614,7 +609,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/discover/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "discover",
         axis: "generic",
         status: "reviewed",
@@ -623,7 +618,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/author/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "author",
         axis: "generic",
         status: "reviewed",
@@ -641,7 +636,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
         references: [
@@ -681,15 +676,15 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"] }),
+      ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
     writeFm(path.join(dir, "patterns/pattern-x.md"), {
-      ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Pattern X" }),
+      ...patternRequired({ type: "pattern", tags: ["target/galaxy"], title: "Pattern X" }),
     });
     writeFm(path.join(dir, "schemas/schema-x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-x",
         title: "Schema X",
         package: "@example/schema-x",
@@ -699,7 +694,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "prompts/prompt-x.md"), {
       ...baseRequired({
         type: "prompt",
-        tags: ["prompt", "prompt/galaxy-internal", "target/galaxy"],
+        tags: ["prompt/galaxy-internal", "target/galaxy"],
         title: "Prompt X",
         prompt_file: "prompt-x.upstream.prompt",
       }),
@@ -717,7 +712,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "prompts/prompt-x.md"), {
       ...baseRequired({
         type: "prompt",
-        tags: ["prompt", "prompt/galaxy-internal", "target/galaxy"],
+        tags: ["prompt/galaxy-internal", "target/galaxy"],
         title: "Prompt X",
         prompt_file: "missing.upstream.prompt",
       }),
@@ -734,7 +729,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
         references: [
@@ -753,7 +748,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "cli/gxwf/validate.md"), {
       ...baseRequired({
         type: "cli-command",
-        tags: ["cli-command", "cli/gxwf"],
+        tags: ["cli/gxwf"],
         tool: "gxwf",
         command: "validate",
         package: "@galaxy-tool-util/cli",
@@ -773,7 +768,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "cli/gxwf/not-real.md"), {
       ...baseRequired({
         type: "cli-command",
-        tags: ["cli-command", "cli/gxwf"],
+        tags: ["cli/gxwf"],
         tool: "gxwf",
         command: "not-real",
         package: "@galaxy-tool-util/cli",
@@ -793,7 +788,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
         references: [
@@ -809,7 +804,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "patterns/not-research.md"), {
-      ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Not Research" }),
+      ...patternRequired({ type: "pattern", tags: ["target/galaxy"], title: "Not Research" }),
     });
 
     const r = validateDirectory({
@@ -858,7 +853,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     );
     writeFm(path.join(dir, "research/not-a-pattern.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"] }),
+      ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 
     const r = validateDirectory({
@@ -874,7 +869,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "x",
         title: "X",
         package: "@some-org/x",
@@ -897,7 +892,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "x",
         title: "X",
         package: "@some-org/x",
@@ -920,7 +915,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "x",
         title: "X",
         package: "@some-org/x",
@@ -943,7 +938,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "x",
         title: "X",
         package: "@galaxy-foundry/x-schema",
@@ -964,7 +959,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
         references: [
@@ -980,7 +975,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"] }),
+      ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 
     const r = validateDirectory({
@@ -994,7 +989,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
         references: [
@@ -1010,7 +1005,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"] }),
+      ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 
     const r = validateDirectory({
@@ -1025,7 +1020,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1046,7 +1041,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1067,7 +1062,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1093,7 +1088,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1125,7 +1120,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1155,7 +1150,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1183,7 +1178,7 @@ describe("validateDirectory (cross-file)", () => {
 
   it("warns when eval.md uses a Case section (oracle must stay abstract)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
-      ...baseRequired({ type: "mold", tags: ["mold"], name: "m", axis: "generic" }),
+      ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "m", axis: "generic" }),
     });
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
@@ -1203,7 +1198,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1222,7 +1217,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1241,7 +1236,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1267,7 +1262,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1310,7 +1305,7 @@ describe("validateDirectory (cross-file)", () => {
   it("ignores body wiki-links inside fenced or inline code", () => {
     const fm = baseRequired({
       type: "research",
-      tags: ["research/component"],
+      tags: ["target/galaxy"],
     });
     mkdirSync(path.dirname(path.join(dir, "research/component-x.md")), { recursive: true });
     writeFileSync(
@@ -1334,7 +1329,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
         references: [
@@ -1353,7 +1348,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/schema-x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-x",
         title: "Schema X",
         package: "@example/schema-x",
@@ -1373,7 +1368,7 @@ describe("validateDirectory (cross-file)", () => {
     mkdirSync(path.join(dir, "molds/m"), { recursive: true });
     const fm = baseRequired({
       type: "mold",
-      tags: ["mold"],
+      tags: ["target/galaxy"],
       name: "m",
       axis: "generic",
       references: [
@@ -1395,7 +1390,7 @@ describe("validateDirectory (cross-file)", () => {
         .join("\n")}\n---\n\n# m\n\nStub. Replace with real content later.\n`,
     );
     writeFm(path.join(dir, "research/component-x.md"), {
-      ...baseRequired({ type: "research", tags: ["research/component"] }),
+      ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 
     const r = validateDirectory({
@@ -1410,7 +1405,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "m",
         axis: "generic",
       }),
@@ -1437,7 +1432,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer",
         axis: "generic",
         output_artifacts: [
@@ -1453,7 +1448,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/consumer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "consumer",
         axis: "generic",
         input_artifacts: [
@@ -1476,7 +1471,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/consumer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "consumer",
         axis: "generic",
         input_artifacts: [
@@ -1499,7 +1494,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer",
         axis: "generic",
         output_artifacts: [
@@ -1528,7 +1523,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer",
         axis: "generic",
         output_artifacts: [
@@ -1545,7 +1540,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/schema-x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-x",
         title: "Schema X",
         package: "@example/schema-x",
@@ -1564,7 +1559,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer-a/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer-a",
         axis: "generic",
         output_artifacts: [
@@ -1581,7 +1576,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer-b/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer-b",
         axis: "generic",
         output_artifacts: [
@@ -1598,7 +1593,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/schema-x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-x",
         title: "Schema X",
         package: "@example/schema-x",
@@ -1608,7 +1603,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/schema-y.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-y",
         title: "Schema Y",
         package: "@example/schema-y",
@@ -1638,7 +1633,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer-a/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer-a",
         axis: "generic",
         output_artifacts: [
@@ -1655,7 +1650,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer-b/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer-b",
         axis: "generic",
         output_artifacts: [
@@ -1671,7 +1666,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/schema-x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-x",
         title: "Schema X",
         package: "@example/schema-x",
@@ -1702,7 +1697,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer",
         axis: "generic",
         output_artifacts: [
@@ -1719,7 +1714,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/schema-x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-x",
         title: "Schema X",
         package: "@example/schema-x",
@@ -1748,7 +1743,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "schemas/schema-x.md"), {
       ...baseRequired({
         type: "schema",
-        tags: ["schema"],
+        tags: ["target/galaxy"],
         name: "schema-x",
         title: "Schema X",
         package: "@galaxy-foundry/schema-x",
@@ -1785,7 +1780,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/producer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "producer",
         axis: "generic",
         output_artifacts: [
@@ -1801,7 +1796,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "molds/consumer/index.md"), {
       ...baseRequired({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "consumer",
         axis: "generic",
         input_artifacts: [{ id: "summary-x", description: "Upstream structured summary." }],
@@ -1811,7 +1806,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/bad-order/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["pipeline"],
+        tags: ["target/galaxy"],
         title: "Bad Order",
         phases: [{ mold: "[[consumer]]" }, { mold: "[[producer]]" }],
       }),

@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy collection-operation tools"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-04-30

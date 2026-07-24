@@ -2,7 +2,6 @@
 type: research
 title: "Nextflow-to-Galaxy channel shape mapping"
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 status: draft

@@ -1,7 +1,6 @@
 ---
 type: research
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 status: draft

@@ -7,7 +7,9 @@ aliases:
   - "Apply Rules build list:paired"
   - "promote paired identifier with Apply Rules"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

@@ -7,7 +7,9 @@ aliases:
   - "extract first dataset"
   - "__EXTRACT_DATASET__ singleton"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

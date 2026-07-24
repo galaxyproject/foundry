@@ -2,7 +2,6 @@
 type: research
 title: "CWL workflow anatomy"
 tags:
-  - research/component
   - source/cwl
 status: draft
 created: 2026-05-10

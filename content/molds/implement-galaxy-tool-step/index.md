@@ -4,7 +4,6 @@ name: implement-galaxy-tool-step
 axis: target-specific
 target: galaxy
 tags:
-  - mold
   - target/galaxy
 status: reviewed
 created: 2026-04-30

@@ -18,7 +18,7 @@ export interface ContentNote {
 
 export interface DashboardSection {
   label: string;
-  tag: string;
+  type: string;
 }
 
 export function loadContentNotes(contentRoot = "content"): ContentNote[] {
@@ -54,8 +54,8 @@ export function loadDashboardSections(filePath = "dashboard_sections.json"): Das
     if (typeof item !== "object" || item === null || Array.isArray(item)) return [];
     const record = item as Record<string, unknown>;
     const label = stringValue(record.label);
-    const tag = stringValue(record.tag);
-    return label && tag ? [{ label, tag }] : [];
+    const type = stringValue(record.type);
+    return label && type ? [{ label, type }] : [];
   });
 }
 

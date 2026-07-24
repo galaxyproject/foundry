@@ -1,7 +1,6 @@
 ---
 type: research
 tags:
-  - research/component
   - source/nextflow
 component: "nf-core Module Conventions"
 status: draft

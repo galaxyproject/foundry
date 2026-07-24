@@ -18,7 +18,6 @@ review_triggers:
   - "Downstream semantics depend on key order as well as key membership."
   - "combine lacks by: and implies Cartesian expansion."
 tags:
-  - source-pattern
   - source/nextflow
   - target/galaxy
 status: draft

@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy collection semantics"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-04-30

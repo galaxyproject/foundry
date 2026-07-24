@@ -7,7 +7,6 @@ aliases:
   - "sample_N relabel"
   - "inline relabel"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

@@ -2,7 +2,6 @@
 type: research
 title: "Nextflow operators to Galaxy collection recipes"
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 status: draft

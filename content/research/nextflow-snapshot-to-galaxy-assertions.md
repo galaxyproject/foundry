@@ -2,7 +2,6 @@
 type: research
 title: "Nextflow nf-test snapshots to Galaxy/Planemo assertions"
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 status: draft

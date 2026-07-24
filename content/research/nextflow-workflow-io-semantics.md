@@ -2,7 +2,6 @@
 type: research
 title: "Nextflow workflow I/O semantics"
 tags:
-  - research/component
   - source/nextflow
 status: draft
 created: 2026-05-06

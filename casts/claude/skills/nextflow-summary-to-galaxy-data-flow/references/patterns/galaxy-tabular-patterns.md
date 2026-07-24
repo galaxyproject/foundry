@@ -8,7 +8,6 @@ aliases:
   - "tabular transformation patterns"
   - "IWC tabular pattern map"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/tabular-transform

@@ -38,7 +38,7 @@ describe("buildNoteSchema", () => {
     const r = schema.safeParse(
       base({
         type: "pattern",
-        tags: ["pattern"],
+        tags: ["target/galaxy"],
         title: "Test Pattern",
         pattern_kind: "operation",
         evidence: "corpus-observed",
@@ -51,7 +51,7 @@ describe("buildNoteSchema", () => {
     const r = schema.safeParse(
       base({
         type: "prompt",
-        tags: ["prompt"],
+        tags: ["prompt/galaxy-internal"],
         title: "Galaxy custom tool critic",
         prompt_file: "custom-tool-critic.upstream.prompt",
         license: "MIT",
@@ -65,7 +65,7 @@ describe("buildNoteSchema", () => {
     const r = schema.safeParse(
       base({
         type: "pattern",
-        tags: ["pattern", "totally-bogus-tag"],
+        tags: ["target/galaxy", "totally-bogus-tag"],
         title: "T",
         pattern_kind: "operation",
         evidence: "corpus-observed",
@@ -81,7 +81,7 @@ describe("buildNoteSchema", () => {
     const r = schema.safeParse(
       base({
         type: "pattern",
-        tags: ["pattern"],
+        tags: ["target/galaxy"],
         title: "T",
         pattern_kind: "operation",
         evidence: "corpus-observed",
@@ -95,7 +95,7 @@ describe("buildNoteSchema", () => {
     const r = schema.safeParse(
       base({
         type: "mold",
-        tags: ["mold"],
+        tags: ["target/galaxy"],
         name: "x",
         axis: "source-specific",
       }),

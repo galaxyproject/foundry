@@ -8,7 +8,6 @@ aliases:
   - "conditional route with pick_value"
   - "one-of-N Galaxy route"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

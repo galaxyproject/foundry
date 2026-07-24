@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy paired_or_unpaired collection type"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-05-11

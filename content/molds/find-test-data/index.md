@@ -3,7 +3,7 @@ type: mold
 name: find-test-data
 axis: generic
 tags:
-  - mold
+  - target/galaxy
 status: reviewed
 created: 2026-04-30
 revised: 2026-07-24

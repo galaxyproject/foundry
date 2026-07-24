@@ -5,7 +5,6 @@ command: test
 package: "planemo"
 upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_test.py"
 tags:
-  - cli-command
   - cli/planemo
 status: draft
 created: 2026-05-11

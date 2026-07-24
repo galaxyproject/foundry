@@ -2,7 +2,6 @@
 type: research
 title: "gxformat2 workflow inputs"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-05-05

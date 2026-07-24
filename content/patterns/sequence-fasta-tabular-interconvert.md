@@ -8,7 +8,6 @@ aliases:
   - "FASTA to tabular and back"
   - "sequence records as a table"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/sequence-transform

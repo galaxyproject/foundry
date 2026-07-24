@@ -1,7 +1,7 @@
 ---
 type: research
 tags:
-  - research/component
+  - source/nextflow
 component: "Nextflow static-introspection CLI (`inspect`, `config`)"
 status: draft
 created: 2026-05-01

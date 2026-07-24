@@ -8,7 +8,6 @@ aliases:
   - "FASTA length table"
   - "sequence lengths to tabular"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/sequence-transform

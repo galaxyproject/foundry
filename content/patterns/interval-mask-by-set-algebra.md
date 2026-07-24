@@ -8,7 +8,6 @@ aliases:
   - "concat merge subtract intervals"
   - "low-coverage and failed-site mask"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform

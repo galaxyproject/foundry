@@ -2,7 +2,6 @@
 type: research
 title: "Galaxy workflow draft format"
 tags:
-  - research/design-spec
   - target/galaxy
 status: draft
 created: 2026-05-06
