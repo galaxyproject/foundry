@@ -1,0 +1,24 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "summarize-cwl-tool",
+    "path": "content/molds/summarize-cwl-tool/index.md",
+    "revision": 2,
+    "content_hash": "75b3eaee693cac227b58e17d65f23de1e9bec7b8a5cb668d70fa9f9048235d3a",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:18.092Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-tool-summary",
+        "kind": "json",
+        "default_filename": "cwl-tool-summary.json",
+        "description": "Compact CWL CommandLineTool summary: container, baseCommand, inputs, outputs, requirements, version metadata."
+      }
+    ],
+    "consumes": []
+  }
+}

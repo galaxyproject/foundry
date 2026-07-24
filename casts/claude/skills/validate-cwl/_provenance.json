@@ -1,0 +1,13 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "validate-cwl",
+    "path": "content/molds/validate-cwl/index.md",
+    "revision": 2,
+    "content_hash": "9b74a3cba42368aa4e32f205294ad860a8df3c3c868ed6a3dcd34d78a9613e5d",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:20.266Z",
+  "refs": []
+}

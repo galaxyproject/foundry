@@ -8,8 +8,8 @@ tags:
   - target/cwl
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Convert an abstract step into a concrete CWL CommandLineTool + step."
 loop_endstate: "No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand."
@@ -26,4 +26,4 @@ output_artifacts:
 ---
 # implement-cwl-tool-step
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+Bind one abstract step to a concrete CWL CommandLineTool using its [[summarize-cwl-tool]] summary, replacing a single placeholder in the CWL workflow draft per loop iteration.

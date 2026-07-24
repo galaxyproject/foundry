@@ -1,0 +1,24 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "summarize-paper",
+    "path": "content/molds/summarize-paper/index.md",
+    "revision": 2,
+    "content_hash": "1e82e242caa7db18217cb489a6d16b5fe23c4a9a32578f7dbb0ebad229de73ec",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:18.702Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "freeform-summary",
+        "kind": "markdown",
+        "default_filename": "freeform-summary.md",
+        "description": "Methods, tools, sample data, references, and workflow intent extracted from a primary paper, normalized into the shared free-form source summary handoff."
+      }
+    ],
+    "consumes": []
+  }
+}

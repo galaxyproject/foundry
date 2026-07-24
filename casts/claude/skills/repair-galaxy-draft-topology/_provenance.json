@@ -1,0 +1,217 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "repair-galaxy-draft-topology",
+    "path": "content/molds/repair-galaxy-draft-topology/index.md",
+    "revision": 1,
+    "content_hash": "d31030715b0bec833af6fc568afa88ca90972f189caf33c58c3a7677fba8caf4",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:17.496Z",
+  "refs": [
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-patterns]]",
+      "src": "content/patterns/galaxy-collection-patterns.md",
+      "dst": "references/patterns/galaxy-collection-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose a corpus-attested collection recipe when the missing producer is a collection construction, reshape, or bridge.",
+      "trigger": "When the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge.",
+      "src_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
+      "dst_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tabular-patterns]]",
+      "src": "content/patterns/galaxy-tabular-patterns.md",
+      "dst": "references/patterns/galaxy-tabular-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce.",
+      "trigger": "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on.",
+      "src_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
+      "dst_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.md",
+      "dst": "references/notes/galaxy-collection-semantics.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve collection typing and map-over/reduction semantics when an inserted producer step joins or reshapes collection inputs.",
+      "trigger": "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
+      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.upstream.myst",
+      "dst": "references/notes/galaxy-collection-semantics.upstream.myst",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve collection typing and map-over/reduction semantics when an inserted producer step joins or reshapes collection inputs.",
+      "trigger": "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections.",
+      "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
+      "src_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
+      "dst_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-semantics]]",
+      "src": "content/research/galaxy-collection-semantics.yml",
+      "dst": "references/notes/galaxy-collection-semantics.yml",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve collection typing and map-over/reduction semantics when an inserted producer step joins or reshapes collection inputs.",
+      "trigger": "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections.",
+      "companion_of": "references/notes/galaxy-collection-semantics.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy.LICENSE",
+      "src_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
+      "dst_hash": "f4e9d0a55459b6080b826e2ae41a920c9404f95fda0e518be8f86bc3d2e73e6e",
+      "source": "deterministic",
+      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-data-flow-draft-contract]]",
+      "src": "content/research/galaxy-data-flow-draft-contract.md",
+      "dst": "references/notes/galaxy-data-flow-draft-contract.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Re-wire the affected region consistently with the data-flow design that settled the surrounding topology.",
+      "verification": "Promote after two repairs preserve the surrounding data-flow design without re-deriving it from the source.",
+      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft-format]]",
+      "src": "content/research/galaxy-workflow-draft-format.md",
+      "dst": "references/notes/galaxy-workflow-draft-format.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Emit re-wired steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
+      "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
+      "src_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "dst_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Read open blocking entries to scope the repair; mark each resolved or surrender it, feeding the loop's decreasing-blocker convergence gate.",
+      "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
+      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft]]",
+      "src": "package://@galaxy-tool-util/schema#galaxyWorkflowDraftJsonSchema",
+      "dst": "references/schemas/galaxy-workflow-draft.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "In/out contract: the draft this Mold reads and re-wires conforms to [[galaxy-workflow-draft]]; cast bundles the JSON Schema so the re-wired draft stays inside the superset the per-step loop expects.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-draft",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-draft.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
+        "description": "Re-wired gxformat2 draft: a producer step (or small sub-path) inserted so the previously-blocked step's declared output is computable; new steps land at draft (TODO) tier."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Ledger with the addressed blocking entries marked resolved, or surrendered with a note when no producer can be found within the escalation budget."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "galaxy-workflow-draft",
+        "description": "Partially-realized gxformat2 draft (see [[galaxy-workflow-draft-format]]) whose topology can't support a declared step — the region to repair.",
+        "inherited_schema": "[[galaxy-workflow-draft]]",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations from [[open-requirements-ledger]]; the open blocking entries name which step output is uncomputable and what evidence is missing.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
+        ]
+      }
+    ]
+  }
+}

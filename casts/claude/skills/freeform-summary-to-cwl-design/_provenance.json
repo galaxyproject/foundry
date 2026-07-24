@@ -1,0 +1,33 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "freeform-summary-to-cwl-design",
+    "path": "content/molds/freeform-summary-to-cwl-design/index.md",
+    "revision": 1,
+    "content_hash": "35bde6960d0abfd147377bf0a7b33addb30b295faf47c6257403957d5f0ddad3",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:12.886Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "freeform-cwl-design",
+        "kind": "markdown",
+        "default_filename": "freeform-cwl-design.md",
+        "description": "Combined CWL interface + data-flow design brief; a single reviewable handoff for free-form sources until examples justify a split."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "freeform-summary",
+        "description": "Free-form source summary emitted by [[summarize-paper]] or [[interview-to-freeform-summary]]; methods, tools, sample data, references, and workflow intent.",
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      }
+    ]
+  }
+}

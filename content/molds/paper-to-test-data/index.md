@@ -8,8 +8,8 @@ tags:
   - source/paper
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Derive workflow test inputs and expected outputs from a paper."
 input_artifacts:
@@ -23,4 +23,4 @@ output_artifacts:
 ---
 # paper-to-test-data
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+Read the paper free-form summary from [[summarize-paper]] and derive concrete workflow test inputs and expected outputs — resolvable URLs, file shapes, and expected hashes — emitted as `test-data-refs`.

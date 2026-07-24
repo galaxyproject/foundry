@@ -1,0 +1,56 @@
+{
+  "provenance_schema_version": 3,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-summary-to-cwl-data-flow",
+    "path": "content/molds/nextflow-summary-to-cwl-data-flow/index.md",
+    "revision": 1,
+    "content_hash": "9f1b25edc84a70670780e41f582cbc157390699c0f04856b1a5e0f55d8964013",
+    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+  },
+  "cast_at": "2026-07-24T13:51:14.581Z",
+  "refs": [
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Read process, channel, operator, and fixture structure while drafting CWL-facing abstract data flow.",
+      "license": "MIT",
+      "src_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "dst_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "nextflow-cwl-data-flow",
+        "kind": "markdown",
+        "default_filename": "nextflow-cwl-data-flow.md",
+        "description": "Reviewable Markdown brief: abstract topology, scatter/gather choices, value transformations, unresolved CommandLineTool needs, confidence."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; consumed alongside the CWL interface brief.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "nextflow-cwl-interface",
+        "description": "Preceding CWL interface brief from [[nextflow-summary-to-cwl-interface]] that pins inputs, outputs, and labels.",
+        "producers": [
+          "nextflow-summary-to-cwl-interface"
+        ]
+      }
+    ]
+  }
+}
