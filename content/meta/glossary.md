@@ -10,11 +10,7 @@ Alphabetical.
 
 **Cast** *(verb)* — produce a self-contained artifact from a Mold via the casting process. *(noun)* — a single casting result for one Mold and target. Example: "the cast of `implement-galaxy-tool-step` for the Claude target."
 
-**Cast artifact** — the compiled output produced by casting a Mold. Self-contained, condensed, no links back to the Foundry, no runtime dependency on it. Frozen against the Foundry version it was cast from. May target Claude's skill format, a web-app-baked skill, a generic format, etc.
-
-**Cast target** — an output format that casting can produce. Examples: Claude skill directory, skill baked into a web application, generic (non-Claude) skill format. A single Mold may cast to several targets.
-
-**Casting** — the LLM-driven process that produces a cast artifact from a Mold. Operates as **per-kind dispatch** over the Mold's typed references (see *Reference kind*): patterns get LLM-condensed, schemas get copied verbatim, manpages get cast to JSON sidecars, examples get copied, prompts get inlined, evals get dropped. The casting process is non-deterministic by design and expected to evolve as models improve.
+**Casting** — the compilation process that produces a cast artifact from a Mold: **deterministic tooling first, LLM condensation second, in that order of trust**. Operates as **per-kind dispatch** over the Mold's typed references (see *Reference*): schemas get copied verbatim, manpages get cast to JSON sidecars, examples get copied, prompts get inlined, patterns get LLM-condensed, evals get dropped. The integration boundary — artifacts come out condensed, isolated, and frozen. Expected to evolve as models improve.
 
 **Casting skill** — the producer skill or tool that reads a Mold and emits a cast artifact. Distinct from a **generated skill**, which is one possible kind of cast artifact.
 
@@ -32,7 +28,7 @@ Alphabetical.
 
 **Evaluation plan** — Mold- or Pipeline-owned content (`eval.md`): the **abstract oracle** for a cast artifact (Mold) or end-to-end journey (Pipeline). Fixture-independent property checks and guardrails — *how* you judge any output, never a specific input/expected pair. Like a checker that asserts "a sort returns the same elements in nondecreasing order," not the case "`sort([3,1,2]) == [1,2,3]`"; concrete cases live in the **Scenario note**. Strictly property-shaped: every check states a property that could fail. Lives alongside the Mold in the Foundry. **Not** packaged into cast artifacts — evals are Foundry-maintainer infrastructure, not consumer-facing. Distinct from **Scenario note** (concrete cases), **Usage note** (illustration), and **Refinement note** (design questions). See `docs/EVAL_PHILOSOPHY.md` for the reasoning.
 
-**Foundry** *(short for Galaxy Workflow Foundry)* — the standalone knowledge base where Pipelines, Molds, pattern pages, CLI manual pages, IO schemas, and IWC-citing content live. Renders as a navigable site; serves as the source of truth that casting reads.
+**Foundry** *(short for Galaxy Workflow Foundry)* — the standalone knowledge base where Pipelines, Molds, pattern pages, CLI manual pages, IO schemas, and IWC-citing content live. Renders as a navigable site; serves as the source of truth that casting reads. The substrate term for this source-of-truth artifact is **Knowledge Base (KB)**.
 
 **Freeform summary** — Markdown source-summary handoff for narrative or interview-derived starts. Produced by `summarize-paper` and `interview-to-freeform-summary`; consumed by `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-cwl-design`, and `freeform-summary-to-galaxy-template`. Deliberately not a rigid workflow schema: it records source evidence, uncertainty, open questions, methods, tools, sample data, parameters, and expected outputs.
 
@@ -54,6 +50,8 @@ Alphabetical.
 
 **IWC exemplar** — one workflow from the IWC corpus. The cleaned `gxformat2` versions live in `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-format2/`. Pattern pages cite exemplars; Molds reference them as ground truth; casting may inline references; evaluations exercise generated skills against them.
 
+**Knowledge Base (KB)** — the inspectable, human-readable source of truth at the center of the instance: the standalone site where Pipelines, Molds, pattern pages, CLI manual pages, and IO schemas live and from which casting reads. Authored to be *read and learned by a human*, not merely stored for an agent to retrieve. The KB is the source; a **skill artifact** is the package. Colloquially *the Foundry* (see **Foundry**).
+
 **Loop** *(`[loop]` annotation)* — a phase-level flag (`loop: true` in frontmatter) marking a phase that runs once per step in the workflow being constructed. Applied to orchestrator Molds that advance the workflow by one step (`advance-galaxy-draft-step`). Renders on a subway map as a decorated station.
 
 **Mold** — an abstract, structured template inside the Foundry that describes a workflow-construction action. Authored as a **typed reference manifest with a presentation layer**: a `.md` file whose frontmatter declares typed references to heterogeneous artifacts (pattern pages, CLI manual pages, IO schemas, prompt fragments, examples), and whose body is a procedural skeleton that ties them together. Rendered as a navigable Foundry page; cast into one or more cast artifacts via casting's per-kind dispatch over those references.
@@ -72,11 +70,13 @@ Alphabetical.
 
 **Planemo** — the runtime CLI tool. Executes Galaxy *and* CWL workflows. Used by `run-workflow-test`, `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`. Inside the Foundry, Planemo's CLI surface is captured as **CLI manual pages** (`content/cli/planemo/*`) referenced by action Molds. Contrasts with **gxwf**.
 
+**Provenance** — a record (`_provenance.json`) emitted beside every cast artifact: which Mold revision, which model version, which references resolved, which checks ran. The durable, non-commodity asset — the answer to "which specific claim is real and where it came from." Present in every cast; never lightened.
+
 **Refinement journal** — append-only sequence of entries under `content/molds/<slug>/refinements/<date>-<slug>.md`, one per `/refine-mold` run. Each entry carries small structured frontmatter (`mold`, `date`, `intent`, `decision`) and free-form body. Entries are superseded rather than edited; the `decision` field (`keep | schema-change | reference-change | eval-add | open-question | other`) supports cross-Mold rollups.
 
 **Refinement note** — Mold-owned content (`refinement.md`) that parks open design questions about the Mold itself: schema fields under suspicion, references whose value isn't clear, scope edges. Free-form; not assertion-shaped. Read by the `/refine-mold` skill as part of context-loading. Never packaged into cast artifacts. Distinct from **Evaluation plan** (assertions) and **Usage note** (illustration).
 
-**Reference kind** — the type discriminator on a Mold's typed references; controls casting behavior. Provisional kinds: `pattern` (markdown reference, LLM-condensed), `cli-command` (manual page, cast to JSON sidecar), `schema` (JSON Schema file, copied verbatim), `example` (fixture, copied verbatim), `prompt` (markdown fragment, inlined verbatim), `eval` (Foundry-only, never in cast). Per-kind dispatch is what makes casting more than "resolve all wiki links the same way."
+**Reference** *(a.k.a. reference kind)* — a typed dependency a Mold declares; the *kind* discriminator controls casting behavior (per-kind dispatch). Provisional kinds: `pattern` (markdown reference, LLM-condensed), `cli-command` (manual page, cast to JSON sidecar), `schema` (JSON Schema file, copied verbatim), `example` (fixture, copied verbatim), `prompt` (markdown fragment, inlined verbatim), `eval` (Foundry-only, never in cast). Per-kind dispatch is what makes casting more than "resolve all wiki links the same way."
 
 **Routing pattern** — the named-pattern value inside a `[branch]` phase that determines its inner shape and rendering. Initial vocabulary: `discover-or-author` (binary with `branches:` and a `fallthrough:` step) and `test-data-resolution` (sequential `chain:` of Mold wiki-links ending in a terminal sentinel like `user-supplied`). Open question whether the set graduates into a closed schema enum or stays open with validator coverage of embedded wiki-links only.
 
@@ -84,9 +84,13 @@ Alphabetical.
 
 **Schema (Mold IO)** — a JSON Schema file declaring the input or output shape of a Mold (e.g., the per-source summary schemas, the Galaxy tool summary schema). Lives in `schemas/` (a non-content directory; not a vault note). Referenced by Molds via typed-path frontmatter fields; copied verbatim into cast bundles by casting. Distinct from the *frontmatter* contract for content notes, which is the shared zod schema in `@galaxy-foundry/note-schema`.
 
+**Skill artifact** *(a.k.a. cast artifact)* — the compiled output produced by casting a Mold: self-contained, condensed, no links back to the Foundry, no runtime dependency on it, frozen against the Foundry version it was cast from. `SKILL.md` (or any skill file) is therefore a compile **target**, never the authoring surface. May target Claude's skill format, a web-app-baked skill, a generic format, etc.
+
 **Subway map** — informal name for the visual rendering of a Pipeline as a vertical line of stops: Mold-shaped phases are linked stations, `[loop]` decorates per-step stations, `[branch]` stops are decision diamonds with their inner branches/chains expanded, future `[gate]` stops would render as checkpoint markers. Off-ramps per stop point to the patterns / CLI manpages / schemas the Mold references — the reference-surface drill-downs from a journey-surface point. Rendered by `[...slug].astro` via `PipelineBody.astro` + `PhaseGraph.astro`; the per-pipeline harness off-ramp lives at `pipelines/[slug]/harness.astro`.
 
 **Source-specific** *(Mold axis)* — a Mold whose content depends on the input format. Examples: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`. Structured sources emit their own schema by design; paper and interview starts share the `freeform-summary` handoff.
+
+**Target** *(a.k.a. cast target)* — an output format that casting can produce. Examples: Claude skill directory, skill baked into a web application, generic (non-Claude) skill format. A single Mold may cast to several targets; the KB stays the source of truth.
 
 **Target-specific** *(Mold axis)* — a Mold whose content depends on the output target. Examples: `summary-to-cwl-template`, `summarize-galaxy-tool`, `validate-cwl`.
 
