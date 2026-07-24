@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.
+- Read artifact `galaxy-workflow`. Produced by `advance-galaxy-draft-step`. Concrete gxformat2 workflow to validate — the loop-endstate `galaxy-workflow.gxwf.yml` from advance-galaxy-draft-step (`class: GalaxyWorkflow`); the assembled build result terminal gxwf validation runs against.
 
 ## Outputs
 
@@ -21,7 +21,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g @galaxy-tool-util/cli@^1.8.1`.
+- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli

@@ -9,9 +9,12 @@ tags:
 status: reviewed
 created: 2026-05-02
 revised: 2026-07-24
-revision: 4
+revision: 5
 ai_generated: true
 summary: "Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures."
+input_artifacts:
+  - id: galaxy-workflow
+    description: "Concrete gxformat2 workflow to validate — the loop-endstate `galaxy-workflow.gxwf.yml` from [[advance-galaxy-draft-step]] (`class: GalaxyWorkflow`); the assembled build result terminal gxwf validation runs against."
 references:
   - kind: cli-command
     ref: "[[gxwf validate]]"

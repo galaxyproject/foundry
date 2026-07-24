@@ -4,11 +4,11 @@
   "mold": {
     "name": "validate-galaxy-workflow",
     "path": "content/molds/validate-galaxy-workflow/index.md",
-    "revision": 3,
-    "content_hash": "58536625c371eed536f6c3f68cde6b4d425b051c8d1ed129e4c5b667a05a3135",
-    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
+    "revision": 5,
+    "content_hash": "1435271ad1da5aad12e26ed9a7c4028ab416625990fefd1393bdc70bf190e38b",
+    "commit": "5e30ac53b1b55fcff0bb5dacb63c0e2a65cefb3e"
   },
-  "cast_at": "2026-07-01T23:46:07.138Z",
+  "cast_at": "2026-07-24T14:15:01.484Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -23,7 +23,7 @@
       "trigger": "After all Galaxy steps and workflow tests have been assembled.",
       "verification": "Run the cast skill on a complete IWC-derived workflow and confirm terminal validation findings are separated from runtime test failures.",
       "src_hash": "8fdf834e8b3bd2c70e9625c9148eb246855a40625510f0be5f6351885b057aa4",
-      "dst_hash": "caec1f5cc5a69b56f2a033f8e96a5330a8393b76ff606d3ea7468b1eb7922de6",
+      "dst_hash": "ff10c49819b0f7af13f247ea03e4dd24ba2e5144da3beaa6b1ab96698c7e03b7",
       "source": "deterministic"
     },
     {
@@ -56,5 +56,17 @@
       "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
       "source": "deterministic"
     }
-  ]
+  ],
+  "artifacts": {
+    "produces": [],
+    "consumes": [
+      {
+        "id": "galaxy-workflow",
+        "description": "Concrete gxformat2 workflow to validate — the loop-endstate `galaxy-workflow.gxwf.yml` from [[advance-galaxy-draft-step]] (`class: GalaxyWorkflow`); the assembled build result terminal gxwf validation runs against.",
+        "producers": [
+          "advance-galaxy-draft-step"
+        ]
+      }
+    ]
+  }
 }
