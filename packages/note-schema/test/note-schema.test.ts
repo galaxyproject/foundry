@@ -7,7 +7,7 @@ import {
   buildNoteSchema,
   loadLicensePolicy,
   loadReferenceContract,
-  loadTags,
+  loadTagRegistry,
 } from "../src/index.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -15,7 +15,7 @@ const repoRoot = path.resolve(here, "../../..");
 
 function realSchema() {
   return buildNoteSchema({
-    tags: loadTags(path.join(repoRoot, "meta_tags.yml")),
+    tags: loadTagRegistry(path.join(repoRoot, "meta_tags.yml")),
     contract: loadReferenceContract(path.join(repoRoot, "reference_contract.yml")),
     licensePolicy: loadLicensePolicy(repoRoot),
   });

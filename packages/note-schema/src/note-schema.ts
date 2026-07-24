@@ -11,10 +11,12 @@ import { z } from "zod";
 
 import { contractKeys, type ReferenceContract } from "./reference-contract.js";
 import { isValidLicenseId, resolveLicenseRow, type LicensePolicy } from "./license-policy.js";
+import { type TagRegistry } from "./tags.js";
 
 export interface BuildNoteSchemaOptions {
-  /** Controlled tag vocabulary (meta_tags.yml keys). */
-  tags: string[];
+  /** Controlled tag vocabulary (meta_tags.yml). Membership is declared by the registry's
+   *  facets, so the schema asks the registry rather than matching a prefix itself. */
+  tags: TagRegistry;
   /** Reference-contract registries (reference_contract.yml). */
   contract: ReferenceContract;
   /** License → redistribution-policy table (license-policy.yml). */
@@ -55,11 +57,11 @@ const sourceKinds = [
 ] as const;
 
 export function buildNoteSchema({ tags, contract, licensePolicy }: BuildNoteSchemaOptions) {
-  const tagSet = new Set(tags);
-
-  // Tag membership check (meta_tags.yml). Mirrors the old ajv tags.items.enum.
+  // Tag membership check (meta_tags.yml): valid iff some facet declares the tag under
+  // its `values`. Never a prefix match — `target/not-a-real-thing` is as invalid as
+  // `nonsense`, and a bare key like `meta` is as valid as a slashed one.
   const tag = z.string().superRefine((t: string, ctx: z.RefinementCtx) => {
-    if (!tagSet.has(t)) {
+    if (!tags.isValidTag(t)) {
       ctx.addIssue({ code: "custom", message: `unknown tag '${t}' (not in meta_tags.yml)` });
     }
   });

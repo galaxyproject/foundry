@@ -1,63 +1,84 @@
 # meta_tags.yml — controlled tag vocabulary.
-# Validator + site inject these keys into the shared note-schema zod contract at build time.
-# Tags are cross-cutting facets only; note-kind is the `type:` discriminator, not a tag.
-# Hierarchy is purely textual (slash-delimited); a bare key (no slash) is a flat flag.
-# Every key is registered with a description: there is no open/prefix-wildcard family, so
-# this file is the complete catalog of what the corpus can carry. See docs/ARCHITECTURE.md §4.
+# Validator + site inject this registry into the shared note-schema zod contract at build time.
+#
+# Tags are cross-cutting facets only; note-kind is the `type:` discriminator, never a tag.
+#
+# Membership is DECLARED, not parsed off the `/` prefix: a tag is valid because its facet
+# lists it under `values`, never because its text starts with a facet name. The slash is
+# therefore a naming convention, and a bare key (no slash, e.g. `meta`) is an ordinary
+# member — not a special "flat flag" case. Browse pages group by the DECLARING facet, so
+# no tag can fall through into an "other" bucket.
+#
+# Every facet is a CLOSED enum: each tag is listed here with a one-line gloss, so every tag
+# the corpus can carry is documented and browsable. There is no open/free-form/wildcard
+# family — an `iwc/*` one was declared once, carried zero notes, and was dropped.
+#
+# The FORMAT is shared across Foundry instances (spec: galaxyproject/foundry-pattern,
+# content/pattern/standing-up-a-foundry.instructions.txt) — treat a format change as a
+# cross-repo change. The facet VOCABULARY below is ours. See docs/ARCHITECTURE.md §4.
 
-# --- meta (flat flag) ---
-meta:
-  description: "Foundry-meta note — about the Foundry's own tooling, casting system, or an external harness/tool it evaluates"
+version: 1
 
-# --- Prompt classifications ---
-prompt/galaxy-internal:
-  description: "Prompt sourced from Galaxy's internal agent prompt library"
-# --- CLI affiliation (for cli-tool and cli-command notes) ---
-cli/gxwf:
-  description: "gxwf CLI (Galaxy workflow design-time tooling)"
-cli/galaxy-tool-cache:
-  description: "galaxy-tool-cache CLI (fetch/cache/inspect Galaxy tool metadata)"
-cli/planemo:
-  description: "Planemo CLI (Galaxy workflow runtime testing)"
-cli/cwltool:
-  description: "cwltool reference runner / validator for CWL"
-cli/cwl-utils:
-  description: "cwl-utils CLI (cwl-normalizer and friends)"
-cli/foundry:
-  description: "Foundry-shipped CLI bins (validators and harness tooling)"
+facets:
+  meta:
+    label: Meta
+    description: >-
+      Foundry-meta notes — about the Foundry's own tooling and casting system, or an
+      external harness/tool it evaluates. The one facet whose member carries no slash.
+    values:
+      meta: "Foundry-meta note — about the Foundry's own tooling, casting system, or an external harness/tool it evaluates"
 
-# --- Mold axis tags (provisional — may graduate to typed fields) ---
-source/paper:
-  description: "Mold consumes paper-shaped input"
-source/interview:
-  description: "Mold or pipeline starts from a free-form user interview"
-source/freeform:
-  description: "Mold consumes a normalized free-form source summary"
-source/nextflow:
-  description: "Mold consumes Nextflow-shaped input"
-source/cwl:
-  description: "Mold consumes CWL-shaped input"
-source/galaxy:
-  description: "Mold consumes an existing Galaxy gxformat2/.ga workflow as its source"
-source/snakemake:
-  description: "Source-pattern or Mold consumes Snakemake-shaped input"
-target/galaxy:
-  description: "Mold targets Galaxy"
-target/cwl:
-  description: "Mold targets CWL"
-tool/gxwf:
-  description: "Mold wraps gxwf CLI surface"
-tool/planemo:
-  description: "Mold wraps Planemo CLI surface"
+  prompt:
+    label: Prompt
+    description: Reusable upstream or Foundry-authored prompt families.
+    values:
+      prompt/galaxy-internal: "Prompt sourced from Galaxy's internal agent prompt library"
 
-# --- topic/* (Foundry-authored pattern/MOC topics) ---
-topic/galaxy-transform:
-  description: "Galaxy data-shape transformation pattern maps"
-topic/collection-transform:
-  description: "Galaxy collection transformation pattern map"
-topic/tabular-transform:
-  description: "Galaxy tabular transformation pattern map"
-topic/interval-transform:
-  description: "Galaxy genomic interval transformation pattern map"
-topic/sequence-transform:
-  description: "Galaxy sequence-record (FASTA) transformation pattern map"
+  cli:
+    label: CLI
+    description: >-
+      CLI affiliation — every cli-tool and cli-command note carries one. Drives per-tool
+      browse pages and action-Mold reference surfaces.
+    values:
+      cli/gxwf: "gxwf CLI (Galaxy workflow design-time tooling)"
+      cli/galaxy-tool-cache: "galaxy-tool-cache CLI (fetch/cache/inspect Galaxy tool metadata)"
+      cli/planemo: "Planemo CLI (Galaxy workflow runtime testing)"
+      cli/cwltool: "cwltool reference runner / validator for CWL"
+      cli/cwl-utils: "cwl-utils CLI (cwl-normalizer and friends)"
+      cli/foundry: "Foundry-shipped CLI bins (validators and harness tooling)"
+
+  source:
+    label: Source
+    description: What shape of input a Mold or source-pattern consumes.
+    values:
+      source/paper: "Mold consumes paper-shaped input"
+      source/interview: "Mold or pipeline starts from a free-form user interview"
+      source/freeform: "Mold consumes a normalized free-form source summary"
+      source/nextflow: "Mold consumes Nextflow-shaped input"
+      source/cwl: "Mold consumes CWL-shaped input"
+      source/galaxy: "Mold consumes an existing Galaxy gxformat2/.ga workflow as its source"
+
+  target:
+    label: Target
+    description: What system a Mold produces for.
+    values:
+      target/galaxy: "Mold targets Galaxy"
+      target/cwl: "Mold targets CWL"
+
+  tool:
+    label: Tool
+    description: >-
+      Which CLI surface a Mold wraps. Distinct from `cli/*`, which says what a cli-tool or
+      cli-command note is *about*.
+    values:
+      tool/planemo: "Mold wraps Planemo CLI surface"
+
+  topic:
+    label: Topic
+    description: Foundry-authored pattern/MOC topics — the subject maps patterns group under.
+    values:
+      topic/galaxy-transform: "Galaxy data-shape transformation pattern maps"
+      topic/collection-transform: "Galaxy collection transformation pattern map"
+      topic/tabular-transform: "Galaxy tabular transformation pattern map"
+      topic/interval-transform: "Galaxy genomic interval transformation pattern map"
+      topic/sequence-transform: "Galaxy sequence-record (FASTA) transformation pattern map"

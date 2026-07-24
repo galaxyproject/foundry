@@ -34,7 +34,7 @@ Authoritative term definitions live in `content/meta/glossary.md`; this section 
 
 - **Note** — a single `.md` file with frontmatter under the foundry's content root. Identity = filename stem, used as the wiki-link target.
 - **Type** — the single note-kind discriminator (`type:` in frontmatter): `mold | pattern | source-pattern | cli-tool | cli-command | pipeline | research | schema | prompt`. The `buildNoteSchema` discriminated union and the whole site (`data.type`) key off it; note-kind is never re-encoded as a tag. Within a type, further shape comes from typed fields (Molds use `axis`, `source`, `target`, `tool`), not a subtype.
-- **Tag** — controlled label declared in `meta_tags.yml`, reserved for **cross-cutting facets only** (never note-kind): hierarchical `source/*`, `target/*`, `tool/*`, `cli/*`, `topic/*`, plus flat flags like `meta`. Further subject-area families bloom as content lands — see §4.
+- **Tag** — controlled label declared in `meta_tags.yml`, reserved for **cross-cutting facets only** (never note-kind). Every tag is declared by a facet — `source`, `target`, `tool`, `cli`, `topic`, `prompt`, `meta` — which is what makes it valid; the slash in `source/paper` is naming convention, not a rule. Further subject-area facets bloom as content lands — see §4.
 - **Mold** — `content/molds/<slug>/index.md`. Directory-based note: `index.md` is the only top-level frontmatter-bearing file; siblings (`eval.md`, `usage.md`, `refinement.md`, `refinements/`, `examples/`, optional `casting.md` / `cast-skill-verification.md` / `changes.md`) ride along verbatim. Files under `refinements/` are the one carve-out: each refinement-journal entry carries small structured frontmatter. Content shape: typed reference manifest in frontmatter + procedural body skeleton.
 - **Pattern** — single `.md` under `content/patterns/`. Reference content. IWC citations live in the body as URLs; see `CORPUS_INGESTION.md`. Wiki-linked from Molds.
 - **Source-pattern** — single `.md` under `content/source-patterns/<source>/`. Reference content mapping source-system structures to target-system constructs, with `source_pattern_kind`, `source`, `target`, and `implemented_by_patterns` frontmatter.
@@ -77,26 +77,36 @@ Source of truth: the `buildNoteSchema` discriminated union in `@galaxy-foundry/n
 
 ## 4. Tag system
 
-`meta_tags.yml` is a flat YAML dict whose **keys** are the entire allowed tag vocabulary; each value is `{ description: "..." }`. Tags are cross-cutting facets only — note-kind is the `type:` discriminator, not a tag. Hierarchy is purely textual (slash-delimited); a bare key (no slash) is a flat flag. Every key carries a `description`, and there is **no open or prefix-wildcard family** — a tag is registered with a gloss or it does not validate, so this file is the complete, permanent catalog of what the corpus can carry. Examples:
+`meta_tags.yml` groups the entire allowed tag vocabulary into **facets** — each declaring a `label`, a `description`, and its `values` (tag → one-line gloss). Tags are cross-cutting facets only; note-kind is the `type:` discriminator, never a tag.
 
 ```yaml
-meta:
-  description: "Foundry-meta note — about the Foundry's own tooling or an external harness it evaluates"
-target/galaxy:
-  description: "Mold targets Galaxy"
-cli/gxwf:
-  description: "gxwf CLI (Galaxy workflow design-time tooling)"
-topic/collection-transform:
-  description: "Galaxy collection transformation pattern map"
+version: 1
+facets:
+  meta:
+    label: Meta
+    description: Foundry-meta notes — the Foundry's own tooling, or an external harness it evaluates.
+    values:
+      meta: "Foundry-meta note — about the Foundry's own tooling, casting system, or an external harness/tool it evaluates"
+  target:
+    label: Target
+    description: What system a Mold produces for.
+    values:
+      target/galaxy: "Mold targets Galaxy"
 ```
 
-`buildNoteSchema` takes the registry keys (`loadTags` from `@galaxy-foundry/note-schema`) and enforces tag membership in the zod schema it builds, so there is no static tag enum to maintain. Vocabulary changes touch one file; the schema code stays static. The separation is load-bearing.
+Three rules carry the weight:
 
-Tag families (facets only — note-kind is `type`, never a tag):
-- **`meta` (flat flag)** — Foundry-meta notes: the Foundry's own tooling / casting system, or an external harness/tool it evaluates. The one non-hierarchical tag.
-- **Prompt tags** (`prompt/*`) — classify reusable upstream or Foundry-authored prompt families, e.g. `prompt/galaxy-internal` for prompts sourced from Galaxy's internal agent prompt library.
-- **`cli/*` (CLI affiliation)** — every `cli-tool` and `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and action-Mold reference surfaces.
-- **Source/target/tool axis tags** (`source/paper`, `source/nextflow`, `source/cwl`, `target/galaxy`, `target/cwl`, `tool/gxwf`, `tool/planemo`) — complement typed Mold and source-pattern fields and drive browse surfaces.
+- **Membership is declared, not parsed.** A tag is valid because its facet lists it under `values`, never because its text starts with a facet name — `target/not-a-real-thing` is as invalid as `nonsense`. The slash is therefore a naming convention, and a bare key like `meta` is an ordinary member rather than a special "flat flag" case. The browse pages group by the *declaring* facet, which is what makes an "other" bucket impossible rather than merely empty.
+- **Every facet is closed.** Each tag is listed with a gloss, and there is no open/free-form/prefix-wildcard family. A tag is registered and documented, or it does not validate — so this file is the complete, permanent catalog of what the corpus can carry, and `/tags` always has something to render beside every entry.
+- **`tags` is `minItems: 1`.** Every note carries at least one tag, always a facet. There is no note-kind tag and no type↔tag coherence check.
+
+`buildNoteSchema` takes the registry (`loadTagRegistry` from `@galaxy-foundry/note-schema`) and asks it for membership, so there is no static tag enum to maintain. Vocabulary changes touch one file; the schema code stays static. The separation is load-bearing.
+
+The facets today: `meta` (Foundry-meta notes), `prompt` (reusable prompt families), `cli` (CLI affiliation — every `cli-tool`/`cli-command` note carries one, driving per-tool browse pages), `source` / `target` (what a Mold consumes and produces for), `tool` (which CLI surface a Mold wraps — distinct from `cli`, which says what a note is *about*), and `topic` (Foundry-authored pattern/MOC subject maps).
+
+`tests/registry-drift.test.ts` checks the converse of what the schema checks: the schema rejects a note carrying an unregistered tag, and the drift test rejects a registered tag carried by zero notes, or a facet with no members in use. It is a corpus-level test rather than a `validateDirectory` check because that runs against arbitrary directories — including fixtures where nearly every registered tag is legitimately unused.
+
+The registry **format** is shared across Foundry instances (spec: [galaxyproject/foundry-pattern](https://github.com/galaxyproject/foundry-pattern), `content/pattern/standing-up-a-foundry.instructions.txt`), so a format change is a cross-repo change. The facet **vocabulary** above is ours; the Statistical Genomics Foundry's is `family`/`role`/`domain`/`topic`, and only `topic` collides by name — ours groups pattern maps, theirs sits beneath a `domain`.
 
 **Subject-area tags are demand-driven.** A general Galaxy code/feature taxonomy (collections, tools, conditionals, ...) is not committed up front. Tag families bloom as patterns surface real cross-cutting needs — and each one arrives as registered keys with glosses, never as an open family declared in advance. An `iwc/*` family (IWC corpus categories, seeded from the clone's directory layout) was declared this way and carried zero notes: patterns cite IWC by URL in the body instead (`CORPUS_INGESTION.md`), so it was dropped rather than filled in.
 

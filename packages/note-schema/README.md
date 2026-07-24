@@ -16,10 +16,14 @@ encoding but not the other).
 The controlled enums are injected at call time from the repo-root registries so
 the schema and the registries can never diverge:
 
-- `meta_tags.yml` → allowed `tags[]`
+- `meta_tags.yml` → allowed `tags[]` (facets, each declaring its members and their glosses)
 - `reference_contract.yml` → allowed `references[]` vocab
 - `license-policy.yml` → allowed `license` ids
 
-The registry loaders (`loadTags`, `loadReferenceContract`, `loadLicensePolicy`,
+The registry loaders (`loadTagRegistry`, `loadReferenceContract`, `loadLicensePolicy`,
 `resolveLicenseRow`, `isValidLicenseId`) are exported from here too, so the
 validator, the caster, and the site's license UI share one implementation.
+
+`loadTagRegistry` returns a registry object rather than a bare list: tag membership
+is *declared* by a facet's `values`, never parsed off the `/` prefix, so callers ask
+it (`isValidTag`, `facetOf`, `tagDescription`, `facets`) instead of matching strings.
