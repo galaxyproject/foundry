@@ -8,10 +8,10 @@ tags:
   - mold
   - source/nextflow
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-05-05
-revised: 2026-05-10
-revision: 4
+revised: 2026-07-24
+revision: 5
 ai_generated: true
 summary: "Map a Nextflow summary into a Galaxy workflow interface design brief."
 input_artifacts:

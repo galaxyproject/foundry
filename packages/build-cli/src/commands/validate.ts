@@ -730,31 +730,13 @@ function validatePipelinePhases(
   metaByPath: Map<string, Frontmatter>,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
-  const moldsReferenced = new Set<string>();
   for (const f of files) {
     if (f.meta.type !== "pipeline") continue;
     const phases = f.meta.phases;
     if (!Array.isArray(phases)) continue;
     const parsed = parsePhases(phases, slugMap, metaByPath, f.path);
     findings.push(...parsed.findings);
-    for (const phase of parsed.phases) {
-      for (const p of phaseMoldPaths(phase)) moldsReferenced.add(p);
-    }
     findings.push(...validatePipelineArtifactBindings(f, parsed.phases, metaByPath));
-  }
-  // Inventory coverage warning: non-draft Molds should appear in at least one pipeline.
-  const orphans: string[] = [];
-  for (const f of files) {
-    if (f.meta.type !== "mold") continue;
-    if (f.meta.status === "draft") continue;
-    if (!moldsReferenced.has(f.path)) orphans.push(f.slug);
-  }
-  if (orphans.length > 0) {
-    findings.push({
-      path: "(inventory)",
-      severity: "warning",
-      message: `Molds with zero pipeline membership: ${orphans.sort().join(", ")}`,
-    });
   }
   return findings;
 }

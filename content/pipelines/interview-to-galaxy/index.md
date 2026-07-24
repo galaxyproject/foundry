@@ -5,10 +5,10 @@ tags:
   - pipeline
   - source/interview
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-05-22
-revised: 2026-05-22
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff."
 harness_notes:

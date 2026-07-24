@@ -6,10 +6,10 @@ target: galaxy
 tags:
   - mold
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-04-30
-revised: 2026-06-12
-revision: 4
+revised: 2026-07-24
+revision: 5
 ai_generated: true
 summary: "Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs."
 input_artifacts:

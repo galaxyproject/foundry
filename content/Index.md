@@ -5,20 +5,20 @@ Generated from content frontmatter. Do not edit by hand.
 ## Pipelines
 
 - [[cwl-to-galaxy]] — Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction.
-- [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff.
+- [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. *(reviewed)*
 - [[nextflow-to-cwl]] — Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
-- [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow.
+- [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. *(reviewed)*
 - [[paper-to-cwl]] — Direct path from a paper to a CWL Workflow + CommandLineTool set.
 - [[paper-to-galaxy]] — Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate.
-- [[update-interview-to-galaxy]] — Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop.
+- [[update-interview-to-galaxy]] — Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. *(reviewed)*
 
 ## Molds
 
-- [[advance-galaxy-draft-step]] — Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate.
-- [[apply-galaxy-workflow-changeset]] — Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps.
-- [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable.
-- [[changeset-to-galaxy-test-plan]] — Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan.
-- [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
+- [[advance-galaxy-draft-step]] — Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. *(reviewed)*
+- [[apply-galaxy-workflow-changeset]] — Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps. *(reviewed)*
+- [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable. *(reviewed)*
+- [[changeset-to-galaxy-test-plan]] — Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan. *(reviewed)*
+- [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring. *(reviewed)*
 - [[convert-nfcore-module-to-galaxy-tool]] — Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks).
 - [[cwl-summary-to-galaxy-data-flow]] — Translate a CWL summary into a Galaxy data-flow design brief.
 - [[cwl-summary-to-galaxy-interface]] — Map a CWL summary into a Galaxy workflow interface design brief.
@@ -26,41 +26,41 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cwl-test-to-galaxy-test-plan]] — Translate CWL test fixtures into a Galaxy workflow test plan.
 - [[cwl-to-test-data]] — Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs.
 - [[debug-cwl-workflow-output]] — Triage failing CWL run outputs; classify failure modes; propose fixes.
-- [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
-- [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
-- [[find-test-data]] — Search IWC fixtures and public sources for test data matching a data-flow shape.
+- [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. *(reviewed)*
+- [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. *(reviewed)*
+- [[find-test-data]] — Search IWC fixtures and public sources for test data matching a data-flow shape. *(reviewed)*
 - [[freeform-summary-to-cwl-design]] — Translate a free-form source summary into a CWL workflow design brief.
-- [[freeform-summary-to-galaxy-data-flow]] — Translate a free-form source summary into a Galaxy data-flow design brief.
-- [[freeform-summary-to-galaxy-interface]] — Map a free-form source summary into a Galaxy workflow interface design brief.
-- [[freeform-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
-- [[freeform-summary-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs.
+- [[freeform-summary-to-galaxy-data-flow]] — Translate a free-form source summary into a Galaxy data-flow design brief. *(reviewed)*
+- [[freeform-summary-to-galaxy-interface]] — Map a free-form source summary into a Galaxy workflow interface design brief. *(reviewed)*
+- [[freeform-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. *(reviewed)*
+- [[freeform-summary-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs. *(reviewed)*
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
-- [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary.
-- [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions.
-- [[interview-to-freeform-summary]] — Normalize a free-form user interview into the shared freeform-summary workflow handoff.
-- [[interview-to-galaxy-workflow-changeset]] — Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set.
+- [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary. *(reviewed)*
+- [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions. *(reviewed)*
+- [[interview-to-freeform-summary]] — Normalize a free-form user interview into the shared freeform-summary workflow handoff. *(reviewed)*
+- [[interview-to-galaxy-workflow-changeset]] — Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. *(reviewed)*
 - [[nextflow-summary-to-cwl-data-flow]] — Translate a Nextflow summary into a CWL data-flow design brief.
 - [[nextflow-summary-to-cwl-interface]] — Map a Nextflow summary into a CWL Workflow interface design brief.
-- [[nextflow-summary-to-galaxy-data-flow]] — Translate a Nextflow summary into a Galaxy data-flow design brief.
-- [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief.
-- [[nextflow-summary-to-galaxy-reference-data]] — Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline.
-- [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs.
+- [[nextflow-summary-to-galaxy-data-flow]] — Translate a Nextflow summary into a Galaxy data-flow design brief. *(reviewed)*
+- [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief. *(reviewed)*
+- [[nextflow-summary-to-galaxy-reference-data]] — Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline. *(reviewed)*
+- [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. *(reviewed)*
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
-- [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan.
-- [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs.
+- [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan. *(reviewed)*
+- [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. *(reviewed)*
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
-- [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
+- [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. *(reviewed)*
 - [[summarize-cwl]] — Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation.
 - [[summarize-cwl-tool]] — Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target.
-- [[summarize-galaxy-tool]] — Pull JSON schema, container, source, inputs/outputs for a Galaxy tool.
-- [[summarize-galaxy-workflow]] — Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps.
-- [[summarize-nextflow]] — Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds.
+- [[summarize-galaxy-tool]] — Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. *(reviewed)*
+- [[summarize-galaxy-workflow]] — Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps. *(reviewed)*
+- [[summarize-nextflow]] — Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds. *(reviewed)*
 - [[summarize-paper]] — Extract methods, tools, sample data, and references from a paper.
 - [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from source and design handoffs.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
-- [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
+- [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. *(reviewed)*
 
 ## Patterns
 

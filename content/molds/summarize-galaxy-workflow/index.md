@@ -6,10 +6,10 @@ source: galaxy
 tags:
   - mold
   - source/galaxy
-status: draft
+status: reviewed
 created: 2026-07-01
-revised: 2026-07-01
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps."
 output_artifacts:

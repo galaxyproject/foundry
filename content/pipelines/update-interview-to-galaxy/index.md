@@ -5,10 +5,10 @@ tags:
   - pipeline
   - source/interview
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-07-01
-revised: 2026-07-01
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop."
 harness_notes:

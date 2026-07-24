@@ -6,10 +6,10 @@ source: interview
 tags:
   - mold
   - source/interview
-status: draft
+status: reviewed
 created: 2026-05-22
-revised: 2026-06-12
-revision: 2
+revised: 2026-07-24
+revision: 3
 ai_generated: true
 summary: "Normalize a free-form user interview into the shared freeform-summary workflow handoff."
 output_artifacts:

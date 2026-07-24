@@ -8,10 +8,10 @@ tags:
   - mold
   - source/freeform
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-06-16
-revised: 2026-06-16
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs."
 input_artifacts:

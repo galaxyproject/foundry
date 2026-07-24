@@ -6,10 +6,10 @@ target: galaxy
 tags:
   - mold
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-04-30
-revised: 2026-05-08
-revision: 3
+revised: 2026-07-24
+revision: 4
 ai_generated: true
 related_notes:
   - "[[nextflow-patterns]]"
