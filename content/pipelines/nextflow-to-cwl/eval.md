@@ -5,10 +5,6 @@ Pipeline-level oracle for the NEXTFLOW → CWL journey. This judges the
 Mold's own `eval.md` still applies to its step's output (composition). Properties
 are abstract — concrete journeys live in `scenarios.md`.
 
-The CWL authoring tier this journey depends on is still nascent (see the maturity
-note in `scenarios.md`), so today these properties are the **target** the walk is
-gated against, not a suite the pipeline already passes.
-
 ## Property: the final CWL Workflow validates
 
 - check: deterministic
@@ -43,9 +39,8 @@ gated against, not a suite the pipeline already passes.
   [[implement-cwl-tool-step]]) are judged at endstate, not per iteration: every
   placeholder step in the `cwl-workflow-draft` is replaced by a concrete
   CommandLineTool step with a resolved `run:` target before the journey proceeds
-  to testing. Unlike the Galaxy spine's `gxwf draft-next-step` oracle, the CWL
-  spine has no shared endstate oracle yet — this property names the endstate the
-  tier must learn to detect.
+  to testing. The CWL spine has no shared endstate oracle yet (unlike the Galaxy
+  spine's `gxwf draft-next-step`); this property names the endstate to detect.
 
 ## Property: every tool is a concrete, provenanced CommandLineTool
 
@@ -54,9 +49,8 @@ gated against, not a suite the pipeline already passes.
   container or software provenance (`DockerRequirement` or `SoftwareRequirement`),
   traceable to the source module's `container` directive — authored fresh or
   reused from a CWL tool library — and no step leaves `baseCommand`/container
-  unresolved or assumes a tool without recording the decision. This is the CWL
-  analog of the Galaxy discover-or-author gate; there is no Tool Shed, so
-  resolution is authoring-first.
+  unresolved or assumes a tool without recording the decision. There is no Tool
+  Shed, so resolution is authoring-first.
 
 ## Property: NF test evidence reaches CWL assertions
 
