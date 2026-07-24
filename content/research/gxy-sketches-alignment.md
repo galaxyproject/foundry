@@ -5,8 +5,8 @@ tags:
   - meta
 status: draft
 created: 2026-04-30
-revised: 2026-05-05
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 related_molds:
   - "[[summarize-nextflow]]"
@@ -87,7 +87,9 @@ When the Foundry's `summarize-paper` / `summarize-nextflow` / `summarize-cwl` (a
 
 The Foundry's `ecosystem` vocabulary should be a superset: gxy-sketches has `nf-core | iwc | snakemake-workflows | wdl`. The Foundry's source axis is currently `paper | nextflow | cwl`; if the Foundry adds an IWC summarizer (§5), use `iwc` not a new term.
 
-### 4. Domain ↔ `iwc/*` vocabulary mapping
+### 4. Domain ↔ `iwc/*` vocabulary mapping — **OBSOLETE**
+
+**Resolved (2026-07): the `iwc/*` tag family was dropped.** It was declared in `meta_tags.yml` as a seed-on-demand family and never carried a single note — patterns cite IWC by URL in the body instead (`CORPUS_INGESTION.md`). There are now no `iwc/*` keys to hang a mapping on, and the registry admits no open families at all, so anyone reviving this would first have to author the categories as registered, glossed keys. The original analysis is retained for context.
 
 gxy-sketches' fixed `domain` enum overlaps heavily with Foundry's `iwc/*` tag family (`iwc/variant-calling`, `iwc/rna-seq`, …). They will not be identical — gxy-sketches' `domain` is a single value chosen by the LLM; the Foundry's `iwc/*` is a multi-tag classification seeded from IWC directory layout (see `CORPUS_INGESTION.md`). Document the mapping in `meta_tags.yml` descriptions for `iwc/*` keys; do not force a merge.
 

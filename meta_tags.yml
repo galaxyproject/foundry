@@ -2,7 +2,8 @@
 # Validator + site inject these keys into the shared note-schema zod contract at build time.
 # Tags are cross-cutting facets only; note-kind is the `type:` discriminator, not a tag.
 # Hierarchy is purely textual (slash-delimited); a bare key (no slash) is a flat flag.
-# See INITIAL_ARCHITECTURE.md §4.
+# Every key is registered with a description: there is no open/prefix-wildcard family, so
+# this file is the complete catalog of what the corpus can carry. See docs/ARCHITECTURE.md §4.
 
 # --- meta (flat flag) ---
 meta:
@@ -48,11 +49,6 @@ tool/gxwf:
   description: "Mold wraps gxwf CLI surface"
 tool/planemo:
   description: "Mold wraps Planemo CLI surface"
-
-# --- iwc/* (subject-area: IWC corpus categories) ---
-# Seeded once from top-level dirs of <iwc-clone>/workflows/.
-# See INITIAL_CORPUS_INGESTION.md.
-# Add iwc/<category> entries here as patterns and Molds reference them.
 
 # --- topic/* (Foundry-authored pattern/MOC topics) ---
 topic/galaxy-transform:
