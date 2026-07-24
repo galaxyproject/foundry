@@ -200,7 +200,6 @@ function renderFrontmatter(meta: CliMetadata, summary: string): string {
     'package: "planemo"',
     `upstream: "https://github.com/galaxyproject/planemo/blob/${PIN.ref}/${meta.module.replace(/\./g, "/")}.py"`,
     "tags:",
-    "  - cli-command",
     "  - cli/planemo",
     "status: draft",
     "created: 2026-05-11",
