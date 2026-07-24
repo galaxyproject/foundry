@@ -4,11 +4,11 @@
   "mold": {
     "name": "changeset-to-galaxy-test-plan",
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
-    "revision": 1,
-    "content_hash": "8523a8cc48083cf6592561c3648d32ccb90c9a2f64f8dd11103a706f8e7e3f63",
-    "commit": "1081b3c161c8a6d3a88828fd667d047f46db226c"
+    "revision": 2,
+    "content_hash": "2abf89b1860d75639e2b1e3799356c993e2db9e37adbf66c56d0e40cf964446e",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-20T19:35:11.347Z",
+  "cast_at": "2026-07-24T14:49:56.489Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Decide which change-set-exposed outputs and promoted checkpoints make meaningful new assertions, and how much a baseline assertion must loosen when an edit intentionally changes an output.",
       "trigger": "When adding assertions for a newly exposed output or a new step, or reconciling a baseline assertion an edit invalidates.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells when loosening a baseline assertion or synthesizing a new one.",
       "trigger": "When considering existence-only, size-only, image-dimension, or tolerant output checks, or recording an omission.",
-      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
-      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "src_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
+      "dst_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Record job-input fixtures for change-set-added inputs (remote-URL-first locations, hashes, collection shapes) as fixture provenance, reusing the baseline's existing fixtures unchanged.",
       "trigger": "When a change-set adds a workflow input that needs new test data, or when recording provenance for a new fixture.",
-      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
-      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "src_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
+      "dst_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the assertion family and tolerance for each change-set-driven expected output by output type.",
       "trigger": "When turning a change-set behavioral delta into assertion intent and a tolerance.",
-      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
-      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "src_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
+      "dst_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
       "trigger": "When recording the labels and checkpoints the downstream test must address.",
-      "src_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
-      "dst_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
+      "src_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
+      "dst_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
       "source": "deterministic"
     },
     {

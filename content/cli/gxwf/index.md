@@ -9,7 +9,6 @@ invoke_fallback: "npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf"
 availability_check: "gxwf --help | grep -q draft-validate"
 docs_url: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli"
 tags:
-  - cli-tool
   - cli/gxwf
 status: draft
 created: 2026-05-10

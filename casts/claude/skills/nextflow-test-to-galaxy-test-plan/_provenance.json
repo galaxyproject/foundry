@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-test-to-galaxy-test-plan",
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
-    "revision": 4,
-    "content_hash": "1d9701f6f4cc323ff19131f81343301fcf7e81c43712155ff5cf54eccc0a292e",
-    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
+    "revision": 5,
+    "content_hash": "19324bbfc09506d2a70993db333058c423fe36295fef641b0b225f9918a84b55",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-20T18:35:05.682Z",
+  "cast_at": "2026-07-24T14:50:15.268Z",
   "refs": [
     {
       "kind": "research",
@@ -22,8 +22,8 @@
       "purpose": "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them.",
       "trigger": "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan.",
       "verification": "Translate nf-core/bacass nf-test snapshots into a Galaxy test plan and confirm this note improves profile/snapshot extraction.",
-      "src_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
-      "dst_hash": "bb750b1abbec1c33bc3c6620594314f0f64848195ce0599d5ce5626528ea834d",
+      "src_hash": "ab6e764d96451f069049ebb410cce19f3d13320c90b6ef127e97d56f3edf629a",
+      "dst_hash": "ab6e764d96451f069049ebb410cce19f3d13320c90b6ef127e97d56f3edf629a",
       "source": "deterministic"
     },
     {
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests.",
       "trigger": "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.",
-      "src_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
-      "dst_hash": "69269abd774152694053f0b9922f88dfcd175ba8c3697b2c530d911740c7fcc6",
+      "src_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
+      "dst_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
       "source": "deterministic"
     },
     {
@@ -68,8 +68,8 @@
       "evidence": "corpus-observed",
       "purpose": "Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes.",
       "trigger": "When writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS.",
-      "src_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
-      "dst_hash": "2c7ef6a674b84f434ed973fe5c93156a6b368fc774a432e828257ddbde5d4993",
+      "src_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
+      "dst_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
       "source": "deterministic"
     },
     {
@@ -83,8 +83,8 @@
       "evidence": "corpus-observed",
       "purpose": "Translate nf-test snapshot captures, helper-pruned file lists, and snapshot checksums into Galaxy workflow-test assertion intent.",
       "trigger": "When converting nf-test snapshot fixtures, .snap sidecars, ignore files, ignore globs, or pipeline-level stable path/name captures.",
-      "src_hash": "01da02f8669bd267b962d49b9c62e86b31ff7b72bf69627a3ead5db4cba9ae32",
-      "dst_hash": "01da02f8669bd267b962d49b9c62e86b31ff7b72bf69627a3ead5db4cba9ae32",
+      "src_hash": "f89ad165b0d26fa602bc01de8a338f62014a6856bf2550773e2eab61d2dffae8",
+      "dst_hash": "f89ad165b0d26fa602bc01de8a338f62014a6856bf2550773e2eab61d2dffae8",
       "source": "deterministic"
     },
     {
@@ -98,8 +98,8 @@
       "evidence": "corpus-observed",
       "purpose": "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs.",
       "trigger": "When turning Nextflow expected outputs or snapshots into Galaxy test-plan assertions.",
-      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
-      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "src_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
+      "dst_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
       "source": "deterministic"
     },
     {

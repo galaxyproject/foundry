@@ -8,7 +8,9 @@ aliases:
   - "tp_find_and_replace to RELABEL_FROM_FILE"
   - "collection relabel from identifier table"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

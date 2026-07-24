@@ -4,7 +4,6 @@ name: nextflow-test-to-galaxy-test-plan
 axis: source-specific
 source: nextflow
 tags:
-  - mold
   - source/nextflow
 status: reviewed
 created: 2026-04-30

@@ -8,7 +8,9 @@ aliases:
   - "flatten list:list to list"
   - "__FLATTEN__ after fanout"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

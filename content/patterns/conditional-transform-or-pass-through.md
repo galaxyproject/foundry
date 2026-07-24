@@ -8,7 +8,6 @@ aliases:
   - "when-gated transform then pick_value"
   - "transform or keep original"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

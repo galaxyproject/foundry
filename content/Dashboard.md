@@ -187,23 +187,31 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[tests-format]] | JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`. | draft | 2026-05-05 | 4 |
 | [[galaxy-tool-discovery]] | JSON Schema for Tool Shed discovery hit, weak, and miss recommendations. | draft | 2026-05-04 | 1 |
 
-## Component Research
+## Research
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[open-requirements-ledger]] | Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously. | draft | 2026-06-16 | 1 |
 | [[component-claude-dynamic-workflows]] | Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate. | draft | 2026-06-15 | 1 |
 | [[galaxy-workflow-comments]] | How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative. | draft | 2026-06-12 | 1 |
 | [[iwc-comments-survey]] | How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention. | draft | 2026-06-12 | 1 |
 | [[galaxy-discover-datasets]] | Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions. | draft | 2026-06-10 | 2 |
 | [[iwc-interval-operations-survey]] | IWC corpus survey of coordinate-aware genomic interval operations; sizing and candidate boundaries for a galaxy-interval-patterns MOC, with hold-if-thin gate. | draft | 2026-06-10 | 1 |
 | [[iwc-sequence-operations-survey]] | IWC survey of record-level FASTA manipulation (interconversion, reformat, merge/dedup, subset, extract-at-intervals); sizes a galaxy-sequence-patterns MOC. | draft | 2026-06-10 | 1 |
+| [[nfcore-channel-input-to-galaxy-collection]] | Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type="data"> or paired/list collection input. | draft | 2026-06-10 | 3 |
+| [[nfcore-meta-map-to-galaxy-params]] | Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier. | draft | 2026-06-10 | 3 |
+| [[nfcore-stub-block-to-galaxy-noop-test]] | nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml. | draft | 2026-06-10 | 3 |
+| [[nfcore-task-ext-args-to-galaxy-additional-options]] | Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments. | draft | 2026-06-10 | 3 |
+| [[nfcore-versions-emit-to-galaxy-version-command]] | Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel. | draft | 2026-06-10 | 3 |
 | [[component-archon]] | Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap. | draft | 2026-05-22 | 3 |
 | [[cwl-pickvalue-to-galaxy]] | CWL `pickValue` (first_non_null / the_only_non_null / all_non_null) → Galaxy's native `pick_value` workflow step added by galaxyproject/galaxy#22222. | draft | 2026-05-11 | 1 |
+| [[cwl-when-pickvalue-to-galaxy-branching]] | CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them. | draft | 2026-05-11 | 1 |
 | [[galaxy-paired-or-unpaired-collections]] | Galaxy's `paired_or_unpaired` collection type: discriminated-union shape for paired-or-single reads, no workflow-level mode switch needed. Galaxy PR #19377. | draft | 2026-05-11 | 1 |
 | [[planemo-asserts-idioms]] | Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate. | draft | 2026-05-11 | 6 |
 | [[planemo-workflow-test-architecture]] | Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries. | draft | 2026-05-11 | 3 |
 | [[component-cwl-workflow-anatomy]] | CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling. | draft | 2026-05-10 | 1 |
 | [[cwl-v1.2-schemas]] | Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization. | draft | 2026-05-10 | 1 |
+| [[galaxy-workflow-draft-format]] | gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step. | draft | 2026-05-10 | 2 |
 | [[nextflow-reference-data-classification]] | Source-side taxonomy of how Nextflow pipelines use reference data — eight classifications detectable from a summary-nextflow artifact. | draft | 2026-05-10 | 3 |
 | [[nextflow-to-galaxy-reference-data-mapping]] | Galaxy-side translation of Nextflow reference-data classifications: idioms available, the v1 posture, datatype defaults, and the in-tool rebuild trade-off. | draft | 2026-05-10 | 5 |
 | [[nextflow-conditional-to-galaxy-subworkflow-when]] | Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule. | draft | 2026-05-08 | 1 |
@@ -224,9 +232,12 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-collection-semantics]] | Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references. | draft | 2026-05-05 | 3 |
 | [[galaxy-native-workflow-schema]] | Vendored structural JSON Schema for Galaxy native workflow (.ga) format: vocabulary for the JSON shape Galaxy emits and consumes. | draft | 2026-05-05 | 1 |
 | [[galaxy-xsd]] | Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax. | draft | 2026-05-05 | 1 |
+| [[gxy-sketches-alignment]] | Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not. | draft | 2026-05-05 | 1 |
 | [[nextflow-snapshot-to-galaxy-assertions]] | Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape. | draft | 2026-05-05 | 2 |
 | [[iwc-runtime-parameter-shims-survey]] | Focused survey of tiny IWC runtime parameter shims for flags, enums, counts, booleans, and composed text. | draft | 2026-05-04 | 1 |
 | [[component-tool-shed-search]] | Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload | draft | 2026-05-03 | 2 |
+| [[galaxy-data-flow-draft-contract]] | Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation. | draft | 2026-05-03 | 2 |
+| [[galaxy-tool-summary-input-source]] | Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source. | draft | 2026-05-03 | 2 |
 | [[iwc-map-over-lifecycle-survey]] | Survey of IWC map-over lifecycle recipes, with a Nextflow-to-Galaxy crosswalk for collection construction, cleanup, reshape, reduce, and publish phases. | draft | 2026-05-03 | 1 |
 | [[iwc-shortcuts-anti-patterns]] | What IWC test suites cut corners on (accepted) vs what's a code smell — existence-only probes, sim_size deltas, image dim checks, label coupling. | draft | 2026-05-03 | 2 |
 | [[iwc-test-data-conventions]] | How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas. | draft | 2026-05-03 | 3 |
@@ -243,13 +254,3 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[component-nextflow-inspect]] | White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-05-01 | 1 |
 | [[component-nf-core-tools]] | White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision. | draft | 2026-05-01 | 1 |
-
-## Design Problems
-
-| Name | Summary | Status | Revised | Rev |
-| --- | --- | --- | --- | --- |
-| [[nfcore-channel-input-to-galaxy-collection]] | Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type="data"> or paired/list collection input. | draft | 2026-06-10 | 3 |
-| [[nfcore-meta-map-to-galaxy-params]] | Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier. | draft | 2026-06-10 | 3 |
-| [[nfcore-stub-block-to-galaxy-noop-test]] | nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml. | draft | 2026-06-10 | 3 |
-| [[nfcore-task-ext-args-to-galaxy-additional-options]] | Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments. | draft | 2026-06-10 | 3 |
-| [[nfcore-versions-emit-to-galaxy-version-command]] | Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel. | draft | 2026-06-10 | 3 |

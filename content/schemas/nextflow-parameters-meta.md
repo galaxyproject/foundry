@@ -8,7 +8,6 @@ upstream: "https://github.com/nextflow-io/nf-schema/blob/bde406e81a4ac614650d73d
 license: Apache-2.0
 license_file: LICENSES/nf-schema.LICENSE
 tags:
-  - schema
   - source/nextflow
 status: draft
 created: 2026-05-05

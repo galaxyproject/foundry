@@ -9,7 +9,6 @@ invoke_fallback: "npx --yes --package @galaxy-tool-util/cli@1.8.1 galaxy-tool-ca
 availability_check: "galaxy-tool-cache --help | grep -q summarize"
 docs_url: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli"
 tags:
-  - cli-tool
   - cli/galaxy-tool-cache
 status: draft
 created: 2026-06-16

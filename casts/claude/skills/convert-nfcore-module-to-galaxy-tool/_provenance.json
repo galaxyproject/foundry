@@ -5,10 +5,10 @@
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 4,
-    "content_hash": "b620de36e245302737d9a82171fb2847ee214466915dbb28392a0ac02bc6df68",
-    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
+    "content_hash": "ee8b8cb4798efce36f8297be17f4ff29281981901b8144a7565f1d7b44ca2e86",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-20T18:41:11.132Z",
+  "cast_at": "2026-07-24T14:49:57.494Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -36,7 +36,7 @@
       "purpose": "Reference for `planemo lint` flags and output classification; first gate in the convergence loop.",
       "trigger": "Step 10.1 — after every <command>/<inputs>/<outputs> emission.",
       "verification": "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses.",
-      "src_hash": "658bedace8f94b4f88299ecf60b542f670a892c634d2bb602546aae50d7dc5a4",
+      "src_hash": "30d8cb7a3de6b56270469b9466243824b607e598c2327c5743fcdbf8dcfb6377",
       "dst_hash": "862d714fa6eb7d9233173948162ff880262e2c867394f1157d073a4ce8d81523",
       "source": "deterministic"
     },
@@ -52,7 +52,7 @@
       "purpose": "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path.",
       "trigger": "Step 10.2 — after lint clears.",
       "verification": "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout.",
-      "src_hash": "708692af91e36e4bf5b317509df8dee19e4e15617aeaa53a7ddcbfde18b41f74",
+      "src_hash": "e461742cf0bd43697e497dee69a0675e273e1a0b048414e62af77d0ef54b4ff1",
       "dst_hash": "f4698abd6b129048befaa3e335010d99c2748a3a4a5334b90584ce5b9ee913e6",
       "source": "deterministic"
     },
@@ -68,8 +68,8 @@
       "purpose": "Install metadata for the planemo CLI invoked by the convergence loop.",
       "trigger": "Always — the cast skill needs planemo on PATH before running lint/test.",
       "verification": "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command.",
-      "src_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
-      "dst_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
+      "src_hash": "09b47f6f70d15c711f01b0c970c8668cb4fec7b17d90b22204dfbbb5f6c75a30",
+      "dst_hash": "09b47f6f70d15c711f01b0c970c8668cb4fec7b17d90b22204dfbbb5f6c75a30",
       "source": "deterministic"
     },
     {
@@ -84,8 +84,8 @@
       "purpose": "Resolve the container directive (mulled, biocontainer, Wave) and environment.yml into a Galaxy <requirements> block with matching bioconda pins.",
       "trigger": "When emitting <requirements> and the module's container directive is non-trivial (ternary or mulled).",
       "verification": "Cast against a mulled-container module (multiqc); confirm <requirements> declares all packages from environment.yml.",
-      "src_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
-      "dst_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "src_hash": "75c8b051377ff4210f67c403939bdd5e28127df0f5ed9d955330b54768c4d60b",
+      "dst_hash": "75c8b051377ff4210f67c403939bdd5e28127df0f5ed9d955330b54768c4d60b",
       "source": "deterministic"
     },
     {
@@ -116,8 +116,8 @@
       "purpose": "Reference for nf-core module conventions: meta.yml shape, modules.json, environment.yml posture, test layout, container directive idioms.",
       "trigger": "When parsing meta.yml, environment.yml, or main.nf and a convention is unclear; when populating _provenance.yml.",
       "verification": "Cast and verify _provenance.yml.nfcore_source.git_sha resolution and meta.yml DOI extraction work for fastp.",
-      "src_hash": "5147b7148fe43a1d271bbae7c854a868be951855b6aac454d0ea72620d50de6c",
-      "dst_hash": "5147b7148fe43a1d271bbae7c854a868be951855b6aac454d0ea72620d50de6c",
+      "src_hash": "bf14354625ba64d5a0d83a7829f2a6e8273d88f5185dcdd178847f59131a123a",
+      "dst_hash": "bf14354625ba64d5a0d83a7829f2a6e8273d88f5185dcdd178847f59131a123a",
       "source": "deterministic"
     },
     {
@@ -132,8 +132,8 @@
       "purpose": "Reference for the <discover_datasets> XML element: attributes, named/regex patterns, <data> vs <collection> contexts, test-side <discovered_dataset>.",
       "trigger": "When translating a Nextflow output: channel that uses a glob path or runtime-interpolated filenames into a Galaxy <collection> or multi-output <data>.",
       "verification": "Cast against a glob-output module (samtools/index); confirm the emitted <collection><discover_datasets pattern=...> shape resolves the glob correctly under planemo test.",
-      "src_hash": "9d91ad0bd1dee8373157491a9e3c662bb3ab97adc2db3be0dd8fadea3cfd6026",
-      "dst_hash": "9d91ad0bd1dee8373157491a9e3c662bb3ab97adc2db3be0dd8fadea3cfd6026",
+      "src_hash": "6656bfa2fe8c9d1565a6371ba77ce9d044bcadbe084e54108fe71958c11b05e3",
+      "dst_hash": "6656bfa2fe8c9d1565a6371ba77ce9d044bcadbe084e54108fe71958c11b05e3",
       "source": "deterministic"
     },
     {
@@ -148,8 +148,8 @@
       "purpose": "Map process input channels (tuple(meta, path)) to Galaxy <param type=\"data\"> / <param type=\"data_collection\">.",
       "trigger": "When emitting <inputs> for a module.",
       "verification": "Cast and run against fastp (paired, tuple(meta, [path,path])) and seqkit/grep (single, tuple(meta, path)); confirm Galaxy <inputs> shape matches the channel cardinality.",
-      "src_hash": "99a980281fd90c95216e0e0a39fa79ec505acc874c18c2c0f358795374292e37",
-      "dst_hash": "99a980281fd90c95216e0e0a39fa79ec505acc874c18c2c0f358795374292e37",
+      "src_hash": "9b20237b2c802c0e9610d2c1f6161debf74bffc55369e268c67ed369c2a023fc",
+      "dst_hash": "9b20237b2c802c0e9610d2c1f6161debf74bffc55369e268c67ed369c2a023fc",
       "source": "deterministic"
     },
     {
@@ -164,8 +164,8 @@
       "purpose": "Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped.",
       "trigger": "When a process consumes a meta-map and any meta keys influence the script: body.",
       "verification": "Cast against a paired-aware module (fastp); confirm meta.single_end becomes a <conditional>, meta.id is dropped.",
-      "src_hash": "ad9adb5be21948f9843eea6126f071b5376edb3d2b385cd4498a5325492a16a3",
-      "dst_hash": "ad9adb5be21948f9843eea6126f071b5376edb3d2b385cd4498a5325492a16a3",
+      "src_hash": "079fc32b6992f43f6a4b2f9e8270698a4657dbe97ef1d1a6492d26bafbb649ad",
+      "dst_hash": "079fc32b6992f43f6a4b2f9e8270698a4657dbe97ef1d1a6492d26bafbb649ad",
       "source": "deterministic"
     },
     {
@@ -180,8 +180,8 @@
       "purpose": "Document the intentional drop of stub: blocks; rely on planemo test for fixture coverage.",
       "trigger": "When the module's main.nf contains a stub: block.",
       "verification": "Confirm _provenance.yml.overrides records the dropped stub: block with reason.",
-      "src_hash": "fd32e88774b41a5a9b16b3d96694612bce03953448e9b5b0a723409e0eb22a49",
-      "dst_hash": "fd32e88774b41a5a9b16b3d96694612bce03953448e9b5b0a723409e0eb22a49",
+      "src_hash": "60c1f6ac64955df70d41a51d32cdaca4719572c01f2c37c8a764fd6f22d33880",
+      "dst_hash": "60c1f6ac64955df70d41a51d32cdaca4719572c01f2c37c8a764fd6f22d33880",
       "source": "deterministic"
     },
     {
@@ -196,8 +196,8 @@
       "purpose": "Surface task.ext.args as a single Galaxy text param; do not enumerate per-flag inputs.",
       "trigger": "When the upstream script: body interpolates ${task.ext.args} (or args2/args3).",
       "verification": "Cast against a module with task.ext.args (samtools/sort); confirm a single extra_args text param is emitted with sane sanitization.",
-      "src_hash": "df34b232629a1ffc46b655b82c0e1a677d2d201a1883667fc066dd79ae9acc24",
-      "dst_hash": "df34b232629a1ffc46b655b82c0e1a677d2d201a1883667fc066dd79ae9acc24",
+      "src_hash": "3799946922d7d5b7a0e0a6f42a0b6d5735d6340ab26a5482e71621f66a780ca1",
+      "dst_hash": "3799946922d7d5b7a0e0a6f42a0b6d5735d6340ab26a5482e71621f66a780ca1",
       "source": "deterministic"
     },
     {
@@ -212,8 +212,8 @@
       "purpose": "Translate the versions.yml emit block (or topic: versions) into Galaxy's <version_command>.",
       "trigger": "When the script: body or output: declarations contain a versions emit.",
       "verification": "Cast against fastp; confirm <version_command> reproduces the upstream version string for the primary tool.",
-      "src_hash": "8b96ee8347a6044d5333a9596e5b8746a7c88be580a7313c413c2bd21a9c401b",
-      "dst_hash": "8b96ee8347a6044d5333a9596e5b8746a7c88be580a7313c413c2bd21a9c401b",
+      "src_hash": "b86ab21998500cb6d392e386b77c7d1ca548ae2b7e139660b6f05756af21c9d1",
+      "dst_hash": "b86ab21998500cb6d392e386b77c7d1ca548ae2b7e139660b6f05756af21c9d1",
       "source": "deterministic"
     },
     {

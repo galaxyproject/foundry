@@ -8,7 +8,6 @@ aliases:
   - "dynamic text parameter"
   - "connected text expression"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

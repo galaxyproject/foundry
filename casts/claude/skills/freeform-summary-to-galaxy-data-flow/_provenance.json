@@ -4,11 +4,11 @@
   "mold": {
     "name": "freeform-summary-to-galaxy-data-flow",
     "path": "content/molds/freeform-summary-to-galaxy-data-flow/index.md",
-    "revision": 1,
-    "content_hash": "6efaac78027083ba93caf8f89514396639f9522597dd0356c4cb58d28d5c1a2c",
-    "commit": "dca2ac888332ee86d0cdcb5aabef94804fa16c54"
+    "revision": 2,
+    "content_hash": "d35856168c75639efcaa37093dd9bd03dee71d1eca9a3227623d4cc59e6dbbab",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-20T16:07:58.590Z",
+  "cast_at": "2026-07-24T14:50:05.582Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
       "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
-      "src_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
-      "dst_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
+      "src_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
+      "dst_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
       "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
-      "dst_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "src_hash": "8cf7ac6c34d98764fb564973e84800d188e47f131cf7b23f6fdfffe4cd518e25",
+      "dst_hash": "8cf7ac6c34d98764fb564973e84800d188e47f131cf7b23f6fdfffe4cd518e25",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
       "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
-      "src_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
-      "dst_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
+      "src_hash": "55a74e2e229bbbe699e73206b7de6caf2752a5cc143bae9f2097b194bde77117",
+      "dst_hash": "55a74e2e229bbbe699e73206b7de6caf2752a5cc143bae9f2097b194bde77117",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns.",
       "trigger": "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges.",
-      "src_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
-      "dst_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
+      "src_hash": "0b88a934cd3edd52b902da97c80f628b74d02a35a5c3be75289683b3295b01c2",
+      "dst_hash": "0b88a934cd3edd52b902da97c80f628b74d02a35a5c3be75289683b3295b01c2",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked freeform-to-Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
+      "dst_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
       "source": "deterministic"
     },
     {
@@ -96,8 +96,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it.",
       "trigger": "When the interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or the free-form summary describes per-sample/per-record metadata that must survive map-over steps.",
-      "src_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
-      "dst_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
+      "src_hash": "96a989e3b9604ba109f96b8951c24b06ff0d61d079e49875de11eb6f09e39e70",
+      "dst_hash": "96a989e3b9604ba109f96b8951c24b06ff0d61d079e49875de11eb6f09e39e70",
       "source": "deterministic"
     },
     {
@@ -111,8 +111,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     }
   ],

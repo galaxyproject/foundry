@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: component
 title: "Galaxy tool XML schema"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-05-03

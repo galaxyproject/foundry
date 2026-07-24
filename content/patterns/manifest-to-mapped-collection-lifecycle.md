@@ -8,7 +8,6 @@ aliases:
   - "samplesheet to Galaxy map-over"
   - "table rows to mapped collection outputs"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/collection-transform

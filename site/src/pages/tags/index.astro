@@ -15,18 +15,14 @@ for (const note of allNotes) {
 
 const sorted = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 
-const noteTypeTags = sorted.filter(([t]) =>
-  ['mold', 'pattern', 'cli-reference', 'pipeline'].includes(t) || t.startsWith('research/')
-);
 const sourceTags = sorted.filter(([t]) => t.startsWith('source/'));
 const targetTags = sorted.filter(([t]) => t.startsWith('target/'));
 const topicTags = sorted.filter(([t]) => t.startsWith('topic/'));
 const toolTags = sorted.filter(([t]) => t.startsWith('tool/') || t.startsWith('cli/'));
-const seen = new Set([...noteTypeTags, ...sourceTags, ...targetTags, ...topicTags, ...toolTags].map(([t]) => t));
+const seen = new Set([...sourceTags, ...targetTags, ...topicTags, ...toolTags].map(([t]) => t));
 const otherTags = sorted.filter(([t]) => !seen.has(t));
 
 const groups = [
-  { label: 'Note Type', tags: noteTypeTags },
   { label: 'Source', tags: sourceTags },
   { label: 'Target', tags: targetTags },
   { label: 'Topic', tags: topicTags },

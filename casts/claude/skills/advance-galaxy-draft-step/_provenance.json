@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 2,
-    "content_hash": "9acaa43167eb3af4aff128dc31b1947e3fc24291140b7e8586518a9e0cc9ed85",
-    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
+    "revision": 3,
+    "content_hash": "df43db65d6be3a909e8c7bd9a31f7ad9d65c58d0dfe66f8149e2cfb8cf74483f",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-01T23:45:45.347Z",
+  "cast_at": "2026-07-24T14:49:53.802Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "At loop endstate, extract the concrete gxformat2 workflow from the fully-concretized draft — drop drafty steps, strip `_plan_*` fields, promote `class` to `GalaxyWorkflow` — and write it as the runnable `galaxy-workflow.gxwf.yml`.",
       "trigger": "When [[draft-next-step]] reports `draft: false` (no remaining drafty steps).",
       "verification": "Cast the skill, run the loop to endstate on an IWC-derived draft, confirm draft-extract emits a `class: GalaxyWorkflow` file that passes terminal `gxwf validate` with no `_plan_*` fields or drafty steps.",
-      "src_hash": "4b31c0d610b5e249dee86f7896e07b83374411b362829573e3160e2e868142cf",
+      "src_hash": "e6a39391176cc91828b8526cf0e7e7475a8b27781844bf866701882e2f75c93d",
       "dst_hash": "c59fbafbe6cf53cd7bcdd867d73b69d078c949c0dfa83abdc084f309793a60aa",
       "source": "deterministic"
     },
@@ -38,7 +38,7 @@
       "purpose": "Deterministically pick the next drafty step (or report no remaining work). The orchestrator owns the loop oracle so the harness reduces to `while draft: invoke skill`.",
       "trigger": "At the start of every iteration, before any per-step work.",
       "verification": "Cast the skill, run on a multi-step IWC-derived draft, confirm the orchestrator picks one step per call and exits when draft: false.",
-      "src_hash": "fa5a7da3939964791f75897df46ddb9563b533c79d2162ee2c04b0cff9ca53c7",
+      "src_hash": "964024a7847479177e8a492045e869ec2ea38008caaa85e8b654b0d4d4037bc6",
       "dst_hash": "8638645f5974d8072dc3c63e522b7ab25d562f8d6217ea93b61f0a29f371d6f7",
       "source": "deterministic"
     },
@@ -54,8 +54,8 @@
       "purpose": "Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2.",
       "trigger": "After implementing or modifying the chosen step in the draft.",
       "verification": "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched.",
-      "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
-      "dst_hash": "77e2efef3176ce4b4ea6fb3b0bbc4821b3dbf2e6678e8c20f943586791163b02",
+      "src_hash": "23d17ddff3fa875677fdab6f603ebce5c907223a3fd1acb359f26d9fc9963e2c",
+      "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
       "source": "deterministic"
     },
     {
@@ -69,8 +69,8 @@
       "evidence": "corpus-observed",
       "purpose": "Classify [[draft-validate]] diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice).",
       "trigger": "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.",
-      "src_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
-      "dst_hash": "9d5c615b75660e932c0bb1b6f8d13390e735901764aea5989cd39ec500227e1b",
+      "src_hash": "c9565a7348e09d5f0739adee34bb32ccc5f0dbbdbc8acbdbe26afdfb33a4a029",
+      "dst_hash": "c9565a7348e09d5f0739adee34bb32ccc5f0dbbdbc8acbdbe26afdfb33a4a029",
       "source": "deterministic"
     },
     {
@@ -84,8 +84,8 @@
       "evidence": "hypothesis",
       "purpose": "Recognize the blocking entry [[implement-galaxy-tool-step]] appends (its shape and `open | resolved | surrendered` status) so the orchestrator can detect the raised computability gap, count open blocking entries for the convergence gate, and escalate to [[repair-galaxy-draft-topology]].",
       "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that strictly reduces the open count.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     },
     {

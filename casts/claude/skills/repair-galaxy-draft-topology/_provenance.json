@@ -5,10 +5,10 @@
     "name": "repair-galaxy-draft-topology",
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 1,
-    "content_hash": "d31030715b0bec833af6fc568afa88ca90972f189caf33c58c3a7677fba8caf4",
-    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+    "content_hash": "e4cd3e1268da87169d2cf592e34aa7ec45a2706920860ff31afb854570cdb6f8",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-24T13:51:17.496Z",
+  "cast_at": "2026-07-24T14:50:16.779Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested collection recipe when the missing producer is a collection construction, reshape, or bridge.",
       "trigger": "When the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge.",
-      "src_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
-      "dst_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
+      "src_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
+      "dst_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce.",
       "trigger": "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on.",
-      "src_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
-      "dst_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
+      "src_hash": "0b88a934cd3edd52b902da97c80f628b74d02a35a5c3be75289683b3295b01c2",
+      "dst_hash": "0b88a934cd3edd52b902da97c80f628b74d02a35a5c3be75289683b3295b01c2",
       "source": "deterministic"
     },
     {
@@ -53,8 +53,8 @@
       "trigger": "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
-      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "src_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
+      "dst_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -107,8 +107,8 @@
       "evidence": "hypothesis",
       "purpose": "Re-wire the affected region consistently with the data-flow design that settled the surrounding topology.",
       "verification": "Promote after two repairs preserve the surrounding data-flow design without re-deriving it from the source.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
+      "dst_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
       "source": "deterministic"
     },
     {
@@ -122,8 +122,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit re-wired steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
       "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
-      "src_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
-      "dst_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "src_hash": "c44ec53ecb85fd287f959d78a34c150f71b3e44550d43d634c260a9ba5787552",
+      "dst_hash": "c44ec53ecb85fd287f959d78a34c150f71b3e44550d43d634c260a9ba5787552",
       "source": "deterministic"
     },
     {
@@ -137,8 +137,8 @@
       "evidence": "hypothesis",
       "purpose": "Read open blocking entries to scope the repair; mark each resolved or surrender it, feeding the loop's decreasing-blocker convergence gate.",
       "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     },
     {

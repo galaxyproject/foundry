@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: component
 title: "Galaxy sample_sheet collection types"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-05-05

@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: component
 title: "Nextflow reference-data classification"
 tags:
-  - research/component
   - source/nextflow
 status: draft
 created: 2026-05-10

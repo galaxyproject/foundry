@@ -5,7 +5,6 @@ axis: source-specific
 source: cwl
 target: galaxy
 tags:
-  - mold
   - source/cwl
   - target/galaxy
 status: draft

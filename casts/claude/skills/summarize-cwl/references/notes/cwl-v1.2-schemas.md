@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: component
 title: "CWL v1.2 schema documents"
 tags:
-  - research/component
   - source/cwl
 status: draft
 created: 2026-05-10

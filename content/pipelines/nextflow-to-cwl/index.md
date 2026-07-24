@@ -2,7 +2,6 @@
 type: pipeline
 title: NEXTFLOW → CWL
 tags:
-  - pipeline
   - source/nextflow
   - target/cwl
 status: draft

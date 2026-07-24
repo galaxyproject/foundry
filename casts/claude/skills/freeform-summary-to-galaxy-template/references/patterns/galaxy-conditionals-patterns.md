@@ -8,7 +8,6 @@ aliases:
   - "Galaxy when patterns"
   - "conditional workflow patterns"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
 status: draft

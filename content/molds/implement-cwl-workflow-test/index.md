@@ -4,7 +4,6 @@ name: implement-cwl-workflow-test
 axis: target-specific
 target: cwl
 tags:
-  - mold
   - target/cwl
 status: draft
 created: 2026-04-30

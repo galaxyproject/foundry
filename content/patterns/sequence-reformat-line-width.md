@@ -8,7 +8,6 @@ aliases:
   - "rewrap FASTA"
   - "normalize FASTA line length"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/sequence-transform

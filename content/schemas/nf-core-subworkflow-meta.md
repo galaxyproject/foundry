@@ -8,7 +8,6 @@ upstream: "https://github.com/nf-core/modules/blob/d8529909206a06d9ec73703ea07a5
 license: MIT
 license_file: LICENSES/nf-core-modules.LICENSE
 tags:
-  - schema
   - source/nextflow
 status: draft
 created: 2026-05-05

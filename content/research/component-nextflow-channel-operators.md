@@ -1,8 +1,6 @@
 ---
 type: research
-subtype: component
 tags:
-  - research/component
   - source/nextflow
 component: "Nextflow Channel Operators"
 status: draft

@@ -4,7 +4,7 @@ name: cast-provenance
 title: "Cast provenance (_provenance.json, schema v2)"
 upstream: "https://github.com/galaxyproject/foundry/blob/main/scripts/lib/schemas/cast-provenance.schema.json"
 tags:
-  - schema
+  - meta
 status: draft
 created: 2026-05-17
 revised: 2026-05-17

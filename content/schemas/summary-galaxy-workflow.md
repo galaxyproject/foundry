@@ -9,7 +9,6 @@ validator_subcommand: validate-summary-galaxy-workflow
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json"
 license: MIT
 tags:
-  - schema
   - source/galaxy
 status: draft
 created: 2026-07-01

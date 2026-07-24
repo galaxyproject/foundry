@@ -2,7 +2,6 @@
 type: pipeline
 title: PAPER → CWL
 tags:
-  - pipeline
   - source/paper
   - target/cwl
 status: draft

@@ -19,7 +19,6 @@ review_triggers:
   - "Aggregation should skip empty mapped outputs before report generation."
   - "publishDir path or layout semantics are user-visible."
 tags:
-  - source-pattern
   - source/nextflow
   - target/galaxy
 status: draft

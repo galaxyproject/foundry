@@ -21,7 +21,6 @@ review_triggers:
   - "ifEmpty fallback changes required outputs, collection shape, or report semantics."
   - "Translation would rely on FILTER_NULL as primary cleanup."
 tags:
-  - source-pattern
   - source/nextflow
   - target/galaxy
 status: draft

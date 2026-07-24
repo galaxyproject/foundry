@@ -8,7 +8,6 @@ upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/blob/main/packages/s
 license: MIT
 license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 tags:
-  - schema
   - target/galaxy
 status: draft
 created: 2026-05-05

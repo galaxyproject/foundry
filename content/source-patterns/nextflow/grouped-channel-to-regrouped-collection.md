@@ -18,7 +18,6 @@ review_triggers:
   - "Downstream logic depends on tuple field order rather than named identifiers."
   - "Flattening would discard a grouping axis needed downstream."
 tags:
-  - source-pattern
   - source/nextflow
   - target/galaxy
 status: draft

@@ -8,7 +8,6 @@ aliases:
   - "sequence-record transformation patterns"
   - "IWC sequence pattern map"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/sequence-transform

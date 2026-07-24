@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: design-spec
 title: "Open-requirements ledger"
 tags:
-  - research/design-spec
   - target/galaxy
 status: draft
 created: 2026-06-16

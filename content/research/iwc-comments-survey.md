@@ -1,8 +1,6 @@
 ---
 type: research
-subtype: component
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-06-12

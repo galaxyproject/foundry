@@ -273,7 +273,6 @@ export function buildNoteSchema({ tags, contract, licensePolicy }: BuildNoteSche
   const researchSchema = z
     .object({
       type: z.literal("research"),
-      subtype: z.enum(["component", "design-problem", "design-spec"]),
       component: z.string().optional(),
       companions: companions.optional(),
       license: licenseId.optional(),

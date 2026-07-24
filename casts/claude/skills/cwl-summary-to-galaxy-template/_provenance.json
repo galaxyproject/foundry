@@ -5,10 +5,10 @@
     "name": "cwl-summary-to-galaxy-template",
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 4,
-    "content_hash": "3300502c66f2db1a9b499e7f9c8f8b73939680d6bf7bfe0016c6af9ad7a741d4",
-    "commit": "4fa83bcea5c2823574416d0ab0b054f387d22141"
+    "content_hash": "62c5df0ac112ce59c5608c7bbdbc88a3a400724d1803b050ec97595251aed6c5",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-02T15:08:31.114Z",
+  "cast_at": "2026-07-24T14:50:01.014Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off.",
       "trigger": "After writing or modifying the draft workflow file.",
       "verification": "Cast the skill, run on a representative CWL workflow, confirm draft-validate diagnostics route back.",
-      "src_hash": "9b75e618475a0f46c9fab322d274aee9998ebfd9f99f8447e2c1533c3e442cc6",
-      "dst_hash": "77e2efef3176ce4b4ea6fb3b0bbc4821b3dbf2e6678e8c20f943586791163b02",
+      "src_hash": "23d17ddff3fa875677fdab6f603ebce5c907223a3fd1acb359f26d9fc9963e2c",
+      "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
       "source": "deterministic"
     },
     {
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
-      "src_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
-      "dst_hash": "8da85411065e8c384bfdd18d96893137c6863c483640f1c8ad9ce97aed1441e8",
+      "src_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
+      "dst_hash": "74de93b889433bc7365784875f7a8a38e913b5a28c6f88c9d6ba92d1c5116162",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded conditional pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
-      "dst_hash": "78c19d4675114575cb8872c7e795b00ceb3fedfa354312700a88d3d011ed57d0",
+      "src_hash": "8cf7ac6c34d98764fb564973e84800d188e47f131cf7b23f6fdfffe4cd518e25",
+      "dst_hash": "8cf7ac6c34d98764fb564973e84800d188e47f131cf7b23f6fdfffe4cd518e25",
       "source": "deterministic"
     },
     {
@@ -67,8 +67,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded genomic-interval pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for interval overlap, merge, coverage, windowing, masking, or set-algebra on coordinate features.",
-      "src_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
-      "dst_hash": "138f9f9d5e6265a5d8db50e578f6a80a7cacf286528f5a9178f096d6c42ed24f",
+      "src_hash": "55a74e2e229bbbe699e73206b7de6caf2752a5cc143bae9f2097b194bde77117",
+      "dst_hash": "55a74e2e229bbbe699e73206b7de6caf2752a5cc143bae9f2097b194bde77117",
       "source": "deterministic"
     },
     {
@@ -82,8 +82,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
-      "src_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
-      "dst_hash": "a458296e7636fb87cff2a5ff038f1cd1ccb5f426d37d5d6aa9676644f4131dfa",
+      "src_hash": "0b88a934cd3edd52b902da97c80f628b74d02a35a5c3be75289683b3295b01c2",
+      "dst_hash": "0b88a934cd3edd52b902da97c80f628b74d02a35a5c3be75289683b3295b01c2",
       "source": "deterministic"
     },
     {
@@ -97,8 +97,8 @@
       "evidence": "hypothesis",
       "purpose": "Preserve the lightweight CWL boundary and avoid re-inferring structure already present in the summary.",
       "verification": "Run after the first CWL interface/data-flow briefs and confirm gxformat2 placeholder steps preserve CWL step boundaries unless the data-flow brief explicitly asks to split them.",
-      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
-      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "src_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
+      "dst_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
       "source": "deterministic"
     },
     {
@@ -114,8 +114,8 @@
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
-      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "src_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
+      "dst_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -169,8 +169,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
-      "dst_hash": "af68cbd0a4460d2ce5c9768a6437f909f533f4f7cbe0473ad6b5e75db9d81681",
+      "src_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
+      "dst_hash": "d25c6ee62ee9b663218c66c71a2ae2994f9ac96d6caca78ec12ab4e3481d9c02",
       "source": "deterministic"
     },
     {
@@ -184,8 +184,8 @@
       "evidence": "corpus-observed",
       "purpose": "Group the settled step set into titled stage frames (the gxformat2 `comments:` array) so the skeleton carries the analysis-stage narrative IWC authors annotate by hand. Schema-legal and optional.",
       "trigger": "After topology is settled and the skeleton can be partitioned into named analysis stages (inputs, per-stage step clusters, parameter-derivation knots, visualization/outputs).",
-      "src_hash": "74e5217153f23b91f845dca8ed58c3639f8cdd10ef8e351b3b0a0d8422e19dc1",
-      "dst_hash": "74e5217153f23b91f845dca8ed58c3639f8cdd10ef8e351b3b0a0d8422e19dc1",
+      "src_hash": "28c41af1c35a0a6a95693fecc7030a75e2d6d219c7702a1629478f075c46f946",
+      "dst_hash": "28c41af1c35a0a6a95693fecc7030a75e2d6d219c7702a1629478f075c46f946",
       "source": "deterministic"
     },
     {
@@ -199,8 +199,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
-      "dst_hash": "e17baee79b786a2003c66baed9ce6e9c581f79b29b423e83c93c871b3e61bdda",
+      "src_hash": "c44ec53ecb85fd287f959d78a34c150f71b3e44550d43d634c260a9ba5787552",
+      "dst_hash": "c44ec53ecb85fd287f959d78a34c150f71b3e44550d43d634c260a9ba5787552",
       "source": "deterministic"
     },
     {
@@ -214,8 +214,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton.",
       "trigger": "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
       "source": "deterministic"
     },
     {
@@ -228,8 +228,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
-      "src_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
-      "dst_hash": "0bb90e9f12037d9e8a368bed6a90bcd1c70583d174b7ed2bec3eb489d75ec5b2",
+      "src_hash": "3b23786bb1a90278bc4876a732d212cc7cbc44207228571e5cf3cbbb4d569e0b",
+      "dst_hash": "3b23786bb1a90278bc4876a732d212cc7cbc44207228571e5cf3cbbb4d569e0b",
       "source": "deterministic"
     },
     {
@@ -243,8 +243,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     },
     {

@@ -5,7 +5,6 @@ axis: source-specific
 source: nextflow
 target: galaxy
 tags:
-  - mold
   - source/nextflow
   - target/galaxy
 status: reviewed

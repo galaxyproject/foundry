@@ -6,7 +6,6 @@ title: "Tabular: pivot collection to wide"
 aliases:
   - "collection-to-wide-table-with-collection_column_join"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

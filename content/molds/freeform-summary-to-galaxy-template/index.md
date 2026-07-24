@@ -5,7 +5,6 @@ axis: source-specific
 source: freeform
 target: galaxy
 tags:
-  - mold
   - source/freeform
   - target/galaxy
 status: reviewed

@@ -5,7 +5,6 @@ axis: source-specific
 source: nextflow
 target: cwl
 tags:
-  - mold
   - source/nextflow
   - target/cwl
 status: draft

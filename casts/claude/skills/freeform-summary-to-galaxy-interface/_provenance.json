@@ -4,11 +4,11 @@
   "mold": {
     "name": "freeform-summary-to-galaxy-interface",
     "path": "content/molds/freeform-summary-to-galaxy-interface/index.md",
-    "revision": 1,
-    "content_hash": "a469bc6a7c70f15915b20baf8b2d0f8b24ae151581070ee66eda201b936b0376",
-    "commit": "dca2ac888332ee86d0cdcb5aabef94804fa16c54"
+    "revision": 2,
+    "content_hash": "35080256be645a29aef66f8f9c4c5c55b3e9bd9df4ac12281889370a52fbc282",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-20T16:07:59.385Z",
+  "cast_at": "2026-07-24T14:50:06.048Z",
   "refs": [
     {
       "kind": "research",
@@ -23,8 +23,8 @@
       "trigger": "When the free-form summary describes paired reads, per-sample groups, nested or grouped inputs, or any input that should become a Galaxy dataset collection.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
-      "dst_hash": "75d22f549355dff8aec171cef13a59a8416f70adf4ef414ddc54fb68c9928325",
+      "src_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
+      "dst_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -77,8 +77,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the right sample_sheet variant and translate described per-sample column metadata into Galaxy column_definitions when the source describes sample-sheet-shaped inputs.",
       "trigger": "When the free-form summary describes a sample sheet, a per-sample/per-record table, or any table mapping samples to files that should become a Galaxy collection or sample-sheet input.",
-      "src_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
-      "dst_hash": "9e0b495c4370a028e1d9ab9b6b4630c79135042d01406fc20833ed5f09148444",
+      "src_hash": "96a989e3b9604ba109f96b8951c24b06ff0d61d079e49875de11eb6f09e39e70",
+      "dst_hash": "96a989e3b9604ba109f96b8951c24b06ff0d61d079e49875de11eb6f09e39e70",
       "source": "deterministic"
     },
     {
@@ -92,8 +92,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address.",
       "trigger": "When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.",
-      "src_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
-      "dst_hash": "e4d5991a5085e0f9ad52b8e6856f64179362334bd51b77a3302faeb96732f980",
+      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
       "source": "deterministic"
     },
     {
@@ -107,8 +107,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     }
   ],

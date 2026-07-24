@@ -5,7 +5,6 @@ axis: source-specific
 source: interview
 target: galaxy
 tags:
-  - mold
   - source/interview
   - target/galaxy
 status: reviewed

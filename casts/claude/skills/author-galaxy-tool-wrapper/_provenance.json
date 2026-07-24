@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 3,
-    "content_hash": "17349c178341419cbf0a42e1ae1ccb9408c2c4d6f722d2c2b4122a2ca3b375db",
-    "commit": "39555fca3fd95bf7db8b0191e97135ce20c77cb2"
+    "revision": 4,
+    "content_hash": "6b08efefd19160a5215ea57111fbafb3634116b7d0d9d7d8275dc902f4012d8a",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-20T18:34:59.090Z",
+  "cast_at": "2026-07-24T14:49:55.401Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -66,8 +66,8 @@
       "purpose": "Map Nextflow container/conda evidence to Galaxy UDT container and package provenance.",
       "trigger": "When a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.",
       "verification": "Author one UDT from nf-core/bacass or nf-core/rnaseq process evidence and confirm the note improves requirements/container extraction.",
-      "src_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
-      "dst_hash": "e710290d7c1b91469ca2dcb4ad35044b730fbce66d93d0e792a4a30c3236da6d",
+      "src_hash": "75c8b051377ff4210f67c403939bdd5e28127df0f5ed9d955330b54768c4d60b",
+      "dst_hash": "75c8b051377ff4210f67c403939bdd5e28127df0f5ed9d955330b54768c4d60b",
       "source": "deterministic"
     },
     {

@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: component
 title: "Galaxy tool and job failure reference"
 tags:
-  - research/component
   - target/galaxy
 status: draft
 created: 2026-05-02

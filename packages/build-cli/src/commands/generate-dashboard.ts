@@ -24,7 +24,7 @@ export function runGenerateDashboardCommand(argv = process.argv.slice(2)): void 
   ];
 
   for (const section of sections) {
-    const sectionNotes = sortByRevisedDesc(notes.filter((note) => note.tags.includes(section.tag)));
+    const sectionNotes = sortByRevisedDesc(notes.filter((note) => note.type === section.type));
     if (sectionNotes.length === 0) continue;
     parts.push(`## ${section.label}`, "");
     parts.push(

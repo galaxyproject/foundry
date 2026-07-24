@@ -8,7 +8,6 @@ aliases:
   - "interval intersect"
   - "overlap features between two interval sets"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform
