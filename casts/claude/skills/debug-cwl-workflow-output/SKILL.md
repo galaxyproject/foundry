@@ -13,11 +13,11 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.
+- Read artifact `workflow-test-result`. Produced by `run-workflow-test`. Structured run handoff from run-workflow-test: test result, run/job/artifact context, and the observed CWL failure modality.
 
 ## Outputs
 
-- None declared.
+- Write artifact `cwl-workflow-debug-report` as `cwl-workflow-debug-report.md`. Format: `markdown`. CWL failure-surface classification with captured run/job/output evidence and a recommended next step or reference-gap follow-up.
 
 ## Required Tools
 
