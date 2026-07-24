@@ -5,10 +5,10 @@ tags:
   - pipeline
   - source/nextflow
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-04-30
-revised: 2026-05-10
-revision: 3
+revised: 2026-07-24
+revision: 4
 ai_generated: true
 summary: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow."
 harness_notes:

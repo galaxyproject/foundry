@@ -8,10 +8,10 @@ tags:
   - mold
   - source/nextflow
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-05-05
-revised: 2026-06-11
-revision: 7
+revised: 2026-07-24
+revision: 8
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs."
 input_artifacts:

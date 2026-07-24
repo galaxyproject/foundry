@@ -6,10 +6,10 @@ source: nextflow
 tags:
   - mold
   - source/nextflow
-status: draft
+status: reviewed
 created: 2026-04-30
-revised: 2026-05-08
-revision: 13
+revised: 2026-07-24
+revision: 14
 ai_generated: true
 output_artifacts:
   - id: summary-nextflow

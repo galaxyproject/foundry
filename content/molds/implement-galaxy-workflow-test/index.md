@@ -6,10 +6,10 @@ target: galaxy
 tags:
   - mold
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-04-30
-revised: 2026-06-12
-revision: 7
+revised: 2026-07-24
+revision: 8
 ai_generated: true
 related_notes:
   - "[[galaxy-workflow-test-plan]]"

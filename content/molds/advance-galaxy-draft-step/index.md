@@ -6,10 +6,10 @@ target: galaxy
 tags:
   - mold
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-06-02
-revised: 2026-06-18
-revision: 2
+revised: 2026-07-24
+revision: 3
 ai_generated: true
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."

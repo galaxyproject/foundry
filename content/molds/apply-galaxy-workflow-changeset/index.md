@@ -6,10 +6,10 @@ target: galaxy
 tags:
   - mold
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-07-01
-revised: 2026-07-01
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps."
 input_artifacts:

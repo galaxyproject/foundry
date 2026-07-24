@@ -8,10 +8,10 @@ tags:
   - mold
   - source/interview
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-07-01
-revised: 2026-07-01
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set."
 input_artifacts:

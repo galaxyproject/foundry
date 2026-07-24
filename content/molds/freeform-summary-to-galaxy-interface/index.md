@@ -8,10 +8,10 @@ tags:
   - mold
   - source/freeform
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-06-09
-revised: 2026-06-09
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Map a free-form source summary into a Galaxy workflow interface design brief."
 input_artifacts:

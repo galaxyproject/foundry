@@ -4,10 +4,10 @@ name: find-test-data
 axis: generic
 tags:
   - mold
-status: draft
+status: reviewed
 created: 2026-04-30
-revised: 2026-06-12
-revision: 2
+revised: 2026-07-24
+revision: 3
 ai_generated: true
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:

@@ -6,10 +6,10 @@ source: nextflow
 tags:
   - mold
   - source/nextflow
-status: draft
+status: reviewed
 created: 2026-07-17
-revised: 2026-07-17
-revision: 1
+revised: 2026-07-24
+revision: 2
 ai_generated: true
 summary: "Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs."
 input_artifacts:

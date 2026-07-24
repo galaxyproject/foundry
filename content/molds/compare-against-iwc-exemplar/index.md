@@ -6,10 +6,10 @@ target: galaxy
 tags:
   - mold
   - target/galaxy
-status: draft
+status: reviewed
 created: 2026-04-30
-revised: 2026-06-11
-revision: 7
+revised: 2026-07-24
+revision: 8
 ai_generated: true
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring."
 input_artifacts:
