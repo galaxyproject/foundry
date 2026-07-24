@@ -1,8 +1,7 @@
 ---
 type: research
-subtype: component
 tags:
-  - research/component
+  - meta
 component: "Archon harness substrate evaluation"
 status: draft
 created: 2026-04-29

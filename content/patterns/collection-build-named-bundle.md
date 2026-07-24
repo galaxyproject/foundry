@@ -8,7 +8,9 @@ aliases:
   - "__BUILD_LIST__ named bundle"
   - "tool-output fan-in collection"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

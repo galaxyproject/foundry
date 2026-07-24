@@ -4,7 +4,6 @@ pattern_kind: operation
 evidence: corpus-observed
 title: "Tabular: cut and reorder columns"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-04-30

@@ -8,7 +8,6 @@ aliases:
   - "skip reporting on empty output"
   - "data-derived when gate"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

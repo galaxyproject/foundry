@@ -4,11 +4,11 @@
   "mold": {
     "name": "summarize-galaxy-workflow",
     "path": "content/molds/summarize-galaxy-workflow/index.md",
-    "revision": 1,
-    "content_hash": "557ba0f649698476dab3b52b9aab4ee7aa6b5e0c8657bfcfdf8f3d05461d9418",
-    "commit": "6c6c45591c6caf42b0af3e065bc4167de9c0626d"
+    "revision": 2,
+    "content_hash": "c9acfa4e8d4b4ea27e3f4acda9813e004095fde9c12638f0b53027e77e6e0309",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-10T18:29:24.488Z",
+  "cast_at": "2026-07-24T14:50:21.214Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Convert a legacy `.ga` workflow to gxformat2 before summarizing, and record the conversion under documents.converted_path.",
       "trigger": "When the supplied workflow is native `.ga` rather than gxformat2.",
       "verification": "Cast the skill, run on one `.ga` and one gxformat2 fixture; confirm the `.ga` case populates documents.converted_path and both summaries validate.",
-      "src_hash": "24b91f53b0e7850d1dfc38df1074f2d4270c72f20778d0e4d710545bf64be3e0",
+      "src_hash": "3aca2ac1c40d74c6cdbf84c3a84400a427f1c46c4015e9a2c0d3742ddfbbf0b6",
       "dst_hash": "1cdf49f10f77039af6efc5b82fe79720bb18e50d1f57d653670697f7262c7640",
       "source": "deterministic"
     },
@@ -38,8 +38,8 @@
       "purpose": "Validate the gxformat2 workflow before extraction and record diagnostics under documents.validation.",
       "trigger": "Before extracting structure from the workflow document.",
       "verification": "Cast the skill, run on one valid and one malformed workflow; the malformed one surfaces gxwf validate diagnostics in the summary.",
-      "src_hash": "8fdf834e8b3bd2c70e9625c9148eb246855a40625510f0be5f6351885b057aa4",
-      "dst_hash": "caec1f5cc5a69b56f2a033f8e96a5330a8393b76ff606d3ea7468b1eb7922de6",
+      "src_hash": "276c5091c21a979a2180315e76625d58a4f252d46783a090b3f25116fd1cc3ad",
+      "dst_hash": "ff10c49819b0f7af13f247ea03e4dd24ba2e5144da3beaa6b1ab96698c7e03b7",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-galaxy-workflow.json with `foundry validate-summary-galaxy-workflow` before returning it from the skill.",
-      "src_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
-      "dst_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
+      "src_hash": "c6e2f02e470df54afc00cd4209ae476b5f60e1eab270ab61a149745677d87167",
+      "dst_hash": "c6e2f02e470df54afc00cd4209ae476b5f60e1eab270ab61a149745677d87167",
       "source": "deterministic"
     },
     {

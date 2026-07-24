@@ -13,13 +13,12 @@ export interface ContentNote {
   revised: string;
   revision: number;
   type: string;
-  subtype?: string;
   tags: string[];
 }
 
 export interface DashboardSection {
   label: string;
-  tag: string;
+  type: string;
 }
 
 export function loadContentNotes(contentRoot = "content"): ContentNote[] {
@@ -42,7 +41,6 @@ export function loadContentNotes(contentRoot = "content"): ContentNote[] {
       revised: stringValue(meta.revised) || "0000-00-00",
       revision: numberValue(meta.revision) ?? 1,
       type,
-      subtype: stringValue(meta.subtype) || undefined,
       tags,
     });
   }
@@ -56,8 +54,8 @@ export function loadDashboardSections(filePath = "dashboard_sections.json"): Das
     if (typeof item !== "object" || item === null || Array.isArray(item)) return [];
     const record = item as Record<string, unknown>;
     const label = stringValue(record.label);
-    const tag = stringValue(record.tag);
-    return label && tag ? [{ label, tag }] : [];
+    const type = stringValue(record.type);
+    return label && type ? [{ label, type }] : [];
   });
 }
 

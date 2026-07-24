@@ -9,7 +9,6 @@ aliases:
   - "count-to-parameter"
   - "derive-count-parameter-from-file-or-collection"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

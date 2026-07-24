@@ -8,7 +8,6 @@ aliases:
   - "concatenate FASTA and dedup"
   - "merge sequence files unique"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/sequence-transform

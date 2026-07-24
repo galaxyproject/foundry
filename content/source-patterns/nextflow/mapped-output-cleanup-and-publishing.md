@@ -24,7 +24,6 @@ review_triggers:
   - "Per-element branch or filter behavior controls what is published."
   - "Publishing expects directory structure rather than labeled Galaxy outputs."
 tags:
-  - source-pattern
   - source/nextflow
   - target/galaxy
 status: draft

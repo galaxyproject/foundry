@@ -5,10 +5,10 @@
     "name": "summarize-cwl",
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
-    "content_hash": "fc96f678cb072237347f4990644a86c47d84f4fff303160fbb4ae3a92a55e1c5",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "content_hash": "e7a52ddad0256cee9257eea22271c48631233e5ec5f821bf6314d6cae6c82a54",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-09T14:32:48.116Z",
+  "cast_at": "2026-07-24T14:50:18.984Z",
   "refs": [
     {
       "kind": "cli-tool",
@@ -21,8 +21,8 @@
       "evidence": "hypothesis",
       "purpose": "Normalize the CWL workflow (cwl-normalizer) into a single JSON document for extraction.",
       "verification": "Run summarize-cwl against the cross-document-run-refs eval case; documents.normalized_path must be populated and tools[] must contain the referenced CommandLineTools.",
-      "src_hash": "aa2a242d31c7cf61e6d7dfa1b43a77271b1e3f9fb1a844e43982a7da55f9fd28",
-      "dst_hash": "aa2a242d31c7cf61e6d7dfa1b43a77271b1e3f9fb1a844e43982a7da55f9fd28",
+      "src_hash": "c77ea8f5c96504b592aeb3526bfdbf1c82cf7a4abb505b41dade73ce2735aaed",
+      "dst_hash": "c77ea8f5c96504b592aeb3526bfdbf1c82cf7a4abb505b41dade73ce2735aaed",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "hypothesis",
       "purpose": "Validate the CWL entrypoint before normalization.",
       "verification": "Run summarize-cwl against one valid and one invalid CWL fixture; the invalid one must surface cwltool diagnostics in summary-cwl.json.",
-      "src_hash": "f330f8308b74a228f3d373aee74b20f62380812864b111fd39ed1b057a4bb08a",
-      "dst_hash": "f330f8308b74a228f3d373aee74b20f62380812864b111fd39ed1b057a4bb08a",
+      "src_hash": "7998be3802dd8931b32612f6efae67c77b2cfe54fdb51c329ead8b1f475d0b1e",
+      "dst_hash": "7998be3802dd8931b32612f6efae67c77b2cfe54fdb51c329ead8b1f475d0b1e",
       "source": "deterministic"
     },
     {
@@ -50,8 +50,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-cwl.json before returning it from the skill.",
-      "src_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
-      "dst_hash": "0211ac0ab62e3bc536043cb93ef7b340dcc359b9a876340deeca7fd9a0317fe3",
+      "src_hash": "c6e2f02e470df54afc00cd4209ae476b5f60e1eab270ab61a149745677d87167",
+      "dst_hash": "c6e2f02e470df54afc00cd4209ae476b5f60e1eab270ab61a149745677d87167",
       "source": "deterministic"
     },
     {
@@ -65,8 +65,8 @@
       "evidence": "hypothesis",
       "purpose": "Use CWL's native workflow, step, tool, scatter, conditional, and requirement structure without copying the heavier Nextflow inference pipeline.",
       "verification": "Run the generated summarize-cwl skill against one simple normalized workflow, one scattered workflow, and one workflow with remote run references; confirm the summary validates and downstream CWL-to-Galaxy molds can consume it.",
-      "src_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
-      "dst_hash": "3322ec34115f2d12f0a72c2b9fb1fa33a06aaa6a0d004653310306f40e741f2d",
+      "src_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
+      "dst_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
       "source": "deterministic"
     },
     {
@@ -80,8 +80,8 @@
       "evidence": "corpus-observed",
       "purpose": "Check official CWL v1.2 field names and source-language semantics when summarizing less-common features.",
       "trigger": "When the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure.",
-      "src_hash": "ad847826f59dba599078fe1cc6750ffe131134966e7fefce5f81544b768153ed",
-      "dst_hash": "ad847826f59dba599078fe1cc6750ffe131134966e7fefce5f81544b768153ed",
+      "src_hash": "33ec155e148192f7aa682e93a11b001ec705e8da31e7f7c743d1c2bb86f3bfa3",
+      "dst_hash": "33ec155e148192f7aa682e93a11b001ec705e8da31e7f7c743d1c2bb86f3bfa3",
       "source": "deterministic"
     },
     {

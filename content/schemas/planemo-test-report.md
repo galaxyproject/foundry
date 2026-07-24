@@ -9,7 +9,6 @@ upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/test/mo
 license: MIT
 license_file: LICENSES/planemo.LICENSE
 tags:
-  - schema
   - target/galaxy
 status: draft
 created: 2026-05-11

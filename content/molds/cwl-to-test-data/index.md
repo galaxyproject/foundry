@@ -4,7 +4,6 @@ name: cwl-to-test-data
 axis: source-specific
 source: cwl
 tags:
-  - mold
   - source/cwl
 status: draft
 created: 2026-07-17

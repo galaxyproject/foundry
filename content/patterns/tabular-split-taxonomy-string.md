@@ -4,7 +4,6 @@ pattern_kind: operation
 evidence: corpus-observed
 title: "Tabular: split taxonomy string"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

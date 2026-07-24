@@ -8,7 +8,6 @@ aliases:
   - "reproducible peaks by replicate overlap"
   - "multi-intersect then threshold"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform

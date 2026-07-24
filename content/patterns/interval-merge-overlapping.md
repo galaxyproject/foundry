@@ -8,7 +8,6 @@ aliases:
   - "gops merge in Galaxy"
   - "collapse overlapping intervals"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform

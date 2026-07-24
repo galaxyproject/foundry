@@ -5,7 +5,6 @@ command: add
 package: "@galaxy-tool-util/cli"
 upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/galaxy-tool-cache.json"
 tags:
-  - cli-command
   - cli/galaxy-tool-cache
 status: draft
 created: 2026-06-16

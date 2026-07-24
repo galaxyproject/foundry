@@ -8,7 +8,6 @@ invoke_fallback: "uvx --from cwl-utils cwl-normalizer"
 availability_check: "cwl-normalizer --help"
 docs_url: "https://github.com/common-workflow-language/cwl-utils"
 tags:
-  - cli-tool
   - cli/cwl-utils
 status: draft
 created: 2026-05-10

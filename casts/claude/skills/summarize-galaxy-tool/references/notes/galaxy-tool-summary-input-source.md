@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: design-spec
 title: "Galaxy tool summary input source"
 tags:
-  - research/design-spec
   - target/galaxy
 status: draft
 created: 2026-05-03

@@ -8,7 +8,6 @@ invoke_fallback: "uvx cwltool"
 availability_check: "cwltool --version"
 docs_url: "https://cwltool.readthedocs.io/"
 tags:
-  - cli-tool
   - cli/cwltool
 status: draft
 created: 2026-05-10

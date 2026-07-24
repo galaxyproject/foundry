@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: component
 title: "Nextflow conditional to Galaxy subworkflow / when"
 tags:
-  - research/component
   - source/nextflow
   - target/galaxy
 status: draft

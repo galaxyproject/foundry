@@ -2,7 +2,6 @@
 type: pipeline
 title: NEXTFLOW → GALAXY
 tags:
-  - pipeline
   - source/nextflow
   - target/galaxy
 status: reviewed

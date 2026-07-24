@@ -2,7 +2,6 @@
 type: pipeline
 title: INTERVIEW → GALAXY
 tags:
-  - pipeline
   - source/interview
   - target/galaxy
 status: reviewed

@@ -5,7 +5,6 @@ command: workflow_test_on_invocation
 package: "planemo"
 upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_workflow_test_on_invocation.py"
 tags:
-  - cli-command
   - cli/planemo
 status: draft
 created: 2026-05-11

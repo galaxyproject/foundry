@@ -5,7 +5,6 @@ command: output_schema
 package: "planemo"
 upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_output_schema.py"
 tags:
-  - cli-command
   - cli/planemo
 status: draft
 created: 2026-05-11

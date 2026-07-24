@@ -4,7 +4,6 @@ name: summarize-galaxy-workflow
 axis: source-specific
 source: galaxy
 tags:
-  - mold
   - source/galaxy
 status: reviewed
 created: 2026-07-01

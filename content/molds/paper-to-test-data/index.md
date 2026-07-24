@@ -4,7 +4,6 @@ name: paper-to-test-data
 axis: source-specific
 source: paper
 tags:
-  - mold
   - source/paper
 status: draft
 created: 2026-04-30

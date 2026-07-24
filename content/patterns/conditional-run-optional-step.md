@@ -8,7 +8,6 @@ aliases:
   - "Galaxy when gate"
   - "optional branch with when"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

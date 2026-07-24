@@ -5,7 +5,6 @@ command: convert
 package: "@galaxy-tool-util/cli"
 upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
 tags:
-  - cli-command
   - cli/gxwf
 status: draft
 created: 2026-05-05

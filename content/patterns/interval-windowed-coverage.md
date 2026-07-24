@@ -8,7 +8,6 @@ aliases:
   - "slop merge coverage"
   - "reads per feature neighborhood"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform

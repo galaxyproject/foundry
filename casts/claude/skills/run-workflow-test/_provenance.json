@@ -4,11 +4,11 @@
   "mold": {
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
-    "revision": 5,
-    "content_hash": "a64eef297fb4784e3b44db215ad59ce7c172b6465f36eacde2c53159d977fecf",
-    "commit": "1081b3c161c8a6d3a88828fd667d047f46db226c"
+    "revision": 6,
+    "content_hash": "93728553835a58c3ade1c573d22b9e4c7b5bcae2dc1f1cfe327a0979765fa966",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-20T19:41:50.907Z",
+  "cast_at": "2026-07-24T14:50:17.863Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -30,7 +30,7 @@
       "evidence": "corpus-observed",
       "purpose": "Run static schema and workflow-label checks before expensive workflow execution.",
       "trigger": "Before invoking Planemo when a Galaxy workflow test file is present.",
-      "src_hash": "98bdbc75c14b520e6dd03da5b08488890bced76569a55d202bb8e807757cf1ed",
+      "src_hash": "2bb112ae7b79471b316428e8c3e4957932093c853332fd6eec8542ce76f3a5a6",
       "dst_hash": "973184698733ffb86bb5a15781902846afec311047f5684f779f8ad023e5d24c",
       "source": "deterministic"
     },
@@ -44,8 +44,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that executes the Galaxy or CWL workflow test; install before driving the harness.",
-      "src_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
-      "dst_hash": "0f6cee85c6f90b44e33e0b1e1343648be1058084487a55b037c718f3c036ef4b",
+      "src_hash": "09b47f6f70d15c711f01b0c970c8668cb4fec7b17d90b22204dfbbb5f6c75a30",
+      "dst_hash": "09b47f6f70d15c711f01b0c970c8668cb4fec7b17d90b22204dfbbb5f6c75a30",
       "source": "deterministic"
     },
     {
@@ -59,8 +59,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve invocation identifiers and state summaries needed to inspect workflow-level runtime failures after Planemo returns.",
       "trigger": "When Planemo reports a failed, cancelled, missing-output, or ambiguous workflow invocation result.",
-      "src_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
-      "dst_hash": "9c68c90b974111298e089ba2e4193e3fc074836a4d675ddfedf954a2b133337c",
+      "src_hash": "023d21ee826721bc6c74e7b4b0f18349140d8fd92669ff3b2d198a1a276d012f",
+      "dst_hash": "023d21ee826721bc6c74e7b4b0f18349140d8fd92669ff3b2d198a1a276d012f",
       "source": "deterministic"
     },
     {
@@ -74,8 +74,8 @@
       "evidence": "corpus-observed",
       "purpose": "Interpret assertion failures and choose the right fast inner-loop command before full reruns.",
       "trigger": "When a workflow test file exists and the task is to run, iterate, or classify its test assertions.",
-      "src_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
-      "dst_hash": "9d87cd37efcc3f5e3a378011892f3846c8fdecec7a5765193044d71edb746ed9",
+      "src_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
+      "dst_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
       "source": "deterministic"
     },
     {
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Run workflow tests while preserving Planemo structured artifacts, Galaxy mode, invocation id, history id, and API follow-up context.",
       "trigger": "When choosing between managed Galaxy, external Galaxy, full test runs, existing invocation checks, or direct workflow runs.",
-      "src_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
-      "dst_hash": "41845074f48e96f268c6a2668f751868f9502399818c3c0fe3265b3b594dbb24",
+      "src_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
+      "dst_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
       "source": "deterministic"
     },
     {

@@ -4,7 +4,6 @@ name: nextflow-test-to-cwl-test-plan
 axis: source-specific
 source: nextflow
 tags:
-  - mold
   - source/nextflow
   - target/cwl
 status: draft

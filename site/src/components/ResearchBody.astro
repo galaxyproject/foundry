@@ -7,10 +7,9 @@ interface Props {
 
 const { entry } = Astro.props;
 const data = entry.data as any;
-const isInfrastructure = data.tags?.includes('research/infrastructure');
 ---
-<div class="mb-6 flex flex-wrap gap-2 items-center">
-  {isInfrastructure && <span class="text-xs px-2 py-1 rounded bg-(--color-accent) text-white font-mono">project infrastructure</span>}
-  <span class="text-xs px-2 py-1 rounded bg-(--color-galaxy-grey) text-white font-mono">{data.subtype}</span>
-  {data.component && <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">{data.component}</span>}
-</div>
+{data.component && (
+  <div class="mb-6 flex flex-wrap gap-2 items-center">
+    <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">{data.component}</span>
+  </div>
+)}

@@ -4,7 +4,6 @@ pattern_kind: operation
 evidence: corpus-observed
 title: "Tabular: compute a new column"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-04-30

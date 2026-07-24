@@ -27,19 +27,6 @@ interface CliArgs {
   root: string | null;
 }
 
-const TYPE_TAG_MAP: Record<string, string> = {
-  "mold|": "mold",
-  "pattern|": "pattern",
-  "source-pattern|": "source-pattern",
-  "cli-command|": "cli-command",
-  "pipeline|": "pipeline",
-  "research|component": "research/component",
-  "research|design-problem": "research/design-problem",
-  "research|design-spec": "research/design-spec",
-  "schema|": "schema",
-  "prompt|": "prompt",
-};
-
 const CLI_METADATA_KEYS = new Set([
   ...[gxwfCliMeta, galaxyToolCacheCliMeta, foundryCliMeta].flatMap((program) =>
     program.commands.map((command) => `${program.name}/${command.name}`),
@@ -67,7 +54,6 @@ export function validateData(data: Frontmatter, schema: NoteSchema): ValidationR
   const wiki = validateWikiLinks(data);
   result.errors.push(...wiki.errors);
   result.warnings.push(...wiki.warnings);
-  result.warnings.push(...validateTagCoherence(data));
   return result;
 }
 
@@ -137,23 +123,6 @@ function validateWikiLinks(data: Frontmatter): ValidationResult {
     });
   }
   return result;
-}
-
-function validateTagCoherence(data: Frontmatter): string[] {
-  const tags = data.tags;
-  const noteType = data.type;
-  const subtype = data.subtype;
-  if (!Array.isArray(tags) || typeof noteType !== "string") return [];
-  const key = `${noteType}|${typeof subtype === "string" ? subtype : ""}`;
-  const expected = TYPE_TAG_MAP[key] ?? TYPE_TAG_MAP[`${noteType}|`];
-  if (!expected) return [];
-  const matches = tags.some(
-    (t) => typeof t === "string" && (t === expected || t.startsWith(expected + "/")),
-  );
-  if (matches) return [];
-  return [
-    `tags: expected '${expected}' tag for type=${noteType}${subtype ? `, subtype=${subtype}` : ""} but tags are ${JSON.stringify(tags)}`,
-  ];
 }
 
 // ---- cross-file validation ----

@@ -9,7 +9,6 @@ invoke_fallback: "uvx --from planemo==0.75.45 planemo"
 availability_check: "planemo --version"
 docs_url: "https://planemo.readthedocs.io/"
 tags:
-  - cli-tool
   - cli/planemo
 status: draft
 created: 2026-05-10

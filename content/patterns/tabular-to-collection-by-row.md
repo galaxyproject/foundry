@@ -8,7 +8,10 @@ aliases:
   - "split_file_to_collection by column"
   - "row fan-out collection"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
+  - topic/tabular-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

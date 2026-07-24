@@ -4,11 +4,11 @@
   "mold": {
     "name": "interview-to-galaxy-workflow-changeset",
     "path": "content/molds/interview-to-galaxy-workflow-changeset/index.md",
-    "revision": 1,
-    "content_hash": "3d6d8fc9dd09c98125a3ab4c0f7ae5972e85b5afc1707e2922c2e4132d2871a3",
-    "commit": "2e8ea5a6363235576bacfa5defd11492bbab6f94"
+    "revision": 2,
+    "content_hash": "033eb6d5fdd09b107b28da179ed9ad1215b3e24d4b97bf7808bcea42aa4df083",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-10T18:51:37.939Z",
+  "cast_at": "2026-07-24T14:50:11.575Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: append requested changes the current workflow cannot support rather than inventing or dropping them, and mark resolved the ones this step closes.",
       "verification": "Promote after a worked run shows entries this Mold appends are consumed by apply-galaxy-workflow-changeset or a reviewer without re-derivation.",
-      "src_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
-      "dst_hash": "04d5c952cf0e952ae6153b3962334066f0a440a64da4237cf61264a59920be4f",
+      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
       "source": "deterministic"
     },
     {

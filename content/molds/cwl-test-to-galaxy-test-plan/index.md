@@ -4,7 +4,6 @@ name: cwl-test-to-galaxy-test-plan
 axis: source-specific
 source: cwl
 tags:
-  - mold
   - source/cwl
 status: draft
 created: 2026-04-30

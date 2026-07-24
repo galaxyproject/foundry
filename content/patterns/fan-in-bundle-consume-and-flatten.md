@@ -8,7 +8,6 @@ aliases:
   - "build list for collection consumer"
   - "mid-workflow collection fan-in lifecycle"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/collection-transform

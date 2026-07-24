@@ -11,7 +11,7 @@ const infrastructureDocs = designDocsByCategory('infrastructure');
 const dashboardSections = sections.map(s => ({
   label: s.label,
   notes: allNotes
-    .filter(n => n.data.tags.includes(s.tag) && n.data.status !== 'archived')
+    .filter(n => n.data.type === s.type && n.data.status !== 'archived')
     .sort((a, b) => b.data.revised.getTime() - a.data.revised.getTime()),
 }));
 const activeDashboardSections = dashboardSections.filter(s => s.notes.length > 0);

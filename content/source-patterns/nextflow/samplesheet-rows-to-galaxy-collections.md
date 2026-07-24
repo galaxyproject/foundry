@@ -17,7 +17,6 @@ review_triggers:
   - "Rows encode multiple files that are not paired reads."
   - "fromSamplesheet or splitCsv logic mutates the row shape."
 tags:
-  - source-pattern
   - source/nextflow
   - target/galaxy
 status: draft

@@ -8,7 +8,6 @@ validator_bin: foundry
 validator_subcommand: validate-galaxy-tool-summary
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json"
 tags:
-  - schema
   - target/galaxy
 status: draft
 created: 2026-05-05

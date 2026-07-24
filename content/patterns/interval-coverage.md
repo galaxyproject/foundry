@@ -8,7 +8,6 @@ aliases:
   - "bedtools coverage in Galaxy"
   - "coverage track and reads-in-regions"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform

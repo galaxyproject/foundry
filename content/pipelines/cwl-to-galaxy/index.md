@@ -2,7 +2,6 @@
 type: pipeline
 title: CWL → GALAXY
 tags:
-  - pipeline
   - source/cwl
   - target/galaxy
 status: draft

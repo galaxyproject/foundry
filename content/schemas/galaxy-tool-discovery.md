@@ -8,7 +8,6 @@ validator_bin: foundry
 validator_subcommand: validate-galaxy-tool-discovery
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json"
 tags:
-  - schema
   - target/galaxy
 status: draft
 created: 2026-05-04

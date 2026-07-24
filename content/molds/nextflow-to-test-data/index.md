@@ -4,7 +4,6 @@ name: nextflow-to-test-data
 axis: source-specific
 source: nextflow
 tags:
-  - mold
   - source/nextflow
 status: reviewed
 created: 2026-07-17

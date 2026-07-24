@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: design-problem
 title: "nf-core task.ext.args → Galaxy additional-options bag"
 tags:
-  - research/design-problem
   - source/nextflow
   - target/galaxy
 status: draft

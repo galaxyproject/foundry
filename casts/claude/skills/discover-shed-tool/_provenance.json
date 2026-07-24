@@ -4,11 +4,11 @@
   "mold": {
     "name": "discover-shed-tool",
     "path": "content/molds/discover-shed-tool/index.md",
-    "revision": 4,
-    "content_hash": "2e5fa1f8b22f1f9c984fa4c4dc05999294de5db706a9c1691d3af7b3459cbecb",
-    "commit": "e90a42769ba95218355e011fe62fb6daeaef28a7"
+    "revision": 5,
+    "content_hash": "d0e2ded5b6ce2ac897d33a0ca076db4fbdb8feff4301a0933dc8e54c78c15a23",
+    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
   },
-  "cast_at": "2026-07-09T14:20:22.945Z",
+  "cast_at": "2026-07-24T14:50:04.686Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -50,7 +50,7 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve a Tool Shed tool version to an installable changeset revision.",
       "trigger": "After selecting a candidate version that needs a reproducible changeset pin.",
-      "src_hash": "4a2e231e4f71ccfc93bee17daf234f46ce9fa93a45c9ae2798c06fd703835c1a",
+      "src_hash": "e1b97d62627e40c0ae395fa54f610ddd10543703504226bfb7066ffb6821d757",
       "dst_hash": "db0b13f2b92593c9cd3bf5a80276a31e537c07caff76786167ebe9f7feac5938",
       "source": "deterministic"
     },
@@ -65,7 +65,7 @@
       "evidence": "corpus-observed",
       "purpose": "Search the Tool Shed for candidate wrappers matching a step's tool need.",
       "trigger": "When resolving a workflow step to an installable Galaxy tool wrapper.",
-      "src_hash": "e3bfd60c1c4f4e64c7a625b1ae5123d297002aa24cc86b53a72a1365cb707bb8",
+      "src_hash": "8288ec72cb1817c1c05a1a63057cf010debfbbed0a05d568e4891cfc7b580c66",
       "dst_hash": "72f5f7cc0cd5ed40038af89e6041c7916d65c51ba1c7bc7b2c46ba64c51d9359",
       "source": "deterministic"
     },
@@ -80,7 +80,7 @@
       "evidence": "corpus-observed",
       "purpose": "List available Tool Shed versions for a selected candidate.",
       "trigger": "After a Tool Shed search candidate is selected and before pinning a version.",
-      "src_hash": "597997fe54c620832c1d94f752a0dfaf6352bb7d58646e4378f6d75de5e61cab",
+      "src_hash": "9fbc9a8726d8939d9621786efba23ea0e7d0949051a41974638895bbfe321e32",
       "dst_hash": "90f35a407af778a1a1c714f79ceb8dc3559523964175e734b565eed8b9aeb6a5",
       "source": "deterministic"
     },
@@ -95,8 +95,8 @@
       "evidence": "corpus-observed",
       "purpose": "Explain Tool Shed search/indexing limitations that affect hit scoring and fallthrough decisions.",
       "trigger": "When results are missing, weak, duplicated across owners, stale, or ambiguous.",
-      "src_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
-      "dst_hash": "8b43c2cbdfa0cd65df789f4a3a0d456dbd33f827898453075909317860960110",
+      "src_hash": "232e96bb6685c1719b662437e6191c97ccae14fa574bb1bee6b774f8d483aa08",
+      "dst_hash": "232e96bb6685c1719b662437e6191c97ccae14fa574bb1bee6b774f8d483aa08",
       "source": "deterministic"
     },
     {

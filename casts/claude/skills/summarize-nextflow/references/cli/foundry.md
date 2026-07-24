@@ -8,7 +8,6 @@ invoke_fallback: "npx --package @galaxy-foundry/foundry foundry"
 availability_check: "foundry --help"
 docs_url: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md"
 tags:
-  - cli-tool
   - cli/foundry
 status: draft
 created: 2026-05-11

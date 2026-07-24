@@ -9,7 +9,6 @@ validator_subcommand: validate-summary-nextflow
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/summarize-nextflow/src/schema/summary-nextflow.schema.json"
 license: MIT
 tags:
-  - schema
   - source/nextflow
 status: draft
 created: 2026-04-30

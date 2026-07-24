@@ -7,7 +7,9 @@ aliases:
   - "regroup list:list by inner identifier"
   - "Apply Rules swap list nesting"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

@@ -4,7 +4,6 @@ name: interview-to-freeform-summary
 axis: source-specific
 source: interview
 tags:
-  - mold
   - source/interview
 status: reviewed
 created: 2026-05-22

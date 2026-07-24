@@ -8,7 +8,9 @@ aliases:
   - "sort sibling collections by identifier file"
   - "SORTLIST file-driven harmonization"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

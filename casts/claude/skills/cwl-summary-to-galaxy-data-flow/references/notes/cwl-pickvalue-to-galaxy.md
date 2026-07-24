@@ -1,9 +1,7 @@
 ---
 type: research
-subtype: component
 title: "CWL pickValue → Galaxy pick_value (post galaxy#22222)"
 tags:
-  - research/component
   - source/cwl
   - target/galaxy
 status: draft

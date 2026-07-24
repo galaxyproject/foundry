@@ -33,9 +33,8 @@ Consumers (external):
 Authoritative term definitions live in `content/meta/glossary.md`; this section is the architectural picture.
 
 - **Note** — a single `.md` file with frontmatter under the foundry's content root. Identity = filename stem, used as the wiki-link target.
-- **Type** — top-level kind of note (`type:` in frontmatter): `mold | pattern | source-pattern | cli-tool | cli-command | pipeline | research | schema | prompt`.
-- **Subtype** — second-level discriminator. Used for `research` (`component | design-problem | design-spec`). Molds use `axis`, `source`, `target`, and `tool` instead of `subtype`.
-- **Tag** — controlled hierarchical label declared in `meta_tags.yml`. Two roles: classify the note's kind (note-type tags like `mold`, `pattern`, `research/component`) and classify subject area (e.g., `iwc/<category>` for IWC domain coverage; further subject-area families bloom as content lands — see §4).
+- **Type** — the single note-kind discriminator (`type:` in frontmatter): `mold | pattern | source-pattern | cli-tool | cli-command | pipeline | research | schema | prompt`. The `buildNoteSchema` discriminated union and the whole site (`data.type`) key off it; note-kind is never re-encoded as a tag. Within a type, further shape comes from typed fields (Molds use `axis`, `source`, `target`, `tool`), not a subtype.
+- **Tag** — controlled label declared in `meta_tags.yml`, reserved for **cross-cutting facets only** (never note-kind): hierarchical `source/*`, `target/*`, `tool/*`, `cli/*`, `topic/*`, `iwc/*`, plus flat flags like `meta`. Further subject-area families bloom as content lands — see §4.
 - **Mold** — `content/molds/<slug>/index.md`. Directory-based note: `index.md` is the only top-level frontmatter-bearing file; siblings (`eval.md`, `usage.md`, `refinement.md`, `refinements/`, `examples/`, optional `casting.md` / `cast-skill-verification.md` / `changes.md`) ride along verbatim. Files under `refinements/` are the one carve-out: each refinement-journal entry carries small structured frontmatter. Content shape: typed reference manifest in frontmatter + procedural body skeleton.
 - **Pattern** — single `.md` under `content/patterns/`. Reference content. IWC citations live in the body as URLs; see `CORPUS_INGESTION.md`. Wiki-linked from Molds.
 - **Source-pattern** — single `.md` under `content/source-patterns/<source>/`. Reference content mapping source-system structures to target-system constructs, with `source_pattern_kind`, `source`, `target`, and `implemented_by_patterns` frontmatter.
@@ -54,39 +53,37 @@ The Foundry's content types each aggregate references — Molds aggregate patter
 
 The content root is `content/` — the Astro idiom, and accurate to a new contributor since the Foundry isn't an Obsidian vault by intent.
 
-## 3. Note types and subtypes
+## 3. Note types
 
-Source of truth: the `buildNoteSchema` discriminated union in `@galaxy-foundry/note-schema` (per-type `.strict()` members + cross-field `superRefine`s); `meta_tags.yml` for the matching tag.
+Source of truth: the `buildNoteSchema` discriminated union in `@galaxy-foundry/note-schema` (per-type `.strict()` members + cross-field `superRefine`s). `type` is the sole note-kind discriminator; the `Facet tag(s)` column lists only the cross-cutting facets a note of that kind typically carries (never a note-kind tag).
 
-| `type` | `subtype` | Required-extra | Tag(s) | Directory |
-|---|---|---|---|---|
-| `mold` | — | `name`, `axis` | `mold` | `content/molds/<slug>/index.md` only |
-| `pattern` | — | `title`, `pattern_kind`, `evidence` | `pattern` (+ optional `iwc/*`) | `content/patterns/` |
-| `source-pattern` | — | `title`, `source`, `target`, `source_pattern_kind`, `implemented_by_patterns` | `source-pattern` (+ source/target tags) | `content/source-patterns/<source>/` |
-| `cli-tool` | — | `tool`, `origin`, `package`, `invoke` | `cli-tool` (+ `cli/<tool>`) | `content/cli/<tool>/index.md` |
-| `cli-command` | — | `tool`, `command` | `cli-command` (+ `cli/<tool>`) | `content/cli/<tool>/` |
-| `pipeline` | — | `title`, `phases` | `pipeline` (+ optional `source/*`, `target/*`) | `content/pipelines/<slug>/index.md` only |
-| `research` | `component` | (base + `subtype`) | `research/component` | `content/research/` |
-| `research` | `design-problem` | (base + `subtype`) | `research/design-problem` | `content/research/` |
-| `research` | `design-spec` | (base + `subtype`) | `research/design-spec` | `content/research/` |
-| `schema` | — | `name`, `title` | `schema` | `content/schemas/` |
-| `prompt` | — | `title`, `prompt_file` | `prompt` (+ optional `prompt/*`) | `content/prompts/` |
+| `type` | Required-extra | Facet tag(s) | Directory |
+|---|---|---|---|
+| `mold` | `name`, `axis` | `source/*`, `target/*`, `tool/*` per axis | `content/molds/<slug>/index.md` only |
+| `pattern` | `title`, `pattern_kind`, `evidence` | `target/*`, `topic/*`, optional `iwc/*` | `content/patterns/` |
+| `source-pattern` | `title`, `source`, `target`, `source_pattern_kind`, `implemented_by_patterns` | `source/*`, `target/*` | `content/source-patterns/<source>/` |
+| `cli-tool` | `tool`, `origin`, `package`, `invoke` | `cli/<tool>` | `content/cli/<tool>/index.md` |
+| `cli-command` | `tool`, `command` | `cli/<tool>` | `content/cli/<tool>/` |
+| `pipeline` | `title`, `phases` | optional `source/*`, `target/*` | `content/pipelines/<slug>/index.md` only |
+| `research` | (base only) | `source/*`, `target/*`, or `meta` | `content/research/` |
+| `schema` | `name`, `title` | `target/*`, `source/*`, or `meta` | `content/schemas/` |
+| `prompt` | `title`, `prompt_file` | optional `prompt/*` | `content/prompts/` |
 
 `mold` and `pipeline` have a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling `.md` files in `content/molds/<slug>/` and `content/pipelines/<slug>/` are skipped — only `index.md` is validated). They are the two directory-note types; `docs/` holds long-form design docs.
 
 `cli-command` notes are *not* directory-based — each command is a flat single file. The two-level `content/cli/<tool>/<cmd>.md` directory structure is for organization, not directory-note semantics.
 
-The `research` subtypes (`component`, `design-problem`, `design-spec`) cover self-design notes plus background syntheses (e.g., the existing `COMPONENT_NEXTFLOW_WORKFLOW_TESTING` content lands as a `research/component` note).
+`research` is a flat kind (no subtype): it covers self-design notes plus background syntheses (e.g., the existing `COMPONENT_NEXTFLOW_WORKFLOW_TESTING` content lands as a `research` note).
 
 ## 4. Tag system
 
-`meta_tags.yml` is a flat YAML dict whose **keys** are the entire allowed tag vocabulary; each value is `{ description: "..." }`. Hierarchy is purely textual (slash-delimited). Examples:
+`meta_tags.yml` is a flat YAML dict whose **keys** are the entire allowed tag vocabulary; each value is `{ description: "..." }`. Tags are cross-cutting facets only — note-kind is the `type:` discriminator, not a tag. Hierarchy is purely textual (slash-delimited); a bare key (no slash) is a flat flag. Examples:
 
 ```yaml
-mold:
-  description: "Mold note (source artifact for casting)"
-pattern:
-  description: "Pattern reference page (Galaxy workflow construction patterns)"
+meta:
+  description: "Foundry-meta note — about the Foundry's own tooling or an external harness it evaluates"
+target/galaxy:
+  description: "Mold targets Galaxy"
 iwc/variant-calling:
   description: "Variant-calling workflows (DNA-seq, somatic, germline)"
 iwc/rna-seq:
@@ -95,8 +92,8 @@ iwc/rna-seq:
 
 `buildNoteSchema` takes the registry keys (`loadTags` from `@galaxy-foundry/note-schema`) and enforces tag membership in the zod schema it builds, so there is no static tag enum to maintain. Vocabulary changes touch one file; the schema code stays static. The separation is load-bearing.
 
-Tag families:
-- **Note-type tags** (`mold`, `pattern`, `source-pattern`, `cli-tool`, `cli-command`, `pipeline`, `research/*`, `schema`, `prompt`) — every note carries exactly one. Coherence-checked.
+Tag families (facets only — note-kind is `type`, never a tag):
+- **`meta` (flat flag)** — Foundry-meta notes: the Foundry's own tooling / casting system, or an external harness/tool it evaluates. The one non-hierarchical tag.
 - **Prompt tags** (`prompt/*`) — classify reusable upstream or Foundry-authored prompt families, e.g. `prompt/galaxy-internal` for prompts sourced from Galaxy's internal agent prompt library.
 - **`iwc/*` (IWC domain coverage)** — not used as an aggregation surface. Pattern work relies on corpus citations in bodies.
 - **`cli/*` (CLI affiliation)** — every `cli-tool` and `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and action-Mold reference surfaces.
@@ -104,7 +101,7 @@ Tag families:
 
 **Subject-area tags beyond `iwc/*` are demand-driven.** A general Galaxy code/feature taxonomy (collections, tools, conditionals, ...) is not committed up front. Tag families bloom as patterns surface real cross-cutting needs.
 
-Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (not error) when a note's `(type, subtype)` doesn't carry its expected note-type tag. Hierarchy-aware: `research/component` satisfies `research`.
+Every note still carries at least one tag (`tags` is `minItems: 1`), but that tag is always a facet — there is no note-kind tag and no type↔tag coherence check.
 
 ## 5. Frontmatter schema
 
@@ -181,20 +178,19 @@ Layered validation (`validateData` orchestrates):
 2. **`validateSchema`** — Ajv compiled against the schema with tag enum injected at load time.
 3. **`validateDates`** — second pass on `created` / `revised` via strict ISO parse.
 4. **`validateWikiLinks`** — regex-checks the inner text of `[[...]]` for whitespace-only payloads.
-5. **`validateTagCoherence`** — *warning* when `(type, subtype)` doesn't carry its expected tag.
-6. **`validateBidirectionalRelatedNotes`** (cross-file) — builds slug→file map; warns on asymmetric `related_notes` links.
-7. **`validateMoldRefs`** — every Mold's typed references resolve, per kind:
+5. **`validateBidirectionalRelatedNotes`** (cross-file) — builds slug→file map; warns on asymmetric `related_notes` links.
+6. **`validateMoldRefs`** — every Mold's typed references resolve, per kind:
    - `related_patterns` and `related_molds` resolve to notes of the expected type.
    - `references[].kind` dispatches to note-type checks for `pattern`, `cli-command`, `research`, and `schema`; schema refs must target `type: schema` notes with `package` and `package_export`.
    - `example` refs are repo paths under `content/`.
    Failures error. The per-kind dispatch here is the static-validation analog of casting's per-kind dispatch.
-8. **`validateSourcePatternRefs`** — every `source-pattern` note's `implemented_by_patterns` links resolve to `type: pattern` notes.
-9. **`validatePipelinePhases`** — every `pipeline` note's `phases` items resolve:
+7. **`validateSourcePatternRefs`** — every `source-pattern` note's `implemented_by_patterns` links resolve to `type: pattern` notes.
+8. **`validatePipelinePhases`** — every `pipeline` note's `phases` items resolve:
    - `mold`-shaped phases — wiki link resolves to a `type: mold` note.
    - `branch`-shaped phases — `branch` value is a known routing pattern; embedded wiki links (in `branches`, `chain`, etc.) resolve to `type: mold` notes.
    - Other phase kinds (e.g., `gate`) — validated per the kind's own shape when introduced.
    Failures error. Pipeline membership is not required of a Mold — standalone and indirectly-invoked Molds are first-class, so no coverage warning is emitted.
-10. **Artifact graph and layout checks** — producer/consumer artifact IDs, producer-owned `output_artifacts[].schema` links, schema vendoring metadata, schema `validator_bin` package bins, Mold source layout, CLI command docs, pattern evidence, body wiki links, and Mold stub bodies.
+9. **Artifact graph and layout checks** — producer/consumer artifact IDs, producer-owned `output_artifacts[].schema` links, schema vendoring metadata, schema `validator_bin` package bins, Mold source layout, CLI command docs, pattern evidence, body wiki links, and Mold stub bodies.
 
 `findMdFiles` skip rules:
 
@@ -236,17 +232,17 @@ All generated files live under `content/` and are committed to git; CI runs `--c
 
 **`Dashboard.md`** — Obsidian Dataview tables, one per section. **`site/src/pages/index.astro`** — same sections rendered as HTML tables.
 
-`dashboard_sections.json` is the single source of truth:
+`dashboard_sections.json` is the single source of truth (each section keys on a note `type`):
 
 ```json
 [
-  { "label": "Pipelines", "tag": "pipeline" },
-  { "label": "Molds", "tag": "mold" },
-  { "label": "Patterns", "tag": "pattern" },
-  { "label": "CLI Commands", "tag": "cli-command" },
-  { "label": "Component Research", "tag": "research/component" },
-  { "label": "Design Problems", "tag": "research/design-problem" },
-  { "label": "Design Specs", "tag": "research/design-spec" }
+  { "label": "Pipelines", "type": "pipeline" },
+  { "label": "Molds", "type": "mold" },
+  { "label": "Patterns", "type": "pattern" },
+  { "label": "Source Patterns", "type": "source-pattern" },
+  { "label": "CLI Commands", "type": "cli-command" },
+  { "label": "Schemas", "type": "schema" },
+  { "label": "Research", "type": "research" }
 ]
 ```
 
@@ -254,7 +250,7 @@ Pipelines lead the dashboard because they are the **primary task surface** of th
 
 `foundry-build generate-dashboard` emits Dataview blocks; the Astro page imports the same JSON. Both filter `status !== 'archived'`, sort `revised DESC`.
 
-**`Index.md`** — flat prose catalog grouped by `type`/`subtype`, alphabetized within each group:
+**`Index.md`** — flat prose catalog grouped by `type`, alphabetized within each group:
 
 ```
 - [[slug]] — {summary} *(stale)*
@@ -288,7 +284,7 @@ Foundry slash commands:
 - **`/draft-pattern`** — scaffold a pattern page; convention (not enforced) that the page cite at least one IWC workflow URL in `## Exemplars` (corpus-first principle).
 - **`/cast`** — wraps `foundry-build cast`; classify Mold → resolve refs → call casting LLM → write `casts/<target>/<name>/` → record `_provenance.json` → append to `log.md`.
 
-There is no IWC ingestion command. IWC is referenced by URL in pattern bodies (see `CORPUS_INGESTION.md`); no ingest-iwc script exists. Background research lands as hand-authored `research/component` notes.
+There is no IWC ingestion command. IWC is referenced by URL in pattern bodies (see `CORPUS_INGESTION.md`); no ingest-iwc script exists. Background research lands as hand-authored `research` notes.
 
 The keystone agent shape — *classify → fetch → dedup → draft → cross-ref → write → validate → log → regenerate* — is realized in `/cast`.
 
@@ -348,7 +344,7 @@ Routes:
 - `molds/index.astro`, `patterns/index.astro`, `source-patterns/nextflow/index.astro` — type and source-pattern browse pages.
 - `artifacts/index.astro`, `artifacts/[id].astro`, `usage/index.astro`, `usage/claude/[skill].astro` — cast artifact and usage surfaces. The `/usage/` Mold-cast grid excludes `pipeline-*` harness casts (`isHarnessSlug` in `lib/casts.ts`); harnesses render as a dedicated "Run a pipeline" section (`RunPipelines.astro`) above the cast grid, sourced from each pipeline's `_assembly.json`.
 - `design/index.astro`, `design/[slug].astro`, `story/index.astro`, `external.astro`, `log.astro`, `glossary.astro` — supporting public pages.
-- `tags/index.astro` — bucketed tag browser (note-type / `iwc/*` / other). New subject-area buckets get added as tag families bloom.
+- `tags/index.astro` — bucketed facet browser (source / target / topic / tool·cli / other). New subject-area buckets get added as tag families bloom. Per-type browse lives on the `molds`/`patterns`/`pipelines` index pages and the Dashboard/Index catalogs.
 - `tags/[...tag].astro` — per-tag filter.
 - `raw/[...slug].md.ts` — raw text endpoints (`Content-Type: text/plain`). Trivially makes the foundry agent-consumable.
 
@@ -390,7 +386,7 @@ Stack:
 ## 13. Cross-cutting concerns
 
 **Validation.** Two layers:
-- *Static* — `foundry-build validate` checks frontmatter against schema, wiki link integrity, tag coherence, bidirectional `related_notes`, source-pattern links, pipeline phases, artifact contracts, schema vendoring, CLI docs, pattern evidence, body wiki links, and Mold source layout.
+- *Static* — `foundry-build validate` checks frontmatter against schema, wiki link integrity, bidirectional `related_notes`, source-pattern links, pipeline phases, artifact contracts, schema vendoring, CLI docs, pattern evidence, body wiki links, and Mold source layout.
 - *Casting-time* — `foundry-build cast` refuses to cast a Mold that fails static validation, and validates resolved refs conform to their schemas.
 
 **Versioning.** No semver on Molds, no semver on casts. Identity = name + content hash. Re-casting is the migration path. See `COMPILATION_PIPELINE.md`.

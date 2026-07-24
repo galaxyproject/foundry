@@ -17,9 +17,7 @@ const TYPE_LABELS: Record<string, string> = {
   "source-pattern": "Source Patterns",
   "cli-command": "CLI Commands",
   schema: "Schemas",
-  "research/component": "Component Research",
-  "research/design-problem": "Design Problems",
-  "research/design-spec": "Design Specs",
+  research: "Research",
 };
 
 export function runGenerateIndexCommand(argv = process.argv.slice(2)): void {
@@ -80,8 +78,7 @@ function parseGenerateIndexArgs(argv: string[]): GenerateIndexArgs {
 function groupByType(notes: ContentNote[]): Map<string, ContentNote[]> {
   const grouped = new Map<string, ContentNote[]>();
   for (const note of notes) {
-    const key =
-      note.type === "research" && note.subtype ? `${note.type}/${note.subtype}` : note.type;
+    const key = note.type;
     const bucket = grouped.get(key) ?? [];
     bucket.push(note);
     grouped.set(key, bucket);

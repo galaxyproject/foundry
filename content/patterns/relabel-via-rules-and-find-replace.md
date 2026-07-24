@@ -8,7 +8,9 @@ aliases:
   - "structured relabel via Apply Rules"
   - "influenza collection relabel fan-out"
 tags:
-  - pattern
+  - target/galaxy
+  - topic/galaxy-transform
+  - topic/collection-transform
 status: draft
 created: 2026-05-02
 revised: 2026-05-03

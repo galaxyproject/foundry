@@ -5,7 +5,6 @@ axis: source-specific
 source: galaxy
 target: galaxy
 tags:
-  - mold
   - source/galaxy
   - target/galaxy
 status: reviewed

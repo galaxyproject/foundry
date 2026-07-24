@@ -8,7 +8,6 @@ aliases:
   - "extend intervals"
   - "build windows around features"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/interval-transform

@@ -8,7 +8,6 @@ aliases:
   - "collection axis remap lifecycle"
   - "fan-out axis correction before map-over"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/collection-transform

@@ -8,7 +8,6 @@ aliases:
   - "collection transformation patterns"
   - "IWC collection pattern map"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/collection-transform

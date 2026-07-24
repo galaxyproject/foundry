@@ -1,8 +1,7 @@
 ---
 type: research
-subtype: component
 tags:
-  - research/component
+  - source/nextflow
 component: "nf-core/tools (Python package + ecosystem)"
 status: draft
 created: 2026-05-01

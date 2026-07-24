@@ -8,7 +8,6 @@ aliases:
   - "enum-to-tool-dialect mapping"
   - "workflow enum normalization"
 tags:
-  - pattern
   - target/galaxy
 status: draft
 created: 2026-05-02

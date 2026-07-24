@@ -4,7 +4,6 @@ name: convert-nfcore-module-to-galaxy-tool
 axis: target-specific
 target: galaxy
 tags:
-  - mold
   - target/galaxy
   - source/nextflow
 status: draft

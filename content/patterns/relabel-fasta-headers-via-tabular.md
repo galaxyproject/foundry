@@ -8,7 +8,6 @@ aliases:
   - "fasta2tab find-replace tab2fasta"
   - "inject sample id into FASTA header"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/sequence-transform

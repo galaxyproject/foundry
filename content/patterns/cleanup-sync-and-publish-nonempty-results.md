@@ -8,7 +8,6 @@ aliases:
   - "mapped output cleanup and sibling sync"
   - "non-empty mapped result publishing"
 tags:
-  - pattern
   - target/galaxy
   - topic/galaxy-transform
   - topic/collection-transform

@@ -4,7 +4,6 @@ name: validate-galaxy-workflow
 axis: target-specific
 target: galaxy
 tags:
-  - mold
   - target/galaxy
 status: reviewed
 created: 2026-05-02

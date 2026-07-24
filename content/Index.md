@@ -175,8 +175,9 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nf-core-subworkflow-meta]] — JSON Schema (Draft-07) validating nf-core subworkflow meta.yml — channel IO, components dependencies, authors. Upstream from nf-core/modules.
 - [[planemo-test-report]] — JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo.
 
-## Component Research
+## Research
 
+- [[gxy-sketches-alignment]] — Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not.
 - [[component-archon]] — Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap.
 - [[component-claude-dynamic-workflows]] — Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate.
 - [[component-nextflow-channel-operators]] — Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation.
@@ -189,18 +190,22 @@ Generated from content frontmatter. Do not edit by hand.
 - [[component-tool-shed-search]] — Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload
 - [[cwl-pickvalue-to-galaxy]] — CWL `pickValue` (first_non_null / the_only_non_null / all_non_null) → Galaxy's native `pick_value` workflow step added by galaxyproject/galaxy#22222.
 - [[cwl-v1.2-schemas]] — Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization.
+- [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
 - [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
 - [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.
 - [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.
 - [[galaxy-collection-tools]] — Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics.
+- [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
 - [[galaxy-datatypes-conf]] — Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications.
 - [[galaxy-native-workflow-schema]] — Vendored structural JSON Schema for Galaxy native workflow (.ga) format: vocabulary for the JSON shape Galaxy emits and consumes.
 - [[galaxy-paired-or-unpaired-collections]] — Galaxy's `paired_or_unpaired` collection type: discriminated-union shape for paired-or-single reads, no workflow-level mode switch needed. Galaxy PR #19377.
 - [[galaxy-sample-sheet-collections]] — Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist.
 - [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
+- [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
 - [[galaxy-xsd]] — Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax.
 - [[galaxy-workflow-comments]] — How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative.
+- [[galaxy-workflow-draft-format]] — gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step.
 - [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
 - [[galaxy-workflow-testability-design]] — Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible.
 - [[gxformat2-schema]] — Vendored structural JSON Schema for gxformat2 workflows: vocabulary for inputs, outputs, steps, and step subtypes.
@@ -226,26 +231,15 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-to-galaxy-reference-data-mapping]] — Galaxy-side translation of Nextflow reference-data classifications: idioms available, the v1 posture, datatype defaults, and the in-tool rebuild trade-off.
 - [[nextflow-workflow-io-semantics]] — Defines Nextflow workflow inputs and outputs from docs plus observed fixture pipeline structures.
 - [[nextflow-to-galaxy-channel-shape-mapping]] — Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes.
-- [[nf-schema-samplesheet-galaxy-gaps]] — nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary.
-- [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
-- [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
-
-## Design Problems
-
 - [[nfcore-channel-input-to-galaxy-collection]] — Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type="data"> or paired/list collection input.
 - [[nfcore-meta-map-to-galaxy-params]] — Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier.
 - [[nfcore-stub-block-to-galaxy-noop-test]] — nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml.
 - [[nfcore-task-ext-args-to-galaxy-additional-options]] — Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments.
 - [[nfcore-versions-emit-to-galaxy-version-command]] — Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel.
-
-## Design Specs
-
-- [[gxy-sketches-alignment]] — Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not.
-- [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
-- [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
-- [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
-- [[galaxy-workflow-draft-format]] — gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step.
+- [[nf-schema-samplesheet-galaxy-gaps]] — nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary.
 - [[open-requirements-ledger]] — Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously.
+- [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
+- [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 
 ## Cli Tool
 
