@@ -4,10 +4,29 @@
   "mold": {
     "name": "debug-cwl-workflow-output",
     "path": "content/molds/debug-cwl-workflow-output/index.md",
-    "revision": 2,
-    "content_hash": "dd86078aac141070bbd438dd5eaab775c880515996d2e336131d4b80522dbc83",
-    "commit": "e487fe785f468afdf25f2b6bd140c3a115a12021"
+    "revision": 3,
+    "content_hash": "368710e2c3c15d34ac9a9552cb498fa1619522e2924f0c3ee0c0a6111361c25f",
+    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
   },
-  "cast_at": "2026-07-24T13:51:12.321Z",
-  "refs": []
+  "cast_at": "2026-07-24T14:25:52.402Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "cwl-workflow-debug-report",
+        "kind": "markdown",
+        "default_filename": "cwl-workflow-debug-report.md",
+        "description": "CWL failure-surface classification with captured run/job/output evidence and a recommended next step or reference-gap follow-up."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "workflow-test-result",
+        "description": "Structured run handoff from [[run-workflow-test]]: test result, run/job/artifact context, and the observed CWL failure modality.",
+        "producers": [
+          "run-workflow-test"
+        ]
+      }
+    ]
+  }
 }
