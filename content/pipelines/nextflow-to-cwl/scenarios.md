@@ -31,22 +31,19 @@ fixtures with `make fixtures-cwl`.
   `when`-gated steps or an explicit stated scope decision; the data-flow brief
   records the `scatter`/`when` choices the template then renders.
 
-## Not yet walkable — what a first walk needs
+## Tier maturity — what would gate the walk
 
-The extraction/design chain ([[summarize-nextflow]] →
-[[nextflow-summary-to-cwl-interface]] → [[nextflow-summary-to-cwl-data-flow]] →
-[[summary-to-cwl-template]]) carries real bodies and references. The per-tool
-authoring and validation loop is seeded stubs, so these cases define the target,
-not a passing suite. To make even the demo case walkable:
+Every phase carries a body, so the journey runs end to end today. What it lacks is
+per-step gating and depth on the CWL-authoring tier:
 
-1. Real bodies + `eval.md` oracles for [[summarize-cwl-tool]] and
-   [[implement-cwl-tool-step]].
-2. A failure-classification rubric for [[validate-cwl]] and a real body for
-   [[implement-cwl-workflow-test]].
-3. A CWL tool reuse-vs-author decision — no [[discover-shed-tool]] analog exists;
-   `bio-cwl-tools` is a pinned fixture nothing looks up.
-4. A CWL run path — [[run-workflow-test]] is Planemo-oriented; cwltool execution
-   is unowned.
+1. [[summarize-cwl-tool]], [[implement-cwl-tool-step]], [[validate-cwl]], and
+   [[implement-cwl-workflow-test]] carry one-line bodies but no `eval.md` oracles
+   and no packaged `references:` — so the walk runs but isn't gated per step.
+2. No CWL tool reuse-vs-author decision — there's no [[discover-shed-tool]]
+   analog; `bio-cwl-tools` is a pinned fixture nothing looks up.
+3. The run path is unproven for CWL — [[run-workflow-test]] executes via Planemo;
+   a cwltool execution path isn't established.
 
-Until (1)–(2) land, the tractable move is a partial walk of the demo case through
-the real extraction chain, stopping at the first placeholder CommandLineTool.
+The near-term move is a first walk of the demo case to see where the thin
+authoring bodies produce placeholder or unprovenanced steps, then harden those
+molds against what it surfaces.
