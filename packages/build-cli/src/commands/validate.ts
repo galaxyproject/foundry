@@ -283,10 +283,6 @@ function validateTypedReference(
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return;
   const ref = raw as Record<string, unknown>;
   if (typeof ref.kind !== "string" || typeof ref.ref !== "string") return;
-  // The two intra-reference rules (hypothesis => verification, on-demand => trigger) are
-  // NOT checked here: they are cross-field rules over one reference object, which the note
-  // schema already raises path-anchored issues for. Only the CROSS-FILE checks below —
-  // which need the slug map and cannot live in a schema — belong in this pass.
 
   const expectedTypes: Record<string, string> = {
     pattern: "pattern",
