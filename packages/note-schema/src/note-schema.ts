@@ -92,8 +92,23 @@ export function buildNoteSchema({ tags, contract, licensePolicy }: BuildNoteSche
     })
     .strict()
     .superRefine((ref, ctx) => {
+      // Both cross-field rules the reference contract's vocabularies imply. `on-demand`
+      // without a `trigger` names no condition under which the cast should read the note,
+      // so the reference is unreachable at runtime; it was a /review-mold warning here and
+      // a schema rule in the sibling Foundry, and the whole corpus already satisfies it.
+      if (ref.load === "on-demand" && !ref.trigger) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["trigger"],
+          message: `on-demand ref "${ref.ref}" requires a trigger`,
+        });
+      }
       if (ref.evidence === "hypothesis" && !ref.verification) {
-        ctx.addIssue({ code: "custom", message: "hypothesis references require `verification`" });
+        ctx.addIssue({
+          code: "custom",
+          path: ["verification"],
+          message: `hypothesis-evidence ref "${ref.ref}" requires a verification`,
+        });
       }
     });
 

@@ -647,6 +647,7 @@ describe("validateDirectory (cross-file)", () => {
             load: "on-demand",
             mode: "verbatim",
             evidence: "corpus-observed",
+            trigger: "When the component is in scope.",
           },
           {
             kind: "pattern",
@@ -985,7 +986,7 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
-  it("warns when on-demand references omit triggers", () => {
+  it("rejects on-demand references that omit triggers", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
@@ -1012,8 +1013,10 @@ describe("validateDirectory (cross-file)", () => {
       directory: dir,
       tagsPath: TAGS_PATH,
     });
-    expect(r.errors).toBe(0);
-    expect(r.warnings).toBeGreaterThanOrEqual(1);
+    // An error, not a warning: an on-demand reference that names no trigger states no
+    // condition under which the cast should read it, so it is unreachable at runtime.
+    // Enforced by the note schema, which is why the validator no longer re-encodes it.
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
   it("flags Mold source layout drift", () => {

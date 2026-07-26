@@ -91,6 +91,48 @@ describe("buildNoteSchema", () => {
     expect(r.success).toBe(false);
   });
 
+  const moldWithRef = (ref: Record<string, unknown>) =>
+    base({
+      type: "mold",
+      tags: ["target/galaxy"],
+      name: "x",
+      axis: "generic",
+      references: [
+        {
+          kind: "pattern",
+          ref: "[[some-pattern]]",
+          used_at: "cast-time",
+          load: "upfront",
+          mode: "condense",
+          evidence: "corpus-observed",
+          ...ref,
+        },
+      ],
+    });
+
+  it("requires a trigger on an on-demand reference", () => {
+    const r = schema.safeParse(moldWithRef({ load: "on-demand" }));
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues.some((i) => /requires a trigger/.test(i.message))).toBe(true);
+    }
+  });
+
+  it("accepts an on-demand reference that names its trigger", () => {
+    const r = schema.safeParse(
+      moldWithRef({ load: "on-demand", trigger: "When emitting the tool XML." }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("requires a verification on a hypothesis reference", () => {
+    const r = schema.safeParse(moldWithRef({ evidence: "hypothesis" }));
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues.some((i) => /requires a verification/.test(i.message))).toBe(true);
+    }
+  });
+
   it("requires source on a source-specific mold", () => {
     const r = schema.safeParse(
       base({
