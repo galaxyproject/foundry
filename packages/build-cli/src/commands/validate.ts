@@ -16,7 +16,7 @@ import {
 import { readMarkdown } from "../lib/frontmatter.js";
 import { loadLicensePolicy, resolveLicenseRow } from "../lib/license-policy.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
-import { loadTags } from "../lib/schema.js";
+import { loadTagRegistry } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
 import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
@@ -132,6 +132,11 @@ interface CrossFileFinding {
   message: string;
   severity: "error" | "warning";
 }
+
+// Registry drift — "is a registered tag carried by nothing?" — is deliberately NOT checked
+// here. validateDirectory runs against arbitrary directories, including small fixtures, where
+// almost every registered tag is legitimately unused; the question only means anything against
+// the whole corpus. It lives in tests/registry-drift.test.ts instead.
 
 function buildSlugMap(files: FileMeta[]): Map<string, string> {
   const m = new Map<string, string>();
@@ -1380,7 +1385,7 @@ export function validateDirectory(opts: ValidateOptions): {
   const repoRoot =
     path.basename(opts.directory) === "content" ? path.dirname(opts.directory) : opts.directory;
   const schema = buildNoteSchema({
-    tags: loadTags(opts.tagsPath),
+    tags: loadTagRegistry(opts.tagsPath),
     contract: loadReferenceContract(),
     licensePolicy: loadLicensePolicy(repoRoot),
   });

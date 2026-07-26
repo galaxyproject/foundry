@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { tags as registry } from '../../lib/registries';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getCollection('content');
@@ -15,32 +16,34 @@ for (const note of allNotes) {
 
 const sorted = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 
-const sourceTags = sorted.filter(([t]) => t.startsWith('source/'));
-const targetTags = sorted.filter(([t]) => t.startsWith('target/'));
-const topicTags = sorted.filter(([t]) => t.startsWith('topic/'));
-const toolTags = sorted.filter(([t]) => t.startsWith('tool/') || t.startsWith('cli/'));
-const seen = new Set([...sourceTags, ...targetTags, ...topicTags, ...toolTags].map(([t]) => t));
-const otherTags = sorted.filter(([t]) => !seen.has(t));
-
-const groups = [
-  { label: 'Source', tags: sourceTags },
-  { label: 'Target', tags: targetTags },
-  { label: 'Topic', tags: topicTags },
-  { label: 'Tool / CLI', tags: toolTags },
-  { label: 'Other', tags: otherTags },
-];
+// Groups come from meta_tags.yml in its declared facet order, and each tag lands in the
+// facet that DECLARED it — not the one its text happens to start with. That is why there
+// is no "Other" bucket to fall into: every tag in use is registered, so every tag has a
+// facet. The per-tag glosses the registry has always carried are rendered here too.
+const groups = registry.facets().map(f => ({
+  ...f,
+  tags: sorted.filter(([t]) => registry.facetOf(t) === f.key),
+}));
 ---
 <Base title="Tags">
   <h1 class="mb-4 text-2xl font-bold">Tags</h1>
+  <p class="mb-6 text-(--color-text-secondary)">
+    Cross-cutting facets only — a note's kind is its <code>type</code>, never a tag. Every tag
+    below is registered and glossed in <code>meta_tags.yml</code>.
+  </p>
 
   {groups.map(g => g.tags.length > 0 && (
     <>
-      <h2 class="mt-8 mb-3 text-xl font-semibold border-b-2 border-(--color-accent)/20 pb-2">{g.label}</h2>
-      <ul class="list-none my-2 mb-6 p-0 flex flex-wrap gap-2">
+      <h2 class="mt-8 mb-1 text-xl font-semibold border-b-2 border-(--color-accent)/20 pb-2">{g.label}</h2>
+      <p class="mb-3 text-sm text-(--color-text-secondary)">{g.description}</p>
+      <ul class="list-none my-2 mb-6 p-0 grid gap-3 sm:grid-cols-2">
         {g.tags.map(([tag, count]) => (
-          <li class="flex items-center gap-1">
-            <a href={`${base}/tags/${tag}/`} class="no-underline"><span class="tag">{tag}</span></a>
-            <span class="text-xs text-(--color-text-secondary)">({count})</span>
+          <li>
+            <a href={`${base}/tags/${tag}/`} class="no-underline flex items-baseline gap-2">
+              <span class="tag">{tag}</span>
+              <span class="text-xs text-(--color-text-secondary)">({count})</span>
+            </a>
+            <div class="mt-0.5 text-sm text-(--color-text-secondary)">{registry.tagDescription(tag)}</div>
           </li>
         ))}
       </ul>

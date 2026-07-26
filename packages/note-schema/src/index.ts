@@ -25,4 +25,12 @@ export {
   type RedistributionPolicy,
 } from "./license-policy.js";
 
-export { loadTags } from "./tags.js";
+export {
+  loadTagRegistry,
+  tagRegistry,
+  buildTagIndex,
+  type TagRegistry,
+  type TagRegistryFile,
+  type Facet,
+  type FacetInfo,
+} from "./tags.js";

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { tags as registry } from '../../lib/registries';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -15,6 +16,11 @@ export async function getStaticPaths() {
 
 const { tag } = Astro.props;
 const allNotes = await getCollection('content');
+
+// Declaring facet + registry gloss, resolved from meta_tags.yml rather than parsed off
+// the tag text — so this stays correct for a bare tag like `meta`.
+const facetLabel = registry.facetLabel(registry.facetOf(tag));
+const gloss = registry.tagDescription(tag);
 
 const notes = allNotes
   .filter(n => n.data.tags.includes(tag) && n.data.status !== 'archived')
@@ -44,7 +50,9 @@ function noteTitle(n: typeof allNotes[number]): string {
 }
 ---
 <Base title={`Tag: ${tag}`}>
-  <h1 class="mb-4 text-2xl font-bold">Tag: <span class="tag">{tag}</span></h1>
+  <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-(--color-text-secondary)">{facetLabel}</div>
+  <h1 class="mb-2 text-2xl font-bold">Tag: <span class="tag">{tag}</span></h1>
+  {gloss && <p class="mb-2 text-(--color-text-secondary)">{gloss}</p>}
   <p class="mb-4 text-(--color-text-secondary)">{notes.length} note{notes.length !== 1 ? 's' : ''}</p>
 
   {coTags.length > 0 && (

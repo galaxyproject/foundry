@@ -6,7 +6,7 @@ import {
   buildNoteSchema,
   loadLicensePolicy,
   loadReferenceContract,
-  loadTags,
+  loadTagRegistry,
 } from "@galaxy-foundry/note-schema";
 import { validateData, validateDirectory } from "../packages/build-cli/src/commands/validate.js";
 
@@ -16,7 +16,7 @@ const TAGS_PATH = path.join(repoRoot, "meta_tags.yml");
 
 function loadRealSchema() {
   return buildNoteSchema({
-    tags: loadTags(TAGS_PATH),
+    tags: loadTagRegistry(TAGS_PATH),
     contract: loadReferenceContract(path.join(repoRoot, "reference_contract.yml")),
     licensePolicy: loadLicensePolicy(repoRoot),
   });
