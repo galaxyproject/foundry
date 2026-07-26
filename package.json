@@ -15,6 +15,8 @@
     "check:dashboard": "tsx packages/build-cli/src/bin/foundry-build.ts generate-dashboard --root . --check",
     "index": "tsx packages/build-cli/src/bin/foundry-build.ts generate-index --root .",
     "check:index": "tsx packages/build-cli/src/bin/foundry-build.ts generate-index --root . --check",
+    "kinds": "tsx scripts/generate-kind-manifest.ts",
+    "check:kinds": "tsx scripts/generate-kind-manifest.ts --check",
     "check:vendored": "tsx scripts/sync-vendored-upstreams.ts --check",
     "sync:vendored": "tsx scripts/sync-vendored-upstreams.ts --update",
     "cast": "tsx packages/build-cli/src/bin/foundry-build.ts cast --root .",

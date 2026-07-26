@@ -1,0 +1,962 @@
+{
+  "instance": "galaxy-workflow-foundry",
+  "version": 1,
+  "kinds": [
+    {
+      "kind": "mold",
+      "title": "Mold",
+      "origin": "substrate",
+      "summary": "One repeatable action, described as a typed reference manifest that casting compiles into a skill artifact.",
+      "doc": "# Mold\n\nA **Mold** describes *one repeatable action* — not a document, not a tutorial, but a unit of\nwork worth casting into a skill artifact. Its body says how to do the action; its frontmatter\ndeclares the *typed reference manifest* naming every note the cast must carry, and how.\n\nMolds are the substrate's centre of gravity. Everything else in the corpus exists so a Mold can\ncite it.\n\n## Why each required field is required\n\n- **`name`** — the stable slug the pipeline and the cast bundle address the Mold by. Distinct\n  from `title`, which is prose for a reader.\n- **`axis`** — which dimension the Mold is specialized along, and therefore how a caller\n  *selects* it. `source-specific` / `target-specific` / `tool-specific` each require the\n  matching field (`source` / `target` / `tool`): an axis that names no subject is a Mold\n  nothing can be selected by, so the schema rejects it rather than letting it sit unfindable.\n  `generic` requires none — it applies everywhere.\n- The **base envelope** (`tags`, `status`, `created`, `revised`, `revision`, `ai_generated`,\n  `summary`) — as on every kind. `summary` is bounded 20–160 characters because it is printed\n  in every browse row; unbounded, half the catalog renders as a bare name and the other half\n  as a paragraph.\n\n## The optional fields that carry the weight\n\n- **`references`** — the manifest. Each entry draws `kind` / `used_at` / `load` / `mode` /\n  `evidence` from `reference_contract.yml`. Two rules the schema enforces: `load: on-demand`\n  requires a `trigger` (a reference the cast is never told to read is unreachable), and\n  `evidence: hypothesis` requires a `verification` (an unmarked guess is the failure mode the\n  field exists to prevent).\n- **`input_artifacts` / `output_artifacts`** — the Mold's declared IO, which is what lets\n  Molds be composed into a pipeline phase without reading their bodies. An output may name a\n  `schema` note, making the handoff machine-checkable.\n- **`loop_endstate`** — for a Mold that runs until a condition holds, the condition. Prose,\n  but *required* prose once the Mold loops: \"until it passes\" is not an end state.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "axis",
+          "required": true,
+          "type": "source-specific | target-specific | tool-specific | generic"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "name",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"mold\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "input_artifacts",
+          "required": false,
+          "type": "object[]"
+        },
+        {
+          "name": "loop_endstate",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "output_artifacts",
+          "required": false,
+          "type": "object[]"
+        },
+        {
+          "name": "references",
+          "required": false,
+          "type": "object[]"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "source",
+          "required": false,
+          "type": "paper | nextflow | cwl | snakemake | interview | freeform | galaxy"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "target",
+          "required": false,
+          "type": "galaxy | cwl | web | generic"
+        },
+        {
+          "name": "title",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "tool",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "kind": "pattern",
+      "title": "Pattern",
+      "origin": "substrate",
+      "summary": "One reusable piece of domain knowledge a Mold can reference, graded by how strongly the corpus supports it.",
+      "doc": "# Pattern\n\nA **Pattern** is one reusable piece of domain knowledge, authored so that a Mold can *cite* it\ninstead of restating it. Patterns are the corpus a cast is grounded in: if a Mold's body starts\nexplaining how something generally works, that explanation wants to be a Pattern.\n\n## Why each required field is required\n\n- **`title`** — patterns are read by humans browsing the corpus, and a slug is not a title.\n- **`pattern_kind`** — `operation` (one transformation), `recipe` (an assembled sequence), or\n  `moc` (a map of content: a hub note whose job is to point at others). The three are browsed\n  and cast differently, so the distinction is declared rather than guessed from the body.\n- **`evidence`** — how strongly the corpus supports the claim: `corpus-observed`,\n  `structurally-verified`, `corpus-and-verified`, or `hypothesis`. **`hypothesis` is legal**,\n  and that is the point: a speculative pattern that is *marked* speculative can be safely\n  loaded and later verified, while an unmarked one silently anchors every cast that reads it.\n  This field is what keeps the corpus honest as it grows faster than it is checked.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`iwc_exemplars`** — citations into the IWC workflow corpus that exhibit the pattern, each\n  with a `why` and a `confidence`. This is what makes `corpus-observed` checkable rather than\n  asserted: the exemplar names the workflow, and a reviewer can go look.\n- **`parent_pattern`** — a `[[wiki-link]]` to the more general pattern this specializes.\n- **`verification_paths`** — how someone would confirm the claim.\n- **`companions`** — sibling files the cast copies verbatim beside the note.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "evidence",
+          "required": true,
+          "type": "corpus-observed | structurally-verified | corpus-and-verified | hypothesis"
+        },
+        {
+          "name": "pattern_kind",
+          "required": true,
+          "type": "operation | recipe | moc"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "title",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"pattern\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "companions",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "iwc_exemplars",
+          "required": false,
+          "type": "object[]"
+        },
+        {
+          "name": "parent_pattern",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "verification_paths",
+          "required": false,
+          "type": "string[]"
+        }
+      ]
+    },
+    {
+      "kind": "source-pattern",
+      "title": "Source Pattern",
+      "origin": "instance",
+      "summary": "A shape recurring in one SOURCE ecosystem, held separate from the target-side patterns that implement it.",
+      "doc": "# Source Pattern\n\nA **Source Pattern** is a shape that recurs in one *source* ecosystem — a Nextflow channel\nidiom, a CWL scatter convention — held deliberately separate from the target-side `pattern`\nnotes that say what to *do* about it.\n\nThe split exists because the two sides have different lifetimes. A source ecosystem changes on\nits own schedule; when it does, the source-pattern notes go stale together, and the target-side\npatterns they point at usually do not. Merging them into one kind would make every upstream\nchange look like a change to Galaxy knowledge.\n\nThis kind is **instance-specific**: it only makes sense for a Foundry whose work is *conversion*\nbetween two named ecosystems.\n\n## Why each required field is required\n\n- **`source`** and **`target`** — the pair the pattern bridges. Both required: a source shape\n  with no stated target is an observation about someone else's ecosystem, not knowledge this\n  Foundry can act on.\n- **`source_pattern_kind`** — `moc`, `channel-shape`, `operator`, `lifecycle`, or\n  `review-trigger`. What sort of recurring thing it is, and therefore when it gets consulted.\n- **`implemented_by_patterns`** — at least one `[[wiki-link]]` to the target-side Pattern that\n  handles it. **`min(1)` is the load-bearing rule of this kind**: a source shape nothing\n  implements is a note that can never be acted on, and the link is what makes the source/target\n  split navigable in both directions instead of a one-way pile.\n- **`title`** and the **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`review_triggers`** — conditions under which a converted workflow should be looked at again\n  because this shape was involved.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "implemented_by_patterns",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "paper | nextflow | cwl | snakemake | interview | freeform | galaxy"
+        },
+        {
+          "name": "source_pattern_kind",
+          "required": true,
+          "type": "moc | channel-shape | operator | lifecycle | review-trigger"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "target",
+          "required": true,
+          "type": "galaxy | cwl | web | generic"
+        },
+        {
+          "name": "title",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"source-pattern\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "review_triggers",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        }
+      ]
+    },
+    {
+      "kind": "cli-tool",
+      "title": "CLI Tool",
+      "origin": "instance",
+      "summary": "One external command-line tool the casting pipeline may invoke — how to install it, how to run it, how to tell it is present.",
+      "doc": "# CLI Tool\n\nA **CLI Tool** note describes one external command-line program the casting pipeline may\ninvoke: where it comes from, how to run it, and how to tell whether it is present.\n\nIt pairs with `cli-command`: the tool note is the *installation and invocation* record, the\ncommand notes are the manual pages. One `cli-tool` typically has several `cli-command` siblings.\n\n## Why each required field is required\n\n- **`tool`** — the kebab slug the `cli-command` notes join on. This is the whole reason the two\n  kinds can stay separate.\n- **`origin`** (`npm` | `pypi`) and **`package`** — how to install it. A tool a cast is told to\n  run but not told how to obtain is a runtime failure waiting for the first clean machine.\n- **`invoke`** — the actual binary name, which is frequently *not* the package name.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`package_version`** — pin it when a cast depends on version-specific behaviour.\n- **`invoke_fallback`** — a second way to run it (`npx …`, `python -m …`) when the binary is not\n  on `PATH`.\n- **`availability_check`** — the command that answers \"is it here?\", so the cast can check\n  rather than fail mid-run.\n- **`docs_url`** — upstream documentation.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "invoke",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "origin",
+          "required": true,
+          "type": "npm | pypi"
+        },
+        {
+          "name": "package",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "tool",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"cli-tool\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "availability_check",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "docs_url",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "invoke_fallback",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "package_version",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "title",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "kind": "cli-command",
+      "title": "CLI Command",
+      "origin": "instance",
+      "summary": "One subcommand of a CLI tool, authored as a manual page a cast can read instead of guessing at flags.",
+      "doc": "# CLI Command\n\nA **CLI Command** note is a manual page for one subcommand, authored so a cast reads the real\nflags instead of inventing plausible ones.\n\nThis is the kind that most directly buys correctness: hallucinated command-line flags are\nsyntactically perfect and completely wrong, and no amount of prompt care fixes that. Writing the\npage down and referencing it does.\n\n## Why each required field is required\n\n- **`tool`** — the `cli-tool` slug this command belongs to. The join key.\n- **`command`** — the subcommand itself. Together with `tool` it identifies the page.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`package`** / **`upstream`** — where the command's implementation lives, for the reader who\n  needs to check the page against the source.\n\n## Body convention\n\nThe validator warns when the body omits a `## Gotchas` section. That is deliberate: the flags\nare recoverable from `--help`, but the failure modes are exactly what a cast cannot discover on\nits own, and they are the reason the note is worth its tokens.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "command",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "tool",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"cli-command\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "package",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "title",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "upstream",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "kind": "pipeline",
+      "title": "Pipeline",
+      "origin": "instance",
+      "summary": "An ordered end-to-end protocol composing Molds into phases — the optional composition layer, for domains whose work is a journey.",
+      "doc": "# Pipeline\n\nA **Pipeline** composes Molds into an ordered end-to-end protocol. It is the *composition\nlayer*, and it is optional: a Foundry whose actions stand alone needs no Pipelines at all.\n\nKeep it thin. The Pipeline names phases and their order; it does not restate what the Molds do.\nAnything a phase explains about the work itself belongs in the Mold.\n\nThis kind is **instance-specific**. Workflow construction is inherently sequential, so Pipelines\nearn their keep here; a domain whose Molds are a standalone toolkit should not adopt this kind\njust because the parent has it.\n\n## Why each required field is required\n\n- **`title`** — the protocol's name, as a reader navigating the map sees it.\n- **`phases`** (min 1) — the ordered steps. Each phase is one of two shapes:\n  - a **Mold phase** — `{ mold: \"[[slug]]\", loop?: true }`;\n  - a **branch phase** — `{ branch: \"<question>\", branches: [...] | chain: [...] }`, which must\n    carry `branches` or `chain`. A branch that names a decision but lists no alternatives is a\n    phase nothing can execute, so the schema rejects it.\n\n  A branch item may be a `[[wiki-link]]`, free text for a terminal outcome\n  (`\"user-supplied\"`), or `{ fallthrough: \"[[slug]]\" }` for the default arm.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`harness_notes`** — what the orchestrator running this pipeline needs to know that is not\n  in any single phase.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "phases",
+          "required": true,
+          "type": "object[]"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "title",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"pipeline\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "harness_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        }
+      ]
+    },
+    {
+      "kind": "research",
+      "title": "Research Note",
+      "origin": "instance",
+      "summary": "A captured finding about the domain or its tooling — the grounding a Mold cites rather than inventing.",
+      "doc": "# Research Note\n\nA **Research Note** captures a finding about the domain or its tooling — the grounding a Mold\ncites instead of inventing. It is the loosest kind on purpose: research arrives before you know\nwhat shape it wants, and forcing it into a stricter kind on arrival loses it.\n\nThe discipline is not in the frontmatter, it is in the grading: a research note is good enough\nonly if the target skill could be **rebuilt from the note alone** — no re-reading the source, no\nmodel memory. Hold the numbers, thresholds, exact procedure, and named decision criteria.\n\n## Why each required field is required\n\nOnly the **base envelope**. A research note is `type` plus the envelope; everything else is\noptional, because the kind's job is to accept a finding, not to interrogate it.\n\n`summary` still applies (20–160 characters), and it does the most work here: with no `title`\nrequired, the summary is what a browsing reader has to go on.\n\n## Optional fields\n\n- **`component`** — the subsystem the finding is about, when it is about one.\n- **`license`** / **`license_file`** — required *in practice* whenever the note redistributes\n  someone else's text. The id resolves against `license-policy.yml`; where the policy row says\n  the licence text travels with the content, `license_file` points at the vendored copy under\n  `LICENSES/`.\n- **`companions`** — sibling files the cast copies verbatim beside the note.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"research\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "companions",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "component",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "license",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "license_file",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "title",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "kind": "schema",
+      "title": "Schema Note",
+      "origin": "instance",
+      "summary": "A machine-checkable contract a cast can validate against, plus the validator that decides it.",
+      "doc": "# Schema Note\n\nA **Schema Note** documents a machine-checkable contract a cast can validate its output\nagainst, and names the validator that decides it. It is how a Mold's `output_artifacts` stop\nbeing a promise and start being a check.\n\n## Why each required field is required\n\n- **`name`** — the slug a Mold's `output_artifacts[].schema` wiki-link resolves to.\n- **`title`** — prose, for the reader.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`package`** / **`package_export`** — where the schema is importable from. The validator\n  requires both on any note a `references[].kind: schema` entry points at: a schema you cannot\n  import is a schema no cast can run.\n- **`validator_bin`** / **`validator_subcommand`** — the command that checks against it.\n- **`upstream`** — where the schema came from, if it is vendored.\n- **`license`** / **`license_file`** — see the rule below.\n\n## The cross-field rule this kind enforces\n\nA schema note whose `upstream` points **outside this repository** is redistributing someone\nelse's work, so it **must** declare a `license`. And where that licence's row in\n`license-policy.yml` says the text travels with the content, it must also declare a\n`license_file` pointing at the vendored copy under `LICENSES/`.\n\nAn `upstream` inside `github.com/galaxyproject/foundry/` is our own work and needs neither —\nwhich is why the rule keys off *where upstream points*, not on whether the field is present.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "name",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "title",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"schema\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "license",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "license_file",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "package",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "package_export",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "upstream",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "validator_bin",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "validator_subcommand",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "kind": "prompt",
+      "title": "Prompt",
+      "origin": "instance",
+      "summary": "A raw upstream prompt carried verbatim in a sibling file, with the note recording where it came from and under what license.",
+      "doc": "# Prompt\n\nA **Prompt** note carries a raw upstream prompt — someone else's, verbatim — in a sibling file,\nand records where it came from and under what licence.\n\nThe verbatim file is the whole point. A prompt paraphrased is a different prompt, so the text\nlives untouched in its own file and the note carries the provenance around it. Casting copies\nthe file across unchanged.\n\n## Why each required field is required\n\n- **`title`** — prose, for the reader.\n- **`prompt_file`** — the sibling-relative path to the raw text. Separate from the note body so\n  the prompt is never accidentally reflowed, summarized, or wiki-linked by an editor working on\n  the note.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`license`** / **`license_file`** — optional in the schema, but a prompt taken from an\n  external project is redistributed text: name the licence, and vendor the licence file under\n  `LICENSES/` where the policy row calls for it. The schema does not force this the way the\n  `schema` kind does, because a prompt authored here has no upstream to name.",
+      "fields": [
+        {
+          "name": "ai_generated",
+          "required": true,
+          "type": "boolean"
+        },
+        {
+          "name": "created",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "prompt_file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "revised",
+          "required": true,
+          "type": "date"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "draft | reviewed | revised | stale | archived"
+        },
+        {
+          "name": "summary",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "type": "string[]"
+        },
+        {
+          "name": "title",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "required": true,
+          "type": "\"prompt\""
+        },
+        {
+          "name": "aliases",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "license",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "license_file",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "related_molds",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_notes",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "related_patterns",
+          "required": false,
+          "type": "string[]"
+        },
+        {
+          "name": "sources",
+          "required": false,
+          "type": "string[]"
+        }
+      ]
+    }
+  ]
+}

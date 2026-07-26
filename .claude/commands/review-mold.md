@@ -16,8 +16,8 @@ Before reading anything, run `npm run validate` and capture its output. Do **not
 - Frontmatter schema + tag registration.
 - Wiki-link resolution and target-type matching for `patterns`, `cli_commands`, `related_patterns`, `related_molds`.
 - `references[].kind` → target `type` matching (`pattern`, `cli-command`, `prompt`, `research`, `schema`, `example`).
-- `evidence: hypothesis` requires `verification`.
-- `load: on-demand` requires `trigger` (warning).
+- `evidence: hypothesis` requires `verification` (schema error).
+- `load: on-demand` requires `trigger` (schema error).
 - Schema refs require `package` + `package_export` on the target note.
 - Bidirectional `related_notes` backlinks.
 

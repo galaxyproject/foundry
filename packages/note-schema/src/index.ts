@@ -4,6 +4,25 @@
 export { buildNoteSchema, type BuildNoteSchemaOptions, type NoteSchema } from "./note-schema.js";
 
 export {
+  KINDS,
+  KINDS_BY_NAME,
+  buildKindContext,
+  type KindContext,
+  type KindDefinition,
+} from "./types/index.js";
+
+export {
+  buildKindManifest,
+  describeFields,
+  describeType,
+  KIND_MANIFEST_VERSION,
+  type BuildKindManifestOptions,
+  type KindManifest,
+  type ManifestField,
+  type ManifestKind,
+} from "./kind-manifest.js";
+
+export {
   loadReferenceContract,
   findReferenceContractPath,
   contractKeys,

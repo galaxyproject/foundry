@@ -36,6 +36,9 @@ jobs:
       - name: Validate content
         run: npm run validate
 
+      - name: Check the kind manifest is current
+        run: npm run check:kinds
+
       - name: Typecheck root and site
         run: npm run typecheck
 
