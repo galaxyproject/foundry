@@ -13,7 +13,8 @@ import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import { KINDS, buildNoteSchema, loadReferenceContract, loadTagRegistry } from "../src/index.js";
+import { KINDS, buildNoteSchema, loadReferenceContract } from "../src/index.js";
+import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const typesDir = path.resolve(here, "../src/types");

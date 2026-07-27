@@ -41,12 +41,11 @@ export {
 // that package directly, so there is one place to look and nothing here to drift.
 export type { LicensePolicy } from "@galaxy-foundry/license-policy";
 
-export {
-  loadTagRegistry,
-  tagRegistry,
-  buildTagIndex,
-  type TagRegistry,
-  type TagRegistryFile,
-  type Facet,
-  type FacetInfo,
-} from "./tags.js";
+// Same arrangement as the license table above, and for the same reason. The meta_tags.yml
+// FORMAT is not ours: it ships in @galaxy-foundry/tag-registry, shared across Foundry
+// instances. The facet VOCABULARY is ours and stays at our repo root — that package
+// deliberately ships none, because facets are the browse axes of one domain. Only
+// `TagRegistry` is re-exported, because a caller building the kind-context options has to
+// name the type; loading a registry, parsing one, or asking it about a tag is imported
+// from the package directly.
+export type { TagRegistry } from "@galaxy-foundry/tag-registry";

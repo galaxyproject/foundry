@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import { buildNoteSchema, loadReferenceContract, loadTagRegistry } from "../src/index.js";
+import { buildNoteSchema, loadReferenceContract } from "../src/index.js";
+import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");

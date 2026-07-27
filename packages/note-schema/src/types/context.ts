@@ -9,10 +9,10 @@
 // against a synthetic registry — which is the one thing a kind test always needs.
 
 import { type LicensePolicy, isValidLicenseId } from "@galaxy-foundry/license-policy";
+import { type TagRegistry } from "@galaxy-foundry/tag-registry";
 import { z } from "zod";
 
 import { contractKeys, type ReferenceContract } from "./../reference-contract.js";
-import { type TagRegistry } from "./../tags.js";
 
 export interface BuildKindContextOptions {
   /** Controlled tag vocabulary (meta_tags.yml). Membership is declared by the registry's
