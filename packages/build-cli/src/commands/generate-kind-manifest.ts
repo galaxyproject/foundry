@@ -15,12 +15,8 @@ import path from "node:path";
 import process from "node:process";
 
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import {
-  KINDS,
-  buildKindManifest,
-  loadReferenceContract,
-  loadTagRegistry,
-} from "@galaxy-foundry/note-schema";
+import { KINDS, buildKindManifest, loadReferenceContract } from "@galaxy-foundry/note-schema";
+import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 import { writeOrCheck } from "../lib/content-notes.js";
 

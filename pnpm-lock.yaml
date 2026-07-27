@@ -45,6 +45,9 @@ importers:
       '@galaxy-foundry/summarize-nextflow':
         specifier: workspace:*
         version: link:packages/summarize-nextflow
+      '@galaxy-foundry/tag-registry':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -96,6 +99,9 @@ importers:
       '@galaxy-foundry/planemo-cli-meta':
         specifier: workspace:*
         version: link:../planemo-cli-meta
+      '@galaxy-foundry/tag-registry':
+        specifier: ^0.1.0
+        version: 0.1.0
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
@@ -162,6 +168,9 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-foundry/reference-contract':
+        specifier: ^0.1.0
+        version: 0.1.0
+      '@galaxy-foundry/tag-registry':
         specifier: ^0.1.0
         version: 0.1.0
       js-yaml:
@@ -255,6 +264,9 @@ importers:
         specifier: workspace:*
         version: link:../packages/note-schema
       '@galaxy-foundry/reference-contract':
+        specifier: ^0.1.0
+        version: 0.1.0
+      '@galaxy-foundry/tag-registry':
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-tool-util/cli':
@@ -970,6 +982,10 @@ packages:
 
   '@galaxy-foundry/reference-contract@0.1.0':
     resolution: {integrity: sha512-rOfkD8PQ02HW5p3AoiK1WZXbAV7YO6qa9xUvFhXiQcAXjId8ugF0+fpXCJLrDsVH9mAFXSXNhTbrGhqvYBeeiw==}
+    engines: {node: '>=20'}
+
+  '@galaxy-foundry/tag-registry@0.1.0':
+    resolution: {integrity: sha512-BhMI6R0QChol9+gnQZH0TFXcP7mM1145XElC2N3s6C3sXCpUIZ2shs7/l23buZLEMR6t/rQih3Tm1vY9IjK5Bw==}
     engines: {node: '>=20'}
 
   '@galaxy-tool-util/cli@1.10.0':
@@ -4219,6 +4235,10 @@ snapshots:
       js-yaml: 4.1.1
 
   '@galaxy-foundry/reference-contract@0.1.0':
+    dependencies:
+      js-yaml: 4.1.1
+
+  '@galaxy-foundry/tag-registry@0.1.0':
     dependencies:
       js-yaml: 4.1.1
 

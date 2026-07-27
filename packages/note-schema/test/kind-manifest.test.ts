@@ -22,9 +22,9 @@ import {
   MANIFEST_SOURCE,
   buildKindManifest,
   loadReferenceContract,
-  loadTagRegistry,
   parseKindManifest,
 } from "../src/index.js";
+import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");

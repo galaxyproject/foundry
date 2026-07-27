@@ -5,7 +5,8 @@
 import path from 'node:path';
 
 import { bundledPolicy } from '@galaxy-foundry/license-policy';
-import { loadReferenceContract, loadTagRegistry } from '@galaxy-foundry/note-schema';
+import { loadReferenceContract } from '@galaxy-foundry/note-schema';
+import { loadTagRegistry } from '@galaxy-foundry/tag-registry';
 
 // Astro builds run from the site/ directory; the registries live at the repo root.
 const repoRoot = path.resolve('..');
@@ -23,6 +24,8 @@ export const licensePolicy = bundledPolicy();
 // path resolves against site/dist/chunks/ instead of node_modules — an ENOENT that only
 // appears in `astro build`, never in tests or typecheck. Declaring it keeps it external.
 export const referenceContract = loadReferenceContract(path.join(repoRoot, 'reference_contract.yml'));
-// The tag registry answers membership itself (declared by its facets, never parsed off the
-// `/` prefix) and carries the facet labels/descriptions the /tags pages group and render by.
+// The facet vocabulary is ours, but the format is not: @galaxy-foundry/tag-registry parses
+// and validates it. The registry answers membership itself (declared by its facets, never
+// parsed off the `/` prefix) and carries the facet labels/descriptions the /tags pages
+// group and render by.
 export const tags = loadTagRegistry(path.join(repoRoot, 'meta_tags.yml'));

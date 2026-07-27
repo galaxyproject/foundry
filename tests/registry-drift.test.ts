@@ -1,7 +1,9 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { loadTagRegistry } from "@galaxy-foundry/note-schema";
+import yaml from "js-yaml";
+import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 import { readMarkdown } from "../packages/build-cli/src/lib/frontmatter.js";
 import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";
 
@@ -58,5 +60,43 @@ describe("registry drift (authored vocabulary vs corpus)", () => {
   it("has no tag in use that the registry does not declare", () => {
     const unregistered = [...tagsInUse].filter((t) => !registry.isValidTag(t));
     expect(unregistered, `\nin use but unregistered: ${unregistered.join(", ")}`).toEqual([]);
+  });
+});
+
+// What @galaxy-foundry/tag-registry cannot check for us, on the registry it does parse.
+//
+// It refuses an undocumented tag and a tag two facets both declare, so those need no
+// assertion here — a violation cannot reach a test, it throws at load. What it does not do
+// is object to keys it has never heard of: an unrecognized facet field is ignored, exactly
+// as both instances' hand-rolled loaders ignored it.
+describe("closed-registry invariant", () => {
+  it("declares no open facets in meta_tags.yml", () => {
+    // `open` was a concept the loader once honored and no longer does. A re-added
+    // `open: true` would therefore be a SILENT no-op — a facet the author believes is
+    // extensible while the registry stays closed. This is what turns that into a failure.
+    const raw = yaml.load(readFileSync(path.join(repoRoot, "meta_tags.yml"), "utf8")) as {
+      facets: Record<string, Record<string, unknown>>;
+    };
+    const open = Object.entries(raw.facets)
+      .filter(([, f]) => "open" in f)
+      .map(([key]) => key);
+    expect(open, `\nfacets declaring \`open\`: ${open.join(", ")}`).toEqual([]);
+  });
+
+  // The package requires both fields and refuses an empty string, so what is left for this
+  // to catch is the whitespace-only case — a facet that parses but renders as a blank
+  // heading on /tags.
+  it("gives every facet a label and description for the browse surface", () => {
+    const bare = registry.facets().filter((f) => !f.label.trim() || !f.description.trim());
+    expect(bare).toEqual([]);
+  });
+
+  // A spot check that our own vocabulary resolves through the shared loader at all, in both
+  // directions. The corpus checks above would all pass vacuously against an empty registry.
+  it("validates its own tags and rejects an unregistered one", () => {
+    expect(registry.isValidTag("target/galaxy")).toBe(true);
+    expect(registry.isValidTag("meta")).toBe(true);
+    expect(registry.isValidTag("target/not-a-real-thing")).toBe(false);
+    expect(registry.allTags().length).toBeGreaterThan(10);
   });
 });

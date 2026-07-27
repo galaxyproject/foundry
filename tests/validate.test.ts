@@ -6,8 +6,8 @@ import { bundledPolicy } from "@galaxy-foundry/license-policy";
 import {
   buildNoteSchema,
   loadReferenceContract,
-  loadTagRegistry,
 } from "@galaxy-foundry/note-schema";
+import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 import { validateData, validateDirectory } from "../packages/build-cli/src/commands/validate.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
