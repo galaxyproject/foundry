@@ -958,5 +958,9 @@
         }
       ]
     }
-  ]
+  ],
+  "source": {
+    "repo": "galaxyproject/foundry",
+    "path": "packages/note-schema/src/types/kinds.generated.json"
+  }
 }
