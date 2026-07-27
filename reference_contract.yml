@@ -1,3 +1,16 @@
+# The reference kinds this Foundry authors — the `kind:` of an entry in a Mold's
+# `references[]` manifest.
+#
+# Only `kinds` lives here. The other four vocabularies a reference entry names —
+# `used_at`, `load`, `modes`, `evidence` — describe the compilation machinery rather
+# than any domain, so they are the same in every Foundry and ship as data in
+# @galaxy-foundry/reference-contract. packages/note-schema/src/reference-contract.ts
+# composes the two halves.
+#
+# `kinds` stays here because it is the half that genuinely varies. It is also the half
+# that carries its own `href`: these kinds are specified in this repo's MOLD_SPEC, while
+# the inherited four are specified in the Foundry Pattern and link there.
+
 kinds:
   pattern:
     label: Pattern
@@ -34,55 +47,3 @@ kinds:
     description: Background synthesis loaded by explicit progressive-disclosure metadata.
     href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
     ref_shape: wiki-link
-
-used_at:
-  cast-time:
-    label: Cast Time
-    description: Used while building the cast artifact.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-  runtime:
-    label: Runtime
-    description: Consulted by the generated skill while doing work.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-  both:
-    label: Both
-    description: Used during casting and available to the generated skill at runtime.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-
-load:
-  upfront:
-    label: Upfront
-    description: Loaded with the generated skill's initial context or main instructions.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-  on-demand:
-    label: On Demand
-    description: Loaded only when the reference trigger applies.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-
-modes:
-  verbatim:
-    label: Verbatim
-    description: Copied without LLM rewrite.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-  condense:
-    label: Condense
-    description: LLM condensation is required before final packaging; generic handling is not complete yet.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-  sidecar:
-    label: Sidecar
-    description: Transformed into a structured runtime artifact beside the generated skill.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-
-evidence:
-  hypothesis:
-    label: Hypothesis
-    description: Added because it seems useful; not yet proven by a real cast run.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-  corpus-observed:
-    label: Corpus Observed
-    description: Grounded in survey or research over real workflows, upstream source, or runtime behavior.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
-  cast-validated:
-    label: Cast Validated
-    description: A generated skill used this reference successfully on real data.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest

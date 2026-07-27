@@ -1,6 +1,6 @@
 # Mold Spec
 
-This document is the source-layout contract for Mold authoring. The shared zod schema in `@galaxy-foundry/note-schema` (`buildNoteSchema`) is the frontmatter contract, and `reference_contract.yml` remains the controlled vocabulary for typed references.
+This document is the source-layout contract for Mold authoring. The shared zod schema in `@galaxy-foundry/note-schema` (`buildNoteSchema`) is the frontmatter contract, and the reference contract remains the controlled vocabulary for typed references — `kinds` at `reference_contract.yml`, the other four vocabularies from `@galaxy-foundry/reference-contract`.
 
 ## Source Layout
 
@@ -94,7 +94,7 @@ Conditional fields:
 - `trigger` is required when `load: on-demand`.
 - `purpose` is strongly recommended for generated-skill instructions and reviewer context.
 
-`reference_contract.yml` owns labels, descriptions, and allowed values. Casting consumes the manifest by kind; see `COMPILATION_PIPELINE.md` for output layout and provenance.
+The reference contract owns labels, descriptions, and allowed values: `reference_contract.yml` for `kind`, and `@galaxy-foundry/reference-contract` for `used_at`, `load`, `mode` and `evidence`, which are the same in every Foundry. Casting consumes the manifest by kind; see `COMPILATION_PIPELINE.md` for output layout and provenance.
 
 ## Eval, Scenario, Usage, Refinement: what goes where
 

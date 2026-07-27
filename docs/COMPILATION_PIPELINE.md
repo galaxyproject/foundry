@@ -27,7 +27,7 @@ Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for k
 
 ### Typed reference manifest
 
-Molds declare operational dependencies through the object-shaped `references` manifest. `MOLD_SPEC.md` is canonical for field requirements and authoring rules; `reference_contract.yml` is canonical for vocabulary labels and descriptions. Casting reads the manifest, resolves each reference by `kind`, and writes the target-specific reference layout described below.
+Molds declare operational dependencies through the object-shaped `references` manifest. `MOLD_SPEC.md` is canonical for field requirements and authoring rules; the reference contract is canonical for vocabulary labels and descriptions — `reference_contract.yml` for `kind`, `@galaxy-foundry/reference-contract` for the four inherited vocabularies. Casting reads the manifest, resolves each reference by `kind`, and writes the target-specific reference layout described below.
 
 Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`. Producer-owned `output_artifacts[].schema` wiki-links point at schema notes that casting packages; consumers inherit those contracts by binding to the same artifact `id`.
 
