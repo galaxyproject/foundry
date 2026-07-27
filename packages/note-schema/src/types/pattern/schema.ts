@@ -26,7 +26,7 @@ const iwcExemplar = z
 export const kind = defineKind({
   kind: "pattern",
   title: "Pattern",
-  origin: "substrate",
+  layer: "substrate",
   summary:
     "One reusable piece of domain knowledge a Mold can reference, graded by how strongly the corpus supports it.",
 

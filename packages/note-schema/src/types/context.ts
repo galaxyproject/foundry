@@ -171,6 +171,9 @@ export function buildKindContext(options: BuildKindContextOptions): KindContext 
   };
 }
 
+/** Any shape that can be a member of the `type`-discriminated union. */
+export type KindShape = { type: z.ZodTypeAny } & z.ZodRawShape;
+
 /**
  * What a `types/<kind>/schema.ts` exports.
  *
@@ -180,17 +183,18 @@ export function buildKindContext(options: BuildKindContextOptions): KindContext 
  * table. Per-kind cross-field rules go in `refine`, which the assembler dispatches by `type`
  * after the union resolves — so the rule still LIVES in the kind's directory.
  */
-/** Any shape that can be a member of the `type`-discriminated union. */
-export type KindShape = { type: z.ZodTypeAny } & z.ZodRawShape;
-
 export interface KindDefinition<T extends KindShape = KindShape> {
   /** The `type:` discriminator value. MUST equal the directory name. */
   kind: string;
   /** Display name for the kind catalog. */
   title: string;
   /** `substrate` = a kind the Foundry pattern's other instances also declare;
-   *  `instance` = one this domain added. The cross-instance catalog groups by this. */
-  origin: "substrate" | "instance";
+   *  `instance` = one this domain added. The cross-instance catalog groups by this.
+   *
+   *  Named `layer`, not `origin`, because `origin` is already a frontmatter field on the
+   *  `cli-tool` kind (`npm | pypi`) — one manifest carrying both meanings under one word is a
+   *  trap for anything reading across instances. */
+  layer: "substrate" | "instance";
   /** One line: what a note of this kind IS. Rendered in the catalog. */
   summary: string;
   /** A strict object carrying a `type:` literal — a union member, and the `.shape` the

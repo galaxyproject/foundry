@@ -5,7 +5,7 @@ import { type KindContext, defineKind } from "../context.js";
 export const kind = defineKind({
   kind: "research",
   title: "Research Note",
-  origin: "instance",
+  layer: "instance",
   summary:
     "A captured finding about the domain or its tooling — the grounding a Mold cites rather than inventing.",
 

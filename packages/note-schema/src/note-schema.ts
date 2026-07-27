@@ -1,15 +1,14 @@
-// The single source of truth for Foundry note frontmatter. This zod schema replaces the
-// former hand-written meta_schema.yml (ajv) + site zod pair; the validator
-// (`@galaxy-foundry/build-cli`) and the Astro site both build it from the same three
-// registries so the two encodings can no longer drift.
+// The single source of truth for Foundry note frontmatter. One zod encoding, built by both
+// the validator (`@galaxy-foundry/build-cli`) and the Astro site from the same three
+// registries, so there is no second encoding to drift against.
 //
-// This module is now only the ASSEMBLER. Each note kind is defined — and documented, and
-// exemplified — in its own directory under src/types/; see src/types/index.ts for the
-// enumeration and src/types/context.ts for the shared envelope every kind spreads.
+// This module is the ASSEMBLER, and only the assembler. Each note kind is defined — and
+// documented, and exemplified — in its own directory under src/types/; see src/types/index.ts
+// for the enumeration and src/types/context.ts for the shared envelope every kind spreads.
 //
-// `buildNoteSchema` is a factory: the controlled enums (tags, reference-contract vocab,
-// license ids) live in YAML registries loaded at call time and injected here, mirroring how
-// the old validator injected them into the JSON Schema.
+// `buildNoteSchema` is a factory rather than a constant because the controlled enums (tags,
+// reference-contract vocab, license ids) live in YAML registries loaded at call time and
+// injected here — which is also what lets a test build the schema against a synthetic registry.
 
 import { z } from "zod";
 

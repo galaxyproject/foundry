@@ -7,6 +7,9 @@ This is the kind that most directly buys correctness: hallucinated command-line 
 syntactically perfect and completely wrong, and no amount of prompt care fixes that. Writing the
 page down and referencing it does.
 
+This kind is **instance-specific**, and pairs with `cli-tool`: both exist because this Foundry's
+casts run real binaries.
+
 ## Why each required field is required
 
 - **`tool`** — the `cli-tool` slug this command belongs to. The join key.

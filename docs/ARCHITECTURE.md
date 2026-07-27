@@ -116,6 +116,8 @@ Every note still carries at least one tag (`tags` is `minItems: 1`), but that ta
 
 The frontmatter contract is the zod schema built by `buildNoteSchema` in `@galaxy-foundry/note-schema`.
 
+**One directory per note kind**, under `packages/note-schema/src/types/`. Each holds `schema.ts` (that kind's contract), `kind.md` (what the kind is for, and why each required field is required), and `example.md` (a minimal valid note, which `test/kind-directories.test.ts` parses against that kind's own schema — so the documentation stays executable). `types/context.ts` holds the base envelope and the field primitives shared by more than one kind; `types/index.ts` is the one enumeration of the kinds, and a drift test asserts it matches the directory listing both ways. `note-schema.ts` is the assembler and nothing else: it composes those definitions into the discriminated union and defines no fields of its own. To add or change a field, edit that kind's `schema.ts`. `types/kinds.generated.json` is the machine-readable form of this section, derived from the zod shapes (§8).
+
 **Base required (everywhere)**: `type`, `tags`, `status`, `created`, `revised`, `revision`, `ai_generated`, `summary`.
 
 - `status` enum: `draft | reviewed | revised | stale | archived`. Drives badge rendering and `archived` filtering throughout the site.
@@ -237,7 +239,7 @@ Prefix-match candidates are sorted **shortest-first, then alphabetically** — `
 
 ## 8. Generated artifacts
 
-All generated files live under `content/` and are committed to git; CI runs `--check` drift gates before deploy.
+Generated files are committed to git and CI runs `--check` drift gates before deploy. Most live under `content/`; the one exception is `packages/note-schema/src/types/kinds.generated.json`, which sits beside the schemas it is derived from because its consumer is another repository (the pattern site's cross-instance kind catalog), not this site.
 
 **`Dashboard.md`** — Obsidian Dataview tables, one per section. **`site/src/pages/index.astro`** — same sections rendered as HTML tables.
 
@@ -267,7 +269,9 @@ Pipelines lead the dashboard because they are the **primary task surface** of th
 
 `foundry-build generate-index` walks `findMdFiles` (reusing the validator's skip logic), groups by type, emits the file. Directory-note slugs use the parent directory name.
 
-**Drift detection**: `--check` flag on every generator reads the file and string-compares with re-generation; exit 1 on mismatch. Wired into `npm run check:dashboard` and `check:index`.
+**`kinds.generated.json`** — the machine-readable manifest of the note kinds: for each kind its `layer` (`substrate` or `instance`), summary, and required-metadata list, with the field list **derived from that kind's zod shape** rather than written by hand. `foundry-build generate-kinds` emits it from `packages/note-schema/src/types/`; nothing in this repo reads it (see §5). The field is `layer` rather than `origin` because `origin` is already a frontmatter field on `cli-tool`.
+
+**Drift detection**: `--check` flag on every generator reads the file and string-compares with re-generation; exit 1 on mismatch. Wired into `npm run check:dashboard`, `check:index`, and `check:kinds`.
 
 **Cast-bundle payloads — how a note's non-`.md` payload reaches a bundle.** Casts live under `casts/` (§14), not `content/`. Several notes are render-wrappers: the `.md` is human-facing, but the consumable payload is a separate structured file that casting must copy into the bundle. Four frontmatter mechanisms carry such a payload, sharing one shape (frontmatter names the file → validator confirms it exists → caster lands it in the bundle) but differing in payload source and casting behavior:
 
@@ -383,12 +387,13 @@ One ingestion spine — Mold casting. There is no IWC ingestion (see `CORPUS_ING
 - `test` — Vitest suite.
 - `dashboard` / `check:dashboard` — Obsidian dashboard.
 - `index` / `check:index` — flat catalog.
+- `kinds` / `check:kinds` — the note-kind manifest (§8). Requires `packages-build` first: the command imports the built `@galaxy-foundry/note-schema`.
 - `cast -- --mold=<slug> --target=<target>` — one-shot cast.
 - `site:dev` / `site:build` / `site:preview` — Astro lifecycle.
 
 Stack:
 - **`tsx`** to run TS scripts directly (no compile step in dev); `tsc --noEmit` for typecheck in CI.
-- **Ajv** for schema validation, **gray-matter** for frontmatter parse, **js-yaml** for YAML loads.
+- **zod** for the frontmatter contract (`@galaxy-foundry/note-schema`); **Ajv** for Mold IO schema validation and cast verification; **gray-matter** for frontmatter parse, **js-yaml** for YAML loads.
 - **Vitest** for tests.
 - **pnpm workspace packages** for published runtime and build tooling; root `package.json` keeps authoring shortcuts. Astro imports shared wiki-link behavior through `site/src/lib/wiki-links.ts`, which re-exports the shared resolver.
 

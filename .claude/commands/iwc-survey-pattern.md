@@ -13,7 +13,7 @@ Write or refine exactly one pattern page under `content/patterns/` from a survey
 2. **`CLAUDE.md`** — local authoring rules.
 3. **`docs/PATTERNS.md`** — operation-anchored naming, corpus-first rule, legacy-tool posture.
 4. **`docs/ARCHITECTURE.md`** §3, §5, §6 — note types, frontmatter, validation.
-5. **`packages/note-schema/src/note-schema.ts`** + **`meta_tags.yml`** — frontmatter contract and tags.
+5. **`packages/note-schema/src/types/<kind>/`** (one directory per note kind — `schema.ts`, `kind.md`, `example.md`) + **`meta_tags.yml`** — frontmatter contract and tags.
 6. **`common_paths.yml.sample`** — citation prefix vocabulary; use `$IWC_FORMAT2/path:line` citations.
 7. **The survey at `$1`** — especially the candidate boundary, decisions, and open-question resolution relevant to `$2`.
 

@@ -21,7 +21,7 @@ import { type KindDefinition } from "./context.js";
 
 // NOT annotated `: readonly KindDefinition[]`. That annotation would widen every element to
 // the default shape and the erasure would propagate to the Astro site, where `entry.data.tags`
-// degrades to `any`. Left inferred, this is a tuple of nine precisely-typed kinds.
+// degrades to `any`. Left inferred, this is a tuple of precisely-typed kinds.
 export const KINDS = [
   mold,
   pattern,

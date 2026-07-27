@@ -12,7 +12,7 @@ Review the note at `$1` and return a structured report. Do **not** edit files �
 1. **`content/meta/glossary.md`** — pinned vocabulary (Mold, Pipeline, Pattern, Cast, axis, …). Misreading these terms breaks the review.
 2. **`CLAUDE.md`** — authoring rules (`additionalProperties: false`, registered tags, wiki-link conventions, "don't weaken the schema").
 3. **`docs/ARCHITECTURE.md`** §3 (note types), §5 (frontmatter contract), §6 (validation pipeline). Skim the rest only if needed.
-4. **`packages/note-schema/src/note-schema.ts`** + **`meta_tags.yml`** — frontmatter and tag enums.
+4. **`packages/note-schema/src/types/pattern/`** (`schema.ts`, `kind.md`, `example.md`; shared primitives in `types/context.ts`) + **`meta_tags.yml`** — frontmatter and tag enums.
 5. **`common_paths.yml.sample`** — the citation prefix vocabulary. Logical names (`$IWC`, `$IWC_FORMAT2`, `$GALAXY`, `$TOOLS_IUC`, `$PLANEMO`, `$GXFORMAT2`) map to filesystem paths and (when set) GitHub repos. Resolve every `$NAME/...` citation in the note via this file before checking it.
 6. **The note's `related_notes` and survey/research companions** — pinned decisions live in `## Decisions` sections (e.g. `iwc-tabular-operations-survey.md` §7). Treat those as binding unless the review surfaces a reason they're wrong; if so, flag for both the note *and* the source decision record.
 

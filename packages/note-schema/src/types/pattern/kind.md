@@ -4,6 +4,9 @@ A **Pattern** is one reusable piece of domain knowledge, authored so that a Mold
 instead of restating it. Patterns are the corpus a cast is grounded in: if a Mold's body starts
 explaining how something generally works, that explanation wants to be a Pattern.
 
+This kind is **substrate**, alongside `mold`: a Foundry that cannot cite its domain knowledge in
+units has nothing to ground a cast in, whatever the domain.
+
 ## Why each required field is required
 
 - **`title`** — patterns are read by humans browsing the corpus, and a slug is not a title.

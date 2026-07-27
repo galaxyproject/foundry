@@ -1015,7 +1015,7 @@ describe("validateDirectory (cross-file)", () => {
     });
     // An error, not a warning: an on-demand reference that names no trigger states no
     // condition under which the cast should read it, so it is unreachable at runtime.
-    // Enforced by the note schema, which is why the validator no longer re-encodes it.
+    // The note schema is what raises it.
     expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 

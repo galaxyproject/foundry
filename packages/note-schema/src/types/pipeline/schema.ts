@@ -36,7 +36,7 @@ const phase = z.union([moldPhase, branchPhase]);
 export const kind = defineKind({
   kind: "pipeline",
   title: "Pipeline",
-  origin: "instance",
+  layer: "instance",
   summary:
     "An ordered end-to-end protocol composing Molds into phases — the optional composition layer, for domains whose work is a journey.",
 

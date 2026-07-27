@@ -5,7 +5,7 @@ import { sourceKinds, targetKinds, type KindContext, defineKind } from "../conte
 export const kind = defineKind({
   kind: "source-pattern",
   title: "Source Pattern",
-  origin: "instance",
+  layer: "instance",
   summary:
     "A shape recurring in one SOURCE ecosystem, held separate from the target-side patterns that implement it.",
 

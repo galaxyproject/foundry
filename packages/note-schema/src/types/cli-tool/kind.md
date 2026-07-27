@@ -6,6 +6,10 @@ invoke: where it comes from, how to run it, and how to tell whether it is presen
 It pairs with `cli-command`: the tool note is the *installation and invocation* record, the
 command notes are the manual pages. One `cli-tool` typically has several `cli-command` siblings.
 
+This kind is **instance-specific**: it exists because this Foundry's casts shell out to real
+binaries. A Foundry whose skills invoke no external program needs neither this kind nor
+`cli-command`.
+
 ## Why each required field is required
 
 - **`tool`** — the kebab slug the `cli-command` notes join on. This is the whole reason the two

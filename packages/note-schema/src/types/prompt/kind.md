@@ -7,6 +7,9 @@ The verbatim file is the whole point. A prompt paraphrased is a different prompt
 lives untouched in its own file and the note carries the provenance around it. Casting copies
 the file across unchanged.
 
+This kind is **instance-specific**: it exists because this Foundry redistributes prompts it did
+not author. A Foundry that writes all its own prompts has no upstream provenance to record.
+
 ## Why each required field is required
 
 - **`title`** — prose, for the reader.
@@ -21,3 +24,7 @@ the file across unchanged.
   external project is redistributed text: name the licence, and vendor the licence file under
   `LICENSES/` where the policy row calls for it. The schema does not force this the way the
   `schema` kind does, because a prompt authored here has no upstream to name.
+
+`example.md` illustrates the frontmatter only. The paths it names (`prompt_file`,
+`license_file`) are the shape a real note declares, not files shipped beside the example — in
+the corpus the validator resolves both and fails if either is missing.
