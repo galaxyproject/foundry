@@ -15,11 +15,15 @@ export {
   buildKindManifest,
   describeFields,
   describeType,
+  parseKindManifest,
+  withRevision,
   KIND_MANIFEST_VERSION,
+  MANIFEST_SOURCE,
   type BuildKindManifestOptions,
   type KindManifest,
   type ManifestField,
   type ManifestKind,
+  type ManifestSource,
 } from "./kind-manifest.js";
 
 export {

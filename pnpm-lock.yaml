@@ -149,6 +149,9 @@ importers:
 
   packages/note-schema:
     dependencies:
+      '@galaxy-foundry/kind-manifest':
+        specifier: ^0.2.1
+        version: 0.2.1(zod@3.25.76)
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.1
@@ -936,6 +939,12 @@ packages:
 
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
+
+  '@galaxy-foundry/kind-manifest@0.2.1':
+    resolution: {integrity: sha512-a/H/xFryorwsgu0S2kiWlp4rNQvFfaRo2R/BcKPJI+u4u7gzzQuahQk34OS9+BIOG0d0q8ce0i/ElRBvtlA1Gg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      zod: ^3.25.0
 
   '@galaxy-tool-util/cli@1.10.0':
     resolution: {integrity: sha512-K4KDHl/AsBudimBpmIjT6u85qFExY+XKKehiWeaEJcB8CPkvZULkf5JjwW2gLvB3HVxo2bnD7bWeZmVNFMNWdQ==}
@@ -4174,6 +4183,10 @@ snapshots:
       levn: 0.4.1
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
+
+  '@galaxy-foundry/kind-manifest@0.2.1(zod@3.25.76)':
+    dependencies:
+      zod: 3.25.76
 
   '@galaxy-tool-util/cli@1.10.0':
     dependencies:
