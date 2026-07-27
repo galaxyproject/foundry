@@ -5,7 +5,7 @@ import { type KindContext, defineKind } from "../context.js";
 export const kind = defineKind({
   kind: "cli-tool",
   title: "CLI Tool",
-  origin: "instance",
+  layer: "instance",
   summary:
     "One external command-line tool the casting pipeline may invoke — how to install it, how to run it, how to tell it is present.",
 

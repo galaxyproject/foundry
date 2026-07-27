@@ -9,7 +9,7 @@ const binName = z.string().regex(/^[A-Za-z0-9._-]+$/);
 export const kind = defineKind({
   kind: "schema",
   title: "Schema Note",
-  origin: "instance",
+  layer: "instance",
   summary:
     "A machine-checkable contract a cast can validate against, plus the validator that decides it.",
 

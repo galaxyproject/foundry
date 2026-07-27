@@ -29,7 +29,7 @@ const inputArtifact = z
 export const kind = defineKind({
   kind: "mold",
   title: "Mold",
-  origin: "substrate",
+  layer: "substrate",
   summary:
     "One repeatable action, described as a typed reference manifest that casting compiles into a skill artifact.",
 

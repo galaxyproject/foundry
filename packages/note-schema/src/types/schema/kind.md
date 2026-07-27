@@ -4,6 +4,10 @@ A **Schema Note** documents a machine-checkable contract a cast can validate its
 against, and names the validator that decides it. It is how a Mold's `output_artifacts` stop
 being a promise and start being a check.
 
+This kind is **instance-specific**: it exists because this Foundry's outputs are structured
+formats a parser can decide. Every Foundry needs an external check, but a domain whose notion of
+"correct" has no mechanical oracle will express that check some other way entirely.
+
 ## Why each required field is required
 
 - **`name`** — the slug a Mold's `output_artifacts[].schema` wiki-link resolves to.

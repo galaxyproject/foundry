@@ -8,6 +8,10 @@ The discipline is not in the frontmatter, it is in the grading: a research note 
 only if the target skill could be **rebuilt from the note alone** — no re-reading the source, no
 model memory. Hold the numbers, thresholds, exact procedure, and named decision criteria.
 
+This kind is **instance-specific**, though what it carries is not: every Foundry grounds its
+knowledge in an external corpus. This is one instance's container for that grounding, and
+another may hold it in kinds of a different shape.
+
 ## Why each required field is required
 
 Only the **base envelope**. A research note is `type` plus the envelope; everything else is

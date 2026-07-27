@@ -10,7 +10,7 @@ const promptFile = z
 export const kind = defineKind({
   kind: "prompt",
   title: "Prompt",
-  origin: "instance",
+  layer: "instance",
   summary:
     "A raw upstream prompt carried verbatim in a sibling file, with the note recording where it came from and under what license.",
 

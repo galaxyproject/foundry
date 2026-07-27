@@ -47,7 +47,7 @@ describe("buildNoteSchema", () => {
     expect(r.success).toBe(true);
   });
 
-  it("accepts a prompt note (regression: prompt was absent from the site zod)", () => {
+  it("accepts a prompt note", () => {
     const r = schema.safeParse(
       base({
         type: "prompt",
