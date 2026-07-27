@@ -13,16 +13,22 @@ It replaces the former two-encoding pair — a hand-written `meta_schema.yml`
 kept in lockstep by hand and drifted (e.g. the `prompt` note type existed in one
 encoding but not the other).
 
-The controlled enums are injected at call time from the repo-root registries so
-the schema and the registries can never diverge:
+The controlled enums are injected at call time from the registries so the schema
+and the registries can never diverge:
 
 - `meta_tags.yml` → allowed `tags[]` (facets, each declaring its members and their glosses)
 - `reference_contract.yml` → allowed `references[]` vocab
-- `license-policy.yml` → allowed `license` ids
+- the license table → allowed `license` ids
 
-The registry loaders (`loadTagRegistry`, `loadReferenceContract`, `loadLicensePolicy`,
-`resolveLicenseRow`, `isValidLicenseId`) are exported from here too, so the
-validator, the caster, and the site's license UI share one implementation.
+The first two are ours, at the repo root, and their loaders (`loadTagRegistry`,
+`loadReferenceContract`) are exported from here.
+
+The license table is not ours. It is shared across Foundry instances, so it ships
+in [`@galaxy-foundry/license-policy`](https://www.npmjs.com/package/@galaxy-foundry/license-policy);
+callers get it from `bundledPolicy()` and pass it in. Only the `LicensePolicy` type
+is re-exported here, because you need to name it to build the options object —
+`resolveLicenseRow`, `isValidLicenseId` and the rest come from that package
+directly, so there is one place to look and no name list here to drift.
 
 `loadTagRegistry` returns a registry object rather than a bare list: tag membership
 is *declared* by a facet's `values`, never parsed off the `/` prefix, so callers ask

@@ -8,10 +8,10 @@
 // Kinds receive this rather than importing the registries themselves, so a kind can be tested
 // against a synthetic registry — which is the one thing a kind test always needs.
 
+import { type LicensePolicy, isValidLicenseId } from "@galaxy-foundry/license-policy";
 import { z } from "zod";
 
 import { contractKeys, type ReferenceContract } from "./../reference-contract.js";
-import { type LicensePolicy, isValidLicenseId } from "./../license-policy.js";
 import { type TagRegistry } from "./../tags.js";
 
 export interface BuildKindContextOptions {

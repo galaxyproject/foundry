@@ -12,13 +12,8 @@ import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 
-import {
-  KINDS,
-  buildNoteSchema,
-  loadLicensePolicy,
-  loadReferenceContract,
-  loadTagRegistry,
-} from "../src/index.js";
+import { bundledPolicy } from "@galaxy-foundry/license-policy";
+import { KINDS, buildNoteSchema, loadReferenceContract, loadTagRegistry } from "../src/index.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const typesDir = path.resolve(here, "../src/types");
@@ -58,7 +53,7 @@ describe("types/ kind directories", () => {
   const schema = buildNoteSchema({
     tags: loadTagRegistry(path.join(repoRoot, "meta_tags.yml")),
     contract: loadReferenceContract(path.join(repoRoot, "reference_contract.yml")),
-    licensePolicy: loadLicensePolicy(repoRoot),
+    licensePolicy: bundledPolicy(),
   });
 
   for (const definition of KINDS) {

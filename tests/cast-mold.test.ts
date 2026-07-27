@@ -909,16 +909,12 @@ Body.
 });
 
 describe("cast-mold license → redistribution-policy enforcement", () => {
-  // Temp repo: one mold referencing one research note (verbatim), plus a copy of
-  // the real license-policy.yml so enforcement resolves against the true table.
+  // Temp repo: one mold referencing one research note (verbatim). Enforcement resolves
+  // against the shipped table, so the scaffold no longer has to plant a copy of it.
   function scaffold(dir: string, noteFrontmatter: string, extraLicenseFile?: string): void {
     mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
     mkdirSync(path.join(dir, "content/research"), { recursive: true });
     mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
-    writeFileSync(
-      path.join(dir, "license-policy.yml"),
-      readFileSync(path.join(repoRoot, "license-policy.yml"), "utf8"),
-    );
     if (extraLicenseFile) {
       mkdirSync(path.join(dir, "LICENSES"), { recursive: true });
       writeFileSync(path.join(dir, extraLicenseFile), "TEST LICENSE TEXT\n");

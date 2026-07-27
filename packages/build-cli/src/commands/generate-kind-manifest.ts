@@ -14,10 +14,10 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
+import { bundledPolicy } from "@galaxy-foundry/license-policy";
 import {
   KINDS,
   buildKindManifest,
-  loadLicensePolicy,
   loadReferenceContract,
   loadTagRegistry,
 } from "@galaxy-foundry/note-schema";
@@ -57,7 +57,7 @@ export function runGenerateKindManifestCommand(argv = process.argv.slice(2)): vo
     docs: loadDocs(path.join(opts.root, TYPES_DIR)),
     tags: loadTagRegistry(path.join(opts.root, "meta_tags.yml")),
     contract: loadReferenceContract(path.join(opts.root, "reference_contract.yml")),
-    licensePolicy: loadLicensePolicy(opts.root),
+    licensePolicy: bundledPolicy(),
   });
 
   const output = path.join(opts.root, OUTPUT);

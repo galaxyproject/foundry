@@ -3,12 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  buildNoteSchema,
-  loadLicensePolicy,
-  loadReferenceContract,
-  loadTagRegistry,
-} from "../src/index.js";
+import { bundledPolicy } from "@galaxy-foundry/license-policy";
+import { buildNoteSchema, loadReferenceContract, loadTagRegistry } from "../src/index.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
@@ -17,7 +13,7 @@ function realSchema() {
   return buildNoteSchema({
     tags: loadTagRegistry(path.join(repoRoot, "meta_tags.yml")),
     contract: loadReferenceContract(path.join(repoRoot, "reference_contract.yml")),
-    licensePolicy: loadLicensePolicy(repoRoot),
+    licensePolicy: bundledPolicy(),
   });
 }
 

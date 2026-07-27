@@ -23,8 +23,9 @@ for (const e of entries) {
     <h1 class="text-2xl font-semibold m-0">Redistributed upstream licenses</h1>
     <p class="text-sm text-(--color-text-secondary) mt-2">
       Verbatim copies of upstream LICENSE files for third-party content the Foundry
-      redistributes. Redistribution policy is governed by the root
-      <code>license-policy.yml</code> table.
+      redistributes. Redistribution policy is governed by the shared
+      <code>license-policy</code> table, which every Foundry instance consumes from
+      <code>@galaxy-foundry/license-policy</code> rather than keeping its own copy of.
     </p>
   </header>
 

@@ -38,6 +38,7 @@
   "license": "MIT",
   "dependencies": {
     "@galaxy-foundry/kind-manifest": "^0.2.1",
+    "@galaxy-foundry/license-policy": "^0.1.0",
     "js-yaml": "^4.1.0",
     "zod": "^3.25.76"
   },

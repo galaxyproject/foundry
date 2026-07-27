@@ -1,66 +1,63 @@
+// What this Foundry owes the license table, now that the table itself ships in
+// @galaxy-foundry/license-policy.
+//
+// The table's own invariants — own-words-only never permits a copying carry, verbatim-ok
+// always demands its notice, no row permits nothing — moved to that package along with the
+// table they describe. Re-asserting them here would be the hand-mirroring this removes,
+// wearing a test's clothes.
+//
+// What is still ours: our frontmatter contract derives its `license` grammar from that table
+// rather than from a hand-written enum. That claim spans the package and our schema, so it is
+// only checkable here.
+
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { bundledPolicy, licenseIds } from "@galaxy-foundry/license-policy";
 import {
-  loadLicensePolicy,
-  licenseIds,
-  isValidLicenseId,
-  resolveLicenseRow,
-  type CastMode,
-} from "../packages/build-cli/src/lib/license-policy.js";
+  buildNoteSchema,
+  loadReferenceContract,
+  loadTagRegistry,
+} from "@galaxy-foundry/note-schema";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 
-const CAST_MODES: CastMode[] = ["verbatim", "condense", "sidecar"];
+const schema = buildNoteSchema({
+  tags: loadTagRegistry(path.join(repoRoot, "meta_tags.yml")),
+  contract: loadReferenceContract(path.join(repoRoot, "reference_contract.yml")),
+  licensePolicy: bundledPolicy(),
+});
 
-describe("license-policy table", () => {
-  const policy = loadLicensePolicy(repoRoot);
+/** A minimal research note — the loosest kind that carries a license. */
+const noteWithLicense = (license: string) => ({
+  type: "research",
+  tags: ["target/galaxy"],
+  status: "draft",
+  created: "2026-04-30",
+  revised: "2026-04-30",
+  revision: 1,
+  ai_generated: false,
+  summary: "A short summary that meets the minimum length requirement.",
+  license,
+});
 
-  it("the schema license grammar accepts exactly the table's ids (plus LicenseRef)", () => {
-    // The frontmatter contract derives its `license` grammar from this table via
-    // isValidLicenseId (no separate hand-written enum to keep in lockstep). Every
-    // table id must be accepted; a LicenseRef-<slug> escape hatch too; nothing else.
-    for (const id of licenseIds(policy)) {
-      expect(isValidLicenseId(policy, id), id).toBe(true);
-    }
-    expect(isValidLicenseId(policy, "LicenseRef-example-thing")).toBe(true);
-    expect(isValidLicenseId(policy, "Not-A-Real-License")).toBe(false);
-  });
-
-  it("every row's allowed_modes are valid cast modes", () => {
-    for (const [id, row] of Object.entries(policy.licenses)) {
-      expect(row.allowed_modes.length, `${id} has no allowed_modes`).toBeGreaterThan(0);
-      for (const m of row.allowed_modes) {
-        expect(CAST_MODES, `${id} mode ${m}`).toContain(m);
-      }
-    }
-  });
-
-  it("own-words-only rows forbid verbatim carry and require no license_file", () => {
-    for (const [id, row] of Object.entries(policy.licenses)) {
-      if (row.policy !== "own-words-only") continue;
-      expect(row.allowed_modes, `${id}`).not.toContain("verbatim");
-      expect(row.allowed_modes, `${id}`).not.toContain("sidecar");
-      expect(row.license_file, `${id}`).toBe(false);
+describe("the frontmatter contract's license grammar", () => {
+  it("accepts every id the shipped table names", () => {
+    // No separate hand-written enum to keep in lockstep: the grammar asks the table.
+    // A row added upstream becomes authorable here the moment the dependency is bumped.
+    for (const id of licenseIds(bundledPolicy())) {
+      expect(schema.safeParse(noteWithLicense(id)).success, id).toBe(true);
     }
   });
 
-  it("verbatim-ok rows permit verbatim carry and require a license_file", () => {
-    for (const [id, row] of Object.entries(policy.licenses)) {
-      if (row.policy !== "verbatim-ok") continue;
-      expect(row.allowed_modes, `${id}`).toContain("verbatim");
-      expect(row.license_file, `${id}`).toBe(true);
-    }
+  it("accepts the LicenseRef escape hatch for ids outside the curated set", () => {
+    expect(schema.safeParse(noteWithLicense("LicenseRef-example-thing")).success).toBe(true);
   });
 
-  it("unknown and missing license ids resolve to the default (own-words + defect)", () => {
-    for (const id of [undefined, null, "Nonexistent-1.0"]) {
-      const row = resolveLicenseRow(policy, id);
-      expect(row.policy).toBe("own-words-only");
-      expect(row.defect).toBe(true);
-    }
+  it("rejects an id the table does not name", () => {
+    expect(schema.safeParse(noteWithLicense("Not-A-Real-License")).success).toBe(false);
   });
 });
