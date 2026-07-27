@@ -4,12 +4,15 @@
 // validator also uses — so the site and the validator can no longer drift.
 import path from 'node:path';
 
-import { loadLicensePolicy, loadReferenceContract, loadTagRegistry } from '@galaxy-foundry/note-schema';
+import { bundledPolicy } from '@galaxy-foundry/license-policy';
+import { loadReferenceContract, loadTagRegistry } from '@galaxy-foundry/note-schema';
 
 // Astro builds run from the site/ directory; the registries live at the repo root.
 const repoRoot = path.resolve('..');
 
-export const licensePolicy = loadLicensePolicy(repoRoot);
+// The license table is the exception: it is shared across Foundry instances rather than
+// authored here, so it ships in @galaxy-foundry/license-policy instead of at our root.
+export const licensePolicy = bundledPolicy();
 export const referenceContract = loadReferenceContract(path.join(repoRoot, 'reference_contract.yml'));
 // The tag registry answers membership itself (declared by its facets, never parsed off the
 // `/` prefix) and carries the facet labels/descriptions the /tags pages group and render by.

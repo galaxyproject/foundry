@@ -34,19 +34,12 @@ export {
   type ReferenceContractTerm,
 } from "./reference-contract.js";
 
-export {
-  loadLicensePolicy,
-  findLicensePolicyPath,
-  licenseIds,
-  isValidLicenseId,
-  resolveLicenseRow,
-  LICENSE_POLICY_FILE,
-  LICENSE_REF_RE,
-  type LicensePolicy,
-  type LicenseRow,
-  type CastMode,
-  type RedistributionPolicy,
-} from "./license-policy.js";
+// The license table is not ours: it ships in @galaxy-foundry/license-policy, shared
+// across Foundry instances. Only `LicensePolicy` is re-exported, because a caller
+// building the options object below has to name the type. Everything else about
+// licenses — resolving a row, validating an id, reading the table — is imported from
+// that package directly, so there is one place to look and nothing here to drift.
+export type { LicensePolicy } from "@galaxy-foundry/license-policy";
 
 export {
   loadTagRegistry,

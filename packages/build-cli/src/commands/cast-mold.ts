@@ -27,8 +27,13 @@ import Ajv2020Import from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
+import {
+  bundledPolicy,
+  resolveLicenseRow,
+  type LicensePolicy,
+} from "@galaxy-foundry/license-policy";
+
 import { readMarkdown } from "../lib/frontmatter.js";
-import { loadLicensePolicy, resolveLicenseRow, type LicensePolicy } from "../lib/license-policy.js";
 import {
   aggregateRequiredTools,
   requiredToolRows,
@@ -1011,11 +1016,12 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
 // *presence* rules live in the validator, where `upstream` scoping distinguishes
 // Foundry-authored license annotations from genuine third-party redistribution.
 // Returns error strings for any policy violation.
+// `repoRoot` is still needed: the table says what a licence permits, but `license_file`
+// points into the tree being cast, and only that tree can be hashed.
 function applyLicensePolicy(entries: ProvenanceRefEntry[], repoRoot: string): string[] {
-  // Load the policy table only when a ref actually redistributes licensed content,
-  // so bundles/casts with no third-party refs don't require the table to exist.
+  // Parse the shipped table only when a ref actually redistributes licensed content.
   if (!entries.some((e) => e.license)) return [];
-  const policy: LicensePolicy = loadLicensePolicy(repoRoot);
+  const policy: LicensePolicy = bundledPolicy();
   const errors: string[] = [];
   for (const e of entries) {
     if (!e.license) continue;

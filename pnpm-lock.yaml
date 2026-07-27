@@ -30,6 +30,9 @@ importers:
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
+      '@galaxy-foundry/license-policy':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:packages/note-schema
@@ -84,6 +87,9 @@ importers:
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
+      '@galaxy-foundry/license-policy':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../note-schema
@@ -152,6 +158,9 @@ importers:
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.2.1
         version: 0.2.1(zod@3.25.76)
+      '@galaxy-foundry/license-policy':
+        specifier: ^0.1.0
+        version: 0.1.0
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.1
@@ -236,6 +245,9 @@ importers:
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../packages/foundry
+      '@galaxy-foundry/license-policy':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../packages/note-schema
@@ -945,6 +957,10 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       zod: ^3.25.0
+
+  '@galaxy-foundry/license-policy@0.1.0':
+    resolution: {integrity: sha512-dn4D0TgbK9mbpww4gVj6j1NYVRKIy5GFqmx7aJZcaPqhiNlRrqvab7+NyOSmRY4dYUjCQa1uLVKuVJFhN8DFzQ==}
+    engines: {node: '>=20'}
 
   '@galaxy-tool-util/cli@1.10.0':
     resolution: {integrity: sha512-K4KDHl/AsBudimBpmIjT6u85qFExY+XKKehiWeaEJcB8CPkvZULkf5JjwW2gLvB3HVxo2bnD7bWeZmVNFMNWdQ==}
@@ -4187,6 +4203,10 @@ snapshots:
   '@galaxy-foundry/kind-manifest@0.2.1(zod@3.25.76)':
     dependencies:
       zod: 3.25.76
+
+  '@galaxy-foundry/license-policy@0.1.0':
+    dependencies:
+      js-yaml: 4.1.1
 
   '@galaxy-tool-util/cli@1.10.0':
     dependencies:

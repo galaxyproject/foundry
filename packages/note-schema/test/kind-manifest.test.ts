@@ -15,12 +15,12 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { bundledPolicy } from "@galaxy-foundry/license-policy";
 import {
   KINDS,
   KIND_MANIFEST_VERSION,
   MANIFEST_SOURCE,
   buildKindManifest,
-  loadLicensePolicy,
   loadReferenceContract,
   loadTagRegistry,
   parseKindManifest,
@@ -32,7 +32,7 @@ const repoRoot = path.resolve(here, "../../..");
 const registries = {
   tags: loadTagRegistry(path.join(repoRoot, "meta_tags.yml")),
   contract: loadReferenceContract(path.join(repoRoot, "reference_contract.yml")),
-  licensePolicy: loadLicensePolicy(repoRoot),
+  licensePolicy: bundledPolicy(),
 };
 
 const INSTANCE = "galaxy-workflow-foundry";

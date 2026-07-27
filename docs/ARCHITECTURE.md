@@ -213,9 +213,11 @@ const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
 
 Hidden directories skipped. Casts directory (`casts/`) is **always skipped** — it's generated content, validated by casting tooling separately.
 
-**One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver lives in `scripts/lib/wiki-links.ts` (the site re-exports from it or imports via path alias). The **frontmatter schema, reference contract, and license policy** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
+**One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver lives in `scripts/lib/wiki-links.ts` (the site re-exports from it or imports via path alias). The **frontmatter schema and reference contract** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
 
-`tests/validate.test.ts` (Vitest) builds the *real* shared schema (from `meta_tags.yml` + `reference_contract.yml` + `license-policy.yml`) and exercises `validateData` (unit) and `validateDirectory` (integration with `tmp` directories).
+The **license → redistribution-policy table** goes one step further: it is shared across Foundry *instances*, not just across our own consumers, so it ships in `@galaxy-foundry/license-policy` rather than sitting at our repo root. `bundledPolicy()` reads the copy inside that dependency; changing a row is a version bump there, not an edit here. What stays ours is *coherence* — whether a given note is consistent with its licence (`validateSchemaVendoring`) — because that rule genuinely differs between instances.
+
+`tests/validate.test.ts` (Vitest) builds the *real* shared schema (from `meta_tags.yml` + `reference_contract.yml` + the packaged license table) and exercises `validateData` (unit) and `validateDirectory` (integration with `tmp` directories).
 
 ## 7. Wiki links
 

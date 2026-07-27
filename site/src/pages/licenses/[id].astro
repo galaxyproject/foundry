@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { getLicenses, licenseIdFromFile } from '../../lib/licenses';
-import { resolveLicenseRow } from '@galaxy-foundry/note-schema';
+import { resolveLicenseRow } from '@galaxy-foundry/license-policy';
 import { licensePolicy } from '../../lib/registries';
 
 export async function getStaticPaths() {

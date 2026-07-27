@@ -13,6 +13,7 @@
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
     "@galaxy-foundry/foundry": "workspace:*",
+    "@galaxy-foundry/license-policy": "^0.1.0",
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-tool-util/cli": "^1.8.1",
     "@galaxy-tool-util/schema": "^1.7.2",

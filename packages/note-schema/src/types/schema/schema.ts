@@ -1,6 +1,6 @@
+import { resolveLicenseRow } from "@galaxy-foundry/license-policy";
 import { z } from "zod";
 
-import { resolveLicenseRow } from "../../license-policy.js";
 import { type KindContext, defineKind } from "../context.js";
 
 // Schema-local: package bin / subcommand names for the validator this note documents.

@@ -13,8 +13,8 @@ import {
   loadReferenceContract,
   type NoteSchema,
 } from "@galaxy-foundry/note-schema";
+import { bundledPolicy, resolveLicenseRow } from "@galaxy-foundry/license-policy";
 import { readMarkdown } from "../lib/frontmatter.js";
-import { loadLicensePolicy, resolveLicenseRow } from "../lib/license-policy.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadTagRegistry } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, ValidationResult } from "../lib/types.js";
@@ -557,10 +557,9 @@ function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossF
   const findings: CrossFileFinding[] = [];
   const repoRoot =
     path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
-  // Load the policy table lazily, only when a check actually needs to resolve a
-  // license row, so license-free content trees validate without it.
-  let policy: ReturnType<typeof loadLicensePolicy> | undefined;
-  const getPolicy = () => (policy ??= loadLicensePolicy(repoRoot));
+  // The table ships with the package rather than sitting in the tree being validated,
+  // so a content tree no longer has to carry a copy to be checked against it.
+  const getPolicy = bundledPolicy;
 
   // Reconcile with the license → redistribution-policy table (foundry-pattern#4):
   // an own-words-only license redistributes nothing verbatim, so it must NOT ship
@@ -1368,12 +1367,10 @@ export function validateDirectory(opts: ValidateOptions): {
   warnings: number;
   filesChecked: number;
 } {
-  const repoRoot =
-    path.basename(opts.directory) === "content" ? path.dirname(opts.directory) : opts.directory;
   const schema = buildNoteSchema({
     tags: loadTagRegistry(opts.tagsPath),
     contract: loadReferenceContract(),
-    licensePolicy: loadLicensePolicy(repoRoot),
+    licensePolicy: bundledPolicy(),
   });
 
   let errorCount = 0;
