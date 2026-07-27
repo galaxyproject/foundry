@@ -168,7 +168,7 @@ The frontmatter contract is the zod schema built by `buildNoteSchema` in `@galax
 
   Other inline phase kinds — e.g., `gate` for an approval / scope-confirmation checkpoint — are coined when they first appear inline. The phase-kind set is **open**; we don't pre-enumerate. `branch` and `gate` are unrelated behaviors and don't share an umbrella.
 
-**Mold = typed reference manifest.** A Mold's frontmatter declares operational dependencies through `references:` plus explicit IO schema fields. `MOLD_SPEC.md` owns the authoring contract, and `reference_contract.yml` owns the vocabulary for kind, usage timing, load behavior, transform mode, and evidence labels. Producer-owned `output_artifacts[].schema` links resolve to `type: schema` notes; consumers inherit schema contracts through shared artifact `id`s. The validator resolves each kind with its own check; casting dispatches per kind — see `COMPILATION_PIPELINE.md`.
+**Mold = typed reference manifest.** A Mold's frontmatter declares operational dependencies through `references:` plus explicit IO schema fields. `MOLD_SPEC.md` owns the authoring contract. `reference_contract.yml` owns the vocabulary for kind — the one part that varies by domain — while usage timing, load behavior, transform mode, and evidence labels describe the compilation machinery and are inherited from `@galaxy-foundry/reference-contract`. Producer-owned `output_artifacts[].schema` links resolve to `type: schema` notes; consumers inherit schema contracts through shared artifact `id`s. The validator resolves each kind with its own check; casting dispatches per kind — see `COMPILATION_PIPELINE.md`.
 
 **Wiki-link frontmatter fields** (regex `^\[\[.+\]\]$`):
 - `parent_pattern` (single, optional).
@@ -217,7 +217,7 @@ Hidden directories skipped. Casts directory (`casts/`) is **always skipped** —
 
 The **license → redistribution-policy table** goes one step further: it is shared across Foundry *instances*, not just across our own consumers, so it ships in `@galaxy-foundry/license-policy` rather than sitting at our repo root. `bundledPolicy()` reads the copy inside that dependency; changing a row is a version bump there, not an edit here. What stays ours is *coherence* — whether a given note is consistent with its licence (`validateSchemaVendoring`) — because that rule genuinely differs between instances.
 
-`tests/validate.test.ts` (Vitest) builds the *real* shared schema (from `meta_tags.yml` + `reference_contract.yml` + the packaged license table) and exercises `validateData` (unit) and `validateDirectory` (integration with `tmp` directories).
+`tests/validate.test.ts` (Vitest) builds the *real* shared schema (from `meta_tags.yml` + `reference_contract.yml` + the packaged reference-contract and license tables) and exercises `validateData` (unit) and `validateDirectory` (integration with `tmp` directories).
 
 ## 7. Wiki links
 

@@ -161,6 +161,9 @@ importers:
       '@galaxy-foundry/license-policy':
         specifier: ^0.1.0
         version: 0.1.0
+      '@galaxy-foundry/reference-contract':
+        specifier: ^0.1.0
+        version: 0.1.0
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.1
@@ -251,6 +254,9 @@ importers:
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../packages/note-schema
+      '@galaxy-foundry/reference-contract':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@galaxy-tool-util/cli':
         specifier: ^1.8.1
         version: 1.10.0
@@ -960,6 +966,10 @@ packages:
 
   '@galaxy-foundry/license-policy@0.1.0':
     resolution: {integrity: sha512-dn4D0TgbK9mbpww4gVj6j1NYVRKIy5GFqmx7aJZcaPqhiNlRrqvab7+NyOSmRY4dYUjCQa1uLVKuVJFhN8DFzQ==}
+    engines: {node: '>=20'}
+
+  '@galaxy-foundry/reference-contract@0.1.0':
+    resolution: {integrity: sha512-rOfkD8PQ02HW5p3AoiK1WZXbAV7YO6qa9xUvFhXiQcAXjId8ugF0+fpXCJLrDsVH9mAFXSXNhTbrGhqvYBeeiw==}
     engines: {node: '>=20'}
 
   '@galaxy-tool-util/cli@1.10.0':
@@ -4205,6 +4215,10 @@ snapshots:
       zod: 3.25.76
 
   '@galaxy-foundry/license-policy@0.1.0':
+    dependencies:
+      js-yaml: 4.1.1
+
+  '@galaxy-foundry/reference-contract@0.1.0':
     dependencies:
       js-yaml: 4.1.1
 

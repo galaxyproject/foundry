@@ -15,6 +15,7 @@
     "@galaxy-foundry/foundry": "workspace:*",
     "@galaxy-foundry/license-policy": "^0.1.0",
     "@galaxy-foundry/note-schema": "workspace:*",
+    "@galaxy-foundry/reference-contract": "^0.1.0",
     "@galaxy-tool-util/cli": "^1.8.1",
     "@galaxy-tool-util/schema": "^1.7.2",
     "@tailwindcss/typography": "^0.5.19",
