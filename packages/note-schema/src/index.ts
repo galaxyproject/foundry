@@ -4,6 +4,16 @@
 export { buildNoteSchema, type BuildNoteSchemaOptions, type NoteSchema } from "./note-schema.js";
 
 export {
+  COLLECTIONS,
+  COLLECTION_NAMES,
+  collectionOf,
+  kindOf,
+  matchesCollection,
+  type CollectionDefinition,
+  type CollectionName,
+} from "./collections.js";
+
+export {
   KINDS,
   KINDS_BY_NAME,
   buildKindContext,
