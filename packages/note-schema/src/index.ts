@@ -27,6 +27,7 @@ export {
   KINDS_BY_NAME,
   buildKindContext,
   defineKind,
+  type AnyKindDefinition,
   type KindContext,
   type KindDefinition,
   type KindShape,
