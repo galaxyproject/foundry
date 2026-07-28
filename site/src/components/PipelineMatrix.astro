@@ -1,9 +1,8 @@
 ---
-import { getAllNotes } from '../lib/notes';
+import { getCollection } from 'astro:content';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const all = await getAllNotes();
-const pipelines = all.filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived');
+const pipelines = (await getCollection('pipelines')).filter(n => n.data.status !== 'archived');
 
 const SOURCES = ['paper', 'cwl', 'nextflow'] as const;
 const TARGETS = ['galaxy', 'cwl'] as const;
@@ -20,13 +19,13 @@ const grid = new Map<string, Cell>();
 for (const src of SOURCES) for (const tgt of TARGETS) grid.set(`${src}|${tgt}`, null);
 
 for (const p of pipelines) {
-  const tags: string[] = (p.data as any).tags ?? [];
+  const tags = p.data.tags;
   const src = tags.find(t => t.startsWith('source/'))?.split('/')[1];
   const tgt = tags.find(t => t.startsWith('target/'))?.split('/')[1];
   if (!src || !tgt) continue;
   const key = `${src}|${tgt}`;
   if (!grid.has(key)) continue;
-  const d = p.data as any;
+  const d = p.data;
   grid.set(key, {
     slug: p.id,
     title: d.title,

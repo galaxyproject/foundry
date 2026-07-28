@@ -1,24 +1,23 @@
 ---
-import { getAllNotes } from '../../lib/notes';
+import { getCollection } from 'astro:content';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import Base from '../../layouts/Base.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const all = await getAllNotes();
-const molds = all.filter(n => n.data.type === 'mold' && n.data.status !== 'archived');
+const molds = (await getCollection('molds')).filter(n => n.data.status !== 'archived');
 const evalCount = molds.filter(m => hasEval(m.id)).length;
 
 // Group by axis.
 const AXES = ['source-specific', 'target-specific', 'tool-specific', 'generic'] as const;
 const byAxis = new Map<string, typeof molds>();
 for (const m of molds) {
-  const ax = (m.data as any).axis;
+  const ax = m.data.axis;
   const list = byAxis.get(ax) ?? [];
   list.push(m);
   byAxis.set(ax, list);
 }
-for (const [, list] of byAxis) list.sort((a, b) => (a.data as any).name.localeCompare((b.data as any).name));
+for (const [, list] of byAxis) list.sort((a, b) => a.data.name.localeCompare(b.data.name));
 
 function hasEval(id: string): boolean {
   const evalPath = fileURLToPath(new URL(`../../../../content/${id}/eval.md`, import.meta.url));
@@ -26,7 +25,7 @@ function hasEval(id: string): boolean {
 }
 
 function healthFor(m: typeof molds[number]): 'ok' | 'warn' | 'error' {
-  const d = m.data as any;
+  const d = m.data;
   if (d.axis === 'source-specific' && !d.source) return 'error';
   if (d.axis === 'target-specific' && !d.target) return 'error';
   if (d.axis === 'tool-specific' && !d.tool) return 'error';
@@ -77,7 +76,7 @@ function healthFor(m: typeof molds[number]): 'ok' | 'warn' | 'error' {
         </div>
         <div class="card-grid">
           {list.map(m => {
-            const d = m.data as any;
+            const d = m.data;
             const spec = d.source ?? d.target ?? d.tool ?? null;
             const health = healthFor(m);
             const evalPresent = hasEval(m.id);

@@ -1,15 +1,14 @@
 ---
-import { getAllNotes } from '../../../lib/notes';
+import { getCollection } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const all = await getAllNotes();
-const sourcePatterns = all
-  .filter(n => n.data.type === 'source-pattern' && (n.data as any).source === 'nextflow' && n.data.status !== 'archived')
-  .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
+const sourcePatterns = (await getCollection('source-patterns'))
+  .filter(n => n.data.source === 'nextflow' && n.data.status !== 'archived')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
 
-const maps = sourcePatterns.filter(p => (p.data as any).source_pattern_kind === 'moc');
-const leaves = sourcePatterns.filter(p => (p.data as any).source_pattern_kind !== 'moc');
+const maps = sourcePatterns.filter(p => p.data.source_pattern_kind === 'moc');
+const leaves = sourcePatterns.filter(p => p.data.source_pattern_kind !== 'moc');
 
 function formatKind(kind: string): string {
   return kind.replace(/-/g, ' ');
@@ -46,7 +45,7 @@ function formatKind(kind: string): string {
       </div>
       <div class="source-pattern-grid source-pattern-grid-maps">
         {maps.map(pattern => {
-          const data = pattern.data as any;
+          const data = pattern.data;
           return (
             <article class="source-pattern-card source-pattern-card-map tinted-shadow tinted-shadow-hover">
               <div class="source-pattern-card-top">
@@ -72,7 +71,7 @@ function formatKind(kind: string): string {
     ) : (
       <div class="source-pattern-grid">
         {leaves.map(pattern => {
-          const data = pattern.data as any;
+          const data = pattern.data;
           const implementedBy = data.implemented_by_patterns?.length ?? 0;
           return (
             <article class="source-pattern-card tinted-shadow tinted-shadow-hover">
