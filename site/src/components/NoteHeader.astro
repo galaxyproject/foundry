@@ -1,8 +1,8 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from '../lib/notes';
 
 interface Props {
-  entry: CollectionEntry<'content'>;
+  entry: NoteEntry;
   pageTitle: string;
   typeLabel: string;
   eyebrow?: string;

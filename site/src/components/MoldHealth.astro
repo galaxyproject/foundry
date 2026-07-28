@@ -1,14 +1,14 @@
 ---
+import { type NoteEntry } from '../lib/notes';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import type { CollectionEntry } from 'astro:content';
 import HealthPanel from './HealthPanel.astro';
 import { resolveWikiLinkId, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
 
 interface Props {
-  entry: CollectionEntry<'content'>;
+  entry: NoteEntry;
   linkMap: Map<string, WikiLinkTarget>;
-  entryById: Map<string, CollectionEntry<'content'>>;
+  entryById: Map<string, NoteEntry>;
 }
 
 interface HealthItem {

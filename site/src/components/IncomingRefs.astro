@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from '../lib/notes';
 import type { Backlink } from '../lib/wiki-links';
 
 interface Props {
-  incoming: (Backlink & { source: CollectionEntry<'content'> })[];
+  incoming: (Backlink & { source: NoteEntry })[];
 }
 
 const { incoming } = Astro.props;
@@ -18,7 +18,7 @@ const FIELD_LABELS: Record<string, string> = {
   output_artifact_schema: 'schema of artifact output',
 };
 
-function fileTitle(entry: CollectionEntry<'content'>): string {
+function fileTitle(entry: NoteEntry): string {
   const data = entry.data as any;
   if (data.title) return data.title;
   if (data.name) return data.name;

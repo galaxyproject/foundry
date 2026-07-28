@@ -1,12 +1,12 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from '../lib/notes';
 import type { WikiLinkTarget } from '../lib/wiki-links';
 import PhaseGraph from './PhaseGraph.astro';
 import StopGapBanner from './StopGapBanner.astro';
 import { loadAssembly, assemblyStats } from '../lib/casts';
 
 interface Props {
-  entry: CollectionEntry<'content'>;
+  entry: NoteEntry;
   linkMap: Map<string, WikiLinkTarget>;
 }
 

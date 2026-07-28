@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import RunPipelines from '../../components/RunPipelines.astro';
 import { listAllCasts, loadAssembly } from '../../lib/casts';
@@ -7,12 +7,12 @@ import { listAllCasts, loadAssembly } from '../../lib/casts';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const casts = listAllCasts();
 
-const runnablePipelines = (await getCollection('content'))
+const runnablePipelines = (await getAllNotes())
   .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
   .filter(p => loadAssembly(p.id.split('/').pop()!)).length;
 
 // Resolve mold backlinks by name → entry slug.
-const molds = (await getCollection('content')).filter(e => e.data.type === 'mold');
+const molds = (await getAllNotes()).filter(e => e.data.type === 'mold');
 const moldByName = new Map<string, string>();
 for (const m of molds) {
   const name = (m.data as any).name;

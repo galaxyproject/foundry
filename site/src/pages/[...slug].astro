@@ -1,5 +1,6 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getAllNotes } from '../lib/notes';
+import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NoteHeader from '../components/NoteHeader.astro';
 import NoteMeta from '../components/NoteMeta.astro';
@@ -17,7 +18,7 @@ import { buildWikiLinkMap, buildBacklinkMap } from '../lib/wiki-links';
 import { buildArtifactGraph } from '../lib/artifacts';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('content');
+  const entries = await getAllNotes();
   return entries.map(entry => ({
     params: { slug: entry.id },
     props: { entry },
@@ -27,7 +28,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
-const allEntries = await getCollection('content');
+const allEntries = await getAllNotes();
 const linkMap = buildWikiLinkMap(allEntries);
 const backlinkMap = buildBacklinkMap(allEntries, linkMap);
 const artifactGraph = buildArtifactGraph(allEntries, linkMap);

@@ -1,11 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import Base from '../../layouts/Base.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const all = await getCollection('content');
+const all = await getAllNotes();
 const molds = all.filter(n => n.data.type === 'mold' && n.data.status !== 'archived');
 const evalCount = molds.filter(m => hasEval(m.id)).length;
 

@@ -3,7 +3,7 @@
 // runnable harness-card grid. Mounted on /usage/ (variant="full") above the
 // Mold casts, and on /pipelines/ (variant="text") below the catalog table.
 // Single source for the run story — edit here, both surfaces follow.
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../lib/notes';
 import StopGapBanner from './StopGapBanner.astro';
 import { loadAssembly, assemblyStats } from '../lib/casts';
 
@@ -13,7 +13,7 @@ interface Props {
 const { variant = 'full' } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-const pipelines = (await getCollection('content'))
+const pipelines = (await getAllNotes())
   .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
   .map(p => {
     const slug = p.id.split('/').pop()!;
