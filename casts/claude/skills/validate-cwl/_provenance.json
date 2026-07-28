@@ -5,10 +5,10 @@
     "name": "validate-cwl",
     "path": "content/molds/validate-cwl/index.md",
     "revision": 3,
-    "content_hash": "a5ce29374816394f67661d637605401d0f164ef5d93db344a73f5b6f19702c78",
-    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
+    "content_hash": "772d8dd9082df825c33645a6868f63e781355257c0a7d1a371a3bea4eee6dc75",
+    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
   },
-  "cast_at": "2026-07-24T14:19:42.025Z",
+  "cast_at": "2026-07-28T01:44:40.214Z",
   "refs": [],
   "artifacts": {
     "produces": [],

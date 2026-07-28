@@ -10,6 +10,7 @@
 
 import { type LicensePolicy, isValidLicenseId } from "@galaxy-foundry/license-policy";
 import { type TagRegistry } from "@galaxy-foundry/tag-registry";
+import { WIKI_LINK_RE } from "@galaxy-foundry/wiki-links";
 import { z } from "zod";
 
 import { contractKeys, type ReferenceContract } from "./../reference-contract.js";
@@ -78,7 +79,9 @@ export interface KindContext {
 export function buildKindContext(options: BuildKindContextOptions): KindContext {
   const { tags, contract, licensePolicy } = options;
 
-  const wikiLink = z.string().regex(/^\[\[.+\]\]$/, { message: "must be a [[wiki-link]]" });
+  // The shape check is the package's regex, not a local copy — the same grammar the site,
+  // the validator and the caster resolve against.
+  const wikiLink = z.string().regex(WIKI_LINK_RE, { message: "must be a [[wiki-link]]" });
 
   // Tag membership check (meta_tags.yml): valid iff some facet declares the tag under its
   // `values`. Never a prefix match — `target/not-a-real-thing` is as invalid as `nonsense`,

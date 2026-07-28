@@ -11,7 +11,13 @@
 
 import { resolveWikiLink as resolve } from "@galaxy-foundry/wiki-links";
 
-export { WIKI_LINK_RE, slugify, stripBrackets } from "@galaxy-foundry/wiki-links";
+export {
+  WIKI_LINK_RE,
+  WIKI_LINK_SCAN_RE,
+  parseWikiLink,
+  slugify,
+  stripBrackets,
+} from "@galaxy-foundry/wiki-links";
 
 export function resolveWikiLink(wikiLink: unknown, slugToPath: Map<string, string>): string | null {
   return resolve(wikiLink, slugToPath) ?? null;

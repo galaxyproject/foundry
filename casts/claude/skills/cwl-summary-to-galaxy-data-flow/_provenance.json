@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
     "content_hash": "390a704aa29b7ed17f49d0204d4a770ad7146cfeaa682b7ceb6ecf34e64184b0",
-    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
+    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
   },
-  "cast_at": "2026-07-24T14:49:58.588Z",
+  "cast_at": "2026-07-28T01:44:05.982Z",
   "refs": [
     {
       "kind": "pattern",
@@ -95,8 +95,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Default reference for translating CWL when:/pickValue branching: pick among `paired_or_unpaired` collection input, native `pick_value` workflow step, or sibling workflows per mode.",
-      "src_hash": "9194d5f0f0851ba2f3dece053d8a71cc53c9bdbdaa747b79528b34f770764ba4",
-      "dst_hash": "9194d5f0f0851ba2f3dece053d8a71cc53c9bdbdaa747b79528b34f770764ba4",
+      "src_hash": "44706c61cadc5e5eb0e0346a3a02f2fc7c5994e4cadd0535f33bb1d2a4b4af87",
+      "dst_hash": "44706c61cadc5e5eb0e0346a3a02f2fc7c5994e4cadd0535f33bb1d2a4b4af87",
       "source": "deterministic"
     },
     {

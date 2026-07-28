@@ -5,10 +5,10 @@
     "name": "debug-cwl-workflow-output",
     "path": "content/molds/debug-cwl-workflow-output/index.md",
     "revision": 3,
-    "content_hash": "368710e2c3c15d34ac9a9552cb498fa1619522e2924f0c3ee0c0a6111361c25f",
-    "commit": "540e04c26b41b02336b3581b55521b916c7fe330"
+    "content_hash": "59053fa99f9971df986393d5dd8d31a4483bef6d55f02ac75a09a7ff013e906c",
+    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
   },
-  "cast_at": "2026-07-24T14:25:52.402Z",
+  "cast_at": "2026-07-28T01:44:11.420Z",
   "refs": [],
   "artifacts": {
     "produces": [

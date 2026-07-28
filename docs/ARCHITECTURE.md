@@ -221,11 +221,13 @@ The **license → redistribution-policy table** goes one step further: it is sha
 
 ## 7. Wiki links
 
-**Frontmatter wiki-link fields**: `parent_pattern`, `related_notes`, `related_patterns`, `related_molds`. All regex `^\[\[.+\]\]$`.
+**Frontmatter wiki-link fields**: `parent_pattern`, `related_notes`, `related_patterns`, `related_molds`. All shape-checked against `WIKI_LINK_RE` from the package — the zod schemas in `@galaxy-foundry/note-schema` import it rather than restating the pattern, as do the two site components that ask whether a string is link-shaped.
 
 **Format**: `[[Target Name]]`. Pipe-aliasing supported in body (`[[Target|display]]`) by the remark plugin; not in frontmatter.
 
 **A backtick means the syntax, not a link.** Wiki links inside `inlineCode`, a fenced block, or raw HTML are left exactly as written — that is how this document names the token, and how a note names a slot it cannot link (`[[summary-<source>]]` in `content/research/gxy-sketches-alignment.md`). Only text is rewritten.
+
+The rule cuts both ways, and the second edge is sharp: **`validateBodyWikiLinks` strips code spans before it scans**, so a backticked link is not merely unrendered — it is unchecked. It can name a note that never existed and nothing will say so. The corpus had accumulated 63 real citations written that way, invisible on both surfaces at once; they were unwrapped in one sweep. What stays deliberately wrapped is exactly the literal cases: the placeholder above, the field shapes the glossary and the schema notes quote (`mold: [[...]]`), the three "deep-link a `$def` via `[[note#Anchor]]`" illustrations, and two shell commands where `[[:space:]]` is a POSIX character class and not a wiki link at all.
 
 **Resolution algorithm.** The grammar and the lookup rule ship in `@galaxy-foundry/wiki-links`, shared with the sibling Foundry and the pattern site. The validator, the caster, the site page renderer and the remark transformer all resolve through it, so they cannot answer differently. What stays ours is the MAP — which notes exist and what each is addressable by.
 

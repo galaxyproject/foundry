@@ -1,3 +1,4 @@
+import { WIKI_LINK_RE } from "@galaxy-foundry/wiki-links";
 import { z } from "zod";
 
 import { sourceKinds, targetKinds, type KindContext, defineKind } from "../context.js";
@@ -11,10 +12,7 @@ const outputArtifact = z
     id: artifactId,
     kind: z.enum(["json", "markdown", "yaml", "text", "other"]),
     default_filename: z.string().min(1),
-    schema: z
-      .string()
-      .regex(/^\[\[.+\]\]$/)
-      .optional(),
+    schema: z.string().regex(WIKI_LINK_RE).optional(),
     description: z.string().min(20),
   })
   .strict();

@@ -48,7 +48,7 @@ The shape:
 - **`source`** — where the cache entry came from (`toolshed`, `galaxy`, `local`, `orphan`, `unknown`), with the raw cache-index `label`, origin URL, and cached-at timestamp.
 - **`artifacts`** — filesystem paths to `<cache_key>.json` and (later) `<cache_key>.source` so consumers can reload or pass-through the raw bytes. Local debugging only; not stable across machines. `raw_tool_source_path` is `null` until [galaxy-tool-util-ts#82](https://github.com/jmchilton/galaxy-tool-util-ts/issues/82) ships the raw-source storage path.
 - **`parsed_tool`** — upstream `ParsedTool` payload, owned by `@galaxy-tool-util/schema`. Validated against `parsedToolSchema`; see [[parsed-tool]] for the inner shape. The Foundry schema does not duplicate this model.
-- **`input_schemas`** — generated JSON Schemas for the `workflow_step` and `workflow_step_linked` representations, suitable for direct binding by `[[implement-galaxy-tool-step]]`. Either entry is `null` when generation fails, in which case `warnings[]` carries the reason.
+- **`input_schemas`** — generated JSON Schemas for the `workflow_step` and `workflow_step_linked` representations, suitable for direct binding by [[implement-galaxy-tool-step]]. Either entry is `null` when generation fails, in which case `warnings[]` carries the reason.
 
 ## Scope and v2 follow-ups
 

@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { CollectionEntry } from 'astro:content';
 import HealthPanel from './HealthPanel.astro';
-import { resolveWikiLinkId, type WikiLinkTarget } from '../lib/wiki-links';
+import { resolveWikiLinkId, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
 
 interface Props {
   entry: CollectionEntry<'content'>;
@@ -45,7 +45,7 @@ function referenceFindings(): HealthItem[] {
   const refs = Array.isArray(data.references) ? data.references : [];
   const items: HealthItem[] = [];
   const unresolved = refs.filter((ref: any) => {
-    if (typeof ref?.ref !== 'string' || !/^\[\[.+\]\]$/.test(ref.ref)) return false;
+    if (typeof ref?.ref !== 'string' || !WIKI_LINK_RE.test(ref.ref)) return false;
     return !resolveWikiLinkId(ref.ref, linkMap);
   });
   const missingTriggers = refs.filter((ref: any) => ref?.load === 'on-demand' && !ref.trigger);

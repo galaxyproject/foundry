@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-interface/index.md",
     "revision": 2,
     "content_hash": "832d555724596f2b3c7cfdc7dd1b356f69097b054b7d2c0784543e555fe5a0bf",
-    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
+    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
   },
-  "cast_at": "2026-07-24T14:49:59.893Z",
+  "cast_at": "2026-07-28T01:44:07.231Z",
   "refs": [
     {
       "kind": "research",
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick among the three honest Galaxy branching translations (paired_or_unpaired input, native pick_value step, sibling workflows) before drafting the interface.",
       "trigger": "When summary-cwl has any steps[].when non-null OR any workflow output uses pickValue.",
-      "src_hash": "9194d5f0f0851ba2f3dece053d8a71cc53c9bdbdaa747b79528b34f770764ba4",
-      "dst_hash": "9194d5f0f0851ba2f3dece053d8a71cc53c9bdbdaa747b79528b34f770764ba4",
+      "src_hash": "44706c61cadc5e5eb0e0346a3a02f2fc7c5994e4cadd0535f33bb1d2a4b4af87",
+      "dst_hash": "44706c61cadc5e5eb0e0346a3a02f2fc7c5994e4cadd0535f33bb1d2a4b4af87",
       "source": "deterministic"
     },
     {

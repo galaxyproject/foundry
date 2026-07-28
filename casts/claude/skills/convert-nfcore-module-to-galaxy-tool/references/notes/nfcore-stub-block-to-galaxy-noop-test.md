@@ -88,6 +88,6 @@ In all three the convert Mold's deliverable is identical: tool.xml + macros.xml 
 
 ## See also
 
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
+- [[convert-nfcore-module-to-galaxy-tool]] — Mold that consumes this note.
 - `planemo test` — the runtime sink that makes the drop safe.
 - `planemo lint` — the XML-shape gate that fills in for the DAG-resolution part of `-stub-run`.

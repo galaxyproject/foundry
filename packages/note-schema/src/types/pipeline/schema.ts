@@ -1,3 +1,4 @@
+import { WIKI_LINK_RE } from "@galaxy-foundry/wiki-links";
 import { z } from "zod";
 
 import { type KindContext, defineKind } from "../context.js";
@@ -6,15 +7,15 @@ import { type KindContext, defineKind } from "../context.js";
 // else composes Molds, so the phase grammar stays here.
 const branchItem: z.ZodType<unknown> = z.lazy(() =>
   z.union([
-    z.string().regex(/^\[\[.+\]\]$/),
+    z.string().regex(WIKI_LINK_RE),
     z.string(), // free-text terminal like "user-supplied"
-    z.object({ fallthrough: z.string().regex(/^\[\[.+\]\]$/) }).strict(),
+    z.object({ fallthrough: z.string().regex(WIKI_LINK_RE) }).strict(),
   ]),
 );
 
 const moldPhase = z
   .object({
-    mold: z.string().regex(/^\[\[.+\]\]$/, { message: "must be a [[wiki-link]]" }),
+    mold: z.string().regex(WIKI_LINK_RE, { message: "must be a [[wiki-link]]" }),
     loop: z.boolean().optional(),
   })
   .strict();

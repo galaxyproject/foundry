@@ -1,5 +1,5 @@
 ---
-import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+import { resolveWikiLink, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
 
 interface Props {
   phases: any[];
@@ -18,7 +18,7 @@ function resolved(wl: string) {
 }
 
 function isWikiLink(s: string): boolean {
-  return /^\[\[.+\]\]$/.test(s);
+  return WIKI_LINK_RE.test(s);
 }
 ---
 

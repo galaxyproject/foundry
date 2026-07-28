@@ -45,7 +45,7 @@ When the CWL `when:` predicates discriminate the **paired-vs-single mode of read
 - The `pickValue` fan-in disappears — both branches feed the same wrapper, branching happens inside the wrapper via `has_single_item`.
 - Result: one workflow, fewer steps, no synthetic merge.
 
-See `[[galaxy-paired-or-unpaired-collections]]` for the type itself and the decision rule.
+See [[galaxy-paired-or-unpaired-collections]] for the type itself and the decision rule.
 
 ### Translation B — native `pick_value` workflow step (preferred for non-collection-shaped branches, post galaxy#22222)
 
@@ -55,7 +55,7 @@ When the CWL `pickValue` is on the workflow output (or a step input) but the dis
 - A `type: pick_value` step with `state.mode: <cwl_mode>` fans in the branch outputs.
 - Workflow output reads from the `pick_value` step's `output`.
 
-See `[[cwl-pickvalue-to-galaxy]]` for the full mapping (mode table, gxformat2 surface, gotchas, version floor).
+See [[cwl-pickvalue-to-galaxy]] for the full mapping (mode table, gxformat2 surface, gotchas, version floor).
 
 ### Translation C — sibling workflows per mode (preferred when IWC convention exists or modes diverge structurally)
 
@@ -71,7 +71,7 @@ Evidence: `EBI-Metagenomics/pipeline-v5` → IWC ports `amplicon/amplicon-mgnify
 
 Decision walk for the data-flow Mold:
 
-1. **Is the discriminator paired-vs-single reads (or a near-cousin: optional File? read inputs gated by `when:`)?** → A. Translation B/C are fallbacks if `paired_or_unpaired` cannot model the shape (e.g., scatter/nesting depth limit; see `[[galaxy-paired-or-unpaired-collections]]` §"Limitation: only deepest rank").
+1. **Is the discriminator paired-vs-single reads (or a near-cousin: optional File? read inputs gated by `when:`)?** → A. Translation B/C are fallbacks if `paired_or_unpaired` cannot model the shape (e.g., scatter/nesting depth limit; see [[galaxy-paired-or-unpaired-collections]] §"Limitation: only deepest rank").
 2. **Does an IWC port of the same upstream pipeline exist as sibling workflows?** → C, *unless* updating to `paired_or_unpaired` (A) is explicitly an upgrade. Surface both options in `compare-against-iwc-exemplar`'s comparison notes.
 3. **Does the workflow output use `pickValue: all_non_null` (collection aggregation), or does the branching produce structurally divergent outputs that need first-non-null/the-only-non-null fan-in?** → B.
 4. **None of the above (custom predicate, non-paired-mode `when:`)** → B (default to native `pick_value`). Use C only if the branches share *no* downstream structure.
@@ -95,8 +95,8 @@ Translation B (native `pick_value`) requires Galaxy ≥ `main` 2026-03-31 (galax
 
 ## Citations
 
-- `[[cwl-pickvalue-to-galaxy]]` — full PR analysis of galaxy#22222 (the native `pick_value` module).
-- `[[galaxy-paired-or-unpaired-collections]]` — the discriminated-union collection type and the `paired ⊏ paired_or_unpaired` subtyping lattice.
+- [[cwl-pickvalue-to-galaxy]] — full PR analysis of galaxy#22222 (the native `pick_value` module).
+- [[galaxy-paired-or-unpaired-collections]] — the discriminated-union collection type and the `paired ⊏ paired_or_unpaired` subtyping lattice.
 - IWC sibling-workflows convention: `amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-quality-control-paired-end` and `…-single-end` in the IWC corpus.
 - Run-dir evidence for the discriminator-classification trap: `casts/claude/_emulated-runs/mgnify-seqprep-subwf/cwl-galaxy-interface.md` (the under-read Option A) vs the now-recommended translation A.
 

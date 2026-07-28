@@ -110,11 +110,11 @@ The convert Mold defaults to (1) because it preserves the rest of Galaxy's input
 
 - **Don't double-quote the bag in `<command>`.** `'$extra_args'` injects literal quotes around the entire string, breaking the user's quoting.
 - **Watch for `${task.cpus}` interpolation.** nf-core scripts use `${task.cpus}` for thread counts; Galaxy's analog is `\${GALAXY_SLOTS:-1}`. Translate this directly; it does **not** belong in the args bag.
-- **Don't surface `task.ext.prefix`.** Modules use it for output filenames; Galaxy's `$input.element_identifier` is the right substitute. See `[[nfcore-meta-map-to-galaxy-params]]`.
+- **Don't surface `task.ext.prefix`.** Modules use it for output filenames; Galaxy's `$input.element_identifier` is the right substitute. See [[nfcore-meta-map-to-galaxy-params]].
 - **`task.ext.when`** is the conditional gate for whether the process runs. It has no Galaxy analog (Galaxy's tool runs unconditionally when invoked); ignore.
 
 ## See also
 
-- `[[nfcore-meta-map-to-galaxy-params]]` — sibling: handling identity vs behavior keys.
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
+- [[nfcore-meta-map-to-galaxy-params]] — sibling: handling identity vs behavior keys.
+- [[convert-nfcore-module-to-galaxy-tool]] — Mold that consumes this note.
 - `tools-iuc/tools/fastp/fastp.xml` — IUC's per-flag promotion choice (option 2 above).

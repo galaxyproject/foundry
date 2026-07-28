@@ -6,9 +6,9 @@
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 2,
     "content_hash": "580b8bd6c36ad2ac98835525a0455a4ac2135eefd9c5c218db6c89103911fe3b",
-    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
+    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
   },
-  "cast_at": "2026-07-24T14:49:54.890Z",
+  "cast_at": "2026-07-28T01:44:01.732Z",
   "refs": [
     {
       "kind": "cli-command",

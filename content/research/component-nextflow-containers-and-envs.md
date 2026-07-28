@@ -41,11 +41,11 @@ related_notes:
 
 # Nextflow Containers and Environments
 
-Operational grounding for `[[summarize-nextflow]]` §5 ("Build the tool registry"). Resolves the regex-pinned URL grammar a static walker needs to bucket each NF process's `container` and `conda` directives into the right `tools[]` field, and surfaces the cases the cast skill must recognize but cannot resolve without runtime help.
+Operational grounding for [[summarize-nextflow]] §5 ("Build the tool registry"). Resolves the regex-pinned URL grammar a static walker needs to bucket each NF process's `container` and `conda` directives into the right `tools[]` field, and surfaces the cases the cast skill must recognize but cannot resolve without runtime help.
 
 Companion structured form: `component-nextflow-containers-and-envs.yml` (regex + example + derivation rule per form). Agents and resolver code consume the YAML; this prose note explains the *why* and pins the canonical examples.
 
-Cross-link rather than restate: ternary directive mechanics, `nextflow inspect` runtime resolution, and the `nf-core download` flow are documented in `[[component-nextflow-inspect]]` and `[[component-nf-core-tools]]`. This note is grammar + bucketing rules.
+Cross-link rather than restate: ternary directive mechanics, `nextflow inspect` runtime resolution, and the `nf-core download` flow are documented in [[component-nextflow-inspect]] and [[component-nf-core-tools]]. This note is grammar + bucketing rules.
 
 ## Sources of truth
 
@@ -237,12 +237,12 @@ These are not warnings to log; they are forms the bucketing rules above must con
 - **Modern ternary predicate variant.** `workflow.containerEngine in ['singularity', 'apptainer']` (current nf-core template) and `workflow.containerEngine == 'singularity'` (older form, still in the Mold's prose) must both parse.
 - **`task.ext.singularity_pull_docker_container` toggle.** Per-task override that flips the ternary to the docker branch even under Singularity. Effectively unused in committed nf-core configs (0 hits), but the directive expression must still parse cleanly.
 - **`conf/modules.config` `withName:` overrides.** Pipeline-level `process { withName: 'PROC' { container = '...' } }` blocks override the module-level directive. The pipeline template ships these by convention — see `nf_core/pipeline-template/conf/modules.config`. The cast skill cannot resolve these statically with regex over `.nf` files; either run `nextflow inspect` (which honors them) or surface the override as an unresolved directive.
-- **`params.*` interpolation in directives.** `container = "registry/${params.image_tag}"` resolves at config-build time. Without a `-params-file` or CLI override, interpolation produces `null`. See `[[component-nextflow-inspect]]` for the runtime behavior; the static walker should report the raw string.
+- **`params.*` interpolation in directives.** `container = "registry/${params.image_tag}"` resolves at config-build time. Without a `-params-file` or CLI override, interpolation produces `null`. See [[component-nextflow-inspect]] for the runtime behavior; the static walker should report the raw string.
 - **Closure-form directives.** `container = { task.ext.foo ? 'A' : 'B' }`. Nextflow allows the directive itself to be a closure rather than a GString. Less common than the GString ternary, but legal.
 - **Multi-tool processes.** A single process running multiple binaries (e.g. `dragmap | samtools`) backed by a mulled-v2 container. The Mold notes `Process.tool` is nullable for these — populate by linking to the `tools[]` mulled entry, not by splitting one process across multiple `tools[]` entries.
 - **Mixed BioContainer + Wave in one pipeline.** Common in 2025 nf-core: fastqc still ships a quay BioContainer, multiqc has migrated to Wave. Both forms appear in the same pipeline's `tools[]`. No special handling required if URL-prefix bucketing is used.
 
-## Galaxy UDT translation (handoff to `[[author-galaxy-tool-wrapper]]`)
+## Galaxy UDT translation (handoff to [[author-galaxy-tool-wrapper]])
 
 The `tools[]` block this Mold produces is the input contract for Galaxy user-defined tool dependency and container selection. The mapping is:
 
@@ -251,7 +251,7 @@ The `tools[]` block this Mold produces is the input contract for Galaxy user-def
 - `tools[].wave` alone → no Galaxy round-trip. The UDT authoring Mold must surface this as an unresolved tool.
 - `tools[].docker` alone → direct container evidence only when the image is fully qualified and versioned; otherwise require review.
 
-The `[[author-galaxy-tool-wrapper]]` Mold owns this translation; this note documents the contract on the producer side.
+The [[author-galaxy-tool-wrapper]] Mold owns this translation; this note documents the contract on the producer side.
 
 The safest default for newly authored Galaxy UDTs is a stable, fully qualified container image when one is directly evidenced:
 
@@ -270,7 +270,7 @@ Treat package evidence as directly usable for container search or review when ev
 - Nextflow `conda` directive with `bioconda::name=version`, `conda-forge::name=version`, or unqualified `name=version` for a known conda package.
 - `environment.yml` dependency entries with exact package pins from Bioconda or conda-forge.
 - nf-core module `environment.yml` with one primary tool package and exact version.
-- Existing Galaxy wrapper requirements from `[[summarize-galaxy-tool]]`; these should be reported as wrapper facts, not remapped.
+- Existing Galaxy wrapper requirements from [[summarize-galaxy-tool]]; these should be reported as wrapper facts, not remapped.
 
 Emit explicit UDT container values directly when evidence is one of:
 
@@ -388,13 +388,13 @@ Direct use of a Wave image as a UDT `container` is acceptable only when exact ru
 
 ### Existing Galaxy Wrapper Summaries
 
-`[[summarize-galaxy-tool]]` should not infer new Bioconda equivalences from container names. Existing wrappers are summarized as declared:
+[[summarize-galaxy-tool]] should not infer new Bioconda equivalences from container names. Existing wrappers are summarized as declared:
 
 - Keep `<requirement type="package">` entries as package facts.
 - Keep `<container>` entries as container facts.
 - Warn if the wrapper has only an explicit container and no package requirements, because downstream tooling may be less portable.
 
-Equivalence inference belongs to `[[author-galaxy-tool-wrapper]]`, where the Foundry is authoring new UDT YAML from source-process evidence.
+Equivalence inference belongs to [[author-galaxy-tool-wrapper]], where the Foundry is authoring new UDT YAML from source-process evidence.
 
 ## Reliability Ladder
 

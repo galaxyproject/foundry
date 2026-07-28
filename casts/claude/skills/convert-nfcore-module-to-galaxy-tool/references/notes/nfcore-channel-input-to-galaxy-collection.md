@@ -34,7 +34,7 @@ Cited modules pinned to `nf-core/modules@9b261a459473bc8e2d830bfc626f480c0733f4f
 | `tuple val(meta), path(reads, stageAs: "input*/*")` (multi-list) | yes (single/paired branching) | `<conditional>` switching `<param type="data" multiple="true">` ↔ `<param type="data_collection" collection_type="list:paired">` |
 | `tuple val(meta), path("*.bam")` glob | no | `<param type="data_collection" collection_type="list">` |
 
-The `meta` map itself is **never** an input — see `[[nfcore-meta-map-to-galaxy-params]]`. Its keys may *gate* a `<conditional>`, but the map data does not flow as a Galaxy param.
+The `meta` map itself is **never** an input — see [[nfcore-meta-map-to-galaxy-params]]. Its keys may *gate* a `<conditional>`, but the map data does not flow as a Galaxy param.
 
 ## Cited cases
 
@@ -107,7 +107,7 @@ if ( task.ext.args?.contains('--interleaved_in') ) {
 }
 ```
 
-Three branches: interleaved (driven by `task.ext.args` introspection — see `[[nfcore-task-ext-args-to-galaxy-additional-options]]`), single-end (driven by `meta.single_end == true`), paired (default). The first two are *meta- and args-driven* convergence onto a single-input shape; the third is the genuine paired shape.
+Three branches: interleaved (driven by `task.ext.args` introspection — see [[nfcore-task-ext-args-to-galaxy-additional-options]]), single-end (driven by `meta.single_end == true`), paired (default). The first two are *meta- and args-driven* convergence onto a single-input shape; the third is the genuine paired shape.
 
 `tools-iuc/tools/fastp/fastp.xml` (revision pinned by viewing master) shows the canonical Galaxy translation as a **two-arm** conditional:
 
@@ -134,7 +134,7 @@ Two reasons IUC chose `paired_collection` over a literal `paired` (in1 + in2 sep
 1. **Galaxy collection idiom.** Paired-end data in Galaxy lives in `paired` collections; pairing them into a collection at upload time is the recommended workflow shape (and the only shape that survives downstream collection-aware tools cleanly).
 2. **Single source of truth for the pair.** Two separate `data` params lets a user pair non-matching files; a paired collection enforces the pair structure at the dataset level.
 
-The convert Mold's posture should match IUC: emit `single` + `paired_collection` only. The interleaved-FASTQ path collapses into the `single` arm — `task.ext.args` carrying `--interleaved_in` is a usage choice the user makes via the additional-options bag (see `[[nfcore-task-ext-args-to-galaxy-additional-options]]`), not a third `<conditional>` arm.
+The convert Mold's posture should match IUC: emit `single` + `paired_collection` only. The interleaved-FASTQ path collapses into the `single` arm — `task.ext.args` carrying `--interleaved_in` is a usage choice the user makes via the additional-options bag (see [[nfcore-task-ext-args-to-galaxy-additional-options]]), not a third `<conditional>` arm.
 
 ### Multi-list (cat/fastq style) → `<conditional>` over multi-data + list:paired
 
@@ -142,14 +142,14 @@ The convert Mold's posture should match IUC: emit `single` + `paired_collection`
 
 ## Pitfalls
 
-- **Don't promote `meta.id` to a Galaxy input.** Galaxy datasets carry their own identifier (`$input.element_identifier`); `meta.id` belongs in the wrapper script, not in `<inputs>`. See `[[nfcore-meta-map-to-galaxy-params]]`.
+- **Don't promote `meta.id` to a Galaxy input.** Galaxy datasets carry their own identifier (`$input.element_identifier`); `meta.id` belongs in the wrapper script, not in `<inputs>`. See [[nfcore-meta-map-to-galaxy-params]].
 - **Glob inputs (`path('*.bam')`) ≠ `multiple="true"`.** They map to a `<param type="data_collection" collection_type="list">`, because Galaxy's collection abstraction is the right idiom for "N files of the same shape with stable identifiers." `multiple="true"` discards element identifiers.
 - **`stageAs:` directives carry information.** `path(reads, stageAs: "input*/*")` tells Nextflow to stage each read under a numbered subdirectory; the convert Mold should preserve this in `<command>` via `&& mkdir input1 input2 && ln -sf` style staging, not flatten to a single dir.
 - **Optional artifacts are `optional="true"`, not a separate `<conditional>` arm.** `tuple val(meta), path(adapter_fasta)` where `adapter_fasta` may be empty maps to `<param ... optional="true">`, not a paired/no-paired conditional.
 
 ## See also
 
-- `[[nfcore-meta-map-to-galaxy-params]]` — sibling: how to handle the `meta` map keys that travel with the data path.
-- `[[galaxy-discover-datasets]]` — reference for the `<discover_datasets>` element used in the glob-input mapping.
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
+- [[nfcore-meta-map-to-galaxy-params]] — sibling: how to handle the `meta` map keys that travel with the data path.
+- [[galaxy-discover-datasets]] — reference for the `<discover_datasets>` element used in the glob-input mapping.
+- [[convert-nfcore-module-to-galaxy-tool]] — Mold that consumes this note.
 - `tools-iuc/tools/fastp/fastp.xml` — canonical IUC paired/single conditional shape.
