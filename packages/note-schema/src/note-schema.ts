@@ -32,7 +32,7 @@ export function buildNoteSchema(options: BuildNoteSchemaOptions) {
 
   return z.discriminatedUnion("type", members).superRefine((d, issues) => {
     const definition = KINDS_BY_NAME.get((d as { type: string }).type);
-    definition?.refine?.(d as Record<string, unknown>, issues, ctx);
+    definition?.refine?.(d as never, issues, ctx);
   });
 }
 

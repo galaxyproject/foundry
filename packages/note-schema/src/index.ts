@@ -7,8 +7,10 @@ export {
   KINDS,
   KINDS_BY_NAME,
   buildKindContext,
+  defineKind,
   type KindContext,
   type KindDefinition,
+  type KindShape,
 } from "./types/index.js";
 
 export {
