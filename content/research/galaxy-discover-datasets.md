@@ -37,7 +37,7 @@ Two parents, slightly different behavior:
 | `<data>` | The primary dataset's siblings (and optionally the primary itself with `assign_primary_output="true"`) | Multiple history items derived from one `<data>` declaration |
 | `<collection>` | The elements of the collection | A `list`, `paired`, `list:paired`, or arbitrarily-nested collection |
 
-The convert Mold (`[[convert-nfcore-module-to-galaxy-tool]]`) reaches for `<discover_datasets>` inside `<collection>` whenever a Nextflow `output:` channel uses a glob (`path('*.bam')`) or names interpolated from runtime values; the corresponding Galaxy idiom needs to discover the matching files after the script runs.
+The convert Mold ([[convert-nfcore-module-to-galaxy-tool]]) reaches for `<discover_datasets>` inside `<collection>` whenever a Nextflow `output:` channel uses a glob (`path('*.bam')`) or names interpolated from runtime values; the corresponding Galaxy idiom needs to discover the matching files after the script runs.
 
 ## Two discovery modes
 
@@ -296,7 +296,7 @@ This needs a custom regex; no named pattern captures the `R1`/`R2` split into `i
 
 ### Rule 5 — `versions.yml` (the versions emit) → drop
 
-The `versions:` channel has no Galaxy analog (`<version_command>` covers it). Don't emit `<data>` or `<collection>` for it. See `[[nfcore-versions-emit-to-galaxy-version-command]]`.
+The `versions:` channel has no Galaxy analog (`<version_command>` covers it). Don't emit `<data>` or `<collection>` for it. See [[nfcore-versions-emit-to-galaxy-version-command]].
 
 ## Pitfalls
 
@@ -311,10 +311,10 @@ The `versions:` channel has no Galaxy analog (`<version_command>` covers it). Do
 
 ## See also
 
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this reference when emitting `<outputs>`.
-- `[[nfcore-channel-input-to-galaxy-collection]]` — companion: how to map input channels to data / collection params.
-- `[[galaxy-collection-semantics]]` — what map-over / reduction does to a collection at workflow time.
-- `[[planemo-asserts-idioms]]` — how to write assertions inside `<discovered_dataset>` / `<element>` bodies.
+- [[convert-nfcore-module-to-galaxy-tool]] — Mold that consumes this reference when emitting `<outputs>`.
+- [[nfcore-channel-input-to-galaxy-collection]] — companion: how to map input channels to data / collection params.
+- [[galaxy-collection-semantics]] — what map-over / reduction does to a collection at workflow time.
+- [[planemo-asserts-idioms]] — how to write assertions inside `<discovered_dataset>` / `<element>` bodies.
 - Galaxy XSD: `lib/galaxy/tool_util/xsd/galaxy.xsd` — authoritative attribute grammar.
 - Galaxy test tools: `test/functional/tools/multi_output*.xml`, `output_filter.xml`, `discover_sort_by.xml`, `collection_creates_dynamic_*.xml` — exhaustive coverage of supported shapes.
 - Planemo writing-advanced docs: "Multiple output files" — narrative tutorial.

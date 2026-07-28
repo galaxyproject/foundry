@@ -4,11 +4,11 @@
   "mold": {
     "name": "interview-to-freeform-summary",
     "path": "content/molds/interview-to-freeform-summary/index.md",
-    "revision": 2,
-    "content_hash": "a0a5f051eb9e0b46bd1f1eeb6b264aa51b56cf73c54be1ca6179216970ed5db1",
-    "commit": "7e21e08dee76406496df85fe6d41e5096879f55d"
+    "revision": 3,
+    "content_hash": "a6224538f5bb5226299f2cc956cdb31969f08f44b84b27c02f4b7b4143fb3e5f",
+    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
   },
-  "cast_at": "2026-07-01T23:45:59.691Z",
+  "cast_at": "2026-07-28T01:44:22.185Z",
   "refs": [],
   "artifacts": {
     "produces": [

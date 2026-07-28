@@ -76,7 +76,7 @@ if ( task.ext.args?.contains('--interleaved_in') ) {
 }
 ```
 
-`meta.single_end` gates a hard branch — the command line is materially different. The first branch (interleaved) is `task.ext.args`-driven, not meta-driven, and collapses into the single-input shape (see `[[nfcore-task-ext-args-to-galaxy-additional-options]]`). Galaxy mapping for the meta gate: a `<conditional name="single_paired">` whose selector drives both the `<inputs>` shape (per `[[nfcore-channel-input-to-galaxy-collection]]` — two arms `single` + `paired_collection`) and the `<command>` branching:
+`meta.single_end` gates a hard branch — the command line is materially different. The first branch (interleaved) is `task.ext.args`-driven, not meta-driven, and collapses into the single-input shape (see [[nfcore-task-ext-args-to-galaxy-additional-options]]). Galaxy mapping for the meta gate: a `<conditional name="single_paired">` whose selector drives both the `<inputs>` shape (per [[nfcore-channel-input-to-galaxy-collection]] — two arms `single` + `paired_collection`) and the `<command>` branching:
 
 ```xml
 <command><![CDATA[
@@ -113,5 +113,5 @@ Option 1 is right unless the upstream tool genuinely supports two distinct ident
 
 ## See also
 
-- `[[nfcore-channel-input-to-galaxy-collection]]` — sibling note: meta-driven input shape decisions.
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
+- [[nfcore-channel-input-to-galaxy-collection]] — sibling note: meta-driven input shape decisions.
+- [[convert-nfcore-module-to-galaxy-tool]] — Mold that consumes this note.

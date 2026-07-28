@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 8,
     "content_hash": "134786c1d73ac6751e72557fe299d0358d92fb401de1a2eabd1a3a83071d9093",
-    "commit": "6e680289256d4e7787fdce7ec6a851620711b407"
+    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
   },
-  "cast_at": "2026-07-24T14:50:20.100Z",
+  "cast_at": "2026-07-28T01:44:36.559Z",
   "refs": [
     {
       "kind": "cli-command",

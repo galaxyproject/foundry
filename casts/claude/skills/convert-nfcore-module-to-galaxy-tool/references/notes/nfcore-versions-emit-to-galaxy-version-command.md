@@ -109,5 +109,5 @@ Translation is identical: extract the `eval(...)` argument; emit one `<version_c
 
 ## See also
 
-- `[[convert-nfcore-module-to-galaxy-tool]]` — Mold that consumes this note.
+- [[convert-nfcore-module-to-galaxy-tool]] — Mold that consumes this note.
 - `tools-iuc/tools/fastp/fastp.xml` — IUC's `<version_command>` posture (often shorter than nf-core's because IUC wraps a single tool).

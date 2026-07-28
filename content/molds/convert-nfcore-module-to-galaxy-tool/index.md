@@ -130,7 +130,7 @@ related_notes:
 
 Convert **one nf-core module directory** into a Galaxy tool wrapper. Input is a path to `modules/nf-core/<name>/` (or any directory of the same shape: `main.nf` + `meta.yml` + `environment.yml` + optional `tests/`). Output is a self-contained tool dir: `tool.xml`, `macros.xml`, `_provenance.yml`, with `<test>` blocks pinned to remote `nf-core/test-datasets` URLs.
 
-The Mold authors a Galaxy tool XML wrapper directly from the nf-core module shape — the regular structure (`tuple(meta, path)` channels, `task.ext.args` escape hatch, versions emit, environment.yml bioconda pin) makes a mechanical mapping practical. It does **not** depend on `[[summarize-nextflow]]` — that Mold summarizes whole pipelines, the wrong granularity for one module.
+The Mold authors a Galaxy tool XML wrapper directly from the nf-core module shape — the regular structure (`tuple(meta, path)` channels, `task.ext.args` escape hatch, versions emit, environment.yml bioconda pin) makes a mechanical mapping practical. It does **not** depend on [[summarize-nextflow]] — that Mold summarizes whole pipelines, the wrong granularity for one module.
 
 The Mold is run per module by an outer harness (a script or human loop). Cross-module batches are not its concern.
 
@@ -215,7 +215,7 @@ The cast skill is **not a single LLM prompt**. It is a small program with embedd
 - **Deterministic:** read meta.yml / main.nf / environment.yml / tests/main.nf.test; tokenize the `process` block for input/output channels; resolve container directive into bioconda packages; compute file hashes; resolve git SHAs; emit `_provenance.yml` and the static portions of `<requirements>`, `<citations>`, `<version_command>`.
 - **LLM-driven:** translate the `script:` body into Galaxy `<command>` Cheetah; pick `<inputs>` shapes (data vs collection; conditional gating); name and document outputs; humanize `<help>`; place `<test>` block fixtures.
 
-The boundary mirrors `[[summarize-nextflow]]` §Procedure: enumerated artifacts deterministic, free-text fields LLM.
+The boundary mirrors [[summarize-nextflow]] §Procedure: enumerated artifacts deterministic, free-text fields LLM.
 
 ### 1. Read the module
 
@@ -225,25 +225,25 @@ Compute `sha256` of each file and capture for `_provenance.yml`.
 
 ### 2. Build `<requirements>`
 
-Walk `environment.yml.dependencies:`. Each `bioconda::<name>=<version>` becomes a Galaxy `<requirement type="package" version="<version>"><name></requirement>` entry. For mulled / multi-package environments, declare every package — bioconda's mulled-resolution produces an equivalent image (per `[[component-nextflow-containers-and-envs]]`).
+Walk `environment.yml.dependencies:`. Each `bioconda::<name>=<version>` becomes a Galaxy `<requirement type="package" version="<version>"><name></requirement>` entry. For mulled / multi-package environments, declare every package — bioconda's mulled-resolution produces an equivalent image (per [[component-nextflow-containers-and-envs]]).
 
 Record any forced divergence from upstream container choice in `_provenance.yml.overrides`.
 
 ### 3. Translate `<inputs>`
 
-Per `[[nfcore-channel-input-to-galaxy-collection]]`, decide the Galaxy input shape from the process's input channel cardinality. Per `[[nfcore-meta-map-to-galaxy-params]]`, triage meta-map keys into Galaxy params, conditionals, or drops.
+Per [[nfcore-channel-input-to-galaxy-collection]], decide the Galaxy input shape from the process's input channel cardinality. Per [[nfcore-meta-map-to-galaxy-params]], triage meta-map keys into Galaxy params, conditionals, or drops.
 
-Emit a final `extra_args` text param per `[[nfcore-task-ext-args-to-galaxy-additional-options]]` if (and only if) the script body interpolates `${task.ext.args}` / `args2` / `args3`.
+Emit a final `extra_args` text param per [[nfcore-task-ext-args-to-galaxy-additional-options]] if (and only if) the script body interpolates `${task.ext.args}` / `args2` / `args3`.
 
 ### 4. Translate `<outputs>`
 
-For each `output:` channel that isn't the `versions` emit, **decide cardinality first, then shape** (per `[[galaxy-discover-datasets]]` §*Convert Mold posture*). The Nextflow glob alone is not enough — `path('*.bam')` (N files, one per element of an upstream collection) and `path('*.{bai,csi,crai}')` (exactly one file, alternation across mutually-exclusive extensions) look the same but map to different Galaxy idioms.
+For each `output:` channel that isn't the `versions` emit, **decide cardinality first, then shape** (per [[galaxy-discover-datasets]] §*Convert Mold posture*). The Nextflow glob alone is not enough — `path('*.bam')` (N files, one per element of an upstream collection) and `path('*.{bai,csi,crai}')` (exactly one file, alternation across mutually-exclusive extensions) look the same but map to different Galaxy idioms.
 
 - **Single output, deterministic name** (`path("${prefix}.json")`) → `<data name="..." format="json" from_work_dir="${prefix}.json"/>`. No `<discover_datasets>`.
-- **Single output, variable extension** (alternation glob like `path("*.{bai,csi,crai}")`, or `path("${prefix}.${ext}")` where `ext` is computed): the channel emits **one** file whose extension depends on inputs or args. Map to a `<data>` with the most-common extension as `format=`, plus a `<change_format>` block that flips on the input ext or the responsible param. **Preserve the upstream invocation byte-for-byte** and capture the result with a tight `mv` — `ln -s '$input' 'input.${input.ext}'` to stage with the upstream-expected name, run the tool exactly as the nf-core `script:` body does, then `mv 'input.${input.ext}'.{bai,csi,crai} '$output_name'`. **Do not** use `<collection>` + `<discover_datasets>` for this shape — there is no list. Direct write to `'$output_name'` (instead of `mv`) is the secondary form, used only when the upstream `script:` body itself passes an output-path arg to the tool. See `[[galaxy-discover-datasets]]` §*Convert Mold posture* Rule 2 for the full pattern, including the variant and the `from_work_dir` callout.
+- **Single output, variable extension** (alternation glob like `path("*.{bai,csi,crai}")`, or `path("${prefix}.${ext}")` where `ext` is computed): the channel emits **one** file whose extension depends on inputs or args. Map to a `<data>` with the most-common extension as `format=`, plus a `<change_format>` block that flips on the input ext or the responsible param. **Preserve the upstream invocation byte-for-byte** and capture the result with a tight `mv` — `ln -s '$input' 'input.${input.ext}'` to stage with the upstream-expected name, run the tool exactly as the nf-core `script:` body does, then `mv 'input.${input.ext}'.{bai,csi,crai} '$output_name'`. **Do not** use `<collection>` + `<discover_datasets>` for this shape — there is no list. Direct write to `'$output_name'` (instead of `mv`) is the secondary form, used only when the upstream `script:` body itself passes an output-path arg to the tool. See [[galaxy-discover-datasets]] §*Convert Mold posture* Rule 2 for the full pattern, including the variant and the `from_work_dir` callout.
 - **Multi-output, list cardinality** (true glob like `path('*.bam')` where the upstream process emits N files keyed by element identifier) → `<collection type="list" name="..." format="bam">` with `<discover_datasets pattern="__name_and_ext__" visible="true"/>`.
 - **Multi-output, paired cardinality** (`tuple val(meta), path("*_R{1,2}.fastp.fastq.gz")`) → `<collection type="paired" ...>` with a custom `(?P<name>...)_R(?P<identifier_1>[12])...` regex.
-- **`versions` channel** → drop; the `<version_command>` carries that load (per `[[nfcore-versions-emit-to-galaxy-version-command]]`).
+- **`versions` channel** → drop; the `<version_command>` carries that load (per [[nfcore-versions-emit-to-galaxy-version-command]]).
 
 **Cardinality heuristic**: if the upstream `input:` channel is `tuple(meta, path)` (one item per process invocation) and `output:` emits one path per concept, the output is single — even when the path is glob-shaped. Process cardinality = output cardinality unless the script explicitly fans out.
 
@@ -259,7 +259,7 @@ Ask only for the Cheetah-flavored Galaxy command. Wrap in `<![CDATA[...]]>`. Set
 
 ### 6. Emit `<version_command>`
 
-Per `[[nfcore-versions-emit-to-galaxy-version-command]]`: extract the primary tool's version-emit line from the heredoc or `topic: versions` annotation, strip Nextflow escaping (`\$( → $(` etc.), and wrap in `<![CDATA[...]]>`.
+Per [[nfcore-versions-emit-to-galaxy-version-command]]: extract the primary tool's version-emit line from the heredoc or `topic: versions` annotation, strip Nextflow escaping (`\$( → $(` etc.), and wrap in `<![CDATA[...]]>`.
 
 ### 7. Emit `<citations>` and `<help>`
 
@@ -273,7 +273,7 @@ Read `tests/main.nf.test`. For each test that asserts a successful run with a no
 - Emit Galaxy `<param ... location="https://..."/>` for inputs.
 - For outputs, prefer `<output name="..." location="https://..." checksum="sha256$..."/>` (compute checksum from the upstream snapshot file when one exists; omit if not).
 
-When `tests/main.nf.test` has no usable fixture (stub-only coverage, missing test file), the convert Mold **does not ship a placeholder `<test>`**. It surfaces the gap in `_provenance.yml.overrides` and exits with a non-zero status; the harness escalates to human review. Every shipped wrapper carries at least one `<test>` block backed by a real fixture (per `[[nfcore-stub-block-to-galaxy-noop-test]]` and the reviewer Mold's dimension #6).
+When `tests/main.nf.test` has no usable fixture (stub-only coverage, missing test file), the convert Mold **does not ship a placeholder `<test>`**. It surfaces the gap in `_provenance.yml.overrides` and exits with a non-zero status; the harness escalates to human review. Every shipped wrapper carries at least one `<test>` block backed by a real fixture (per [[nfcore-stub-block-to-galaxy-noop-test]] and the reviewer Mold's dimension #6).
 
 ### 9. Emit `_provenance.yml`
 
@@ -310,7 +310,7 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the cast sk
 ## Non-goals
 
 - **Subworkflow conversion.** `meta.yml.components:` populated → out of scope. Routed to a separate Mold (not in this plan).
-- **Pipeline conversion.** Whole nf-core pipelines stay with `[[nextflow-to-galaxy]]`; this Mold runs at the module tier.
+- **Pipeline conversion.** Whole nf-core pipelines stay with [[nextflow-to-galaxy]]; this Mold runs at the module tier.
 - **Discovery / dedup against IUC.** The new repo coexists with IUC by design (different interface contract for the same upstream tool).
 - **Cross-module refactoring.** Per-module unit; harness owns batches.
 - **Tool Shed publication.** The output is a tool dir on disk; `.shed.yml` and shed publication live in the new repo's CI, not in this Mold.
@@ -320,11 +320,11 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the cast sk
 - **`meta.yml` may lie.** Hand-authored, can drift from `script:` IO. When the LLM-inferred IO disagrees with `meta.yml`, prefer `meta.yml` and surface the disagreement in `_provenance.yml.overrides`.
 - **Container directive ternaries** require pulling **both** branches; the bioconda pin from `environment.yml` is the source of truth for `<requirements>`. Don't substitute a hand-picked container source.
 - **`task.ext.args` with embedded Groovy logic** can't be cleanly mapped to a single text param. Surface as a text param **plus** a heavy `<help>` block; document the divergence in `_provenance.yml.overrides`.
-- **Stub-only tests.** When `tests/main.nf.test` has only stub-mode coverage (`-stub-run`), the convert Mold cannot derive a Galaxy `<test>` from it (per `[[nfcore-stub-block-to-galaxy-noop-test]]`). Surface the gap; let the harness decide whether to author a `<test>` by hand.
+- **Stub-only tests.** When `tests/main.nf.test` has only stub-mode coverage (`-stub-run`), the convert Mold cannot derive a Galaxy `<test>` from it (per [[nfcore-stub-block-to-galaxy-noop-test]]). Surface the gap; let the harness decide whether to author a `<test>` by hand.
 
 ## Reference dispatch (for casting)
 
-- `research` → the 5 nf-core→Galaxy translation notes (`[[nfcore-channel-input-to-galaxy-collection]]`, `[[nfcore-meta-map-to-galaxy-params]]`, `[[nfcore-task-ext-args-to-galaxy-additional-options]]`, `[[nfcore-versions-emit-to-galaxy-version-command]]`, `[[nfcore-stub-block-to-galaxy-noop-test]]`) plus `[[component-nf-core-tools]]`, `[[component-nextflow-containers-and-envs]]`, `[[galaxy-discover-datasets]]`. All copied verbatim into the cast bundle under `references/notes/`, loaded per each ref's `used_at`/`load`.
+- `research` → the 5 nf-core→Galaxy translation notes ([[nfcore-channel-input-to-galaxy-collection]], [[nfcore-meta-map-to-galaxy-params]], [[nfcore-task-ext-args-to-galaxy-additional-options]], [[nfcore-versions-emit-to-galaxy-version-command]], [[nfcore-stub-block-to-galaxy-noop-test]]) plus [[component-nf-core-tools]], [[component-nextflow-containers-and-envs]], [[galaxy-discover-datasets]]. All copied verbatim into the cast bundle under `references/notes/`, loaded per each ref's `used_at`/`load`.
 - `cli-tool` → [[planemo]] carries the pinned install metadata; flows into the cast bundle's `_required_tools.json` via the PR #235 mechanism.
 - `cli-command` → [[planemo-lint]] and [[planemo-test]] cast to JSON sidecars; consulted on-demand inside the §10 loop.
 - `schema` → [[planemo-test-report]] copied verbatim into the cast bundle; the convergence loop AJV-validates `--test_output_json` output against it before classifying failures.
