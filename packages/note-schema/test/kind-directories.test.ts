@@ -13,7 +13,7 @@ import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import { KINDS, buildNoteSchema, loadReferenceContract } from "../src/index.js";
+import { DEFINITIONS, KINDS, buildNoteSchema, loadReferenceContract } from "../src/index.js";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -49,6 +49,19 @@ describe("types/ kind directories", () => {
 
   it("declares no duplicate kind names", () => {
     expect(new Set(KINDS.map((k) => k.kind)).size).toBe(KINDS.length);
+  });
+
+  // DEFINITIONS is the by-name view the per-collection schemas are built from. It is written
+  // out by hand rather than derived from KINDS, because deriving it through a `.map` or a Map
+  // widens every entry to the default shape — the erasure this whole arrangement exists to
+  // avoid. Hand-written means it can disagree with the barrel, so: both directions, and each
+  // key must be the kind it points at rather than merely a kind that exists.
+  it("the by-name view holds exactly the barrel's kinds, keyed by their own names", () => {
+    expect(Object.keys(DEFINITIONS).sort()).toEqual(KINDS.map((k) => k.kind).sort());
+    const mismatched = Object.entries(DEFINITIONS)
+      .filter(([name, definition]) => definition.kind !== name)
+      .map(([name, definition]) => `${name} -> ${definition.kind}`);
+    expect(mismatched, `\nkeys not matching their kind: ${mismatched.join(", ")}`).toEqual([]);
   });
 
   const schema = buildNoteSchema({

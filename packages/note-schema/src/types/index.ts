@@ -34,6 +34,29 @@ export const KINDS = [
   prompt,
 ] as const;
 
+/**
+ * The same kinds, reachable BY NAME with their shapes intact.
+ *
+ * `KINDS_BY_NAME` cannot serve this purpose. A Map has one value type for every entry, so a
+ * lookup through it yields the widened `KindDefinition` and every field the caller knew about
+ * is gone. Named properties keep each kind precisely typed, which is what lets a per-collection
+ * schema carry its own frontmatter type all the way to the Astro pages.
+ *
+ * Keys are the `type:` discriminator values, so `DEFINITIONS[COLLECTIONS[c].kind]` resolves to
+ * exactly one kind rather than to a union of nine.
+ */
+export const DEFINITIONS = {
+  mold,
+  pattern,
+  "source-pattern": sourcePattern,
+  "cli-tool": cliTool,
+  "cli-command": cliCommand,
+  pipeline,
+  research,
+  schema: schemaNote,
+  prompt,
+} as const;
+
 type BuiltKind<K> = K extends { build: (...args: never[]) => infer R } ? R : never;
 
 /** Each kind's union member, in barrel order, with its shape preserved. */
