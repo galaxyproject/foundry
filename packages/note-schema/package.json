@@ -41,6 +41,7 @@
     "@galaxy-foundry/license-policy": "^0.1.0",
     "@galaxy-foundry/reference-contract": "^0.1.0",
     "@galaxy-foundry/tag-registry": "^0.1.0",
+    "@galaxy-foundry/wiki-links": "^0.1.0",
     "js-yaml": "^4.1.0",
     "zod": "^3.25.76"
   },

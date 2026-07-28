@@ -1,6 +1,10 @@
 import { resolveWikiLink as resolve, slugify } from '@galaxy-foundry/wiki-links';
 import type { CollectionEntry } from 'astro:content';
 
+// Components asking "is this string a wiki link at all?" get the package's answer, not their
+// own regex. Re-exported here so a component has one import for everything link-shaped.
+export { WIKI_LINK_RE } from '@galaxy-foundry/wiki-links';
+
 // The MAP is ours: which notes exist, and what each is addressable by — a basename, a Mold's
 // `name`, a `tool command` pair. The grammar and the lookup rule are not, and now come from
 // @galaxy-foundry/wiki-links, so the site, the validator and the caster cannot answer

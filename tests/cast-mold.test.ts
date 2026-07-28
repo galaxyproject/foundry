@@ -1031,3 +1031,32 @@ license_file: LICENSES/test.LICENSE
     }
   });
 });
+
+// A cast bundle is read outside the site, so the SKILL.md body carries the wiki link's human
+// text and drops the syntax. No mold body in this corpus uses an anchor or an alias, so
+// re-casting every skill cannot exercise those branches — they are only covered here.
+describe("stripWikiLinks", () => {
+  it("keeps the bare target, drops an anchor, and prefers an explicit alias", async () => {
+    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    expect(stripWikiLinks("See [[summarize-nextflow]] first.")).toBe("See summarize-nextflow first.");
+    expect(stripWikiLinks("See [[summarize-nextflow#Procedure]].")).toBe("See summarize-nextflow.");
+    expect(stripWikiLinks("See [[summarize-nextflow|the summary Mold]].")).toBe(
+      "See the summary Mold.",
+    );
+    expect(stripWikiLinks("See [[summarize-nextflow#Procedure|its procedure]].")).toBe(
+      "See its procedure.",
+    );
+  });
+
+  it("rewrites every link on a line and leaves text without links alone", async () => {
+    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    expect(stripWikiLinks("Per [[a]] and [[b]], do the thing.")).toBe("Per a and b, do the thing.");
+    expect(stripWikiLinks("No links here at all.")).toBe("No links here at all.");
+  });
+
+  // A payload that yields no text would otherwise delete itself silently.
+  it("leaves a degenerate payload as authored rather than emitting nothing", async () => {
+    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    expect(stripWikiLinks("An [[#anchor-only]] ref.")).toBe("An [[#anchor-only]] ref.");
+  });
+});

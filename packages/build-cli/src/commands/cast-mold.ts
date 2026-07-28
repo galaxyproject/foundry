@@ -41,7 +41,13 @@ import {
 } from "../lib/required-tools.js";
 import type { Frontmatter } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
-import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
+import {
+  parseWikiLink,
+  resolveWikiLink,
+  slugify,
+  WIKI_LINK_RE,
+  WIKI_LINK_SCAN_RE,
+} from "../lib/wiki-links.js";
 
 type AjvValidator = {
   compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
@@ -1049,10 +1055,21 @@ function scalar(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function stripWikiLinks(text: string): string {
-  return text.replace(/\[\[([^\]#|]+)(?:#[^\]|]+)?(?:\|([^\]]+))?\]\]/g, (_m, target, label) =>
-    String(label || target).trim(),
-  );
+// A cast bundle is read outside the site, where `[[a#b|c]]` addresses nothing — so the
+// SKILL.md body carries the human text and drops the syntax.
+//
+// The grammar is the package's, not another regex here. This function used to hand-roll a
+// fifth copy of `[[target#anchor|display]]`, which is exactly the drift the shared package
+// exists to stop.
+export function stripWikiLinks(text: string): string {
+  return text.replace(WIKI_LINK_SCAN_RE, (whole) => {
+    const link = parseWikiLink(whole);
+    if (!link) return whole;
+    // An explicit alias wins. Without one, `display` is the whole address, so fall back to
+    // the bare target and drop the anchor.
+    const label = link.display === `${link.target}${link.anchor}` ? link.target : link.display;
+    return label.trim() || whole;
+  });
 }
 
 function runtimeProcedureBody(body: string, moldName: string): string {
