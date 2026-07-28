@@ -1,8 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
-import { visit, SKIP } from 'unist-util-visit';
-import type { Root, Text, PhrasingContent } from 'mdast';
+import remarkWikiLinks from '@galaxy-foundry/wiki-links/remark';
+import { resolveWikiLink, slugify } from '@galaxy-foundry/wiki-links';
+import type { Root } from 'mdast';
+
+// The map is ours — a filesystem walk, because this runs at markdown-compile time when
+// astro:content is not available yet. The walk over the tree, the `[[a#b|c]]` grammar and
+// the lookup rule come from @galaxy-foundry/wiki-links, so this file and
+// site/src/lib/wiki-links.ts can no longer drift. See docs/ARCHITECTURE.md §7.
 
 interface Target {
   id: string;
@@ -13,14 +19,6 @@ interface Target {
 interface Options {
   contentDir: string;
   base: string;
-}
-
-function slugify(name: string): string {
-  return name.toLowerCase()
-    .replace(/\s+-\s+/g, '-')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9\-]/g, '')
-    .replace(/-+/g, '-');
 }
 
 function slugifyPath(rel: string): string {
@@ -83,69 +81,19 @@ function buildMap(contentDir: string): Map<string, Target> {
   return map;
 }
 
-function resolve(label: string, map: Map<string, Target>): Target | null {
-  const slug = slugify(label);
-  const exact = map.get(slug);
-  if (exact) return exact;
-  for (const [basename, target] of map) {
-    if (basename.startsWith(slug)) return target;
-  }
-  return null;
-}
-
-const WIKI_RE = /\[\[([^\]\n]+)\]\]/g;
-
-export default function remarkWikiLinks(opts: Options) {
+export default function remarkWikiLinksPlugin(opts: Options) {
   let cache: Map<string, Target> | null = null;
   const getMap = () => (cache ??= buildMap(opts.contentDir));
   const baseTrim = opts.base.replace(/\/$/, '');
 
-  return function transformer(tree: Root) {
-    const map = getMap();
-    visit(tree, 'text', (node: Text, index, parent) => {
-      if (!parent || index === undefined) return;
-      if (parent.type === 'link' || parent.type === 'linkReference') return;
-      const value = node.value;
-      if (!value.includes('[[')) return;
+  const transform = remarkWikiLinks({
+    resolve: (link) => {
+      const t = resolveWikiLink(link.target, getMap());
+      return t ? { href: `${baseTrim}/${t.id}/`, title: t.summary ?? null } : null;
+    },
+  });
 
-      const replacements: PhrasingContent[] = [];
-      let last = 0;
-      let m: RegExpExecArray | null;
-      WIKI_RE.lastIndex = 0;
-      while ((m = WIKI_RE.exec(value)) !== null) {
-        if (m.index > last) {
-          replacements.push({ type: 'text', value: value.slice(last, m.index) });
-        }
-        const inner = m[1];
-        if (inner === undefined) continue;
-        const pipe = inner.indexOf('|');
-        const target = pipe >= 0 ? inner.slice(0, pipe) : inner;
-        const display = pipe >= 0 ? inner.slice(pipe + 1) : inner;
-        const hashIdx = target.indexOf('#');
-        const pageTarget = hashIdx >= 0 ? target.slice(0, hashIdx) : target;
-        const anchor = hashIdx >= 0 ? target.slice(hashIdx) : '';
-        const t = resolve(pageTarget, map);
-        if (t) {
-          replacements.push({
-            type: 'link',
-            url: `${baseTrim}/${t.id}/${anchor}`,
-            title: t.summary ?? null,
-            children: [{ type: 'text', value: display }],
-          });
-        } else {
-          replacements.push({
-            type: 'strong',
-            children: [{ type: 'text', value: display }],
-          });
-        }
-        last = m.index + m[0].length;
-      }
-      if (last === 0) return;
-      if (last < value.length) {
-        replacements.push({ type: 'text', value: value.slice(last) });
-      }
-      (parent.children as PhrasingContent[]).splice(index, 1, ...replacements);
-      return [SKIP, index + replacements.length];
-    });
+  return function transformer(tree: Root) {
+    transform(tree);
   };
 }

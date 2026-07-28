@@ -1,4 +1,10 @@
+import { resolveWikiLink as resolve, slugify } from '@galaxy-foundry/wiki-links';
 import type { CollectionEntry } from 'astro:content';
+
+// The MAP is ours: which notes exist, and what each is addressable by — a basename, a Mold's
+// `name`, a `tool command` pair. The grammar and the lookup rule are not, and now come from
+// @galaxy-foundry/wiki-links, so the site, the validator and the caster cannot answer
+// differently. See docs/ARCHITECTURE.md §7.
 
 export interface WikiLinkTarget {
   id: string;
@@ -24,39 +30,22 @@ export function buildWikiLinkMap(entries: CollectionEntry<'content'>[]): Map<str
   return map;
 }
 
-function slugify(name: string): string {
-  return name.toLowerCase()
-    .replace(/\s+-\s+/g, '-')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9\-]/g, '')
-    .replace(/-+/g, '-');
-}
-
-function stripBrackets(wikiLink: string): string {
-  return wikiLink.replace(/^\[\[/, '').replace(/\]\]$/, '');
-}
-
-/** Resolve a `[[...]]` wiki link to an entry href + summary. */
+/**
+ * Resolve a `[[...]]` wiki link to an entry href + summary.
+ *
+ * `label` stays the raw payload, anchor and all, because the components render it as the
+ * link text and several of them show `[[note#section]]` deliberately.
+ */
 export function resolveWikiLink(
   wikiLink: string,
   linkMap: Map<string, WikiLinkTarget>,
   base: string
 ): { href: string | null; label: string; summary: string | null } {
-  const label = stripBrackets(wikiLink);
+  const label = wikiLink.replace(/^\[\[/, '').replace(/\]\]$/, '');
   const hashIdx = label.indexOf('#');
-  const pageLabel = hashIdx >= 0 ? label.slice(0, hashIdx) : label;
   const anchor = hashIdx >= 0 ? label.slice(hashIdx) : '';
-  const slug = slugify(pageLabel);
-
-  if (linkMap.has(slug)) {
-    const t = linkMap.get(slug)!;
-    return { href: `${base}/${t.id}/${anchor}`, label, summary: t.summary };
-  }
-  for (const [basename, target] of linkMap) {
-    if (basename.startsWith(slug)) {
-      return { href: `${base}/${target.id}/${anchor}`, label, summary: target.summary };
-    }
-  }
+  const target = resolve(wikiLink, linkMap);
+  if (target) return { href: `${base}/${target.id}/${anchor}`, label, summary: target.summary };
   return { href: null, label, summary: null };
 }
 
@@ -64,15 +53,7 @@ export function resolveWikiLinkId(
   wikiLink: string,
   linkMap: Map<string, WikiLinkTarget>
 ): string | null {
-  const label = stripBrackets(wikiLink);
-  const hashIdx = label.indexOf('#');
-  const pageLabel = hashIdx >= 0 ? label.slice(0, hashIdx) : label;
-  const slug = slugify(pageLabel);
-  if (linkMap.has(slug)) return linkMap.get(slug)!.id;
-  for (const [basename, target] of linkMap) {
-    if (basename.startsWith(slug)) return target.id;
-  }
-  return null;
+  return resolve(wikiLink, linkMap)?.id ?? null;
 }
 
 export type BacklinkField =

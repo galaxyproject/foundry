@@ -48,6 +48,9 @@ importers:
       '@galaxy-foundry/tag-registry':
         specifier: ^0.1.0
         version: 0.1.0
+      '@galaxy-foundry/wiki-links':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -100,6 +103,9 @@ importers:
         specifier: workspace:*
         version: link:../planemo-cli-meta
       '@galaxy-foundry/tag-registry':
+        specifier: ^0.1.0
+        version: 0.1.0
+      '@galaxy-foundry/wiki-links':
         specifier: ^0.1.0
         version: 0.1.0
       ajv:
@@ -267,6 +273,9 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-foundry/tag-registry':
+        specifier: ^0.1.0
+        version: 0.1.0
+      '@galaxy-foundry/wiki-links':
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-tool-util/cli':
@@ -986,6 +995,10 @@ packages:
 
   '@galaxy-foundry/tag-registry@0.1.0':
     resolution: {integrity: sha512-BhMI6R0QChol9+gnQZH0TFXcP7mM1145XElC2N3s6C3sXCpUIZ2shs7/l23buZLEMR6t/rQih3Tm1vY9IjK5Bw==}
+    engines: {node: '>=20'}
+
+  '@galaxy-foundry/wiki-links@0.1.0':
+    resolution: {integrity: sha512-9s8R1CEwlBleYhuqitHpxJ1TrKnwq6A+DnFM1xBd9Nh+JFzdxKzY7QyarbAeV+ttjduzp79gkhJDrYYF7fsSlw==}
     engines: {node: '>=20'}
 
   '@galaxy-tool-util/cli@1.10.0':
@@ -4241,6 +4254,8 @@ snapshots:
   '@galaxy-foundry/tag-registry@0.1.0':
     dependencies:
       js-yaml: 4.1.1
+
+  '@galaxy-foundry/wiki-links@0.1.0': {}
 
   '@galaxy-tool-util/cli@1.10.0':
     dependencies:
