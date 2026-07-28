@@ -47,6 +47,7 @@
     "@galaxy-foundry/planemo-test-report-schema": "workspace:*",
     "@galaxy-foundry/summarize-nextflow": "workspace:*",
     "@galaxy-foundry/tag-registry": "^0.1.0",
+    "@galaxy-foundry/wiki-links": "^0.1.0",
     "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",

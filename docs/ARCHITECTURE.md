@@ -213,7 +213,7 @@ const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
 
 Hidden directories skipped. Casts directory (`casts/`) is **always skipped** — it's generated content, validated by casting tooling separately.
 
-**One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver lives in `scripts/lib/wiki-links.ts` (the site re-exports from it or imports via path alias). The **frontmatter schema and reference contract** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
+**One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver now lives one level further out, in `@galaxy-foundry/wiki-links`, shared across Foundry instances; `packages/build-cli/src/lib/wiki-links.ts` and `site/src/lib/wiki-links.ts` are thin adapters over it that add this instance's map and return shapes. The **frontmatter schema and reference contract** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
 
 The **license → redistribution-policy table** goes one step further: it is shared across Foundry *instances*, not just across our own consumers, so it ships in `@galaxy-foundry/license-policy` rather than sitting at our repo root. `bundledPolicy()` reads the copy inside that dependency; changing a row is a version bump there, not an edit here. What stays ours is *coherence* — whether a given note is consistent with its licence (`validateSchemaVendoring`) — because that rule genuinely differs between instances.
 
@@ -225,15 +225,17 @@ The **license → redistribution-policy table** goes one step further: it is sha
 
 **Format**: `[[Target Name]]`. Pipe-aliasing supported in body (`[[Target|display]]`) by the remark plugin; not in frontmatter.
 
-**Resolution algorithm.** Single shared module (`scripts/lib/wiki-links.ts`); validator, site page renderer, and the remark transformer all import the same `slugify` and `resolveWikiLink`.
+**A backtick means the syntax, not a link.** Wiki links inside `inlineCode`, a fenced block, or raw HTML are left exactly as written — that is how this document names the token, and how a note names a slot it cannot link (`[[summary-<source>]]` in `content/research/gxy-sketches-alignment.md`). Only text is rewritten.
+
+**Resolution algorithm.** The grammar and the lookup rule ship in `@galaxy-foundry/wiki-links`, shared with the sibling Foundry and the pattern site. The validator, the caster, the site page renderer and the remark transformer all resolve through it, so they cannot answer differently. What stays ours is the MAP — which notes exist and what each is addressable by.
 
 ```
 slug = lower(name) → "  -  " → "-" → spaces → "-" → strip [^a-z0-9-] → collapse dashes
 ```
 
-Lookup: **exact match on a basename-keyed map first, then prefix-match fallback**. Directory-based notes (`molds/<slug>/index.md`) are keyed by their parent directory name. Lets `[[implement-galaxy-tool-step]]` resolve to `content/molds/implement-galaxy-tool-step/index.md`.
+Lookup: **exact match on a basename-keyed map. Nothing else.** Directory-based notes (`molds/<slug>/index.md`) are keyed by their parent directory name. Lets `[[implement-galaxy-tool-step]]` resolve to `content/molds/implement-galaxy-tool-step/index.md`.
 
-Prefix-match candidates are sorted **shortest-first, then alphabetically** — `[[foo-b]]` resolves to `foo-bar` rather than `foo-bar-baz`, which is what an author typing a partial stub almost always means. Deterministic across runs.
+There is **no prefix-match fallback**. There used to be, sorted shortest-first, on the theory that it completed a stub an author had half-typed. Resolving all 3,108 corpus links both ways showed it changed the answer for exactly one: `[[...]]` in `content/meta/glossary.md`, which slugifies to the empty string and therefore prefix-matched all 264 map keys, landing on whichever came first. It never once completed a real stub, so an unresolved link now stays visibly unresolved — bold in the body, a validator warning in `--check`.
 
 **Backlinks** computed only from typed frontmatter fields (bounded, fast, author-controlled). Each note page renders an "Incoming References" section grouped by field. Body wiki links are rendered inline but do not contribute backlink edges.
 
@@ -397,7 +399,7 @@ Stack:
 - **`tsx`** to run TS scripts directly (no compile step in dev); `tsc --noEmit` for typecheck in CI.
 - **zod** for the frontmatter contract (`@galaxy-foundry/note-schema`); **Ajv** for Mold IO schema validation and cast verification; **gray-matter** for frontmatter parse, **js-yaml** for YAML loads.
 - **Vitest** for tests.
-- **pnpm workspace packages** for published runtime and build tooling; root `package.json` keeps authoring shortcuts. Astro imports shared wiki-link behavior through `site/src/lib/wiki-links.ts`, which re-exports the shared resolver.
+- **pnpm workspace packages** for published runtime and build tooling; root `package.json` keeps authoring shortcuts. Astro imports shared wiki-link behavior through `site/src/lib/wiki-links.ts`, which builds this instance's link map over the resolver in `@galaxy-foundry/wiki-links`.
 
 ## 13. Cross-cutting concerns
 
@@ -522,7 +524,7 @@ foundry/
 │   └── lib/
 │       ├── schema.ts                     # load + tag-enum injection
 │       ├── frontmatter.ts                # gray-matter wrapper + date normalization
-│       ├── wiki-links.ts                 # slug + resolver (shared with site)
+│       ├── wiki-links.ts                 # adapter over @galaxy-foundry/wiki-links
 │       └── walk.ts                       # findMdFiles + skip rules
 ├── tests/
 │   └── validate.test.ts                  # Vitest
@@ -530,7 +532,7 @@ foundry/
 │   ├── src/
 │   │   ├── content.config.ts             # Astro content collection schema
 │   │   ├── lib/
-│   │   │   ├── wiki-links.ts             # shared resolver export
+│   │   │   ├── wiki-links.ts             # link map + backlinks over the shared resolver
 │   │   │   ├── remark-wiki-links.ts
 │   │   │   └── schema-registry.ts
 │   │   ├── pages/

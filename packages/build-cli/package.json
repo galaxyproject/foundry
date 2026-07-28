@@ -42,6 +42,7 @@
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-foundry/planemo-cli-meta": "workspace:*",
     "@galaxy-foundry/tag-registry": "^0.1.0",
+    "@galaxy-foundry/wiki-links": "^0.1.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "gray-matter": "^4.0.3",
