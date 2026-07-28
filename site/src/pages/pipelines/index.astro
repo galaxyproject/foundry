@@ -1,14 +1,13 @@
 ---
-import { getAllNotes } from '../../lib/notes';
+import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import RunPipelines from '../../components/RunPipelines.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const all = await getAllNotes();
-const pipelines = all
-  .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
-  .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
-const totalPhases = pipelines.reduce((sum, p) => sum + phaseCount((p.data as any).phases), 0);
+const pipelines = (await getCollection('pipelines'))
+  .filter(n => n.data.status !== 'archived')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const totalPhases = pipelines.reduce((sum, p) => sum + phaseCount(p.data.phases), 0);
 
 function phaseCount(phases: unknown): number {
   return Array.isArray(phases) ? phases.length : 0;
@@ -47,7 +46,7 @@ function phaseCount(phases: unknown): number {
     <thead><tr><th>Pipeline</th><th>Summary</th><th>Phases</th><th>Status</th></tr></thead>
     <tbody>
       {pipelines.map(p => {
-        const d = p.data as any;
+        const d = p.data;
         return (
           <tr>
             <td><a href={`${base}/${p.id}/`}>{d.title}</a></td>

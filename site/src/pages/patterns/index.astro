@@ -1,21 +1,23 @@
 ---
-import { getAllNotes } from '../../lib/notes';
+import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 
+// The patterns collection, not the whole corpus filtered down to it: `entry.data` is a
+// pattern's own frontmatter here, so `title` and `pattern_kind` are typed fields rather than
+// casts.
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const all = await getAllNotes();
-const patterns = all
-  .filter(n => n.data.type === 'pattern' && n.data.status !== 'archived')
-  .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
+const patterns = (await getCollection('patterns'))
+  .filter(n => n.data.status !== 'archived')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
 
-const maps = patterns.filter(p => (p.data as any).pattern_kind === 'moc');
-const implementationPatterns = patterns.filter(p => ['operation', 'recipe'].includes((p.data as any).pattern_kind));
-const topicTags = [...new Set(patterns.flatMap(p => (p.data.tags as string[]).filter(t => t.startsWith('topic/'))))]
+const maps = patterns.filter(p => p.data.pattern_kind === 'moc');
+const implementationPatterns = patterns.filter(p => ['operation', 'recipe'].includes(p.data.pattern_kind));
+const topicTags = [...new Set(patterns.flatMap(p => p.data.tags.filter(t => t.startsWith('topic/'))))]
   .sort((a, b) => a.localeCompare(b));
 
 const groups = new Map<string, typeof implementationPatterns>();
 for (const pattern of implementationPatterns) {
-  const title = (pattern.data as any).title as string;
+  const title = pattern.data.title;
   const group = title.includes(':') ? title.split(':')[0] : 'General';
   const list = groups.get(group) ?? [];
   list.push(pattern);
@@ -61,9 +63,9 @@ function formatDate(d: Date): string {
       </div>
       <div class="card-grid card-grid-wide">
         {maps.map(pattern => {
-          const data = pattern.data as any;
+          const data = pattern.data;
           const linkedCount = data.related_patterns?.length ?? 0;
-          const subjectTags = (data.tags as string[]).filter(t => t !== 'pattern');
+          const subjectTags = data.tags.filter(t => t !== 'pattern');
           return (
             <article class="card card-feature tinted-shadow tinted-shadow-hover">
               <div class="card-top">
@@ -102,8 +104,8 @@ function formatDate(d: Date): string {
       </div>
       <div class="card-grid">
         {list.map(pattern => {
-          const data = pattern.data as any;
-          const subjectTags = (data.tags as string[]).filter(t => t !== 'pattern');
+          const data = pattern.data;
+          const subjectTags = data.tags.filter(t => t !== 'pattern');
           return (
             <article class="card tinted-shadow tinted-shadow-hover">
               <div class="card-top">
