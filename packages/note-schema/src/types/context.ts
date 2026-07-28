@@ -203,7 +203,21 @@ export interface KindDefinition<T extends KindShape = KindShape> {
   /** A strict object carrying a `type:` literal — a union member, and the `.shape` the
    *  manifest generator walks to derive this kind's required-metadata table. */
   build: (ctx: KindContext) => z.ZodObject<T, "strict">;
-  refine?: (data: Record<string, unknown>, ctx: z.RefinementCtx, kctx: KindContext) => void;
+  /**
+   * Cross-field rules over this kind's own fields — the constraints a shape cannot state,
+   * because whether one field is valid depends on another's value (a `source-specific` mold
+   * must name a `source`; a schema note vendoring an external upstream must name a license).
+   *
+   * `data` is this kind's INFERRED frontmatter, not `Record<string, unknown>`. That matters
+   * more than it reads: every rule here is conditional, so a rule that never fires looks
+   * exactly like a rule with nothing to complain about. Untyped, `d.axis === "source-specifc"`
+   * compiled clean and the mold rule was silently dead.
+   */
+  refine?: (
+    data: z.infer<z.ZodObject<T, "strict">>,
+    ctx: z.RefinementCtx,
+    kctx: KindContext,
+  ) => void;
 }
 
 /**

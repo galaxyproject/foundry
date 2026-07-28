@@ -34,8 +34,7 @@ export const kind = defineKind({
   // it must name the license, and (where the policy row says the text travels with it) point
   // at the vendored copy. An upstream inside this repo is our own and needs neither.
   refine: (d, ctx, kctx) => {
-    const upstream = typeof d.upstream === "string" ? d.upstream : "";
-    const external = upstream && !upstream.includes("github.com/galaxyproject/foundry/");
+    const external = d.upstream && !d.upstream.includes("github.com/galaxyproject/foundry/");
     if (!external) return;
     if (!d.license) {
       ctx.addIssue({
@@ -45,12 +44,12 @@ export const kind = defineKind({
       });
       return;
     }
-    const row = resolveLicenseRow(kctx.registries.licensePolicy, d.license as string);
+    const row = resolveLicenseRow(kctx.registries.licensePolicy, d.license);
     if (row.license_file && !d.license_file) {
       ctx.addIssue({
         code: "custom",
         path: ["license_file"],
-        message: `license ${String(d.license)} requires a \`license_file\``,
+        message: `license ${d.license} requires a \`license_file\``,
       });
     }
   },
