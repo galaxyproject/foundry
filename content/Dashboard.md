@@ -191,6 +191,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[gxy-sketches-alignment]] | Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not. | draft | 2026-07-24 | 2 |
 | [[open-requirements-ledger]] | Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously. | draft | 2026-06-16 | 1 |
 | [[component-claude-dynamic-workflows]] | Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate. | draft | 2026-06-15 | 1 |
 | [[galaxy-workflow-comments]] | How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative. | draft | 2026-06-12 | 1 |
@@ -232,7 +233,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-collection-semantics]] | Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references. | draft | 2026-05-05 | 3 |
 | [[galaxy-native-workflow-schema]] | Vendored structural JSON Schema for Galaxy native workflow (.ga) format: vocabulary for the JSON shape Galaxy emits and consumes. | draft | 2026-05-05 | 1 |
 | [[galaxy-xsd]] | Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax. | draft | 2026-05-05 | 1 |
-| [[gxy-sketches-alignment]] | Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not. | draft | 2026-05-05 | 1 |
 | [[nextflow-snapshot-to-galaxy-assertions]] | Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape. | draft | 2026-05-05 | 2 |
 | [[iwc-runtime-parameter-shims-survey]] | Focused survey of tiny IWC runtime parameter shims for flags, enums, counts, booleans, and composed text. | draft | 2026-05-04 | 1 |
 | [[component-tool-shed-search]] | Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload | draft | 2026-05-03 | 2 |
