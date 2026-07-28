@@ -1,9 +1,9 @@
 // Where each kind's notes LIVE — the one path→kind routing table.
 //
-// Two things currently decide which files are notes, and they are written twice: the Astro
+// Two things used to decide which files are notes, and they were written twice: the Astro
 // loader's glob in site/src/content.config.ts, and `walk.ts`'s SKIP_FILES / DIR_NOTE_TYPES in
-// the validator. Nothing makes them agree, and they do not: `content/prompts/**` is walked by
-// the validator and globbed by neither, so two notes are checked and never published.
+// the validator. Nothing made them agree, and they did not: `content/prompts/**` was walked by
+// the validator and globbed by neither, so two notes were checked and never published.
 //
 // This is that table, stated once. A collection maps a directory (plus the glob selecting note
 // files within it) to the ONE kind every note there declares. Both consumers route from here,
@@ -23,6 +23,16 @@ export interface CollectionDefinition {
   /** The `type:` every note in this collection declares. Must be a kind in KINDS. */
   kind: string;
 }
+
+/**
+ * The one directory every collection lives under, stated once.
+ *
+ * `base` is written repo-relative because that is the form both consumers can check a real
+ * path against without knowing where they were invoked from. Consumers that walk the content
+ * tree directly are handed that directory under whatever name it has on disk, so they need
+ * this to route what they find. The routing test pins it against the table.
+ */
+export const CONTENT_DIR = "content";
 
 /**
  * Every collection this Foundry publishes and validates.

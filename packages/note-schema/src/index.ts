@@ -13,6 +13,7 @@ export {
 export {
   COLLECTIONS,
   COLLECTION_NAMES,
+  CONTENT_DIR,
   collectionOf,
   kindOf,
   matchesCollection,

@@ -1,20 +1,28 @@
 // File discovery for the validator and generators.
-// See INITIAL_ARCHITECTURE.md §6 for skip rules.
+//
+// Which files are notes is decided by ONE table: COLLECTIONS in @galaxy-foundry/note-schema.
+// This module used to answer that question a second time — SKIP_FILES named the generated
+// files at the content root, DIR_NOTE_TYPES re-stated "molds and pipelines are directory
+// notes", and between them they approximated the site's globs closely enough to look
+// deliberate. They were never held to it: the two rules disagreed about `content/prompts/**`
+// for as long as it existed.
+//
+// This module now traverses and routes. It does not decide.
 
 import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
-
-export const SKIP_DIRS = new Set([".obsidian", "casts"]);
-export const SKIP_FILES = new Set(["Dashboard.md", "Index.md", "log.md", "glossary.md"]);
-/** Note types that use directory-note semantics: only `<type>/<slug>/index.md` is validated. */
-export const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
+import { CONTENT_DIR, collectionOf } from "@galaxy-foundry/note-schema";
 
 /**
- * Walk a directory and yield .md file paths that should be validated.
- * Skips hidden dirs, SKIP_DIRS, SKIP_FILES, and non-`index.md` files inside DIR_NOTE_TYPES dirs.
+ * Walk a content root and yield the files COLLECTIONS claims as notes, in sorted depth-first
+ * order.
+ *
+ * `contentRoot` is the content directory itself — absolute or relative, and under any name a
+ * checkout gives it. What it is called on disk does not route anything: paths are matched as
+ * `CONTENT_DIR`-relative, because that is the form COLLECTIONS states its bases in.
  */
-export function* findMdFiles(root: string): Generator<string> {
-  yield* walk(root, root);
+export function* findMdFiles(contentRoot: string): Generator<string> {
+  yield* walk(contentRoot, contentRoot);
 }
 
 function* walk(dir: string, root: string): Generator<string> {
@@ -25,20 +33,23 @@ function* walk(dir: string, root: string): Generator<string> {
     return;
   }
   for (const entry of entries) {
-    if (entry.startsWith(".") || SKIP_DIRS.has(entry)) continue;
+    // Dotfiles are the one exclusion the table cannot express: `.obsidian/` holds markdown
+    // that is editor state rather than content, and no glob would tell it apart from a note.
+    if (entry.startsWith(".")) continue;
     const full = path.join(dir, entry);
-    const st = statSync(full);
-    if (st.isDirectory()) {
+    if (statSync(full).isDirectory()) {
       yield* walk(full, root);
       continue;
     }
-    if (!entry.endsWith(".md")) continue;
-    if (SKIP_FILES.has(entry)) continue;
-    const rel = path.relative(root, full);
-    const parts = rel.split(path.sep);
-    if (parts.some((p) => DIR_NOTE_TYPES.has(p)) && entry !== "index.md") continue;
+    // Routing subsumes the extension check — every pattern in the table ends in `.md`.
+    if (!collectionOf(routablePath(root, full))) continue;
     yield full;
   }
+}
+
+/** A walked path in the repo-relative form COLLECTIONS matches against. */
+function routablePath(root: string, full: string): string {
+  return `${CONTENT_DIR}/${path.relative(root, full).split(path.sep).join("/")}`;
 }
 
 /** Slug used for wiki-link resolution: `index.md` → parent dir name; otherwise basename without extension. */
