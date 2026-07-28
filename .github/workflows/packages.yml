@@ -39,6 +39,13 @@ jobs:
       - name: Check the kind manifest is current
         run: npm run check:kinds
 
+      # Dashboard.md and Index.md are generated from content frontmatter, so
+      # editing a note without regenerating leaves them silently wrong. Runs
+      # the same target `make check` does rather than listing the checks a
+      # second time. Same placement rule as validate: needs `dist/`.
+      - name: Check generated content notes are current
+        run: make check-generated
+
       - name: Typecheck root and site
         run: npm run typecheck
 
