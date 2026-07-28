@@ -203,15 +203,14 @@ Layered validation (`validateData` orchestrates):
    Failures error. Pipeline membership is not required of a Mold — standalone and indirectly-invoked Molds are first-class, so no coverage warning is emitted.
 9. **Artifact graph and layout checks** — producer/consumer artifact IDs, producer-owned `output_artifacts[].schema` links, schema vendoring metadata, schema `validator_bin` package bins, Mold source layout, CLI command docs, pattern evidence, body wiki links, and Mold stub bodies.
 
-`findMdFiles` skip rules:
+`findMdFiles` does not decide which files are notes. It walks `content/` and routes what it finds through `COLLECTIONS`:
 
 ```ts
-const SKIP_DIRS = new Set([".obsidian", "casts"]);
-const SKIP_FILES = new Set(["Dashboard.md", "Index.md", "log.md", "glossary.md"]);
-const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
+if (entry.startsWith(".")) continue;                        // .obsidian and friends
+if (!collectionOf(`${CONTENT_DIR}/${rel}`)) continue;       // the table decides
 ```
 
-Hidden directories skipped. Casts directory (`casts/`) is **always skipped** — it's generated content, validated by casting tooling separately.
+Everything the old skip rules named falls out of the table rather than being restated: `Dashboard.md` / `Index.md` / `log.md` sit at the content root and `glossary.md` in `content/meta/`, and no collection's base reaches either; `molds` and `pipelines` glob `**/index.md`, which is directory-note semantics stated as a pattern; `casts/` is outside `content/` entirely. Dotfiles are the one exclusion left in code, because `.obsidian/` holds markdown that is editor state and no glob would tell it apart from a note.
 
 **One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver now lives one level further out, in `@galaxy-foundry/wiki-links`, shared across Foundry instances; `packages/build-cli/src/lib/wiki-links.ts` and `site/src/lib/wiki-links.ts` are thin adapters over it that add this instance's map and return shapes. The **frontmatter schema and reference contract** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
 
@@ -333,14 +332,13 @@ content/pipelines/nextflow-to-galaxy/
 
 `docs/` holds long-form Foundry-meta design narrative; the validator's directory-note rule applies to Mold and Pipeline.
 
-Validator distinction:
+Directory-note semantics are a glob in the shared table, not a rule of their own:
 ```ts
-const DIR_NOTE_TYPES = new Set(["molds", "pipelines"]);
-if (parts.some(p => DIR_NOTE_TYPES.has(p)) && path.basename !== "index.md") continue;
+molds:     { base: "content/molds",     pattern: ["**/index.md"], kind: "mold" },
+pipelines: { base: "content/pipelines", pattern: ["**/index.md"], kind: "pipeline" },
 ```
 
-Astro content collection:
-- `content` — typed, explicit globs for `cli/**/*.md`, `molds/**/index.md`, `patterns/**/*.md`, `source-patterns/**/*.md`, `pipelines/**/index.md`, `research/**/*.md`, and `schemas/**/*.md`, with generated dashboard/index/log/glossary files excluded.
+Astro content collections: one per entry in `COLLECTIONS`, each loading its own base and glob and parsing against its own kind's schema. The validator's walk routes from the same table, so what the site publishes and what the validator checks are the same set by construction — see §6.
 
 Routes:
 - `[...slug].astro` renders content notes, including Mold `index.md` directory notes, through type-specific body components.
@@ -527,12 +525,12 @@ foundry/
 │       ├── schema.ts                     # load + tag-enum injection
 │       ├── frontmatter.ts                # gray-matter wrapper + date normalization
 │       ├── wiki-links.ts                 # adapter over @galaxy-foundry/wiki-links
-│       └── walk.ts                       # findMdFiles + skip rules
+│       └── walk.ts                       # findMdFiles; routes through COLLECTIONS
 ├── tests/
 │   └── validate.test.ts                  # Vitest
 ├── site/                                 # Astro renderer
 │   ├── src/
-│   │   ├── content.config.ts             # Astro content collection schema
+│   │   ├── content.config.ts             # one Astro collection per COLLECTIONS entry
 │   │   ├── lib/
 │   │   │   ├── wiki-links.ts             # link map + backlinks over the shared resolver
 │   │   │   ├── remark-wiki-links.ts

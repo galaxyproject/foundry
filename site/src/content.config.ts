@@ -1,6 +1,11 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { COLLECTIONS, buildKindSchemas, type CollectionName } from '@galaxy-foundry/note-schema';
+import {
+  COLLECTIONS,
+  CONTENT_DIR,
+  buildKindSchemas,
+  type CollectionName,
+} from '@galaxy-foundry/note-schema';
 import { licensePolicy, referenceContract, tags } from './lib/registries';
 
 // One collection per kind, routed by path. The directory a note lives in picks the schema it
@@ -30,7 +35,7 @@ function slugifyPath(entry: string): string {
 // collection's base reaches them.
 function load(name: CollectionName) {
   const { base, pattern } = COLLECTIONS[name];
-  const prefix = base.replace(/^content\//, '');
+  const prefix = base.slice(`${CONTENT_DIR}/`.length);
   return glob({
     pattern: [...pattern],
     base: `../${base}`,

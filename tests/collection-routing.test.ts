@@ -1,9 +1,11 @@
+import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   COLLECTIONS,
   COLLECTION_NAMES,
+  CONTENT_DIR,
   collectionOf,
   KINDS,
   matchesCollection,
@@ -19,23 +21,54 @@ import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";
 // into per-kind collections. Nothing here is domain-specific; it is the check any Foundry
 // wants once location decides which schema a note is parsed against.
 //
-// Three distinct failures this catches:
+// Four distinct failures this catches:
 //   1. a kind with no collection — unauthorable, its schema can never run;
-//   2. a note file no collection claims — walked by the validator, published by nothing;
-//   3. a note whose declared `type:` is not the kind its location routes to.
+//   2. a note file no collection claims — committed, validated by nothing, published by nothing;
+//   3. a note whose declared `type:` is not the kind its location routes to;
+//   4. a walk that does not yield what the table claims.
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 
-/** Every walked note, as (repo-relative path, declared type). */
+/** Every markdown file under `content/`, repo-relative, whether or not it is a note. */
+const everyMarkdownFile = (() => {
+  const found: string[] = [];
+  const visit = (dir: string): void => {
+    for (const entry of readdirSync(dir).sort()) {
+      if (entry.startsWith(".")) continue;
+      const full = path.join(dir, entry);
+      if (statSync(full).isDirectory()) {
+        visit(full);
+        continue;
+      }
+      if (entry.endsWith(".md")) found.push(path.relative(repoRoot, full).split(path.sep).join("/"));
+    }
+  };
+  visit(path.join(repoRoot, CONTENT_DIR));
+  return found;
+})();
+
+/** Every file the validator's walk yields, repo-relative and in walk order. */
+const corpusFiles = [...findMdFiles(path.join(repoRoot, CONTENT_DIR))].map((file) =>
+  path.relative(repoRoot, file).split(path.sep).join("/"),
+);
+
+/**
+ * Every markdown file under `content/` that declares a `type:`, as (path, declared type).
+ *
+ * Deliberately NOT sourced from the walk. The walk now routes from COLLECTIONS, so anything
+ * derived from it agrees with the table by construction — the orphan check below would pass on
+ * a corpus it was silently blind to. Frontmatter is the one statement of "this is a note" that
+ * the table does not get a vote in, so it is what the table is held against.
+ */
 const corpus = (() => {
   const notes: { rel: string; type: string }[] = [];
-  for (const file of findMdFiles(path.join(repoRoot, "content"))) {
-    const { hasFrontmatter, meta } = readMarkdown(file);
+  for (const rel of everyMarkdownFile) {
+    const { hasFrontmatter, meta } = readMarkdown(path.join(repoRoot, rel));
     if (!hasFrontmatter) continue;
     const type = meta?.type;
     if (typeof type !== "string") continue;
-    notes.push({ rel: path.relative(repoRoot, file).split(path.sep).join("/"), type });
+    notes.push({ rel, type });
   }
   return notes;
 })();
@@ -56,6 +89,35 @@ describe("collection routing (path table vs corpus)", () => {
     expect(unroutable, `\nkinds with no collection: ${unroutable.join(", ")}`).toEqual([]);
   });
 
+  // `CONTENT_DIR` is what lets a consumer holding the content directory under some other name
+  // route a path it finds there. It is only true because every `base` starts with it, and
+  // nothing in the table's own types says so.
+  it("puts every collection under the content dir", () => {
+    const outside = COLLECTION_NAMES.filter(
+      (n) => !COLLECTIONS[n].base.startsWith(`${CONTENT_DIR}/`),
+    );
+    expect(outside, `\ncollections outside ${CONTENT_DIR}/: ${outside.join(", ")}`).toEqual([]);
+  });
+
+  // The validator's walk and the site's globs are ONE rule now, so this is what holds the walk
+  // to it: it enumerates the content tree independently and asserts the walk yields exactly the
+  // files the table claims, no frontmatter filter involved.
+  //
+  // Both directions matter and fail differently. A file the table claims but the walk misses is
+  // published unvalidated; a file the walk yields but the table disclaims is validated as a note
+  // the site will never render — which is precisely the `content/prompts/**` bug this table was
+  // written to end, in the era when the walk decided for itself.
+  it("walks exactly the files the table claims", () => {
+    const walked = corpusFiles;
+    const claimed = everyMarkdownFile.filter((rel) => collectionOf(rel));
+    const missed = claimed.filter((rel) => !walked.includes(rel));
+    const extra = walked.filter((rel) => !claimed.includes(rel));
+    expect(
+      { missed, extra },
+      `\nclaimed but not walked:\n  ${missed.join("\n  ")}\nwalked but not claimed:\n  ${extra.join("\n  ")}`,
+    ).toEqual({ missed: [], extra: [] });
+  });
+
   // Every collection's `kind` must be a kind that exists — the other direction of the same
   // rule, which a typo in the table would otherwise satisfy silently.
   it("routes every collection to a kind that exists", () => {
@@ -64,12 +126,15 @@ describe("collection routing (path table vs corpus)", () => {
     expect(bogus, `\ncollections naming no kind: ${bogus.join(", ")}`).toEqual([]);
   });
 
-  // A note the validator checks but no collection claims is checked and never published.
-  // This is the drift that existed while the Astro glob and `walk.ts` were two separate
-  // rules, and the reason this table exists.
-  it("claims every note the validator walks", () => {
+  // A file that declares a `type:` has announced itself as a note. If no collection claims it,
+  // it is authored, committed, and invisible to everything — neither validated nor published.
+  // `content/prompts/**` sat in exactly that state, and this is the check that would have said
+  // so on the day it was added.
+  it("claims every note in the content tree", () => {
     const orphans = corpus.filter((n) => !collectionOf(n.rel)).map((n) => n.rel);
-    expect(orphans, `\nwalked but in no collection:\n  ${orphans.join("\n  ")}`).toEqual([]);
+    expect(orphans, `\ndeclares a type but is in no collection:\n  ${orphans.join("\n  ")}`).toEqual(
+      [],
+    );
   });
 
   // Location picks the schema; the `type:` literal in that schema asserts the note agrees.
