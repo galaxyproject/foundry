@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { getLicenses, licenseIdFromFile } from '../../lib/licenses';
 import { resolveLicenseRow } from '@galaxy-foundry/license-policy';
@@ -16,7 +16,7 @@ const { license } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // Notes that redistribute content under this LICENSES/ file, with their SPDX id.
-const entries = await getCollection('content');
+const entries = await getAllNotes();
 const users = entries
   .filter(e => {
     const lf = (e.data as any).license_file;

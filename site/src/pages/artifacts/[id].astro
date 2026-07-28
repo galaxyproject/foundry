@@ -1,11 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { buildWikiLinkMap, resolveWikiLink } from '../../lib/wiki-links';
 import { buildArtifactGraph } from '../../lib/artifacts';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('content');
+  const entries = await getAllNotes();
   const linkMap = buildWikiLinkMap(entries);
   const graph = buildArtifactGraph(entries, linkMap);
   return Array.from(graph.values()).map(node => ({
@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 }
 
 const { id } = Astro.props;
-const entries = await getCollection('content');
+const entries = await getAllNotes();
 const linkMap = buildWikiLinkMap(entries);
 const graph = buildArtifactGraph(entries, linkMap);
 const node = graph.get(id);

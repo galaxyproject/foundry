@@ -1,13 +1,13 @@
+import { getAllNotes } from '../../lib/notes';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { getCollection } from 'astro:content';
 
 // Sibling artifacts served alongside a directory note's index.md.
 const SIBLINGS = ['eval', 'scenarios'] as const;
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const entries = await getCollection('content');
+  const entries = await getAllNotes();
   const paths = entries.map(entry => ({
     params: { slug: entry.id },
     props: { body: entry.body ?? '' },

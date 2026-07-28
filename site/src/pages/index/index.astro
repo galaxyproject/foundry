@@ -1,10 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { DESIGN_DOC_GROUPS, designDocsByCategory } from '../../lib/design-docs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const allNotes = await getCollection('content');
+const allNotes = await getAllNotes();
 const designDocGroups = DESIGN_DOC_GROUPS.map(group => ({
   ...group,
   docs: designDocsByCategory(group.category),

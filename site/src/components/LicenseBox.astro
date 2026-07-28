@@ -1,11 +1,11 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from '../lib/notes';
 import { licenseIdFromFile } from '../lib/licenses';
 import { resolveLicenseRow } from '@galaxy-foundry/license-policy';
 import { licensePolicy } from '../lib/registries';
 
 interface Props {
-  entry: CollectionEntry<'content'>;
+  entry: NoteEntry;
 }
 
 const { entry } = Astro.props;

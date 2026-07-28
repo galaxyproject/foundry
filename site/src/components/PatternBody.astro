@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 
 interface Props {
-  entry: CollectionEntry<'content'>;
+  entry: NoteEntry;
   linkMap: Map<string, WikiLinkTarget>;
   placement?: 'before' | 'after';
 }

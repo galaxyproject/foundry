@@ -1,10 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import RunPipelines from '../../components/RunPipelines.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const all = await getCollection('content');
+const all = await getAllNotes();
 const pipelines = all
   .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
   .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
