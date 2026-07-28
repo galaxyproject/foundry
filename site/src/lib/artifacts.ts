@@ -1,4 +1,4 @@
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from './notes';
 import { resolveWikiLinkId, type WikiLinkTarget } from './wiki-links';
 
 export interface OutputArtifactDecl {
@@ -87,7 +87,7 @@ function collectMoldRefsFromPhase(phase: unknown): string[] {
 }
 
 export function buildArtifactGraph(
-  entries: CollectionEntry<'content'>[],
+  entries: NoteEntry[],
   linkMap: Map<string, WikiLinkTarget>,
 ): ArtifactGraph {
   const graph: ArtifactGraph = new Map();

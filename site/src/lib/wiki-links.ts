@@ -1,5 +1,5 @@
+import { type NoteEntry } from './notes';
 import { resolveWikiLink as resolve, slugify } from '@galaxy-foundry/wiki-links';
-import type { CollectionEntry } from 'astro:content';
 
 // Components asking "is this string a wiki link at all?" get the package's answer, not their
 // own regex. Re-exported here so a component has one import for everything link-shaped.
@@ -16,7 +16,7 @@ export interface WikiLinkTarget {
 }
 
 /** Map from slugified note basename → target. */
-export function buildWikiLinkMap(entries: CollectionEntry<'content'>[]): Map<string, WikiLinkTarget> {
+export function buildWikiLinkMap(entries: NoteEntry[]): Map<string, WikiLinkTarget> {
   const map = new Map<string, WikiLinkTarget>();
   for (const entry of entries) {
     const basename = entry.id.split('/').pop()!;
@@ -76,7 +76,7 @@ export interface Backlink {
 
 /** Build target entry ID → notes that link to it via frontmatter wiki-link fields. */
 export function buildBacklinkMap(
-  entries: CollectionEntry<'content'>[],
+  entries: NoteEntry[],
   linkMap: Map<string, WikiLinkTarget>
 ): Map<string, Backlink[]> {
   const map = new Map<string, Backlink[]>();

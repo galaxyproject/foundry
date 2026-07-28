@@ -1,18 +1,21 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import sections from '../../../../dashboard_sections.json';
 import { designDocsByCategory } from '../../lib/design-docs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const allNotes = await getCollection('content');
+const allNotes = await getAllNotes();
 const infrastructureDocs = designDocsByCategory('infrastructure');
 
+// Ties broken by id, matching the validator's own sortByRevisedDesc. Without it, notes
+// sharing a revised date fall back to whatever order the loader happened to yield, so a
+// section's rows move whenever the corpus is walked differently.
 const dashboardSections = sections.map(s => ({
   label: s.label,
   notes: allNotes
     .filter(n => n.data.type === s.type && n.data.status !== 'archived')
-    .sort((a, b) => b.data.revised.getTime() - a.data.revised.getTime()),
+    .sort((a, b) => b.data.revised.getTime() - a.data.revised.getTime() || a.id.localeCompare(b.id)),
 }));
 const activeDashboardSections = dashboardSections.filter(s => s.notes.length > 0);
 const activeNotes = allNotes.filter(n => n.data.status !== 'archived');

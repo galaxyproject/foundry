@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from '../lib/notes';
 import { schemaRegistry } from '../lib/schema-registry';
 
 interface Props {
-  entry: CollectionEntry<'content'>;
+  entry: NoteEntry;
 }
 
 const { entry } = Astro.props;

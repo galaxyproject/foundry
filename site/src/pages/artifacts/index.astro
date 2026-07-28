@@ -1,10 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
+import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { buildWikiLinkMap } from '../../lib/wiki-links';
 import { buildArtifactGraph, artifactHref } from '../../lib/artifacts';
 
-const entries = await getCollection('content');
+const entries = await getAllNotes();
 const linkMap = buildWikiLinkMap(entries);
 const graph = buildArtifactGraph(entries, linkMap);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');

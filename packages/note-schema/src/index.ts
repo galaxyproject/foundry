@@ -1,7 +1,14 @@
 // Public surface for @galaxy-foundry/note-schema — the single source of truth
 // for Foundry note frontmatter, shared by the validator and the Astro site.
 
-export { buildNoteSchema, type BuildNoteSchemaOptions, type NoteSchema } from "./note-schema.js";
+export {
+  buildNoteSchema,
+  buildKindSchemas,
+  type Assembled,
+  type BuildNoteSchemaOptions,
+  type KindSchemas,
+  type NoteSchema,
+} from "./note-schema.js";
 
 export {
   COLLECTIONS,
@@ -14,6 +21,7 @@ export {
 } from "./collections.js";
 
 export {
+  DEFINITIONS,
   KINDS,
   KINDS_BY_NAME,
   buildKindContext,

@@ -1,15 +1,15 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type NoteEntry } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 import ReferenceContract from './ReferenceContract.astro';
 import CastArtifacts from './CastArtifacts.astro';
 import { artifactHref, type ArtifactGraph } from '../lib/artifacts';
 
 interface Props {
-  entry: CollectionEntry<'content'>;
+  entry: NoteEntry;
   linkMap: Map<string, WikiLinkTarget>;
   artifactGraph?: ArtifactGraph;
-  entryById?: Map<string, CollectionEntry<'content'>>;
+  entryById?: Map<string, NoteEntry>;
 }
 
 const { entry, linkMap, artifactGraph, entryById } = Astro.props;
