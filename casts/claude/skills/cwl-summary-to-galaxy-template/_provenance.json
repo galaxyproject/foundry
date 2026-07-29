@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 4,
     "content_hash": "62c5df0ac112ce59c5608c7bbdbc88a3a400724d1803b050ec97595251aed6c5",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "78e70dcf0b91246017017b9437a22494c53bda88"
   },
-  "cast_at": "2026-07-28T01:44:08.425Z",
+  "cast_at": "2026-07-29T23:09:52.815Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -228,9 +228,30 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
-      "src_hash": "3b23786bb1a90278bc4876a732d212cc7cbc44207228571e5cf3cbbb4d569e0b",
-      "dst_hash": "3b23786bb1a90278bc4876a732d212cc7cbc44207228571e5cf3cbbb4d569e0b",
-      "source": "deterministic"
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "c594e350c2de111d8566a9dc9e1bd1f203a71acd185b8d3d1be9e666f3082f96",
+      "dst_hash": "c594e350c2de111d8566a9dc9e1bd1f203a71acd185b8d3d1be9e666f3082f96",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[gxformat2-schema]]",
+      "src": "content/research/gxformat2.schema.json",
+      "dst": "references/notes/gxformat2.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
+      "companion_of": "references/notes/gxformat2-schema.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "2c4b3df730b70d9c648105ced438fc08be306a41f2aff7d4bd2897f72f94d509",
+      "dst_hash": "2c4b3df730b70d9c648105ced438fc08be306a41f2aff7d4bd2897f72f94d509",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
     {
       "kind": "research",

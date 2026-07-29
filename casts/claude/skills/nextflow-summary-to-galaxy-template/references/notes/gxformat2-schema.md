@@ -8,6 +8,8 @@ created: 2026-05-05
 revised: 2026-05-06
 revision: 2
 ai_generated: true
+license: MIT
+license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 related_notes:
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-datatypes-conf]]"
@@ -16,10 +18,12 @@ related_notes:
   - "[[galaxy-workflow-draft]]"
 sources:
   - "https://github.com/jmchilton/galaxy-tool-util-ts/blob/7ae4ecd0ba8d492225f58a6d455c4cc5317298f0/packages/schema/src/galaxy-workflow.ts"
+companions:
+  - "gxformat2.schema.json"
 summary: "Vendored structural JSON Schema for gxformat2 workflows: vocabulary for inputs, outputs, steps, and step subtypes."
 ---
 
-> **Vendored from upstream**, pinned at SHA `7ae4ecd`. One file lives next to this note:
+> **Vendored from upstream**, pinned at SHA `7ae4ecd`. One file lives next to this note, declared in `companions:` so casting carries it into every bundle this note reaches:
 >
 > - `gxformat2.schema.json` — Draft-07 JSON Schema generated from the `@galaxy-tool-util/schema` Effect-TS schema via `gxwf structural-schema --format format2`. **Agents and casting should consume this** when validating gxformat2 workflows or reasoning about the closed vocabulary of input/step types.
 >
