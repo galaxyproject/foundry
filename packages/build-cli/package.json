@@ -38,6 +38,7 @@
   "license": "MIT",
   "dependencies": {
     "@galaxy-foundry/foundry": "workspace:*",
+    "@galaxy-foundry/kind-schema": "^0.3.0",
     "@galaxy-foundry/license-policy": "^0.1.0",
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-foundry/planemo-cli-meta": "workspace:*",
