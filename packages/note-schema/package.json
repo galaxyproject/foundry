@@ -38,7 +38,7 @@
   "license": "MIT",
   "dependencies": {
     "@galaxy-foundry/kind-manifest": "^0.2.1",
-    "@galaxy-foundry/kind-schema": "^0.2.0",
+    "@galaxy-foundry/kind-schema": "^0.3.0",
     "@galaxy-foundry/license-policy": "^0.1.0",
     "@galaxy-foundry/reference-contract": "^0.1.0",
     "@galaxy-foundry/tag-registry": "^0.1.0",

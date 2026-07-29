@@ -10,10 +10,10 @@
 // foundry-pattern site renders both instances' manifests side by side as a kind catalog, and
 // it must be able to read them from a checkout without installing either instance's toolchain.
 
-import { readFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
+import { loadKindDocs } from "@galaxy-foundry/kind-schema/docs";
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
 import { KINDS, buildKindManifest, loadReferenceContract } from "@galaxy-foundry/note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
@@ -25,24 +25,20 @@ const OUTPUT = `${TYPES_DIR}/kinds.generated.json`;
 const INSTANCE = "galaxy-workflow-foundry";
 
 /**
- * kind name -> kind.md body.
+ * Read each kind's `kind.md`, or say which one is missing and stop.
  *
- * Driven by the barrel rather than a directory listing: `KINDS` is the one enumeration, so a
- * kind with no `kind.md` fails naming itself, and an unrelated directory under types/ is not
- * mistaken for a kind.
+ * The READING is not ours — it ships in @galaxy-foundry/kind-schema, because the other instance
+ * wrote the same loader beside the same manifest call. What stays here is the decision to exit:
+ * the package throws, deliberately, so a library never takes a command's exit for it. Reported
+ * as one line rather than rethrown, because the bin's catch-all prints a stack.
  */
 function loadDocs(typesDir: string): Record<string, string> {
-  const docs: Record<string, string> = {};
-  for (const definition of KINDS) {
-    const file = path.join(typesDir, definition.kind, "kind.md");
-    try {
-      docs[definition.kind] = readFileSync(file, "utf8").trim();
-    } catch {
-      process.stderr.write(`${definition.kind}: cannot read ${file}\n`);
-      process.exit(1);
-    }
+  try {
+    return loadKindDocs(KINDS, typesDir);
+  } catch (e) {
+    process.stderr.write(`${(e as Error).message}\n`);
+    process.exit(1);
   }
-  return docs;
 }
 
 export function runGenerateKindManifestCommand(argv = process.argv.slice(2)): void {

@@ -96,6 +96,9 @@ importers:
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
+      '@galaxy-foundry/kind-schema':
+        specifier: ^0.3.0
+        version: 0.3.0(zod@3.25.76)
       '@galaxy-foundry/license-policy':
         specifier: ^0.1.0
         version: 0.1.0
@@ -174,8 +177,8 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1(zod@3.25.76)
       '@galaxy-foundry/kind-schema':
-        specifier: ^0.2.0
-        version: 0.2.0(zod@3.25.76)
+        specifier: ^0.3.0
+        version: 0.3.0(zod@3.25.76)
       '@galaxy-foundry/license-policy':
         specifier: ^0.1.0
         version: 0.1.0
@@ -994,8 +997,8 @@ packages:
     peerDependencies:
       zod: ^3.25.0
 
-  '@galaxy-foundry/kind-schema@0.2.0':
-    resolution: {integrity: sha512-UjLOkR32b7b/fa6pxe6xa12yThDXESlbhSyrZqRA/ZV5bN558CZ6B/QVsUw+ohexWlYQLybw0rjxe61qcOU7Iw==}
+  '@galaxy-foundry/kind-schema@0.3.0':
+    resolution: {integrity: sha512-D25FnCCy4h7fNZCSzseMPQwU9+7jhYlbrv1Yf/lzeOytmLPoaufZGSZ0/L9y0DYZGCne/y/eVg23WEH1LereLg==}
     engines: {node: '>=20'}
     peerDependencies:
       zod: ^3.25.0
@@ -4258,7 +4261,7 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  '@galaxy-foundry/kind-schema@0.2.0(zod@3.25.76)':
+  '@galaxy-foundry/kind-schema@0.3.0(zod@3.25.76)':
     dependencies:
       '@galaxy-foundry/kind-manifest': 0.2.1(zod@3.25.76)
       zod: 3.25.76
