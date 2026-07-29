@@ -9,7 +9,6 @@
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
 import { execSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import {
   copyFileSync,
   existsSync,
@@ -34,6 +33,14 @@ import {
 } from "@galaxy-foundry/license-policy";
 
 import { readMarkdown } from "../lib/frontmatter.js";
+import {
+  driftOf,
+  reconcile,
+  reconcileText,
+  sha256File,
+  sha256Text,
+  type Drift,
+} from "../lib/reconcile.js";
 import {
   aggregateRequiredTools,
   requiredToolRows,
@@ -382,14 +389,6 @@ function expandCompanions(
 }
 
 // ---- file ops ----
-
-function sha256(filePath: string): string {
-  return createHash("sha256").update(readFileSync(filePath)).digest("hex");
-}
-
-function sha256OfBuffer(buf: Buffer | string): string {
-  return createHash("sha256").update(buf).digest("hex");
-}
 
 function gitHead(repoRoot: string): string | null {
   try {
@@ -827,6 +826,17 @@ function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOv
 
 // ---- cast assembly ----
 
+/**
+ * What provenance records for a ref's destination.
+ *
+ * A `--check` run writes nothing, so a drifted ref keeps the hash that was actually on disk —
+ * the record reports what the check FOUND, not what it wanted. Every other path has just put
+ * the expected bytes there, or found them already there, so the expected hash is the truth.
+ */
+function recordedHash(drift: Drift, check: boolean): string | null {
+  return drift.reason && check ? drift.currentHash : drift.expectedHash;
+}
+
 async function castOneRef(
   resolved: ResolvedRef,
   repoRoot: string,
@@ -869,25 +879,20 @@ async function castOneRef(
         error: `failed to import ${resolved.package_source.spec}: ${(e as Error).message}`,
       };
     }
-    const expectedHash = sha256OfBuffer(json);
-    const dstExists = existsSync(dstAbs);
-    const dstHash = dstExists ? sha256(dstAbs) : null;
-    let drift: string | undefined;
-    if (dstHash !== expectedHash) {
-      drift = dstExists ? "package schema content drifted" : "package schema missing";
-      if (!check) {
-        mkdirSync(path.dirname(dstAbs), { recursive: true });
-        writeFileSync(dstAbs, json);
-      }
-    }
+    const drift = reconcileText({
+      path: dstAbs,
+      expected: json,
+      label: "package schema",
+      check,
+    });
     return {
       entry: {
         ...skeleton(resolved),
-        src_hash: expectedHash,
-        dst_hash: drift && check ? dstHash : expectedHash,
+        src_hash: drift.expectedHash,
+        dst_hash: recordedHash(drift, check),
         source: "deterministic",
       },
-      drift,
+      drift: drift.reason,
     };
   }
 
@@ -898,24 +903,26 @@ async function castOneRef(
       error: `ref source missing: ${resolved.src}`,
     };
   }
-  const srcHash = sha256(srcAbs);
+  const srcHash = sha256File(srcAbs);
 
   if (resolved.mode === "verbatim") {
-    const dstExists = existsSync(dstAbs);
-    const dstHash = dstExists ? sha256(dstAbs) : null;
-    let drift: string | undefined;
-    if (dstHash !== srcHash) {
-      drift = dstExists ? "dst hash differs from src" : "dst missing";
-      if (!check) copyVerbatim(srcAbs, dstAbs);
-    }
+    // The one ref that is a COPY rather than a render: compared against the source's own hash,
+    // and written with `copyFileSync`, so the expected bytes are never a string in hand.
+    const drift = reconcile({
+      path: dstAbs,
+      expectedHash: srcHash,
+      label: "dst",
+      check,
+      write: () => copyVerbatim(srcAbs, dstAbs),
+    });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: srcHash,
-        dst_hash: drift && check ? dstHash : srcHash,
+        dst_hash: recordedHash(drift, check),
         source: "deterministic",
       },
-      drift,
+      drift: drift.reason,
     };
   }
 
@@ -923,25 +930,15 @@ async function castOneRef(
     const parsed = readMarkdown(srcAbs);
     const sidecar = await buildCliSidecar(srcAbs, resolved.src, parsed.meta);
     const text = JSON.stringify(sidecar, null, 2) + "\n";
-    const expectedHash = sha256OfBuffer(text);
-    const dstExists = existsSync(dstAbs);
-    const dstHash = dstExists ? sha256(dstAbs) : null;
-    let drift: string | undefined;
-    if (dstHash !== expectedHash) {
-      drift = dstExists ? "sidecar content differs" : "sidecar missing";
-      if (!check) {
-        mkdirSync(path.dirname(dstAbs), { recursive: true });
-        writeFileSync(dstAbs, text);
-      }
-    }
+    const drift = reconcileText({ path: dstAbs, expected: text, label: "sidecar", check });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: srcHash,
-        dst_hash: drift && check ? dstHash : expectedHash,
+        dst_hash: recordedHash(drift, check),
         source: "deterministic",
       },
-      drift,
+      drift: drift.reason,
     };
   }
 
@@ -956,7 +953,7 @@ async function castOneRef(
     ) {
       // Source hasn't drifted; carry forward prior LLM output entry.
       const dstExists = existsSync(dstAbs);
-      const dstHash = dstExists ? sha256(dstAbs) : null;
+      const dstHash = dstExists ? sha256File(dstAbs) : null;
       const drift =
         dstHash === priorEntry.dst_hash
           ? undefined
@@ -1040,7 +1037,7 @@ function applyLicensePolicy(entries: ProvenanceRefEntry[], repoRoot: string): st
     if (e.license_file) {
       const abs = path.join(repoRoot, e.license_file);
       if (existsSync(abs)) {
-        e.license_file_hash = sha256(abs);
+        e.license_file_hash = sha256File(abs);
       } else {
         errors.push(`${e.src}: license_file missing: ${e.license_file}`);
       }
@@ -1243,22 +1240,6 @@ function renderSkillMarkdown(args: {
   return lines.join("\n");
 }
 
-function reconcileSkillMarkdown(
-  bundleRoot: string,
-  expected: string,
-  check: boolean,
-): { drift?: string } {
-  const skillPath = path.join(bundleRoot, "SKILL.md");
-  const expectedHash = sha256OfBuffer(expected);
-  const exists = existsSync(skillPath);
-  const currentHash = exists ? sha256(skillPath) : null;
-  if (currentHash === expectedHash) return {};
-  if (!check) writeFileSync(skillPath, expected);
-  return {
-    drift: exists ? "SKILL.md content differs from deterministic render" : "SKILL.md missing",
-  };
-}
-
 // ---- main ----
 
 export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<void> {
@@ -1279,7 +1260,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     console.error(`${moldRel}: type is not 'mold' (got ${String(moldParsed.meta.type)})`);
     process.exit(2);
   }
-  const moldHash = sha256(moldAbs);
+  const moldHash = sha256File(moldAbs);
 
   // Claude target lives under a `skills/` subdir so casts/claude/ doubles as a
   // Claude Code plugin root (.claude-plugin/plugin.json + skills/<name>/SKILL.md).
@@ -1317,13 +1298,13 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   );
 
   const refEntries: ProvenanceRefEntry[] = [];
-  const drift: Array<{ src: string; reason: string }> = [];
+  const drift: Array<{ file: string; reason: string }> = [];
 
   for (const r of resolved) {
     const result = await castOneRef(r, repoRoot, bundleRoot, carry.prior_refs, args.check);
     refEntries.push(result.entry);
     if (result.error) errors.push(result.error);
-    if (result.drift) drift.push({ src: r.src, reason: result.drift });
+    if (result.drift) drift.push({ file: r.src, reason: result.drift });
   }
 
   // License → redistribution-policy enforcement + license_file hashing.
@@ -1341,30 +1322,36 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     metaByPath,
     requiredTools,
   });
-  const skillResult = reconcileSkillMarkdown(bundleRoot, skillText, args.check);
-  if (skillResult.drift) drift.push({ src: "SKILL.md", reason: skillResult.drift });
+  const skillDrift = reconcileText({
+    path: path.join(bundleRoot, "SKILL.md"),
+    expected: skillText,
+    label: "SKILL.md",
+    check: args.check,
+  });
+  if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
 
   // Emit/reconcile _required_tools.json manifest at bundle root.
   const requiredToolsPath = path.join(bundleRoot, "_required_tools.json");
   if (requiredTools.length === 0) {
+    // Reconciling to ABSENT — the one desired state `reconcile` cannot express, since there is
+    // no expected content to hash. A mold that stops requiring tools must not leave the old
+    // manifest behind claiming it still does.
     if (existsSync(requiredToolsPath)) {
       if (args.check) {
-        drift.push({ src: "_required_tools.json", reason: "stale manifest (no tools required)" });
+        drift.push({ file: "_required_tools.json", reason: "stale manifest (no tools required)" });
       } else {
         unlinkSync(requiredToolsPath);
       }
     }
   } else {
-    const manifestText = JSON.stringify(requiredTools, null, 2) + "\n";
-    const expectedHash = sha256OfBuffer(manifestText);
-    const exists = existsSync(requiredToolsPath);
-    const currentHash = exists ? sha256(requiredToolsPath) : null;
-    if (currentHash !== expectedHash) {
-      drift.push({
-        src: "_required_tools.json",
-        reason: exists ? "manifest content drifted" : "manifest missing",
-      });
-      if (!args.check) writeFileSync(requiredToolsPath, manifestText);
+    const manifestDrift = reconcileText({
+      path: requiredToolsPath,
+      expected: JSON.stringify(requiredTools, null, 2) + "\n",
+      label: "_required_tools.json",
+      check: args.check,
+    });
+    if (manifestDrift.reason) {
+      drift.push({ file: "_required_tools.json", reason: manifestDrift.reason });
     }
   }
 
@@ -1372,14 +1359,11 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const verifyText = JSON.stringify(verify, null, 2) + "\n";
   const verifyPath = path.join(bundleRoot, "_verify.json");
   if (args.check) {
-    const existingVerifyHash = existsSync(verifyPath) ? sha256(verifyPath) : null;
-    const expectedVerifyHash = sha256OfBuffer(verifyText);
-    if (existingVerifyHash !== expectedVerifyHash) {
-      drift.push({
-        src: "_verify.json",
-        reason: existingVerifyHash ? "verify manifest content drifted" : "verify manifest missing",
-      });
-    }
+    // Compared but never written here: the write happens with the provenance record below,
+    // behind an error gate that can abort the cast. Reconciling it early would put the file on
+    // disk for a cast that then refused to finish.
+    const verifyDrift = driftOf(verifyPath, sha256Text(verifyText), "_verify.json");
+    if (verifyDrift.reason) drift.push({ file: "_verify.json", reason: verifyDrift.reason });
   }
 
   // runs/*/summary.json validation — find a schema ref for this mold and validate any committed runs.
@@ -1395,7 +1379,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
 
   // Report.
   for (const e of errors) console.error(`error: ${e}`);
-  for (const d of drift) console.error(`drift: ${d.src} — ${d.reason}`);
+  for (const d of drift) console.error(`drift: ${d.file} — ${d.reason}`);
 
   if (args.check) {
     if (errors.length || drift.length) {
