@@ -7,8 +7,8 @@ import {
   COLLECTION_NAMES,
   CONTENT_DIR,
   collectionOf,
+  collectionsClaiming,
   KINDS,
-  matchesCollection,
 } from "@galaxy-foundry/note-schema";
 import { readMarkdown } from "../packages/build-cli/src/lib/frontmatter.js";
 import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";
@@ -158,10 +158,7 @@ describe("collection routing (path table vs corpus)", () => {
   // they share a base and are kept disjoint only by the `!*/index.md` exclusion.
   it("claims each note for exactly one collection", () => {
     const overlapping = corpus
-      .map((n) => ({
-        rel: n.rel,
-        names: COLLECTION_NAMES.filter((c) => matchesCollection(n.rel, COLLECTIONS[c])),
-      }))
+      .map((n) => ({ rel: n.rel, names: collectionsClaiming(n.rel) }))
       .filter((r) => r.names.length > 1)
       .map((r) => `${r.rel}: ${r.names.join(", ")}`);
     expect(overlapping, `\nclaimed by several collections:\n  ${overlapping.join("\n  ")}`).toEqual(
