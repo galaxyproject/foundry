@@ -193,11 +193,12 @@ export type { KindShape };
 /**
  * What a `types/<kind>/schema.ts` exports.
  *
- * `build` returns a plain strict ZodObject rather than the refined schema, for two reasons:
- * zod's `discriminatedUnion` only accepts ZodObject members (a `.superRefine` would wrap it
- * in ZodEffects), and the manifest generator walks `.shape` to derive the required-metadata
- * table. Per-kind cross-field rules go in `refine`, which the assembler dispatches by `type`
- * after the union resolves — so the rule still LIVES in the kind's directory.
+ * The contract itself — why `build` returns a bare strict object, why refinement is a separate
+ * slot, how the union dispatches it — is documented on `KindDefinition` in
+ * @galaxy-foundry/kind-schema, where that machinery now lives. It is deliberately not restated
+ * here: two docstrings for one type is how the wrong one goes stale unnoticed.
+ *
+ * What is worth saying locally is what it means for a kind AUTHOR in this repo.
  *
  * `refine`'s `data` is this kind's INFERRED frontmatter, not `Record<string, unknown>`, and
  * that matters more than it reads: every rule is conditional, so a rule that never fires looks
@@ -216,9 +217,16 @@ export type AnyKindDefinition = LibAnyKindDefinition<KindContext>;
 /**
  * Identity helper a kind directory wraps its definition in.
  *
- * It exists purely to INFER the object shape rather than widen it. Annotating a kind as
- * `: KindDefinition` erases which fields it declares, and that erasure propagates all the way
- * to the Astro site, where `entry.data.tags` degrades to `any`. Inferring keeps each kind's
- * frontmatter type precise for every consumer of the assembled union.
+ * It exists purely to INFER the object shape rather than widen it, and the two ways of losing
+ * that inference fail very differently — worth knowing which one you are looking at.
+ *
+ * Annotating a kind `: KindDefinition` does not erase anything: it fails the package build
+ * outright, one TS2322 at the annotation, because `ZodObject` is invariant in its shape
+ * parameter and a concrete kind is not assignable to the default shape at all. Loud, local,
+ * measured.
+ *
+ * The `any`-shaped erasure is the dangerous one, and it is not visible from here — see
+ * `KINDS` in ./index.ts, where widening the LIST costs nothing anywhere except one type-level
+ * test. Neither failure reaches the Astro site, which this comment used to claim was the guard.
  */
 export const defineKind = kindDefiner<KindContext>();

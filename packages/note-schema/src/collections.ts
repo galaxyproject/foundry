@@ -20,12 +20,10 @@
 // no caller has to remember to pass the table.
 import {
   collectionOf as routeCollection,
+  collectionsClaiming as routeClaiming,
   kindOf as routeKind,
-  matchesCollection,
   type CollectionRoute,
 } from "@galaxy-foundry/kind-schema/collections";
-
-export { matchesCollection };
 
 /**
  * One collection: a directory, the note files in it, and the kind they all declare.
@@ -88,4 +86,14 @@ export function collectionOf(repoRelPath: string): CollectionName | undefined {
 /** The kind a repo-relative path routes to, or `undefined` if it is not a note. */
 export function kindOf(repoRelPath: string): string | undefined {
   return routeKind(COLLECTIONS, repoRelPath);
+}
+
+/**
+ * EVERY collection claiming a path, not just the first.
+ *
+ * Exists for the routing test that asserts the answer is never longer than one entry — which is
+ * what earns `collectionOf` the right to return the first match and stop.
+ */
+export function collectionsClaiming(repoRelPath: string): CollectionName[] {
+  return routeClaiming(COLLECTIONS, repoRelPath);
 }

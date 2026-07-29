@@ -19,9 +19,16 @@ import { kind as sourcePattern } from "./source-pattern/schema.js";
 
 import { type AnyKindDefinition } from "./context.js";
 
-// NOT annotated `: readonly KindDefinition[]`. That annotation would widen every element to
-// the default shape and the erasure would propagate to the Astro site, where `entry.data.tags`
-// degrades to `any`. Left inferred, this is a tuple of precisely-typed kinds.
+// `as const`, and NOT annotated. The tuple is load-bearing: `buildKindUnion` is generic over the
+// kind LIST and recovers each member's output type from it. Annotate this
+// `readonly AnyKindDefinition[]` and `.map` erasure reaches the return type, so
+// `z.infer<NoteSchema>` — which this package re-exports — degrades to `unknown` for consumers
+// who never touched a kind.
+//
+// Nothing you would think to run reports that. Measured: the widening costs 0 `tsc` errors
+// across the packages and 0 in `astro check`, because the erasure arrives as `any`, and an `any`
+// satisfies every field access rather than failing one. tests/note-union.test-d.ts is the only
+// thing that catches it, which is why it exists.
 export const KINDS = [
   mold,
   pattern,

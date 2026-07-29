@@ -15,8 +15,8 @@ export {
   COLLECTION_NAMES,
   CONTENT_DIR,
   collectionOf,
+  collectionsClaiming,
   kindOf,
-  matchesCollection,
   type CollectionDefinition,
   type CollectionName,
 } from "./collections.js";
