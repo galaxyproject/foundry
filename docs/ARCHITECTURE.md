@@ -15,7 +15,7 @@ Foundry-internal (in the `foundry/` repo):
 - **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds (e.g., `advance-galaxy-draft-step` → `cli/gxwf/draft-validate`). Cast to JSON sidecars, not inlined as prose.
 - **Research / reference notes** — background syntheses (e.g., Nextflow testing, CWL conformance) that aren't actions and aren't Galaxy patterns.
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
-- **Prompts** — wrapper notes under `content/prompts/` that add Foundry metadata and usage framing around raw prompt sidecars. Molds reference the wrapper via `kind: prompt`; casting copies the raw `prompt_file` verbatim.
+- **Prompts** — wrapper notes under `content/prompts/` that add Foundry metadata and usage framing around raw prompt sidecars. Molds reference the wrapper via `kind: prompt`; casting copies the raw `upstream.prompt` verbatim.
 - **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Each has a `type: schema` content note under `content/schemas/<name>.md`; the JSON itself lives with its producer (`@galaxy-foundry/summarize-nextflow` for `summary-nextflow` and the nf-core meta schemas) or in `@galaxy-foundry/foundry` (orphan schemas with no in-repo TS producer: `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary`, `tests-format`). The `tests-format` JSON is synced from upstream `@galaxy-tool-util/schema`. Mold frontmatter cites schemas via `[[wiki-link]]` to the note; the note declares `package` + `package_export` (cast imports the runtime export and serializes it) and `validator_bin` + `validator_subcommand` (skills validate via `foundry validate-<name>`). See `SCHEMA_PACKAGES.md`.
 - **Frontmatter schema** — the zod contract in `@galaxy-foundry/note-schema` (`buildNoteSchema`), the single source of truth shared by the validator and the Astro site. Distinct from the Mold IO schemas under `content/schemas/`.
 - **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the note-schema factory at build time.
@@ -42,7 +42,7 @@ Authoritative term definitions live in `content/meta/glossary.md`; this section 
 - **CLI command** — single `.md` under `content/cli/<tool>/<cmd>.md` (e.g., `content/cli/gxwf/tool-search.md`, `content/cli/gxwf/validate.md`). Reference content describing one CLI command/subcommand: synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas. Wiki-linked from Molds. Cast to a JSON sidecar (not inlined as prose) by casting's `cli-command`-kind dispatch.
 - **Pipeline** — directory note under `content/pipelines/<slug>/` (`index.md` is the only frontmatter-bearing file; optional `eval.md` / `scenarios.md` siblings carry the pipeline-level oracle and end-to-end journeys). Ordered sequence of phases that compose into a harness journey (e.g., `nextflow-to-galaxy/`, `paper-to-galaxy/`). **Dual purpose**: (a) build artifact — names the Molds a harness will orchestrate; (b) navigation primitive — renders as a "subway map" / journey index over the KB. Each phase is a `mold` reference, a `[loop]`-flagged Mold, or a `[branch]`-flagged routing step (not a Mold; harness-level orchestration — binary branches with fallthrough, or N-step fallback chains). Other inline harness annotations (e.g., `[gate]` for an approval / scope-confirmation checkpoint) will be coined when they first surface as inline phases; the set is open and not pre-enumerated. Pipelines are *not* cast; they are referenced content. Machine-checked: every phase resolves to a Mold (or is explicitly a non-Mold annotation like `[branch]`). A Mold need not belong to any pipeline — standalone and indirectly-invoked Molds are first-class.
 - **Schema** — single `.md` under `content/schemas/`. Renderable reference note for a JSON Schema package/export or vendored schema artifact.
-- **Prompt** — single `.md` wrapper under `content/prompts/`, plus a sibling raw `prompt_file` sidecar. The wrapper is human-facing and linkable; the raw sidecar is what casting packages.
+- **Prompt** — directory note under `content/prompts/<area>/<slug>/`: `index.md` is the wrapper, `upstream.prompt` beside it is the raw text. The wrapper is human-facing and linkable; the raw sidecar is what casting packages. The sidecar's name is fixed by the kind rather than declared per note, so there is no path to resolve and none to get wrong.
 - **Cast** / **Casting** / **Cast skill** / **Cast target** — per `content/meta/glossary.md`. The cast directory tree (`casts/<target>/<name>/`) is generated from Molds, committed to the repo, and skipped by the validator.
 - **Wiki link** — Obsidian-flavored `[[Target]]`. First-class in both frontmatter (typed fields like `parent_pattern`, `related_patterns`, `related_notes`) and body prose (resolved by a remark plugin in the site).
 - **Log** — `content/log.md`, append-only journal of foundry operations (`cast`, `lint`, `query`). Excluded from validator and site collection.
@@ -67,9 +67,9 @@ Source of truth: the `buildNoteSchema` discriminated union in `@galaxy-foundry/n
 | `pipeline` | `title`, `phases` | optional `source/*`, `target/*` | `content/pipelines/<slug>/index.md` only |
 | `research` | (base only) | `source/*`, `target/*`, or `meta` | `content/research/` |
 | `schema` | `name`, `title` | `target/*`, `source/*`, or `meta` | `content/schemas/` |
-| `prompt` | `title`, `prompt_file` | optional `prompt/*` | `content/prompts/` |
+| `prompt` | `title` | optional `prompt/*` | `content/prompts/<area>/<slug>/index.md` only |
 
-`mold` and `pipeline` have a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling `.md` files in `content/molds/<slug>/` and `content/pipelines/<slug>/` are skipped — only `index.md` is validated). They are the two directory-note types; `docs/` holds long-form design docs.
+`mold`, `pipeline`, and `prompt` have a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling files in `content/molds/<slug>/`, `content/pipelines/<slug>/`, and `content/prompts/<area>/<slug>/` are skipped — only `index.md` is validated). They are the three directory-note types; `docs/` holds long-form design docs.
 
 `cli-command` notes are *not* directory-based — each command is a flat single file. The two-level `content/cli/<tool>/<cmd>.md` directory structure is for organization, not directory-note semantics.
 
@@ -138,7 +138,7 @@ The frontmatter contract is the zod schema built by `buildNoteSchema` in `@galax
 | `cli-command` | `tool`, `command` |
 | `pipeline` | `title`, `phases` |
 | `schema` | `name`, `title` |
-| `prompt` | `title`, `prompt_file` |
+| `prompt` | `title` |
 
 **Foundry-specific field types**:
 - `axis`: enum `[source-specific, target-specific, tool-specific, generic]` (Mold).
@@ -278,16 +278,17 @@ Pipelines lead the dashboard because they are the **primary task surface** of th
 
 **Drift detection**: `--check` flag on every generator reads the file and string-compares with re-generation; exit 1 on mismatch. Wired into `npm run check:dashboard`, `check:index`, and `check:kinds`.
 
-**Cast-bundle payloads — how a note's non-`.md` payload reaches a bundle.** Casts live under `casts/` (§14), not `content/`. Several notes are render-wrappers: the `.md` is human-facing, but the consumable payload is a separate structured file that casting must copy into the bundle. Four frontmatter mechanisms carry such a payload, sharing one shape (frontmatter names the file → validator confirms it exists → caster lands it in the bundle) but differing in payload source and casting behavior:
+**Cast-bundle payloads — how a note's non-`.md` payload reaches a bundle.** Casts live under `casts/` (§14), not `content/`. Several notes are render-wrappers: the `.md` is human-facing, but the consumable payload is a separate structured file that casting must copy into the bundle. Three frontmatter mechanisms carry such a payload, sharing one shape (frontmatter names the file → validator confirms it exists → caster lands it in the bundle) but differing in payload source and casting behavior:
 
 | Field | Payload source | Casting behavior | Note type |
 |---|---|---|---|
-| `prompt_file` | sibling `.md` sidecar | copied, inlined into SKILL prose | `prompt` |
 | `package_export` | npm runtime export | imported + serialized (schema-validated) | `schema` |
 | `companions` | sibling file(s) | copied verbatim (hash-parity) | `research` / `pattern` |
 | `license_file` | `LICENSES/<file>` | copied verbatim (redistribution) | any vendoring note |
 
-`package_export` and `companions` are the same *concept* — wrapper note + vendored structured payload — split only by where the payload lives (npm package vs. checked-in sibling). They stay separate fields because the casting behaviors genuinely differ: import-and-stringify with schema validation vs. verbatim bytes with hash parity. `companions` attaches to the **note**, not the consuming Mold, so a note referenced by many Molds declares its siblings once and every consumer inherits them; the caster desugars each into a synthetic verbatim ref through the normal copy/provenance path. Before adding a fifth payload mechanism, check whether one of these already fits.
+`package_export` and `companions` are the same *concept* — wrapper note + vendored structured payload — split only by where the payload lives (npm package vs. checked-in sibling). They stay separate fields because the casting behaviors genuinely differ: import-and-stringify with schema validation vs. verbatim bytes with hash parity. `companions` attaches to the **note**, not the consuming Mold, so a note referenced by many Molds declares its siblings once and every consumer inherits them; the caster desugars each into a synthetic verbatim ref through the normal copy/provenance path.
+
+A fourth payload reaches a bundle without any frontmatter at all: a `prompt` note's `upstream.prompt`. Its name is fixed by the kind, so the validator asks whether the file is *there* rather than whether a declared path resolves. That is the cheaper arrangement wherever a kind admits exactly one payload at one name — the field it replaces could only ever restate the convention. Prefer it, and reach for a frontmatter mechanism only when the count or the naming genuinely varies per note. Before adding another payload mechanism, check whether one of these already fits.
 
 ## 9. Authoring flow
 

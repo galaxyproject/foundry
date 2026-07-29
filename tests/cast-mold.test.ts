@@ -371,11 +371,11 @@ describe("artifact-contract inheritance", () => {
 });
 
 describe("cast-mold prompt refs", () => {
-  it("copies prompt_file sidecars using the prompt wrapper slug", () => {
+  it("copies the upstream.prompt companion using the prompt directory slug", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-prompt-"));
     try {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
-      mkdirSync(path.join(dir, "content/prompts"), { recursive: true });
+      mkdirSync(path.join(dir, "content/prompts/prompt-x"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
@@ -424,7 +424,7 @@ Use the prompt reference.
 `,
       );
       writeFileSync(
-        path.join(dir, "content/prompts/prompt-x.md"),
+        path.join(dir, "content/prompts/prompt-x/index.md"),
         `---
 type: prompt
 title: Prompt X
@@ -435,13 +435,12 @@ revised: 2026-05-07
 revision: 1
 ai_generated: false
 summary: Prompt wrapper summary for cast sidecar behavior.
-prompt_file: prompt-x.upstream.prompt
 ---
 
 Wrapper body should not be copied.
 `,
       );
-      writeFileSync(path.join(dir, "content/prompts/prompt-x.upstream.prompt"), "RAW PROMPT\n");
+      writeFileSync(path.join(dir, "content/prompts/prompt-x/upstream.prompt"), "RAW PROMPT\n");
 
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
@@ -453,7 +452,7 @@ Wrapper body should not be copied.
       const prov = JSON.parse(
         readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
       );
-      expect(prov.refs[0].src).toBe("content/prompts/prompt-x.upstream.prompt");
+      expect(prov.refs[0].src).toBe("content/prompts/prompt-x/upstream.prompt");
       expect(prov.refs[0].dst).toBe("references/prompts/prompt-x.md");
     } finally {
       rmSync(dir, { recursive: true, force: true });

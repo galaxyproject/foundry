@@ -115,16 +115,16 @@
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 
-- local: content/prompts/galaxy/custom-tool-critic.upstream.prompt
+- local: content/prompts/galaxy/custom-tool-critic/upstream.prompt
   source: $GALAXY_DANNON/lib/galaxy/agents/prompts/custom_tool_critic.md
   pinned_ref: 69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e
-  framing: content/prompts/galaxy/custom-tool-critic.md
+  framing: content/prompts/galaxy/custom-tool-critic/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
 
-- local: content/prompts/galaxy/custom-tool-structured.upstream.prompt
+- local: content/prompts/galaxy/custom-tool-structured/upstream.prompt
   source: $GALAXY_DANNON/lib/galaxy/agents/prompts/custom_tool_structured.md
   pinned_ref: 69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e
-  framing: content/prompts/galaxy/custom-tool-structured.md
+  framing: content/prompts/galaxy/custom-tool-structured/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE

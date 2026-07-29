@@ -2,10 +2,16 @@ import { z } from "zod";
 
 import { type KindContext, defineKind } from "../context.js";
 
-// Prompt-local: the sibling-relative raw prompt file casting copies verbatim.
-const promptFile = z
-  .string()
-  .regex(/^[A-Za-z0-9._/-]+$/, { message: "must be a sibling-relative path" });
+/**
+ * The raw prompt file, named by convention rather than by frontmatter.
+ *
+ * A prompt note is a directory: `index.md` is the note, and this file beside it is the
+ * verbatim upstream text. There is exactly one, at exactly this name, so a `prompt_file:`
+ * field could only ever restate the convention — and a restated convention is a thing that
+ * can disagree with itself. The name is here, next to the kind it belongs to, because that
+ * is where a per-kind declaration of companion files will go when one exists.
+ */
+export const UPSTREAM_PROMPT_FILE = "upstream.prompt";
 
 export const kind = defineKind({
   kind: "prompt",
@@ -20,7 +26,6 @@ export const kind = defineKind({
         ...ctx.base,
         type: z.literal("prompt"),
         title: z.string(),
-        prompt_file: promptFile,
         license: ctx.licenseId.optional(),
         license_file: ctx.licenseFile.optional(),
       })

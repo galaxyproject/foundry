@@ -50,7 +50,6 @@ describe("buildNoteSchema", () => {
         type: "prompt",
         tags: ["prompt/galaxy-internal"],
         title: "Galaxy custom tool critic",
-        prompt_file: "custom-tool-critic.upstream.prompt",
         license: "MIT",
         license_file: "LICENSES/galaxy.LICENSE",
       }),

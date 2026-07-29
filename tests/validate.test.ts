@@ -284,7 +284,6 @@ describe("validateData (per-file)", () => {
         type: "prompt",
         tags: ["prompt/galaxy-internal", "target/galaxy"],
         title: "Galaxy Prompt",
-        prompt_file: "galaxy-prompt.upstream.prompt",
       }),
       schema,
     );
@@ -690,15 +689,14 @@ describe("validateDirectory (cross-file)", () => {
         package_export: "schemaX",
       }),
     });
-    writeFm(path.join(dir, "prompts/prompt-x.md"), {
+    writeFm(path.join(dir, "prompts/prompt-x/index.md"), {
       ...baseRequired({
         type: "prompt",
         tags: ["prompt/galaxy-internal", "target/galaxy"],
         title: "Prompt X",
-        prompt_file: "prompt-x.upstream.prompt",
       }),
     });
-    writeFileSync(path.join(dir, "prompts/prompt-x.upstream.prompt"), "Prompt body\n");
+    writeFileSync(path.join(dir, "prompts/prompt-x/upstream.prompt"), "Prompt body\n");
 
     const r = validateDirectory({
       directory: dir,
@@ -707,21 +705,23 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBe(0);
   });
 
-  it("rejects prompt notes with missing prompt_file", () => {
-    writeFm(path.join(dir, "prompts/prompt-x.md"), {
+  // The companion is named by convention, so the only way to get this wrong is to omit it.
+  // The note below is otherwise valid: what fails is the empty directory beside it.
+  it("rejects a prompt note with no upstream.prompt beside it", () => {
+    writeFm(path.join(dir, "prompts/prompt-x/index.md"), {
       ...baseRequired({
         type: "prompt",
         tags: ["prompt/galaxy-internal", "target/galaxy"],
         title: "Prompt X",
-        prompt_file: "missing.upstream.prompt",
       }),
     });
 
-    const r = validateDirectory({
-      directory: dir,
-      tagsPath: TAGS_PATH,
-    });
-    expect(r.errors).toBeGreaterThanOrEqual(1);
+    const missing = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(missing.errors).toBeGreaterThanOrEqual(1);
+
+    writeFileSync(path.join(dir, "prompts/prompt-x/upstream.prompt"), "Prompt body\n");
+    const present = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(present.errors).toBe(0);
   });
 
   it("resolves CLI command references by tool and command", () => {

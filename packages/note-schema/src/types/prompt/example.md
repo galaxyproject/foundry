@@ -1,7 +1,6 @@
 ---
 type: prompt
 title: Galaxy custom tool critic
-prompt_file: custom-tool-critic.upstream.prompt
 license: MIT
 license_file: LICENSES/galaxy.LICENSE
 tags:
@@ -16,5 +15,5 @@ summary: Upstream Galaxy prompt that reviews a generated tool XML for correctnes
 
 # Galaxy custom tool critic
 
-The prompt text itself is in `custom-tool-critic.upstream.prompt`, untouched; this note holds
+The prompt text itself is in `upstream.prompt` beside this note, untouched; this note holds
 only the provenance around it.
