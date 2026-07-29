@@ -173,6 +173,9 @@ importers:
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.2.1
         version: 0.2.1(zod@3.25.76)
+      '@galaxy-foundry/kind-schema':
+        specifier: ^0.2.0
+        version: 0.2.0(zod@3.25.76)
       '@galaxy-foundry/license-policy':
         specifier: ^0.1.0
         version: 0.1.0
@@ -987,6 +990,12 @@ packages:
 
   '@galaxy-foundry/kind-manifest@0.2.1':
     resolution: {integrity: sha512-a/H/xFryorwsgu0S2kiWlp4rNQvFfaRo2R/BcKPJI+u4u7gzzQuahQk34OS9+BIOG0d0q8ce0i/ElRBvtlA1Gg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      zod: ^3.25.0
+
+  '@galaxy-foundry/kind-schema@0.2.0':
+    resolution: {integrity: sha512-UjLOkR32b7b/fa6pxe6xa12yThDXESlbhSyrZqRA/ZV5bN558CZ6B/QVsUw+ohexWlYQLybw0rjxe61qcOU7Iw==}
     engines: {node: '>=20'}
     peerDependencies:
       zod: ^3.25.0
@@ -4247,6 +4256,11 @@ snapshots:
 
   '@galaxy-foundry/kind-manifest@0.2.1(zod@3.25.76)':
     dependencies:
+      zod: 3.25.76
+
+  '@galaxy-foundry/kind-schema@0.2.0(zod@3.25.76)':
+    dependencies:
+      '@galaxy-foundry/kind-manifest': 0.2.1(zod@3.25.76)
       zod: 3.25.76
 
   '@galaxy-foundry/license-policy@0.1.0':

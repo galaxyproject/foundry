@@ -8,6 +8,12 @@
 // Kinds receive this rather than importing the registries themselves, so a kind can be tested
 // against a synthetic registry — which is the one thing a kind test always needs.
 
+import {
+  kindDefiner,
+  type AnyKindDefinition as LibAnyKindDefinition,
+  type KindDefinition as LibKindDefinition,
+  type KindShape,
+} from "@galaxy-foundry/kind-schema";
 import { type LicensePolicy, isValidLicenseId } from "@galaxy-foundry/license-policy";
 import { type TagRegistry } from "@galaxy-foundry/tag-registry";
 import { WIKI_LINK_RE } from "@galaxy-foundry/wiki-links";
@@ -174,8 +180,15 @@ export function buildKindContext(options: BuildKindContextOptions): KindContext 
   };
 }
 
-/** Any shape that can be a member of the `type`-discriminated union. */
-export type KindShape = { type: z.ZodTypeAny } & z.ZodRawShape;
+// ---- the kind contract, bound to this instance's context ----
+//
+// `KindDefinition` and `defineKind` are not ours. They ship in @galaxy-foundry/kind-schema,
+// generic over the context a kind draws from, because every Foundry-pattern instance needs the
+// same contract over a different context. What is OURS is `KindContext` above — the field
+// primitives a kind may spread. Binding the parameter once, here, is what keeps the nine kind
+// directories writing `defineKind({...})` with no type parameter in sight.
+
+export type { KindShape };
 
 /**
  * What a `types/<kind>/schema.ts` exports.
@@ -185,40 +198,20 @@ export type KindShape = { type: z.ZodTypeAny } & z.ZodRawShape;
  * in ZodEffects), and the manifest generator walks `.shape` to derive the required-metadata
  * table. Per-kind cross-field rules go in `refine`, which the assembler dispatches by `type`
  * after the union resolves — so the rule still LIVES in the kind's directory.
+ *
+ * `refine`'s `data` is this kind's INFERRED frontmatter, not `Record<string, unknown>`, and
+ * that matters more than it reads: every rule is conditional, so a rule that never fires looks
+ * exactly like a rule with nothing to complain about. Untyped, `d.axis === "source-specifc"`
+ * compiled clean and the mold rule was silently dead. tests/kind-refine.test-d.ts pins it.
  */
-export interface KindDefinition<T extends KindShape = KindShape> {
-  /** The `type:` discriminator value. MUST equal the directory name. */
-  kind: string;
-  /** Display name for the kind catalog. */
-  title: string;
-  /** `substrate` = a kind the Foundry pattern's other instances also declare;
-   *  `instance` = one this domain added. The cross-instance catalog groups by this.
-   *
-   *  Named `layer`, not `origin`, because `origin` is already a frontmatter field on the
-   *  `cli-tool` kind (`npm | pypi`) — one manifest carrying both meanings under one word is a
-   *  trap for anything reading across instances. */
-  layer: "substrate" | "instance";
-  /** One line: what a note of this kind IS. Rendered in the catalog. */
-  summary: string;
-  /** A strict object carrying a `type:` literal — a union member, and the `.shape` the
-   *  manifest generator walks to derive this kind's required-metadata table. */
-  build: (ctx: KindContext) => z.ZodObject<T, "strict">;
-  /**
-   * Cross-field rules over this kind's own fields — the constraints a shape cannot state,
-   * because whether one field is valid depends on another's value (a `source-specific` mold
-   * must name a `source`; a schema note vendoring an external upstream must name a license).
-   *
-   * `data` is this kind's INFERRED frontmatter, not `Record<string, unknown>`. That matters
-   * more than it reads: every rule here is conditional, so a rule that never fires looks
-   * exactly like a rule with nothing to complain about. Untyped, `d.axis === "source-specifc"`
-   * compiled clean and the mold rule was silently dead.
-   */
-  refine?: (
-    data: z.infer<z.ZodObject<T, "strict">>,
-    ctx: z.RefinementCtx,
-    kctx: KindContext,
-  ) => void;
-}
+export type KindDefinition<T extends KindShape = KindShape> = LibKindDefinition<KindContext, T>;
+
+/**
+ * A kind definition with its shape erased — for code that ITERATES the kinds rather than
+ * validating with one. `ZodObject` is invariant in its shape parameter, so the widened
+ * `KindDefinition` above cannot hold a concrete kind at all; this is the iteration type.
+ */
+export type AnyKindDefinition = LibAnyKindDefinition<KindContext>;
 
 /**
  * Identity helper a kind directory wraps its definition in.
@@ -228,6 +221,4 @@ export interface KindDefinition<T extends KindShape = KindShape> {
  * to the Astro site, where `entry.data.tags` degrades to `any`. Inferring keeps each kind's
  * frontmatter type precise for every consumer of the assembled union.
  */
-export function defineKind<T extends KindShape>(definition: KindDefinition<T>): KindDefinition<T> {
-  return definition;
-}
+export const defineKind = kindDefiner<KindContext>();

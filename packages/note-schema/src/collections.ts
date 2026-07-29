@@ -14,15 +14,26 @@
 // directory holding two kinds. The reverse (two collections, one kind) is equally allowed —
 // it is how a browse route can exist without inventing a kind for it.
 
-/** One collection: a directory, the note files in it, and the kind they all declare. */
-export interface CollectionDefinition {
-  /** Repo-relative directory holding this collection's notes. */
-  base: string;
-  /** Globs relative to `base` selecting note files. Later `!`-prefixed entries exclude. */
-  pattern: readonly string[];
-  /** The `type:` every note in this collection declares. Must be a kind in KINDS. */
-  kind: string;
-}
+// The MATCHING is not ours — it ships in @galaxy-foundry/kind-schema, because the alternative
+// is each instance writing a glob matcher and each getting `**/` subtly wrong in its own way.
+// The TABLE is ours: it names this Foundry's directories. The wrappers below bind the two, so
+// no caller has to remember to pass the table.
+import {
+  collectionOf as routeCollection,
+  kindOf as routeKind,
+  matchesCollection,
+  type CollectionRoute,
+} from "@galaxy-foundry/kind-schema/collections";
+
+export { matchesCollection };
+
+/**
+ * One collection: a directory, the note files in it, and the kind they all declare.
+ *
+ * `base` is repo-relative here — the shared type leaves the frame to the caller, and this is
+ * the frame both consumers can check a real path against without knowing where they ran from.
+ */
+export type CollectionDefinition = CollectionRoute;
 
 /**
  * The one directory every collection lives under, stated once.
@@ -64,29 +75,6 @@ export type CollectionName = keyof typeof COLLECTIONS;
 /** Collection names, for a consumer that needs to iterate every collection. */
 export const COLLECTION_NAMES = Object.keys(COLLECTIONS) as readonly CollectionName[];
 
-// The three glob constructs the table above uses, and nothing more. Astro's loader matches
-// these patterns with picomatch; this matches them for the validator, which has no globber.
-// Two implementations of the same patterns is exactly the drift this module exists to end, so
-// the routing test pins this one against the real corpus — if it and picomatch ever disagreed
-// about a file, the published collection sizes would stop matching the walked file count.
-function globToRegExp(pattern: string): RegExp {
-  let out = "";
-  for (let i = 0; i < pattern.length; i += 1) {
-    const rest = pattern.slice(i);
-    if (rest.startsWith("**/")) {
-      out += "(?:[^/]+/)*"; // zero or more leading path segments
-      i += 2;
-    } else if (pattern[i] === "*") {
-      out += "[^/]*"; // one segment, no separators
-    } else if (".+^${}()|[]\\?".includes(pattern[i]!)) {
-      out += `\\${pattern[i]}`;
-    } else {
-      out += pattern[i];
-    }
-  }
-  return new RegExp(`^${out}$`);
-}
-
 /**
  * The collection a repo-relative path belongs to, or `undefined` if it is not a note.
  *
@@ -94,31 +82,10 @@ function globToRegExp(pattern: string): RegExp {
  * routing test asserts it cannot happen, so the first match is the only match.
  */
 export function collectionOf(repoRelPath: string): CollectionName | undefined {
-  const normalized = repoRelPath.split("\\").join("/");
-  for (const name of COLLECTION_NAMES) {
-    if (matchesCollection(normalized, COLLECTIONS[name])) return name;
-  }
-  return undefined;
-}
-
-/** Whether a repo-relative path is one of this collection's note files. */
-export function matchesCollection(repoRelPath: string, collection: CollectionDefinition): boolean {
-  const prefix = `${collection.base}/`;
-  if (!repoRelPath.startsWith(prefix)) return false;
-  const withinBase = repoRelPath.slice(prefix.length);
-  let matched = false;
-  for (const pattern of collection.pattern) {
-    const negated = pattern.startsWith("!");
-    const re = globToRegExp(negated ? pattern.slice(1) : pattern);
-    if (!re.test(withinBase)) continue;
-    if (negated) return false;
-    matched = true;
-  }
-  return matched;
+  return routeCollection(COLLECTIONS, repoRelPath);
 }
 
 /** The kind a repo-relative path routes to, or `undefined` if it is not a note. */
 export function kindOf(repoRelPath: string): string | undefined {
-  const name = collectionOf(repoRelPath);
-  return name && COLLECTIONS[name].kind;
+  return routeKind(COLLECTIONS, repoRelPath);
 }

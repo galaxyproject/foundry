@@ -2,80 +2,31 @@
 // the validator (`@galaxy-foundry/build-cli`) and the Astro site from the same three
 // registries, so there is no second encoding to drift against.
 //
-// This module is the ASSEMBLER, and only the assembler. Each note kind is defined — and
-// documented, and exemplified — in its own directory under src/types/; see src/types/index.ts
-// for the enumeration and src/types/context.ts for the shared envelope every kind spreads.
+// This module is the ASSEMBLER, and only the assembler — and the assembly itself is no longer
+// ours. `assemble` and `buildKindUnion` ship in @galaxy-foundry/kind-schema, parameterized by
+// the kind context. What stays here is which kinds this Foundry has and how its registries
+// resolve into that context. Each note kind is defined — and documented, and exemplified — in
+// its own directory under src/types/; see src/types/index.ts for the enumeration and
+// src/types/context.ts for the shared envelope every kind spreads.
 //
 // `buildNoteSchema` is a factory rather than a constant because the controlled enums (tags,
 // reference-contract vocab, license ids) live in YAML registries loaded at call time and
 // injected here — which is also what lets a test build the schema against a synthetic registry.
 
-import { z } from "zod";
+import { assemble, buildKindUnion } from "@galaxy-foundry/kind-schema";
 
-import {
-  buildKindContext,
-  type BuildKindContextOptions,
-  type KindContext,
-  type KindDefinition,
-  type KindShape,
-} from "./types/context.js";
-import { DEFINITIONS, KINDS, KINDS_BY_NAME, type BuiltKinds } from "./types/index.js";
+import { buildKindContext, type BuildKindContextOptions } from "./types/context.js";
+import { DEFINITIONS, KINDS } from "./types/index.js";
+
+export type { Assembled } from "@galaxy-foundry/kind-schema";
 
 export type BuildNoteSchemaOptions = BuildKindContextOptions;
 
 export function buildNoteSchema(options: BuildNoteSchemaOptions) {
-  const ctx = buildKindContext(options);
-
-  // zod's discriminatedUnion accepts ZodObject members only, so each kind contributes a plain
-  // strict object here and its cross-field rules run in the dispatch below. The rules still
-  // LIVE in the kind's directory — this only decides when they fire.
-  //
-  // The assertion is the one place a cast is unavoidable: `.map` over a tuple returns an
-  // array, losing the per-element types the site's frontmatter inference depends on. The
-  // mapped type restores exactly what `.map` erased — same order, same length, same elements.
-  type Member = BuiltKinds[number];
-  const members = KINDS.map((k) => k.build(ctx)) as unknown as readonly [Member, ...Member[]];
-
-  return z.discriminatedUnion("type", members).superRefine((d, issues) => {
-    const definition = KINDS_BY_NAME.get((d as { type: string }).type);
-    definition?.refine?.(d as never, issues, ctx);
-  });
+  return buildKindUnion(KINDS, buildKindContext(options));
 }
 
 export type NoteSchema = ReturnType<typeof buildNoteSchema>;
-
-/**
- * One kind's assembled schema: parses that kind's frontmatter, yields that kind's own output.
- *
- * Stated as ONE type rather than left to inference, because inference over the optional
- * `refine` slot yields a UNION of "refined" and "not" — and a union is what turns an ordinary
- * field access on an Astro page into an error, since it would have to hold on both arms.
- */
-export type Assembled<T extends KindShape> = z.ZodType<
-  z.infer<z.ZodObject<T, "strict">>,
-  z.ZodTypeDef,
-  z.input<z.ZodObject<T, "strict">>
->;
-
-/**
- * Assemble one kind into the schema its collection validates with.
- *
- * `build` returns the bare strict object so the manifest generator can walk its `.shape`;
- * `refine` is applied here, to that kind's schema alone, so a cross-field rule sees only its
- * own kind's fields.
- */
-function assemble<T extends KindShape>(
-  definition: KindDefinition<T>,
-  ctx: KindContext,
-): Assembled<T> {
-  const object = definition.build(ctx);
-  const { refine } = definition;
-  // No cast on `d`. Assembling one kind at a time is what makes `superRefine`'s argument
-  // already exactly the payload `refine` declares — which is the whole point of applying the
-  // rule to its own kind's schema rather than after a union resolves.
-  const refined = refine ? object.superRefine((d, issues) => refine(d, issues, ctx)) : object;
-  return refined as Assembled<T>;
-}
 
 /**
  * Every kind's schema, by kind name — what a per-collection Astro loader validates with.

@@ -17,7 +17,7 @@ import { kind as research } from "./research/schema.js";
 import { kind as schemaNote } from "./schema/schema.js";
 import { kind as sourcePattern } from "./source-pattern/schema.js";
 
-import { type KindDefinition } from "./context.js";
+import { type AnyKindDefinition } from "./context.js";
 
 // NOT annotated `: readonly KindDefinition[]`. That annotation would widen every element to
 // the default shape and the erasure would propagate to the Astro site, where `entry.data.tags`
@@ -57,19 +57,21 @@ export const DEFINITIONS = {
   prompt,
 } as const;
 
-type BuiltKind<K> = K extends { build: (...args: never[]) => infer R } ? R : never;
-
-/** Each kind's union member, in barrel order, with its shape preserved. */
-export type BuiltKinds = { -readonly [I in keyof typeof KINDS]: BuiltKind<(typeof KINDS)[I]> };
-
-/** Kind definitions by their `type:` discriminator value. */
-export const KINDS_BY_NAME: ReadonlyMap<string, KindDefinition> = new Map(
-  KINDS.map((k) => [k.kind, k as KindDefinition]),
+/**
+ * Kind definitions by their `type:` discriminator value.
+ *
+ * Erased to `AnyKindDefinition`, and it has to be: a Map has one value type for every entry, so
+ * the shapes collapse regardless. Callers who need a kind with its shape intact go through
+ * `DEFINITIONS` above.
+ */
+export const KINDS_BY_NAME: ReadonlyMap<string, AnyKindDefinition> = new Map(
+  KINDS.map((k) => [k.kind, k]),
 );
 
 export {
   buildKindContext,
   defineKind,
+  type AnyKindDefinition,
   type KindContext,
   type KindDefinition,
   type KindShape,

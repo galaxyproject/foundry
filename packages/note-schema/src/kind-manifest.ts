@@ -4,8 +4,10 @@
 // The FORMAT, the zod-shape deriver, and the reader all live in
 // @galaxy-foundry/kind-manifest, because they are shared across instances (spec:
 // galaxyproject/foundry-pattern, `content/pattern/standing-up-a-foundry.instructions.txt`).
-// What stays here is the part that is genuinely ours: which kinds exist, and how this
-// instance's registries resolve into the context they are built against.
+// The bridge between the two — turning kind definitions into the deriver's input — is
+// `manifestKinds` in @galaxy-foundry/kind-schema, because both instances had written it
+// identically. What stays here is the part that is genuinely ours: which kinds exist, and how
+// this instance's registries resolve into the context they are built against.
 //
 // `fields` is still DERIVED from the zod shape, never hand-written — that has just moved
 // one repo over, along with the synthetic-shape tests that prove the deriver right.
@@ -15,6 +17,7 @@ import {
   type KindManifest,
   type ManifestSource,
 } from "@galaxy-foundry/kind-manifest";
+import { manifestKinds } from "@galaxy-foundry/kind-schema";
 
 import { buildKindContext } from "./types/context.js";
 import type { BuildKindContextOptions } from "./types/context.js";
@@ -57,20 +60,9 @@ export function buildKindManifest({
   docs = {},
   ...registries
 }: BuildKindManifestOptions): KindManifest {
-  const ctx = buildKindContext(registries);
   return deriveKindManifest({
     instance,
     source: MANIFEST_SOURCE,
-    kinds: KINDS.map((definition) => {
-      const doc = docs[definition.kind];
-      return {
-        kind: definition.kind,
-        title: definition.title,
-        layer: definition.layer,
-        summary: definition.summary,
-        shape: definition.build(ctx).shape,
-        ...(doc === undefined ? {} : { doc }),
-      };
-    }),
+    kinds: manifestKinds(KINDS, buildKindContext(registries), docs),
   });
 }
