@@ -9,13 +9,13 @@
 // Usage:
 //   foundry-build assemble-pipeline <slug> [harness-name] [--check] [--root <dir>]
 
-import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
+import { reconcileText } from "../lib/reconcile.js";
 import {
   aggregateRequiredTools,
   moldCliRefs,
@@ -106,14 +106,6 @@ function firstSentence(s: string): string {
   const idx = s.indexOf(". ");
   const head = idx >= 0 ? s.slice(0, idx) : s.replace(/\.\s*$/, "");
   return head.trim();
-}
-
-function sha256OfBuffer(buf: Buffer | string): string {
-  return createHash("sha256").update(buf).digest("hex");
-}
-
-function sha256(filePath: string): string {
-  return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
 
 // ---- assembly model ----
@@ -429,26 +421,6 @@ function renderAssembly(
   return lines.join("\n");
 }
 
-// ---- reconcile ----
-
-function reconcile(
-  filePath: string,
-  expected: string,
-  check: boolean,
-  label: string,
-): { drift?: string } {
-  const exists = existsSync(filePath);
-  const currentHash = exists ? sha256(filePath) : null;
-  if (currentHash === sha256OfBuffer(expected)) return {};
-  if (!check) {
-    mkdirSync(path.dirname(filePath), { recursive: true });
-    writeFileSync(filePath, expected);
-  }
-  return {
-    drift: exists ? `${label} content differs from deterministic render` : `${label} missing`,
-  };
-}
-
 // ---- main ----
 
 export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): Promise<void> {
@@ -513,20 +485,18 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
 
   const bundleRoot = path.join(repoRoot, "casts", "claude", "skills", harnessName);
   const drift: Array<{ file: string; reason: string }> = [];
-  const skillResult = reconcile(
-    path.join(bundleRoot, "SKILL.md"),
-    result.skill,
-    args.check,
-    "SKILL.md",
-  );
-  if (skillResult.drift) drift.push({ file: "SKILL.md", reason: skillResult.drift });
-  const assemblyResult = reconcile(
-    path.join(bundleRoot, "_assembly.json"),
-    assemblyText,
-    args.check,
-    "_assembly.json",
-  );
-  if (assemblyResult.drift) drift.push({ file: "_assembly.json", reason: assemblyResult.drift });
+  for (const [label, expected] of [
+    ["SKILL.md", result.skill],
+    ["_assembly.json", assemblyText],
+  ] as const) {
+    const outcome = reconcileText({
+      path: path.join(bundleRoot, label),
+      expected,
+      label,
+      check: args.check,
+    });
+    if (outcome.reason) drift.push({ file: label, reason: outcome.reason });
+  }
 
   for (const d of drift) console.error(`drift: ${d.file} — ${d.reason}`);
 

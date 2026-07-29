@@ -3,10 +3,11 @@
 // stderr are captured as diagnostic evidence without requiring a JSON shape.
 
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
+
+import { sha256File, sha256Text } from "../lib/reconcile.js";
 import type { VerifyManifest, VerifyManifestEntry } from "./cast-mold.js";
 
 interface Args {
@@ -59,14 +60,6 @@ function parseArgs(argv: string[]): Args {
     provenancePath,
     root,
   };
-}
-
-function sha256Text(text: string): string {
-  return createHash("sha256").update(text).digest("hex");
-}
-
-function sha256File(filePath: string): string {
-  return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
 
 function loadVerifyEntry(verifyPath: string, artifactId: string): VerifyManifestEntry {
