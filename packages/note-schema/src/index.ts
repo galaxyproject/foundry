@@ -25,6 +25,7 @@ export {
   DEFINITIONS,
   KINDS,
   KINDS_BY_NAME,
+  UPSTREAM_PROMPT_FILE,
   buildKindContext,
   defineKind,
   type AnyKindDefinition,

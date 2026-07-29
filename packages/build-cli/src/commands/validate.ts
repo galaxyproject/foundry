@@ -11,6 +11,7 @@ import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import {
   buildNoteSchema,
   loadReferenceContract,
+  UPSTREAM_PROMPT_FILE,
   type NoteSchema,
 } from "@galaxy-foundry/note-schema";
 import { bundledPolicy, resolveLicenseRow } from "@galaxy-foundry/license-policy";
@@ -1191,18 +1192,20 @@ function validateCliTools(files: FileMeta[]): CrossFileFinding[] {
   return findings;
 }
 
+// A prompt note is a directory whose `index.md` is the wrapper and whose `upstream.prompt` is
+// the verbatim text casting packages. The file is required and its name is fixed, so this asks
+// whether the note is complete rather than whether a frontmatter path resolves — there is no
+// declared path left to be wrong about.
 function validatePromptFiles(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
     if (f.meta.type !== "prompt") continue;
-    const promptFile = typeof f.meta.prompt_file === "string" ? f.meta.prompt_file : "";
-    if (!promptFile) continue;
-    const fullPath = path.resolve(path.dirname(f.path), promptFile);
+    const fullPath = path.resolve(path.dirname(f.path), UPSTREAM_PROMPT_FILE);
     if (!existsSync(fullPath)) {
       findings.push({
         path: f.path,
         severity: "error",
-        message: `prompt_file: file does not exist: ${promptFile}`,
+        message: `prompt: required companion is missing: ${UPSTREAM_PROMPT_FILE}`,
       });
       continue;
     }
@@ -1210,7 +1213,7 @@ function validatePromptFiles(files: FileMeta[]): CrossFileFinding[] {
       findings.push({
         path: f.path,
         severity: "error",
-        message: `prompt_file: path is not a file: ${promptFile}`,
+        message: `prompt: companion is not a file: ${UPSTREAM_PROMPT_FILE}`,
       });
     }
   }

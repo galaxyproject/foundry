@@ -31,6 +31,7 @@ import {
   resolveLicenseRow,
   type LicensePolicy,
 } from "@galaxy-foundry/license-policy";
+import { UPSTREAM_PROMPT_FILE } from "@galaxy-foundry/note-schema";
 
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
@@ -291,26 +292,21 @@ function resolveMoldRef(
       };
     }
     if (kind === "prompt") {
-      const promptFile = metaByPath.get(tp)?.prompt_file;
-      if (typeof promptFile !== "string" || promptFile.length === 0) {
-        return {
-          error: `references[${index}]: prompt ref ${refStr} target is missing prompt_file`,
-        };
-      }
-      src = path.posix.join(path.posix.dirname(tp), promptFile);
-      dstOverride = path.posix.join(
-        kindCfg.dst_dir,
-        `${path.basename(tp, ".md")}${kindCfg.dst_extension}`,
-      );
+      // A prompt note is `content/prompts/<area>/<slug>/index.md`; what casting packages is
+      // the verbatim `upstream.prompt` beside it, never the wrapper. The name is a convention
+      // owned by the kind, not a frontmatter field, so there is nothing here to resolve and
+      // nothing that can point at a file that is not there.
+      src = path.posix.join(path.posix.dirname(tp), UPSTREAM_PROMPT_FILE);
+      dstOverride = path.posix.join(kindCfg.dst_dir, `${fileSlug(tp)}${kindCfg.dst_extension}`);
     } else if (kind === "cli-tool") {
-      // cli-tool notes live at content/cli/<tool>/index.md. Use the parent dir
-      // slug (which equals the tool name) for the bundled filename so casts
-      // get readable filenames like references/cli/cwltool.md.
+      // cli-tool notes live at content/cli/<tool>/index.md, so the slug is the parent dir
+      // name and casts get readable filenames like references/cli/cwltool.md. `tool:`
+      // overrides it for the tool whose directory is not its command name.
       src = tp;
       const toolSlug =
         typeof metaByPath.get(tp)?.tool === "string"
           ? (metaByPath.get(tp)!.tool as string)
-          : path.basename(path.posix.dirname(tp));
+          : fileSlug(tp);
       dstOverride = path.posix.join(kindCfg.dst_dir, `${toolSlug}${kindCfg.dst_extension}`);
     } else {
       src = tp;
