@@ -10,9 +10,12 @@ import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
 import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import {
   buildNoteSchema,
+  collectionOf,
+  CONTENT_DIR,
   kindOf,
   KINDS_BY_NAME,
   loadReferenceContract,
+  nonNoteAllowanceOf,
   type NoteSchema,
 } from "@galaxy-foundry/note-schema";
 // Directly from the shared package rather than through the barrel, which is the arrangement
@@ -884,17 +887,10 @@ function validatePipelineSourceLayout(
   const seenDirs = new Set(pipelineFiles.map((f) => path.dirname(f.path)));
   for (const entry of readdirSync(pipelinesRoot).sort()) {
     const pdir = path.join(pipelinesRoot, entry);
-    if (!statSync(pdir).isDirectory()) {
-      if (entry.endsWith(".md")) {
-        findings.push({
-          path: pdir,
-          severity: "warning",
-          message:
-            "pipeline must be a directory note (content/pipelines/<slug>/index.md), not a flat file",
-        });
-      }
-      continue;
-    }
+    // A flat `.md` here is not this function's to report any more. `validateUnroutedContent`
+    // catches it as content no collection claims — one rule covering every collection, instead
+    // of a per-collection warning that only `pipelines` ever got written for.
+    if (!statSync(pdir).isDirectory()) continue;
 
     const indexPath = path.join(pdir, "index.md");
     if (!existsSync(indexPath)) {
@@ -1190,6 +1186,67 @@ function validateCompanionLayout(contentRoot: string, files: FileMeta[]): CrossF
   return findings;
 }
 
+/**
+ * Markdown under the content root that is neither a note, nor a companion, nor declared as
+ * deliberately neither.
+ *
+ * The residue used to be accounted for by silence. Nothing claimed `content/log.md`, so the
+ * walker skipped it — and skipped, by exactly the same rule, anything else nobody had routed.
+ * `content/prompts/**` lived in that gap for as long as it existed: two notes, committed,
+ * validated by nothing and published by nothing. This closes the set, so the residue is empty
+ * by construction rather than by having been looked at recently.
+ *
+ * A directory-shaped note's own directory is left alone: `validateCompanionLayout` owns it, and
+ * reports an undeclared file there against the KIND that failed to declare it, which is the
+ * more useful sentence. Reporting it twice would say less, not more.
+ *
+ * Markdown only. Every collection pattern selects `.md`, so "is this a note?" is a question
+ * only a markdown file raises; the fixtures, schemas and vendored sources under `content/` are
+ * data, governed by the companion declaration of whichever note owns their directory.
+ */
+function validateUnroutedContent(contentRoot: string, files: FileMeta[]): CrossFileFinding[] {
+  const ownedByKind = new Set(
+    files
+      .filter((f) => KINDS_BY_NAME.get(String(f.meta.type))?.shape === "directory")
+      .map((f) => path.dirname(routablePath(contentRoot, f.path))),
+  );
+  const underDirectoryNote = (routable: string): boolean => {
+    for (let dir = path.dirname(routable); dir !== CONTENT_DIR && dir !== "."; ) {
+      if (ownedByKind.has(dir)) return true;
+      dir = path.dirname(dir);
+    }
+    return false;
+  };
+
+  const findings: CrossFileFinding[] = [];
+  const visit = (dir: string): void => {
+    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )) {
+      if (entry.name.startsWith(".")) continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        visit(full);
+        continue;
+      }
+      if (!entry.name.endsWith(".md")) continue;
+      const routable = routablePath(contentRoot, full);
+      if (collectionOf(routable)) continue;
+      if (nonNoteAllowanceOf(routable)) continue;
+      if (underDirectoryNote(routable)) continue;
+      findings.push({
+        path: full,
+        severity: "error",
+        message:
+          "no collection claims this file and no allowance declares it — add it to a " +
+          "collection, put it beside the note that owns it, or declare it in NOT_NOTES",
+      });
+    }
+  };
+  visit(contentRoot);
+  return findings;
+}
+
 function validateCompanionFiles(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
@@ -1415,6 +1472,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateCliCommandDocs(validFiles));
   crossFindings.push(...validateCliTools(validFiles));
   crossFindings.push(...validateCompanionLayout(opts.directory, validFiles));
+  crossFindings.push(...validateUnroutedContent(opts.directory, validFiles));
   crossFindings.push(...validateCompanionFiles(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
   crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));

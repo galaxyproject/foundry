@@ -591,6 +591,59 @@ describe("validateDirectory (cross-file)", () => {
     );
   });
 
+  // The residue: markdown under the content root that no collection claims. It used to be
+  // accounted for by silence — nothing routed `log.md`, so the walker skipped it, and skipped
+  // anything else unrouted by the same rule.
+  describe("markdown no collection claims", () => {
+    it("errors on a file that is neither note, companion, nor declared non-note", () => {
+      writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
+      expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
+
+      writeFileSync(path.join(dir, "notes-to-self.md"), "# scratch\n");
+      expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(1);
+    });
+
+    it("errors inside a collection's own directory, where no note owns the file", () => {
+      writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
+      // `content/patterns/` is a flat collection: nothing there is a directory note, so no
+      // companion declaration covers this and the layout check never looks.
+      writeFileSync(path.join(dir, "patterns/README.md"), "# orientation\n");
+      expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(1);
+    });
+
+    it("accepts what NOT_NOTES declares", () => {
+      writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
+      writeFileSync(path.join(dir, "Dashboard.md"), "# Dashboard\n");
+      writeFileSync(path.join(dir, "Index.md"), "# Index\n");
+      writeFileSync(path.join(dir, "log.md"), "# Log\n");
+      mkdirSync(path.join(dir, "meta"), { recursive: true });
+      writeFileSync(path.join(dir, "meta/glossary.md"), "# Glossary\n");
+      expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
+    });
+
+    // Exactly one, not two. A directory note's own directory belongs to the companion check,
+    // which names the kind that failed to declare the file — the more useful sentence of the
+    // two, and worth nothing if a second check repeats it in weaker words.
+    it("leaves a stray beside a directory note to the kind that did not declare it", () => {
+      writeFm(path.join(dir, "molds/mold-a/index.md"), {
+        ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
+      });
+      writeFileSync(path.join(dir, "molds/mold-a/scenario.md"), "# misnamed\n");
+      expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(1);
+    });
+
+    // A companion directory is declared as a whole, so its CONTENTS are the note's business and
+    // not the residue's — one level down or four.
+    it("ignores markdown nested under a declared companion directory", () => {
+      writeFm(path.join(dir, "molds/mold-a/index.md"), {
+        ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
+      });
+      mkdirSync(path.join(dir, "molds/mold-a/examples/case-1"), { recursive: true });
+      writeFileSync(path.join(dir, "molds/mold-a/examples/case-1/README.md"), "# fixture\n");
+      expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
+    });
+  });
+
   it("does not warn on an examples/ subdir of scenario fixtures in a pipeline directory", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
@@ -607,18 +660,23 @@ describe("validateDirectory (cross-file)", () => {
     expect(after.warnings).toBe(before);
   });
 
-  it("warns on a flat .md file under content/pipelines/", () => {
+  // Was a warning from a `pipelines`-only branch. It is an error now, and from the general
+  // check: `content/pipelines/**/index.md` is what the collection claims, so a flat file there
+  // is content nothing routes — the same failure as a stray anywhere else, and no longer worth
+  // a rule of its own.
+  it("errors on a flat .md file under content/pipelines/", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
-    const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
+    const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(before.errors).toBe(0);
     writeFileSync(path.join(dir, "pipelines/stray.md"), "not a directory note\n");
     const after = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
-    expect(after.errors).toBe(0);
-    expect(after.warnings).toBeGreaterThan(before);
+    expect(after.errors).toBe(1);
+    expect(after.warnings).toBe(before.warnings);
   });
 
   it("resolves a pipeline's [branch] phase to molds", () => {

@@ -9,6 +9,8 @@ import {
   collectionOf,
   collectionsClaiming,
   KINDS,
+  NON_NOTE_NAMES,
+  nonNoteAllowanceOf,
 } from "@galaxy-foundry/note-schema";
 import { readMarkdown } from "../packages/build-cli/src/lib/frontmatter.js";
 import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";
@@ -178,6 +180,53 @@ describe("collection routing (path table vs corpus)", () => {
           `${n.rel} declares '${n.type}' but routes to '${COLLECTIONS[collectionOf(n.rel)!].kind}'`,
       );
     expect(misfiled, `\n${misfiled.join("\n")}`).toEqual([]);
+  });
+
+  // The other direction from "claims every note": not "is every note routed" but "is every
+  // markdown file accounted for at all". A file with no frontmatter cannot announce itself as a
+  // note, so the orphan check above never sees it — and it is exactly the file that can sit in
+  // the tree indefinitely, meaning nothing to anything.
+  //
+  // Three ways to be accounted for, and no fourth: a collection claims it, a directory note
+  // owns the directory it sits in (its kind's companion declaration answers for it), or
+  // NOT_NOTES declares it deliberately outside the note system.
+  it("accounts for every markdown file in the content tree", () => {
+    const directoryNoteDirs = new Set(
+      corpus
+        .filter((n) => KINDS.find((k) => k.kind === n.type)?.shape === "directory")
+        .map((n) => path.dirname(n.rel)),
+    );
+    const ownedByDirectoryNote = (rel: string): boolean => {
+      for (let dir = path.dirname(rel); dir !== CONTENT_DIR && dir !== "."; ) {
+        if (directoryNoteDirs.has(dir)) return true;
+        dir = path.dirname(dir);
+      }
+      return false;
+    };
+
+    const unaccounted = everyMarkdownFile.filter(
+      (rel) => !collectionOf(rel) && !nonNoteAllowanceOf(rel) && !ownedByDirectoryNote(rel),
+    );
+    expect(
+      unaccounted,
+      `\nneither note, companion, nor declared non-note:\n  ${unaccounted.join("\n  ")}`,
+    ).toEqual([]);
+  });
+
+  // An allowance is a location table like COLLECTIONS, and the same failure applies: a base
+  // nothing reaches is a row claiming to account for something that is not there.
+  it("matches every non-note allowance to a file that exists", () => {
+    const empty = NON_NOTE_NAMES.filter(
+      (name) => !everyMarkdownFile.some((rel) => nonNoteAllowanceOf(rel) === name),
+    );
+    expect(empty, `\nallowances matching nothing: ${empty.join(", ")}`).toEqual([]);
+  });
+
+  // Both tables answer "what is this path?", and a path both claim has two answers. `content/`
+  // is a collection base and an allowance base at once, so the overlap is one glob away.
+  it("keeps the allowance table disjoint from the collection table", () => {
+    const both = everyMarkdownFile.filter((rel) => collectionOf(rel) && nonNoteAllowanceOf(rel));
+    expect(both, `\nclaimed as note AND declared not-a-note:\n  ${both.join("\n  ")}`).toEqual([]);
   });
 
   // `collectionOf` returns the FIRST match, so overlapping collections would route by table

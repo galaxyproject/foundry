@@ -214,7 +214,17 @@ if (entry.startsWith(".")) continue;                        // .obsidian and fri
 if (!collectionOf(`${CONTENT_DIR}/${rel}`)) continue;       // the table decides
 ```
 
-Everything the old skip rules named falls out of the table rather than being restated: `Dashboard.md` / `Index.md` / `log.md` sit at the content root and `glossary.md` in `content/meta/`, and no collection's base reaches either; `molds` and `pipelines` glob `**/index.md`, which is directory-note semantics stated as a pattern; `casts/` is outside `content/` entirely. Dotfiles are the one exclusion left in code, because `.obsidian/` holds markdown that is editor state and no glob would tell it apart from a note.
+Everything the old skip rules named falls out of the table rather than being restated: `molds` and `pipelines` glob `**/index.md`, which is directory-note semantics stated as a pattern; `casts/` is outside `content/` entirely. Dotfiles are the one exclusion left in code, because `.obsidian/` holds markdown that is editor state and no glob would tell it apart from a note.
+
+**Falling out of the table is not the same as being accounted for.** `Dashboard.md` / `Index.md` / `log.md` at the content root and `content/meta/` are not notes, and were once known not to be notes only because no collection's base reached them — which is exactly as true of a file nobody meant to add. They are declared in `NOT_NOTES` beside `COLLECTIONS`, each with the reason it is not a note, and `validateUnroutedContent` errors on markdown under `content/` that is none of the three things it can be:
+
+| accounted for by | who answers for it |
+|---|---|
+| a collection claims it | the routing table |
+| a directory note owns the directory it sits in | that kind's companion declaration |
+| `NOT_NOTES` declares it | the allowance table |
+
+The residue is empty by construction rather than by having been looked at recently. Markdown only — every collection pattern selects `.md`, so the fixtures and vendored sources under `content/` are data, governed by the companion declaration of whichever note owns their directory.
 
 **One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver now lives one level further out, in `@galaxy-foundry/wiki-links`, shared across Foundry instances; `packages/build-cli/src/lib/wiki-links.ts` and `site/src/lib/wiki-links.ts` are thin adapters over it that add this instance's map and return shapes. The **frontmatter schema and reference contract** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
 
