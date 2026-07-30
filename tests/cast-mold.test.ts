@@ -400,7 +400,6 @@ describe("cast-mold prompt refs", () => {
           "skill_constraints:",
           "  frontmatter_required: [name, description]",
           "  forbidden_runtime_paths: []",
-          "  forbid_packaged_files: []",
           "",
         ].join("\n"),
       );
@@ -490,7 +489,6 @@ describe("cast-mold cli-command meta injection", () => {
           "skill_constraints:",
           "  frontmatter_required: [name, description]",
           "  forbidden_runtime_paths: []",
-          "  forbid_packaged_files: []",
           "",
         ].join("\n"),
       );
@@ -596,7 +594,6 @@ describe("cast-mold companion files", () => {
         "skill_constraints:",
         "  frontmatter_required: [name, description]",
         "  forbidden_runtime_paths: []",
-        "  forbid_packaged_files: []",
         "",
       ].join("\n"),
     );
@@ -799,6 +796,107 @@ ${mention}`,
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  // The disposition is declared once, per companion, on the kind. These cases are the whole
+  // contract the verifier reads out of it. `_target.yml` used to answer this question with a
+  // hand-written list naming `eval.md` and `refinement.md` — two of the eight — so nothing below
+  // except the first case would have failed a bundle before.
+  describe("companions the kind layer says never travel", () => {
+    function castThenPlant(
+      dir: string,
+      plant: (bundle: string) => void,
+    ): ReturnType<typeof execVerify> {
+      writeCompanionFixture(dir, { declareCompanions: true });
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+      plant(path.join(dir, "casts/claude/skills/m"));
+      return execVerify(dir, "m");
+    }
+
+    it.each([
+      ["eval.md", "foundry-only"],
+      ["scenarios.md", "foundry-only"],
+      ["changes.md", "foundry-only"],
+      ["README.md", "foundry-only"],
+      ["casting.md", "cast-input"],
+      ["cast-skill-verification.md", "cast-input"],
+    ])("rejects a bundle carrying %s (%s)", (file, disposition) => {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-forbidden-"));
+      try {
+        const verify = castThenPlant(dir, (bundle) => {
+          writeFileSync(path.join(bundle, file), "Foundry-only content.\n");
+        });
+        expect(verify.code, `${file} must not survive verification`).not.toBe(0);
+        expect(verify.stderr).toContain(file);
+        expect(verify.stderr).toContain(disposition);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    // A directory-shaped companion is matched as a directory. `refinements/` and `refinement.md`
+    // are different companions, and a name matching the wrong type is neither of them.
+    it("rejects a refinements/ directory, and not a file of the same name", () => {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refinements-"));
+      try {
+        const asDirectory = castThenPlant(dir, (bundle) => {
+          mkdirSync(path.join(bundle, "refinements"));
+          writeFileSync(path.join(bundle, "refinements/2026-07-30.md"), "entry\n");
+        });
+        expect(asDirectory.code, "a refinements/ journal must not ship").not.toBe(0);
+        expect(asDirectory.stderr).toContain("refinements");
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+
+      const other = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refinements-file-"));
+      try {
+        const asFile = castThenPlant(other, (bundle) => {
+          writeFileSync(path.join(bundle, "refinements"), "not the journal\n");
+        });
+        expect(
+          asFile.code,
+          `a file named 'refinements' is not the declared directory: ${asFile.stderr}`,
+        ).toBe(0);
+      } finally {
+        rmSync(other, { recursive: true, force: true });
+      }
+    });
+
+    // `examples/` is declared `bundled` by both `mold` and `pipeline`. A name any kind packages
+    // must stay packageable even though other names beside it in the same declaration do not.
+    it("accepts an examples/ directory, which a kind declares bundled", () => {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-examples-"));
+      try {
+        const verify = castThenPlant(dir, (bundle) => {
+          mkdirSync(path.join(bundle, "examples"));
+          writeFileSync(path.join(bundle, "examples/fixture.json"), "{}\n");
+        });
+        expect(verify.code, `a bundled companion must survive: ${verify.stderr}`).toBe(0);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    // The check has only a basename to go on, so a note whose own vendored sidecar happens to be
+    // called `README.md` would collide with the mold companion of that name. Provenance breaks the
+    // tie: a file some ref claims went through the manifest and is that note's to ship.
+    it("accepts a companion a ref claims, even where the name collides with a mold's", () => {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-collision-"));
+      try {
+        writeCompanionFixture(dir, { declareCompanions: true, siblingName: "README.md" });
+        expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+        expect(
+          existsSync(path.join(dir, "casts/claude/skills/m/references/notes/README.md")),
+          "the note's own README should be carried",
+        ).toBe(true);
+
+        const verify = execVerify(dir, "m");
+        expect(verify.code, `a claimed companion is not a stray: ${verify.stderr}`).toBe(0);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
 });
 
 function execVerify(cwd: string, mold: string): { code: number; stdout: string; stderr: string } {
@@ -988,7 +1086,6 @@ describe("cast-mold negative cases", () => {
           "skill_constraints:",
           "  frontmatter_required: [name, description]",
           "  forbidden_runtime_paths: []",
-          "  forbid_packaged_files: []",
           "",
         ].join("\n"),
       );
@@ -1050,7 +1147,6 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
         "skill_constraints:",
         "  frontmatter_required: [name, description]",
         "  forbidden_runtime_paths: []",
-        "  forbid_packaged_files: []",
         "",
       ].join("\n"),
     );
