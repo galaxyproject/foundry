@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-paper/index.md",
     "revision": 2,
     "content_hash": "f579e924d372462d88d6e5d38f3cae0e6c206bc5ecc95ee192e922a7c4c01891",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:39.021Z",
+  "cast_at": "2026-07-30T13:18:32.592Z",
   "refs": [],
   "artifacts": {
     "produces": [

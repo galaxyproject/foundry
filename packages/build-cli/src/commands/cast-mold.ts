@@ -215,16 +215,19 @@ const SUPPORTED_KINDS = new Set([
 const NOT_IMPLEMENTED_KINDS = new Set(["example"]);
 
 function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
-  // 1:1 strict slug mapping. For verbatim copies, preserve the source basename
-  // (avoids double-extension hazards like `.schema.json`). For sidecars,
-  // derive a new file from the source slug with the target's dst_extension.
-  if (mode === "verbatim") {
+  // 1:1 strict slug mapping: a bundled file is named for the note it came from, never for the
+  // file it happens to be stored in. Those were the same string while every note was
+  // `<slug>.md`, which is why the verbatim branch could get away with the basename — and why
+  // it silently produced `references/notes/index.md` the moment a kind became a directory.
+  //
+  // Non-markdown sources keep their literal basename: a slug plus `dst_extension` would turn
+  // `gxformat2.schema.json` into `gxformat2.schema.json.json`.
+  if (path.extname(src) !== ".md") {
     return path.posix.join(kindCfg.dst_dir, path.basename(src));
   }
-  const ext = path.extname(src);
-  const base = path.basename(src, ext);
-  const slug = base === "index" ? path.basename(path.dirname(src)) : base;
-  return path.posix.join(kindCfg.dst_dir, `${slug}${kindCfg.dst_extension}`);
+  const slug = fileSlug(src);
+  const ext = mode === "verbatim" ? ".md" : kindCfg.dst_extension;
+  return path.posix.join(kindCfg.dst_dir, `${slug}${ext}`);
 }
 
 function resolveMoldRef(
@@ -1306,10 +1309,22 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   resolved.length = 0;
   resolved.push(...expanded);
 
-  // Stable ordering: by (kind, src).
-  resolved.sort((a, b) =>
-    a.kind === b.kind ? a.src.localeCompare(b.src) : a.kind.localeCompare(b.kind),
-  );
+  // Stable ordering: by (kind, note, companions after the note they belong to).
+  //
+  // Keyed on `dst` rather than `src` because `dst` is what a reader of the bundle sees, and
+  // because a companion's place in the list is not a fact about where it is stored. Sorting on
+  // `src` put a companion after its note only while both were flat and `.md` sorted before
+  // `.yml`; under `<slug>/index.md` it sorted before instead, and the SKILL.md line saying
+  // "sibling of X — read it where that note directs" arrived above X.
+  const groupKey = (r: ResolvedRef): string => r.companion_of ?? r.dst;
+  resolved.sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind.localeCompare(b.kind);
+    const group = groupKey(a).localeCompare(groupKey(b));
+    if (group !== 0) return group;
+    // Same note: it comes first, then its companions among themselves.
+    const companion = Number(Boolean(a.companion_of)) - Number(Boolean(b.companion_of));
+    return companion !== 0 ? companion : a.dst.localeCompare(b.dst);
+  });
 
   const refEntries: ProvenanceRefEntry[] = [];
   const drift: Array<{ file: string; reason: string }> = [];

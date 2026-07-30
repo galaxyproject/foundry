@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
     "content_hash": "e7a52ddad0256cee9257eea22271c48631233e5ec5f821bf6314d6cae6c82a54",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:35.363Z",
+  "cast_at": "2026-07-30T13:18:28.428Z",
   "refs": [
     {
       "kind": "cli-tool",
@@ -58,7 +58,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[component-cwl-workflow-anatomy]]",
-      "src": "content/research/component-cwl-workflow-anatomy.md",
+      "src": "content/research/component-cwl-workflow-anatomy/index.md",
       "dst": "references/notes/component-cwl-workflow-anatomy.md",
       "used_at": "runtime",
       "load": "upfront",
@@ -73,7 +73,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[cwl-v1.2-schemas]]",
-      "src": "content/research/cwl-v1.2-schemas.md",
+      "src": "content/research/cwl-v1.2-schemas/index.md",
       "dst": "references/notes/cwl-v1.2-schemas.md",
       "used_at": "runtime",
       "load": "on-demand",

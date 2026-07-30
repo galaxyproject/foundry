@@ -6,9 +6,9 @@
     "path": "content/molds/interview-to-freeform-summary/index.md",
     "revision": 3,
     "content_hash": "a6224538f5bb5226299f2cc956cdb31969f08f44b84b27c02f4b7b4143fb3e5f",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:22.185Z",
+  "cast_at": "2026-07-30T13:18:04.147Z",
   "refs": [],
   "artifacts": {
     "produces": [

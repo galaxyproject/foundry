@@ -6,15 +6,15 @@
     "path": "content/molds/cwl-to-test-data/index.md",
     "revision": 1,
     "content_hash": "7da01d055e886319a2ce4b9cee23a5c6816981cca0766101095979ede4f1cf14",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:10.838Z",
+  "cast_at": "2026-07-30T13:17:51.887Z",
   "refs": [
     {
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[component-cwl-workflow-anatomy]]",
-      "src": "content/research/component-cwl-workflow-anatomy.md",
+      "src": "content/research/component-cwl-workflow-anatomy/index.md",
       "dst": "references/notes/component-cwl-workflow-anatomy.md",
       "used_at": "runtime",
       "load": "on-demand",
@@ -29,7 +29,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[galaxy-workflow-testability-design]]",
-      "src": "content/research/galaxy-workflow-testability-design.md",
+      "src": "content/research/galaxy-workflow-testability-design/index.md",
       "dst": "references/notes/galaxy-workflow-testability-design.md",
       "used_at": "runtime",
       "load": "on-demand",
@@ -44,7 +44,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[iwc-test-data-conventions]]",
-      "src": "content/research/iwc-test-data-conventions.md",
+      "src": "content/research/iwc-test-data-conventions/index.md",
       "dst": "references/notes/iwc-test-data-conventions.md",
       "used_at": "runtime",
       "load": "on-demand",

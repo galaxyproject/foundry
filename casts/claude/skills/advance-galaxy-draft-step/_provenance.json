@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 3,
     "content_hash": "df43db65d6be3a909e8c7bd9a31f7ad9d65c58d0dfe66f8149e2cfb8cf74483f",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:00.554Z",
+  "cast_at": "2026-07-30T13:17:40.759Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -62,7 +62,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-job-failure-reference]]",
-      "src": "content/research/galaxy-tool-job-failure-reference.md",
+      "src": "content/research/galaxy-tool-job-failure-reference/index.md",
       "dst": "references/notes/galaxy-tool-job-failure-reference.md",
       "used_at": "runtime",
       "load": "on-demand",
@@ -77,7 +77,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[open-requirements-ledger]]",
-      "src": "content/research/open-requirements-ledger.md",
+      "src": "content/research/open-requirements-ledger/index.md",
       "dst": "references/notes/open-requirements-ledger.md",
       "used_at": "runtime",
       "load": "upfront",

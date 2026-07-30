@@ -63,9 +63,9 @@ export const COLLECTIONS = {
   "cli-tools": { base: "content/cli", pattern: ["*/index.md"], kind: "cli-tool" },
   "cli-commands": { base: "content/cli", pattern: ["*/*.md", "!*/index.md"], kind: "cli-command" },
   pipelines: { base: "content/pipelines", pattern: ["**/index.md"], kind: "pipeline" },
-  research: { base: "content/research", pattern: ["**/*.md"], kind: "research" },
+  research: { base: "content/research", pattern: ["**/index.md"], kind: "research" },
   schemas: { base: "content/schemas", pattern: ["**/*.md"], kind: "schema" },
-  prompts: { base: "content/prompts", pattern: ["**/*.md"], kind: "prompt" },
+  prompts: { base: "content/prompts", pattern: ["**/index.md"], kind: "prompt" },
 } as const satisfies Record<string, CollectionDefinition>;
 
 export type CollectionName = keyof typeof COLLECTIONS;

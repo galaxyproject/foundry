@@ -6,9 +6,9 @@
     "path": "content/molds/validate-cwl/index.md",
     "revision": 3,
     "content_hash": "772d8dd9082df825c33645a6868f63e781355257c0a7d1a371a3bea4eee6dc75",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:40.214Z",
+  "cast_at": "2026-07-30T13:18:33.989Z",
   "refs": [],
   "artifacts": {
     "produces": [],

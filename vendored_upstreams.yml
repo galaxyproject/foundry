@@ -10,35 +10,35 @@
 # LICENSES/ path) are required on every entry so a license attaches at the point
 # of sync. The sync script asserts the license_file exists at sync/check time.
 
-- local: content/research/galaxy-collection-semantics.yml
+- local: content/research/galaxy-collection-semantics/galaxy-collection-semantics.yml
   source: $GALAXY/lib/galaxy/model/dataset_collections/types/collection_semantics.yml
   pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
-  framing: content/research/galaxy-collection-semantics.md
+  framing: content/research/galaxy-collection-semantics/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
 
-- local: content/research/galaxy-collection-semantics.upstream.myst
+- local: content/research/galaxy-collection-semantics/galaxy-collection-semantics.upstream.myst
   source: $GALAXY/doc/source/dev/collection_semantics.md
   pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
-  framing: content/research/galaxy-collection-semantics.md
+  framing: content/research/galaxy-collection-semantics/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
 
-- local: content/research/galaxy.xsd
+- local: content/research/galaxy-xsd/galaxy.xsd
   source: $GALAXY/lib/galaxy/tool_util/xsd/galaxy.xsd
   pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
-  framing: content/research/galaxy-xsd.md
+  framing: content/research/galaxy-xsd/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
 
-- local: content/research/datatypes_conf.xml.sample
+- local: content/research/galaxy-datatypes-conf/datatypes_conf.xml.sample
   source: $GALAXY/config/datatypes_conf.xml.sample
   pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
-  framing: content/research/galaxy-datatypes-conf.md
+  framing: content/research/galaxy-datatypes-conf/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
 
-- local: content/research/gxformat2.schema.json
+- local: content/research/gxformat2-schema/gxformat2.schema.json
   source: $GALAXY_TOOL_UTIL_TS/dist/structural-schemas/gxformat2.schema.json
   pinned_ref: 7ae4ecd0ba8d492225f58a6d455c4cc5317298f0
   build:
@@ -48,11 +48,11 @@
              --output dist/structural-schemas/gxformat2.schema.json \
         && node packages/cli/dist/bin/gxwf.js structural-schema --format native \
              --output dist/structural-schemas/native-galaxy-workflow.schema.json
-  framing: content/research/gxformat2-schema.md
+  framing: content/research/gxformat2-schema/index.md
   license: MIT
   license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 
-- local: content/research/native-galaxy-workflow.schema.json
+- local: content/research/galaxy-native-workflow-schema/native-galaxy-workflow.schema.json
   source: $GALAXY_TOOL_UTIL_TS/dist/structural-schemas/native-galaxy-workflow.schema.json
   pinned_ref: 7ae4ecd0ba8d492225f58a6d455c4cc5317298f0
   build:
@@ -62,56 +62,56 @@
              --output dist/structural-schemas/gxformat2.schema.json \
         && node packages/cli/dist/bin/gxwf.js structural-schema --format native \
              --output dist/structural-schemas/native-galaxy-workflow.schema.json
-  framing: content/research/galaxy-native-workflow-schema.md
+  framing: content/research/galaxy-native-workflow-schema/index.md
   license: MIT
   license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 
-- local: content/research/cwl-v1.2/cwl.yaml
+- local: content/research/cwl-v1.2-schemas/cwl-v1.2/cwl.yaml
   source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/json-schema/cwl.yaml
   pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
-  framing: content/research/cwl-v1.2-schemas.md
+  framing: content/research/cwl-v1.2-schemas/index.md
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 
-- local: content/research/cwl-v1.2/CommonWorkflowLanguage.yml
+- local: content/research/cwl-v1.2-schemas/cwl-v1.2/CommonWorkflowLanguage.yml
   source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/CommonWorkflowLanguage.yml
   pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
-  framing: content/research/cwl-v1.2-schemas.md
+  framing: content/research/cwl-v1.2-schemas/index.md
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 
-- local: content/research/cwl-v1.2/Process.yml
+- local: content/research/cwl-v1.2-schemas/cwl-v1.2/Process.yml
   source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/Process.yml
   pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
-  framing: content/research/cwl-v1.2-schemas.md
+  framing: content/research/cwl-v1.2-schemas/index.md
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 
-- local: content/research/cwl-v1.2/CommandLineTool.yml
+- local: content/research/cwl-v1.2-schemas/cwl-v1.2/CommandLineTool.yml
   source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/CommandLineTool.yml
   pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
-  framing: content/research/cwl-v1.2-schemas.md
+  framing: content/research/cwl-v1.2-schemas/index.md
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 
-- local: content/research/cwl-v1.2/CommandLineTool-standalone.yml
+- local: content/research/cwl-v1.2-schemas/cwl-v1.2/CommandLineTool-standalone.yml
   source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/CommandLineTool-standalone.yml
   pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
-  framing: content/research/cwl-v1.2-schemas.md
+  framing: content/research/cwl-v1.2-schemas/index.md
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 
-- local: content/research/cwl-v1.2/Workflow.yml
+- local: content/research/cwl-v1.2-schemas/cwl-v1.2/Workflow.yml
   source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/Workflow.yml
   pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
-  framing: content/research/cwl-v1.2-schemas.md
+  framing: content/research/cwl-v1.2-schemas/index.md
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 
-- local: content/research/cwl-v1.2/Operation.yml
+- local: content/research/cwl-v1.2-schemas/cwl-v1.2/Operation.yml
   source: https://raw.githubusercontent.com/common-workflow-language/cwl-v1.2/ae6899d159b5d62411f5f16d797f1d8e2176c5ba/Operation.yml
   pinned_ref: ae6899d159b5d62411f5f16d797f1d8e2176c5ba
-  framing: content/research/cwl-v1.2-schemas.md
+  framing: content/research/cwl-v1.2-schemas/index.md
   license: Apache-2.0
   license_file: LICENSES/cwl-v1.2.LICENSE
 

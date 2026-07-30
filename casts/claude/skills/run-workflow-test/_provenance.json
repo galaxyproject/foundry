@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 6,
     "content_hash": "93728553835a58c3ade1c573d22b9e4c7b5bcae2dc1f1cfe327a0979765fa966",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:33.544Z",
+  "cast_at": "2026-07-30T13:18:26.417Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -52,7 +52,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[galaxy-workflow-invocation-failure-reference]]",
-      "src": "content/research/galaxy-workflow-invocation-failure-reference.md",
+      "src": "content/research/galaxy-workflow-invocation-failure-reference/index.md",
       "dst": "references/notes/galaxy-workflow-invocation-failure-reference.md",
       "used_at": "runtime",
       "load": "on-demand",
@@ -67,7 +67,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[planemo-asserts-idioms]]",
-      "src": "content/research/planemo-asserts-idioms.md",
+      "src": "content/research/planemo-asserts-idioms/index.md",
       "dst": "references/notes/planemo-asserts-idioms.md",
       "used_at": "runtime",
       "load": "on-demand",
@@ -82,7 +82,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[planemo-workflow-test-architecture]]",
-      "src": "content/research/planemo-workflow-test-architecture.md",
+      "src": "content/research/planemo-workflow-test-architecture/index.md",
       "dst": "references/notes/planemo-workflow-test-architecture.md",
       "used_at": "runtime",
       "load": "on-demand",

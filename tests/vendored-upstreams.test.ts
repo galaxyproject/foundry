@@ -1,7 +1,8 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   findVendoredDrift,
@@ -103,5 +104,46 @@ describe("vendored upstream sync", () => {
     expect(readFileSync(manifest, "utf-8")).toBe(
       "# keep\n\n- local: content/vendored.txt\n  source: $UPSTREAM/docs/source.txt\n  pinned_ref: newref\n",
     );
+  });
+});
+
+// The real manifest, checked against the real tree. `check:vendored` cannot do this in CI:
+// it resolves every `source:` against a clone named in common_paths.yml, so it needs upstream
+// checkouts nobody has on a fresh machine, and it is in no workflow. That left the manifest's
+// own paths unverified by anything — a `local:` naming a file that is not there, or a `framing:`
+// naming a note that is not there, was findable only by a human reading 16 entries.
+//
+// This asks the half of the question that needs no network: are both ends of every entry
+// actually on disk here?
+describe("vendored_upstreams.yml (the committed manifest)", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const entries = loadVendoredUpstreams(repoRoot);
+
+  it("has entries", () => {
+    expect(entries.length).toBeGreaterThan(0);
+  });
+
+  it.each(entries.map((e) => e.local))("vendors a file that exists: %s", (local) => {
+    expect(existsSync(path.join(repoRoot, local))).toBe(true);
+  });
+
+  it.each([...new Set(entries.map((e) => e.framing).filter((f): f is string => Boolean(f)))])(
+    "is framed by a note that exists: %s",
+    (framing) => {
+      expect(existsSync(path.join(repoRoot, framing))).toBe(true);
+    },
+  );
+
+  it("frames each vendored file from a note in its own directory", () => {
+    // What the directory shape buys: a companion and the note that frames it are siblings, so
+    // "which note owns this file" is answerable by looking at where it sits. While research was
+    // flat the only association was a shared basename, and `gxformat2.schema.json` sat one
+    // hyphen away from `gxformat2-schema.md` and shipped into no cast because of it.
+    for (const entry of entries) {
+      if (!entry.framing) continue;
+      expect(entry.local.startsWith(`${path.posix.dirname(entry.framing)}/`), entry.local).toBe(
+        true,
+      );
+    }
   });
 });

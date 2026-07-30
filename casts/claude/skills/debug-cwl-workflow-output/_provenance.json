@@ -6,9 +6,9 @@
     "path": "content/molds/debug-cwl-workflow-output/index.md",
     "revision": 3,
     "content_hash": "59053fa99f9971df986393d5dd8d31a4483bef6d55f02ac75a09a7ff013e906c",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:11.420Z",
+  "cast_at": "2026-07-30T13:17:52.534Z",
   "refs": [],
   "artifacts": {
     "produces": [

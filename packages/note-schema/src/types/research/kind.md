@@ -12,6 +12,19 @@ This kind is **instance-specific**, though what it carries is not: every Foundry
 knowledge in an external corpus. This is one instance's container for that grounding, and
 another may hold it in kinds of a different shape.
 
+## Layout
+
+A research note is a **directory**: `content/research/<slug>/index.md`, plus whatever vendored
+upstream files that note frames. The companion set is declared **open** — the kind lists no
+names, because what sits beside a note is whatever that note is about, and the next note is
+about something else. `vendored_upstreams.yml` is what says which of those files must exist,
+where each came from, and under what licence.
+
+Owning the directory is what makes the sidecars findable at all. While research notes were flat,
+a file could only be associated with a note by sharing its basename — which is why
+`gxformat2.schema.json` sat one hyphen away from `gxformat2-schema.md` and shipped into no cast
+while a neighbour with a luckier name did.
+
 ## Why each required field is required
 
 Only the **base envelope**. A research note is `type` plus the envelope; everything else is

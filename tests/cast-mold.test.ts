@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
@@ -88,10 +89,12 @@ describe("cast-mold (summarize-nextflow integration)", () => {
       expect(r.pending_llm).toBeUndefined();
       expect(r.src_hash).toBe(r.dst_hash);
     }
-    // Refs sorted by (kind, src) for stability.
-    const keys = prov.refs.map((r: { kind: string; src: string }) => `${r.kind}:${r.src}`);
-    const sorted = [...keys].sort();
-    expect(keys).toEqual(sorted);
+    // Refs sorted by (kind, note), each note followed by its own companions.
+    const keys = prov.refs.map(
+      (r: { kind: string; dst: string; companion_of?: string }) =>
+        `${r.kind}:${r.companion_of ?? r.dst}:${r.companion_of ? 1 : 0}:${r.dst}`,
+    );
+    expect(keys).toEqual([...keys].sort());
     // v3 license lineage: this mold vendors third-party schemas (nf-core MIT,
     // nf-schema Apache-2.0), so at least one ref carries license + hashed file.
     const licensed = prov.refs.filter(
@@ -105,7 +108,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     }
   });
 
-  it("dst paths use strict 1:1 source basename for verbatim refs", () => {
+  it("verbatim refs are named for the note they came from", () => {
     const provPath = path.join(
       repoRoot,
       "casts",
@@ -120,10 +123,15 @@ describe("cast-mold (summarize-nextflow integration)", () => {
       // Package-vendored schema refs use a `package://...#export` src marker; the
       // dst basename derives from the schema note slug, not the export name.
       if (typeof r.src === "string" && r.src.startsWith("package://")) continue;
-      // cli-tool notes live at content/cli/<tool>/index.md; their dst is renamed
-      // to references/cli/<tool>.md so tool notes don't all collide on index.md.
+      // cli-tool notes may rename to their `tool:` field, which is the one case where
+      // the bundle filename is not the note's own slug.
       if (r.kind === "cli-tool") continue;
-      expect(path.basename(r.dst)).toBe(path.basename(r.src));
+      // A companion is not a note: it keeps its literal filename, which is what the
+      // note body cites it by.
+      const expected = r.companion_of
+        ? path.basename(r.src)
+        : `${fileSlug(r.src)}${path.extname(r.dst)}`;
+      expect(path.basename(r.dst)).toBe(expected);
     }
   });
 });
@@ -555,7 +563,7 @@ Body prose only — no flag list; options come from the package meta.
 describe("cast-mold companion files", () => {
   function writeCompanionFixture(dir: string, opts: { declareCompanions: boolean }): void {
     mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
-    mkdirSync(path.join(dir, "content/research"), { recursive: true });
+    mkdirSync(path.join(dir, "content/research/bundled-note"), { recursive: true });
     mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
     // The verifier loads the provenance schema relative to cwd; mirror it.
     mkdirSync(path.join(dir, "scripts/lib/schemas"), { recursive: true });
@@ -612,7 +620,7 @@ Use the bundled note reference.
     );
     const companionsFm = opts.declareCompanions ? "companions:\n  - bundled-note.spec.yml\n" : "";
     writeFileSync(
-      path.join(dir, "content/research/bundled-note.md"),
+      path.join(dir, "content/research/bundled-note/index.md"),
       `---
 type: research
 title: Bundled note
@@ -628,7 +636,10 @@ ${companionsFm}---
 Consume \`bundled-note.spec.yml\` for the structured spec.
 `,
     );
-    writeFileSync(path.join(dir, "content/research/bundled-note.spec.yml"), "spec: true\n");
+    writeFileSync(
+      path.join(dir, "content/research/bundled-note/bundled-note.spec.yml"),
+      "spec: true\n",
+    );
   }
 
   it("copies declared companion files next to the note and records companion_of", () => {
@@ -912,7 +923,7 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
   // against the shipped table, so the scaffold no longer has to plant a copy of it.
   function scaffold(dir: string, noteFrontmatter: string, extraLicenseFile?: string): void {
     mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
-    mkdirSync(path.join(dir, "content/research"), { recursive: true });
+    mkdirSync(path.join(dir, "content/research/note-x"), { recursive: true });
     mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
     if (extraLicenseFile) {
       mkdirSync(path.join(dir, "LICENSES"), { recursive: true });
@@ -964,7 +975,7 @@ references:
 Use the research reference.
 `,
     );
-    writeFileSync(path.join(dir, "content/research/note-x.md"), noteFrontmatter);
+    writeFileSync(path.join(dir, "content/research/note-x/index.md"), noteFrontmatter);
   }
 
   const noteBody = "\n\n# Note X\n\nThird-party prose.\n";

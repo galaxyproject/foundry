@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 8,
     "content_hash": "134786c1d73ac6751e72557fe299d0358d92fb401de1a2eabd1a3a83071d9093",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
   },
-  "cast_at": "2026-07-28T01:44:36.559Z",
+  "cast_at": "2026-07-30T13:18:29.796Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -76,7 +76,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[component-tool-shed-search]]",
-      "src": "content/research/component-tool-shed-search.md",
+      "src": "content/research/component-tool-shed-search/index.md",
       "dst": "references/notes/component-tool-shed-search.md",
       "used_at": "runtime",
       "load": "on-demand",
@@ -91,7 +91,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-summary-input-source]]",
-      "src": "content/research/galaxy-tool-summary-input-source.md",
+      "src": "content/research/galaxy-tool-summary-input-source/index.md",
       "dst": "references/notes/galaxy-tool-summary-input-source.md",
       "used_at": "runtime",
       "load": "upfront",
