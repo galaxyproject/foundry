@@ -6,15 +6,15 @@
     "path": "content/molds/interview-to-galaxy-workflow-changeset/index.md",
     "revision": 2,
     "content_hash": "033eb6d5fdd09b107b28da179ed9ad1215b3e24d4b97bf7808bcea42aa4df083",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "29dd43fa81259c03d5dee6dd04e74aef0cdc5233"
   },
-  "cast_at": "2026-07-28T01:44:23.368Z",
+  "cast_at": "2026-07-30T13:35:57.245Z",
   "refs": [
     {
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[open-requirements-ledger]]",
-      "src": "content/research/open-requirements-ledger.md",
+      "src": "content/research/open-requirements-ledger/index.md",
       "dst": "references/notes/open-requirements-ledger.md",
       "used_at": "runtime",
       "load": "upfront",

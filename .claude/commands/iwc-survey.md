@@ -5,7 +5,7 @@ argument-hint: "<topic>  e.g. collections, conditionals, awk, apply_rules, genom
 
 # IWC corpus survey: `$1`
 
-Produce or refresh `content/research/iwc-$1-survey.md`. The survey **proposes candidate patterns** (with keep / drop / merge calls and corpus evidence) and surfaces open questions — that's its main deliverable. What it does *not* do is **decide** which candidates graduate to pattern pages, edit policy docs, or land anti-pattern calls. Those decisions happen out of band via `/iwc-survey-act`, with fresh eyes on the proposals.
+Produce or refresh `content/research/iwc-$1-survey/index.md`. The survey **proposes candidate patterns** (with keep / drop / merge calls and corpus evidence) and surfaces open questions — that's its main deliverable. What it does *not* do is **decide** which candidates graduate to pattern pages, edit policy docs, or land anti-pattern calls. Those decisions happen out of band via `/iwc-survey-act`, with fresh eyes on the proposals.
 
 ## Load context first (in order)
 
@@ -15,9 +15,9 @@ Produce or refresh `content/research/iwc-$1-survey.md`. The survey **proposes ca
 4. **`docs/ARCHITECTURE.md`** §3 (note types), §5 (frontmatter), §6 (validation).
 5. **`packages/note-schema/src/types/<kind>/`** (one directory per note kind — `schema.ts`, `kind.md`, `example.md`) + **`meta_tags.yml`**.
 6. **`common_paths.yml.sample`** — `$IWC_FORMAT2` is the cleaned `gxformat2` corpus root for grep work and full-workflow reads; `$IWC_SKELETONS` mirrors that tree with non-structural fields stripped (tool_ids + topology + control flow only) — cheap structural scans for step-pair / step-sequence patterns; `$IWC` is the upstream `.ga` source for permalinks. Write citations as `` `$IWC_FORMAT2/path:line` `` (or `` `$IWC_SKELETONS/path:line` `` when the structural view is what's evidenced).
-7. **`content/research/iwc-shortcuts-anti-patterns.md`** — already-pinned "don't endorse" calls. Do not re-surface anything covered here as a recommendation.
-8. **Existing surveys** under `content/research/iwc-*-survey.md` — for shape and tone, and to detect topic overlap.
-9. **If `content/research/iwc-$1-survey.md` already exists** — load it. You are in **refresh mode** (see §Refresh mode below).
+7. **`content/research/iwc-shortcuts-anti-patterns/index.md`** — already-pinned "don't endorse" calls. Do not re-surface anything covered here as a recommendation.
+8. **Existing surveys** under `content/research/iwc-*-survey/index.md` — for shape and tone, and to detect topic overlap.
+9. **If `content/research/iwc-$1-survey/index.md` already exists** — load it. You are in **refresh mode** (see §Refresh mode below).
 
 ## Step 1 — Scope out loud, then pause
 
@@ -47,7 +47,7 @@ Once scope is confirmed, work through the techniques you committed to:
 
 ## Step 3 — Write the survey
 
-Write `content/research/iwc-$1-survey.md` with frontmatter matching the existing surveys (`type: research`, `tags: [target/galaxy]`, `ai_generated: true`, `status: draft`, `created`/`revised` set, `summary` line).
+Write `content/research/iwc-$1-survey/index.md` with frontmatter matching the existing surveys (`type: research`, `tags: [target/galaxy]`, `ai_generated: true`, `status: draft`, `created`/`revised` set, `summary` line).
 
 ### Required moves (rubric, not section layout)
 
@@ -87,7 +87,7 @@ If the survey note already exists:
 
 1. `npm run validate` — schema + cross-file checks must pass.
 2. Post a one-paragraph debrief summarizing: scope decided, candidate count (keep / drop / merge), idiom count, open-question count, anything that surprised you.
-3. Suggest the user run `/iwc-survey-act content/research/iwc-$1-survey.md` next — but do not run it yourself. Fresh eyes on the act phase is the point.
+3. Suggest the user run `/iwc-survey-act content/research/iwc-$1-survey/index.md` next — but do not run it yourself. Fresh eyes on the act phase is the point.
 
 ## What this command does **not** do
 

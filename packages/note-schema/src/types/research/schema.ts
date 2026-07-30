@@ -9,11 +9,18 @@ export const kind = defineKind({
   summary:
     "A captured finding about the domain or its tooling — the grounding a Mold cites rather than inventing.",
 
-  // Still flat, so still nothing declarable — which is exactly why this kind keeps the per-note
-  // `companions:` frontmatter field for now. Turning research into a directory kind is what lets
-  // that field go, and it is a 63-note migration of its own.
-  shape: "file",
+  shape: "directory",
+
+  // Nothing is declared, and `allow` says so out loud. A research note's companions are its
+  // vendored upstream files — a set that is open by nature: what is beside a note is whatever
+  // that note framed, and the next note frames something else. `vendored_upstreams.yml` remains
+  // the thing that says which of them must exist and where each came from; this kind only says
+  // the directory is theirs.
+  //
+  // The alternative — 63 hand-written companion lists — would be a second copy of that manifest,
+  // and the copy nobody syncs is the one that drifts.
   companions: [],
+  additionalCompanions: "allow",
 
   build: (ctx: KindContext) =>
     z

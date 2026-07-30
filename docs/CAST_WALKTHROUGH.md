@@ -40,7 +40,7 @@ Nothing in `references/` is freehand. Each file is the destination of exactly on
 
 `[[component-tool-shed-search]]` is a research note. Cast `mode: verbatim`:
 
-- `src: content/research/component-tool-shed-search.md` → `dst: references/notes/component-tool-shed-search.md`
+- `src: content/research/component-tool-shed-search/index.md` → `dst: references/notes/component-tool-shed-search.md`
 - `src_hash == dst_hash`. Byte-identical. A verbatim copy's matching hashes are the cheapest possible proof that nothing was paraphrased or silently edited on the way into the bundle.
 
 ### schema → verbatim from a package export (×1)
@@ -72,7 +72,7 @@ The `mold` block anchors the whole bundle:
 ```
 
 - **Drift detection** compares the live `content/molds/discover-shed-tool/index.md` content hash against `mold.content_hash`. Mismatch ⇒ the cast is stale; `foundry status` flags it, `foundry cast` regenerates it.
-- **Reference drift** is per-ref: if `content/research/component-tool-shed-search.md` changes, its live hash no longer matches the recorded `src_hash`, so the stale reference is identifiable without re-reading the whole bundle.
+- **Reference drift** is per-ref: if `content/research/component-tool-shed-search/index.md` changes, its live hash no longer matches the recorded `src_hash`, so the stale reference is identifiable without re-reading the whole bundle.
 - **Forensics**: "why does this bundle contain `references/cli/tool-search.json`?" → the `refs[]` entry whose `dst` is that path, back to `[[tool-search]]` in the Mold manifest, with `purpose` and `trigger` explaining why the Mold pulled it.
 - **Artifact handoff**: `artifacts.produces` records `galaxy-tool-pin` with its producer-owned `schema: [[galaxy-tool-discovery]]`. A downstream Mold that consumes `galaxy-tool-pin` by shared `id` inherits that schema contract — provenance is where a harness reads the wiring.
 - **`cast_history`** keeps the human-readable trail of why this cast was re-taken (here: five entries, schema wiki-link merge → runtime-facing render → marking the discovery schema cast-validated).

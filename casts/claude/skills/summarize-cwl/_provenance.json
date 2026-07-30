@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
     "content_hash": "e7a52ddad0256cee9257eea22271c48631233e5ec5f821bf6314d6cae6c82a54",
-    "commit": "e521770dfb9b2e16505c7b20927630b056eda3d1"
+    "commit": "29dd43fa81259c03d5dee6dd04e74aef0cdc5233"
   },
-  "cast_at": "2026-07-28T01:44:35.363Z",
+  "cast_at": "2026-07-30T13:36:09.554Z",
   "refs": [
     {
       "kind": "cli-tool",
@@ -58,7 +58,7 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[component-cwl-workflow-anatomy]]",
-      "src": "content/research/component-cwl-workflow-anatomy.md",
+      "src": "content/research/component-cwl-workflow-anatomy/index.md",
       "dst": "references/notes/component-cwl-workflow-anatomy.md",
       "used_at": "runtime",
       "load": "upfront",
@@ -73,15 +73,15 @@
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[cwl-v1.2-schemas]]",
-      "src": "content/research/cwl-v1.2-schemas.md",
+      "src": "content/research/cwl-v1.2-schemas/index.md",
       "dst": "references/notes/cwl-v1.2-schemas.md",
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
       "purpose": "Check official CWL v1.2 field names and source-language semantics when summarizing less-common features.",
       "trigger": "When the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure.",
-      "src_hash": "33ec155e148192f7aa682e93a11b001ec705e8da31e7f7c743d1c2bb86f3bfa3",
-      "dst_hash": "33ec155e148192f7aa682e93a11b001ec705e8da31e7f7c743d1c2bb86f3bfa3",
+      "src_hash": "22e934a16cb42f5e275b970f10a031b3786d4ef8ea110c9e0d918e9f51bd61c6",
+      "dst_hash": "22e934a16cb42f5e275b970f10a031b3786d4ef8ea110c9e0d918e9f51bd61c6",
       "source": "deterministic"
     },
     {

@@ -7,10 +7,17 @@
 
 # Skip generated/synced sources, test fixtures, and lockfiles — not ours to
 # reformat and hygiene hooks would cause noise or break vendored mirrors.
+#
+# The research rule covers every file in a research note's directory EXCEPT the note: those
+# are its companions, and the vendored ones are byte-for-byte upstream copies that a
+# whitespace fixer would silently fork from their source. This used to name `cwl-v1.2/`
+# alone, which held only while the other vendored files were flat and had no directory to
+# spell — `galaxy.xsd` and `*.upstream.myst` were unprotected the whole time, and went
+# unnoticed only because a file nobody edits is a file no hook ever sees.
 exclude: |
   (?x)^(
     packages/tests-format-schema/src/tests\.schema\.|
-    content/research/cwl-v1\.2/|
+    content/research/[^/]+/(?!index\.md$)|
     packages/.*/test/fixtures/|
     workflow-fixtures/|
     casts/|

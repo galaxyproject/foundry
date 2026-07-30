@@ -676,7 +676,7 @@ describe("validateDirectory (cross-file)", () => {
         ],
       }),
     });
-    writeFm(path.join(dir, "research/component-x.md"), {
+    writeFm(path.join(dir, "research/component-x/index.md"), {
       ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
     writeFm(path.join(dir, "patterns/pattern-x.md"), {
@@ -904,7 +904,7 @@ describe("validateDirectory (cross-file)", () => {
         implemented_by_patterns: ["[[not-a-pattern]]"],
       }),
     );
-    writeFm(path.join(dir, "research/not-a-pattern.md"), {
+    writeFm(path.join(dir, "research/not-a-pattern/index.md"), {
       ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 
@@ -1026,7 +1026,7 @@ describe("validateDirectory (cross-file)", () => {
         ],
       }),
     });
-    writeFm(path.join(dir, "research/component-x.md"), {
+    writeFm(path.join(dir, "research/component-x/index.md"), {
       ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 
@@ -1056,7 +1056,7 @@ describe("validateDirectory (cross-file)", () => {
         ],
       }),
     });
-    writeFm(path.join(dir, "research/component-x.md"), {
+    writeFm(path.join(dir, "research/component-x/index.md"), {
       ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 
@@ -1378,9 +1378,9 @@ describe("validateDirectory (cross-file)", () => {
       type: "research",
       tags: ["target/galaxy"],
     });
-    mkdirSync(path.dirname(path.join(dir, "research/component-x.md")), { recursive: true });
+    mkdirSync(path.dirname(path.join(dir, "research/component-x/index.md")), { recursive: true });
     writeFileSync(
-      path.join(dir, "research/component-x.md"),
+      path.join(dir, "research/component-x/index.md"),
       `---\n${Object.entries(fm)
         .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
         .join(
@@ -1460,7 +1460,7 @@ describe("validateDirectory (cross-file)", () => {
         .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
         .join("\n")}\n---\n\n# m\n\nStub. Replace with real content later.\n`,
     );
-    writeFm(path.join(dir, "research/component-x.md"), {
+    writeFm(path.join(dir, "research/component-x/index.md"), {
       ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
     });
 

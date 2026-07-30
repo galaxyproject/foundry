@@ -24,7 +24,7 @@ related_molds:
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
 sources:
-  - "content/research/datatypes_conf.xml.sample"
+  - "content/research/galaxy-datatypes-conf/datatypes_conf.xml.sample"
   - "https://github.com/galaxyproject/galaxy/blob/7765fae934fbfdee77e3be5f5b235e43735273ae/config/datatypes_conf.xml.sample"
   - "https://www.nextflow.io/docs/latest/process.html"
   - "https://www.nextflow.io/docs/latest/reference/channel.html"

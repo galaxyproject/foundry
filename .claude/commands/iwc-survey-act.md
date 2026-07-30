@@ -1,6 +1,6 @@
 ---
 description: Walk an IWC survey's findings, decide PR-local authoring vs deferred GitHub issues, and track new pages, refinements, merges, and anti-pattern calls.
-argument-hint: "<path-to-survey-note>  e.g. content/research/iwc-collections-survey.md"
+argument-hint: "<path-to-survey-note>  e.g. content/research/iwc-collections-survey/index.md"
 ---
 
 # Act on an IWC survey: `$1`
@@ -19,7 +19,7 @@ Default posture:
 2. **`docs/PATTERNS.md`** — authorship policy. Operation-anchored naming is mandatory; corpus-first is mandatory; legacy-tool footnote convention is mandatory.
 3. **`docs/ARCHITECTURE.md`** §3 (note types).
 4. **`common_paths.yml.sample`** — citation prefix vocabulary for any new entries you write.
-5. **`content/research/iwc-shortcuts-anti-patterns.md`** — the live anti-pattern note. You will edit this inline. Read its full current state so additions match its shape and tone.
+5. **`content/research/iwc-shortcuts-anti-patterns/index.md`** — the live anti-pattern note. You will edit this inline. Read its full current state so additions match its shape and tone.
 6. **All existing pattern pages** under `content/patterns/` — title, scope, related links. Anything already covered by an existing page is *not* a "create new" candidate; classify it as already-authored, refine existing, or merge into existing.
 7. **The survey at `$1`** — full read.
 8. **The survey's `related_notes`** — for cross-cutting context.
@@ -137,7 +137,7 @@ Survey: <path>#<section-anchor>
 
 After issues are open, or after PR-local authoring is complete if anti-pattern edits were made:
 
-- `git add content/research/iwc-shortcuts-anti-patterns.md`
+- `git add content/research/iwc-shortcuts-anti-patterns/index.md`
 - Commit with a message naming the survey and listing the additions in one line each.
 - Do **not** push unless the user explicitly asks.
 

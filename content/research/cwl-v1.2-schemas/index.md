@@ -23,7 +23,7 @@ summary: "Vendored official CWL v1.2.1 JSON/SALAD schema documents used as sourc
 
 Vendored from `common-workflow-language/cwl-v1.2` tag `v1.2.1`, pinned at SHA `ae6899d`. These files are reference material for [[summarize-cwl]] and [[component-cwl-workflow-anatomy]], not Mold IO schemas.
 
-Vendored files under `content/research/cwl-v1.2/`:
+Vendored files under `cwl-v1.2/`, beside this note:
 
 - `cwl.yaml` — generated JSON Schema for CWL v1.2.
 - `CommonWorkflowLanguage.yml` — top-level SALAD schema imports.

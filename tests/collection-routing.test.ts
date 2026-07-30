@@ -118,6 +118,33 @@ describe("collection routing (path table vs corpus)", () => {
     ).toEqual({ missed: [], extra: [] });
   });
 
+  // A kind's `shape` and the glob its notes are found by are two statements of one fact, and
+  // they were free to disagree. `research` said `shape: 'file'` while its collection globbed
+  // `**/*.md`, and flipping the kind to `directory` without tightening the glob to `**/index.md`
+  // would have left every companion `.md` beside a note routed as a second note — validated
+  // against the wrong schema and published as a page nobody meant to write.
+  //
+  // Stated as: a directory kind is found at `index.md`, and a file kind is not. `!`-prefixed
+  // exclusions are not claims about shape, so they are skipped — `cli-commands` carves out
+  // `!*/index.md` precisely because its notes are the files that are NOT the directory's note.
+  it("globs each kind's notes at the shape the kind declares", () => {
+    const shapeOf = new Map(KINDS.map((k) => [k.kind, k.shape]));
+    const mismatches: string[] = [];
+    for (const name of COLLECTION_NAMES) {
+      const { kind, pattern } = COLLECTIONS[name];
+      const shape = shapeOf.get(kind);
+      for (const glob of pattern) {
+        if (glob.startsWith("!")) continue;
+        const findsIndex = glob.endsWith("/index.md");
+        if (shape === "directory" && !findsIndex)
+          mismatches.push(`${name}: kind '${kind}' is directory-shaped but globs '${glob}'`);
+        if (shape === "file" && findsIndex)
+          mismatches.push(`${name}: kind '${kind}' is file-shaped but globs '${glob}'`);
+      }
+    }
+    expect(mismatches, `\n  ${mismatches.join("\n  ")}`).toEqual([]);
+  });
+
   // Every collection's `kind` must be a kind that exists — the other direction of the same
   // rule, which a typo in the table would otherwise satisfy silently.
   it("routes every collection to a kind that exists", () => {

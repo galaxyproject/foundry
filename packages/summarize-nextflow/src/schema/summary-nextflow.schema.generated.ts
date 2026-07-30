@@ -5,7 +5,7 @@ export const summaryNextflowSchema = {
   "$id": "https://galaxyproject.org/foundry/schemas/summary-nextflow.schema.json",
   "$comment": "Canonical source: packages/summarize-nextflow/src/schema/summary-nextflow.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[summary-nextflow]] wiki-links; the cast pipeline imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.",
   "title": "Nextflow Pipeline Summary",
-  "description": "Structured per-source summary emitted by the summarize-nextflow Mold.\n\nPer-source schema by design — paper, Nextflow, and CWL each have their own summary shape; downstream Molds (data flow, templates, tool wrappers) consume any source's summary and handle the polymorphism.\n\nField names mirror gxy-sketches' SketchSource / ToolSpec / TestDataRef / ExpectedOutputRef where parity exists; see content/research/gxy-sketches-alignment.md.",
+  "description": "Structured per-source summary emitted by the summarize-nextflow Mold.\n\nPer-source schema by design — paper, Nextflow, and CWL each have their own summary shape; downstream Molds (data flow, templates, tool wrappers) consume any source's summary and handle the polymorphism.\n\nField names mirror gxy-sketches' SketchSource / ToolSpec / TestDataRef / ExpectedOutputRef where parity exists; see content/research/gxy-sketches-alignment/index.md.",
   "$ref": "#/$defs/Summary",
   "$defs": {
     "Summary": {

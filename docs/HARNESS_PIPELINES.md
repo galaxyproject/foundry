@@ -157,7 +157,7 @@ The Foundry's first `GALAXY → GALAXY` (edit) pipeline: it consumes an existing
 8. `run-workflow-test` — runs the carried-forward tests as the regression check.
 9. `debug-galaxy-workflow-output`
 
-`summarize-galaxy-workflow` also serves `compare-against-iwc-exemplar`, which previously lacked a structured view of the exemplar it diffs against — closing the Galaxy-as-source summarizer gap tracked in `content/research/gxy-sketches-alignment.md §5`.
+`summarize-galaxy-workflow` also serves `compare-against-iwc-exemplar`, which previously lacked a structured view of the exemplar it diffs against — closing the Galaxy-as-source summarizer gap tracked in `content/research/gxy-sketches-alignment/index.md §5`.
 
 Test-plan handoff: like every Galaxy-targeting pipeline, this one places a dedicated `*-to-galaxy-test-plan` producer before `implement-galaxy-workflow-test`. The update case gets its own — `changeset-to-galaxy-test-plan` — rather than reusing the freeform one, because its inputs and semantics are update-specific: it carries the existing workflow's tests forward as a regression baseline (`source.derived_from: mixed`) and only augments for the change-set's deltas, where the freeform Mold synthesizes a plan from scratch. `test-data-refs` come from the baseline's existing fixtures, with `find-test-data` reached only when a change-set-added input needs new data.
 

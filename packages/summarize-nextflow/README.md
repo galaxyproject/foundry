@@ -36,7 +36,7 @@ summarize-nextflow <path-or-url> \
 
 ### Optional Nextflow integration
 
-When `nextflow` is on PATH, `summarize-nextflow` shells out to `nextflow inspect -format json` and `nextflow config -flat` for fields only Groovy can resolve (per-process container under a profile, fully merged config). Pass `--no-with-nextflow` to force pure static parsing. See `content/research/external-tool-nextflow-inspect.md`.
+When `nextflow` is on PATH, `summarize-nextflow` shells out to `nextflow inspect -format json` and `nextflow config -flat` for fields only Groovy can resolve (per-process container under a profile, fully merged config). Pass `--no-with-nextflow` to force pure static parsing. See `content/research/component-nextflow-inspect/index.md`.
 
 ## Output contract
 

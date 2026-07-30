@@ -22,7 +22,7 @@ Operation pattern pages are named after the **operation** they describe, not the
 - ❌ `tp_grep_tool.md` — tool name in title.
 - ❌ `awk-in-galaxy.md` — tool name in title; split into operation-named sub-pages instead.
 
-Operation-anchored naming was decided 2026-04-30 in the tabular survey (`content/research/iwc-tabular-operations-survey.md` §7). Recipe pages extend the same rule to multi-step lifecycle patterns.
+Operation-anchored naming was decided 2026-04-30 in the tabular survey (`content/research/iwc-tabular-operations-survey/index.md` §7). Recipe pages extend the same rule to multi-step lifecycle patterns.
 
 ## Corpus-first
 
@@ -39,7 +39,7 @@ When the corpus shows a modern tool *and* a legacy alternative for the same oper
 | Layer | What lives there | Example |
 |---|---|---|
 | `docs/PATTERNS.md` (this file) | Project-level authorship policy | "Operation-anchored naming" |
-| `content/research/iwc-shortcuts-anti-patterns.md` | Corpus-grounded "don't do this" calls | "Don't reach for `Grep1` when `tp_grep_tool` is available" |
+| `content/research/iwc-shortcuts-anti-patterns/index.md` | Corpus-grounded "don't do this" calls | "Don't reach for `Grep1` when `tp_grep_tool` is available" |
 | The pattern page itself | Prescriptive per-pattern rules | `auto_col_types` per-expression-kind table on `tabular-compute-new-column` |
 
 The IWC survey commands read all three before asking the user a question, so already-decided calls don't get re-litigated.
