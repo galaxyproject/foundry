@@ -9,7 +9,6 @@ status: draft
 created: 2026-07-17
 revised: 2026-07-17
 revision: 1
-ai_generated: true
 summary: "Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs."
 input_artifacts:
   - id: summary-cwl

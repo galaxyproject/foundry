@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 3
-ai_generated: true
 summary: "Use compose_text_param to build connected text expressions from constants plus runtime scalar values."
 related_notes:
   - "[[iwc-parameter-derivation-survey]]"

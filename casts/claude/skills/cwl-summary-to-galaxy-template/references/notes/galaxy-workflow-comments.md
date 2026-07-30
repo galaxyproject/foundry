@@ -6,7 +6,6 @@ status: draft
 created: 2026-06-12
 revised: 2026-06-12
 revision: 1
-ai_generated: true
 related_notes:
   - "[[iwc-comments-survey]]"
   - "[[gxformat2-schema]]"

@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-cwl-interface",
     "path": "content/molds/nextflow-summary-to-cwl-interface/index.md",
     "revision": 1,
-    "content_hash": "6ff1fe27014c67f2df361bb6462824408239ccbb354113c37059a43d2a8d9404",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "3fc1ccd78b3828e77382b921fc547a4ea2f56d7123cd92cf0e1cfefd4561984f",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:30.704Z",
+  "cast_at": "2026-07-30T19:12:34.748Z",
   "refs": [
     {
       "kind": "schema",

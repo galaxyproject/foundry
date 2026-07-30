@@ -5,10 +5,10 @@
     "name": "cwl-summary-to-galaxy-interface",
     "path": "content/molds/cwl-summary-to-galaxy-interface/index.md",
     "revision": 2,
-    "content_hash": "832d555724596f2b3c7cfdc7dd1b356f69097b054b7d2c0784543e555fe5a0bf",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "649563e256607e8ff0816877427a127fcf0380aa2badefee0668bdb806b6ecdf",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:11.482Z",
+  "cast_at": "2026-07-30T19:12:15.195Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep source-faithful CWL facts separate from Galaxy-facing interface choices.",
       "verification": "Run against the first representative CWL summaries and confirm workflow inputs/outputs map without re-parsing the original CWL.",
-      "src_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
-      "dst_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
+      "src_hash": "e91f1c14b581c51c10dd8e2d2f673b339389150de1ce65b5bac76e38fa2f37b4",
+      "dst_hash": "e91f1c14b581c51c10dd8e2d2f673b339389150de1ce65b5bac76e38fa2f37b4",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick among the three honest Galaxy branching translations (paired_or_unpaired input, native pick_value step, sibling workflows) before drafting the interface.",
       "trigger": "When summary-cwl has any steps[].when non-null OR any workflow output uses pickValue.",
-      "src_hash": "44706c61cadc5e5eb0e0346a3a02f2fc7c5994e4cadd0535f33bb1d2a4b4af87",
-      "dst_hash": "44706c61cadc5e5eb0e0346a3a02f2fc7c5994e4cadd0535f33bb1d2a4b4af87",
+      "src_hash": "018ed7b60c3379173d76ffa0f84fadeddd444be02c38f390b84a2147e8ec9f81",
+      "dst_hash": "018ed7b60c3379173d76ffa0f84fadeddd444be02c38f390b84a2147e8ec9f81",
       "source": "deterministic"
     },
     {
@@ -53,8 +53,8 @@
       "trigger": "When CWL types include arrays, records, Directory, secondaryFiles, or scatter over File-like inputs.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "f5372cea45b3df39b9fc4e82a65c846b2cb617caebd360afdfcd862071e2da4a",
-      "dst_hash": "f5372cea45b3df39b9fc4e82a65c846b2cb617caebd360afdfcd862071e2da4a",
+      "src_hash": "4ddc7587e187cf38a3dca02d6966e2f6ea58f9faf9bd97034ad513eb4c4c638b",
+      "dst_hash": "4ddc7587e187cf38a3dca02d6966e2f6ea58f9faf9bd97034ad513eb4c4c638b",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },
@@ -88,8 +88,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose `paired_or_unpaired` (or `list:paired_or_unpaired`) shape when the CWL discriminator is paired-vs-single reads, instead of inventing a workflow-level `reads_mode` select parameter.",
       "trigger": "When summary-cwl declares 2+ optional File? read-like inputs whose step bindings are gated by complementary `when:` predicates, OR workflow outputs use pickValue over branches keyed on input presence, OR an upstream `meta.single_end`-style discriminator surfaces in the summary.",
-      "src_hash": "ec41b6f362edd06d0303d190ea9108174c4645b27d6f3eca1bc653f6b21a2f71",
-      "dst_hash": "ec41b6f362edd06d0303d190ea9108174c4645b27d6f3eca1bc653f6b21a2f71",
+      "src_hash": "f4f25820425ec5fbe4efa50b3e350981e055e959fc362510ae60837773f3d83a",
+      "dst_hash": "f4f25820425ec5fbe4efa50b3e350981e055e959fc362510ae60837773f3d83a",
       "source": "deterministic"
     },
     {
@@ -103,8 +103,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable Galaxy workflow input/output labels and promoted checkpoint outputs.",
       "trigger": "When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.",
-      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
-      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
       "source": "deterministic"
     },
     {
@@ -118,8 +118,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
-      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "src_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
+      "dst_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
       "source": "deterministic"
     },
     {

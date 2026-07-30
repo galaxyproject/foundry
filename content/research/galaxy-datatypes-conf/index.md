@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-06
 revision: 2
-ai_generated: false
 related_notes:
   - "[[galaxy-xsd]]"
   - "[[galaxy-collection-semantics]]"

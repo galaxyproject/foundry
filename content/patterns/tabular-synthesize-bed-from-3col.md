@@ -9,7 +9,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

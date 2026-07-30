@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-27
 revised: 2026-05-27
 revision: 1
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-draft]]"
 summary: "Validate a `class: GalaxyWorkflowDraft` workflow against draft-contract rules; with --concrete, also validate the extracted concrete subset."

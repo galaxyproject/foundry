@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-03
 revised: 2026-05-06
 revision: 3
-ai_generated: true
 summary: "Validate Galaxy workflow test files and optionally cross-check labels against their workflow."
 related_notes:
   - "[[tests-format]]"

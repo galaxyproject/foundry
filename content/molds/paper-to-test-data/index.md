@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-07-24
 revision: 2
-ai_generated: true
 summary: "Derive workflow test inputs and expected outputs from a paper."
 input_artifacts:
   - id: freeform-summary

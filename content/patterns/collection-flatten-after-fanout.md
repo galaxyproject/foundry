@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters."
 related_notes:
   - "[[iwc-transformations-survey]]"

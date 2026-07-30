@@ -7,7 +7,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload"
 related_notes:
   - "[[galaxy-tool-summary-input-source]]"

@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-04
 revised: 2026-05-04
 revision: 1
-ai_generated: true
 summary: "Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing."
 related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"

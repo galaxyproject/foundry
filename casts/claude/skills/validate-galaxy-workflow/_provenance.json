@@ -5,10 +5,10 @@
     "name": "validate-galaxy-workflow",
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 4,
-    "content_hash": "21ef363f5fcc2f78a21ef394d21bf60559c1375a0e8eb1ae6e08dead3e6aafb4",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "02f24bacec6166da30493ac9b6a56e5e2ce1fda6b12ec3ad82001ad053512478",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:48.355Z",
+  "cast_at": "2026-07-30T19:12:56.709Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Validate the assembled gxformat2 workflow before runtime testing.",
       "trigger": "After all Galaxy steps and workflow tests have been assembled.",
       "verification": "Run the cast skill on a complete IWC-derived workflow and confirm terminal validation findings are separated from runtime test failures.",
-      "src_hash": "276c5091c21a979a2180315e76625d58a4f252d46783a090b3f25116fd1cc3ad",
+      "src_hash": "7f5b7f131c79ecdca31d890502b71940cae8319cd35c20041e3c285bc2ae9ac9",
       "dst_hash": "ff10c49819b0f7af13f247ea03e4dd24ba2e5144da3beaa6b1ab96698c7e03b7",
       "source": "deterministic"
     },
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep static workflow validation findings distinct from Galaxy invocation/runtime failure surfaces.",
       "trigger": "When a workflow passes gxwf validation but still has likely runtime risks around invocation scheduling, outputs, conditionals, or collection population.",
-      "src_hash": "023d21ee826721bc6c74e7b4b0f18349140d8fd92669ff3b2d198a1a276d012f",
-      "dst_hash": "023d21ee826721bc6c74e7b4b0f18349140d8fd92669ff3b2d198a1a276d012f",
+      "src_hash": "e8115df6ddca447d47d77cb33becda847cdd19b2cbe9924782bfc180b94bb451",
+      "dst_hash": "e8115df6ddca447d47d77cb33becda847cdd19b2cbe9924782bfc180b94bb451",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Classify validation or pre-test findings that indicate missing labels, omitted workflow outputs, or untestable checkpoint structure.",
       "trigger": "When terminal validation passes but workflow-level outputs, labels, or collection shapes look likely to break future workflow tests.",
-      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
-      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
       "source": "deterministic"
     }
   ]

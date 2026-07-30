@@ -5,10 +5,10 @@
     "name": "cwl-test-to-galaxy-test-plan",
     "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
     "revision": 2,
-    "content_hash": "dddad8eaf54c4069666f1e6b42bfcccecba3af7866b171483520a641230cfa73",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "b708f94d8cbc0698ed076f62ff6d6194da5ae34c3cdb6443597c433eeca625e3",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:14.094Z",
+  "cast_at": "2026-07-30T19:12:17.767Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose which workflow outputs and promoted checkpoints make meaningful assertions.",
       "trigger": "When deciding which outputs to assert and which labels the plan should bind to.",
-      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
-      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests.",
       "trigger": "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.",
-      "src_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
-      "dst_hash": "f9dbf36a0195f06268dc1e145fa793de0f1cfb3566b48e00f8e7cd6a450c1b06",
+      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes.",
       "trigger": "When writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS.",
-      "src_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
-      "dst_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
+      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs.",
       "trigger": "When turning CWL expected outputs into Galaxy test-plan assertions.",
-      "src_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
-      "dst_hash": "1e1cfa4e281faf6089d7c986f2cdc110a559d5fdc95ee08001c09debf4016284",
+      "src_hash": "2ea0965d34eb40e8631db199270ea8278b01349b7939e8ec0a8a87ad3f6a2c93",
+      "dst_hash": "2ea0965d34eb40e8631db199270ea8278b01349b7939e8ec0a8a87ad3f6a2c93",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
       "trigger": "When recording the labels and checkpoints the downstream test must address.",
-      "src_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
-      "dst_hash": "89c53b2eca169b48d30ed2ed3296dc016b5d4cc708145131639d6e279e70d815",
+      "src_hash": "d6ac347c8361d6c312c64c1197426673e53aa1c5577e1c72f1c80a20ccd1cce3",
+      "dst_hash": "d6ac347c8361d6c312c64c1197426673e53aa1c5577e1c72f1c80a20ccd1cce3",
       "source": "deterministic"
     },
     {

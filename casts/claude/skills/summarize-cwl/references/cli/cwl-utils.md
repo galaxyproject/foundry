@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-05-10
 revision: 1
-ai_generated: true
 summary: "CWL document utilities. summarize-cwl uses cwl-normalizer to gather references and upgrade to v1.2 JSON."
 ---
 

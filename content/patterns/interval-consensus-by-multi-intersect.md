@@ -16,7 +16,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Find features reproducible across replicates: multi-intersect per-replicate sets, threshold by replicate count, then intersect back against the merged call."
 related_notes:
   - "[[iwc-interval-operations-survey]]"

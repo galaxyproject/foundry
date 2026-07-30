@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise."
 related_notes:
   - "[[iwc-conditionals-survey]]"

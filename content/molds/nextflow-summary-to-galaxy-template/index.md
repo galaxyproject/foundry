@@ -11,7 +11,6 @@ status: reviewed
 created: 2026-05-05
 revised: 2026-07-24
 revision: 8
-ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs."
 input_artifacts:
   - id: summary-nextflow

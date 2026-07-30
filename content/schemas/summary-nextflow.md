@@ -14,7 +14,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-06
 revision: 10
-ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
   - "[[nextflow-workflow-io-semantics]]"
@@ -47,13 +46,13 @@ This page is auto-rendered from the JSON Schema authored in this repo and shippe
 foundry validate-summary-nextflow summary.json
 ```
 
-The same schema is copied verbatim into `references/schemas/summary-nextflow.schema.json` per the casting policy in `docs/COMPILATION_PIPELINE.md`. The package additionally exports `validateSummary` (AJV gate) for TypeScript consumers, but generated skills should prefer command-shaped validation so failures are easy to reproduce outside the agent runtime.
+The same schema is copied verbatim into `references/schemas/summary-nextflow.schema.json` per the casting policy in `content/meta/casting.md`. The package additionally exports `validateSummary` (AJV gate) for TypeScript consumers, but generated skills should prefer command-shaped validation so failures are easy to reproduce outside the agent runtime.
 
 Contrast with [[tests-format]], which is vendored *from* an external npm package (`@galaxy-tool-util/schema`); this schema is *authored here* and shipped *to* npm — the direction of the source-of-truth chain is reversed.
 
 ## Why per-source
 
-Paper, Nextflow, and CWL are different enough that forcing a shared cross-source summary shape would either lose detail or bloat all three (`docs/HARNESS_PIPELINES.md` §"Mold-inventory parity"). Each `summarize-<source>` Mold emits its own schema; downstream source-target Molds such as `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, and `nextflow-summary-to-cwl-data-flow` consume this summary without pretending every source has one shared shape.
+Paper, Nextflow, and CWL are different enough that forcing a shared cross-source summary shape would either lose detail or bloat all three (`content/meta/harness-pipelines.md` §"Mold-inventory parity"). Each `summarize-<source>` Mold emits its own schema; downstream source-target Molds such as `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, and `nextflow-summary-to-cwl-data-flow` consume this summary without pretending every source has one shared shape.
 
 ## Field-name parity with gxy-sketches
 
@@ -65,7 +64,7 @@ Three sub-shapes mirror gxy-sketches verbatim — see [[gxy-sketches-alignment]]
 
 ## Cast-time role
 
-Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[summarize-nextflow]] via `output_artifacts[].schema` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
+Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by [[summarize-nextflow]] via `output_artifacts[].schema` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
 
 ## What is intentionally not modeled
 

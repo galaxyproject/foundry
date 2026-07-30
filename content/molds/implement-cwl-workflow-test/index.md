@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-07-24
 revision: 2
-ai_generated: true
 summary: "Assemble CWL job file(s) and expected-output assertions."
 input_artifacts:
   - id: cwl-test-plan

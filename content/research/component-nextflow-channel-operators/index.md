@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-05
 revision: 1
-ai_generated: true
 summary: "Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation."
 companions:
   - "component-nextflow-channel-operators.yml"

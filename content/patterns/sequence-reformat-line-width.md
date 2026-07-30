@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Rewrap FASTA records to a fixed sequence-line width so downstream tools and viewers get canonical 60/70/80-column output; cshl_fasta_formatter."
 related_notes:
   - "[[iwc-sequence-operations-survey]]"

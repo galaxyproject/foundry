@@ -9,7 +9,6 @@ status: reviewed
 created: 2026-04-30
 revised: 2026-07-24
 revision: 5
-ai_generated: true
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 output_artifacts:
   - id: galaxy-tool-pin

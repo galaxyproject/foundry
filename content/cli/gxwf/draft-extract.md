@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-27
 revised: 2026-05-27
 revision: 1
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-draft]]"
 summary: "Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved."

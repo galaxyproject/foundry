@@ -9,7 +9,6 @@ status: reviewed
 created: 2026-07-26
 revised: 2026-07-26
 revision: 2
-ai_generated: true
 summary: A tool given a collection where it declares a single dataset runs once per element, implicitly.
 iwc_exemplars:
   - workflow: rnaseq-pe

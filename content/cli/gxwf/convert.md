@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-06
 revision: 2
-ai_generated: true
 summary: "Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations."
 ---
 

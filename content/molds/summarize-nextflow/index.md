@@ -9,7 +9,6 @@ status: reviewed
 created: 2026-04-30
 revised: 2026-07-24
 revision: 14
-ai_generated: true
 output_artifacts:
   - id: summary-nextflow
     kind: json

@@ -9,7 +9,6 @@ status: reviewed
 created: 2026-04-30
 revised: 2026-07-24
 revision: 6
-ai_generated: true
 summary: "Execute a workflow's tests via Planemo; emit structured pass/fail and outputs."
 related_notes:
   - "[[tests-format]]"

@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-05
 revision: 1
-ai_generated: true
 summary: "RFC 2119 conventions enforced by nf-core/tools module lint, with lint-check pointers. Backs summarize-nextflow + author-galaxy-tool-wrapper."
 companions:
   - "component-nf-core-module-conventions.yml"

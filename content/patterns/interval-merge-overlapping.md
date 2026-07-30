@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Collapse overlapping or book-ended intervals within one set into single spans; bedtools mergebed or the gops_merge Operate-on-Genomic-Intervals tool."
 related_notes:
   - "[[iwc-interval-operations-survey]]"

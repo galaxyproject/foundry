@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-04
 revised: 2026-05-04
 revision: 1
-ai_generated: true
 related_molds:
   - "[[discover-shed-tool]]"
   - "[[summarize-galaxy-tool]]"
@@ -59,7 +58,7 @@ The schema uses Foundry's JSON contract style: `snake_case` fields such as `tool
 
 ## Cast-time role
 
-Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[discover-shed-tool]] via `output_artifacts[].schema` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted recommendation with `validate-galaxy-tool-discovery` before returning; downstream phases bind to this object and would produce worse errors later.
+Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by [[discover-shed-tool]] via `output_artifacts[].schema` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted recommendation with `validate-galaxy-tool-discovery` before returning; downstream phases bind to this object and would produce worse errors later.
 
 The same object feeds several consumers:
 

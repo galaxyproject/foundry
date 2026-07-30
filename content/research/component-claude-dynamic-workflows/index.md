@@ -7,7 +7,6 @@ status: draft
 created: 2026-06-15
 revised: 2026-06-15
 revision: 1
-ai_generated: true
 summary: "Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate."
 sources:
   - "https://claude.com/blog/introducing-dynamic-workflows-in-claude-code"
@@ -232,7 +231,7 @@ Re-read against the same Foundry harness requirements used for [[component-archo
   workflow being built is the *exact* thing Archon could not express natively and had to fake with the
   Ralph plan-on-disk pattern (see [[component-archon]] §8/§10). Here both shapes the Foundry uses are
   native one-liners. The Galaxy spine has already collapsed its per-step loop into a single orchestrator
-  Mold (`[loop] advance-galaxy-draft-step`, per `docs/HARNESS_PIPELINES.md`), so its loop is a plain
+  Mold (`[loop] advance-galaxy-draft-step`, per `content/meta/harness-pipelines.md`), so its loop is a plain
   `while (await advance()).draft { … }` — the orchestrator owns the inner sequencing, and `pipeline()`'s
   no-barrier streaming buys little. The CWL spine keeps a genuine multi-stage per-step loop
   (`[loop] summarize-cwl-tool → implement-cwl-tool-step → validate-cwl`), and *that* is the one-line
@@ -315,7 +314,7 @@ a strong typed-IO culture), dynamic workflows is the more natural first substrat
 explicit caveat that the inline-gate story is a regression from Archon and worth re-checking if `[gate]`
 phases ever become load-bearing.
 
-## 11. Does this belong in `docs/COMPARISONS.md`?
+## 11. Does this belong in `content/meta/comparisons.md`?
 
 **Recommendation: no — it belongs here as component research, alongside [[component-archon]], not in
 COMPARISONS.** Reasoning:
@@ -334,7 +333,7 @@ COMPARISONS.** Reasoning:
   (validate agent output at runtime), not a KB→skill compile feature (cast curated content into a bundle).
   It does not change the layer dynamic workflows lives at.
 
-**COMPARISONS treatment (done):** the only change made to `docs/COMPARISONS.md` is a one-line scope note
+**COMPARISONS treatment (done):** the only change made to `content/meta/comparisons.md` is a one-line scope note
 at the end of "Where the Foundry lands" — that the doc tracks the KB→skill axis only, and the adjacent
 *which-harness-runs-the-casts* question (Archon, Claude Code dynamic workflows, LangGraph, …) is evaluated
 under `content/research/component-*/`. That pointer names this note's subject explicitly and pre-empts the

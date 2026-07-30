@@ -68,7 +68,20 @@ export interface KindContext {
   /** One entry of a Mold's typed reference manifest. */
   reference: z.ZodType<unknown>;
 
-  /** THE BASE ENVELOPE — the fields every kind in this instance carries. Kinds spread it. */
+  /**
+   * THE BASE ENVELOPE — the fields every kind in this instance carries. Kinds spread it.
+   *
+   * `ai_generated` used to be here and was removed rather than lost. It was a boolean, and it
+   * had gone constant: 221 of 226 notes said `true`. The five that said `false` were the
+   * vendored-from-upstream notes, and every one of them already recorded that far better —
+   * a pinned `sources:` SHA, `license` + `license_file`, and a "vendored from upstream"
+   * blockquote in the body. So the field was uninformative where it varied least and
+   * redundant where it varied at all, and the sibling instance never adopted it.
+   *
+   * The thing worth having is not a flag. It is provenance a reader can check, which is what
+   * `sources` and the license pair already are. Re-adding a boolean here would recreate a
+   * field whose only reachable value is `true`.
+   */
   base: {
     tags: z.ZodType<string[]>;
     status: z.ZodEnum<{
@@ -81,7 +94,6 @@ export interface KindContext {
     created: z.ZodType<Date, unknown>;
     revised: z.ZodType<Date, unknown>;
     revision: z.ZodNumber;
-    ai_generated: z.ZodBoolean;
     summary: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
     aliases: z.ZodOptional<z.ZodArray<z.ZodString>>;
@@ -199,7 +211,6 @@ export function buildKindContext(options: BuildKindContextOptions): KindContext 
       created: z.coerce.date(),
       revised: z.coerce.date(),
       revision: z.number().int().min(1),
-      ai_generated: z.boolean(),
       summary: z.string().min(20).max(160),
       title: z.string().optional(),
       aliases: z.array(z.string()).optional(),
@@ -216,7 +227,7 @@ export function buildKindContext(options: BuildKindContextOptions): KindContext 
 // `KindDefinition` and `defineKind` are not ours. They ship in @galaxy-foundry/kind-schema,
 // generic over the context a kind draws from, because every Foundry-pattern instance needs the
 // same contract over a different context. What is OURS is `KindContext` above — the field
-// primitives a kind may spread. Binding the parameter once, here, is what keeps the nine kind
+// primitives a kind may spread. Binding the parameter once, here, is what keeps the ten kind
 // directories writing `defineKind({...})` with no type parameter in sight.
 
 export type { KindShape };

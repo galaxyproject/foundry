@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-03
 revision: 3
-ai_generated: true
 summary: "Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

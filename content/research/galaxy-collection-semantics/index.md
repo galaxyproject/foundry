@@ -7,7 +7,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-05
 revision: 3
-ai_generated: false
 license: MIT
 license_file: LICENSES/galaxy.LICENSE
 related_notes:

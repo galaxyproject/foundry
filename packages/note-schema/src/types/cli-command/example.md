@@ -9,7 +9,6 @@ status: reviewed
 created: 2026-07-26
 revised: 2026-07-26
 revision: 1
-ai_generated: true
 summary: Check a Galaxy workflow file against the gxformat2 schema and report the first failure.
 ---
 

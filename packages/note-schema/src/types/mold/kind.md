@@ -14,10 +14,9 @@ cite it.
 - **`axis`** — which dimension the Mold is specialized along, and therefore how a caller
   *selects* it. `source-specific` / `target-specific` / `tool-specific` name a subject;
   `generic` applies everywhere. See the cross-field rules below.
-- The **base envelope** (`tags`, `status`, `created`, `revised`, `revision`, `ai_generated`,
-  `summary`) — as on every kind. `summary` is bounded 20–160 characters because it is printed
-  in every browse row; unbounded, half the catalog renders as a bare name and the other half
-  as a paragraph.
+- The **base envelope** (`tags`, `status`, `created`, `revised`, `revision`, `summary`) — as on
+  every kind. `summary` is bounded 20–160 characters because it is printed in every browse row;
+  unbounded, half the catalog renders as a bare name and the other half as a paragraph.
 
 ## Optional fields
 

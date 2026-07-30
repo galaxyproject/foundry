@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-06
 revision: 2
-ai_generated: true
 related_notes:
   - "[[nextflow-workflow-io-semantics]]"
   - "[[nextflow-params-to-galaxy-inputs]]"

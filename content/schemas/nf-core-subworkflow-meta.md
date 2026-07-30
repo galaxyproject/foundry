@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-05
 revision: 1
-ai_generated: true
 related_notes:
   - "[[nf-core-module-meta]]"
   - "[[summarize-nextflow]]"

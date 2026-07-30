@@ -161,7 +161,6 @@ status: draft
 created: 2026-06-11
 revised: 2026-06-11
 revision: 1
-ai_generated: false
 summary: A minimal mold used by the unsupported-branch assemble test.
 ---
 
@@ -178,7 +177,6 @@ status: draft
 created: 2026-06-11
 revised: 2026-06-11
 revision: 1
-ai_generated: false
 summary: A minimal pipeline exercising an unsupported branch pattern for the test.
 phases:
   - mold: "[[mold-a]]"
@@ -219,7 +217,6 @@ status: draft
 created: 2026-06-11
 revised: 2026-06-11
 revision: 1
-ai_generated: false
 summary: A looping mold used by the minimal assemble test.
 loop_endstate: "Owns its own oracle; re-invoke until done, then continue."
 ---
@@ -237,7 +234,6 @@ status: draft
 created: 2026-06-11
 revised: 2026-06-11
 revision: 1
-ai_generated: false
 summary: A minimal one-phase pipeline for the assemble happy path.
 phases:
   - mold: "[[looper]]"

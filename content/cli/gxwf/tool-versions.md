@@ -10,7 +10,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-06
 revision: 2
-ai_generated: true
 summary: "List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence."
 related_notes:
   - "[[component-tool-shed-search]]"

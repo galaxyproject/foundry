@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-02
 revision: 1
-ai_generated: true
 summary: "Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

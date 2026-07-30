@@ -414,7 +414,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: Prompt-copy cast test mold summary.
 references:
   - kind: prompt
@@ -440,7 +439,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: Prompt wrapper summary for cast sidecar behavior.
 ---
 
@@ -503,7 +501,6 @@ status: draft
 created: 2026-06-18
 revised: 2026-06-18
 revision: 1
-ai_generated: false
 summary: CLI meta-injection cast test mold summary.
 references:
   - kind: cli-command
@@ -531,7 +528,6 @@ status: draft
 created: 2026-06-18
 revised: 2026-06-18
 revision: 1
-ai_generated: false
 summary: Fetch a tool and cache it.
 ---
 
@@ -608,7 +604,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: Companion-copy cast test mold summary.
 references:
   - kind: research
@@ -639,7 +634,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: A multi-file note carrying a structured spec beside it for casting to bundle.
 ${companionsFm}---
 
@@ -1100,7 +1094,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: Never-cast mold used to check that --check stays read-only.
 references: []
 ---
@@ -1161,7 +1154,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: License enforcement cast test mold summary.
 references:
   - kind: research
@@ -1195,7 +1187,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: Own-words-only note that must not be carried verbatim.
 license: CC-BY-NC-SA-2.0
 ---${noteBody}`,
@@ -1222,7 +1213,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 summary: Verbatim-ok note carried under MIT with a license file.
 license: MIT
 license_file: LICENSES/test.LICENSE

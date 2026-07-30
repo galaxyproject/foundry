@@ -6,7 +6,6 @@ status: draft
 created: 2026-05-01
 revised: 2026-05-02
 revision: 2
-ai_generated: true
 related_notes:
   - "[[galaxy-collection-tools]]"
   - "[[galaxy-collection-semantics]]"
@@ -112,7 +111,7 @@ The boundary is fuzzy. `samtools_merge` and `gops_merge_1` reduce a collection t
 
 ### 2d. Notable IWC absences (catalog vs corpus)
 
-The reference catalog [[galaxy-collection-tools]] documents these tools, but **zero corpus uptake**. Per `docs/PATTERNS.md` corpus-first policy, no candidate patterns for these:
+The reference catalog [[galaxy-collection-tools]] documents these tools, but **zero corpus uptake**. Per `content/meta/pattern-authorship.md` corpus-first policy, no candidate patterns for these:
 
 - `__NEST__` — add a nesting level. Zero. Authors who need extra nesting reach for `__APPLY_RULES__` instead.
 - `__HARMONIZELISTS__` — make two collections share identifiers in same order. Zero. The corpus-attested recipe is `__SORTLIST__` with `sort_type: file` driven by the other collection's identifiers (see §4 recipe I).
@@ -332,7 +331,7 @@ Where a single tool has a *recurring parameter shape* the corpus uses, beyond th
 
 ## 7. Candidate pattern boundaries
 
-Operation-anchored pattern proposals. Each carries scope sketch, primary corpus citations (file:line), and an explicit keep / drop / merge call. Recipes (multi-step) are first-class candidates per `docs/PATTERNS.md`. Numbering parallels [[iwc-tabular-operations-survey]] §4 and continues from a fresh start since the hierarchies are independent.
+Operation-anchored pattern proposals. Each carries scope sketch, primary corpus citations (file:line), and an explicit keep / drop / merge call. Recipes (multi-step) are first-class candidates per `content/meta/pattern-authorship.md`. Numbering parallels [[iwc-tabular-operations-survey]] §4 and continues from a fresh start since the hierarchies are independent.
 
 ### Keep
 
@@ -374,7 +373,7 @@ Operation-anchored pattern proposals. Each carries scope sketch, primary corpus 
 
 ### Gaps (no pattern page; document corpus-zero status)
 
-18. `__NEST__`, `__HARMONIZELISTS__`, `__CROSS_PRODUCT_FLAT__`, `__CROSS_PRODUCT_NESTED__`, `__SPLIT_PAIRED_AND_UNPAIRED__`, `__TAG_FROM_FILE__`, `__FILTER_NULL__`, `__KEEP_SUCCESS_DATASETS__`. Per `docs/PATTERNS.md` corpus-first, no pages. Recorded in §2d.
+18. `__NEST__`, `__HARMONIZELISTS__`, `__CROSS_PRODUCT_FLAT__`, `__CROSS_PRODUCT_NESTED__`, `__SPLIT_PAIRED_AND_UNPAIRED__`, `__TAG_FROM_FILE__`, `__FILTER_NULL__`, `__KEEP_SUCCESS_DATASETS__`. Per `content/meta/pattern-authorship.md` corpus-first, no pages. Recorded in §2d.
 
 ### Cross-reference (already proposed elsewhere; do not duplicate)
 

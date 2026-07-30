@@ -7,7 +7,6 @@ status: draft
 created: 2026-07-26
 revised: 2026-07-26
 revision: 1
-ai_generated: true
 summary: gxformat2 rejects duplicate step labels, so generated labels must be made unique before emit.
 ---
 

@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-05
 revision: 1
-ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
   - "[[nf-core-subworkflow-meta]]"
@@ -36,7 +35,7 @@ JSON Schema vendored verbatim from `nf-core/modules` at SHA `d852990`. Validates
 2. Vendored verbatim into `content/schemas/nf-core-module-meta.schema.json` here, pinned at the SHA in `upstream`.
 3. **Re-sync:** re-run `curl -sL https://raw.githubusercontent.com/nf-core/modules/<sha>/modules/meta-schema.json -o content/schemas/nf-core-module-meta.schema.json` and bump the SHA in this note's `upstream` field.
 
-**At cast time** (per `docs/COMPILATION_PIPELINE.md`): copied verbatim into the cast bundle's `references/schemas/`. Cast skills resolving an nf-core module's `meta.yml` validate against this contract before consuming the IO descriptions.
+**At cast time** (per `content/meta/casting.md`): copied verbatim into the cast bundle's `references/schemas/`. Cast skills resolving an nf-core module's `meta.yml` validate against this contract before consuming the IO descriptions.
 
 ## Top-level shape
 

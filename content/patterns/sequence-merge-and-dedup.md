@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Concatenate several FASTA files into one and drop duplicate records by sequence identity in a single step; fasta_merge_files_and_filter_unique_sequences."
 related_notes:
   - "[[iwc-sequence-operations-survey]]"

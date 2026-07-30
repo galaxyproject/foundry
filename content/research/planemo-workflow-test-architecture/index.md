@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-11
 revision: 3
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[galaxy-tool-job-failure-reference]]"

@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-11
 revised: 2026-05-11
 revision: 1
-ai_generated: true
 summary: "Statically introspect a Nextflow / nf-core pipeline tree and emit a validated JSON summary."
 related_notes:
   - "[[summary-nextflow]]"

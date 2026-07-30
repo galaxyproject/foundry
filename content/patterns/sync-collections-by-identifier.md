@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections."
 related_notes:
   - "[[iwc-transformations-survey]]"

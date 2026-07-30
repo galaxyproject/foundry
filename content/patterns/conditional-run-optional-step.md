@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 4
-ai_generated: true
 summary: "Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch."
 related_notes:
   - "[[iwc-conditionals-survey]]"

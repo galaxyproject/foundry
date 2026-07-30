@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Keep, drop, or annotate coordinate features by overlap with a second feature set; bedtools intersect (BED) or vcfvcfintersect (VCF), mapped over a collection."
 related_notes:
   - "[[iwc-interval-operations-survey]]"

@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-06-10
 revision: 3
-ai_generated: true
 summary: "Promote nf-core meta-map keys to Galaxy <param>s only when they drive script behavior; drop identity-only keys; pull naming from $input.element_identifier."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"

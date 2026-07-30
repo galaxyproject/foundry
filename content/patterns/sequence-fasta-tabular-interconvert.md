@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Move sequence records between FASTA and a (header, sequence) table so tabular tools can edit them; fasta2tab one way, tab2fasta back."
 related_notes:
   - "[[iwc-sequence-operations-survey]]"

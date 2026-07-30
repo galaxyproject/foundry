@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

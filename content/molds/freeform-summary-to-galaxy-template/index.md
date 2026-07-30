@@ -11,7 +11,6 @@ status: reviewed
 created: 2026-05-05
 revised: 2026-07-24
 revision: 5
-ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief."
 input_artifacts:
   - id: freeform-summary

@@ -9,7 +9,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

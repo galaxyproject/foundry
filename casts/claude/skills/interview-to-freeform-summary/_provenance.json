@@ -5,10 +5,10 @@
     "name": "interview-to-freeform-summary",
     "path": "content/molds/interview-to-freeform-summary/index.md",
     "revision": 3,
-    "content_hash": "a6224538f5bb5226299f2cc956cdb31969f08f44b84b27c02f4b7b4143fb3e5f",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "19864b16965d5b644be5a6a712696211326cfa6099a3084bae3eb79271b56f7d",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:27.998Z",
+  "cast_at": "2026-07-30T19:12:32.081Z",
   "refs": [],
   "artifacts": {
     "produces": [

@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-06
 revised: 2026-05-08
 revision: 4
-ai_generated: true
 related_notes:
   - "[[component-nextflow-pipeline-anatomy]]"
   - "[[component-nextflow-channel-operators]]"

@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-05-10
 revision: 1
-ai_generated: true
 summary: "Reference CWL runner and validator. Used by summarize-cwl for entrypoint validation."
 ---
 

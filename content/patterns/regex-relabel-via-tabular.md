@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE."
 related_notes:
   - "[[iwc-transformations-survey]]"

@@ -11,7 +11,6 @@ status: reviewed
 created: 2026-07-01
 revised: 2026-07-24
 revision: 2
-ai_generated: true
 summary: "Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan."
 input_artifacts:
   - id: summary-galaxy-workflow

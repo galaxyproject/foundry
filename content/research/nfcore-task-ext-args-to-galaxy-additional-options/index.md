@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-06-10
 revision: 3
-ai_generated: true
 summary: "Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"

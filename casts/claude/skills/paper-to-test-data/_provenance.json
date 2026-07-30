@@ -5,10 +5,10 @@
     "name": "paper-to-test-data",
     "path": "content/molds/paper-to-test-data/index.md",
     "revision": 2,
-    "content_hash": "f07d0e25ce483b55a9d074f2267b70ccea341b09c81a0608f0c0d78a92cf08e5",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "863d7b503a77fa63449899f124d1669e181fdfd9a72f81f516a219cdc89cb6bb",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:37.654Z",
+  "cast_at": "2026-07-30T19:12:41.663Z",
   "refs": [],
   "artifacts": {
     "produces": [

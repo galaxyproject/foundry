@@ -319,7 +319,7 @@ function main(): void {
     if (!existsSync(srcDir)) continue;
 
     // Fenced blocks are payload, not instruction. This repo already draws that line — "a
-    // backtick means the syntax, not a link" (AGENTS.md, docs/ARCHITECTURE.md §wiki links) —
+    // backtick means the syntax, not a link" (AGENTS.md, content/meta/architecture.md §wiki links) —
     // and a fence is where a note carries site-render directives naming files casting is not
     // meant to ship. `galaxy-collection-semantics` is the case: its ```vendored-myst block
     // names the rendered upstream view, which is a site asset by design.

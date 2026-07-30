@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-08
 revised: 2026-05-08
 revision: 1
-ai_generated: true
 related_notes:
   - "[[nextflow-to-galaxy-reference-data-mapping]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"

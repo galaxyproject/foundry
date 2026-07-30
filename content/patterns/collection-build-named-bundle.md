@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in."
 related_notes:
   - "[[iwc-transformations-survey]]"

@@ -14,7 +14,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-05-10
 revision: 1
-ai_generated: true
 related_notes:
   - "[[summarize-cwl]]"
   - "[[component-cwl-workflow-anatomy]]"

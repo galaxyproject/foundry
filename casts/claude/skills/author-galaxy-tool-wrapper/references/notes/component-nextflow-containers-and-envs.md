@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-01
 revised: 2026-05-05
 revision: 3
-ai_generated: true
 summary: "Container URL grammar (depot, BioContainers, mulled-v2, Wave, ORAS) and conda directive resolution rules backing summarize-nextflow §5."
 companions:
   - "component-nextflow-containers-and-envs.yml"

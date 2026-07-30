@@ -11,7 +11,6 @@ status: reviewed
 created: 2026-05-10
 revised: 2026-07-24
 revision: 4
-ai_generated: true
 summary: "Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline."
 input_artifacts:
   - id: summary-nextflow

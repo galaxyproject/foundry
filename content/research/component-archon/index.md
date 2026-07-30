@@ -7,7 +7,6 @@ status: draft
 created: 2026-04-29
 revised: 2026-05-22
 revision: 3
-ai_generated: true
 summary: "Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap."
 sources:
   - "https://github.com/coleam00/Archon"
@@ -173,7 +172,7 @@ Re-read against Foundry harness requirements:
 
 **Interactive vs. unsupervised posture.** The answer to "is Archon more for unsupervised pipelines?" is **mostly yes by default, but no by capability**. Its marketing and Web UI defaults favor background, fire-and-forget workflows. Its docs and architecture still make user interaction a first-class, explicit shape: `approval` nodes, interactive loops, foreground Web workflows, and chat/CLI/Web approval commands. What it does **not** offer is free-form, arbitrary user steering in the middle of any running node. If user involvement matters, the workflow author must model that point as an approval node, rejection-redraft gate, or interactive loop.
 
-**Foundry-specific read.** Foundry's own `docs/HARNESS_PIPELINES.md` already says approval gates, scope confirmation, plan presentation, state, and resumption are harness-level concerns, not Molds. Current `content/pipelines/*.md` files include `[loop]` and `[branch]`, but no inline `[gate]` phase yet; the docs only reserve `[gate]` for the first real approval/scope checkpoint. That means the current Foundry pipeline spine is closer to an unsupervised Mold sequence with harness-owned checkpoints layered around it than to a fully conversational workflow. Archon fits that posture: keep the same Mold pipeline and author separate interactive vs. batch Archon workflow variants by inserting or omitting `approval` nodes.
+**Foundry-specific read.** Foundry's own `content/meta/harness-pipelines.md` already says approval gates, scope confirmation, plan presentation, state, and resumption are harness-level concerns, not Molds. Current `content/pipelines/*.md` files include `[loop]` and `[branch]`, but no inline `[gate]` phase yet; the docs only reserve `[gate]` for the first real approval/scope checkpoint. That means the current Foundry pipeline spine is closer to an unsupervised Mold sequence with harness-owned checkpoints layered around it than to a fully conversational workflow. Archon fits that posture: keep the same Mold pipeline and author separate interactive vs. batch Archon workflow variants by inserting or omitting `approval` nodes.
 
 **What Archon would actively get in the way of:** very little. The main friction is if you want a different runtime model (durable async like Temporal, externally-scheduled, or a different agent runtime than Claude/Codex/Pi). Archon assumes one in-process Bun event loop, one of three SDKs.
 

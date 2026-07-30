@@ -5,10 +5,10 @@
     "name": "freeform-summary-to-cwl-design",
     "path": "content/molds/freeform-summary-to-cwl-design/index.md",
     "revision": 1,
-    "content_hash": "d8a735b07c6d10599fdef3c508e174be7b79007f5809d93fe85f237eccc17d72",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "bdc96941ec75c70907bac77ab58b94da70923cb81ab28da3badd3410ce38a678",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:19.424Z",
+  "cast_at": "2026-07-30T19:12:23.184Z",
   "refs": [],
   "artifacts": {
     "produces": [

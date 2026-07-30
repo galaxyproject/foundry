@@ -9,7 +9,6 @@ status: reviewed
 created: 2026-04-30
 revised: 2026-07-24
 revision: 8
-ai_generated: true
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
 input_artifacts:
   - id: galaxy-tool-pin

@@ -9,7 +9,6 @@ status: draft
 created: 2026-07-26
 revised: 2026-07-26
 revision: 1
-ai_generated: true
 summary: Read a CWL workflow and emit the structured summary the Galaxy interface Molds consume.
 output_artifacts:
   - id: workflow-summary

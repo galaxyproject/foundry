@@ -6,7 +6,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"

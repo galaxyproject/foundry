@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-06-19
 revision: 4
-ai_generated: true
 summary: "Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks)."
 references:
   - kind: research

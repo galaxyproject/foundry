@@ -11,7 +11,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-05
 revision: 1
-ai_generated: true
 summary: "Map a Nextflow summary into a CWL Workflow interface design brief."
 input_artifacts:
   - id: summary-nextflow

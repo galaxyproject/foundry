@@ -6,7 +6,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-02
 revision: 1
-ai_generated: true
 related_notes:
   - "[[iwc-conditionals-survey]]"
   - "[[iwc-tabular-operations-survey]]"

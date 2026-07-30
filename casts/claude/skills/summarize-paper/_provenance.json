@@ -5,10 +5,10 @@
     "name": "summarize-paper",
     "path": "content/molds/summarize-paper/index.md",
     "revision": 2,
-    "content_hash": "f579e924d372462d88d6e5d38f3cae0e6c206bc5ecc95ee192e922a7c4c01891",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "ac601516a655a5a97bf9cc6d865839622efd509a295f99410c9e47e3952f269d",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:46.349Z",
+  "cast_at": "2026-07-30T19:12:54.685Z",
   "refs": [],
   "artifacts": {
     "produces": [

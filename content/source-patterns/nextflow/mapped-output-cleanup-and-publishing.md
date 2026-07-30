@@ -30,7 +30,6 @@ status: draft
 created: 2026-05-04
 revised: 2026-05-04
 revision: 1
-ai_generated: true
 related_notes:
   - "[[nextflow-patterns]]"
 summary: "Route Nextflow mapped-output cleanup and publishDir-style intent to Galaxy filtering, relabeling, gating, bundling, and reports."

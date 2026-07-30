@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps."
 related_notes:
   - "[[iwc-transformations-survey]]"

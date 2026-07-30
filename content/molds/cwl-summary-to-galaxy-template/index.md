@@ -11,7 +11,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-06-11
 revision: 4
-ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs."
 input_artifacts:
   - id: summary-cwl

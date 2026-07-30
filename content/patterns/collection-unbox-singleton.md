@@ -14,7 +14,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use __EXTRACT_DATASET__ with which: first when a one-element collection must become a dataset."
 related_notes:
   - "[[iwc-transformations-survey]]"

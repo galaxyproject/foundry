@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-06-10
 revision: 3
-ai_generated: true
 summary: "Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"

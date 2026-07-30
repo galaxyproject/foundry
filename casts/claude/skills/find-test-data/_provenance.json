@@ -5,10 +5,10 @@
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
     "revision": 3,
-    "content_hash": "51a8431bf8433de5214b3e941d7d4d8d33a30c8e01bb398af20cf65c1d8f61ae",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "665cfe683d98566abe3b786538fee915a2ad4dc98cc8e5c9365c737434373557",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:18.767Z",
+  "cast_at": "2026-07-30T19:12:22.481Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Confirm the collection shapes and labels the resolved data must populate so downstream tests can address them.",
       "trigger": "When mapping an input label in the data-flow brief to a concrete file or collection of files.",
-      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
-      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Match IWC test-data conventions — Zenodo/remote-URL first, SHA-1 integrity, per-input collection layout — when selecting or describing candidate fixtures.",
       "trigger": "When choosing where test data should come from or describing the shape a candidate file must have.",
-      "src_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
-      "dst_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
+      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
       "source": "deterministic"
     }
   ],

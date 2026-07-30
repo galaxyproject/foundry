@@ -6,7 +6,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
   - "[[iwc-transformations-survey]]"
@@ -86,7 +85,7 @@ Distinct interval-algebra steps, by operation. Counts are evidence, not the head
 
 Where the corpus shows more than one tool competing for the same job — the boundaries the MOC must adjudicate.
 
-1. **Modern `bedtools_*` (iuc) vs legacy `gops_*` "Operate on Genomic Intervals" (devteam).** The corpus splits cleanly by domain, not by capability: epigenetics (`atacseq`, `consensus-peaks`) and VGP reach for `bedtools_*`; the SARS-CoV-2 `consensus-from-variation` masking pipeline uses `gops_concat` + `gops_merge` + `gops_subtract`. This mirrors the `Grep1`-vs-`tp_grep_tool` redundancy the tabular survey resolved (see [[iwc-tabular-operations-survey]] §7 / `docs/PATTERNS.md` "Legacy tools as footnotes"). **Caveat against a clean 1:1 mapping:** `bedtools` has `mergebed` (matches `gops_merge`) but the corpus has no `bedtools_subtractbed`, and `gops_concat` is barely interval-aware (it is closer to plain concatenation than to set union). So a "recommend bedtools, footnote gops" rule is directionally right for `merge`, but `subtract`/`concat` need their own call. → Q1.
+1. **Modern `bedtools_*` (iuc) vs legacy `gops_*` "Operate on Genomic Intervals" (devteam).** The corpus splits cleanly by domain, not by capability: epigenetics (`atacseq`, `consensus-peaks`) and VGP reach for `bedtools_*`; the SARS-CoV-2 `consensus-from-variation` masking pipeline uses `gops_concat` + `gops_merge` + `gops_subtract`. This mirrors the `Grep1`-vs-`tp_grep_tool` redundancy the tabular survey resolved (see [[iwc-tabular-operations-survey]] §7 / `content/meta/pattern-authorship.md` "Legacy tools as footnotes"). **Caveat against a clean 1:1 mapping:** `bedtools` has `mergebed` (matches `gops_merge`) but the corpus has no `bedtools_subtractbed`, and `gops_concat` is barely interval-aware (it is closer to plain concatenation than to set union). So a "recommend bedtools, footnote gops" rule is directionally right for `merge`, but `subtract`/`concat` need their own call. → Q1.
 2. **VCF-native vs BED-native intersection.** Intersecting variants with regions is done two ways: convert variants to a BED-shaped feature set and use `bedtools_intersectbed` (`ont-artic-variation.gxwf.yml:648`), or stay in VCF space with `vcfvcfintersect` (`pe-artic-variation.gxwf.yml:891`). The decision turns on whether downstream needs VCF semantics (INFO/FORMAT preserved) or just coordinates. → Q2.
 3. **"Coverage" is two operations.** `genomecoveragebed` (genome-wide bedgraph, for masking input or a normalized track) and `coveragebed` (reads-in-given-regions count) share a name and a tool family but answer different questions. A single "coverage" pattern page would have to hold both modes explicitly. → Q4.
 
@@ -108,7 +107,7 @@ These are invisible to grep and are where interval algebra actually earns a MOC.
 
 ## 4. Candidate pattern boundaries
 
-Operation-anchored names per `docs/PATTERNS.md`. Because the operations are thin and the recipes carry the value, the keep-set leans recipe-heavy — the inverse of the tabular survey.
+Operation-anchored names per `content/meta/pattern-authorship.md`. Because the operations are thin and the recipes carry the value, the keep-set leans recipe-heavy — the inverse of the tabular survey.
 
 **Recipes (keep — highest value):**
 

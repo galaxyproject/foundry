@@ -10,7 +10,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-06
 revision: 2
-ai_generated: true
 summary: "Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence."
 related_notes:
   - "[[component-tool-shed-search]]"

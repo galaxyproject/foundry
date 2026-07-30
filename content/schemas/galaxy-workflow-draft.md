@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-27
 revised: 2026-05-27
 revision: 1
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
   - "[[galaxy-data-flow-draft-contract]]"

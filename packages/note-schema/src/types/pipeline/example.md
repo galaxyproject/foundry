@@ -7,7 +7,6 @@ status: draft
 created: 2026-07-26
 revised: 2026-07-26
 revision: 1
-ai_generated: true
 summary: Summarize a CWL workflow, choose the interface strategy, then build and validate the Galaxy workflow.
 phases:
   - mold: "[[summarize-cwl-workflow]]"

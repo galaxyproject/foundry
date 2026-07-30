@@ -6,7 +6,6 @@ status: draft
 created: 2026-06-12
 revised: 2026-06-12
 revision: 1
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-comments]]"
   - "[[galaxy-native-workflow-schema]]"
@@ -25,7 +24,7 @@ field, and tool-parameter noise that merely contains the word "comment"
 
 This is an **authoring-metadata / convention** surface, not an operation family.
 Comments do not move data; they document and visually organize a workflow.
-The `docs/PATTERNS.md` operation/recipe lens mostly does not apply — see
+The `content/meta/pattern-authorship.md` operation/recipe lens mostly does not apply — see
 §7 for the no-pattern-candidate call.
 
 ## 1. The comment object
@@ -163,7 +162,7 @@ blocks. A scan keyed only on column-0 `comments:` misses these.
 
 There is **no operation-anchored or recipe-anchored pattern candidate here.** A
 comment frame is not a workflow-construction operation — it produces no data, has
-no tool, and `docs/PATTERNS.md`'s operation/recipe taxonomy does not fit it.
+no tool, and `content/meta/pattern-authorship.md`'s operation/recipe taxonomy does not fit it.
 Forcing an operation name would be miscategorization. The corpus uptake is real
 (25 workflows), so this is *not* a zero-uptake gap either — it is a genuine
 authoring convention that lives outside the pattern surface.

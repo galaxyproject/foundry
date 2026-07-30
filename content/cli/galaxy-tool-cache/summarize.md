@@ -10,7 +10,6 @@ status: draft
 created: 2026-06-16
 revised: 2026-06-18
 revision: 2
-ai_generated: true
 summary: "Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool."
 ---
 

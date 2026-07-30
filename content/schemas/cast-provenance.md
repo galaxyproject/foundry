@@ -9,13 +9,12 @@ status: draft
 created: 2026-05-17
 revised: 2026-05-17
 revision: 1
-ai_generated: true
 summary: "_provenance.json contract beside every cast: Mold revision, per-ref deterministic-vs-LLM origin, src/dst hashes, artifact handoff. Schema v2."
 ---
 
 Every cast bundle carries a sibling `_provenance.json`: the forensic record of *what* was produced, *from which Mold revision*, *by which method*, and *what each reference's deterministic-vs-LLM provenance looks like*. It is required, but it is **not** part of the skill — consumers read `SKILL.md` and `references/`; maintainers read `_provenance.json`.
 
-**Contract of record.** The authoritative schema is the repo-local JSON Schema at `scripts/lib/schemas/cast-provenance.schema.json` (`provenance_schema_version` is a `const: 3`). It is Foundry-authored — there is no upstream package and no `package_export`; the `upstream` link above points at the in-repo file. The narrative in `docs/COMPILATION_PIPELINE.md` describes *why* the shape is what it is; this note plus the JSON Schema are the *contract*. When the two disagree, the JSON Schema wins.
+**Contract of record.** The authoritative schema is the repo-local JSON Schema at `scripts/lib/schemas/cast-provenance.schema.json` (`provenance_schema_version` is a `const: 3`). It is Foundry-authored — there is no upstream package and no `package_export`; the `upstream` link above points at the in-repo file. The narrative in `content/meta/casting.md` describes *why* the shape is what it is; this note plus the JSON Schema are the *contract*. When the two disagree, the JSON Schema wins.
 
 **Enforcement.** The deterministic verifier `scripts/cast-skill-verify.ts` AJV-validates every committed `_provenance.json` against the schema and additionally rejects any entry still carrying `pending_llm: true` (an unfilled `mode: condense` placeholder). The verifier — not a packaged `validator_bin` — is the enforcement point, which is why this note declares neither `package` nor `validator_bin`.
 
