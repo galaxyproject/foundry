@@ -36,7 +36,8 @@ export const kind = defineKind({
   // Transcribed from the file-roles table `docs/MOLD_SPEC.md` used to carry, which now reads FROM
   // here. Two copies of a layout is how the copy nobody runs drifts from the one that is enforced,
   // and this one is enforced: `validateCompanionLayout` checks a mold directory against exactly
-  // these names, and `_target.yml`'s forbidden-files list is derived from their dispositions.
+  // these names, and the cast verifier refuses a bundle carrying any of them whose disposition is
+  // not `bundled`.
   //
   // `eval.md` and `scenarios.md` are `recommended` rather than `required` because the spec calls
   // them "strongly recommended, warning-only for now" and 33 and 27 of 47 molds have them. The

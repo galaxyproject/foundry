@@ -17,6 +17,7 @@ import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
+import { NEVER_PACKAGED } from "../packages/build-cli/src/lib/dispositions.js";
 import { listFilesUnder } from "../packages/build-cli/src/lib/walk.js";
 import { readMarkdown } from "./lib/frontmatter.js";
 
@@ -88,7 +89,6 @@ interface TargetConfig {
   skill_constraints: {
     frontmatter_required: string[];
     forbidden_runtime_paths: string[];
-    forbid_packaged_files: string[];
   };
 }
 
@@ -341,10 +341,27 @@ function main(): void {
     }
   }
 
-  // Forbidden packaged files: e.g. eval.md must not be inside the bundle.
-  for (const forbidden of target.skill_constraints.forbid_packaged_files) {
-    const matches = walkAndFind(bundleRoot, forbidden);
-    if (matches.length) errors.push(`forbidden file packaged: ${matches.join(", ")}`);
+  // Companions that never travel — `eval.md` and the rest — must not be inside the bundle.
+  //
+  // Read from the kind declarations, not from the target: a disposition is a fact about the kind
+  // ("this stays in the Foundry"), so a per-target list could only restate it, and the one that
+  // used to live in `_target.yml` named two of the eight.
+  //
+  // A file some ref CLAIMS is exempt. Provenance is the record of what went through the ref
+  // manifest, which already applied the owning note's own disposition rules; a research note whose
+  // vendored sidecar happens to be called `README.md` is shipping its own file, not a mold's.
+  // Without the exemption this check would reject it on the strength of a basename collision.
+  const claimed = (prov.refs ?? []).map((r) => r.dst);
+  for (const companion of NEVER_PACKAGED) {
+    const matches = walkAndFind(bundleRoot, companion.name, companion.directory).filter((abs) => {
+      const rel = path.relative(bundleRoot, abs).split(path.sep).join("/");
+      return !claimed.some((dst) => dst === rel || dst.startsWith(`${rel}/`));
+    });
+    if (!matches.length) continue;
+    errors.push(
+      `forbidden file packaged: ${matches.join(", ")} — '${companion.file}' is declared ` +
+        `${companion.disposition} by kind ${companion.declaredBy.join(", ")}`,
+    );
   }
 
   if (errors.length) {
@@ -355,7 +372,14 @@ function main(): void {
   console.log(`verify clean: ${(prov.refs ?? []).length} ref(s)`);
 }
 
-function walkAndFind(root: string, basename: string): string[] {
+/**
+ * Every entry named `basename` anywhere under `root`.
+ *
+ * `directory` selects which kind of entry counts. A declared companion is one or the other —
+ * `refinements/` is a directory and `refinement.md` is a file — and a name matching the wrong
+ * type is not that companion.
+ */
+function walkAndFind(root: string, basename: string, directory = false): string[] {
   const out: string[] = [];
   const stack = [root];
   while (stack.length) {
@@ -375,7 +399,7 @@ function walkAndFind(root: string, basename: string): string[] {
         continue;
       }
       if (st.isDirectory()) stack.push(full);
-      else if (e === basename) out.push(full);
+      if (e === basename && st.isDirectory() === directory) out.push(full);
     }
   }
   return out;

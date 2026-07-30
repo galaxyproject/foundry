@@ -32,9 +32,8 @@ import {
   resolveLicenseRow,
   type LicensePolicy,
 } from "@galaxy-foundry/license-policy";
-import { DEFINITIONS } from "@galaxy-foundry/note-schema";
-import { companionsOf } from "@galaxy-foundry/kind-schema";
 
+import { PROMPT_PAYLOAD } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
   driftOf,
@@ -66,23 +65,6 @@ const Ajv = AjvImport as unknown as new (opts: {
   allErrors: boolean;
   strict: boolean;
 }) => AjvValidator;
-/**
- * The one file a prompt note carries that casting packages.
- *
- * Derived from the kind rather than restated here, and asserted to be singular: two `bundled`
- * companions would make "the payload" ambiguous, and the failure belongs at load time rather than
- * in a cast that silently picked the first one.
- */
-const PROMPT_PAYLOAD = ((): string => {
-  const bundled = [...companionsOf(DEFINITIONS.prompt).values()].filter(
-    (companion) => companion.disposition === "bundled",
-  );
-  if (bundled.length !== 1) {
-    throw new Error(`prompt: expected exactly one bundled companion, found ${bundled.length}`);
-  }
-  return bundled[0]!.name;
-})();
-
 const Ajv2020 = Ajv2020Import as unknown as new (opts: {
   allErrors: boolean;
   strict: boolean;
@@ -142,7 +124,6 @@ interface TargetConfig {
   skill_constraints: {
     frontmatter_required: string[];
     forbidden_runtime_paths: string[];
-    forbid_packaged_files: string[];
   };
 }
 
