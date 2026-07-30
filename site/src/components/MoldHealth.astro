@@ -1,7 +1,7 @@
 ---
 import { type NoteEntry } from '../lib/notes';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import type { CompanionRequirement, NormalizedCompanion } from '@galaxy-foundry/kind-schema';
+import { checkNoteDirectory, companionOf, readCompanion } from '../lib/content-files';
 import HealthPanel from './HealthPanel.astro';
 import { resolveWikiLinkId, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
 
@@ -23,16 +23,27 @@ interface HealthItem {
 const { entry, linkMap, entryById } = Astro.props;
 const data = entry.data as any;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const evalPath = fileURLToPath(new URL(`../../../content/${entry.id}/eval.md`, import.meta.url));
-const hasEval = existsSync(evalPath);
-const scenariosPath = fileURLToPath(new URL(`../../../content/${entry.id}/scenarios.md`, import.meta.url));
-const hasScenarios = existsSync(scenariosPath);
-const moldDir = fileURLToPath(new URL(`../../../content/${entry.id}/`, import.meta.url));
 
-const EVAL_HELP = 'Abstract oracle: fixture-independent property checks any run must satisfy.';
-const SCENARIOS_HELP = 'Concrete cases: fixtures bound to expected values, run against the eval properties.';
-const evalHref = `${base}/raw/${entry.id}/eval.md`;
-const scenariosHref = `${base}/raw/${entry.id}/scenarios.md`;
+// The two files this panel reports on, taken from the kind rather than described here. The
+// NAME stays, because the checks below read these files' contents and no declaration can say
+// what a Property section is — but the purpose, the requirement level, and whether the mold
+// kind still declares them at all are the kind's to answer.
+const EVAL = companionOf('mold', 'eval.md');
+const SCENARIOS = companionOf('mold', 'scenarios.md');
+
+const evalBody = readCompanion(entry.id, EVAL);
+const scenariosBody = readCompanion(entry.id, SCENARIOS);
+const layout = checkNoteDirectory(entry.id, 'mold');
+
+/** How loudly an absent companion reads, from what the kind asked for. */
+const MISSING_STATE: Record<CompanionRequirement, 'ok' | 'warn' | 'error'> = {
+  required: 'error',
+  recommended: 'warn',
+  optional: 'ok',
+};
+
+const hrefFor = (companion: NormalizedCompanion): string =>
+  `${base}/raw/${entry.id}/${companion.name}`;
 
 function hasAxisSpecifier(): boolean {
   if (data.axis === 'source-specific') return Boolean(data.source);
@@ -77,63 +88,57 @@ function referenceFindings(): HealthItem[] {
   return items;
 }
 
-function listMarkdownFiles(dir: string): string[] {
-  const files: string[] = [];
-  if (!existsSync(dir)) return files;
-  for (const item of readdirSync(dir)) {
-    const full = `${dir}/${item}`;
-    const stat = statSync(full);
-    if (stat.isDirectory()) files.push(...listMarkdownFiles(full));
-    else if (item.endsWith('.md')) files.push(full);
-  }
-  return files;
-}
-
-function hasFrontmatter(filePath: string): boolean {
-  return readFileSync(filePath, 'utf8').startsWith('---');
+/** An absent companion, reported at the volume its requirement level asks for. */
+function missing(companion: NormalizedCompanion, label: string): HealthItem {
+  return {
+    label,
+    help: companion.purpose,
+    state: MISSING_STATE[companion.requirement],
+    detail: `${companion.name} not written yet.`,
+  };
 }
 
 function evalDetail(): HealthItem {
-  const labelled = { label: 'Eval plan', help: EVAL_HELP } as const;
-  if (!hasEval) {
-    return { ...labelled, state: 'warn', detail: 'eval.md not written yet.' };
-  }
-  const item = { ...labelled, href: evalHref, hrefLabel: 'eval.md' };
-  const body = readFileSync(evalPath, 'utf8');
-  const hasProperty = /^##\s+Property:/m.test(body);
-  const hasCase = /^##\s+Case:/m.test(body);
-  const hasCheck = /\b(deterministic|llm-judged)\b/.test(body);
+  if (evalBody === undefined) return missing(EVAL, 'Eval plan');
+  const item = { label: 'Eval plan', help: EVAL.purpose, href: hrefFor(EVAL), hrefLabel: EVAL.name };
+  const hasProperty = /^##\s+Property:/m.test(evalBody);
+  const hasCase = /^##\s+Case:/m.test(evalBody);
+  const hasCheck = /\b(deterministic|llm-judged)\b/.test(evalBody);
   if (hasCase) {
-    return { ...item, state: 'warn', detail: 'eval.md has a Case section — concrete cases belong in scenarios.md.' };
+    return { ...item, state: 'warn', detail: `${EVAL.name} has a Case section — concrete cases belong in ${SCENARIOS.name}.` };
   }
-  if (hasProperty && hasCheck) return { ...item, state: 'ok', detail: 'eval.md declares properties and check type.' };
-  return { ...item, state: 'warn', detail: 'eval.md should declare a Property section and a deterministic or llm-judged check.' };
+  if (hasProperty && hasCheck) return { ...item, state: 'ok', detail: `${EVAL.name} declares properties and check type.` };
+  return { ...item, state: 'warn', detail: `${EVAL.name} should declare a Property section and a deterministic or llm-judged check.` };
 }
 
 function scenariosDetail(): HealthItem {
-  const labelled = { label: 'Scenarios', help: SCENARIOS_HELP } as const;
-  if (!hasScenarios) {
-    return { ...labelled, state: 'warn', detail: 'scenarios.md not written yet.' };
-  }
-  const item = { ...labelled, href: scenariosHref, hrefLabel: 'scenarios.md' };
-  const body = readFileSync(scenariosPath, 'utf8');
-  const hasCase = /^##\s+Case:/m.test(body);
-  const hasFixture = /\bfixture\b/i.test(body);
-  if (hasCase && hasFixture) return { ...item, state: 'ok', detail: 'scenarios.md declares cases bound to fixtures.' };
-  if (hasCase) return { ...item, state: 'warn', detail: 'scenarios.md cases should bind a fixture.' };
-  return { ...item, state: 'warn', detail: 'scenarios.md should declare at least one Case section.' };
+  if (scenariosBody === undefined) return missing(SCENARIOS, 'Scenarios');
+  const item = { label: 'Scenarios', help: SCENARIOS.purpose, href: hrefFor(SCENARIOS), hrefLabel: SCENARIOS.name };
+  const hasCase = /^##\s+Case:/m.test(scenariosBody);
+  const hasFixture = /\bfixture\b/i.test(scenariosBody);
+  if (hasCase && hasFixture) return { ...item, state: 'ok', detail: `${SCENARIOS.name} declares cases bound to fixtures.` };
+  if (hasCase) return { ...item, state: 'warn', detail: `${SCENARIOS.name} cases should bind a fixture.` };
+  return { ...item, state: 'warn', detail: `${SCENARIOS.name} should declare at least one Case section.` };
 }
 
-const nonIndexFrontmatter = listMarkdownFiles(moldDir)
-  .filter(path => !path.endsWith('/index.md'))
-  .filter(hasFrontmatter);
+// What the kind says about the directory, not a rule restated here. `unknown` is a file the mold
+// kind does not declare — the misnamed `scenario.md` case — and the validator errors on the same
+// set, so this panel and the gate cannot disagree about which files belong.
+//
+// A declared companion DIRECTORY is checked as a whole and its contents are its own business:
+// `refinements/` entries carry frontmatter by declaration, and the recursive frontmatter scan
+// this replaced counted every one of them as a layout error.
+function layoutDetail(): HealthItem {
+  const labelled = { label: 'Source layout' } as const;
+  if (layout.unknown.length === 0) {
+    return { ...labelled, state: 'ok', detail: 'Every file beside index.md is one the mold kind declares.' };
+  }
+  const names = layout.unknown.map((e) => e.name).join(', ');
+  return { ...labelled, state: 'error', detail: `Undeclared beside the note: ${names}.` };
+}
 
 const items: HealthItem[] = [
-  {
-    label: 'Source layout',
-    state: nonIndexFrontmatter.length === 0 ? 'ok' : 'error',
-    detail: nonIndexFrontmatter.length === 0 ? 'Directory Mold with only index.md frontmatter.' : `${nonIndexFrontmatter.length} non-index Markdown file${nonIndexFrontmatter.length === 1 ? '' : 's'} with frontmatter.`,
-  },
+  layoutDetail(),
   {
     label: 'Axis fields',
     state: hasAxisSpecifier() ? 'ok' : 'error',
