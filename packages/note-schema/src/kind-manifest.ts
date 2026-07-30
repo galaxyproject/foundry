@@ -19,6 +19,7 @@ import {
 } from "@galaxy-foundry/kind-manifest";
 import { manifestKinds } from "@galaxy-foundry/kind-schema";
 
+import { COLLECTIONS } from "./collections.js";
 import { buildKindContext } from "./types/context.js";
 import type { BuildKindContextOptions } from "./types/context.js";
 import { KINDS } from "./types/index.js";
@@ -53,16 +54,26 @@ export interface BuildKindManifestOptions extends BuildKindContextOptions {
   instance: string;
   /** kind name -> kind.md body. The caller reads these; this module stays filesystem-free. */
   docs?: Record<string, string>;
+  /** kind name -> worked example.md body. Read by the caller, for the same reason. */
+  examples?: Record<string, string>;
 }
 
 export function buildKindManifest({
   instance,
   docs = {},
+  examples = {},
   ...registries
 }: BuildKindManifestOptions): KindManifest {
   return deriveKindManifest({
     instance,
     source: MANIFEST_SOURCE,
-    kinds: manifestKinds(KINDS, buildKindContext(registries), docs),
+    // `COLLECTIONS` rather than a per-kind location list: the bridge derives each kind's
+    // `locations` from the routing table, so the manifest cannot claim a kind lives somewhere the
+    // validator and the site do not look for it.
+    kinds: manifestKinds(KINDS, buildKindContext(registries), {
+      docs,
+      examples,
+      collections: COLLECTIONS,
+    }),
   });
 }

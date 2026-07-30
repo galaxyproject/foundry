@@ -97,8 +97,8 @@ importers:
         specifier: workspace:*
         version: link:../foundry
       '@galaxy-foundry/kind-schema':
-        specifier: ^0.3.0
-        version: 0.3.0(zod@3.25.76)
+        specifier: ^0.4.0
+        version: 0.4.0(zod@3.25.76)
       '@galaxy-foundry/license-policy':
         specifier: ^0.1.0
         version: 0.1.0
@@ -174,11 +174,11 @@ importers:
   packages/note-schema:
     dependencies:
       '@galaxy-foundry/kind-manifest':
-        specifier: ^0.2.1
-        version: 0.2.1(zod@3.25.76)
-      '@galaxy-foundry/kind-schema':
         specifier: ^0.3.0
         version: 0.3.0(zod@3.25.76)
+      '@galaxy-foundry/kind-schema':
+        specifier: ^0.4.0
+        version: 0.4.0(zod@3.25.76)
       '@galaxy-foundry/license-policy':
         specifier: ^0.1.0
         version: 0.1.0
@@ -991,14 +991,14 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/kind-manifest@0.2.1':
-    resolution: {integrity: sha512-a/H/xFryorwsgu0S2kiWlp4rNQvFfaRo2R/BcKPJI+u4u7gzzQuahQk34OS9+BIOG0d0q8ce0i/ElRBvtlA1Gg==}
+  '@galaxy-foundry/kind-manifest@0.3.0':
+    resolution: {integrity: sha512-WxIpzbLn+IJP9nGN3Y7TTQth8RdMsrP3l7gJl0S/S/dMUC2YO01yMMGpAyl0lhxYgw9DRILE2aRiqwn1cMyIYw==}
     engines: {node: '>=20'}
     peerDependencies:
       zod: ^3.25.0
 
-  '@galaxy-foundry/kind-schema@0.3.0':
-    resolution: {integrity: sha512-D25FnCCy4h7fNZCSzseMPQwU9+7jhYlbrv1Yf/lzeOytmLPoaufZGSZ0/L9y0DYZGCne/y/eVg23WEH1LereLg==}
+  '@galaxy-foundry/kind-schema@0.4.0':
+    resolution: {integrity: sha512-1jv41eTE7unomrcZc/rXGOeHIyjAlBLdhocASV/ECoNx9KHJEcqZnFQ3LrdaXeH26f/tYdbadSQAuUG+FHEZYg==}
     engines: {node: '>=20'}
     peerDependencies:
       zod: ^3.25.0
@@ -4257,13 +4257,13 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/kind-manifest@0.2.1(zod@3.25.76)':
+  '@galaxy-foundry/kind-manifest@0.3.0(zod@3.25.76)':
     dependencies:
       zod: 3.25.76
 
-  '@galaxy-foundry/kind-schema@0.3.0(zod@3.25.76)':
+  '@galaxy-foundry/kind-schema@0.4.0(zod@3.25.76)':
     dependencies:
-      '@galaxy-foundry/kind-manifest': 0.2.1(zod@3.25.76)
+      '@galaxy-foundry/kind-manifest': 0.3.0(zod@3.25.76)
       zod: 3.25.76
 
   '@galaxy-foundry/license-policy@0.1.0':

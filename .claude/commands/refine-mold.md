@@ -22,7 +22,7 @@ Read these before doing anything else. They are cheap and the skill won't make s
 2. `docs/MOLD_SPEC.md` — Mold source layout. Pay attention to **Eval, Usage, Refinement: what goes where** and the **Refinement Contract**. The journal entry shape is contractual.
 3. The Mold itself — `content/molds/$1/`:
    - `index.md` (full body and frontmatter)
-   - `eval.md`, `usage.md`, `refinement.md` (any that exist)
+   - `eval.md`, `scenarios.md`, `refinement.md` (any that exist)
    - `casting.md` (if present — Mold-owned guidance read by casting; often explains why the cast looks the way it does)
    - `cast-skill-verification.md` (if present — post-cast review checklist; relevant when the intent touches cast quality)
    - prior entries under `refinements/` if any (don't repeat work; supersede if you do)

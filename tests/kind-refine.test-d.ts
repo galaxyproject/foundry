@@ -33,6 +33,8 @@ export const wellTyped = defineKind({
   title: "Probe",
   layer: "instance",
   summary: "Asserts refine sees this kind's own fields.",
+  shape: "file",
+  companions: [],
   build,
   refine: (d, ctx) => {
     if (d.axis === "source-specific" && !d.source) {
@@ -46,6 +48,8 @@ export const misspelledLiteral = defineKind({
   title: "Probe",
   layer: "instance",
   summary: "Asserts a typo'd literal is a compile error, not a dead rule.",
+  shape: "file",
+  companions: [],
   build,
   refine: (d, ctx) => {
     // @ts-expect-error — "source-specifc" is not one of the four axis values, so this

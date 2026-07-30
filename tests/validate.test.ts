@@ -545,18 +545,21 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
-  it("warns on an unexpected file in a pipeline directory", () => {
+  it("errors on an undeclared file in a pipeline directory", () => {
     writeFm(path.join(dir, "molds/mold-a/index.md"), {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
     });
-    const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
+    expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
     writeFileSync(path.join(dir, "pipelines/p/notes.md"), "stray notes\n");
-    const after = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
-    expect(after.errors).toBe(0);
-    expect(after.warnings).toBeGreaterThan(before);
+    // An error rather than a warning, now that the kind declares its own layout: a file the kind
+    // does not name is indistinguishable from a misnamed one, and `notes.md` beside a pipeline is
+    // as likely to be a typo'd `scenarios.md` as a deliberate choice.
+    expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBeGreaterThanOrEqual(
+      1,
+    );
   });
 
   it("does not warn on an examples/ subdir of scenario fixtures in a pipeline directory", () => {
@@ -761,6 +764,56 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
+  });
+
+  // The note-vs-companion distinction, which nothing checked before a kind declared its layout.
+  // `cli-tool` declares `companions: []` and sits in a directory full of markdown — every sibling
+  // `.md` is a `cli-command` NOTE. A layout check that guessed from the extension would report
+  // every documented subcommand in the corpus as a stray.
+  //
+  // These two use a content root literally named `content`, because `validateCliTools` requires a
+  // cli-tool to live at `content/cli/<tool>/index.md` and matches the path as a suffix. Both
+  // assertions are absolute counts, not deltas, so nothing here passes on a coincidence.
+  const cliVault = (): string => {
+    const contentRoot = path.join(dir, "content");
+    mkdirSync(path.join(contentRoot, "cli/gxwf"), { recursive: true });
+    writeFm(path.join(contentRoot, "cli/gxwf/index.md"), {
+      ...baseRequired({
+        type: "cli-tool",
+        tags: ["cli/gxwf"],
+        tool: "gxwf",
+        origin: "npm",
+        package: "@galaxy-tool-util/cli",
+        invoke: "gxwf",
+      }),
+    });
+    return contentRoot;
+  };
+
+  it("does not treat a cli-tool's sibling command notes as undeclared companions", () => {
+    const contentRoot = cliVault();
+    writeFm(path.join(contentRoot, "cli/gxwf/validate.md"), {
+      ...baseRequired({
+        type: "cli-command",
+        tags: ["cli/gxwf"],
+        tool: "gxwf",
+        command: "validate",
+        package: "@galaxy-tool-util/cli",
+        upstream:
+          "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
+      }),
+    });
+
+    expect(validateDirectory({ directory: contentRoot, tagsPath: TAGS_PATH }).errors).toBe(0);
+  });
+
+  it("does flag a non-note file beside a cli-tool, which declares no companions", () => {
+    const contentRoot = cliVault();
+    writeFileSync(path.join(contentRoot, "cli/gxwf/gxwf.json"), "{}\n");
+
+    expect(
+      validateDirectory({ directory: contentRoot, tagsPath: TAGS_PATH }).errors,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("rejects CLI command notes missing upstream metadata", () => {
@@ -1059,7 +1112,10 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBe(0);
   });
 
-  it("accepts usage.md and refinement.md siblings without frontmatter", () => {
+  it("accepts a declared sibling and rejects an undeclared one", () => {
+    // `usage.md` was an allowlisted mold sibling with zero instances in the corpus and no code
+    // reading it. The mold kind no longer declares it, so it is now exactly as undeclared as a
+    // typo would be — which is the whole point of a kind stating its own layout.
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
@@ -1072,17 +1128,17 @@ describe("validateDirectory (cross-file)", () => {
       path.join(dir, "molds/m/eval.md"),
       "# m eval\n\n## Property: basic\n\n- check: deterministic\n- assertion: x\n",
     );
-    writeFileSync(path.join(dir, "molds/m/usage.md"), "# m usage\n\nSample run.\n");
     writeFileSync(
       path.join(dir, "molds/m/refinement.md"),
       "# m refinement\n\nIs field x pulling weight?\n",
     );
 
-    const r = validateDirectory({
-      directory: dir,
-      tagsPath: TAGS_PATH,
-    });
-    expect(r.errors).toBe(0);
+    expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
+
+    writeFileSync(path.join(dir, "molds/m/usage.md"), "# m usage\n\nSample run.\n");
+    expect(
+      validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("allowlists scenarios.md and accepts Property sections in eval.md", () => {
@@ -1113,8 +1169,10 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(withScenarios.errors).toBe(0);
-    // valid scenarios.md is allowlisted and well-formed: adds no warning
-    expect(withScenarios.warnings).toBe(withoutScenarios.warnings);
+    // A well-formed scenarios.md does not merely avoid a warning — it CLEARS one. The mold kind
+    // declares it `recommended`, so its absence is the warning, which is the check the old
+    // allowlist could not express: an allowlist can only say a file is permitted.
+    expect(withScenarios.warnings).toBeLessThan(withoutScenarios.warnings);
   });
 
   it("warns when scenarios.md lacks a Case section", () => {
@@ -1129,6 +1187,12 @@ describe("validateDirectory (cross-file)", () => {
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
       "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: x\n",
+    );
+    // Baseline with a WELL-FORMED scenarios.md, not with none: a missing one is its own warning
+    // now, so measuring from absent would net out to zero and prove nothing about the content check.
+    writeFileSync(
+      path.join(dir, "molds/m/scenarios.md"),
+      "# m scenarios\n\n## Case: basic\n\n- fixture: synthetic\n- expect: 1\n",
     );
     const before = validateDirectory({
       directory: dir,
@@ -1159,6 +1223,11 @@ describe("validateDirectory (cross-file)", () => {
     writeFileSync(
       path.join(dir, "molds/m/eval.md"),
       "# m eval\n\n## Property: p\n\n- check: deterministic\n- assertion: x\n",
+    );
+    // Well-formed baseline, for the reason above: absence is its own warning now.
+    writeFileSync(
+      path.join(dir, "molds/m/scenarios.md"),
+      "# m scenarios\n\n## Case: basic\n\n- fixture: synthetic\n- expect: 1\n",
     );
     const before = validateDirectory({
       directory: dir,
@@ -1195,7 +1264,7 @@ describe("validateDirectory (cross-file)", () => {
     expect(after.warnings).toBeGreaterThan(before);
   });
 
-  it("warns on unexpected files in a Mold directory", () => {
+  it("errors on an undeclared file in a Mold directory", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
@@ -1206,15 +1275,17 @@ describe("validateDirectory (cross-file)", () => {
     });
     writeFileSync(path.join(dir, "molds/m/scratch.md"), "stray notes\n");
 
+    // The case the mechanism exists for. `scratch.md` is what a typo'd `scenarios.md` looks like,
+    // and the validator's walker drops anything the collection table does not claim — so before the
+    // kind declared its layout, a misnamed companion and a deliberate non-note were the same thing.
     const r = validateDirectory({
       directory: dir,
       tagsPath: TAGS_PATH,
     });
-    expect(r.errors).toBe(0);
-    expect(r.warnings).toBeGreaterThanOrEqual(1);
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
-  it("warns on unexpected subdirectories in a Mold directory", () => {
+  it("errors on an undeclared subdirectory in a Mold directory", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
         type: "mold",
@@ -1229,8 +1300,7 @@ describe("validateDirectory (cross-file)", () => {
       directory: dir,
       tagsPath: TAGS_PATH,
     });
-    expect(r.errors).toBe(0);
-    expect(r.warnings).toBeGreaterThanOrEqual(1);
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
   it("accepts refinement journal entries with valid frontmatter", () => {

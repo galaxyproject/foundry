@@ -30,6 +30,9 @@ export const kind = defineKind({
   summary:
     "One reusable piece of domain knowledge a Mold can reference, graded by how strongly the corpus supports it.",
 
+  shape: "file",
+  companions: [],
+
   build: (ctx: KindContext) =>
     z
       .object({

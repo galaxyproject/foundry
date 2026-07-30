@@ -9,6 +9,9 @@ export const kind = defineKind({
   summary:
     "A shape recurring in one SOURCE ecosystem, held separate from the target-side patterns that implement it.",
 
+  shape: "file",
+  companions: [],
+
   build: (ctx: KindContext) =>
     z
       .object({

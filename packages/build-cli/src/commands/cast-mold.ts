@@ -31,7 +31,8 @@ import {
   resolveLicenseRow,
   type LicensePolicy,
 } from "@galaxy-foundry/license-policy";
-import { UPSTREAM_PROMPT_FILE } from "@galaxy-foundry/note-schema";
+import { DEFINITIONS } from "@galaxy-foundry/note-schema";
+import { companionsOf } from "@galaxy-foundry/kind-schema";
 
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
@@ -64,6 +65,23 @@ const Ajv = AjvImport as unknown as new (opts: {
   allErrors: boolean;
   strict: boolean;
 }) => AjvValidator;
+/**
+ * The one file a prompt note carries that casting packages.
+ *
+ * Derived from the kind rather than restated here, and asserted to be singular: two `bundled`
+ * companions would make "the payload" ambiguous, and the failure belongs at load time rather than
+ * in a cast that silently picked the first one.
+ */
+const PROMPT_PAYLOAD = ((): string => {
+  const bundled = [...companionsOf(DEFINITIONS.prompt).values()].filter(
+    (companion) => companion.disposition === "bundled",
+  );
+  if (bundled.length !== 1) {
+    throw new Error(`prompt: expected exactly one bundled companion, found ${bundled.length}`);
+  }
+  return bundled[0]!.name;
+})();
+
 const Ajv2020 = Ajv2020Import as unknown as new (opts: {
   allErrors: boolean;
   strict: boolean;
@@ -293,10 +311,10 @@ function resolveMoldRef(
     }
     if (kind === "prompt") {
       // A prompt note is `content/prompts/<area>/<slug>/index.md`; what casting packages is
-      // the verbatim `upstream.prompt` beside it, never the wrapper. The name is a convention
-      // owned by the kind, not a frontmatter field, so there is nothing here to resolve and
-      // nothing that can point at a file that is not there.
-      src = path.posix.join(path.posix.dirname(tp), UPSTREAM_PROMPT_FILE);
+      // the verbatim payload beside it, never the wrapper. Which file that is comes from the
+      // kind's own companion declaration, so there is nothing here to resolve and nothing that
+      // can point at a file that is not there.
+      src = path.posix.join(path.posix.dirname(tp), PROMPT_PAYLOAD);
       dstOverride = path.posix.join(kindCfg.dst_dir, `${fileSlug(tp)}${kindCfg.dst_extension}`);
     } else if (kind === "cli-tool") {
       // cli-tool notes live at content/cli/<tool>/index.md, so the slug is the parent dir

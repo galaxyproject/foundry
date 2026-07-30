@@ -48,7 +48,7 @@ Frame each as *"X must appear, or be explicitly flagged; it must not silently va
 
 Every eval property must have a pass/fail edge — an output you can imagine that violates it. This is the line between eval and the neighboring files.
 
-- No failure edge, just "here's what running this tends to look like"? That's **`usage.md`** — illustration.
+- No failure edge, just "here's what running this tends to look like"? That belongs in the Mold body or in `examples/` — illustration, not evaluation.
 - An open design question with no answer yet ("is field X pulling weight?")? That's **`refinement.md`**.
 - A concrete fixture and its expected value? That's **`scenarios.md`**.
 - A re-statement of the procedural body ("produce X" when `index.md` already says to produce X)? That's nothing — delete it. Eval targets failure modes the body won't prevent.

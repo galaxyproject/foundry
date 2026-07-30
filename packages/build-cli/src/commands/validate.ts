@@ -10,16 +10,20 @@ import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
 import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import {
   buildNoteSchema,
+  kindOf,
+  KINDS_BY_NAME,
   loadReferenceContract,
-  UPSTREAM_PROMPT_FILE,
   type NoteSchema,
 } from "@galaxy-foundry/note-schema";
+// Directly from the shared package rather than through the barrel, which is the arrangement
+// note-schema states for every other borrowed mechanism: one place to look, nothing to drift.
+import { checkCompanions } from "@galaxy-foundry/kind-schema";
 import { bundledPolicy, resolveLicenseRow } from "@galaxy-foundry/license-policy";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadTagRegistry } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, ValidationResult } from "../lib/types.js";
-import { fileSlug, findMdFiles } from "../lib/walk.js";
+import { fileSlug, findMdFiles, routablePath } from "../lib/walk.js";
 import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
 
 interface CliArgs {
@@ -761,33 +765,11 @@ function validatePipelineArtifactBindings(
   return findings;
 }
 
-// Allowlisted top-level entries inside a Mold directory.
-// Files with frontmatter rules apply to top-level .md files only;
-// `refinements/` is the carve-out where journal entries carry frontmatter.
-const MOLD_TOP_FILES = new Set([
-  "index.md",
-  "eval.md",
-  "scenarios.md",
-  "usage.md",
-  "refinement.md",
-  "casting.md",
-  "cast-skill-verification.md",
-  "changes.md",
-  "README.md",
-]);
-const MOLD_TOP_DIRS = new Set(["examples", "refinements"]);
-
-// Allowlisted top-level entries inside a Pipeline directory note.
-// `eval.md` / `scenarios.md` are optional pipeline-level evaluation siblings.
-const PIPELINE_TOP_FILES = new Set([
-  "index.md",
-  "eval.md",
-  "scenarios.md",
-  "usage.md",
-  "README.md",
-]);
-// Allowlisted subdirectory: local scenario fixtures referenced by scenarios.md.
-const PIPELINE_TOP_DIRS = new Set(["examples"]);
+// The allowlists that used to sit here — MOLD_TOP_FILES, MOLD_TOP_DIRS, PIPELINE_TOP_FILES,
+// PIPELINE_TOP_DIRS — are gone. Each kind now declares what may sit beside its notes, and
+// `validateCompanionLayout` below checks every directory kind against its own declaration.
+// `refinements/` being the frontmatter carve-out is still enforced here; that is a rule about a
+// file's CONTENTS, which a layout declaration does not and should not express.
 
 const REFINEMENT_DECISION_VOCAB = new Set([
   "keep",
@@ -824,26 +806,6 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
       });
     }
 
-    for (const child of readdirSync(moldDir).sort()) {
-      const childPath = path.join(moldDir, child);
-      const isDir = statSync(childPath).isDirectory();
-      if (isDir) {
-        if (!MOLD_TOP_DIRS.has(child)) {
-          findings.push({
-            path: childPath,
-            severity: "warning",
-            message: `unexpected directory in mold source: ${child}`,
-          });
-        }
-      } else if (!MOLD_TOP_FILES.has(child)) {
-        findings.push({
-          path: childPath,
-          severity: "warning",
-          message: `unexpected file in mold source: ${child}`,
-        });
-      }
-    }
-
     for (const mdPath of listMarkdownFiles(moldDir)) {
       if (path.basename(mdPath) === "index.md") continue;
       const rel = path.relative(moldDir, mdPath);
@@ -878,14 +840,10 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
       }
     }
 
-    if (!existsSync(evalPath)) {
-      findings.push({
-        path: moldDir,
-        severity: "warning",
-        message: "mold source directory should contain eval.md",
-      });
-      continue;
-    }
+    // Whether eval.md is PRESENT is the companion declaration's business — `recommended` there
+    // produces the warning this used to duplicate. What is left here is whether its CONTENTS say
+    // anything, which no layout declaration can answer.
+    if (!existsSync(evalPath)) continue;
 
     const evalBody = readMarkdown(evalPath).body;
     if (!/^##\s+Property:/m.test(evalBody)) {
@@ -951,25 +909,6 @@ function validatePipelineSourceLayout(
         severity: "error",
         message: "pipeline source index.md must validate as type=pipeline",
       });
-    }
-
-    for (const child of readdirSync(pdir).sort()) {
-      const childPath = path.join(pdir, child);
-      if (statSync(childPath).isDirectory()) {
-        if (!PIPELINE_TOP_DIRS.has(child)) {
-          findings.push({
-            path: childPath,
-            severity: "warning",
-            message: `unexpected directory in pipeline source: ${child}`,
-          });
-        }
-      } else if (!PIPELINE_TOP_FILES.has(child)) {
-        findings.push({
-          path: childPath,
-          severity: "warning",
-          message: `unexpected file in pipeline source: ${child}`,
-        });
-      }
     }
 
     for (const mdPath of listMarkdownFiles(pdir)) {
@@ -1192,28 +1131,59 @@ function validateCliTools(files: FileMeta[]): CrossFileFinding[] {
   return findings;
 }
 
-// A prompt note is a directory whose `index.md` is the wrapper and whose `upstream.prompt` is
-// the verbatim text casting packages. The file is required and its name is fixed, so this asks
-// whether the note is complete rather than whether a frontmatter path resolves — there is no
-// declared path left to be wrong about.
-function validatePromptFiles(files: FileMeta[]): CrossFileFinding[] {
+/**
+ * Every directory note, measured against what its kind declares sits beside it.
+ *
+ * One function where there were four mechanisms: two hardcoded allowlists (mold, pipeline), a
+ * per-kind constant naming a single required file (prompt), and nothing at all for `cli-tool`. The
+ * allowlists could not say a file was REQUIRED, the constant could not say a file was forbidden,
+ * and none of them was reachable from the kind whose layout it described.
+ *
+ * `note` is supplied from the collection table rather than guessed, and `content/cli/<tool>/` is
+ * why: `index.md` is a cli-tool and every sibling `.md` is a cli-command, so that kind has a
+ * directory full of markdown and no companions at all. Inferring from the extension would report
+ * every documented subcommand in the corpus as a stray.
+ */
+function validateCompanionLayout(contentRoot: string, files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
-    if (f.meta.type !== "prompt") continue;
-    const fullPath = path.resolve(path.dirname(f.path), UPSTREAM_PROMPT_FILE);
-    if (!existsSync(fullPath)) {
+    const definition = KINDS_BY_NAME.get(String(f.meta.type));
+    if (definition === undefined || definition.shape !== "directory") continue;
+
+    const dir = path.dirname(f.path);
+    const entries = readdirSync(dir, { withFileTypes: true })
+      // The one exclusion a declaration cannot express, and the same carve-out the walker makes:
+      // a dotfile is editor or OS state, not something a kind failed to declare.
+      .filter((entry) => !entry.name.startsWith("."))
+      .map((entry) => ({
+        name: entry.name,
+        directory: entry.isDirectory(),
+        note: kindOf(routablePath(contentRoot, path.join(dir, entry.name))) !== undefined,
+      }));
+
+    const layout = checkCompanions(entries, definition);
+    for (const companion of layout.missingRequired) {
       findings.push({
         path: f.path,
         severity: "error",
-        message: `prompt: required companion is missing: ${UPSTREAM_PROMPT_FILE}`,
+        message: `${definition.kind}: required companion is missing: ${companion.file}`,
       });
-      continue;
     }
-    if (!statSync(fullPath).isFile()) {
+    for (const companion of layout.missingRecommended) {
       findings.push({
         path: f.path,
+        severity: "warning",
+        message: `${definition.kind}: should have ${companion.file} — ${companion.purpose}`,
+      });
+    }
+    // An error, not a warning. A file the kind does not declare is indistinguishable from a
+    // misnamed one — `scenario.md` beside a mold is the case worth catching — and the corpus has
+    // none today, so this costs nothing and stops the next one at the gate.
+    for (const entry of layout.unknown) {
+      findings.push({
+        path: path.join(dir, entry.name),
         severity: "error",
-        message: `prompt: companion is not a file: ${UPSTREAM_PROMPT_FILE}`,
+        message: `${definition.kind}: undeclared ${entry.directory ? "directory" : "file"} beside the note: ${entry.name}`,
       });
     }
   }
@@ -1444,7 +1414,7 @@ export function validateDirectory(opts: ValidateOptions): {
   );
   crossFindings.push(...validateCliCommandDocs(validFiles));
   crossFindings.push(...validateCliTools(validFiles));
-  crossFindings.push(...validatePromptFiles(validFiles));
+  crossFindings.push(...validateCompanionLayout(opts.directory, validFiles));
   crossFindings.push(...validateCompanionFiles(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
   crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));
