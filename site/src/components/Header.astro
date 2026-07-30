@@ -1,5 +1,5 @@
 ---
-import Search from 'astro-pagefind/components/Search';
+import Search from 'astro-pagefind/components/Search.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 const navLinks = [
@@ -85,7 +85,7 @@ const moreActive = moreLinks.some(link => link.match(pathname));
       </nav>
     </div>
     <div class="flex items-center gap-2">
-      <Search id="site-search" className="pagefind-ui" uiOptions={{ showImages: false, showSubResults: true }} />
+      <Search className="pagefind-ui" searchboxOptions={{ 'show-sub-results': true }} />
     <button id="theme-toggle" type="button"
       class="p-1.5 rounded text-(--color-text-on-dark) opacity-70 hover:opacity-100 hover:text-(--color-accent) transition-all duration-200 cursor-pointer active:scale-95"
       aria-label="Toggle dark mode">
@@ -101,38 +101,29 @@ const moreActive = moreLinks.some(link => link.match(pathname));
 </header>
 
 <style is:global>
+  /* Pagefind 2's searchbox positions, borders and shadows its own dropdown, so only the
+     palette and sizing are ours now. Dark values come from the component's own
+     `[data-pf-theme]` palette, set on <html> beside the `.dark` class. */
   .pagefind-ui {
-    --pagefind-ui-scale: 0.8;
-    --pagefind-ui-primary: #1e3a5f;
-    --pagefind-ui-text: #1f2937;
-    --pagefind-ui-background: #ffffff;
-    --pagefind-ui-border: rgba(0, 0, 0, 0.15);
-    --pagefind-ui-border-radius: 0.375rem;
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-font: inherit;
-    min-width: 16rem;
-    position: relative;
+    /* Not `inherit`: pagefind 2 gives --pf-font a :root default, so `inherit` would resolve
+       to that system stack rather than reaching font-family as a keyword the way v1's did. */
+    --pf-font: var(--font-sans);
+    --pf-input-height: 32px;
+    --pf-input-font-size: 14px;
+    --pf-result-title-font-size: 13px;
+    --pf-result-excerpt-font-size: 12px;
+    --pf-summary-font-size: 11px;
+    --pf-border-radius: 0.375rem;
+    --pf-searchbox-max-width: 16rem;
+    --pf-searchbox-dropdown-max-height: 70vh;
+    --pf-dropdown-z-index: 50;
   }
-  .pagefind-ui .pagefind-ui__drawer:not(.pagefind-ui__hidden) {
-    position: absolute;
-    top: 100%;
+  /* The input sits at the right edge of a narrow header, so the dropdown is widened and
+     right-anchored rather than tracking the input's 16rem width. */
+  .pagefind-ui .pf-searchbox-dropdown {
     right: 0;
     left: auto;
     width: min(28rem, 90vw);
-    max-height: 70vh;
-    overflow-y: auto;
-    margin-top: 0.25rem;
-    padding: 0.75rem;
-    background: var(--pagefind-ui-background);
-    border: 1px solid var(--pagefind-ui-border);
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 25px rgba(44, 49, 67, 0.25);
-    z-index: 50;
-  }
-  :is(.dark) .pagefind-ui {
-    --pagefind-ui-text: #e5e7eb;
-    --pagefind-ui-background: #1f2937;
-    --pagefind-ui-border: rgba(255, 255, 255, 0.15);
   }
 </style>
 
@@ -172,17 +163,8 @@ const moreActive = moreLinks.some(link => link.match(pathname));
   toggle?.addEventListener('click', () => {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.theme = isDark ? 'dark' : 'light';
+    document.documentElement.dataset.pfTheme = isDark ? 'dark' : 'light';
     updateIcons();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      const input = document.querySelector('#site-search input[type="text"]');
-      if (input) {
-        e.preventDefault();
-        input.focus();
-      }
-    }
   });
 
   const moreTrigger = document.getElementById('nav-more-trigger');
