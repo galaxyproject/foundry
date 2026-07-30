@@ -1,7 +1,7 @@
 {
   "name": "@galaxy-foundry/note-schema",
   "version": "0.0.0",
-  "description": "Single source of truth for Galaxy Workflow Foundry note frontmatter \u2014 one zod contract shared by the validator and the site.",
+  "description": "Single source of truth for Galaxy Workflow Foundry note frontmatter — one zod contract shared by the validator and the site.",
   "type": "module",
   "exports": {
     ".": {
@@ -37,14 +37,14 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@galaxy-foundry/kind-manifest": "^0.3.0",
-    "@galaxy-foundry/kind-schema": "^0.4.0",
+    "@galaxy-foundry/kind-manifest": "^0.4.0",
+    "@galaxy-foundry/kind-schema": "^0.5.0",
     "@galaxy-foundry/license-policy": "^0.1.0",
     "@galaxy-foundry/reference-contract": "^0.1.0",
     "@galaxy-foundry/tag-registry": "^0.1.0",
     "@galaxy-foundry/wiki-links": "^0.1.0",
     "js-yaml": "^4.1.0",
-    "zod": "^3.25.76"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
@@ -53,6 +53,6 @@
     "vitest": "^2.1.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   }
 }
