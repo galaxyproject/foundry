@@ -17,8 +17,13 @@ export {
   collectionOf,
   collectionsClaiming,
   kindOf,
+  NON_NOTE_NAMES,
+  NOT_NOTES,
+  nonNoteAllowanceOf,
   type CollectionDefinition,
   type CollectionName,
+  type NonNoteAllowance,
+  type NonNoteName,
 } from "./collections.js";
 
 export {
