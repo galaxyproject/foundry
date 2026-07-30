@@ -21,13 +21,13 @@
     "@galaxy-tool-util/cli": "^1.8.1",
     "@galaxy-tool-util/schema": "^1.7.2",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "4.1.18",
-    "astro": "^5.17.1",
+    "@tailwindcss/vite": "4.3.3",
+    "astro": "^6.4.8",
     "js-yaml": "^4.1.0",
     "katex": "^0.16.45",
     "marked": "^18.0.2",
     "marked-katex-extension": "^5.1.8",
-    "tailwindcss": "4.1.18",
+    "tailwindcss": "4.3.3",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -38,6 +38,9 @@
     "pagefind": "^1.5.2",
     "typescript": "^5.7.0",
     "vfile": "^6.0.3",
-    "vite": "6.4.2"
+    "vite": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

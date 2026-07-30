@@ -67,9 +67,15 @@ export interface KindContext {
   /** THE BASE ENVELOPE — the fields every kind in this instance carries. Kinds spread it. */
   base: {
     tags: z.ZodType<string[]>;
-    status: z.ZodEnum<["draft", "reviewed", "revised", "stale", "archived"]>;
-    created: z.ZodType<Date, z.ZodTypeDef, unknown>;
-    revised: z.ZodType<Date, z.ZodTypeDef, unknown>;
+    status: z.ZodEnum<{
+      draft: "draft";
+      reviewed: "reviewed";
+      revised: "revised";
+      stale: "stale";
+      archived: "archived";
+    }>;
+    created: z.ZodType<Date, unknown>;
+    revised: z.ZodType<Date, unknown>;
     revision: z.ZodNumber;
     ai_generated: z.ZodBoolean;
     summary: z.ZodString;
