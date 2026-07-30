@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 5,
     "content_hash": "fc2bd8ab71d3b98f1c9cdeb372917a89cc05910675c22e2a3acfe4cdc769ccd1",
-    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
+    "commit": "29dd43fa81259c03d5dee6dd04e74aef0cdc5233"
   },
-  "cast_at": "2026-07-30T13:18:12.415Z",
+  "cast_at": "2026-07-30T13:35:59.932Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -83,8 +83,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs.",
-      "src_hash": "e1093f86aa48dc7b8ad04bf248eca11ef4181ede6961304c767ddb9a713652c7",
-      "dst_hash": "e1093f86aa48dc7b8ad04bf248eca11ef4181ede6961304c767ddb9a713652c7",
+      "src_hash": "fa2fe71181714a1bf29ab7c0631a0d81339e41aa0873cec15413896a126cb173",
+      "dst_hash": "fa2fe71181714a1bf29ab7c0631a0d81339e41aa0873cec15413896a126cb173",
       "source": "deterministic"
     },
     {
@@ -157,8 +157,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.",
       "license": "MIT",
-      "src_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
-      "dst_hash": "06430103b6111c40c030990459d41fe599faba0015865bba54d0e8bd0cf9fd1c",
+      "src_hash": "946330cc314556e77bb41725fa294e2496fe99b618888c660b7e8be7dc62ee5a",
+      "dst_hash": "946330cc314556e77bb41725fa294e2496fe99b618888c660b7e8be7dc62ee5a",
       "source": "deterministic"
     }
   ],

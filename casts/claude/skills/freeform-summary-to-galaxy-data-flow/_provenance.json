@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
     "content_hash": "d35856168c75639efcaa37093dd9bd03dee71d1eca9a3227623d4cc59e6dbbab",
-    "commit": "53060a12c041de8fc3d674807fabf63f7db86726"
+    "commit": "29dd43fa81259c03d5dee6dd04e74aef0cdc5233"
   },
-  "cast_at": "2026-07-30T13:17:56.555Z",
+  "cast_at": "2026-07-30T13:35:48.396Z",
   "refs": [
     {
       "kind": "pattern",

@@ -61,7 +61,7 @@ function pinnedRefLink(source: string, ref: string): string | null {
 
 function framingHref(framing?: string): string | null {
   if (!framing) return null;
-  // content/research/foo.md -> ${base}/research/foo/
+  // content/research/foo/index.md -> ${base}/research/foo/
   const id = framing.replace(/^content\//, '').replace(/\.md$/, '');
   return `${base}/${id}/`;
 }

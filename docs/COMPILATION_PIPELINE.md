@@ -15,7 +15,7 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 | `pattern` | `content/patterns/*.md` | Verbatim copy or LLM-condense per `mode` | `references/patterns/<slug>.md` | v1 |
 | `cli-command` | `content/cli/<tool>/<cmd>.md` framing note plus registered upstream CLI metadata | Deterministic JSON sidecar sourced from registry metadata + framing markdown | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
 | `schema` | `[[wiki-link]]` to a `type: schema` note in `content/schemas/`. The note declares `package` + `package_export`; cast imports the named runtime export at build time and serializes it. Foundry-authored: schemas in `packages/<name>-schema/src/<name>.schema.json` (e.g. `summary-nextflow`, `galaxy-tool-discovery`). Vendored: schemas synced from upstream packages into `packages/<name>-schema/src/` (e.g. `tests-format` from `@galaxy-tool-util/schema`). | Verbatim copy of the imported export, JSON-serialized | `references/schemas/<note-slug>.schema.json` | v1 |
-| `research` | `content/research/*.md` or paired structured sources under `content/research/` | Verbatim copy or LLM condense per `mode` | `references/notes/<source-basename>` (strict 1:1) | v1 |
+| `research` | `content/research/<slug>/index.md` plus any companion files in that directory | Verbatim copy or LLM condense per `mode` | `references/notes/<slug>.md` for the note; each companion keeps its own filename | v1 |
 | `prompt` | `content/prompts/<area>/<slug>/index.md` wrapper note plus its `upstream.prompt` companion | Raw prompt sidecar copied verbatim, no LLM rewrite | `references/prompts/<slug>.md` | v1 |
 | `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` | Contracted; caster rejects until a real Mold needs it |
 | `eval` | `content/molds/<slug>/eval.md` | **Never packaged** | — (Foundry-only) | n/a |
@@ -37,9 +37,9 @@ When an upstream project ships *both* a structured source (YAML, JSON Schema, ID
 
 Canonical examples: [[galaxy-collection-semantics]] and [[galaxy-xsd]]. Upstream (`galaxyproject/galaxy`) keeps the formal collection type-rule spec in `lib/galaxy/model/dataset_collections/types/collection_semantics.yml`, runs `semantics.py` to generate `doc/source/dev/collection_semantics.md` (MyST admonitions + LaTeX math), and keeps the Galaxy tool wrapper XML contract in `lib/galaxy/tool_util/xsd/galaxy.xsd`. The Foundry vendors these artifacts at the same SHA:
 
-- `content/research/galaxy-collection-semantics.yml` — canonical for casting and for any agent reasoning about collection mapping/reduction. Carries `tests:` blocks pinning concrete Galaxy test names that the rendered MD drops.
-- `content/research/galaxy-collection-semantics.upstream.myst` — vendored solely so the site can render the upstream view for human readers. Not consumed by casting.
-- `content/research/galaxy.xsd` — canonical for casting and agent reasoning about Galaxy tool wrapper XML. Framed by [[galaxy-xsd]] and synced through the same vendored-upstream manifest as the collection-semantics artifacts.
+- `content/research/galaxy-collection-semantics/galaxy-collection-semantics.yml` — canonical for casting and for any agent reasoning about collection mapping/reduction. Carries `tests:` blocks pinning concrete Galaxy test names that the rendered MD drops.
+- `content/research/galaxy-collection-semantics/galaxy-collection-semantics.upstream.myst` — vendored solely so the site can render the upstream view for human readers. Not consumed by casting.
+- `content/research/galaxy-xsd/galaxy.xsd` — canonical for casting and agent reasoning about Galaxy tool wrapper XML. Framed by [[galaxy-xsd]] and synced through the same vendored-upstream manifest as the collection-semantics artifacts.
 
 Casting policy: a cast that needs collection-semantics knowledge resolves the `.yml` and inlines/condenses from there; a cast that needs Galaxy wrapper syntax resolves `galaxy.xsd`; the rendered MyST is a site-rendering concern only. Pattern generalizes — when both forms exist, agents read structure, humans read prose.
 
@@ -136,7 +136,7 @@ For **generic**: single self-contained markdown unless a richer consumer appears
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[component-nextflow-testing]]",
-      "src": "content/research/component-nextflow-testing.md",
+      "src": "content/research/component-nextflow-testing/index.md",
       "dst": "references/notes/component-nextflow-testing.md",
       "used_at": "runtime",
       "load": "on-demand",
@@ -149,7 +149,7 @@ For **generic**: single self-contained markdown unless a richer consumer appears
       "kind": "research",
       "mode": "condense",
       "ref": "[[some-other-note]]",
-      "src": "content/research/some-other-note.md",
+      "src": "content/research/some-other-note/index.md",
       "dst": "references/notes/some-other-note.md",
       "used_at": "runtime",
       "load": "on-demand",

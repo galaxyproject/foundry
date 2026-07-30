@@ -1,6 +1,6 @@
 ---
 description: Draft one Foundry pattern page from an IWC survey candidate without turning the survey into a rigid template.
-argument-hint: "<survey-path> <operation-slug>  e.g. content/research/iwc-tabular-operations-survey.md tabular-sql-query"
+argument-hint: "<survey-path> <operation-slug>  e.g. content/research/iwc-tabular-operations-survey/index.md tabular-sql-query"
 ---
 
 # Draft one pattern page from a survey: `$1` `$2`

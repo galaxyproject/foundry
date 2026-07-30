@@ -73,7 +73,11 @@ Source of truth: the `buildNoteSchema` discriminated union in `@galaxy-foundry/n
 
 `cli-command` notes are *not* directory-based — each command is a flat single file. The two-level `content/cli/<tool>/<cmd>.md` directory structure is for organization, not directory-note semantics.
 
-`research` is a flat kind (no subtype): it covers self-design notes plus background syntheses (e.g., the existing `COMPONENT_NEXTFLOW_WORKFLOW_TESTING` content lands as a `research` note).
+`research` has no subtype: it covers self-design notes plus background syntheses (e.g., the existing
+`COMPONENT_NEXTFLOW_WORKFLOW_TESTING` content lands as a `research` note). It is directory-shaped —
+`content/research/<slug>/index.md` — because a research note's vendored upstream files are its
+companions, and a companion has to sit somewhere the note owns. Its companion set is declared open
+(`additionalCompanions: 'allow'`); `vendored_upstreams.yml` says which files must be there.
 
 ## 4. Tag system
 
@@ -224,7 +228,7 @@ The **license → redistribution-policy table** goes one step further: it is sha
 
 **Format**: `[[Target Name]]`. Pipe-aliasing supported in body (`[[Target|display]]`) by the remark plugin; not in frontmatter.
 
-**A backtick means the syntax, not a link.** Wiki links inside `inlineCode`, a fenced block, or raw HTML are left exactly as written — that is how this document names the token, and how a note names a slot it cannot link (`[[summary-<source>]]` in `content/research/gxy-sketches-alignment.md`). Only text is rewritten.
+**A backtick means the syntax, not a link.** Wiki links inside `inlineCode`, a fenced block, or raw HTML are left exactly as written — that is how this document names the token, and how a note names a slot it cannot link (`[[summary-<source>]]` in `content/research/gxy-sketches-alignment/index.md`). Only text is rewritten.
 
 The rule cuts both ways, and the second edge is sharp: **`validateBodyWikiLinks` strips code spans before it scans**, so a backticked link is not merely unrendered — it is unchecked. It can name a note that never existed and nothing will say so. The corpus had accumulated 63 real citations written that way, invisible on both surfaces at once; they were unwrapped in one sweep. What stays deliberately wrapped is exactly the literal cases: the placeholder above, the field shapes the glossary and the schema notes quote (`mold: [[...]]`), the three "deep-link a `$def` via `[[note#Anchor]]`" illustrations, and two shell commands where `[[:space:]]` is a POSIX character class and not a wiki link at all.
 
@@ -506,8 +510,10 @@ foundry/
 │   ├── source-patterns/
 │   │   └── …
 │   └── research/
-│       ├── component-nextflow-testing.md           # background syntheses
-│       ├── gxformat2-schema.md
+│       ├── component-nextflow-testing/
+│       │   ├── index.md                            # background syntheses
+│       │   └── component-nextflow-testing.yml      # its vendored companion
+│       ├── gxformat2-schema/
 │       └── …
 ├── casts/                                # generated; committed; skipped by validator
 │   ├── claude/

@@ -325,7 +325,7 @@ COMPARISONS.** Reasoning:
   Nexus, OpenAPI→tool, Voyager, RAG, Custom GPTs) is a KB→skill *bridging* approach. Dynamic workflows is
   not on that axis at all — it is a *harness / orchestration runtime* that *consumes* casts. It competes
   with Archon, LangGraph, Temporal, plain-SDK harnesses — none of which are in COMPARISONS, because the
-  harness-substrate question is tracked exactly here, in `content/research/component-*`.
+  harness-substrate question is tracked exactly here, in `content/research/component-*/`.
 - **Precedent is explicit.** Archon — the other harness substrate — is component research, deliberately
   *not* a COMPARISONS entry. Putting dynamic workflows in COMPARISONS would split the harness-substrate
   evaluation across two docs with two different decay disciplines.
@@ -337,6 +337,6 @@ COMPARISONS.** Reasoning:
 **COMPARISONS treatment (done):** the only change made to `docs/COMPARISONS.md` is a one-line scope note
 at the end of "Where the Foundry lands" — that the doc tracks the KB→skill axis only, and the adjacent
 *which-harness-runs-the-casts* question (Archon, Claude Code dynamic workflows, LangGraph, …) is evaluated
-under `content/research/component-*`. That pointer names this note's subject explicitly and pre-empts the
+under `content/research/component-*/`. That pointer names this note's subject explicitly and pre-empts the
 "why isn't dynamic workflows in here?" reader. No Part B entry is added; COMPARISONS stays strictly on its
 KB→skill axis.
