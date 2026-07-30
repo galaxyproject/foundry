@@ -25,10 +25,11 @@ const fullTitle = `${title} - Foundry`;
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
   <script is:inline>
-    document.documentElement.classList.toggle('dark',
-      localStorage.theme === 'dark' ||
-        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    );
+    const dark = localStorage.theme === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', dark);
+    // Pagefind's component UI reads its palette off this attribute, not our `.dark` class.
+    document.documentElement.dataset.pfTheme = dark ? 'dark' : 'light';
   </script>
 </head>
 <body class="min-h-dvh flex flex-col bg-(--color-surface) text-(--color-text-primary)">
