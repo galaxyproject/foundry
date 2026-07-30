@@ -225,9 +225,21 @@ if (entry.startsWith(".")) continue;                        // .obsidian and fri
 if (!collectionOf(`${CONTENT_DIR}/${rel}`)) continue;       // the table decides
 ```
 
-Everything the old skip rules named falls out of the table rather than being restated: `Dashboard.md` / `Index.md` / `log.md` sit at the content root and `glossary.md` in `content/meta/`, and no collection's base reaches either; `molds` and `pipelines` glob `**/index.md`, which is directory-note semantics stated as a pattern; `casts/` is outside `content/` entirely. Dotfiles are the one exclusion left in code, because `.obsidian/` holds markdown that is editor state and no glob would tell it apart from a note.
+Everything the old skip rules named falls out of the table rather than being restated: `molds` and `pipelines` glob `**/index.md`, which is directory-note semantics stated as a pattern; `casts/` is outside `content/` entirely. Dotfiles are the one exclusion left in code, because `.obsidian/` holds markdown that is editor state and no glob would tell it apart from a note.
+
+**Falling out of the table is not the same as being accounted for.** `Dashboard.md` / `Index.md` / `log.md` at the content root and `content/meta/` are not notes, and were once known not to be notes only because no collection's base reached them — which is exactly as true of a file nobody meant to add. They are declared in `NOT_NOTES` beside `COLLECTIONS`, each with the reason it is not a note, and `validateUnroutedContent` errors on markdown under `content/` that is none of the three things it can be:
+
+| accounted for by | who answers for it |
+|---|---|
+| a collection claims it | the routing table |
+| a directory note owns the directory it sits in | that kind's companion declaration |
+| `NOT_NOTES` declares it | the allowance table |
+
+The residue is empty by construction rather than by having been looked at recently. Markdown only — every collection pattern selects `.md`, so the fixtures and vendored sources under `content/` are data, governed by the companion declaration of whichever note owns their directory.
 
 **One shared module, no drift.** Because everything is TS, anything both the validator and the Astro site depend on lives in **one shared module** imported by both. The wiki-link slug + resolver now lives one level further out, in `@galaxy-foundry/wiki-links`, shared across Foundry instances; `packages/build-cli/src/lib/wiki-links.ts` and `site/src/lib/wiki-links.ts` are thin adapters over it that add this instance's map and return shapes. The **frontmatter schema and reference contract** likewise live in `@galaxy-foundry/note-schema` — `buildNoteSchema` and the registry loaders — which both the validator and `site/src/content.config.ts` build from. No parallel implementations, no drift risk.
+
+**Companions on the site come from the kind, not from the page.** `site/src/lib/companions.ts` resolves a companion by name through `companionsOf(DEFINITIONS[kind])` and measures a note's directory with `checkCompanions` — the same declaration and the same function the validator runs, so the Mold health panel and `make check` cannot disagree about which files belong beside a note. `site/src/lib/content-files.ts` is the half that has to ask Astro where the project is (`astro:config/server`), kept separate so the layout rules stay testable outside a build. Neither file counts `../` from its own depth: that count differs between `astro dev` and `astro build`, and the panel spent its life resolving one level short of the repository root, reporting every Mold as having no `eval.md`.
 
 The **license → redistribution-policy table** goes one step further: it is shared across Foundry *instances*, not just across our own consumers, so it ships in `@galaxy-foundry/license-policy` rather than sitting at our repo root. `bundledPolicy()` reads the copy inside that dependency; changing a row is a version bump there, not an edit here. What stays ours is *coherence* — whether a given note is consistent with its licence (`validateSchemaVendoring`) — because that rule genuinely differs between instances.
 

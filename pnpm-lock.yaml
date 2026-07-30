@@ -278,6 +278,9 @@ importers:
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../packages/foundry
+      '@galaxy-foundry/kind-schema':
+        specifier: ^0.5.0
+        version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
         specifier: ^0.1.0
         version: 0.1.0
