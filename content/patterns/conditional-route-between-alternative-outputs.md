@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 3
-ai_generated: true
 summary: "Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value."
 related_notes:
   - "[[iwc-conditionals-survey]]"

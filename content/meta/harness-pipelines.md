@@ -1,4 +1,16 @@
-# Harness Pipelines
+---
+type: meta
+title: "Harness Pipelines"
+record_kind: foundation
+order: 9
+tags:
+  - meta
+status: reviewed
+created: 2026-04-30
+revised: 2026-07-30
+revision: 17
+summary: "The source-to-target journeys that compose Molds, loops, and branch phases."
+---
 
 Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase corresponds to one atomic, harness-step-sized Mold, and the union of phases across pipelines is the Mold catalog. See `MOLDS.md`.
 

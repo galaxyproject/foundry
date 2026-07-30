@@ -1,8 +1,17 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { DESIGN_DOC_GROUPS, designDocsByCategory } from '../../lib/design-docs';
+import { DESIGN_DOC_GROUPS, designDocsByCategory, designDocHref } from '../../lib/design-docs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Resolved up front rather than inside the template. Reading the collection is async now, and
+// an un-awaited promise renders as an empty section instead of failing.
+const groups = await Promise.all(
+  DESIGN_DOC_GROUPS.map(async group => ({
+    ...group,
+    docs: await designDocsByCategory(group.category),
+  })),
+);
 ---
 
 <Base
@@ -19,30 +28,27 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </p>
   </section>
 
-  {DESIGN_DOC_GROUPS.map(group => {
-    const docs = designDocsByCategory(group.category);
-    return (
-      <section class="design-doc-section" aria-labelledby={`design-${group.category}`}>
-        <div class="design-section-heading">
-          <div>
-            <h2 id={`design-${group.category}`}>{group.title}</h2>
-            <p>{group.summary}</p>
-          </div>
-          <span class="font-mono">{docs.length} records</span>
+  {groups.map(group => (
+    <section class="design-doc-section" aria-labelledby={`design-${group.category}`}>
+      <div class="design-section-heading">
+        <div>
+          <h2 id={`design-${group.category}`}>{group.title}</h2>
+          <p>{group.summary}</p>
         </div>
-        <div class="design-doc-grid">
-          {docs.map((doc, index) => (
-            <a href={`${base}/design/${doc.slug}/`} class="design-doc-card tinted-shadow tinted-shadow-hover">
-              <span class="design-doc-num font-mono">{String(index + 1).padStart(2, '0')}</span>
-              <span class="design-doc-title">{doc.title}</span>
-              <span class="design-doc-summary">{doc.summary}</span>
-              <span class="design-doc-source font-mono">{group.action}</span>
-            </a>
-          ))}
-        </div>
-      </section>
-    );
-  })}
+        <span class="font-mono">{group.docs.length} records</span>
+      </div>
+      <div class="design-doc-grid">
+        {group.docs.map((doc, index) => (
+          <a href={designDocHref(doc, base)} class="design-doc-card tinted-shadow tinted-shadow-hover">
+            <span class="design-doc-num font-mono">{String(index + 1).padStart(2, '0')}</span>
+            <span class="design-doc-title">{doc.data.title}</span>
+            <span class="design-doc-summary">{doc.data.summary}</span>
+            <span class="design-doc-source font-mono">{group.action}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
 </Base>
 
 <style>

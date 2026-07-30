@@ -8,7 +8,7 @@ import type { Root } from 'mdast';
 // The map is ours — a filesystem walk, because this runs at markdown-compile time when
 // astro:content is not available yet. The walk over the tree, the `[[a#b|c]]` grammar and
 // the lookup rule come from @galaxy-foundry/wiki-links, so this file and
-// site/src/lib/wiki-links.ts can no longer drift. See docs/ARCHITECTURE.md §7.
+// site/src/lib/wiki-links.ts can no longer drift. See content/meta/architecture.md §7.
 
 interface Target {
   id: string;

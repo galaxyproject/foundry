@@ -10,7 +10,6 @@ status: draft
 created: 2026-07-01
 revised: 2026-07-01
 revision: 1
-ai_generated: true
 summary: "AJV gate for summarize-galaxy-workflow JSON documents."
 related_notes:
   - "[[summary-galaxy-workflow]]"

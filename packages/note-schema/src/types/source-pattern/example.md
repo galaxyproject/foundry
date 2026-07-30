@@ -12,7 +12,6 @@ status: draft
 created: 2026-07-26
 revised: 2026-07-26
 revision: 1
-ai_generated: true
 summary: fromFilePairs yields (sampleId, [r1, r2]) tuples, which convert to a paired dataset collection.
 review_triggers:
   - The converted workflow declares two separate FASTQ inputs where the source had one channel.

@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-06
 revised: 2026-05-06
 revision: 1
-ai_generated: true
 related_notes:
   - "[[galaxy-sample-sheet-collections]]"
   - "[[nextflow-params-to-galaxy-inputs]]"

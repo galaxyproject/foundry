@@ -5,10 +5,10 @@
     "name": "cwl-to-test-data",
     "path": "content/molds/cwl-to-test-data/index.md",
     "revision": 1,
-    "content_hash": "7da01d055e886319a2ce4b9cee23a5c6816981cca0766101095979ede4f1cf14",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "a9ea8415ba92031680c1163a566b99272f50c56ffca632f87451d0f2a8a13bbd",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:15.429Z",
+  "cast_at": "2026-07-30T19:12:19.069Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Interpret a CWL job file's input objects (File/Directory, secondaryFiles, arrays, inline literals) before mapping them onto Galaxy inputs.",
       "trigger": "When reading a `job_path`'s declared inputs to decide their Galaxy shape.",
-      "src_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
-      "dst_hash": "9e4a0d6944addd7e00955e66836f55bb1842471e0aebfe9a997fc7737010ef91",
+      "src_hash": "e91f1c14b581c51c10dd8e2d2f673b339389150de1ce65b5bac76e38fa2f37b4",
+      "dst_hash": "e91f1c14b581c51c10dd8e2d2f673b339389150de1ce65b5bac76e38fa2f37b4",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Map each declared job input to an addressable Galaxy input label and the collection shape it must populate.",
       "trigger": "When mapping a CWL File-array or secondaryFiles input onto a Galaxy collection shape.",
-      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
-      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Express each ref remote-URL-first with SHA-1 integrity and per-input collection layout when recording resolved fixtures.",
       "trigger": "When writing each `test-data-refs` entry.",
-      "src_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
-      "dst_hash": "67a9b33ed30c3cae0df7ef69530199937db4494a1272327e353162bf44b00a81",
+      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
       "source": "deterministic"
     },
     {

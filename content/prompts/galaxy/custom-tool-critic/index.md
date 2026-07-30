@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-07
 revised: 2026-05-07
 revision: 1
-ai_generated: false
 sources:
   - "https://github.com/dannon/galaxy/blob/69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e/lib/galaxy/agents/prompts/custom_tool_critic.md"
 license: MIT

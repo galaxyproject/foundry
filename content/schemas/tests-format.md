@@ -15,7 +15,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-05
 revision: 4
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
@@ -38,4 +37,4 @@ This page is auto-rendered from the JSON Schema vendored in `@galaxy-tool-util/s
 2. `scripts/dump-test-format-schema.py` + `make sync-test-format-schema` in [jmchilton/galaxy-tool-util-ts](https://github.com/jmchilton/galaxy-tool-util-ts) write `tests.schema.json` with a `.sha256` integrity file — see [PR #75](https://github.com/jmchilton/galaxy-tool-util-ts/pull/75).
 3. Published as `@galaxy-tool-util/schema` on npm; the Foundry pins a version in `package.json`, `packages/foundry/scripts/sync-schema.mjs` mirrors the JSON into `packages/foundry/src/schemas/tests-format/tests.schema.json` at `prebuild`, and the site re-renders. Mold frontmatter cites it via [[tests-format]] wiki-links; cast imports the `testsFormatSchema` runtime export from `@galaxy-foundry/foundry` (declared in this note's `package` / `package_export` frontmatter) and serializes it into cast bundles.
 
-**At runtime in cast skills:** the same vendored schema is copied verbatim into `references/schemas/tests.schema.json` per the casting policy in `docs/COMPILATION_PIPELINE.md`. `@galaxy-tool-util/schema` continues to provide `validateTestsFile` (AJV gate) and `checkTestsAgainstWorkflow` (label/type cross-check against a `.ga` or format2 workflow); `foundry validate-tests-format` wraps both as a CLI subcommand for cast skills and harnesses.
+**At runtime in cast skills:** the same vendored schema is copied verbatim into `references/schemas/tests.schema.json` per the casting policy in `content/meta/casting.md`. `@galaxy-tool-util/schema` continues to provide `validateTestsFile` (AJV gate) and `checkTestsAgainstWorkflow` (label/type cross-check against a `.ga` or format2 workflow); `foundry validate-tests-format` wraps both as a CLI subcommand for cast skills and harnesses.

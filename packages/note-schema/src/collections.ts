@@ -51,6 +51,17 @@ export const CONTENT_DIR = "content";
  * the camelCase an identifier would want — they are looked up as strings, never as properties.
  */
 export const COLLECTIONS = {
+  // The design record. `glossary.md` shares the directory and is deliberately NOT a note: it is
+  // hand-curated, alphabetical, and rendered by its own page. It is excluded HERE, in the
+  // pattern, rather than by each consumer — which is the whole point of the table, and is why
+  // the exclusion survived at all. It used to sit in the site's glob as `!meta/glossary.md`,
+  // and was dropped when no collection's base reached `content/meta/` any more. This row makes
+  // that directory reachable again, so the rule has to come back with it.
+  //
+  // The negation says only that the glossary is not one of THESE. `NOT_NOTES.glossary` below is
+  // what says it is not a note at all — and the two have to agree, because a file excluded here
+  // and undeclared there is unrouted, which is now an error rather than a silence.
+  meta: { base: "content/meta", pattern: ["*.md", "!glossary.md"], kind: "meta" },
   molds: { base: "content/molds", pattern: ["**/index.md"], kind: "mold" },
   patterns: { base: "content/patterns", pattern: ["**/*.md"], kind: "pattern" },
   "source-patterns": {
@@ -118,8 +129,12 @@ export interface NonNoteAllowance {
  * — every markdown file under `content/` is now a note, a companion its kind declares, or one
  * of these, and anything else is an error rather than a thing the walker quietly skips.
  *
- * Directory allowances are deliberate where they appear: `content/meta/` is an area outside the
- * note system rather than a list of files, and saying so is the honest description.
+ * These are FILES, not areas. `content/meta/` was briefly the exception — a whole directory
+ * declared outside the note system, back when the glossary was the only thing in it. It is not
+ * an exception any more: the directory is the design record's home, twelve notes of the `meta`
+ * kind, and only `glossary.md` remains outside. An area allowance that outlived the area it
+ * described would have gone on covering every future stray beneath it — which is the silence
+ * this table exists to end, reintroduced one directory at a time.
  */
 export const NOT_NOTES = {
   dashboard: {
@@ -137,9 +152,9 @@ export const NOT_NOTES = {
     pattern: ["log.md"],
     reason: "append-only journal of foundry operations",
   },
-  meta: {
+  glossary: {
     base: `${CONTENT_DIR}/meta`,
-    pattern: ["**/*.md"],
+    pattern: ["glossary.md"],
     reason: "vocabulary the corpus is written in, not part of the corpus",
   },
 } as const satisfies Record<string, NonNoteAllowance>;

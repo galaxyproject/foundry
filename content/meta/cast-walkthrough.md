@@ -1,4 +1,16 @@
-# Cast Walkthrough
+---
+type: meta
+title: "Cast Walkthrough"
+record_kind: foundation
+order: 6
+tags:
+  - meta
+status: reviewed
+created: 2026-05-17
+revised: 2026-07-30
+revision: 2
+summary: "One real committed cast (discover-shed-tool) annotated end to end: every bundle file traced back through per-kind dispatch and _provenance.json."
+---
 
 `COMPILATION_PIPELINE.md` describes casting abstractly. This page narrates one **real, committed** cast end to end so the abstraction has something concrete behind it: every file in the bundle, where it came from, and how `_provenance.json` lets you prove it.
 

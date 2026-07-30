@@ -14,7 +14,6 @@ status: draft
 created: 2026-06-16
 revised: 2026-06-16
 revision: 1
-ai_generated: true
 related_notes:
   - "[[tests-format]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"

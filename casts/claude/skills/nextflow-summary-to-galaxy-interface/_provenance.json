@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-interface",
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 5,
-    "content_hash": "fc2bd8ab71d3b98f1c9cdeb372917a89cc05910675c22e2a3acfe4cdc769ccd1",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "dcebf8087554cd90d5f9e7da322551dd2f76883369db0eef8f028bf6f85a0f7a",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:32.152Z",
+  "cast_at": "2026-07-30T19:12:36.185Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -40,8 +40,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs.",
       "trigger": "When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.",
-      "src_hash": "96a989e3b9604ba109f96b8951c24b06ff0d61d079e49875de11eb6f09e39e70",
-      "dst_hash": "96a989e3b9604ba109f96b8951c24b06ff0d61d079e49875de11eb6f09e39e70",
+      "src_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
+      "dst_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
       "source": "deterministic"
     },
     {
@@ -55,8 +55,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address.",
       "trigger": "When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.",
-      "src_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
-      "dst_hash": "c63a78553eb9469025a3c0ed426a4b9b35ee46e1312e078bca387859b5e373ff",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
       "source": "deterministic"
     },
     {
@@ -69,8 +69,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs.",
-      "src_hash": "9a2e314ea6c2c374c1866efbd5faac7eeb5d275695943e9a70d3cc98268e847e",
-      "dst_hash": "9a2e314ea6c2c374c1866efbd5faac7eeb5d275695943e9a70d3cc98268e847e",
+      "src_hash": "b65bf1a16cb986bc04ff7926e6ca0eea9ce35980aa4d4c47d8a102a28ffae085",
+      "dst_hash": "b65bf1a16cb986bc04ff7926e6ca0eea9ce35980aa4d4c47d8a102a28ffae085",
       "source": "deterministic"
     },
     {
@@ -83,8 +83,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs.",
-      "src_hash": "fa2fe71181714a1bf29ab7c0631a0d81339e41aa0873cec15413896a126cb173",
-      "dst_hash": "fa2fe71181714a1bf29ab7c0631a0d81339e41aa0873cec15413896a126cb173",
+      "src_hash": "04d728aef2d113ff01cd00789cc7980cb808d5bc51bdf9752ef7ee53af486419",
+      "dst_hash": "04d728aef2d113ff01cd00789cc7980cb808d5bc51bdf9752ef7ee53af486419",
       "source": "deterministic"
     },
     {
@@ -98,8 +98,8 @@
       "evidence": "corpus-observed",
       "purpose": "Cross-check source-side reference-data classifications before translating the reference-data brief into Galaxy workflow inputs.",
       "trigger": "When the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.",
-      "src_hash": "d5d7ffc8b0d14b8b7f3225c647c14525f9b9cfcf9f6399d03ed92d7f0cddc9ff",
-      "dst_hash": "d5d7ffc8b0d14b8b7f3225c647c14525f9b9cfcf9f6399d03ed92d7f0cddc9ff",
+      "src_hash": "2b33f3bddb635c9d700e506784b4bf16f8c387369bc66194a15cb75be9ad8a1f",
+      "dst_hash": "2b33f3bddb635c9d700e506784b4bf16f8c387369bc66194a15cb75be9ad8a1f",
       "source": "deterministic"
     },
     {
@@ -112,8 +112,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes.",
-      "src_hash": "8265a9264a4130e666808ee7f8bbc4fcf4a499f20dcc835632fd9f38fea61ab9",
-      "dst_hash": "8265a9264a4130e666808ee7f8bbc4fcf4a499f20dcc835632fd9f38fea61ab9",
+      "src_hash": "32efd59cc86563b145819cda38f0692bdd3144aac10ae831dc6d8accd9dcda8d",
+      "dst_hash": "32efd59cc86563b145819cda38f0692bdd3144aac10ae831dc6d8accd9dcda8d",
       "source": "deterministic"
     },
     {
@@ -127,8 +127,8 @@
       "evidence": "corpus-observed",
       "purpose": "Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence.",
       "trigger": "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source.",
-      "src_hash": "6c4bb70660c29a3b655c09d1f78a90201f12ef88d3c27d62ea708ea94a536bcc",
-      "dst_hash": "6c4bb70660c29a3b655c09d1f78a90201f12ef88d3c27d62ea708ea94a536bcc",
+      "src_hash": "4676cdf3de4bcec6161b6102c9e842efa7b3c953f9c2f2787b4debea48e4a7eb",
+      "dst_hash": "4676cdf3de4bcec6161b6102c9e842efa7b3c953f9c2f2787b4debea48e4a7eb",
       "source": "deterministic"
     },
     {
@@ -142,8 +142,8 @@
       "evidence": "hypothesis",
       "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
-      "dst_hash": "7e835bdae66bf61ba4d69cc98b60d7b69a6fcb21a0a35755cbd5c47745809244",
+      "src_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
+      "dst_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
       "source": "deterministic"
     },
     {

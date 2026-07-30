@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

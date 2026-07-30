@@ -9,7 +9,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

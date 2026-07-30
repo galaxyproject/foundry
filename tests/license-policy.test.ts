@@ -39,7 +39,6 @@ const noteWithLicense = (license: string) => ({
   created: "2026-04-30",
   revised: "2026-04-30",
   revision: 1,
-  ai_generated: false,
   summary: "A short summary that meets the minimum length requirement.",
   license,
 });

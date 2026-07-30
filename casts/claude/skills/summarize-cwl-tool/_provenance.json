@@ -5,10 +5,10 @@
     "name": "summarize-cwl-tool",
     "path": "content/molds/summarize-cwl-tool/index.md",
     "revision": 2,
-    "content_hash": "241d8cb0935a5795438a2c99351019c096bd72b94cd6b28b7a9e08fea1fae3ff",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "90e63831882034dbd0d3c735c17b4044943c6eab7dce8d243e606a05e15b0e60",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:40.903Z",
+  "cast_at": "2026-07-30T19:12:50.604Z",
   "refs": [],
   "artifacts": {
     "produces": [

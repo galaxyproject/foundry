@@ -14,7 +14,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-06-18
 revision: 2
-ai_generated: true
 summary: "Galaxy workflow design-time CLI (validate, convert, lint, roundtrip, tool-cache discovery)."
 ---
 

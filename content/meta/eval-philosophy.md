@@ -1,6 +1,18 @@
-# Eval Philosophy
+---
+type: meta
+title: "Eval Philosophy"
+record_kind: foundation
+order: 7
+tags:
+  - meta
+status: reviewed
+created: 2026-06-14
+revised: 2026-07-29
+revision: 3
+summary: "Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/usage/refinement split."
+---
 
-`docs/MOLD_SPEC.md` owns the eval *contract* — the file layout, the case shapes, the validator checklist. This document is the *why* behind it. When a contract rule feels arbitrary, the reasoning is here.
+`content/meta/mold-spec.md` owns the eval *contract* — the file layout, the case shapes, the validator checklist. This document is the *why* behind it. When a contract rule feels arbitrary, the reasoning is here.
 
 The one-line version: **`eval.md` is an oracle, not a test suite.** It says how to judge any output; it does not enumerate inputs. That single stance generates almost every rule in the contract.
 
@@ -68,4 +80,4 @@ A Pipeline is judged two ways at once:
 - **Composition** — each member Mold's `eval.md` runs against that step's output as the journey advances. A `[loop]` phase is judged at its endstate, not per iteration; a `[branch]` phase carries no oracle of its own, so the chosen Mold's `eval.md` applies.
 - **A thin pipeline-level oracle** — the Pipeline's own `eval.md` states the end-to-end and cross-step properties no single Mold owns: the final gxformat2 workflow validates and round-trips; the source's scientific intent survived source → target without silent contradiction. Its `scenarios.md` names the journey input once.
 
-See `docs/ARCHITECTURE.md` for how pipeline companions are laid out and resolved.
+See `content/meta/architecture.md` for how pipeline companions are laid out and resolved.

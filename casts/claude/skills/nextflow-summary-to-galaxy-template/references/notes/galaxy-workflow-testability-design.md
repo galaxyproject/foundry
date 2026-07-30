@@ -6,7 +6,6 @@ status: draft
 created: 2026-05-03
 revised: 2026-05-06
 revision: 2
-ai_generated: true
 related_notes:
   - "[[iwc-workflow-testability-survey]]"
   - "[[iwc-test-data-conventions]]"

@@ -1,14 +1,16 @@
 ---
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
-import { DESIGN_DOC_GROUPS, designDocsByCategory } from '../../lib/design-docs';
+import { DESIGN_DOC_GROUPS, designDocsByCategory, designDocHref } from '../../lib/design-docs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getAllNotes();
-const designDocGroups = DESIGN_DOC_GROUPS.map(group => ({
-  ...group,
-  docs: designDocsByCategory(group.category),
-}));
+const designDocGroups = await Promise.all(
+  DESIGN_DOC_GROUPS.map(async group => ({
+    ...group,
+    docs: await designDocsByCategory(group.category),
+  })),
+);
 
 // Group by top-level directory.
 const byDir = new Map<string, typeof allNotes>();
@@ -87,11 +89,11 @@ function noteTitle(n: typeof allNotes[number]): string {
         <ul class="list-none p-0 space-y-1">
           {group.docs.map(doc => (
             <li class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-              <a href={`${base}/design/${doc.slug}/`} class="text-(--color-link) hover:underline font-medium">{doc.title}</a>
+              <a href={designDocHref(doc, base)} class="text-(--color-link) hover:underline font-medium">{doc.data.title}</a>
               <span class="text-xs px-1.5 py-0.5 rounded bg-(--color-surface-raised) text-(--color-text-secondary) w-fit">
-                {doc.category === 'infrastructure' ? 'project infrastructure' : 'design record'}
+                {doc.data.record_kind === 'infrastructure' ? 'project infrastructure' : 'design record'}
               </span>
-              <span class="text-sm text-(--color-text-muted) italic">{doc.summary}</span>
+              <span class="text-sm text-(--color-text-muted) italic">{doc.data.summary}</span>
             </li>
           ))}
         </ul>

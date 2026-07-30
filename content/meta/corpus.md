@@ -1,4 +1,16 @@
-# IWC Integration
+---
+type: meta
+title: "Corpus Integration"
+record_kind: foundation
+order: 8
+tags:
+  - meta
+status: reviewed
+created: 2026-04-30
+revised: 2026-05-10
+revision: 6
+summary: "How IWC grounding works without turning the Foundry into an upstream workflow mirror."
+---
 
 The Foundry has **no IWC ingestion pipeline, no exemplar mirror, and no `workflow-fixtures` runtime dependency**. It integrates the IWC corpus through citations, survey notes, optional inline excerpts, and Molds that can fetch live corpus evidence at runtime.
 

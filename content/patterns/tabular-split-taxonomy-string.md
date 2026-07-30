@@ -9,7 +9,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

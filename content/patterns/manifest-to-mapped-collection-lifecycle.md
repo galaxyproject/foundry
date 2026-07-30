@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-04
 revised: 2026-05-04
 revision: 1
-ai_generated: true
 summary: "Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs."
 related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"

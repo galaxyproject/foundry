@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 14,
-    "content_hash": "f8c6f89c09702859907e7f88645de686285e448782c4d0d4028367ae7f7d29f2",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "cb1d13ddba33496cc62070c3adde6a3e4159053db8ee304fbe5a803e810f849e",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-07-30T14:45:45.682Z",
+  "cast_at": "2026-07-30T19:12:53.993Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -81,8 +81,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-nextflow.json before returning it from the skill.",
-      "src_hash": "c6e2f02e470df54afc00cd4209ae476b5f60e1eab270ab61a149745677d87167",
-      "dst_hash": "c6e2f02e470df54afc00cd4209ae476b5f60e1eab270ab61a149745677d87167",
+      "src_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
+      "dst_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
       "source": "deterministic"
     },
     {
@@ -96,8 +96,8 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
       "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
-      "src_hash": "09ed8151d8175f5e3e51434debb8197bac9380725e9ecedc2185de5a117d9e7e",
-      "dst_hash": "09ed8151d8175f5e3e51434debb8197bac9380725e9ecedc2185de5a117d9e7e",
+      "src_hash": "a720bc706423ea601b127fb9e2bcf7e09c439ab59d4ecbb8e3e71b6a827288e1",
+      "dst_hash": "a720bc706423ea601b127fb9e2bcf7e09c439ab59d4ecbb8e3e71b6a827288e1",
       "source": "deterministic"
     },
     {
@@ -128,8 +128,8 @@
       "purpose": "Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology.",
       "trigger": "When walking pipeline structure or resolving process aliases and channel flow.",
       "verification": "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves process/channel topology extraction.",
-      "src_hash": "61cede36414280b24a78abf3efee296531fe540e3520778e23989177544cc993",
-      "dst_hash": "61cede36414280b24a78abf3efee296531fe540e3520778e23989177544cc993",
+      "src_hash": "30fa555739dbe40fc74f6bad780a2ec62432efb8650114c92858abe0eb76e4ab",
+      "dst_hash": "30fa555739dbe40fc74f6bad780a2ec62432efb8650114c92858abe0eb76e4ab",
       "source": "deterministic"
     },
     {
@@ -144,8 +144,8 @@
       "purpose": "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions.",
       "trigger": "When filling test_fixtures or nf_tests sections of the summary.",
       "verification": "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction.",
-      "src_hash": "ab6e764d96451f069049ebb410cce19f3d13320c90b6ef127e97d56f3edf629a",
-      "dst_hash": "ab6e764d96451f069049ebb410cce19f3d13320c90b6ef127e97d56f3edf629a",
+      "src_hash": "807c26846c6ea331b12c129e8caa438eacf5ea113b9dde51e2e3027c9878ad58",
+      "dst_hash": "807c26846c6ea331b12c129e8caa438eacf5ea113b9dde51e2e3027c9878ad58",
       "source": "deterministic"
     },
     {

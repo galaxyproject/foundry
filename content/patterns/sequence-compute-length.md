@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Emit a (id, length) table from a FASTA so downstream tabular steps can filter, sort, or threshold records by length; fasta_compute_length."
 related_notes:
   - "[[iwc-sequence-operations-survey]]"

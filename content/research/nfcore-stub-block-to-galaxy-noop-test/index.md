@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-06-10
 revision: 3
-ai_generated: true
 summary: "nf-core's stub: block has no Galaxy analog; the convert Mold drops it intentionally and records the drop in _provenance.yml."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"

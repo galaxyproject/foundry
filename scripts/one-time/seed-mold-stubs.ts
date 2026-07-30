@@ -86,7 +86,6 @@ function frontmatterFor(s: Stub): string {
   lines.push(`created: ${TODAY}`);
   lines.push(`revised: ${TODAY}`);
   lines.push("revision: 1");
-  lines.push("ai_generated: true");
   lines.push(`summary: ${JSON.stringify(s.summary)}`);
   lines.push("---", "");
   return lines.join("\n");

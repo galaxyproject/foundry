@@ -5,10 +5,10 @@
     "name": "nextflow-test-to-cwl-test-plan",
     "path": "content/molds/nextflow-test-to-cwl-test-plan/index.md",
     "revision": 1,
-    "content_hash": "b0fd0ddb5c26ce4b519b43ef30c6716e5c6a23d44d3db01eecac214699f37231",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "6b2b5d921e5998debde2018e44ad2b117e7af6e538feddbff5a17ee21a9e256f",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:34.954Z",
+  "cast_at": "2026-07-30T19:12:38.915Z",
   "refs": [
     {
       "kind": "schema",

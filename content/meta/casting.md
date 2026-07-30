@@ -1,4 +1,16 @@
-# Compilation Pipeline
+---
+type: meta
+title: "Compilation Pipeline"
+record_kind: foundation
+order: 5
+tags:
+  - meta
+status: reviewed
+created: 2026-04-30
+revised: 2026-07-30
+revision: 29
+summary: "How typed Mold references become target-specific cast artifacts with provenance."
+---
 
 How Molds become cast artifacts. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **deterministic assembly first, LLM condensation only where needed, reproducible enough to diff**. The generated skill body is deterministic; individual condensed references may still be LLM-produced and recorded.
 

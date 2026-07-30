@@ -23,7 +23,7 @@ The shape of "test-drive" is the same regardless: ensure inputs exist, run the r
 
 Parse `$1` and figure out:
 
-- Which Mold(s) are in scope. Cross-reference `docs/HARNESS_PIPELINES.md` and `content/pipelines/<slug>/index.md` only as a lookup — don't force the run into a pipeline shape if the scenario is narrower.
+- Which Mold(s) are in scope. Cross-reference `content/meta/harness-pipelines.md` and `content/pipelines/<slug>/index.md` only as a lookup — don't force the run into a pipeline shape if the scenario is narrower.
 - Whether `$1` names a `scenarios.md` case — a Mold's `content/molds/<mold>/scenarios.md` `## Case: <name>`, or a pipeline's `content/pipelines/<pipeline>/scenarios.md` case. If so, bind that case's fixture and carry its `expect:` assertions into step 5. Otherwise the scenario is ad-hoc and you pick the fixture.
 - What input artifacts each Mold needs and where they should come from — a fixture, a prior emulation run, a freshly-produced upstream artifact, or the user's hands.
 - What's already on disk vs what needs producing.
@@ -80,7 +80,7 @@ If a Mold's procedure depends on a decision that's not in the source evidence (s
 
 ## 5. Evaluate: apply `eval.md` properties to the scenario output
 
-Two files split the work (see `docs/EVAL_PHILOSOPHY.md`): `eval.md` is the **abstract oracle** (`## Property:` sections — how to judge any output), `scenarios.md` is the **concrete cases** (`## Case:` sections — fixture + expected values).
+Two files split the work (see `content/meta/eval-philosophy.md`): `eval.md` is the **abstract oracle** (`## Property:` sections — how to judge any output), `scenarios.md` is the **concrete cases** (`## Case:` sections — fixture + expected values).
 
 For each Mold the run exercised:
 

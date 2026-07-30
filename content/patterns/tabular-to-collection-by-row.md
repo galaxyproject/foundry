@@ -16,7 +16,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key."
 related_notes:
   - "[[iwc-transformations-survey]]"

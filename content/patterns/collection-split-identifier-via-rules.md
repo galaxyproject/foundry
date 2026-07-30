@@ -14,7 +14,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use Apply Rules regex columns to split one collection identifier into nested list identifiers."
 related_notes:
   - "[[iwc-transformations-survey]]"

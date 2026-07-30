@@ -13,7 +13,6 @@ status: reviewed
 created: 2026-07-26
 revised: 2026-07-26
 revision: 1
-ai_generated: true
 summary: The structured summary shape the source-reading Molds emit and the interface Molds consume.
 ---
 

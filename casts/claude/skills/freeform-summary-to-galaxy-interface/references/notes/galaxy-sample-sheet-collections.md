@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-06
 revision: 2
-ai_generated: true
 related_notes:
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-collection-tools]]"

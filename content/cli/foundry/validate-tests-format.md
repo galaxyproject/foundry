@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-11
 revised: 2026-05-11
 revision: 1
-ai_generated: true
 summary: "AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check."
 related_notes:
   - "[[tests-format]]"

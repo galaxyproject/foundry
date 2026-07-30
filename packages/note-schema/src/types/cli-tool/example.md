@@ -12,7 +12,6 @@ status: reviewed
 created: 2026-07-26
 revised: 2026-07-26
 revision: 1
-ai_generated: true
 summary: Validate, lint, and convert Galaxy workflow files from the command line.
 ---
 

@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 3
-ai_generated: true
 summary: "Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets."
 related_notes:
   - "[[iwc-parameter-derivation-survey]]"

@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-05-10
 revision: 1
-ai_generated: true
 related_notes:
   - "[[summary-cwl]]"
   - "[[cwl-v1.2-schemas]]"

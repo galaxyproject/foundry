@@ -6,7 +6,6 @@ status: draft
 created: 2026-05-03
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
 summary: "IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful."
@@ -110,7 +109,7 @@ Design implication: workflow input labels and collection types should be designe
 
 ## 4. Distribution plan
 
-No formal `content/patterns/*.md` pages are recommended from this issue right now. These findings are cross-cutting workflow-testability guidance, not operation-anchored Galaxy construction patterns as defined in `docs/PATTERNS.md`.
+No formal `content/patterns/*.md` pages are recommended from this issue right now. These findings are cross-cutting workflow-testability guidance, not operation-anchored Galaxy construction patterns as defined in `content/meta/pattern-authorship.md`.
 
 | Finding | Permanent home | Integration action |
 |---|---|---|

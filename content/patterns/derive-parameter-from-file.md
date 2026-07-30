@@ -14,7 +14,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 3
-ai_generated: true
 summary: "Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters."
 related_notes:
   - "[[iwc-parameter-derivation-survey]]"

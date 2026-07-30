@@ -11,7 +11,6 @@ status: reviewed
 created: 2026-06-09
 revised: 2026-07-24
 revision: 2
-ai_generated: true
 summary: "Translate a free-form source summary into a Galaxy data-flow design brief."
 input_artifacts:
   - id: freeform-summary

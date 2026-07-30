@@ -9,6 +9,7 @@
 
 import { kind as cliCommand } from "./cli-command/schema.js";
 import { kind as cliTool } from "./cli-tool/schema.js";
+import { kind as meta } from "./meta/schema.js";
 import { kind as mold } from "./mold/schema.js";
 import { kind as pattern } from "./pattern/schema.js";
 import { kind as pipeline } from "./pipeline/schema.js";
@@ -31,6 +32,7 @@ import { type AnyKindDefinition } from "./context.js";
 // satisfies every field access rather than failing one. tests/note-union.test-d.ts is the only
 // thing that catches it, which is why it exists.
 export const KINDS = [
+  meta,
   mold,
   pattern,
   sourcePattern,
@@ -51,9 +53,10 @@ export const KINDS = [
  * schema carry its own frontmatter type all the way to the Astro pages.
  *
  * Keys are the `type:` discriminator values, so `DEFINITIONS[COLLECTIONS[c].kind]` resolves to
- * exactly one kind rather than to a union of nine.
+ * exactly one kind rather than to a union of ten.
  */
 export const DEFINITIONS = {
+  meta,
   mold,
   pattern,
   "source-pattern": sourcePattern,

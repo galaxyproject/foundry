@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-07-24
 revision: 3
-ai_generated: true
 summary: "Triage failing CWL run outputs; classify failure modes; propose fixes."
 input_artifacts:
   - id: workflow-test-result

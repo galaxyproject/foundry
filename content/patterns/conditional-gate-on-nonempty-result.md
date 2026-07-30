@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 3
-ai_generated: true
 summary: "Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps."
 related_notes:
   - "[[iwc-conditionals-survey]]"

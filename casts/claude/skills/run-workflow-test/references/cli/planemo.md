@@ -14,7 +14,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-07-20
 revision: 5
-ai_generated: true
 summary: "Galaxy tool/workflow runtime testing CLI; used by run-workflow-test and friends."
 ---
 

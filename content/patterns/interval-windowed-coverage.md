@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Quantify signal in fixed neighborhoods around point features: window the features (slop), collapse overlaps (merge), then count reads in each window (coverage)."
 related_notes:
   - "[[iwc-interval-operations-survey]]"

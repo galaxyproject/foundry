@@ -205,7 +205,6 @@ function renderFrontmatter(meta: CliMetadata, summary: string): string {
     "created: 2026-05-11",
     "revised: 2026-05-11",
     "revision: 1",
-    "ai_generated: true",
     `summary: "${escapeYamlString(summary)}"`,
     "---",
   ];

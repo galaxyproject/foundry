@@ -23,7 +23,6 @@ status: draft
 created: 2026-05-04
 revised: 2026-05-04
 revision: 1
-ai_generated: true
 related_notes:
   - "[[nextflow-patterns]]"
 summary: "Route Nextflow samplesheet row streams and repeated tuple inputs to Galaxy list, paired, or list:paired collections."

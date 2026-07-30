@@ -11,8 +11,8 @@ Produce or refresh `content/research/iwc-$1-survey/index.md`. The survey **propo
 
 1. **`content/meta/glossary.md`** — pinned vocabulary.
 2. **`CLAUDE.md`** — authoring rules.
-3. **`docs/PATTERNS.md`** — pattern-authorship policy. **Operation-anchored naming** is mandatory in candidate-pattern proposals; do not surface tool-anchored names. Corpus-first applies — no speculative candidates.
-4. **`docs/ARCHITECTURE.md`** §3 (note types), §5 (frontmatter), §6 (validation).
+3. **`content/meta/pattern-authorship.md`** — pattern-authorship policy. **Operation-anchored naming** is mandatory in candidate-pattern proposals; do not surface tool-anchored names. Corpus-first applies — no speculative candidates.
+4. **`content/meta/architecture.md`** §3 (note types), §5 (frontmatter), §6 (validation).
 5. **`packages/note-schema/src/types/<kind>/`** (one directory per note kind — `schema.ts`, `kind.md`, `example.md`) + **`meta_tags.yml`**.
 6. **`common_paths.yml.sample`** — `$IWC_FORMAT2` is the cleaned `gxformat2` corpus root for grep work and full-workflow reads; `$IWC_SKELETONS` mirrors that tree with non-structural fields stripped (tool_ids + topology + control flow only) — cheap structural scans for step-pair / step-sequence patterns; `$IWC` is the upstream `.ga` source for permalinks. Write citations as `` `$IWC_FORMAT2/path:line` `` (or `` `$IWC_SKELETONS/path:line` `` when the structural view is what's evidenced).
 7. **`content/research/iwc-shortcuts-anti-patterns/index.md`** — already-pinned "don't endorse" calls. Do not re-surface anything covered here as a recommendation.
@@ -47,7 +47,7 @@ Once scope is confirmed, work through the techniques you committed to:
 
 ## Step 3 — Write the survey
 
-Write `content/research/iwc-$1-survey/index.md` with frontmatter matching the existing surveys (`type: research`, `tags: [target/galaxy]`, `ai_generated: true`, `status: draft`, `created`/`revised` set, `summary` line).
+Write `content/research/iwc-$1-survey/index.md` with frontmatter matching the existing surveys (`type: research`, `tags: [target/galaxy]`, `status: draft`, `created`/`revised` set, `summary` line).
 
 ### Required moves (rubric, not section layout)
 
@@ -58,7 +58,7 @@ The survey *must* support these moves; section titles and ordering are your call
 3. **Recurring idioms** — split into two kinds, both with file:line citations:
     - **Single-tool parameter idioms** — recurring parameter shapes within one tool (the `BEGIN{OFS="\t"}` awk ritual; the `add_name + one_header + place_name` `collapse_dataset` triad; `auto_col_types: true` for raw-`cN` arithmetic).
     - **Multi-step recipes** — sequences or topologies that span tools or workflow connections (`datamash collapse → tp_find_and_replace` to emulate "argmax"; `__APPLY_RULES__ → __FILTER_EMPTY_DATASETS__` cleanup; `__HARMONIZELISTS__ → __ZIP_COLLECTION__` for paired-end alignment). These are often the highest-value patterns and are invisible to grep — they only surface from workflow-level reading. Treat them as first-class.
-4. **Candidate pattern boundaries** — operation-anchored names (per `docs/PATTERNS.md`). Each candidate carries: scope sketch, 2-3 corpus citations, and an explicit **keep / drop / merge** call with a reason. Drops and merges are equal in importance to keeps. **Candidates can be recipes**, not just single-tool patterns — a `multi-step:harmonize-then-zip-paired` pattern is as valid as a `tabular-filter-by-regex` pattern if the corpus shows the recipe recurring.
+4. **Candidate pattern boundaries** — operation-anchored names (per `content/meta/pattern-authorship.md`). Each candidate carries: scope sketch, 2-3 corpus citations, and an explicit **keep / drop / merge** call with a reason. Drops and merges are equal in importance to keeps. **Candidates can be recipes**, not just single-tool patterns — a `multi-step:harmonize-then-zip-paired` pattern is as valid as a `tabular-filter-by-regex` pattern if the corpus shows the recipe recurring.
 5. **Open questions** — things only the user can decide: prescriptive rules, redundancy tie-breaks, scope calls, deferral choices. Numbered, with the evidence each question needs to be answered.
 
 ### What the survey does **not** include

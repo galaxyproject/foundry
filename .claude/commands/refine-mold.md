@@ -19,7 +19,7 @@ You decide what kind of investigation the intent calls for. There is no fixed mo
 Read these before doing anything else. They are cheap and the skill won't make sense without them.
 
 1. `content/meta/glossary.md` — pinned vocabulary (Mold, Cast, reference kind, evaluation plan, refinement journal, …). Misreading these breaks the refinement.
-2. `docs/MOLD_SPEC.md` — Mold source layout. Pay attention to **Eval, Usage, Refinement: what goes where** and the **Refinement Contract**. The journal entry shape is contractual.
+2. `content/meta/mold-spec.md` — Mold source layout. Pay attention to **Eval, Usage, Refinement: what goes where** and the **Refinement Contract**. The journal entry shape is contractual.
 3. The Mold itself — `content/molds/$1/`:
    - `index.md` (full body and frontmatter)
    - `eval.md`, `scenarios.md`, `refinement.md` (any that exist)
@@ -36,7 +36,7 @@ Restate the user's intent in one or two sentences. This catches dyslexic typos a
 Now that you know what's actually being investigated, pull the rest. Load only what the intent needs:
 
 - **References from the manifest.** Open the patterns / schemas / CLI manual pages / research notes / prompts / examples the intent touches. Skim the rest. For an intent like "is field X useful," that's usually the IO schema and one or two consumers; don't burn context on every reference.
-- **`docs/COMPILATION_PIPELINE.md`** — read when the intent involves re-casting, suppressing a reference, or reasoning about per-kind dispatch.
+- **`content/meta/casting.md`** — read when the intent involves re-casting, suppressing a reference, or reasoning about per-kind dispatch.
 - **The current cast bundle** — `casts/<target>/$1/` (typically `casts/claude/$1/`). Read `_provenance.json` first for what was packaged; open individual artifacts on demand. Required when the intent involves running the cast or comparing output shape.
 - **Sibling Molds** — only if the intent involves overlap, scope, or split questions.
 

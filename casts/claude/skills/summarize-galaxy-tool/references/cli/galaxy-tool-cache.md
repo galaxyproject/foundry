@@ -14,7 +14,6 @@ status: draft
 created: 2026-06-16
 revised: 2026-06-18
 revision: 2
-ai_generated: true
 summary: "Cache and inspect Galaxy tool metadata (fetch from ToolShed, summarize ParsedTool, export input JSON Schema)."
 ---
 

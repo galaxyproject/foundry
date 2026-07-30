@@ -11,7 +11,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

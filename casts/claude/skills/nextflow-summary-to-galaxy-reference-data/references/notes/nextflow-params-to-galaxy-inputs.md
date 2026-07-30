@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-06
 revised: 2026-05-08
 revision: 4
-ai_generated: true
 related_notes:
   - "[[nextflow-workflow-io-semantics]]"
   - "[[gxformat2-workflow-inputs]]"

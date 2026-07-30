@@ -5,10 +5,10 @@
     "name": "implement-cwl-tool-step",
     "path": "content/molds/implement-cwl-tool-step/index.md",
     "revision": 2,
-    "content_hash": "b7b4d9736fa2dfb92c4b13b37ae75f850ed13b8f096d93781f2a08ff8ce17723",
-    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
+    "content_hash": "7d82c631c885eb9a1bb2039411b5ebc9fa5ec5fc88507f42e60836b7efc26f65",
+    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
   },
-  "cast_at": "2026-07-30T14:45:24.037Z",
+  "cast_at": "2026-07-30T19:12:27.990Z",
   "refs": [],
   "artifacts": {
     "produces": [

@@ -6,7 +6,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-11
 revision: 6
-ai_generated: true
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
@@ -240,7 +239,7 @@ clustered_anndata:
 - [[galaxy-workflow-testability-design]] — decide which workflow outputs and checkpoints to expose before choosing assertions.
 - [[iwc-test-data-conventions]] — input-side conventions (job inputs, collection shapes, `hashes:`, CVMFS).
 - [[iwc-shortcuts-anti-patterns]] — accepted-vs-smell catalog and corpus prevalence; this note's mirror image.
-- Test-format schema (`@galaxy-tool-util/schema` npm package) — authoritative vocabulary; will be vendored into a Foundry-rendered schema note. See `docs/COMPILATION_PIPELINE.md` for the casting story.
+- Test-format schema (`@galaxy-tool-util/schema` npm package) — authoritative vocabulary; will be vendored into a Foundry-rendered schema note. See `content/meta/casting.md` for the casting story.
 - Planemo test-format spec: [planemo.readthedocs.io/en/latest/test_format.html](https://planemo.readthedocs.io/en/latest/test_format.html).
 - [[galaxy-xsd]] — Galaxy XSD assertion source of truth, vendored from upstream.
 - Tightening of the schema and Pydantic source: [galaxyproject/galaxy#22566](https://github.com/galaxyproject/galaxy/pull/22566).

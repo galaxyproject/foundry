@@ -11,7 +11,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-10
 revision: 2
-ai_generated: true
 summary: "Translate a CWL summary into a Galaxy data-flow design brief."
 input_artifacts:
   - id: summary-cwl

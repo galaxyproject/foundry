@@ -7,7 +7,7 @@
 // The prefix-match fallback this used to carry is GONE, deliberately. Measured over the
 // whole corpus it resolved exactly one link: `[[...]]` in the glossary, which slugifies to
 // the empty string and therefore prefix-matched all 264 map keys, landing on whichever came
-// first. Every other link already matched exactly. See docs/ARCHITECTURE.md §7.
+// first. Every other link already matched exactly. See content/meta/architecture.md §7.
 
 import { resolveWikiLink as resolve } from "@galaxy-foundry/wiki-links";
 

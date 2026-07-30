@@ -14,7 +14,6 @@ status: draft
 created: 2026-07-01
 revised: 2026-07-01
 revision: 1
-ai_generated: true
 related_notes:
   - "[[summarize-galaxy-workflow]]"
   - "[[interview-to-galaxy-workflow-changeset]]"

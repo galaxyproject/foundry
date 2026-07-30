@@ -10,7 +10,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-06
 revision: 3
-ai_generated: true
 summary: "Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution."
 ---
 

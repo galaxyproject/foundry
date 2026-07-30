@@ -33,7 +33,7 @@ export const kind = defineKind({
 
   shape: "directory",
 
-  // Transcribed from the file-roles table `docs/MOLD_SPEC.md` used to carry, which now reads FROM
+  // Transcribed from the file-roles table `content/meta/mold-spec.md` used to carry, which now reads FROM
   // here. Two copies of a layout is how the copy nobody runs drifts from the one that is enforced,
   // and this one is enforced: `validateCompanionLayout` checks a mold directory against exactly
   // these names, and the cast verifier refuses a bundle carrying any of them whose disposition is

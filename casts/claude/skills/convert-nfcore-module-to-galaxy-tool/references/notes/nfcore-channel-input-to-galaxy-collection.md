@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-10
 revised: 2026-06-10
 revision: 3
-ai_generated: true
 summary: "Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type=\"data\"> or paired/list collection input."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"

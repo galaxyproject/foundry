@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-05
 revised: 2026-05-05
 revision: 1
-ai_generated: true
 license: MIT
 license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 related_notes:

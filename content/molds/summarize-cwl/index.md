@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-10
 revision: 2
-ai_generated: true
 summary: "Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation."
 output_artifacts:
   - id: summary-cwl

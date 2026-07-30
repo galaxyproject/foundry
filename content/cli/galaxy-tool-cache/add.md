@@ -10,7 +10,6 @@ status: draft
 created: 2026-06-16
 revised: 2026-06-18
 revision: 2
-ai_generated: true
 summary: "Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema."
 ---
 

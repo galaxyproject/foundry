@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-04
 revised: 2026-05-04
 revision: 1
-ai_generated: true
 summary: "Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results."
 related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"

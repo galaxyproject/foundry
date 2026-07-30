@@ -15,35 +15,35 @@ kinds:
   pattern:
     label: Pattern
     description: Workflow-construction idiom. Usually condensed during casting.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
   cli-tool:
     label: CLI Tool
     description: Tool-level install metadata. Aggregated into the cast bundle's Required Tools section.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
   cli-command:
     label: CLI Command
     description: Command reference. Usually cast to a sidecar and loaded only when invoked.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
   schema:
     label: Schema
     description: Structured contract copied for validation or lookup.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
   prompt:
     label: Prompt
     description: Prompt fragment copied verbatim or inlined by the target adapter.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
   example:
     label: Example
     description: Fixture or exemplar copied verbatim.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: path
   research:
     label: Research
     description: Background synthesis loaded by explicit progressive-disclosure metadata.
-    href: https://github.com/galaxyproject/foundry/blob/main/docs/MOLD_SPEC.md#typed-reference-manifest
+    href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link

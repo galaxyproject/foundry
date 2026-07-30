@@ -1,4 +1,16 @@
-# Mold Spec
+---
+type: meta
+title: "Mold Spec"
+record_kind: foundation
+order: 4
+tags:
+  - meta
+status: reviewed
+created: 2026-05-02
+revised: 2026-07-29
+revision: 12
+summary: "The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it."
+---
 
 This document is the source-layout contract for Mold authoring. The shared zod schema in `@galaxy-foundry/note-schema` (`buildNoteSchema`) is the frontmatter contract, and the reference contract remains the controlled vocabulary for typed references — `kinds` at `reference_contract.yml`, the other four vocabularies from `@galaxy-foundry/reference-contract`.
 
@@ -81,7 +93,7 @@ The reference contract owns labels, descriptions, and allowed values: `reference
 
 ## Eval, Scenario, Usage, Refinement: what goes where
 
-Three sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences. The reasoning behind the split lives in `docs/EVAL_PHILOSOPHY.md`.
+Three sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences. The reasoning behind the split lives in `content/meta/eval-philosophy.md`.
 
 - **`eval.md`** — the **abstract oracle**. Fixture-independent property checks: *how* you judge any output. Like a checker that asserts "a sort returns the same elements in nondecreasing order" — never the case "`sort([3,1,2]) == [1,2,3]`". No fixture paths, no magic values. **If you can't state it as a property that holds across inputs, it isn't eval.**
 - **`scenarios.md`** — the **concrete cases**. A fixture/input binding plus its expected values or assertions ("`sort([3,1,2]) == [1,2,3]`"; "CalliNGS-NF → 11 processes"). All fixture-specific concreteness lives here; the `eval.md` oracle is applied to whatever a scenario produces. This is the home for the case-shaped content agents used to misfile into `eval.md`.

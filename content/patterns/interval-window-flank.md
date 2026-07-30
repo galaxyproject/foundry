@@ -15,7 +15,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Extend features by a fixed or fractional amount to build neighborhood windows, clamped to chromosome ends; bedtools slopbed with a genome file."
 related_notes:
   - "[[iwc-interval-operations-survey]]"

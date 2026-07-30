@@ -9,7 +9,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

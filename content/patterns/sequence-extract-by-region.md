@@ -16,7 +16,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 summary: "Turn coordinates into sequence: extract FASTA at BED intervals (getfasta), mask regions by BED (maskfasta), or extract transcripts from a GFF (gffread)."
 related_notes:
   - "[[iwc-sequence-operations-survey]]"

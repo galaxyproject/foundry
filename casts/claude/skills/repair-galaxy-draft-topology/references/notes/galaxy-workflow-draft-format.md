@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-06
 revised: 2026-05-10
 revision: 2
-ai_generated: true
 related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-data-flow-draft-contract]]"

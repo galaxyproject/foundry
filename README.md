@@ -14,7 +14,7 @@ Convert workflows authored in other systems — papers describing computational 
 
 Hand-authored, monolithic conversion skills are brittle, hard to test, and don't compose. The Foundry takes a different shape:
 
-- **Principled.** The Foundry keeps upstream systems authoritative, records provenance for derived artifacts, uses deterministic tooling for deterministic checks, and keeps source knowledge portable across agent runtimes. See `docs/GUIDING_PRINCIPLES.md`.
+- **Principled.** The Foundry keeps upstream systems authoritative, records provenance for derived artifacts, uses deterministic tooling for deterministic checks, and keeps source knowledge portable across agent runtimes. See `content/meta/guiding-principles.md`.
 - **Decomposed.** Each conversion step is its own Mold — a typed reference manifest that casts into a self-contained skill artifact. The full conversion is an ordered Pipeline of Molds.
 - **Schema-driven.** `gxwf` validates every authored step inline. The validation loop catches failure modes deterministically — UUID validity, tool-ID and `+galaxyN` revision suffixes, `input_connections` parameter-name mismatches, conditional-selector branches in `tool_state` — rather than relying on enumerated prose caveats.
 - **Corpus-grounded.** Patterns and Molds are derived from observed structure in the IWC workflow corpus, not invented top-down. Every reference is traceable back to one or more curated, working `gxformat2` exemplars; the same exemplars double as evaluation material for cast skills.

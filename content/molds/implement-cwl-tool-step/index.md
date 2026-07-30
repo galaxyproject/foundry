@@ -9,7 +9,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-07-24
 revision: 2
-ai_generated: true
 summary: "Convert an abstract step into a concrete CWL CommandLineTool + step."
 loop_endstate: "No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand."
 input_artifacts:

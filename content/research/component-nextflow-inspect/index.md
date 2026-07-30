@@ -7,7 +7,6 @@ status: draft
 created: 2026-05-01
 revised: 2026-05-01
 revision: 1
-ai_generated: true
 summary: "White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision."
 related_molds:
   - "[[summarize-nextflow]]"

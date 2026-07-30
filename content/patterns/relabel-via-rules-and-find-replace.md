@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup."
 related_notes:
   - "[[iwc-transformations-survey]]"

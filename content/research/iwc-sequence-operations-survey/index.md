@@ -6,7 +6,6 @@ status: draft
 created: 2026-06-10
 revised: 2026-06-10
 revision: 1
-ai_generated: true
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
   - "[[iwc-interval-operations-survey]]"
@@ -133,7 +132,7 @@ Invisible to grep; the most reusable sequence construct in the corpus. **`fasta2
 
 ## 4. Candidate pattern boundaries
 
-Operation-/recipe-anchored names per `docs/PATTERNS.md`. Because the interconversion seam and its recipe carry the value, the keep-set is interconversion-led with a recipe at the top.
+Operation-/recipe-anchored names per `content/meta/pattern-authorship.md`. Because the interconversion seam and its recipe carry the value, the keep-set is interconversion-led with a recipe at the top.
 
 **Recipe (keep — highest value):**
 

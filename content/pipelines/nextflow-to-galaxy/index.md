@@ -8,7 +8,6 @@ status: reviewed
 created: 2026-04-30
 revised: 2026-07-24
 revision: 4
-ai_generated: true
 summary: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow."
 harness_notes:
   - "Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven."
@@ -35,6 +34,6 @@ phases:
 
 # NEXTFLOW → GALAXY
 
-Direct path. Lifted from `docs/HARNESS_PIPELINES.md` §"NEXTFLOW → GALAXY".
+Direct path. Lifted from `content/meta/harness-pipelines.md` §"NEXTFLOW → GALAXY".
 
 Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven (gxwf static schema replaces the prose caveat catalog).

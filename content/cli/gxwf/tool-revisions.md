@@ -10,7 +10,6 @@ status: draft
 created: 2026-04-30
 revised: 2026-05-06
 revision: 2
-ai_generated: true
 summary: "Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin."
 related_notes:
   - "[[component-tool-shed-search]]"

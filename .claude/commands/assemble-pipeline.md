@@ -7,7 +7,7 @@ argument-hint: "<pipeline-slug> [harness-name]"
 
 Assembling a `pipeline-<slug>` harness is now **fully deterministic** — there is no LLM step. Do not hand-author the harness; run the build command, which projects the Pipeline note's `phases:` spine plus each Mold's `summary`/`loop_endstate` and the pipeline's `harness_notes` into `casts/claude/skills/pipeline-<slug>/SKILL.md` + `_assembly.json`.
 
-A harness is **Not a Mold** (glossary): orchestration glue, not a cast of a Mold. These in-repo `pipeline-*` skills are the deliberate **stop-gap** (`docs/ARCHITECTURE.md` §14/§15), a trivial linear exercise of the pipeline spine for test-driving the casts end-to-end — not the production harness surface.
+A harness is **Not a Mold** (glossary): orchestration glue, not a cast of a Mold. These in-repo `pipeline-*` skills are the deliberate **stop-gap** (`content/meta/architecture.md` §14/§15), a trivial linear exercise of the pipeline spine for test-driving the casts end-to-end — not the production harness surface.
 
 ## Run
 

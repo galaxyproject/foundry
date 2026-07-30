@@ -10,7 +10,6 @@ status: draft
 created: 2026-06-18
 revised: 2026-06-18
 revision: 1
-ai_generated: true
 summary: "Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached."
 ---
 

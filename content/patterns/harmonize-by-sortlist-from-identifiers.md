@@ -15,7 +15,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers."
 related_notes:
   - "[[iwc-transformations-survey]]"

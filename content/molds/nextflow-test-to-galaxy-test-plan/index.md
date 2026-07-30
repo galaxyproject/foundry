@@ -9,7 +9,6 @@ status: reviewed
 created: 2026-04-30
 revised: 2026-07-24
 revision: 5
-ai_generated: true
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 input_artifacts:
   - id: summary-nextflow

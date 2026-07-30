@@ -13,7 +13,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"

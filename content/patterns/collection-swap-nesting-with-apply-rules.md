@@ -14,7 +14,6 @@ status: draft
 created: 2026-05-02
 revised: 2026-05-03
 revision: 2
-ai_generated: true
 summary: "Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns."
 related_notes:
   - "[[iwc-transformations-survey]]"

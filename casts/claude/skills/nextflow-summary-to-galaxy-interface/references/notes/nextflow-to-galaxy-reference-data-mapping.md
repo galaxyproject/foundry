@@ -8,7 +8,6 @@ status: draft
 created: 2026-05-08
 revised: 2026-05-10
 revision: 5
-ai_generated: true
 related_notes:
   - "[[nextflow-reference-data-classification]]"
   - "[[nextflow-params-to-galaxy-inputs]]"

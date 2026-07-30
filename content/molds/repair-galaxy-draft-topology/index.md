@@ -9,7 +9,6 @@ status: draft
 created: 2026-06-16
 revised: 2026-06-16
 revision: 1
-ai_generated: true
 summary: "Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs."
 input_artifacts:
   - id: galaxy-workflow-draft
