@@ -39,6 +39,7 @@ export type NoteSchema = ReturnType<typeof buildNoteSchema>;
 export function buildKindSchemas(options: BuildNoteSchemaOptions) {
   const ctx = buildKindContext(options);
   return {
+    meta: assemble(DEFINITIONS.meta, ctx),
     mold: assemble(DEFINITIONS.mold, ctx),
     pattern: assemble(DEFINITIONS.pattern, ctx),
     "source-pattern": assemble(DEFINITIONS["source-pattern"], ctx),

@@ -30,9 +30,14 @@ function slugifyPath(entry: string): string {
 // its OWN base, so the base's path has to go back on before slugifying — without it every note
 // loses its leading segment and every URL on the site moves.
 //
-// The old glob's `!Dashboard.md` / `!Index.md` / `!log.md` / `!meta/glossary.md` exclusions are
-// gone rather than dropped: those files sit at content/ root and in content/meta/, and no
-// collection's base reaches them.
+// The old glob's `!Dashboard.md` / `!Index.md` / `!log.md` exclusions are gone rather than
+// dropped: those files sit at content/ root, and no collection's base reaches them.
+//
+// `!meta/glossary.md` is the one that came BACK, and it is stated in COLLECTIONS rather than
+// here. The `meta` collection's base is `content/meta`, so that directory is reachable again —
+// and the glossary shares it without being a note of that kind. The exclusion belongs to the
+// routing table because the validator has to honour it too; written here it would hold for the
+// site alone, and the glossary would start failing a check it is deliberately outside of.
 function load(name: CollectionName) {
   const { base, pattern } = COLLECTIONS[name];
   const prefix = base.slice(`${CONTENT_DIR}/`.length);
@@ -51,6 +56,7 @@ function load(name: CollectionName) {
 // shape — which is how `entry.data` degrades to `unknown` on the pages. Naming each schema
 // keeps each collection's type precise.
 export const collections = {
+  meta: defineCollection({ loader: load('meta'), schema: schemas.meta }),
   molds: defineCollection({ loader: load('molds'), schema: schemas.mold }),
   patterns: defineCollection({ loader: load('patterns'), schema: schemas.pattern }),
   'source-patterns': defineCollection({

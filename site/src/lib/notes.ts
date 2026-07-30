@@ -26,6 +26,7 @@ import type { CollectionName } from '@galaxy-foundry/note-schema';
  * module's job to not silently change the answer, not to pick a different one.
  */
 export const NOTE_COLLECTIONS = [
+  'meta',
   'cli-tools',
   'cli-commands',
   'molds',

@@ -50,6 +50,13 @@ export const CONTENT_DIR = "content";
  * the camelCase an identifier would want — they are looked up as strings, never as properties.
  */
 export const COLLECTIONS = {
+  // The design record. `glossary.md` shares the directory and is deliberately NOT a note: it is
+  // hand-curated, alphabetical, and rendered by its own page. It is excluded HERE, in the
+  // pattern, rather than by each consumer — which is the whole point of the table, and is why
+  // the exclusion survived at all. It used to sit in the site's glob as `!meta/glossary.md`,
+  // and was dropped when no collection's base reached `content/meta/` any more. This row makes
+  // that directory reachable again, so the rule has to come back with it.
+  meta: { base: "content/meta", pattern: ["*.md", "!glossary.md"], kind: "meta" },
   molds: { base: "content/molds", pattern: ["**/index.md"], kind: "mold" },
   patterns: { base: "content/patterns", pattern: ["**/*.md"], kind: "pattern" },
   "source-patterns": {
