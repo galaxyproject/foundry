@@ -9,6 +9,12 @@ export const kind = defineKind({
   summary:
     "A captured finding about the domain or its tooling — the grounding a Mold cites rather than inventing.",
 
+  // Still flat, so still nothing declarable — which is exactly why this kind keeps the per-note
+  // `companions:` frontmatter field for now. Turning research into a directory kind is what lets
+  // that field go, and it is a 63-note migration of its own.
+  shape: "file",
+  companions: [],
+
   build: (ctx: KindContext) =>
     z
       .object({

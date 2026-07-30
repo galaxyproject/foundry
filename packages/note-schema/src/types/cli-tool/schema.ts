@@ -9,6 +9,14 @@ export const kind = defineKind({
   summary:
     "One external command-line tool the casting pipeline may invoke — how to install it, how to run it, how to tell it is present.",
 
+  shape: "directory",
+
+  // Empty, and this is the kind that proves the note-vs-companion distinction is load-bearing:
+  // `content/cli/<tool>/` is full of markdown, and every one of those files is a `cli-command`
+  // NOTE rather than a companion. A layout check that guessed from the extension would report
+  // every documented subcommand in the corpus as a stray.
+  companions: [],
+
   build: (ctx: KindContext) =>
     z
       .object({

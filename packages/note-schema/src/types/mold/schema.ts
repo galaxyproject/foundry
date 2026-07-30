@@ -31,6 +31,74 @@ export const kind = defineKind({
   summary:
     "One repeatable action, described as a typed reference manifest that casting compiles into a skill artifact.",
 
+  shape: "directory",
+
+  // Transcribed from the file-roles table `docs/MOLD_SPEC.md` used to carry, which now reads FROM
+  // here. Two copies of a layout is how the copy nobody runs drifts from the one that is enforced,
+  // and this one is enforced: `validateCompanionLayout` checks a mold directory against exactly
+  // these names, and `_target.yml`'s forbidden-files list is derived from their dispositions.
+  //
+  // `eval.md` and `scenarios.md` are `recommended` rather than `required` because the spec calls
+  // them "strongly recommended, warning-only for now" and 33 and 27 of 47 molds have them. The
+  // level records the state honestly instead of choosing between a rule that fails 14 molds and
+  // one that says these files are merely nice to have.
+  companions: [
+    {
+      file: "eval.md",
+      requirement: "recommended",
+      purpose: "Abstract oracle: the properties any cast of this Mold must satisfy.",
+      disposition: "foundry-only",
+    },
+    {
+      file: "scenarios.md",
+      requirement: "recommended",
+      purpose: "Concrete cases bound to fixtures, run against the eval properties.",
+      disposition: "foundry-only",
+    },
+    {
+      file: "refinement.md",
+      requirement: "optional",
+      purpose: "Standing notes for `/refine-mold`: what to reconsider on the next pass.",
+      disposition: "foundry-only",
+    },
+    {
+      file: "refinements/",
+      requirement: "optional",
+      purpose: "Dated `/refine-mold` journal. Entries carry their own frontmatter.",
+      disposition: "foundry-only",
+    },
+    {
+      file: "changes.md",
+      requirement: "optional",
+      purpose: "Reviewer-facing log of what changed in this Mold and why.",
+      disposition: "foundry-only",
+    },
+    {
+      file: "casting.md",
+      requirement: "optional",
+      purpose: "Per-Mold condensation prompts, read by `/cast` when a reference casts condensed.",
+      disposition: "cast-input",
+    },
+    {
+      file: "cast-skill-verification.md",
+      requirement: "optional",
+      purpose: "Instructions for the agentic review that runs after a cast.",
+      disposition: "cast-input",
+    },
+    {
+      file: "examples/",
+      requirement: "optional",
+      purpose: "Fixtures cited by index.md or eval.md. Carried into a cast only when referenced.",
+      disposition: "bundled",
+    },
+    {
+      file: "README.md",
+      requirement: "optional",
+      purpose: "Orientation for someone opening the directory. Not part of the Mold contract.",
+      disposition: "foundry-only",
+    },
+  ],
+
   build: (ctx: KindContext) =>
     z
       .object({

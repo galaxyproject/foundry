@@ -14,7 +14,6 @@ import { kind as pattern } from "./pattern/schema.js";
 import { kind as pipeline } from "./pipeline/schema.js";
 import { kind as prompt } from "./prompt/schema.js";
 
-export { UPSTREAM_PROMPT_FILE } from "./prompt/schema.js";
 import { kind as research } from "./research/schema.js";
 import { kind as schemaNote } from "./schema/schema.js";
 import { kind as sourcePattern } from "./source-pattern/schema.js";

@@ -13,6 +13,11 @@ export const kind = defineKind({
   summary:
     "A machine-checkable contract a cast can validate against, plus the validator that decides it.",
 
+  // Flat, despite being the kind most about a file: the schema document itself is a `references:`
+  // payload resolved through `source_url` or a vendored path, not a sibling of the note.
+  shape: "file",
+  companions: [],
+
   build: (ctx: KindContext) =>
     z
       .object({

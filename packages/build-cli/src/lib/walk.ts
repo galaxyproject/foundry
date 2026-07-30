@@ -47,8 +47,14 @@ function* walk(dir: string, root: string): Generator<string> {
   }
 }
 
-/** A walked path in the repo-relative form COLLECTIONS matches against. */
-function routablePath(root: string, full: string): string {
+/**
+ * A path in the repo-relative form COLLECTIONS matches against.
+ *
+ * Exported because routing is not only the walker's business: anything asking "is this entry a
+ * note?" — the companion-layout check, for one — has to ask it in this frame or the table claims
+ * nothing and every note beside a note reads as a stray.
+ */
+export function routablePath(root: string, full: string): string {
   return `${CONTENT_DIR}/${path.relative(root, full).split(path.sep).join("/")}`;
 }
 

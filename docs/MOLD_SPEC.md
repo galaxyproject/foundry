@@ -6,24 +6,22 @@ This document is the source-layout contract for Mold authoring. The shared zod s
 
 A Mold source unit is a directory under `content/molds/<slug>/`.
 
-Required files:
+Which files may sit beside `index.md`, which of them are expected, and which casting may carry into
+an artifact are **declared by the kind**, in
+`packages/note-schema/src/types/mold/schema.ts`. The validator checks a Mold directory against that
+declaration, so it is the enforced answer rather than a description of one.
 
-- `index.md` — the only frontmatter-bearing Mold source file. Owns the Mold contract and the operational `references:` manifest.
+- `index.md` — required, and the only frontmatter-bearing Mold source file. Owns the Mold contract
+  and the operational `references:` manifest.
+- `eval.md`, `scenarios.md` — expected of every Mold; their absence is a warning today.
+- `refinement.md`, `refinements/`, `changes.md`, `casting.md`, `cast-skill-verification.md`,
+  `examples/`, `README.md` — optional.
 
-Strongly recommended (warning-only for now):
+What each one is FOR is below. Whether it is required, and whether casting packages it, is in the
+declaration and only there.
 
-- `eval.md` — Foundry-maintainer evaluation oracle: **abstract**, fixture-independent property checks and guardrails about cast output. The *how-to-judge*, never the concrete input/expected pair (those live in `scenarios.md`). Never packaged into cast artifacts.
-- `scenarios.md` — Foundry-maintainer test cases: concrete fixtures plus their expected values/assertions, exercised by the `eval.md` oracle. Holds all fixture-specific concreteness so `eval.md` stays pure. Never packaged into cast artifacts.
-
-Optional files:
-
-- `usage.md` — narrative examples / representative invocations of the Mold. Author-facing illustration, not assertion. Never packaged into cast artifacts in v1; may later be cast as `examples/` content.
-- `refinement.md` — open design questions about the Mold itself: schema fields under suspicion, references whose value isn't clear, scope edges. Free-form. Never packaged into cast artifacts.
-- `refinements/` — append-only journal of refinement runs (one file per run, see Refinement Journal). Never packaged.
-- `casting.md` — Mold-owned guidance read by casting itself (skill assembly notes, condensation prompts). Not packaged into the generated skill runtime unless explicitly incorporated by the cast.
-- `cast-skill-verification.md` — Mold-owned dynamic-review checklist for a generated skill. Used after casting by reviewers or verification agents; not packaged into runtime artifacts.
-- `changes.md` — Mold-owned revision history / changelog. Use this for content that documents how the Mold has evolved across casts. Never packaged into cast artifacts.
-- `examples/` — local examples or small fixtures referenced by `index.md` or `eval.md`.
+There is no `usage.md`. Illustration belongs in the Mold body or in `examples/`; a file by that
+name beside a Mold is undeclared, and undeclared is an error.
 
 Markdown files at the top level of a Mold directory must not contain frontmatter, except `index.md`. Files under `refinements/` are exempt from this rule because each refinement journal entry carries small structured frontmatter (see Refinement Journal). If a supporting note needs frontmatter beyond that, move it to the appropriate content collection and reference it from the Mold.
 
@@ -34,21 +32,6 @@ The body of `index.md` is procedural content the cast skill renders into generat
 - Revision history / changelog → `changes.md`.
 - "Reference dispatch (for casting)" or similar redundant restatements of the `references:` manifest → delete; the metadata is the contract. Runtime guidance about when to consult a packaged reference is allowed when it adds operational judgment beyond the manifest.
 - Open authoring questions about scope or future references → `casting.md` (cast-time) or the Mold's eval/notes, not the body.
-
-### File roles at a glance
-
-| File                          | Audience                          | Packaged into cast?            |
-| ----------------------------- | --------------------------------- | ------------------------------ |
-| `index.md`                    | Mold contract + casting manifest  | Body rendered into generated skills |
-| `eval.md`                     | Foundry maintainers (abstract oracle) | Never                      |
-| `scenarios.md`                | Foundry maintainers (concrete cases)  | Never                      |
-| `usage.md`                    | Mold authors / readers            | Never (v1)                     |
-| `refinement.md`               | Mold authors / `/refine-mold`     | Never                          |
-| `refinements/`                | `/refine-mold` journal            | Never                          |
-| `casting.md`                  | Cast skill / casting LLM          | Read at cast time              |
-| `cast-skill-verification.md`  | Post-cast reviewer / agent        | Never                          |
-| `changes.md`                  | Mold authors / reviewers          | Never                          |
-| `examples/`                   | `index.md`, `eval.md`             | Only if referenced explicitly  |
 
 ## Index Contract
 
@@ -98,14 +81,13 @@ The reference contract owns labels, descriptions, and allowed values: `reference
 
 ## Eval, Scenario, Usage, Refinement: what goes where
 
-Four sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences. The reasoning behind the split lives in `docs/EVAL_PHILOSOPHY.md`.
+Three sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences. The reasoning behind the split lives in `docs/EVAL_PHILOSOPHY.md`.
 
 - **`eval.md`** — the **abstract oracle**. Fixture-independent property checks: *how* you judge any output. Like a checker that asserts "a sort returns the same elements in nondecreasing order" — never the case "`sort([3,1,2]) == [1,2,3]`". No fixture paths, no magic values. **If you can't state it as a property that holds across inputs, it isn't eval.**
 - **`scenarios.md`** — the **concrete cases**. A fixture/input binding plus its expected values or assertions ("`sort([3,1,2]) == [1,2,3]`"; "CalliNGS-NF → 11 processes"). All fixture-specific concreteness lives here; the `eval.md` oracle is applied to whatever a scenario produces. This is the home for the case-shaped content agents used to misfile into `eval.md`.
-- **`usage.md`** — illustration. Representative invocations and example inputs/outputs, with no assertion attached. The "here's what running this Mold tends to look like" file. Optional; create only when narrative examples accumulate.
 - **`refinement.md`** — open design questions about the Mold. "Is field X pulling weight?" "Does reference Y change the cast output?" "Should this Mold split?" Free-form notes; the `/refine-mold` skill writes journal entries under `refinements/` that may resolve or accumulate against this file.
 
-The four are not interchangeable. Misfiling is the main failure mode: agents tend to write concrete, fixture-bound cases into `eval.md` (they belong in `scenarios.md`) and usage-shaped illustration as eval cases (it belongs in `usage.md`). Two tests: does the entry name a specific fixture or magic value? → `scenarios.md`, not `eval.md`. Does the entry have a pass/fail edge at all? → if not, it's usage or refinement, not eval.
+The three are not interchangeable. Misfiling is the main failure mode: agents tend to write concrete, fixture-bound cases into `eval.md`, where they belong in `scenarios.md`. Two tests: does the entry name a specific fixture or magic value? → `scenarios.md`, not `eval.md`. Does the entry have a pass/fail edge at all? → if not, it is refinement, not eval.
 
 ## Eval Contract
 
@@ -157,10 +139,6 @@ Guidance:
 - **`expect:` may be free text.** Mechanizable expectations are welcome (a count, a `validate-*` exit code), but a prose assertion a reviewer checks by eye is a valid scenario too.
 - **The oracle applies to every scenario by default.** A run pairs a scenario's output with the full `eval.md` property set; a scenario adds its fixture-bound `expect:` on top and may mark a property `N/A`. Scenarios do not re-list the eval properties.
 - **Drive runs with `/test-drive`.** It binds a scenario, runs the cast artifact, applies `eval.md`, and harvests refinements.
-
-## Usage Contract
-
-`usage.md` is freeform markdown. No required structure. Suggested rhythm: one H2 per representative scenario, a short prose description, and a code block or transcript excerpt showing the invocation and a representative excerpt of output. No `expectation:` lines — that vocabulary is reserved for `eval.md`.
 
 ## Refinement Contract
 

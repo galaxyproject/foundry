@@ -33,7 +33,7 @@ Run it once and trust it. Do **not** re-derive these checks by hand — spend to
 6. **`common_paths.yml.sample`** — citation-prefix vocabulary for resolving inline `$NAME/...` corpus references.
 7. **The Mold itself** — `content/molds/$1/`:
    - `index.md` (frontmatter + body)
-   - `eval.md`, `usage.md`, `casting.md`, `cast-skill-verification.md`, `refinement.md` if present
+   - `eval.md`, `scenarios.md`, `casting.md`, `cast-skill-verification.md`, `refinement.md` if present
    - prior entries under `refinements/`
 8. **The cast bundle if present** — `casts/claude/$1/_provenance.json` first; individual artifacts on demand.
 9. **Each referenced note** — open every `references[].ref` target. The whole point of this skill is auditing them in their loading context.
@@ -87,7 +87,7 @@ This is partly mechanical, but interpretation (does the drift matter? is it inte
 
 ### Inline citation verification
 
-For any `$NAME/path:line` citations in `index.md`, `eval.md`, `usage.md`, `casting.md`: resolve via `common_paths.yml.sample` and `Read` the cited range. Same standard as `/review-pattern`. Skip if there are no inline citations (Mold bodies often don't carry them — citations live in referenced research notes).
+For any `$NAME/path:line` citations in `index.md`, `eval.md`, `scenarios.md`, `casting.md`: resolve via `common_paths.yml.sample` and `Read` the cited range. Same standard as `/review-pattern`. Skip if there are no inline citations (Mold bodies often don't carry them — citations live in referenced research notes).
 
 ## Reporting format
 
