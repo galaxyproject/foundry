@@ -33,6 +33,15 @@ export const kind = defineKind({
   shape: "file",
   companions: [],
 
+  // No `companions:` frontmatter, unlike `research`. A pattern is a flat note, so the directory
+  // a companion path would resolve against is `content/patterns/` — shared by every pattern in
+  // the instance. A note there cannot name "its own" file, only a file, and the caster would
+  // copy that file into the bundle of whichever pattern happened to claim it.
+  //
+  // The field was available here and no pattern ever used it, so nothing is being taken away.
+  // If a pattern ever needs to carry a file, the answer is the one `research` took: become a
+  // directory kind, so the note has a directory to own.
+
   build: (ctx: KindContext) =>
     z
       .object({
@@ -51,7 +60,6 @@ export const kind = defineKind({
         parent_pattern: ctx.wikiLink.optional(),
         verification_paths: z.array(z.string()).optional(),
         iwc_exemplars: z.array(iwcExemplar).optional(),
-        companions: ctx.companions.optional(),
       })
       .strict(),
 });

@@ -6,9 +6,9 @@
     "path": "content/molds/implement-cwl-workflow-test/index.md",
     "revision": 2,
     "content_hash": "94b796b46c1111d66cb7341061e578b62898bd2cb9faff2fa8fb57156a4892b5",
-    "commit": "29dd43fa81259c03d5dee6dd04e74aef0cdc5233"
+    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
   },
-  "cast_at": "2026-07-30T13:35:52.833Z",
+  "cast_at": "2026-07-30T14:45:24.692Z",
   "refs": [],
   "artifacts": {
     "produces": [

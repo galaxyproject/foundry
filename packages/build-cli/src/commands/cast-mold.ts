@@ -15,6 +15,7 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  rmdirSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -49,7 +50,7 @@ import {
   type RequiredTool,
 } from "../lib/required-tools.js";
 import type { Frontmatter } from "../lib/types.js";
-import { fileSlug, findMdFiles } from "../lib/walk.js";
+import { fileSlug, findMdFiles, listFilesUnder } from "../lib/walk.js";
 import {
   parseWikiLink,
   resolveWikiLink,
@@ -213,6 +214,17 @@ const SUPPORTED_KINDS = new Set([
   "prompt",
 ]);
 const NOT_IMPLEMENTED_KINDS = new Set(["example"]);
+
+/** Remove directories left empty by pruning, deepest first. Keeps `dir` itself. */
+function pruneEmptyDirs(dir: string): void {
+  if (!existsSync(dir)) return;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const full = path.join(dir, entry.name);
+    pruneEmptyDirs(full);
+    if (readdirSync(full).length === 0) rmdirSync(full);
+  }
+}
 
 function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
   // 1:1 strict slug mapping: a bundled file is named for the note it came from, never for the
@@ -1358,6 +1370,29 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     check: args.check,
   });
   if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
+
+  // Reconcile `references/` to ABSENT for anything provenance no longer lists.
+  //
+  // Casting writes each ref and never looked at what was already there, so a file that stops
+  // being a ref stayed in the bundle forever. Undeclaring one companion was enough to prove it:
+  // provenance dropped `galaxy-collection-semantics.upstream.myst`, SKILL.md stopped naming it,
+  // and the file sat in nine bundles regardless — invisible to every check, and still the first
+  // thing an agent listing the directory would find.
+  //
+  // Same failure as the stale `_required_tools.json` below, and the same fix: the bundle holds
+  // what the manifest says and nothing else. Scoped to `references/` because that subtree is the
+  // only part of a bundle casting owns — `runs/` is harvested output and is not ours to delete.
+  const referencesRoot = path.join(bundleRoot, "references");
+  const declared = new Set(refEntries.map((entry) => entry.dst));
+  for (const rel of listFilesUnder(referencesRoot, bundleRoot)) {
+    if (declared.has(rel)) continue;
+    if (args.check) {
+      drift.push({ file: rel, reason: "orphan (no ref claims it)" });
+    } else {
+      unlinkSync(path.join(bundleRoot, rel));
+    }
+  }
+  if (!args.check) pruneEmptyDirs(referencesRoot);
 
   // Emit/reconcile _required_tools.json manifest at bundle root.
   const requiredToolsPath = path.join(bundleRoot, "_required_tools.json");

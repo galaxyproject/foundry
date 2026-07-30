@@ -48,6 +48,13 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load On Demand
 
 - `references/notes/cwl-v1.2-schemas.md`: Research note copied verbatim into the bundle. Check official CWL v1.2 field names and source-language semantics when summarizing less-common features. Use when: the workflow uses WorkflowStep features, requirements, hints, Operation, ExpressionTool, or CommandLineTool bindings not covered by the short procedure.
+- `references/notes/cwl-v1.2/CommandLineTool-standalone.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/cwl-v1.2-schemas.md`; read it where that note directs.
+- `references/notes/cwl-v1.2/CommandLineTool.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/cwl-v1.2-schemas.md`; read it where that note directs.
+- `references/notes/cwl-v1.2/CommonWorkflowLanguage.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/cwl-v1.2-schemas.md`; read it where that note directs.
+- `references/notes/cwl-v1.2/cwl.yaml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/cwl-v1.2-schemas.md`; read it where that note directs.
+- `references/notes/cwl-v1.2/Operation.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/cwl-v1.2-schemas.md`; read it where that note directs.
+- `references/notes/cwl-v1.2/Process.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/cwl-v1.2-schemas.md`; read it where that note directs.
+- `references/notes/cwl-v1.2/Workflow.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/cwl-v1.2-schemas.md`; read it where that note directs.
 
 ## Validation
 

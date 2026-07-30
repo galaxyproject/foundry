@@ -67,6 +67,35 @@ describe("validateData (per-file)", () => {
     expect(r.errors.length).toBeGreaterThan(0);
   });
 
+  // `companions:` names files RELATIVE TO THE NOTE'S DIRECTORY, so a vendored subtree is
+  // declarable. `cwl-v1.2-schemas` is the case: its seven upstream schemas live one level down,
+  // and while the field admitted no separator they could not be declared at all.
+  const researchRequired = (overrides: Record<string, unknown> = {}) =>
+    baseRequired({ type: "research", tags: ["target/galaxy"], ...overrides });
+
+  it("accepts a companion path inside the note's own subdirectory", () => {
+    const r = validateData(researchRequired({ companions: ["cwl-v1.2/Workflow.yml"] }), schema);
+    expect(r.errors).toEqual([]);
+  });
+
+  // The character class allows `.` and `-`, so `..` is a legal-looking SEGMENT. Without an
+  // explicit check a note could reach out of its directory and bundle a file it does not own —
+  // which, for a flat-note era holdover, would have meant any file in the collection.
+  it("rejects a companion path that climbs out of the note's directory", () => {
+    const r = validateData(
+      researchRequired({ companions: ["../galaxy-xsd/galaxy.xsd"] }),
+      schema,
+    );
+    expect(r.errors.length).toBeGreaterThan(0);
+  });
+
+  // `pattern` is a flat note, so the directory a companion would resolve against is
+  // `content/patterns/` — shared by every pattern. There is no "its own" file to name.
+  it("rejects companions on a flat-note kind", () => {
+    const r = validateData(patternRequired({ companions: ["x.yml"] }), schema);
+    expect(r.errors.some((e) => /companions/.test(e))).toBe(true);
+  });
+
   it("rejects unknown fields", () => {
     const r = validateData(patternRequired({ bogus: "x" }), schema);
     expect(r.errors.some((e) => /bogus/.test(e))).toBe(true);

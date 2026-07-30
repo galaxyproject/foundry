@@ -30,7 +30,6 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load On Demand
 
 - `references/notes/galaxy-collection-semantics.md`: Research note copied verbatim into the bundle. Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs. Use when: a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure.
-- `references/notes/galaxy-collection-semantics.upstream.myst`: Companion file copied verbatim into the bundle. Sibling of `references/notes/galaxy-collection-semantics.md`; read it where that note directs.
 - `references/notes/galaxy-collection-semantics.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/galaxy-collection-semantics.md`; read it where that note directs.
 - `references/notes/galaxy-tool-job-failure-reference.md`: Research note copied verbatim into the bundle. Interpret Galaxy job-level failure evidence including stdio rules, exit code, job messages, and output dataset state. Use when: a failed workflow test includes errored jobs, tool stderr/stdout, non-zero exit codes, or red output datasets.
 - `references/notes/galaxy-workflow-invocation-failure-reference.md`: Research note copied verbatim into the bundle. Interpret Galaxy invocation-level failure evidence including invocation state, structured messages, and step job summaries. Use when: a failed workflow test has invocation failure, missing workflow outputs, cancelled/paused steps, subworkflow failures, or collection population errors.

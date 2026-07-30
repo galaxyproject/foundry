@@ -9,7 +9,7 @@
 //
 // This module now traverses and routes. It does not decide.
 
-import { readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { CONTENT_DIR, collectionOf } from "@galaxy-foundry/note-schema";
 
@@ -56,6 +56,27 @@ function* walk(dir: string, root: string): Generator<string> {
  */
 export function routablePath(root: string, full: string): string {
   return `${CONTENT_DIR}/${path.relative(root, full).split(path.sep).join("/")}`;
+}
+
+/**
+ * Every file under `dir`, recursively, as paths relative to `relativeTo` with `/` separators.
+ * A missing directory yields nothing rather than throwing.
+ *
+ * Unrelated to `findMdFiles`: that one routes, this one just lists. Both the caster (pruning a
+ * bundle down to what provenance claims) and the verifier (asking what actually sits beside a
+ * note) need the raw listing, and neither wants the collection table involved.
+ */
+export function listFilesUnder(dir: string, relativeTo: string): string[] {
+  if (!existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  )) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listFilesUnder(full, relativeTo));
+    else out.push(path.relative(relativeTo, full).split(path.sep).join("/"));
+  }
+  return out;
 }
 
 /** Slug used for wiki-link resolution: `index.md` → parent dir name; otherwise basename without extension. */

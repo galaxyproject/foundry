@@ -17,6 +17,7 @@ import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
+import { listFilesUnder } from "../packages/build-cli/src/lib/walk.js";
 import { readMarkdown } from "./lib/frontmatter.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +51,35 @@ function sha256(filePath: string): string {
 
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Markdown with fenced code blocks removed, line count preserved.
+ *
+ * Blank-lines rather than deletes so any message quoting a line number still points at the
+ * line the reader sees. Opening fence is 3+ backticks or tildes; a fence closes on the same
+ * character at the same length or longer, which is what lets a ```` ```` ```` block hold a
+ * ``` one.
+ */
+function stripFencedBlocks(markdown: string): string {
+  const lines = markdown.split("\n");
+  let fence: { char: string; length: number } | null = null;
+  return lines
+    .map((line) => {
+      const opener = /^\s{0,3}(`{3,}|~{3,})/.exec(line);
+      if (fence === null) {
+        if (opener) {
+          fence = { char: opener[1]![0]!, length: opener[1]!.length };
+          return "";
+        }
+        return line;
+      }
+      if (opener && opener[1]![0] === fence.char && opener[1]!.length >= fence.length) {
+        fence = null;
+      }
+      return "";
+    })
+    .join("\n");
 }
 
 interface TargetConfig {
@@ -265,32 +295,49 @@ function main(): void {
     }
   }
 
-  // Backstop: a bundled note must not point at a sibling file (a `<stem>.*`
-  // companion) that isn't in the bundle. Catches multi-file notes whose
-  // companions weren't declared/copied — the class of bug where the cast `.md`
-  // tells the agent to read a sibling that never shipped.
+  // Backstop: a bundled note must not tell an agent to read a file that is not in the bundle.
+  //
+  // This is the enforcement arm of `companions:`, not a substitute for it. The declaration is
+  // what decides membership; this is what notices when a note's prose and its declaration
+  // disagree — the class of bug where the cast `.md` names a sibling that never shipped.
+  //
+  // Driven by the note's SOURCE DIRECTORY, not by a naming guess. It used to look for
+  // `<stem>.<ext>` — files sharing the note's basename — which meant it could only ever see
+  // companions whose names happened to pair. `gxformat2-schema/index.md` names
+  // `gxformat2.schema.json`, one hyphen away from pairing, and went unseen through the whole
+  // life of the check; `cwl-v1.2-schemas` names seven files in a subdirectory and could not
+  // pair by construction. Listing the directory answers for every name at once, and it is a
+  // fact rather than a heuristic: these are the files that ARE next to the note.
   for (const r of prov.refs ?? []) {
     if (r.companion_of) continue;
     if (r.kind !== "research" && r.kind !== "pattern") continue;
     if (!r.dst.endsWith(".md")) continue;
     const dstAbs = path.join(bundleRoot, r.dst);
     if (!existsSync(dstAbs)) continue; // already reported above
-    const noteDir = path.dirname(dstAbs);
-    const selfBase = path.basename(r.dst);
-    const stem = selfBase.slice(0, -".md".length);
-    const body = readFileSync(dstAbs, "utf8");
-    const siblingRe = new RegExp(
-      `(?<![A-Za-z0-9._-])${escapeRegExp(stem)}(?:\\.[A-Za-z0-9]+)+`,
-      "g",
-    );
-    const referenced = new Set(body.match(siblingRe) ?? []);
-    for (const sibling of referenced) {
-      if (sibling === selfBase) continue;
-      if (!existsSync(path.join(noteDir, sibling))) {
-        errors.push(
-          `ref ${r.src}: bundled note ${r.dst} references sibling '${sibling}' not present in the bundle (declare it in the note's 'companions:' frontmatter)`,
-        );
-      }
+    if (typeof r.src !== "string") continue;
+    const srcDir = path.dirname(path.join(repoRoot, r.src));
+    if (!existsSync(srcDir)) continue;
+
+    // Fenced blocks are payload, not instruction. This repo already draws that line — "a
+    // backtick means the syntax, not a link" (AGENTS.md, docs/ARCHITECTURE.md §wiki links) —
+    // and a fence is where a note carries site-render directives naming files casting is not
+    // meant to ship. `galaxy-collection-semantics` is the case: its ```vendored-myst block
+    // names the rendered upstream view, which is a site asset by design.
+    //
+    // INLINE code is deliberately still scanned. Every filename in this corpus is written in
+    // backticks, so exempting inline code would retire the check rather than narrow it.
+    const body = stripFencedBlocks(readFileSync(dstAbs, "utf8"));
+    const bundleDir = path.dirname(dstAbs);
+
+    for (const neighbour of listFilesUnder(srcDir, srcDir)) {
+      if (neighbour === "index.md") continue; // the note itself
+      // Cited by name, not merely a substring of some longer token.
+      const cited = new RegExp(`(?<![A-Za-z0-9._/-])${escapeRegExp(neighbour)}(?![A-Za-z0-9_-])`);
+      if (!cited.test(body)) continue;
+      if (existsSync(path.join(bundleDir, neighbour))) continue;
+      errors.push(
+        `ref ${r.src}: bundled note ${r.dst} tells the agent to read '${neighbour}', which is beside the note in the Foundry but not in the bundle (declare it in the note's 'companions:' frontmatter, or stop naming it in the body)`,
+      );
     }
   }
 

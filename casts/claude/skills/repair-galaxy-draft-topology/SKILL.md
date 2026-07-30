@@ -37,7 +37,6 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/patterns/galaxy-collection-patterns.md`: Pattern note copied verbatim into the bundle. Choose a corpus-attested collection recipe when the missing producer is a collection construction, reshape, or bridge. Use when: the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge.
 - `references/patterns/galaxy-tabular-patterns.md`: Pattern note copied verbatim into the bundle. Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce. Use when: the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on.
 - `references/notes/galaxy-collection-semantics.md`: Research note copied verbatim into the bundle. Preserve collection typing and map-over/reduction semantics when an inserted producer step joins or reshapes collection inputs. Use when: the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections.
-- `references/notes/galaxy-collection-semantics.upstream.myst`: Companion file copied verbatim into the bundle. Sibling of `references/notes/galaxy-collection-semantics.md`; read it where that note directs.
 - `references/notes/galaxy-collection-semantics.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/galaxy-collection-semantics.md`; read it where that note directs.
 
 ## Validation

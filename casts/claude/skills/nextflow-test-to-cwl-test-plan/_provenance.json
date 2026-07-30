@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-cwl-test-plan/index.md",
     "revision": 1,
     "content_hash": "b0fd0ddb5c26ce4b519b43ef30c6716e5c6a23d44d3db01eecac214699f37231",
-    "commit": "29dd43fa81259c03d5dee6dd04e74aef0cdc5233"
+    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
   },
-  "cast_at": "2026-07-30T13:36:02.577Z",
+  "cast_at": "2026-07-30T14:45:34.954Z",
   "refs": [
     {
       "kind": "schema",

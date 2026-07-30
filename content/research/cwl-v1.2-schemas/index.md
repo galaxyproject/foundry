@@ -13,6 +13,14 @@ related_notes:
   - "[[summary-cwl]]"
 related_molds:
   - "[[summarize-cwl]]"
+companions:
+  - "cwl-v1.2/cwl.yaml"
+  - "cwl-v1.2/CommonWorkflowLanguage.yml"
+  - "cwl-v1.2/Process.yml"
+  - "cwl-v1.2/CommandLineTool.yml"
+  - "cwl-v1.2/CommandLineTool-standalone.yml"
+  - "cwl-v1.2/Workflow.yml"
+  - "cwl-v1.2/Operation.yml"
 sources:
   - "https://github.com/common-workflow-language/cwl-v1.2/tree/v1.2.1"
   - "https://www.commonwl.org/v1.2/Workflow.html"

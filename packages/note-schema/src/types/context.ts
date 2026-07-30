@@ -59,7 +59,11 @@ export interface KindContext {
   licenseId: z.ZodType<string>;
   /** Package bin / subcommand names. Shared by `schema` and (as a slug) the cli kinds. */
   toolSlug: z.ZodString;
-  /** Sibling filenames a multi-file note bundles; casting copies them verbatim. */
+  /**
+   * Files a multi-file note bundles, as paths relative to the note's own directory. Casting
+   * copies them verbatim. Only meaningful for a directory-shaped kind: a flat note's "directory"
+   * is the whole collection, and every note in it would be naming files it does not own.
+   */
   companions: z.ZodType<string[]>;
   /** One entry of a Mold's typed reference manifest. */
   reference: z.ZodType<unknown>;
@@ -108,8 +112,29 @@ export function buildKindContext(options: BuildKindContextOptions): KindContext 
 
   const toolSlug = z.string().regex(/^[a-z][a-z0-9-]*$/);
 
+  // A path RELATIVE TO THE NOTE'S DIRECTORY, so a note can name a file in a vendored subtree
+  // and not only a flat sibling. `cwl-v1.2-schemas` is why: its seven upstream schemas live in
+  // `cwl-v1.2/`, and while this pattern admitted no separator they were undeclarable — which is
+  // the reason galaxyproject/foundry#404 fixed two notes and had to leave that one alone.
+  //
+  // Every segment is a literal name. No globs: the repo has exactly one glob dialect, in
+  // `@galaxy-foundry/kind-schema/collections`, and it does not export its matcher — so a pattern
+  // here would be a SECOND dialect, which is the drift that module's own header exists to end.
+  // Naming seven files is also the more explicit half of the choice, and explicit is the point
+  // of this field.
+  const companionPath = z
+    .string()
+    .regex(/^[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)*$/, {
+      message: "must be a path relative to the note's directory",
+    })
+    // `[A-Za-z0-9._-]+` admits `.` and `..` as whole segments, so the character class alone
+    // would let a note reach out of its own directory and bundle a file it does not own.
+    .refine((p) => !p.split("/").some((seg) => seg === "." || seg === ".."), {
+      message: "must not contain '.' or '..' segments",
+    });
+
   const companions = z
-    .array(z.string().regex(/^[A-Za-z0-9._-]+$/, { message: "must be a sibling filename" }))
+    .array(companionPath)
     .min(1)
     .refine((a) => new Set(a).size === a.length, { message: "companions must be unique" });
 

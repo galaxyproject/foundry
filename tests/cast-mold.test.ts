@@ -561,7 +561,17 @@ Body prose only — no flag list; options come from the package meta.
 });
 
 describe("cast-mold companion files", () => {
-  function writeCompanionFixture(dir: string, opts: { declareCompanions: boolean }): void {
+  function writeCompanionFixture(
+    dir: string,
+    opts: {
+      declareCompanions: boolean;
+      /** Path of the sibling, relative to the note's directory. May name a subdirectory. */
+      siblingName?: string;
+      /** Name it only inside a fenced block, which is payload rather than a read instruction. */
+      bodyMentionsSiblingInFence?: boolean;
+    },
+  ): void {
+    const sibling = opts.siblingName ?? "bundled-note.spec.yml";
     mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
     mkdirSync(path.join(dir, "content/research/bundled-note"), { recursive: true });
     mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
@@ -618,7 +628,10 @@ references:
 Use the bundled note reference.
 `,
     );
-    const companionsFm = opts.declareCompanions ? "companions:\n  - bundled-note.spec.yml\n" : "";
+    const companionsFm = opts.declareCompanions ? `companions:\n  - ${sibling}\n` : "";
+    const mention = opts.bodyMentionsSiblingInFence
+      ? `\`\`\`vendored-view\nfile: ${sibling}\n\`\`\`\n`
+      : `Consume \`${sibling}\` for the structured spec.\n`;
     writeFileSync(
       path.join(dir, "content/research/bundled-note/index.md"),
       `---
@@ -630,16 +643,14 @@ created: 2026-05-07
 revised: 2026-05-07
 revision: 1
 ai_generated: false
-summary: A multi-file note; consume bundled-note.spec.yml for the structured spec.
+summary: A multi-file note carrying a structured spec beside it for casting to bundle.
 ${companionsFm}---
 
-Consume \`bundled-note.spec.yml\` for the structured spec.
-`,
+${mention}`,
     );
-    writeFileSync(
-      path.join(dir, "content/research/bundled-note/bundled-note.spec.yml"),
-      "spec: true\n",
-    );
+    const siblingAbs = path.join(dir, "content/research/bundled-note", sibling);
+    mkdirSync(path.dirname(siblingAbs), { recursive: true });
+    writeFileSync(siblingAbs, "spec: true\n");
   }
 
   it("copies declared companion files next to the note and records companion_of", () => {
@@ -688,7 +699,102 @@ Consume \`bundled-note.spec.yml\` for the structured spec.
       const verify = execVerify(dir, "m");
       expect(verify.code).not.toBe(0);
       expect(verify.stderr).toContain("bundled-note.spec.yml");
-      expect(verify.stderr).toContain("not present in the bundle");
+      expect(verify.stderr).toContain("not in the bundle");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The sibling here does NOT share the note's basename, which is the case the old `<stem>.*`
+  // scan could not see. `gxformat2.schema.json` sat one hyphen from `gxformat2-schema.md` and
+  // went unreported for the whole life of that check; the fix was to list the note's directory
+  // instead of guessing at names.
+  it("verifier rejects an undeclared sibling that does not share the note's basename", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-unpaired-"));
+    try {
+      writeCompanionFixture(dir, { declareCompanions: false, siblingName: "structural.schema.json" });
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+
+      const verify = execVerify(dir, "m");
+      expect(verify.code, "an unpaired undeclared sibling must be reported").not.toBe(0);
+      expect(verify.stderr).toContain("structural.schema.json");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // A fenced block is payload, not an instruction to open a file — the same line this repo
+  // already draws for wiki links. `galaxy-collection-semantics` names its site-only MyST
+  // rendering inside a ```vendored-myst block, and that must not read as "go read this".
+  it("verifier ignores a sibling named only inside a fenced block", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-fenced-"));
+    try {
+      writeCompanionFixture(dir, {
+        declareCompanions: false,
+        siblingName: "site-only.myst",
+        bodyMentionsSiblingInFence: true,
+      });
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+
+      const verify = execVerify(dir, "m");
+      expect(verify.code, `a fenced mention is not a read instruction: ${verify.stderr}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("prunes a bundle file no ref claims, and reports it under --check", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-orphan-"));
+    try {
+      writeCompanionFixture(dir, { declareCompanions: true });
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+
+      // Stand in for a companion that was declared once and then undeclared: casting wrote it,
+      // nothing claims it now, and before pruning existed it stayed in the bundle forever while
+      // provenance and SKILL.md both said it was gone.
+      const orphan = path.join(dir, "casts/claude/skills/m/references/notes/left-behind.yml");
+      writeFileSync(orphan, "stale: true\n");
+
+      const checked = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--check", "--root", dir]);
+      expect(checked.code, "--check must not pass with an orphan present").not.toBe(0);
+      expect(`${checked.stdout}${checked.stderr}`).toContain("left-behind.yml");
+      expect(existsSync(orphan), "--check must not delete anything").toBe(true);
+
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+      expect(existsSync(orphan), "a normal cast prunes it").toBe(false);
+      // The files that ARE claimed survive.
+      expect(
+        existsSync(path.join(dir, "casts/claude/skills/m/references/notes/bundled-note.spec.yml")),
+      ).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("carries a companion that lives in a subdirectory of the note", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-nested-"));
+    try {
+      writeCompanionFixture(dir, { declareCompanions: true, siblingName: "vendor/spec.yml" });
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+
+      // Nested dst, not flattened: the note names `vendor/spec.yml` and the bundle mirrors it,
+      // so a vendored tree whose files reference each other by relative path still resolves.
+      const nested = path.join(dir, "casts/claude/skills/m/references/notes/vendor/spec.yml");
+      expect(existsSync(nested), "nested companion should mirror its path in the bundle").toBe(true);
+
+      const prov = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+      );
+      const companion = prov.refs.find(
+        (ref: { dst: string }) => ref.dst === "references/notes/vendor/spec.yml",
+      );
+      expect(companion, "nested companion recorded in provenance").toBeTruthy();
+      expect(companion.companion_of).toBe("references/notes/bundled-note.md");
+
+      expect(execVerify(dir, "m").code).toBe(0);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
