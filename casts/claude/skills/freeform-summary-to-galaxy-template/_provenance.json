@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "1837cf301b6df1f1a8f0c17861b83ea17a1daa88efb52e546608d1d119f7bc65",
-    "commit": "29dd43fa81259c03d5dee6dd04e74aef0cdc5233"
+    "commit": "d02c342be6732a608503b6f7541921ad8c94d377"
   },
-  "cast_at": "2026-07-30T13:35:50.277Z",
+  "cast_at": "2026-07-30T14:45:22.028Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -99,27 +99,8 @@
       "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
-      "dst_hash": "3503b5667276674ff474681afa6bd83ff6cfaec46831c206702c4ae73b0533b8",
-      "source": "deterministic",
-      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
-    },
-    {
-      "kind": "research",
-      "mode": "verbatim",
-      "ref": "[[galaxy-collection-semantics]]",
-      "src": "content/research/galaxy-collection-semantics/galaxy-collection-semantics.upstream.myst",
-      "dst": "references/notes/galaxy-collection-semantics.upstream.myst",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton.",
-      "trigger": "When creating workflow inputs, outputs, and placeholder connections involving collections.",
-      "companion_of": "references/notes/galaxy-collection-semantics.md",
-      "license": "MIT",
-      "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
-      "dst_hash": "bbc8215b0a6ae8e735042af8353c73fc0d740f4ff8a32d85aba83eae63a2b3a1",
+      "src_hash": "f5372cea45b3df39b9fc4e82a65c846b2cb617caebd360afdfcd862071e2da4a",
+      "dst_hash": "f5372cea45b3df39b9fc4e82a65c846b2cb617caebd360afdfcd862071e2da4a",
       "source": "deterministic",
       "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
     },

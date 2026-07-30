@@ -24,14 +24,16 @@ sources:
   - "https://github.com/galaxyproject/galaxy/blob/7765fae934fbfdee77e3be5f5b235e43735273ae/lib/galaxy/model/dataset_collections/types/collection_semantics.yml"
 companions:
   - "galaxy-collection-semantics.yml"
-  - "galaxy-collection-semantics.upstream.myst"
 summary: "Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references."
 ---
 
-> **Vendored from upstream**, pinned at SHA `7765fae`. Two files live next to this note:
+> **Vendored from upstream**, pinned at SHA `7765fae`. One file travels with this note:
 >
 > - `galaxy-collection-semantics.yml` — the structured source. **Agents and casting should consume this.** It carries the `tests:` blocks that pin concrete Galaxy test names; the rendered upstream view drops them.
-> - `galaxy-collection-semantics.upstream.myst` — Galaxy's auto-generated MyST/LaTeX rendering of the YAML, vendored only so the human view below has something to render. Sync is manual.
+>
+> The Foundry also vendors Galaxy's auto-generated MyST/LaTeX rendering of the same YAML, which
+> is what the human view below renders from. It is a site asset: casting does not carry it, so
+> do not look for it beside this note in a skill bundle. Sync is manual.
 >
 > **When to consult:** authoring or reasoning about Molds and patterns that touch `data_collection` inputs, map-over / reduction shape changes, sub-collection mapping, `paired_or_unpaired`, or `sample_sheet`.
 

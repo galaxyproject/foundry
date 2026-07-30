@@ -259,11 +259,6 @@
           "type": "string[]"
         },
         {
-          "name": "companions",
-          "required": false,
-          "type": "string[]"
-        },
-        {
           "name": "iwc_exemplars",
           "required": false,
           "type": "object[]"
