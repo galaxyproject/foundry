@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
-import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { companionOf, readCompanion } from '../../lib/content-files';
 import Base from '../../layouts/Base.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const EVAL = companionOf('mold', 'eval.md');
 const molds = (await getCollection('molds')).filter(n => n.data.status !== 'archived');
 const evalCount = molds.filter(m => hasEval(m.id)).length;
 
@@ -20,8 +20,7 @@ for (const m of molds) {
 for (const [, list] of byAxis) list.sort((a, b) => a.data.name.localeCompare(b.data.name));
 
 function hasEval(id: string): boolean {
-  const evalPath = fileURLToPath(new URL(`../../../../content/${id}/eval.md`, import.meta.url));
-  return existsSync(evalPath);
+  return readCompanion(id, EVAL) !== undefined;
 }
 
 function healthFor(m: typeof molds[number]): 'ok' | 'warn' | 'error' {
