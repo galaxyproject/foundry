@@ -7,7 +7,7 @@ argument-hint: "<pipeline> [scenarios.md case name or description]"
 
 Scoped entry point into `/test-drive` for a whole pipeline journey. `$1` is `<pipeline-slug> [case]`.
 
-This is `/test-drive` over a pipeline's Mold chain, with evaluation **between each step** (composition) and a **pipeline-level oracle** at the end. Follow `.claude/commands/test-drive.md`; this file fixes the scope, the phase order, and the scenario source. See `docs/EVAL_PHILOSOPHY.md` for why the two layers exist.
+This is `/test-drive` over a pipeline's Mold chain, with evaluation **between each step** (composition) and a **pipeline-level oracle** at the end. Follow `.claude/commands/test-drive.md`; this file fixes the scope, the phase order, and the scenario source. See `content/meta/eval-philosophy.md` for why the two layers exist.
 
 ## Bind
 

@@ -7,7 +7,7 @@ argument-hint: "<mold> [scenarios.md case name or description]"
 
 Scoped entry point into `/test-drive` for one Mold. `$1` is `<mold-slug> [case]`.
 
-This is `/test-drive` narrowed to a single Mold bound to a `scenarios.md` case. Follow `.claude/commands/test-drive.md` end to end; this file only fixes the scope and the scenario source. The eval↔scenario split is in `docs/EVAL_PHILOSOPHY.md`.
+This is `/test-drive` narrowed to a single Mold bound to a `scenarios.md` case. Follow `.claude/commands/test-drive.md` end to end; this file only fixes the scope and the scenario source. The eval↔scenario split is in `content/meta/eval-philosophy.md`.
 
 ## Bind
 

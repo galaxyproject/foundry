@@ -9,7 +9,7 @@ Drive the cast pipeline for `$1` against the named target (default `claude`). Th
 
 ## 0. Orient
 
-- **`docs/MOLD_SPEC.md`** — Mold source layout. `index.md` is the contract; `casting.md` is for you (cast-time guidance); `cast-skill-verification.md` is for the post-cast review pass; `eval.md` never lands in the bundle.
+- **`content/meta/mold-spec.md`** — Mold source layout. `index.md` is the contract; `casting.md` is for you (cast-time guidance); `cast-skill-verification.md` is for the post-cast review pass; `eval.md` never lands in the bundle.
 - **`casts/<target>/_target.yml`** — per-kind dst conventions, required outputs, skill constraints.
 - **`reference_contract.yml`** — kinds, modes, used_at/load/evidence vocabulary.
 

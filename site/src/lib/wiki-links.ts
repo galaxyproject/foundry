@@ -8,7 +8,7 @@ export { WIKI_LINK_RE } from '@galaxy-foundry/wiki-links';
 // The MAP is ours: which notes exist, and what each is addressable by — a basename, a Mold's
 // `name`, a `tool command` pair. The grammar and the lookup rule are not, and now come from
 // @galaxy-foundry/wiki-links, so the site, the validator and the caster cannot answer
-// differently. See docs/ARCHITECTURE.md §7.
+// differently. See content/meta/architecture.md §7.
 
 export interface WikiLinkTarget {
   id: string;

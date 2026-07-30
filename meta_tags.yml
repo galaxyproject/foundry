@@ -15,7 +15,7 @@
 #
 # The FORMAT is shared across Foundry instances (spec: galaxyproject/foundry-pattern,
 # content/pattern/standing-up-a-foundry.instructions.txt) — treat a format change as a
-# cross-repo change. The facet VOCABULARY below is ours. See docs/ARCHITECTURE.md §4.
+# cross-repo change. The facet VOCABULARY below is ours. See content/meta/architecture.md §4.
 
 version: 1
 

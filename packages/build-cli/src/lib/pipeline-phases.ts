@@ -1,7 +1,7 @@
 // Shared pipeline-phase compiler. Parses a pipeline note's `phases:` spine into
 // ordered, typed phase descriptors. Consumed by the validator (cross-file phase
 // resolution + artifact-binding order) and by the assembler (harness rendering).
-// One grammar, one parser — see docs/HARNESS_PIPELINES.md and the glossary
+// One grammar, one parser — see content/meta/harness-pipelines.md and the glossary
 // (Phase, Mold, Branch, Loop, Routing pattern).
 
 import type { Frontmatter } from "./types.js";

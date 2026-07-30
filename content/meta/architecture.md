@@ -1,4 +1,16 @@
-# Architecture
+---
+type: meta
+title: "Architecture"
+record_kind: foundation
+order: 2
+tags:
+  - meta
+status: reviewed
+created: 2026-04-30
+revised: 2026-07-30
+revision: 44
+summary: "Physical layout, content types, validation pipeline, generated artifacts, and site rendering."
+---
 
 Galaxy Workflow Foundry architecture, anchored on the **physical file layout** of the foundry repo. Working premise: organize the data well — typed frontmatter, registered tags, wiki-linked references, generated indexes — and the skills, validation, and rendering fall out naturally.
 
@@ -122,14 +134,13 @@ The frontmatter contract is the zod schema built by `buildNoteSchema` in `@galax
 
 **One directory per note kind**, under `packages/note-schema/src/types/`. Each holds `schema.ts` (that kind's contract), `kind.md` (what the kind is for, and why each required field is required), and `example.md` (a minimal valid note, which `test/kind-directories.test.ts` parses against that kind's own schema — so the documentation stays executable). `types/context.ts` holds the base envelope and the field primitives shared by more than one kind; `types/index.ts` is the one enumeration of the kinds, and a drift test asserts it matches the directory listing both ways. `note-schema.ts` is the assembler and nothing else: it composes those definitions into the discriminated union and defines no fields of its own. To add or change a field, edit that kind's `schema.ts`. `types/kinds.generated.json` is the machine-readable form of this section, derived from the zod shapes (§8).
 
-**Base required (everywhere)**: `type`, `tags`, `status`, `created`, `revised`, `revision`, `ai_generated`, `summary`.
+**Base required (everywhere)**: `type`, `tags`, `status`, `created`, `revised`, `revision`, `summary`.
 
 - `status` enum: `draft | reviewed | revised | stale | archived`. Drives badge rendering and `archived` filtering throughout the site.
 - `summary`: `string`, `minLength: 20`, `maxLength: 160` — forced compression. Powers `Index.md`, dashboard tooltips, and link previews.
 - `revision`: `integer >= 1`; bumped by hand on every edit.
 - `created` / `revised`: ISO date strings (`z.coerce.date()` in the schema; the validator adds a separate `YYYY-MM-DD` format pass).
 - `tags`: array, `minItems: 1`, items checked for membership in `meta_tags.yml`.
-- `ai_generated`: boolean.
 
 **Per-type required fields** are expressed as a zod `discriminatedUnion("type", …)`: each note type is its own `.strict()` member that declares exactly the fields it requires. Cross-field rules that a single member can't express (a `source-specific` mold requires `source`; an external-upstream `schema` note requires `license`) live in a `superRefine` on the union.
 
@@ -300,7 +311,7 @@ A fourth payload reaches a bundle without any frontmatter at all: a `prompt` not
 
 Every kind declares `shape` (`file` or `directory`) and `companions` — the non-note files a note may carry. The validator checks each directory note against its kind's declaration: a missing `required` companion is an error, a missing `recommended` one a warning, and an **undeclared** file beside a note is an error, because a file the kind does not name is indistinguishable from a misnamed one.
 
-That declaration replaced four disagreeing answers to the same question: two hardcoded allowlists in `validate.ts` (`MOLD_TOP_FILES`, `PIPELINE_TOP_FILES`), a bare `UPSTREAM_PROMPT_FILE` constant for `prompt`, and nothing at all for `cli-tool`. The allowlists could not say a file was *required*; the constant could not say a file was *forbidden*; none of them was reachable from the kind it described, and `docs/MOLD_SPEC.md` carried a fifth copy as prose that had already drifted from the cast target's forbidden-files list.
+That declaration replaced four disagreeing answers to the same question: two hardcoded allowlists in `validate.ts` (`MOLD_TOP_FILES`, `PIPELINE_TOP_FILES`), a bare `UPSTREAM_PROMPT_FILE` constant for `prompt`, and nothing at all for `cli-tool`. The allowlists could not say a file was *required*; the constant could not say a file was *forbidden*; none of them was reachable from the kind it described, and `content/meta/mold-spec.md` carried a fifth copy as prose that had already drifted from the cast target's forbidden-files list.
 
 Whether an entry is a **note** comes from the collection table, never from its extension. `content/cli/<tool>/` is why: `index.md` is a `cli-tool` and every sibling `.md` is a `cli-command`, so that kind has a directory full of markdown and no companions at all.
 
@@ -590,7 +601,7 @@ Key decisions reflected in the layout:
 
 ## 15. Tracked Follow-Up
 
-- **Harness execution strategy (open research question).** How a pipeline becomes an executable harness spans a spectrum. The current floor is a **stop-gap**: `/assemble-pipeline` compiles a pipeline into a trivial linear `pipeline-<slug>` skill that runs its phase casts in order, defers loop endstate detection to the looped Mold's own oracle (`advance-galaxy-draft-step` → `gxwf draft-next-step`), expands `[branch]` routing inline, and sets up a per-run working directory (foundry#282). The ceiling is heavyweight stateful orchestration — resumption, approval gates, autonomy posture, cross-step rework, routing the harness owns rather than the looped/branching Molds. Unresolved: where sophisticated harnesses live (downstream repos vs. a Foundry-blessed format), how much routing the harness owns vs. the Molds own, and whether the stop-gap assembler graduates into something durable or stays a test-drive convenience. See `docs/HARNESS_PIPELINES.md`.
+- **Harness execution strategy (open research question).** How a pipeline becomes an executable harness spans a spectrum. The current floor is a **stop-gap**: `/assemble-pipeline` compiles a pipeline into a trivial linear `pipeline-<slug>` skill that runs its phase casts in order, defers loop endstate detection to the looped Mold's own oracle (`advance-galaxy-draft-step` → `gxwf draft-next-step`), expands `[branch]` routing inline, and sets up a per-run working directory (foundry#282). The ceiling is heavyweight stateful orchestration — resumption, approval gates, autonomy posture, cross-step rework, routing the harness owns rather than the looped/branching Molds. Unresolved: where sophisticated harnesses live (downstream repos vs. a Foundry-blessed format), how much routing the harness owns vs. the Molds own, and whether the stop-gap assembler graduates into something durable or stays a test-drive convenience. See `content/meta/harness-pipelines.md`.
 - **Composed pipelines (`PAPER -> CWL -> GALAXY`).** Track representation for composed paths in [issue #200](https://github.com/galaxyproject/foundry/issues/200). The Mold inventory already supports the paths; the unresolved question is whether composed journeys get distinct `content/pipelines/<slug>/` notes or remain harness-level runtime compositions.
 
 ## 16. Resolved Contracts

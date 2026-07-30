@@ -1,4 +1,16 @@
-# Guiding Principles
+---
+type: meta
+title: "Guiding Principles"
+record_kind: foundation
+order: 1
+tags:
+  - meta
+status: reviewed
+created: 2026-05-01
+revised: 2026-07-17
+revision: 7
+summary: "The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding."
+---
 
 LLM-proposed Galaxy workflows fail in specific, detectable ways — hallucinated tool IDs, dropped conditional branches, fabricated parameters, `gxformat2` the parser rejects — and monolithic conversion skills decay because they answer those failures with prose caveats that neither compose nor scale. These principles are the design pressure behind the alternative.
 

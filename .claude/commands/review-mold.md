@@ -27,8 +27,8 @@ Run it once and trust it. Do **not** re-derive these checks by hand — spend to
 
 1. **`content/meta/glossary.md`** — pinned vocabulary. Misreading "Mold," "Cast," "reference kind" breaks the review.
 2. **`CLAUDE.md`** / **`AGENTS.md`** — authoring rules.
-3. **`docs/MOLD_SPEC.md`** — Mold source layout and the eval/usage/refinement contract; reference-kind taxonomy; `load`/`mode`/`used_at` semantics.
-4. **`docs/COMPILATION_PIPELINE.md`** — what Cast does with each reference kind; `mode: verbatim` vs LLM-condensed.
+3. **`content/meta/mold-spec.md`** — Mold source layout and the eval/usage/refinement contract; reference-kind taxonomy; `load`/`mode`/`used_at` semantics.
+4. **`content/meta/casting.md`** — what Cast does with each reference kind; `mode: verbatim` vs LLM-condensed.
 5. **`packages/note-schema/src/types/mold/`** — the Mold contract (`schema.ts`), what each required field is for (`kind.md`), and a minimal valid note (`example.md`). The `references[]` shape itself is shared, in `packages/note-schema/src/types/context.ts`. Skim, don't memorize.
 6. **`common_paths.yml.sample`** — citation-prefix vocabulary for resolving inline `$NAME/...` corpus references.
 7. **The Mold itself** — `content/molds/$1/`:

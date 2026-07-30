@@ -2,11 +2,11 @@
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import sections from '../../../../dashboard_sections.json';
-import { designDocsByCategory } from '../../lib/design-docs';
+import { designDocsByCategory, designDocHref } from '../../lib/design-docs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getAllNotes();
-const infrastructureDocs = designDocsByCategory('infrastructure');
+const infrastructureDocs = await designDocsByCategory('infrastructure');
 
 // Ties broken by id, matching the validator's own sortByRevisedDesc. Without it, notes
 // sharing a revised date fall back to whatever order the loader happened to yield, so a
@@ -93,8 +93,8 @@ function noteTitle(n: typeof allNotes[number]): string {
       <tbody>
         {infrastructureDocs.map(doc => (
           <tr>
-            <td><a href={`${base}/design/${doc.slug}/`}>{doc.title}</a></td>
-            <td class="text-sm text-(--color-text-muted)">{doc.summary}</td>
+            <td><a href={designDocHref(doc, base)}>{doc.data.title}</a></td>
+            <td class="text-sm text-(--color-text-muted)">{doc.data.summary}</td>
             <td><span class="tag">design</span></td>
           </tr>
         ))}

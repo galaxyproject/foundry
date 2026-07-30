@@ -1,4 +1,16 @@
-# Molds
+---
+type: meta
+title: "Molds"
+record_kind: foundation
+order: 3
+tags:
+  - meta
+status: reviewed
+created: 2026-04-30
+revised: 2026-07-27
+revision: 21
+summary: "The Mold inventory, bucketing axes, and boundaries between Molds and reference content."
+---
 
 Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines in `HARNESS_PIPELINES.md`. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
 

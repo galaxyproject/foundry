@@ -44,7 +44,7 @@ export const kind = defineKind({
   shape: "directory",
 
   // The same companion vocabulary a mold uses, minus the authoring journal — and this is the first
-  // time a pipeline's layout is written down anywhere, since `docs/MOLD_SPEC.md` is mold-only.
+  // time a pipeline's layout is written down anywhere, since `content/meta/mold-spec.md` is mold-only.
   //
   // Duplicated from `mold` rather than shared. Two call sites is not yet a pattern, and a shared
   // companion set would have to decide what happens when one kind wants one more file — which is a

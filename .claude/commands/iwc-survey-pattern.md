@@ -11,8 +11,8 @@ Write or refine exactly one pattern page under `content/patterns/` from a survey
 
 1. **`content/meta/glossary.md`** — pinned Foundry vocabulary.
 2. **`CLAUDE.md`** — local authoring rules.
-3. **`docs/PATTERNS.md`** — operation-anchored naming, corpus-first rule, legacy-tool posture.
-4. **`docs/ARCHITECTURE.md`** §3, §5, §6 — note types, frontmatter, validation.
+3. **`content/meta/pattern-authorship.md`** — operation-anchored naming, corpus-first rule, legacy-tool posture.
+4. **`content/meta/architecture.md`** §3, §5, §6 — note types, frontmatter, validation.
 5. **`packages/note-schema/src/types/<kind>/`** (one directory per note kind — `schema.ts`, `kind.md`, `example.md`) + **`meta_tags.yml`** — frontmatter contract and tags.
 6. **`common_paths.yml.sample`** — citation prefix vocabulary; use `$IWC_FORMAT2/path:line` citations.
 7. **The survey at `$1`** — especially the candidate boundary, decisions, and open-question resolution relevant to `$2`.
@@ -36,7 +36,7 @@ Examples:
 - Filename and title are operation-anchored. Tool names belong in `## Tool`, not the slug, unless the operation is inseparable from one named Galaxy primitive.
 - Keep title prefixes coherent within a family (`Tabular: ...`, `Collection: ...`) even when slugs reflect bridge operations or survey wording.
 - Use `aliases` for old survey candidate names, tool-anchored names, or terms users are likely to search for.
-- If `$2` looks like a typo or an outlier against `docs/PATTERNS.md`, the survey, or nearby slugs, stop and ask. Recommend the correction.
+- If `$2` looks like a typo or an outlier against `content/meta/pattern-authorship.md`, the survey, or nearby slugs, stop and ask. Recommend the correction.
 
 ## Page shape
 

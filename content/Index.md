@@ -250,6 +250,21 @@ Generated from content frontmatter. Do not edit by hand.
 - [[gxwf]] — Galaxy workflow design-time CLI (validate, convert, lint, roundtrip, tool-cache discovery).
 - [[planemo]] — Galaxy tool/workflow runtime testing CLI; used by run-workflow-test and friends.
 
+## Meta
+
+- [[architecture]] — Physical layout, content types, validation pipeline, generated artifacts, and site rendering. *(reviewed)*
+- [[cast-walkthrough]] — One real committed cast (discover-shed-tool) annotated end to end: every bundle file traced back through per-kind dispatch and _provenance.json. *(reviewed)*
+- [[comparisons]] — Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) — a dated snapshot. *(reviewed)*
+- [[casting]] — How typed Mold references become target-specific cast artifacts with provenance. *(reviewed)*
+- [[corpus]] — How IWC grounding works without turning the Foundry into an upstream workflow mirror. *(reviewed)*
+- [[eval-philosophy]] — Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/usage/refinement split. *(reviewed)*
+- [[guiding-principles]] — The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding. *(reviewed)*
+- [[harness-pipelines]] — The source-to-target journeys that compose Molds, loops, and branch phases. *(reviewed)*
+- [[mold-spec]] — The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it. *(reviewed)*
+- [[molds]] — The Mold inventory, bucketing axes, and boundaries between Molds and reference content. *(reviewed)*
+- [[pattern-authorship]] — Developer-facing authorship rules for operation-named, corpus-grounded pattern pages. *(reviewed)*
+- [[schema-packages]] — Where a Mold IO schema lives, how cast resolves one through a schema note, and why there is no separate schema package. *(reviewed)*
+
 ## Prompt
 
 - [[custom-tool-critic]] — Vendored Galaxy internal prompt for critiquing generated custom tool definitions.

@@ -16,8 +16,8 @@ Default posture:
 ## Load context first (in order)
 
 1. **`content/meta/glossary.md`** — pinned vocabulary.
-2. **`docs/PATTERNS.md`** — authorship policy. Operation-anchored naming is mandatory; corpus-first is mandatory; legacy-tool footnote convention is mandatory.
-3. **`docs/ARCHITECTURE.md`** §3 (note types).
+2. **`content/meta/pattern-authorship.md`** — authorship policy. Operation-anchored naming is mandatory; corpus-first is mandatory; legacy-tool footnote convention is mandatory.
+3. **`content/meta/architecture.md`** §3 (note types).
 4. **`common_paths.yml.sample`** — citation prefix vocabulary for any new entries you write.
 5. **`content/research/iwc-shortcuts-anti-patterns/index.md`** — the live anti-pattern note. You will edit this inline. Read its full current state so additions match its shape and tone.
 6. **All existing pattern pages** under `content/patterns/` — title, scope, related links. Anything already covered by an existing page is *not* a "create new" candidate; classify it as already-authored, refine existing, or merge into existing.
@@ -36,7 +36,7 @@ Before asking the user anything, suppress questions covered by prior answers:
 
 - Any candidate pattern whose scope overlaps an existing `content/patterns/*.md` page → classify as "already authored," "refine existing," or "merge into existing," not "create new."
 - Any idiom or tool already called out in `iwc-shortcuts-anti-patterns.md` → do not re-surface as a recommendation candidate; cite the existing entry instead.
-- Any naming-axis question (operation vs tool vs shape) → do not ask; `docs/PATTERNS.md` decides. Use operation-anchored names.
+- Any naming-axis question (operation vs tool vs shape) → do not ask; `content/meta/pattern-authorship.md` decides. Use operation-anchored names.
 - Any "should we write a speculative page for this gap" question → do not ask; corpus-first decides. Document the gap, no page.
 
 Build a compact classification table before user questions:
@@ -153,7 +153,7 @@ Post a final summary:
 
 ## What this command does **not** do
 
-- Decide naming axis, corpus-first stance, or any policy already pinned in `docs/PATTERNS.md`.
+- Decide naming axis, corpus-first stance, or any policy already pinned in `content/meta/pattern-authorship.md`.
 - Push commits.
 - Re-run the survey or update its citations.
 

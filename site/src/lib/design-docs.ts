@@ -1,126 +1,70 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { marked } from 'marked';
+// The design record, read from the corpus rather than restated beside it.
+//
+// This module used to BE the registry: a hand-written `DESIGN_DOCS` array carrying every
+// record's title, summary, source filename and category in TypeScript, plus a link rewriter
+// that turned relative `docs/*.md` links into routes. It drifted, as a second copy does —
+// `MOLD_SPEC.md` and `SCHEMA_PACKAGES.md` sat in `docs/` and the array named neither, so two
+// design records were rendered by nothing and no check could notice.
+//
+// Now the records are notes of the `meta` kind under `content/meta/`, so title and summary
+// come from frontmatter that a schema checks, and membership is the collection's answer. A
+// record cannot exist and go unrendered any more: the collection either has it or it is not a
+// record. The renderer is gone too — these are ordinary notes, so the catch-all note route
+// renders them and the wiki-link checker gates their cross-references.
+//
+// What is left here is the part that is genuinely presentation: how the two shelves are
+// introduced on the index page.
 
-const DOCS_DIR = path.resolve('../docs');
+import { getCollection, type CollectionEntry } from 'astro:content';
 
-export type DesignDoc = {
-  slug: string;
+export type DesignDoc = CollectionEntry<'meta'>;
+
+export type RecordKind = DesignDoc['data']['record_kind'];
+
+/** The route a design record renders at — the same content-path rule every note follows. */
+export function designDocHref(doc: DesignDoc, base: string): string {
+  return `${base}/${doc.id}/`;
+}
+
+/**
+ * Every design record, in reading order.
+ *
+ * Sorted by the note's own `order`, which is what the old array's POSITION used to carry and
+ * the only thing about it that frontmatter could not otherwise express: the sequence is
+ * pedagogical, so neither `created` nor the title sorts it right.
+ */
+export async function getDesignDocs(): Promise<DesignDoc[]> {
+  const docs = await getCollection('meta');
+  return docs.sort((a, b) => a.data.order - b.data.order);
+}
+
+export async function designDocsByCategory(category: RecordKind): Promise<DesignDoc[]> {
+  const docs = await getDesignDocs();
+  return docs.filter(doc => doc.data.record_kind === category);
+}
+
+// Shelf furniture: headings and card verbs for the index page. Deliberately NOT frontmatter —
+// this describes how a SET of records is introduced, and no single record owns it. `category`
+// is typed as the kind's own enum, so a `record_kind` added to the schema without a heading
+// here is a typecheck error rather than a section that silently renders empty.
+export const DESIGN_DOC_GROUPS: readonly {
+  category: RecordKind;
   title: string;
-  source: string;
   summary: string;
-  category: 'foundation' | 'infrastructure';
-};
-
-export const DESIGN_DOCS: DesignDoc[] = [
-  {
-    slug: 'guiding-principles',
-    title: 'Guiding Principles',
-    source: 'GUIDING_PRINCIPLES.md',
-    summary: 'The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding.',
-    category: 'foundation',
-  },
-  {
-    slug: 'architecture',
-    title: 'Architecture',
-    source: 'ARCHITECTURE.md',
-    summary: 'Physical layout, content types, validation pipeline, generated artifacts, and site rendering.',
-    category: 'foundation',
-  },
-  {
-    slug: 'molds',
-    title: 'Molds',
-    source: 'MOLDS.md',
-    summary: 'The Mold inventory, bucketing axes, and boundaries between Molds and reference content.',
-    category: 'foundation',
-  },
-  {
-    slug: 'casting',
-    title: 'Compilation Pipeline',
-    source: 'COMPILATION_PIPELINE.md',
-    summary: 'How typed Mold references become target-specific cast artifacts with provenance.',
-    category: 'foundation',
-  },
-  {
-    slug: 'cast-walkthrough',
-    title: 'Cast Walkthrough',
-    source: 'CAST_WALKTHROUGH.md',
-    summary: 'One real committed cast (discover-shed-tool) annotated end to end: every bundle file traced back through per-kind dispatch and _provenance.json.',
-    category: 'foundation',
-  },
-  {
-    slug: 'eval-philosophy',
-    title: 'Eval Philosophy',
-    source: 'EVAL_PHILOSOPHY.md',
-    summary: 'Why eval.md is an abstract oracle and scenarios.md holds the concrete cases — property checks, hallucination guardrails, and the eval/scenario/usage/refinement split.',
-    category: 'foundation',
-  },
-  {
-    slug: 'corpus',
-    title: 'Corpus Integration',
-    source: 'CORPUS_INGESTION.md',
-    summary: 'How IWC grounding works without turning the Foundry into an upstream workflow mirror.',
-    category: 'foundation',
-  },
-  {
-    slug: 'harness-pipelines',
-    title: 'Harness Pipelines',
-    source: 'HARNESS_PIPELINES.md',
-    summary: 'The source-to-target journeys that compose Molds, loops, and branch phases.',
-    category: 'foundation',
-  },
-  {
-    slug: 'comparisons',
-    title: 'Comparisons',
-    source: 'COMPARISONS.md',
-    summary: 'Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) — a dated snapshot.',
-    category: 'infrastructure',
-  },
-  {
-    slug: 'pattern-authorship',
-    title: 'Pattern Authorship Policy',
-    source: 'PATTERNS.md',
-    summary: 'Developer-facing authorship rules for operation-named, corpus-grounded pattern pages.',
-    category: 'infrastructure',
-  },
-];
-
-export const DESIGN_DOC_GROUPS = [
+  action: string;
+}[] = [
   {
     category: 'foundation',
     title: 'Foundry design records',
-    summary: 'The core rationale behind Molds, casting, corpus grounding, and source-to-target pipelines.',
+    summary:
+      'The core rationale behind Molds, casting, corpus grounding, and source-to-target pipelines.',
     action: 'READ THE RECORD',
   },
   {
     category: 'infrastructure',
     title: 'Project infrastructure research',
-    summary: 'Developer-facing evaluations and adjacent-project notes that shape how the Foundry is built, hosted, and integrated.',
+    summary:
+      'Developer-facing evaluations and adjacent-project notes that shape how the Foundry is built, hosted, and integrated.',
     action: 'READ THE RESEARCH',
   },
-] as const;
-
-export function designDocsByCategory(category: DesignDoc['category']): DesignDoc[] {
-  return DESIGN_DOCS.filter(doc => doc.category === category);
-}
-
-export function getDesignDoc(slug: string): DesignDoc | undefined {
-  return DESIGN_DOCS.find(doc => doc.slug === slug);
-}
-
-export function renderDesignDoc(doc: DesignDoc, base: string): string {
-  const raw = fs.readFileSync(path.join(DOCS_DIR, doc.source), 'utf-8');
-  const withoutTitle = raw.replace(/^# .+\n+/, '');
-  const rewritten = rewriteDocLinks(withoutTitle, base);
-  return marked.parse(rewritten, { async: false }) as string;
-}
-
-function rewriteDocLinks(markdown: string, base: string): string {
-  const bySource = new Map(DESIGN_DOCS.map(doc => [doc.source, doc.slug]));
-  return markdown.replace(/\]\(([^)]+\.md)(#[^)]+)?\)/g, (match, target, hash = '') => {
-    const filename = target.split('/').pop();
-    const slug = filename ? bySource.get(filename) : undefined;
-    if (!slug) return match;
-    return `](${base}/design/${slug}/${hash})`;
-  });
-}
+];

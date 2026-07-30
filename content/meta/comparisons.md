@@ -1,4 +1,16 @@
-# Comparisons
+---
+type: meta
+title: "Comparisons"
+record_kind: infrastructure
+order: 1
+tags:
+  - meta
+status: reviewed
+created: 2026-05-15
+revised: 2026-07-30
+revision: 5
+summary: "Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) \u2014 a dated snapshot."
+---
 
 Where the Foundry sits relative to adjacent approaches, in two parts with
 deliberately different decay rates — the same separate-decay-rates discipline

@@ -1,4 +1,16 @@
-# Schema Packages
+---
+type: meta
+title: "Schema Packages"
+record_kind: infrastructure
+order: 3
+tags:
+  - meta
+status: reviewed
+created: 2026-05-04
+revised: 2026-05-11
+revision: 5
+summary: "Where a Mold IO schema lives, how cast resolves one through a schema note, and why there is no separate schema package."
+---
 
 Foundry-authored Mold IO schemas live in TypeScript packages. The `content/schemas/` tree only holds the human-readable `<name>.md` schema notes; there are no JSON mirrors there. Mold frontmatter cites schemas as `[[wiki-link]]` to the schema note — cast resolves the wiki-link, reads `package` + `package_export` from the note's frontmatter, imports the named runtime export, and serializes it into the bundle.
 

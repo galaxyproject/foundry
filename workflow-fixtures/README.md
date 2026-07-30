@@ -55,7 +55,7 @@ A skeleton is an `iwc-format2/.../foo.gxwf.yml` workflow with non-structural fie
 
 Dropped: `tool_state` parameter blobs, `position:` UI metadata, step-level `comments:`, `uuid` and other non-structural IDs.
 
-Each skeleton is ~5–20KB instead of ~100KB–1MB; all 120 fit in agent context. Used by `/iwc-survey` as a cheap first-pass scan for step-pair / step-sequence patterns before drilling into `$IWC_FORMAT2`. See `../docs/CORPUS_INGESTION.md`.
+Each skeleton is ~5–20KB instead of ~100KB–1MB; all 120 fit in agent context. Used by `/iwc-survey` as a cheap first-pass scan for step-pair / step-sequence patterns before drilling into `$IWC_FORMAT2`. See `../content/meta/corpus.md`.
 
 ## Adding a Nextflow fixture
 

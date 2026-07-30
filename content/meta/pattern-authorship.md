@@ -1,4 +1,16 @@
-# Pattern authorship policy
+---
+type: meta
+title: "Pattern Authorship Policy"
+record_kind: infrastructure
+order: 2
+tags:
+  - meta
+status: reviewed
+created: 2026-05-01
+revised: 2026-07-30
+revision: 4
+summary: "Developer-facing authorship rules for operation-named, corpus-grounded pattern pages."
+---
 
 Project-infrastructure policy for `content/patterns/` notes. Read this before hand-authoring
 pattern pages or running survey commands that propose new ones. Pattern-specific rules (for example,
@@ -38,7 +50,7 @@ When the corpus shows a modern tool *and* a legacy alternative for the same oper
 
 | Layer | What lives there | Example |
 |---|---|---|
-| `docs/PATTERNS.md` (this file) | Project-level authorship policy | "Operation-anchored naming" |
+| `content/meta/pattern-authorship.md` (this file) | Project-level authorship policy | "Operation-anchored naming" |
 | `content/research/iwc-shortcuts-anti-patterns/index.md` | Corpus-grounded "don't do this" calls | "Don't reach for `Grep1` when `tp_grep_tool` is available" |
 | The pattern page itself | Prescriptive per-pattern rules | `auto_col_types` per-expression-kind table on `tabular-compute-new-column` |
 
