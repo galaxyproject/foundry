@@ -12,9 +12,9 @@ revision: 21
 summary: "The Mold inventory, bucketing axes, and boundaries between Molds and reference content."
 ---
 
-Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines in `HARNESS_PIPELINES.md`. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
+Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines in [[harness-pipelines]]. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
 
-This is the inventory, not the Mold source-layout contract. `MOLD_SPEC.md` owns Mold authoring rules, the procedural Mold body, and the `references:` manifest; `reference_contract.yml` owns the reference `kinds`, and `@galaxy-foundry/reference-contract` the four vocabularies every Foundry shares. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`; producer-owned `output_artifacts[].schema` wiki-links attach schemas to emitted artifact IDs. Cast skills are deterministic renderings of Mold body + artifact contracts + typed references, so any improvement to a generated skill belongs back in the Mold or its referenced notes.
+This is the inventory, not the Mold source-layout contract. [[mold-spec]] owns Mold authoring rules, the procedural Mold body, and the `references:` manifest; `reference_contract.yml` owns the reference `kinds`, and `@galaxy-foundry/reference-contract` the four vocabularies every Foundry shares. Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`; producer-owned `output_artifacts[].schema` wiki-links attach schemas to emitted artifact IDs. Cast skills are deterministic renderings of Mold body + artifact contracts + typed references, so any improvement to a generated skill belongs back in the Mold or its referenced notes.
 
 ## Bucketing axes
 
@@ -107,7 +107,7 @@ Validate Molds describe the **step in the process** even where they wrap a stati
 - `validate-galaxy-workflow` — run gxwf validation after workflow assembly, classify workflow-level failures, and route back to the responsible authoring phase when possible.
 - `validate-cwl` — analogous: `cwltool --validate` / schema lint, interpret, recommend/apply fixes.
 
-Per-step Galaxy validation is no longer a standalone Mold; `advance-galaxy-draft-step` (the per-step Galaxy orchestrator) runs `gxwf draft-validate --concrete` inline at the end of each iteration and routes failures locally. See `HARNESS_PIPELINES.md` § Orchestrator-as-contract.
+Per-step Galaxy validation is no longer a standalone Mold; `advance-galaxy-draft-step` (the per-step Galaxy orchestrator) runs `gxwf draft-validate --concrete` inline at the end of each iteration and routes failures locally. See [[harness-pipelines]] § Orchestrator-as-contract.
 
 ### Run & debug (Planemo-backed runtime)
 
@@ -135,16 +135,16 @@ CLI command docs live under `content/cli/<tool>/<command>.md`. Action Molds refe
 
 Excluded from the inventory by design. Naming them keeps the boundary visible.
 
-- **Pure reference content.** Pattern pages (`design-galaxy-tabular-manipulation`, `design-galaxy-collection-manipulation`, `design-galaxy-conditional-handling`, the custom-tool-authoring pattern, ...), CLI manual pages (`content/cli/<tool>/<cmd>.md`), IO schemas (`content/schemas/<name>.md` schema notes, with the JSON itself in `packages/<name>-schema/src/`), prompt fragments, examples, and operational research notes are **referenced by** Molds, not Molds themselves. Casting handles each kind according to the `MOLD_SPEC.md` and `reference_contract.yml` contract.
+- **Pure reference content.** Pattern pages (`design-galaxy-tabular-manipulation`, `design-galaxy-collection-manipulation`, `design-galaxy-conditional-handling`, the custom-tool-authoring pattern, ...), CLI manual pages (`content/cli/<tool>/<cmd>.md`), IO schemas (`content/schemas/<name>.md` schema notes, with the JSON itself in `packages/<name>-schema/src/`), prompt fragments, examples, and operational research notes are **referenced by** Molds, not Molds themselves. Casting handles each kind according to the [[mold-spec]] and `reference_contract.yml` contract.
 - **Harnesses.** `nf-to-galaxy`, the conjectural Archon harness, lightweight orchestration skills — all hand-authored, sequence Molds, never cast.
-- **Approval gates / scope confirmation / plan presentation.** Harness-level concerns, not Molds. See `HARNESS_PIPELINES.md` for the rationale.
+- **Approval gates / scope confirmation / plan presentation.** Harness-level concerns, not Molds. See [[harness-pipelines]] for the rationale.
 - **Hand-authored prior-art skills (being replaced).** The current `~/.claude/skills/gxwf-cli` (help-text dump) and the `find-shed-tool` skill design (`old/PLAN_SEARCH_CLI.md`) are *not* Foundry artifacts; they are prior art. Their content feeds CLI manual pages and action Molds; their form does not.
 
 **Wrapping a CLI is *not* a Mold disqualifier.** `discover-shed-tool`, `advance-galaxy-draft-step`, `validate-galaxy-workflow`, and `run-workflow-test` all wrap CLIs and are Molds. The criterion is whether there is procedural content worth casting (when to run, how to interpret, when to loop back), not whether the underlying mechanism is a CLI.
 
 ### Worked example: `compare-against-iwc-exemplar`
 
-A case that genuinely could have gone the other way. "Compare the design against the IWC corpus" sounds like *knowledge*: the corpus-first principle is already reference content (`CORPUS_INGESTION.md`, the IWC-grounding research notes). One plausible shape was a pattern page describing the corpus-first idiom, referenced by the template Mold — no separate Mold.
+A case that genuinely could have gone the other way. "Compare the design against the IWC corpus" sounds like *knowledge*: the corpus-first principle is already reference content ([[corpus]], the IWC-grounding research notes). One plausible shape was a pattern page describing the corpus-first idiom, referenced by the template Mold — no separate Mold.
 
 It landed as an **action Mold** (`content/molds/compare-against-iwc-exemplar/`) because the deciding criterion from the rule above resolves the same way it does for the CLI wrappers — there is procedural content worth casting:
 
@@ -165,11 +165,11 @@ The corpus-first *principle* it rests on stays reference content; the *act* of l
 
 ## What this list is for
 
-This list exists to keep the Mold inventory and pipeline coverage understandable. The metadata schema is carried by the shared `@galaxy-foundry/note-schema` zod contract plus the `reference_contract.yml` registry; `MOLD_SPEC.md` is the Mold authoring contract, and `COMPILATION_PIPELINE.md` is the design narrative for casting and reference dispatch. Suggested first walks, in priority order:
+This list exists to keep the Mold inventory and pipeline coverage understandable. The metadata schema is carried by the shared `@galaxy-foundry/note-schema` zod contract plus the `reference_contract.yml` registry; [[mold-spec]] is the Mold authoring contract, and [[casting]] is the design narrative for casting and reference dispatch. Suggested first walks, in priority order:
 
 1. `summarize-paper` — most novel, most uncertain, exercises source-summarization shape and IO-schema reference.
 2. `implement-galaxy-tool-step` — runs in inner loop, pulls heavily from pattern pages and corpus, exercises wiki-link resolution and condensation.
 3. `advance-galaxy-draft-step` — exercises orchestrator-shaped Mold, CLI-manual-page reference, per-step loop oracle, and failure routing; surfaces what an orchestrator needs from its leaves and CLI sidecars.
 4. `validate-galaxy-workflow` — exercises terminal Galaxy validation separate from the per-step loop.
 
-After those four, the remaining work is not inventing the reference schema from scratch; it is tightening `MOLD_SPEC.md`, migrating legacy reference fields where useful, and verifying that the `references:` manifest gives generated skills enough progressive-disclosure and evidence metadata to behave well.
+After those four, the remaining work is not inventing the reference schema from scratch; it is tightening [[mold-spec]], migrating legacy reference fields where useful, and verifying that the `references:` manifest gives generated skills enough progressive-disclosure and evidence metadata to behave well.

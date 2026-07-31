@@ -65,7 +65,7 @@ Every eval property must have a pass/fail edge — an output you can imagine tha
 - A concrete fixture and its expected value? That's **`scenarios.md`**.
 - A re-statement of the procedural body ("produce X" when `index.md` already says to produce X)? That's nothing — delete it. Eval targets failure modes the body won't prevent.
 
-The four maintainer-facing files decay differently and serve different readers; keeping them separate is what lets each stay honest. `MOLD_SPEC.md` has the per-file contract.
+The four maintainer-facing files decay differently and serve different readers; keeping them separate is what lets each stay honest. [[mold-spec]] has the per-file contract.
 
 ## A deterministic check is run, not emulated
 

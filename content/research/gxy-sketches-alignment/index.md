@@ -55,7 +55,7 @@ Pydantic types worth knowing (`src/gxy_sketches/schema.py`):
 | Question answered | "Which analysis class do I pick for this user request?" | "How do I build this Galaxy/CWL workflow from this source?" |
 | Consumer | gxy3 agent at routing time | Harnesses doing source→target translation, validation, debug |
 | Per-workflow unit | One `SKETCH.md` (frontmatter + decision-aid prose) | `summarize-<source>` Mold output (structured JSON per `[[summary-<source>]]`, schema in `packages/summary-<source>-schema/src/`) |
-| Source coverage | nf-core, IWC (v1) | paper, nextflow, cwl. **No IWC ingest** — IWC cited by URL in pattern bodies (see `CORPUS_INGESTION.md`) |
+| Source coverage | nf-core, IWC (v1) | paper, nextflow, cwl. **No IWC ingest** — IWC cited by URL in pattern bodies (see [[corpus]]) |
 | Output shape | Markdown + YAML frontmatter | JSON Schema-validated structured data |
 | Test fixtures | Bundled into the sketch dir, capped at 5 MB total | Referenced as data; no bundling, no size cap |
 | Generation | One-shot LLM call per workflow, prompt-cached system prompt | Per-Mold cast, per-kind dispatch over typed references |
@@ -88,9 +88,9 @@ The Foundry's `ecosystem` vocabulary should be a superset: gxy-sketches has `nf-
 
 ### 4. Domain ↔ `iwc/*` vocabulary mapping — **OBSOLETE**
 
-**Resolved (2026-07): the `iwc/*` tag family was dropped.** It was declared in `meta_tags.yml` as a seed-on-demand family and never carried a single note — patterns cite IWC by URL in the body instead (`CORPUS_INGESTION.md`). There are now no `iwc/*` keys to hang a mapping on, and the registry admits no open families at all, so anyone reviving this would first have to author the categories as registered, glossed keys. The original analysis is retained for context.
+**Resolved (2026-07): the `iwc/*` tag family was dropped.** It was declared in `meta_tags.yml` as a seed-on-demand family and never carried a single note — patterns cite IWC by URL in the body instead ([[corpus]]). There are now no `iwc/*` keys to hang a mapping on, and the registry admits no open families at all, so anyone reviving this would first have to author the categories as registered, glossed keys. The original analysis is retained for context.
 
-gxy-sketches' fixed `domain` enum overlaps heavily with Foundry's `iwc/*` tag family (`iwc/variant-calling`, `iwc/rna-seq`, …). They will not be identical — gxy-sketches' `domain` is a single value chosen by the LLM; the Foundry's `iwc/*` is a multi-tag classification seeded from IWC directory layout (see `CORPUS_INGESTION.md`). Document the mapping in `meta_tags.yml` descriptions for `iwc/*` keys; do not force a merge.
+gxy-sketches' fixed `domain` enum overlaps heavily with Foundry's `iwc/*` tag family (`iwc/variant-calling`, `iwc/rna-seq`, …). They will not be identical — gxy-sketches' `domain` is a single value chosen by the LLM; the Foundry's `iwc/*` is a multi-tag classification seeded from IWC directory layout (see [[corpus]]). Document the mapping in `meta_tags.yml` descriptions for `iwc/*` keys; do not force a merge.
 
 ### 5. Inventory gap surfaced by alignment: `summarize-galaxy-workflow` — **CLOSED**
 
@@ -102,7 +102,7 @@ gxy-sketches treats IWC (gxformat2 `.ga` files + planemo `*-tests.yml`) as a fir
 - It would let a future `sketch` cast target be populated from IWC workflows entirely inside the Foundry pipeline, without re-implementing gxy-sketches' IWC ingestor.
 - It mirrors `summarize-cwl` cleanly (same target — Galaxy — on the input side).
 
-Add to `MOLDS.md` as a candidate; do not commit until the first walk-through.
+Add to [[molds]] as a candidate; do not commit until the first walk-through.
 
 ### 6. Inventory gap: decision-aid layer
 
@@ -131,7 +131,7 @@ Explicit non-goals, so future contributors do not retrofit them:
 - **Validators.** gxy-sketches' validator enforces a sketch-directory bundle contract (file presence, orphan files, 5 MB cap, name uniqueness). The Foundry's validator enforces a content-collection contract (frontmatter schema, wiki-link integrity, tag coherence, Mold ref resolution). Different jobs.
 - **5 MB test-fixture cap.** Sketch-bundle-only invariant. Do not propagate into Foundry summary schemas.
 - **LLM generation pipeline.** gxy-sketches: one-shot prompt-cached call per workflow, JSON output, deterministic frontmatter fill-in by the writer. Foundry: per-Mold cast with per-kind dispatch over typed references (patterns LLM-condensed, schemas verbatim, CLI command pages → JSON sidecars). Different shapes for different jobs.
-- **IWC mirroring.** gxy-sketches clones IWC into `workflows_cache/`. The Foundry **does not** — patterns cite IWC by URL (`CORPUS_INGESTION.md`). If `summarize-galaxy-workflow` lands (§5), revisit whether the Foundry needs an IWC clone for that Mold's runtime; the answer should still be "no" if the generated skill operates on URLs supplied at runtime.
+- **IWC mirroring.** gxy-sketches clones IWC into `workflows_cache/`. The Foundry **does not** — patterns cite IWC by URL ([[corpus]]). If `summarize-galaxy-workflow` lands (§5), revisit whether the Foundry needs an IWC clone for that Mold's runtime; the answer should still be "no" if the generated skill operates on URLs supplied at runtime.
 
 ## Site placement
 

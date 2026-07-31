@@ -12,11 +12,11 @@ revision: 29
 summary: "How typed Mold references become target-specific cast artifacts with provenance."
 ---
 
-How Molds become cast artifacts. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **deterministic assembly first, LLM condensation only where needed, reproducible enough to diff**. The generated skill body is deterministic; individual condensed references may still be LLM-produced and recorded.
+How Molds become cast artifacts. Anchored to the file layout in [[architecture]] (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **deterministic assembly first, LLM condensation only where needed, reproducible enough to diff**. The generated skill body is deterministic; individual condensed references may still be LLM-produced and recorded.
 
 ## What casting is
 
-Casting takes a Mold (a typed reference manifest plus a procedural body), its artifact IO contracts, and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific cast artifact. `MOLD_SPEC.md` owns the source-layout and manifest contract; this document describes how casting consumes that contract. The cast is **isolated** — no links back to the Foundry, no runtime dependency on it.
+Casting takes a Mold (a typed reference manifest plus a procedural body), its artifact IO contracts, and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific cast artifact. [[mold-spec]] owns the source-layout and manifest contract; this document describes how casting consumes that contract. The cast is **isolated** — no links back to the Foundry, no runtime dependency on it.
 
 For the Claude target, `SKILL.md` is always rendered from Mold source. The renderer combines the Mold `summary`, `input_artifacts[]`, `output_artifacts[]`, inherited producer/schema metadata, resolved `references[]`, and the procedural body of `index.md`. Generated skill bodies are not hand-maintained; if a cast looks under-instructed, improve the Mold body or referenced notes and re-cast.
 
@@ -39,7 +39,7 @@ Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for k
 
 ### Typed reference manifest
 
-Molds declare operational dependencies through the object-shaped `references` manifest. `MOLD_SPEC.md` is canonical for field requirements and authoring rules; the reference contract is canonical for vocabulary labels and descriptions — `reference_contract.yml` for `kind`, `@galaxy-foundry/reference-contract` for the four inherited vocabularies. Casting reads the manifest, resolves each reference by `kind`, and writes the target-specific reference layout described below.
+Molds declare operational dependencies through the object-shaped `references` manifest. [[mold-spec]] is canonical for field requirements and authoring rules; the reference contract is canonical for vocabulary labels and descriptions — `reference_contract.yml` for `kind`, `@galaxy-foundry/reference-contract` for the four inherited vocabularies. Casting reads the manifest, resolves each reference by `kind`, and writes the target-specific reference layout described below.
 
 Mold IO contracts live on `input_artifacts[]` / `output_artifacts[]`. Producer-owned `output_artifacts[].schema` wiki-links point at schema notes that casting packages; consumers inherit those contracts by binding to the same artifact `id`.
 

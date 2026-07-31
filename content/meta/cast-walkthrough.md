@@ -12,7 +12,7 @@ revision: 2
 summary: "One real committed cast (discover-shed-tool) annotated end to end: every bundle file traced back through per-kind dispatch and _provenance.json."
 ---
 
-`COMPILATION_PIPELINE.md` describes casting abstractly. This page narrates one **real, committed** cast end to end so the abstraction has something concrete behind it: every file in the bundle, where it came from, and how `_provenance.json` lets you prove it.
+[[casting]] describes casting abstractly. This page narrates one **real, committed** cast end to end so the abstraction has something concrete behind it: every file in the bundle, where it came from, and how `_provenance.json` lets you prove it.
 
 The subject is **`discover-shed-tool`** (`content/molds/discover-shed-tool/`), cast to the Claude target at `casts/claude/skills/discover-shed-tool/`. It was chosen because its cast is **fully deterministic** — no `mode: condense` references, so no LLM step — which makes the walkthrough stable across rebuilds and lets us talk about provenance without "it depends on the model that day."
 
@@ -67,7 +67,7 @@ Every entry here is `source: deterministic`. There is no `prompt` or `model` blo
 
 ## How `SKILL.md` is built
 
-`SKILL.md` is **not** authored in the bundle. It is a deterministic render of `content/molds/discover-shed-tool/index.md`'s body: the `## When To Use`, `## Inputs`, `## Outputs`, `## Required Tools`, `## Load Upfront`, and `## Load On Demand` sections are projected from the Mold's frontmatter (`output_artifacts`, `references[].load`/`trigger`) and procedural body. The rule from `COMPILATION_PIPELINE.md` holds here literally: skill-body changes flow from Mold source changes; the LLM phase (when there is one) may fill condense refs but must not hand-edit `SKILL.md`. `_required_tools.json` aggregates install metadata (here: `gxwf`); `_verify.json` is the per-artifact verification contract — the `validator_bin` + `args` + `schema` a harness or CI runs to validate the artifact this skill produces (`galaxy-tool-pin`). Recorded validation *results* live in `_provenance.json`'s `validation_results[]` — empty here, since `galaxy-tool-pin` is produced at runtime, not at cast time.
+`SKILL.md` is **not** authored in the bundle. It is a deterministic render of `content/molds/discover-shed-tool/index.md`'s body: the `## When To Use`, `## Inputs`, `## Outputs`, `## Required Tools`, `## Load Upfront`, and `## Load On Demand` sections are projected from the Mold's frontmatter (`output_artifacts`, `references[].load`/`trigger`) and procedural body. The rule from [[casting]] holds here literally: skill-body changes flow from Mold source changes; the LLM phase (when there is one) may fill condense refs but must not hand-edit `SKILL.md`. `_required_tools.json` aggregates install metadata (here: `gxwf`); `_verify.json` is the per-artifact verification contract — the `validator_bin` + `args` + `schema` a harness or CI runs to validate the artifact this skill produces (`galaxy-tool-pin`). Recorded validation *results* live in `_provenance.json`'s `validation_results[]` — empty here, since `galaxy-tool-pin` is produced at runtime, not at cast time.
 
 ## How provenance ties it together
 

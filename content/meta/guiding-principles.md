@@ -148,4 +148,4 @@ Each layer has a job. The Foundry works when those jobs stay separate and the co
 
 ## See Also
 
-[COMPARISONS.md](COMPARISONS.md) — how this shape contrasts with wikis and skill bundles, and where it sits in the wider knowledge-base-to-skill landscape (a dated snapshot).
+[[comparisons]] — how this shape contrasts with wikis and skill bundles, and where it sits in the wider knowledge-base-to-skill landscape (a dated snapshot).

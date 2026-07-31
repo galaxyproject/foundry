@@ -17,18 +17,18 @@ Galaxy Workflow Foundry architecture, anchored on the **physical file layout** o
 ## 1. Component map
 
 External:
-- **IWC corpus** — the canonical Galaxy workflow corpus at `https://github.com/galaxyproject/iwc`. Pattern pages cite IWC workflows by URL (optionally pinned to commit SHA per citation). Not mirrored into the Foundry; not a build-time dependency. `workflow-fixtures/` lives as a top-level directory inside the Foundry checkout — a generated-corpus workspace for authoring/survey evidence, outside `content/`, with gitignored outputs (`pipelines/`, `cwl/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/`). Not part of the content model; not a runtime/cast dependency. See `CORPUS_INGESTION.md`.
+- **IWC corpus** — the canonical Galaxy workflow corpus at `https://github.com/galaxyproject/iwc`. Pattern pages cite IWC workflows by URL (optionally pinned to commit SHA per citation). Not mirrored into the Foundry; not a build-time dependency. `workflow-fixtures/` lives as a top-level directory inside the Foundry checkout — a generated-corpus workspace for authoring/survey evidence, outside `content/`, with gitignored outputs (`pipelines/`, `cwl/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/`). Not part of the content model; not a runtime/cast dependency. See [[corpus]].
 - **gxwf** — design-time CLI; called by Molds (and by validation tooling) for schema validation, tool search/discovery, conversion. TS and Python implementations with a shared interface. Lives in its own repo(s).
 - **Planemo** — runtime CLI; executes Galaxy and CWL workflows. Used by `run-workflow-test` and `debug-*-workflow-output` Molds at generated-skill runtime, not by the Foundry directly.
 
 Foundry-internal (in the `foundry/` repo):
-- **Pattern pages** — Foundry reference content (collection manipulation, tabular, conditional, custom-tool authoring, …). Hand-authored. Wiki-linked from Molds. **IWC is referenced by URL in pattern bodies**, not mirrored — see `CORPUS_INGESTION.md`.
+- **Pattern pages** — Foundry reference content (collection manipulation, tabular, conditional, custom-tool authoring, …). Hand-authored. Wiki-linked from Molds. **IWC is referenced by URL in pattern bodies**, not mirrored — see [[corpus]].
 - **Source-pattern pages** — source-to-target mapping reference under `content/source-patterns/`, currently focused on Nextflow-to-Galaxy translation patterns.
 - **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds (e.g., `advance-galaxy-draft-step` → `cli/gxwf/draft-validate`). Cast to JSON sidecars, not inlined as prose.
 - **Research / reference notes** — background syntheses (e.g., Nextflow testing, CWL conformance) that aren't actions and aren't Galaxy patterns.
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
 - **Prompts** — wrapper notes under `content/prompts/` that add Foundry metadata and usage framing around raw prompt sidecars. Molds reference the wrapper via `kind: prompt`; casting copies the raw `upstream.prompt` verbatim.
-- **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Each has a `type: schema` content note under `content/schemas/<name>.md`; the JSON itself lives with its producer (`@galaxy-foundry/summarize-nextflow` for `summary-nextflow` and the nf-core meta schemas) or in `@galaxy-foundry/foundry` (orphan schemas with no in-repo TS producer: `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary`, `tests-format`). The `tests-format` JSON is synced from upstream `@galaxy-tool-util/schema`. Mold frontmatter cites schemas via `[[wiki-link]]` to the note; the note declares `package` + `package_export` (cast imports the runtime export and serializes it) and `validator_bin` + `validator_subcommand` (skills validate via `foundry validate-<name>`). See `SCHEMA_PACKAGES.md`.
+- **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Each has a `type: schema` content note under `content/schemas/<name>.md`; the JSON itself lives with its producer (`@galaxy-foundry/summarize-nextflow` for `summary-nextflow` and the nf-core meta schemas) or in `@galaxy-foundry/foundry` (orphan schemas with no in-repo TS producer: `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary`, `tests-format`). The `tests-format` JSON is synced from upstream `@galaxy-tool-util/schema`. Mold frontmatter cites schemas via `[[wiki-link]]` to the note; the note declares `package` + `package_export` (cast imports the runtime export and serializes it) and `validator_bin` + `validator_subcommand` (skills validate via `foundry validate-<name>`). See [[schema-packages]].
 - **Frontmatter schema** — the zod contract in `@galaxy-foundry/note-schema` (`buildNoteSchema`), the single source of truth shared by the validator and the Astro site. Distinct from the Mold IO schemas under `content/schemas/`.
 - **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the note-schema factory at build time.
 - **Cast skills** — produced by casting from Molds. Per-target output layout under `casts/<target>/<name>/`.
@@ -48,7 +48,7 @@ Authoritative term definitions live in `content/meta/glossary.md`; this section 
 - **Type** — the single note-kind discriminator (`type:` in frontmatter): `mold | pattern | source-pattern | cli-tool | cli-command | pipeline | research | schema | prompt`. The `buildNoteSchema` discriminated union and the whole site (`data.type`) key off it; note-kind is never re-encoded as a tag. Within a type, further shape comes from typed fields (Molds use `axis`, `source`, `target`, `tool`), not a subtype.
 - **Tag** — controlled label declared in `meta_tags.yml`, reserved for **cross-cutting facets only** (never note-kind). Every tag is declared by a facet — `source`, `target`, `tool`, `cli`, `topic`, `prompt`, `meta` — which is what makes it valid; the slash in `source/paper` is naming convention, not a rule. Further subject-area facets bloom as content lands — see §4.
 - **Mold** — `content/molds/<slug>/index.md`. Directory-based note: `index.md` is the only top-level frontmatter-bearing file; the companions its kind declares (`eval.md`, `scenarios.md`, `refinement.md`, `refinements/`, `examples/`, `casting.md`, `cast-skill-verification.md`, `changes.md`, `README.md`) ride along verbatim. Files under `refinements/` are the one carve-out: each refinement-journal entry carries small structured frontmatter. Content shape: typed reference manifest in frontmatter + procedural body skeleton.
-- **Pattern** — single `.md` under `content/patterns/`. Reference content. IWC citations live in the body as URLs; see `CORPUS_INGESTION.md`. Wiki-linked from Molds.
+- **Pattern** — single `.md` under `content/patterns/`. Reference content. IWC citations live in the body as URLs; see [[corpus]]. Wiki-linked from Molds.
 - **Source-pattern** — single `.md` under `content/source-patterns/<source>/`. Reference content mapping source-system structures to target-system constructs, with `source_pattern_kind`, `source`, `target`, and `implemented_by_patterns` frontmatter.
 - **CLI tool** — single `.md` at `content/cli/<tool>/index.md` (e.g., `content/cli/gxwf/index.md`, `content/cli/planemo/index.md`). Tool-level install metadata (`origin`, `package`, `package_version`, `invoke`, `invoke_fallback`, `availability_check`, `docs_url`) aggregating install instructions for every CLI command note under the same tool. Wiki-linked from Molds; aggregated into the cast bundle's Required Tools section.
 - **CLI command** — single `.md` under `content/cli/<tool>/<cmd>.md` (e.g., `content/cli/gxwf/tool-search.md`, `content/cli/gxwf/validate.md`). Reference content describing one CLI command/subcommand: synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas. Wiki-linked from Molds. Cast to a JSON sidecar (not inlined as prose) by casting's `cli-command`-kind dispatch.
@@ -81,7 +81,7 @@ Source of truth: the `buildNoteSchema` discriminated union in `@galaxy-foundry/n
 | `schema` | `name`, `title` | `target/*`, `source/*`, or `meta` | `content/schemas/` |
 | `prompt` | `title` | optional `prompt/*` | `content/prompts/<area>/<slug>/index.md` only |
 
-`mold`, `pipeline`, and `prompt` have a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling files in `content/molds/<slug>/`, `content/pipelines/<slug>/`, and `content/prompts/<area>/<slug>/` are skipped — only `index.md` is validated). They are the three directory-note types; `docs/` holds long-form design docs.
+`mold`, `pipeline`, and `prompt` have a **directory-placement contract** enforced by the validator's `findMdFiles` (sibling files in `content/molds/<slug>/`, `content/pipelines/<slug>/`, and `content/prompts/<area>/<slug>/` are skipped — only `index.md` is validated). They are the three directory-note types. `meta` is the counterexample that makes the contract a property of the kind rather than of the content root: the design record is `shape: file`, one flat note per page under `content/meta/`, so no companion contract applies to it at all.
 
 `cli-command` notes are *not* directory-based — each command is a flat single file. The two-level `content/cli/<tool>/<cmd>.md` directory structure is for organization, not directory-note semantics.
 
@@ -124,7 +124,7 @@ The facets today: `meta` (Foundry-meta notes), `prompt` (reusable prompt familie
 
 The registry **format** is shared across Foundry instances (spec: [galaxyproject/foundry-pattern](https://github.com/galaxyproject/foundry-pattern), `content/pattern/standing-up-a-foundry.instructions.txt`), so a format change is a cross-repo change. The facet **vocabulary** above is ours; the Statistical Genomics Foundry's is `family`/`role`/`domain`/`topic`, and only `topic` collides by name — ours groups pattern maps, theirs sits beneath a `domain`.
 
-**Subject-area tags are demand-driven.** A general Galaxy code/feature taxonomy (collections, tools, conditionals, ...) is not committed up front. Tag families bloom as patterns surface real cross-cutting needs — and each one arrives as registered keys with glosses, never as an open family declared in advance. An `iwc/*` family (IWC corpus categories, seeded from the clone's directory layout) was declared this way and carried zero notes: patterns cite IWC by URL in the body instead (`CORPUS_INGESTION.md`), so it was dropped rather than filled in.
+**Subject-area tags are demand-driven.** A general Galaxy code/feature taxonomy (collections, tools, conditionals, ...) is not committed up front. Tag families bloom as patterns surface real cross-cutting needs — and each one arrives as registered keys with glosses, never as an open family declared in advance. An `iwc/*` family (IWC corpus categories, seeded from the clone's directory layout) was declared this way and carried zero notes: patterns cite IWC by URL in the body instead ([[corpus]]), so it was dropped rather than filled in.
 
 Every note still carries at least one tag (`tags` is `minItems: 1`), but that tag is always a facet — there is no note-kind tag and no type↔tag coherence check.
 
@@ -183,7 +183,7 @@ The frontmatter contract is the zod schema built by `buildNoteSchema` in `@galax
 
   Other inline phase kinds — e.g., `gate` for an approval / scope-confirmation checkpoint — are coined when they first appear inline. The phase-kind set is **open**; we don't pre-enumerate. `branch` and `gate` are unrelated behaviors and don't share an umbrella.
 
-**Mold = typed reference manifest.** A Mold's frontmatter declares operational dependencies through `references:` plus explicit IO schema fields. `MOLD_SPEC.md` owns the authoring contract. `reference_contract.yml` owns the vocabulary for kind — the one part that varies by domain — while usage timing, load behavior, transform mode, and evidence labels describe the compilation machinery and are inherited from `@galaxy-foundry/reference-contract`. Producer-owned `output_artifacts[].schema` links resolve to `type: schema` notes; consumers inherit schema contracts through shared artifact `id`s. The validator resolves each kind with its own check; casting dispatches per kind — see `COMPILATION_PIPELINE.md`.
+**Mold = typed reference manifest.** A Mold's frontmatter declares operational dependencies through `references:` plus explicit IO schema fields. [[mold-spec]] owns the authoring contract. `reference_contract.yml` owns the vocabulary for kind — the one part that varies by domain — while usage timing, load behavior, transform mode, and evidence labels describe the compilation machinery and are inherited from `@galaxy-foundry/reference-contract`. Producer-owned `output_artifacts[].schema` links resolve to `type: schema` notes; consumers inherit schema contracts through shared artifact `id`s. The validator resolves each kind with its own check; casting dispatches per kind — see [[casting]].
 
 **Wiki-link frontmatter fields** (regex `^\[\[.+\]\]$`):
 - `parent_pattern` (single, optional).
@@ -191,7 +191,7 @@ The frontmatter contract is the zod schema built by `buildNoteSchema` in `@galax
 - `related_patterns` (array).
 - `related_molds` (array; discouraged for operational dependencies; factor shared content into patterns, CLI manual pages, schemas, prompts, examples, or research notes).
 
-Pattern notes can declare `iwc_exemplars` metadata with abstract IWC workflow IDs. Polished prose cites IWC workflows by URL or abstract ID rather than generated fixture paths (see `CORPUS_INGESTION.md`).
+Pattern notes can declare `iwc_exemplars` metadata with abstract IWC workflow IDs. Polished prose cites IWC workflows by URL or abstract ID rather than generated fixture paths (see [[corpus]]).
 
 **Strict mode**: `additionalProperties: false`. Every conditional field declared at top level.
 
@@ -340,7 +340,7 @@ Foundry slash commands:
 - **`/draft-pattern`** — scaffold a pattern page; convention (not enforced) that the page cite at least one IWC workflow URL in `## Exemplars` (corpus-first principle).
 - **`/cast`** — wraps `foundry-build cast`; classify Mold → resolve refs → call casting LLM → write `casts/<target>/<name>/` → record `_provenance.json` → append to `log.md`.
 
-There is no IWC ingestion command. IWC is referenced by URL in pattern bodies (see `CORPUS_INGESTION.md`); no ingest-iwc script exists. Background research lands as hand-authored `research` notes.
+There is no IWC ingestion command. IWC is referenced by URL in pattern bodies (see [[corpus]]); no ingest-iwc script exists. Background research lands as hand-authored `research` notes.
 
 The keystone agent shape — *classify → fetch → dedup → draft → cross-ref → write → validate → log → regenerate* — is realized in `/cast`.
 
@@ -368,7 +368,7 @@ content/pipelines/nextflow-to-galaxy/
 
 `eval.md` / `scenarios.md` co-locate evaluation with the note (improves discoverability and ownership) without bleeding into cast artifacts or the assembled harness. Casting reads `index.md` and refs; never reads `eval.md` / `scenarios.md`.
 
-`docs/` holds long-form Foundry-meta design narrative; the validator's directory-note rule applies to Mold and Pipeline.
+`content/meta/` holds the long-form Foundry-meta design narrative as flat `meta` notes; the validator's directory-note rule applies to Mold and Pipeline.
 
 Directory-note semantics are a glob in the shared table, not a rule of their own:
 ```ts
@@ -409,9 +409,9 @@ Deployment: two-job GitHub Pages workflow on push to `main` (`withastro/action@v
 
 ## 12. Ingestion and maintenance
 
-One ingestion spine — Mold casting. There is no IWC ingestion (see `CORPUS_INGESTION.md`).
+One ingestion spine — Mold casting. There is no IWC ingestion (see [[corpus]]).
 
-**Mold casting** (`foundry-build cast`, driven by `/cast`). Covered in `COMPILATION_PIPELINE.md`. Reads from `content/molds/`, `content/patterns/`, `content/schemas/`; writes only to `casts/<target>/<name>/`.
+**Mold casting** (`foundry-build cast`, driven by `/cast`). Covered in [[casting]]. Reads from `content/molds/`, `content/patterns/`, `content/schemas/`; writes only to `casts/<target>/<name>/`.
 
 **`content/log.md`** — append-only, excluded from validator and Astro collections, Obsidian-visible. Reserved entry types: `cast`, `lint`, and `query`. Format:
 
@@ -445,10 +445,10 @@ Stack:
 - *Static* — `foundry-build validate` checks frontmatter against schema, wiki link integrity, bidirectional `related_notes`, source-pattern links, pipeline phases, artifact contracts, schema vendoring, CLI docs, pattern evidence, body wiki links, and Mold source layout.
 - *Casting-time* — `foundry-build cast` refuses to cast a Mold that fails static validation, and validates resolved refs conform to their schemas.
 
-**Versioning.** No semver on Molds, no semver on casts. Identity = name + content hash. Re-casting is the migration path. See `COMPILATION_PIPELINE.md`.
+**Versioning.** No semver on Molds, no semver on casts. Identity = name + content hash. Re-casting is the migration path. See [[casting]].
 
 **Provenance.** Every derived artifact records what produced it:
-- Cast skills: `_provenance.json` per cast (Mold hash, model, prompt version, resolved-ref hashes, timestamp). Detail in `COMPILATION_PIPELINE.md`.
+- Cast skills: `_provenance.json` per cast (Mold hash, model, prompt version, resolved-ref hashes, timestamp). Detail in [[casting]].
 - Generated indexes: rebuilt from current content state; drift detected by `--check`.
 
 IWC-cited URLs in pattern bodies are *not* tracked as provenance — they are author-controlled citations. Pinning to a commit SHA is at the author's discretion per citation.
@@ -469,21 +469,24 @@ foundry/
 ├── reference_contract.yml                # Mold reference-kind contract
 ├── vendored_upstreams.yml                # synced upstream artifact registry
 ├── dashboard_sections.json               # single source for Obsidian + Astro dashboards
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── GUIDING_PRINCIPLES.md
-│   ├── MOLD_SPEC.md
-│   ├── HARNESS_PIPELINES.md
-│   ├── MOLDS.md
-│   ├── PATTERNS.md
-│   ├── COMPILATION_PIPELINE.md
-│   ├── CORPUS_INGESTION.md
-│   └── SCHEMA_PACKAGES.md
 ├── content/
 │   ├── Dashboard.md                      # generated; --check
 │   ├── Index.md                          # generated; --check
 │   ├── log.md                            # append-only operations journal
-│   ├── glossary.md                       # hand-curated terminology; skipped by validator
+│   ├── meta/                             # the design record — notes of kind `meta`, in reading order
+│   │   ├── guiding-principles.md         # foundation, order 1
+│   │   ├── architecture.md
+│   │   ├── molds.md
+│   │   ├── mold-spec.md
+│   │   ├── casting.md
+│   │   ├── cast-walkthrough.md
+│   │   ├── eval-philosophy.md
+│   │   ├── corpus.md
+│   │   ├── harness-pipelines.md          # foundation, order 9
+│   │   ├── comparisons.md                # infrastructure, order 1
+│   │   ├── pattern-authorship.md
+│   │   ├── schema-packages.md            # infrastructure, order 3
+│   │   └── glossary.md                   # hand-curated terminology; NOT a note (NOT_NOTES.glossary)
 │   ├── schemas/                          # Mold IO schemas (the schema library)
 │   │   ├── tests-format.md               # vendored from @galaxy-tool-util/schema
 │   │   ├── summary-nextflow.md           # Foundry-authored schema note
@@ -532,6 +535,11 @@ foundry/
 │   │   └── nextflow-to-cwl/
 │   ├── source-patterns/
 │   │   └── …
+│   ├── prompts/                        # vendored upstream prompts, each framed by a note
+│   │   └── galaxy/
+│   │       └── custom-tool-critic/
+│   │           ├── index.md            # the framing note
+│   │           └── upstream.prompt     # its vendored companion
 │   └── research/
 │       ├── component-nextflow-testing/
 │       │   ├── index.md                            # background syntheses
@@ -605,8 +613,8 @@ Key decisions reflected in the layout:
 - **`content/schemas/` separate from the frontmatter contract** — the frontmatter contract (`@galaxy-foundry/note-schema`) governs content-note frontmatter; `content/schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas live as content notes (renderable via `SchemaBody.astro`) so they show up in the dashboard, in the Index, and in tag/backlink browses; the actual JSON Schema lives in the schema's TypeScript package at `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored: hand-edited there; vendored: synced from an upstream package). The note's frontmatter declares `package` + `package_export`; `site/src/lib/schema-registry.ts` imports each schema directly from its package, and casting imports the named runtime export and serializes it into cast bundles. Molds reference schemas via wiki-link frontmatter fields (`output_artifacts[].schema` on the producer side, `references[].ref` for `kind: schema`).
 - **`content/cli/<tool>/<cmd>.md` flat per tool** — CLI manual pages are organized two-deep for browsing, but each command is a single flat file; not directory-note semantics.
 - **`casts/` outside `content/`** — casts are not foundry notes. They have their own provenance shape and target-specific layouts; collapsing them into `content/` would muddy the validator and the site.
-- **`docs/` for Foundry-meta** — long-form design docs (architecture, MOLD_SPEC) live here, not as content notes.
-- **No `content/exemplars/` directory** — IWC is referenced by URL in pattern bodies, not mirrored. See `CORPUS_INGESTION.md`.
+- **`content/meta/` for Foundry-meta** — the long-form design record lives as notes of kind `meta`, `shape: file` rather than directory-shaped. It sat in a top-level `docs/` until the collection claimed it, and the cost of being outside the note system was measurable: no schema saw its frontmatter, a hand-written TypeScript array decided which pages the site rendered, and two records were rendered by nothing at all. `glossary.md` shares the directory and is deliberately not a note — excluded in the collection pattern, declared in `NOT_NOTES`.
+- **No `content/exemplars/` directory** — IWC is referenced by URL in pattern bodies, not mirrored. See [[corpus]].
 - **No top-level `harnesses/`** — the Foundry doesn't host the production harness surface; sophisticated, stateful orchestration is an open research question (§15) that belongs in downstream repos consuming a pipeline + the cast Molds. `content/pipelines/` is the Foundry's representation of the journey shape. The one in-repo exception is a deliberate **stop-gap**: `/assemble-pipeline` compiles a pipeline into a trivial linear harness skill (`pipeline-<slug>` under `casts/claude/skills/`, namespaced by prefix) that runs its phase casts in order for end-to-end test-drives. A trivial exercise of the pipeline spine — not a commitment to in-repo orchestration, and not a `harnesses/` directory.
 - **`content/pipelines/` as primary IA** — pipelines are the journey surface (subway maps over the KB) and the source of truth for "what Molds compose into a buildable harness." `validatePipelinePhases` machine-checks that every phase resolves to a real Mold; it does not require Molds to belong to a pipeline.
 - **Single `package.json`, single `tsconfig.json`** — tooling and site share a dep tree. The wiki-link module under `scripts/lib/` is imported by both sides via path alias.
@@ -625,7 +633,7 @@ Pipelines:
 - **Pipeline rendering.** Current pipeline pages are the supported public rendering. No separate rendering gate blocks the architecture.
 
 Schema:
-- `MOLD_SPEC.md` owns the typed-reference manifest and Mold authoring rules.
+- [[mold-spec]] owns the typed-reference manifest and Mold authoring rules.
 - Producer Molds attach schema contracts to `output_artifacts[].schema`; consumer `input_artifacts[]` inherit by shared artifact `id`.
 - CLI command pages are reference content, and action Molds reference exact commands.
 
