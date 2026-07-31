@@ -69,3 +69,47 @@ export function checkDirectoryLayout(dir: string, id: string, kind: NoteKind): C
     : [];
   return checkCompanions(entries, DEFINITIONS[kind]);
 }
+
+/**
+ * Every file beside a note that is not itself a note, recursively, relative to `dir`.
+ *
+ * This is the set the raw route serves, and it is deliberately NOT read from the companion
+ * declaration. The route used to name two files — `eval.md` and `scenarios.md` — and the question
+ * of which of the nine a `mold` declares should join them looked like it needed a new axis on the
+ * declaration, or a rule read off `disposition`. It needed neither: nothing beside a note is
+ * withheld, so there is no set to choose. A file that is present and unreachable is a bug.
+ *
+ * `disposition` cannot be that rule anyway. It says how far a companion travels toward a CAST
+ * BUNDLE — `foundry-only` means it is never packaged, not that it is never published — and the
+ * Foundry's own site is the Foundry. The two questions never met.
+ *
+ * Reading the directory rather than the declaration is also the only answer that stays correct
+ * for a kind whose companion set is open: `research` sets `additionalCompanions: 'allow'`, so
+ * its vendored sidecars are legal and undeclared, and a declaration-derived route would serve
+ * none of them.
+ *
+ * Notes are excluded because they have their own route, and asking the collection table which
+ * siblings are notes is what makes `cli-tool` work — its directory holds nothing but other
+ * notes, so it contributes nothing here rather than republishing every command under a second
+ * URL. Dotfiles are skipped: `content/cli/planemo/.gitkeep` is scaffolding, not content.
+ */
+export function adjacentFiles(dir: string, id: string): string[] {
+  const walk = (absolute: string, relative: string): string[] => {
+    if (!existsSync(absolute)) return [];
+    const out: string[] = [];
+    for (const entry of readdirSync(absolute, { withFileTypes: true })) {
+      if (entry.name.startsWith('.')) continue;
+      const rel = relative ? `${relative}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) out.push(...walk(path.join(absolute, entry.name), rel));
+      else if (entry.isFile() && kindOf(`${CONTENT_DIR}/${id}/${rel}`) === undefined) out.push(rel);
+    }
+    return out;
+  };
+  return walk(dir, '').sort();
+}
+
+/** The contents of a file beside a note, or `undefined` when it is not there. */
+export function readAdjacentIn(dir: string, relativePath: string): string | undefined {
+  const file = path.join(dir, relativePath);
+  return existsSync(file) ? readFileSync(file, 'utf8') : undefined;
+}
