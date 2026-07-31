@@ -9,7 +9,7 @@ status: reviewed
 created: 2026-06-14
 revised: 2026-07-29
 revision: 3
-summary: "Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/usage/refinement split."
+summary: "Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/refinement split."
 ---
 
 `content/meta/mold-spec.md` owns the eval *contract* — the file layout, the case shapes, the validator checklist. This document is the *why* behind it. When a contract rule feels arbitrary, the reasoning is here.

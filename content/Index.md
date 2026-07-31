@@ -257,7 +257,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[comparisons]] — Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) — a dated snapshot. *(reviewed)*
 - [[casting]] — How typed Mold references become target-specific cast artifacts with provenance. *(reviewed)*
 - [[corpus]] — How IWC grounding works without turning the Foundry into an upstream workflow mirror. *(reviewed)*
-- [[eval-philosophy]] — Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/usage/refinement split. *(reviewed)*
+- [[eval-philosophy]] — Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/refinement split. *(reviewed)*
 - [[guiding-principles]] — The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding. *(reviewed)*
 - [[harness-pipelines]] — The source-to-target journeys that compose Molds, loops, and branch phases. *(reviewed)*
 - [[mold-spec]] — The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it. *(reviewed)*
