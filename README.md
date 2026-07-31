@@ -77,16 +77,28 @@ npm run site:dev          # Astro dev server
 
 ## Design docs
 
-Long-form design narrative under `docs/`:
+Long-form design narrative under [`content/meta/`](content/meta/), as notes of kind `meta` —
+so the collection, not this list, is the authority on which records exist. Read in `order`:
 
-- `GUIDING_PRINCIPLES.md` — why the Foundry prioritizes upstream authority, provenance, deterministic tooling, portability, actionable knowledge, and corpus grounding.
-- `ARCHITECTURE.md` — directory layout, types, validation pipeline, site rendering.
-- `HARNESS_PIPELINES.md` — pipeline narrative behind `content/pipelines/`.
-- `MOLDS.md` — Mold inventory rationale and bucketing axes.
-- `COMPILATION_PIPELINE.md` — casting design.
-- `CORPUS_INGESTION.md` — IWC grounding; URL-not-mirror principle.
-- `SCHEMA_PACKAGES.md` — standard package shape for Foundry-authored JSON Schemas and CLI validators.
-- `COMPARISONS.md` — positioning vs wikis/skill bundles plus a dated KB-to-skill landscape snapshot.
+**Foundation**
+
+1. [`guiding-principles.md`](content/meta/guiding-principles.md) — why the Foundry prioritizes upstream authority, provenance, deterministic tooling, portability, actionable knowledge, and corpus grounding.
+2. [`architecture.md`](content/meta/architecture.md) — directory layout, types, validation pipeline, site rendering.
+3. [`molds.md`](content/meta/molds.md) — Mold inventory rationale and bucketing axes.
+4. [`mold-spec.md`](content/meta/mold-spec.md) — the Mold authoring contract: source layout, which files may sit beside `index.md`, and who enforces it.
+5. [`casting.md`](content/meta/casting.md) — how typed Mold references become target-specific cast artifacts with provenance.
+6. [`cast-walkthrough.md`](content/meta/cast-walkthrough.md) — one real committed cast annotated end to end.
+7. [`eval-philosophy.md`](content/meta/eval-philosophy.md) — why `eval.md` is an abstract oracle and `scenarios.md` holds the concrete cases.
+8. [`corpus.md`](content/meta/corpus.md) — IWC grounding; URL-not-mirror principle.
+9. [`harness-pipelines.md`](content/meta/harness-pipelines.md) — pipeline narrative behind `content/pipelines/`.
+
+**Infrastructure**
+
+1. [`comparisons.md`](content/meta/comparisons.md) — positioning vs wikis/skill bundles plus a dated KB-to-skill landscape snapshot.
+2. [`pattern-authorship.md`](content/meta/pattern-authorship.md) — authorship rules for operation-named, corpus-grounded pattern pages.
+3. [`schema-packages.md`](content/meta/schema-packages.md) — where a Mold IO schema lives and how cast resolves one through a schema note.
+
+[`content/meta/glossary.md`](content/meta/glossary.md) shares the directory and is deliberately not a note.
 
 ## Status
 

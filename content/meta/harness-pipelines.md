@@ -12,7 +12,7 @@ revision: 17
 summary: "The source-to-target journeys that compose Molds, loops, and branch phases."
 ---
 
-Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase corresponds to one atomic, harness-step-sized Mold, and the union of phases across pipelines is the Mold catalog. See `MOLDS.md`.
+Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase corresponds to one atomic, harness-step-sized Mold, and the union of phases across pipelines is the Mold catalog. See [[molds]].
 
 ## Framing
 
