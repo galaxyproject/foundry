@@ -15,10 +15,12 @@ typecheck:
 generated:
 	npm run dashboard
 	npm run index
+	npm run readme
 
 check-generated:
 	npm run check:dashboard
 	npm run check:index
+	npm run check:readme
 
 assemble-pipelines:
 	@for p in $(PIPELINE_SLUGS); do echo "assemble $$p"; $(FOUNDRY_BUILD) assemble-pipeline --root . $$p || exit 1; done

@@ -6,6 +6,7 @@ import { runCastMoldCommand } from "../commands/cast-mold.js";
 import { runGenerateDashboardCommand } from "../commands/generate-dashboard.js";
 import { runGenerateIndexCommand } from "../commands/generate-index.js";
 import { runGenerateKindManifestCommand } from "../commands/generate-kind-manifest.js";
+import { runGenerateReadmeStatsCommand } from "../commands/generate-readme-stats.js";
 import { runValidateArtifactCommand } from "../commands/validate-artifact.js";
 import { runValidateCommand } from "../commands/validate.js";
 
@@ -14,6 +15,7 @@ const COMMANDS = [
   "generate-index",
   "generate-dashboard",
   "generate-kinds",
+  "generate-readme",
   "cast",
   "assemble-pipeline",
   "validate-artifact",
@@ -30,6 +32,7 @@ async function main(argv = process.argv.slice(2)): Promise<void> {
   else if (command === "generate-index") runGenerateIndexCommand(rest);
   else if (command === "generate-dashboard") runGenerateDashboardCommand(rest);
   else if (command === "generate-kinds") runGenerateKindManifestCommand(rest);
+  else if (command === "generate-readme") runGenerateReadmeStatsCommand(rest);
   else if (command === "cast") await runCastMoldCommand(rest);
   else if (command === "assemble-pipeline") await runAssemblePipelineCommand(rest);
   else if (command === "validate-artifact") runValidateArtifactCommand(rest);

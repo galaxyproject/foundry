@@ -94,6 +94,33 @@ export function writeOrCheck(filePath: string, content: string, check: boolean):
   writeFileSync(filePath, normalized);
 }
 
+/**
+ * Swap the body of a `<!-- generated:NAME -->` … `<!-- /generated:NAME -->` region.
+ *
+ * `writeOrCheck` owns whole files, which is right for `Index.md` and `Dashboard.md` — nothing in
+ * them is hand-written. A README is the other case: an argument a person wrote, carrying facts
+ * that go stale. Generating the whole file would mean the generator owned the prose; leaving the
+ * facts in the prose is what let the Mold count sit two behind in two sentences. A region is the
+ * seam between the two, and it is marked in the output so a reader editing by hand can see which
+ * half is theirs.
+ *
+ * Throws when the markers are absent or malformed. A generator that silently no-ops on a file
+ * someone reorganized would report success while going on being wrong, which is the failure this
+ * whole mechanism exists to end.
+ */
+export function replaceGeneratedRegion(text: string, name: string, body: string): string {
+  const open = `<!-- generated:${name} -->`;
+  const close = `<!-- /generated:${name} -->`;
+  const start = text.indexOf(open);
+  const end = text.indexOf(close);
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error(
+      `missing or malformed \`generated:${name}\` region (expected ${open} … ${close})`,
+    );
+  }
+  return `${text.slice(0, start + open.length)}\n${body.trim()}\n${text.slice(end)}`;
+}
+
 export function markdownTable(rows: string[][]): string {
   if (rows.length === 0) return "";
   const header = rows[0] ?? [];

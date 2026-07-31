@@ -69,6 +69,7 @@ npm run test              # vitest suite
 npm run typecheck         # tsc --noEmit
 npm run dashboard         # generate content/Dashboard.md
 npm run index             # generate content/Index.md
+npm run readme            # refresh this file's corpus counts
 npm run cast              # cast a Mold (see above)
 npm run site:dev          # Astro dev server
 ```
@@ -102,6 +103,23 @@ so the collection, not this list, is the authority on which records exist. Read 
 
 ## Status
 
-Working system, pre-review. All seven pipelines cast end-to-end into Claude skills: 45 Molds, 54 pattern pages, CLI manual pages for six tools, `foundry-build cast` + `assemble-pipeline`, and the live Astro site.
+Working system. Every pipeline casts end-to-end into Claude skills, on top of `foundry-build cast` + `assemble-pipeline` and the live Astro site.
 
-Forward work is quality and reach rather than existence. Every Mold is still `status: draft` — none have passed a review gate. The `generic` and `web` cast targets are scaffolded but empty; only Claude casts today. Eval coverage is partial: 33 of 45 Molds have an `eval.md`, 27 have `scenarios.md`.
+Forward work is quality and reach rather than existence. Review is underway rather than finished, and eval coverage is partial — `eval.md` and `scenarios.md` are `recommended` rather than `required`, and the table below is what that costs today. The `generic` and `web` cast targets are scaffolded but empty; only Claude casts.
+
+<!-- generated:corpus -->
+|  | count |
+| --- | --- |
+| Pipelines | 7 |
+| Molds | 47 — 27 reviewed, 20 draft |
+| … with `eval.md` | 33 |
+| … with `scenarios.md` | 27 |
+| Pattern pages | 54 |
+| Source-pattern pages | 7 |
+| CLI tools | 6 |
+| CLI command pages | 26 |
+| Schema notes | 14 |
+| Research notes | 63 |
+<!-- /generated:corpus -->
+
+Counted from the corpus by `foundry-build generate-readme`, not by hand — `make check-generated` fails the build when they drift. Everything outside the markers is hand-written.
