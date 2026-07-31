@@ -380,7 +380,7 @@ Astro content collections: one per entry in `COLLECTIONS`, each loading its own 
 
 Routes:
 - `[...slug].astro` renders content notes, including Mold `index.md` directory notes, through type-specific body components.
-- `raw/[...slug].md.ts` serves raw note text endpoints.
+- `raw/[...path].ts` serves raw text endpoints for every note and every file beside one.
 
 Casts directory (`casts/<target>/<name>/`) is **not** a content collection — it's generated, language-target-shaped, and treated as a standalone artifact, not a Foundry note.
 
@@ -401,7 +401,7 @@ Routes:
 - `design/index.astro`, `design/[slug].astro`, `story/index.astro`, `external.astro`, `log.astro`, `glossary.astro` — supporting public pages.
 - `tags/index.astro` — bucketed facet browser (source / target / topic / tool·cli / other). New subject-area buckets get added as tag families bloom. Per-type browse lives on the `molds`/`patterns`/`pipelines` index pages and the Dashboard/Index catalogs.
 - `tags/[...tag].astro` — per-tag filter.
-- `raw/[...slug].md.ts` — raw text endpoints (`Content-Type: text/plain`). Trivially makes the foundry agent-consumable.
+- `raw/[...path].ts` — raw text endpoints (`Content-Type: text/plain`). Trivially makes the foundry agent-consumable. Every note at `/raw/<id>.md`, and **every file beside a note** at `/raw/<id>/<path>` — companions, `refinements/` entries, `examples/` fixtures, vendored sidecars. Nothing adjacent to a note is withheld: the repository is public, so an unserved file is hidden from an agent reading the site and from nobody else. The path carries the whole filename rather than a stem, which is what lets a `.yml` or `.prompt` sidecar have a URL at all.
 
 Theme: CSS custom properties under `@theme { ... }` with `@custom-variant dark` and a `.dark { ... }` override block. Status badges (`.badge-draft`, …) and `.tag` chips first-class. `.dangling` styles unresolved wiki links muted+italic.
 

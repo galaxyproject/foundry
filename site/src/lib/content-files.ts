@@ -20,7 +20,13 @@ import { root } from 'astro:config/server';
 import type { NormalizedCompanion } from '@galaxy-foundry/kind-schema';
 import { CONTENT_DIR } from '@galaxy-foundry/note-schema';
 
-import { checkDirectoryLayout, readCompanionIn, type NoteKind } from './companions';
+import {
+  adjacentFiles,
+  checkDirectoryLayout,
+  readAdjacentIn,
+  readCompanionIn,
+  type NoteKind,
+} from './companions';
 
 export { companionOf } from './companions';
 
@@ -40,4 +46,14 @@ export function readCompanion(id: string, companion: NormalizedCompanion): strin
 /** What sits in a note's directory, measured against what its kind declares. */
 export function checkNoteDirectory(id: string, kind: NoteKind) {
   return checkDirectoryLayout(noteDir(id), id, kind);
+}
+
+/** Every file beside a note that is not itself a note, relative to the note's directory. */
+export function noteAdjacentFiles(id: string): string[] {
+  return adjacentFiles(noteDir(id), id);
+}
+
+/** The contents of a file beside a note, or `undefined` when it is not there. */
+export function readAdjacent(id: string, relativePath: string): string | undefined {
+  return readAdjacentIn(noteDir(id), relativePath);
 }

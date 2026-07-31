@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
+  adjacentFiles,
   checkDirectoryLayout,
   companionOf,
   readCompanionIn,
@@ -77,5 +78,50 @@ describe("readCompanionIn", () => {
     const companion = companionOf("mold", "eval.md");
     expect(readCompanionIn(moldDir("discover-shed-tool"), companion)).toContain("#");
     expect(readCompanionIn(moldDir("no-such-mold"), companion)).toBeUndefined();
+  });
+});
+
+// What the raw route serves. The route named two files while `mold` declares nine, so 48 files
+// sat in the corpus unreachable from the site — and the fix is not a longer list but the absence
+// of one: a file beside a note is served because it is there.
+describe("adjacentFiles", () => {
+  it("reaches into a declared companion directory", () => {
+    // The `refinements/` journal is the case a flat companion list cannot express at all: the
+    // declaration names the directory, and what is served is the entries inside it.
+    expect(adjacentFiles(moldDir("discover-shed-tool"), "molds/discover-shed-tool")).toContain(
+      "refinements/2026-06-17-tool-id-query-normalization.md",
+    );
+  });
+
+  it("serves companions no kind declares, for a kind whose set is open", () => {
+    // `research` sets `additionalCompanions: 'allow'`, so its vendored sidecars are legal AND
+    // undeclared. Anything derived from the declaration would serve none of them, which is the
+    // reason this reads the directory instead.
+    const id = "research/component-nextflow-testing";
+    expect(adjacentFiles(path.join(repoRoot, "content", id), id)).toContain(
+      "component-nextflow-testing.yml",
+    );
+  });
+
+  it("is not markdown-only", () => {
+    const id = "prompts/galaxy/custom-tool-critic";
+    expect(adjacentFiles(path.join(repoRoot, "content", id), id)).toEqual(["upstream.prompt"]);
+  });
+
+  it("excludes siblings that are themselves notes", () => {
+    // A `cli-tool` directory holds nothing but `cli-command` notes. Each has its own raw URL,
+    // and inferring "not a note" from the extension would republish every one of them under a
+    // second path.
+    expect(adjacentFiles(path.join(repoRoot, "content/cli/gxwf"), "cli/gxwf")).toEqual([]);
+  });
+
+  it("leaves nothing beside a Mold unreachable", () => {
+    // The invariant the route exists to hold, checked against a Mold carrying the companions
+    // that were unreachable before: an eval, a journal, and the index.md that is the note.
+    const slug = "advance-galaxy-draft-step";
+    const served = adjacentFiles(moldDir(slug), `molds/${slug}`);
+    expect(served).not.toContain("index.md");
+    expect(served.filter((f) => f.startsWith("refinements/")).length).toBeGreaterThan(0);
+    expect(served).toContain("eval.md");
   });
 });
