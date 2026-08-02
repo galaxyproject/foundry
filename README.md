@@ -105,7 +105,7 @@ so the collection, not this list, is the authority on which records exist. Read 
 
 Working system. Every pipeline casts end-to-end into Claude skills, on top of `foundry-build cast` + `assemble-pipeline` and the live Astro site.
 
-Forward work is quality and reach rather than existence. Review is underway rather than finished, and eval coverage is partial — `eval.md` and `scenarios.md` are `recommended` rather than `required`, and the table below is what that costs today. The `generic` and `web` cast targets are scaffolded but empty; only Claude casts.
+Forward work is quality and reach rather than existence. Review is underway rather than finished, and eval coverage is partial — `eval.md` and `scenarios.md` are `recommended` rather than `required`, and the table below is what that costs today. Claude is the only cast target; a second one begins with a `casts/<target>/_target.yml`, which is what makes a target real.
 
 <!-- generated:corpus -->
 |  | count |
