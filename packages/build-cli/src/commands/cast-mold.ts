@@ -196,6 +196,16 @@ interface ResolvedRef {
 // decisions keyed on kind-name literals here. They are now read from `reference_contract.yml`'s
 // `cast:` blocks — see packages/note-schema/src/cast-contract.ts for why.
 
+/**
+ * The message of something thrown, without assuming it was an `Error`.
+ *
+ * `(e as Error).message` renders `undefined` for a thrown string or object, which turns a
+ * reported failure into a line that says nothing.
+ */
+function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
 /** Remove directories left empty by pruning, deepest first. Keeps `dir` itself. */
 function pruneEmptyDirs(dir: string): void {
   if (!existsSync(dir)) return;
@@ -350,7 +360,7 @@ function resolveMoldRef(
       try {
         payload = payloadCompanionOf(kind);
       } catch (e) {
-        return { error: `references[${index}]: ${(e as Error).message}` };
+        return { error: `references[${index}]: ${errorMessage(e)}` };
       }
       src = path.posix.join(path.posix.dirname(tp), payload);
       dstOverride = namedDst;
@@ -1331,9 +1341,19 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const rawRefs = Array.isArray(moldParsed.meta.references)
     ? (moldParsed.meta.references as unknown[])
     : [];
-  const { contract: refContract, cast: castContract } = loadCastReferenceContract(
-    path.join(repoRoot, "reference_contract.yml"),
-  );
+  // A malformed contract is a authoring error in a YAML file, not a bug in the caster, so it
+  // reports like every other bad input here rather than as a stack trace. Same reasoning as
+  // catching `payloadCompanionOf` below: the message is already good, the delivery was not.
+  let refContract: ReturnType<typeof loadCastReferenceContract>["contract"];
+  let castContract: CastContract;
+  try {
+    ({ contract: refContract, cast: castContract } = loadCastReferenceContract(
+      path.join(repoRoot, "reference_contract.yml"),
+    ));
+  } catch (e) {
+    console.error(errorMessage(e));
+    process.exit(2);
+  }
 
   const resolved: ResolvedRef[] = [];
   const errors: string[] = [];

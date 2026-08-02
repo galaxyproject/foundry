@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import {
   copyFileSync,
+  cpSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -74,26 +75,44 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     expect(r.stdout).toContain("clean");
   });
 
+  // Gutting the committed `_verify.json` in place and restoring it in a `finally` is the same
+  // hazard the mutated-contract helper below was rewritten to remove: vitest runs files in
+  // parallel, so a sibling suite — or a `make check-casts` in another shell — reads a gutted
+  // manifest and reports drift on a Mold nobody touched, and a SIGINT leaves it gutted in the
+  // working tree. The bundle under test is COPIED into a temp root instead; only the copy is
+  // damaged, and the tracked tree is never opened for writing.
   it("foundry-build cast --check catches stale _verify.json", () => {
-    const verifyPath = path.join(
-      repoRoot,
-      "casts",
-      "claude",
-      "skills",
-      "summarize-nextflow",
-      "_verify.json",
-    );
-    const original = readFileSync(verifyPath, "utf8");
+    const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-verify-"));
     try {
+      const bundle = path.join(root, "casts/claude/skills/summarize-nextflow");
+      mkdirSync(bundle, { recursive: true });
+      cpSync(path.join(repoRoot, "casts/claude/skills/summarize-nextflow"), bundle, {
+        recursive: true,
+      });
+      copyFileSync(
+        path.join(repoRoot, "casts/claude/_target.yml"),
+        path.join(root, "casts/claude/_target.yml"),
+      );
+      seedReferenceContract(root);
+      for (const name of ["content", "LICENSES"]) {
+        symlinkSync(path.join(repoRoot, name), path.join(root, name));
+      }
       writeFileSync(
-        verifyPath,
+        path.join(bundle, "_verify.json"),
         JSON.stringify({ verify_schema_version: 1, entries: [] }, null, 2) + "\n",
       );
-      const r = runTsx(foundryBuild, ["cast", "summarize-nextflow", "--target=claude", "--check"]);
+      const r = runTsx(foundryBuild, [
+        "cast",
+        "summarize-nextflow",
+        "--target=claude",
+        "--check",
+        "--root",
+        root,
+      ]);
       expect(r.code).not.toBe(0);
       expect(r.stderr).toContain("_verify.json");
     } finally {
-      writeFileSync(verifyPath, original);
+      rmSync(root, { recursive: true, force: true });
     }
   });
 
@@ -1345,24 +1364,59 @@ describe("reference_contract.yml cast declarations are load-bearing", () => {
    * every comment in the file — including the block documenting `cast:` itself, which is
    * exactly the prose this repo treats as load-bearing.
    *
-   * So the mutated contract goes in a temp root beside symlinks to the real `content/` and
-   * `casts/`. Both callers pass `--check`, which never writes, so the tracked file is never
-   * opened for writing at all.
+   * So the mutated contract goes in a temp root beside symlinks to the real tree.
+   *
+   * Two things this helper OWNS rather than leaves to its callers, both learned the hard way:
+   *
+   * It runs the cast itself, always with `--check`. The root it builds symlinks the whole real
+   * `casts/` tree, and a caller that forgot `--check` would rewrite `SKILL.md`, rewrite
+   * `_provenance.json`, and `unlinkSync` committed reference files in the tracked tree — while
+   * exiting 0 and looking like a passing test. "Every caller remembers" is not a property of a
+   * helper that hands out a path and lets callers compose argv.
+   *
+   * And it asserts a CONTROL first: the same root with the contract UNMUTATED must cast clean.
+   * Without that, `expect(code).not.toBe(0)` is satisfied by any environmental breakage in the
+   * root, and these two tests were in fact passing that way — the root omitted `LICENSES/`, so
+   * both Molds failed on `license_file missing` whether or not the declaration was honoured.
+   * The mutation must be the ONLY reason the cast stops working, and the only way to know that
+   * is to run it without one.
    */
-  function withMutatedContract(
+  function castWithMutatedContract(
+    moldName: string,
     mutate: (kinds: Record<string, Record<string, unknown>>) => void,
-    assert: (root: string) => void,
-  ): void {
-    const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-contract-"));
-    try {
+  ): { code: number; stdout: string; stderr: string } {
+    const build = (root: string, mutated: boolean): void => {
       const doc = yaml.load(readFileSync(contractPath, "utf8")) as {
         kinds: Record<string, Record<string, unknown>>;
       };
-      mutate(doc.kinds);
+      if (mutated) mutate(doc.kinds);
       writeFileSync(path.join(root, "reference_contract.yml"), yaml.dump(doc));
-      symlinkSync(path.join(repoRoot, "content"), path.join(root, "content"));
-      symlinkSync(path.join(repoRoot, "casts"), path.join(root, "casts"));
-      assert(root);
+      // Everything the caster reads out of the repo root. `LICENSES/` is not optional: refs
+      // carrying `license_file:` are hashed against it, and its absence is an error.
+      for (const name of ["content", "casts", "LICENSES"]) {
+        symlinkSync(path.join(repoRoot, name), path.join(root, name));
+      }
+    };
+    const run = (root: string) =>
+      runTsx(foundryBuild, ["cast", moldName, "--target=claude", "--check", "--root", root]);
+
+    const controlRoot = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-control-"));
+    try {
+      build(controlRoot, false);
+      const control = run(controlRoot);
+      expect(
+        control.code,
+        `control (unmutated contract) must cast clean, else the real assertion below proves ` +
+          `nothing about the declaration:\n${control.stderr}`,
+      ).toBe(0);
+    } finally {
+      rmSync(controlRoot, { recursive: true, force: true });
+    }
+
+    const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-contract-"));
+    try {
+      build(root, true);
+      return run(root);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -1371,49 +1425,25 @@ describe("reference_contract.yml cast declarations are load-bearing", () => {
   // Replaces `SUPPORTED_KINDS` / `NOT_IMPLEMENTED_KINDS`: castability is the presence of the
   // block, so deleting it has to be enough to stop the cast.
   it("a kind with no cast: block is refused, and says so as a deliberate gap", () => {
-    withMutatedContract(
-      (kinds) => {
-        delete kinds.research!.cast;
-      },
-      (root) => {
-        const r = runTsx(foundryBuild, [
-          "cast",
-          "summarize-nextflow",
-          "--target=claude",
-          "--check",
-          "--root",
-          root,
-        ]);
-        expect(r.code).not.toBe(0);
-        expect(r.stderr).toContain("kind=research is not castable");
-      },
-    );
+    const r = castWithMutatedContract("summarize-nextflow", (kinds) => {
+      delete kinds.research!.cast;
+    });
+    expect(r.code).not.toBe(0);
+    expect(r.stderr).toContain("kind=research is not castable");
   });
 
   // Replaces `if (r.kind !== "research" && r.kind !== "pattern") continue`. With companions
   // switched off for the kind, the files the note declares stop being claimed by any ref and
   // the bundle's own orphan check is what reports them.
   it("companions: false stops a kind's notes carrying their declared companions", () => {
-    withMutatedContract(
-      (kinds) => {
-        kinds.research!.cast = {
-          ...(kinds.research!.cast as Record<string, unknown>),
-          companions: false,
-        };
-      },
-      (root) => {
-        const r = runTsx(foundryBuild, [
-          "cast",
-          "author-galaxy-tool-wrapper",
-          "--target=claude",
-          "--check",
-          "--root",
-          root,
-        ]);
-        expect(r.code).not.toBe(0);
-        expect(r.stderr).toContain("orphan (no ref claims it)");
-      },
-    );
+    const r = castWithMutatedContract("author-galaxy-tool-wrapper", (kinds) => {
+      kinds.research!.cast = {
+        ...(kinds.research!.cast as Record<string, unknown>),
+        companions: false,
+      };
+    });
+    expect(r.code).not.toBe(0);
+    expect(r.stderr).toContain("orphan (no ref claims it)");
   });
 });
 
