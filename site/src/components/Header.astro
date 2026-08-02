@@ -1,5 +1,6 @@
 ---
 import Search from 'astro-pagefind/components/Search.astro';
+import { CONTAINER, SITE_NAME } from '../lib/site-identity';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 const navLinks = [
@@ -20,10 +21,10 @@ const moreActive = moreLinks.some(link => link.match(pathname));
 ---
 <header class="bg-(--color-galaxy-dark) border-b-4 border-(--color-accent) relative">
   <div class="absolute inset-0 bg-grid-header pointer-events-none"></div>
-  <div class="relative max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-2">
+  <div class={`relative ${CONTAINER} mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-2`}>
     <div class="flex items-center gap-4">
       <a href={`${base}/`} class="text-xl font-bold text-(--color-text-on-dark) no-underline hover:text-(--color-accent) transition-colors">
-        Foundry
+        {SITE_NAME}
       </a>
       <nav class="flex items-center gap-3 text-sm" aria-label="Primary">
         {navLinks.map(link => {
