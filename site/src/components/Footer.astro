@@ -1,13 +1,14 @@
 ---
+import { CONTAINER, REPO_URL, SITE_FULL_NAME } from '../lib/site-identity';
 const year = new Date().getFullYear();
 ---
 <footer class="mt-auto bg-(--color-galaxy-dark) text-(--color-text-on-dark)">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-wrap items-center justify-between gap-4 text-sm opacity-70">
+  <div class={`${CONTAINER} mx-auto px-4 sm:px-6 py-6 flex flex-wrap items-center justify-between gap-4 text-sm opacity-70`}>
     <div class="flex items-center gap-2">
       <div class="w-1 h-4 bg-(--color-accent) rounded-full"></div>
-      <span>&copy; {year} Galaxy Workflow Foundry</span>
+      <span>&copy; {year} {SITE_FULL_NAME}</span>
     </div>
-    <a href="https://github.com/galaxyproject/foundry" class="text-(--color-text-on-dark) no-underline hover:text-(--color-accent) transition-colors">
+    <a href={REPO_URL} class="text-(--color-text-on-dark) no-underline hover:text-(--color-accent) transition-colors">
       GitHub
     </a>
   </div>
