@@ -26,9 +26,26 @@ export const REPO_URL = 'https://github.com/galaxyproject/foundry';
 /**
  * The measure of the reading column, as a Tailwind class.
  *
- * Written out in full because Tailwind finds utilities by scanning source text: assembled from
- * pieces (`max-w-${size}`) it would find nothing and emit no rule, and the page would build clean
- * and render full-bleed. Base, Header and Footer had a copy of this each, free to disagree —
- * `tests/built-shell.test.ts` now asserts the three agree, which is what makes this safe to move.
+ * NOT this site's to choose, unlike everything above it — both instances now carry the same value.
+ * The sibling used to sit one step narrower, and that difference was never decided: its shell was copied
+ * from this one two months later, and the width changed in the same edit as the name and the
+ * description. Neither repo touched it again.
+ *
+ * Nor does either corpus defend a value. The prose measure is set by narrowing locally on the
+ * pages that want it — the sibling does that a dozen times, this instance once — so this is only
+ * the outer bound for tables and grids, of which this instance has 117 pages' worth.
+ *
+ * It lives here because it has to live somewhere until the shell is shared, and it is the first
+ * thing that should LEAVE this file when it is: a shared component can hold one measure and take
+ * no prop for it.
+ *
+ * Two notes on spelling, one mechanism behind both: Tailwind finds utilities by scanning source
+ * TEXT, comments included. So the value is written out in full rather than assembled — from
+ * pieces (`max-w-${size}`) it would find nothing, emit no rule, and the page would build clean and
+ * render full-bleed. And the widths above are described rather than named, because this file
+ * briefly shipped a rule for a width nothing used, on the strength of a comment mentioning it.
+ *
+ * Base, Header and Footer each carried a copy of this, free to disagree —
+ * `tests/built-shell.test.ts` asserts the three agree.
  */
 export const CONTAINER = 'max-w-6xl';
