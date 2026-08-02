@@ -99,6 +99,23 @@ describe("the design record", () => {
     expect(/^---\n/.test(fs.readFileSync(glossary, "utf8"))).toBe(false);
   });
 
+  it("the architecture set is present and the map links every focused record", () => {
+    // The split only holds while every piece stays reachable. A focused record the map stops
+    // linking is a record nobody opens, and the concern it owns drifts back into the map.
+    const FOCUSED = [
+      "code-architecture",
+      "content-model",
+      "build-and-validation",
+      "repository-layout",
+    ];
+    const slugs = recordFiles.map((f) => f.replace(/\.md$/, ""));
+    expect(slugs).toEqual(expect.arrayContaining(["architecture", ...FOCUSED]));
+
+    const map = fs.readFileSync(path.join(META_DIR, "architecture.md"), "utf8");
+    const unlinked = FOCUSED.filter((slug) => !map.includes(`[[${slug}]]`));
+    expect(unlinked).toEqual([]);
+  });
+
   it("orders a reader can follow: no duplicate order within a shelf", () => {
     // `order` replaced the old array's POSITION. Position could not collide; a number can, and
     // two records sharing one sort non-deterministically.

@@ -40,7 +40,10 @@ Authors change source notes, registries, schema implementations, or code. Genera
 4. load tag and reference registries and enforce membership and coherence;
 5. build the shared wiki-link map and resolve frontmatter and body links;
 6. run kind-specific checks for Molds, Patterns, Pipelines, schemas, CLI notes, prompts, research notes, and artifacts;
-7. run cross-note checks such as bidirectional relationships, typed-reference compatibility, pipeline phase resolution, and artifact producer/consumer ordering.
+7. run cross-note checks such as bidirectional relationships, typed-reference compatibility, pipeline phase resolution, and artifact producer/consumer ordering;
+8. run `validateUnroutedContent`, which errors on markdown under `content/` that no collection claims, no directory note owns, and `NOT_NOTES` does not declare.
+
+Step 8 is what closes the walk. Steps 1–7 check the files the routing table found; step 8 checks that the table found everything there was to find. [[content-model]] owns the three-way accounting it enforces.
 
 Errors block. Warnings identify advisory quality concerns. Casting refuses to proceed from a Mold that fails static validation.
 
@@ -82,6 +85,8 @@ The Astro application loads every note collection from the shared collection tab
 - tags, backlinks, wiki links, and raw text endpoints;
 - specialized renderers for Molds, Patterns, Pipelines, schemas, research, and CLI references;
 - cast and usage surfaces derived from committed artifacts.
+
+The raw endpoints follow one rule: **every note is served, and so is every file beside one** — companions, `refinements/` entries, `examples/` fixtures, vendored sidecars. Nothing adjacent to a note is withheld, because the repository is public and an unserved file is hidden from an agent reading the site and from nobody else. The path carries the whole filename rather than a stem, which is what lets a `.yml` or `.prompt` sidecar have a URL at all.
 
 `npm run site:build` performs the production static build. GitHub Pages deployment consumes that output; the site is never an authoring source.
 

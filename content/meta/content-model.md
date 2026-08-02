@@ -57,7 +57,9 @@ The registry has two corpus-level drift rules: a note may not use an undeclared 
 
 ## Links and typed references
 
-Body prose and selected frontmatter fields use Obsidian-style `[[Target]]` links. The validator and renderer share one parser and resolver. Resolution is exact after normalization; unresolved links fail validation or render visibly unresolved. Code spans are excluded because a backticked `[[Target]]` names the syntax rather than creating a link.
+Body prose and selected frontmatter fields use Obsidian-style `[[Target]]` links. The validator and renderer share one parser and resolver. Resolution is exact after normalization — there is no prefix fallback, so an unresolved link fails validation or renders visibly unresolved rather than landing on an arbitrary near-match. Code spans are excluded because a backticked `[[Target]]` names the syntax rather than creating a link.
+
+That exclusion cuts both ways, and the second edge is the sharp one: `validateBodyWikiLinks` strips code spans *before* it scans, so a backticked link is not merely unrendered — it is unchecked. It can name a note that never existed and neither the site nor the validator will say so. Wrap a wiki link in backticks only when the literal token is the subject: a template slot, a frontmatter field shape, or a shell construct like `[[:space:]]` that is not a wiki link at all.
 
 A wiki link expresses knowledge navigation. A Mold **Reference** adds compilation behavior: its `kind`, `load`, `used_at`, `modes`, and `evidence` fields tell casting how the target participates. Patterns may be condensed, prompts inlined, schemas and examples copied, CLI commands serialized as sidecars, and evaluation companions omitted. [[mold-spec]] owns the authoring contract and [[casting]] owns dispatch semantics.
 
@@ -68,6 +70,43 @@ Directory-shaped kinds own a directory whose `index.md` is the only frontmatter-
 Examples include Mold `eval.md`, `scenarios.md`, `refinement.md`, `refinements/`, and `examples/`; Pipeline `eval.md` and `scenarios.md`; Prompt `upstream.prompt`; and Research vendored source files. Undeclared siblings are rejected unless the kind explicitly allows additional companions.
 
 Flat organization alone does not make a directory note. CLI command pages are individual notes grouped two levels deep; each command file still has its own frontmatter and identity.
+
+## Payload mechanisms
+
+Several notes are render-wrappers: the `.md` is human-facing, but the consumable payload is a separate structured file that casting must land in the bundle. Four mechanisms carry such a payload. They share one shape — something names the file, the validator confirms it is there, the caster copies it — and differ in where the payload lives and what casting does with it.
+
+| Mechanism | Payload source | Casting behavior | Declared by |
+|---|---|---|---|
+| `package_export` | npm runtime export | imported and serialized, schema-validated | note frontmatter (`schema`) |
+| `companions` | sibling file(s) | copied verbatim, hash parity | note frontmatter (`research`) |
+| `license_file` | `LICENSES/<file>` | copied verbatim for redistribution | note frontmatter (any vendoring note) |
+| kind companion | fixed sibling at a fixed name | copied verbatim | the kind (e.g. Prompt `upstream.prompt`) |
+
+`package_export` and `companions` are one concept split by payload location; they stay separate fields because import-and-stringify with schema validation and verbatim-bytes-with-hash-parity are genuinely different behaviors. `companions` attaches to the **note**, not to the consuming Mold, so a note many Molds reference declares its siblings once.
+
+The kind-declared form is the cheapest and the default: wherever a kind admits a fixed set of payloads at fixed names, the kind says so and the validator asks whether the file is *there* rather than whether a declared path resolves. A per-note field in that position could only restate the kind's own layout. `companions:` frontmatter is correspondingly narrowing — it survives for `research`, whose notes have nowhere else to declare anything. **Before adding a fifth mechanism, check whether one of these four already fits.**
+
+## Pipeline phases
+
+A Pipeline's `phases:` is an ordered array in which each item is exactly one phase:
+
+```yaml
+phases:
+  - mold: "[[summarize-nextflow]]"          # Mold-shaped phase
+  - mold: "[[implement-galaxy-tool-step]]"
+    loop: true                              # runs per workflow step
+  - branch: discover-or-author              # routing, not a Mold
+    branches:
+      - "[[discover-shed-tool]]"
+      - fallthrough: "[[author-galaxy-tool-wrapper]]"
+  - branch: test-data-resolution
+    chain:
+      - "[[paper-to-test-data]]"
+      - "[[find-test-data]]"
+      - user-supplied                       # terminal fallback
+```
+
+`branch` values come from a closed vocabulary of named routing patterns. Wiki links inside a `branch` block resolve through the same validator pass as Mold-shaped phases. The phase-kind set is open: a new inline kind such as `gate` is coined when a real pipeline needs it, and unrelated behaviors do not share an umbrella. [[harness-pipelines]] owns what the phases mean to a harness.
 
 ## Aggregation model
 
@@ -83,5 +122,15 @@ No separate navigation-hub kind is required. Generated dashboard and index pages
 ## Deliberate non-notes
 
 `content/meta/glossary.md` shares the design-record directory but is deliberately excluded from the `meta` collection. It has its own renderer and term anchors. `content/log.md` is an append-only operations record excluded from normal note validation and collections. Sharing a directory is a filing decision, not a type declaration.
+
+Not being claimed by a collection is not the same as being accounted for: a file nobody meant to add is equally unclaimed. Every non-note is therefore *declared*, in `NOT_NOTES` beside `COLLECTIONS`, with the reason it is not a note. Markdown under `content/` must be one of exactly three things:
+
+| accounted for by | who answers for it |
+|---|---|
+| a collection claims it | the routing table |
+| a directory note owns the directory it sits in | that kind's companion declaration |
+| `NOT_NOTES` declares it | the allowance table |
+
+`validateUnroutedContent` errors on anything else, which is what keeps the residue empty by construction rather than by having been looked at recently. The rule is markdown-only: every collection pattern selects `.md`, so fixtures and vendored sources under `content/` are data, governed by the companion declaration of whichever note owns their directory.
 
 Change this record when a kind, base metadata rule, tag rule, link contract, reference relationship, or companion model changes.
