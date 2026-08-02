@@ -1,13 +1,13 @@
 ---
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
-import { getLicenses, licenseIdFromFile } from '../../lib/licenses';
-import { resolveLicenseRow } from '@galaxy-foundry/license-policy';
+import { getLicenses } from '../../lib/licenses';
+import { licenseIdFromFilePath, resolveLicenseRow } from '@galaxy-foundry/license-policy';
 import { licensePolicy } from '../../lib/registries';
 
 export async function getStaticPaths() {
   return getLicenses().map(license => ({
-    params: { id: license.id },
+    params: { id: license.licenseId },
     props: { license },
   }));
 }
@@ -20,7 +20,7 @@ const entries = await getAllNotes();
 const users = entries
   .filter(e => {
     const lf = (e.data as any).license_file;
-    return typeof lf === 'string' && licenseIdFromFile(lf) === license.id;
+    return typeof lf === 'string' && licenseIdFromFilePath(lf) === license.licenseId;
   })
   .map(e => ({ id: e.id, spdx: (e.data as any).license as string | undefined }))
   .sort((a, b) => a.id.localeCompare(b.id));
@@ -29,7 +29,7 @@ const users = entries
 const spdxIds = [...new Set(users.map(u => u.spdx).filter(Boolean) as string[])];
 const rows = spdxIds.map(id => ({ id, row: resolveLicenseRow(licensePolicy, id) }));
 ---
-<Base title={`license: ${license.id}`}>
+<Base title={`license: ${license.licenseId}`}>
   <header class="mb-4">
     <p class="text-xs font-mono uppercase tracking-widest text-(--color-text-muted) mb-1">license</p>
     <h1 class="text-2xl font-mono font-semibold m-0">{license.filename}</h1>
