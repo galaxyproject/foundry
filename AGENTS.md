@@ -7,7 +7,11 @@
 ## Then orient
 
 - `README.md` — what this project is and why.
-- `content/meta/architecture.md` — directory layout, types, validation pipeline, site rendering. The structural authority.
+- `content/meta/architecture.md` — short system map and reading routes across the focused architecture records.
+- `content/meta/code-architecture.md` — packages, applications, dependency direction, and implementation contracts.
+- `content/meta/content-model.md` — note kinds, frontmatter, tags, links, references, and companions.
+- `content/meta/build-and-validation.md` — validation, generation, casting, assembly, site builds, and drift gates.
+- `content/meta/repository-layout.md` — physical placement and authored/generated ownership boundaries.
 - `content/meta/molds.md` — Mold inventory and bucketing axes.
 - `content/meta/mold-spec.md` — Mold authoring contract (frontmatter, references, eval/usage/refinement). Load when authoring or editing a Mold or its `eval.md`.
 - `content/meta/harness-pipelines.md` — pipeline narrative behind `content/pipelines/`.
