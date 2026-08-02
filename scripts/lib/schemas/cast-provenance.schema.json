@@ -2,12 +2,12 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "cast-provenance.schema.json",
   "title": "Cast Provenance",
-  "description": "Forensic record of a cast: what got produced, from which Mold revision, by which method, and what each ref's deterministic vs LLM provenance looks like.",
+  "description": "Forensic record of a cast: what got produced, from which Mold revision, by which method, and the source and destination hash of every reference it resolved.",
   "type": "object",
   "additionalProperties": false,
   "required": ["provenance_schema_version", "cast_target", "mold", "refs"],
   "properties": {
-    "provenance_schema_version": { "type": "integer", "const": 3 },
+    "provenance_schema_version": { "type": "integer", "const": 4 },
     "cast_target": { "type": "string" },
     "mold": {
       "type": "object",

@@ -127,7 +127,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
       "_provenance.json",
     );
     const prov = JSON.parse(readFileSync(provPath, "utf8"));
-    expect(prov.provenance_schema_version).toBe(3);
+    expect(prov.provenance_schema_version).toBe(4);
     expect(prov.cast_target).toBe("claude");
     expect(Array.isArray(prov.refs)).toBe(true);
     expect(prov.refs.length).toBeGreaterThan(0);
@@ -437,7 +437,7 @@ describe("cast-mold prompt refs", () => {
         path.join(dir, "casts/claude/_target.yml"),
         [
           "name: claude",
-          "provenance_schema_version: 3",
+          "provenance_schema_version: 4",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds:",
           "  prompt:",
@@ -524,7 +524,7 @@ describe("cast-mold cli-command meta injection", () => {
         path.join(dir, "casts/claude/_target.yml"),
         [
           "name: claude",
-          "provenance_schema_version: 3",
+          "provenance_schema_version: 4",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds:",
           "  cli-command:",
@@ -628,7 +628,7 @@ describe("cast-mold companion files", () => {
       path.join(dir, "casts/claude/_target.yml"),
       [
         "name: claude",
-        "provenance_schema_version: 3",
+        "provenance_schema_version: 4",
         "required_outputs: [SKILL.md, _provenance.json]",
         "kinds:",
         "  research:",
@@ -1148,7 +1148,7 @@ describe("cast-mold negative cases", () => {
         path.join(dir, "casts/claude/_target.yml"),
         [
           "name: claude",
-          "provenance_schema_version: 3",
+          "provenance_schema_version: 4",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds: {}",
           "skill_constraints:",
@@ -1203,7 +1203,7 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
       path.join(dir, "casts/claude/_target.yml"),
       [
         "name: claude",
-        "provenance_schema_version: 3",
+        "provenance_schema_version: 4",
         "required_outputs: [SKILL.md, _provenance.json]",
         "kinds:",
         "  research:",
@@ -1450,7 +1450,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
   function targetYml(kind: string, dstDir: string, ext: string, modes: string): string {
     return [
       "name: claude",
-      "provenance_schema_version: 3",
+      "provenance_schema_version: 4",
       "required_outputs: [SKILL.md, _provenance.json]",
       "kinds:",
       `  ${kind}:`,
@@ -1574,7 +1574,7 @@ describe("cast declarations: stricter than before, on purpose", () => {
       path.join(dir, "casts/claude/_target.yml"),
       [
         "name: claude",
-        "provenance_schema_version: 3",
+        "provenance_schema_version: 4",
         "required_outputs: [SKILL.md, _provenance.json]",
         "kinds:",
         "  pattern:",

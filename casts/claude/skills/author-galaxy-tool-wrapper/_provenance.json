@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 4,
     "content_hash": "f9c208c6c9e6cc4b6515ae68c3dcacb60b682eeee7e60d65d24c179faee75de2",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:09.815Z",
+  "cast_at": "2026-08-02T22:04:17.980Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [

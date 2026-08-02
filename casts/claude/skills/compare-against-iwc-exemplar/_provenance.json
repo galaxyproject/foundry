@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 8,
     "content_hash": "5e9518f154f452aadc1916e8bcfab3f864b69134479fe8c8dd542b1028731941",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:11.942Z",
+  "cast_at": "2026-08-02T22:04:20.641Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [

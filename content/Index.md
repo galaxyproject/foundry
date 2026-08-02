@@ -160,7 +160,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Schemas
 
-- [[cast-provenance]] — _provenance.json contract beside every cast: Mold revision, per-ref deterministic-vs-LLM origin, src/dst hashes, artifact handoff. Schema v2.
+- [[cast-provenance]] — _provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only.
 - [[summary-cwl]] — JSON Schema for the structured summary emitted by the summarize-cwl Mold.
 - [[parsed-tool]] — JSON Schema for the upstream Galaxy `ParsedTool` model, vendored from `@galaxy-tool-util/schema`.
 - [[galaxy-tool-discovery]] — JSON Schema for Tool Shed discovery hit, weak, and miss recommendations.

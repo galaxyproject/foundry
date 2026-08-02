@@ -7,7 +7,7 @@
 
 name: claude
 
-provenance_schema_version: 3
+provenance_schema_version: 4
 
 # Required runtime artifacts the generated skill must produce.
 # The deterministic verifier checks these before any agentic review.
