@@ -17,6 +17,8 @@ import {
   type ReferenceContract,
 } from "@galaxy-foundry/reference-contract";
 
+import { loadCastContract, type CastContract } from "./cast-contract.js";
+
 export {
   contractKeys,
   findReferenceContractPath,
@@ -36,4 +38,20 @@ export function loadReferenceContract(
   contractPath = findReferenceContractPath(),
 ): ReferenceContract {
   return buildReferenceContract({ kinds: loadInstanceKinds(contractPath) });
+}
+
+/**
+ * The casting half of the same file — what the caster does with each kind.
+ *
+ * Separate entry point because the two halves have different readers: the site renders
+ * `label`/`description`/`ref_shape` and has no use for a resolve strategy, while the
+ * caster needs the strategy and never renders a pill. Both read one file, which is what
+ * keeps them from disagreeing.
+ */
+export function loadCastReferenceContract(contractPath = findReferenceContractPath()): {
+  contract: ReferenceContract;
+  cast: CastContract;
+} {
+  const contract = loadReferenceContract(contractPath);
+  return { contract, cast: loadCastContract(contractPath, Object.keys(contract.modes)) };
 }

@@ -1,8 +1,17 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
@@ -14,7 +23,24 @@ const castVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
 // Resolve the repo-local tsx binary by absolute path. Invoking `npx tsx` from a
 // temp-dir cwd can't see local node_modules and auto-installs tsx into the
 // shared npx cache; two such installs racing across test files corrupt it.
-const tsxBin = path.join(repoRoot, "node_modules", ".bin", process.platform === "win32" ? "tsx.cmd" : "tsx");
+const tsxBin = path.join(
+  repoRoot,
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "tsx.cmd" : "tsx",
+);
+
+// A temp repo is a miniature Foundry, and a Foundry without a reference contract has no
+// `cast:` declarations to compile against — the caster reads which kinds are castable, what
+// each defaults to and how each resolves from this file. Fixtures write their own
+// `_target.yml` (placement, per test) and inherit the real contract (strategy, repo-wide),
+// which is the same split the two files have in the repo proper.
+function seedReferenceContract(dir: string): void {
+  copyFileSync(
+    path.join(repoRoot, "reference_contract.yml"),
+    path.join(dir, "reference_contract.yml"),
+  );
+}
 
 function runTsx(script: string, args: string[]): { code: number; stdout: string; stderr: string } {
   try {
@@ -381,6 +407,7 @@ describe("artifact-contract inheritance", () => {
 describe("cast-mold prompt refs", () => {
   it("copies the upstream.prompt companion using the prompt directory slug", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-prompt-"));
+    seedReferenceContract(dir);
     try {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
       mkdirSync(path.join(dir, "content/prompts/prompt-x"), { recursive: true });
@@ -468,6 +495,7 @@ Wrapper body should not be copied.
 describe("cast-mold cli-command meta injection", () => {
   it("embeds args/options from the package meta subpath and leaves the body flag-free", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-cli-"));
+    seedReferenceContract(dir);
     try {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
       mkdirSync(path.join(dir, "content/cli/galaxy-tool-cache"), { recursive: true });
@@ -545,7 +573,9 @@ Body prose only — no flag list; options come from the package meta.
       expect(sidecar.package).toBe("@galaxy-tool-util/cli");
       expect(sidecar.description).toMatch(/Fetch a tool/i);
       expect(Array.isArray(sidecar.options)).toBe(true);
-      const galaxyUrl = sidecar.options.find((o: { flags: string }) => o.flags.includes("--galaxy-url"));
+      const galaxyUrl = sidecar.options.find((o: { flags: string }) =>
+        o.flags.includes("--galaxy-url"),
+      );
       expect(galaxyUrl?.description).toMatch(/after the ToolShed/i);
       expect(sidecar.body).not.toContain("## Flags");
     } finally {
@@ -646,6 +676,7 @@ ${mention}`,
 
   it("copies declared companion files next to the note and records companion_of", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-companion-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: true });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
@@ -678,6 +709,7 @@ ${mention}`,
 
   it("verifier rejects a bundled note pointing at an undeclared sibling", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-companion-neg-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: false });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
@@ -702,8 +734,12 @@ ${mention}`,
   // instead of guessing at names.
   it("verifier rejects an undeclared sibling that does not share the note's basename", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-unpaired-"));
+    seedReferenceContract(dir);
     try {
-      writeCompanionFixture(dir, { declareCompanions: false, siblingName: "structural.schema.json" });
+      writeCompanionFixture(dir, {
+        declareCompanions: false,
+        siblingName: "structural.schema.json",
+      });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code, `stderr: ${r.stderr}`).toBe(0);
 
@@ -720,6 +756,7 @@ ${mention}`,
   // rendering inside a ```vendored-myst block, and that must not read as "go read this".
   it("verifier ignores a sibling named only inside a fenced block", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-fenced-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, {
         declareCompanions: false,
@@ -738,6 +775,7 @@ ${mention}`,
 
   it("prunes a bundle file no ref claims, and reports it under --check", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-orphan-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: true });
       expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
@@ -748,7 +786,14 @@ ${mention}`,
       const orphan = path.join(dir, "casts/claude/skills/m/references/notes/left-behind.yml");
       writeFileSync(orphan, "stale: true\n");
 
-      const checked = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--check", "--root", dir]);
+      const checked = runTsx(foundryBuild, [
+        "cast",
+        "m",
+        "--target=claude",
+        "--check",
+        "--root",
+        dir,
+      ]);
       expect(checked.code, "--check must not pass with an orphan present").not.toBe(0);
       expect(`${checked.stdout}${checked.stderr}`).toContain("left-behind.yml");
       expect(existsSync(orphan), "--check must not delete anything").toBe(true);
@@ -766,6 +811,7 @@ ${mention}`,
 
   it("carries a companion that lives in a subdirectory of the note", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-nested-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: true, siblingName: "vendor/spec.yml" });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
@@ -774,7 +820,9 @@ ${mention}`,
       // Nested dst, not flattened: the note names `vendor/spec.yml` and the bundle mirrors it,
       // so a vendored tree whose files reference each other by relative path still resolves.
       const nested = path.join(dir, "casts/claude/skills/m/references/notes/vendor/spec.yml");
-      expect(existsSync(nested), "nested companion should mirror its path in the bundle").toBe(true);
+      expect(existsSync(nested), "nested companion should mirror its path in the bundle").toBe(
+        true,
+      );
 
       const prov = JSON.parse(
         readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
@@ -815,6 +863,7 @@ ${mention}`,
       ["cast-skill-verification.md", "cast-input"],
     ])("rejects a bundle carrying %s (%s)", (file, disposition) => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-forbidden-"));
+      seedReferenceContract(dir);
       try {
         const verify = castThenPlant(dir, (bundle) => {
           writeFileSync(path.join(bundle, file), "Foundry-only content.\n");
@@ -831,6 +880,7 @@ ${mention}`,
     // are different companions, and a name matching the wrong type is neither of them.
     it("rejects a refinements/ directory, and not a file of the same name", () => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refinements-"));
+      seedReferenceContract(dir);
       try {
         const asDirectory = castThenPlant(dir, (bundle) => {
           mkdirSync(path.join(bundle, "refinements"));
@@ -843,6 +893,8 @@ ${mention}`,
       }
 
       const other = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refinements-file-"));
+
+      seedReferenceContract(other);
       try {
         const asFile = castThenPlant(other, (bundle) => {
           writeFileSync(path.join(bundle, "refinements"), "not the journal\n");
@@ -860,6 +912,7 @@ ${mention}`,
     // must stay packageable even though other names beside it in the same declaration do not.
     it("accepts an examples/ directory, which a kind declares bundled", () => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-examples-"));
+      seedReferenceContract(dir);
       try {
         const verify = castThenPlant(dir, (bundle) => {
           mkdirSync(path.join(bundle, "examples"));
@@ -876,6 +929,7 @@ ${mention}`,
     // tie: a file some ref claims went through the manifest and is that note's to ship.
     it("accepts a companion a ref claims, even where the name collides with a mold's", () => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-collision-"));
+      seedReferenceContract(dir);
       try {
         writeCompanionFixture(dir, { declareCompanions: true, siblingName: "README.md" });
         expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
@@ -916,6 +970,7 @@ describe("validate-artifact process runner", () => {
     const { runProcessValidation } =
       await import("../packages/build-cli/src/commands/validate-artifact.js");
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-validate-"));
+    seedReferenceContract(dir);
     const artifact = path.join(dir, "artifact.json");
     writeFileSync(artifact, "{}\n");
     const result = runProcessValidation(
@@ -937,6 +992,7 @@ describe("validate-artifact process runner", () => {
 
   it("foundry-build validate-artifact records process evidence in provenance", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-validate-cli-"));
+    seedReferenceContract(dir);
     const artifact = path.join(dir, "artifact.json");
     const verify = path.join(dir, "_verify.json");
     const provenance = path.join(dir, "_provenance.json");
@@ -998,6 +1054,7 @@ describe("validate-artifact process runner", () => {
 
   it("validate-artifact preserves results for different paths with the same artifact id", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-validate-many-"));
+    seedReferenceContract(dir);
     const artifactA = path.join(dir, "a.json");
     const artifactB = path.join(dir, "b.json");
     const verify = path.join(dir, "_verify.json");
@@ -1066,6 +1123,7 @@ describe("cast-mold negative cases", () => {
 
   it("--check on a never-cast mold leaves no bundle directory behind", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-check-"));
+    seedReferenceContract(dir);
     try {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
@@ -1176,6 +1234,7 @@ Use the research reference.
 
   it("refuses verbatim carry of an own-words-only license", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-owf-"));
+    seedReferenceContract(dir);
     try {
       scaffold(
         dir,
@@ -1202,6 +1261,7 @@ license: CC-BY-NC-SA-2.0
 
   it("carries a verbatim-ok license and hashes its license_file into provenance", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-ok-"));
+    seedReferenceContract(dir);
     try {
       scaffold(
         dir,
@@ -1240,7 +1300,9 @@ license_file: LICENSES/test.LICENSE
 describe("stripWikiLinks", () => {
   it("keeps the bare target, drops an anchor, and prefers an explicit alias", async () => {
     const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
-    expect(stripWikiLinks("See [[summarize-nextflow]] first.")).toBe("See summarize-nextflow first.");
+    expect(stripWikiLinks("See [[summarize-nextflow]] first.")).toBe(
+      "See summarize-nextflow first.",
+    );
     expect(stripWikiLinks("See [[summarize-nextflow#Procedure]].")).toBe("See summarize-nextflow.");
     expect(stripWikiLinks("See [[summarize-nextflow|the summary Mold]].")).toBe(
       "See the summary Mold.",
@@ -1260,5 +1322,194 @@ describe("stripWikiLinks", () => {
   it("leaves a degenerate payload as authored rather than emitting nothing", async () => {
     const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
     expect(stripWikiLinks("An [[#anchor-only]] ref.")).toBe("An [[#anchor-only]] ref.");
+  });
+});
+
+// The `cast:` blocks in reference_contract.yml replaced three sets of kind-name literals in
+// cast-mold.ts. A declaration that nothing reads is documentation, so each test below breaks
+// one declaration and asserts the cast NOTICES — the same way the companion dispositions were
+// shown to be load-bearing rather than asserted to be.
+describe("reference_contract.yml cast declarations are load-bearing", () => {
+  const contractPath = path.join(repoRoot, "reference_contract.yml");
+
+  function withMutatedContract(
+    mutate: (kinds: Record<string, Record<string, unknown>>) => void,
+    assert: () => void,
+  ): void {
+    const original = readFileSync(contractPath, "utf8");
+    try {
+      const doc = yaml.load(original) as { kinds: Record<string, Record<string, unknown>> };
+      mutate(doc.kinds);
+      writeFileSync(contractPath, yaml.dump(doc));
+      assert();
+    } finally {
+      writeFileSync(contractPath, original);
+    }
+  }
+
+  // Replaces `SUPPORTED_KINDS` / `NOT_IMPLEMENTED_KINDS`: castability is the presence of the
+  // block, so deleting it has to be enough to stop the cast.
+  it("a kind with no cast: block is refused, and says so as a deliberate gap", () => {
+    withMutatedContract(
+      (kinds) => {
+        delete kinds.research!.cast;
+      },
+      () => {
+        const r = runTsx(foundryBuild, [
+          "cast",
+          "summarize-nextflow",
+          "--target=claude",
+          "--check",
+        ]);
+        expect(r.code).not.toBe(0);
+        expect(r.stderr).toContain("kind=research is not castable");
+      },
+    );
+  });
+
+  // Replaces `if (r.kind !== "research" && r.kind !== "pattern") continue`. With companions
+  // switched off for the kind, the files the note declares stop being claimed by any ref and
+  // the bundle's own orphan check is what reports them.
+  it("companions: false stops a kind's notes carrying their declared companions", () => {
+    withMutatedContract(
+      (kinds) => {
+        kinds.research!.cast = {
+          ...(kinds.research!.cast as Record<string, unknown>),
+          companions: false,
+        };
+      },
+      () => {
+        const r = runTsx(foundryBuild, [
+          "cast",
+          "author-galaxy-tool-wrapper",
+          "--target=claude",
+          "--check",
+        ]);
+        expect(r.code).not.toBe(0);
+        expect(r.stderr).toContain("orphan (no ref claims it)");
+      },
+    );
+  });
+});
+
+// `default_mode` and `slug_field` are declarations no committed Mold exercises: every
+// reference in the corpus names its own `mode`, and no cli-tool note's directory differs
+// from its `tool:`. That makes them exactly the declarations most likely to rot into
+// decoration, so they are exercised here against fixtures built to tell the difference.
+describe("cast declarations the corpus does not currently exercise", () => {
+  function targetYml(kind: string, dstDir: string, ext: string, modes: string): string {
+    return [
+      "name: claude",
+      "provenance_schema_version: 3",
+      "required_outputs: [SKILL.md, _provenance.json]",
+      "kinds:",
+      `  ${kind}:`,
+      `    dst_dir: ${dstDir}`,
+      `    dst_extension: ${ext}`,
+      `    modes: ${modes}`,
+      "condense_prompts: {}",
+      "skill_constraints:",
+      "  frontmatter_required: [name, description]",
+      "  forbidden_runtime_paths: []",
+      "",
+    ].join("\n");
+  }
+
+  function contractYml(kind: string, cast: Record<string, unknown>): string {
+    return yaml.dump({
+      kinds: {
+        [kind]: { label: kind, description: `${kind} refs.`, ref_shape: "wiki-link", cast },
+      },
+    });
+  }
+
+  // A ref that names no `mode` takes the kind's declared default. Same fixture cast twice,
+  // differing only in the declaration: sidecar serializes to JSON, verbatim copies markdown.
+  it("default_mode decides the transform for a ref that names no mode", () => {
+    for (const [mode, expected] of [
+      ["sidecar", "references/cli/c.json"],
+      ["verbatim", "references/cli/c.md"],
+    ] as const) {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-defaultmode-"));
+      try {
+        mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+        mkdirSync(path.join(dir, "content/cli/t"), { recursive: true });
+        mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+        writeFileSync(
+          path.join(dir, "casts/claude/_target.yml"),
+          targetYml(
+            "cli-command",
+            "references/cli/",
+            mode === "sidecar" ? ".json" : ".md",
+            "[verbatim, sidecar]",
+          ),
+        );
+        writeFileSync(
+          path.join(dir, "reference_contract.yml"),
+          contractYml("cli-command", { resolve: "note", default_mode: mode, companions: false }),
+        );
+        writeFileSync(
+          path.join(dir, "content/molds/m/index.md"),
+          `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Default-mode cast test mold summary.\nreferences:\n  - kind: cli-command\n    ref: "[[c]]"\n    used_at: runtime\n    load: upfront\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+        );
+        writeFileSync(
+          path.join(dir, "content/cli/t/c.md"),
+          `---\ntype: cli-command\ntool: t\ncommand: c\nsummary: A command.\ntags: [cli]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of c.\n`,
+        );
+        const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+        expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+        const prov = JSON.parse(
+          readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+        );
+        expect(prov.refs[0].mode).toBe(mode);
+        expect(prov.refs[0].dst).toBe(expected);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  // The bundled filename comes from the declared frontmatter field, not the note's directory.
+  it("slug_field names the bundled file; without it the note's own slug does", () => {
+    for (const [slugField, expected] of [
+      ["tool", "references/cli/real-name.md"],
+      [undefined, "references/cli/some-dir.md"],
+    ] as const) {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-slugfield-"));
+      try {
+        mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+        mkdirSync(path.join(dir, "content/cli/some-dir"), { recursive: true });
+        mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+        writeFileSync(
+          path.join(dir, "casts/claude/_target.yml"),
+          targetYml("cli-tool", "references/cli/", ".md", "[verbatim]"),
+        );
+        writeFileSync(
+          path.join(dir, "reference_contract.yml"),
+          contractYml("cli-tool", {
+            resolve: "note",
+            default_mode: "verbatim",
+            companions: false,
+            ...(slugField ? { slug_field: slugField } : {}),
+          }),
+        );
+        writeFileSync(
+          path.join(dir, "content/molds/m/index.md"),
+          `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Slug-field cast test mold summary.\nreferences:\n  - kind: cli-tool\n    ref: "[[some-dir]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+        );
+        writeFileSync(
+          path.join(dir, "content/cli/some-dir/index.md"),
+          `---\ntype: cli-tool\ntool: real-name\nsummary: A tool whose directory is not its name.\ntags: [cli]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody.\n`,
+        );
+        const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+        expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+        const prov = JSON.parse(
+          readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+        );
+        expect(prov.refs[0].dst).toBe(expected);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
   });
 });

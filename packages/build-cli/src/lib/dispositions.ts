@@ -12,21 +12,27 @@ import { companionsOf, type NormalizedCompanion } from "@galaxy-foundry/kind-sch
 import { DEFINITIONS } from "@galaxy-foundry/note-schema";
 
 /**
- * The one file a prompt note carries that casting packages.
+ * The one file a note of `kind` carries that casting packages.
  *
  * Derived from the kind rather than restated here, and asserted to be singular: two `bundled`
- * companions would make "the payload" ambiguous, and the failure belongs at load time rather than
- * in a cast that silently picked the first one.
+ * companions would make "the payload" ambiguous, and the failure belongs at lookup time rather
+ * than in a cast that silently picked the first one.
+ *
+ * Answers the `payload-companion` resolve strategy for whichever kind declares it. This read
+ * `DEFINITIONS.prompt` directly while `prompt` was the only kind using that strategy, which put
+ * the strategy's one instance in the code rather than in the declaration that selects it.
  */
-export const PROMPT_PAYLOAD = ((): string => {
-  const bundled = [...companionsOf(DEFINITIONS.prompt).values()].filter(
+export function payloadCompanionOf(kind: string): string {
+  const definition = DEFINITIONS[kind as keyof typeof DEFINITIONS];
+  if (!definition) throw new Error(`${kind}: no such kind, so it declares no bundled companion`);
+  const bundled = [...companionsOf(definition).values()].filter(
     (companion) => companion.disposition === "bundled",
   );
   if (bundled.length !== 1) {
-    throw new Error(`prompt: expected exactly one bundled companion, found ${bundled.length}`);
+    throw new Error(`${kind}: expected exactly one bundled companion, found ${bundled.length}`);
   }
   return bundled[0]!.name;
-})();
+}
 
 /** A companion no cast may carry, with the kinds that say so. */
 export interface UnpackagedCompanion extends NormalizedCompanion {

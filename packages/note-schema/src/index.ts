@@ -55,11 +55,20 @@ export {
 
 export {
   loadReferenceContract,
+  loadCastReferenceContract,
   findReferenceContractPath,
   contractKeys,
   type ReferenceContract,
   type ReferenceContractTerm,
 } from "./reference-contract.js";
+
+export {
+  CAST_RESOLVE_VALUES,
+  loadCastContract,
+  type CastContract,
+  type CastDeclaration,
+  type CastResolve,
+} from "./cast-contract.js";
 
 // The license table is not ours: it ships in @galaxy-foundry/license-policy, shared
 // across Foundry instances. Only `LicensePolicy` is re-exported, because a caller

@@ -33,7 +33,13 @@ import {
   type LicensePolicy,
 } from "@galaxy-foundry/license-policy";
 
-import { PROMPT_PAYLOAD } from "../lib/dispositions.js";
+import {
+  loadCastReferenceContract,
+  type CastContract,
+  type ReferenceContractTerm,
+} from "@galaxy-foundry/note-schema";
+
+import { payloadCompanionOf } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
   driftOf,
@@ -186,15 +192,9 @@ interface ResolvedRef {
   license_file?: string;
 }
 
-const SUPPORTED_KINDS = new Set([
-  "schema",
-  "research",
-  "pattern",
-  "cli-tool",
-  "cli-command",
-  "prompt",
-]);
-const NOT_IMPLEMENTED_KINDS = new Set(["example"]);
+// Which kinds are castable, what each defaults to, and how each resolves used to be three
+// sets of kind-name literals here. They are now read from `reference_contract.yml`'s
+// `cast:` blocks — see packages/note-schema/src/cast-contract.ts for why.
 
 /** Remove directories left empty by pruning, deepest first. Keeps `dir` itself. */
 function pruneEmptyDirs(dir: string): void {
@@ -230,6 +230,8 @@ function resolveMoldRef(
   slugMap: Map<string, string>,
   metaByPath: Map<string, Frontmatter>,
   target: TargetConfig,
+  castContract: CastContract,
+  refKinds: Record<string, ReferenceContractTerm & { ref_shape?: string }>,
 ): { resolved?: ResolvedRef; error?: string } {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     return { error: `references[${index}]: not an object` };
@@ -238,22 +240,27 @@ function resolveMoldRef(
   const kind = typeof ref.kind === "string" ? ref.kind : "";
   const refStr = typeof ref.ref === "string" ? ref.ref : "";
 
-  if (NOT_IMPLEMENTED_KINDS.has(kind)) {
+  const castDecl = castContract[kind];
+  if (!castDecl) {
+    // Two different failures, and the distinction is the declaration's: a kind the contract
+    // never names is a typo, while a kind it names WITHOUT a `cast:` block is deliberate —
+    // authored vocabulary the caster has no support for yet.
     return {
-      error: `references[${index}]: kind=${kind} not implemented in v1 (no real consumers; first Mold to need this defines the contract)`,
+      error: refKinds[kind]
+        ? `references[${index}]: kind=${kind} is not castable — reference_contract.yml declares it with no \`cast:\` block (the first Mold to need one defines the contract)`
+        : `references[${index}]: unknown kind=${kind}`,
     };
-  }
-  if (!SUPPORTED_KINDS.has(kind)) {
-    return { error: `references[${index}]: unknown kind=${kind}` };
   }
   const kindCfg = target.kinds[kind];
   if (!kindCfg) {
     return { error: `references[${index}]: target=${target.name} does not declare kind=${kind}` };
   }
 
-  // Default mode by kind: schema/research/pattern → verbatim, cli-command → sidecar.
-  const defaultMode = kind === "cli-command" ? "sidecar" : "verbatim";
-  const mode = (typeof ref.mode === "string" ? ref.mode : defaultMode) as ResolvedRef["mode"];
+  const mode = (
+    typeof ref.mode === "string" ? ref.mode : castDecl.default_mode
+  ) as ResolvedRef["mode"];
+  // The target's list is a CONSTRAINT on the kind's, never a second declaration of it: a
+  // target may refuse a mode the kind allows, and can never permit one the kind does not.
   if (!kindCfg.modes.includes(mode)) {
     return {
       error: `references[${index}]: kind=${kind} does not support mode=${mode} (allowed: ${kindCfg.modes.join(", ")})`,
@@ -264,66 +271,65 @@ function resolveMoldRef(
   let src: string;
   let dstOverride: string | undefined;
   let packageSource: { spec: string; exportName: string } | undefined;
+
+  // Every kind addresses its note the same way and expects the note's `type` to be the kind's
+  // own name; the strategies differ only in what they take FROM that note.
+  //
+  // The address check answers to the kind's declared `ref_shape` rather than assuming every
+  // castable kind is wiki-link-shaped. They all are today, which is exactly why asserting it
+  // in code would sit there being true until the first `path`-shaped kind, and then be wrong.
+  if (refKinds[kind]?.ref_shape === "wiki-link" && !WIKI_LINK_RE.test(refStr)) {
+    return {
+      error: `references[${index}]: ${kind} ref must be a [[wiki-link]] to a ${kind} note (got ${refStr})`,
+    };
+  }
+  const tp = resolveWikiLink(refStr, slugMap);
+  if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
   // Frontmatter of the note this ref resolves to; source of its license fields.
-  let noteMeta: Frontmatter | undefined;
-  if (kind === "schema") {
-    // Schema refs are wiki-links to a `type: schema` note. The note declares
-    // `package` + `package_export`; cast imports the runtime export,
-    // JSON.stringifies it, and writes to the bundle.
-    if (!WIKI_LINK_RE.test(refStr)) {
-      return {
-        error: `references[${index}]: schema ref must be a [[wiki-link]] to a schema note (got ${refStr})`,
-      };
+  const noteMeta: Frontmatter | undefined = metaByPath.get(tp);
+  if (noteMeta?.type !== kind) {
+    return {
+      error: `references[${index}]: ${kind} ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected ${kind}`,
+    };
+  }
+
+  // The bundled filename is the note's slug, never the storage filename — `fileSlug` is what
+  // keeps a directory-shaped kind from landing as `index.md`. `slug_field` overrides it where
+  // the note's own slug is the wrong name for a reader of the bundle.
+  const declaredSlug = castDecl.slug_field ? noteMeta[castDecl.slug_field] : undefined;
+  const slug = typeof declaredSlug === "string" && declaredSlug ? declaredSlug : fileSlug(tp);
+  const namedDst = path.posix.join(kindCfg.dst_dir, `${slug}${kindCfg.dst_extension}`);
+
+  switch (castDecl.resolve) {
+    case "package-export": {
+      // The note declares `package` + `package_export`; cast imports the runtime export,
+      // JSON.stringifies it, and writes that to the bundle. There is no file to copy.
+      const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
+      const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
+      if (!pkg || !exp) {
+        return {
+          error: `references[${index}]: ${kind} ref ${refStr} resolves to a note missing 'package' and/or 'package_export' frontmatter`,
+        };
+      }
+      src = `package://${pkg}#${exp}`;
+      dstOverride = namedDst;
+      packageSource = { spec: pkg, exportName: exp };
+      break;
     }
-    const tp = resolveWikiLink(refStr, slugMap);
-    if (!tp) return { error: `references[${index}]: schema ref ${refStr} did not resolve` };
-    noteMeta = metaByPath.get(tp);
-    if (noteMeta?.type !== "schema") {
-      return {
-        error: `references[${index}]: schema ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
-      };
+    case "payload-companion": {
+      // What casting packages is the payload beside the note, never the wrapper. Which file
+      // that is comes from the kind's own companion declaration, so there is nothing here to
+      // resolve and nothing that can point at a file that is not there.
+      src = path.posix.join(path.posix.dirname(tp), payloadCompanionOf(kind));
+      dstOverride = namedDst;
+      break;
     }
-    const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
-    const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
-    if (!pkg || !exp) {
-      return {
-        error: `references[${index}]: schema ref ${refStr} resolves to a schema note missing 'package' and/or 'package_export' frontmatter`,
-      };
-    }
-    const noteSlug = path.basename(tp, ".md");
-    src = `package://${pkg}#${exp}`;
-    dstOverride = path.posix.join(kindCfg.dst_dir, `${noteSlug}.schema.json`);
-    packageSource = { spec: pkg, exportName: exp };
-  } else {
-    const tp = resolveWikiLink(refStr, slugMap);
-    if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
-    noteMeta = metaByPath.get(tp);
-    const expected = kind === "cli-command" ? "cli-command" : kind;
-    const targetType = noteMeta?.type;
-    if (targetType !== expected) {
-      return {
-        error: `references[${index}]: ${kind} ref ${refStr} resolves to type=${targetType ?? "(none)"}, expected ${expected}`,
-      };
-    }
-    if (kind === "prompt") {
-      // A prompt note is `content/prompts/<area>/<slug>/index.md`; what casting packages is
-      // the verbatim payload beside it, never the wrapper. Which file that is comes from the
-      // kind's own companion declaration, so there is nothing here to resolve and nothing that
-      // can point at a file that is not there.
-      src = path.posix.join(path.posix.dirname(tp), PROMPT_PAYLOAD);
-      dstOverride = path.posix.join(kindCfg.dst_dir, `${fileSlug(tp)}${kindCfg.dst_extension}`);
-    } else if (kind === "cli-tool") {
-      // cli-tool notes live at content/cli/<tool>/index.md, so the slug is the parent dir
-      // name and casts get readable filenames like references/cli/cwltool.md. `tool:`
-      // overrides it for the tool whose directory is not its command name.
+    case "note": {
       src = tp;
-      const toolSlug =
-        typeof metaByPath.get(tp)?.tool === "string"
-          ? (metaByPath.get(tp)!.tool as string)
-          : fileSlug(tp);
-      dstOverride = path.posix.join(kindCfg.dst_dir, `${toolSlug}${kindCfg.dst_extension}`);
-    } else {
-      src = tp;
+      // Only a kind that renames its output needs the explicit dst; the rest go through
+      // `deriveDst`, which is also the path a non-markdown source has to take.
+      if (castDecl.slug_field) dstOverride = namedDst;
+      break;
     }
   }
 
@@ -365,11 +371,15 @@ function expandCompanions(
   resolved: ResolvedRef[],
   metaByPath: Map<string, Frontmatter>,
   target: TargetConfig,
+  castContract: CastContract,
 ): ResolvedRef[] {
   const out: ResolvedRef[] = [];
   for (const r of resolved) {
     out.push(r);
-    if (r.kind !== "research" && r.kind !== "pattern") continue;
+    // Whether a kind's notes may carry companions is the kind's declaration, not a pair of
+    // names checked here. The note still lists its own — membership stays declared per-note,
+    // and a file is never packaged for merely sitting in the directory.
+    if (!castContract[r.kind]?.companions) continue;
     const rawCompanions = metaByPath.get(r.src)?.companions;
     const companions = Array.isArray(rawCompanions) ? (rawCompanions as unknown[]) : [];
     if (companions.length === 0) continue;
@@ -1289,16 +1299,29 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const rawRefs = Array.isArray(moldParsed.meta.references)
     ? (moldParsed.meta.references as unknown[])
     : [];
+  const { contract: refContract, cast: castContract } = loadCastReferenceContract(
+    path.join(repoRoot, "reference_contract.yml"),
+  );
+
   const resolved: ResolvedRef[] = [];
   const errors: string[] = [];
   rawRefs.forEach((r, i) => {
-    const out = resolveMoldRef(r, i, moldRel, slugMap, metaByPath, target);
+    const out = resolveMoldRef(
+      r,
+      i,
+      moldRel,
+      slugMap,
+      metaByPath,
+      target,
+      castContract,
+      refContract.kinds,
+    );
     if (out.error) errors.push(out.error);
     if (out.resolved) resolved.push(out.resolved);
   });
 
   // Expand multi-file notes' declared companion files into sibling verbatim refs.
-  const expanded = expandCompanions(resolved, metaByPath, target);
+  const expanded = expandCompanions(resolved, metaByPath, target, castContract);
   resolved.length = 0;
   resolved.push(...expanded);
 
