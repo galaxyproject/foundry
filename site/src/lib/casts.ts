@@ -9,7 +9,8 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+import { REPO_ROOT } from './repo-root';
 
 export type CastTarget = 'claude' | 'web' | 'generic';
 
@@ -93,10 +94,15 @@ export function isHarnessSlug(slug: string): boolean {
   return slug.startsWith('pipeline-');
 }
 
-/** Repo root inferred relative to this file: site/src/lib → ../../.. */
+// This was `path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')` — three
+// hops counted from this file's own source depth. After `astro build` the module runs from a
+// bundled chunk four levels below the repo root, so those three hops landed on `site/` and every
+// lookup beneath it found nothing. The Usage page rendered `Pipelines 0 / Shared skills 0 /
+// Casts 0` against 54 committed skills, and 54 pages went unbuilt — 47 `/usage/claude/*` plus the
+// 7 `/pipelines/*/harness`. Nothing errored; the lists were simply empty, and the build was green
+// at 316 pages instead of 370. Only the DEFAULT moved; every function below still takes a root.
 function defaultRepoRoot(): string {
-  const here = path.dirname(fileURLToPath(import.meta.url));
-  return path.resolve(here, '..', '..', '..');
+  return REPO_ROOT;
 }
 
 function castDirFor(target: CastTarget, moldSlug: string, repoRoot: string): string {

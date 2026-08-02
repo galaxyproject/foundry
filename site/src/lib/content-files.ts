@@ -8,15 +8,16 @@
 // index page it links to served the same file correctly from a different `../` count that
 // happened to land.
 //
-// `astro:config/server` gives the project root as Astro computed it, which is the one anchor
-// that does not depend on where a module ended up. It is also why this is a module of its own:
-// that import only resolves inside an Astro build, and the layout rules in `./companions` are
-// worth testing outside one.
+// That anchor now lives in `./repo-root`, because `casts.ts` needed the same one, did not know
+// this module existed, and inferred its own — with the same result one directory over: the Usage
+// page reporting `Casts = 0` against 54 committed skills. `tests/root-anchoring.test.ts` asserts
+// the rule rather than waiting for a third module to learn it.
+//
+// The layout rules stay in `./companions`, which takes a directory rather than finding one and is
+// worth testing outside a build.
 
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { root } from 'astro:config/server';
 import type { NormalizedCompanion } from '@galaxy-foundry/kind-schema';
 import { CONTENT_DIR } from '@galaxy-foundry/note-schema';
 
@@ -27,11 +28,12 @@ import {
   readCompanionIn,
   type NoteKind,
 } from './companions';
+import { REPO_ROOT } from './repo-root';
 
 export { companionOf } from './companions';
 
-/** Absolute path of the corpus root — `root` is the site directory, `content/` its sibling. */
-export const CONTENT_ROOT = fileURLToPath(new URL(`../${CONTENT_DIR}/`, root));
+/** Absolute path of the corpus root — `content/` sits at the repository root. */
+export const CONTENT_ROOT = path.join(REPO_ROOT, CONTENT_DIR);
 
 /** A note's own directory. `id` is the collection-prefixed entry id, e.g. `molds/find-test-data`. */
 export function noteDir(id: string): string {
