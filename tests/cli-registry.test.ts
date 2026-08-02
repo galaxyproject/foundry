@@ -28,7 +28,12 @@ describe("cli metadata registry", () => {
       ],
     };
 
-    const registry = indexProgram(program, "@galaxy-tool-util/cli", "1.2.3", "https://example.test/spec.json");
+    const registry = indexProgram(
+      program,
+      "@galaxy-tool-util/cli",
+      "1.2.3",
+      "https://example.test/spec.json",
+    );
 
     expect(Object.keys(registry)).toEqual(["gxwf/validate"]);
     expect(registry["gxwf/validate"]?.command.synopsis).toBe("gxwf validate [options] <file>");

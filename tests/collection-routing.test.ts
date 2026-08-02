@@ -43,7 +43,8 @@ const everyMarkdownFile = (() => {
         visit(full);
         continue;
       }
-      if (entry.endsWith(".md")) found.push(path.relative(repoRoot, full).split(path.sep).join("/"));
+      if (entry.endsWith(".md"))
+        found.push(path.relative(repoRoot, full).split(path.sep).join("/"));
     }
   };
   visit(path.join(repoRoot, CONTENT_DIR));
@@ -161,9 +162,10 @@ describe("collection routing (path table vs corpus)", () => {
   // so on the day it was added.
   it("claims every note in the content tree", () => {
     const orphans = corpus.filter((n) => !collectionOf(n.rel)).map((n) => n.rel);
-    expect(orphans, `\ndeclares a type but is in no collection:\n  ${orphans.join("\n  ")}`).toEqual(
-      [],
-    );
+    expect(
+      orphans,
+      `\ndeclares a type but is in no collection:\n  ${orphans.join("\n  ")}`,
+    ).toEqual([]);
   });
 
   // Location picks the schema; the `type:` literal in that schema asserts the note agrees.

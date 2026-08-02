@@ -28,6 +28,25 @@ export {
 } from "@galaxy-foundry/reference-contract";
 
 /**
+ * The casting transforms this Foundry supports — the inherited `modes` minus `condense`.
+ *
+ * `condense` is not description, it is CAPACITY: it commits a Foundry to an LLM phase in its
+ * caster, and with it the unfilled-slot bookkeeping, the prompt/model provenance a reproducible
+ * cast needs, and the loss of byte-stable output that makes a `--check` gate possible at all.
+ * This Foundry built that phase, ran it, and arrived at zero condense refs — the last became
+ * verbatim in `convert-nfcore-module-to-galaxy-tool` rev 4 because "the prior condense was
+ * always a verbatim passthrough". The machinery is now gone, so the vocabulary should stop
+ * offering a mode the caster would refuse.
+ *
+ * Declined here rather than deleted from @galaxy-foundry/reference-contract, which is where the
+ * plan for this change originally pointed. The shared vocabulary is the PATTERN's, and the
+ * pattern's model names condensation as a transform mode; removing it would say no Foundry may
+ * ever have an LLM phase, and would take a package release to reverse. `narrow` is the mechanism
+ * the substrate provides for exactly this, and declining a capacity is what it is for.
+ */
+export const SUPPORTED_MODES = ["verbatim", "sidecar"] as const;
+
+/**
  * The full contract: this repo's `kinds` composed with the four inherited vocabularies.
  *
  * Still takes a path to reference_contract.yml, unchanged from when that file held all
@@ -37,7 +56,10 @@ export {
 export function loadReferenceContract(
   contractPath = findReferenceContractPath(),
 ): ReferenceContract {
-  return buildReferenceContract({ kinds: loadInstanceKinds(contractPath) });
+  return buildReferenceContract({
+    kinds: loadInstanceKinds(contractPath),
+    narrow: { modes: SUPPORTED_MODES },
+  });
 }
 
 /**

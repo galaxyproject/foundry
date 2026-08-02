@@ -17,20 +17,14 @@ import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import {
-  COLLECTIONS,
-  buildNoteSchema,
-  loadReferenceContract,
-} from "@galaxy-foundry/note-schema";
+import { COLLECTIONS, buildNoteSchema, loadReferenceContract } from "@galaxy-foundry/note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const META_DIR = path.join(repoRoot, COLLECTIONS.meta.base);
 
 /** Files the `meta` collection's pattern deliberately does NOT select, spelled as it spells them. */
-const EXCLUDED = COLLECTIONS.meta.pattern
-  .filter((p) => p.startsWith("!"))
-  .map((p) => p.slice(1));
+const EXCLUDED = COLLECTIONS.meta.pattern.filter((p) => p.startsWith("!")).map((p) => p.slice(1));
 
 function frontmatter(file: string): Record<string, unknown> {
   const text = fs.readFileSync(file, "utf8");

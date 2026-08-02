@@ -11,7 +11,12 @@ const foundryBuild = path.join(repoRoot, "packages", "build-cli", "src", "bin", 
 // Resolve the repo-local tsx binary by absolute path. Invoking `npx tsx` from a
 // temp-dir cwd can't see local node_modules and auto-installs tsx into the
 // shared npx cache; two such installs racing across test files corrupt it.
-const tsxBin = path.join(repoRoot, "node_modules", ".bin", process.platform === "win32" ? "tsx.cmd" : "tsx");
+const tsxBin = path.join(
+  repoRoot,
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "tsx.cmd" : "tsx",
+);
 
 const PIPELINES = [
   "cwl-to-galaxy",
