@@ -83,7 +83,7 @@ jobs:
         run: npm run packages-lint
 
       - name: Cast drift check
-        run: npm run cast -- summarize-nextflow --check
+        run: make check-casts
 
       - name: Build site
         run: npm run site:build
