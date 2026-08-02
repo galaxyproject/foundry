@@ -75,12 +75,6 @@ export const kind = defineKind({
       disposition: "foundry-only",
     },
     {
-      file: "casting.md",
-      requirement: "optional",
-      purpose: "Per-Mold condensation prompts, read by `/cast` when a reference casts condensed.",
-      disposition: "cast-input",
-    },
-    {
       file: "cast-skill-verification.md",
       requirement: "optional",
       purpose: "Instructions for the agentic review that runs after a cast.",

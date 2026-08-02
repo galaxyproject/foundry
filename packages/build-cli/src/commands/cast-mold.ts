@@ -2,8 +2,8 @@
 // Deterministic cast assembly. Reads the Mold's `index.md` frontmatter as the
 // source of truth for `references:` and resolves each ref to a concrete file
 // op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v3)
-// recording every resolved ref, its hash, and whether it was produced
-// deterministically or is pending an LLM step.
+// recording every resolved ref and its hash. Assembly is deterministic
+// throughout: there is no LLM phase, so a cast is byte-stable and --check-able.
 //
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
@@ -126,7 +126,6 @@ interface TargetConfig {
   provenance_schema_version: number;
   required_outputs: string[];
   kinds: Record<string, TargetKindConfig>;
-  condense_prompts: Record<string, string>;
   skill_constraints: {
     frontmatter_required: string[];
     forbidden_runtime_paths: string[];
@@ -172,7 +171,7 @@ function buildSlugMap(repoRoot: string): {
 
 interface ResolvedRef {
   kind: "schema" | "research" | "pattern" | "cli-tool" | "cli-command" | "prompt";
-  mode: "verbatim" | "condense" | "sidecar";
+  mode: "verbatim" | "sidecar";
   ref: string;
   src: string;
   dst: string;
@@ -406,8 +405,7 @@ function resolveMoldRef(
 // A multi-file note (e.g. a vendored bundle) lists `companions:` filenames in
 // its `.md`; each is copied verbatim next to the note in the bundle so the
 // note body can reference it at runtime. Companions ship verbatim regardless
-// of the parent note's mode — a condensed note still points at its structured
-// sibling. They inherit the parent ref's load/used_at/trigger/purpose and
+// of the parent note's mode.  A note points at its structured sibling either way. They inherit the parent ref's load/used_at/trigger/purpose and
 // carry `companion_of` for provenance.
 function expandCompanions(
   resolved: ResolvedRef[],
@@ -599,10 +597,12 @@ interface ProvenanceRefEntry {
   verification?: string;
   src_hash: string | null;
   dst_hash: string | null;
-  source: "deterministic" | "llm";
-  pending_llm?: boolean;
-  prompt?: { origin: string; identity: string; hash?: string };
-  model?: { name: string; version?: string };
+  /**
+   * Always `deterministic`. Kept as a recorded field rather than dropped: it is the claim the
+   * provenance makes about how the bytes were produced, and a reader should not have to infer
+   * it from the absence of anything else.
+   */
+  source: "deterministic";
   companion_of?: string;
   // License lineage of redistributed third-party content (foundry-pattern#4).
   // Absent for Foundry-authored refs (root LICENSE, out of policy scope).
@@ -849,7 +849,6 @@ interface LegacyProvenanceCarryOver {
   cast_history?: Array<{ rev: number; date: string; note: string }>;
   open_questions?: string[];
   validation_results?: ValidationResult[];
-  prior_refs?: Map<string, ProvenanceRefEntry>;
 }
 
 function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOver {
@@ -870,19 +869,6 @@ function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOv
       ? (data.validation_results as ValidationResult[])
       : undefined,
   };
-  // Capture prior refs by src so condense LLM output and prompt provenance carry
-  // over across re-casts. Accept v2 and v3 so a v2 bundle still seeds a v3 re-cast.
-  if (
-    typeof data.provenance_schema_version === "number" &&
-    data.provenance_schema_version >= 2 &&
-    Array.isArray(data.refs)
-  ) {
-    const prior = new Map<string, ProvenanceRefEntry>();
-    for (const r of data.refs as ProvenanceRefEntry[]) {
-      if (typeof r?.src === "string") prior.set(`${r.kind}:${r.src}`, r);
-    }
-    carry.prior_refs = prior;
-  }
   return carry;
 }
 
@@ -903,7 +889,6 @@ async function castOneRef(
   resolved: ResolvedRef,
   repoRoot: string,
   bundleRoot: string,
-  prior: Map<string, ProvenanceRefEntry> | undefined,
   check: boolean,
 ): Promise<{ entry: ProvenanceRefEntry; drift?: string; error?: string }> {
   const dstAbs = path.join(bundleRoot, resolved.dst);
@@ -1001,50 +986,6 @@ async function castOneRef(
         source: "deterministic",
       },
       drift: drift.reason,
-    };
-  }
-
-  if (resolved.mode === "condense") {
-    // Two-phase. Deterministic phase records placeholder; LLM phase fills in.
-    const priorEntry = prior?.get(`${resolved.kind}:${resolved.src}`);
-    if (
-      priorEntry &&
-      priorEntry.pending_llm !== true &&
-      priorEntry.src_hash === srcHash &&
-      priorEntry.dst_hash
-    ) {
-      // Source hasn't drifted; carry forward prior LLM output entry.
-      const dstExists = existsSync(dstAbs);
-      const dstHash = dstExists ? sha256File(dstAbs) : null;
-      const drift =
-        dstHash === priorEntry.dst_hash
-          ? undefined
-          : dstExists
-            ? "condense output drifted vs recorded dst_hash"
-            : "condense output missing";
-      return {
-        entry: {
-          ...priorEntry,
-          ...skeleton(resolved),
-          src_hash: srcHash,
-          dst_hash: priorEntry.dst_hash,
-          source: "llm",
-          prompt: priorEntry.prompt,
-          model: priorEntry.model,
-        },
-        drift,
-      };
-    }
-    // Either no prior LLM output, or source drifted — re-mark pending.
-    return {
-      entry: {
-        ...skeleton(resolved),
-        src_hash: srcHash,
-        dst_hash: null,
-        source: "llm",
-        pending_llm: true,
-      },
-      drift: priorEntry ? "source drift requires re-condense" : "condense output not yet produced",
     };
   }
 
@@ -1398,7 +1339,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const drift: Array<{ file: string; reason: string }> = [];
 
   for (const r of resolved) {
-    const result = await castOneRef(r, repoRoot, bundleRoot, carry.prior_refs, args.check);
+    const result = await castOneRef(r, repoRoot, bundleRoot, args.check);
     refEntries.push(result.entry);
     if (result.error) errors.push(result.error);
     if (result.drift) drift.push({ file: r.src, reason: result.drift });
@@ -1506,14 +1447,6 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
       process.exit(1);
     }
-    if (refEntries.some((r) => r.pending_llm)) {
-      const pending = refEntries
-        .filter((r) => r.pending_llm)
-        .map((r) => r.src)
-        .join(", ");
-      console.error(`check failed: pending_llm refs: ${pending}`);
-      process.exit(1);
-    }
     console.log("clean: no drift, no errors");
     return;
   }
@@ -1560,11 +1493,6 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   writeFileSync(verifyPath, verifyText);
   console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
   if (drift.length) console.log(`reconciled ${drift.length} drifted ref(s)`);
-  if (refEntries.some((r) => r.pending_llm)) {
-    const pending = refEntries.filter((r) => r.pending_llm).map((r) => r.src);
-    console.log(`pending LLM steps for ${pending.length} ref(s):`);
-    for (const s of pending) console.log(`  - ${s}`);
-  }
 }
 
 const isDirectInvocation = import.meta.url === `file://${process.argv[1]}`;

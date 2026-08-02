@@ -128,7 +128,7 @@
       "required": ["kind", "mode", "src", "dst", "source", "used_at", "load"],
       "properties": {
         "kind": { "enum": ["schema", "research", "pattern", "cli-tool", "cli-command", "prompt"] },
-        "mode": { "enum": ["verbatim", "condense", "sidecar"] },
+        "mode": { "enum": ["verbatim", "sidecar"] },
         "ref": {
           "type": "string",
           "description": "The original Mold ref (wiki-link or path)."
@@ -143,19 +143,15 @@
         "verification": { "type": "string" },
         "src_hash": {
           "type": ["string", "null"],
-          "description": "sha256 of source file at cast time. Null only when pending_llm and source is a generated artifact."
+          "description": "sha256 of source file at cast time."
         },
         "dst_hash": {
           "type": ["string", "null"],
-          "description": "sha256 of destination file at cast time. Null when pending_llm."
+          "description": "sha256 of destination file at cast time. For mode=verbatim it equals src_hash, which is the proof that nothing was paraphrased between source and artifact."
         },
         "source": {
-          "enum": ["deterministic", "llm"],
-          "description": "Whether this ref's dst content was produced deterministically or by an LLM step."
-        },
-        "pending_llm": {
-          "type": "boolean",
-          "description": "True when mode=condense and the LLM phase has not yet filled this entry. Verifier rejects committed provenance with any pending_llm=true."
+          "enum": ["deterministic"],
+          "description": "How this ref's dst content was produced. Casting has no LLM phase, so the only value is `deterministic` — recorded rather than implied, because it is the claim the provenance makes."
         },
         "companion_of": {
           "type": "string",
@@ -172,38 +168,8 @@
         "license_file_hash": {
           "type": "string",
           "description": "sha256 of the license_file at cast time, making the license of every redistributed byte part of the lineage."
-        },
-        "prompt": {
-          "type": "object",
-          "description": "Required when source=llm. Identifies the prompt used so casts can be reproduced.",
-          "additionalProperties": false,
-          "required": ["origin", "identity"],
-          "properties": {
-            "origin": { "enum": ["target_default", "casting_md", "mold_manifest"] },
-            "identity": { "type": "string", "description": "Stable name or path of the prompt." },
-            "hash": { "type": "string", "description": "sha256 of the prompt text used." }
-          }
-        },
-        "model": {
-          "type": "object",
-          "description": "LLM identity when source=llm. Optional but strongly recommended.",
-          "additionalProperties": false,
-          "properties": {
-            "name": { "type": "string" },
-            "version": { "type": "string" }
-          }
         }
-      },
-      "allOf": [
-        {
-          "if": { "properties": { "source": { "const": "llm" } }, "required": ["source"] },
-          "then": { "required": ["prompt"] }
-        },
-        {
-          "if": { "properties": { "pending_llm": { "const": true } }, "required": ["pending_llm"] },
-          "then": { "properties": { "source": { "const": "llm" } } }
-        }
-      ]
+      }
     }
   }
 }

@@ -880,7 +880,6 @@ ${mention}`,
       ["scenarios.md", "foundry-only"],
       ["changes.md", "foundry-only"],
       ["README.md", "foundry-only"],
-      ["casting.md", "cast-input"],
       ["cast-skill-verification.md", "cast-input"],
     ])("rejects a bundle carrying %s (%s)", (file, disposition) => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-forbidden-"));

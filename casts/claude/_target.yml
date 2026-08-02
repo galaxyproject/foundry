@@ -30,11 +30,11 @@ kinds:
   research:
     dst_dir: references/notes/
     dst_extension: .md
-    modes: [verbatim, condense]
+    modes: [verbatim]
   pattern:
     dst_dir: references/patterns/
     dst_extension: .md
-    modes: [verbatim, condense]
+    modes: [verbatim]
   cli-tool:
     dst_dir: references/cli/
     dst_extension: .md
@@ -47,11 +47,6 @@ kinds:
     dst_dir: references/prompts/
     dst_extension: .md
     modes: [verbatim]
-
-# Default condensation prompts per reference kind.
-# Empty for v1 — Molds that need condense must declare a prompt
-# in their casting.md (## Condensation Prompts) until target defaults exist.
-condense_prompts: {}
 
 # Generated-skill constraints checked by cast-skill-verify.ts.
 #
