@@ -1,45 +1,64 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { marked } from 'marked';
-import { resolveWikiLink, type WikiLinkTarget } from './wiki-links';
+import {
+  addBoldTermAnchors,
+  resolveWikiLink,
+  resolveWikiLinksInMarkdown,
+} from '@galaxy-foundry/wiki-links';
 
-const CONTENT_DIR = path.resolve('../content');
+/**
+ * What this renderer needs of a link target, which is less than `./wiki-links` defines.
+ *
+ * Declared here rather than imported so the module reaches no `astro:content` — that import
+ * arrives through `./wiki-links` → `./notes`, and it is what kept a pure string renderer
+ * untestable outside an Astro build. Structural, so the site's own `WikiLinkTarget` satisfies it;
+ * a caller passing the real map is checked against it either way.
+ */
+export interface VaultDocTarget {
+  id: string;
+  summary: string;
+}
+
+// The glossary and the ops log live outside every collection, so they render through `marked`
+// rather than the remark pipeline — which means links resolve on the STRING, before parsing.
+//
+// Neither half of that is ours. The grammar and the anchor minting both ship in
+// @galaxy-foundry/wiki-links, so this path and its remark twin cannot answer differently. What
+// was here before was a local `/\[\[([^\[\]]+)\]\]/g` plus a local copy of the anchor helpers,
+// and the regex rewrote inside code spans, where a backtick means the syntax: the glossary's
+// definition of a Phase rendered `mold: [[...]]` as `mold: **...**`. Nothing reported it — the
+// validator strips code spans before scanning too, so both surfaces went blind on the same text.
+//
+// Resolving through the package rather than `./wiki-links` also uncouples this module from
+// astro:content, which that wrapper reaches through `./notes`. It is a string renderer; it can
+// now be tested as one.
+
+const DEFAULT_CONTENT_DIR = path.resolve('../content');
 
 /**
  * Load a content-root markdown file (log.md, glossary.md), resolve [[wiki links]],
  * and render to HTML.
+ *
+ * `contentDir` defaults to the corpus as seen from the site/ cwd an Astro build runs in. It is a
+ * parameter for the same reason the LICENSES directory is one: an implicit relative path is
+ * exactly the part that does not survive being called from somewhere else.
  */
 export function renderContentDoc(
   filename: string,
-  linkMap: Map<string, WikiLinkTarget>,
-  base: string
+  linkMap: Map<string, VaultDocTarget>,
+  base: string,
+  contentDir: string = DEFAULT_CONTENT_DIR
 ): string {
-  const raw = fs.readFileSync(path.join(CONTENT_DIR, filename), 'utf-8');
-  const withLinks = raw.replace(/\[\[([^\[\]]+)\]\]/g, (_, inner) => {
-    const { href, label } = resolveWikiLink(`[[${inner}]]`, linkMap, base);
-    return href ? `[${label}](${href})` : `**${label}**`;
+  const raw = fs.readFileSync(path.join(contentDir, filename), 'utf-8');
+  const withLinks = resolveWikiLinksInMarkdown(raw, {
+    // Deliberately the same body as the remark plugin's `resolve`: one link map, one href shape,
+    // and the package appends the link's own `#anchor` to whatever it is handed.
+    resolve: (link) => {
+      const target = resolveWikiLink(link.target, linkMap);
+      return target ? { href: `${base}/${target.id}/`, title: target.summary } : null;
+    },
   });
   const html = marked.parse(withLinks, { async: false }) as string;
   return addBoldTermAnchors(html);
-}
-
-function slugifyTerm(term: string): string {
-  return term
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-');
-}
-
-// Glossary entries are paragraphs starting with **Term**. Inject an id on the
-// containing <p> so that #term anchor links from the landing page resolve.
-function addBoldTermAnchors(html: string): string {
-  return html.replace(
-    /<p>(\s*)<strong>([^<]+)<\/strong>/g,
-    (match, ws, term) => {
-      const id = slugifyTerm(term);
-      if (!id) return match;
-      return `<p id="${id}">${ws}<strong>${term}</strong>`;
-    }
-  );
 }
