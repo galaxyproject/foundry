@@ -6,6 +6,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -1679,5 +1680,67 @@ describe("cast declarations: stricter than before, on purpose", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+// The premise the condense removal rests on, pinned as a check rather than asserted in a
+// commit message: nothing in this Foundry uses the LLM phase. Every reference is verbatim or
+// sidecar, no bundle carries an LLM-produced fragment, and no provenance entry is waiting for
+// one. If a Mold ever needs condensation, this is the test that has to be deleted first — and
+// deleting it is the decision to build the phase again, made explicitly.
+describe("casting is deterministic end to end", () => {
+  it("no Mold declares mode: condense", () => {
+    const offenders: string[] = [];
+    for (const moldDir of readdirSync(path.join(repoRoot, "content/molds"))) {
+      const notePath = path.join(repoRoot, "content/molds", moldDir, "index.md");
+      if (!existsSync(notePath)) continue;
+      const front = readFileSync(notePath, "utf8").match(/^---\n([\s\S]*?)\n---/);
+      if (!front) continue;
+      const meta = yaml.load(front[1]!) as { references?: Array<{ mode?: string }> };
+      for (const ref of meta.references ?? []) {
+        if (ref.mode === "condense") offenders.push(moldDir);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("no committed cast carries an LLM fragment or an unfilled one", () => {
+    const skills = path.join(repoRoot, "casts/claude/skills");
+    const offenders: string[] = [];
+    for (const bundle of readdirSync(skills)) {
+      const provPath = path.join(skills, bundle, "_provenance.json");
+      if (!existsSync(provPath)) continue;
+      const prov = JSON.parse(readFileSync(provPath, "utf8")) as {
+        refs?: Array<{
+          source?: string;
+          pending_llm?: boolean;
+          src_hash?: string;
+          dst_hash?: string;
+        }>;
+      };
+      for (const ref of prov.refs ?? []) {
+        if (ref.source !== "deterministic" || ref.pending_llm) offenders.push(bundle);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  // The verbatim guarantee, stated as the equality that proves it. This is what went stale in
+  // seven bundles unnoticed, and it costs one pass over the tree to keep honest.
+  it("every verbatim ref proves itself with src_hash == dst_hash", () => {
+    const skills = path.join(repoRoot, "casts/claude/skills");
+    const offenders: string[] = [];
+    for (const bundle of readdirSync(skills)) {
+      const provPath = path.join(skills, bundle, "_provenance.json");
+      if (!existsSync(provPath)) continue;
+      const prov = JSON.parse(readFileSync(provPath, "utf8")) as {
+        refs?: Array<{ mode?: string; src?: string; src_hash?: string; dst_hash?: string }>;
+      };
+      for (const ref of prov.refs ?? []) {
+        if (ref.mode !== "verbatim") continue;
+        if (ref.src_hash !== ref.dst_hash) offenders.push(`${bundle}: ${ref.src}`);
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 });
