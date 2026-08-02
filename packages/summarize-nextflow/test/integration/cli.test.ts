@@ -37,6 +37,21 @@ const BACASS_PIPELINE = resolve(FIXTURES, "nf-core__bacass");
 const RNASEQ_PIPELINE = resolve(FIXTURES, "nf-core__rnaseq");
 const SAREK_PIPELINE = resolve(FIXTURES, "nf-core__sarek");
 const SPAWN_MAX_BUFFER = 64 * 1024 * 1024;
+
+/**
+ * Budgets for the two tests that shell out to fetch real test data over the network.
+ *
+ * The vitest budget has to EXCEED the subprocess cap, or vitest kills the test first and reports
+ * a bare timeout in place of the child's own `status: null` — which is the difference between
+ * "the download was slow" and no information at all.
+ *
+ * Both are needed because vitest 4 enforces `testTimeout` on SYNCHRONOUS tests. `spawnSync`
+ * blocks the event loop, so under 3 the timer could not fire and these ran as long as they liked;
+ * one has been taking ~12-16s against the default 5s budget and reporting success. It now reports
+ * "Test timed out in 5000ms" AFTER running to completion, which is the same test, told truthfully.
+ */
+const NETWORK_SPAWN_TIMEOUT_MS = 120_000;
+const NETWORK_TEST_TIMEOUT_MS = NETWORK_SPAWN_TIMEOUT_MS + 30_000;
 const DEMO_SUMMARY = resolve(
   FOUNDRY_ROOT,
   "casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json",
@@ -59,6 +74,15 @@ const itIfDemoFixture = cliBuilt() && fixturePresent(DEMO_PIPELINE) ? it : it.sk
 const itIfBacassFixture = cliBuilt() && fixturePresent(BACASS_PIPELINE) ? it : it.skip;
 const itIfRnaseqFixture = cliBuilt() && fixturePresent(RNASEQ_PIPELINE) ? it : it.skip;
 const itIfSarekFixture = cliBuilt() && fixturePresent(SAREK_PIPELINE) ? it : it.skip;
+
+/** The same guards, for the tests that also wait on a real download — see the budget constants. */
+const overNetwork =
+  (base: typeof it) =>
+  (name: string, body: () => void): void =>
+    base(name, body, NETWORK_TEST_TIMEOUT_MS);
+
+const itIfDemoFixtureOverNetwork = overNetwork(itIfDemoFixture);
+const itIfBacassFixtureOverNetwork = overNetwork(itIfBacassFixture);
 
 describe("summarize-nextflow CLI — built bin", () => {
   itIfBuilt("--version emits a semver", () => {
@@ -674,11 +698,11 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
     expect(fastqc.container).toBe("quay.io/example/fastqc:inspect");
   });
 
-  itIfDemoFixture("fetches samplesheet-referenced test data when requested", () => {
+  itIfDemoFixtureOverNetwork("fetches samplesheet-referenced test data when requested", () => {
     const r = spawnSync(
       "node",
       [CLI, DEMO_PIPELINE, "--no-with-nextflow", "--fetch-test-data", "--no-validate"],
-      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER, timeout: 120_000 },
+      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER, timeout: NETWORK_SPAWN_TIMEOUT_MS },
     );
     expect(r.status).toBe(0);
 
@@ -832,7 +856,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () => {
-  itIfBacassFixture("resolves bacass profile test data expressions", () => {
+  itIfBacassFixtureOverNetwork("resolves bacass profile test data expressions", () => {
     const dataDir = mkdtempSync(join(os.tmpdir(), "foundry-bacass-test-data-"));
     const r = spawnSync(
       "node",
@@ -847,7 +871,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
         dataDir,
         "--no-validate",
       ],
-      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER, timeout: 120_000 },
+      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER, timeout: NETWORK_SPAWN_TIMEOUT_MS },
     );
     expect(r.status).toBe(0);
 
