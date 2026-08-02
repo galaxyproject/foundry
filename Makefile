@@ -1,4 +1,4 @@
-.PHONY: validate test typecheck generated check-generated check casts check-casts assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli
+.PHONY: validate test typecheck generated check-generated check casts check-casts check-verify assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli
 
 FOUNDRY_BUILD := npx tsx packages/build-cli/src/bin/foundry-build.ts
 PIPELINE_SLUGS := $(patsubst content/pipelines/%/index.md,%,$(wildcard content/pipelines/*/index.md))
@@ -43,13 +43,30 @@ check-casts:
 	  exit 1; \
 	fi
 
+# The other half of the same lesson, and it went unlearned twice. `cast --check`
+# re-derives a bundle from its sources; the verifier asks a different question —
+# is the committed bundle internally consistent, does its provenance still
+# satisfy the JSON Schema, does it honour the target's constraints. Nothing ran
+# it over the corpus: it lived in two tests against one Mold, so the schema the
+# provenance is contracted to was enforced on 1 of 47 records.
+check-verify:
+	@fail=0; for m in $(MOLD_SLUGS); do \
+	  out=$$(npx tsx scripts/cast-skill-verify.ts $$m --target=claude 2>&1) || { \
+	    echo "$$m:"; echo "$$out" | sed 's/^/  /'; fail=1; }; \
+	done; \
+	if [ $$fail -ne 0 ]; then \
+	  echo "cast-skill-verify failed above. A schema or constraint failure is fixed"; \
+	  echo "at the source; a hash mismatch means 'make casts' + commit."; \
+	  exit 1; \
+	fi
+
 assemble-pipelines:
 	@for p in $(PIPELINE_SLUGS); do echo "assemble $$p"; $(FOUNDRY_BUILD) assemble-pipeline --root . $$p || exit 1; done
 
 check-assemble-pipelines:
 	@for p in $(PIPELINE_SLUGS); do $(FOUNDRY_BUILD) assemble-pipeline --root . $$p --check || exit 1; done
 
-check: validate check-generated check-casts check-assemble-pipelines test
+check: validate check-generated check-casts check-verify check-assemble-pipelines test
 
 fixtures:
 	$(MAKE) -C workflow-fixtures all
