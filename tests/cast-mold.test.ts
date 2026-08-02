@@ -1680,37 +1680,80 @@ describe("cast declarations: stricter than before, on purpose", () => {
 // sidecar, no bundle carries an LLM-produced fragment, and no provenance entry is waiting for
 // one. If a Mold ever needs condensation, this is the test that has to be deleted first — and
 // deleting it is the decision to build the phase again, made explicitly.
+// The wire shape, named here rather than imported from the caster: these tests read committed
+// records, so what they must agree with is the JSON on disk, not the type that produced it.
+interface CommittedRefEntry {
+  mode?: string;
+  source?: string;
+  pending_llm?: boolean;
+  src?: string;
+  src_hash?: string;
+  dst_hash?: string;
+}
+
 describe("casting is deterministic end to end", () => {
+  // Floors, not inventories. Each assertion below scans the tree and reports the offenders it
+  // found, which is a shape that passes just as green on nothing as on everything: rename
+  // `_provenance.json`, rename the `refs` key, move `content/molds/`, and a test whose entire
+  // job is to license a deletion reports zero offenders because it read zero records. These
+  // numbers are deliberately well under the current corpus (47 Molds, ~253 declared refs, ~277
+  // recorded refs, ~255 of them verbatim) so ordinary authoring never trips them — they exist
+  // to fail loudly the moment a scan collapses, the same guard `design-docs.test.ts` puts on
+  // its own path lookup.
+  const SOME_MOLDS = 40;
+  const SOME_REFS = 200;
+
+  /**
+   * Every committed bundle's provenance, with the skip accounted for rather than silent.
+   *
+   * The pipeline harness bundles legitimately carry `_assembly.json` instead — that is the
+   * only reason a bundle may have no provenance, so it is asserted rather than assumed. A
+   * `continue` on a missing file cannot tell "this one is a harness" from "the filename
+   * changed and I am now reading nothing."
+   */
+  function provenanceRecords(): Array<{ bundle: string; refs: CommittedRefEntry[] }> {
+    const skills = path.join(repoRoot, "casts/claude/skills");
+    const records: Array<{ bundle: string; refs: CommittedRefEntry[] }> = [];
+    for (const bundle of readdirSync(skills)) {
+      const provPath = path.join(skills, bundle, "_provenance.json");
+      if (!existsSync(provPath)) {
+        expect(existsSync(path.join(skills, bundle, "_assembly.json"))).toBe(true);
+        continue;
+      }
+      const prov = JSON.parse(readFileSync(provPath, "utf8")) as { refs?: CommittedRefEntry[] };
+      expect(Array.isArray(prov.refs)).toBe(true);
+      records.push({ bundle, refs: prov.refs! });
+    }
+    expect(records.length).toBeGreaterThanOrEqual(SOME_MOLDS);
+    expect(records.reduce((n, r) => n + r.refs.length, 0)).toBeGreaterThanOrEqual(SOME_REFS);
+    return records;
+  }
+
   it("no Mold declares mode: condense", () => {
     const offenders: string[] = [];
+    let refsScanned = 0;
+    let moldsScanned = 0;
     for (const moldDir of readdirSync(path.join(repoRoot, "content/molds"))) {
       const notePath = path.join(repoRoot, "content/molds", moldDir, "index.md");
       if (!existsSync(notePath)) continue;
       const front = readFileSync(notePath, "utf8").match(/^---\n([\s\S]*?)\n---/);
       if (!front) continue;
+      moldsScanned += 1;
       const meta = yaml.load(front[1]!) as { references?: Array<{ mode?: string }> };
       for (const ref of meta.references ?? []) {
+        refsScanned += 1;
         if (ref.mode === "condense") offenders.push(moldDir);
       }
     }
+    expect(moldsScanned).toBeGreaterThanOrEqual(SOME_MOLDS);
+    expect(refsScanned).toBeGreaterThanOrEqual(SOME_REFS);
     expect(offenders).toEqual([]);
   });
 
   it("no committed cast carries an LLM fragment or an unfilled one", () => {
-    const skills = path.join(repoRoot, "casts/claude/skills");
     const offenders: string[] = [];
-    for (const bundle of readdirSync(skills)) {
-      const provPath = path.join(skills, bundle, "_provenance.json");
-      if (!existsSync(provPath)) continue;
-      const prov = JSON.parse(readFileSync(provPath, "utf8")) as {
-        refs?: Array<{
-          source?: string;
-          pending_llm?: boolean;
-          src_hash?: string;
-          dst_hash?: string;
-        }>;
-      };
-      for (const ref of prov.refs ?? []) {
+    for (const { bundle, refs } of provenanceRecords()) {
+      for (const ref of refs) {
         if (ref.source !== "deterministic" || ref.pending_llm) offenders.push(bundle);
       }
     }
@@ -1720,19 +1763,16 @@ describe("casting is deterministic end to end", () => {
   // The verbatim guarantee, stated as the equality that proves it. This is what went stale in
   // seven bundles unnoticed, and it costs one pass over the tree to keep honest.
   it("every verbatim ref proves itself with src_hash == dst_hash", () => {
-    const skills = path.join(repoRoot, "casts/claude/skills");
     const offenders: string[] = [];
-    for (const bundle of readdirSync(skills)) {
-      const provPath = path.join(skills, bundle, "_provenance.json");
-      if (!existsSync(provPath)) continue;
-      const prov = JSON.parse(readFileSync(provPath, "utf8")) as {
-        refs?: Array<{ mode?: string; src?: string; src_hash?: string; dst_hash?: string }>;
-      };
-      for (const ref of prov.refs ?? []) {
+    let verbatimRefs = 0;
+    for (const { bundle, refs } of provenanceRecords()) {
+      for (const ref of refs) {
         if (ref.mode !== "verbatim") continue;
+        verbatimRefs += 1;
         if (ref.src_hash !== ref.dst_hash) offenders.push(`${bundle}: ${ref.src}`);
       }
     }
+    expect(verbatimRefs).toBeGreaterThanOrEqual(SOME_REFS);
     expect(offenders).toEqual([]);
   });
 });
