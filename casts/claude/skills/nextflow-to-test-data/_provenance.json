@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "nextflow-to-test-data",
     "path": "content/molds/nextflow-to-test-data/index.md",
     "revision": 2,
     "content_hash": "5569467ca2b1bb6bdaec69f4d6a9482b111b4433d5a70f1bf19c29a8d511f3ca",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:41.001Z",
+  "cast_at": "2026-08-02T22:04:59.139Z",
   "refs": [
     {
       "kind": "research",

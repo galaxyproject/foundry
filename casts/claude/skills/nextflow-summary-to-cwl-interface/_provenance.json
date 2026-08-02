@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "nextflow-summary-to-cwl-interface",
     "path": "content/molds/nextflow-summary-to-cwl-interface/index.md",
     "revision": 1,
     "content_hash": "3fc1ccd78b3828e77382b921fc547a4ea2f56d7123cd92cf0e1cfefd4561984f",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:34.748Z",
+  "cast_at": "2026-08-02T22:04:51.152Z",
   "refs": [
     {
       "kind": "schema",

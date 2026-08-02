@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "changeset-to-galaxy-test-plan",
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "1a5f10ecf90158c4fdaf292055ca73dcd6dd39e7253fe417b62020c3c4ec8be9",
-    "commit": "466d4480b91afa1ea77ae0076fd78f62d727d264"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-08-02T18:10:24.924Z",
+  "cast_at": "2026-08-02T22:04:19.647Z",
   "refs": [
     {
       "kind": "research",

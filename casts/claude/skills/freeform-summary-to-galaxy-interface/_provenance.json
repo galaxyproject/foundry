@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "freeform-summary-to-galaxy-interface",
     "path": "content/molds/freeform-summary-to-galaxy-interface/index.md",
     "revision": 2,
     "content_hash": "d270dc661413a024843c92b3352abd27779604866d429b6eb3092d03565eb276",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:24.650Z",
+  "cast_at": "2026-08-02T22:04:38.066Z",
   "refs": [
     {
       "kind": "research",

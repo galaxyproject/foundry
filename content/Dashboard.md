@@ -172,11 +172,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only. | draft | 2026-08-02 | 2 |
 | [[planemo-test-report]] | JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo. | draft | 2026-07-20 | 3 |
 | [[summary-galaxy-workflow]] | JSON Schema for the structured summary emitted by the summarize-galaxy-workflow Mold. | draft | 2026-07-01 | 1 |
 | [[galaxy-workflow-test-plan]] | JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test. | draft | 2026-06-16 | 1 |
 | [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-05-27 | 1 |
-| [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref deterministic-vs-LLM origin, src/dst hashes, artifact handoff. Schema v2. | draft | 2026-05-17 | 1 |
 | [[summary-cwl]] | JSON Schema for the structured summary emitted by the summarize-cwl Mold. | draft | 2026-05-10 | 1 |
 | [[summary-nextflow]] | JSON Schema for the structured summary emitted by the summarize-nextflow Mold. | draft | 2026-05-06 | 10 |
 | [[galaxy-tool-summary]] | JSON Schema for the deterministic per-tool manifest emitted by `galaxy-tool-cache summarize`. | draft | 2026-05-05 | 1 |
