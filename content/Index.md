@@ -252,10 +252,13 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Meta
 
-- [[architecture]] — Physical layout, content types, validation pipeline, generated artifacts, and site rendering. *(reviewed)*
+- [[architecture]] — A short map of the Foundry's major parts, boundaries, and focused architecture records. *(reviewed)*
+- [[build-and-validation]] — How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current. *(reviewed)*
 - [[cast-walkthrough]] — One real committed cast (discover-shed-tool) annotated end to end: every bundle file traced back through per-kind dispatch and _provenance.json. *(reviewed)*
+- [[code-architecture]] — Implementation components, dependency direction, entry points, and contracts across the Foundry codebase. *(reviewed)*
 - [[comparisons]] — Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) — a dated snapshot. *(reviewed)*
 - [[casting]] — How typed Mold references become target-specific cast artifacts with provenance. *(reviewed)*
+- [[content-model]] — How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge. *(reviewed)*
 - [[corpus]] — How IWC grounding works without turning the Foundry into an upstream workflow mirror. *(reviewed)*
 - [[eval-philosophy]] — Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/refinement split. *(reviewed)*
 - [[guiding-principles]] — The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding. *(reviewed)*
@@ -263,6 +266,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[mold-spec]] — The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it. *(reviewed)*
 - [[molds]] — The Mold inventory, bucketing axes, and boundaries between Molds and reference content. *(reviewed)*
 - [[pattern-authorship]] — Developer-facing authorship rules for operation-named, corpus-grounded pattern pages. *(reviewed)*
+- [[repository-layout]] — Where authored source, implementation code, generated artifacts, fixtures, and site files belong. *(reviewed)*
 - [[schema-packages]] — Where a Mold IO schema lives, how cast resolves one through a schema note, and why there is no separate schema package. *(reviewed)*
 
 ## Prompt
