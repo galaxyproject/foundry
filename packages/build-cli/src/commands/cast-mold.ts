@@ -192,8 +192,8 @@ interface ResolvedRef {
   license_file?: string;
 }
 
-// Which kinds are castable, what each defaults to, and how each resolves used to be three
-// sets of kind-name literals here. They are now read from `reference_contract.yml`'s
+// Which kinds are castable, what each defaults to, and how each resolves used to be four
+// decisions keyed on kind-name literals here. They are now read from `reference_contract.yml`'s
 // `cast:` blocks — see packages/note-schema/src/cast-contract.ts for why.
 
 /** Remove directories left empty by pruning, deepest first. Keeps `dir` itself. */
@@ -278,6 +278,14 @@ function resolveMoldRef(
   // The address check answers to the kind's declared `ref_shape` rather than assuming every
   // castable kind is wiki-link-shaped. They all are today, which is exactly why asserting it
   // in code would sit there being true until the first `path`-shaped kind, and then be wrong.
+  //
+  // This is STRICTER than what came before, and deliberately so. The check used to run for
+  // `schema` alone; the other five kinds went straight to `resolveWikiLink`, which accepts the
+  // bare inner text (`planemo-asserts-idioms`) as readily as `[[planemo-asserts-idioms]]`. All
+  // 253 committed refs are bracketed, so no cast changes — but a bare or space-padded ref that
+  // used to resolve for those five kinds is now refused. A kind declaring `ref_shape:
+  // wiki-link` and then accepting things that are not wiki-links is the declaration not
+  // meaning anything, which is the whole point of moving these decisions onto declarations.
   if (refKinds[kind]?.ref_shape === "wiki-link" && !WIKI_LINK_RE.test(refStr)) {
     return {
       error: `references[${index}]: ${kind} ref must be a [[wiki-link]] to a ${kind} note (got ${refStr})`,
@@ -296,8 +304,21 @@ function resolveMoldRef(
   // The bundled filename is the note's slug, never the storage filename — `fileSlug` is what
   // keeps a directory-shaped kind from landing as `index.md`. `slug_field` overrides it where
   // the note's own slug is the wrong name for a reader of the bundle.
-  const declaredSlug = castDecl.slug_field ? noteMeta[castDecl.slug_field] : undefined;
-  const slug = typeof declaredSlug === "string" && declaredSlug ? declaredSlug : fileSlug(tp);
+  //
+  // A declared `slug_field` the note does not carry is an ERROR, not a fallback to the slug:
+  // the declaration's whole content is "the note's own slug is the wrong name here", so
+  // quietly using it anyway would rename every file of the kind on a typo'd field name and
+  // look like a successful cast.
+  let slug = fileSlug(tp);
+  if (castDecl.slug_field) {
+    const declaredSlug = noteMeta[castDecl.slug_field];
+    if (typeof declaredSlug !== "string" || !declaredSlug) {
+      return {
+        error: `references[${index}]: ${kind} ref ${refStr} resolves to a note with no \`${castDecl.slug_field}\`, which its kind declares as slug_field`,
+      };
+    }
+    slug = declaredSlug;
+  }
   const namedDst = path.posix.join(kindCfg.dst_dir, `${slug}${kindCfg.dst_extension}`);
 
   switch (castDecl.resolve) {
@@ -320,7 +341,18 @@ function resolveMoldRef(
       // What casting packages is the payload beside the note, never the wrapper. Which file
       // that is comes from the kind's own companion declaration, so there is nothing here to
       // resolve and nothing that can point at a file that is not there.
-      src = path.posix.join(path.posix.dirname(tp), payloadCompanionOf(kind));
+      //
+      // Caught rather than thrown: a kind declaring no single `bundled` companion is a broken
+      // declaration, and every other failure in this function arrives as a collected
+      // `references[i]: ...` line. Letting this one escape as a stack trace would lose the
+      // ref index — the only thing that says WHICH reference was being resolved.
+      let payload: string;
+      try {
+        payload = payloadCompanionOf(kind);
+      } catch (e) {
+        return { error: `references[${index}]: ${(e as Error).message}` };
+      }
+      src = path.posix.join(path.posix.dirname(tp), payload);
       dstOverride = namedDst;
       break;
     }

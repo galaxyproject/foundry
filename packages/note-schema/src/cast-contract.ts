@@ -11,8 +11,8 @@
 //     const defaultMode = kind === "cli-command" ? "sidecar" : "verbatim";
 //     if (r.kind !== "research" && r.kind !== "pattern") continue;
 //
-// Three lists of kind names, none of them the declaration, all of them able to disagree
-// with it. That is the same shape as the hand-written `forbid_packaged_files` that named
+// Four decisions keyed on the kind NAME, none of them the declaration, all of them able to
+// disagree with it. That is the same shape as the hand-written `forbid_packaged_files` that named
 // two of the eight companions its kinds declared, and it is fixed the same way: the kind
 // declares, and the caster reads the declaration.
 //
@@ -72,6 +72,8 @@ export interface CastDeclaration {
 /** A reference kind the caster can compile. Kinds with no `cast:` block are not castable. */
 export type CastContract = Record<string, CastDeclaration>;
 
+const CAST_FIELDS = new Set(["resolve", "default_mode", "slug_field", "companions"]);
+
 function fail(sourcePath: string, message: string): never {
   throw new Error(`${sourcePath}: ${message}`);
 }
@@ -87,6 +89,17 @@ function parseCastDeclaration(
     fail(sourcePath, `${where} is not a mapping`);
   }
   const fields = raw as Record<string, unknown>;
+
+  // Reject rather than ignore. This parser exists because the shared one DROPS what it does
+  // not recognise, and a `cast:` block reaching no reader is the failure it was written to
+  // avoid — so a `slug_feild:` inside the block must not be quietly discarded here either.
+  const unknownFields = Object.keys(fields).filter((key) => !CAST_FIELDS.has(key));
+  if (unknownFields.length > 0) {
+    fail(
+      sourcePath,
+      `${where} has unknown field(s) ${unknownFields.join(", ")} (known: ${[...CAST_FIELDS].join(", ")})`,
+    );
+  }
 
   const resolve = fields["resolve"];
   if (typeof resolve !== "string" || !CAST_RESOLVE_VALUES.includes(resolve as CastResolve)) {

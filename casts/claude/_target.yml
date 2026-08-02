@@ -15,9 +15,13 @@ required_outputs:
   - SKILL.md
   - _provenance.json
 
-# Per-reference-kind dst conventions.
+# Per-reference-kind PLACEMENT: where this target puts each kind, and under what extension.
 # `dst` is computed from the source slug; the verifier enforces 1:1.
-# Kinds not listed here are rejected as "not implemented in v1".
+#
+# Placement only. Whether a kind is castable at all, how it resolves, and what it defaults to
+# are the KIND's to declare, in reference_contract.yml's `cast:` blocks — a kind with no such
+# block is refused there, not here. `modes` below is a CONSTRAINT on what the kind allows:
+# this target may refuse a mode the kind permits, and can never permit one the kind does not.
 kinds:
   schema:
     dst_dir: references/schemas/

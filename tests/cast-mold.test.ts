@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import os from "node:os";
@@ -1332,18 +1333,38 @@ describe("stripWikiLinks", () => {
 describe("reference_contract.yml cast declarations are load-bearing", () => {
   const contractPath = path.join(repoRoot, "reference_contract.yml");
 
+  /**
+   * Cast the real corpus against a MUTATED contract, without touching the real contract.
+   *
+   * The obvious version — overwrite `reference_contract.yml`, run, restore in a `finally` —
+   * is not safe here, and not merely in theory. vitest runs test files in parallel and three
+   * sibling suites call `loadReferenceContract()` on this path at module scope, so a
+   * concurrent worker (or a `make check-casts` in another shell) reads a contract with a
+   * kind's `cast:` block deleted and fails for reasons that have nothing to do with it. The
+   * `finally` also does not cover SIGINT or a timeout kill, and `yaml.dump` round-trips away
+   * every comment in the file — including the block documenting `cast:` itself, which is
+   * exactly the prose this repo treats as load-bearing.
+   *
+   * So the mutated contract goes in a temp root beside symlinks to the real `content/` and
+   * `casts/`. Both callers pass `--check`, which never writes, so the tracked file is never
+   * opened for writing at all.
+   */
   function withMutatedContract(
     mutate: (kinds: Record<string, Record<string, unknown>>) => void,
-    assert: () => void,
+    assert: (root: string) => void,
   ): void {
-    const original = readFileSync(contractPath, "utf8");
+    const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-contract-"));
     try {
-      const doc = yaml.load(original) as { kinds: Record<string, Record<string, unknown>> };
+      const doc = yaml.load(readFileSync(contractPath, "utf8")) as {
+        kinds: Record<string, Record<string, unknown>>;
+      };
       mutate(doc.kinds);
-      writeFileSync(contractPath, yaml.dump(doc));
-      assert();
+      writeFileSync(path.join(root, "reference_contract.yml"), yaml.dump(doc));
+      symlinkSync(path.join(repoRoot, "content"), path.join(root, "content"));
+      symlinkSync(path.join(repoRoot, "casts"), path.join(root, "casts"));
+      assert(root);
     } finally {
-      writeFileSync(contractPath, original);
+      rmSync(root, { recursive: true, force: true });
     }
   }
 
@@ -1354,12 +1375,14 @@ describe("reference_contract.yml cast declarations are load-bearing", () => {
       (kinds) => {
         delete kinds.research!.cast;
       },
-      () => {
+      (root) => {
         const r = runTsx(foundryBuild, [
           "cast",
           "summarize-nextflow",
           "--target=claude",
           "--check",
+          "--root",
+          root,
         ]);
         expect(r.code).not.toBe(0);
         expect(r.stderr).toContain("kind=research is not castable");
@@ -1378,12 +1401,14 @@ describe("reference_contract.yml cast declarations are load-bearing", () => {
           companions: false,
         };
       },
-      () => {
+      (root) => {
         const r = runTsx(foundryBuild, [
           "cast",
           "author-galaxy-tool-wrapper",
           "--target=claude",
           "--check",
+          "--root",
+          root,
         ]);
         expect(r.code).not.toBe(0);
         expect(r.stderr).toContain("orphan (no ref claims it)");
@@ -1510,6 +1535,119 @@ describe("cast declarations the corpus does not currently exercise", () => {
       } finally {
         rmSync(dir, { recursive: true, force: true });
       }
+    }
+  });
+});
+
+// Two behaviour changes the 47-Mold byte-identity gate cannot see, because no committed
+// content takes either path. Pinned so they read as decisions rather than accidents.
+describe("cast declarations: stricter than before, on purpose", () => {
+  function fixture(dir: string, ref: string): void {
+    mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+    mkdirSync(path.join(dir, "content/patterns"), { recursive: true });
+    mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "casts/claude/_target.yml"),
+      [
+        "name: claude",
+        "provenance_schema_version: 3",
+        "required_outputs: [SKILL.md, _provenance.json]",
+        "kinds:",
+        "  pattern:",
+        "    dst_dir: references/patterns/",
+        "    dst_extension: .md",
+        "    modes: [verbatim]",
+        "condense_prompts: {}",
+        "skill_constraints:",
+        "  frontmatter_required: [name, description]",
+        "  forbidden_runtime_paths: []",
+        "",
+      ].join("\n"),
+    );
+    writeFileSync(
+      path.join(dir, "reference_contract.yml"),
+      yaml.dump({
+        kinds: {
+          pattern: {
+            label: "Pattern",
+            description: "Pattern refs.",
+            ref_shape: "wiki-link",
+            cast: { resolve: "note", default_mode: "verbatim", companions: false },
+          },
+        },
+      }),
+    );
+    writeFileSync(
+      path.join(dir, "content/molds/m/index.md"),
+      `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Ref-shape cast test mold summary.\nreferences:\n  - kind: pattern\n    ref: ${ref}\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+    );
+    writeFileSync(
+      path.join(dir, "content/patterns/p.md"),
+      `---\ntype: pattern\ntitle: P\nsummary: A pattern.\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of p.\n`,
+    );
+  }
+
+  // resolveWikiLink accepts the bare inner text, so before this branch an unbracketed ref
+  // resolved for every kind except `schema`. A kind that declares `ref_shape: wiki-link` and
+  // then accepts a non-wiki-link is a declaration that means nothing.
+  it("refuses a bare ref for a kind declaring ref_shape: wiki-link", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refshape-"));
+    try {
+      fixture(dir, '"p"');
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("must be a [[wiki-link]]");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("still accepts the bracketed form", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refshape-ok-"));
+    try {
+      fixture(dir, '"[[p]]"');
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // A declared slug_field the note does not carry used to fall back to the note's own slug —
+  // silently renaming every bundled file of the kind on a typo'd field name.
+  it("refuses a note missing the field its kind declares as slug_field", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-slugmissing-"));
+    try {
+      fixture(dir, '"[[p]]"');
+      const contract = yaml.load(
+        readFileSync(path.join(dir, "reference_contract.yml"), "utf8"),
+      ) as { kinds: Record<string, Record<string, Record<string, unknown>>> };
+      contract.kinds.pattern!.cast!.slug_field = "no_such_field";
+      writeFileSync(path.join(dir, "reference_contract.yml"), yaml.dump(contract));
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("no_such_field");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The parser rejects an unknown key inside a cast: block rather than dropping it, which is
+  // the failure mode it exists to prevent in the shared parser.
+  it("refuses an unknown field inside a cast: block", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-unknownkey-"));
+    try {
+      fixture(dir, '"[[p]]"');
+      const contract = yaml.load(
+        readFileSync(path.join(dir, "reference_contract.yml"), "utf8"),
+      ) as { kinds: Record<string, Record<string, Record<string, unknown>>> };
+      contract.kinds.pattern!.cast!.slug_feild = "tool";
+      writeFileSync(path.join(dir, "reference_contract.yml"), yaml.dump(contract));
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("slug_feild");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
   });
 });
