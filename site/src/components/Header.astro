@@ -165,7 +165,12 @@ const moreActive = moreLinks.some(link => link.active);
     document.documentElement.dataset.pfTheme = isDark ? 'dark' : 'light';
     updateIcons();
   });
+</script>
 
+{/* Ships only where there is a group to drive. An instance whose destinations all fit on the bar
+    renders no "More", and every line below would bind to nothing on every one of its pages. */}
+{moreLinks.length > 0 && (
+<script is:inline>
   const moreTrigger = document.getElementById('nav-more-trigger');
   const moreWrap = moreTrigger?.closest('.nav-more');
   function closeMore() {
@@ -183,3 +188,4 @@ const moreActive = moreLinks.some(link => link.active);
     if (e.key === 'Escape') closeMore();
   });
 </script>
+)}
