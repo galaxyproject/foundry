@@ -33,8 +33,15 @@ casts:
 # bundles carried a dead doc path for two weeks while the one Mold CI checked
 # stayed green.
 check-casts:
-	@fail=0; for m in $(MOLD_SLUGS); do $(FOUNDRY_BUILD) cast --root . $$m --check >/dev/null || { echo "drift: $$m"; fail=1; }; done; \
-	if [ $$fail -ne 0 ]; then echo "cast drift — run 'make casts' and commit the result"; exit 1; fi
+	@fail=0; for m in $(MOLD_SLUGS); do \
+	  out=$$($(FOUNDRY_BUILD) cast --root . $$m --check 2>&1) || { \
+	    echo "$$m:"; echo "$$out" | sed 's/^/  /'; fail=1; }; \
+	done; \
+	if [ $$fail -ne 0 ]; then \
+	  echo "cast --check failed above. Drift is fixed by 'make casts' + commit;"; \
+	  echo "an error (unresolved ref, bad declaration) is fixed at the source."; \
+	  exit 1; \
+	fi
 
 assemble-pipelines:
 	@for p in $(PIPELINE_SLUGS); do echo "assemble $$p"; $(FOUNDRY_BUILD) assemble-pipeline --root . $$p || exit 1; done

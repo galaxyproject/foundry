@@ -2,8 +2,8 @@
 // Deterministic cast assembly. Reads the Mold's `index.md` frontmatter as the
 // source of truth for `references:` and resolves each ref to a concrete file
 // op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v3)
-// recording every resolved ref, its hash, and whether it was produced
-// deterministically or is pending an LLM step.
+// recording every resolved ref and its hash. Assembly is deterministic
+// throughout: there is no LLM phase, so a cast is byte-stable and --check-able.
 //
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
@@ -33,7 +33,13 @@ import {
   type LicensePolicy,
 } from "@galaxy-foundry/license-policy";
 
-import { PROMPT_PAYLOAD } from "../lib/dispositions.js";
+import {
+  loadCastReferenceContract,
+  type CastContract,
+  type ReferenceContractTerm,
+} from "@galaxy-foundry/note-schema";
+
+import { payloadCompanionOf } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
   driftOf,
@@ -120,7 +126,6 @@ interface TargetConfig {
   provenance_schema_version: number;
   required_outputs: string[];
   kinds: Record<string, TargetKindConfig>;
-  condense_prompts: Record<string, string>;
   skill_constraints: {
     frontmatter_required: string[];
     forbidden_runtime_paths: string[];
@@ -166,7 +171,7 @@ function buildSlugMap(repoRoot: string): {
 
 interface ResolvedRef {
   kind: "schema" | "research" | "pattern" | "cli-tool" | "cli-command" | "prompt";
-  mode: "verbatim" | "condense" | "sidecar";
+  mode: "verbatim" | "sidecar";
   ref: string;
   src: string;
   dst: string;
@@ -186,15 +191,19 @@ interface ResolvedRef {
   license_file?: string;
 }
 
-const SUPPORTED_KINDS = new Set([
-  "schema",
-  "research",
-  "pattern",
-  "cli-tool",
-  "cli-command",
-  "prompt",
-]);
-const NOT_IMPLEMENTED_KINDS = new Set(["example"]);
+// Which kinds are castable, what each defaults to, and how each resolves used to be four
+// decisions keyed on kind-name literals here. They are now read from `reference_contract.yml`'s
+// `cast:` blocks — see packages/note-schema/src/cast-contract.ts for why.
+
+/**
+ * The message of something thrown, without assuming it was an `Error`.
+ *
+ * `(e as Error).message` renders `undefined` for a thrown string or object, which turns a
+ * reported failure into a line that says nothing.
+ */
+function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
 
 /** Remove directories left empty by pruning, deepest first. Keeps `dir` itself. */
 function pruneEmptyDirs(dir: string): void {
@@ -230,6 +239,8 @@ function resolveMoldRef(
   slugMap: Map<string, string>,
   metaByPath: Map<string, Frontmatter>,
   target: TargetConfig,
+  castContract: CastContract,
+  refKinds: Record<string, ReferenceContractTerm & { ref_shape?: string }>,
 ): { resolved?: ResolvedRef; error?: string } {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     return { error: `references[${index}]: not an object` };
@@ -238,22 +249,27 @@ function resolveMoldRef(
   const kind = typeof ref.kind === "string" ? ref.kind : "";
   const refStr = typeof ref.ref === "string" ? ref.ref : "";
 
-  if (NOT_IMPLEMENTED_KINDS.has(kind)) {
+  const castDecl = castContract[kind];
+  if (!castDecl) {
+    // Two different failures, and the distinction is the declaration's: a kind the contract
+    // never names is a typo, while a kind it names WITHOUT a `cast:` block is deliberate —
+    // authored vocabulary the caster has no support for yet.
     return {
-      error: `references[${index}]: kind=${kind} not implemented in v1 (no real consumers; first Mold to need this defines the contract)`,
+      error: refKinds[kind]
+        ? `references[${index}]: kind=${kind} is not castable — reference_contract.yml declares it with no \`cast:\` block (the first Mold to need one defines the contract)`
+        : `references[${index}]: unknown kind=${kind}`,
     };
-  }
-  if (!SUPPORTED_KINDS.has(kind)) {
-    return { error: `references[${index}]: unknown kind=${kind}` };
   }
   const kindCfg = target.kinds[kind];
   if (!kindCfg) {
     return { error: `references[${index}]: target=${target.name} does not declare kind=${kind}` };
   }
 
-  // Default mode by kind: schema/research/pattern → verbatim, cli-command → sidecar.
-  const defaultMode = kind === "cli-command" ? "sidecar" : "verbatim";
-  const mode = (typeof ref.mode === "string" ? ref.mode : defaultMode) as ResolvedRef["mode"];
+  const mode = (
+    typeof ref.mode === "string" ? ref.mode : castDecl.default_mode
+  ) as ResolvedRef["mode"];
+  // The target's list is a CONSTRAINT on the kind's, never a second declaration of it: a
+  // target may refuse a mode the kind allows, and can never permit one the kind does not.
   if (!kindCfg.modes.includes(mode)) {
     return {
       error: `references[${index}]: kind=${kind} does not support mode=${mode} (allowed: ${kindCfg.modes.join(", ")})`,
@@ -264,66 +280,97 @@ function resolveMoldRef(
   let src: string;
   let dstOverride: string | undefined;
   let packageSource: { spec: string; exportName: string } | undefined;
+
+  // Every kind addresses its note the same way and expects the note's `type` to be the kind's
+  // own name; the strategies differ only in what they take FROM that note.
+  //
+  // The address check answers to the kind's declared `ref_shape` rather than assuming every
+  // castable kind is wiki-link-shaped. They all are today, which is exactly why asserting it
+  // in code would sit there being true until the first `path`-shaped kind, and then be wrong.
+  //
+  // This is STRICTER than what came before, and deliberately so. The check used to run for
+  // `schema` alone; the other five kinds went straight to `resolveWikiLink`, which accepts the
+  // bare inner text (`planemo-asserts-idioms`) as readily as `[[planemo-asserts-idioms]]`. All
+  // 253 committed refs are bracketed, so no cast changes — but a bare or space-padded ref that
+  // used to resolve for those five kinds is now refused. A kind declaring `ref_shape:
+  // wiki-link` and then accepting things that are not wiki-links is the declaration not
+  // meaning anything, which is the whole point of moving these decisions onto declarations.
+  if (refKinds[kind]?.ref_shape === "wiki-link" && !WIKI_LINK_RE.test(refStr)) {
+    return {
+      error: `references[${index}]: ${kind} ref must be a [[wiki-link]] to a ${kind} note (got ${refStr})`,
+    };
+  }
+  const tp = resolveWikiLink(refStr, slugMap);
+  if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
   // Frontmatter of the note this ref resolves to; source of its license fields.
-  let noteMeta: Frontmatter | undefined;
-  if (kind === "schema") {
-    // Schema refs are wiki-links to a `type: schema` note. The note declares
-    // `package` + `package_export`; cast imports the runtime export,
-    // JSON.stringifies it, and writes to the bundle.
-    if (!WIKI_LINK_RE.test(refStr)) {
+  const noteMeta: Frontmatter | undefined = metaByPath.get(tp);
+  if (noteMeta?.type !== kind) {
+    return {
+      error: `references[${index}]: ${kind} ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected ${kind}`,
+    };
+  }
+
+  // The bundled filename is the note's slug, never the storage filename — `fileSlug` is what
+  // keeps a directory-shaped kind from landing as `index.md`. `slug_field` overrides it where
+  // the note's own slug is the wrong name for a reader of the bundle.
+  //
+  // A declared `slug_field` the note does not carry is an ERROR, not a fallback to the slug:
+  // the declaration's whole content is "the note's own slug is the wrong name here", so
+  // quietly using it anyway would rename every file of the kind on a typo'd field name and
+  // look like a successful cast.
+  let slug = fileSlug(tp);
+  if (castDecl.slug_field) {
+    const declaredSlug = noteMeta[castDecl.slug_field];
+    if (typeof declaredSlug !== "string" || !declaredSlug) {
       return {
-        error: `references[${index}]: schema ref must be a [[wiki-link]] to a schema note (got ${refStr})`,
+        error: `references[${index}]: ${kind} ref ${refStr} resolves to a note with no \`${castDecl.slug_field}\`, which its kind declares as slug_field`,
       };
     }
-    const tp = resolveWikiLink(refStr, slugMap);
-    if (!tp) return { error: `references[${index}]: schema ref ${refStr} did not resolve` };
-    noteMeta = metaByPath.get(tp);
-    if (noteMeta?.type !== "schema") {
-      return {
-        error: `references[${index}]: schema ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
-      };
+    slug = declaredSlug;
+  }
+  const namedDst = path.posix.join(kindCfg.dst_dir, `${slug}${kindCfg.dst_extension}`);
+
+  switch (castDecl.resolve) {
+    case "package-export": {
+      // The note declares `package` + `package_export`; cast imports the runtime export,
+      // JSON.stringifies it, and writes that to the bundle. There is no file to copy.
+      const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
+      const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
+      if (!pkg || !exp) {
+        return {
+          error: `references[${index}]: ${kind} ref ${refStr} resolves to a note missing 'package' and/or 'package_export' frontmatter`,
+        };
+      }
+      src = `package://${pkg}#${exp}`;
+      dstOverride = namedDst;
+      packageSource = { spec: pkg, exportName: exp };
+      break;
     }
-    const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
-    const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
-    if (!pkg || !exp) {
-      return {
-        error: `references[${index}]: schema ref ${refStr} resolves to a schema note missing 'package' and/or 'package_export' frontmatter`,
-      };
+    case "payload-companion": {
+      // What casting packages is the payload beside the note, never the wrapper. Which file
+      // that is comes from the kind's own companion declaration, so there is nothing here to
+      // resolve and nothing that can point at a file that is not there.
+      //
+      // Caught rather than thrown: a kind declaring no single `bundled` companion is a broken
+      // declaration, and every other failure in this function arrives as a collected
+      // `references[i]: ...` line. Letting this one escape as a stack trace would lose the
+      // ref index — the only thing that says WHICH reference was being resolved.
+      let payload: string;
+      try {
+        payload = payloadCompanionOf(kind);
+      } catch (e) {
+        return { error: `references[${index}]: ${errorMessage(e)}` };
+      }
+      src = path.posix.join(path.posix.dirname(tp), payload);
+      dstOverride = namedDst;
+      break;
     }
-    const noteSlug = path.basename(tp, ".md");
-    src = `package://${pkg}#${exp}`;
-    dstOverride = path.posix.join(kindCfg.dst_dir, `${noteSlug}.schema.json`);
-    packageSource = { spec: pkg, exportName: exp };
-  } else {
-    const tp = resolveWikiLink(refStr, slugMap);
-    if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
-    noteMeta = metaByPath.get(tp);
-    const expected = kind === "cli-command" ? "cli-command" : kind;
-    const targetType = noteMeta?.type;
-    if (targetType !== expected) {
-      return {
-        error: `references[${index}]: ${kind} ref ${refStr} resolves to type=${targetType ?? "(none)"}, expected ${expected}`,
-      };
-    }
-    if (kind === "prompt") {
-      // A prompt note is `content/prompts/<area>/<slug>/index.md`; what casting packages is
-      // the verbatim payload beside it, never the wrapper. Which file that is comes from the
-      // kind's own companion declaration, so there is nothing here to resolve and nothing that
-      // can point at a file that is not there.
-      src = path.posix.join(path.posix.dirname(tp), PROMPT_PAYLOAD);
-      dstOverride = path.posix.join(kindCfg.dst_dir, `${fileSlug(tp)}${kindCfg.dst_extension}`);
-    } else if (kind === "cli-tool") {
-      // cli-tool notes live at content/cli/<tool>/index.md, so the slug is the parent dir
-      // name and casts get readable filenames like references/cli/cwltool.md. `tool:`
-      // overrides it for the tool whose directory is not its command name.
+    case "note": {
       src = tp;
-      const toolSlug =
-        typeof metaByPath.get(tp)?.tool === "string"
-          ? (metaByPath.get(tp)!.tool as string)
-          : fileSlug(tp);
-      dstOverride = path.posix.join(kindCfg.dst_dir, `${toolSlug}${kindCfg.dst_extension}`);
-    } else {
-      src = tp;
+      // Only a kind that renames its output needs the explicit dst; the rest go through
+      // `deriveDst`, which is also the path a non-markdown source has to take.
+      if (castDecl.slug_field) dstOverride = namedDst;
+      break;
     }
   }
 
@@ -358,18 +405,21 @@ function resolveMoldRef(
 // A multi-file note (e.g. a vendored bundle) lists `companions:` filenames in
 // its `.md`; each is copied verbatim next to the note in the bundle so the
 // note body can reference it at runtime. Companions ship verbatim regardless
-// of the parent note's mode — a condensed note still points at its structured
-// sibling. They inherit the parent ref's load/used_at/trigger/purpose and
+// of the parent note's mode.  A note points at its structured sibling either way. They inherit the parent ref's load/used_at/trigger/purpose and
 // carry `companion_of` for provenance.
 function expandCompanions(
   resolved: ResolvedRef[],
   metaByPath: Map<string, Frontmatter>,
   target: TargetConfig,
+  castContract: CastContract,
 ): ResolvedRef[] {
   const out: ResolvedRef[] = [];
   for (const r of resolved) {
     out.push(r);
-    if (r.kind !== "research" && r.kind !== "pattern") continue;
+    // Whether a kind's notes may carry companions is the kind's declaration, not a pair of
+    // names checked here. The note still lists its own — membership stays declared per-note,
+    // and a file is never packaged for merely sitting in the directory.
+    if (!castContract[r.kind]?.companions) continue;
     const rawCompanions = metaByPath.get(r.src)?.companions;
     const companions = Array.isArray(rawCompanions) ? (rawCompanions as unknown[]) : [];
     if (companions.length === 0) continue;
@@ -547,10 +597,12 @@ interface ProvenanceRefEntry {
   verification?: string;
   src_hash: string | null;
   dst_hash: string | null;
-  source: "deterministic" | "llm";
-  pending_llm?: boolean;
-  prompt?: { origin: string; identity: string; hash?: string };
-  model?: { name: string; version?: string };
+  /**
+   * Always `deterministic`. Kept as a recorded field rather than dropped: it is the claim the
+   * provenance makes about how the bytes were produced, and a reader should not have to infer
+   * it from the absence of anything else.
+   */
+  source: "deterministic";
   companion_of?: string;
   // License lineage of redistributed third-party content (foundry-pattern#4).
   // Absent for Foundry-authored refs (root LICENSE, out of policy scope).
@@ -797,7 +849,6 @@ interface LegacyProvenanceCarryOver {
   cast_history?: Array<{ rev: number; date: string; note: string }>;
   open_questions?: string[];
   validation_results?: ValidationResult[];
-  prior_refs?: Map<string, ProvenanceRefEntry>;
 }
 
 function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOver {
@@ -818,19 +869,6 @@ function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOv
       ? (data.validation_results as ValidationResult[])
       : undefined,
   };
-  // Capture prior refs by src so condense LLM output and prompt provenance carry
-  // over across re-casts. Accept v2 and v3 so a v2 bundle still seeds a v3 re-cast.
-  if (
-    typeof data.provenance_schema_version === "number" &&
-    data.provenance_schema_version >= 2 &&
-    Array.isArray(data.refs)
-  ) {
-    const prior = new Map<string, ProvenanceRefEntry>();
-    for (const r of data.refs as ProvenanceRefEntry[]) {
-      if (typeof r?.src === "string") prior.set(`${r.kind}:${r.src}`, r);
-    }
-    carry.prior_refs = prior;
-  }
   return carry;
 }
 
@@ -851,7 +889,6 @@ async function castOneRef(
   resolved: ResolvedRef,
   repoRoot: string,
   bundleRoot: string,
-  prior: Map<string, ProvenanceRefEntry> | undefined,
   check: boolean,
 ): Promise<{ entry: ProvenanceRefEntry; drift?: string; error?: string }> {
   const dstAbs = path.join(bundleRoot, resolved.dst);
@@ -949,50 +986,6 @@ async function castOneRef(
         source: "deterministic",
       },
       drift: drift.reason,
-    };
-  }
-
-  if (resolved.mode === "condense") {
-    // Two-phase. Deterministic phase records placeholder; LLM phase fills in.
-    const priorEntry = prior?.get(`${resolved.kind}:${resolved.src}`);
-    if (
-      priorEntry &&
-      priorEntry.pending_llm !== true &&
-      priorEntry.src_hash === srcHash &&
-      priorEntry.dst_hash
-    ) {
-      // Source hasn't drifted; carry forward prior LLM output entry.
-      const dstExists = existsSync(dstAbs);
-      const dstHash = dstExists ? sha256File(dstAbs) : null;
-      const drift =
-        dstHash === priorEntry.dst_hash
-          ? undefined
-          : dstExists
-            ? "condense output drifted vs recorded dst_hash"
-            : "condense output missing";
-      return {
-        entry: {
-          ...priorEntry,
-          ...skeleton(resolved),
-          src_hash: srcHash,
-          dst_hash: priorEntry.dst_hash,
-          source: "llm",
-          prompt: priorEntry.prompt,
-          model: priorEntry.model,
-        },
-        drift,
-      };
-    }
-    // Either no prior LLM output, or source drifted — re-mark pending.
-    return {
-      entry: {
-        ...skeleton(resolved),
-        src_hash: srcHash,
-        dst_hash: null,
-        source: "llm",
-        pending_llm: true,
-      },
-      drift: priorEntry ? "source drift requires re-condense" : "condense output not yet produced",
     };
   }
 
@@ -1289,16 +1282,39 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const rawRefs = Array.isArray(moldParsed.meta.references)
     ? (moldParsed.meta.references as unknown[])
     : [];
+  // A malformed contract is a authoring error in a YAML file, not a bug in the caster, so it
+  // reports like every other bad input here rather than as a stack trace. Same reasoning as
+  // catching `payloadCompanionOf` below: the message is already good, the delivery was not.
+  let refContract: ReturnType<typeof loadCastReferenceContract>["contract"];
+  let castContract: CastContract;
+  try {
+    ({ contract: refContract, cast: castContract } = loadCastReferenceContract(
+      path.join(repoRoot, "reference_contract.yml"),
+    ));
+  } catch (e) {
+    console.error(errorMessage(e));
+    process.exit(2);
+  }
+
   const resolved: ResolvedRef[] = [];
   const errors: string[] = [];
   rawRefs.forEach((r, i) => {
-    const out = resolveMoldRef(r, i, moldRel, slugMap, metaByPath, target);
+    const out = resolveMoldRef(
+      r,
+      i,
+      moldRel,
+      slugMap,
+      metaByPath,
+      target,
+      castContract,
+      refContract.kinds,
+    );
     if (out.error) errors.push(out.error);
     if (out.resolved) resolved.push(out.resolved);
   });
 
   // Expand multi-file notes' declared companion files into sibling verbatim refs.
-  const expanded = expandCompanions(resolved, metaByPath, target);
+  const expanded = expandCompanions(resolved, metaByPath, target, castContract);
   resolved.length = 0;
   resolved.push(...expanded);
 
@@ -1323,7 +1339,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const drift: Array<{ file: string; reason: string }> = [];
 
   for (const r of resolved) {
-    const result = await castOneRef(r, repoRoot, bundleRoot, carry.prior_refs, args.check);
+    const result = await castOneRef(r, repoRoot, bundleRoot, args.check);
     refEntries.push(result.entry);
     if (result.error) errors.push(result.error);
     if (result.drift) drift.push({ file: r.src, reason: result.drift });
@@ -1431,14 +1447,6 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
       process.exit(1);
     }
-    if (refEntries.some((r) => r.pending_llm)) {
-      const pending = refEntries
-        .filter((r) => r.pending_llm)
-        .map((r) => r.src)
-        .join(", ");
-      console.error(`check failed: pending_llm refs: ${pending}`);
-      process.exit(1);
-    }
     console.log("clean: no drift, no errors");
     return;
   }
@@ -1485,11 +1493,6 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   writeFileSync(verifyPath, verifyText);
   console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
   if (drift.length) console.log(`reconciled ${drift.length} drifted ref(s)`);
-  if (refEntries.some((r) => r.pending_llm)) {
-    const pending = refEntries.filter((r) => r.pending_llm).map((r) => r.src);
-    console.log(`pending LLM steps for ${pending.length} ref(s):`);
-    for (const s of pending) console.log(`  - ${s}`);
-  }
 }
 
 const isDirectInvocation = import.meta.url === `file://${process.argv[1]}`;

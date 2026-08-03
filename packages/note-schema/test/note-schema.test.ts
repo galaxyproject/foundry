@@ -98,7 +98,7 @@ describe("buildNoteSchema", () => {
           ref: "[[some-pattern]]",
           used_at: "cast-time",
           load: "upfront",
-          mode: "condense",
+          mode: "verbatim",
           evidence: "corpus-observed",
           ...ref,
         },

@@ -16,10 +16,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { bundledPolicy, licenseIds } from "@galaxy-foundry/license-policy";
-import {
-  buildNoteSchema,
-  loadReferenceContract,
-} from "@galaxy-foundry/note-schema";
+import { buildNoteSchema, loadReferenceContract } from "@galaxy-foundry/note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 const here = path.dirname(fileURLToPath(import.meta.url));

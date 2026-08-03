@@ -116,15 +116,9 @@ Per-kind subdirectories under `references/` mirror the casting dispatch and let 
 
 The plugin root carries both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`, each pointing to the same `skills/` directory. Repo marketplace metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, while Codex reads `.agents/plugins/marketplace.json`. Neither duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
 
-For the **web target**:
-```
-casts/web/<mold-name>/
-├── skill.json                # structured skill description
-├── prompt.md
-└── _provenance.json
-```
-
-For **generic**: single self-contained markdown unless a richer consumer appears.
+**Claude is the only target.** A target becomes real by acquiring a `casts/<target>/_target.yml` —
+that file's existence is what the caster and the site each read, so there is no list of targets
+anywhere to keep in step with the directories.
 
 `_provenance.json` is required for every cast. The contract of record is the [[cast-provenance]] schema note (rendered field-by-field from `scripts/lib/schemas/cast-provenance.schema.json`, schema version 2); the JSON below is an illustrative sketch, not the authority. Shape:
 
@@ -278,7 +272,7 @@ We expect deterministic assembly to be byte-stable aside from timestamps/provena
 
 To exercise the architecture without overbuilding:
 
-- One cast target: **Claude**. Web and generic stay out of scope until the Claude path is proven.
+- One cast target: **Claude**. A second one starts by adding `casts/<target>/_target.yml`.
 - One casting model: pick one, pin in `casts/claude/_target.yml`.
 - Cast 3-4 Molds end-to-end: `summarize-paper` or `interview-to-freeform-summary` (exercises freeform Markdown handoff), `implement-galaxy-tool-step` (exercises `pattern` + `example`), `advance-galaxy-draft-step` (exercises orchestrator-shaped Mold with `cli-command` references and leaf sequencing), `validate-galaxy-workflow` (exercises terminal validation posture). Diversity exercises the per-kind dispatch, not just the prompt.
 - Manual `foundry cast` only.

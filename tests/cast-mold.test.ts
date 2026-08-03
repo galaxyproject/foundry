@@ -1,8 +1,20 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
@@ -14,7 +26,24 @@ const castVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
 // Resolve the repo-local tsx binary by absolute path. Invoking `npx tsx` from a
 // temp-dir cwd can't see local node_modules and auto-installs tsx into the
 // shared npx cache; two such installs racing across test files corrupt it.
-const tsxBin = path.join(repoRoot, "node_modules", ".bin", process.platform === "win32" ? "tsx.cmd" : "tsx");
+const tsxBin = path.join(
+  repoRoot,
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "tsx.cmd" : "tsx",
+);
+
+// A temp repo is a miniature Foundry, and a Foundry without a reference contract has no
+// `cast:` declarations to compile against — the caster reads which kinds are castable, what
+// each defaults to and how each resolves from this file. Fixtures write their own
+// `_target.yml` (placement, per test) and inherit the real contract (strategy, repo-wide),
+// which is the same split the two files have in the repo proper.
+function seedReferenceContract(dir: string): void {
+  copyFileSync(
+    path.join(repoRoot, "reference_contract.yml"),
+    path.join(dir, "reference_contract.yml"),
+  );
+}
 
 function runTsx(script: string, args: string[]): { code: number; stdout: string; stderr: string } {
   try {
@@ -47,26 +76,44 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     expect(r.stdout).toContain("clean");
   });
 
+  // Gutting the committed `_verify.json` in place and restoring it in a `finally` is the same
+  // hazard the mutated-contract helper below was rewritten to remove: vitest runs files in
+  // parallel, so a sibling suite — or a `make check-casts` in another shell — reads a gutted
+  // manifest and reports drift on a Mold nobody touched, and a SIGINT leaves it gutted in the
+  // working tree. The bundle under test is COPIED into a temp root instead; only the copy is
+  // damaged, and the tracked tree is never opened for writing.
   it("foundry-build cast --check catches stale _verify.json", () => {
-    const verifyPath = path.join(
-      repoRoot,
-      "casts",
-      "claude",
-      "skills",
-      "summarize-nextflow",
-      "_verify.json",
-    );
-    const original = readFileSync(verifyPath, "utf8");
+    const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-verify-"));
     try {
+      const bundle = path.join(root, "casts/claude/skills/summarize-nextflow");
+      mkdirSync(bundle, { recursive: true });
+      cpSync(path.join(repoRoot, "casts/claude/skills/summarize-nextflow"), bundle, {
+        recursive: true,
+      });
+      copyFileSync(
+        path.join(repoRoot, "casts/claude/_target.yml"),
+        path.join(root, "casts/claude/_target.yml"),
+      );
+      seedReferenceContract(root);
+      for (const name of ["content", "LICENSES"]) {
+        symlinkSync(path.join(repoRoot, name), path.join(root, name));
+      }
       writeFileSync(
-        verifyPath,
+        path.join(bundle, "_verify.json"),
         JSON.stringify({ verify_schema_version: 1, entries: [] }, null, 2) + "\n",
       );
-      const r = runTsx(foundryBuild, ["cast", "summarize-nextflow", "--target=claude", "--check"]);
+      const r = runTsx(foundryBuild, [
+        "cast",
+        "summarize-nextflow",
+        "--target=claude",
+        "--check",
+        "--root",
+        root,
+      ]);
       expect(r.code).not.toBe(0);
       expect(r.stderr).toContain("_verify.json");
     } finally {
-      writeFileSync(verifyPath, original);
+      rmSync(root, { recursive: true, force: true });
     }
   });
 
@@ -381,6 +428,7 @@ describe("artifact-contract inheritance", () => {
 describe("cast-mold prompt refs", () => {
   it("copies the upstream.prompt companion using the prompt directory slug", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-prompt-"));
+    seedReferenceContract(dir);
     try {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
       mkdirSync(path.join(dir, "content/prompts/prompt-x"), { recursive: true });
@@ -396,7 +444,6 @@ describe("cast-mold prompt refs", () => {
           "    dst_dir: references/prompts/",
           "    dst_extension: .md",
           "    modes: [verbatim]",
-          "condense_prompts: {}",
           "skill_constraints:",
           "  frontmatter_required: [name, description]",
           "  forbidden_runtime_paths: []",
@@ -468,6 +515,7 @@ Wrapper body should not be copied.
 describe("cast-mold cli-command meta injection", () => {
   it("embeds args/options from the package meta subpath and leaves the body flag-free", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-cli-"));
+    seedReferenceContract(dir);
     try {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
       mkdirSync(path.join(dir, "content/cli/galaxy-tool-cache"), { recursive: true });
@@ -483,7 +531,6 @@ describe("cast-mold cli-command meta injection", () => {
           "    dst_dir: references/cli/",
           "    dst_extension: .json",
           "    modes: [sidecar]",
-          "condense_prompts: {}",
           "skill_constraints:",
           "  frontmatter_required: [name, description]",
           "  forbidden_runtime_paths: []",
@@ -545,7 +592,9 @@ Body prose only — no flag list; options come from the package meta.
       expect(sidecar.package).toBe("@galaxy-tool-util/cli");
       expect(sidecar.description).toMatch(/Fetch a tool/i);
       expect(Array.isArray(sidecar.options)).toBe(true);
-      const galaxyUrl = sidecar.options.find((o: { flags: string }) => o.flags.includes("--galaxy-url"));
+      const galaxyUrl = sidecar.options.find((o: { flags: string }) =>
+        o.flags.includes("--galaxy-url"),
+      );
       expect(galaxyUrl?.description).toMatch(/after the ToolShed/i);
       expect(sidecar.body).not.toContain("## Flags");
     } finally {
@@ -585,8 +634,7 @@ describe("cast-mold companion files", () => {
         "  research:",
         "    dst_dir: references/notes/",
         "    dst_extension: .md",
-        "    modes: [verbatim, condense]",
-        "condense_prompts: {}",
+        "    modes: [verbatim]",
         "skill_constraints:",
         "  frontmatter_required: [name, description]",
         "  forbidden_runtime_paths: []",
@@ -646,6 +694,7 @@ ${mention}`,
 
   it("copies declared companion files next to the note and records companion_of", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-companion-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: true });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
@@ -678,6 +727,7 @@ ${mention}`,
 
   it("verifier rejects a bundled note pointing at an undeclared sibling", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-companion-neg-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: false });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
@@ -702,8 +752,12 @@ ${mention}`,
   // instead of guessing at names.
   it("verifier rejects an undeclared sibling that does not share the note's basename", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-unpaired-"));
+    seedReferenceContract(dir);
     try {
-      writeCompanionFixture(dir, { declareCompanions: false, siblingName: "structural.schema.json" });
+      writeCompanionFixture(dir, {
+        declareCompanions: false,
+        siblingName: "structural.schema.json",
+      });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code, `stderr: ${r.stderr}`).toBe(0);
 
@@ -720,6 +774,7 @@ ${mention}`,
   // rendering inside a ```vendored-myst block, and that must not read as "go read this".
   it("verifier ignores a sibling named only inside a fenced block", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-fenced-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, {
         declareCompanions: false,
@@ -738,6 +793,7 @@ ${mention}`,
 
   it("prunes a bundle file no ref claims, and reports it under --check", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-orphan-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: true });
       expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
@@ -748,7 +804,14 @@ ${mention}`,
       const orphan = path.join(dir, "casts/claude/skills/m/references/notes/left-behind.yml");
       writeFileSync(orphan, "stale: true\n");
 
-      const checked = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--check", "--root", dir]);
+      const checked = runTsx(foundryBuild, [
+        "cast",
+        "m",
+        "--target=claude",
+        "--check",
+        "--root",
+        dir,
+      ]);
       expect(checked.code, "--check must not pass with an orphan present").not.toBe(0);
       expect(`${checked.stdout}${checked.stderr}`).toContain("left-behind.yml");
       expect(existsSync(orphan), "--check must not delete anything").toBe(true);
@@ -766,6 +829,7 @@ ${mention}`,
 
   it("carries a companion that lives in a subdirectory of the note", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-nested-"));
+    seedReferenceContract(dir);
     try {
       writeCompanionFixture(dir, { declareCompanions: true, siblingName: "vendor/spec.yml" });
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
@@ -774,7 +838,9 @@ ${mention}`,
       // Nested dst, not flattened: the note names `vendor/spec.yml` and the bundle mirrors it,
       // so a vendored tree whose files reference each other by relative path still resolves.
       const nested = path.join(dir, "casts/claude/skills/m/references/notes/vendor/spec.yml");
-      expect(existsSync(nested), "nested companion should mirror its path in the bundle").toBe(true);
+      expect(existsSync(nested), "nested companion should mirror its path in the bundle").toBe(
+        true,
+      );
 
       const prov = JSON.parse(
         readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
@@ -811,10 +877,10 @@ ${mention}`,
       ["scenarios.md", "foundry-only"],
       ["changes.md", "foundry-only"],
       ["README.md", "foundry-only"],
-      ["casting.md", "cast-input"],
       ["cast-skill-verification.md", "cast-input"],
     ])("rejects a bundle carrying %s (%s)", (file, disposition) => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-forbidden-"));
+      seedReferenceContract(dir);
       try {
         const verify = castThenPlant(dir, (bundle) => {
           writeFileSync(path.join(bundle, file), "Foundry-only content.\n");
@@ -831,6 +897,7 @@ ${mention}`,
     // are different companions, and a name matching the wrong type is neither of them.
     it("rejects a refinements/ directory, and not a file of the same name", () => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refinements-"));
+      seedReferenceContract(dir);
       try {
         const asDirectory = castThenPlant(dir, (bundle) => {
           mkdirSync(path.join(bundle, "refinements"));
@@ -843,6 +910,8 @@ ${mention}`,
       }
 
       const other = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refinements-file-"));
+
+      seedReferenceContract(other);
       try {
         const asFile = castThenPlant(other, (bundle) => {
           writeFileSync(path.join(bundle, "refinements"), "not the journal\n");
@@ -860,6 +929,7 @@ ${mention}`,
     // must stay packageable even though other names beside it in the same declaration do not.
     it("accepts an examples/ directory, which a kind declares bundled", () => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-examples-"));
+      seedReferenceContract(dir);
       try {
         const verify = castThenPlant(dir, (bundle) => {
           mkdirSync(path.join(bundle, "examples"));
@@ -876,6 +946,7 @@ ${mention}`,
     // tie: a file some ref claims went through the manifest and is that note's to ship.
     it("accepts a companion a ref claims, even where the name collides with a mold's", () => {
       const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-collision-"));
+      seedReferenceContract(dir);
       try {
         writeCompanionFixture(dir, { declareCompanions: true, siblingName: "README.md" });
         expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
@@ -916,6 +987,7 @@ describe("validate-artifact process runner", () => {
     const { runProcessValidation } =
       await import("../packages/build-cli/src/commands/validate-artifact.js");
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-validate-"));
+    seedReferenceContract(dir);
     const artifact = path.join(dir, "artifact.json");
     writeFileSync(artifact, "{}\n");
     const result = runProcessValidation(
@@ -937,6 +1009,7 @@ describe("validate-artifact process runner", () => {
 
   it("foundry-build validate-artifact records process evidence in provenance", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-validate-cli-"));
+    seedReferenceContract(dir);
     const artifact = path.join(dir, "artifact.json");
     const verify = path.join(dir, "_verify.json");
     const provenance = path.join(dir, "_provenance.json");
@@ -998,6 +1071,7 @@ describe("validate-artifact process runner", () => {
 
   it("validate-artifact preserves results for different paths with the same artifact id", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-validate-many-"));
+    seedReferenceContract(dir);
     const artifactA = path.join(dir, "a.json");
     const artifactB = path.join(dir, "b.json");
     const verify = path.join(dir, "_verify.json");
@@ -1066,6 +1140,7 @@ describe("cast-mold negative cases", () => {
 
   it("--check on a never-cast mold leaves no bundle directory behind", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-check-"));
+    seedReferenceContract(dir);
     try {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
@@ -1076,7 +1151,6 @@ describe("cast-mold negative cases", () => {
           "provenance_schema_version: 3",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds: {}",
-          "condense_prompts: {}",
           "skill_constraints:",
           "  frontmatter_required: [name, description]",
           "  forbidden_runtime_paths: []",
@@ -1135,8 +1209,7 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
         "  research:",
         "    dst_dir: references/notes/",
         "    dst_extension: .md",
-        "    modes: [verbatim, condense]",
-        "condense_prompts: {}",
+        "    modes: [verbatim]",
         "skill_constraints:",
         "  frontmatter_required: [name, description]",
         "  forbidden_runtime_paths: []",
@@ -1176,6 +1249,7 @@ Use the research reference.
 
   it("refuses verbatim carry of an own-words-only license", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-owf-"));
+    seedReferenceContract(dir);
     try {
       scaffold(
         dir,
@@ -1202,6 +1276,7 @@ license: CC-BY-NC-SA-2.0
 
   it("carries a verbatim-ok license and hashes its license_file into provenance", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-ok-"));
+    seedReferenceContract(dir);
     try {
       scaffold(
         dir,
@@ -1240,7 +1315,9 @@ license_file: LICENSES/test.LICENSE
 describe("stripWikiLinks", () => {
   it("keeps the bare target, drops an anchor, and prefers an explicit alias", async () => {
     const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
-    expect(stripWikiLinks("See [[summarize-nextflow]] first.")).toBe("See summarize-nextflow first.");
+    expect(stripWikiLinks("See [[summarize-nextflow]] first.")).toBe(
+      "See summarize-nextflow first.",
+    );
     expect(stripWikiLinks("See [[summarize-nextflow#Procedure]].")).toBe("See summarize-nextflow.");
     expect(stripWikiLinks("See [[summarize-nextflow|the summary Mold]].")).toBe(
       "See the summary Mold.",
@@ -1260,5 +1337,402 @@ describe("stripWikiLinks", () => {
   it("leaves a degenerate payload as authored rather than emitting nothing", async () => {
     const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
     expect(stripWikiLinks("An [[#anchor-only]] ref.")).toBe("An [[#anchor-only]] ref.");
+  });
+});
+
+// The `cast:` blocks in reference_contract.yml replaced three sets of kind-name literals in
+// cast-mold.ts. A declaration that nothing reads is documentation, so each test below breaks
+// one declaration and asserts the cast NOTICES — the same way the companion dispositions were
+// shown to be load-bearing rather than asserted to be.
+describe("reference_contract.yml cast declarations are load-bearing", () => {
+  const contractPath = path.join(repoRoot, "reference_contract.yml");
+
+  /**
+   * Cast the real corpus against a MUTATED contract, without touching the real contract.
+   *
+   * The obvious version — overwrite `reference_contract.yml`, run, restore in a `finally` —
+   * is not safe here, and not merely in theory. vitest runs test files in parallel and three
+   * sibling suites call `loadReferenceContract()` on this path at module scope, so a
+   * concurrent worker (or a `make check-casts` in another shell) reads a contract with a
+   * kind's `cast:` block deleted and fails for reasons that have nothing to do with it. The
+   * `finally` also does not cover SIGINT or a timeout kill, and `yaml.dump` round-trips away
+   * every comment in the file — including the block documenting `cast:` itself, which is
+   * exactly the prose this repo treats as load-bearing.
+   *
+   * So the mutated contract goes in a temp root beside symlinks to the real tree.
+   *
+   * Two things this helper OWNS rather than leaves to its callers, both learned the hard way:
+   *
+   * It runs the cast itself, always with `--check`. The root it builds symlinks the whole real
+   * `casts/` tree, and a caller that forgot `--check` would rewrite `SKILL.md`, rewrite
+   * `_provenance.json`, and `unlinkSync` committed reference files in the tracked tree — while
+   * exiting 0 and looking like a passing test. "Every caller remembers" is not a property of a
+   * helper that hands out a path and lets callers compose argv.
+   *
+   * And it asserts a CONTROL first: the same root with the contract UNMUTATED must cast clean.
+   * Without that, `expect(code).not.toBe(0)` is satisfied by any environmental breakage in the
+   * root, and these two tests were in fact passing that way — the root omitted `LICENSES/`, so
+   * both Molds failed on `license_file missing` whether or not the declaration was honoured.
+   * The mutation must be the ONLY reason the cast stops working, and the only way to know that
+   * is to run it without one.
+   */
+  function castWithMutatedContract(
+    moldName: string,
+    mutate: (kinds: Record<string, Record<string, unknown>>) => void,
+  ): { code: number; stdout: string; stderr: string } {
+    const build = (root: string, mutated: boolean): void => {
+      const doc = yaml.load(readFileSync(contractPath, "utf8")) as {
+        kinds: Record<string, Record<string, unknown>>;
+      };
+      if (mutated) mutate(doc.kinds);
+      writeFileSync(path.join(root, "reference_contract.yml"), yaml.dump(doc));
+      // Everything the caster reads out of the repo root. `LICENSES/` is not optional: refs
+      // carrying `license_file:` are hashed against it, and its absence is an error.
+      for (const name of ["content", "casts", "LICENSES"]) {
+        symlinkSync(path.join(repoRoot, name), path.join(root, name));
+      }
+    };
+    const run = (root: string) =>
+      runTsx(foundryBuild, ["cast", moldName, "--target=claude", "--check", "--root", root]);
+
+    const controlRoot = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-control-"));
+    try {
+      build(controlRoot, false);
+      const control = run(controlRoot);
+      expect(
+        control.code,
+        `control (unmutated contract) must cast clean, else the real assertion below proves ` +
+          `nothing about the declaration:\n${control.stderr}`,
+      ).toBe(0);
+    } finally {
+      rmSync(controlRoot, { recursive: true, force: true });
+    }
+
+    const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-contract-"));
+    try {
+      build(root, true);
+      return run(root);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  // Replaces `SUPPORTED_KINDS` / `NOT_IMPLEMENTED_KINDS`: castability is the presence of the
+  // block, so deleting it has to be enough to stop the cast.
+  it("a kind with no cast: block is refused, and says so as a deliberate gap", () => {
+    const r = castWithMutatedContract("summarize-nextflow", (kinds) => {
+      delete kinds.research!.cast;
+    });
+    expect(r.code).not.toBe(0);
+    expect(r.stderr).toContain("kind=research is not castable");
+  });
+
+  // Replaces `if (r.kind !== "research" && r.kind !== "pattern") continue`. With companions
+  // switched off for the kind, the files the note declares stop being claimed by any ref and
+  // the bundle's own orphan check is what reports them.
+  it("companions: false stops a kind's notes carrying their declared companions", () => {
+    const r = castWithMutatedContract("author-galaxy-tool-wrapper", (kinds) => {
+      kinds.research!.cast = {
+        ...(kinds.research!.cast as Record<string, unknown>),
+        companions: false,
+      };
+    });
+    expect(r.code).not.toBe(0);
+    expect(r.stderr).toContain("orphan (no ref claims it)");
+  });
+});
+
+// `default_mode` and `slug_field` are declarations no committed Mold exercises: every
+// reference in the corpus names its own `mode`, and no cli-tool note's directory differs
+// from its `tool:`. That makes them exactly the declarations most likely to rot into
+// decoration, so they are exercised here against fixtures built to tell the difference.
+describe("cast declarations the corpus does not currently exercise", () => {
+  function targetYml(kind: string, dstDir: string, ext: string, modes: string): string {
+    return [
+      "name: claude",
+      "provenance_schema_version: 3",
+      "required_outputs: [SKILL.md, _provenance.json]",
+      "kinds:",
+      `  ${kind}:`,
+      `    dst_dir: ${dstDir}`,
+      `    dst_extension: ${ext}`,
+      `    modes: ${modes}`,
+      "skill_constraints:",
+      "  frontmatter_required: [name, description]",
+      "  forbidden_runtime_paths: []",
+      "",
+    ].join("\n");
+  }
+
+  function contractYml(kind: string, cast: Record<string, unknown>): string {
+    return yaml.dump({
+      kinds: {
+        [kind]: { label: kind, description: `${kind} refs.`, ref_shape: "wiki-link", cast },
+      },
+    });
+  }
+
+  // A ref that names no `mode` takes the kind's declared default. Same fixture cast twice,
+  // differing only in the declaration: sidecar serializes to JSON, verbatim copies markdown.
+  it("default_mode decides the transform for a ref that names no mode", () => {
+    for (const [mode, expected] of [
+      ["sidecar", "references/cli/c.json"],
+      ["verbatim", "references/cli/c.md"],
+    ] as const) {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-defaultmode-"));
+      try {
+        mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+        mkdirSync(path.join(dir, "content/cli/t"), { recursive: true });
+        mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+        writeFileSync(
+          path.join(dir, "casts/claude/_target.yml"),
+          targetYml(
+            "cli-command",
+            "references/cli/",
+            mode === "sidecar" ? ".json" : ".md",
+            "[verbatim, sidecar]",
+          ),
+        );
+        writeFileSync(
+          path.join(dir, "reference_contract.yml"),
+          contractYml("cli-command", { resolve: "note", default_mode: mode, companions: false }),
+        );
+        writeFileSync(
+          path.join(dir, "content/molds/m/index.md"),
+          `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Default-mode cast test mold summary.\nreferences:\n  - kind: cli-command\n    ref: "[[c]]"\n    used_at: runtime\n    load: upfront\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+        );
+        writeFileSync(
+          path.join(dir, "content/cli/t/c.md"),
+          `---\ntype: cli-command\ntool: t\ncommand: c\nsummary: A command.\ntags: [cli]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of c.\n`,
+        );
+        const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+        expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+        const prov = JSON.parse(
+          readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+        );
+        expect(prov.refs[0].mode).toBe(mode);
+        expect(prov.refs[0].dst).toBe(expected);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  // The bundled filename comes from the declared frontmatter field, not the note's directory.
+  it("slug_field names the bundled file; without it the note's own slug does", () => {
+    for (const [slugField, expected] of [
+      ["tool", "references/cli/real-name.md"],
+      [undefined, "references/cli/some-dir.md"],
+    ] as const) {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-slugfield-"));
+      try {
+        mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+        mkdirSync(path.join(dir, "content/cli/some-dir"), { recursive: true });
+        mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+        writeFileSync(
+          path.join(dir, "casts/claude/_target.yml"),
+          targetYml("cli-tool", "references/cli/", ".md", "[verbatim]"),
+        );
+        writeFileSync(
+          path.join(dir, "reference_contract.yml"),
+          contractYml("cli-tool", {
+            resolve: "note",
+            default_mode: "verbatim",
+            companions: false,
+            ...(slugField ? { slug_field: slugField } : {}),
+          }),
+        );
+        writeFileSync(
+          path.join(dir, "content/molds/m/index.md"),
+          `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Slug-field cast test mold summary.\nreferences:\n  - kind: cli-tool\n    ref: "[[some-dir]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+        );
+        writeFileSync(
+          path.join(dir, "content/cli/some-dir/index.md"),
+          `---\ntype: cli-tool\ntool: real-name\nsummary: A tool whose directory is not its name.\ntags: [cli]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody.\n`,
+        );
+        const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+        expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+        const prov = JSON.parse(
+          readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+        );
+        expect(prov.refs[0].dst).toBe(expected);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+});
+
+// Two behaviour changes the 47-Mold byte-identity gate cannot see, because no committed
+// content takes either path. Pinned so they read as decisions rather than accidents.
+describe("cast declarations: stricter than before, on purpose", () => {
+  function fixture(dir: string, ref: string): void {
+    mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+    mkdirSync(path.join(dir, "content/patterns"), { recursive: true });
+    mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "casts/claude/_target.yml"),
+      [
+        "name: claude",
+        "provenance_schema_version: 3",
+        "required_outputs: [SKILL.md, _provenance.json]",
+        "kinds:",
+        "  pattern:",
+        "    dst_dir: references/patterns/",
+        "    dst_extension: .md",
+        "    modes: [verbatim]",
+        "skill_constraints:",
+        "  frontmatter_required: [name, description]",
+        "  forbidden_runtime_paths: []",
+        "",
+      ].join("\n"),
+    );
+    writeFileSync(
+      path.join(dir, "reference_contract.yml"),
+      yaml.dump({
+        kinds: {
+          pattern: {
+            label: "Pattern",
+            description: "Pattern refs.",
+            ref_shape: "wiki-link",
+            cast: { resolve: "note", default_mode: "verbatim", companions: false },
+          },
+        },
+      }),
+    );
+    writeFileSync(
+      path.join(dir, "content/molds/m/index.md"),
+      `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Ref-shape cast test mold summary.\nreferences:\n  - kind: pattern\n    ref: ${ref}\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+    );
+    writeFileSync(
+      path.join(dir, "content/patterns/p.md"),
+      `---\ntype: pattern\ntitle: P\nsummary: A pattern.\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of p.\n`,
+    );
+  }
+
+  // resolveWikiLink accepts the bare inner text, so before this branch an unbracketed ref
+  // resolved for every kind except `schema`. A kind that declares `ref_shape: wiki-link` and
+  // then accepts a non-wiki-link is a declaration that means nothing.
+  it("refuses a bare ref for a kind declaring ref_shape: wiki-link", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refshape-"));
+    try {
+      fixture(dir, '"p"');
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("must be a [[wiki-link]]");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("still accepts the bracketed form", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refshape-ok-"));
+    try {
+      fixture(dir, '"[[p]]"');
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // A declared slug_field the note does not carry used to fall back to the note's own slug —
+  // silently renaming every bundled file of the kind on a typo'd field name.
+  it("refuses a note missing the field its kind declares as slug_field", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-slugmissing-"));
+    try {
+      fixture(dir, '"[[p]]"');
+      const contract = yaml.load(
+        readFileSync(path.join(dir, "reference_contract.yml"), "utf8"),
+      ) as { kinds: Record<string, Record<string, Record<string, unknown>>> };
+      contract.kinds.pattern!.cast!.slug_field = "no_such_field";
+      writeFileSync(path.join(dir, "reference_contract.yml"), yaml.dump(contract));
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("no_such_field");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The parser rejects an unknown key inside a cast: block rather than dropping it, which is
+  // the failure mode it exists to prevent in the shared parser.
+  it("refuses an unknown field inside a cast: block", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-unknownkey-"));
+    try {
+      fixture(dir, '"[[p]]"');
+      const contract = yaml.load(
+        readFileSync(path.join(dir, "reference_contract.yml"), "utf8"),
+      ) as { kinds: Record<string, Record<string, Record<string, unknown>>> };
+      contract.kinds.pattern!.cast!.slug_feild = "tool";
+      writeFileSync(path.join(dir, "reference_contract.yml"), yaml.dump(contract));
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("slug_feild");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+// The premise the condense removal rests on, pinned as a check rather than asserted in a
+// commit message: nothing in this Foundry uses the LLM phase. Every reference is verbatim or
+// sidecar, no bundle carries an LLM-produced fragment, and no provenance entry is waiting for
+// one. If a Mold ever needs condensation, this is the test that has to be deleted first — and
+// deleting it is the decision to build the phase again, made explicitly.
+describe("casting is deterministic end to end", () => {
+  it("no Mold declares mode: condense", () => {
+    const offenders: string[] = [];
+    for (const moldDir of readdirSync(path.join(repoRoot, "content/molds"))) {
+      const notePath = path.join(repoRoot, "content/molds", moldDir, "index.md");
+      if (!existsSync(notePath)) continue;
+      const front = readFileSync(notePath, "utf8").match(/^---\n([\s\S]*?)\n---/);
+      if (!front) continue;
+      const meta = yaml.load(front[1]!) as { references?: Array<{ mode?: string }> };
+      for (const ref of meta.references ?? []) {
+        if (ref.mode === "condense") offenders.push(moldDir);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("no committed cast carries an LLM fragment or an unfilled one", () => {
+    const skills = path.join(repoRoot, "casts/claude/skills");
+    const offenders: string[] = [];
+    for (const bundle of readdirSync(skills)) {
+      const provPath = path.join(skills, bundle, "_provenance.json");
+      if (!existsSync(provPath)) continue;
+      const prov = JSON.parse(readFileSync(provPath, "utf8")) as {
+        refs?: Array<{
+          source?: string;
+          pending_llm?: boolean;
+          src_hash?: string;
+          dst_hash?: string;
+        }>;
+      };
+      for (const ref of prov.refs ?? []) {
+        if (ref.source !== "deterministic" || ref.pending_llm) offenders.push(bundle);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  // The verbatim guarantee, stated as the equality that proves it. This is what went stale in
+  // seven bundles unnoticed, and it costs one pass over the tree to keep honest.
+  it("every verbatim ref proves itself with src_hash == dst_hash", () => {
+    const skills = path.join(repoRoot, "casts/claude/skills");
+    const offenders: string[] = [];
+    for (const bundle of readdirSync(skills)) {
+      const provPath = path.join(skills, bundle, "_provenance.json");
+      if (!existsSync(provPath)) continue;
+      const prov = JSON.parse(readFileSync(provPath, "utf8")) as {
+        refs?: Array<{ mode?: string; src?: string; src_hash?: string; dst_hash?: string }>;
+      };
+      for (const ref of prov.refs ?? []) {
+        if (ref.mode !== "verbatim") continue;
+        if (ref.src_hash !== ref.dst_hash) offenders.push(`${bundle}: ${ref.src}`);
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 });

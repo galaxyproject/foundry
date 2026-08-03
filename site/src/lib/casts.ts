@@ -2,8 +2,9 @@
 //
 // Layout:
 //   casts/claude/skills/<mold>/SKILL.md   (Claude target — under skills/ for plugin layout)
-//   casts/web/<mold>/...                   (web target — placeholder)
-//   casts/generic/<mold>/...               (generic target — placeholder)
+//   casts/<target>/<mold>/...              (any other target)
+//
+// Which targets exist is read off the tree — see discoverTargets.
 //
 // Used by the Astro Mold page (Cast Artifacts panel) and the /usage/ index.
 
@@ -12,7 +13,8 @@ import path from 'node:path';
 
 import { REPO_ROOT } from './repo-root';
 
-export type CastTarget = 'claude' | 'web' | 'generic';
+/** A cast target's name — whatever directory under `casts/` carries a `_target.yml`. */
+export type CastTarget = string;
 
 export interface CastArtifact {
   target: CastTarget;
@@ -83,7 +85,22 @@ export interface ClaudeSkillBundle extends CastArtifact {
   attachedFiles: CastAttachedFile[];
 }
 
-const TARGETS: CastTarget[] = ['claude', 'web', 'generic'];
+/**
+ * The cast targets that exist, which is the ones carrying a `_target.yml`.
+ *
+ * Listed rather than declared: a hardcoded `['claude', 'web', 'generic']` outlived the
+ * `web` and `generic` scaffolds by naming two directories that were deleted, and a target
+ * list that can disagree with the targets is the thing this repo keeps removing. A target
+ * is real when it has a config the caster can read; nothing else has to be told.
+ */
+function discoverTargets(repoRoot: string): CastTarget[] {
+  const castsRoot = path.join(repoRoot, 'casts');
+  if (!existsSync(castsRoot)) return [];
+  return readdirSync(castsRoot)
+    .filter((name) => !name.startsWith('.'))
+    .filter((name) => existsSync(path.join(castsRoot, name, '_target.yml')))
+    .sort();
+}
 
 /**
  * Pipeline harness casts (`pipeline-<slug>`, carrying `_assembly.json` not
@@ -189,7 +206,7 @@ export function loadClaudeSkillBundle(moldSlug: string, repoRoot: string = defau
 /** All cast artifacts for one mold, across targets. */
 export function listCastsForMold(moldSlug: string, repoRoot: string = defaultRepoRoot()): CastArtifact[] {
   const out: CastArtifact[] = [];
-  for (const target of TARGETS) {
+  for (const target of discoverTargets(repoRoot)) {
     const dir = castDirFor(target, moldSlug, repoRoot);
     if (!existsSync(dir)) continue;
     const skillPath = path.join(dir, 'SKILL.md');
@@ -203,7 +220,7 @@ export function listCastsForMold(moldSlug: string, repoRoot: string = defaultRep
 /** All cast artifacts across all molds, by walking the casts tree. */
 export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact[] {
   const out: CastArtifact[] = [];
-  for (const target of TARGETS) {
+  for (const target of discoverTargets(repoRoot)) {
     const root = target === 'claude'
       ? path.join(repoRoot, 'casts', 'claude', 'skills')
       : path.join(repoRoot, 'casts', target);

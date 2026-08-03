@@ -3,10 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import {
-  buildNoteSchema,
-  loadReferenceContract,
-} from "@galaxy-foundry/note-schema";
+import { buildNoteSchema, loadReferenceContract } from "@galaxy-foundry/note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 import { validateData, validateDirectory } from "../packages/build-cli/src/commands/validate.js";
 
@@ -81,10 +78,7 @@ describe("validateData (per-file)", () => {
   // explicit check a note could reach out of its directory and bundle a file it does not own —
   // which, for a flat-note era holdover, would have meant any file in the collection.
   it("rejects a companion path that climbs out of the note's directory", () => {
-    const r = validateData(
-      researchRequired({ companions: ["../galaxy-xsd/galaxy.xsd"] }),
-      schema,
-    );
+    const r = validateData(researchRequired({ companions: ["../galaxy-xsd/galaxy.xsd"] }), schema);
     expect(r.errors.length).toBeGreaterThan(0);
   });
 
@@ -201,7 +195,10 @@ describe("validateData (per-file)", () => {
   });
 
   it("rejects mold missing axis", () => {
-    const r = validateData(baseRequired({ type: "mold", tags: ["target/galaxy"], name: "x" }), schema);
+    const r = validateData(
+      baseRequired({ type: "mold", tags: ["target/galaxy"], name: "x" }),
+      schema,
+    );
     expect(r.errors.some((e) => /axis/.test(e))).toBe(true);
   });
 
@@ -226,7 +223,7 @@ describe("validateData (per-file)", () => {
             ref: "[[component-x]]",
             used_at: "runtime",
             load: "on-demand",
-            mode: "condense",
+            mode: "verbatim",
             evidence: "hypothesis",
             purpose: "Explain when to load this reference.",
             trigger: "When the runtime task needs component details.",
@@ -547,7 +544,12 @@ describe("validateDirectory (cross-file)", () => {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "P",
+        phases: [{ mold: "[[mold-a]]" }],
+      }),
     });
     writeFileSync(
       path.join(dir, "pipelines/p/eval.md"),
@@ -566,7 +568,12 @@ describe("validateDirectory (cross-file)", () => {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "P",
+        phases: [{ mold: "[[mold-a]]" }],
+      }),
     });
     writeFileSync(path.join(dir, "pipelines/p/eval.md"), "---\ntype: junk\n---\n\nbad\n");
     const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
@@ -578,16 +585,21 @@ describe("validateDirectory (cross-file)", () => {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "P",
+        phases: [{ mold: "[[mold-a]]" }],
+      }),
     });
     expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
     writeFileSync(path.join(dir, "pipelines/p/notes.md"), "stray notes\n");
     // An error rather than a warning, now that the kind declares its own layout: a file the kind
     // does not name is indistinguishable from a misnamed one, and `notes.md` beside a pipeline is
     // as likely to be a typo'd `scenarios.md` as a deliberate choice.
-    expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBeGreaterThanOrEqual(
-      1,
-    );
+    expect(
+      validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   // The residue: markdown under the content root that no collection claims. It used to be
@@ -648,12 +660,23 @@ describe("validateDirectory (cross-file)", () => {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "P",
+        phases: [{ mold: "[[mold-a]]" }],
+      }),
     });
     const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).warnings;
     mkdirSync(path.join(dir, "pipelines/p/examples"), { recursive: true });
-    writeFileSync(path.join(dir, "pipelines/p/examples/UC_issue.md"), "# Interview input\n\nno frontmatter\n");
-    writeFileSync(path.join(dir, "pipelines/p/examples/UC_extracted.ga"), '{"a_galaxy_workflow":"true"}\n');
+    writeFileSync(
+      path.join(dir, "pipelines/p/examples/UC_issue.md"),
+      "# Interview input\n\nno frontmatter\n",
+    );
+    writeFileSync(
+      path.join(dir, "pipelines/p/examples/UC_extracted.ga"),
+      '{"a_galaxy_workflow":"true"}\n',
+    );
     const after = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(after.errors).toBe(0);
     expect(after.warnings).toBe(before);
@@ -668,7 +691,12 @@ describe("validateDirectory (cross-file)", () => {
       ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
     });
     writeFm(path.join(dir, "pipelines/p/index.md"), {
-      ...baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "P", phases: [{ mold: "[[mold-a]]" }] }),
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "P",
+        phases: [{ mold: "[[mold-a]]" }],
+      }),
     });
     const before = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(before.errors).toBe(0);
@@ -740,7 +768,7 @@ describe("validateDirectory (cross-file)", () => {
             ref: "[[pattern-x]]",
             used_at: "cast-time",
             load: "upfront",
-            mode: "condense",
+            mode: "verbatim",
             evidence: "corpus-observed",
           },
           {

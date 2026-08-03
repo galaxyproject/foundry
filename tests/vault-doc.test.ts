@@ -27,8 +27,7 @@ const LINK_MAP = new Map<string, VaultDocTarget>([
 // vitest runs from the repo root, an Astro build from site/ — hence the explicit dir.
 const CONTENT_DIR = new URL("../content/", import.meta.url).pathname;
 
-const glossary = (): string =>
-  renderContentDoc("meta/glossary.md", LINK_MAP, BASE, CONTENT_DIR);
+const glossary = (): string => renderContentDoc("meta/glossary.md", LINK_MAP, BASE, CONTENT_DIR);
 
 describe("rendering the glossary", () => {
   it("leaves a backticked link as the token it names", () => {

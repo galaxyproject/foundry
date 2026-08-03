@@ -10,6 +10,27 @@
 # `kinds` stays here because it is the half that genuinely varies. It is also the half
 # that carries its own `href`: these kinds are specified in this repo's MOLD_SPEC, while
 # the inherited four are specified in the Foundry Pattern and link there.
+#
+# Each kind also declares HOW IT IS CAST, in a `cast:` block:
+#
+#   resolve       where the source bytes come from, and how the bundled file is named:
+#                 `note` (the note file), `package-export` (an npm export the note names
+#                 in `package` + `package_export`), `payload-companion` (the kind's single
+#                 `bundled` companion, sitting beside the note).
+#   default_mode  the transform applied when a `references[]` entry names no `mode`.
+#   slug_field    frontmatter field naming the bundled file, where the note's own slug is
+#                 the wrong name for a reader of the bundle.
+#   companions    whether this kind's notes may carry per-note `companions:` into a
+#                 bundle. Layout is the kind's, membership stays the note's — `true` says
+#                 notes of this kind are ALLOWED to declare companions, never which.
+#
+# A kind with NO `cast:` block is vocabulary the site renders and the caster refuses. That
+# is the whole mechanism: the caster has no list of castable kinds to keep in step with
+# this one, it just asks whether the kind declared how.
+#
+# Which DIRECTORY a cast lands each kind in, and under what extension, is not here: that
+# varies by target and lives in casts/<target>/_target.yml. The split is that a kind
+# declares its STRATEGY and a target declares its PLACEMENT.
 
 kinds:
   pattern:
@@ -17,33 +38,61 @@ kinds:
     description: Workflow-construction idiom. Usually condensed during casting.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
+    cast:
+      resolve: note
+      default_mode: verbatim
+      companions: true
   cli-tool:
     label: CLI Tool
     description: Tool-level install metadata. Aggregated into the cast bundle's Required Tools section.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
+    cast:
+      resolve: note
+      default_mode: verbatim
+      # content/cli/<dir>/index.md, and the directory is not always the command.
+      slug_field: tool
+      companions: false
   cli-command:
     label: CLI Command
     description: Command reference. Usually cast to a sidecar and loaded only when invoked.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
+    cast:
+      resolve: note
+      default_mode: sidecar
+      companions: false
   schema:
     label: Schema
     description: Structured contract copied for validation or lookup.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
+    cast:
+      resolve: package-export
+      default_mode: verbatim
+      companions: false
   prompt:
     label: Prompt
     description: Prompt fragment copied verbatim or inlined by the target adapter.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
+    cast:
+      resolve: payload-companion
+      default_mode: verbatim
+      companions: false
   example:
     label: Example
     description: Fixture or exemplar copied verbatim.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: path
+    # No `cast:` block: authored vocabulary with no caster support. The first Mold to
+    # reference one defines the contract — declare a block here and the caster picks it up.
   research:
     label: Research
     description: Background synthesis loaded by explicit progressive-disclosure metadata.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
+    cast:
+      resolve: note
+      default_mode: verbatim
+      companions: true
