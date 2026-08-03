@@ -1,23 +1,22 @@
 ---
 import Search from 'astro-pagefind/components/Search.astro';
-import { CONTAINER, SITE_NAME } from '../lib/site-identity';
+import { CONTAINER, NAV_LINKS, NAV_VISIBLE, SITE_NAME } from '../lib/site-identity';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
-const navLinks = [
-  { href: `${base}/story/`, label: 'Story', match: (p: string) => p.startsWith(`${base}/story`) },
-  { href: `${base}/usage/`, label: 'Usage', match: (p: string) => p.startsWith(`${base}/usage`) },
-  { href: `${base}/molds/`, label: 'Molds', match: (p: string) => p.startsWith(`${base}/molds`) },
-  { href: `${base}/patterns/`, label: 'Patterns', match: (p: string) => p.startsWith(`${base}/patterns`) },
-  { href: `${base}/pipelines/`, label: 'Pipelines', match: (p: string) => p.startsWith(`${base}/pipelines`) && !p.includes('/molds') },
-];
-const moreLinks = [
-  { href: `${base}/dashboard/`, label: 'Dashboard', match: (p: string) => p.startsWith(`${base}/dashboard`) },
-  { href: `${base}/index/`, label: 'Index', match: (p: string) => p.startsWith(`${base}/index`) },
-  { href: `${base}/tags/`, label: 'Tags', match: (p: string) => p.startsWith(`${base}/tags`) },
-  { href: `${base}/external/`, label: 'External', match: (p: string) => p.startsWith(`${base}/external`) },
-  { href: `${base}/log/`, label: 'Log', match: (p: string) => p.startsWith(`${base}/log`) },
-];
-const moreActive = moreLinks.some(link => link.match(pathname));
+// One list and a cut point, not two lists. Which destinations exist and which of them fit on the
+// bar are different questions, and only the second one is about this header's width.
+const links = NAV_LINKS.map(link => {
+  const href = `${base}${link.path}`;
+  const section = href.replace(/\/$/, '');
+  return {
+    ...link,
+    href,
+    active: pathname === section || pathname.startsWith(`${section}/`),
+  };
+});
+const barLinks = links.slice(0, NAV_VISIBLE);
+const moreLinks = links.slice(NAV_VISIBLE);
+const moreActive = moreLinks.some(link => link.active);
 ---
 <header class="bg-(--color-galaxy-dark) border-b-4 border-(--color-accent) relative">
   <div class="absolute inset-0 bg-grid-header pointer-events-none"></div>
@@ -27,21 +26,19 @@ const moreActive = moreLinks.some(link => link.match(pathname));
         {SITE_NAME}
       </a>
       <nav class="flex items-center gap-3 text-sm" aria-label="Primary">
-        {navLinks.map(link => {
-          const active = link.match(pathname);
-          return (
-            <a
-              href={link.href}
-              aria-current={active ? 'page' : undefined}
-              class:list={[
-                'text-(--color-text-on-dark) no-underline hover:text-(--color-accent) transition-colors opacity-80 hover:opacity-100',
-                active && 'nav-link-active',
-              ]}
-            >
-              {link.label}
-            </a>
-          );
-        })}
+        {barLinks.map(link => (
+          <a
+            href={link.href}
+            aria-current={link.active ? 'page' : undefined}
+            class:list={[
+              'text-(--color-text-on-dark) no-underline hover:text-(--color-accent) transition-colors opacity-80 hover:opacity-100',
+              link.active && 'nav-link-active',
+            ]}
+          >
+            {link.label}
+          </a>
+        ))}
+        {moreLinks.length > 0 && (
         <div class="nav-more relative">
           <button
             type="button"
@@ -65,38 +62,36 @@ const moreActive = moreLinks.some(link => link.match(pathname));
             aria-labelledby="nav-more-trigger"
             class="nav-more-menu absolute left-0 top-full mt-2 min-w-40 rounded-md border border-(--color-accent) bg-(--color-galaxy-dark) shadow-lg py-1 z-50"
           >
-            {moreLinks.map(link => {
-              const active = link.match(pathname);
-              return (
-                <a
-                  href={link.href}
-                  role="menuitem"
-                  aria-current={active ? 'page' : undefined}
-                  class:list={[
-                    'block px-4 py-1.5 text-sm text-(--color-text-on-dark) no-underline hover:text-(--color-accent) hover:bg-white/5 transition-colors opacity-80 hover:opacity-100',
-                    active && 'nav-link-active',
-                  ]}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
+            {moreLinks.map(link => (
+              <a
+                href={link.href}
+                role="menuitem"
+                aria-current={link.active ? 'page' : undefined}
+                class:list={[
+                  'block px-4 py-1.5 text-sm text-(--color-text-on-dark) no-underline hover:text-(--color-accent) hover:bg-white/5 transition-colors opacity-80 hover:opacity-100',
+                  link.active && 'nav-link-active',
+                ]}
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
         </div>
+        )}
       </nav>
     </div>
     <div class="flex items-center gap-2">
       <Search className="pagefind-ui" searchboxOptions={{ 'show-sub-results': true }} />
-    <button id="theme-toggle" type="button"
-      class="p-1.5 rounded text-(--color-text-on-dark) opacity-70 hover:opacity-100 hover:text-(--color-accent) transition-all duration-200 cursor-pointer active:scale-95"
-      aria-label="Toggle dark mode">
-      <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-      </svg>
-      <svg id="icon-moon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-    </button>
+      <button id="theme-toggle" type="button"
+        class="p-1.5 rounded text-(--color-text-on-dark) opacity-70 hover:opacity-100 hover:text-(--color-accent) transition-all duration-200 cursor-pointer active:scale-95"
+        aria-label="Toggle dark mode">
+        <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <svg id="icon-moon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
     </div>
   </div>
 </header>
@@ -119,8 +114,11 @@ const moreActive = moreLinks.some(link => link.match(pathname));
     --pf-searchbox-dropdown-max-height: 70vh;
     --pf-dropdown-z-index: 50;
   }
-  /* The input sits at the right edge of a narrow header, so the dropdown is widened and
-     right-anchored rather than tracking the input's 16rem width. */
+  /* The input sits at the right edge of the header, so the dropdown is widened and right-anchored
+     rather than tracking the input's width. The two instances shipped different input widths from
+     the pagefind 2 migration until now — that migration was done twice on the same day and the
+     value drifted between the copies — and this comment called the header "narrow", which stopped
+     being true of either of them once the container widths converged. */
   .pagefind-ui .pf-searchbox-dropdown {
     right: 0;
     left: auto;
