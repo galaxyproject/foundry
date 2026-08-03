@@ -176,9 +176,11 @@ describe("the navigation", () => {
   const region = (html: string, open: string, close: string): string =>
     html.slice(html.indexOf(open), html.indexOf(close) + close.length);
   const hrefsIn = (nav: string): string[] =>
-    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"/g)].map((m) => m[1]);
+    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"/g)].flatMap((m) => (m[1] ? [m[1]] : []));
   const activeIn = (nav: string): string[] =>
-    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].map((m) => m[1]);
+    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].flatMap((m) =>
+      m[1] ? [m[1]] : [],
+    );
   /** The wordmark is the first link in the header, and it points at the site root. */
   const baseFrom = (html: string): string =>
     (/<a\s[^>]*href="([^"]+)"/.exec(region(html, "<header", "</header>"))?.[1] ?? "/").replace(
@@ -230,7 +232,7 @@ describe("the navigation", () => {
       // The section index and the last page under it. The rule is "this page or anything beneath
       // it", and the second sample is the half a plain equality check would get wrong.
       return [under[0], under[under.length - 1]]
-        .filter(Boolean)
+        .filter((file): file is string => Boolean(file))
         .map((file) => ({
           page: rel(file),
           marked: activeIn(region(read(file), "<nav", "</nav>")),
