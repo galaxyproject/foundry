@@ -16,6 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
+import { PROVENANCE_SCHEMA_VERSION } from "@galaxy-foundry/cast";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -117,7 +118,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     }
   });
 
-  it("provenance is schema v3 and lists deterministic refs", () => {
+  it("provenance is schema v4 and lists deterministic refs", () => {
     const provPath = path.join(
       repoRoot,
       "casts",
@@ -506,6 +507,91 @@ Wrapper body should not be copied.
       );
       expect(prov.refs[0].src).toBe("content/prompts/prompt-x/upstream.prompt");
       expect(prov.refs[0].dst).toBe("references/prompts/prompt-x.md");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("cast-mold provenance schema version", () => {
+  it("emits the caster's version, not one the target claims", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provver-"));
+    seedReferenceContract(dir);
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/prompts/prompt-x"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        [
+          "name: claude",
+          // A target cannot move the record's shape. If it could, this would produce a
+          // document announcing a contract nothing writes and nothing validates.
+          "provenance_schema_version: 99",
+          "bundle_path: skills/{mold}",
+          "required_outputs: [SKILL.md, _provenance.json]",
+          "kinds:",
+          "  prompt:",
+          "    dst_dir: references/prompts/",
+          "    dst_extension: .md",
+          "    modes: [verbatim]",
+          "skill_constraints:",
+          "  frontmatter_required: [name, description]",
+          "  forbidden_runtime_paths: []",
+          "",
+        ].join("\n"),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Provenance version cast test mold summary.
+references:
+  - kind: prompt
+    ref: "[[prompt-x]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+---
+
+# m
+
+Use the prompt reference.
+`,
+      );
+      writeFileSync(
+        path.join(dir, "content/prompts/prompt-x/index.md"),
+        `---
+type: prompt
+title: Prompt X
+tags: [prompt]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Prompt wrapper summary for provenance version test.
+---
+
+Wrapper body should not be copied.
+`,
+      );
+      writeFileSync(path.join(dir, "content/prompts/prompt-x/upstream.prompt"), "RAW PROMPT\n");
+
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+      const prov = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+      );
+      expect(prov.provenance_schema_version).toBe(PROVENANCE_SCHEMA_VERSION);
+      expect(prov.provenance_schema_version).toBe(4);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

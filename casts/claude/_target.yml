@@ -1,13 +1,14 @@
 # Claude cast target.
 #
-# Read by scripts/cast-mold.ts and scripts/cast-skill-verify.ts.
-# Defines the deterministic side of cast assembly: where each kind of
-# reference lands, what files the generated skill must produce, and the
-# provenance schema this target writes.
+# Read by the caster and by scripts/cast-skill-verify.ts. Defines the deterministic side of
+# cast assembly: where each kind of reference lands and what files the generated skill must
+# produce.
+#
+# The provenance schema version is NOT declared here. The record's shape belongs to the caster
+# that writes it, so the version ships with @galaxy-foundry/cast; a target declaring its own
+# could name a shape the caster does not emit.
 
 name: claude
-
-provenance_schema_version: 4
 
 # Where this target's bundles sit under casts/claude/. `{mold}` is the bundle name.
 # The `skills/` level is what makes casts/claude/ double as a Claude Code plugin root:

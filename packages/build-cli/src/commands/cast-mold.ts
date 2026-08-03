@@ -8,14 +8,11 @@
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
-import { execSync } from "node:child_process";
 import {
-  copyFileSync,
   existsSync,
   mkdirSync,
   readFileSync,
   readdirSync,
-  rmdirSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -26,6 +23,21 @@ import AjvImport from "ajv";
 import Ajv2020Import from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
+
+import {
+  copyVerbatim,
+  gitHead,
+  pruneEmptyDirs,
+  readProvenanceCarryOver,
+  recordedHash,
+  PROVENANCE_SCHEMA_VERSION,
+  type Provenance,
+  type ProvenanceArtifactInput,
+  type ProvenanceArtifactOutput,
+  type ProvenanceArtifacts,
+  type ProvenanceCarryOver,
+  type ProvenanceRefEntry,
+} from "@galaxy-foundry/cast";
 
 import {
   bundledPolicy,
@@ -41,14 +53,7 @@ import {
 
 import { payloadCompanionOf } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
-import {
-  driftOf,
-  reconcile,
-  reconcileText,
-  sha256File,
-  sha256Text,
-  type Drift,
-} from "../lib/reconcile.js";
+import { driftOf, reconcile, reconcileText, sha256File, sha256Text } from "../lib/reconcile.js";
 import {
   aggregateRequiredTools,
   requiredToolRows,
@@ -122,9 +127,18 @@ interface TargetKindConfig {
   modes: string[];
 }
 
+/**
+ * What a `_target.yml` declares.
+ *
+ * Deliberately no `provenance_schema_version`. The record's shape is the CASTER's, not the
+ * target's, so the version travels with the code that emits it — `PROVENANCE_SCHEMA_VERSION`
+ * in @galaxy-foundry/cast. A target that declared its own could name a shape the caster does
+ * not write, and the JSON Schema at scripts/lib/schemas/cast-provenance.schema.json stays the
+ * contract of record: `make check-verify` validates every committed record against it, so the
+ * two are cross-checked rather than merely restated.
+ */
 interface TargetConfig {
   name: string;
-  provenance_schema_version: number;
   /** Where bundles sit under `casts/<target>/`; see lib/target-layout.ts. */
   bundle_path?: string;
   required_outputs: string[];
@@ -206,17 +220,6 @@ interface ResolvedRef {
  */
 function errorMessage(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
-}
-
-/** Remove directories left empty by pruning, deepest first. Keeps `dir` itself. */
-function pruneEmptyDirs(dir: string): void {
-  if (!existsSync(dir)) return;
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const full = path.join(dir, entry.name);
-    pruneEmptyDirs(full);
-    if (readdirSync(full).length === 0) rmdirSync(full);
-  }
 }
 
 function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
@@ -452,19 +455,6 @@ function expandCompanions(
 
 // ---- file ops ----
 
-function gitHead(repoRoot: string): string | null {
-  try {
-    return execSync("git rev-parse HEAD", { cwd: repoRoot, encoding: "utf8" }).trim();
-  } catch {
-    return null;
-  }
-}
-
-function copyVerbatim(srcAbs: string, dstAbs: string): void {
-  mkdirSync(path.dirname(dstAbs), { recursive: true });
-  copyFileSync(srcAbs, dstAbs);
-}
-
 interface CliSidecar {
   type: "cli-command";
   tool: string;
@@ -598,76 +588,10 @@ function validateRuns(bundleRoot: string, schemaAbs: string): string[] {
 }
 
 // ---- provenance ----
-
-interface ProvenanceRefEntry {
-  kind: string;
-  mode: string;
-  ref: string;
-  src: string;
-  dst: string;
-  used_at: string;
-  load: string;
-  evidence?: string;
-  purpose?: string;
-  trigger?: string;
-  verification?: string;
-  src_hash: string | null;
-  dst_hash: string | null;
-  /**
-   * Always `deterministic`. Kept as a recorded field rather than dropped: it is the claim the
-   * provenance makes about how the bytes were produced, and a reader should not have to infer
-   * it from the absence of anything else.
-   */
-  source: "deterministic";
-  companion_of?: string;
-  // License lineage of redistributed third-party content (foundry-pattern#4).
-  // Absent for Foundry-authored refs (root LICENSE, out of policy scope).
-  license?: string;
-  license_file?: string;
-  license_file_hash?: string;
-}
-
-interface ProvenanceArtifactOutput {
-  id: string;
-  kind: string;
-  default_filename: string;
-  schema?: string;
-  description: string;
-}
-
-interface ProvenanceArtifactInput {
-  id: string;
-  description: string;
-  inherited_schema?: string;
-  producers?: string[];
-}
-
-interface ProvenanceArtifacts {
-  produces: ProvenanceArtifactOutput[];
-  consumes: ProvenanceArtifactInput[];
-}
-
-interface Provenance {
-  provenance_schema_version: number;
-  cast_target: string;
-  mold: {
-    name: string;
-    path: string;
-    revision?: number;
-    content_hash: string;
-    commit: string | null;
-  };
-  cast_method?: string;
-  cast_agent?: string;
-  cast_at: string;
-  cast_date?: string;
-  cast_revision?: number;
-  cast_history?: Array<{ rev: number; date: string; note: string }>;
-  refs: ProvenanceRefEntry[];
-  artifacts?: ProvenanceArtifacts;
-  validation_results?: ValidationResult[];
-  open_questions?: string[];
-}
+//
+// The record's shape ships in @galaxy-foundry/cast. What stays here is what this Foundry puts
+// IN it: which artifacts a Mold declares, which producer feeds which input, and what its
+// validators reported.
 
 interface ProducerInfo {
   schema?: string;
@@ -690,20 +614,6 @@ export interface VerifyManifestEntry {
 export interface VerifyManifest {
   verify_schema_version: 1;
   entries: VerifyManifestEntry[];
-}
-
-interface ValidationResult {
-  artifact_id: string;
-  path: string;
-  status: "passed" | "failed" | "error";
-  validator_bin: string;
-  artifact_hash?: string;
-  stdout: string;
-  stderr: string;
-  stdout_hash?: string;
-  stderr_hash?: string;
-  exit_code?: number | null;
-  error?: string;
 }
 
 export function buildProducerIndex(
@@ -857,49 +767,14 @@ export function readArtifactContracts(
   return { produces: out, consumes: inp };
 }
 
-interface LegacyProvenanceCarryOver {
-  cast_method?: string;
-  cast_agent?: string;
-  cast_date?: string;
-  cast_revision?: number;
-  cast_history?: Array<{ rev: number; date: string; note: string }>;
-  open_questions?: string[];
-  validation_results?: ValidationResult[];
-}
-
-function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOver {
-  if (!existsSync(provenancePath)) return {};
-  const data = JSON.parse(readFileSync(provenancePath, "utf8")) as Record<string, unknown>;
-  const carry: LegacyProvenanceCarryOver = {
-    cast_method: typeof data.cast_method === "string" ? data.cast_method : undefined,
-    cast_agent: typeof data.cast_agent === "string" ? data.cast_agent : undefined,
-    cast_date: typeof data.cast_date === "string" ? data.cast_date : undefined,
-    cast_revision: typeof data.cast_revision === "number" ? data.cast_revision : undefined,
-    cast_history: Array.isArray(data.cast_history)
-      ? (data.cast_history as Array<{ rev: number; date: string; note: string }>)
-      : undefined,
-    open_questions: Array.isArray(data.open_questions)
-      ? (data.open_questions as string[])
-      : undefined,
-    validation_results: Array.isArray(data.validation_results)
-      ? (data.validation_results as ValidationResult[])
-      : undefined,
-  };
-  return carry;
+/** The hand-recorded fields of the record already on disk, or nothing on a first cast. */
+function readExistingProvenance(provenancePath: string): ProvenanceCarryOver {
+  return readProvenanceCarryOver(
+    existsSync(provenancePath) ? readFileSync(provenancePath, "utf8") : null,
+  );
 }
 
 // ---- cast assembly ----
-
-/**
- * What provenance records for a ref's destination.
- *
- * A `--check` run writes nothing, so a drifted ref keeps the hash that was actually on disk —
- * the record reports what the check FOUND, not what it wanted. Every other path has just put
- * the expected bytes there, or found them already there, so the expected hash is the truth.
- */
-function recordedHash(drift: Drift, check: boolean): string | null {
-  return drift.reason && check ? drift.currentHash : drift.expectedHash;
-}
 
 async function castOneRef(
   resolved: ResolvedRef,
@@ -1492,7 +1367,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
 
   const next: Provenance = {
-    provenance_schema_version: target.provenance_schema_version,
+    provenance_schema_version: PROVENANCE_SCHEMA_VERSION,
     cast_target: args.target,
     mold: {
       name: args.moldName,
