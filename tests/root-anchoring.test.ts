@@ -11,7 +11,7 @@
 // resolve one level short — at `site/` rather than the repo root.
 //
 // That is not a hypothesis. `MoldHealth.astro` (`site/src/components/`, three hops) reported
-// "eval.md not written yet" on all 47 Mold pages while 33 had one, and `content-files.ts` was
+// "eval.md not written yet" on all 47 Mold pages while 33 had one, and `note-directory.ts` was
 // written to fix it. `casts.ts` (`site/src/lib/`, three hops) then did the same thing to the
 // Usage page: 54 skills on disk, `Casts = 0` rendered, and 54 pages never built — 47
 // `/usage/claude/*` and 7 `/pipelines/*/harness`. Both builds were green, one at 316 pages and
@@ -38,7 +38,7 @@ function sourceFiles(dir: string): string[] {
   });
 }
 
-// Comments are stripped first, so a module is free to DESCRIBE the mistake — `content-files.ts`
+// Comments are stripped first, so a module is free to DESCRIBE the mistake — `note-directory.ts`
 // and this file both do, at length, and neither is a violation.
 function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");

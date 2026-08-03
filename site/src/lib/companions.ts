@@ -7,7 +7,7 @@
 // of this Mold must satisfy".
 //
 // Everything here takes a directory rather than finding one. Where `content/` is belongs to
-// `content-files.ts`, which has to ask Astro; keeping that out of this module is what lets the
+// `note-directory.ts`, which has to ask Astro; keeping that out of this module is what lets the
 // layout rules be tested against a real Mold directory from the root test suite.
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
