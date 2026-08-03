@@ -1,10 +1,8 @@
 // Where a target's cast bundles sit under `casts/<target>/`.
 //
 // This is placement, so it belongs to the target — the same split the per-kind `dst_dir` /
-// `dst_extension` rows already follow. It was previously a `target === "claude"` ternary
-// repeated in the caster, the verifier, the pipeline assembler and the site: four copies of one
-// fact, in a repo that has now twice found a hand-written list disagreeing with the declaration
-// it duplicated.
+// `dst_extension` rows already follow. One module reads it, so the caster, the verifier, the
+// pipeline assembler and the site cannot hold four copies of the fact and disagree.
 
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";

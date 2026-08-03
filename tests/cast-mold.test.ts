@@ -1574,8 +1574,8 @@ describe("cast declarations the corpus does not currently exercise", () => {
   });
 
   // Where a bundle lands is the target's to declare. Cast the same Mold under two different
-  // `bundle_path` templates and the bundle moves — the four readers that used to carry
-  // `target === "claude" ? "skills/..." : "..."` now all answer to this one line.
+  // `bundle_path` templates and the bundle moves — the caster, the verifier, the pipeline
+  // assembler and the site all answer to this one line.
   it("bundle_path decides where the bundle lands", () => {
     for (const [template, expected] of [
       ["skills/{mold}", "casts/claude/skills/m"],
@@ -1618,8 +1618,8 @@ describe("cast declarations the corpus does not currently exercise", () => {
   });
 
   // `bundle_path: {mold}` is not the string it looks like — unquoted braces are YAML
-  // flow-mapping syntax, so it loads as an object. Easy to write, and the failure it used to
-  // produce was a TypeError from three frames away.
+  // flow-mapping syntax, so it loads as an object. Easy to write, and without a check where the
+  // value is read it surfaces as a TypeError three frames away.
   it("says so when bundle_path is an unquoted {mold}", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-bundlepathyaml-"));
     try {
@@ -1646,8 +1646,8 @@ describe("cast declarations the corpus does not currently exercise", () => {
   });
 
   // The package named in a SKILL.md validation row is the one the schema note declares ships
-  // the bin. The caster used to infer it — "has a subcommand" meant `@galaxy-foundry/foundry` —
-  // which put one instance's CLI package name in the caster.
+  // the bin, not one the caster infers from "has a subcommand" — that inference would put a
+  // single instance's CLI package name in code every instance runs.
   it("validator_package names the package the validation row cites", () => {
     for (const [declared, expected] of [
       ["", "@acme/schema-pkg"],
@@ -1687,11 +1687,10 @@ describe("cast declarations the corpus does not currently exercise", () => {
     }
   });
 
-  // Committed sample runs are checked against the schema the Mold declares for its OWN output.
-  // The old lookup preferred `[[summary-nextflow]]` by name and otherwise took whichever schema
-  // ref came first — a schema with no stated relationship to what the runs contain. This Mold
-  // declares two schema refs and names the SECOND as its output schema, so which one the caster
-  // reaches for is what separates the two implementations.
+  // Committed sample runs are checked against the schema the Mold declares for its OWN output,
+  // not whichever schema ref comes first — that one has no stated relationship to what the runs
+  // contain. This Mold declares two schema refs and names the SECOND as its output schema, so
+  // which one the caster reaches for is the whole assertion.
   it("runs are validated against the Mold's declared output schema, not the first ref", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-runs-"));
     try {
@@ -1731,9 +1730,9 @@ describe("cast declarations the corpus does not currently exercise", () => {
     }
   });
 
-  // The sidecar builder used to be reached only by `mode === "sidecar" && kind === "cli-command"`.
-  // The kind half was a second gate behind the target's `modes` list, so it could only ever
-  // disagree with it. A kind the target lets take `sidecar` now gets one.
+  // The sidecar builder is reached on the mode alone. Gating it on `kind === "cli-command"` as
+  // well would put a second check behind the target's `modes` list, which can only ever
+  // disagree with it. A kind the target lets take `sidecar` gets one.
   it("sidecar dispatches on the declared mode, not on the kind's name", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-sidecarkind-"));
     try {
@@ -1820,8 +1819,8 @@ describe("cast declarations: stricter than before, on purpose", () => {
     );
   }
 
-  // resolveWikiLink accepts the bare inner text, so before this branch an unbracketed ref
-  // resolved for every kind except `schema`. A kind that declares `ref_shape: wiki-link` and
+  // resolveWikiLink accepts the bare inner text, so an unbracketed ref would resolve for every
+  // kind if nothing checked the shape first. A kind that declares `ref_shape: wiki-link` and
   // then accepts a non-wiki-link is a declaration that means nothing.
   it("refuses a bare ref for a kind declaring ref_shape: wiki-link", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refshape-"));
@@ -1846,8 +1845,9 @@ describe("cast declarations: stricter than before, on purpose", () => {
     }
   });
 
-  // A declared slug_field the note does not carry used to fall back to the note's own slug —
-  // silently renaming every bundled file of the kind on a typo'd field name.
+  // A declared slug_field the note does not carry is an error, not a fall back to the note's
+  // own slug — falling back would silently rename every bundled file of the kind on a typo'd
+  // field name.
   it("refuses a note missing the field its kind declares as slug_field", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-slugmissing-"));
     try {

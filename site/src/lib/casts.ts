@@ -4,8 +4,7 @@
 //   casts/<target>/<bundle_path>/SKILL.md
 //
 // Which targets exist is read off the tree, and where each puts its bundles is read off that
-// target's `_target.yml` — see discoverTargets and target-layout.ts. Neither is listed here;
-// this file used to hardcode both, and outlived two targets that were deleted.
+// target's `_target.yml` — see discoverTargets and target-layout.ts. Neither is listed here.
 //
 // Used by the Astro Mold page (Cast Artifacts panel) and the /usage/ index.
 
@@ -93,10 +92,9 @@ export interface ClaudeSkillBundle extends CastArtifact {
 /**
  * The cast targets that exist, which is the ones carrying a `_target.yml`.
  *
- * Listed rather than declared: a hardcoded `['claude', 'web', 'generic']` outlived the
- * `web` and `generic` scaffolds by naming two directories that were deleted, and a target
- * list that can disagree with the targets is the thing this repo keeps removing. A target
- * is real when it has a config the caster can read; nothing else has to be told.
+ * Discovered rather than listed: a target list that can disagree with the targets is the
+ * thing this repo keeps removing. A target is real when it has a config the caster can
+ * read; nothing else has to be told.
  */
 function discoverTargets(repoRoot: string): CastTarget[] {
   const castsRoot = path.join(repoRoot, 'casts');

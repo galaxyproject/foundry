@@ -194,9 +194,9 @@ interface ResolvedRef {
   license_file?: string;
 }
 
-// Which kinds are castable, what each defaults to, and how each resolves used to be four
-// decisions keyed on kind-name literals here. They are now read from `reference_contract.yml`'s
-// `cast:` blocks — see packages/note-schema/src/cast-contract.ts for why.
+// Which kinds are castable, what each defaults to, and how each resolves are read from
+// `reference_contract.yml`'s `cast:` blocks rather than decided here — see
+// packages/note-schema/src/cast-contract.ts for why.
 
 /**
  * The message of something thrown, without assuming it was an `Error`.
@@ -291,13 +291,11 @@ function resolveMoldRef(
   // castable kind is wiki-link-shaped. They all are today, which is exactly why asserting it
   // in code would sit there being true until the first `path`-shaped kind, and then be wrong.
   //
-  // This is STRICTER than what came before, and deliberately so. The check used to run for
-  // `schema` alone; the other five kinds went straight to `resolveWikiLink`, which accepts the
-  // bare inner text (`planemo-asserts-idioms`) as readily as `[[planemo-asserts-idioms]]`. All
-  // 253 committed refs are bracketed, so no cast changes — but a bare or space-padded ref that
-  // used to resolve for those five kinds is now refused. A kind declaring `ref_shape:
-  // wiki-link` and then accepting things that are not wiki-links is the declaration not
-  // meaning anything, which is the whole point of moving these decisions onto declarations.
+  // It is deliberately strict. `resolveWikiLink` accepts the bare inner text
+  // (`planemo-asserts-idioms`) as readily as `[[planemo-asserts-idioms]]`, so without this
+  // precheck a kind could declare `ref_shape: wiki-link` and still take things that are not
+  // wiki-links — a declaration that means nothing. All 253 committed refs are bracketed; a bare
+  // or space-padded one is refused.
   if (refKinds[kind]?.ref_shape === "wiki-link" && !WIKI_LINK_RE.test(refStr)) {
     return {
       error: `references[${index}]: ${kind} ref must be a [[wiki-link]] to a ${kind} note (got ${refStr})`,
@@ -1454,10 +1452,9 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
 
   // runs/*/summary.json validation — a bundle may carry sample runs, and they are checked
-  // against the schema the Mold declares for its OWN output. This used to prefer
-  // `[[summary-nextflow]]` by name and fall back to whichever schema ref came first, which named
-  // one domain's artifact in the caster and, for any other Mold, picked a schema that had no
-  // stated relationship to what the runs contain.
+  // against the schema the Mold declares for its OWN output. Not against whichever schema ref
+  // happens to come first: a Mold's runs contain what that Mold produces, and only
+  // `output_artifacts[].schema` states which schema that is.
   const outputSchemaRefs = new Set(
     (artifactContracts?.produces ?? []).map((o) => o.schema).filter((s): s is string => !!s),
   );
