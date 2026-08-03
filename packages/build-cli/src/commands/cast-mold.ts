@@ -40,6 +40,7 @@ import {
 } from "@galaxy-foundry/note-schema";
 
 import { payloadCompanionOf } from "../lib/dispositions.js";
+import { bundlePathOf, resolveBundlePath } from "../lib/target-layout.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
   driftOf,
@@ -124,6 +125,8 @@ interface TargetKindConfig {
 interface TargetConfig {
   name: string;
   provenance_schema_version: number;
+  /** Where bundles sit under `casts/<target>/`; see lib/target-layout.ts. */
+  bundle_path?: string;
   required_outputs: string[];
   kinds: Record<string, TargetKindConfig>;
   skill_constraints: {
@@ -974,7 +977,10 @@ async function castOneRef(
     };
   }
 
-  if (resolved.mode === "sidecar" && resolved.kind === "cli-command") {
+  // Dispatched on the mode alone. Which kinds may take `sidecar` is already declared — the
+  // target's `kinds.<kind>.modes` gates it above, and no kind but `cli-command` lists it today —
+  // so naming the kind again here was a second gate that could only ever disagree with the first.
+  if (resolved.mode === "sidecar") {
     const parsed = readMarkdown(srcAbs);
     const sidecar = await buildCliSidecar(srcAbs, resolved.src, parsed.meta);
     const text = JSON.stringify(sidecar, null, 2) + "\n";
@@ -1266,12 +1272,15 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
   const moldHash = sha256File(moldAbs);
 
-  // Claude target lives under a `skills/` subdir so casts/claude/ doubles as a
-  // Claude Code plugin root (.claude-plugin/plugin.json + skills/<name>/SKILL.md).
-  const bundleRoot =
-    args.target === "claude"
-      ? path.join(repoRoot, "casts", args.target, "skills", args.moldName)
-      : path.join(repoRoot, "casts", args.target, args.moldName);
+  const bundleRoot = path.join(
+    repoRoot,
+    "casts",
+    args.target,
+    resolveBundlePath(
+      bundlePathOf(target.bundle_path, `casts/${args.target}/_target.yml`),
+      args.moldName,
+    ),
+  );
   // --check is read-only: never materialize the bundle dir for a never-cast Mold.
   if (!args.check) mkdirSync(bundleRoot, { recursive: true });
   const provenancePath = path.join(bundleRoot, "_provenance.json");

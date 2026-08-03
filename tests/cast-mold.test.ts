@@ -437,6 +437,7 @@ describe("cast-mold prompt refs", () => {
         [
           "name: claude",
           "provenance_schema_version: 4",
+          "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds:",
           "  prompt:",
@@ -524,6 +525,7 @@ describe("cast-mold cli-command meta injection", () => {
         [
           "name: claude",
           "provenance_schema_version: 4",
+          "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds:",
           "  cli-command:",
@@ -628,6 +630,7 @@ describe("cast-mold companion files", () => {
       [
         "name: claude",
         "provenance_schema_version: 4",
+        "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",
         "kinds:",
         "  research:",
@@ -1148,6 +1151,7 @@ describe("cast-mold negative cases", () => {
         [
           "name: claude",
           "provenance_schema_version: 4",
+          "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
           "kinds: {}",
           "skill_constraints:",
@@ -1203,6 +1207,7 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
       [
         "name: claude",
         "provenance_schema_version: 4",
+        "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",
         "kinds:",
         "  research:",
@@ -1446,10 +1451,17 @@ describe("reference_contract.yml cast declarations are load-bearing", () => {
 // from its `tool:`. That makes them exactly the declarations most likely to rot into
 // decoration, so they are exercised here against fixtures built to tell the difference.
 describe("cast declarations the corpus does not currently exercise", () => {
-  function targetYml(kind: string, dstDir: string, ext: string, modes: string): string {
+  function targetYml(
+    kind: string,
+    dstDir: string,
+    ext: string,
+    modes: string,
+    bundlePath = "skills/{mold}",
+  ): string {
     return [
       "name: claude",
       "provenance_schema_version: 4",
+      `bundle_path: ${bundlePath}`,
       "required_outputs: [SKILL.md, _provenance.json]",
       "kinds:",
       `  ${kind}:`,
@@ -1560,6 +1572,118 @@ describe("cast declarations the corpus does not currently exercise", () => {
       }
     }
   });
+
+  // Where a bundle lands is the target's to declare. Cast the same Mold under two different
+  // `bundle_path` templates and the bundle moves — the four readers that used to carry
+  // `target === "claude" ? "skills/..." : "..."` now all answer to this one line.
+  it("bundle_path decides where the bundle lands", () => {
+    for (const [template, expected] of [
+      ["skills/{mold}", "casts/claude/skills/m"],
+      ['"{mold}"', "casts/claude/m"],
+      ["bundles/{mold}/v1", "casts/claude/bundles/m/v1"],
+    ] as const) {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-bundlepath-"));
+      try {
+        mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+        mkdirSync(path.join(dir, "content/patterns"), { recursive: true });
+        mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+        writeFileSync(
+          path.join(dir, "casts/claude/_target.yml"),
+          targetYml("pattern", "references/patterns/", ".md", "[verbatim]", template),
+        );
+        writeFileSync(
+          path.join(dir, "reference_contract.yml"),
+          contractYml("pattern", {
+            resolve: "note",
+            default_mode: "verbatim",
+            companions: false,
+          }),
+        );
+        writeFileSync(
+          path.join(dir, "content/molds/m/index.md"),
+          `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Bundle-path cast test mold summary.\nreferences:\n  - kind: pattern\n    ref: "[[p]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+        );
+        writeFileSync(
+          path.join(dir, "content/patterns/p.md"),
+          `---\ntype: pattern\ntitle: P\nsummary: A pattern.\ntags: [pattern]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of p.\n`,
+        );
+        const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+        expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+        expect(existsSync(path.join(dir, expected, "SKILL.md"))).toBe(true);
+        expect(existsSync(path.join(dir, expected, "_provenance.json"))).toBe(true);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  // `bundle_path: {mold}` is not the string it looks like — unquoted braces are YAML
+  // flow-mapping syntax, so it loads as an object. Easy to write, and the failure it used to
+  // produce was a TypeError from three frames away.
+  it("says so when bundle_path is an unquoted {mold}", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-bundlepathyaml-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        targetYml("pattern", "references/patterns/", ".md", "[verbatim]", "{mold}"),
+      );
+      writeFileSync(
+        path.join(dir, "reference_contract.yml"),
+        contractYml("pattern", { resolve: "note", default_mode: "verbatim", companions: false }),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Bundle-path YAML trap test mold summary.\n---\n\n# m\n\nBody.\n`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("bundle_path must be a string");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The sidecar builder used to be reached only by `mode === "sidecar" && kind === "cli-command"`.
+  // The kind half was a second gate behind the target's `modes` list, so it could only ever
+  // disagree with it. A kind the target lets take `sidecar` now gets one.
+  it("sidecar dispatches on the declared mode, not on the kind's name", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-sidecarkind-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/research/r"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        targetYml("research", "references/notes/", ".json", "[sidecar]"),
+      );
+      writeFileSync(
+        path.join(dir, "reference_contract.yml"),
+        contractYml("research", {
+          resolve: "note",
+          default_mode: "sidecar",
+          companions: false,
+        }),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Sidecar-kind cast test mold summary.\nreferences:\n  - kind: research\n    ref: "[[r]]"\n    used_at: runtime\n    load: upfront\n    mode: sidecar\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+      );
+      writeFileSync(
+        path.join(dir, "content/research/r/index.md"),
+        `---\ntype: research\ntitle: R\nsummary: A note.\ntags: [research]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of r.\n`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+      const sidecar = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/references/notes/r.json"), "utf8"),
+      );
+      expect(sidecar.body).toContain("Body of r.");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 // Two behaviour changes the 47-Mold byte-identity gate cannot see, because no committed
@@ -1574,6 +1698,7 @@ describe("cast declarations: stricter than before, on purpose", () => {
       [
         "name: claude",
         "provenance_schema_version: 4",
+        "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",
         "kinds:",
         "  pattern:",

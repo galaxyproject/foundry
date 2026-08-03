@@ -1,16 +1,21 @@
 // Discover cast artifacts on disk for a given Mold slug.
 //
 // Layout:
-//   casts/claude/skills/<mold>/SKILL.md   (Claude target — under skills/ for plugin layout)
-//   casts/<target>/<mold>/...              (any other target)
+//   casts/<target>/<bundle_path>/SKILL.md
 //
-// Which targets exist is read off the tree — see discoverTargets.
+// Which targets exist is read off the tree, and where each puts its bundles is read off that
+// target's `_target.yml` — see discoverTargets and target-layout.ts. Neither is listed here;
+// this file used to hardcode both, and outlived two targets that were deleted.
 //
 // Used by the Astro Mold page (Cast Artifacts panel) and the /usage/ index.
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 
+import {
+  bundlePathTemplate,
+  resolveBundlePath,
+} from '../../../packages/build-cli/src/lib/target-layout.js';
 import { REPO_ROOT } from './repo-root';
 
 /** A cast target's name — whatever directory under `casts/` carries a `_target.yml`. */
@@ -123,8 +128,18 @@ function defaultRepoRoot(): string {
 }
 
 function castDirFor(target: CastTarget, moldSlug: string, repoRoot: string): string {
-  if (target === 'claude') return path.join(repoRoot, 'casts', target, 'skills', moldSlug);
-  return path.join(repoRoot, 'casts', target, moldSlug);
+  const rel = resolveBundlePath(bundlePathTemplate(repoRoot, target), moldSlug);
+  return path.join(repoRoot, 'casts', target, rel);
+}
+
+/**
+ * The directory bundles sit *in* for a target — the parent of one resolved bundle path.
+ *
+ * Derived from the same declaration rather than named separately, so a target that moves its
+ * bundles cannot move them for the per-Mold lookup and not for the inventory walk.
+ */
+function castsRootFor(target: CastTarget, repoRoot: string): string {
+  return path.dirname(castDirFor(target, '_', repoRoot));
 }
 
 function readSkillFrontmatter(skillPath: string): { name?: string; description?: string } {
@@ -155,7 +170,8 @@ function readProvenance(provenancePath: string): CastProvenance | null {
 }
 
 function anchorForPath(bundlePath: string): string {
-  return `ref-${bundlePath.toLowerCase()
+  return `ref-${bundlePath
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')}`;
 }
@@ -169,7 +185,7 @@ function safeBundlePath(bundleRoot: string, bundlePath: string): string | null {
 
 function attachedFilesFor(dir: string, provenance: CastProvenance | null): CastAttachedFile[] {
   if (!provenance?.refs) return [];
-  return provenance.refs.map(ref => {
+  return provenance.refs.map((ref) => {
     const absPath = safeBundlePath(dir, ref.dst);
     const exists = absPath ? existsSync(absPath) : false;
     const stats = exists && absPath ? statSync(absPath) : null;
@@ -185,7 +201,10 @@ function attachedFilesFor(dir: string, provenance: CastProvenance | null): CastA
   });
 }
 
-export function loadClaudeSkillBundle(moldSlug: string, repoRoot: string = defaultRepoRoot()): ClaudeSkillBundle | null {
+export function loadClaudeSkillBundle(
+  moldSlug: string,
+  repoRoot: string = defaultRepoRoot(),
+): ClaudeSkillBundle | null {
   const dir = castDirFor('claude', moldSlug, repoRoot);
   const skillPath = path.join(dir, 'SKILL.md');
   if (!existsSync(dir) || !existsSync(skillPath)) return null;
@@ -204,7 +223,10 @@ export function loadClaudeSkillBundle(moldSlug: string, repoRoot: string = defau
 }
 
 /** All cast artifacts for one mold, across targets. */
-export function listCastsForMold(moldSlug: string, repoRoot: string = defaultRepoRoot()): CastArtifact[] {
+export function listCastsForMold(
+  moldSlug: string,
+  repoRoot: string = defaultRepoRoot(),
+): CastArtifact[] {
   const out: CastArtifact[] = [];
   for (const target of discoverTargets(repoRoot)) {
     const dir = castDirFor(target, moldSlug, repoRoot);
@@ -221,12 +243,14 @@ export function listCastsForMold(moldSlug: string, repoRoot: string = defaultRep
 export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact[] {
   const out: CastArtifact[] = [];
   for (const target of discoverTargets(repoRoot)) {
-    const root = target === 'claude'
-      ? path.join(repoRoot, 'casts', 'claude', 'skills')
-      : path.join(repoRoot, 'casts', target);
+    const root = castsRootFor(target, repoRoot);
     if (!existsSync(root)) continue;
     let entries: string[];
-    try { entries = readdirSync(root); } catch { continue; }
+    try {
+      entries = readdirSync(root);
+    } catch {
+      continue;
+    }
     for (const name of entries) {
       if (name.startsWith('.') || name.startsWith('_')) continue;
       const dir = path.join(root, name);
@@ -240,8 +264,8 @@ export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact
       out.push({ target, moldSlug: name, dir, hasSkill, ...fm });
     }
   }
-  return out.sort((a, b) =>
-    a.target.localeCompare(b.target) || a.moldSlug.localeCompare(b.moldSlug),
+  return out.sort(
+    (a, b) => a.target.localeCompare(b.target) || a.moldSlug.localeCompare(b.moldSlug),
   );
 }
 
@@ -282,8 +306,14 @@ export interface AssemblyStats {
 }
 
 /** Load the harness assembly for a pipeline slug (e.g. `nextflow-to-galaxy`). */
-export function loadAssembly(pipelineSlug: string, repoRoot: string = defaultRepoRoot()): AssemblyManifest | null {
-  const file = path.join(repoRoot, 'casts', 'claude', 'skills', `pipeline-${pipelineSlug}`, '_assembly.json');
+export function loadAssembly(
+  pipelineSlug: string,
+  repoRoot: string = defaultRepoRoot(),
+): AssemblyManifest | null {
+  const file = path.join(
+    castDirFor('claude', `pipeline-${pipelineSlug}`, repoRoot),
+    '_assembly.json',
+  );
   if (!existsSync(file)) return null;
   try {
     return JSON.parse(readFileSync(file, 'utf8')) as AssemblyManifest;

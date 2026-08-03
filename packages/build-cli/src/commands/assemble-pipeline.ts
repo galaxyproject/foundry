@@ -16,6 +16,7 @@ import process from "node:process";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { reconcileText } from "../lib/reconcile.js";
+import { bundleDir } from "../lib/target-layout.js";
 import {
   aggregateRequiredTools,
   moldCliRefs,
@@ -94,7 +95,7 @@ function listPipelines(repoRoot: string): string[] {
 // ---- helpers ----
 
 function castPresent(repoRoot: string, moldSlug: string): boolean {
-  return existsSync(path.join(repoRoot, "casts", "claude", "skills", moldSlug, "SKILL.md"));
+  return existsSync(path.join(bundleDir(repoRoot, "claude", moldSlug), "SKILL.md"));
 }
 
 function scalar(value: unknown): string {
@@ -483,7 +484,7 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
     process.exit(1);
   }
 
-  const bundleRoot = path.join(repoRoot, "casts", "claude", "skills", harnessName);
+  const bundleRoot = bundleDir(repoRoot, "claude", harnessName);
   const drift: Array<{ file: string; reason: string }> = [];
   for (const [label, expected] of [
     ["SKILL.md", result.skill],
