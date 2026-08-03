@@ -31,7 +31,7 @@ import path from "node:path";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { NAV_LINKS } from "../site/src/lib/site-identity";
+import { FOOTER_LINKS, NAV_LINKS, REPO_URL } from "../site/src/lib/site-identity";
 
 const REPO_ROOT = new URL("../", import.meta.url).pathname;
 const SITE = path.join(REPO_ROOT, "site");
@@ -165,6 +165,21 @@ describe("the stylesheet the shell depends on", () => {
   });
 });
 
+const region = (html: string, open: string, close: string): string =>
+  html.slice(html.indexOf(open), html.indexOf(close) + close.length);
+const hrefsIn = (nav: string): string[] =>
+  [...nav.matchAll(/<a\s[^>]*href="([^"]+)"/g)].flatMap((m) => (m[1] ? [m[1]] : []));
+const activeIn = (nav: string): string[] =>
+  [...nav.matchAll(/<a\s[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].flatMap((m) =>
+    m[1] ? [m[1]] : [],
+  );
+/** The wordmark is the first link in the header, and it points at the site root. */
+const baseFrom = (html: string): string =>
+  (/<a\s[^>]*href="([^"]+)"/.exec(region(html, "<header", "</header>"))?.[1] ?? "/").replace(
+    /\/$/,
+    "",
+  );
+
 describe("the navigation", () => {
   // `NAV_LINKS` is data: a path and a label, nothing callable. Which link is active is DERIVED
   // from the path rather than declared per entry, and one derivation now stands in for ten
@@ -173,21 +188,6 @@ describe("the navigation", () => {
   // Both halves fail quietly. A destination that points at no route renders as a perfectly good
   // link to a 404, and a section that never lights up looks like a page the reader navigated to
   // some other way. Neither shows up in a build log.
-  const region = (html: string, open: string, close: string): string =>
-    html.slice(html.indexOf(open), html.indexOf(close) + close.length);
-  const hrefsIn = (nav: string): string[] =>
-    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"/g)].flatMap((m) => (m[1] ? [m[1]] : []));
-  const activeIn = (nav: string): string[] =>
-    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].flatMap((m) =>
-      m[1] ? [m[1]] : [],
-    );
-  /** The wordmark is the first link in the header, and it points at the site root. */
-  const baseFrom = (html: string): string =>
-    (/<a\s[^>]*href="([^"]+)"/.exec(region(html, "<header", "</header>"))?.[1] ?? "/").replace(
-      /\/$/,
-      "",
-    );
-
   it("emits links under the base the site is configured to deploy at", () => {
     // The assertion that found the `BASE_URL` leak above, stated directly so the next one names
     // itself instead of surfacing as "no section is ever marked active". The pages are served
@@ -240,6 +240,36 @@ describe("the navigation", () => {
         .filter((seen) => seen.marked.length !== 1 || seen.marked[0] !== href);
     });
     expect(wrong, "\npages whose header does not mark exactly their own section").toEqual([]);
+  });
+});
+
+describe("the footer", () => {
+  it("links to the repository and to every extra destination it declares", () => {
+    const links = hrefsIn(region(home, "<footer", "</footer>"));
+    const declared = FOOTER_LINKS.map((link) => `${baseFrom(home)}${link.path}`);
+
+    expect(links, "\nthe repository link is missing from the footer").toContain(REPO_URL);
+    expect(
+      declared.filter((href) => !links.includes(href)),
+      "\ndeclared but not rendered",
+    ).toEqual([]);
+    expect(
+      FOOTER_LINKS.filter((link) => !existsSync(path.join(DIST, link.path, "index.html"))).map(
+        (link) => link.path,
+      ),
+      "\nfooter destinations with no built index",
+    ).toEqual([]);
+  });
+
+  it("puts no clock in the output", () => {
+    // The copyright line used to read `© ${new Date().getFullYear()}`, which runs at BUILD time:
+    // the page reported when it was last deployed, and the same commit rendered differently on
+    // either side of a new year. Every check this shell has is a diff against built output, and a
+    // build that is not reproducible from its source makes those diffs unreadable.
+    const stamped = pages.filter((file) =>
+      /\b(19|20)\d{2}\b/.test(region(read(file), "<footer", "</footer>")),
+    );
+    expect(stamped.map(rel), "\npages whose footer carries a year").toEqual([]);
   });
 });
 

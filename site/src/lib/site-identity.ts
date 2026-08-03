@@ -28,11 +28,16 @@ export const SITE_DESCRIPTION =
 export const REPO_URL = "https://github.com/galaxyproject/foundry";
 
 /**
- * The primary navigation, in order.
+ * A destination in the shell's chrome.
  *
  * `path` is site-absolute and carries no base — `BASE_URL` is applied where the link is rendered.
- * That keeps this a plain list: no closures, nothing an environment variable has to resolve, so it
- * can be serialized, read from a file, or handed to a shared header as a prop.
+ * That keeps these plain lists: no closures, nothing an environment variable has to resolve, so
+ * they can be serialized, read from a file, or handed to a shared component as props.
+ */
+export type ShellLink = { path: string; label: string };
+
+/**
+ * The primary navigation, in order.
  *
  * Active state is DERIVED from `path`: a link is active on its own page and on everything under
  * it. Every entry used to carry that rule as its own `match` closure, and fifteen of the sixteen
@@ -41,7 +46,7 @@ export const REPO_URL = "https://github.com/galaxyproject/foundry";
  * dates to the first commit of the repo and matches none of the 374 pages the build emits. It is
  * gone rather than ported, because a shared header cannot take an exception it cannot express.
  */
-export const NAV_LINKS = [
+export const NAV_LINKS: ShellLink[] = [
   { path: "/story/", label: "Story" },
   { path: "/usage/", label: "Usage" },
   { path: "/molds/", label: "Molds" },
@@ -66,6 +71,17 @@ export const NAV_LINKS = [
  * Raise it while the bar has slack; lower it the moment a label wraps to a second row.
  */
 export const NAV_VISIBLE = 5;
+
+/**
+ * Destinations the footer offers beside the repository, which it always links.
+ *
+ * Empty here, and one entry in the sibling. That is the whole of what the two footers disagreed
+ * about once the copyright line went: an instance whose corpus has an obvious front door names it
+ * twice, and this one does not have one.
+ *
+ * The list renders in order, before the repository link.
+ */
+export const FOOTER_LINKS: ShellLink[] = [];
 
 /**
  * The measure of the reading column, as a Tailwind class.
