@@ -41,9 +41,22 @@ const STYLESHEET = "site/src/styles/global.css";
  */
 const CHIP_CLASSES = ["tag", "topic-chip"];
 
-/** Opening `<a>` tags whose attributes name a tag-page path. */
-const TAG_LINK = /<a\s[^>]*\/tags\//g;
+/**
+ * Anchors whose href names a SPECIFIC tag page.
+ *
+ * The trailing exclusion matters: `${base}/tags/` on its own is the index, which is not a chip
+ * and must not be held to a chip's rule. Nothing links to it that way here today — the sibling
+ * instance does, and the rule is the same one in both.
+ */
+const TAG_LINK = /<a\s[^>]*\/tags\/(?![`'"])/g;
 const STATIC_CLASS = /class="([^"]*)"/g;
+
+/**
+ * The count today. Its job is not the number: it is that a regex which quietly stops matching
+ * would make every assertion below vacuously true, and a chip rule with no chips to check
+ * reports the same PASS as a site with no drift.
+ */
+const MIN_TAG_LINKS = 5;
 
 /** Every `<a … /tags/… >` in a file, paired with the markup it encloses and its own attributes. */
 function tagLinks(file: string): { file: string; markup: string; opening: string }[] {
@@ -65,9 +78,7 @@ describe("the tag chip", () => {
   const links = siteSourceFiles().flatMap(tagLinks);
 
   it("is asked for by every link to a tag page", () => {
-    // Guards the guard: a regex that stops matching would make the rule below vacuously true,
-    // and a chip rule with no chips to check reports the same PASS as a site with no drift.
-    expect(links.length).toBeGreaterThan(3);
+    expect(links.length).toBeGreaterThanOrEqual(MIN_TAG_LINKS);
 
     const inline = links
       .filter((link) => !classesIn(link.markup).some((name) => CHIP_CLASSES.includes(name)))
