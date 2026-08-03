@@ -28,14 +28,14 @@ importers:
         specifier: workspace:*
         version: link:packages/build-cli
       '@galaxy-foundry/cast':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
       '@galaxy-foundry/license-policy':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:packages/note-schema
@@ -97,8 +97,8 @@ importers:
   packages/build-cli:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
@@ -106,8 +106,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../note-schema
@@ -186,8 +186,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@galaxy-foundry/reference-contract':
         specifier: ^0.1.0
         version: 0.1.0
@@ -288,8 +288,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../packages/note-schema
@@ -1008,8 +1008,8 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/cast@0.2.0':
-    resolution: {integrity: sha512-CyiRqV3b/XnMh4RooFrJHKk0YH40lKnIt2+3haT6rR/7m6AfvO8AAECFbRHxfZwCtZC3cjTKXJuUFskTX/F4Ig==}
+  '@galaxy-foundry/cast@0.3.0':
+    resolution: {integrity: sha512-r86coDgK2UZPUVFrc5PVbzkoODkGqwl049SJY39jBlRJ9Zqf4zCn6BdmgRPxoVnXWny2TvsMcLH/hHQSIkUpEg==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/kind-manifest@0.4.0':
@@ -1024,8 +1024,8 @@ packages:
     peerDependencies:
       zod: ^4.0.0
 
-  '@galaxy-foundry/license-policy@0.2.0':
-    resolution: {integrity: sha512-hQ6qtQfMH0PLsfW1CFJttSKvUNuNa5WPa60Echn5aYtMBGWEfWgRTcw6tJcT/m0VxCCiJR3STAKi1sH3ZWlkpQ==}
+  '@galaxy-foundry/license-policy@0.3.0':
+    resolution: {integrity: sha512-slmZ38u2fty5vRBpZUHmwu42KCLpEDrtf8hDLKL/ktcbuwgfdHmOdHspDFu+qbDk6aptdhpkhpMlSSEh2ygI0g==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/reference-contract@0.1.0':
@@ -4455,9 +4455,9 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/cast@0.2.0':
+  '@galaxy-foundry/cast@0.3.0':
     dependencies:
-      '@galaxy-foundry/license-policy': 0.2.0
+      '@galaxy-foundry/license-policy': 0.3.0
       js-yaml: 4.3.0
 
   '@galaxy-foundry/kind-manifest@0.4.0(zod@4.4.3)':
@@ -4469,7 +4469,7 @@ snapshots:
       '@galaxy-foundry/kind-manifest': 0.4.0(zod@4.4.3)
       zod: 4.4.3
 
-  '@galaxy-foundry/license-policy@0.2.0':
+  '@galaxy-foundry/license-policy@0.3.0':
     dependencies:
       js-yaml: 4.3.0
 

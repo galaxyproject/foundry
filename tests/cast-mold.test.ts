@@ -1358,7 +1358,11 @@ license: CC-BY-NC-SA-2.0
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code).not.toBe(0);
       expect(r.stderr).toContain("own-words-only");
-      expect(r.stderr).toContain("forbids mode=verbatim");
+      // The note declares no `derived:` posture, so it is pass-through by default and stays
+      // governed. The remedy named is summarizing the source, not picking another transform —
+      // no mode was ever the answer, so the message stops offering one.
+      expect(r.stderr).toContain("cannot be carried into a cast");
+      expect(r.stderr).not.toContain("mode=");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
