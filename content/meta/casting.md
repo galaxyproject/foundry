@@ -116,10 +116,8 @@ Per-kind subdirectories under `references/` mirror the casting dispatch and let 
 
 The plugin root carries both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`, each pointing to the same `skills/` directory. Repo marketplace metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, while Codex reads `.agents/plugins/marketplace.json`. Neither duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
 
-**Claude is the only target.** `casts/web/` and `casts/generic/` sat scaffolded and empty long
-enough to have a layout specified here that no caster could produce; the directories and those
-layouts are both gone. A target becomes real by acquiring a `casts/<target>/_target.yml` — that
-file's existence is what the caster and the site each read, so there is no list of targets
+**Claude is the only target.** A target becomes real by acquiring a `casts/<target>/_target.yml` —
+that file's existence is what the caster and the site each read, so there is no list of targets
 anywhere to keep in step with the directories.
 
 `_provenance.json` is required for every cast. The contract of record is the [[cast-provenance]] schema note (rendered field-by-field from `scripts/lib/schemas/cast-provenance.schema.json`, schema version 2); the JSON below is an illustrative sketch, not the authority. Shape:
