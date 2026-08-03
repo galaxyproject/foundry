@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "ef30eb8dfeee86c3f938b849bb3bbb95720027dab1189829919b8d4b55b4b816",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "aede1aeab8ceb890192c9606a6e967a36fcf2224"
   },
-  "cast_at": "2026-08-02T22:04:39.728Z",
+  "cast_at": "2026-08-03T23:37:54.185Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -67,8 +67,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded genomic-interval pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for interval overlap, merge, coverage, windowing, masking, or set-algebra on coordinate features.",
-      "src_hash": "4566e84f1f4182729f45d11401c1eaf844ae81a19351035c60ee76e50537c173",
-      "dst_hash": "4566e84f1f4182729f45d11401c1eaf844ae81a19351035c60ee76e50537c173",
+      "src_hash": "2f6e228baab452d7bd51fbd27fc4f584cb9387d496261cb264695824901d23bf",
+      "dst_hash": "2f6e228baab452d7bd51fbd27fc4f584cb9387d496261cb264695824901d23bf",
       "source": "deterministic"
     },
     {

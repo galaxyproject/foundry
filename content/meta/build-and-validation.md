@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-02
-revision: 1
+revised: 2026-08-03
+revision: 2
 summary: "How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current."
 ---
 
@@ -38,7 +38,7 @@ Authors change source notes, registries, schema implementations, or code. Genera
 2. parse frontmatter and validate the note against its kind's strict zod schema;
 3. check dates, paths, note shapes, and companion contracts;
 4. load tag and reference registries and enforce membership and coherence;
-5. build the shared wiki-link map and resolve frontmatter and body links;
+5. build the shared wiki-link map and resolve frontmatter and body links; an unresolved link is an error wherever it is written, and `related_patterns` and `related_molds` resolve on every kind that declares them rather than on Molds alone;
 6. run kind-specific checks for Molds, Patterns, Pipelines, schemas, CLI notes, prompts, research notes, and artifacts;
 7. run cross-note checks such as bidirectional relationships, typed-reference compatibility, pipeline phase resolution, and artifact producer/consumer ordering;
 8. run `validateUnroutedContent`, which errors on markdown under `content/` that no collection claims, no directory note owns, and `NOT_NOTES` does not declare.

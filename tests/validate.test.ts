@@ -1470,7 +1470,36 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.warnings).toBeGreaterThanOrEqual(1);
   });
 
-  it("warns on body wiki-links that do not resolve", () => {
+  // The check used to run only on notes of type `mold`, so the same dangling `related_molds`
+  // entry was an error on a Mold and silent on every other kind that declares the field.
+  it("errors on related_molds that do not resolve, on a note that is not a mold", () => {
+    writeFm(path.join(dir, "patterns/pattern-r.md"), {
+      ...patternRequired({ title: "Pattern R" }),
+      related_molds: ["[[ghost-mold]]"],
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("errors when related_molds resolves to a note that is not a mold", () => {
+    writeFm(path.join(dir, "patterns/pattern-s.md"), {
+      ...patternRequired({ title: "Pattern S" }),
+      related_molds: ["[[pattern-t]]"],
+    });
+    writeFm(path.join(dir, "patterns/pattern-t.md"), patternRequired({ title: "Pattern T" }));
+
+    const r = validateDirectory({
+      directory: dir,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("errors on body wiki-links that do not resolve", () => {
     mkdirSync(path.dirname(path.join(dir, "patterns/pattern-x.md")), { recursive: true });
     writeFileSync(
       path.join(dir, "patterns/pattern-x.md"),
@@ -1483,8 +1512,7 @@ describe("validateDirectory (cross-file)", () => {
       directory: dir,
       tagsPath: TAGS_PATH,
     });
-    expect(r.errors).toBe(0);
-    expect(r.warnings).toBeGreaterThanOrEqual(1);
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
   it("ignores body wiki-links inside fenced or inline code", () => {

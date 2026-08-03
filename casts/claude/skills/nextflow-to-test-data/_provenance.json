@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-to-test-data/index.md",
     "revision": 2,
     "content_hash": "5569467ca2b1bb6bdaec69f4d6a9482b111b4433d5a70f1bf19c29a8d511f3ca",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "aede1aeab8ceb890192c9606a6e967a36fcf2224"
   },
-  "cast_at": "2026-08-02T22:04:59.139Z",
+  "cast_at": "2026-08-03T23:38:01.703Z",
   "refs": [
     {
       "kind": "research",
@@ -22,8 +22,8 @@
       "purpose": "Interpret nf-test profiles and fixture conventions before mapping declared fixtures onto Galaxy inputs.",
       "trigger": "When reading `test_fixtures` / `nf_tests` to decide which profile's fixtures best cover the workflow inputs.",
       "verification": "Map nf-core/bacass declared fixtures onto its Galaxy interface and confirm this note improves profile/fixture selection.",
-      "src_hash": "807c26846c6ea331b12c129e8caa438eacf5ea113b9dde51e2e3027c9878ad58",
-      "dst_hash": "807c26846c6ea331b12c129e8caa438eacf5ea113b9dde51e2e3027c9878ad58",
+      "src_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
+      "dst_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
       "source": "deterministic"
     },
     {
