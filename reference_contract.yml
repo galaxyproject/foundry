@@ -35,7 +35,7 @@
 kinds:
   pattern:
     label: Pattern
-    description: Workflow-construction idiom. Usually condensed during casting.
+    description: Workflow-construction idiom. Copied verbatim; may carry companions.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
     cast:
