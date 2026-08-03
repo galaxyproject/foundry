@@ -1645,6 +1645,92 @@ describe("cast declarations the corpus does not currently exercise", () => {
     }
   });
 
+  // The package named in a SKILL.md validation row is the one the schema note declares ships
+  // the bin. The caster used to infer it — "has a subcommand" meant `@galaxy-foundry/foundry` —
+  // which put one instance's CLI package name in the caster.
+  it("validator_package names the package the validation row cites", () => {
+    for (const [declared, expected] of [
+      ["", "@acme/schema-pkg"],
+      ['validator_package: "@acme/cli-pkg"', "@acme/cli-pkg"],
+    ] as const) {
+      const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-validatorpkg-"));
+      try {
+        mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+        mkdirSync(path.join(dir, "content/schemas"), { recursive: true });
+        mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+        writeFileSync(
+          path.join(dir, "casts/claude/_target.yml"),
+          targetYml("schema", "references/schemas/", ".schema.json", "[verbatim]"),
+        );
+        writeFileSync(
+          path.join(dir, "reference_contract.yml"),
+          contractYml("schema", {
+            resolve: "note",
+            default_mode: "verbatim",
+            companions: false,
+          }),
+        );
+        writeFileSync(
+          path.join(dir, "content/molds/m/index.md"),
+          `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Validator-package cast test mold summary.\noutput_artifacts:\n  - id: a\n    kind: json\n    default_filename: a.json\n    schema: "[[s]]"\n    description: An artifact.\nreferences:\n  - kind: schema\n    ref: "[[s]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+        );
+        writeFileSync(
+          path.join(dir, "content/schemas/s.md"),
+          `---\ntype: schema\nname: s\ntitle: S\nsummary: A schema.\ntags: [meta]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\npackage: "@acme/schema-pkg"\nvalidator_bin: acme\nvalidator_subcommand: validate-s\n${declared}\n---\n\nBody of s.\n`,
+        );
+        const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+        const skill = readFileSync(path.join(dir, "casts/claude/skills/m/SKILL.md"), "utf8");
+        expect(skill, `stderr: ${r.stderr}`).toContain(expected);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  // Committed sample runs are checked against the schema the Mold declares for its OWN output.
+  // The old lookup preferred `[[summary-nextflow]]` by name and otherwise took whichever schema
+  // ref came first — a schema with no stated relationship to what the runs contain. This Mold
+  // declares two schema refs and names the SECOND as its output schema, so which one the caster
+  // reaches for is what separates the two implementations.
+  it("runs are validated against the Mold's declared output schema, not the first ref", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-runs-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/schemas"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude/skills/m/runs/sample"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/skills/m/runs/sample/summary.json"),
+        JSON.stringify({ count: "not-a-number" }) + "\n",
+      );
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        targetYml("schema", "references/schemas/", ".md", "[verbatim]"),
+      );
+      writeFileSync(
+        path.join(dir, "reference_contract.yml"),
+        contractYml("schema", { resolve: "note", default_mode: "verbatim", companions: false }),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Runs-validation cast test mold summary.\noutput_artifacts:\n  - id: a\n    kind: json\n    default_filename: a.json\n    schema: "[[second]]"\n    description: An artifact.\nreferences:\n  - kind: schema\n    ref: "[[first]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n  - kind: schema\n    ref: "[[second]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+      );
+      for (const name of ["first", "second"]) {
+        writeFileSync(
+          path.join(dir, `content/schemas/${name}.md`),
+          `---\ntype: schema\nname: ${name}\ntitle: ${name}\nsummary: A schema note.\ntags: [meta]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\npackage: "@acme/schema-pkg"\n---\n\nBody of ${name}.\n`,
+        );
+      }
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      // The bundled dst of a `resolve: note` schema is the note itself, so Ajv fails to load it
+      // — which is incidental. What the assertion pins is WHICH file it reached for.
+      expect(r.stderr).toContain("second.md: not loadable as a JSON Schema");
+      expect(r.stderr).not.toContain("first.md: not loadable as a JSON Schema");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   // The sidecar builder used to be reached only by `mode === "sidecar" && kind === "cli-command"`.
   // The kind half was a second gate behind the target's `modes` list, so it could only ever
   // disagree with it. A kind the target lets take `sidecar` now gets one.

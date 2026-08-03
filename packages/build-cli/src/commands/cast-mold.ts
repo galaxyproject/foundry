@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 // Deterministic cast assembly. Reads the Mold's `index.md` frontmatter as the
 // source of truth for `references:` and resolves each ref to a concrete file
-// op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v3)
+// op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v4)
 // recording every resolved ref and its hash. Assembly is deterministic
 // throughout: there is no LLM phase, so a cast is byte-stable and --check-able.
 //
@@ -40,7 +40,6 @@ import {
 } from "@galaxy-foundry/note-schema";
 
 import { payloadCompanionOf } from "../lib/dispositions.js";
-import { bundlePathOf, resolveBundlePath } from "../lib/target-layout.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
   driftOf,
@@ -55,6 +54,7 @@ import {
   requiredToolRows,
   type RequiredTool,
 } from "../lib/required-tools.js";
+import { bundlePathOf, resolveBundlePath } from "../lib/target-layout.js";
 import type { Frontmatter } from "../lib/types.js";
 import { fileSlug, findMdFiles, listFilesUnder } from "../lib/walk.js";
 import {
@@ -557,8 +557,22 @@ async function buildCliSidecar(
 // ---- runs/*/summary.json schema validation ----
 
 function loadAjvForSchema(schemaPath: string): ReturnType<AjvValidator["compile"]> {
-  const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
-  const schemaUri = typeof schema?.$schema === "string" ? schema.$schema : "";
+  // Named, because the bare SyntaxError from JSON.parse says only that something somewhere was
+  // not JSON — and the file it means is one the caster picked, not one the author pointed at.
+  let schema: unknown;
+  try {
+    schema = JSON.parse(readFileSync(schemaPath, "utf8"));
+  } catch (e) {
+    throw new Error(`${schemaPath}: not loadable as a JSON Schema: ${errorMessage(e)}`, {
+      cause: e,
+    });
+  }
+  const schemaUri =
+    schema &&
+    typeof schema === "object" &&
+    typeof (schema as { $schema?: unknown }).$schema === "string"
+      ? (schema as { $schema: string }).$schema
+      : "";
   const ajv = schemaUri.includes("2020-12")
     ? new Ajv2020({ allErrors: true, strict: false })
     : new Ajv({ allErrors: true, strict: false });
@@ -1173,9 +1187,11 @@ function schemaValidationRows(
     const validator = scalar(meta?.validator_bin);
     const subcommand = scalar(meta?.validator_subcommand);
     const command = validator && subcommand ? `${validator} ${subcommand}` : validator;
-    // A declared subcommand means the bin ships in the foundry CLI package; the
-    // schema's `package` only names the export source (mirrors validate.ts).
-    const validatorPackage = subcommand ? "@galaxy-foundry/foundry" : scalar(meta?.package);
+    // The package that ships the bin, which the note declares when it differs from the
+    // package the export comes from. Inferring it from "has a subcommand" hardcoded one
+    // instance's CLI package name in the caster, and was wrong in principle for any Foundry
+    // whose multi-command validator is not called @galaxy-foundry/foundry.
+    const validatorPackage = scalar(meta?.validator_package) ?? scalar(meta?.package);
     const schemaName = stripWikiLinks(output.schema);
     const file = output.default_filename
       ? `\`${output.default_filename}\``
@@ -1437,14 +1453,26 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     if (verifyDrift.reason) drift.push({ file: "_verify.json", reason: verifyDrift.reason });
   }
 
-  // runs/*/summary.json validation — find a schema ref for this mold and validate any committed runs.
-  const schemaRefEntry =
-    refEntries.find((r) => r.kind === "schema" && r.ref === "[[summary-nextflow]]") ??
-    refEntries.find((r) => r.kind === "schema");
+  // runs/*/summary.json validation — a bundle may carry sample runs, and they are checked
+  // against the schema the Mold declares for its OWN output. This used to prefer
+  // `[[summary-nextflow]]` by name and fall back to whichever schema ref came first, which named
+  // one domain's artifact in the caster and, for any other Mold, picked a schema that had no
+  // stated relationship to what the runs contain.
+  const outputSchemaRefs = new Set(
+    (artifactContracts?.produces ?? []).map((o) => o.schema).filter((s): s is string => !!s),
+  );
+  const schemaRefEntry = refEntries.find((r) => r.kind === "schema" && outputSchemaRefs.has(r.ref));
   if (schemaRefEntry) {
     const schemaAbs = path.join(bundleRoot, schemaRefEntry.dst);
     if (existsSync(schemaAbs)) {
-      errors.push(...validateRuns(bundleRoot, schemaAbs));
+      // Collected rather than thrown: a schema the runs cannot be checked against is a finding
+      // about this cast, and the caller reports findings. Letting it escape ends the run with a
+      // stack trace instead.
+      try {
+        errors.push(...validateRuns(bundleRoot, schemaAbs));
+      } catch (e) {
+        errors.push(errorMessage(e));
+      }
     }
   }
 
