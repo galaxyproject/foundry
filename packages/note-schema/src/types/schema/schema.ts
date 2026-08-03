@@ -30,6 +30,12 @@ export const kind = defineKind({
         package_export: z.string().optional(),
         validator_bin: binName.optional(),
         validator_subcommand: binName.optional(),
+        // Which package SHIPS the bin, when that is not the package the export comes from.
+        // `package` names the export source; usually the same package also ships the CLI, and
+        // this is omitted. `summary-nextflow` is the case that is not: its schema is exported
+        // by @galaxy-foundry/summarize-nextflow while `foundry validate-summary-nextflow`
+        // ships in @galaxy-foundry/foundry.
+        validator_package: z.string().optional(),
         license: ctx.licenseId.optional(),
         license_file: ctx.licenseFile.optional(),
       })

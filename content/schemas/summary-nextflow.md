@@ -6,6 +6,9 @@ package: "@galaxy-foundry/summarize-nextflow"
 package_export: "summaryNextflowSchema"
 validator_bin: foundry
 validator_subcommand: validate-summary-nextflow
+# The schema is exported by @galaxy-foundry/summarize-nextflow; the CLI that validates against
+# it ships in @galaxy-foundry/foundry. `package` names the first, this names the second.
+validator_package: "@galaxy-foundry/foundry"
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/summarize-nextflow/src/schema/summary-nextflow.schema.json"
 license: MIT
 tags:

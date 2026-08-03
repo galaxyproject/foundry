@@ -1017,6 +1017,11 @@
           "type": "string"
         },
         {
+          "name": "validator_package",
+          "required": false,
+          "type": "string"
+        },
+        {
           "name": "validator_subcommand",
           "required": false,
           "type": "string"
