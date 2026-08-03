@@ -65,10 +65,6 @@
   --color-badge-archived-bg: #d6d8db;
   --color-badge-archived-text: #383d41;
 
-  /* Tags */
-  --color-tag-bg: #edf4fa;
-  --color-tag-bg-hover: #cde0f0;
-
   /* Fonts */
   --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: Monaco, Menlo, Consolas, 'Courier New', monospace;
@@ -98,8 +94,6 @@
   --color-badge-stale-text: #f85149;
   --color-badge-archived-bg: #21262d;
   --color-badge-archived-text: #8b949e;
-  --color-tag-bg: #21262d;
-  --color-tag-bg-hover: #30363d;
 }
 
 /* --- Grid background --- */
@@ -130,15 +124,29 @@
 
 .tag {
   @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-150;
-  background-color: var(--color-tag-bg);
+  background-color: var(--color-surface-hover);
   color: var(--color-link);
 }
 .dark .tag {
   color: #9bb8d6;
 }
-a:hover .tag {
+
+/* Both nestings, deliberately. An anchor sometimes IS the chip and sometimes WRAPS it — on the
+   tags index it covers the chip and the note count beside it, so there is nothing to collapse.
+   The rule used to be the descendant half alone, which meant `<a class="tag">` had a transition
+   and nothing to transition to: no hover, no error, and the two forms a line apart on the same
+   page behaved differently. Which nesting a call site needs is a layout question; whether the
+   chip lights up is not, and it should not follow from the answer. */
+a:hover .tag,
+a.tag:hover {
   background-color: var(--color-accent);
   color: var(--color-galaxy-dark);
+}
+
+/* A count riding inside the chip. Opacity rather than a muted color token, so it stays legible
+   against the accent on hover instead of needing a second rule to undo the first. */
+.tag-count {
+  opacity: 0.7;
 }
 
 .dangling {

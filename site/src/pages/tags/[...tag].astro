@@ -63,10 +63,7 @@ function noteTitle(n: typeof allNotes[number]): string {
       <h2 class="text-sm font-semibold mb-2 text-(--color-text-secondary) uppercase tracking-wide">Frequently co-occurs with</h2>
       <div class="flex flex-wrap gap-2">
         {coTags.map(([t, count]) => (
-          <a href={`${base}/tags/${t}/`} class="no-underline inline-flex items-baseline gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-(--color-surface) border border-(--color-border-subtle) text-(--color-link) hover:bg-(--color-surface-hover) transition-colors">
-            <span>{t}</span>
-            <span class="text-(--color-text-secondary)">×{count}</span>
-          </a>
+          <a href={`${base}/tags/${t}/`} class="tag no-underline">{t} <span class="tag-count">×{count}</span></a>
         ))}
       </div>
     </div>

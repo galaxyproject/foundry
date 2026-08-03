@@ -27,7 +27,7 @@ const data = entry.data;
   )}
   <div class="note-tags">
     <span class={`badge badge-${data.status}`}>{data.status}</span>
-    {data.tags.map(t => <a href={`${base}/tags/${t}/`} class="no-underline"><span class="tag">{t}</span></a>)}
+    {data.tags.map(t => <a href={`${base}/tags/${t}/`} class="tag no-underline">{t}</a>)}
   </div>
   {showActions && (
     <div class="note-actions">
