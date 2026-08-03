@@ -404,9 +404,10 @@ function resolveMoldRef(
 // Expand companion files declared on a note's frontmatter into sibling refs.
 // A multi-file note (e.g. a vendored bundle) lists `companions:` filenames in
 // its `.md`; each is copied verbatim next to the note in the bundle so the
-// note body can reference it at runtime. Companions ship verbatim regardless
-// of the parent note's mode.  A note points at its structured sibling either way. They inherit the parent ref's load/used_at/trigger/purpose and
-// carry `companion_of` for provenance.
+// note body can reference it at runtime. Companions ship verbatim whatever the
+// parent ref's mode — a note points at its structured sibling either way. They
+// inherit the parent ref's load/used_at/trigger/purpose and carry
+// `companion_of` for provenance.
 function expandCompanions(
   resolved: ResolvedRef[],
   metaByPath: Map<string, Frontmatter>,

@@ -48,7 +48,7 @@ For each Mold in scope, check its cast bundle is in sync with `content/molds/<mo
 npm run cast -- <mold> --target=claude --check
 ```
 
-If `--check` reports drift, run without `--check` to reconcile, then `npx tsx scripts/cast-skill-verify.ts <mold> --target=claude`. If LLM follow-up is required (any `pending_llm: true` ref), do that work per `.claude/commands/cast.md` step 4.
+If `--check` reports drift, run without `--check` to reconcile, then `npx tsx scripts/cast-skill-verify.ts <mold> --target=claude`. Reconciling is the whole fix — the cast is deterministic, so there is no follow-up authoring step.
 
 If casts changed in a way that would matter to runtime skill invocation (i.e., this branch will be merged and other agents will pick the skills up), remind the user: **"casts updated — `/reload-plugins` if you want a future session to invoke these as real skills, otherwise emulation in-session is fine."**
 

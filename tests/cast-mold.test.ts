@@ -133,7 +133,6 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     expect(prov.refs.length).toBeGreaterThan(0);
     for (const r of prov.refs) {
       expect(r.source).toBe("deterministic");
-      expect(r.pending_llm).toBeUndefined();
       expect(r.src_hash).toBe(r.dst_hash);
     }
     // Refs sorted by (kind, note), each note followed by its own companions.
