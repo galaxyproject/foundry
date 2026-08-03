@@ -7,7 +7,13 @@
 
 name: claude
 
-provenance_schema_version: 3
+provenance_schema_version: 4
+
+# Where this target's bundles sit under casts/claude/. `{mold}` is the bundle name.
+# The `skills/` level is what makes casts/claude/ double as a Claude Code plugin root:
+# .claude-plugin/plugin.json beside skills/<name>/SKILL.md. A target that declares no
+# bundle_path gets one directory per bundle, named for it.
+bundle_path: skills/{mold}
 
 # Required runtime artifacts the generated skill must produce.
 # The deterministic verifier checks these before any agentic review.

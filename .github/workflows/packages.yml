@@ -85,5 +85,8 @@ jobs:
       - name: Cast drift check
         run: make check-casts
 
+      - name: Cast bundle verification
+        run: make check-verify
+
       - name: Build site
         run: npm run site:build

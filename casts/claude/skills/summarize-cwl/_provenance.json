@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "summarize-cwl",
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
     "content_hash": "7d83e5522f8a478186cb2c8c0585261342357c4e79ec2a17139096b5346acb12",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:49.914Z",
+  "cast_at": "2026-08-02T22:05:05.808Z",
   "refs": [
     {
       "kind": "cli-tool",

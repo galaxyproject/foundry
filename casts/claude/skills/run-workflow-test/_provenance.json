@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 6,
     "content_hash": "ddce4858e472c7e4ff1cc74b48be4c18dffe9e732e254bd6e84c41aeab1eae75",
-    "commit": "466d4480b91afa1ea77ae0076fd78f62d727d264"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-08-02T18:10:33.465Z",
+  "cast_at": "2026-08-02T22:05:03.236Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [

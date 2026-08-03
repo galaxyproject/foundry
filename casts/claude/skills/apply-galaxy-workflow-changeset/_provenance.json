@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "apply-galaxy-workflow-changeset",
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 2,
     "content_hash": "ad5df3bb1de89c558f5fa3cf34b0379131407180da0878eaf601caec48d6711c",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:09.034Z",
+  "cast_at": "2026-08-02T22:04:16.954Z",
   "refs": [
     {
       "kind": "cli-command",

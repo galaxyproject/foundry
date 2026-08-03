@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "freeform-summary-to-galaxy-data-flow",
     "path": "content/molds/freeform-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
     "content_hash": "f64e964f842d70005c254bda1498dc619ce5af19a750f2a1dc85838c0023125c",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:23.921Z",
+  "cast_at": "2026-08-02T22:04:36.997Z",
   "refs": [
     {
       "kind": "pattern",

@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "summarize-paper",
     "path": "content/molds/summarize-paper/index.md",
     "revision": 2,
     "content_hash": "ac601516a655a5a97bf9cc6d865839622efd509a295f99410c9e47e3952f269d",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:54.685Z",
+  "cast_at": "2026-08-02T22:05:11.026Z",
   "refs": [],
   "artifacts": {
     "produces": [

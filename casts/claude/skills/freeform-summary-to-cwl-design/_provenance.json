@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "freeform-summary-to-cwl-design",
     "path": "content/molds/freeform-summary-to-cwl-design/index.md",
     "revision": 1,
     "content_hash": "bdc96941ec75c70907bac77ab58b94da70923cb81ab28da3badd3410ce38a678",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:23.184Z",
+  "cast_at": "2026-08-02T22:04:36.005Z",
   "refs": [],
   "artifacts": {
     "produces": [

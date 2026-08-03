@@ -155,6 +155,11 @@ describe("assemble-pipeline negative cases", () => {
       mkdirSync(path.join(dir, "content/pipelines/test-pipe"), { recursive: true });
       mkdirSync(path.join(dir, "content/molds/mold-a"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude/skills"), { recursive: true });
+      // Bundle placement is the target's declaration, so a temp repo has to make it.
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        ["name: claude", "bundle_path: skills/{mold}", ""].join("\n"),
+      );
       writeFileSync(
         path.join(dir, "content/molds/mold-a/index.md"),
         `---
@@ -211,6 +216,11 @@ phases:
       mkdirSync(path.join(dir, "content/pipelines/mini"), { recursive: true });
       mkdirSync(path.join(dir, "content/molds/looper"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude/skills"), { recursive: true });
+      // Bundle placement is the target's declaration, so a temp repo has to make it.
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        ["name: claude", "bundle_path: skills/{mold}", ""].join("\n"),
+      );
       writeFileSync(
         path.join(dir, "content/molds/looper/index.md"),
         `---

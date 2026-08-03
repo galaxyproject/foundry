@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "interview-to-galaxy-workflow-changeset",
     "path": "content/molds/interview-to-galaxy-workflow-changeset/index.md",
     "revision": 2,
     "content_hash": "f01d7cef449db6f8f7c6bce428334c4280cb1f36edcf786fa40102548fa38677",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:33.339Z",
+  "cast_at": "2026-08-02T22:04:49.185Z",
   "refs": [
     {
       "kind": "research",

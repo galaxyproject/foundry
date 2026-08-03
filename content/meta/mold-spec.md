@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-05-02
-revised: 2026-07-29
-revision: 12
+revised: 2026-08-02
+revision: 13
 summary: "The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it."
 ---
 
@@ -76,11 +76,12 @@ references:
 
 Required fields:
 
-- `kind` selects the resolver and casting behavior (`pattern`, `cli-command`, `schema`, `prompt`, `example`, `research`).
+- `kind` selects the resolver and casting behavior (`pattern`, `cli-tool`, `cli-command`, `schema`, `prompt`, `example`, `research`).
 - `ref` is a wiki link for note-backed references. Current schema references use the `content/schemas/<name>.md` schema note as the wiki-link target.
 - `used_at` records whether the reference is used at cast time, runtime, or both.
 - `load` is `upfront` or `on-demand`; `on-demand` references require `trigger`.
-- `mode` declares the transformation (`verbatim`, `condense`, `sidecar`).
+- `mode` declares the transformation (`verbatim`, `sidecar`). Omit it and the reference takes the
+  `default_mode` its kind declares in `reference_contract.yml`.
 - `evidence` tracks confidence: `hypothesis`, `corpus-observed`, or `cast-validated`.
 
 Conditional fields:
@@ -89,7 +90,7 @@ Conditional fields:
 - `trigger` is required when `load: on-demand`.
 - `purpose` is strongly recommended for generated-skill instructions and reviewer context.
 
-The reference contract owns labels, descriptions, and allowed values: `reference_contract.yml` for `kind`, and `@galaxy-foundry/reference-contract` for `used_at`, `load`, `mode` and `evidence`, which are the same in every Foundry. Casting consumes the manifest by kind; see [[casting]] for output layout and provenance.
+The reference contract owns labels, descriptions, and allowed values: `reference_contract.yml` for `kind`, and `@galaxy-foundry/reference-contract` for `used_at`, `load`, `mode` and `evidence`, which are the same in every Foundry. The inherited `mode` vocabulary also offers `condense`, which this Foundry declines — its caster is deterministic end to end, so a Mold declaring `mode: condense` is rejected by validate. Casting consumes the manifest by kind; see [[casting]] for output layout and provenance.
 
 ## Eval, Scenario, Usage, Refinement: what goes where
 
