@@ -5,6 +5,17 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* The shell lives in @galaxy-foundry/site-kit, and Tailwind's automatic source detection does not
+   look inside node_modules. Without this line every utility the shell writes — the container
+   measure, the header bar, the footer row — is missing from the emitted stylesheet: the build stays
+   green, all 374 pages render, and the site has no layout.
+
+   This line cannot be verified by reading it. A typo'd path resolves to nothing and Tailwind says
+   nothing about it; `site-kitt` builds exactly as cleanly as the correct spelling. What tells the
+   two apart is `tests/built-shell.test.ts`, which asserts that a utility only the KIT writes
+   reaches the stylesheet. */
+@source "../../node_modules/@galaxy-foundry/site-kit/src";
+
 @theme {
   /* Galaxy brand */
   --color-galaxy-primary: #25537b;
