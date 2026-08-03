@@ -1859,6 +1859,47 @@ describe("cast declarations the corpus does not currently exercise", () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  // The vocabulary is the gate, and it closes before the caster runs.
+  //
+  // Renderers are registered per mode, so a mode with nothing behind it is a real failure state
+  // — but not one this instance can reach. Our `modes` vocabulary is narrowed to exactly the two
+  // modes we implement, so an unimplemented mode is refused when the contract loads rather than
+  // when a ref reaches the renderer table. Worth pinning: it is the property that lets the
+  // caster's own "no renderer" branch stay defensive, and it is the same mechanism a second
+  // instance uses to decline a mode it inherits but does not want.
+  it("refuses an unimplemented mode at the vocabulary, before any renderer is consulted", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-norenderer-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/research/r"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        targetYml("research", "references/notes/", ".txt", "[condense]"),
+      );
+      writeFileSync(
+        path.join(dir, "reference_contract.yml"),
+        contractYml("research", { resolve: "note", default_mode: "condense", companions: false }),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Unrendered-mode cast test mold summary.\nreferences:\n  - kind: research\n    ref: "[[r]]"\n    used_at: runtime\n    load: upfront\n    mode: condense\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+      );
+      writeFileSync(
+        path.join(dir, "content/research/r/index.md"),
+        `---\ntype: research\ntitle: R\nsummary: A note.\ntags: [research]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of r.\n`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("not in this instance's `modes` vocabulary");
+      expect(r.stderr).toContain("condense");
+      // The refusal is total: a mode we cannot render must not leave a half-cast bundle behind.
+      expect(existsSync(path.join(dir, "casts/claude/skills/m/_provenance.json"))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 // Two behaviour changes the 47-Mold byte-identity gate cannot see, because no committed

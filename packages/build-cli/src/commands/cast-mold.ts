@@ -46,6 +46,7 @@ import {
   type ReferenceContractTerm,
 } from "@galaxy-foundry/note-schema";
 
+import type { CastHooks, RefRenderers } from "../lib/cast-hooks.js";
 import { payloadCompanionOf } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { driftOf, reconcile, reconcileText, sha256File, sha256Text } from "../lib/reconcile.js";
@@ -537,6 +538,21 @@ async function buildCliSidecar(
   return sidecar;
 }
 
+/**
+ * What this instance attaches to the caster.
+ *
+ * `sidecar` renders a planemo command description: the note's body plus, when the note names a
+ * `package`, the argument and option metadata that package publishes. Nothing about that is
+ * general — it is this repo's knowledge of how Galaxy's CLI tooling describes itself, which is
+ * exactly why it is registered here rather than living inside the dispatch.
+ */
+const GALAXY_HOOKS: CastHooks = {
+  renderers: {
+    sidecar: async ({ srcAbs, srcRel, meta }) =>
+      JSON.stringify(await buildCliSidecar(srcAbs, srcRel, meta), null, 2) + "\n",
+  },
+};
+
 // ---- runs/*/summary.json schema validation ----
 
 function loadAjvForSchema(schemaPath: string): ReturnType<AjvValidator["compile"]> {
@@ -776,6 +792,7 @@ async function castOneRef(
   repoRoot: string,
   bundleRoot: string,
   check: boolean,
+  renderers: RefRenderers,
 ): Promise<{ entry: ProvenanceRefEntry; drift?: string; error?: string }> {
   const dstAbs = path.join(bundleRoot, resolved.dst);
 
@@ -859,14 +876,17 @@ async function castOneRef(
     };
   }
 
-  // Dispatched on the mode alone. Which kinds may take `sidecar` is already declared — the
-  // target's `kinds.<kind>.modes` gates it above, and no kind but `cli-command` lists it today —
-  // so naming the kind again here was a second gate that could only ever disagree with the first.
-  if (resolved.mode === "sidecar") {
+  // Dispatched on the mode alone. Which kinds may take a given mode is already declared — the
+  // target's `kinds.<kind>.modes` gates it above — so naming the kind again here would be a
+  // second gate that could only ever disagree with the first.
+  //
+  // Which RENDERER a mode selects is a separate question, and the instance answers it. The mode
+  // is shared vocabulary; the bytes it produces are not.
+  const renderer = renderers[resolved.mode];
+  if (renderer) {
     const parsed = readMarkdown(srcAbs);
-    const sidecar = await buildCliSidecar(srcAbs, resolved.src, parsed.meta);
-    const text = JSON.stringify(sidecar, null, 2) + "\n";
-    const drift = reconcileText({ path: dstAbs, expected: text, label: "sidecar", check });
+    const text = await renderer({ srcAbs, srcRel: resolved.src, meta: parsed.meta });
+    const drift = reconcileText({ path: dstAbs, expected: text, label: resolved.mode, check });
     return {
       entry: {
         ...skeleton(resolved),
@@ -878,9 +898,14 @@ async function castOneRef(
     };
   }
 
+  // Unreachable from this instance, and kept anyway. Our `modes` vocabulary is narrowed to
+  // exactly the modes we implement, so an unimplemented one is refused when the contract loads.
+  // That is a fact about this instance's vocabulary, not a guarantee of the caster: widen the
+  // vocabulary without registering a renderer and this is the failure. Says which of the two
+  // disagreed, because "kind does not support mode" is a Mold to fix and this is a hook to write.
   return {
     entry: { ...skeleton(resolved), src_hash: srcHash, dst_hash: null, source: "deterministic" },
-    error: `unsupported (kind=${resolved.kind}, mode=${resolved.mode})`,
+    error: `no renderer for mode=${resolved.mode} (kind=${resolved.kind}) — the target admits this mode but nothing implements it`,
   };
 }
 
@@ -1203,7 +1228,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const drift: Array<{ file: string; reason: string }> = [];
 
   for (const r of resolved) {
-    const result = await castOneRef(r, repoRoot, bundleRoot, args.check);
+    const result = await castOneRef(r, repoRoot, bundleRoot, args.check, GALAXY_HOOKS.renderers);
     refEntries.push(result.entry);
     if (result.error) errors.push(result.error);
     if (result.drift) drift.push({ file: r.src, reason: result.drift });
