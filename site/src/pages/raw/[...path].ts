@@ -1,5 +1,5 @@
 import { getAllNotes } from '../../lib/notes';
-import { noteAdjacentFiles, readAdjacent } from '../../lib/content-files';
+import { noteAdjacentFiles, readAdjacent } from '../../lib/note-directory';
 import { DEFINITIONS } from '@galaxy-foundry/note-schema';
 import type { APIRoute, GetStaticPaths } from 'astro';
 
