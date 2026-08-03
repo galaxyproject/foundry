@@ -25,6 +25,7 @@ import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
 import {
+  applyLicensePolicy,
   copyVerbatim,
   gitHead,
   pruneEmptyDirs,
@@ -38,12 +39,6 @@ import {
   type ProvenanceCarryOver,
   type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
-
-import {
-  bundledPolicy,
-  resolveLicenseRow,
-  type LicensePolicy,
-} from "@galaxy-foundry/license-policy";
 
 import {
   loadCastReferenceContract,
@@ -908,40 +903,10 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
   };
 }
 
-// Enforce the license → redistribution-policy table (foundry-pattern#4) over the
-// assembled refs, and stamp each redistributed ref's license_file content hash
-// into provenance. Refs with no `license` are Foundry-authored (root LICENSE) and
-// out of policy scope. The transform-mode check is the enforcement hook: an
-// own-words-only license may not be carried verbatim/sidecar. The license_file
-// *presence* rules live in the validator, where `upstream` scoping distinguishes
-// Foundry-authored license annotations from genuine third-party redistribution.
-// Returns error strings for any policy violation.
-// `repoRoot` is still needed: the table says what a licence permits, but `license_file`
-// points into the tree being cast, and only that tree can be hashed.
-function applyLicensePolicy(entries: ProvenanceRefEntry[], repoRoot: string): string[] {
-  // Parse the shipped table only when a ref actually redistributes licensed content.
-  if (!entries.some((e) => e.license)) return [];
-  const policy: LicensePolicy = bundledPolicy();
-  const errors: string[] = [];
-  for (const e of entries) {
-    if (!e.license) continue;
-    const row = resolveLicenseRow(policy, e.license);
-    if (!row.allowed_modes.includes(e.mode as (typeof row.allowed_modes)[number])) {
-      errors.push(
-        `${e.src}: license ${e.license} (${row.policy}) forbids mode=${e.mode} (allowed: ${row.allowed_modes.join(", ")})`,
-      );
-    }
-    if (e.license_file) {
-      const abs = path.join(repoRoot, e.license_file);
-      if (existsSync(abs)) {
-        e.license_file_hash = sha256File(abs);
-      } else {
-        errors.push(`${e.src}: license_file missing: ${e.license_file}`);
-      }
-    }
-  }
-  return errors;
-}
+// The license → redistribution-policy check ships in @galaxy-foundry/cast. What stays this
+// Foundry's is the license_file PRESENCE rule — which notes must declare one at all — because
+// only the validator's `upstream` scoping can tell a Foundry-authored license annotation from
+// genuine third-party redistribution.
 
 // ---- deterministic SKILL.md assembly ----
 
