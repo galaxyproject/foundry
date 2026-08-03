@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
+import { base } from '../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const pipelines = (await getCollection('pipelines')).filter(n => n.data.status !== 'archived');
 
 const SOURCES = ['paper', 'cwl', 'nextflow'] as const;

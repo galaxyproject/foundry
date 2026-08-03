@@ -1,5 +1,6 @@
 ---
 import { type NoteEntry } from '../lib/notes';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -10,7 +11,6 @@ interface Props {
 }
 
 const { entry, pageTitle, typeLabel, eyebrow, showActions = false } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const data = entry.data;
 ---
 <header class="note-header">

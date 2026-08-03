@@ -2,6 +2,7 @@
 import { type NoteEntry } from '../lib/notes';
 import { licenseIdFromFilePath, resolveLicenseRow } from '@galaxy-foundry/license-policy';
 import { licensePolicy } from '../lib/registries';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -9,7 +10,6 @@ interface Props {
 
 const { entry } = Astro.props;
 const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const license: string | undefined = data.license;
 const licenseFile: string | undefined = data.license_file;

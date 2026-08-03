@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
+import { base } from '../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const patterns = (await getCollection('patterns'))
   .filter(n => n.data.status !== 'archived')
   .sort((a, b) => {

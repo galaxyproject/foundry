@@ -11,6 +11,7 @@
 import '../styles/global.css';
 import SiteShell from '@galaxy-foundry/site-kit/SiteShell.astro';
 
+import { base } from '../lib/site-base';
 import { SITE_IDENTITY } from '../lib/site-identity';
 
 // The composition point for @galaxy-foundry/site-kit, and the only file in this repo that knows
@@ -21,10 +22,11 @@ import { SITE_IDENTITY } from '../lib/site-identity';
 // Tailwind at the kit's source — without the `@source` line there, every utility the kit writes is
 // missing from the emitted stylesheet and the build stays green.
 //
-// `BASE_URL` and the pathname are read HERE rather than in the kit, so the kit reads no
-// environment. Not tidiness: under vitest `import.meta.env.BASE_URL` is mirrored into the process
-// and comes back as `/`, which is how this repo's suite once spent weeks asserting against a site
-// built at the wrong base.
+// `BASE_URL` and the pathname are read by this INSTANCE, never by the kit, so the kit reads no
+// environment. The base comes from `lib/site-base` — the same import every page here builds its
+// hrefs from — so the chrome and the corpus cannot resolve it differently. Not tidiness: under
+// vitest `import.meta.env.BASE_URL` is mirrored into the process and comes back as `/`, which is
+// how this repo's suite once spent weeks asserting against a site built at the wrong base.
 interface Props {
   title: string;
   description?: string;
@@ -34,7 +36,7 @@ const { title, description } = Astro.props;
 <SiteShell
   title={title}
   description={description}
-  base={import.meta.env.BASE_URL}
+  base={base}
   pathname={Astro.url.pathname}
   identity={SITE_IDENTITY}
 >

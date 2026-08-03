@@ -1,12 +1,12 @@
 ---
 import { listCastsForMold, type CastArtifact } from '../lib/casts';
+import { base } from '../lib/site-base';
 
 interface Props {
   moldSlug: string;
 }
 
 const { moldSlug } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const casts: CastArtifact[] = listCastsForMold(moldSlug);
 
 const TARGET_LABEL: Record<string, string> = {

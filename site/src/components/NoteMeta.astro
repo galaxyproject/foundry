@@ -1,6 +1,7 @@
 ---
 import { type NoteEntry } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -11,7 +12,6 @@ interface Props {
 const { entry, linkMap, mode = 'full' } = Astro.props;
 const showRevision = mode === 'full';
 const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function formatDate(d: Date): string {
   return d.toISOString().slice(0, 10);

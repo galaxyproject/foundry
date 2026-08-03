@@ -4,6 +4,7 @@ import type { WikiLinkTarget } from '../lib/wiki-links';
 import PhaseGraph from './PhaseGraph.astro';
 import StopGapBanner from './StopGapBanner.astro';
 import { loadAssembly, assemblyStats } from '../lib/casts';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -11,7 +12,6 @@ interface Props {
 }
 
 const { entry, linkMap } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const data = entry.data as any;
 const phaseCount = Array.isArray(data.phases) ? data.phases.length : 0;
 

@@ -2,8 +2,8 @@
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { DESIGN_DOC_GROUPS, designDocsByCategory, designDocHref } from '../../lib/design-docs';
+import { base } from '../../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getAllNotes();
 const designDocGroups = await Promise.all(
   DESIGN_DOC_GROUPS.map(async group => ({

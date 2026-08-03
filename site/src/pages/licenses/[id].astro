@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import { getLicenses } from '../../lib/licenses';
 import { licenseIdFromFilePath, resolveLicenseRow } from '@galaxy-foundry/license-policy';
 import { licensePolicy } from '../../lib/registries';
+import { base } from '../../lib/site-base';
 
 export async function getStaticPaths() {
   return getLicenses().map(license => ({
@@ -13,7 +14,6 @@ export async function getStaticPaths() {
 }
 
 const { license } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // Notes that redistribute content under this LICENSES/ file, with their SPDX id.
 const entries = await getAllNotes();

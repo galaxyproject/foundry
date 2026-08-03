@@ -1,4 +1,6 @@
 ---
+import { base } from '../lib/site-base';
+
 // Shared stop-gap framing for the pipeline-harness surfaces (run-a-pipeline
 // page, per-pipeline Run panel, harness sub-route). Single source for the
 // "these are deliberate in-repo stop-gaps" honesty wired to the harness design record.
@@ -6,7 +8,6 @@ interface Props {
   compact?: boolean;
 }
 const { compact = false } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const harnessHref = `${base}/meta/harness-pipelines/`;
 ---
 <aside class:list={['stop-gap', compact && 'stop-gap-compact']} aria-label="Stop-gap notice">

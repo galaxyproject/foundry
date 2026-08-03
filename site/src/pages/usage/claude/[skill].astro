@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import Base from '../../../layouts/Base.astro';
 import { listAllCasts, loadClaudeSkillBundle, type CastAttachedFile } from '../../../lib/casts';
+import { base } from '../../../lib/site-base';
 
 export async function getStaticPaths() {
   const casts = listAllCasts().filter(c => c.target === 'claude' && c.hasSkill);
@@ -18,7 +19,6 @@ export async function getStaticPaths() {
 }
 
 const { moldSlug, dir, name, description } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const bundle = loadClaudeSkillBundle(moldSlug);
 const skillText = readFileSync(path.join(dir, 'SKILL.md'), 'utf8');
 const body = skillText.replace(/^---\n[\s\S]*?\n---\n/, '');

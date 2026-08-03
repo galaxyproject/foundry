@@ -4,6 +4,7 @@ import type { CompanionRequirement, NormalizedCompanion } from '@galaxy-foundry/
 import { checkNoteDirectory, companionOf, readCompanion } from '../lib/note-directory';
 import HealthPanel from './HealthPanel.astro';
 import { resolveWikiLinkId, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -22,7 +23,6 @@ interface HealthItem {
 
 const { entry, linkMap, entryById } = Astro.props;
 const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // The two files this panel reports on, taken from the kind rather than described here. The
 // NAME stays, because the checks below read these files' contents and no declaration can say

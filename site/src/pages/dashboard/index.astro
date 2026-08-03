@@ -3,8 +3,8 @@ import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import sections from '../../../../dashboard_sections.json';
 import { designDocsByCategory, designDocHref } from '../../lib/design-docs';
+import { base } from '../../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getAllNotes();
 const infrastructureDocs = await designDocsByCategory('infrastructure');
 

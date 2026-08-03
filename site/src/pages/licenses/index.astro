@@ -3,8 +3,8 @@ import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { getLicenses } from '../../lib/licenses';
 import { licenseIdFromFilePath } from '@galaxy-foundry/license-policy';
+import { base } from '../../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const licenses = getLicenses();
 
 // Count redistributing notes per license file.

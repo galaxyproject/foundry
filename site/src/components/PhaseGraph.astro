@@ -1,5 +1,6 @@
 ---
 import { resolveWikiLink, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
 interface Props {
   phases: any[];
@@ -7,7 +8,6 @@ interface Props {
 }
 
 const { phases, linkMap } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n);

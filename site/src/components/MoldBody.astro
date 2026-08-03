@@ -4,6 +4,7 @@ import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 import ReferenceContract from './ReferenceContract.astro';
 import CastArtifacts from './CastArtifacts.astro';
 import { artifactHref, type ArtifactGraph } from '../lib/artifacts';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -14,7 +15,6 @@ interface Props {
 
 const { entry, linkMap, artifactGraph, entryById } = Astro.props;
 const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const axisChip = data.axis;
 const specifier = data.source ?? data.target ?? data.tool ?? null;

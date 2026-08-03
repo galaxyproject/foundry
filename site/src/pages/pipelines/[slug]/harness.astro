@@ -3,6 +3,7 @@ import { getAllNotes } from '../../../lib/notes';
 import { readFileSync } from 'node:fs';
 import Base from '../../../layouts/Base.astro';
 import StopGapBanner from '../../../components/StopGapBanner.astro';
+import { base } from '../../../lib/site-base';
 import {
   loadAssembly,
   loadClaudeSkillBundle,
@@ -26,7 +27,6 @@ export async function getStaticPaths() {
 }
 
 const { slug, title } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const assembly = loadAssembly(slug)!;
 const stats = assemblyStats(assembly);
 const bundle = loadClaudeSkillBundle(assembly.harness_name);

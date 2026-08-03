@@ -1,13 +1,13 @@
 ---
 import { type NoteEntry } from '../lib/notes';
 import type { Backlink } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
 interface Props {
   incoming: (Backlink & { source: NoteEntry })[];
 }
 
 const { incoming } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const FIELD_LABELS: Record<string, string> = {
   parent_pattern: 'parent pattern',

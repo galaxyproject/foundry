@@ -22,40 +22,25 @@
 //
 // The correct anchor is `root` from `astro:config/server` — see `site/src/lib/repo-root.ts`.
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import path from "node:path";
-
 import { describe, expect, it } from "vitest";
 
-const SITE_SRC = new URL("../site/src/", import.meta.url).pathname;
-const SCANNED_EXTENSIONS = [".ts", ".astro", ".mts", ".js", ".mjs"];
-
-function sourceFiles(dir: string): string[] {
-  return readdirSync(dir).flatMap((entry) => {
-    const full = path.join(dir, entry);
-    if (statSync(full).isDirectory()) return sourceFiles(full);
-    return SCANNED_EXTENSIONS.includes(path.extname(full)) ? [full] : [];
-  });
-}
-
-// Comments are stripped first, so a module is free to DESCRIBE the mistake — `note-directory.ts`
-// and this file both do, at length, and neither is a violation.
-function stripComments(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
-}
+import { repoRelative, siteSourceCode, siteSourceFiles } from "./site-sources";
 
 // A fixed hop count. `package-version.ts` walks up one `dirname` at a time until it finds what it
 // is looking for, which is depth-tolerant by construction and deliberately not matched here.
+//
+// Comments are stripped before this is applied, so a module is free to DESCRIBE the mistake —
+// `note-directory.ts` and this file both do, at length, and neither is a violation.
 const PARENT_HOP = /(['"`])\.\.[\/'"`]/;
 
 describe("anchoring a site module to the repository root", () => {
   it("never counts ../ from import.meta.url", () => {
-    const offenders = sourceFiles(SITE_SRC)
+    const offenders = siteSourceFiles()
       .filter((file) => {
-        const code = stripComments(readFileSync(file, "utf-8"));
+        const code = siteSourceCode(file);
         return code.includes("import.meta.url") && PARENT_HOP.test(code);
       })
-      .map((file) => path.relative(path.join(SITE_SRC, "../.."), file));
+      .map(repoRelative);
 
     expect(
       offenders,

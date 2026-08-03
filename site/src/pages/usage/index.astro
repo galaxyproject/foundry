@@ -3,8 +3,8 @@ import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import RunPipelines from '../../components/RunPipelines.astro';
 import { listAllCasts, loadAssembly } from '../../lib/casts';
+import { base } from '../../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const casts = listAllCasts();
 
 const runnablePipelines = (await getAllNotes())
