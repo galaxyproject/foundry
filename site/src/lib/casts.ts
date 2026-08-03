@@ -1,16 +1,22 @@
 // Discover cast artifacts on disk for a given Mold slug.
 //
 // Layout:
-//   casts/claude/skills/<mold>/SKILL.md   (Claude target — under skills/ for plugin layout)
-//   casts/<target>/<mold>/...              (any other target)
+//   casts/<target>/<bundle_path>/SKILL.md
 //
-// Which targets exist is read off the tree — see discoverTargets.
+// Which targets exist is read off the tree, and where each puts its bundles is read off that
+// target's `_target.yml` — see discoverTargets and target-layout.ts. Neither is listed here;
+// this file used to hardcode both, and outlived two targets that were deleted.
 //
 // Used by the Astro Mold page (Cast Artifacts panel) and the /usage/ index.
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import {
+  bundlePathTemplate,
+  resolveBundlePath,
+} from "../../../packages/build-cli/src/lib/target-layout.js";
 
 /** A cast target's name — whatever directory under `casts/` carries a `_target.yml`. */
 export type CastTarget = string;
@@ -93,11 +99,11 @@ export interface ClaudeSkillBundle extends CastArtifact {
  * is real when it has a config the caster can read; nothing else has to be told.
  */
 function discoverTargets(repoRoot: string): CastTarget[] {
-  const castsRoot = path.join(repoRoot, 'casts');
+  const castsRoot = path.join(repoRoot, "casts");
   if (!existsSync(castsRoot)) return [];
   return readdirSync(castsRoot)
-    .filter((name) => !name.startsWith('.'))
-    .filter((name) => existsSync(path.join(castsRoot, name, '_target.yml')))
+    .filter((name) => !name.startsWith("."))
+    .filter((name) => existsSync(path.join(castsRoot, name, "_target.yml")))
     .sort();
 }
 
@@ -107,34 +113,44 @@ function discoverTargets(repoRoot: string): CastTarget[] {
  * not in the `/usage/` cast inventory.
  */
 export function isHarnessSlug(slug: string): boolean {
-  return slug.startsWith('pipeline-');
+  return slug.startsWith("pipeline-");
 }
 
 /** Repo root inferred relative to this file: site/src/lib → ../../.. */
 function defaultRepoRoot(): string {
   const here = path.dirname(fileURLToPath(import.meta.url));
-  return path.resolve(here, '..', '..', '..');
+  return path.resolve(here, "..", "..", "..");
 }
 
 function castDirFor(target: CastTarget, moldSlug: string, repoRoot: string): string {
-  if (target === 'claude') return path.join(repoRoot, 'casts', target, 'skills', moldSlug);
-  return path.join(repoRoot, 'casts', target, moldSlug);
+  const rel = resolveBundlePath(bundlePathTemplate(repoRoot, target), moldSlug);
+  return path.join(repoRoot, "casts", target, rel);
+}
+
+/**
+ * The directory bundles sit *in* for a target — the parent of one resolved bundle path.
+ *
+ * Derived from the same declaration rather than named separately, so a target that moves its
+ * bundles cannot move them for the per-Mold lookup and not for the inventory walk.
+ */
+function castsRootFor(target: CastTarget, repoRoot: string): string {
+  return path.dirname(castDirFor(target, "_", repoRoot));
 }
 
 function readSkillFrontmatter(skillPath: string): { name?: string; description?: string } {
   if (!existsSync(skillPath)) return {};
-  const text = readFileSync(skillPath, 'utf8');
+  const text = readFileSync(skillPath, "utf8");
   const m = text.match(/^---\n([\s\S]*?)\n---/);
   if (!m) return {};
   const out: { name?: string; description?: string } = {};
-  for (const line of m[1]!.split('\n')) {
+  for (const line of m[1]!.split("\n")) {
     const k = line.match(/^(name|description):\s*(.*?)\s*$/);
     if (!k) continue;
     let v = k[2]!;
     if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
       v = v.slice(1, -1);
     }
-    out[k[1] as 'name' | 'description'] = v;
+    out[k[1] as "name" | "description"] = v;
   }
   return out;
 }
@@ -142,28 +158,29 @@ function readSkillFrontmatter(skillPath: string): { name?: string; description?:
 function readProvenance(provenancePath: string): CastProvenance | null {
   if (!existsSync(provenancePath)) return null;
   try {
-    return JSON.parse(readFileSync(provenancePath, 'utf8')) as CastProvenance;
+    return JSON.parse(readFileSync(provenancePath, "utf8")) as CastProvenance;
   } catch {
     return null;
   }
 }
 
 function anchorForPath(bundlePath: string): string {
-  return `ref-${bundlePath.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')}`;
+  return `ref-${bundlePath
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")}`;
 }
 
 function safeBundlePath(bundleRoot: string, bundlePath: string): string | null {
   const abs = path.resolve(bundleRoot, bundlePath);
   const rel = path.relative(bundleRoot, abs);
-  if (rel.startsWith('..') || path.isAbsolute(rel)) return null;
+  if (rel.startsWith("..") || path.isAbsolute(rel)) return null;
   return abs;
 }
 
 function attachedFilesFor(dir: string, provenance: CastProvenance | null): CastAttachedFile[] {
   if (!provenance?.refs) return [];
-  return provenance.refs.map(ref => {
+  return provenance.refs.map((ref) => {
     const absPath = safeBundlePath(dir, ref.dst);
     const exists = absPath ? existsSync(absPath) : false;
     const stats = exists && absPath ? statSync(absPath) : null;
@@ -173,20 +190,23 @@ function attachedFilesFor(dir: string, provenance: CastProvenance | null): CastA
       absPath: exists ? absPath : null,
       exists,
       sizeBytes: stats?.size ?? null,
-      extension: path.extname(ref.dst).replace(/^\./, ''),
+      extension: path.extname(ref.dst).replace(/^\./, ""),
       anchor: anchorForPath(ref.dst),
     };
   });
 }
 
-export function loadClaudeSkillBundle(moldSlug: string, repoRoot: string = defaultRepoRoot()): ClaudeSkillBundle | null {
-  const dir = castDirFor('claude', moldSlug, repoRoot);
-  const skillPath = path.join(dir, 'SKILL.md');
+export function loadClaudeSkillBundle(
+  moldSlug: string,
+  repoRoot: string = defaultRepoRoot(),
+): ClaudeSkillBundle | null {
+  const dir = castDirFor("claude", moldSlug, repoRoot);
+  const skillPath = path.join(dir, "SKILL.md");
   if (!existsSync(dir) || !existsSync(skillPath)) return null;
-  const provenance = readProvenance(path.join(dir, '_provenance.json'));
+  const provenance = readProvenance(path.join(dir, "_provenance.json"));
   const fm = readSkillFrontmatter(skillPath);
   return {
-    target: 'claude',
+    target: "claude",
     moldSlug,
     dir,
     hasSkill: true,
@@ -198,12 +218,15 @@ export function loadClaudeSkillBundle(moldSlug: string, repoRoot: string = defau
 }
 
 /** All cast artifacts for one mold, across targets. */
-export function listCastsForMold(moldSlug: string, repoRoot: string = defaultRepoRoot()): CastArtifact[] {
+export function listCastsForMold(
+  moldSlug: string,
+  repoRoot: string = defaultRepoRoot(),
+): CastArtifact[] {
   const out: CastArtifact[] = [];
   for (const target of discoverTargets(repoRoot)) {
     const dir = castDirFor(target, moldSlug, repoRoot);
     if (!existsSync(dir)) continue;
-    const skillPath = path.join(dir, 'SKILL.md');
+    const skillPath = path.join(dir, "SKILL.md");
     const hasSkill = existsSync(skillPath);
     const fm = hasSkill ? readSkillFrontmatter(skillPath) : {};
     out.push({ target, moldSlug, dir, hasSkill, ...fm });
@@ -215,27 +238,29 @@ export function listCastsForMold(moldSlug: string, repoRoot: string = defaultRep
 export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact[] {
   const out: CastArtifact[] = [];
   for (const target of discoverTargets(repoRoot)) {
-    const root = target === 'claude'
-      ? path.join(repoRoot, 'casts', 'claude', 'skills')
-      : path.join(repoRoot, 'casts', target);
+    const root = castsRootFor(target, repoRoot);
     if (!existsSync(root)) continue;
     let entries: string[];
-    try { entries = readdirSync(root); } catch { continue; }
+    try {
+      entries = readdirSync(root);
+    } catch {
+      continue;
+    }
     for (const name of entries) {
-      if (name.startsWith('.') || name.startsWith('_')) continue;
+      if (name.startsWith(".") || name.startsWith("_")) continue;
       const dir = path.join(root, name);
       if (!statSync(dir).isDirectory()) continue;
       // Pipeline harnesses (prefix + an `_assembly.json` manifest) render on the
       // pipelines surface, not the `/usage/` cast inventory.
-      if (isHarnessSlug(name) && existsSync(path.join(dir, '_assembly.json'))) continue;
-      const skillPath = path.join(dir, 'SKILL.md');
+      if (isHarnessSlug(name) && existsSync(path.join(dir, "_assembly.json"))) continue;
+      const skillPath = path.join(dir, "SKILL.md");
       const hasSkill = existsSync(skillPath);
       const fm = hasSkill ? readSkillFrontmatter(skillPath) : {};
       out.push({ target, moldSlug: name, dir, hasSkill, ...fm });
     }
   }
-  return out.sort((a, b) =>
-    a.target.localeCompare(b.target) || a.moldSlug.localeCompare(b.moldSlug),
+  return out.sort(
+    (a, b) => a.target.localeCompare(b.target) || a.moldSlug.localeCompare(b.moldSlug),
   );
 }
 
@@ -245,7 +270,7 @@ export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact
 
 export interface AssemblyPhase {
   phase: number;
-  kind: 'mold' | 'branch' | string;
+  kind: "mold" | "branch" | string;
   /** Present for `kind: mold`. */
   skill?: string;
   /** Boolean for mold phases; per-leg array for branch phases. */
@@ -276,11 +301,17 @@ export interface AssemblyStats {
 }
 
 /** Load the harness assembly for a pipeline slug (e.g. `nextflow-to-galaxy`). */
-export function loadAssembly(pipelineSlug: string, repoRoot: string = defaultRepoRoot()): AssemblyManifest | null {
-  const file = path.join(repoRoot, 'casts', 'claude', 'skills', `pipeline-${pipelineSlug}`, '_assembly.json');
+export function loadAssembly(
+  pipelineSlug: string,
+  repoRoot: string = defaultRepoRoot(),
+): AssemblyManifest | null {
+  const file = path.join(
+    castDirFor("claude", `pipeline-${pipelineSlug}`, repoRoot),
+    "_assembly.json",
+  );
   if (!existsSync(file)) return null;
   try {
-    return JSON.parse(readFileSync(file, 'utf8')) as AssemblyManifest;
+    return JSON.parse(readFileSync(file, "utf8")) as AssemblyManifest;
   } catch {
     return null;
   }

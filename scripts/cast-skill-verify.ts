@@ -18,6 +18,7 @@ import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
 import { NEVER_PACKAGED } from "../packages/build-cli/src/lib/dispositions.js";
+import { bundlePathOf, resolveBundlePath } from "../packages/build-cli/src/lib/target-layout.js";
 import { listFilesUnder } from "../packages/build-cli/src/lib/walk.js";
 import { readMarkdown } from "./lib/frontmatter.js";
 
@@ -85,6 +86,7 @@ function stripFencedBlocks(markdown: string): string {
 
 interface TargetConfig {
   name: string;
+  bundle_path?: string;
   required_outputs: string[];
   skill_constraints: {
     frontmatter_required: string[];
@@ -133,11 +135,13 @@ function main(): void {
   if (!existsSync(targetCfgPath)) fail(`missing target config: ${targetCfgPath}`);
   const target = yaml.load(readFileSync(targetCfgPath, "utf8")) as TargetConfig;
 
-  // Claude target casts live under skills/ (plugin layout).
-  const bundleRoot =
-    args.target === "claude"
-      ? path.join(repoRoot, "casts", args.target, "skills", args.moldName)
-      : path.join(repoRoot, "casts", args.target, args.moldName);
+  // Placement is the target's to declare; see packages/build-cli/src/lib/target-layout.ts.
+  const bundleRoot = path.join(
+    repoRoot,
+    "casts",
+    args.target,
+    resolveBundlePath(bundlePathOf(target.bundle_path, targetCfgPath), args.moldName),
+  );
   if (!existsSync(bundleRoot)) fail(`missing bundle: ${bundleRoot}`);
 
   const errors: string[] = [];
@@ -239,7 +243,9 @@ function main(): void {
   const validationSection = (skillBody.match(/## Validation[\s\S]*?(?=\n## |$)/) ?? [""])[0];
   for (const cmd of verifyOutputCommands) {
     if (!validationSection.includes(cmd)) {
-      errors.push(`SKILL.md: Validation section omits '${cmd}' from _verify.json (renderer dropped the validator subcommand)`);
+      errors.push(
+        `SKILL.md: Validation section omits '${cmd}' from _verify.json (renderer dropped the validator subcommand)`,
+      );
     }
   }
 
