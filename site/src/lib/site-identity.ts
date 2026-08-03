@@ -2,9 +2,13 @@
 //
 // The shell — Base, Header, Footer — is within a handful of lines of the sibling instance's, and
 // every one of those lines is a value rather than a decision: the name in the wordmark, the name
-// in the footer, the description, the width of the column. Naming them here is worth doing on its
-// own terms, and it is also what would have to happen first if the shell were ever to be shared:
-// what remains after this is markup, and markup is the part that could move.
+// in the footer, the description, the width of the column, where the nav goes. Naming them here is
+// worth doing on its own terms, and it is also what would have to happen first if the shell were
+// ever to be shared: what remains after this is markup, and markup is the part that could move.
+//
+// Base.astro and Header.astro are now byte-identical to the sibling's. That is the measure of how
+// much of the shell was ever this site's: two files, and the difference between them was entirely
+// the values below.
 //
 // The two names are not redundant. The wordmark and the <title> suffix want the short one, and
 // the footer wants the full one — this instance is "Foundry" in its own header and "Galaxy
@@ -12,16 +16,56 @@
 // which is a fact about its name and not about the shape of this file.
 
 /** Short name: the header wordmark and the `<title>` suffix. */
-export const SITE_NAME = 'Foundry';
+export const SITE_NAME = "Foundry";
 
 /** Full name: the footer, and the first words of the description. */
-export const SITE_FULL_NAME = 'Galaxy Workflow Foundry';
+export const SITE_FULL_NAME = "Galaxy Workflow Foundry";
 
 /** Default `<meta name="description">`, and the og/twitter pair built from it. */
 export const SITE_DESCRIPTION =
-  'Galaxy Workflow Foundry — knowledge base + casting pipeline for Galaxy workflows.';
+  "Galaxy Workflow Foundry — knowledge base + casting pipeline for Galaxy workflows.";
 
-export const REPO_URL = 'https://github.com/galaxyproject/foundry';
+export const REPO_URL = "https://github.com/galaxyproject/foundry";
+
+/**
+ * The primary navigation, in order.
+ *
+ * `path` is site-absolute and carries no base — `BASE_URL` is applied where the link is rendered.
+ * That keeps this a plain list: no closures, nothing an environment variable has to resolve, so it
+ * can be serialized, read from a file, or handed to a shared header as a prop.
+ *
+ * Active state is DERIVED from `path`: a link is active on its own page and on everything under
+ * it. Every entry used to carry that rule as its own `match` closure, and fifteen of the sixteen
+ * across the two instances were the same single line. The sixteenth — Pipelines, here — also
+ * excluded any path containing `/molds`, and that pair of routes has never existed: the clause
+ * dates to the first commit of the repo and matches none of the 374 pages the build emits. It is
+ * gone rather than ported, because a shared header cannot take an exception it cannot express.
+ */
+export const NAV_LINKS = [
+  { path: "/story/", label: "Story" },
+  { path: "/usage/", label: "Usage" },
+  { path: "/molds/", label: "Molds" },
+  { path: "/patterns/", label: "Patterns" },
+  { path: "/pipelines/", label: "Pipelines" },
+  { path: "/dashboard/", label: "Dashboard" },
+  { path: "/index/", label: "Index" },
+  { path: "/tags/", label: "Tags" },
+  { path: "/external/", label: "External" },
+  { path: "/log/", label: "Log" },
+];
+
+/**
+ * How many of them stay on the bar. Everything after goes under "More".
+ *
+ * A count, not a claim about which sections matter — it is set by what fits, and what fits differs
+ * between the two instances because the wordmark does. Measured against the built page at the
+ * 1152px bound: this wordmark is 75px, and five links plus the search box leave 399px of slack.
+ * The sibling's wordmark is 279px — 204px more, about four links' worth — so it carries all six of
+ * its destinations on the bar and its "More" group never renders.
+ *
+ * Raise it while the bar has slack; lower it the moment a label wraps to a second row.
+ */
+export const NAV_VISIBLE = 5;
 
 /**
  * The measure of the reading column, as a Tailwind class.
@@ -48,4 +92,4 @@ export const REPO_URL = 'https://github.com/galaxyproject/foundry';
  * Base, Header and Footer each carried a copy of this, free to disagree —
  * `tests/built-shell.test.ts` asserts the three agree.
  */
-export const CONTAINER = 'max-w-6xl';
+export const CONTAINER = "max-w-6xl";

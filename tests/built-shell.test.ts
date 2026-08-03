@@ -31,6 +31,8 @@ import path from "node:path";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { NAV_LINKS } from "../site/src/lib/site-identity";
+
 const REPO_ROOT = new URL("../", import.meta.url).pathname;
 const SITE = path.join(REPO_ROOT, "site");
 const DIST = path.join(SITE, "dist");
@@ -47,6 +49,20 @@ function newestMtime(dir: string): number {
 }
 
 /**
+ * The environment for the child build, with vitest's own removed.
+ *
+ * Vitest mirrors `import.meta.env` into `process.env` — `MODE`, `DEV`, `PROD`, `SSR`, and
+ * `BASE_URL=/`. A child `astro build` inherits all five, and takes `BASE_URL` over the `base` in
+ * `astro.config.mjs`: every link on every page comes out root-relative, and this suite asserts
+ * against a site that is not the one being shipped. It built cleanly, all 374 pages, for as long
+ * as this file has existed. Nothing noticed until an assertion read an href.
+ */
+function buildEnv(): NodeJS.ProcessEnv {
+  const { BASE_URL, MODE, DEV, PROD, SSR, ...rest } = process.env;
+  return rest;
+}
+
+/**
  * Build only when `dist/` is missing or older than the sources.
  *
  * Asserting against a stale `dist/` is worse than not asserting: it reports on a site nobody is
@@ -55,10 +71,9 @@ function newestMtime(dir: string): number {
 function ensureBuilt(): void {
   const landmark = path.join(DIST, "index.html");
   const fresh =
-    existsSync(landmark) &&
-    statSync(landmark).mtimeMs > newestMtime(path.join(SITE, "src"));
+    existsSync(landmark) && statSync(landmark).mtimeMs > newestMtime(path.join(SITE, "src"));
   if (fresh) return;
-  execFileSync("pnpm", ["run", "build"], { cwd: SITE, stdio: "inherit" });
+  execFileSync("pnpm", ["run", "build"], { cwd: SITE, stdio: "inherit", env: buildEnv() });
 }
 
 function builtPages(dir: string = DIST): string[] {
@@ -145,8 +160,86 @@ describe("the stylesheet the shell depends on", () => {
       css.includes(LAYOUT_ONLY_UTILITY),
       `\n\`${LAYOUT_ONLY_UTILITY}\` is referenced by the built markup but has no rule in any` +
         ` emitted stylesheet. Tailwind did not scan the file that declares it — see the header` +
-        ` comment. The pages will render unstyled, and nothing else reports this.`
+        ` comment. The pages will render unstyled, and nothing else reports this.`,
     ).toBe(true);
+  });
+});
+
+describe("the navigation", () => {
+  // `NAV_LINKS` is data: a path and a label, nothing callable. Which link is active is DERIVED
+  // from the path rather than declared per entry, and one derivation now stands in for ten
+  // hand-written matchers — so the derivation is what gets asserted, against built pages.
+  //
+  // Both halves fail quietly. A destination that points at no route renders as a perfectly good
+  // link to a 404, and a section that never lights up looks like a page the reader navigated to
+  // some other way. Neither shows up in a build log.
+  const region = (html: string, open: string, close: string): string =>
+    html.slice(html.indexOf(open), html.indexOf(close) + close.length);
+  const hrefsIn = (nav: string): string[] =>
+    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"/g)].flatMap((m) => (m[1] ? [m[1]] : []));
+  const activeIn = (nav: string): string[] =>
+    [...nav.matchAll(/<a\s[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].flatMap((m) =>
+      m[1] ? [m[1]] : [],
+    );
+  /** The wordmark is the first link in the header, and it points at the site root. */
+  const baseFrom = (html: string): string =>
+    (/<a\s[^>]*href="([^"]+)"/.exec(region(html, "<header", "</header>"))?.[1] ?? "/").replace(
+      /\/$/,
+      "",
+    );
+
+  it("emits links under the base the site is configured to deploy at", () => {
+    // The assertion that found the `BASE_URL` leak above, stated directly so the next one names
+    // itself instead of surfacing as "no section is ever marked active". The pages are served
+    // from a subpath; a build that forgets it produces links that all 404 on the deployed site
+    // and all resolve locally.
+    const configured = /\bbase\s*[:=]\s*["']([^"']+)["']/.exec(
+      read(path.join(SITE, "astro.config.mjs")),
+    )?.[1];
+
+    expect(configured, "\nno base in astro.config.mjs — has the config moved?").toBeTruthy();
+    expect(baseFrom(home)).toBe(configured);
+  });
+
+  it("points every destination at a section the build emitted", () => {
+    const missing = NAV_LINKS.filter(
+      (link) => !existsSync(path.join(DIST, link.path, "index.html")),
+    );
+    expect(
+      missing.map((link) => link.path),
+      "\nnav destinations with no built index",
+    ).toEqual([]);
+  });
+
+  it("renders every destination it declares, on the bar or under More", () => {
+    // The bar is a slice of the list, so a wrong cut point drops links off the end of the header
+    // rather than erroring. Count and membership both, since a duplicate would satisfy the count.
+    const rendered = new Set(hrefsIn(region(home, "<nav", "</nav>")));
+    const declared = NAV_LINKS.map((link) => `${baseFrom(home)}${link.path}`);
+
+    expect(
+      declared.filter((href) => !rendered.has(href)),
+      "\ndeclared but not rendered",
+    ).toEqual([]);
+    expect(rendered.size).toBe(NAV_LINKS.length);
+  });
+
+  it("marks the section the reader is in, and marks no other", () => {
+    const base = baseFrom(home);
+    const wrong = NAV_LINKS.flatMap((link) => {
+      const href = `${base}${link.path}`;
+      const under = pages.filter((file) => rel(file).startsWith(link.path.slice(1)));
+      // The section index and the last page under it. The rule is "this page or anything beneath
+      // it", and the second sample is the half a plain equality check would get wrong.
+      return [under[0], under[under.length - 1]]
+        .filter((file): file is string => Boolean(file))
+        .map((file) => ({
+          page: rel(file),
+          marked: activeIn(region(read(file), "<nav", "</nav>")),
+        }))
+        .filter((seen) => seen.marked.length !== 1 || seen.marked[0] !== href);
+    });
+    expect(wrong, "\npages whose header does not mark exactly their own section").toEqual([]);
   });
 });
 
