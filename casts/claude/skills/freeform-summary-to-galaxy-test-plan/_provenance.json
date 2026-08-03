@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "9c1d56e625a5dd26cb7a82082ac8f4eeb7db287a626bf00e73457c8dd491ad6d",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "466d4480b91afa1ea77ae0076fd78f62d727d264"
   },
-  "cast_at": "2026-07-30T19:12:27.267Z",
+  "cast_at": "2026-08-02T18:10:28.915Z",
   "refs": [
     {
       "kind": "research",
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the assertion family and tolerance that fit each synthesized expected output by output type.",
       "trigger": "When turning an expected output into assertion intent and a tolerance.",
-      "src_hash": "2ea0965d34eb40e8631db199270ea8278b01349b7939e8ec0a8a87ad3f6a2c93",
-      "dst_hash": "2ea0965d34eb40e8631db199270ea8278b01349b7939e8ec0a8a87ad3f6a2c93",
+      "src_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
+      "dst_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
       "source": "deterministic"
     },
     {
