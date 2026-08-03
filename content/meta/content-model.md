@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-08-02
 revised: 2026-08-02
-revision: 1
+revision: 2
 summary: "How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge."
 ---
 
@@ -16,26 +16,17 @@ This record owns the representation of knowledge under `content/`. It answers **
 
 ## Notes, kinds, and identity
 
-A **Note** is a Markdown source file whose frontmatter declares exactly one `type`. That type selects a **Kind** definition: the metadata contract, file-or-directory shape, and permitted companions. Identity is the note's content-relative slug, with kind-specific aliases added only by the shared resolver.
+A **Note** is a Markdown source file whose frontmatter declares exactly one `type`. That type selects a **Kind** definition: the metadata contract, file-or-directory shape, and permitted companions.
 
-The current kinds are:
+The kinds fall into four groups. **`meta`** is the design record — the one kind whose subject is the Foundry itself rather than Galaxy workflow construction. **`mold` and `pipeline`** are what acts: an abstract action, and an ordered journey of actions. **`pattern`, `source-pattern`, `cli-tool`, `cli-command`, `schema`, and `prompt`** are the reference content a Mold cites, each carried into a bundle its own way. **`research`** is background synthesis holding its own vendored sources.
 
-| Kind | Purpose | Shape and location |
-|---|---|---|
-| `meta` | design record about the Foundry | flat file under `content/meta/` |
-| `mold` | abstract action compiled into cast artifacts | `content/molds/<slug>/index.md` plus declared companions |
-| `pattern` | reusable Galaxy construction reference | flat file under `content/patterns/` |
-| `source-pattern` | source-to-target mapping reference | flat file under `content/source-patterns/<source>/` |
-| `cli-tool` | installation and invocation metadata for one CLI | `content/cli/<tool>/index.md` |
-| `cli-command` | one command or subcommand manual page | `content/cli/<tool>/<command>.md` |
-| `pipeline` | ordered journey of Mold and routing phases | `content/pipelines/<slug>/index.md` plus declared companions |
-| `research` | background synthesis with owned source companions | `content/research/<slug>/index.md` |
-| `schema` | renderable reference to a Mold IO schema | flat file under `content/schemas/` |
-| `prompt` | human framing plus a raw prompt sidecar | `content/prompts/<area>/<slug>/index.md` |
+`packages/note-schema/src/types/<kind>/` holds each kind's schema, its `kind.md` rationale, and a minimal `example.md`; `kinds.generated.json` beside them is the enumeration a consumer reads, derived from those definitions rather than restated. [[repository-layout]] owns where each kind's notes sit under `content/`.
 
-Kind is never inferred from a tag. Paths route files into collections; the note's literal `type` must agree with the collection's declared kind.
+Kind is never inferred from a tag, and every kind is its own literal rather than a member of one broad kind carrying a discriminating enum field. The literal is what makes the collection and the declared kind agree, or fail: a shared enum makes every field legal on every member, and would let a `cli-command` note sit at `content/cli/<tool>/index.md` — where a `cli-tool` belongs — and still validate. Paths route files into collections; the note's literal `type` must agree with the collection's declared kind.
 
-## Frontmatter contract
+Identity is the note's basename — a link's target is slugified and matched against it. The instance's link map adds the kind-specific aliases — a Mold's `name`, a `tool command` pair — while the grammar and the lookup rule come from `@galaxy-foundry/wiki-links`.
+
+## Frontmatter envelope
 
 Every note carries the base lifecycle envelope:
 
@@ -47,6 +38,8 @@ Every note carries the base lifecycle envelope:
 
 Each kind adds only fields meaningful to that kind. Definitions are strict: an unknown key is an error rather than silently accumulated metadata. The zod definitions in `@galaxy-foundry/note-schema` are the single authority used by validation, the site, and kind-manifest generation.
 
+Strictness is not only tidiness. An undeclared key is also an unvalidated key, and YAML will silently coerce it: a version pin left unquoted arrives as a float, where `1.20` and `1.2` are the same YAML number and two different pins. Declaring a field is what puts a type on it — the `id` on a Pattern's IWC exemplar step is a declared union of string-or-integer in `packages/note-schema/src/types/pattern/schema.ts`, because a Galaxy step id is sometimes `3` and sometimes `fastqc`, and declaring it makes that ambiguity a decision rather than a discovery.
+
 Mold IO schemas are a different contract. They validate artifacts passed between Molds; they do not validate note frontmatter. Their human-facing schema notes live under `content/schemas/`, while the JSON schema implementation stays with its producer package or the runtime `foundry` package. See [[schema-packages]].
 
 ## Tags and facets
@@ -55,11 +48,13 @@ Mold IO schemas are a different contract. They validate artifacts passed between
 
 The registry has two corpus-level drift rules: a note may not use an undeclared tag, and a declared instance tag or facet may not remain unused. Shared inherited vocabularies are not treated as instance-authored dead vocabulary.
 
-## Links and typed references
+## Links
 
 Body prose and selected frontmatter fields use Obsidian-style `[[Target]]` links. The validator and renderer share one parser and resolver. Resolution is exact after normalization — there is no prefix fallback, so an unresolved link fails validation or renders visibly unresolved rather than landing on an arbitrary near-match. Code spans are excluded because a backticked `[[Target]]` names the syntax rather than creating a link.
 
 That exclusion cuts both ways, and the second edge is the sharp one: `validateBodyWikiLinks` strips code spans *before* it scans, so a backticked link is not merely unrendered — it is unchecked. It can name a note that never existed and neither the site nor the validator will say so. Wrap a wiki link in backticks only when the literal token is the subject: a template slot, a frontmatter field shape, or a shell construct like `[[:space:]]` that is not a wiki link at all.
+
+## Typed references
 
 A wiki link expresses knowledge navigation. A Mold **Reference** adds compilation behavior: its `kind`, `load`, `used_at`, `modes`, and `evidence` fields tell casting how the target participates. Patterns may be condensed, prompts inlined, schemas and examples copied, CLI commands serialized as sidecars, and evaluation companions omitted. [[mold-spec]] owns the authoring contract and [[casting]] owns dispatch semantics.
 
