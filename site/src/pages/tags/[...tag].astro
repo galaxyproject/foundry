@@ -2,6 +2,7 @@
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { tags as registry } from '../../lib/registries';
+import { facetLabelOf } from '../../lib/tag-browse';
 import { base } from '../../lib/site-base';
 
 
@@ -19,7 +20,7 @@ const allNotes = await getAllNotes();
 
 // Declaring facet + registry gloss, resolved from meta_tags.yml rather than parsed off
 // the tag text — so this stays correct for a bare tag like `meta`.
-const facetLabel = registry.facetLabel(registry.facetOf(tag));
+const facetLabel = facetLabelOf(registry, tag);
 const gloss = registry.tagDescription(tag);
 
 // Ties broken by id, matching the validator's own sortByRevisedDesc. Without it, notes
