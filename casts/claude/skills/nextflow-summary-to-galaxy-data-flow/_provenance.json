@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "nextflow-summary-to-galaxy-data-flow",
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 5,
     "content_hash": "ab1fde58ac26d8d204e39eca5032fe304ad01c5128eb82b5f06bd2321426b174",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:35.477Z",
+  "cast_at": "2026-08-02T22:04:52.122Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [

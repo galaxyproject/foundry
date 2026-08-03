@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "summarize-galaxy-tool",
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 8,
     "content_hash": "a53a303bff1d7ace3b44fb12af329b12695bfcd165933634b8fb6484c0c306f7",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:51.923Z",
+  "cast_at": "2026-08-02T22:05:07.494Z",
   "refs": [
     {
       "kind": "cli-command",

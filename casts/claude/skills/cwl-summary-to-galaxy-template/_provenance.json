@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "cwl-summary-to-galaxy-template",
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 4,
     "content_hash": "6b50dfd2d7faf9306f9e69e9adf0163c41d9c5739b470e2cf1ae5e5c46f18d69",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:16.479Z",
+  "cast_at": "2026-08-02T22:04:26.955Z",
   "refs": [
     {
       "kind": "cli-command",

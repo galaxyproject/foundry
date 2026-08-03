@@ -34,7 +34,7 @@ For research notes:
 2. **Correctness vs corpus** — citations resolve, ranges are tight, paraphrases are faithful.
 3. **Schema / tag conformance** — frontmatter validates against the `@galaxy-foundry/note-schema` contract, all tags appear in `meta_tags.yml`. Note: per-type members are `.strict()`, so unknown frontmatter fields are blockers.
 4. **Survey decision conformance** — `## Decisions` sections in companion research notes are binding. Drift between page and decision record is a flag on both.
-5. **Form quality for casting** — pattern pages get LLM-condensed into cast skills; reference content should be "do this," not "what we considered." Pitfalls concrete; wiki-links meaningful.
+5. **Form quality for casting** — pattern pages are copied **verbatim** into cast skills, so what you see here is exactly what the agent gets: no summarization step will tighten it later. Reference content should be "do this," not "what we considered." Pitfalls concrete; wiki-links meaningful.
 
 ## Reporting format
 

@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 3,
     "content_hash": "f2852f94cb0101011ecfa991f09d551a8537bb3da02117a17e34ecba6e81c2a6",
-    "commit": "9cd5a742613078781ad8e08918af93285ae29367"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-07-30T19:12:07.696Z",
+  "cast_at": "2026-08-02T22:04:15.280Z",
   "refs": [
     {
       "kind": "cli-command",

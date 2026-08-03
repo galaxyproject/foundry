@@ -1,14 +1,14 @@
 {
-  "provenance_schema_version": 3,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
     "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "466d4480b91afa1ea77ae0076fd78f62d727d264"
+    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
   },
-  "cast_at": "2026-08-02T18:10:30.430Z",
+  "cast_at": "2026-08-02T22:04:46.585Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [

@@ -7,12 +7,12 @@ tags:
   - meta
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-30
-revision: 29
+revised: 2026-08-02
+revision: 30
 summary: "How typed Mold references become target-specific cast artifacts with provenance."
 ---
 
-How Molds become cast artifacts. Anchored to the file layout in [[architecture]] (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **deterministic assembly first, LLM condensation only where needed, reproducible enough to diff**. The generated skill body is deterministic; individual condensed references may still be LLM-produced and recorded.
+How Molds become cast artifacts. Anchored to the file layout in [[architecture]] (`molds/<name>/` -> `casts/<target>/<name>/`). Working premise: **deterministic assembly first, LLM second, reproducible enough to diff**. In this Foundry the deterministic half reaches all the way — there is no LLM phase, every reference is copied or built mechanically, and a re-cast of an unchanged Mold is byte-identical. That is what makes `--check` a gate rather than a diff review.
 
 ## What casting is
 
@@ -24,16 +24,18 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 
 | Reference kind | Source location | Casting transformation | Lands at | Status |
 |---|---|---|---|---|
-| `pattern` | `content/patterns/*.md` | Verbatim copy or LLM-condense per `mode` | `references/patterns/<slug>.md` | v1 |
+| `pattern` | `content/patterns/*.md` | Verbatim copy; may carry per-note companions | `references/patterns/<slug>.md` | v1 |
 | `cli-command` | `content/cli/<tool>/<cmd>.md` framing note plus registered upstream CLI metadata | Deterministic JSON sidecar sourced from registry metadata + framing markdown | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
 | `schema` | `[[wiki-link]]` to a `type: schema` note in `content/schemas/`. The note declares `package` + `package_export`; cast imports the named runtime export at build time and serializes it. Foundry-authored: schemas in `packages/<name>-schema/src/<name>.schema.json` (e.g. `summary-nextflow`, `galaxy-tool-discovery`). Vendored: schemas synced from upstream packages into `packages/<name>-schema/src/` (e.g. `tests-format` from `@galaxy-tool-util/schema`). | Verbatim copy of the imported export, JSON-serialized | `references/schemas/<note-slug>.schema.json` | v1 |
-| `research` | `content/research/<slug>/index.md` plus any companion files in that directory | Verbatim copy or LLM condense per `mode` | `references/notes/<slug>.md` for the note; each companion keeps its own filename | v1 |
-| `prompt` | `content/prompts/<area>/<slug>/index.md` wrapper note plus its `upstream.prompt` companion | Raw prompt sidecar copied verbatim, no LLM rewrite | `references/prompts/<slug>.md` | v1 |
+| `research` | `content/research/<slug>/index.md` plus any companion files in that directory | Verbatim copy | `references/notes/<slug>.md` for the note; each companion keeps its own filename | v1 |
+| `prompt` | `content/prompts/<area>/<slug>/index.md` wrapper note plus its `upstream.prompt` companion | Raw prompt sidecar copied verbatim | `references/prompts/<slug>.md` | v1 |
 | `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` | Contracted; caster rejects until a real Mold needs it |
 | `eval` | `content/molds/<slug>/eval.md` | **Never packaged** | — (Foundry-only) | n/a |
 | `mold` (smell) | another Mold | Discouraged; factor shared content into other reference kinds | — | n/a |
 
-Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for kinds where it adds value (patterns, research notes). `mode: condense` is implemented as a **two-phase contract**: the deterministic caster records a `pending_llm: true` placeholder for the ref (with a slot for prompt provenance and dst hash), and the `/cast` LLM phase fills it in. The deterministic verifier rejects committed provenance with any unfilled `pending_llm` entry.
+Every path above is deterministic. Which one a kind takes is not knowledge the caster holds: each kind's `cast:` block in `reference_contract.yml` declares its `resolve` strategy (`note`, `package-export`, `payload-companion`), its `default_mode`, an optional `slug_field`, and whether its notes may carry companions. A kind with no `cast:` block is not castable, which is how `example` is refused — stated where the kinds live rather than in a second list inside the caster.
+
+The inherited `mode` vocabulary also offers `condense`, for a Foundry whose caster has an LLM phase. This one has none, so `SUPPORTED_MODES` narrows the vocabulary and validate rejects `mode: condense` at the source.
 
 `example` is declared in the contract but no Mold uses it yet, so the caster fails fast rather than guessing dst conventions. `prompt` is active for wrapper notes; the raw text is the `upstream.prompt` file beside `index.md`, named by convention rather than declared in frontmatter.
 
@@ -53,19 +55,19 @@ Canonical examples: [[galaxy-collection-semantics]] and [[galaxy-xsd]]. Upstream
 - `content/research/galaxy-collection-semantics/galaxy-collection-semantics.upstream.myst` — vendored solely so the site can render the upstream view for human readers. Not consumed by casting.
 - `content/research/galaxy-xsd/galaxy.xsd` — canonical for casting and agent reasoning about Galaxy tool wrapper XML. Framed by [[galaxy-xsd]] and synced through the same vendored-upstream manifest as the collection-semantics artifacts.
 
-Casting policy: a cast that needs collection-semantics knowledge resolves the `.yml` and inlines/condenses from there; a cast that needs Galaxy wrapper syntax resolves `galaxy.xsd`; the rendered MyST is a site-rendering concern only. Pattern generalizes — when both forms exist, agents read structure, humans read prose.
+Casting policy: a cast that needs collection-semantics knowledge resolves the `.yml` and inlines from there; a cast that needs Galaxy wrapper syntax resolves `galaxy.xsd`; the rendered MyST is a site-rendering concern only. Pattern generalizes — when both forms exist, agents read structure, humans read prose.
 
-The casting process is itself expected to evolve. Today: deterministic `SKILL.md` assembly, deterministic file copies and sidecars, and LLM involvement only for reference kinds explicitly cast with `mode: condense`. Tomorrow: maybe smarter condensation prompts, different models per kind, or additional target renderers. The Foundry does not lock in every implementation detail; it locks in a **contract** (input shape, output shape, provenance).
+The casting process is itself expected to evolve. Today: deterministic `SKILL.md` assembly, deterministic file copies and sidecars, no LLM phase at all. Tomorrow: maybe additional target renderers, or a condensation phase if some kind ever earns one — the vocabulary for that is still in the shared contract, declined rather than deleted, so re-admitting it is a one-line narrowing change plus the machinery. The Foundry does not lock in every implementation detail; it locks in a **contract** (input shape, output shape, provenance).
 
 ## When casting runs
 
 Three triggers, in increasing automation:
 
-1. **Manual.** `npm run cast -- <mold-name> --target=<target>` for deterministic assembly. A future `/cast` wrapper may fill `mode: condense` references, but it must not hand-maintain `SKILL.md`.
+1. **Manual.** `npm run cast -- <mold-name> --target=<target>`. That is the whole cast — there is no follow-up phase, and `SKILL.md` is never hand-maintained.
 2. **CI on Mold change.** When a PR touches `molds/<name>/`, CI re-casts that Mold against all configured targets and surfaces the diff in review.
 3. **Watch-on-change** for development convenience.
 
-Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, pending LLM entries, and missing or stale `SKILL.md`).
+Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, schema violations, and missing or stale `SKILL.md`). `make check-casts` and `make check-verify` run each over every Mold.
 
 ## Input contract
 
@@ -83,13 +85,12 @@ To cast a Mold, the casting process consumes:
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
   - Other Molds (`related_molds`) — flagged as a smell; shared operational content should move to a pattern page, CLI manual page, schema, prompt, example, or research note.
 - **The cast bundle spec** — the deterministic Agent Skills assembly and reference layout declared in `casts/claude/_target.yml`. The historical target name remains for provenance compatibility; Claude Code and Codex package the resulting tree through separate thin manifests.
-- **A casting model and prompt version** — recorded in provenance.
 
 Resolution policy is per-kind, not a single rule:
-- `pattern` — verbatim inline if under a size threshold; LLM-summarize otherwise. Casting hints (`inline: true` / `summarize: true`) may override.
+- `pattern` — verbatim copy, and one of the two kinds whose notes may declare companions.
 - `cli-command` — always cast to JSON sidecar from registered upstream metadata plus the Foundry framing note; no token-budget condensation needed because the sidecar is loaded only when the agent needs that command.
 - `schema`, `example`, `prompt` — always verbatim copy unless the typed reference declares a future supported transformation.
-- `research` — operational background; copied or condensed according to `mode`, and loaded according to `used_at` / `load`. `mode: condense` is specified but not implemented in v1 tooling yet.
+- `research` — operational background; copied verbatim, loaded according to `used_at` / `load`, and the other kind that may carry companions.
 - `eval` — never packaged.
 
 ## Output contract
@@ -101,11 +102,11 @@ casts/claude/skills/<mold-name>/
 ├── references/               # supporting content, organized by kind
 │   ├── schemas/              # verbatim *.schema.json
 │   ├── cli/                  # deterministic JSON sidecars (flat, <slug>.json)
-│   ├── patterns/             # verbatim or condensed pattern excerpts
-│   ├── notes/                # research notes (verbatim by default; condense per ref mode)
+│   ├── patterns/             # verbatim pattern excerpts
+│   ├── notes/                # research notes, verbatim
 │   ├── prompts/              # raw prompt sidecars copied from prompt wrapper notes
 │   └── examples/             # populated when example refs exist
-└── _provenance.json          # required, not part of the skill (schema v2 — see below)
+└── _provenance.json          # required, not part of the skill (schema v4 — see below)
 ```
 
 Per-kind dst conventions are declared in `casts/claude/_target.yml` (`kinds.<kind>.dst_dir` + `dst_extension` + allowed `modes`). For verbatim modes the dst basename matches the source 1:1; for sidecars it's `<source-slug><dst_extension>`.
@@ -120,11 +121,11 @@ The plugin root carries both `.claude-plugin/plugin.json` and `.codex-plugin/plu
 that file's existence is what the caster and the site each read, so there is no list of targets
 anywhere to keep in step with the directories.
 
-`_provenance.json` is required for every cast. The contract of record is the [[cast-provenance]] schema note (rendered field-by-field from `scripts/lib/schemas/cast-provenance.schema.json`, schema version 2); the JSON below is an illustrative sketch, not the authority. Shape:
+`_provenance.json` is required for every cast. The contract of record is the [[cast-provenance]] schema note (rendered field-by-field from `scripts/lib/schemas/cast-provenance.schema.json`, schema version 4); the JSON below is an illustrative sketch, not the authority. Shape:
 
 ```json
 {
-  "provenance_schema_version": 2,
+  "provenance_schema_version": 4,
   "cast_target": "claude",
   "mold": {
     "name": "summarize-nextflow",
@@ -152,18 +153,17 @@ anywhere to keep in step with the directories.
       "source": "deterministic"
     },
     {
-      "kind": "research",
-      "mode": "condense",
-      "ref": "[[some-other-note]]",
-      "src": "content/research/some-other-note/index.md",
-      "dst": "references/notes/some-other-note.md",
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[planemo-test]]",
+      "src": "content/cli/planemo/test.md",
+      "dst": "references/cli/test.json",
       "used_at": "runtime",
       "load": "on-demand",
+      "trigger": "before running a tool test",
       "src_hash": "<sha256>",
-      "dst_hash": "<sha256 of LLM output>",
-      "source": "llm",
-      "prompt": { "origin": "casting_md", "identity": "research-condense", "hash": "<sha256>" },
-      "model": { "name": "claude-opus-4-7", "version": "..." }
+      "dst_hash": "<sha256 of the built sidecar>",
+      "source": "deterministic"
     }
   ],
   "artifacts": {
@@ -177,7 +177,7 @@ anywhere to keep in step with the directories.
 }
 ```
 
-`refs[]` is sorted by `(kind, src)` for stable diffs. Each entry's `source` field records whether the dst was produced deterministically or by an LLM step. `artifacts` records the runtime handoff contract after producer inheritance. While a condense ref is awaiting LLM output, the entry carries `pending_llm: true` and the deterministic verifier rejects committed provenance with any unfilled entry.
+`refs[]` is sorted by `(kind, src)` for stable diffs. Each entry's `source` records how the dst was produced; it is `deterministic` and nothing else, kept as a positive claim rather than dropped so a reader never has to infer determinism from a missing field. A `verbatim` entry proves itself with `src_hash == dst_hash`. `artifacts` records the runtime handoff contract after producer inheritance.
 
 Provenance is the foundation for drift detection, reproducibility audits, and "why does this cast contain X" forensics. See [[cast-provenance]] for the per-field contract and stable anchors.
 
@@ -212,12 +212,12 @@ cast_mold(mold_name, target):
   # Per-kind dispatch:
   for ref in refs:
     case ref.kind:
-      pattern      -> verbatim copy or LLM-condense per mode
+      pattern      -> verbatim copy (plus any declared companions)
                       write to references/patterns/<source-basename>
       cli-command  -> deterministic JSON sidecar from registry metadata + framing body
                       write to references/cli/<source-slug>.json
       schema       -> copy verbatim to references/schemas/<source-basename>
-      research     -> copy verbatim or condense per mode
+      research     -> copy verbatim (plus any declared companions)
                       write to references/notes/<source-basename>
       prompt       -> copy sibling `upstream.prompt` verbatim to references/prompts/<slug>.md
       example      -> reject until first example ref establishes target convention
@@ -226,13 +226,12 @@ cast_mold(mold_name, target):
   artifacts <- read_artifact_contracts(mold.meta, producer_index)
   skill_md  <- target.assemble_skill(mold.summary, mold.body, artifacts, refs)
   write SKILL.md to casts/<target>/<mold_name>/
-  write _provenance.json (schema v2: mold object, refs[] sorted by kind+src,
-                          per-ref src_hash/dst_hash, source=deterministic|llm,
-                          pending_llm flag for unfilled condense entries,
-                          prompt + model identity for LLM-produced entries)
+  write _provenance.json (schema v4: mold object, refs[] sorted by kind+src,
+                          per-ref src_hash/dst_hash, source=deterministic,
+                          per-ref license lineage for redistributed bytes)
 ```
 
-The deterministic phase (`foundry-build cast`) handles verbatim copies, sidecars, condense placeholders, `SKILL.md` rendering, and provenance. Any LLM phase may fill `pending_llm` reference entries and rewrite provenance for those refs, but it must not hand-edit generated `SKILL.md`; skill-body changes flow from Mold source changes. The deterministic verifier (`scripts/cast-skill-verify.ts`) enforces the contract on the result.
+`foundry-build cast` handles verbatim copies, sidecars, `SKILL.md` rendering, orphan pruning, and provenance — the whole cast. Nothing hand-edits a bundle; skill-body changes flow from Mold source changes, and a hand edit is reported as drift by `--check` and overwritten by the next cast. The deterministic verifier (`scripts/cast-skill-verify.ts`) enforces the contract on the result.
 
 ## Drift detection
 
@@ -240,10 +239,9 @@ A cast is **stale** when any of:
 - The Mold's `index.md` content hash differs from `_provenance.mold.content_hash`.
 - Any resolved ref's source hash differs from the recorded `refs[*].src_hash`, or its dst hash drifts from `refs[*].dst_hash`.
 - The deterministic `SKILL.md` render differs from the committed `SKILL.md`.
-- The target adapter (prompt version) has changed.
-- The casting model has changed (and we want to re-cast against the new model).
+- The target adapter has changed.
 
-`foundry status` enumerates stale casts; `foundry cast --all` re-casts every stale entry. Re-casting an unchanged Mold with unchanged deterministic refs should produce the same `SKILL.md`, sidecars, copied refs, and provenance shape except for cast timestamps/history. LLM-condensed refs can still differ when explicitly re-condensed; those differences are reviewed via provenance and diff.
+`foundry status` enumerates stale casts; `foundry cast --all` re-casts every stale entry. Re-casting an unchanged Mold with unchanged refs produces the same `SKILL.md`, sidecars, copied refs, and provenance except for cast timestamps, `commit`, and history — which is exactly what `make check-casts` asserts over all 47 Molds.
 
 ## Versioning
 
@@ -253,13 +251,13 @@ This keeps the Foundry's iteration loop fast: change a Mold, re-cast, review the
 
 ## Reproducibility
 
-Casting is **deterministic for skill assembly** and traceable for any LLM-produced ref condensation. Every cast records exactly what went into it (Mold hash, ref hashes, artifact contracts, model/prompt identity for LLM refs). A reviewer can:
+Casting is **deterministic end to end**. Every cast records exactly what went into it (Mold hash, ref hashes, license lineage, artifact contracts). A reviewer can:
 
 - Check whether a cast is up-to-date (drift detection).
 - Reproduce deterministic cast outputs from the recorded Mold and refs.
 - Compare two casts' provenance to explain content differences.
 
-We expect deterministic assembly to be byte-stable aside from timestamps/provenance history. We do not guarantee byte-identical output for explicit LLM condensation, but provenance records the source, prompt, and model identity for review.
+Assembly is byte-stable aside from timestamps, `commit`, and provenance history. There is no non-deterministic path left to carve out of that guarantee, which is why the drift gate can be a pass/fail check in CI rather than a diff a human reads.
 
 ## What casting does *not* do
 
