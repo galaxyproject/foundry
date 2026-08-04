@@ -161,48 +161,7 @@ function buildSlugMap(files: FileMeta[]): Map<string, string> {
   return m;
 }
 
-function validateBidirectionalRelatedNotes(
-  files: FileMeta[],
-  slugMap: Map<string, string>,
-): CrossFileFinding[] {
-  const forward = new Map<string, Set<string>>();
-  for (const f of files) {
-    const targets = new Set<string>();
-    const rns = f.meta.related_notes;
-    if (Array.isArray(rns)) {
-      for (const wl of rns) {
-        const tp = resolveWikiLink(wl, slugMap);
-        if (tp && tp !== f.path) targets.add(tp);
-      }
-    }
-    forward.set(f.path, targets);
-  }
-  const slugByPath = new Map<string, string>();
-  for (const f of files) slugByPath.set(f.path, f.slug);
-  const findings: CrossFileFinding[] = [];
-  for (const [a, targets] of forward) {
-    for (const b of targets) {
-      const back = forward.get(b);
-      if (!back || back.has(a)) continue;
-      const aSlug = slugByPath.get(a) ?? a;
-      findings.push({
-        path: b,
-        severity: "warning",
-        message: `related_notes: missing backlink to [[${aSlug}]] (declared in ${a})`,
-      });
-    }
-  }
-  return findings;
-}
-
-/**
- * `related_patterns` and `related_molds` resolve, and resolve to the kind the field names.
- *
- * Every kind that declares these fields is checked, not only Molds. Gating on `type === "mold"`
- * silently exempted the pattern, research and schema notes that carry the same fields, and a
- * deleted Mold left dangling references in all three — the field a note uses decides what is
- * checked, not the kind of note using it.
- */
+/** `related_patterns` and `related_molds` resolve to a note of the kind the field names. */
 function validateRelatedFields(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -241,12 +200,7 @@ function validateRelatedFields(
   return findings;
 }
 
-/**
- * Mold typed-references resolve to a note of the kind the reference declares.
- *
- * Mold-only, and legitimately so: `references` is a Mold field. (Schema-/example-/prompt-path
- * checks deferred until those kinds appear — matches `INITIAL_ARCHITECTURE.md` §6 sketch.)
- */
+/** Mold typed-references resolve to a note of the kind the reference declares. */
 function validateMoldRefs(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -1016,14 +970,7 @@ const BODY_WIKI_LINK_RE = /\[\[([^\]\n]+)\]\]/g;
 const FENCED_CODE_RE = /```[\s\S]*?```/g;
 const INLINE_CODE_RE = /(`+)[\s\S]+?\1/g;
 
-/**
- * Body wiki links resolve.
- *
- * An error, matching the frontmatter link fields. As a warning this reported a dangling link
- * beside 228 advisory ones and blocked nothing, which is the same as not reporting it — and
- * `content/meta/content-model.md` says an unresolved link fails validation, which was not true
- * of the body until it was an error.
- */
+/** Body wiki links resolve, outside fenced and inline code. */
 function validateBodyWikiLinks(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -1477,7 +1424,6 @@ export function validateDirectory(opts: ValidateOptions): {
   for (const f of validFiles) metaByPath.set(f.path, f.meta);
 
   const crossFindings: CrossFileFinding[] = [];
-  crossFindings.push(...validateBidirectionalRelatedNotes(validFiles, slugMap));
   crossFindings.push(...validateRelatedFields(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
