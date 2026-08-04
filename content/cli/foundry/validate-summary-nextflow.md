@@ -8,8 +8,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-05-11
-revised: 2026-05-11
-revision: 1
+revised: 2026-08-04
+revision: 2
 summary: "AJV gate for summarize-nextflow JSON documents."
 related_notes:
   - "[[summary-nextflow]]"
@@ -21,7 +21,7 @@ Validate a JSON document against the [[summary-nextflow]] schema bundled with `@
 
 ## Output
 
-Silent on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors (missing file, malformed JSON) exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors (missing file, malformed JSON) exit `1`.
 
 ## Examples
 
