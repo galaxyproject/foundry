@@ -8,8 +8,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-07-01
-revised: 2026-07-01
-revision: 1
+revised: 2026-08-04
+revision: 2
 summary: "AJV gate for summarize-galaxy-workflow JSON documents."
 related_notes:
   - "[[summary-galaxy-workflow]]"
@@ -21,10 +21,15 @@ Validate a JSON document against the [[summary-galaxy-workflow]] schema bundled 
 
 ## Output
 
-Silent on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors exit `1`.
 
 ## Examples
 
 ```bash
 foundry validate-summary-galaxy-workflow summary-galaxy-workflow.json
 ```
+
+## Gotchas
+
+- **Shape is all this checks, and the producer is an LLM.** [[summarize-galaxy-workflow]] writes these documents, so a summary can name steps the workflow does not have, or miss ones it does, and still pass. Exit `0` means safe to parse, never faithful to the workflow.
+- The gate cannot substitute for [[gxwf validate]]. That runs against the workflow; this runs against a description of it, and the two disagree exactly when the summary is wrong — the case worth catching.
