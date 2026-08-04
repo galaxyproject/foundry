@@ -1469,6 +1469,95 @@ describe("stripWikiLinks", () => {
   });
 });
 
+// Re-casting the corpus proves the 47 committed skill documents still render byte for byte, but
+// it cannot show that the caster renders what it is GIVEN rather than a list it knows. These
+// pin the part the oracle cannot see: hand a section list nothing in this repo would produce,
+// and get exactly that back.
+describe("the skill document is the sections it was handed", () => {
+  it("renders them in order, and nothing it was not given", async () => {
+    const { renderSkillMarkdown } = await import(
+      "../packages/build-cli/src/commands/cast-mold.js"
+    );
+    const doc = renderSkillMarkdown({
+      moldName: "m",
+      meta: { summary: "Summarize a thing." },
+      lede: "Lede line.",
+      sections: [
+        { title: "Second", body: "- b" },
+        { title: "First", body: "prose, not a list" },
+      ],
+    });
+    expect(doc).toBe(
+      [
+        "---",
+        "name: m",
+        'description: "Summarize a thing."',
+        "---",
+        "",
+        "# m",
+        "",
+        "Lede line.",
+        "",
+        "## Second",
+        "",
+        "- b",
+        "",
+        "## First",
+        "",
+        "prose, not a list",
+        "",
+      ].join("\n"),
+    );
+    // The names this instance happens to use are the instance's, not the caster's.
+    expect(doc).not.toContain("## Outputs");
+    expect(doc).not.toContain("## Procedure");
+  });
+
+  it("takes the description from the summary, stripped of link syntax and quote-safe", async () => {
+    const { renderSkillMarkdown } = await import(
+      "../packages/build-cli/src/commands/cast-mold.js"
+    );
+    const doc = renderSkillMarkdown({
+      moldName: "m",
+      meta: { summary: 'Handle a "quoted" [[thing|name]].' },
+      lede: "L",
+      sections: [],
+    });
+    expect(doc).toContain('description: "Handle a \\"quoted\\" name."');
+  });
+
+  // A skill that requires no tools has said something. A reader who finds no heading cannot
+  // tell that from a caster that never asked.
+  it("says so for an empty section rather than dropping the heading", async () => {
+    const { bulletSection } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    expect(bulletSection("Required Tools", []).body).toBe("- None declared.");
+    expect(bulletSection("Required Tools", [], "- None, and none assumed.").body).toBe(
+      "- None, and none assumed.",
+    );
+    expect(bulletSection("Required Tools", ["- a", "- b"]).body).toBe("- a\n- b");
+  });
+});
+
+// Casting, the validator and pipeline assembly each answer "which slug reaches which note?",
+// and all three used to answer it separately. They agreed by hand; assemble-pipeline's copy
+// even carried a comment claiming parity rather than holding it.
+describe("second addresses are one rule, not three", () => {
+  it("gives a cli-command note the address a Mold author writes", async () => {
+    const { GALAXY_SLUG_ALIASES } = await import("../packages/build-cli/src/lib/slug-map.js");
+    expect(GALAXY_SLUG_ALIASES({ type: "cli-command", tool: "gxwf", command: "validate" })).toEqual(
+      ["gxwf validate"],
+    );
+  });
+
+  it("gives no second address to a note that has not earned one", async () => {
+    const { GALAXY_SLUG_ALIASES } = await import("../packages/build-cli/src/lib/slug-map.js");
+    // Right type, but no command to compound with — the address would be the tool's own.
+    expect(GALAXY_SLUG_ALIASES({ type: "cli-command", tool: "gxwf" })).toEqual([]);
+    expect(GALAXY_SLUG_ALIASES({ type: "cli-tool", tool: "gxwf", command: "validate" })).toEqual([]);
+    expect(GALAXY_SLUG_ALIASES({ type: "research" })).toEqual([]);
+  });
+});
+
 // The `cast:` blocks in reference_contract.yml replaced three sets of kind-name literals in
 // cast-mold.ts. A declaration that nothing reads is documentation, so each test below breaks
 // one declaration and asserts the cast NOTICES — the same way the companion dispositions were

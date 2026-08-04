@@ -8,13 +8,9 @@
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import type { ErrorObject } from "ajv";
-import AjvImport from "ajv";
-import Ajv2020Import from "ajv/dist/2020.js";
-import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
 import {
@@ -38,8 +34,9 @@ import {
   type ReferenceContractTerm,
 } from "@galaxy-foundry/note-schema";
 
-import type { BundleFile, CastHooks, RefRenderers } from "../lib/cast-hooks.js";
+import type { BundleFile, CastHooks, SkillSection, RefRenderers } from "../lib/cast-hooks.js";
 import { payloadCompanionOf } from "../lib/dispositions.js";
+import { errorMessage } from "../lib/errors.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
   reconcile,
@@ -48,34 +45,18 @@ import {
   reconcileTreeTo,
   sha256File,
 } from "../lib/reconcile.js";
-import {
-  aggregateRequiredTools,
-  requiredToolRows,
-  type RequiredTool,
-} from "../lib/required-tools.js";
+import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
+import { validateRuns } from "../lib/runs-check.js";
+import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
 import { bundlePathOf, resolveBundlePath } from "../lib/target-layout.js";
 import type { Frontmatter } from "../lib/types.js";
-import { fileSlug, findMdFiles } from "../lib/walk.js";
+import { fileSlug } from "../lib/walk.js";
 import {
   parseWikiLink,
   resolveWikiLink,
-  slugify,
   WIKI_LINK_RE,
   WIKI_LINK_SCAN_RE,
 } from "../lib/wiki-links.js";
-
-type AjvValidator = {
-  compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
-};
-const Ajv = AjvImport as unknown as new (opts: {
-  allErrors: boolean;
-  strict: boolean;
-}) => AjvValidator;
-const Ajv2020 = Ajv2020Import as unknown as new (opts: {
-  allErrors: boolean;
-  strict: boolean;
-}) => AjvValidator;
-const addFormats = addFormatsImport as unknown as (ajv: AjvValidator) => unknown;
 
 // ---- argv ----
 
@@ -151,33 +132,6 @@ function loadTargetConfig(repoRoot: string, target: string): TargetConfig {
   return data;
 }
 
-// ---- slug map (shared with validator semantics) ----
-
-function buildSlugMap(repoRoot: string): {
-  slugMap: ReadonlyMap<string, string>;
-  metaByPath: ReadonlyMap<string, Frontmatter>;
-} {
-  const slugMap = new Map<string, string>();
-  const metaByPath = new Map<string, Frontmatter>();
-  const contentRoot = path.join(repoRoot, "content");
-  for (const abs of findMdFiles(contentRoot)) {
-    const parsed = readMarkdown(abs);
-    if (!parsed.hasFrontmatter) continue;
-    const rel = path.relative(repoRoot, abs);
-    const slug = fileSlug(rel);
-    slugMap.set(slugify(slug), rel);
-    metaByPath.set(rel, parsed.meta);
-    if (
-      parsed.meta.type === "cli-command" &&
-      typeof parsed.meta.tool === "string" &&
-      typeof parsed.meta.command === "string"
-    ) {
-      slugMap.set(slugify(`${parsed.meta.tool} ${parsed.meta.command}`), rel);
-    }
-  }
-  return { slugMap, metaByPath };
-}
-
 // ---- ref resolution ----
 
 interface ResolvedRef {
@@ -205,16 +159,6 @@ interface ResolvedRef {
 // Which kinds are castable, what each defaults to, and how each resolves are read from
 // `reference_contract.yml`'s `cast:` blocks rather than decided here — see
 // packages/note-schema/src/cast-contract.ts for why.
-
-/**
- * The message of something thrown, without assuming it was an `Error`.
- *
- * `(e as Error).message` renders `undefined` for a thrown string or object, which turns a
- * reported failure into a line that says nothing.
- */
-function errorMessage(e: unknown): string {
-  return e instanceof Error ? e.message : String(e);
-}
 
 function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
   // 1:1 strict slug mapping: a bundled file is named for the note it came from, never for the
@@ -567,12 +511,77 @@ const GALAXY_HOOKS: CastHooks = {
         path: "_verify.json",
         content:
           JSON.stringify(
-            buildVerifyManifest(meta, buildProducerIndex(metaByPath), slugMap, metaByPath),
+            buildVerifyManifest(meta, producerIndexFor(metaByPath), slugMap, metaByPath),
             null,
             2,
           ) + "\n",
       },
     ],
+  ],
+  skillLede:
+    "Follow the procedure below and use the artifact/reference sections as the runtime contract.",
+  skillSections: ({ moldName, meta, body, refs, metaByPath, slugMap }) => {
+    const summary = skillSummary(meta, moldName);
+    const artifacts = readArtifactContracts(meta, producerIndexFor(metaByPath));
+    const produces = artifacts?.produces ?? [];
+    const runtime = refs.filter((r) => r.used_at !== "cast-time");
+    const describe = { kindLabel: refKindLabel, modePhrase: refModePhrase };
+    const procedure = runtimeProcedureBody(body, moldName);
+    return [
+      bulletSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
+      bulletSection(
+        "Inputs",
+        artifactRows(artifacts?.consumes ?? [], "input"),
+        "- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.",
+      ),
+      bulletSection("Outputs", artifactRows(produces, "output")),
+      bulletSection(
+        "Required Tools",
+        requiredToolRows(aggregateRequiredTools([...refs], metaByPath, slugMap)),
+        "- None declared. Procedure should not assume external CLIs are present.",
+      ),
+      bulletSection(
+        "Load Upfront",
+        refRows(
+          runtime.filter((r) => r.load === "upfront"),
+          describe,
+        ),
+      ),
+      bulletSection(
+        "Load On Demand",
+        refRows(
+          runtime.filter((r) => r.load === "on-demand"),
+          describe,
+        ),
+      ),
+      bulletSection("Validation", schemaValidationRows(produces, slugMap, metaByPath)),
+      { title: "Procedure", body: procedure || "No Mold body supplied." },
+      // Contributed whole rather than appended to a generic closing note. Two of the three
+      // bullets name artifacts, and an instance that inherited the third would be unable to
+      // reword or reorder around its own.
+      bulletSection("Runtime Notes", [
+        "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
+        "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
+        "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
+      ]),
+    ];
+  },
+  slugAliases: GALAXY_SLUG_ALIASES,
+  bundleChecks: [
+    // Harvested sample runs, against the schema this Mold declares for its OWN output. Not
+    // against whichever schema ref happens to come first: a Mold's runs contain what that Mold
+    // produces, and only `output_artifacts[].schema` states which schema that is.
+    ({ meta, refs, metaByPath, bundleRoot }) => {
+      const declared = new Set(
+        (readArtifactContracts(meta, producerIndexFor(metaByPath))?.produces ?? [])
+          .map((o) => o.schema)
+          .filter((s): s is string => !!s),
+      );
+      const schemaRef = refs.find((r) => r.kind === "schema" && declared.has(r.ref));
+      if (!schemaRef) return [];
+      const schemaAbs = path.join(bundleRoot, schemaRef.dst);
+      return existsSync(schemaAbs) ? validateRuns(bundleRoot, schemaAbs) : [];
+    },
   ],
 };
 
@@ -606,51 +615,6 @@ function reconcileBundleFiles(
   return found;
 }
 
-// ---- runs/*/summary.json schema validation ----
-
-function loadAjvForSchema(schemaPath: string): ReturnType<AjvValidator["compile"]> {
-  // Named, because the bare SyntaxError from JSON.parse says only that something somewhere was
-  // not JSON — and the file it means is one the caster picked, not one the author pointed at.
-  let schema: unknown;
-  try {
-    schema = JSON.parse(readFileSync(schemaPath, "utf8"));
-  } catch (e) {
-    throw new Error(`${schemaPath}: not loadable as a JSON Schema: ${errorMessage(e)}`, {
-      cause: e,
-    });
-  }
-  const schemaUri =
-    schema &&
-    typeof schema === "object" &&
-    typeof (schema as { $schema?: unknown }).$schema === "string"
-      ? (schema as { $schema: string }).$schema
-      : "";
-  const ajv = schemaUri.includes("2020-12")
-    ? new Ajv2020({ allErrors: true, strict: false })
-    : new Ajv({ allErrors: true, strict: false });
-  addFormats(ajv);
-  return ajv.compile(schema);
-}
-
-function validateRuns(bundleRoot: string, schemaAbs: string): string[] {
-  const errors: string[] = [];
-  const runsDir = path.join(bundleRoot, "runs");
-  if (!existsSync(runsDir)) return errors;
-  const validate = loadAjvForSchema(schemaAbs);
-  for (const entry of readdirSync(runsDir)) {
-    const summaryPath = path.join(runsDir, entry, "summary.json");
-    if (!existsSync(summaryPath)) continue;
-    const data = JSON.parse(readFileSync(summaryPath, "utf8"));
-    if (!validate(data)) {
-      const messages = (validate.errors ?? []).map(
-        (e) => `    ${e.instancePath || "(root)"}: ${e.message}`,
-      );
-      errors.push(`runs/${entry}/summary.json:\n${messages.join("\n")}`);
-    }
-  }
-  return errors;
-}
-
 // ---- provenance ----
 //
 // The record's shape ships in @galaxy-foundry/cast. What stays here is what this Foundry puts
@@ -678,6 +642,27 @@ export interface VerifyManifestEntry {
 export interface VerifyManifest {
   verify_schema_version: 1;
   entries: VerifyManifestEntry[];
+}
+
+const producerIndexCache = new WeakMap<
+  ReadonlyMap<string, Frontmatter>,
+  Map<string, ProducerInfo>
+>();
+
+/**
+ * The producer index for a corpus, built once per corpus.
+ *
+ * Three contributors want it — the verify manifest, the artifact contracts, the runs check — and
+ * each would otherwise walk every note again. Keyed on the map itself rather than memoized into
+ * a module variable, so a test casting against two fixture corpora in one process gets the index
+ * for the corpus it asked about.
+ */
+function producerIndexFor(metaByPath: ReadonlyMap<string, Frontmatter>): Map<string, ProducerInfo> {
+  const cached = producerIndexCache.get(metaByPath);
+  if (cached) return cached;
+  const built = buildProducerIndex(metaByPath);
+  producerIndexCache.set(metaByPath, built);
+  return built;
 }
 
 export function buildProducerIndex(
@@ -1043,6 +1028,14 @@ function triggerSentence(text: string): string {
   return cleaned ? `Use when: ${lowerFirst(cleaned)}.` : "";
 }
 
+/**
+ * How this instance's kinds read in prose.
+ *
+ * Every name here is Galaxy's — a Foundry of research notes has no schemas and no CLI tools, and
+ * would answer this question with its own nouns. Passed to `refRows` rather than consulted
+ * inside it for the same reason a renderer is passed to the dispatch: the shape of a reference
+ * row is general, the vocabulary in it is not.
+ */
 function refKindLabel(ref: ProvenanceRefEntry): string {
   if (ref.companion_of) return "Companion file";
   if (ref.kind === "schema") return "Schema file";
@@ -1051,6 +1044,11 @@ function refKindLabel(ref: ProvenanceRefEntry): string {
   if (ref.kind === "cli-tool") return "CLI tool reference";
   if (ref.kind === "cli-command") return "CLI command reference";
   return `${ref.kind} reference`;
+}
+
+/** How this instance's modes read in prose. Same reasoning as `refKindLabel`. */
+function refModePhrase(ref: ProvenanceRefEntry): string {
+  return ref.mode === "sidecar" ? "packaged as a sidecar" : "copied verbatim into the bundle";
 }
 
 function artifactRows(
@@ -1074,11 +1072,22 @@ function artifactRows(
   });
 }
 
-function refRows(refs: ProvenanceRefEntry[]): string[] {
+/**
+ * One line per reference: where it landed, what it is, and when to read it.
+ *
+ * The row's shape is casting's; the nouns in it are the instance's, which is why `describe`
+ * is an argument. A second Foundry gets the same layout under its own vocabulary instead of
+ * re-deriving how a reference should read.
+ */
+function refRows(
+  refs: readonly ProvenanceRefEntry[],
+  describe: {
+    kindLabel: (ref: ProvenanceRefEntry) => string;
+    modePhrase: (ref: ProvenanceRefEntry) => string;
+  },
+): string[] {
   return refs.map((r) => {
-    const packaging =
-      r.mode === "sidecar" ? "packaged as a sidecar" : "copied verbatim into the bundle";
-    const details = [`- \`${r.dst}\`: ${refKindLabel(r)} ${packaging}.`];
+    const details = [`- \`${r.dst}\`: ${describe.kindLabel(r)} ${describe.modePhrase(r)}.`];
     if (r.companion_of) {
       // The parent note row already carries purpose/trigger; just point to it.
       details.push(`Sibling of \`${r.companion_of}\`; read it where that note directs.`);
@@ -1121,29 +1130,40 @@ function schemaValidationRows(
   return rows;
 }
 
-function renderSection(title: string, lines: string[], empty = "- None declared."): string {
-  return [`## ${title}`, "", ...(lines.length ? lines : [empty]), ""].join("\n");
+/**
+ * A section whose content is a list, with something to say when the list is empty.
+ *
+ * The empty case is not omission: a skill that declares no required tools has said something,
+ * and a reader who finds no heading cannot tell that from a caster that forgot to ask.
+ */
+export function bulletSection(
+  title: string,
+  lines: string[],
+  empty = "- None declared.",
+): SkillSection {
+  return { title, body: (lines.length ? lines : [empty]).join("\n") };
 }
 
-function renderSkillMarkdown(args: {
+/** The skill's one-line description, falling back to naming the Mold when none was written. */
+function skillSummary(meta: Frontmatter, moldName: string): string {
+  return scalar(meta.summary) ?? `Run the ${moldName} Mold.`;
+}
+
+/**
+ * The skill document: frontmatter, title, lede, then the sections the instance contributed.
+ *
+ * What stays here is only what holds for any Foundry — the frontmatter a harness reads to find
+ * the skill, and the `## Title` convention. Which sections exist and what they say came from
+ * `skillSections`, because a document's contents are a fact about the corpus it describes.
+ */
+export function renderSkillMarkdown(args: {
   moldName: string;
   meta: Frontmatter;
-  body: string;
-  refs: ProvenanceRefEntry[];
-  artifacts?: ProvenanceArtifacts;
-  slugMap: ReadonlyMap<string, string>;
-  metaByPath: ReadonlyMap<string, Frontmatter>;
-  requiredTools: RequiredTool[];
+  lede: string;
+  sections: readonly SkillSection[];
 }): string {
-  const summary = scalar(args.meta.summary) ?? `Run the ${args.moldName} Mold.`;
-  const consumes = args.artifacts?.consumes ?? [];
-  const produces = args.artifacts?.produces ?? [];
-  const upfront = args.refs.filter((r) => r.load === "upfront" && r.used_at !== "cast-time");
-  const onDemand = args.refs.filter((r) => r.load === "on-demand" && r.used_at !== "cast-time");
-  const validationRows = schemaValidationRows(produces, args.slugMap, args.metaByPath);
-  const toolRows = requiredToolRows(args.requiredTools);
-  const body = runtimeProcedureBody(args.body, args.moldName);
-  const lines = [
+  const summary = skillSummary(args.meta, args.moldName);
+  return [
     "---",
     `name: ${args.moldName}`,
     `description: "${escapeFrontmatterString(stripWikiLinks(summary))}"`,
@@ -1151,35 +1171,10 @@ function renderSkillMarkdown(args: {
     "",
     `# ${args.moldName}`,
     "",
-    "Follow the procedure below and use the artifact/reference sections as the runtime contract.",
+    args.lede,
     "",
-    renderSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
-    renderSection(
-      "Inputs",
-      artifactRows(consumes, "input"),
-      "- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.",
-    ),
-    renderSection("Outputs", artifactRows(produces, "output")),
-    renderSection(
-      "Required Tools",
-      toolRows,
-      "- None declared. Procedure should not assume external CLIs are present.",
-    ),
-    renderSection("Load Upfront", refRows(upfront)),
-    renderSection("Load On Demand", refRows(onDemand)),
-    renderSection("Validation", validationRows),
-    "## Procedure",
-    "",
-    body || "No Mold body supplied.",
-    "",
-    "## Runtime Notes",
-    "",
-    "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
-    "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
-    "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
-    "",
-  ];
-  return lines.join("\n");
+    ...args.sections.map((s) => [`## ${s.title}`, "", s.body, ""].join("\n")),
+  ].join("\n");
 }
 
 // ---- main ----
@@ -1218,8 +1213,8 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   const provenancePath = path.join(bundleRoot, "_provenance.json");
   const carry = readExistingProvenance(provenancePath);
 
-  const { slugMap, metaByPath } = buildSlugMap(repoRoot);
-  const producerIndex = buildProducerIndex(metaByPath);
+  const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_HOOKS.slugAliases);
+  const producerIndex = producerIndexFor(metaByPath);
 
   const rawRefs = Array.isArray(moldParsed.meta.references)
     ? (moldParsed.meta.references as unknown[])
@@ -1291,16 +1286,18 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   errors.push(...applyLicensePolicy(refEntries, repoRoot));
 
   const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
-  const requiredTools = aggregateRequiredTools(refEntries, metaByPath, slugMap);
   const skillText = renderSkillMarkdown({
     moldName: args.moldName,
     meta: moldParsed.meta,
-    body: moldParsed.body,
-    refs: refEntries,
-    artifacts: artifactContracts,
-    slugMap,
-    metaByPath,
-    requiredTools,
+    lede: GALAXY_HOOKS.skillLede,
+    sections: GALAXY_HOOKS.skillSections({
+      moldName: args.moldName,
+      meta: moldParsed.meta,
+      body: moldParsed.body,
+      refs: refEntries,
+      metaByPath,
+      slugMap,
+    }),
   });
   const skillDrift = reconcileText({
     path: path.join(bundleRoot, "SKILL.md"),
@@ -1343,25 +1340,25 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   );
   drift.push(...reconcileBundleFiles(contributed, bundleRoot, true));
 
-  // runs/*/summary.json validation — a bundle may carry sample runs, and they are checked
-  // against the schema the Mold declares for its OWN output. Not against whichever schema ref
-  // happens to come first: a Mold's runs contain what that Mold produces, and only
-  // `output_artifacts[].schema` states which schema that is.
-  const outputSchemaRefs = new Set(
-    (artifactContracts?.produces ?? []).map((o) => o.schema).filter((s): s is string => !!s),
-  );
-  const schemaRefEntry = refEntries.find((r) => r.kind === "schema" && outputSchemaRefs.has(r.ref));
-  if (schemaRefEntry) {
-    const schemaAbs = path.join(bundleRoot, schemaRefEntry.dst);
-    if (existsSync(schemaAbs)) {
-      // Collected rather than thrown: a schema the runs cannot be checked against is a finding
-      // about this cast, and the caller reports findings. Letting it escape ends the run with a
-      // stack trace instead.
-      try {
-        errors.push(...validateRuns(bundleRoot, schemaAbs));
-      } catch (e) {
-        errors.push(errorMessage(e));
-      }
+  // Checks this instance runs over the finished bundle.
+  //
+  // Collected rather than thrown: a bundle that fails its own check is a finding about this
+  // cast, and the caller reports findings. Letting one escape ends the run with a stack trace
+  // instead — and a check that throws is itself a finding, not a reason to lose the others.
+  for (const check of GALAXY_HOOKS.bundleChecks) {
+    try {
+      errors.push(
+        ...check({
+          moldName: args.moldName,
+          meta: moldParsed.meta,
+          refs: refEntries,
+          metaByPath,
+          slugMap,
+          bundleRoot,
+        }),
+      );
+    } catch (e) {
+      errors.push(errorMessage(e));
     }
   }
 

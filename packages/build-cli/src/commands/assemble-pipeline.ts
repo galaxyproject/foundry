@@ -16,6 +16,7 @@ import process from "node:process";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { reconcileText } from "../lib/reconcile.js";
+import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
 import { bundleDir } from "../lib/target-layout.js";
 import {
   aggregateRequiredTools,
@@ -25,8 +26,6 @@ import {
   type RequiredToolRef,
 } from "../lib/required-tools.js";
 import type { Frontmatter } from "../lib/types.js";
-import { fileSlug, findMdFiles } from "../lib/walk.js";
-import { slugify } from "../lib/wiki-links.js";
 
 // ---- argv ----
 
@@ -55,33 +54,6 @@ function parseArgs(argv: string[]): Args {
     );
   }
   return { slug: positional[0]!, harnessName: positional[1] ?? null, check, root };
-}
-
-// ---- content index ----
-
-function buildContentIndex(repoRoot: string): {
-  slugMap: Map<string, string>;
-  metaByPath: Map<string, Frontmatter>;
-} {
-  const slugMap = new Map<string, string>();
-  const metaByPath = new Map<string, Frontmatter>();
-  for (const abs of findMdFiles(path.join(repoRoot, "content"))) {
-    const parsed = readMarkdown(abs);
-    if (!parsed.hasFrontmatter) continue;
-    const rel = path.relative(repoRoot, abs);
-    slugMap.set(slugify(fileSlug(rel)), rel);
-    metaByPath.set(rel, parsed.meta);
-    // Compound `<tool> <command>` slug for cli-command notes (parity with cast's
-    // buildSlugMap) so `[[gxwf validate]]`-style refs resolve at assembly time.
-    if (
-      parsed.meta.type === "cli-command" &&
-      typeof parsed.meta.tool === "string" &&
-      typeof parsed.meta.command === "string"
-    ) {
-      slugMap.set(slugify(`${parsed.meta.tool} ${parsed.meta.command}`), rel);
-    }
-  }
-  return { slugMap, metaByPath };
 }
 
 function listPipelines(repoRoot: string): string[] {
@@ -158,8 +130,8 @@ function assemble(
   harnessName: string,
   pipelineMeta: Frontmatter,
   parsed: ParsedPhase[],
-  metaByPath: Map<string, Frontmatter>,
-  slugMap: Map<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
   repoRoot: string,
 ): Assembled {
   const errors: string[] = [];
@@ -278,7 +250,7 @@ function renderMoldLine(
 function renderBranchLines(
   n: number,
   phase: Extract<ParsedPhase, { kind: "branch" }>,
-  metaByPath: Map<string, Frontmatter>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
   repoRoot: string,
 ): string {
   const lines = [
@@ -450,7 +422,7 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
   }
 
   const harnessName = args.harnessName ?? `pipeline-${args.slug}`;
-  const { slugMap, metaByPath } = buildContentIndex(repoRoot);
+  const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES);
   const parsedPhases = parsePhases(phases, slugMap, metaByPath, pipelineRel);
 
   const errors: string[] = [];
