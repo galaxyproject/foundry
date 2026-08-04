@@ -78,22 +78,28 @@ export type NoteType = NoteEntry['data']['type'];
 /**
  * What to call a note, for a reader that has one of any kind.
  *
- * The kinds name themselves differently — most carry a `title`, molds and patterns carry a `name`,
+ * The kinds name themselves differently — most carry a `title`, molds and schemas carry a `name`,
  * a CLI command is its `tool command` pair — and none of those fields is on every arm, so this is
- * a question the union forces someone to answer. Four callers answered it privately: the note
- * route, the tag pages, the incoming-references list and the mold artifact tables, each reading
- * the fields off `any` and each spelling the id fallback again.
+ * a question the union forces someone to answer. SEVEN callers answered it privately: the note
+ * route, the full index, the dashboard, the tag pages, the incoming-references list, the mold
+ * artifact tables and the artifact pages. Each read the fields off `any`; each spelled the id
+ * fallback again.
  *
- * Three of the four agreed. The fourth asked for `name` before `title` and fell back to a raw
- * basename, so an artifact table showed `summarize-nextflow` where every other surface on the site
- * showed `Summarize Nextflow` — a disagreement no page could see, because each was only ever read
- * next to itself.
+ * They fell into three answers, not two. Two asked for the `tool command` pair and five did not,
+ * so every CLI command was titled from its slug on five of the seven surfaces — `Planemo
+ * Climetadata`, and in a list of links the unqualified `Add`, `List`, `Convert`, `Validate`. The
+ * remaining two asked for `name` before `title` and fell back to a raw basename; that ordering
+ * never mattered, because both are only ever called with mold ids and no mold declares a `title`.
+ * A disagreement that costs nothing today is still a disagreement nothing was comparing.
  */
 export function noteTitle(entry: NoteEntry): string {
   const data = entry.data;
   if ('title' in data && data.title) return data.title;
   if ('name' in data && data.name) return data.name;
   if ('tool' in data && 'command' in data) return `${data.tool} ${data.command}`;
+  // Unreachable for every kind defined today — `title` or `name` is required on all ten. Kept
+  // because it costs one line and the alternative, when an eleventh kind arrives, is a page whose
+  // heading is the empty string.
   return entry.id
     .split('/')
     .pop()!

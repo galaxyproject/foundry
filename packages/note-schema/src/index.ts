@@ -37,6 +37,8 @@ export {
   type KindDefinition,
   type KindReference,
   type KindShape,
+  type PhaseBranchItem,
+  type PipelinePhase,
 } from "./types/index.js";
 
 export {

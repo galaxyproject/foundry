@@ -138,7 +138,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
       <div class="artifact-block">
         <h3 class="artifact-side">Produces</h3>
         <ul class="artifact-list">
-          {outputArtifacts.map((a: any) => {
+          {outputArtifacts.map(a => {
             const schemaLink = a.schema ? resolveWikiLink(a.schema, linkMap, base) : null;
             const consumers = consumersOf(a.id);
             return (
@@ -183,7 +183,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
       <div class="artifact-block">
         <h3 class="artifact-side">Consumes</h3>
         <ul class="artifact-list">
-          {inputArtifacts.map((a: any) => {
+          {inputArtifacts.map(a => {
             const producers = producersOf(a.id);
             return (
               <li class="artifact-card">

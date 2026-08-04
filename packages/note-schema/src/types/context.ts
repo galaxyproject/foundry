@@ -32,26 +32,33 @@ export interface BuildKindContextOptions {
 }
 
 /**
- * One entry of a Mold's typed reference manifest.
+ * The fields of one entry in a Mold's typed reference manifest.
  *
- * Stated as a type because the schema below is the only thing that knew this shape, and it was
- * declared as `z.ZodType<unknown>` — so every consumer that wanted to RENDER a reference had to
- * describe the object again from the outside. One did, field for field, and nothing compared the
- * two. The vocabularies stay `string` here rather than the contract's enums: those come from
- * `reference_contract.yml` at runtime, so a compile-time literal union would be a second, staler
+ * Hoisted out of `buildKindContext` so that the schema and the exported type are ONE description.
+ * Written as an interface beside the schema they would have been two, and two descriptions of an
+ * object whose fields are mostly optional do not fail against each other: dropping `trigger` from
+ * the schema leaves the output still assignable to an interface that declares it optional, so
+ * every consumer compiles and the Trigger row silently stops rendering. That is the same
+ * "nothing compares them" failure the type was added to end, one level quieter.
+ *
+ * The vocabularies stay `string` rather than the contract's enums, because they come from
+ * `reference_contract.yml` at runtime — a compile-time literal union would be a second, staler
  * copy of a registry that is already the authority.
  */
-export interface KindReference {
-  kind: string;
-  ref: string;
-  used_at: string;
-  load: string;
-  mode: string;
-  evidence: string;
-  purpose?: string;
-  trigger?: string;
-  verification?: string;
-}
+const referenceShape = (enumOf: (group: keyof ReferenceContract) => z.ZodType<string>) => ({
+  kind: enumOf("kinds"),
+  ref: z.string().min(1),
+  used_at: enumOf("used_at"),
+  load: enumOf("load"),
+  mode: enumOf("modes"),
+  evidence: enumOf("evidence"),
+  purpose: z.string().min(1).optional(),
+  trigger: z.string().min(1).optional(),
+  verification: z.string().min(1).optional(),
+});
+
+/** One entry of a Mold's typed reference manifest, as the schema above defines it. */
+export type KindReference = z.infer<z.ZodObject<ReturnType<typeof referenceShape>>>;
 
 /** Source formats this Foundry converts FROM. Shared by `mold` and `source-pattern`. */
 export const sourceKinds = [
@@ -186,17 +193,7 @@ export function buildKindContext(options: BuildKindContextOptions): KindContext 
   }
 
   const reference = z
-    .object({
-      kind: registryEnum("kinds"),
-      ref: z.string().min(1),
-      used_at: registryEnum("used_at"),
-      load: registryEnum("load"),
-      mode: registryEnum("modes"),
-      evidence: registryEnum("evidence"),
-      purpose: z.string().min(1).optional(),
-      trigger: z.string().min(1).optional(),
-      verification: z.string().min(1).optional(),
-    })
+    .object(referenceShape(registryEnum))
     .strict()
     .superRefine((ref, ctx) => {
       // Both cross-field rules the reference contract's vocabularies imply. `on-demand`

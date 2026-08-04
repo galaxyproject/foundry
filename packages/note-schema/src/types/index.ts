@@ -88,3 +88,7 @@ export {
   type KindReference,
   type KindShape,
 } from "./context.js";
+
+// The phase grammar is pipeline-local, but the SITE renders it, so the shapes are named here
+// rather than left for a component to describe from the outside.
+export type { PhaseBranchItem, PipelinePhase } from "./pipeline/schema.js";
