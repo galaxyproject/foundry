@@ -1368,6 +1368,41 @@ license: CC-BY-NC-SA-2.0
     }
   });
 
+  // A refused cast leaves no manifest describing the bundle it declined to finish.
+  //
+  // `_verify.json` was always deferred past the error gate for this reason; `_required_tools.json`
+  // was not, and got written before the gate that then aborted the run. Both are contributed
+  // files now and travel one path, so this pins the property for the mechanism rather than for
+  // whichever file happened to have it.
+  it("writes no bundle manifest for a cast it refuses", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refused-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(
+        dir,
+        `---
+type: research
+title: Note X
+tags: [research]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Own-words-only note that must not be carried verbatim.
+license: CC-BY-NC-SA-2.0
+---${noteBody}`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      const bundle = path.join(dir, "casts/claude/skills/m");
+      expect(existsSync(path.join(bundle, "_verify.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_required_tools.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("carries a verbatim-ok license and hashes its license_file into provenance", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-ok-"));
     seedReferenceContract(dir);
@@ -1660,6 +1695,48 @@ describe("cast declarations the corpus does not currently exercise", () => {
       } finally {
         rmSync(dir, { recursive: true, force: true });
       }
+    }
+  });
+
+  // A refused cast writes no manifest describing the bundle it declined to finish.
+  //
+  // `_verify.json` was always deferred past the error gate for exactly this reason, and its
+  // comment said so. `_required_tools.json` was not: it reconciled before the gate, so a cast
+  // that then aborted left a fresh tools manifest beside stale provenance. Both are contributed
+  // files now and share one write, after the gate.
+  //
+  // Needs BOTH a resolvable cli-tool ref (so a manifest is owed) and a broken one (so the cast
+  // refuses) — with no tools required the manifest is absent either way and proves nothing.
+  it("writes no tools manifest for a cast it refuses", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refused-tools-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/cli/real-tool"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        targetYml("cli-tool", "references/cli/", ".md", "[verbatim]"),
+      );
+      writeFileSync(
+        path.join(dir, "reference_contract.yml"),
+        contractYml("cli-tool", { resolve: "note", default_mode: "verbatim", companions: false }),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Refused-cast tools manifest test mold summary.\nreferences:\n  - kind: cli-tool\n    ref: "[[real-tool]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n  - kind: cli-tool\n    ref: "[[does-not-exist]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+      );
+      writeFileSync(
+        path.join(dir, "content/cli/real-tool/index.md"),
+        `---\ntype: cli-tool\ntool: real-tool\norigin: pypi\ninvoke: real-tool\nsummary: A tool the mold really needs.\ntags: [cli]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody.\n`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      const bundle = path.join(dir, "casts/claude/skills/m");
+      expect(existsSync(path.join(bundle, "_required_tools.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_verify.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
   });
 

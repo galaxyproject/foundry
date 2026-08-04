@@ -19,6 +19,9 @@ export {
   stripBrackets,
 } from "@galaxy-foundry/wiki-links";
 
-export function resolveWikiLink(wikiLink: unknown, slugToPath: Map<string, string>): string | null {
+export function resolveWikiLink(
+  wikiLink: unknown,
+  slugToPath: ReadonlyMap<string, string>,
+): string | null {
   return resolve(wikiLink, slugToPath) ?? null;
 }

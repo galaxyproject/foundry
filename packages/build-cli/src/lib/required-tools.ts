@@ -38,7 +38,7 @@ export interface RequiredToolRef {
  */
 export function moldCliRefs(
   moldMeta: Frontmatter | undefined,
-  slugMap: Map<string, string>,
+  slugMap: ReadonlyMap<string, string>,
 ): RequiredToolRef[] {
   const refs = Array.isArray(moldMeta?.references) ? moldMeta.references : [];
   const out: RequiredToolRef[] = [];
@@ -56,8 +56,8 @@ export function moldCliRefs(
 
 export function aggregateRequiredTools(
   refs: RequiredToolRef[],
-  metaByPath: Map<string, Frontmatter>,
-  slugMap: Map<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
 ): RequiredTool[] {
   const tools = new Map<string, RequiredTool>();
 

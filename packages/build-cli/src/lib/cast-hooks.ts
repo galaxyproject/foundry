@@ -13,6 +13,8 @@
 // One point is declared so far. The rest — bundle-file contributors, SKILL.md section
 // contributors, the provenance `artifacts` block, and slug aliasing — are still inline.
 
+import type { ProvenanceRefEntry } from "@galaxy-foundry/cast";
+
 import type { Frontmatter } from "./types.js";
 
 export interface RefRenderInput {
@@ -48,6 +50,45 @@ export type RefRenderer = (input: RefRenderInput) => Promise<string> | string;
  */
 export type RefRenderers = Readonly<Record<string, RefRenderer>>;
 
+/** What a cast knows about itself, and all a contributor is given to work from. */
+export interface CastContext {
+  /** The Mold being cast. */
+  readonly moldName: string;
+  /** Its frontmatter. */
+  readonly meta: Frontmatter;
+  /** Every ref this cast resolved, in the order the bundle lists them. */
+  readonly refs: readonly ProvenanceRefEntry[];
+  /** Every note in the corpus, by repo-relative path. */
+  readonly metaByPath: ReadonlyMap<string, Frontmatter>;
+  /** Wiki-link slug to repo-relative path. */
+  readonly slugMap: ReadonlyMap<string, string>;
+}
+
+/** A file a cast puts at the bundle root beyond the ones casting always writes. */
+export interface BundleFile {
+  /** Bundle-relative path. */
+  readonly path: string;
+  /**
+   * The bytes, or null when this cast requires the file NOT to be there.
+   *
+   * Null is the case worth having: a Mold that stops requiring tools must not leave the old
+   * manifest behind still claiming it does, and nothing else in a cast can notice that, because
+   * hash comparison only ever visits files something still declares.
+   */
+  readonly content: string | null;
+  /** Shown when a check finds a file that `content: null` says should be gone. */
+  readonly absentReason?: string;
+}
+
+/**
+ * Extra bundle-root files this instance derives from the cast.
+ *
+ * Contributors run after refs are resolved and licence-checked, so they see the finished ref
+ * list. They must be pure functions of their input: a cast is byte-stable, and a contributor
+ * that consults anything else breaks `--check` for every Mold.
+ */
+export type BundleFileContributor = (context: CastContext) => readonly BundleFile[];
+
 export interface CastHooks {
   /**
    * Renderers for every non-verbatim mode this instance admits.
@@ -58,4 +99,12 @@ export interface CastHooks {
    * cannot guess which one is right.
    */
   readonly renderers: RefRenderers;
+  /**
+   * Bundle-root files beyond `SKILL.md` and `_provenance.json`.
+   *
+   * Both of ours describe Galaxy: which tools a skill needs installed, and how to verify what it
+   * produces. A Foundry of research notes contributes none, and gets a bundle of exactly the two
+   * files casting itself writes.
+   */
+  readonly bundleFiles: readonly BundleFileContributor[];
 }

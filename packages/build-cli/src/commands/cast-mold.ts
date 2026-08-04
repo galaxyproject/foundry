@@ -8,14 +8,7 @@
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  unlinkSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import type { ErrorObject } from "ajv";
@@ -28,7 +21,6 @@ import {
   applyLicensePolicy,
   copyVerbatim,
   gitHead,
-  pruneEmptyDirs,
   readProvenanceCarryOver,
   recordedHash,
   PROVENANCE_SCHEMA_VERSION,
@@ -46,10 +38,16 @@ import {
   type ReferenceContractTerm,
 } from "@galaxy-foundry/note-schema";
 
-import type { CastHooks, RefRenderers } from "../lib/cast-hooks.js";
+import type { BundleFile, CastHooks, RefRenderers } from "../lib/cast-hooks.js";
 import { payloadCompanionOf } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
-import { driftOf, reconcile, reconcileText, sha256File, sha256Text } from "../lib/reconcile.js";
+import {
+  reconcile,
+  reconcileAbsent,
+  reconcileText,
+  reconcileTreeTo,
+  sha256File,
+} from "../lib/reconcile.js";
 import {
   aggregateRequiredTools,
   requiredToolRows,
@@ -57,7 +55,7 @@ import {
 } from "../lib/required-tools.js";
 import { bundlePathOf, resolveBundlePath } from "../lib/target-layout.js";
 import type { Frontmatter } from "../lib/types.js";
-import { fileSlug, findMdFiles, listFilesUnder } from "../lib/walk.js";
+import { fileSlug, findMdFiles } from "../lib/walk.js";
 import {
   parseWikiLink,
   resolveWikiLink,
@@ -156,8 +154,8 @@ function loadTargetConfig(repoRoot: string, target: string): TargetConfig {
 // ---- slug map (shared with validator semantics) ----
 
 function buildSlugMap(repoRoot: string): {
-  slugMap: Map<string, string>;
-  metaByPath: Map<string, Frontmatter>;
+  slugMap: ReadonlyMap<string, string>;
+  metaByPath: ReadonlyMap<string, Frontmatter>;
 } {
   const slugMap = new Map<string, string>();
   const metaByPath = new Map<string, Frontmatter>();
@@ -238,8 +236,8 @@ function resolveMoldRef(
   raw: unknown,
   index: number,
   moldPath: string,
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
   target: TargetConfig,
   castContract: CastContract,
   refKinds: Record<string, ReferenceContractTerm & { ref_shape?: string }>,
@@ -410,7 +408,7 @@ function resolveMoldRef(
 // `companion_of` for provenance.
 function expandCompanions(
   resolved: ResolvedRef[],
-  metaByPath: Map<string, Frontmatter>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
   target: TargetConfig,
   castContract: CastContract,
 ): ResolvedRef[] {
@@ -551,7 +549,62 @@ const GALAXY_HOOKS: CastHooks = {
     sidecar: async ({ srcAbs, srcRel, meta }) =>
       JSON.stringify(await buildCliSidecar(srcAbs, srcRel, meta), null, 2) + "\n",
   },
+  bundleFiles: [
+    // Which Galaxy tools a skill needs installed before it can run.
+    ({ refs, metaByPath, slugMap }) => {
+      const tools = aggregateRequiredTools([...refs], metaByPath, slugMap);
+      return [
+        {
+          path: "_required_tools.json",
+          content: tools.length ? JSON.stringify(tools, null, 2) + "\n" : null,
+          absentReason: "stale manifest (no tools required)",
+        },
+      ];
+    },
+    // How to check an artifact this skill produced — which validator, invoked how.
+    ({ meta, metaByPath, slugMap }) => [
+      {
+        path: "_verify.json",
+        content:
+          JSON.stringify(
+            buildVerifyManifest(meta, buildProducerIndex(metaByPath), slugMap, metaByPath),
+            null,
+            2,
+          ) + "\n",
+      },
+    ],
+  ],
 };
+
+/**
+ * Compare every contributed file against the bundle, and bring it into line unless checking.
+ *
+ * Run twice per cast: once to report, before the error gate, and once to write, after it. The
+ * second call's findings are discarded because the first already reported them. Splitting it
+ * that way is what keeps a refused cast from leaving files behind — a cast that reports an
+ * unresolved ref and exits must not have already written a manifest describing the bundle it
+ * declined to finish.
+ */
+function reconcileBundleFiles(
+  files: readonly BundleFile[],
+  bundleRoot: string,
+  check: boolean,
+): Array<{ file: string; reason: string }> {
+  const found: Array<{ file: string; reason: string }> = [];
+  for (const file of files) {
+    const abs = path.join(bundleRoot, file.path);
+    const outcome =
+      file.content === null
+        ? reconcileAbsent({
+            path: abs,
+            reason: file.absentReason ?? "stale (nothing declares it)",
+            check,
+          })
+        : reconcileText({ path: abs, expected: file.content, label: file.path, check });
+    if (outcome.reason) found.push({ file: file.path, reason: outcome.reason });
+  }
+  return found;
+}
 
 // ---- runs/*/summary.json schema validation ----
 
@@ -628,7 +681,7 @@ export interface VerifyManifest {
 }
 
 export function buildProducerIndex(
-  metaByPath: Map<string, Frontmatter>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): Map<string, ProducerInfo> {
   const idx = new Map<string, ProducerInfo>();
   for (const [rel, meta] of metaByPath) {
@@ -670,8 +723,8 @@ interface ValidatorInvocation {
 
 function schemaValidatorInvocation(
   schemaRef: string,
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): ValidatorInvocation | undefined {
   const target = resolveWikiLink(schemaRef, slugMap);
   if (!target) return undefined;
@@ -686,8 +739,8 @@ function schemaValidatorInvocation(
 export function buildVerifyManifest(
   meta: Frontmatter,
   producerIndex: Map<string, ProducerInfo>,
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): VerifyManifest {
   const entries: VerifyManifestEntry[] = [];
   const rawOut = meta.output_artifacts;
@@ -1039,8 +1092,8 @@ function refRows(refs: ProvenanceRefEntry[]): string[] {
 
 function schemaValidationRows(
   outputs: ProvenanceArtifactOutput[],
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): string[] {
   const rows: string[] = [];
   for (const output of outputs) {
@@ -1078,8 +1131,8 @@ function renderSkillMarkdown(args: {
   body: string;
   refs: ProvenanceRefEntry[];
   artifacts?: ProvenanceArtifacts;
-  slugMap: Map<string, string>;
-  metaByPath: Map<string, Frontmatter>;
+  slugMap: ReadonlyMap<string, string>;
+  metaByPath: ReadonlyMap<string, Frontmatter>;
   requiredTools: RequiredTool[];
 }): string {
   const summary = scalar(args.meta.summary) ?? `Run the ${args.moldName} Mold.`;
@@ -1257,7 +1310,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   });
   if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
 
-  // Reconcile `references/` to ABSENT for anything provenance no longer lists.
+  // Reduce `references/` to exactly what provenance lists.
   //
   // Casting writes each ref and never looked at what was already there, so a file that stops
   // being a ref stayed in the bundle forever. Undeclaring one companion was enough to prove it:
@@ -1265,56 +1318,30 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   // and the file sat in nine bundles regardless — invisible to every check, and still the first
   // thing an agent listing the directory would find.
   //
-  // Same failure as the stale `_required_tools.json` below, and the same fix: the bundle holds
-  // what the manifest says and nothing else. Scoped to `references/` because that subtree is the
-  // only part of a bundle casting owns — `runs/` is harvested output and is not ours to delete.
-  const referencesRoot = path.join(bundleRoot, "references");
-  const declared = new Set(refEntries.map((entry) => entry.dst));
-  for (const rel of listFilesUnder(referencesRoot, bundleRoot)) {
-    if (declared.has(rel)) continue;
-    if (args.check) {
-      drift.push({ file: rel, reason: "orphan (no ref claims it)" });
-    } else {
-      unlinkSync(path.join(bundleRoot, rel));
-    }
-  }
-  if (!args.check) pruneEmptyDirs(referencesRoot);
-
-  // Emit/reconcile _required_tools.json manifest at bundle root.
-  const requiredToolsPath = path.join(bundleRoot, "_required_tools.json");
-  if (requiredTools.length === 0) {
-    // Reconciling to ABSENT — the one desired state `reconcile` cannot express, since there is
-    // no expected content to hash. A mold that stops requiring tools must not leave the old
-    // manifest behind claiming it still does.
-    if (existsSync(requiredToolsPath)) {
-      if (args.check) {
-        drift.push({ file: "_required_tools.json", reason: "stale manifest (no tools required)" });
-      } else {
-        unlinkSync(requiredToolsPath);
-      }
-    }
-  } else {
-    const manifestDrift = reconcileText({
-      path: requiredToolsPath,
-      expected: JSON.stringify(requiredTools, null, 2) + "\n",
-      label: "_required_tools.json",
+  // Scoped to `references/` because that subtree is the only part of a bundle casting owns —
+  // `runs/` is harvested output and is not ours to delete.
+  drift.push(
+    ...reconcileTreeTo({
+      root: path.join(bundleRoot, "references"),
+      declared: new Set(refEntries.map((entry) => entry.dst)),
+      relativeTo: bundleRoot,
+      reason: () => "orphan (no ref claims it)",
       check: args.check,
-    });
-    if (manifestDrift.reason) {
-      drift.push({ file: "_required_tools.json", reason: manifestDrift.reason });
-    }
-  }
+    }),
+  );
 
-  const verify = buildVerifyManifest(moldParsed.meta, producerIndex, slugMap, metaByPath);
-  const verifyText = JSON.stringify(verify, null, 2) + "\n";
-  const verifyPath = path.join(bundleRoot, "_verify.json");
-  if (args.check) {
-    // Compared but never written here: the write happens with the provenance record below,
-    // behind an error gate that can abort the cast. Reconciling it early would put the file on
-    // disk for a cast that then refused to finish.
-    const verifyDrift = driftOf(verifyPath, sha256Text(verifyText), "_verify.json");
-    if (verifyDrift.reason) drift.push({ file: "_verify.json", reason: verifyDrift.reason });
-  }
+  // Bundle-root files this instance contributes. Reported here, written after the error gate —
+  // a cast that refuses to finish must not leave a manifest describing the bundle it declined.
+  const contributed = GALAXY_HOOKS.bundleFiles.flatMap((contribute) =>
+    contribute({
+      moldName: args.moldName,
+      meta: moldParsed.meta,
+      refs: refEntries,
+      metaByPath,
+      slugMap,
+    }),
+  );
+  drift.push(...reconcileBundleFiles(contributed, bundleRoot, true));
 
   // runs/*/summary.json validation — a bundle may carry sample runs, and they are checked
   // against the schema the Mold declares for its OWN output. Not against whichever schema ref
@@ -1390,7 +1417,10 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
 
   writeFileSync(provenancePath, JSON.stringify(next, null, 2) + "\n");
-  writeFileSync(verifyPath, verifyText);
+  // Findings discarded: the reporting pass above already collected them, and this call exists
+  // to write. Reaching here means the cast is finishing, so contributed files land beside the
+  // provenance record that describes the same bundle.
+  reconcileBundleFiles(contributed, bundleRoot, false);
   console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
   if (drift.length) console.log(`reconciled ${drift.length} drifted ref(s)`);
 }

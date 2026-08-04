@@ -14,8 +14,11 @@ export {
   driftOf,
   recordedHash,
   reconcile,
+  reconcileAbsent,
   reconcileText,
+  reconcileTreeTo,
   sha256File,
   sha256Text,
+  type Absence,
   type Drift,
 } from "@galaxy-foundry/cast";
