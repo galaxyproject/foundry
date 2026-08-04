@@ -1,5 +1,5 @@
 ---
-import { getAllNotes } from '../../lib/notes';
+import { getAllNotes, noteTitle } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { tags as registry } from '../../lib/registries';
 import { facetLabelOf } from '../../lib/tag-browse';
@@ -46,12 +46,6 @@ function formatDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-function noteTitle(n: typeof allNotes[number]): string {
-  const data = n.data as any;
-  if (data.title) return data.title;
-  if (data.name) return data.name;
-  return n.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
 ---
 <Base title={`Tag: ${tag}`}>
   <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-(--color-text-secondary)">{facetLabel}</div>

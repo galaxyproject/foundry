@@ -1,13 +1,13 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteOf } from '../lib/notes';
 import { cliRegistry } from '../lib/cli-registry';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'cli-commands'>;
 }
 
 const { entry } = Astro.props;
-const data = entry.data as any;
+const data = entry.data;
 const key = `${data.tool}/${data.command}`;
 const reg = cliRegistry[key];
 const cmd = reg?.command;

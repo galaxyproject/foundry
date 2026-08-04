@@ -1,5 +1,5 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { noteTitle, type NoteEntry, type NoteOf } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 import ReferenceContract from './ReferenceContract.astro';
 import CastArtifacts from './CastArtifacts.astro';
@@ -7,31 +7,31 @@ import { artifactHref, type ArtifactGraph } from '../lib/artifacts';
 import { base } from '../lib/site-base';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'molds'>;
   linkMap: Map<string, WikiLinkTarget>;
   artifactGraph?: ArtifactGraph;
+  // Stays the union: the artifact graph reaches notes of any kind, and this component only wants
+  // a display name off them.
   entryById?: Map<string, NoteEntry>;
 }
 
 const { entry, linkMap, artifactGraph, entryById } = Astro.props;
-const data = entry.data as any;
+const data = entry.data;
 
 const axisChip = data.axis;
 const specifier = data.source ?? data.target ?? data.tool ?? null;
 
 function entryName(id: string): string {
   const e = entryById?.get(id);
-  if (!e) return id;
-  const d = e.data as any;
-  return d.name || d.title || id.split('/').pop() || id;
+  return e ? noteTitle(e) : id;
 }
 
 function entryHref(id: string): string {
   return `${base}/${id}/`;
 }
 
-const outputArtifacts: any[] = Array.isArray(data.output_artifacts) ? data.output_artifacts : [];
-const inputArtifacts: any[] = Array.isArray(data.input_artifacts) ? data.input_artifacts : [];
+const outputArtifacts = data.output_artifacts ?? [];
+const inputArtifacts = data.input_artifacts ?? [];
 
 function consumersOf(id: string): { moldId: string; description: string }[] {
   const node = artifactGraph?.get(id);

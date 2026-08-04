@@ -1,13 +1,13 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteOf } from '../lib/notes';
 import { schemaRegistry } from '../lib/schema-registry';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'schemas'>;
 }
 
 const { entry } = Astro.props;
-const data = entry.data as any;
+const data = entry.data;
 const reg = schemaRegistry[data.name];
 
 interface Property {

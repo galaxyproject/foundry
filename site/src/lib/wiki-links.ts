@@ -90,10 +90,13 @@ export function buildBacklinkMap(
   };
 
   for (const entry of entries) {
-    const data = entry.data as any;
+    const data = entry.data;
 
+    // Each field is asked for, because none of them is on every kind. Under a cast this list was
+    // free to name a field no schema declares — and a backlink that never fires looks exactly like
+    // a corpus where nothing links that way.
     const single: [BacklinkField, string | undefined][] = [
-      ['parent_pattern', data.parent_pattern],
+      ['parent_pattern', 'parent_pattern' in data ? data.parent_pattern : undefined],
     ];
     for (const [field, val] of single) {
       if (!val) continue;
@@ -102,10 +105,13 @@ export function buildBacklinkMap(
     }
 
     const arrays: [BacklinkField, string[] | undefined][] = [
-      ['related_notes', data.related_notes],
-      ['related_patterns', data.related_patterns],
-      ['related_molds', data.related_molds],
-      ['implemented_by_patterns', data.implemented_by_patterns],
+      ['related_notes', 'related_notes' in data ? data.related_notes : undefined],
+      ['related_patterns', 'related_patterns' in data ? data.related_patterns : undefined],
+      ['related_molds', 'related_molds' in data ? data.related_molds : undefined],
+      [
+        'implemented_by_patterns',
+        'implemented_by_patterns' in data ? data.implemented_by_patterns : undefined,
+      ],
     ];
     for (const [field, arr] of arrays) {
       if (!arr) continue;
@@ -116,7 +122,7 @@ export function buildBacklinkMap(
     }
 
     // Pipeline phases: walk and collect mold references.
-    if (data.type === 'pipeline' && Array.isArray(data.phases)) {
+    if (data.type === 'pipeline') {
       for (const wl of collectPhaseRefs(data.phases)) {
         const tid = resolveWikiLinkId(wl, linkMap);
         if (tid) add(tid, entry.id, 'phases');
@@ -124,10 +130,9 @@ export function buildBacklinkMap(
     }
 
     // Mold output_artifacts[].schema: link the schema note back to the producing Mold.
-    if (data.type === 'mold' && Array.isArray(data.output_artifacts)) {
-      for (const a of data.output_artifacts) {
-        const schema = a && typeof a === 'object' ? (a as any).schema : undefined;
-        if (typeof schema !== 'string') continue;
+    if (data.type === 'mold') {
+      for (const { schema } of data.output_artifacts ?? []) {
+        if (!schema) continue;
         const tid = resolveWikiLinkId(schema, linkMap);
         if (tid) add(tid, entry.id, 'output_artifact_schema');
       }

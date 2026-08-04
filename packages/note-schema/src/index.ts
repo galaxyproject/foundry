@@ -35,6 +35,7 @@ export {
   type AnyKindDefinition,
   type KindContext,
   type KindDefinition,
+  type KindReference,
   type KindShape,
 } from "./types/index.js";
 

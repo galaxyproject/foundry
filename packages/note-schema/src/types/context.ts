@@ -31,6 +31,28 @@ export interface BuildKindContextOptions {
   licensePolicy: LicensePolicy;
 }
 
+/**
+ * One entry of a Mold's typed reference manifest.
+ *
+ * Stated as a type because the schema below is the only thing that knew this shape, and it was
+ * declared as `z.ZodType<unknown>` — so every consumer that wanted to RENDER a reference had to
+ * describe the object again from the outside. One did, field for field, and nothing compared the
+ * two. The vocabularies stay `string` here rather than the contract's enums: those come from
+ * `reference_contract.yml` at runtime, so a compile-time literal union would be a second, staler
+ * copy of a registry that is already the authority.
+ */
+export interface KindReference {
+  kind: string;
+  ref: string;
+  used_at: string;
+  load: string;
+  mode: string;
+  evidence: string;
+  purpose?: string;
+  trigger?: string;
+  verification?: string;
+}
+
 /** Source formats this Foundry converts FROM. Shared by `mold` and `source-pattern`. */
 export const sourceKinds = [
   "paper",
@@ -66,7 +88,7 @@ export interface KindContext {
    */
   companions: z.ZodType<string[]>;
   /** One entry of a Mold's typed reference manifest. */
-  reference: z.ZodType<unknown>;
+  reference: z.ZodType<KindReference>;
 
   /**
    * THE BASE ENVELOPE — the fields every kind in this instance carries. Kinds spread it.

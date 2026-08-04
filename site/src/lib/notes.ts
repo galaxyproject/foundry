@@ -54,6 +54,54 @@ export type _CollectionsCovered = MustBeTrue<SameSet<NoteCollection, CollectionN
 export type NoteEntry = CollectionEntry<NoteCollection>;
 
 /**
+ * A note of ONE kind — what a component that renders that kind takes.
+ *
+ * `NoteEntry` is for readers that genuinely range over the corpus: the tag pages, the dashboard,
+ * the link graphs. A component that draws a Mold's phases is not one of those, and taking the
+ * union there costs twice. It accepts a note of any kind, so nothing checks that the route handed
+ * it the one it draws; and its own fields are absent from the union, so reading them needs a cast,
+ * which erases the rest of the frontmatter along with them.
+ *
+ * Naming the kind is what makes `{data.type === 'mold' && <MoldBody entry={entry} />}` checked at
+ * the CALL SITE. The branch and the component then agree by compilation rather than by reading.
+ */
+export type NoteOf<C extends NoteCollection> = CollectionEntry<C>;
+
+/**
+ * The `type` literal of a note — the discriminator every arm of the union carries.
+ *
+ * Derived from the union rather than re-listed, so a table keyed by it (`TYPE_LABELS` on the note
+ * route) gains a required row the moment a kind is added, instead of falling through to a default.
+ */
+export type NoteType = NoteEntry['data']['type'];
+
+/**
+ * What to call a note, for a reader that has one of any kind.
+ *
+ * The kinds name themselves differently — most carry a `title`, molds and patterns carry a `name`,
+ * a CLI command is its `tool command` pair — and none of those fields is on every arm, so this is
+ * a question the union forces someone to answer. Four callers answered it privately: the note
+ * route, the tag pages, the incoming-references list and the mold artifact tables, each reading
+ * the fields off `any` and each spelling the id fallback again.
+ *
+ * Three of the four agreed. The fourth asked for `name` before `title` and fell back to a raw
+ * basename, so an artifact table showed `summarize-nextflow` where every other surface on the site
+ * showed `Summarize Nextflow` — a disagreement no page could see, because each was only ever read
+ * next to itself.
+ */
+export function noteTitle(entry: NoteEntry): string {
+  const data = entry.data;
+  if ('title' in data && data.title) return data.title;
+  if ('name' in data && data.name) return data.name;
+  if ('tool' in data && 'command' in data) return `${data.tool} ${data.command}`;
+  return entry.id
+    .split('/')
+    .pop()!
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/**
  * Every note in the corpus, in collection order then id order.
  *
  * Sorted rather than left in load order: several callers build maps and lists straight off

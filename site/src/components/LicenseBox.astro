@@ -9,11 +9,14 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const data = entry.data as any;
+const data = entry.data;
 
-const license: string | undefined = data.license;
-const licenseFile: string | undefined = data.license_file;
-const upstream: string | undefined = data.upstream;
+// The union, not one kind: a license travels with redistributed material, and which kinds carry
+// redistributed material is not this component's to decide. Each field is asked for rather than
+// assumed, so a kind that stops declaring one is a compile error here and not a blank panel.
+const license = 'license' in data ? data.license : undefined;
+const licenseFile = 'license_file' in data ? data.license_file : undefined;
+const upstream = 'upstream' in data ? data.upstream : undefined;
 
 // Only rendered for notes that carry a license (third-party redistribution).
 const row = license ? resolveLicenseRow(licensePolicy, license) : undefined;

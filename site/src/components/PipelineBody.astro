@@ -1,5 +1,5 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteOf } from '../lib/notes';
 import type { WikiLinkTarget } from '../lib/wiki-links';
 import PhaseGraph from './PhaseGraph.astro';
 import StopGapBanner from './StopGapBanner.astro';
@@ -7,13 +7,15 @@ import { loadAssembly, assemblyStats } from '../lib/casts';
 import { base } from '../lib/site-base';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'pipelines'>;
   linkMap: Map<string, WikiLinkTarget>;
 }
 
 const { entry, linkMap } = Astro.props;
-const data = entry.data as any;
-const phaseCount = Array.isArray(data.phases) ? data.phases.length : 0;
+const data = entry.data;
+// `phases` is required and an array in the pipeline schema, so the old `Array.isArray` guard was
+// asking a question the kind already answers.
+const phaseCount = data.phases.length;
 
 const slug = entry.id.split('/').pop()!;
 const assembly = loadAssembly(slug);

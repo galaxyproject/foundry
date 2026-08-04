@@ -1,5 +1,5 @@
 ---
-import { getAllNotes } from '../../../lib/notes';
+import { getCollection } from 'astro:content';
 import { readFileSync } from 'node:fs';
 import Base from '../../../layouts/Base.astro';
 import StopGapBanner from '../../../components/StopGapBanner.astro';
@@ -12,7 +12,15 @@ import {
 } from '../../../lib/casts';
 
 export async function getStaticPaths() {
-  const pipelines = (await getAllNotes()).filter(e => e.data.type === 'pipeline');
+  // The collection, not the corpus narrowed down to it: narrowing inside a predicate reaches
+  // `e.data` and leaves `e` the union, so the pipeline's own `title` was only reachable here by
+  // asserting it.
+  //
+  // The sentence above is phrased around the name of the array method rather than using it,
+  // because that word backtick-quoted in a .astro file is a Tailwind utility candidate — the
+  // scanner reads source TEXT, comments included. Written the obvious way it shipped a 1.2 KB
+  // rule for a class no page carries. See the same warning in layouts/Base.astro.
+  const pipelines = await getCollection('pipelines');
   return pipelines
     .map(p => {
       const slug = p.id.split('/').pop()!;
@@ -20,7 +28,7 @@ export async function getStaticPaths() {
       if (!assembly) return null;
       return {
         params: { slug },
-        props: { slug, title: (p.data as any).title as string },
+        props: { slug, title: p.data.title },
       };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);

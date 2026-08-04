@@ -1,5 +1,5 @@
 ---
-import { getAllNotes } from '../lib/notes';
+import { getAllNotes, noteTitle, type NoteType } from '../lib/notes';
 import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NoteHeader from '../components/NoteHeader.astro';
@@ -39,34 +39,32 @@ const incoming = (backlinkMap.get(entry.id) ?? [])
   .filter(b => b.source)
   .sort((a, b) => a.sourceId.localeCompare(b.sourceId));
 
-const data = entry.data as any;
+const data = entry.data;
 
-const TYPE_LABELS: Record<string, string> = {
+// Every kind, not the eight that happened to get a row. This was `Record<string, string>` with
+// `?? data.type` behind it, so `cli-tool` and `prompt` notes printed their raw type string as the
+// label on every one of their pages — a table missing two rows reads exactly like a table that is
+// complete. `Record<NoteType, …>` makes the eleventh kind a compile error instead.
+const TYPE_LABELS: Record<NoteType, string> = {
   meta: 'Design Record',
   mold: 'Mold',
   pipeline: 'Pipeline',
   pattern: 'Pattern',
   'source-pattern': 'Source Pattern',
+  'cli-tool': 'CLI Tool',
   'cli-command': 'CLI Command',
   research: 'Research',
   schema: 'Schema',
+  prompt: 'Prompt',
 };
 
-function defaultTitle(): string {
-  if (data.title) return data.title;
-  if (data.name) return data.name;
-  if (data.command) return `${data.tool} ${data.command}`;
-  return entry.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
-
-const pageTitle = defaultTitle();
-const typeLabel = TYPE_LABELS[data.type] ?? data.type;
+const pageTitle = noteTitle(entry);
+const typeLabel = TYPE_LABELS[data.type];
 
 function pipelineEyebrow(): string | undefined {
   if (data.type !== 'pipeline') return undefined;
-  const tags: string[] = data.tags ?? [];
-  const src = tags.find(t => t.startsWith('source/'))?.split('/')[1];
-  const tgt = tags.find(t => t.startsWith('target/'))?.split('/')[1];
+  const src = data.tags.find(t => t.startsWith('source/'))?.split('/')[1];
+  const tgt = data.tags.find(t => t.startsWith('target/'))?.split('/')[1];
   if (!src || !tgt) return undefined;
   return `pipeline · ${src} → ${tgt}`;
 }
@@ -80,22 +78,22 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
   <div data-pagefind-body>
     <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} eyebrow={eyebrow} showActions={showActions} />
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
-    {data.license && <LicenseBox entry={entry} />}
+    {'license' in data && data.license && <LicenseBox entry={entry} />}
 
-    {data.type === 'mold' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
-    {data.type === 'pattern' && data.pattern_kind !== 'moc' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
-    {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} artifactGraph={artifactGraph} entryById={entryMap} />}
-    {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} />}
-    {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} placement="before" />}
-    {data.type === 'cli-command' && <CliCommandBody entry={entry} />}
-    {data.type === 'research' && <ResearchBody entry={entry} />}
-    {data.type === 'schema' && <SchemaBody entry={entry} />}
+    {entry.collection === 'molds' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
+    {entry.collection === 'patterns' && entry.data.pattern_kind !== 'moc' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
+    {entry.collection === 'molds' && <MoldBody entry={entry} linkMap={linkMap} artifactGraph={artifactGraph} entryById={entryMap} />}
+    {entry.collection === 'pipelines' && <PipelineBody entry={entry} linkMap={linkMap} />}
+    {entry.collection === 'patterns' && <PatternBody entry={entry} linkMap={linkMap} placement="before" />}
+    {entry.collection === 'cli-commands' && <CliCommandBody entry={entry} />}
+    {entry.collection === 'research' && <ResearchBody entry={entry} />}
+    {entry.collection === 'schemas' && <SchemaBody entry={entry} />}
 
     <article class="prose prose-slate max-w-none dark:prose-invert">
       <Content />
     </article>
 
-    {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} placement="after" />}
+    {entry.collection === 'patterns' && <PatternBody entry={entry} linkMap={linkMap} placement="after" />}
 
     <IncomingRefs incoming={incoming} />
   </div>

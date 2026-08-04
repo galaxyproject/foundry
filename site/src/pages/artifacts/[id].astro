@@ -1,5 +1,5 @@
 ---
-import { getAllNotes } from '../../lib/notes';
+import { getAllNotes, noteTitle } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { buildWikiLinkMap, resolveWikiLink } from '../../lib/wiki-links';
 import { buildArtifactGraph } from '../../lib/artifacts';
@@ -24,9 +24,7 @@ const entryById = new Map(entries.map(e => [e.id, e]));
 
 function entryName(entryId: string): string {
   const e = entryById.get(entryId);
-  if (!e) return entryId;
-  const d = e.data as any;
-  return d.name || d.title || entryId.split('/').pop() || entryId;
+  return e ? noteTitle(e) : entryId;
 }
 
 function entryHref(entryId: string): string {

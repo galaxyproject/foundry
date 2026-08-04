@@ -11,8 +11,8 @@ const licenses = getLicenses();
 const entries = await getAllNotes();
 const counts = new Map<string, number>();
 for (const e of entries) {
-  const lf = (e.data as any).license_file;
-  if (typeof lf === 'string') {
+  const lf = 'license_file' in e.data ? e.data.license_file : undefined;
+  if (lf) {
     const id = licenseIdFromFilePath(lf);
     counts.set(id, (counts.get(id) ?? 0) + 1);
   }

@@ -1,23 +1,15 @@
 ---
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
-import type { ReferenceContractTerm } from '@galaxy-foundry/note-schema';
+import type { KindReference, ReferenceContractTerm } from '@galaxy-foundry/note-schema';
 import { referenceContract } from '../lib/registries';
 import { base } from '../lib/site-base';
 
-interface TypedReference {
-  kind: string;
-  ref: string;
-  used_at: string;
-  load: string;
-  mode: string;
-  evidence: string;
-  purpose?: string;
-  trigger?: string;
-  verification?: string;
-}
+// The shape comes from the kind that declares it. This file used to re-describe it — nine fields,
+// copied from the schema by reading it — which agreed only because the mold body handed references
+// over as `any` and neither side could see the other.
 
 interface Props {
-  references?: TypedReference[];
+  references?: KindReference[];
   linkMap: Map<string, WikiLinkTarget>;
 }
 
