@@ -1,5 +1,5 @@
 ---
-import { getAllNotes, noteTitle, type NoteType } from '../lib/notes';
+import { getAllNotes, noteTitle, type NoteField, type NoteType } from '../lib/notes';
 import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NoteHeader from '../components/NoteHeader.astro';
@@ -70,6 +70,11 @@ function pipelineEyebrow(): string | undefined {
 }
 const eyebrow = pipelineEyebrow();
 
+// `in` checks the value and not the key, so the key is asserted separately — otherwise renaming
+// `license` across the three kinds that declare it removes the box from every page it belongs on
+// and nothing reports it.
+const LICENSE = 'license' satisfies NoteField;
+
 const showActions = data.type === 'research';
 const showMeta = data.type !== 'pipeline';
 const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' : 'full';
@@ -78,7 +83,7 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
   <div data-pagefind-body>
     <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} eyebrow={eyebrow} showActions={showActions} />
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
-    {'license' in data && data.license && <LicenseBox entry={entry} />}
+    {LICENSE in data && data.license && <LicenseBox entry={entry} />}
 
     {entry.collection === 'molds' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
     {entry.collection === 'patterns' && entry.data.pattern_kind !== 'moc' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}

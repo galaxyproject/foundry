@@ -35,8 +35,10 @@ export {
   type AnyKindDefinition,
   type KindContext,
   type KindDefinition,
+  type InputArtifact,
   type KindReference,
   type KindShape,
+  type OutputArtifact,
   type PhaseBranchItem,
   type PipelinePhase,
 } from "./types/index.js";

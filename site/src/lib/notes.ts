@@ -67,6 +67,21 @@ export type NoteEntry = CollectionEntry<NoteCollection>;
  */
 export type NoteOf<C extends NoteCollection> = CollectionEntry<C>;
 
+type KeysOfUnion<T> = T extends unknown ? keyof T : never;
+
+/**
+ * Every field name at least one kind declares.
+ *
+ * `in` narrows the VALUE and never checks the KEY. Measured: `'nope_not_a_field' in data &&
+ * data.nope_not_a_field` compiles at zero errors against this union. So a cross-kind read of a
+ * field renamed in every schema that had it goes quiet instead of red — which is the exact failure
+ * `in` was reached for in place of a cast, arriving one step later.
+ *
+ * Writing the key as `'license' satisfies NoteField` is what makes that rename fail. It does not
+ * type the value; it asserts the question is one some kind can answer.
+ */
+export type NoteField = KeysOfUnion<NoteEntry['data']>;
+
 /**
  * The `type` literal of a note — the discriminator every arm of the union carries.
  *
@@ -92,11 +107,16 @@ export type NoteType = NoteEntry['data']['type'];
  * never mattered, because both are only ever called with mold ids and no mold declares a `title`.
  * A disagreement that costs nothing today is still a disagreement nothing was comparing.
  */
+const NAME = 'name' satisfies NoteField;
+const TOOL = 'tool' satisfies NoteField;
+const COMMAND = 'command' satisfies NoteField;
+
 export function noteTitle(entry: NoteEntry): string {
   const data = entry.data;
-  if ('title' in data && data.title) return data.title;
-  if ('name' in data && data.name) return data.name;
-  if ('tool' in data && 'command' in data) return `${data.tool} ${data.command}`;
+  // `title` is on the base envelope, so every kind has it and it needs no `in`. `name` is not.
+  if (data.title) return data.title;
+  if (NAME in data && data.name) return data.name;
+  if (TOOL in data && COMMAND in data) return `${data.tool} ${data.command}`;
   // Unreachable for every kind defined today — `title` or `name` is required on all ten. Kept
   // because it costs one line and the alternative, when an eleventh kind arrives, is a page whose
   // heading is the empty string.

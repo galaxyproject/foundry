@@ -1,18 +1,13 @@
+import type { InputArtifact, OutputArtifact } from '@galaxy-foundry/note-schema';
 import { type NoteEntry } from './notes';
 import { resolveWikiLinkId, type WikiLinkTarget } from './wiki-links';
 
-export interface OutputArtifactDecl {
-  id: string;
-  kind: string;
-  default_filename: string;
-  schema?: string;
-  description: string;
-}
-
-export interface InputArtifactDecl {
-  id: string;
-  description: string;
-}
+// These two were spelled out here, field for field, copied from the mold schema by reading it —
+// the same re-description the reference manifest had, one level down. An interface beside a schema
+// does not fail against it: `schema` is optional on both sides, so removing it from the kind left
+// this one still satisfied and the artifact tables would simply have stopped linking.
+export type OutputArtifactDecl = OutputArtifact;
+export type InputArtifactDecl = InputArtifact;
 
 export interface ArtifactProducer {
   moldId: string;

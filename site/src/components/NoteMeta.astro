@@ -1,5 +1,5 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteEntry, type NoteField } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 import { base } from '../lib/site-base';
 
@@ -22,21 +22,31 @@ function resolveAll(arr: string[] | undefined) {
   return arr.map(wl => resolveWikiLink(wl, linkMap, base));
 }
 
-// Every row below is optional and declared by SOME kinds — which is what makes this component
-// cross-kind rather than a mold panel. `in` is the question the union answers; the alternative is
-// a cast, and under a cast a field renamed in one kind's schema goes quiet instead of red.
+// Two groups, and the difference is which envelope a field is in.
+//
+// `related_notes`, `related_patterns`, `related_molds` and `sources` are on the BASE envelope, so
+// every kind declares them and they read directly. An `in` here would look like narrowing and be
+// a runtime presence check on an optional property — the more misleading for looking careful.
+const relatedNotes = resolveAll(data.related_notes);
+const relatedPatterns = resolveAll(data.related_patterns);
+const relatedMolds = resolveAll(data.related_molds);
+const sources = data.sources ?? [];
+
+// These three belong to some kinds only, so they genuinely need the union asked. The keys are
+// asserted because `in` does not check them: `'nope' in data` compiles, and a field renamed in the
+// one schema that declares it would just stop rendering its row.
+const PARENT_PATTERN = 'parent_pattern' satisfies NoteField;
+const IMPLEMENTED_BY = 'implemented_by_patterns' satisfies NoteField;
+const REVIEW_TRIGGERS = 'review_triggers' satisfies NoteField;
+
 const parentPattern =
-  'parent_pattern' in data && data.parent_pattern
+  PARENT_PATTERN in data && data.parent_pattern
     ? resolveWikiLink(data.parent_pattern, linkMap, base)
     : null;
-const relatedNotes = resolveAll('related_notes' in data ? data.related_notes : undefined);
-const relatedPatterns = resolveAll('related_patterns' in data ? data.related_patterns : undefined);
 const implementedByPatterns = resolveAll(
-  'implemented_by_patterns' in data ? data.implemented_by_patterns : undefined,
+  IMPLEMENTED_BY in data ? data.implemented_by_patterns : undefined,
 );
-const relatedMolds = resolveAll('related_molds' in data ? data.related_molds : undefined);
-const reviewTriggers = ('review_triggers' in data ? data.review_triggers : undefined) ?? [];
-const sources = ('sources' in data ? data.sources : undefined) ?? [];
+const reviewTriggers = (REVIEW_TRIGGERS in data ? data.review_triggers : undefined) ?? [];
 const hasSources = sources.length > 0;
 const hasAnything =
   showRevision ||

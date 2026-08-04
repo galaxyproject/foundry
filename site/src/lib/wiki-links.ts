@@ -1,5 +1,9 @@
-import { type NoteEntry } from './notes';
+import { type NoteEntry, type NoteField } from './notes';
 import { resolveWikiLink as resolve, slugify } from '@galaxy-foundry/wiki-links';
+
+// Frontmatter keys only some kinds declare. Named here so the assertion runs once.
+const PARENT_PATTERN = 'parent_pattern' satisfies NoteField;
+const IMPLEMENTED_BY = 'implemented_by_patterns' satisfies NoteField;
 
 // Components asking "is this string a wiki link at all?" get the package's answer, not their
 // own regex. Re-exported here so a component has one import for everything link-shaped.
@@ -92,11 +96,12 @@ export function buildBacklinkMap(
   for (const entry of entries) {
     const data = entry.data;
 
-    // Each field is asked for, because none of them is on every kind. Under a cast this list was
-    // free to name a field no schema declares — and a backlink that never fires looks exactly like
-    // a corpus where nothing links that way.
+    // `parent_pattern` and `implemented_by_patterns` belong to some kinds only, so the union has
+    // to be asked; the keys carry `satisfies NoteField` because `in` checks the value and not the
+    // key, and a backlink that never fires looks exactly like a corpus where nothing links that
+    // way. The three `related_*` arrays below are on the base envelope and read directly.
     const single: [BacklinkField, string | undefined][] = [
-      ['parent_pattern', 'parent_pattern' in data ? data.parent_pattern : undefined],
+      ['parent_pattern', PARENT_PATTERN in data ? data.parent_pattern : undefined],
     ];
     for (const [field, val] of single) {
       if (!val) continue;
@@ -105,12 +110,12 @@ export function buildBacklinkMap(
     }
 
     const arrays: [BacklinkField, string[] | undefined][] = [
-      ['related_notes', 'related_notes' in data ? data.related_notes : undefined],
-      ['related_patterns', 'related_patterns' in data ? data.related_patterns : undefined],
-      ['related_molds', 'related_molds' in data ? data.related_molds : undefined],
+      ['related_notes', data.related_notes],
+      ['related_patterns', data.related_patterns],
+      ['related_molds', data.related_molds],
       [
         'implemented_by_patterns',
-        'implemented_by_patterns' in data ? data.implemented_by_patterns : undefined,
+        IMPLEMENTED_BY in data ? data.implemented_by_patterns : undefined,
       ],
     ];
     for (const [field, arr] of arrays) {

@@ -24,6 +24,12 @@ const inputArtifact = z
   })
   .strict();
 
+/** One artifact a Mold PRODUCES, as declared in its frontmatter. */
+export type OutputArtifact = z.infer<typeof outputArtifact>;
+
+/** One artifact a Mold CONSUMES. */
+export type InputArtifact = z.infer<typeof inputArtifact>;
+
 export const kind = defineKind({
   kind: "mold",
   title: "Mold",

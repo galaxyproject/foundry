@@ -89,6 +89,8 @@ export {
   type KindShape,
 } from "./context.js";
 
-// The phase grammar is pipeline-local, but the SITE renders it, so the shapes are named here
-// rather than left for a component to describe from the outside.
+// The phase grammar is pipeline-local and a Mold's artifact declarations are mold-local, but the
+// SITE renders both, so the shapes are named here rather than left for a consumer to describe from
+// the outside. Every one of these was re-described at least once while it was unexported.
+export type { InputArtifact, OutputArtifact } from "./mold/schema.js";
 export type { PhaseBranchItem, PipelinePhase } from "./pipeline/schema.js";
