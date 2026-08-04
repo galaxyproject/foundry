@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-02
-revision: 2
+revised: 2026-08-03
+revision: 3
 summary: "How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge."
 ---
 
@@ -53,6 +53,8 @@ The registry has two corpus-level drift rules: a note may not use an undeclared 
 Body prose and selected frontmatter fields use Obsidian-style `[[Target]]` links. The validator and renderer share one parser and resolver. Resolution is exact after normalization — there is no prefix fallback, so an unresolved link fails validation or renders visibly unresolved rather than landing on an arbitrary near-match. Code spans are excluded because a backticked `[[Target]]` names the syntax rather than creating a link.
 
 That exclusion cuts both ways, and the second edge is the sharp one: `validateBodyWikiLinks` strips code spans *before* it scans, so a backticked link is not merely unrendered — it is unchecked. It can name a note that never existed and neither the site nor the validator will say so. Wrap a wiki link in backticks only when the literal token is the subject: a template slot, a frontmatter field shape, or a shell construct like `[[:space:]]` that is not a wiki link at all.
+
+Links are one-directional and backlinks are derived. The site computes incoming references from the same link fields, so a relationship shows on both notes while being written once. A note is never asked to list what points at it.
 
 ## Typed references
 

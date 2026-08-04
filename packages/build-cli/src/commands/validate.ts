@@ -161,50 +161,11 @@ function buildSlugMap(files: FileMeta[]): Map<string, string> {
   return m;
 }
 
-function validateBidirectionalRelatedNotes(
-  files: FileMeta[],
-  slugMap: Map<string, string>,
-): CrossFileFinding[] {
-  const forward = new Map<string, Set<string>>();
-  for (const f of files) {
-    const targets = new Set<string>();
-    const rns = f.meta.related_notes;
-    if (Array.isArray(rns)) {
-      for (const wl of rns) {
-        const tp = resolveWikiLink(wl, slugMap);
-        if (tp && tp !== f.path) targets.add(tp);
-      }
-    }
-    forward.set(f.path, targets);
-  }
-  const slugByPath = new Map<string, string>();
-  for (const f of files) slugByPath.set(f.path, f.slug);
-  const findings: CrossFileFinding[] = [];
-  for (const [a, targets] of forward) {
-    for (const b of targets) {
-      const back = forward.get(b);
-      if (!back || back.has(a)) continue;
-      const aSlug = slugByPath.get(a) ?? a;
-      findings.push({
-        path: b,
-        severity: "warning",
-        message: `related_notes: missing backlink to [[${aSlug}]] (declared in ${a})`,
-      });
-    }
-  }
-  return findings;
-}
-
-/**
- * For Mold typed-references, ensure wiki-link refs resolve to a note of the
- * expected type. (Schema-/example-/prompt-path checks deferred until those
- * kinds appear — matches `INITIAL_ARCHITECTURE.md` §6 sketch.)
- */
-function validateMoldRefs(
+/** `related_patterns` and `related_molds` resolve to a note of the kind the field names. */
+function validateRelatedFields(
   files: FileMeta[],
   slugMap: Map<string, string>,
   metaByPath: Map<string, Frontmatter>,
-  contentRoot: string,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const checks: Array<{ field: string; expected: string }> = [
@@ -212,7 +173,6 @@ function validateMoldRefs(
     { field: "related_molds", expected: "mold" },
   ];
   for (const f of files) {
-    if (f.meta.type !== "mold") continue;
     for (const c of checks) {
       const v = f.meta[c.field];
       if (!Array.isArray(v)) continue;
@@ -236,6 +196,20 @@ function validateMoldRefs(
         }
       }
     }
+  }
+  return findings;
+}
+
+/** Mold typed-references resolve to a note of the kind the reference declares. */
+function validateMoldRefs(
+  files: FileMeta[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+  contentRoot: string,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    if (f.meta.type !== "mold") continue;
     const typedRefs = f.meta.references;
     if (Array.isArray(typedRefs)) {
       typedRefs.forEach((ref, i) => {
@@ -708,11 +682,8 @@ function validatePipelinePhases(
 }
 
 /**
- * Pipeline artifact binding ordering: every Mold-shaped phase's input_artifacts
- * must be produced by some prior phase in the same pipeline (Mold-shaped or via
- * branch/chain). Branch/chain phases are treated as the union of their inner
- * Molds' artifact contracts (any branch's output may satisfy a downstream
- * input — discover-or-author shape).
+ * Every phase's input_artifacts are produced by a prior phase, counting inputs that
+ * share a `role` as alternatives that one producer satisfies.
  */
 function validatePipelineArtifactBindings(
   file: FileMeta,
@@ -720,11 +691,11 @@ function validatePipelineArtifactBindings(
   metaByPath: Map<string, Frontmatter>,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
-  const phaseDecls: { out: Set<string>; in: { id: string; idx: number }[] }[] = [];
+  const phaseDecls: { out: Set<string>; in: { id: string; role?: string }[] }[] = [];
 
-  phases.forEach((phase, idx) => {
+  phases.forEach((phase) => {
     const out = new Set<string>();
-    const inputs: { id: string; idx: number }[] = [];
+    const inputs: { id: string; role?: string }[] = [];
     for (const moldPath of phaseMoldPaths(phase)) {
       const meta = metaByPath.get(moldPath);
       if (!meta) continue;
@@ -740,7 +711,8 @@ function validatePipelineArtifactBindings(
       if (Array.isArray(inp)) {
         for (const a of inp) {
           if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
-            inputs.push({ id: (a as { id: string }).id, idx });
+            const { id, role } = a as { id: string; role?: unknown };
+            inputs.push({ id, role: typeof role === "string" ? role : undefined });
           }
         }
       }
@@ -751,13 +723,26 @@ function validatePipelineArtifactBindings(
   // Build cumulative produced ids, walking phases in order.
   const cumulative = new Set<string>();
   phaseDecls.forEach((decl, i) => {
+    // A phase may satisfy its own input — loop phases re-feed themselves.
+    const bound = (id: string) => cumulative.has(id) || decl.out.has(id);
+    const roles = new Map<string, string[]>();
     for (const inp of decl.in) {
-      // Self-loop allowance: the same phase may produce and consume (loop phases re-feeding themselves).
-      if (!cumulative.has(inp.id) && !decl.out.has(inp.id)) {
+      if (inp.role) {
+        roles.set(inp.role, [...(roles.get(inp.role) ?? []), inp.id]);
+      } else if (!bound(inp.id)) {
         findings.push({
           path: file.path,
           severity: "warning",
           message: `phases[${i}]: input_artifact '${inp.id}' has no prior phase producing it in this pipeline`,
+        });
+      }
+    }
+    for (const [role, ids] of roles) {
+      if (!ids.some(bound)) {
+        findings.push({
+          path: file.path,
+          severity: "warning",
+          message: `phases[${i}]: no prior phase produces any input_artifact for role '${role}' (${ids.join(", ")})`,
         });
       }
     }
@@ -766,12 +751,6 @@ function validatePipelineArtifactBindings(
 
   return findings;
 }
-
-// The allowlists that used to sit here — MOLD_TOP_FILES, MOLD_TOP_DIRS, PIPELINE_TOP_FILES,
-// PIPELINE_TOP_DIRS — are gone. Each kind now declares what may sit beside its notes, and
-// `validateCompanionLayout` below checks every directory kind against its own declaration.
-// `refinements/` being the frontmatter carve-out is still enforced here; that is a rule about a
-// file's CONTENTS, which a layout declaration does not and should not express.
 
 const REFINEMENT_DECISION_VOCAB = new Set([
   "keep",
@@ -996,6 +975,7 @@ const BODY_WIKI_LINK_RE = /\[\[([^\]\n]+)\]\]/g;
 const FENCED_CODE_RE = /```[\s\S]*?```/g;
 const INLINE_CODE_RE = /(`+)[\s\S]+?\1/g;
 
+/** Body wiki links resolve, outside fenced and inline code. */
 function validateBodyWikiLinks(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -1017,7 +997,7 @@ function validateBodyWikiLinks(
       if (!resolveWikiLink(wl, slugMap)) {
         findings.push({
           path: f.path,
-          severity: "warning",
+          severity: "error",
           message: `body wiki-link ${wl} did not resolve`,
         });
       }
@@ -1449,7 +1429,7 @@ export function validateDirectory(opts: ValidateOptions): {
   for (const f of validFiles) metaByPath.set(f.path, f.meta);
 
   const crossFindings: CrossFileFinding[] = [];
-  crossFindings.push(...validateBidirectionalRelatedNotes(validFiles, slugMap));
+  crossFindings.push(...validateRelatedFields(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));

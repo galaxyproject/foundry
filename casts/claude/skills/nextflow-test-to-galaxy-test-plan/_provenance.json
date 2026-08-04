@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
     "revision": 5,
     "content_hash": "4507e5ff7ffaa9751cf80e33c28fec403766dc95197c0813821362711f603732",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "aede1aeab8ceb890192c9606a6e967a36fcf2224"
   },
-  "cast_at": "2026-08-02T22:04:58.195Z",
+  "cast_at": "2026-08-03T23:38:00.340Z",
   "refs": [
     {
       "kind": "research",
@@ -22,8 +22,8 @@
       "purpose": "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them.",
       "trigger": "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan.",
       "verification": "Translate nf-core/bacass nf-test snapshots into a Galaxy test plan and confirm this note improves profile/snapshot extraction.",
-      "src_hash": "807c26846c6ea331b12c129e8caa438eacf5ea113b9dde51e2e3027c9878ad58",
-      "dst_hash": "807c26846c6ea331b12c129e8caa438eacf5ea113b9dde51e2e3027c9878ad58",
+      "src_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
+      "dst_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
       "source": "deterministic"
     },
     {

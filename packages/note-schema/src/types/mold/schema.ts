@@ -20,6 +20,9 @@ const outputArtifact = z
 const inputArtifact = z
   .object({
     id: artifactId,
+    // Inputs sharing a role are alternatives — a source-agnostic Mold names one role
+    // once per source flavor, and any one flavor satisfies it.
+    role: artifactId.optional(),
     description: z.string().min(20),
   })
   .strict();

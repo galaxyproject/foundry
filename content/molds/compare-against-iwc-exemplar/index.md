@@ -7,21 +7,27 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 8
+revised: 2026-08-04
+revision: 9
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring."
 input_artifacts:
   - id: nextflow-galaxy-interface
+    role: galaxy-interface
     description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] when running the NEXTFLOW → GALAXY pipeline."
   - id: nextflow-galaxy-data-flow
+    role: galaxy-data-flow
     description: "Galaxy data-flow brief from [[nextflow-summary-to-galaxy-data-flow]] when running the NEXTFLOW → GALAXY pipeline."
   - id: cwl-galaxy-interface
+    role: galaxy-interface
     description: "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] when running the CWL → GALAXY pipeline."
   - id: cwl-galaxy-data-flow
+    role: galaxy-data-flow
     description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] when running the CWL → GALAXY pipeline."
   - id: freeform-galaxy-interface
+    role: galaxy-interface
     description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
   - id: freeform-galaxy-data-flow
+    role: galaxy-data-flow
     description: "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
   - id: open-requirements-ledger
     description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
