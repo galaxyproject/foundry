@@ -9,7 +9,6 @@
   /* Galaxy brand */
   --color-galaxy-primary: #25537b;
   --color-galaxy-dark: #2c3143;
-  --color-galaxy-gold: #ffd700;
   --color-galaxy-gold-dark: #d0bd2a;
   --color-galaxy-grey: #58585a;
 
@@ -17,8 +16,6 @@
   --color-surface: #ffffff;
   --color-surface-raised: #f6f8fa;
   --color-surface-hover: #edf4fa;
-  --color-surface-dark: #2c3143;
-  --color-surface-dark-medium: #3c435c;
 
   /* Text */
   --color-text-primary: #2c3143;
@@ -36,11 +33,9 @@
 
   /* Accent — slightly desaturated from pure #ffd700 for less screaming gold */
   --color-accent: #e8c547;
-  --color-accent-hover: #f2d55a;
 
-  /* Rail / station colors for the subway-style phase graph; flip in dark. */
+  /* The rail of the subway-style phase graph; a lighter blue in dark. */
   --color-rail: #25537b;
-  --color-rail-on: #e8c547;
 
   /* Badges */
   --color-badge-draft-bg: #fff3cd;
@@ -54,9 +49,8 @@
   --color-badge-archived-bg: #d6d8db;
   --color-badge-archived-text: #383d41;
 
-  /* Tags */
+  /* Tags. The chip's hover is the accent, not a lighter shade of its own background. */
   --color-tag-bg: #edf4fa;
-  --color-tag-bg-hover: #cde0f0;
 
   /* Fonts */
   --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -74,9 +68,7 @@
   --color-text-secondary: #b6bfca;
   --color-text-muted: #8b94a0;
   --color-rail: #6fa5d4;
-  --color-rail-on: #e8c547;
   --color-link: #6fa5d4;
-  --color-link-hover: #ffd700;
   --color-badge-draft-bg: #3d2e00;
   --color-badge-draft-text: #f0c000;
   --color-badge-reviewed-bg: #0f2d16;
@@ -88,15 +80,17 @@
   --color-badge-archived-bg: #21262d;
   --color-badge-archived-text: #8b949e;
   --color-tag-bg: #21262d;
-  --color-tag-bg-hover: #30363d;
 }
 
 /* --- Grid background --- */
 
+/* The tint is the brand at 6%, so it says so. A colour spelled out as `rgba(37, 83, 123, …)` is
+   invisible to every search for the token it duplicates, including the one that renames it.
+   The dark rule below is NOT the same shape: white at 3% is its own decision, not a token. */
 .bg-grid {
   background-image:
-    linear-gradient(to right, rgba(37, 83, 123, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(37, 83, 123, 0.06) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--color-galaxy-primary) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-galaxy-primary) 6%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 .dark .bg-grid {
