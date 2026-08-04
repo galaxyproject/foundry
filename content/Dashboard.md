@@ -18,15 +18,16 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring. | reviewed | 2026-08-04 | 9 |
+| [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-08-04 | 4 |
+| [[repair-galaxy-draft-topology]] | Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs. | draft | 2026-08-04 | 2 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-07-24 | 3 |
 | [[apply-galaxy-workflow-changeset]] | Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps. | reviewed | 2026-07-24 | 2 |
 | [[author-galaxy-tool-wrapper]] | Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable. | reviewed | 2026-07-24 | 4 |
 | [[changeset-to-galaxy-test-plan]] | Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan. | reviewed | 2026-07-24 | 2 |
-| [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring. | reviewed | 2026-07-24 | 8 |
 | [[debug-cwl-workflow-output]] | Triage failing CWL run outputs; classify failure modes; propose fixes. | draft | 2026-07-24 | 3 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. | reviewed | 2026-07-24 | 5 |
 | [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | reviewed | 2026-07-24 | 5 |
-| [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-07-24 | 3 |
 | [[freeform-summary-to-galaxy-data-flow]] | Translate a free-form source summary into a Galaxy data-flow design brief. | reviewed | 2026-07-24 | 2 |
 | [[freeform-summary-to-galaxy-interface]] | Map a free-form source summary into a Galaxy workflow interface design brief. | reviewed | 2026-07-24 | 2 |
 | [[freeform-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. | reviewed | 2026-07-24 | 5 |
@@ -54,7 +55,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | reviewed | 2026-07-24 | 4 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-07-17 | 1 |
 | [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-06-19 | 4 |
-| [[repair-galaxy-draft-topology]] | Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs. | draft | 2026-06-16 | 1 |
 | [[cwl-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs. | draft | 2026-06-11 | 4 |
 | [[cwl-summary-to-galaxy-data-flow]] | Translate a CWL summary into a Galaxy data-flow design brief. | draft | 2026-05-10 | 2 |
 | [[cwl-summary-to-galaxy-interface]] | Map a CWL summary into a Galaxy workflow interface design brief. | draft | 2026-05-10 | 2 |

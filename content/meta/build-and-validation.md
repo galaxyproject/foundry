@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-03
-revision: 3
+revised: 2026-08-04
+revision: 4
 summary: "How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current."
 ---
 
@@ -40,7 +40,7 @@ Authors change source notes, registries, schema implementations, or code. Genera
 4. load tag and reference registries and enforce membership and coherence;
 5. build the shared wiki-link map and resolve frontmatter and body links; an unresolved link is an error wherever it is written, on every kind that declares the field;
 6. run kind-specific checks for Molds, Patterns, Pipelines, schemas, CLI notes, prompts, research notes, and artifacts;
-7. run cross-note checks such as typed-reference compatibility, pipeline phase resolution, and artifact producer/consumer ordering;
+7. run cross-note checks such as typed-reference compatibility, pipeline phase resolution, and artifact producer/consumer ordering — where inputs sharing a `role` are alternatives one producer satisfies;
 8. run `validateUnroutedContent`, which errors on markdown under `content/` that no collection claims, no directory note owns, and `NOT_NOTES` does not declare.
 
 Step 8 is what closes the walk. Steps 1–7 check the files the routing table found; step 8 checks that the table found everything there was to find. [[content-model]] owns the three-way accounting it enforces.

@@ -113,7 +113,7 @@ Forward work is quality and reach rather than existence. Review is underway rath
 | Pipelines | 7 |
 | Molds | 47 — 27 reviewed, 20 draft |
 | … with `eval.md` | 33 |
-| … with `scenarios.md` | 27 |
+| … with `scenarios.md` | 28 |
 | Pattern pages | 54 |
 | Source-pattern pages | 7 |
 | CLI tools | 6 |

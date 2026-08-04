@@ -27,7 +27,9 @@ These are optional in the schema but they are where a Mold's weight sits.
   rules below say what else an entry must carry.
 - **`input_artifacts` / `output_artifacts`** — the Mold's declared IO, which is what lets
   Molds be composed into a pipeline phase without reading their bodies. An output may name a
-  `schema` note, making the handoff machine-checkable.
+  `schema` note, making the handoff machine-checkable. Inputs sharing a `role` are alternatives:
+  a source-agnostic Mold names one role once per source flavor, and a pipeline that supplies any
+  one of them has satisfied it.
 - **`loop_endstate`** — for a Mold that runs until a condition holds, the condition. Prose,
   but *required* prose once the Mold loops: "until it passes" is not an end state.
 
