@@ -182,6 +182,9 @@ function producersOf(id: string): { moldId: string; description: string }[] {
     {inputArtifacts.length > 0 && (
       <div class="artifact-block">
         <h3 class="artifact-side">Consumes</h3>
+        {inputArtifacts.some((a: any) => a.role) && (
+          <p class="artifact-note">Inputs sharing a role are alternatives — one producer satisfies it.</p>
+        )}
         <ul class="artifact-list">
           {inputArtifacts.map((a: any) => {
             const producers = producersOf(a.id);
@@ -189,6 +192,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
               <li class="artifact-card">
                 <div class="artifact-head">
                   <a href={artifactHref(base, a.id)} class="artifact-id">{a.id}</a>
+                  {a.role && <span class="artifact-kind">{a.role}</span>}
                 </div>
                 <p class="artifact-desc">{a.description}</p>
                 {producers.length > 0 && (
@@ -226,6 +230,11 @@ function producersOf(id: string): { moldId: string; description: string }[] {
     letter-spacing: 0.16em;
     color: var(--color-text-muted);
     margin: 0 0 0.5rem 0;
+  }
+  .artifact-note {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin: 0 0 0.6rem 0;
   }
   .artifact-list {
     list-style: none;
