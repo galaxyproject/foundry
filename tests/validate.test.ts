@@ -1470,8 +1470,6 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.warnings).toBeGreaterThanOrEqual(1);
   });
 
-  // The check used to run only on notes of type `mold`, so the same dangling `related_molds`
-  // entry was an error on a Mold and silent on every other kind that declares the field.
   it("errors on related_molds that do not resolve, on a note that is not a mold", () => {
     writeFm(path.join(dir, "patterns/pattern-r.md"), {
       ...patternRequired({ title: "Pattern R" }),
