@@ -182,7 +182,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
     {inputArtifacts.length > 0 && (
       <div class="artifact-block">
         <h3 class="artifact-side">Consumes</h3>
-        {inputArtifacts.some((a: any) => a.role) && (
+        {inputArtifacts.some(a => a.role) && (
           <p class="artifact-note">Inputs sharing a role are alternatives — one producer satisfies it.</p>
         )}
         <ul class="artifact-list">
