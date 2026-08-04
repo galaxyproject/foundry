@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 5,
     "content_hash": "ab1fde58ac26d8d204e39eca5032fe304ad01c5128eb82b5f06bd2321426b174",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "aede1aeab8ceb890192c9606a6e967a36fcf2224"
   },
-  "cast_at": "2026-08-02T22:04:52.122Z",
+  "cast_at": "2026-08-03T23:37:55.552Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -70,8 +70,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
       "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
-      "src_hash": "4566e84f1f4182729f45d11401c1eaf844ae81a19351035c60ee76e50537c173",
-      "dst_hash": "4566e84f1f4182729f45d11401c1eaf844ae81a19351035c60ee76e50537c173",
+      "src_hash": "2f6e228baab452d7bd51fbd27fc4f584cb9387d496261cb264695824901d23bf",
+      "dst_hash": "2f6e228baab452d7bd51fbd27fc4f584cb9387d496261cb264695824901d23bf",
       "source": "deterministic"
     },
     {

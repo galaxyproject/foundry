@@ -5,9 +5,9 @@ tags:
 component: "Nextflow Testing and Test Fixtures"
 status: draft
 created: 2026-05-01
-revised: 2026-05-05
-revision: 2
-summary: "nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs nextflow-test-to-target-tests Mold and summarize-nextflow §7."
+revised: 2026-08-03
+revision: 3
+summary: "nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7."
 companions:
   - "component-nextflow-testing.yml"
 sources:
@@ -22,7 +22,8 @@ sources:
   - "https://nf-co.re/docs/contributing/pipelines#test-data"
 related_molds:
   - "[[summarize-nextflow]]"
-  - "[[nextflow-test-to-target-tests]]"
+  - "[[nextflow-test-to-galaxy-test-plan]]"
+  - "[[nextflow-test-to-cwl-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
 related_notes:
   - "[[planemo-asserts-idioms]]"
@@ -33,10 +34,11 @@ related_notes:
 
 # Nextflow Testing and Test Fixtures
 
-Operational grounding for two Molds:
+Operational grounding for three Molds:
 
 - [[summarize-nextflow]] §7 — extract `nf_tests[]` and `test_fixtures` from a real nf-core or DSL2 pipeline.
-- [[nextflow-test-to-target-tests]] — translate nf-test fixtures + assertions into Galaxy / CWL equivalents.
+- [[nextflow-test-to-galaxy-test-plan]] — translate nf-test fixtures + assertions into Galaxy equivalents.
+- [[nextflow-test-to-cwl-test-plan]] — the same translation, toward CWL.
 
 The summarize side is mostly *enumeration*: walk `tests/*.nf.test`, extract structured fields per the Mold §7 spec. The translation side is *mapping*: each nf-test assertion pattern has a (sometimes lossy) Galaxy or CWL equivalent.
 
