@@ -1386,11 +1386,13 @@ export function validateDirectory(opts: ValidateOptions): {
   let warningCount = 0;
   let filesChecked = 0;
   const validFiles: FileMeta[] = [];
-  const printedHeaders = new Set<string>();
+  let lastHeader: string | undefined;
 
+  // Reprint on every change of file, not once per file: a file's findings arrive in more than one
+  // block, and a header printed only the first time files the later ones under its neighbour.
   const printHeader = (filePath: string): void => {
-    if (printedHeaders.has(filePath)) return;
-    printedHeaders.add(filePath);
+    if (lastHeader === filePath) return;
+    lastHeader = filePath;
     process.stdout.write(`\n${filePath}:\n`);
   };
 
@@ -1457,14 +1459,23 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));
   crossFindings.push(...validateMoldStubBody(validFiles));
 
+  // Grouped, so each file reads as one block rather than once per cross-file pass that found it.
+  const findingsByPath = new Map<string, CrossFileFinding[]>();
   for (const f of crossFindings) {
-    printHeader(f.path);
-    if (f.severity === "error") {
-      process.stdout.write(`  ERROR  ${f.message}\n`);
-      errorCount++;
-    } else {
-      process.stdout.write(`  WARN   ${f.message}\n`);
-      warningCount++;
+    const group = findingsByPath.get(f.path);
+    if (group) group.push(f);
+    else findingsByPath.set(f.path, [f]);
+  }
+  for (const [filePath, group] of findingsByPath) {
+    printHeader(filePath);
+    for (const f of group) {
+      if (f.severity === "error") {
+        process.stdout.write(`  ERROR  ${f.message}\n`);
+        errorCount++;
+      } else {
+        process.stdout.write(`  WARN   ${f.message}\n`);
+        warningCount++;
+      }
     }
   }
 

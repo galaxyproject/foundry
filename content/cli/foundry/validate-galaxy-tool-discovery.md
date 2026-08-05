@@ -8,8 +8,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-05-11
-revised: 2026-05-11
-revision: 1
+revised: 2026-08-04
+revision: 2
 summary: "AJV gate for discover-shed-tool recommendation documents."
 related_notes:
   - "[[galaxy-tool-discovery]]"
@@ -21,10 +21,15 @@ Validate a tool-discovery recommendation against the [[galaxy-tool-discovery]] s
 
 ## Output
 
-Silent on success (exit `0`). Schema failure: stderr diagnostics, exit `3`. Input errors exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). Schema failure: stderr diagnostics, exit `3`. Input errors exit `1`.
 
 ## Examples
 
 ```bash
 foundry validate-galaxy-tool-discovery recommendation.json
 ```
+
+## Gotchas
+
+- **A miss is a valid document.** `status: miss` with `candidate: null` satisfies the schema, so exit `0` means the recommendation is well-formed — not that a wrapper was found. Branch on `status` (`hit` / `weak` / `miss`); an exit-code check routes every miss down the discover path as if it had succeeded.
+- `weak` is the status that needs a human or a confirmation step. The schema requires a candidate for both `hit` and `weak` and cannot tell them apart for you.

@@ -2082,8 +2082,16 @@ describe("validateDirectory (cross-file)", () => {
         name: "consumer",
         axis: "generic",
         input_artifacts: [
-          { id: "brief-a", role: "brief", description: "Interface brief when running the A pipeline." },
-          { id: "brief-b", role: "brief", description: "Interface brief when running the B pipeline." },
+          {
+            id: "brief-a",
+            role: "brief",
+            description: "Interface brief when running the A pipeline.",
+          },
+          {
+            id: "brief-b",
+            role: "brief",
+            description: "Interface brief when running the B pipeline.",
+          },
         ],
       }),
     });
@@ -2123,5 +2131,68 @@ describe("validateDirectory (cross-file)", () => {
     expect(captureValidate()).toMatch(
       /phases\[0\]: no prior phase produces any input_artifact for role 'brief' \(brief-a, brief-b\)/,
     );
+  });
+
+  const findingsByHeader = (captured: string): Map<string, string[]> => {
+    const blocks = new Map<string, string[]>();
+    let current = "";
+    for (const line of captured.split("\n")) {
+      const header = /^(\S.*):$/.exec(line);
+      if (header?.[1] !== undefined) {
+        current = header[1];
+        if (!blocks.has(current)) blocks.set(current, []);
+        continue;
+      }
+      const finding = /^ {2}(?:ERROR|WARN) {2,}(.*)$/.exec(line);
+      if (finding?.[1] !== undefined) blocks.get(current)?.push(finding[1]);
+    }
+    return blocks;
+  };
+
+  it("files a finding under its own path when its checks are not adjacent", () => {
+    writeFm(path.join(dir, "molds/producer-x/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["target/galaxy"],
+        name: "producer-x",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "summary-x",
+            kind: "json",
+            default_filename: "summary-x.json",
+            description: "Structured summary the consumer reads.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "molds/consumer-x/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["target/galaxy"],
+        name: "consumer-x",
+        axis: "generic",
+        input_artifacts: [
+          { id: "summary-x", description: "Structured summary produced upstream." },
+        ],
+      }),
+    });
+    // Warns from the artifact pass and again from the companion pass, with both Molds between.
+    writeFm(path.join(dir, "pipelines/zeta/index.md"), {
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "Zeta",
+        phases: [{ mold: "[[consumer-x]]" }],
+      }),
+    });
+
+    const blocks = findingsByHeader(captureValidate());
+    expect(blocks.get(path.join(dir, "pipelines/zeta/index.md"))).toEqual([
+      "phases[0]: input_artifact 'summary-x' has no prior phase producing it in this pipeline",
+      expect.stringContaining("should have eval.md"),
+      expect.stringContaining("should have scenarios.md"),
+    ]);
+    expect(blocks.get(path.join(dir, "molds/producer-x/index.md"))).toHaveLength(2);
   });
 });

@@ -150,12 +150,16 @@ describe("the document skeleton", () => {
   });
 });
 
+/** Every stylesheet the build emitted, concatenated. The shell's styles are split across several. */
+const emittedCss = (): string =>
+  readdirSync(path.join(DIST, "_astro"))
+    .filter((entry) => entry.endsWith(".css"))
+    .map((entry) => read(path.join(DIST, "_astro", entry)))
+    .join("\n");
+
 describe("the stylesheet the shell depends on", () => {
   it("emits a utility that only the kit names", () => {
-    const css = readdirSync(path.join(DIST, "_astro"))
-      .filter((entry) => entry.endsWith(".css"))
-      .map((entry) => read(path.join(DIST, "_astro", entry)))
-      .join("\n");
+    const css = emittedCss();
 
     expect(css).not.toHaveLength(0);
     expect(
@@ -165,6 +169,43 @@ describe("the stylesheet the shell depends on", () => {
         ` \`@source\` line in global.css, and see the header comment. The pages will render` +
         ` unstyled, and nothing else reports this.`,
     ).toBe(true);
+  });
+});
+
+// Here rather than in a file of its own because it asserts on the same built `dist/`, and a second
+// suite that spawns its own `astro build` would double the slowest thing in this repo's test run.
+describe("the palette this stylesheet declares", () => {
+  // Tailwind 4 emits an `@theme` token ONLY where it finds a reference, so a token nothing uses
+  // reaches no stylesheet and costs no bytes. Which is exactly why they accumulate: six had, and
+  // the one that mattered was `--color-surface-dark`, a semantic name holding #2c3143 — the colour
+  // the header bar has always used — under the surfaces heading, well away from the brand token
+  // that was actually doing the work. A dead token is not waste, it is a wrong answer waiting for
+  // a reader in a hurry.
+  //
+  // `:root` is the load-bearing part, and it is what found two of the six. A token redeclared under
+  // `.dark` emits from THAT rule whichever way, because a class is not tree-shaken — so a search of
+  // the whole stylesheet reports it alive while the light value is referenced by nothing.
+  // `--color-rail-on` and `--color-tag-bg-hover` were both exactly that: present in the file, absent
+  // from `:root`, used nowhere.
+  it("declares no token that reaches no stylesheet", () => {
+    const source = read(path.join(SITE, "src/styles/global.css"));
+    const block = source.slice(source.indexOf("@theme"), source.indexOf("\n}", source.indexOf("@theme")));
+    const declared = [...block.matchAll(/^\s*(--[\w-]+):/gm)].map((m) => m[1]!);
+
+    const css = emittedCss();
+    const root = (css.match(/:root[^{]*\{[^}]*\}/g) ?? []).join("");
+    const dead = declared.filter((token) => !root.includes(`${token}:`));
+
+    expect(declared.length, "\nno tokens parsed out of @theme — has the block moved?").toBeGreaterThan(20);
+    expect(
+      dead,
+      "\nthese are declared in `@theme` and referenced by nothing, so Tailwind emitted no" +
+        " declaration for them. Delete them, or use them. A token carrying a value that is also" +
+        " some other token's is the worst kind: it reads as the right name for a colour that is" +
+        " actually spelled elsewhere.\n\n  " +
+        dead.join("\n  ") +
+        "\n",
+    ).toEqual([]);
   });
 });
 
