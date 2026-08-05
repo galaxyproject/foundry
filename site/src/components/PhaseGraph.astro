@@ -178,7 +178,7 @@ function isWikiLink(s: string): boolean {
     border-radius: 0.15rem;
     transform: rotate(45deg);
     background: var(--color-surface);
-    border: 2px solid var(--color-galaxy-grey);
+    border: 2px solid var(--color-neutral);
   }
   .stop-loop.stop-branch .stop-marker {
     background: var(--color-accent);
@@ -244,12 +244,12 @@ function isWikiLink(s: string): boolean {
   }
   .stop-tag-loop {
     background: var(--color-accent);
-    color: var(--color-galaxy-dark);
+    color: var(--color-brand-dark);
   }
   .stop-tag-fallthrough {
-    background: color-mix(in srgb, var(--color-galaxy-grey) 18%, transparent);
+    background: color-mix(in srgb, var(--color-neutral) 18%, transparent);
     color: var(--color-text-secondary);
-    border: 1px solid color-mix(in srgb, var(--color-galaxy-grey) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-neutral) 40%, transparent);
   }
 
   /* Branch inner paths */
@@ -258,7 +258,7 @@ function isWikiLink(s: string): boolean {
     list-style: none;
     margin: 0.4rem 0 0.2rem;
     padding: 0 0 0 0.85rem;
-    border-left: 1px dashed color-mix(in srgb, var(--color-galaxy-grey) 50%, transparent);
+    border-left: 1px dashed color-mix(in srgb, var(--color-neutral) 50%, transparent);
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -276,7 +276,7 @@ function isWikiLink(s: string): boolean {
     top: 0.65em;
     width: 0.7rem;
     height: 1px;
-    background: color-mix(in srgb, var(--color-galaxy-grey) 50%, transparent);
+    background: color-mix(in srgb, var(--color-neutral) 50%, transparent);
   }
   .branch-leaf-text {
     font-style: italic;

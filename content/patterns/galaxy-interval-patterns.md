@@ -13,8 +13,8 @@ tags:
   - topic/interval-transform
 status: draft
 created: 2026-06-10
-revised: 2026-06-10
-revision: 1
+revised: 2026-08-03
+revision: 2
 summary: "Use this MOC to choose corpus-grounded Galaxy genomic interval operations and recipes on coordinate features."
 related_notes:
   - "[[iwc-interval-operations-survey]]"
@@ -33,7 +33,7 @@ related_molds:
   - "[[cwl-summary-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[paper-summary-to-galaxy-template]]"
+  - "[[freeform-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 ---
 

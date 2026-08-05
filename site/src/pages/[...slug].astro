@@ -77,7 +77,7 @@ const showMeta = data.type !== 'pipeline';
 const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' : 'full';
 ---
 <Base title={pageTitle}>
-  <div data-pagefind-body>
+  <div>
     <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} eyebrow={eyebrow} showActions={showActions} />
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
     {data.license && <LicenseBox entry={entry} />}

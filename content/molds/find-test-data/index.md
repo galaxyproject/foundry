@@ -6,21 +6,27 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 3
+revised: 2026-08-04
+revision: 4
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:
   - id: freeform-summary
+    role: source-summary
     description: "Source summary from [[summarize-paper]] / [[interview-to-freeform-summary]]; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it)."
   - id: summary-nextflow
+    role: source-summary
     description: "Source summary from [[summarize-nextflow]]; mine its test_fixtures / sample-data evidence when running the NEXTFLOW → GALAXY pipeline."
   - id: summary-cwl
+    role: source-summary
     description: "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline."
   - id: freeform-galaxy-interface
+    role: galaxy-interface
     description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines."
   - id: nextflow-galaxy-interface
+    role: galaxy-interface
     description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the NEXTFLOW → GALAXY pipeline."
   - id: cwl-galaxy-interface
+    role: galaxy-interface
     description: "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the CWL → GALAXY pipeline."
 output_artifacts:
   - id: test-data-refs

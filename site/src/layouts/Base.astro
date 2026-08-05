@@ -6,8 +6,18 @@ import { CONTAINER, SITE_DESCRIPTION, SITE_NAME } from '../lib/site-identity';
 interface Props {
   title: string;
   description?: string;
+  /**
+   * Whether this page's main content goes in the search index. Defaults to yes.
+   *
+   * Pagefind's rule is all-or-nothing and runs backwards from what the attribute looks like: mark
+   * no page and every page is indexed from its `<body>`, mark ONE and every unmarked page leaves
+   * the index entirely. So the default has to be yes — opt-in would leave each new route one
+   * forgotten prop away from being unfindable, with nothing on the page to see. Asserted against
+   * the built index in `tests/search-index.test.ts`.
+   */
+  searchable?: boolean;
 }
-const { title, description = SITE_DESCRIPTION } = Astro.props;
+const { title, description = SITE_DESCRIPTION, searchable = true } = Astro.props;
 const fullTitle = `${title} - ${SITE_NAME}`;
 ---
 <!doctype html>
@@ -32,7 +42,11 @@ const fullTitle = `${title} - ${SITE_NAME}`;
 <body class="min-h-dvh flex flex-col bg-(--color-surface) text-(--color-text-primary)">
   <a href="#main" class="skip-link">Skip to content</a>
   <Header />
-  <main id="main" class={`flex-1 bg-grid ${CONTAINER} w-full mx-auto px-4 sm:px-6 py-6 leading-relaxed`}>
+  <main
+    id="main"
+    class={`flex-1 bg-grid ${CONTAINER} w-full mx-auto px-4 sm:px-6 py-6 leading-relaxed`}
+    data-pagefind-body={searchable ? true : undefined}
+  >
     <slot />
   </main>
   <Footer />

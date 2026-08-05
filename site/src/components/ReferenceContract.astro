@@ -96,11 +96,11 @@ function pillInfo(group: keyof typeof contract, key: string, extraClass = '') {
     border-radius: 1rem;
     background:
       linear-gradient(180deg,
-        color-mix(in srgb, var(--color-galaxy-primary) 4%, transparent),
+        color-mix(in srgb, var(--color-brand) 4%, transparent),
         transparent 40%),
       var(--color-surface-raised);
     padding: 1.25rem 1.25rem 1.1rem;
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--color-galaxy-primary) 6%, transparent);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--color-brand) 6%, transparent);
   }
   .reference-contract-head {
     margin-bottom: 1.1rem;
@@ -166,19 +166,19 @@ function pillInfo(group: keyof typeof contract, key: string, extraClass = '') {
     bottom: 0.7rem;
     width: 3px;
     border-radius: 0 2px 2px 0;
-    background: var(--color-galaxy-primary);
+    background: var(--color-brand);
     opacity: 0.55;
   }
-  .reference-kind-research::before { background: var(--color-galaxy-primary); }
+  .reference-kind-research::before { background: var(--color-brand); }
   .reference-kind-schema::before   { background: var(--color-accent); }
   .reference-kind-pattern::before  { background: var(--color-link); }
-  .reference-kind-mold::before     { background: var(--color-galaxy-gold-dark); }
+  .reference-kind-mold::before     { background: var(--color-accent-dark); }
   .reference-card:hover {
     border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
     transform: translateY(-1px);
     box-shadow:
-      0 1px 2px color-mix(in srgb, var(--color-galaxy-dark) 6%, transparent),
-      0 6px 14px color-mix(in srgb, var(--color-galaxy-dark) 7%, transparent);
+      0 1px 2px color-mix(in srgb, var(--color-brand-dark) 6%, transparent),
+      0 6px 14px color-mix(in srgb, var(--color-brand-dark) 7%, transparent);
   }
   .reference-card-top {
     display: flex;
