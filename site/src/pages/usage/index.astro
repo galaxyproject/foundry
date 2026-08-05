@@ -130,7 +130,7 @@ cp -r foundry/casts/claude/skills/&lt;name&gt; ~/.agents/skills/&lt;name&gt;  # 
             const moldId = moldByName.get(c.moldSlug);
             const skillHref = target === 'claude' ? `${base}/usage/claude/${c.moldSlug}/` : null;
             return (
-              <li class="p-4 rounded-lg border border-(--color-border) hover:border-(--color-galaxy-primary) transition-colors">
+              <li class="p-4 rounded-lg border border-(--color-border) hover:border-(--color-brand) transition-colors">
                 <div class="flex items-baseline justify-between gap-2 mb-1">
                   {skillHref
                     ? <a href={skillHref} class="font-mono font-semibold text-(--color-link) hover:underline">{c.moldSlug}</a>
