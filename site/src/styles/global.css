@@ -6,11 +6,17 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Galaxy brand */
-  --color-galaxy-primary: #25537b;
-  --color-galaxy-dark: #2c3143;
-  --color-galaxy-gold-dark: #d0bd2a;
-  --color-galaxy-grey: #58585a;
+  /* The brand, which is Galaxy's. These NAMES say which colour, not whose — a shared component
+     asking for a branded property name charges every instance that is not that brand with
+     declaring someone else's identity to get a card rendered. Whose brand this is lives in
+     SITE_IDENTITY, where it is a value rather than a property name nothing can override. */
+  --color-brand: #25537b;
+  --color-brand-dark: #2c3143;
+
+  /* Neutral structure: graph stations, chip backgrounds. Equal to --color-text-secondary today,
+     and kept apart from it because a repeated value is not a mapping — a graph's borders are not
+     downstream of a decision about body copy. */
+  --color-neutral: #58585a;
 
   /* Surfaces */
   --color-surface: #ffffff;
@@ -33,6 +39,7 @@
 
   /* Accent — slightly desaturated from pure #ffd700 for less screaming gold */
   --color-accent: #e8c547;
+  --color-accent-dark: #d0bd2a;
 
   /* The rail of the subway-style phase graph; a lighter blue in dark. */
   --color-rail: #25537b;
@@ -89,8 +96,8 @@
    The dark rule below is NOT the same shape: white at 3% is its own decision, not a token. */
 .bg-grid {
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--color-galaxy-primary) 6%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-galaxy-primary) 6%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--color-brand) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-brand) 6%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 .dark .bg-grid {
@@ -121,7 +128,7 @@
 }
 a:hover .tag {
   background-color: var(--color-accent);
-  color: var(--color-galaxy-dark);
+  color: var(--color-brand-dark);
 }
 
 .dangling {
@@ -143,7 +150,7 @@ a:hover .tag {
   top: -3rem;
   z-index: 100;
   padding: 0.5rem 0.75rem;
-  background: var(--color-galaxy-dark);
+  background: var(--color-brand-dark);
   color: var(--color-text-on-dark);
   border-radius: 0.25rem;
   text-decoration: none;
@@ -173,7 +180,7 @@ a:hover .tag {
 }
 .data-table th {
   @apply text-left px-3 py-2 font-semibold border-b text-white;
-  background-color: var(--color-galaxy-primary);
+  background-color: var(--color-brand);
   border-color: var(--color-border-subtle);
 }
 .data-table td {
@@ -205,7 +212,7 @@ a:hover .tag {
   text-decoration-color: var(--color-link-hover);
 }
 .prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  color: var(--color-galaxy-dark);
+  color: var(--color-brand-dark);
 }
 .dark .prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
   color: var(--color-text-primary);
@@ -238,11 +245,11 @@ a:hover .tag {
   content: none;
 }
 .prose :where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  background-color: var(--color-galaxy-dark);
+  background-color: var(--color-brand-dark);
   border-radius: 0.5rem;
 }
 .prose :where(th):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  background-color: var(--color-galaxy-primary);
+  background-color: var(--color-brand);
   color: white;
   padding: 0.5rem 0.75rem;
 }
@@ -330,7 +337,7 @@ a:hover .tag {
 }
 .page-stats dd {
   margin: 0;
-  color: var(--color-galaxy-primary);
+  color: var(--color-brand);
   font-size: 1.65rem;
   font-weight: 700;
   line-height: 1;
@@ -370,12 +377,12 @@ a:hover .tag {
 }
 
 .tinted-shadow {
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-galaxy-primary) 8%, transparent),
-              0 8px 24px -12px color-mix(in srgb, var(--color-galaxy-primary) 18%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-brand) 8%, transparent),
+              0 8px 24px -12px color-mix(in srgb, var(--color-brand) 18%, transparent);
 }
 .tinted-shadow-hover:hover {
-  box-shadow: 0 2px 4px color-mix(in srgb, var(--color-galaxy-primary) 12%, transparent),
-              0 16px 32px -10px color-mix(in srgb, var(--color-galaxy-primary) 28%, transparent);
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--color-brand) 12%, transparent),
+              0 16px 32px -10px color-mix(in srgb, var(--color-brand) 28%, transparent);
 }
 
 /* --- Shared card grid (patterns, molds, …) --- */
@@ -403,9 +410,9 @@ a:hover .tag {
   transform: translateY(-2px);
 }
 .card-feature {
-  border-color: color-mix(in srgb, var(--color-galaxy-primary) 22%, var(--color-border-subtle));
+  border-color: color-mix(in srgb, var(--color-brand) 22%, var(--color-border-subtle));
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--color-galaxy-primary) 9%, transparent), transparent 46%),
+    linear-gradient(135deg, color-mix(in srgb, var(--color-brand) 9%, transparent), transparent 46%),
     var(--color-surface-raised);
   border-radius: 0.75rem;
 }
@@ -509,7 +516,7 @@ a:hover .tag {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   margin-bottom: 0.5rem;
-  color: var(--color-galaxy-primary);
+  color: var(--color-brand);
 }
 .dark .admonition-title {
   color: var(--color-link);
