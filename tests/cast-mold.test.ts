@@ -2029,11 +2029,13 @@ describe("cast declarations the corpus does not currently exercise", () => {
   // The vocabulary is the gate, and it closes before the caster runs.
   //
   // Renderers are registered per mode, so a mode with nothing behind it is a real failure state
-  // — but not one this instance can reach. Our `modes` vocabulary is narrowed to exactly the two
-  // modes we implement, so an unimplemented mode is refused when the contract loads rather than
-  // when a ref reaches the renderer table. Worth pinning: it is the property that lets the
-  // caster's own "no renderer" branch stay defensive, and it is the same mechanism a second
-  // instance uses to decline a mode it inherits but does not want.
+  // — but not one this instance can reach. We implement every mode the substrate ships, so
+  // membership in the vocabulary already means renderable, and anything else is refused when the
+  // contract loads rather than when a ref reaches the renderer table. Worth pinning: it is the
+  // property that lets the caster's own "no renderer" branch stay defensive.
+  //
+  // The mode below is invented for the test. Naming a real term would tie the assertion to
+  // whichever word the substrate happens to have retired.
   it("refuses an unimplemented mode at the vocabulary, before any renderer is consulted", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-norenderer-"));
     try {
@@ -2042,15 +2044,15 @@ describe("cast declarations the corpus does not currently exercise", () => {
       mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
-        targetYml("research", "references/notes/", ".txt", "[condense]"),
+        targetYml("research", "references/notes/", ".txt", "[paraphrase]"),
       );
       writeFileSync(
         path.join(dir, "reference_contract.yml"),
-        contractYml("research", { resolve: "note", default_mode: "condense", companions: false }),
+        contractYml("research", { resolve: "note", default_mode: "paraphrase", companions: false }),
       );
       writeFileSync(
         path.join(dir, "content/molds/m/index.md"),
-        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Unrendered-mode cast test mold summary.\nreferences:\n  - kind: research\n    ref: "[[r]]"\n    used_at: runtime\n    load: upfront\n    mode: condense\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Unrendered-mode cast test mold summary.\nreferences:\n  - kind: research\n    ref: "[[r]]"\n    used_at: runtime\n    load: upfront\n    mode: paraphrase\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
       );
       writeFileSync(
         path.join(dir, "content/research/r/index.md"),
@@ -2059,7 +2061,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code).not.toBe(0);
       expect(r.stderr).toContain("not in this instance's `modes` vocabulary");
-      expect(r.stderr).toContain("condense");
+      expect(r.stderr).toContain("paraphrase");
       // The refusal is total: a mode we cannot render must not leave a half-cast bundle behind.
       expect(existsSync(path.join(dir, "casts/claude/skills/m/_provenance.json"))).toBe(false);
     } finally {
@@ -2182,11 +2184,11 @@ describe("cast declarations: stricter than before, on purpose", () => {
   });
 });
 
-// The premise the condense removal rests on, pinned as a check rather than asserted in a
-// commit message: nothing in this Foundry uses the LLM phase. Every reference is verbatim or
-// sidecar, no bundle carries an LLM-produced fragment, and no provenance entry is waiting for
-// one. If a Mold ever needs condensation, this is the test that has to be deleted first — and
-// deleting it is the decision to build the phase again, made explicitly.
+// Nothing here uses an LLM phase, pinned as a check rather than asserted in a commit message:
+// every reference is a mode the caster renders, no bundle carries an LLM-produced fragment, and
+// no provenance entry is waiting for one. If a Mold ever needs a mode a model produces, these
+// are the tests that have to change first — and changing them is the decision to build that
+// phase, made explicitly.
 // The wire shape, named here rather than imported from the caster: these tests read committed
 // records, so what they must agree with is the JSON on disk, not the type that produced it.
 interface CommittedRefEntry {
@@ -2236,7 +2238,12 @@ describe("casting is deterministic end to end", () => {
     return records;
   }
 
-  it("no Mold declares mode: condense", () => {
+  // Mirrors the modes `GALAXY_HOOKS.renderers` registers. Named here rather than imported
+  // because the caster does not export the table, and this test wants to disagree with it
+  // loudly if a renderer is ever dropped without the corpus following.
+  const RENDERED_MODES = ["verbatim", "sidecar"];
+
+  it("every Mold ref declares a mode the caster renders", () => {
     const offenders: string[] = [];
     let refsScanned = 0;
     let moldsScanned = 0;
@@ -2249,7 +2256,9 @@ describe("casting is deterministic end to end", () => {
       const meta = yaml.load(front[1]!) as { references?: Array<{ mode?: string }> };
       for (const ref of meta.references ?? []) {
         refsScanned += 1;
-        if (ref.mode === "condense") offenders.push(moldDir);
+        if (ref.mode && !RENDERED_MODES.includes(ref.mode)) {
+          offenders.push(`${moldDir}: ${ref.mode}`);
+        }
       }
     }
     expect(moldsScanned).toBeGreaterThanOrEqual(SOME_MOLDS);

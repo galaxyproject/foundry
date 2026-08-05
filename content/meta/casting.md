@@ -35,7 +35,7 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 
 Every path above is deterministic. Which one a kind takes is not knowledge the caster holds: each kind's `cast:` block in `reference_contract.yml` declares its `resolve` strategy (`note`, `package-export`, `payload-companion`), its `default_mode`, an optional `slug_field`, and whether its notes may carry companions. A kind with no `cast:` block is not castable, which is how `example` is refused — stated where the kinds live rather than in a second list inside the caster.
 
-The inherited `mode` vocabulary also offers `condense`, for a Foundry whose caster has an LLM phase. This one has none, so `SUPPORTED_MODES` narrows the vocabulary and validate rejects `mode: condense` at the source.
+The inherited `mode` vocabulary is `verbatim` and `sidecar`, and this Foundry renders both — the copies above and the `cli-command` JSON. So it narrows nothing: every mode an author may spell here is one the caster can perform.
 
 `example` is declared in the contract but no Mold uses it yet, so the caster fails fast rather than guessing dst conventions. `prompt` is active for wrapper notes; the raw text is the `upstream.prompt` file beside `index.md`, named by convention rather than declared in frontmatter.
 

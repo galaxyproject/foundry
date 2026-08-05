@@ -64,9 +64,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <p>
         Molds are not just prose pages. A Mold is a typed reference manifest with a procedural body.
         It can point at patterns, CLI docs, schemas, examples, prompt fragments, and research notes,
-        and each reference kind has its own casting behavior. A schema can be copied verbatim, a CLI
-        page can become a sidecar, a pattern can be condensed, and an evaluation plan can stay
-        Foundry-only.
+        and each reference kind has its own casting behavior. A schema or a pattern is copied
+        verbatim, a CLI page becomes a sidecar, and an evaluation plan stays Foundry-only.
       </p>
       <p>
         This gives each action a shape the validator and the casting pipeline can reason about.
@@ -92,7 +91,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <p>
         Progressive disclosure is not only a site-navigation idea here. It is part of the runtime
         contract. Mold references can say whether a source is needed at cast time, runtime, or both;
-        whether it should load up front or on demand; and whether it should be copied, condensed, or
+        whether it should load up front or on demand; and whether it should be copied verbatim or
         turned into a sidecar. That keeps the generated skill focused without cutting it off from
         richer knowledge when the task actually needs it.
       </p>
@@ -102,7 +101,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <span class="story-kicker font-mono">Casting</span>
       <h2>Casts are frozen, portable, and traceable.</h2>
       <p>
-        A generated skill should not need the whole Foundry at runtime. It should load with the condensed
+        A generated skill should not need the whole Foundry at runtime. It should load with the
         instructions, copied schemas, structured sidecars, and examples it needs to do one job. That
         makes the artifact portable across runtimes: Claude skills are one target, web artifacts and
         generic bundles are other possible targets.

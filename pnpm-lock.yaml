@@ -189,8 +189,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@galaxy-foundry/reference-contract':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@galaxy-foundry/tag-registry':
         specifier: ^0.1.0
         version: 0.1.0
@@ -294,8 +294,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/note-schema
       '@galaxy-foundry/reference-contract':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@galaxy-foundry/tag-registry':
         specifier: ^0.1.0
         version: 0.1.0
@@ -1028,8 +1028,8 @@ packages:
     resolution: {integrity: sha512-slmZ38u2fty5vRBpZUHmwu42KCLpEDrtf8hDLKL/ktcbuwgfdHmOdHspDFu+qbDk6aptdhpkhpMlSSEh2ygI0g==}
     engines: {node: '>=20'}
 
-  '@galaxy-foundry/reference-contract@0.1.0':
-    resolution: {integrity: sha512-rOfkD8PQ02HW5p3AoiK1WZXbAV7YO6qa9xUvFhXiQcAXjId8ugF0+fpXCJLrDsVH9mAFXSXNhTbrGhqvYBeeiw==}
+  '@galaxy-foundry/reference-contract@0.2.0':
+    resolution: {integrity: sha512-j11r0Gn5sY3axvRrK9AgGgBjihSJcXVyAHaP6i1SymHwGumoyExopPDTKcSY29Qd7WIKxZuz9PsdnrqGKnCJXg==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/tag-registry@0.1.0':
@@ -4473,9 +4473,9 @@ snapshots:
     dependencies:
       js-yaml: 4.3.0
 
-  '@galaxy-foundry/reference-contract@0.1.0':
+  '@galaxy-foundry/reference-contract@0.2.0':
     dependencies:
-      js-yaml: 4.1.1
+      js-yaml: 4.3.0
 
   '@galaxy-foundry/tag-registry@0.1.0':
     dependencies:

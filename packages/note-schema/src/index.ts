@@ -56,7 +56,6 @@ export {
 export {
   loadReferenceContract,
   loadCastReferenceContract,
-  SUPPORTED_MODES,
   findReferenceContractPath,
   contractKeys,
   type ReferenceContract,
