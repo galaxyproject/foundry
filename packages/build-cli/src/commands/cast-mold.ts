@@ -150,9 +150,11 @@ interface ResolvedRef {
   package_source?: { spec: string; exportName: string };
   /** Bundle-relative dst of the parent note when this ref is a copied companion file. */
   companion_of?: string;
-  /** License of redistributed third-party content, from the source note's frontmatter. */
+  /** License of the upstream work this ref draws on, from the source note's frontmatter. */
   license?: string;
-  /** Repo-relative LICENSES/ path this ref redistributes under. */
+  /** How an authored note relates to the licensed work it cites. Absent for raw payloads. */
+  derived?: string;
+  /** Repo-relative LICENSES/ path associated with this ref's licensed lineage. */
   license_file?: string;
 }
 
@@ -338,6 +340,13 @@ function resolveMoldRef(
       verification: typeof ref.verification === "string" ? ref.verification : undefined,
       package_source: packageSource,
       license: typeof noteMeta?.license === "string" ? noteMeta.license : undefined,
+      // `derived` describes authored prose. A package export or payload companion is upstream
+      // bytes rather than the note that describes them, so absence deliberately keeps those
+      // refs on the policy's pass-through path.
+      derived:
+        castDecl.resolve === "note" && typeof noteMeta?.derived === "string"
+          ? noteMeta.derived
+          : undefined,
       license_file: typeof noteMeta?.license_file === "string" ? noteMeta.license_file : undefined,
     },
   };
@@ -962,6 +971,7 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
     verification: r.verification,
     companion_of: r.companion_of,
     license: r.license,
+    derived: r.derived,
     license_file: r.license_file,
   };
 }

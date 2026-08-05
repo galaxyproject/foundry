@@ -1284,6 +1284,11 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
     mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
     mkdirSync(path.join(dir, "content/research/note-x"), { recursive: true });
     mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+    mkdirSync(path.join(dir, "scripts/lib/schemas"), { recursive: true });
+    copyFileSync(
+      path.join(repoRoot, "scripts/lib/schemas/cast-provenance.schema.json"),
+      path.join(dir, "scripts/lib/schemas/cast-provenance.schema.json"),
+    );
     if (extraLicenseFile) {
       mkdirSync(path.join(dir, "LICENSES"), { recursive: true });
       writeFileSync(path.join(dir, extraLicenseFile), "TEST LICENSE TEXT\n");
@@ -1363,6 +1368,41 @@ license: CC-BY-NC-SA-2.0
       // no mode was ever the answer, so the message stops offering one.
       expect(r.stderr).toContain("cannot be carried into a cast");
       expect(r.stderr).not.toContain("mode=");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("carries an authored own-words note and records the posture the policy used", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-own-words-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(
+        dir,
+        `---
+type: research
+title: Note X
+tags: [research]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Foundry-authored summary of a non-commercial source.
+license: CC-BY-NC-SA-2.0
+derived: own-words summary
+---${noteBody}`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+      const prov = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+      );
+      const ref = prov.refs.find((x: { kind: string }) => x.kind === "research");
+      expect(ref.license).toBe("CC-BY-NC-SA-2.0");
+      expect(ref.derived).toBe("own-words summary");
+
+      const verify = execVerify(dir, "m");
+      expect(verify.code, `derived must satisfy the provenance schema: ${verify.stderr}`).toBe(0);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
