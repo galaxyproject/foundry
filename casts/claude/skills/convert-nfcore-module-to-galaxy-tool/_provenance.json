@@ -6,9 +6,9 @@
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 4,
     "content_hash": "0f8a5fb3ffc3434b6daec33aa7317e217de81b2c2655da5325154e7ab209e117",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "b9590579bec9fec7caeb35f2274c3a9639d665d6"
   },
-  "cast_at": "2026-08-02T22:04:21.679Z",
+  "cast_at": "2026-08-05T22:23:51.186Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -36,7 +36,7 @@
       "purpose": "Reference for `planemo lint` flags and output classification; first gate in the convergence loop.",
       "trigger": "Step 10.1 — after every <command>/<inputs>/<outputs> emission.",
       "verification": "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses.",
-      "src_hash": "d09982fcb1cbb6f5a92a3be6b32753ab2791dee3c55b19caf27072451ce3ad08",
+      "src_hash": "2db8204a138ffca690abcafae9648cfb3875e1a179d7049fb4c11666dd6a7d7a",
       "dst_hash": "862d714fa6eb7d9233173948162ff880262e2c867394f1157d073a4ce8d81523",
       "source": "deterministic"
     },
@@ -52,7 +52,7 @@
       "purpose": "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path.",
       "trigger": "Step 10.2 — after lint clears.",
       "verification": "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout.",
-      "src_hash": "531ebf6f4f96777eae381bcb3e197980f42ba37967bdd71715d3541472d75d69",
+      "src_hash": "6a499521af2cc5ada3661ae40bed9313b0ab82dd49d9365b40ffb10a3182e742",
       "dst_hash": "f4698abd6b129048befaa3e335010d99c2748a3a4a5334b90584ce5b9ee913e6",
       "source": "deterministic"
     },
