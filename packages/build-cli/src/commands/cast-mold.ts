@@ -9,7 +9,6 @@
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
 import {
-  copyFileSync,
   cpSync,
   existsSync,
   mkdirSync,
@@ -29,7 +28,6 @@ import {
   gitHead,
   provenanceRecord,
   readProvenanceCarryOver,
-  recordedHash,
   PROVENANCE_SCHEMA_VERSION,
   type ProvenanceCarryOver,
   type ProvenanceRefEntry,
@@ -871,11 +869,19 @@ function comparableProvenance(text: string): string | null {
 
 // ---- cast assembly ----
 
+/**
+ * Place one ref's bytes and report what it took.
+ *
+ * There is no check mode in here. Assembly always writes, because it writes into a staged copy
+ * of the bundle that a `--check` run simply never publishes — check-ness is one decision, made
+ * once, after every ref has had its say. That is also why `dst_hash` is the expected hash rather
+ * than `recordedHash`'s answer: the staged file was brought into line by definition, so the two
+ * cases that function distinguishes cannot both arise here.
+ */
 async function castOneRef(
   resolved: ResolvedRef,
   repoRoot: string,
   bundleRoot: string,
-  check: boolean,
   renderers: RefRenderers,
 ): Promise<{ entry: ProvenanceRefEntry; drift?: string; error?: string }> {
   const dstAbs = path.join(bundleRoot, resolved.dst);
@@ -917,13 +923,13 @@ async function castOneRef(
       path: dstAbs,
       expected: json,
       label: "package schema",
-      check,
+      check: false,
     });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: drift.expectedHash,
-        dst_hash: recordedHash(drift, check),
+        dst_hash: drift.expectedHash,
         source: "deterministic",
       },
       drift: drift.reason,
@@ -946,14 +952,14 @@ async function castOneRef(
       path: dstAbs,
       expectedHash: srcHash,
       label: "dst",
-      check,
+      check: false,
       write: () => copyVerbatim(srcAbs, dstAbs),
     });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: srcHash,
-        dst_hash: recordedHash(drift, check),
+        dst_hash: drift.expectedHash,
         source: "deterministic",
       },
       drift: drift.reason,
@@ -970,12 +976,17 @@ async function castOneRef(
   if (renderer) {
     const parsed = readMarkdown(srcAbs);
     const text = await renderer({ srcAbs, srcRel: resolved.src, meta: parsed.meta });
-    const drift = reconcileText({ path: dstAbs, expected: text, label: resolved.mode, check });
+    const drift = reconcileText({
+      path: dstAbs,
+      expected: text,
+      label: resolved.mode,
+      check: false,
+    });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: srcHash,
-        dst_hash: recordedHash(drift, check),
+        dst_hash: drift.expectedHash,
         source: "deterministic",
       },
       drift: drift.reason,
@@ -1330,9 +1341,16 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     const refEntries: ProvenanceRefEntry[] = [];
     const drift: Array<{ file: string; reason: string }> = [];
 
+    // Every bundle-relative path this cast writes into the staged bundle, recorded beside the
+    // write that produces it. Publishing copies exactly this set, so the two halves cannot
+    // disagree about what a cast produces: a new kind of output is added here, at the write,
+    // rather than here AND again in a publish block that re-derives its own list.
+    const staged = new Set<string>();
+
     for (const r of resolved) {
-      const result = await castOneRef(r, repoRoot, stagedBundleRoot, false, GALAXY_HOOKS.renderers);
+      const result = await castOneRef(r, repoRoot, stagedBundleRoot, GALAXY_HOOKS.renderers);
       refEntries.push(result.entry);
+      staged.add(result.entry.dst);
       if (result.error) errors.push(result.error);
       if (result.drift) drift.push({ file: r.src, reason: result.drift });
     }
@@ -1361,6 +1379,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       check: false,
     });
     if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
+    staged.add("SKILL.md");
 
     // Reduce `references/` to exactly what provenance lists.
     //
@@ -1396,6 +1415,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       }),
     );
     drift.push(...reconcileBundleFiles(contributed, stagedBundleRoot, false));
+    for (const file of contributed) if (file.content !== null) staged.add(file.path);
 
     // A `--note` opens a new cast revision. Decided before the record is assembled rather than
     // assigned onto it after, so the numbering does not depend on where a later assignment
@@ -1466,6 +1486,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       });
     }
     writeFileSync(stagedProvenance, provenanceText);
+    staged.add("_provenance.json");
 
     // Checks this instance runs over the finished staged bundle.
     //
@@ -1509,13 +1530,25 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       return;
     }
 
-    // Publish only the subtree/files casting owns. `runs/` and any other harvested state remain
-    // in place; provenance lands last as the record that the preceding writes completed.
+    // Publish what was staged, and only that. `runs/` and any other harvested state stay exactly
+    // as found — casting did not write them and does not own them.
+    //
+    // The set is the one built alongside the staging writes, so this cannot fall behind them.
+    // It iterates in insertion order, which puts `_provenance.json` last because it is staged
+    // last — the record lands only after the files it describes.
+    //
+    // A path in it that is not on disk means a write was recorded and did not happen, which is a
+    // bug in this function rather than a condition to tolerate: publishing the rest would leave a
+    // bundle whose provenance names a file it does not contain.
     mkdirSync(bundleRoot, { recursive: true });
-    for (const entry of refEntries) {
-      const staged = path.join(stagedBundleRoot, entry.dst);
-      if (existsSync(staged)) copyVerbatim(staged, path.join(bundleRoot, entry.dst));
+    for (const rel of staged) {
+      const from = path.join(stagedBundleRoot, rel);
+      if (!existsSync(from)) throw new Error(`staged but never written: ${rel}`);
+      copyVerbatim(from, path.join(bundleRoot, rel));
     }
+
+    // Removals, which copying cannot express: refs that stopped being refs, and contributions
+    // whose declaration says the file must not be there.
     reconcileTreeTo({
       root: path.join(bundleRoot, "references"),
       declared: declaredRefs,
@@ -1523,9 +1556,11 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       reason: () => "orphan (no ref claims it)",
       check: false,
     });
-    copyFileSync(path.join(stagedBundleRoot, "SKILL.md"), path.join(bundleRoot, "SKILL.md"));
-    reconcileBundleFiles(contributed, bundleRoot, false);
-    writeFileSync(provenancePath, provenanceText);
+    reconcileBundleFiles(
+      contributed.filter((file) => file.content === null),
+      bundleRoot,
+      false,
+    );
 
     console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
     if (drift.length) console.log(`reconciled ${drift.length} drifted file(s)`);

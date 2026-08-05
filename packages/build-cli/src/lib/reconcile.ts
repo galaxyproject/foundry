@@ -12,7 +12,6 @@
 
 export {
   driftOf,
-  recordedHash,
   reconcile,
   reconcileAbsent,
   reconcileText,
