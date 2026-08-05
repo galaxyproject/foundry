@@ -3,6 +3,7 @@ type: cli-command
 tool: gxwf
 command: validate
 package: "@galaxy-tool-util/cli"
+source_url: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
 tags:
   - target/galaxy
 status: reviewed

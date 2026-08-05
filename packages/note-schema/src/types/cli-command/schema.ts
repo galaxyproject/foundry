@@ -22,7 +22,14 @@ export const kind = defineKind({
         tool: ctx.toolSlug,
         command: z.string(),
         package: z.string().optional(),
-        upstream: z.string().optional(),
+        // The document this page summarizes — a spec file, a command implementation at a pinned
+        // ref. `source_url` and `z.url()` are the sibling instance's name and constraint for the
+        // same thing, so one field means one thing across both.
+        //
+        // Distinct from the `schema` kind's `upstream`, which is where a VENDORED artifact came
+        // from and carries a cross-field rule keying off whether it points outside this
+        // repository. Summarizing an external command is not vendoring it.
+        source_url: z.url().optional(),
         ...ctx.base,
       })
       .strict(),
