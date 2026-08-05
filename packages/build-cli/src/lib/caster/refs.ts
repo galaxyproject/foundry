@@ -10,15 +10,30 @@ import path from "node:path";
 import { copyVerbatim, type ProvenanceRefEntry } from "@galaxy-foundry/cast";
 import type { CastContract, ReferenceContractTerm } from "@galaxy-foundry/note-schema";
 
-import { payloadCompanionOf } from "../dispositions.js";
 import { errorMessage } from "../errors.js";
 import { readMarkdown } from "../frontmatter.js";
 import { reconcile, reconcileText, sha256File } from "../reconcile.js";
 import type { Frontmatter } from "../types.js";
 import { fileSlug } from "../walk.js";
 import { resolveWikiLink, WIKI_LINK_RE } from "../wiki-links.js";
-import type { RefRenderers } from "./hooks.js";
+import type { CastHooks, RefRenderers } from "./hooks.js";
 import type { TargetConfig, TargetKindConfig } from "./target.js";
+
+/**
+ * What resolving a ref needs to know, all of it already loaded.
+ *
+ * A `CastRequest` satisfies this by construction, so the caster passes itself and these stay
+ * callable on their own — which is what lets a test exercise one declaration without staging a
+ * bundle around it.
+ */
+export interface RefResolution {
+  slugMap: ReadonlyMap<string, string>;
+  metaByPath: ReadonlyMap<string, Frontmatter>;
+  target: TargetConfig;
+  castContract: CastContract;
+  refKinds: Record<string, ReferenceContractTerm & { ref_shape?: string }>;
+  hooks: CastHooks;
+}
 
 export interface ResolvedRef {
   kind: "schema" | "research" | "pattern" | "cli-tool" | "cli-command" | "prompt";
@@ -63,12 +78,9 @@ function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindC
 export function resolveMoldRef(
   raw: unknown,
   index: number,
-  slugMap: ReadonlyMap<string, string>,
-  metaByPath: ReadonlyMap<string, Frontmatter>,
-  target: TargetConfig,
-  castContract: CastContract,
-  refKinds: Record<string, ReferenceContractTerm & { ref_shape?: string }>,
+  ctx: RefResolution,
 ): { resolved?: ResolvedRef; error?: string } {
+  const { slugMap, metaByPath, target, castContract, refKinds } = ctx;
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     return { error: `references[${index}]: not an object` };
   }
@@ -176,13 +188,22 @@ export function resolveMoldRef(
       // that is comes from the kind's own companion declaration, so there is nothing here to
       // resolve and nothing that can point at a file that is not there.
       //
+      // Which file that is, this instance's kind layer answers. Nothing registered means the
+      // contract declares a strategy the instance does not implement, and that is worth saying
+      // out loud: falling back to the note would package the wrapper and look like it worked.
+      // Same shape as an unregistered renderer, and for the same reason.
+      if (!ctx.hooks.payloadCompanion) {
+        return {
+          error: `references[${index}]: kind=${kind} resolves via payload-companion, but nothing registers a payloadCompanion hook — the contract declares this strategy and this Foundry does not implement it`,
+        };
+      }
       // Caught rather than thrown: a kind declaring no single `bundled` companion is a broken
       // declaration, and every other failure in this function arrives as a collected
       // `references[i]: ...` line. Letting this one escape as a stack trace would lose the
       // ref index — the only thing that says WHICH reference was being resolved.
       let payload: string;
       try {
-        payload = payloadCompanionOf(kind);
+        payload = ctx.hooks.payloadCompanion(kind);
       } catch (e) {
         return { error: `references[${index}]: ${errorMessage(e)}` };
       }
@@ -240,12 +261,8 @@ export function resolveMoldRef(
 // parent ref's mode — a note points at its structured sibling either way. They
 // inherit the parent ref's load/used_at/trigger/purpose and carry
 // `companion_of` for provenance.
-export function expandCompanions(
-  resolved: ResolvedRef[],
-  metaByPath: ReadonlyMap<string, Frontmatter>,
-  target: TargetConfig,
-  castContract: CastContract,
-): ResolvedRef[] {
+export function expandCompanions(resolved: ResolvedRef[], ctx: RefResolution): ResolvedRef[] {
+  const { metaByPath, target, castContract } = ctx;
   const out: ResolvedRef[] = [];
   for (const r of resolved) {
     out.push(r);

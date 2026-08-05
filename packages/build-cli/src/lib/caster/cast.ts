@@ -175,7 +175,7 @@ function comparableProvenance(text: string): string | null {
 export async function castMold<Ext extends object = Record<string, never>>(
   request: CastRequest<Ext>,
 ): Promise<CastOutcome> {
-  const { repoRoot, bundleRoot, target, mold, castContract, slugMap, metaByPath, hooks } = request;
+  const { repoRoot, bundleRoot, mold, slugMap, metaByPath, hooks } = request;
   const provenancePath = path.join(bundleRoot, "_provenance.json");
   const carry = readExistingProvenance(provenancePath);
 
@@ -184,13 +184,13 @@ export async function castMold<Ext extends object = Record<string, never>>(
   const resolved: ResolvedRef[] = [];
   const errors: string[] = [];
   rawRefs.forEach((r, i) => {
-    const out = resolveMoldRef(r, i, slugMap, metaByPath, target, castContract, request.refKinds);
+    const out = resolveMoldRef(r, i, request);
     if (out.error) errors.push(out.error);
     if (out.resolved) resolved.push(out.resolved);
   });
 
   // Expand multi-file notes' declared companion files into sibling verbatim refs.
-  const expanded = expandCompanions(resolved, metaByPath, target, castContract);
+  const expanded = expandCompanions(resolved, request);
   resolved.length = 0;
   resolved.push(...expanded);
 

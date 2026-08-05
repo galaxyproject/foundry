@@ -142,6 +142,20 @@ export interface BundleCheckContext extends CastContext {
  */
 export type BundleCheck = (context: BundleCheckContext) => readonly string[];
 
+/**
+ * The one file beside a note that a cast packages in the note's place.
+ *
+ * Answers the `payload-companion` resolve strategy for whichever kinds declare it. Which file
+ * that is comes from the kind layer, and every kind layer is an instance's own — so a Foundry
+ * whose kinds all cast the note itself registers nothing, and never has to write a function
+ * whose only job is to throw.
+ *
+ * Throwing is how a kind that cannot answer says so. The message is reported against the ref
+ * that asked, so a broken declaration names the reference that tripped over it instead of
+ * ending the run with a stack trace.
+ */
+export type PayloadCompanion = (kind: string) => string;
+
 export interface CastHooks {
   /**
    * Renderers for every non-verbatim mode this instance admits.
@@ -166,6 +180,15 @@ export interface CastHooks {
   readonly skillSections: SkillSectionContributor;
   /** Second addresses for a note, beyond the slug of its filename. */
   readonly slugAliases: SlugAliases;
+  /**
+   * The file a `payload-companion` kind ships in its note's place.
+   *
+   * Optional, because a contract with no such kind never asks. A contract that DOES declare the
+   * strategy and finds nothing registered is an error rather than a fallback to the note: the
+   * declaration's whole content is "the note is the wrapper, not the payload", so casting the
+   * wrapper would package the wrong file and look like it worked.
+   */
+  readonly payloadCompanion?: PayloadCompanion;
   /**
    * Checks over the finished bundle, run before the error gate.
    *

@@ -1711,6 +1711,66 @@ describe("the skill document is the sections it was handed", () => {
   });
 });
 
+// `payload-companion` is the last resolve strategy that has to ask the instance a question:
+// which file beside the note IS the payload. The kind layer holding that answer is this
+// Foundry's, so the answer arrives as a hook — and the caster must never spell the filename.
+describe("the payload a companion strategy ships is the instance's answer", () => {
+  const target = {
+    name: "claude",
+    required_outputs: [],
+    kinds: { prompt: { dst_dir: "references/prompts", dst_extension: ".md", modes: ["verbatim"] } },
+    skill_constraints: { frontmatter_required: [], forbidden_runtime_paths: [] },
+  };
+  const castContract = {
+    prompt: { resolve: "payload-companion" as const, default_mode: "verbatim", companions: false },
+  };
+  const refKinds = { prompt: { label: "Prompt", description: "", ref_shape: "wiki-link" as const } };
+  const slugMap = new Map([["p", "content/prompts/p/index.md"]]);
+  const metaByPath = new Map([["content/prompts/p/index.md", { type: "prompt" }]]);
+  // A Foundry that attaches nothing: no renderers, no contributions, no second addresses.
+  const bareHooks = {
+    renderers: {},
+    bundleFiles: [],
+    skillLede: "",
+    skillSections: () => [],
+    slugAliases: () => [],
+    bundleChecks: [],
+  };
+
+  it("refuses a strategy nothing implements, rather than casting the wrapper", async () => {
+    const { resolveMoldRef } = await import("../packages/build-cli/src/lib/caster/refs.js");
+    const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
+      slugMap,
+      metaByPath,
+      target,
+      castContract,
+      refKinds,
+      hooks: bareHooks,
+    });
+    // Falling back to the note would package the file that FRAMES the payload and report
+    // success, which is the one outcome worse than an error.
+    expect(out.resolved).toBeUndefined();
+    expect(out.error).toContain("references[0]");
+    expect(out.error).toContain("payloadCompanion");
+  });
+
+  it("ships the file the hook names, and derives the bundled name from the note", async () => {
+    const { resolveMoldRef } = await import("../packages/build-cli/src/lib/caster/refs.js");
+    const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
+      slugMap,
+      metaByPath,
+      target,
+      castContract,
+      refKinds,
+      hooks: { ...bareHooks, payloadCompanion: () => "not-a-name-the-caster-knows.md" },
+    });
+    expect(out.error).toBeUndefined();
+    expect(out.resolved?.src).toBe("content/prompts/p/not-a-name-the-caster-knows.md");
+    // The bundle is named for the note that frames the payload, never for the payload's file.
+    expect(out.resolved?.dst).toBe("references/prompts/p.md");
+  });
+});
+
 // Casting, the validator and pipeline assembly each answer "which slug reaches which note?",
 // and all three used to answer it separately. They agreed by hand; assemble-pipeline's copy
 // even carried a comment claiming parity rather than holding it.

@@ -35,6 +35,7 @@ import {
   stripWikiLinks,
 } from "../lib/caster/skill.js";
 import { loadTargetConfig } from "../lib/caster/target.js";
+import { payloadCompanionOf } from "../lib/dispositions.js";
 import { errorMessage } from "../lib/errors.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { sha256File } from "../lib/reconcile.js";
@@ -258,6 +259,10 @@ const GALAXY_HOOKS: CastHooks = {
     ];
   },
   slugAliases: GALAXY_SLUG_ALIASES,
+  // Which file a `payload-companion` kind ships instead of its note. Read off the kind's own
+  // companion declarations, so a prompt bundle carries the prompt rather than the note framing
+  // it — and so nothing here names the file.
+  payloadCompanion: payloadCompanionOf,
   bundleChecks: [
     // Harvested sample runs, against the schema this Mold declares for its OWN output. Not
     // against whichever schema ref happens to come first: a Mold's runs contain what that Mold
