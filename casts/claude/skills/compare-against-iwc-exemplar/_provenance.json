@@ -4,11 +4,11 @@
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
-    "revision": 8,
-    "content_hash": "5e9518f154f452aadc1916e8bcfab3f864b69134479fe8c8dd542b1028731941",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "revision": 9,
+    "content_hash": "fadd8c9c2f723fff2e1d30340dbafe61406a81c2b6f26c319f39d09aa5f90add",
+    "commit": "e4ee3dd7e0b3af9886ea6009b961b0c5ecb2f349"
   },
-  "cast_at": "2026-08-02T22:04:20.641Z",
+  "cast_at": "2026-08-05T14:55:30.454Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [

@@ -9,7 +9,7 @@
 //
 // This module now traverses and routes. It does not decide.
 
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { CONTENT_DIR, collectionOf } from "@galaxy-foundry/note-schema";
 
@@ -65,19 +65,12 @@ export function routablePath(root: string, full: string): string {
  * Unrelated to `findMdFiles`: that one routes, this one just lists. Both the caster (pruning a
  * bundle down to what provenance claims) and the verifier (asking what actually sits beside a
  * note) need the raw listing, and neither wants the collection table involved.
+ *
+ * The implementation ships in @galaxy-foundry/cast, where the pruning that needs it lives.
+ * Re-exported rather than re-imported at each call site so the verifier keeps naming the module
+ * it already names.
  */
-export function listFilesUnder(dir: string, relativeTo: string): string[] {
-  if (!existsSync(dir)) return [];
-  const out: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  )) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...listFilesUnder(full, relativeTo));
-    else out.push(path.relative(relativeTo, full).split(path.sep).join("/"));
-  }
-  return out;
-}
+export { listFilesUnder } from "@galaxy-foundry/cast";
 
 /** Slug used for wiki-link resolution: `index.md` → parent dir name; otherwise basename without extension. */
 export function fileSlug(filePath: string): string {

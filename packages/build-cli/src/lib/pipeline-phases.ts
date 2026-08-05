@@ -63,8 +63,8 @@ export interface ParsedPhases {
 /** Resolve a `[[wiki-link]]` to a Mold path, recording a finding on failure. */
 function resolveMold(
   ref: unknown,
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
   filePath: string,
   loc: string,
   findings: PhaseFinding[],
@@ -91,8 +91,8 @@ function resolveMold(
 
 export function parsePhases(
   phases: unknown[],
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
   filePath: string,
 ): ParsedPhases {
   const findings: PhaseFinding[] = [];

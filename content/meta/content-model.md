@@ -58,7 +58,7 @@ Links are one-directional and backlinks are derived. The site computes incoming 
 
 ## Typed references
 
-A wiki link expresses knowledge navigation. A Mold **Reference** adds compilation behavior: its `kind`, `load`, `used_at`, `modes`, and `evidence` fields tell casting how the target participates. Patterns may be condensed, prompts inlined, schemas and examples copied, CLI commands serialized as sidecars, and evaluation companions omitted. [[mold-spec]] owns the authoring contract and [[casting]] owns dispatch semantics.
+A wiki link expresses knowledge navigation. A Mold **Reference** adds compilation behavior: its `kind`, `load`, `used_at`, `modes`, and `evidence` fields tell casting how the target participates. Patterns, prompts, schemas and examples are copied verbatim, CLI commands are serialized as sidecars, and evaluation companions are omitted. [[mold-spec]] owns the authoring contract and [[casting]] owns dispatch semantics.
 
 ## Directory notes and companions
 

@@ -25,6 +25,7 @@ import { bundledPolicy, resolveLicenseRow } from "@galaxy-foundry/license-policy
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadTagRegistry } from "../lib/schema.js";
+import { GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
 import type { FileMeta, Frontmatter, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles, routablePath } from "../lib/walk.js";
 import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
@@ -146,17 +147,14 @@ interface CrossFileFinding {
 // almost every registered tag is legitimately unused; the question only means anything against
 // the whole corpus. It lives in tests/registry-drift.test.ts instead.
 
+// Addressing has to match what casting resolves against, or a link this command calls good
+// fails at cast time. Same rule imported, rather than the same rule restated a third time —
+// assemble-pipeline's copy carried a comment claiming parity with cast's instead of holding it.
 function buildSlugMap(files: FileMeta[]): Map<string, string> {
   const m = new Map<string, string>();
   for (const f of files) {
     m.set(slugify(f.slug), f.path);
-    if (
-      f.meta.type === "cli-command" &&
-      typeof f.meta.tool === "string" &&
-      typeof f.meta.command === "string"
-    ) {
-      m.set(slugify(`${f.meta.tool} ${f.meta.command}`), f.path);
-    }
+    for (const alias of GALAXY_SLUG_ALIASES(f.meta)) m.set(slugify(alias), f.path);
   }
   return m;
 }

@@ -16,6 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
+import { PROVENANCE_SCHEMA_VERSION } from "@galaxy-foundry/cast";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -117,7 +118,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     }
   });
 
-  it("provenance is schema v3 and lists deterministic refs", () => {
+  it("provenance is schema v4 and lists deterministic refs", () => {
     const provPath = path.join(
       repoRoot,
       "casts",
@@ -506,6 +507,225 @@ Wrapper body should not be copied.
       );
       expect(prov.refs[0].src).toBe("content/prompts/prompt-x/upstream.prompt");
       expect(prov.refs[0].dst).toBe("references/prompts/prompt-x.md");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("the provenance record's shape is the caster's", () => {
+  function scaffold(dir: string, extraMoldFrontmatter = ""): void {
+    {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/prompts/prompt-x"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        [
+          "name: claude",
+          // A target cannot move the record's shape. If it could, this would produce a
+          // document announcing a contract nothing writes and nothing validates.
+          "provenance_schema_version: 99",
+          "bundle_path: skills/{mold}",
+          "required_outputs: [SKILL.md, _provenance.json]",
+          "kinds:",
+          "  prompt:",
+          "    dst_dir: references/prompts/",
+          "    dst_extension: .md",
+          "    modes: [verbatim]",
+          "skill_constraints:",
+          "  frontmatter_required: [name, description]",
+          "  forbidden_runtime_paths: []",
+          "",
+        ].join("\n"),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Provenance version cast test mold summary.
+references:
+  - kind: prompt
+    ref: "[[prompt-x]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+${extraMoldFrontmatter}---
+
+# m
+
+Use the prompt reference.
+`,
+      );
+      writeFileSync(
+        path.join(dir, "content/prompts/prompt-x/index.md"),
+        `---
+type: prompt
+title: Prompt X
+tags: [prompt]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Prompt wrapper summary for provenance version test.
+---
+
+Wrapper body should not be copied.
+`,
+      );
+      writeFileSync(path.join(dir, "content/prompts/prompt-x/upstream.prompt"), "RAW PROMPT\n");
+    }
+  }
+
+  function castedRecord(dir: string): Record<string, unknown> {
+    return JSON.parse(
+      readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+    ) as Record<string, unknown>;
+  }
+
+  it("emits the caster's version, not one the target claims", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provver-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(dir);
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+      const prov = castedRecord(dir);
+      expect(prov.provenance_schema_version).toBe(PROVENANCE_SCHEMA_VERSION);
+      expect(prov.provenance_schema_version).toBe(4);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // `artifacts` is this Foundry's own block, and casting reserves one slot for it between what
+  // was compiled and what checking it concluded. Asserted on key ORDER, not membership: a record
+  // is compared by its bytes, so a field that moves rewrites every committed bundle while every
+  // value in it stays correct. `toEqual` on the parsed object is order-blind and would pass.
+  //
+  // The full corpus proves the same thing more strongly, but only for a shape it happens to
+  // contain. This pins the slot for a record built from nothing, including across the revision
+  // that `--note` opens — the one path that assigns fields after the record exists.
+  it("puts this Foundry's own block in the slot between refs and the verdicts", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provslot-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(
+        dir,
+        [
+          "output_artifacts:",
+          "  - id: thing",
+          "    kind: json",
+          "    default_filename: thing.json",
+          "    description: What this Mold produces.",
+          "",
+        ].join("\n"),
+      );
+      const first = runTsx(foundryBuild, [
+        "cast",
+        "m",
+        "--target=claude",
+        "--root",
+        dir,
+        "--note=first cast",
+      ]);
+      expect(first.code, `stderr: ${first.stderr}`).toBe(0);
+
+      const prov = castedRecord(dir);
+      expect(prov.cast_revision).toBe(1);
+      expect(prov.artifacts).toEqual({
+        produces: [
+          {
+            id: "thing",
+            kind: "json",
+            default_filename: "thing.json",
+            description: "What this Mold produces.",
+          },
+        ],
+        consumes: [],
+      });
+
+      // The tail has to be non-empty for the slot to be observable at all. Absent fields are
+      // omitted from the JSON, so a record with no verdicts serializes the same whether the
+      // block sits in its slot or is appended last — and would pass an order assertion for the
+      // wrong reason. `open_questions` carries forward from the record on disk, so planting one
+      // here is what a second cast of a Mold with open questions actually looks like.
+      const planted = castedRecord(dir);
+      planted.open_questions = ["Does the slot hold?"];
+      writeFileSync(
+        path.join(dir, "casts/claude/skills/m/_provenance.json"),
+        JSON.stringify(planted, null, 2) + "\n",
+      );
+
+      const second = runTsx(foundryBuild, [
+        "cast",
+        "m",
+        "--target=claude",
+        "--root",
+        dir,
+        "--note=second cast",
+      ]);
+      expect(second.code, `stderr: ${second.stderr}`).toBe(0);
+      const revised = castedRecord(dir);
+      expect(Object.keys(revised)).toEqual([
+        "provenance_schema_version",
+        "cast_target",
+        "mold",
+        "cast_at",
+        "cast_date",
+        "cast_revision",
+        "cast_history",
+        "refs",
+        "artifacts",
+        "open_questions",
+      ]);
+      expect(revised.cast_revision).toBe(2);
+      expect((revised.cast_history as Array<{ rev: number }>).map((h) => h.rev)).toEqual([1, 2]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The record is the cast's contract, and it was the one file in a bundle `--check` never
+  // compared — so a Mold could move under a committed bundle and the gate stayed green. It did:
+  // three bundles on `main` recorded a Mold revision older than the Mold, for a day, unnoticed.
+  //
+  // Both halves matter. Comparing raw bytes would fail every check, since `cast_at` and
+  // `mold.commit` move on every run, so a gate that reports those is a gate someone turns off.
+  it("reports a record that no longer describes its Mold, and ignores the clock", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provdrift-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(dir);
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+      const recordPath = path.join(dir, "casts/claude/skills/m/_provenance.json");
+      const clean = () =>
+        runTsx(foundryBuild, ["cast", "m", "--target=claude", "--check", "--root", dir]);
+      expect(clean().code, "a freshly cast bundle must check clean").toBe(0);
+
+      // Only the clock moved. A check that fails here fails on every bundle, every run.
+      const record = castedRecord(dir);
+      record.cast_at = "1999-01-01T00:00:00.000Z";
+      (record.mold as { commit: unknown }).commit = "0000000000000000000000000000000000000000";
+      writeFileSync(recordPath, JSON.stringify(record, null, 2) + "\n");
+      const afterClock = clean();
+      expect(afterClock.code, `stderr: ${afterClock.stderr}`).toBe(0);
+
+      // The Mold moved under the bundle: exactly the case the three stale records were in.
+      const stale = castedRecord(dir);
+      (stale.mold as { revision: number }).revision = 99;
+      writeFileSync(recordPath, JSON.stringify(stale, null, 2) + "\n");
+      const afterMold = clean();
+      expect(afterMold.code, "a record naming another Mold revision is drift").not.toBe(0);
+      expect(afterMold.stderr).toContain("_provenance.json");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -1198,6 +1418,11 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
     mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
     mkdirSync(path.join(dir, "content/research/note-x"), { recursive: true });
     mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+    mkdirSync(path.join(dir, "scripts/lib/schemas"), { recursive: true });
+    copyFileSync(
+      path.join(repoRoot, "scripts/lib/schemas/cast-provenance.schema.json"),
+      path.join(dir, "scripts/lib/schemas/cast-provenance.schema.json"),
+    );
     if (extraLicenseFile) {
       mkdirSync(path.join(dir, "LICENSES"), { recursive: true });
       writeFileSync(path.join(dir, extraLicenseFile), "TEST LICENSE TEXT\n");
@@ -1272,7 +1497,84 @@ license: CC-BY-NC-SA-2.0
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code).not.toBe(0);
       expect(r.stderr).toContain("own-words-only");
-      expect(r.stderr).toContain("forbids mode=verbatim");
+      // The note declares no `derived:` posture, so it is pass-through by default and stays
+      // governed. The remedy named is summarizing the source, not picking another transform —
+      // no mode was ever the answer, so the message stops offering one.
+      expect(r.stderr).toContain("cannot be carried into a cast");
+      expect(r.stderr).not.toContain("mode=");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("carries an authored own-words note and records the posture the policy used", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-lic-own-words-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(
+        dir,
+        `---
+type: research
+title: Note X
+tags: [research]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Foundry-authored summary of a non-commercial source.
+license: CC-BY-NC-SA-2.0
+derived: own-words summary
+---${noteBody}`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+      const prov = JSON.parse(
+        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+      );
+      const ref = prov.refs.find((x: { kind: string }) => x.kind === "research");
+      expect(ref.license).toBe("CC-BY-NC-SA-2.0");
+      expect(ref.derived).toBe("own-words summary");
+
+      const verify = execVerify(dir, "m");
+      expect(verify.code, `derived must satisfy the provenance schema: ${verify.stderr}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // A refused cast leaves no manifest describing the bundle it declined to finish.
+  //
+  // `_verify.json` was always deferred past the error gate for this reason; `_required_tools.json`
+  // was not, and got written before the gate that then aborted the run. Both are contributed
+  // files now and travel one path, so this pins the property for the mechanism rather than for
+  // whichever file happened to have it.
+  it("writes no bundle manifest for a cast it refuses", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refused-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(
+        dir,
+        `---
+type: research
+title: Note X
+tags: [research]
+status: draft
+created: 2026-05-07
+revised: 2026-05-07
+revision: 1
+summary: Own-words-only note that must not be carried verbatim.
+license: CC-BY-NC-SA-2.0
+---${noteBody}`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      const bundle = path.join(dir, "casts/claude/skills/m");
+      expect(existsSync(bundle), "a refused cast must publish none of its staged bundle").toBe(
+        false,
+      );
+      expect(existsSync(path.join(bundle, "_verify.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_required_tools.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -1341,6 +1643,93 @@ describe("stripWikiLinks", () => {
   it("leaves a degenerate payload as authored rather than emitting nothing", async () => {
     const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
     expect(stripWikiLinks("An [[#anchor-only]] ref.")).toBe("An [[#anchor-only]] ref.");
+  });
+});
+
+// Re-casting the corpus proves the 47 committed skill documents still render byte for byte, but
+// it cannot show that the caster renders what it is GIVEN rather than a list it knows. These
+// pin the part the oracle cannot see: hand a section list nothing in this repo would produce,
+// and get exactly that back.
+describe("the skill document is the sections it was handed", () => {
+  it("renders them in order, and nothing it was not given", async () => {
+    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const doc = renderSkillMarkdown({
+      moldName: "m",
+      meta: { summary: "Summarize a thing." },
+      lede: "Lede line.",
+      sections: [
+        { title: "Second", body: "- b" },
+        { title: "First", body: "prose, not a list" },
+      ],
+    });
+    expect(doc).toBe(
+      [
+        "---",
+        "name: m",
+        'description: "Summarize a thing."',
+        "---",
+        "",
+        "# m",
+        "",
+        "Lede line.",
+        "",
+        "## Second",
+        "",
+        "- b",
+        "",
+        "## First",
+        "",
+        "prose, not a list",
+        "",
+      ].join("\n"),
+    );
+    // The names this instance happens to use are the instance's, not the caster's.
+    expect(doc).not.toContain("## Outputs");
+    expect(doc).not.toContain("## Procedure");
+  });
+
+  it("takes the description from the summary, stripped of link syntax and quote-safe", async () => {
+    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const doc = renderSkillMarkdown({
+      moldName: "m",
+      meta: { summary: 'Handle a "quoted" [[thing|name]].' },
+      lede: "L",
+      sections: [],
+    });
+    expect(doc).toContain('description: "Handle a \\"quoted\\" name."');
+  });
+
+  // A skill that requires no tools has said something. A reader who finds no heading cannot
+  // tell that from a caster that never asked.
+  it("says so for an empty section rather than dropping the heading", async () => {
+    const { bulletSection } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    expect(bulletSection("Required Tools", []).body).toBe("- None declared.");
+    expect(bulletSection("Required Tools", [], "- None, and none assumed.").body).toBe(
+      "- None, and none assumed.",
+    );
+    expect(bulletSection("Required Tools", ["- a", "- b"]).body).toBe("- a\n- b");
+  });
+});
+
+// Casting, the validator and pipeline assembly each answer "which slug reaches which note?",
+// and all three used to answer it separately. They agreed by hand; assemble-pipeline's copy
+// even carried a comment claiming parity rather than holding it.
+describe("second addresses are one rule, not three", () => {
+  it("gives a cli-command note the address a Mold author writes", async () => {
+    const { GALAXY_SLUG_ALIASES } = await import("../packages/build-cli/src/lib/slug-map.js");
+    expect(GALAXY_SLUG_ALIASES({ type: "cli-command", tool: "gxwf", command: "validate" })).toEqual(
+      ["gxwf validate"],
+    );
+  });
+
+  it("gives no second address to a note that has not earned one", async () => {
+    const { GALAXY_SLUG_ALIASES } = await import("../packages/build-cli/src/lib/slug-map.js");
+    // Right type, but no command to compound with — the address would be the tool's own.
+    expect(GALAXY_SLUG_ALIASES({ type: "cli-command", tool: "gxwf" })).toEqual([]);
+    expect(GALAXY_SLUG_ALIASES({ type: "cli-tool", tool: "gxwf", command: "validate" })).toEqual(
+      [],
+    );
+    expect(GALAXY_SLUG_ALIASES({ type: "research" })).toEqual([]);
   });
 });
 
@@ -1573,6 +1962,48 @@ describe("cast declarations the corpus does not currently exercise", () => {
     }
   });
 
+  // A refused cast writes no manifest describing the bundle it declined to finish.
+  //
+  // `_verify.json` was always deferred past the error gate for exactly this reason, and its
+  // comment said so. `_required_tools.json` was not: it reconciled before the gate, so a cast
+  // that then aborted left a fresh tools manifest beside stale provenance. Both are contributed
+  // files now and share one write, after the gate.
+  //
+  // Needs BOTH a resolvable cli-tool ref (so a manifest is owed) and a broken one (so the cast
+  // refuses) — with no tools required the manifest is absent either way and proves nothing.
+  it("writes no tools manifest for a cast it refuses", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-refused-tools-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/cli/real-tool"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        targetYml("cli-tool", "references/cli/", ".md", "[verbatim]"),
+      );
+      writeFileSync(
+        path.join(dir, "reference_contract.yml"),
+        contractYml("cli-tool", { resolve: "note", default_mode: "verbatim", companions: false }),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Refused-cast tools manifest test mold summary.\nreferences:\n  - kind: cli-tool\n    ref: "[[real-tool]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n  - kind: cli-tool\n    ref: "[[does-not-exist]]"\n    used_at: runtime\n    load: upfront\n    mode: verbatim\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+      );
+      writeFileSync(
+        path.join(dir, "content/cli/real-tool/index.md"),
+        `---\ntype: cli-tool\ntool: real-tool\norigin: pypi\ninvoke: real-tool\nsummary: A tool the mold really needs.\ntags: [cli]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody.\n`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      const bundle = path.join(dir, "casts/claude/skills/m");
+      expect(existsSync(path.join(bundle, "_required_tools.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_verify.json"))).toBe(false);
+      expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   // Where a bundle lands is the target's to declare. Cast the same Mold under two different
   // `bundle_path` templates and the bundle moves — the caster, the verifier, the pipeline
   // assembler and the site all answer to this one line.
@@ -1720,11 +2151,15 @@ describe("cast declarations the corpus does not currently exercise", () => {
           `---\ntype: schema\nname: ${name}\ntitle: ${name}\nsummary: A schema note.\ntags: [meta]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\npackage: "@acme/schema-pkg"\n---\n\nBody of ${name}.\n`,
         );
       }
-      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--check", "--root", dir]);
       // The bundled dst of a `resolve: note` schema is the note itself, so Ajv fails to load it
       // — which is incidental. What the assertion pins is WHICH file it reached for.
       expect(r.stderr).toContain("second.md: not loadable as a JSON Schema");
       expect(r.stderr).not.toContain("first.md: not loadable as a JSON Schema");
+      expect(
+        existsSync(path.join(dir, "casts/claude/skills/m/references/schemas/second.md")),
+        "--check stages expected refs without publishing them",
+      ).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -1765,6 +2200,49 @@ describe("cast declarations the corpus does not currently exercise", () => {
         readFileSync(path.join(dir, "casts/claude/skills/m/references/notes/r.json"), "utf8"),
       );
       expect(sidecar.body).toContain("Body of r.");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The vocabulary is the gate, and it closes before the caster runs.
+  //
+  // Renderers are registered per mode, so a mode with nothing behind it is a real failure state
+  // — but not one this instance can reach. We implement every mode the substrate ships, so
+  // membership in the vocabulary already means renderable, and anything else is refused when the
+  // contract loads rather than when a ref reaches the renderer table. Worth pinning: it is the
+  // property that lets the caster's own "no renderer" branch stay defensive.
+  //
+  // The mode below is invented for the test. Naming a real term would tie the assertion to
+  // whichever word the substrate happens to have retired.
+  it("refuses an unimplemented mode at the vocabulary, before any renderer is consulted", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-norenderer-"));
+    try {
+      mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
+      mkdirSync(path.join(dir, "content/research/r"), { recursive: true });
+      mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
+      writeFileSync(
+        path.join(dir, "casts/claude/_target.yml"),
+        targetYml("research", "references/notes/", ".txt", "[paraphrase]"),
+      );
+      writeFileSync(
+        path.join(dir, "reference_contract.yml"),
+        contractYml("research", { resolve: "note", default_mode: "paraphrase", companions: false }),
+      );
+      writeFileSync(
+        path.join(dir, "content/molds/m/index.md"),
+        `---\ntype: mold\nname: m\naxis: generic\ntags: [mold]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\nsummary: Unrendered-mode cast test mold summary.\nreferences:\n  - kind: research\n    ref: "[[r]]"\n    used_at: runtime\n    load: upfront\n    mode: paraphrase\n    evidence: corpus-observed\n---\n\n# m\n\nBody.\n`,
+      );
+      writeFileSync(
+        path.join(dir, "content/research/r/index.md"),
+        `---\ntype: research\ntitle: R\nsummary: A note.\ntags: [research]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\n---\n\nBody of r.\n`,
+      );
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code).not.toBe(0);
+      expect(r.stderr).toContain("not in this instance's `modes` vocabulary");
+      expect(r.stderr).toContain("paraphrase");
+      // The refusal is total: a mode we cannot render must not leave a half-cast bundle behind.
+      expect(existsSync(path.join(dir, "casts/claude/skills/m/_provenance.json"))).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -1885,11 +2363,11 @@ describe("cast declarations: stricter than before, on purpose", () => {
   });
 });
 
-// The premise the condense removal rests on, pinned as a check rather than asserted in a
-// commit message: nothing in this Foundry uses the LLM phase. Every reference is verbatim or
-// sidecar, no bundle carries an LLM-produced fragment, and no provenance entry is waiting for
-// one. If a Mold ever needs condensation, this is the test that has to be deleted first — and
-// deleting it is the decision to build the phase again, made explicitly.
+// Nothing here uses an LLM phase, pinned as a check rather than asserted in a commit message:
+// every reference is a mode the caster renders, no bundle carries an LLM-produced fragment, and
+// no provenance entry is waiting for one. If a Mold ever needs a mode a model produces, these
+// are the tests that have to change first — and changing them is the decision to build that
+// phase, made explicitly.
 // The wire shape, named here rather than imported from the caster: these tests read committed
 // records, so what they must agree with is the JSON on disk, not the type that produced it.
 interface CommittedRefEntry {
@@ -1939,7 +2417,12 @@ describe("casting is deterministic end to end", () => {
     return records;
   }
 
-  it("no Mold declares mode: condense", () => {
+  // Mirrors the modes `GALAXY_HOOKS.renderers` registers. Named here rather than imported
+  // because the caster does not export the table, and this test wants to disagree with it
+  // loudly if a renderer is ever dropped without the corpus following.
+  const RENDERED_MODES = ["verbatim", "sidecar"];
+
+  it("every Mold ref declares a mode the caster renders", () => {
     const offenders: string[] = [];
     let refsScanned = 0;
     let moldsScanned = 0;
@@ -1952,7 +2435,9 @@ describe("casting is deterministic end to end", () => {
       const meta = yaml.load(front[1]!) as { references?: Array<{ mode?: string }> };
       for (const ref of meta.references ?? []) {
         refsScanned += 1;
-        if (ref.mode === "condense") offenders.push(moldDir);
+        if (ref.mode && !RENDERED_MODES.includes(ref.mode)) {
+          offenders.push(`${moldDir}: ${ref.mode}`);
+        }
       }
     }
     expect(moldsScanned).toBeGreaterThanOrEqual(SOME_MOLDS);

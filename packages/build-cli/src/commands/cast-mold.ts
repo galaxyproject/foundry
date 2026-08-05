@@ -8,30 +8,30 @@
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
-import { execSync } from "node:child_process";
 import {
-  copyFileSync,
+  cpSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
-  readdirSync,
-  rmdirSync,
-  unlinkSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import type { ErrorObject } from "ajv";
-import AjvImport from "ajv";
-import Ajv2020Import from "ajv/dist/2020.js";
-import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
 import {
-  bundledPolicy,
-  resolveLicenseRow,
-  type LicensePolicy,
-} from "@galaxy-foundry/license-policy";
+  applyLicensePolicy,
+  copyVerbatim,
+  gitHead,
+  provenanceRecord,
+  readProvenanceCarryOver,
+  PROVENANCE_SCHEMA_VERSION,
+  type ProvenanceCarryOver,
+  type ProvenanceRefEntry,
+} from "@galaxy-foundry/cast";
 
 import {
   loadCastReferenceContract,
@@ -39,44 +39,34 @@ import {
   type ReferenceContractTerm,
 } from "@galaxy-foundry/note-schema";
 
+import type {
+  ProvenanceArtifactInput,
+  ProvenanceArtifactOutput,
+  ProvenanceArtifacts,
+} from "../lib/artifact-contract.js";
+import type { BundleFile, CastHooks, SkillSection, RefRenderers } from "../lib/cast-hooks.js";
 import { payloadCompanionOf } from "../lib/dispositions.js";
+import { errorMessage } from "../lib/errors.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import {
-  driftOf,
   reconcile,
+  reconcileAbsent,
   reconcileText,
+  reconcileTreeTo,
   sha256File,
-  sha256Text,
-  type Drift,
 } from "../lib/reconcile.js";
-import {
-  aggregateRequiredTools,
-  requiredToolRows,
-  type RequiredTool,
-} from "../lib/required-tools.js";
+import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
+import { validateRuns } from "../lib/runs-check.js";
+import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
 import { bundlePathOf, resolveBundlePath } from "../lib/target-layout.js";
 import type { Frontmatter } from "../lib/types.js";
-import { fileSlug, findMdFiles, listFilesUnder } from "../lib/walk.js";
+import { fileSlug } from "../lib/walk.js";
 import {
   parseWikiLink,
   resolveWikiLink,
-  slugify,
   WIKI_LINK_RE,
   WIKI_LINK_SCAN_RE,
 } from "../lib/wiki-links.js";
-
-type AjvValidator = {
-  compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
-};
-const Ajv = AjvImport as unknown as new (opts: {
-  allErrors: boolean;
-  strict: boolean;
-}) => AjvValidator;
-const Ajv2020 = Ajv2020Import as unknown as new (opts: {
-  allErrors: boolean;
-  strict: boolean;
-}) => AjvValidator;
-const addFormats = addFormatsImport as unknown as (ajv: AjvValidator) => unknown;
 
 // ---- argv ----
 
@@ -122,9 +112,18 @@ interface TargetKindConfig {
   modes: string[];
 }
 
+/**
+ * What a `_target.yml` declares.
+ *
+ * Deliberately no `provenance_schema_version`. The record's shape is the CASTER's, not the
+ * target's, so the version travels with the code that emits it — `PROVENANCE_SCHEMA_VERSION`
+ * in @galaxy-foundry/cast. A target that declared its own could name a shape the caster does
+ * not write, and the JSON Schema at scripts/lib/schemas/cast-provenance.schema.json stays the
+ * contract of record: `make check-verify` validates every committed record against it, so the
+ * two are cross-checked rather than merely restated.
+ */
 interface TargetConfig {
   name: string;
-  provenance_schema_version: number;
   /** Where bundles sit under `casts/<target>/`; see lib/target-layout.ts. */
   bundle_path?: string;
   required_outputs: string[];
@@ -141,33 +140,6 @@ function loadTargetConfig(repoRoot: string, target: string): TargetConfig {
   const data = yaml.load(readFileSync(p, "utf8")) as TargetConfig;
   if (!data || typeof data !== "object") throw new Error(`invalid target config: ${p}`);
   return data;
-}
-
-// ---- slug map (shared with validator semantics) ----
-
-function buildSlugMap(repoRoot: string): {
-  slugMap: Map<string, string>;
-  metaByPath: Map<string, Frontmatter>;
-} {
-  const slugMap = new Map<string, string>();
-  const metaByPath = new Map<string, Frontmatter>();
-  const contentRoot = path.join(repoRoot, "content");
-  for (const abs of findMdFiles(contentRoot)) {
-    const parsed = readMarkdown(abs);
-    if (!parsed.hasFrontmatter) continue;
-    const rel = path.relative(repoRoot, abs);
-    const slug = fileSlug(rel);
-    slugMap.set(slugify(slug), rel);
-    metaByPath.set(rel, parsed.meta);
-    if (
-      parsed.meta.type === "cli-command" &&
-      typeof parsed.meta.tool === "string" &&
-      typeof parsed.meta.command === "string"
-    ) {
-      slugMap.set(slugify(`${parsed.meta.tool} ${parsed.meta.command}`), rel);
-    }
-  }
-  return { slugMap, metaByPath };
 }
 
 // ---- ref resolution ----
@@ -188,36 +160,17 @@ interface ResolvedRef {
   package_source?: { spec: string; exportName: string };
   /** Bundle-relative dst of the parent note when this ref is a copied companion file. */
   companion_of?: string;
-  /** License of redistributed third-party content, from the source note's frontmatter. */
+  /** License of the upstream work this ref draws on, from the source note's frontmatter. */
   license?: string;
-  /** Repo-relative LICENSES/ path this ref redistributes under. */
+  /** How an authored note relates to the licensed work it cites. Absent for raw payloads. */
+  derived?: string;
+  /** Repo-relative LICENSES/ path associated with this ref's licensed lineage. */
   license_file?: string;
 }
 
 // Which kinds are castable, what each defaults to, and how each resolves are read from
 // `reference_contract.yml`'s `cast:` blocks rather than decided here — see
 // packages/note-schema/src/cast-contract.ts for why.
-
-/**
- * The message of something thrown, without assuming it was an `Error`.
- *
- * `(e as Error).message` renders `undefined` for a thrown string or object, which turns a
- * reported failure into a line that says nothing.
- */
-function errorMessage(e: unknown): string {
-  return e instanceof Error ? e.message : String(e);
-}
-
-/** Remove directories left empty by pruning, deepest first. Keeps `dir` itself. */
-function pruneEmptyDirs(dir: string): void {
-  if (!existsSync(dir)) return;
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const full = path.join(dir, entry.name);
-    pruneEmptyDirs(full);
-    if (readdirSync(full).length === 0) rmdirSync(full);
-  }
-}
 
 function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
   // 1:1 strict slug mapping: a bundled file is named for the note it came from, never for the
@@ -239,8 +192,8 @@ function resolveMoldRef(
   raw: unknown,
   index: number,
   moldPath: string,
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
   target: TargetConfig,
   castContract: CastContract,
   refKinds: Record<string, ReferenceContractTerm & { ref_shape?: string }>,
@@ -397,6 +350,13 @@ function resolveMoldRef(
       verification: typeof ref.verification === "string" ? ref.verification : undefined,
       package_source: packageSource,
       license: typeof noteMeta?.license === "string" ? noteMeta.license : undefined,
+      // `derived` describes authored prose. A package export or payload companion is upstream
+      // bytes rather than the note that describes them, so absence deliberately keeps those
+      // refs on the policy's pass-through path.
+      derived:
+        castDecl.resolve === "note" && typeof noteMeta?.derived === "string"
+          ? noteMeta.derived
+          : undefined,
       license_file: typeof noteMeta?.license_file === "string" ? noteMeta.license_file : undefined,
     },
   };
@@ -411,7 +371,7 @@ function resolveMoldRef(
 // `companion_of` for provenance.
 function expandCompanions(
   resolved: ResolvedRef[],
-  metaByPath: Map<string, Frontmatter>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
   target: TargetConfig,
   castContract: CastContract,
 ): ResolvedRef[] {
@@ -451,19 +411,6 @@ function expandCompanions(
 }
 
 // ---- file ops ----
-
-function gitHead(repoRoot: string): string | null {
-  try {
-    return execSync("git rev-parse HEAD", { cwd: repoRoot, encoding: "utf8" }).trim();
-  } catch {
-    return null;
-  }
-}
-
-function copyVerbatim(srcAbs: string, dstAbs: string): void {
-  mkdirSync(path.dirname(dstAbs), { recursive: true });
-  copyFileSync(srcAbs, dstAbs);
-}
 
 interface CliSidecar {
   type: "cli-command";
@@ -552,122 +499,146 @@ async function buildCliSidecar(
   return sidecar;
 }
 
-// ---- runs/*/summary.json schema validation ----
-
-function loadAjvForSchema(schemaPath: string): ReturnType<AjvValidator["compile"]> {
-  // Named, because the bare SyntaxError from JSON.parse says only that something somewhere was
-  // not JSON — and the file it means is one the caster picked, not one the author pointed at.
-  let schema: unknown;
-  try {
-    schema = JSON.parse(readFileSync(schemaPath, "utf8"));
-  } catch (e) {
-    throw new Error(`${schemaPath}: not loadable as a JSON Schema: ${errorMessage(e)}`, {
-      cause: e,
-    });
-  }
-  const schemaUri =
-    schema &&
-    typeof schema === "object" &&
-    typeof (schema as { $schema?: unknown }).$schema === "string"
-      ? (schema as { $schema: string }).$schema
-      : "";
-  const ajv = schemaUri.includes("2020-12")
-    ? new Ajv2020({ allErrors: true, strict: false })
-    : new Ajv({ allErrors: true, strict: false });
-  addFormats(ajv);
-  return ajv.compile(schema);
-}
-
-function validateRuns(bundleRoot: string, schemaAbs: string): string[] {
-  const errors: string[] = [];
-  const runsDir = path.join(bundleRoot, "runs");
-  if (!existsSync(runsDir)) return errors;
-  const validate = loadAjvForSchema(schemaAbs);
-  for (const entry of readdirSync(runsDir)) {
-    const summaryPath = path.join(runsDir, entry, "summary.json");
-    if (!existsSync(summaryPath)) continue;
-    const data = JSON.parse(readFileSync(summaryPath, "utf8"));
-    if (!validate(data)) {
-      const messages = (validate.errors ?? []).map(
-        (e) => `    ${e.instancePath || "(root)"}: ${e.message}`,
+/**
+ * What this instance attaches to the caster.
+ *
+ * `sidecar` renders a planemo command description: the note's body plus, when the note names a
+ * `package`, the argument and option metadata that package publishes. Nothing about that is
+ * general — it is this repo's knowledge of how Galaxy's CLI tooling describes itself, which is
+ * exactly why it is registered here rather than living inside the dispatch.
+ */
+const GALAXY_HOOKS: CastHooks = {
+  renderers: {
+    sidecar: async ({ srcAbs, srcRel, meta }) =>
+      JSON.stringify(await buildCliSidecar(srcAbs, srcRel, meta), null, 2) + "\n",
+  },
+  bundleFiles: [
+    // Which Galaxy tools a skill needs installed before it can run.
+    ({ refs, metaByPath, slugMap }) => {
+      const tools = aggregateRequiredTools([...refs], metaByPath, slugMap);
+      return [
+        {
+          path: "_required_tools.json",
+          content: tools.length ? JSON.stringify(tools, null, 2) + "\n" : null,
+          absentReason: "stale manifest (no tools required)",
+        },
+      ];
+    },
+    // How to check an artifact this skill produced — which validator, invoked how.
+    ({ meta, metaByPath, slugMap }) => [
+      {
+        path: "_verify.json",
+        content:
+          JSON.stringify(
+            buildVerifyManifest(meta, producerIndexFor(metaByPath), slugMap, metaByPath),
+            null,
+            2,
+          ) + "\n",
+      },
+    ],
+  ],
+  skillLede:
+    "Follow the procedure below and use the artifact/reference sections as the runtime contract.",
+  skillSections: ({ moldName, meta, body, refs, metaByPath, slugMap }) => {
+    const summary = skillSummary(meta, moldName);
+    const artifacts = readArtifactContracts(meta, producerIndexFor(metaByPath));
+    const produces = artifacts?.produces ?? [];
+    const runtime = refs.filter((r) => r.used_at !== "cast-time");
+    const describe = { kindLabel: refKindLabel, modePhrase: refModePhrase };
+    const procedure = runtimeProcedureBody(body, moldName);
+    return [
+      bulletSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
+      bulletSection(
+        "Inputs",
+        artifactRows(artifacts?.consumes ?? [], "input"),
+        "- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.",
+      ),
+      bulletSection("Outputs", artifactRows(produces, "output")),
+      bulletSection(
+        "Required Tools",
+        requiredToolRows(aggregateRequiredTools([...refs], metaByPath, slugMap)),
+        "- None declared. Procedure should not assume external CLIs are present.",
+      ),
+      bulletSection(
+        "Load Upfront",
+        refRows(
+          runtime.filter((r) => r.load === "upfront"),
+          describe,
+        ),
+      ),
+      bulletSection(
+        "Load On Demand",
+        refRows(
+          runtime.filter((r) => r.load === "on-demand"),
+          describe,
+        ),
+      ),
+      bulletSection("Validation", schemaValidationRows(produces, slugMap, metaByPath)),
+      { title: "Procedure", body: procedure || "No Mold body supplied." },
+      // Contributed whole rather than appended to a generic closing note. Two of the three
+      // bullets name artifacts, and an instance that inherited the third would be unable to
+      // reword or reorder around its own.
+      bulletSection("Runtime Notes", [
+        "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
+        "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
+        "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
+      ]),
+    ];
+  },
+  slugAliases: GALAXY_SLUG_ALIASES,
+  bundleChecks: [
+    // Harvested sample runs, against the schema this Mold declares for its OWN output. Not
+    // against whichever schema ref happens to come first: a Mold's runs contain what that Mold
+    // produces, and only `output_artifacts[].schema` states which schema that is.
+    ({ meta, refs, metaByPath, bundleRoot }) => {
+      const declared = new Set(
+        (readArtifactContracts(meta, producerIndexFor(metaByPath))?.produces ?? [])
+          .map((o) => o.schema)
+          .filter((s): s is string => !!s),
       );
-      errors.push(`runs/${entry}/summary.json:\n${messages.join("\n")}`);
-    }
+      const schemaRef = refs.find((r) => r.kind === "schema" && declared.has(r.ref));
+      if (!schemaRef) return [];
+      const schemaAbs = path.join(bundleRoot, schemaRef.dst);
+      return existsSync(schemaAbs) ? validateRuns(bundleRoot, schemaAbs) : [];
+    },
+  ],
+};
+
+/**
+ * Compare every contributed file against the bundle, and bring it into line unless checking.
+ *
+ * Run twice per cast: once to report, before the error gate, and once to write, after it. The
+ * second call's findings are discarded because the first already reported them. Splitting it
+ * that way is what keeps a refused cast from leaving files behind — a cast that reports an
+ * unresolved ref and exits must not have already written a manifest describing the bundle it
+ * declined to finish.
+ */
+function reconcileBundleFiles(
+  files: readonly BundleFile[],
+  bundleRoot: string,
+  check: boolean,
+): Array<{ file: string; reason: string }> {
+  const found: Array<{ file: string; reason: string }> = [];
+  for (const file of files) {
+    const abs = path.join(bundleRoot, file.path);
+    const outcome =
+      file.content === null
+        ? reconcileAbsent({
+            path: abs,
+            reason: file.absentReason ?? "stale (nothing declares it)",
+            check,
+          })
+        : reconcileText({ path: abs, expected: file.content, label: file.path, check });
+    if (outcome.reason) found.push({ file: file.path, reason: outcome.reason });
   }
-  return errors;
+  return found;
 }
 
 // ---- provenance ----
-
-interface ProvenanceRefEntry {
-  kind: string;
-  mode: string;
-  ref: string;
-  src: string;
-  dst: string;
-  used_at: string;
-  load: string;
-  evidence?: string;
-  purpose?: string;
-  trigger?: string;
-  verification?: string;
-  src_hash: string | null;
-  dst_hash: string | null;
-  /**
-   * Always `deterministic`. Kept as a recorded field rather than dropped: it is the claim the
-   * provenance makes about how the bytes were produced, and a reader should not have to infer
-   * it from the absence of anything else.
-   */
-  source: "deterministic";
-  companion_of?: string;
-  // License lineage of redistributed third-party content (foundry-pattern#4).
-  // Absent for Foundry-authored refs (root LICENSE, out of policy scope).
-  license?: string;
-  license_file?: string;
-  license_file_hash?: string;
-}
-
-interface ProvenanceArtifactOutput {
-  id: string;
-  kind: string;
-  default_filename: string;
-  schema?: string;
-  description: string;
-}
-
-interface ProvenanceArtifactInput {
-  id: string;
-  description: string;
-  inherited_schema?: string;
-  producers?: string[];
-}
-
-interface ProvenanceArtifacts {
-  produces: ProvenanceArtifactOutput[];
-  consumes: ProvenanceArtifactInput[];
-}
-
-interface Provenance {
-  provenance_schema_version: number;
-  cast_target: string;
-  mold: {
-    name: string;
-    path: string;
-    revision?: number;
-    content_hash: string;
-    commit: string | null;
-  };
-  cast_method?: string;
-  cast_agent?: string;
-  cast_at: string;
-  cast_date?: string;
-  cast_revision?: number;
-  cast_history?: Array<{ rev: number; date: string; note: string }>;
-  refs: ProvenanceRefEntry[];
-  artifacts?: ProvenanceArtifacts;
-  validation_results?: ValidationResult[];
-  open_questions?: string[];
-}
+//
+// The record's shape ships in @galaxy-foundry/cast. What stays here is what this Foundry puts
+// IN it: which artifacts a Mold declares, which producer feeds which input, and what its
+// validators reported.
 
 interface ProducerInfo {
   schema?: string;
@@ -692,22 +663,29 @@ export interface VerifyManifest {
   entries: VerifyManifestEntry[];
 }
 
-interface ValidationResult {
-  artifact_id: string;
-  path: string;
-  status: "passed" | "failed" | "error";
-  validator_bin: string;
-  artifact_hash?: string;
-  stdout: string;
-  stderr: string;
-  stdout_hash?: string;
-  stderr_hash?: string;
-  exit_code?: number | null;
-  error?: string;
+const producerIndexCache = new WeakMap<
+  ReadonlyMap<string, Frontmatter>,
+  Map<string, ProducerInfo>
+>();
+
+/**
+ * The producer index for a corpus, built once per corpus.
+ *
+ * Three contributors want it — the verify manifest, the artifact contracts, the runs check — and
+ * each would otherwise walk every note again. Keyed on the map itself rather than memoized into
+ * a module variable, so a test casting against two fixture corpora in one process gets the index
+ * for the corpus it asked about.
+ */
+function producerIndexFor(metaByPath: ReadonlyMap<string, Frontmatter>): Map<string, ProducerInfo> {
+  const cached = producerIndexCache.get(metaByPath);
+  if (cached) return cached;
+  const built = buildProducerIndex(metaByPath);
+  producerIndexCache.set(metaByPath, built);
+  return built;
 }
 
 export function buildProducerIndex(
-  metaByPath: Map<string, Frontmatter>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): Map<string, ProducerInfo> {
   const idx = new Map<string, ProducerInfo>();
   for (const [rel, meta] of metaByPath) {
@@ -749,8 +727,8 @@ interface ValidatorInvocation {
 
 function schemaValidatorInvocation(
   schemaRef: string,
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): ValidatorInvocation | undefined {
   const target = resolveWikiLink(schemaRef, slugMap);
   if (!target) return undefined;
@@ -765,8 +743,8 @@ function schemaValidatorInvocation(
 export function buildVerifyManifest(
   meta: Frontmatter,
   producerIndex: Map<string, ProducerInfo>,
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): VerifyManifest {
   const entries: VerifyManifestEntry[] = [];
   const rawOut = meta.output_artifacts;
@@ -857,55 +835,54 @@ export function readArtifactContracts(
   return { produces: out, consumes: inp };
 }
 
-interface LegacyProvenanceCarryOver {
-  cast_method?: string;
-  cast_agent?: string;
-  cast_date?: string;
-  cast_revision?: number;
-  cast_history?: Array<{ rev: number; date: string; note: string }>;
-  open_questions?: string[];
-  validation_results?: ValidationResult[];
+/** The hand-recorded fields of the record already on disk, or nothing on a first cast. */
+function readExistingProvenance(provenancePath: string): ProvenanceCarryOver {
+  return readProvenanceCarryOver(
+    existsSync(provenancePath) ? readFileSync(provenancePath, "utf8") : null,
+  );
 }
 
-function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOver {
-  if (!existsSync(provenancePath)) return {};
-  const data = JSON.parse(readFileSync(provenancePath, "utf8")) as Record<string, unknown>;
-  const carry: LegacyProvenanceCarryOver = {
-    cast_method: typeof data.cast_method === "string" ? data.cast_method : undefined,
-    cast_agent: typeof data.cast_agent === "string" ? data.cast_agent : undefined,
-    cast_date: typeof data.cast_date === "string" ? data.cast_date : undefined,
-    cast_revision: typeof data.cast_revision === "number" ? data.cast_revision : undefined,
-    cast_history: Array.isArray(data.cast_history)
-      ? (data.cast_history as Array<{ rev: number; date: string; note: string }>)
-      : undefined,
-    open_questions: Array.isArray(data.open_questions)
-      ? (data.open_questions as string[])
-      : undefined,
-    validation_results: Array.isArray(data.validation_results)
-      ? (data.validation_results as ValidationResult[])
-      : undefined,
-  };
-  return carry;
+/**
+ * A record with the two fields that move on every cast held fixed, or null if it will not parse.
+ *
+ * `cast_at` is the clock and `mold.commit` is wherever HEAD happens to be. Comparing raw bytes
+ * would report drift on every check of a bundle nothing changed, which is why the record was
+ * never compared at all — and why it became the one file in a bundle whose drift a `--check`
+ * could not see. These are the same two fields a regenerate has always been expected to move.
+ *
+ * Key order survives normalizing: `JSON.parse` preserves it and reassigning an existing key does
+ * not move it, so a record whose fields were reshuffled still compares unequal here. That is the
+ * case worth catching — every value stays correct while every committed record rewrites.
+ */
+function comparableProvenance(text: string): string | null {
+  let doc: { cast_at?: unknown; mold?: { commit?: unknown } | null };
+  try {
+    doc = JSON.parse(text) as typeof doc;
+  } catch {
+    return null;
+  }
+  if (typeof doc !== "object" || doc === null) return null;
+  doc.cast_at = "";
+  if (typeof doc.mold === "object" && doc.mold !== null) doc.mold.commit = "";
+  return JSON.stringify(doc);
 }
 
 // ---- cast assembly ----
 
 /**
- * What provenance records for a ref's destination.
+ * Place one ref's bytes and report what it took.
  *
- * A `--check` run writes nothing, so a drifted ref keeps the hash that was actually on disk —
- * the record reports what the check FOUND, not what it wanted. Every other path has just put
- * the expected bytes there, or found them already there, so the expected hash is the truth.
+ * There is no check mode in here. Assembly always writes, because it writes into a staged copy
+ * of the bundle that a `--check` run simply never publishes — check-ness is one decision, made
+ * once, after every ref has had its say. That is also why `dst_hash` is the expected hash rather
+ * than `recordedHash`'s answer: the staged file was brought into line by definition, so the two
+ * cases that function distinguishes cannot both arise here.
  */
-function recordedHash(drift: Drift, check: boolean): string | null {
-  return drift.reason && check ? drift.currentHash : drift.expectedHash;
-}
-
 async function castOneRef(
   resolved: ResolvedRef,
   repoRoot: string,
   bundleRoot: string,
-  check: boolean,
+  renderers: RefRenderers,
 ): Promise<{ entry: ProvenanceRefEntry; drift?: string; error?: string }> {
   const dstAbs = path.join(bundleRoot, resolved.dst);
 
@@ -946,13 +923,13 @@ async function castOneRef(
       path: dstAbs,
       expected: json,
       label: "package schema",
-      check,
+      check: false,
     });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: drift.expectedHash,
-        dst_hash: recordedHash(drift, check),
+        dst_hash: drift.expectedHash,
         source: "deterministic",
       },
       drift: drift.reason,
@@ -975,42 +952,55 @@ async function castOneRef(
       path: dstAbs,
       expectedHash: srcHash,
       label: "dst",
-      check,
+      check: false,
       write: () => copyVerbatim(srcAbs, dstAbs),
     });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: srcHash,
-        dst_hash: recordedHash(drift, check),
+        dst_hash: drift.expectedHash,
         source: "deterministic",
       },
       drift: drift.reason,
     };
   }
 
-  // Dispatched on the mode alone. Which kinds may take `sidecar` is already declared — the
-  // target's `kinds.<kind>.modes` gates it above, and no kind but `cli-command` lists it today —
-  // so naming the kind again here was a second gate that could only ever disagree with the first.
-  if (resolved.mode === "sidecar") {
+  // Dispatched on the mode alone. Which kinds may take a given mode is already declared — the
+  // target's `kinds.<kind>.modes` gates it above — so naming the kind again here would be a
+  // second gate that could only ever disagree with the first.
+  //
+  // Which RENDERER a mode selects is a separate question, and the instance answers it. The mode
+  // is shared vocabulary; the bytes it produces are not.
+  const renderer = renderers[resolved.mode];
+  if (renderer) {
     const parsed = readMarkdown(srcAbs);
-    const sidecar = await buildCliSidecar(srcAbs, resolved.src, parsed.meta);
-    const text = JSON.stringify(sidecar, null, 2) + "\n";
-    const drift = reconcileText({ path: dstAbs, expected: text, label: "sidecar", check });
+    const text = await renderer({ srcAbs, srcRel: resolved.src, meta: parsed.meta });
+    const drift = reconcileText({
+      path: dstAbs,
+      expected: text,
+      label: resolved.mode,
+      check: false,
+    });
     return {
       entry: {
         ...skeleton(resolved),
         src_hash: srcHash,
-        dst_hash: recordedHash(drift, check),
+        dst_hash: drift.expectedHash,
         source: "deterministic",
       },
       drift: drift.reason,
     };
   }
 
+  // Unreachable from this instance, and kept anyway. Our `modes` vocabulary is narrowed to
+  // exactly the modes we implement, so an unimplemented one is refused when the contract loads.
+  // That is a fact about this instance's vocabulary, not a guarantee of the caster: widen the
+  // vocabulary without registering a renderer and this is the failure. Says which of the two
+  // disagreed, because "kind does not support mode" is a Mold to fix and this is a hook to write.
   return {
     entry: { ...skeleton(resolved), src_hash: srcHash, dst_hash: null, source: "deterministic" },
-    error: `unsupported (kind=${resolved.kind}, mode=${resolved.mode})`,
+    error: `no renderer for mode=${resolved.mode} (kind=${resolved.kind}) — the target admits this mode but nothing implements it`,
   };
 }
 
@@ -1029,44 +1019,15 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
     verification: r.verification,
     companion_of: r.companion_of,
     license: r.license,
+    derived: r.derived,
     license_file: r.license_file,
   };
 }
 
-// Enforce the license → redistribution-policy table (foundry-pattern#4) over the
-// assembled refs, and stamp each redistributed ref's license_file content hash
-// into provenance. Refs with no `license` are Foundry-authored (root LICENSE) and
-// out of policy scope. The transform-mode check is the enforcement hook: an
-// own-words-only license may not be carried verbatim/sidecar. The license_file
-// *presence* rules live in the validator, where `upstream` scoping distinguishes
-// Foundry-authored license annotations from genuine third-party redistribution.
-// Returns error strings for any policy violation.
-// `repoRoot` is still needed: the table says what a licence permits, but `license_file`
-// points into the tree being cast, and only that tree can be hashed.
-function applyLicensePolicy(entries: ProvenanceRefEntry[], repoRoot: string): string[] {
-  // Parse the shipped table only when a ref actually redistributes licensed content.
-  if (!entries.some((e) => e.license)) return [];
-  const policy: LicensePolicy = bundledPolicy();
-  const errors: string[] = [];
-  for (const e of entries) {
-    if (!e.license) continue;
-    const row = resolveLicenseRow(policy, e.license);
-    if (!row.allowed_modes.includes(e.mode as (typeof row.allowed_modes)[number])) {
-      errors.push(
-        `${e.src}: license ${e.license} (${row.policy}) forbids mode=${e.mode} (allowed: ${row.allowed_modes.join(", ")})`,
-      );
-    }
-    if (e.license_file) {
-      const abs = path.join(repoRoot, e.license_file);
-      if (existsSync(abs)) {
-        e.license_file_hash = sha256File(abs);
-      } else {
-        errors.push(`${e.src}: license_file missing: ${e.license_file}`);
-      }
-    }
-  }
-  return errors;
-}
+// The license → redistribution-policy check ships in @galaxy-foundry/cast. What stays this
+// Foundry's is the license_file PRESENCE rule — which notes must declare one at all — because
+// only the validator's `upstream` scoping can tell a Foundry-authored license annotation from
+// genuine third-party redistribution.
 
 // ---- deterministic SKILL.md assembly ----
 
@@ -1125,6 +1086,14 @@ function triggerSentence(text: string): string {
   return cleaned ? `Use when: ${lowerFirst(cleaned)}.` : "";
 }
 
+/**
+ * How this instance's kinds read in prose.
+ *
+ * Every name here is Galaxy's — a Foundry of research notes has no schemas and no CLI tools, and
+ * would answer this question with its own nouns. Passed to `refRows` rather than consulted
+ * inside it for the same reason a renderer is passed to the dispatch: the shape of a reference
+ * row is general, the vocabulary in it is not.
+ */
 function refKindLabel(ref: ProvenanceRefEntry): string {
   if (ref.companion_of) return "Companion file";
   if (ref.kind === "schema") return "Schema file";
@@ -1133,6 +1102,11 @@ function refKindLabel(ref: ProvenanceRefEntry): string {
   if (ref.kind === "cli-tool") return "CLI tool reference";
   if (ref.kind === "cli-command") return "CLI command reference";
   return `${ref.kind} reference`;
+}
+
+/** How this instance's modes read in prose. Same reasoning as `refKindLabel`. */
+function refModePhrase(ref: ProvenanceRefEntry): string {
+  return ref.mode === "sidecar" ? "packaged as a sidecar" : "copied verbatim into the bundle";
 }
 
 function artifactRows(
@@ -1156,11 +1130,22 @@ function artifactRows(
   });
 }
 
-function refRows(refs: ProvenanceRefEntry[]): string[] {
+/**
+ * One line per reference: where it landed, what it is, and when to read it.
+ *
+ * The row's shape is casting's; the nouns in it are the instance's, which is why `describe`
+ * is an argument. A second Foundry gets the same layout under its own vocabulary instead of
+ * re-deriving how a reference should read.
+ */
+function refRows(
+  refs: readonly ProvenanceRefEntry[],
+  describe: {
+    kindLabel: (ref: ProvenanceRefEntry) => string;
+    modePhrase: (ref: ProvenanceRefEntry) => string;
+  },
+): string[] {
   return refs.map((r) => {
-    const packaging =
-      r.mode === "sidecar" ? "packaged as a sidecar" : "copied verbatim into the bundle";
-    const details = [`- \`${r.dst}\`: ${refKindLabel(r)} ${packaging}.`];
+    const details = [`- \`${r.dst}\`: ${describe.kindLabel(r)} ${describe.modePhrase(r)}.`];
     if (r.companion_of) {
       // The parent note row already carries purpose/trigger; just point to it.
       details.push(`Sibling of \`${r.companion_of}\`; read it where that note directs.`);
@@ -1174,8 +1159,8 @@ function refRows(refs: ProvenanceRefEntry[]): string[] {
 
 function schemaValidationRows(
   outputs: ProvenanceArtifactOutput[],
-  slugMap: Map<string, string>,
-  metaByPath: Map<string, Frontmatter>,
+  slugMap: ReadonlyMap<string, string>,
+  metaByPath: ReadonlyMap<string, Frontmatter>,
 ): string[] {
   const rows: string[] = [];
   for (const output of outputs) {
@@ -1203,29 +1188,40 @@ function schemaValidationRows(
   return rows;
 }
 
-function renderSection(title: string, lines: string[], empty = "- None declared."): string {
-  return [`## ${title}`, "", ...(lines.length ? lines : [empty]), ""].join("\n");
+/**
+ * A section whose content is a list, with something to say when the list is empty.
+ *
+ * The empty case is not omission: a skill that declares no required tools has said something,
+ * and a reader who finds no heading cannot tell that from a caster that forgot to ask.
+ */
+export function bulletSection(
+  title: string,
+  lines: string[],
+  empty = "- None declared.",
+): SkillSection {
+  return { title, body: (lines.length ? lines : [empty]).join("\n") };
 }
 
-function renderSkillMarkdown(args: {
+/** The skill's one-line description, falling back to naming the Mold when none was written. */
+function skillSummary(meta: Frontmatter, moldName: string): string {
+  return scalar(meta.summary) ?? `Run the ${moldName} Mold.`;
+}
+
+/**
+ * The skill document: frontmatter, title, lede, then the sections the instance contributed.
+ *
+ * What stays here is only what holds for any Foundry — the frontmatter a harness reads to find
+ * the skill, and the `## Title` convention. Which sections exist and what they say came from
+ * `skillSections`, because a document's contents are a fact about the corpus it describes.
+ */
+export function renderSkillMarkdown(args: {
   moldName: string;
   meta: Frontmatter;
-  body: string;
-  refs: ProvenanceRefEntry[];
-  artifacts?: ProvenanceArtifacts;
-  slugMap: Map<string, string>;
-  metaByPath: Map<string, Frontmatter>;
-  requiredTools: RequiredTool[];
+  lede: string;
+  sections: readonly SkillSection[];
 }): string {
-  const summary = scalar(args.meta.summary) ?? `Run the ${args.moldName} Mold.`;
-  const consumes = args.artifacts?.consumes ?? [];
-  const produces = args.artifacts?.produces ?? [];
-  const upfront = args.refs.filter((r) => r.load === "upfront" && r.used_at !== "cast-time");
-  const onDemand = args.refs.filter((r) => r.load === "on-demand" && r.used_at !== "cast-time");
-  const validationRows = schemaValidationRows(produces, args.slugMap, args.metaByPath);
-  const toolRows = requiredToolRows(args.requiredTools);
-  const body = runtimeProcedureBody(args.body, args.moldName);
-  const lines = [
+  const summary = skillSummary(args.meta, args.moldName);
+  return [
     "---",
     `name: ${args.moldName}`,
     `description: "${escapeFrontmatterString(stripWikiLinks(summary))}"`,
@@ -1233,35 +1229,10 @@ function renderSkillMarkdown(args: {
     "",
     `# ${args.moldName}`,
     "",
-    "Follow the procedure below and use the artifact/reference sections as the runtime contract.",
+    args.lede,
     "",
-    renderSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
-    renderSection(
-      "Inputs",
-      artifactRows(consumes, "input"),
-      "- No upstream artifact inputs declared. See the procedure for user-supplied runtime inputs.",
-    ),
-    renderSection("Outputs", artifactRows(produces, "output")),
-    renderSection(
-      "Required Tools",
-      toolRows,
-      "- None declared. Procedure should not assume external CLIs are present.",
-    ),
-    renderSection("Load Upfront", refRows(upfront)),
-    renderSection("Load On Demand", refRows(onDemand)),
-    renderSection("Validation", validationRows),
-    "## Procedure",
-    "",
-    body || "No Mold body supplied.",
-    "",
-    "## Runtime Notes",
-    "",
-    "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
-    "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
-    "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
-    "",
-  ];
-  return lines.join("\n");
+    ...args.sections.map((s) => [`## ${s.title}`, "", s.body, ""].join("\n")),
+  ].join("\n");
 }
 
 // ---- main ----
@@ -1295,13 +1266,11 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       args.moldName,
     ),
   );
-  // --check is read-only: never materialize the bundle dir for a never-cast Mold.
-  if (!args.check) mkdirSync(bundleRoot, { recursive: true });
   const provenancePath = path.join(bundleRoot, "_provenance.json");
   const carry = readExistingProvenance(provenancePath);
 
-  const { slugMap, metaByPath } = buildSlugMap(repoRoot);
-  const producerIndex = buildProducerIndex(metaByPath);
+  const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_HOOKS.slugAliases);
+  const producerIndex = producerIndexFor(metaByPath);
 
   const rawRefs = Array.isArray(moldParsed.meta.references)
     ? (moldParsed.meta.references as unknown[])
@@ -1359,175 +1328,245 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     return companion !== 0 ? companion : a.dst.localeCompare(b.dst);
   });
 
-  const refEntries: ProvenanceRefEntry[] = [];
-  const drift: Array<{ file: string; reason: string }> = [];
+  // Assemble against a private copy of the current bundle. Every reconciliation therefore
+  // reports the same drift it would find on the real tree while leaving the checkout untouched,
+  // and hooks inspect the complete expected bundle — new refs, contributed files and provenance
+  // together. Only a cast that clears every error publishes the owned files below.
+  const stageDir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-stage-"));
+  const stagedBundleRoot = path.join(stageDir, "bundle");
+  if (existsSync(bundleRoot)) cpSync(bundleRoot, stagedBundleRoot, { recursive: true });
+  else mkdirSync(stagedBundleRoot, { recursive: true });
 
-  for (const r of resolved) {
-    const result = await castOneRef(r, repoRoot, bundleRoot, args.check);
-    refEntries.push(result.entry);
-    if (result.error) errors.push(result.error);
-    if (result.drift) drift.push({ file: r.src, reason: result.drift });
-  }
+  try {
+    const refEntries: ProvenanceRefEntry[] = [];
+    const drift: Array<{ file: string; reason: string }> = [];
 
-  // License → redistribution-policy enforcement + license_file hashing.
-  errors.push(...applyLicensePolicy(refEntries, repoRoot));
+    // Every bundle-relative path this cast writes into the staged bundle, recorded beside the
+    // write that produces it. Publishing copies exactly this set, so the two halves cannot
+    // disagree about what a cast produces: a new kind of output is added here, at the write,
+    // rather than here AND again in a publish block that re-derives its own list.
+    const staged = new Set<string>();
 
-  const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
-  const requiredTools = aggregateRequiredTools(refEntries, metaByPath, slugMap);
-  const skillText = renderSkillMarkdown({
-    moldName: args.moldName,
-    meta: moldParsed.meta,
-    body: moldParsed.body,
-    refs: refEntries,
-    artifacts: artifactContracts,
-    slugMap,
-    metaByPath,
-    requiredTools,
-  });
-  const skillDrift = reconcileText({
-    path: path.join(bundleRoot, "SKILL.md"),
-    expected: skillText,
-    label: "SKILL.md",
-    check: args.check,
-  });
-  if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
-
-  // Reconcile `references/` to ABSENT for anything provenance no longer lists.
-  //
-  // Casting writes each ref and never looked at what was already there, so a file that stops
-  // being a ref stayed in the bundle forever. Undeclaring one companion was enough to prove it:
-  // provenance dropped `galaxy-collection-semantics.upstream.myst`, SKILL.md stopped naming it,
-  // and the file sat in nine bundles regardless — invisible to every check, and still the first
-  // thing an agent listing the directory would find.
-  //
-  // Same failure as the stale `_required_tools.json` below, and the same fix: the bundle holds
-  // what the manifest says and nothing else. Scoped to `references/` because that subtree is the
-  // only part of a bundle casting owns — `runs/` is harvested output and is not ours to delete.
-  const referencesRoot = path.join(bundleRoot, "references");
-  const declared = new Set(refEntries.map((entry) => entry.dst));
-  for (const rel of listFilesUnder(referencesRoot, bundleRoot)) {
-    if (declared.has(rel)) continue;
-    if (args.check) {
-      drift.push({ file: rel, reason: "orphan (no ref claims it)" });
-    } else {
-      unlinkSync(path.join(bundleRoot, rel));
+    for (const r of resolved) {
+      const result = await castOneRef(r, repoRoot, stagedBundleRoot, GALAXY_HOOKS.renderers);
+      refEntries.push(result.entry);
+      staged.add(result.entry.dst);
+      if (result.error) errors.push(result.error);
+      if (result.drift) drift.push({ file: r.src, reason: result.drift });
     }
-  }
-  if (!args.check) pruneEmptyDirs(referencesRoot);
 
-  // Emit/reconcile _required_tools.json manifest at bundle root.
-  const requiredToolsPath = path.join(bundleRoot, "_required_tools.json");
-  if (requiredTools.length === 0) {
-    // Reconciling to ABSENT — the one desired state `reconcile` cannot express, since there is
-    // no expected content to hash. A mold that stops requiring tools must not leave the old
-    // manifest behind claiming it still does.
-    if (existsSync(requiredToolsPath)) {
-      if (args.check) {
-        drift.push({ file: "_required_tools.json", reason: "stale manifest (no tools required)" });
-      } else {
-        unlinkSync(requiredToolsPath);
-      }
-    }
-  } else {
-    const manifestDrift = reconcileText({
-      path: requiredToolsPath,
-      expected: JSON.stringify(requiredTools, null, 2) + "\n",
-      label: "_required_tools.json",
-      check: args.check,
+    // License → redistribution-policy enforcement + license_file hashing.
+    errors.push(...applyLicensePolicy(refEntries, repoRoot));
+
+    const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
+    const skillText = renderSkillMarkdown({
+      moldName: args.moldName,
+      meta: moldParsed.meta,
+      lede: GALAXY_HOOKS.skillLede,
+      sections: GALAXY_HOOKS.skillSections({
+        moldName: args.moldName,
+        meta: moldParsed.meta,
+        body: moldParsed.body,
+        refs: refEntries,
+        metaByPath,
+        slugMap,
+      }),
     });
-    if (manifestDrift.reason) {
-      drift.push({ file: "_required_tools.json", reason: manifestDrift.reason });
+    const skillDrift = reconcileText({
+      path: path.join(stagedBundleRoot, "SKILL.md"),
+      expected: skillText,
+      label: "SKILL.md",
+      check: false,
+    });
+    if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
+    staged.add("SKILL.md");
+
+    // Reduce `references/` to exactly what provenance lists.
+    //
+    // Casting writes each ref and never looked at what was already there, so a file that stops
+    // being a ref stayed in the bundle forever. Undeclaring one companion was enough to prove it:
+    // provenance dropped `galaxy-collection-semantics.upstream.myst`, SKILL.md stopped naming it,
+    // and the file sat in nine bundles regardless — invisible to every check, and still the first
+    // thing an agent listing the directory would find.
+    //
+    // Scoped to `references/` because that subtree is the only part of a bundle casting owns —
+    // `runs/` is harvested output and is not ours to delete.
+    const declaredRefs = new Set(refEntries.map((entry) => entry.dst));
+    drift.push(
+      ...reconcileTreeTo({
+        root: path.join(stagedBundleRoot, "references"),
+        declared: declaredRefs,
+        relativeTo: stagedBundleRoot,
+        reason: () => "orphan (no ref claims it)",
+        check: false,
+      }),
+    );
+
+    // Bundle-root files this instance contributes are reconciled into the staged bundle before
+    // checks run. A checker therefore sees the bytes this cast proposes, never a stale manifest
+    // copied from the previous cast.
+    const contributed = GALAXY_HOOKS.bundleFiles.flatMap((contribute) =>
+      contribute({
+        moldName: args.moldName,
+        meta: moldParsed.meta,
+        refs: refEntries,
+        metaByPath,
+        slugMap,
+      }),
+    );
+    drift.push(...reconcileBundleFiles(contributed, stagedBundleRoot, false));
+    for (const file of contributed) if (file.content !== null) staged.add(file.path);
+
+    // A `--note` opens a new cast revision. Decided before the record is assembled rather than
+    // assigned onto it after, so the numbering does not depend on where a later assignment
+    // would leave a key.
+    const history = carry.cast_history ?? [];
+    const revised = args.note
+      ? (() => {
+          const rev = history.reduce((m, h) => Math.max(m, h.rev), 0) + 1;
+          const today = new Date().toISOString().slice(0, 10);
+          return {
+            cast_date: today,
+            cast_revision: rev,
+            cast_history: [...history, { rev, date: today, note: args.note }],
+          };
+        })()
+      : {
+          cast_date: carry.cast_date,
+          cast_revision: carry.cast_revision,
+          cast_history: carry.cast_history,
+        };
+
+    // `artifacts` is this Foundry's, not casting's — the package reserves the slot between
+    // `refs` and `validation_results` and takes whatever fills it. A Mold that declares no
+    // handoff passes `undefined` and the key is simply absent, which is what a Foundry with no
+    // artifacts at all gets for free.
+    const next = provenanceRecord<{ artifacts?: ProvenanceArtifacts }>({
+      head: {
+        provenance_schema_version: PROVENANCE_SCHEMA_VERSION,
+        cast_target: args.target,
+        mold: {
+          name: args.moldName,
+          path: moldRel,
+          revision:
+            typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
+          content_hash: moldHash,
+          commit: gitHead(repoRoot),
+        },
+        cast_method: carry.cast_method,
+        cast_agent: carry.cast_agent,
+        cast_at: new Date().toISOString(),
+        ...revised,
+      },
+      refs: refEntries,
+      extensions: { artifacts: artifactContracts },
+      tail: {
+        validation_results: carry.validation_results,
+        open_questions: carry.open_questions,
+      },
+    });
+
+    const provenanceText = JSON.stringify(next, null, 2) + "\n";
+
+    // The record is reconciled like everything else in the bundle. It used to be the one
+    // exception — written straight out, never compared — which made the file that IS the cast's
+    // contract the only one a `--check` could not see drift in.
+    const stagedProvenance = path.join(stagedBundleRoot, "_provenance.json");
+    const committed = existsSync(stagedProvenance)
+      ? comparableProvenance(readFileSync(stagedProvenance, "utf8"))
+      : undefined;
+    if (committed === undefined) {
+      drift.push({ file: "_provenance.json", reason: "missing (this Mold has not been cast)" });
+    } else if (committed === null) {
+      drift.push({ file: "_provenance.json", reason: "unreadable as JSON" });
+    } else if (committed !== comparableProvenance(provenanceText)) {
+      drift.push({
+        file: "_provenance.json",
+        reason: "changed (a re-cast records something else)",
+      });
     }
-  }
+    writeFileSync(stagedProvenance, provenanceText);
+    staged.add("_provenance.json");
 
-  const verify = buildVerifyManifest(moldParsed.meta, producerIndex, slugMap, metaByPath);
-  const verifyText = JSON.stringify(verify, null, 2) + "\n";
-  const verifyPath = path.join(bundleRoot, "_verify.json");
-  if (args.check) {
-    // Compared but never written here: the write happens with the provenance record below,
-    // behind an error gate that can abort the cast. Reconciling it early would put the file on
-    // disk for a cast that then refused to finish.
-    const verifyDrift = driftOf(verifyPath, sha256Text(verifyText), "_verify.json");
-    if (verifyDrift.reason) drift.push({ file: "_verify.json", reason: verifyDrift.reason });
-  }
-
-  // runs/*/summary.json validation — a bundle may carry sample runs, and they are checked
-  // against the schema the Mold declares for its OWN output. Not against whichever schema ref
-  // happens to come first: a Mold's runs contain what that Mold produces, and only
-  // `output_artifacts[].schema` states which schema that is.
-  const outputSchemaRefs = new Set(
-    (artifactContracts?.produces ?? []).map((o) => o.schema).filter((s): s is string => !!s),
-  );
-  const schemaRefEntry = refEntries.find((r) => r.kind === "schema" && outputSchemaRefs.has(r.ref));
-  if (schemaRefEntry) {
-    const schemaAbs = path.join(bundleRoot, schemaRefEntry.dst);
-    if (existsSync(schemaAbs)) {
-      // Collected rather than thrown: a schema the runs cannot be checked against is a finding
-      // about this cast, and the caller reports findings. Letting it escape ends the run with a
-      // stack trace instead.
+    // Checks this instance runs over the finished staged bundle.
+    //
+    // Collected rather than thrown: a bundle that fails its own check is a finding about this
+    // cast, and the caller reports findings. Letting one escape ends the run with a stack trace
+    // instead — and a check that throws is itself a finding, not a reason to lose the others.
+    for (const check of GALAXY_HOOKS.bundleChecks) {
       try {
-        errors.push(...validateRuns(bundleRoot, schemaAbs));
+        errors.push(
+          ...check({
+            moldName: args.moldName,
+            meta: moldParsed.meta,
+            refs: refEntries,
+            metaByPath,
+            slugMap,
+            bundleRoot: stagedBundleRoot,
+          }),
+        );
       } catch (e) {
         errors.push(errorMessage(e));
       }
     }
-  }
 
-  // Report.
-  for (const e of errors) console.error(`error: ${e}`);
-  for (const d of drift) console.error(`drift: ${d.file} — ${d.reason}`);
+    // Report.
+    for (const e of errors) console.error(`error: ${e}`);
+    for (const d of drift) console.error(`drift: ${d.file} — ${d.reason}`);
 
-  if (args.check) {
-    if (errors.length || drift.length) {
-      console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
-      process.exit(1);
+    if (args.check) {
+      if (errors.length || drift.length) {
+        console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
+        process.exitCode = 1;
+        return;
+      }
+      console.log("clean: no drift, no errors");
+      return;
     }
-    console.log("clean: no drift, no errors");
-    return;
+
+    if (errors.length) {
+      console.error(`refusing to update provenance: ${errors.length} error(s)`);
+      process.exitCode = 1;
+      return;
+    }
+
+    // Publish what was staged, and only that. `runs/` and any other harvested state stay exactly
+    // as found — casting did not write them and does not own them.
+    //
+    // The set is the one built alongside the staging writes, so this cannot fall behind them.
+    // It iterates in insertion order, which puts `_provenance.json` last because it is staged
+    // last — the record lands only after the files it describes.
+    //
+    // A path in it that is not on disk means a write was recorded and did not happen, which is a
+    // bug in this function rather than a condition to tolerate: publishing the rest would leave a
+    // bundle whose provenance names a file it does not contain.
+    mkdirSync(bundleRoot, { recursive: true });
+    for (const rel of staged) {
+      const from = path.join(stagedBundleRoot, rel);
+      if (!existsSync(from)) throw new Error(`staged but never written: ${rel}`);
+      copyVerbatim(from, path.join(bundleRoot, rel));
+    }
+
+    // Removals, which copying cannot express: refs that stopped being refs, and contributions
+    // whose declaration says the file must not be there.
+    reconcileTreeTo({
+      root: path.join(bundleRoot, "references"),
+      declared: declaredRefs,
+      relativeTo: bundleRoot,
+      reason: () => "orphan (no ref claims it)",
+      check: false,
+    });
+    reconcileBundleFiles(
+      contributed.filter((file) => file.content === null),
+      bundleRoot,
+      false,
+    );
+
+    console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
+    if (drift.length) console.log(`reconciled ${drift.length} drifted file(s)`);
+  } finally {
+    rmSync(stageDir, { recursive: true, force: true });
   }
-
-  if (errors.length) {
-    console.error(`refusing to update provenance: ${errors.length} error(s)`);
-    process.exit(1);
-  }
-
-  const next: Provenance = {
-    provenance_schema_version: target.provenance_schema_version,
-    cast_target: args.target,
-    mold: {
-      name: args.moldName,
-      path: moldRel,
-      revision: typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
-      content_hash: moldHash,
-      commit: gitHead(repoRoot),
-    },
-    cast_method: carry.cast_method,
-    cast_agent: carry.cast_agent,
-    cast_at: new Date().toISOString(),
-    cast_date: carry.cast_date,
-    cast_revision: carry.cast_revision,
-    cast_history: carry.cast_history,
-    refs: refEntries,
-    artifacts: artifactContracts,
-    validation_results: carry.validation_results,
-    open_questions: carry.open_questions,
-  };
-
-  if (args.note) {
-    const today = new Date().toISOString().slice(0, 10);
-    const lastRev = (carry.cast_history ?? []).reduce((m, h) => Math.max(m, h.rev), 0);
-    next.cast_history = [
-      ...(carry.cast_history ?? []),
-      { rev: lastRev + 1, date: today, note: args.note },
-    ];
-    next.cast_revision = lastRev + 1;
-    next.cast_date = today;
-  }
-
-  writeFileSync(provenancePath, JSON.stringify(next, null, 2) + "\n");
-  writeFileSync(verifyPath, verifyText);
-  console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
-  if (drift.length) console.log(`reconciled ${drift.length} drifted ref(s)`);
 }
 
 const isDirectInvocation = import.meta.url === `file://${process.argv[1]}`;

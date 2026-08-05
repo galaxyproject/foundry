@@ -251,9 +251,8 @@ function main(): void {
 
   // Per-ref checks.
   for (const r of prov.refs ?? []) {
-    // Was a check for unfilled condense entries. The LLM phase is gone, so the guard is now
-    // the stronger statement it was always standing in for: every byte in a committed bundle
-    // was produced deterministically, and provenance has to say so.
+    // Every byte in a committed bundle was produced deterministically, and provenance has to
+    // say so.
     if (r.source !== "deterministic") {
       errors.push(`ref ${r.src}: source=${r.source} — a committed cast must be deterministic`);
       continue;

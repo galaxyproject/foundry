@@ -90,7 +90,7 @@ Conditional fields:
 - `trigger` is required when `load: on-demand`.
 - `purpose` is strongly recommended for generated-skill instructions and reviewer context.
 
-The reference contract owns labels, descriptions, and allowed values: `reference_contract.yml` for `kind`, and `@galaxy-foundry/reference-contract` for `used_at`, `load`, `mode` and `evidence`, which are the same in every Foundry. The inherited `mode` vocabulary also offers `condense`, which this Foundry declines — its caster is deterministic end to end, so a Mold declaring `mode: condense` is rejected by validate. Casting consumes the manifest by kind; see [[casting]] for output layout and provenance.
+The reference contract owns labels, descriptions, and allowed values: `reference_contract.yml` for `kind`, and `@galaxy-foundry/reference-contract` for `used_at`, `load`, `mode` and `evidence`, which are the same in every Foundry. Both inherited modes are available here — this Foundry renders `verbatim` and `sidecar` alike, so it narrows nothing away. Casting consumes the manifest by kind; see [[casting]] for output layout and provenance.
 
 ## Eval, Scenario, Usage, Refinement: what goes where
 
