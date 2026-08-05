@@ -1,5 +1,6 @@
 ---
 import { type NoteEntry } from '../lib/notes';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -10,7 +11,6 @@ interface Props {
 }
 
 const { entry, pageTitle, typeLabel, eyebrow, showActions = false } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const data = entry.data;
 ---
 <header class="note-header">
@@ -27,7 +27,7 @@ const data = entry.data;
   )}
   <div class="note-tags">
     <span class={`badge badge-${data.status}`}>{data.status}</span>
-    {data.tags.map(t => <a href={`${base}/tags/${t}/`} class="no-underline"><span class="tag">{t}</span></a>)}
+    {data.tags.map(t => <a href={`${base}/tags/${t}/`} class="tag no-underline">{t}</a>)}
   </div>
   {showActions && (
     <div class="note-actions">

@@ -1,25 +1,22 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteOf } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'patterns'>;
   linkMap: Map<string, WikiLinkTarget>;
   placement?: 'before' | 'after';
 }
 
 const { entry, linkMap, placement = 'before' } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const data = entry.data as any;
+const data = entry.data;
 const isMap = data.pattern_kind === 'moc';
 const isImplementationPattern = ['operation', 'recipe'].includes(data.pattern_kind);
-const exemplars = Array.isArray(data.iwc_exemplars) ? data.iwc_exemplars : [];
+const exemplars = data.iwc_exemplars ?? [];
 const relatedPatterns = (data.related_patterns ?? [])
-  .map((link: string) => resolveWikiLink(link, linkMap, base))
-  .filter(
-    (link: ReturnType<typeof resolveWikiLink>): link is ReturnType<typeof resolveWikiLink> & { href: string } =>
-      link.href !== null,
-  );
+  .map(link => resolveWikiLink(link, linkMap, base))
+  .filter((link): link is typeof link & { href: string } => link.href !== null);
 ---
 
 {placement === 'before' && isMap && (
@@ -35,7 +32,7 @@ const relatedPatterns = (data.related_patterns ?? [])
     </p>
     {relatedPatterns.length > 0 && (
       <div class="pattern-map-links">
-        {relatedPatterns.map((link: (typeof relatedPatterns)[number]) => (
+        {relatedPatterns.map(link => (
           <a href={link.href} class="pattern-map-link no-underline">
             <span>{link.label}</span>
             {link.summary && <small>{link.summary}</small>}
@@ -54,16 +51,16 @@ const relatedPatterns = (data.related_patterns ?? [])
     </div>
     <h2 id="iwc-exemplars-heading">IWC Exemplars</h2>
     <div class="iwc-exemplar-list">
-      {exemplars.map((exemplar: any) => (
+      {exemplars.map(exemplar => (
         <article class="iwc-exemplar-card">
           <div class="iwc-exemplar-card-head">
             <code>{exemplar.workflow}</code>
             <span class={`confidence confidence-${exemplar.confidence}`}>{exemplar.confidence}</span>
           </div>
           <p>{exemplar.why}</p>
-          {Array.isArray(exemplar.steps) && exemplar.steps.length > 0 && (
+          {exemplar.steps && exemplar.steps.length > 0 && (
             <ul>
-              {exemplar.steps.map((step: any) => (
+              {exemplar.steps.map(step => (
                 <li>
                   {step.label && <span>{step.label}</span>}
                   {step.id !== undefined && <code>step {step.id}</code>}

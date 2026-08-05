@@ -1,6 +1,7 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteEntry, type NoteField } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
@@ -10,8 +11,7 @@ interface Props {
 
 const { entry, linkMap, mode = 'full' } = Astro.props;
 const showRevision = mode === 'full';
-const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const data = entry.data;
 
 function formatDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -22,13 +22,32 @@ function resolveAll(arr: string[] | undefined) {
   return arr.map(wl => resolveWikiLink(wl, linkMap, base));
 }
 
-const parentPattern = data.parent_pattern ? resolveWikiLink(data.parent_pattern, linkMap, base) : null;
+// Two groups, and the difference is which envelope a field is in.
+//
+// `related_notes`, `related_patterns`, `related_molds` and `sources` are on the BASE envelope, so
+// every kind declares them and they read directly. An `in` here would look like narrowing and be
+// a runtime presence check on an optional property — the more misleading for looking careful.
 const relatedNotes = resolveAll(data.related_notes);
 const relatedPatterns = resolveAll(data.related_patterns);
-const implementedByPatterns = resolveAll(data.implemented_by_patterns);
 const relatedMolds = resolveAll(data.related_molds);
-const reviewTriggers = Array.isArray(data.review_triggers) ? data.review_triggers : [];
-const hasSources = data.sources && data.sources.length > 0;
+const sources = data.sources ?? [];
+
+// These three belong to some kinds only, so they genuinely need the union asked. The keys are
+// asserted because `in` does not check them: `'nope' in data` compiles, and a field renamed in the
+// one schema that declares it would just stop rendering its row.
+const PARENT_PATTERN = 'parent_pattern' satisfies NoteField;
+const IMPLEMENTED_BY = 'implemented_by_patterns' satisfies NoteField;
+const REVIEW_TRIGGERS = 'review_triggers' satisfies NoteField;
+
+const parentPattern =
+  PARENT_PATTERN in data && data.parent_pattern
+    ? resolveWikiLink(data.parent_pattern, linkMap, base)
+    : null;
+const implementedByPatterns = resolveAll(
+  IMPLEMENTED_BY in data ? data.implemented_by_patterns : undefined,
+);
+const reviewTriggers = (REVIEW_TRIGGERS in data ? data.review_triggers : undefined) ?? [];
+const hasSources = sources.length > 0;
 const hasAnything =
   showRevision ||
   parentPattern ||
@@ -69,12 +88,12 @@ const hasAnything =
     <div class="meta-pair meta-pair-block">
       <dt>Sources</dt>
       <dd>
-        {data.sources.map((s: string, i: number) => (
+        {sources.map((s, i) => (
           <>
             {/^https?:\/\//.test(s)
               ? <a href={s} class="break-all">{s}</a>
               : <span class="break-all">{s}</span>}
-            {i < data.sources!.length - 1 ? <br /> : null}
+            {i < sources.length - 1 ? <br /> : null}
           </>
         ))}
       </dd>

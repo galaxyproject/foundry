@@ -1,18 +1,13 @@
+import type { InputArtifact, OutputArtifact } from '@galaxy-foundry/note-schema';
 import { type NoteEntry } from './notes';
 import { resolveWikiLinkId, type WikiLinkTarget } from './wiki-links';
 
-export interface OutputArtifactDecl {
-  id: string;
-  kind: string;
-  default_filename: string;
-  schema?: string;
-  description: string;
-}
-
-export interface InputArtifactDecl {
-  id: string;
-  description: string;
-}
+// These two were spelled out here, field for field, copied from the mold schema by reading it —
+// the same re-description the reference manifest had, one level down. An interface beside a schema
+// does not fail against it: `schema` is optional on both sides, so removing it from the kind left
+// this one still satisfied and the artifact tables would simply have stopped linking.
+export type OutputArtifactDecl = OutputArtifact;
+export type InputArtifactDecl = InputArtifact;
 
 export interface ArtifactProducer {
   moldId: string;
@@ -94,10 +89,13 @@ export function buildArtifactGraph(
   const moldDeclByEntry = new Map<string, { out: OutputArtifactDecl[]; in: InputArtifactDecl[] }>();
 
   for (const entry of entries) {
-    const data = entry.data as any;
+    const data = entry.data;
     if (data.type !== 'mold') continue;
-    const out: OutputArtifactDecl[] = Array.isArray(data.output_artifacts) ? data.output_artifacts : [];
-    const inp: InputArtifactDecl[] = Array.isArray(data.input_artifacts) ? data.input_artifacts : [];
+    // The annotations are the point: they used to sit in front of `any` and assert nothing. With
+    // the arm narrowed they compare the mold schema's shape against the one this module renders,
+    // so a field renamed there fails here instead of arriving undefined.
+    const out: OutputArtifactDecl[] = data.output_artifacts ?? [];
+    const inp: InputArtifactDecl[] = data.input_artifacts ?? [];
     moldDeclByEntry.set(entry.id, { out, in: inp });
     for (const o of out) {
       const node = ensure(graph, o.id);
@@ -114,9 +112,9 @@ export function buildArtifactGraph(
   // Pipeline binding inference: walk phases in order, attribute artifact ids to phase indices
   // by following each phase's referenced Mold(s)' declared artifacts.
   for (const entry of entries) {
-    const data = entry.data as any;
-    if (data.type !== 'pipeline' || !Array.isArray(data.phases)) continue;
-    data.phases.forEach((phase: unknown, idx: number) => {
+    const data = entry.data;
+    if (data.type !== 'pipeline') continue;
+    data.phases.forEach((phase, idx) => {
       const phaseNum = idx + 1;
       const moldRefs = collectMoldRefsFromPhase(phase);
       for (const wl of moldRefs) {

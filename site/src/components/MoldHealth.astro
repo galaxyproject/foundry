@@ -1,12 +1,13 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteEntry, type NoteOf } from '../lib/notes';
 import type { CompanionRequirement, NormalizedCompanion } from '@galaxy-foundry/kind-schema';
 import { checkNoteDirectory, companionOf, readCompanion } from '../lib/note-directory';
 import HealthPanel from './HealthPanel.astro';
 import { resolveWikiLinkId, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'molds'>;
   linkMap: Map<string, WikiLinkTarget>;
   entryById: Map<string, NoteEntry>;
 }
@@ -21,8 +22,7 @@ interface HealthItem {
 }
 
 const { entry, linkMap, entryById } = Astro.props;
-const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const data = entry.data;
 
 // The two files this panel reports on, taken from the kind rather than described here. The
 // NAME stays, because the checks below read these files' contents and no declaration can say
@@ -53,16 +53,19 @@ function hasAxisSpecifier(): boolean {
 }
 
 function referenceFindings(): HealthItem[] {
-  const refs = Array.isArray(data.references) ? data.references : [];
+  // `KindReference[]`, from the kind. The shape checks below used to be written against `any`,
+  // where `ref?.load` and `ref?.evidence` are questions nothing could answer wrong: a renamed
+  // field reads as undefined, the panel reports clean, and a mold with a real problem shows a
+  // green tick.
+  const refs = data.references ?? [];
   const items: HealthItem[] = [];
-  const unresolved = refs.filter((ref: any) => {
-    if (typeof ref?.ref !== 'string' || !WIKI_LINK_RE.test(ref.ref)) return false;
-    return !resolveWikiLinkId(ref.ref, linkMap);
-  });
-  const missingTriggers = refs.filter((ref: any) => ref?.load === 'on-demand' && !ref.trigger);
-  const missingVerification = refs.filter((ref: any) => ref?.evidence === 'hypothesis' && !ref.verification);
-  const wrongCliRefs = refs.filter((ref: any) => {
-    if (ref?.kind !== 'cli-command' || typeof ref.ref !== 'string') return false;
+  const unresolved = refs.filter(
+    ref => WIKI_LINK_RE.test(ref.ref) && !resolveWikiLinkId(ref.ref, linkMap),
+  );
+  const missingTriggers = refs.filter(ref => ref.load === 'on-demand' && !ref.trigger);
+  const missingVerification = refs.filter(ref => ref.evidence === 'hypothesis' && !ref.verification);
+  const wrongCliRefs = refs.filter(ref => {
+    if (ref.kind !== 'cli-command') return false;
     const id = resolveWikiLinkId(ref.ref, linkMap);
     if (!id) return false;
     return entryById.get(id)?.data.type !== 'cli-command';

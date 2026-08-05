@@ -3,8 +3,8 @@ import Base from '../layouts/Base.astro';
 import PipelineMatrix from '../components/PipelineMatrix.astro';
 import FoundryStory from '../components/FoundryStory.astro';
 import PatternSpotlight from '../components/PatternSpotlight.astro';
+import { base } from '../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const navCards = [
   { href: `${base}/dashboard/`, label: 'Dashboard', desc: 'Sectioned tables of every active note.', kbd: 'D' },
@@ -22,7 +22,7 @@ const navCards = [
     <span class="eyebrow mb-4">Galaxy Workflow Foundry</span>
     <h1
       id="hero-heading"
-      class="hero-title text-balance text-(--color-brand-dark) dark:text-(--color-text-primary)"
+      class="hero-title text-balance text-(--color-chrome) dark:text-(--color-text-primary)"
     >
       Build Galaxy workflows<br />
       <span class="hero-title-accent">from anything.</span>
@@ -111,7 +111,7 @@ const navCards = [
     align-items: center;
     gap: 0.4rem;
     padding: 0.55rem 1rem;
-    background: var(--color-brand-dark);
+    background: var(--color-chrome);
     color: var(--color-text-on-dark);
     border-radius: 0.375rem;
     text-decoration: none;

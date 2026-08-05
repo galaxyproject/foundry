@@ -1,5 +1,5 @@
 ---
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+import { base } from '../lib/site-base';
 
 const TERMS: { term: string; gloss: string; anchor: string }[] = [
   { term: 'Mold',     gloss: 'Abstract, structured template for one workflow-construction action. Cast into self-contained skills.', anchor: 'mold' },

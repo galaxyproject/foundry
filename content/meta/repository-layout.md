@@ -69,6 +69,8 @@ Every package owns its source, tests, build configuration, and publish metadata.
 
 `site/src/content.config.ts` wires the shared collections into Astro. `site/src/lib/` contains presentation adapters and registries, `site/src/components/` contains specialized renderers, and `site/src/pages/` owns routes. Site-local code may adapt shared contracts for rendering but must not redefine them.
 
+The shell those routes render inside — document skeleton, header, footer — is installed rather than local: it comes from `@galaxy-foundry/site-kit`, and `site/src/layouts/Base.astro` composes it with the identity in `site/src/lib/site-identity.ts`. The palette stays here, as custom properties in `site/src/styles/global.css` that the kit names and does not ship.
+
 The generated `site/dist/` output is deployment material and is not committed source.
 
 ## Generated and external workspaces

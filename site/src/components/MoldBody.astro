@@ -1,37 +1,51 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { noteTitle, type NoteEntry, type NoteOf } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
-import ReferenceContract from './ReferenceContract.astro';
+import ReferenceContract from '@galaxy-foundry/site-kit/ReferenceContract.astro';
 import CastArtifacts from './CastArtifacts.astro';
 import { artifactHref, type ArtifactGraph } from '../lib/artifacts';
+import { base } from '../lib/site-base';
+import { referenceContract } from '../lib/registries';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'molds'>;
   linkMap: Map<string, WikiLinkTarget>;
   artifactGraph?: ArtifactGraph;
+  // Stays the union: the artifact graph reaches notes of any kind, and this component only wants
+  // a display name off them.
   entryById?: Map<string, NoteEntry>;
 }
 
 const { entry, linkMap, artifactGraph, entryById } = Astro.props;
-const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// How a `ref` becomes a link is this instance's question, not the contract's. Only wiki-shaped
+// refs resolve — a `cli-tool` ref is a command name and points at no page here, and returning
+// null leaves it on the card as the author wrote it.
+//
+// `summary` is narrowed on the way out because this repo spells "no summary" as `null` while the
+// kit's `ResolvedReference` spells it as absent. One spelling of absent per boundary: a package
+// that took both would make every consumer of it handle two.
+const resolveRef = (ref: string) => {
+  if (!/^\[\[.+\]\]$/.test(ref)) return null;
+  const link = resolveWikiLink(ref, linkMap, base);
+  return { ...link, summary: link.summary ?? undefined };
+};
+const data = entry.data;
 
 const axisChip = data.axis;
 const specifier = data.source ?? data.target ?? data.tool ?? null;
 
 function entryName(id: string): string {
   const e = entryById?.get(id);
-  if (!e) return id;
-  const d = e.data as any;
-  return d.name || d.title || id.split('/').pop() || id;
+  return e ? noteTitle(e) : id;
 }
 
 function entryHref(id: string): string {
   return `${base}/${id}/`;
 }
 
-const outputArtifacts: any[] = Array.isArray(data.output_artifacts) ? data.output_artifacts : [];
-const inputArtifacts: any[] = Array.isArray(data.input_artifacts) ? data.input_artifacts : [];
+const outputArtifacts = data.output_artifacts ?? [];
+const inputArtifacts = data.input_artifacts ?? [];
 
 function consumersOf(id: string): { moldId: string; description: string }[] {
   const node = artifactGraph?.get(id);
@@ -124,7 +138,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
   }
 </style>
 
-<ReferenceContract references={data.references} linkMap={linkMap} />
+<ReferenceContract references={data.references ?? []} contract={referenceContract} resolveRef={resolveRef} />
 
 <CastArtifacts moldSlug={data.name} />
 
@@ -138,7 +152,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
       <div class="artifact-block">
         <h3 class="artifact-side">Produces</h3>
         <ul class="artifact-list">
-          {outputArtifacts.map((a: any) => {
+          {outputArtifacts.map(a => {
             const schemaLink = a.schema ? resolveWikiLink(a.schema, linkMap, base) : null;
             const consumers = consumersOf(a.id);
             return (
@@ -182,11 +196,11 @@ function producersOf(id: string): { moldId: string; description: string }[] {
     {inputArtifacts.length > 0 && (
       <div class="artifact-block">
         <h3 class="artifact-side">Consumes</h3>
-        {inputArtifacts.some((a: any) => a.role) && (
+        {inputArtifacts.some(a => a.role) && (
           <p class="artifact-note">Inputs sharing a role are alternatives — one producer satisfies it.</p>
         )}
         <ul class="artifact-list">
-          {inputArtifacts.map((a: any) => {
+          {inputArtifacts.map(a => {
             const producers = producersOf(a.id);
             return (
               <li class="artifact-card">

@@ -1,5 +1,9 @@
-import { type NoteEntry } from './notes';
+import { type NoteEntry, type NoteField } from './notes';
 import { resolveWikiLink as resolve, slugify } from '@galaxy-foundry/wiki-links';
+
+// Frontmatter keys only some kinds declare. Named here so the assertion runs once.
+const PARENT_PATTERN = 'parent_pattern' satisfies NoteField;
+const IMPLEMENTED_BY = 'implemented_by_patterns' satisfies NoteField;
 
 // Components asking "is this string a wiki link at all?" get the package's answer, not their
 // own regex. Re-exported here so a component has one import for everything link-shaped.
@@ -90,10 +94,14 @@ export function buildBacklinkMap(
   };
 
   for (const entry of entries) {
-    const data = entry.data as any;
+    const data = entry.data;
 
+    // `parent_pattern` and `implemented_by_patterns` belong to some kinds only, so the union has
+    // to be asked; the keys carry `satisfies NoteField` because `in` checks the value and not the
+    // key, and a backlink that never fires looks exactly like a corpus where nothing links that
+    // way. The three `related_*` arrays below are on the base envelope and read directly.
     const single: [BacklinkField, string | undefined][] = [
-      ['parent_pattern', data.parent_pattern],
+      ['parent_pattern', PARENT_PATTERN in data ? data.parent_pattern : undefined],
     ];
     for (const [field, val] of single) {
       if (!val) continue;
@@ -105,7 +113,10 @@ export function buildBacklinkMap(
       ['related_notes', data.related_notes],
       ['related_patterns', data.related_patterns],
       ['related_molds', data.related_molds],
-      ['implemented_by_patterns', data.implemented_by_patterns],
+      [
+        'implemented_by_patterns',
+        IMPLEMENTED_BY in data ? data.implemented_by_patterns : undefined,
+      ],
     ];
     for (const [field, arr] of arrays) {
       if (!arr) continue;
@@ -116,7 +127,7 @@ export function buildBacklinkMap(
     }
 
     // Pipeline phases: walk and collect mold references.
-    if (data.type === 'pipeline' && Array.isArray(data.phases)) {
+    if (data.type === 'pipeline') {
       for (const wl of collectPhaseRefs(data.phases)) {
         const tid = resolveWikiLinkId(wl, linkMap);
         if (tid) add(tid, entry.id, 'phases');
@@ -124,10 +135,9 @@ export function buildBacklinkMap(
     }
 
     // Mold output_artifacts[].schema: link the schema note back to the producing Mold.
-    if (data.type === 'mold' && Array.isArray(data.output_artifacts)) {
-      for (const a of data.output_artifacts) {
-        const schema = a && typeof a === 'object' ? (a as any).schema : undefined;
-        if (typeof schema !== 'string') continue;
+    if (data.type === 'mold') {
+      for (const { schema } of data.output_artifacts ?? []) {
+        if (!schema) continue;
         const tid = resolveWikiLinkId(schema, linkMap);
         if (tid) add(tid, entry.id, 'output_artifact_schema');
       }

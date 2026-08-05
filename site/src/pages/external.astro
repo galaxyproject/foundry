@@ -4,8 +4,8 @@ import path from 'node:path';
 import yaml from 'js-yaml';
 import Base from '../layouts/Base.astro';
 import { loadCommonPaths, parseCitation, citationGithubUrl } from '../lib/common-paths';
+import { base } from '../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const repoRoot = path.resolve('..');
 
 interface VendoredEntry {

@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import { getLicenses } from '../../lib/licenses';
 import { licenseIdFromFilePath, resolveLicenseRow } from '@galaxy-foundry/license-policy';
 import { licensePolicy } from '../../lib/registries';
+import { base } from '../../lib/site-base';
 
 export async function getStaticPaths() {
   return getLicenses().map(license => ({
@@ -13,16 +14,17 @@ export async function getStaticPaths() {
 }
 
 const { license } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // Notes that redistribute content under this LICENSES/ file, with their SPDX id.
 const entries = await getAllNotes();
 const users = entries
-  .filter(e => {
-    const lf = (e.data as any).license_file;
-    return typeof lf === 'string' && licenseIdFromFilePath(lf) === license.licenseId;
-  })
-  .map(e => ({ id: e.id, spdx: (e.data as any).license as string | undefined }))
+  .filter(
+    e =>
+      'license_file' in e.data &&
+      e.data.license_file !== undefined &&
+      licenseIdFromFilePath(e.data.license_file) === license.licenseId,
+  )
+  .map(e => ({ id: e.id, spdx: 'license' in e.data ? e.data.license : undefined }))
   .sort((a, b) => a.id.localeCompare(b.id));
 
 // Distinct SPDX ids carried under this file, and their policy rows.

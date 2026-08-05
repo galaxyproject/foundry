@@ -1,13 +1,18 @@
 ---
+import type { PipelinePhase } from '@galaxy-foundry/note-schema';
 import { resolveWikiLink, WIKI_LINK_RE, type WikiLinkTarget } from '../lib/wiki-links';
+import { base } from '../lib/site-base';
 
+// The phase grammar comes from the kind that defines it. This prop was `any[]`, and the caller
+// hands over a properly typed `data.phases` — so the erasure was entirely on this side of the
+// boundary, and every field the subway map draws (`mold`, `branch`, `branches`, `chain`) was
+// unchecked. Rename `mold` in the grammar and this rendered an empty map on every pipeline page.
 interface Props {
-  phases: any[];
+  phases: PipelinePhase[];
   linkMap: Map<string, WikiLinkTarget>;
 }
 
 const { phases, linkMap } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n);
@@ -25,7 +30,7 @@ function isWikiLink(s: string): boolean {
 <ol class="subway not-prose">
   {phases.map((p, idx) => {
     const num = pad2(idx + 1);
-    if (p.mold) {
+    if ('mold' in p) {
       const r = resolved(p.mold);
       return (
         <li class:list={['stop', 'stop-mold', p.loop && 'stop-loop']}>
@@ -40,7 +45,7 @@ function isWikiLink(s: string): boolean {
         </li>
       );
     }
-    if (p.branch) {
+    if ('branch' in p) {
       return (
         <li class:list={['stop', 'stop-branch', p.loop && 'stop-loop']}>
           <span class="stop-num font-mono" aria-hidden="true">{num}</span>
@@ -53,7 +58,7 @@ function isWikiLink(s: string): boolean {
             </div>
             {p.branches && (
               <ul class="branch-paths" aria-label="branches">
-                {p.branches.map((b: any) => {
+                {p.branches.map(b => {
                   if (typeof b === 'string') {
                     if (isWikiLink(b)) {
                       const r = resolved(b);
@@ -84,7 +89,7 @@ function isWikiLink(s: string): boolean {
             )}
             {p.chain && (
               <ol class="branch-chain" aria-label="chain">
-                {p.chain.map((c: any) => {
+                {p.chain.map(c => {
                   if (typeof c === 'string') {
                     if (isWikiLink(c)) {
                       const r = resolved(c);
@@ -244,7 +249,7 @@ function isWikiLink(s: string): boolean {
   }
   .stop-tag-loop {
     background: var(--color-accent);
-    color: var(--color-brand-dark);
+    color: var(--color-chrome);
   }
   .stop-tag-fallthrough {
     background: color-mix(in srgb, var(--color-neutral) 18%, transparent);

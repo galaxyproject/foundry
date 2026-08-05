@@ -1,11 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { base } from '../../lib/site-base';
 
 // The patterns collection, not the whole corpus filtered down to it: `entry.data` is a
 // pattern's own frontmatter here, so `title` and `pattern_kind` are typed fields rather than
 // casts.
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const patterns = (await getCollection('patterns'))
   .filter(n => n.data.status !== 'archived')
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
