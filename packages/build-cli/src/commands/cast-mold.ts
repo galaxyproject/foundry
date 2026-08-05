@@ -844,6 +844,31 @@ function readExistingProvenance(provenancePath: string): ProvenanceCarryOver {
   );
 }
 
+/**
+ * A record with the two fields that move on every cast held fixed, or null if it will not parse.
+ *
+ * `cast_at` is the clock and `mold.commit` is wherever HEAD happens to be. Comparing raw bytes
+ * would report drift on every check of a bundle nothing changed, which is why the record was
+ * never compared at all — and why it became the one file in a bundle whose drift a `--check`
+ * could not see. These are the same two fields a regenerate has always been expected to move.
+ *
+ * Key order survives normalizing: `JSON.parse` preserves it and reassigning an existing key does
+ * not move it, so a record whose fields were reshuffled still compares unequal here. That is the
+ * case worth catching — every value stays correct while every committed record rewrites.
+ */
+function comparableProvenance(text: string): string | null {
+  let doc: { cast_at?: unknown; mold?: { commit?: unknown } | null };
+  try {
+    doc = JSON.parse(text) as typeof doc;
+  } catch {
+    return null;
+  }
+  if (typeof doc !== "object" || doc === null) return null;
+  doc.cast_at = "";
+  if (typeof doc.mold === "object" && doc.mold !== null) doc.mold.commit = "";
+  return JSON.stringify(doc);
+}
+
 // ---- cast assembly ----
 
 async function castOneRef(
@@ -1422,7 +1447,25 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     });
 
     const provenanceText = JSON.stringify(next, null, 2) + "\n";
-    writeFileSync(path.join(stagedBundleRoot, "_provenance.json"), provenanceText);
+
+    // The record is reconciled like everything else in the bundle. It used to be the one
+    // exception — written straight out, never compared — which made the file that IS the cast's
+    // contract the only one a `--check` could not see drift in.
+    const stagedProvenance = path.join(stagedBundleRoot, "_provenance.json");
+    const committed = existsSync(stagedProvenance)
+      ? comparableProvenance(readFileSync(stagedProvenance, "utf8"))
+      : undefined;
+    if (committed === undefined) {
+      drift.push({ file: "_provenance.json", reason: "missing (this Mold has not been cast)" });
+    } else if (committed === null) {
+      drift.push({ file: "_provenance.json", reason: "unreadable as JSON" });
+    } else if (committed !== comparableProvenance(provenanceText)) {
+      drift.push({
+        file: "_provenance.json",
+        reason: "changed (a re-cast records something else)",
+      });
+    }
+    writeFileSync(stagedProvenance, provenanceText);
 
     // Checks this instance runs over the finished staged bundle.
     //

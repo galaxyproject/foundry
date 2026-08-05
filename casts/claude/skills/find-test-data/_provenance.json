@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 3,
-    "content_hash": "665cfe683d98566abe3b786538fee915a2ad4dc98cc8e5c9365c737434373557",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "revision": 4,
+    "content_hash": "109bf96b1180534c6c117fc79eb11c7ff562679c862482e3545991672bd6bfa7",
+    "commit": "e4ee3dd7e0b3af9886ea6009b961b0c5ecb2f349"
   },
-  "cast_at": "2026-08-02T22:04:35.068Z",
+  "cast_at": "2026-08-05T14:55:31.607Z",
   "refs": [
     {
       "kind": "research",

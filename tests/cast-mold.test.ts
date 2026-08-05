@@ -693,6 +693,43 @@ Wrapper body should not be copied.
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  // The record is the cast's contract, and it was the one file in a bundle `--check` never
+  // compared — so a Mold could move under a committed bundle and the gate stayed green. It did:
+  // three bundles on `main` recorded a Mold revision older than the Mold, for a day, unnoticed.
+  //
+  // Both halves matter. Comparing raw bytes would fail every check, since `cast_at` and
+  // `mold.commit` move on every run, so a gate that reports those is a gate someone turns off.
+  it("reports a record that no longer describes its Mold, and ignores the clock", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provdrift-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(dir);
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+      const recordPath = path.join(dir, "casts/claude/skills/m/_provenance.json");
+      const clean = () =>
+        runTsx(foundryBuild, ["cast", "m", "--target=claude", "--check", "--root", dir]);
+      expect(clean().code, "a freshly cast bundle must check clean").toBe(0);
+
+      // Only the clock moved. A check that fails here fails on every bundle, every run.
+      const record = castedRecord(dir);
+      record.cast_at = "1999-01-01T00:00:00.000Z";
+      (record.mold as { commit: unknown }).commit = "0000000000000000000000000000000000000000";
+      writeFileSync(recordPath, JSON.stringify(record, null, 2) + "\n");
+      const afterClock = clean();
+      expect(afterClock.code, `stderr: ${afterClock.stderr}`).toBe(0);
+
+      // The Mold moved under the bundle: exactly the case the three stale records were in.
+      const stale = castedRecord(dir);
+      (stale.mold as { revision: number }).revision = 99;
+      writeFileSync(recordPath, JSON.stringify(stale, null, 2) + "\n");
+      const afterMold = clean();
+      expect(afterMold.code, "a record naming another Mold revision is drift").not.toBe(0);
+      expect(afterMold.stderr).toContain("_provenance.json");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("cast-mold cli-command meta injection", () => {
