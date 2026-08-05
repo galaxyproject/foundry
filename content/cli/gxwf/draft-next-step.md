@@ -3,7 +3,7 @@ type: cli-command
 tool: gxwf
 command: draft-next-step
 package: "@galaxy-tool-util/cli"
-upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
+source_url: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json"
 tags:
   - cli/gxwf
 status: draft

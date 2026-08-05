@@ -3,7 +3,7 @@ type: cli-command
 tool: planemo
 command: output_schema
 package: "planemo"
-upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_output_schema.py"
+source_url: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_output_schema.py"
 tags:
   - cli/planemo
 status: draft

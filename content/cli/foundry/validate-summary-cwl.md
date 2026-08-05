@@ -3,7 +3,6 @@ type: cli-command
 tool: foundry
 command: validate-summary-cwl
 package: "@galaxy-foundry/foundry"
-upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/program.ts"
 tags:
   - cli/foundry
 status: draft

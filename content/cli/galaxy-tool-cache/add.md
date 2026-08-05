@@ -3,7 +3,7 @@ type: cli-command
 tool: galaxy-tool-cache
 command: add
 package: "@galaxy-tool-util/cli"
-upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/galaxy-tool-cache.json"
+source_url: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/galaxy-tool-cache.json"
 tags:
   - cli/galaxy-tool-cache
 status: draft
