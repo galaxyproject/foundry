@@ -1435,6 +1435,9 @@ license: CC-BY-NC-SA-2.0
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code).not.toBe(0);
       const bundle = path.join(dir, "casts/claude/skills/m");
+      expect(existsSync(bundle), "a refused cast must publish none of its staged bundle").toBe(
+        false,
+      );
       expect(existsSync(path.join(bundle, "_verify.json"))).toBe(false);
       expect(existsSync(path.join(bundle, "_required_tools.json"))).toBe(false);
       expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(false);
@@ -1515,9 +1518,7 @@ describe("stripWikiLinks", () => {
 // and get exactly that back.
 describe("the skill document is the sections it was handed", () => {
   it("renders them in order, and nothing it was not given", async () => {
-    const { renderSkillMarkdown } = await import(
-      "../packages/build-cli/src/commands/cast-mold.js"
-    );
+    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: "Summarize a thing." },
@@ -1554,9 +1555,7 @@ describe("the skill document is the sections it was handed", () => {
   });
 
   it("takes the description from the summary, stripped of link syntax and quote-safe", async () => {
-    const { renderSkillMarkdown } = await import(
-      "../packages/build-cli/src/commands/cast-mold.js"
-    );
+    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: 'Handle a "quoted" [[thing|name]].' },
@@ -1593,7 +1592,9 @@ describe("second addresses are one rule, not three", () => {
     const { GALAXY_SLUG_ALIASES } = await import("../packages/build-cli/src/lib/slug-map.js");
     // Right type, but no command to compound with — the address would be the tool's own.
     expect(GALAXY_SLUG_ALIASES({ type: "cli-command", tool: "gxwf" })).toEqual([]);
-    expect(GALAXY_SLUG_ALIASES({ type: "cli-tool", tool: "gxwf", command: "validate" })).toEqual([]);
+    expect(GALAXY_SLUG_ALIASES({ type: "cli-tool", tool: "gxwf", command: "validate" })).toEqual(
+      [],
+    );
     expect(GALAXY_SLUG_ALIASES({ type: "research" })).toEqual([]);
   });
 });
@@ -2016,11 +2017,15 @@ describe("cast declarations the corpus does not currently exercise", () => {
           `---\ntype: schema\nname: ${name}\ntitle: ${name}\nsummary: A schema note.\ntags: [meta]\nstatus: draft\ncreated: 2026-06-18\nrevised: 2026-06-18\nrevision: 1\npackage: "@acme/schema-pkg"\n---\n\nBody of ${name}.\n`,
         );
       }
-      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--check", "--root", dir]);
       // The bundled dst of a `resolve: note` schema is the note itself, so Ajv fails to load it
       // — which is incidental. What the assertion pins is WHICH file it reached for.
       expect(r.stderr).toContain("second.md: not loadable as a JSON Schema");
       expect(r.stderr).not.toContain("first.md: not loadable as a JSON Schema");
+      expect(
+        existsSync(path.join(dir, "casts/claude/skills/m/references/schemas/second.md")),
+        "--check stages expected refs without publishing them",
+      ).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

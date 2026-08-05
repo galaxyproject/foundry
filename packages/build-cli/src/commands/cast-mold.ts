@@ -8,7 +8,17 @@
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import yaml from "js-yaml";
@@ -1218,8 +1228,6 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       args.moldName,
     ),
   );
-  // --check is read-only: never materialize the bundle dir for a never-cast Mold.
-  if (!args.check) mkdirSync(bundleRoot, { recursive: true });
   const provenancePath = path.join(bundleRoot, "_provenance.json");
   const carry = readExistingProvenance(provenancePath);
 
@@ -1282,154 +1290,187 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     return companion !== 0 ? companion : a.dst.localeCompare(b.dst);
   });
 
-  const refEntries: ProvenanceRefEntry[] = [];
-  const drift: Array<{ file: string; reason: string }> = [];
+  // Assemble against a private copy of the current bundle. Every reconciliation therefore
+  // reports the same drift it would find on the real tree while leaving the checkout untouched,
+  // and hooks inspect the complete expected bundle — new refs, contributed files and provenance
+  // together. Only a cast that clears every error publishes the owned files below.
+  const stageDir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-stage-"));
+  const stagedBundleRoot = path.join(stageDir, "bundle");
+  if (existsSync(bundleRoot)) cpSync(bundleRoot, stagedBundleRoot, { recursive: true });
+  else mkdirSync(stagedBundleRoot, { recursive: true });
 
-  for (const r of resolved) {
-    const result = await castOneRef(r, repoRoot, bundleRoot, args.check, GALAXY_HOOKS.renderers);
-    refEntries.push(result.entry);
-    if (result.error) errors.push(result.error);
-    if (result.drift) drift.push({ file: r.src, reason: result.drift });
-  }
+  try {
+    const refEntries: ProvenanceRefEntry[] = [];
+    const drift: Array<{ file: string; reason: string }> = [];
 
-  // License → redistribution-policy enforcement + license_file hashing.
-  errors.push(...applyLicensePolicy(refEntries, repoRoot));
+    for (const r of resolved) {
+      const result = await castOneRef(r, repoRoot, stagedBundleRoot, false, GALAXY_HOOKS.renderers);
+      refEntries.push(result.entry);
+      if (result.error) errors.push(result.error);
+      if (result.drift) drift.push({ file: r.src, reason: result.drift });
+    }
 
-  const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
-  const skillText = renderSkillMarkdown({
-    moldName: args.moldName,
-    meta: moldParsed.meta,
-    lede: GALAXY_HOOKS.skillLede,
-    sections: GALAXY_HOOKS.skillSections({
+    // License → redistribution-policy enforcement + license_file hashing.
+    errors.push(...applyLicensePolicy(refEntries, repoRoot));
+
+    const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
+    const skillText = renderSkillMarkdown({
       moldName: args.moldName,
       meta: moldParsed.meta,
-      body: moldParsed.body,
-      refs: refEntries,
-      metaByPath,
-      slugMap,
-    }),
-  });
-  const skillDrift = reconcileText({
-    path: path.join(bundleRoot, "SKILL.md"),
-    expected: skillText,
-    label: "SKILL.md",
-    check: args.check,
-  });
-  if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
+      lede: GALAXY_HOOKS.skillLede,
+      sections: GALAXY_HOOKS.skillSections({
+        moldName: args.moldName,
+        meta: moldParsed.meta,
+        body: moldParsed.body,
+        refs: refEntries,
+        metaByPath,
+        slugMap,
+      }),
+    });
+    const skillDrift = reconcileText({
+      path: path.join(stagedBundleRoot, "SKILL.md"),
+      expected: skillText,
+      label: "SKILL.md",
+      check: false,
+    });
+    if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
 
-  // Reduce `references/` to exactly what provenance lists.
-  //
-  // Casting writes each ref and never looked at what was already there, so a file that stops
-  // being a ref stayed in the bundle forever. Undeclaring one companion was enough to prove it:
-  // provenance dropped `galaxy-collection-semantics.upstream.myst`, SKILL.md stopped naming it,
-  // and the file sat in nine bundles regardless — invisible to every check, and still the first
-  // thing an agent listing the directory would find.
-  //
-  // Scoped to `references/` because that subtree is the only part of a bundle casting owns —
-  // `runs/` is harvested output and is not ours to delete.
-  drift.push(
-    ...reconcileTreeTo({
+    // Reduce `references/` to exactly what provenance lists.
+    //
+    // Casting writes each ref and never looked at what was already there, so a file that stops
+    // being a ref stayed in the bundle forever. Undeclaring one companion was enough to prove it:
+    // provenance dropped `galaxy-collection-semantics.upstream.myst`, SKILL.md stopped naming it,
+    // and the file sat in nine bundles regardless — invisible to every check, and still the first
+    // thing an agent listing the directory would find.
+    //
+    // Scoped to `references/` because that subtree is the only part of a bundle casting owns —
+    // `runs/` is harvested output and is not ours to delete.
+    const declaredRefs = new Set(refEntries.map((entry) => entry.dst));
+    drift.push(
+      ...reconcileTreeTo({
+        root: path.join(stagedBundleRoot, "references"),
+        declared: declaredRefs,
+        relativeTo: stagedBundleRoot,
+        reason: () => "orphan (no ref claims it)",
+        check: false,
+      }),
+    );
+
+    // Bundle-root files this instance contributes are reconciled into the staged bundle before
+    // checks run. A checker therefore sees the bytes this cast proposes, never a stale manifest
+    // copied from the previous cast.
+    const contributed = GALAXY_HOOKS.bundleFiles.flatMap((contribute) =>
+      contribute({
+        moldName: args.moldName,
+        meta: moldParsed.meta,
+        refs: refEntries,
+        metaByPath,
+        slugMap,
+      }),
+    );
+    drift.push(...reconcileBundleFiles(contributed, stagedBundleRoot, false));
+
+    const next: Provenance = {
+      provenance_schema_version: PROVENANCE_SCHEMA_VERSION,
+      cast_target: args.target,
+      mold: {
+        name: args.moldName,
+        path: moldRel,
+        revision:
+          typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
+        content_hash: moldHash,
+        commit: gitHead(repoRoot),
+      },
+      cast_method: carry.cast_method,
+      cast_agent: carry.cast_agent,
+      cast_at: new Date().toISOString(),
+      cast_date: carry.cast_date,
+      cast_revision: carry.cast_revision,
+      cast_history: carry.cast_history,
+      refs: refEntries,
+      artifacts: artifactContracts,
+      validation_results: carry.validation_results,
+      open_questions: carry.open_questions,
+    };
+
+    if (args.note) {
+      const today = new Date().toISOString().slice(0, 10);
+      const lastRev = (carry.cast_history ?? []).reduce((m, h) => Math.max(m, h.rev), 0);
+      next.cast_history = [
+        ...(carry.cast_history ?? []),
+        { rev: lastRev + 1, date: today, note: args.note },
+      ];
+      next.cast_revision = lastRev + 1;
+      next.cast_date = today;
+    }
+    const provenanceText = JSON.stringify(next, null, 2) + "\n";
+    writeFileSync(path.join(stagedBundleRoot, "_provenance.json"), provenanceText);
+
+    // Checks this instance runs over the finished staged bundle.
+    //
+    // Collected rather than thrown: a bundle that fails its own check is a finding about this
+    // cast, and the caller reports findings. Letting one escape ends the run with a stack trace
+    // instead — and a check that throws is itself a finding, not a reason to lose the others.
+    for (const check of GALAXY_HOOKS.bundleChecks) {
+      try {
+        errors.push(
+          ...check({
+            moldName: args.moldName,
+            meta: moldParsed.meta,
+            refs: refEntries,
+            metaByPath,
+            slugMap,
+            bundleRoot: stagedBundleRoot,
+          }),
+        );
+      } catch (e) {
+        errors.push(errorMessage(e));
+      }
+    }
+
+    // Report.
+    for (const e of errors) console.error(`error: ${e}`);
+    for (const d of drift) console.error(`drift: ${d.file} — ${d.reason}`);
+
+    if (args.check) {
+      if (errors.length || drift.length) {
+        console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
+        process.exitCode = 1;
+        return;
+      }
+      console.log("clean: no drift, no errors");
+      return;
+    }
+
+    if (errors.length) {
+      console.error(`refusing to update provenance: ${errors.length} error(s)`);
+      process.exitCode = 1;
+      return;
+    }
+
+    // Publish only the subtree/files casting owns. `runs/` and any other harvested state remain
+    // in place; provenance lands last as the record that the preceding writes completed.
+    mkdirSync(bundleRoot, { recursive: true });
+    for (const entry of refEntries) {
+      const staged = path.join(stagedBundleRoot, entry.dst);
+      if (existsSync(staged)) copyVerbatim(staged, path.join(bundleRoot, entry.dst));
+    }
+    reconcileTreeTo({
       root: path.join(bundleRoot, "references"),
-      declared: new Set(refEntries.map((entry) => entry.dst)),
+      declared: declaredRefs,
       relativeTo: bundleRoot,
       reason: () => "orphan (no ref claims it)",
-      check: args.check,
-    }),
-  );
+      check: false,
+    });
+    copyFileSync(path.join(stagedBundleRoot, "SKILL.md"), path.join(bundleRoot, "SKILL.md"));
+    reconcileBundleFiles(contributed, bundleRoot, false);
+    writeFileSync(provenancePath, provenanceText);
 
-  // Bundle-root files this instance contributes. Reported here, written after the error gate —
-  // a cast that refuses to finish must not leave a manifest describing the bundle it declined.
-  const contributed = GALAXY_HOOKS.bundleFiles.flatMap((contribute) =>
-    contribute({
-      moldName: args.moldName,
-      meta: moldParsed.meta,
-      refs: refEntries,
-      metaByPath,
-      slugMap,
-    }),
-  );
-  drift.push(...reconcileBundleFiles(contributed, bundleRoot, true));
-
-  // Checks this instance runs over the finished bundle.
-  //
-  // Collected rather than thrown: a bundle that fails its own check is a finding about this
-  // cast, and the caller reports findings. Letting one escape ends the run with a stack trace
-  // instead — and a check that throws is itself a finding, not a reason to lose the others.
-  for (const check of GALAXY_HOOKS.bundleChecks) {
-    try {
-      errors.push(
-        ...check({
-          moldName: args.moldName,
-          meta: moldParsed.meta,
-          refs: refEntries,
-          metaByPath,
-          slugMap,
-          bundleRoot,
-        }),
-      );
-    } catch (e) {
-      errors.push(errorMessage(e));
-    }
+    console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
+    if (drift.length) console.log(`reconciled ${drift.length} drifted file(s)`);
+  } finally {
+    rmSync(stageDir, { recursive: true, force: true });
   }
-
-  // Report.
-  for (const e of errors) console.error(`error: ${e}`);
-  for (const d of drift) console.error(`drift: ${d.file} — ${d.reason}`);
-
-  if (args.check) {
-    if (errors.length || drift.length) {
-      console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
-      process.exit(1);
-    }
-    console.log("clean: no drift, no errors");
-    return;
-  }
-
-  if (errors.length) {
-    console.error(`refusing to update provenance: ${errors.length} error(s)`);
-    process.exit(1);
-  }
-
-  const next: Provenance = {
-    provenance_schema_version: PROVENANCE_SCHEMA_VERSION,
-    cast_target: args.target,
-    mold: {
-      name: args.moldName,
-      path: moldRel,
-      revision: typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
-      content_hash: moldHash,
-      commit: gitHead(repoRoot),
-    },
-    cast_method: carry.cast_method,
-    cast_agent: carry.cast_agent,
-    cast_at: new Date().toISOString(),
-    cast_date: carry.cast_date,
-    cast_revision: carry.cast_revision,
-    cast_history: carry.cast_history,
-    refs: refEntries,
-    artifacts: artifactContracts,
-    validation_results: carry.validation_results,
-    open_questions: carry.open_questions,
-  };
-
-  if (args.note) {
-    const today = new Date().toISOString().slice(0, 10);
-    const lastRev = (carry.cast_history ?? []).reduce((m, h) => Math.max(m, h.rev), 0);
-    next.cast_history = [
-      ...(carry.cast_history ?? []),
-      { rev: lastRev + 1, date: today, note: args.note },
-    ];
-    next.cast_revision = lastRev + 1;
-    next.cast_date = today;
-  }
-
-  writeFileSync(provenancePath, JSON.stringify(next, null, 2) + "\n");
-  // Findings discarded: the reporting pass above already collected them, and this call exists
-  // to write. Reaching here means the cast is finishing, so contributed files land beside the
-  // provenance record that describes the same bundle.
-  reconcileBundleFiles(contributed, bundleRoot, false);
-  console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
-  if (drift.length) console.log(`reconciled ${drift.length} drifted ref(s)`);
 }
 
 const isDirectInvocation = import.meta.url === `file://${process.argv[1]}`;
