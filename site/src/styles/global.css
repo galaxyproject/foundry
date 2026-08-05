@@ -20,9 +20,12 @@
   /* The brand, which is Galaxy's. These NAMES say which colour, not whose — a shared component
      asking for a branded property name charges every instance that is not that brand with
      declaring someone else's identity to get a card rendered. Whose brand this is lives in
-     SITE_IDENTITY, where it is a value rather than a property name nothing can override. */
+     SITE_IDENTITY, where it is a value rather than a property name nothing can override.
+     `chrome` goes one step further and names the JOB rather than a relation to the colour above
+     it: it is what the header, footer and skip link are painted with. That is the name the kit
+     asks for, and a role is the only kind that can mean the same thing in a second instance. */
   --color-brand: #25537b;
-  --color-brand-dark: #2c3143;
+  --color-chrome: #2c3143;
 
   /* Neutral structure: graph stations, chip backgrounds. Equal to --color-text-secondary today,
      and kept apart from it because a repeated value is not a mapping — a graph's borders are not
@@ -50,7 +53,6 @@
 
   /* Accent — slightly desaturated from pure #ffd700 for less screaming gold */
   --color-accent: #e8c547;
-  --color-accent-dark: #d0bd2a;
 
   /* The rail of the subway-style phase graph; a lighter blue in dark. */
   --color-rail: #25537b;
@@ -143,7 +145,7 @@
 a:hover .tag,
 a.tag:hover {
   background-color: var(--color-accent);
-  color: var(--color-brand-dark);
+  color: var(--color-chrome);
 }
 
 /* A count riding inside the chip. Opacity rather than a muted color token, so it stays legible
@@ -171,7 +173,7 @@ a.tag:hover {
   top: -3rem;
   z-index: 100;
   padding: 0.5rem 0.75rem;
-  background: var(--color-brand-dark);
+  background: var(--color-chrome);
   color: var(--color-text-on-dark);
   border-radius: 0.25rem;
   text-decoration: none;
@@ -233,7 +235,7 @@ a.tag:hover {
   text-decoration-color: var(--color-link-hover);
 }
 .prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  color: var(--color-brand-dark);
+  color: var(--color-chrome);
 }
 .dark .prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
   color: var(--color-text-primary);
@@ -266,7 +268,7 @@ a.tag:hover {
   content: none;
 }
 .prose :where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  background-color: var(--color-brand-dark);
+  background-color: var(--color-chrome);
   border-radius: 0.5rem;
 }
 .prose :where(th):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
@@ -554,4 +556,23 @@ a.tag:hover {
  * duplicate. */
 .prose > h1:first-child {
   display: none;
+}
+
+/* The accent bar on a reference card, keyed on which kind the reference is.
+ *
+ * WHICH kinds exist is this instance's to say — `cli-tool` and `schema` are ours and a sibling
+ * Foundry authors neither — so the kit ships the bar and reads `--color-kind-accent` off the card,
+ * and the three names below live here. A kind nobody tinted falls back to the brand, which is a
+ * real answer rather than a missing one; four of our seven take it.
+ *
+ * Custom properties inherit, so setting one on the article reaches the kit's scoped `::before`
+ * without this file naming a selector inside a package. */
+.reference-card[data-kind='research'] {
+  --color-kind-accent: var(--color-brand);
+}
+.reference-card[data-kind='schema'] {
+  --color-kind-accent: var(--color-accent);
+}
+.reference-card[data-kind='pattern'] {
+  --color-kind-accent: var(--color-link);
 }

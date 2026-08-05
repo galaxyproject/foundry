@@ -1,10 +1,11 @@
 ---
 import { noteTitle, type NoteEntry, type NoteOf } from '../lib/notes';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
-import ReferenceContract from './ReferenceContract.astro';
+import ReferenceContract from '@galaxy-foundry/site-kit/ReferenceContract.astro';
 import CastArtifacts from './CastArtifacts.astro';
 import { artifactHref, type ArtifactGraph } from '../lib/artifacts';
 import { base } from '../lib/site-base';
+import { referenceContract } from '../lib/registries';
 
 interface Props {
   entry: NoteOf<'molds'>;
@@ -16,6 +17,19 @@ interface Props {
 }
 
 const { entry, linkMap, artifactGraph, entryById } = Astro.props;
+
+// How a `ref` becomes a link is this instance's question, not the contract's. Only wiki-shaped
+// refs resolve — a `cli-tool` ref is a command name and points at no page here, and returning
+// null leaves it on the card as the author wrote it.
+//
+// `summary` is narrowed on the way out because this repo spells "no summary" as `null` while the
+// kit's `ResolvedReference` spells it as absent. One spelling of absent per boundary: a package
+// that took both would make every consumer of it handle two.
+const resolveRef = (ref: string) => {
+  if (!/^\[\[.+\]\]$/.test(ref)) return null;
+  const link = resolveWikiLink(ref, linkMap, base);
+  return { ...link, summary: link.summary ?? undefined };
+};
 const data = entry.data;
 
 const axisChip = data.axis;
@@ -124,7 +138,7 @@ function producersOf(id: string): { moldId: string; description: string }[] {
   }
 </style>
 
-<ReferenceContract references={data.references} linkMap={linkMap} />
+<ReferenceContract references={data.references ?? []} contract={referenceContract} resolveRef={resolveRef} />
 
 <CastArtifacts moldSlug={data.name} />
 
