@@ -29,9 +29,14 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { SITE_IDENTITY } from "../site/src/lib/site-identity";
+
+// This file's assertions are ~100ms of disk reads on an idle machine and have still hit vitest's
+// 5s default in a full run, where sibling suites spawn child builds on the same cores. The budget
+// was never an assertion about speed; a genuine hang still fails, later.
+vi.setConfig({ testTimeout: 30_000 });
 
 const { footerLinks: FOOTER_LINKS, navLinks: NAV_LINKS, repoUrl: REPO_URL } = SITE_IDENTITY;
 
@@ -88,7 +93,17 @@ function builtPages(dir: string = DIST): string[] {
 }
 
 const rel = (file: string) => path.relative(DIST, file);
-const read = (file: string) => readFileSync(file, "utf-8");
+
+// Memoized because five assertions below each walk all 374 emitted pages. Nothing writes to dist/
+// after beforeAll, so a page read twice is the same page.
+const cache = new Map<string, string>();
+const read = (file: string): string => {
+  const hit = cache.get(file);
+  if (hit !== undefined) return hit;
+  const text = readFileSync(file, "utf-8");
+  cache.set(file, text);
+  return text;
+};
 
 let pages: string[];
 let home: string;
