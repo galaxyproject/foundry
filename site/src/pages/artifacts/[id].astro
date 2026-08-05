@@ -1,8 +1,9 @@
 ---
-import { getAllNotes } from '../../lib/notes';
+import { getAllNotes, noteTitle } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { buildWikiLinkMap, resolveWikiLink } from '../../lib/wiki-links';
 import { buildArtifactGraph } from '../../lib/artifacts';
+import { base } from '../../lib/site-base';
 
 export async function getStaticPaths() {
   const entries = await getAllNotes();
@@ -20,13 +21,10 @@ const linkMap = buildWikiLinkMap(entries);
 const graph = buildArtifactGraph(entries, linkMap);
 const node = graph.get(id);
 const entryById = new Map(entries.map(e => [e.id, e]));
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function entryName(entryId: string): string {
   const e = entryById.get(entryId);
-  if (!e) return entryId;
-  const d = e.data as any;
-  return d.name || d.title || entryId.split('/').pop() || entryId;
+  return e ? noteTitle(e) : entryId;
 }
 
 function entryHref(entryId: string): string {

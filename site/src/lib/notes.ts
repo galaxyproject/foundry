@@ -54,6 +54,80 @@ export type _CollectionsCovered = MustBeTrue<SameSet<NoteCollection, CollectionN
 export type NoteEntry = CollectionEntry<NoteCollection>;
 
 /**
+ * A note of ONE kind — what a component that renders that kind takes.
+ *
+ * `NoteEntry` is for readers that genuinely range over the corpus: the tag pages, the dashboard,
+ * the link graphs. A component that draws a Mold's phases is not one of those, and taking the
+ * union there costs twice. It accepts a note of any kind, so nothing checks that the route handed
+ * it the one it draws; and its own fields are absent from the union, so reading them needs a cast,
+ * which erases the rest of the frontmatter along with them.
+ *
+ * Naming the kind is what makes `{data.type === 'mold' && <MoldBody entry={entry} />}` checked at
+ * the CALL SITE. The branch and the component then agree by compilation rather than by reading.
+ */
+export type NoteOf<C extends NoteCollection> = CollectionEntry<C>;
+
+type KeysOfUnion<T> = T extends unknown ? keyof T : never;
+
+/**
+ * Every field name at least one kind declares.
+ *
+ * `in` narrows the VALUE and never checks the KEY. Measured: `'nope_not_a_field' in data &&
+ * data.nope_not_a_field` compiles at zero errors against this union. So a cross-kind read of a
+ * field renamed in every schema that had it goes quiet instead of red — which is the exact failure
+ * `in` was reached for in place of a cast, arriving one step later.
+ *
+ * Writing the key as `'license' satisfies NoteField` is what makes that rename fail. It does not
+ * type the value; it asserts the question is one some kind can answer.
+ */
+export type NoteField = KeysOfUnion<NoteEntry['data']>;
+
+/**
+ * The `type` literal of a note — the discriminator every arm of the union carries.
+ *
+ * Derived from the union rather than re-listed, so a table keyed by it (`TYPE_LABELS` on the note
+ * route) gains a required row the moment a kind is added, instead of falling through to a default.
+ */
+export type NoteType = NoteEntry['data']['type'];
+
+/**
+ * What to call a note, for a reader that has one of any kind.
+ *
+ * The kinds name themselves differently — most carry a `title`, molds and schemas carry a `name`,
+ * a CLI command is its `tool command` pair — and none of those fields is on every arm, so this is
+ * a question the union forces someone to answer. SEVEN callers answered it privately: the note
+ * route, the full index, the dashboard, the tag pages, the incoming-references list, the mold
+ * artifact tables and the artifact pages. Each read the fields off `any`; each spelled the id
+ * fallback again.
+ *
+ * They fell into three answers, not two. Two asked for the `tool command` pair and five did not,
+ * so every CLI command was titled from its slug on five of the seven surfaces — `Planemo
+ * Climetadata`, and in a list of links the unqualified `Add`, `List`, `Convert`, `Validate`. The
+ * remaining two asked for `name` before `title` and fell back to a raw basename; that ordering
+ * never mattered, because both are only ever called with mold ids and no mold declares a `title`.
+ * A disagreement that costs nothing today is still a disagreement nothing was comparing.
+ */
+const NAME = 'name' satisfies NoteField;
+const TOOL = 'tool' satisfies NoteField;
+const COMMAND = 'command' satisfies NoteField;
+
+export function noteTitle(entry: NoteEntry): string {
+  const data = entry.data;
+  // `title` is on the base envelope, so every kind has it and it needs no `in`. `name` is not.
+  if (data.title) return data.title;
+  if (NAME in data && data.name) return data.name;
+  if (TOOL in data && COMMAND in data) return `${data.tool} ${data.command}`;
+  // Unreachable for every kind defined today — `title` or `name` is required on all ten. Kept
+  // because it costs one line and the alternative, when an eleventh kind arrives, is a page whose
+  // heading is the empty string.
+  return entry.id
+    .split('/')
+    .pop()!
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/**
  * Every note in the corpus, in collection order then id order.
  *
  * Sorted rather than left in load order: several callers build maps and lists straight off

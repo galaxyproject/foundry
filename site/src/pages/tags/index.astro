@@ -2,8 +2,9 @@
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { tags as registry } from '../../lib/registries';
+import { groupTagsInUse } from '../../lib/tag-browse';
+import { base } from '../../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getAllNotes();
 
 const tagCounts = new Map<string, number>();
@@ -14,16 +15,11 @@ for (const note of allNotes) {
   }
 }
 
-const sorted = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-
-// Groups come from meta_tags.yml in its declared facet order, and each tag lands in the
-// facet that DECLARED it — not the one its text happens to start with. That is why there
-// is no "Other" bucket to fall into: every tag in use is registered, so every tag has a
-// facet. The per-tag glosses the registry has always carried are rendered here too.
-const groups = registry.facets().map(f => ({
-  ...f,
-  tags: sorted.filter(([t]) => registry.facetOf(t) === f.key),
-}));
+// What counts as a tagged thing belongs to this instance: a note that is not archived. How the
+// tags then browse does not, and used to be spelled out here — grouped by the facet that DECLARED
+// each tag rather than the one its text starts with, the registry's order kept, unused facets
+// dropped, glosses carried. See lib/tag-browse.ts for why that has exactly one reader.
+const groups = groupTagsInUse(registry, tagCounts);
 ---
 <Base title="Tags">
   <h1 class="mb-4 text-2xl font-bold">Tags</h1>
@@ -32,18 +28,18 @@ const groups = registry.facets().map(f => ({
     below is registered and glossed in <code>meta_tags.yml</code>.
   </p>
 
-  {groups.map(g => g.tags.length > 0 && (
+  {groups.map(g => (
     <>
       <h2 class="mt-8 mb-1 text-xl font-semibold border-b-2 border-(--color-accent)/20 pb-2">{g.label}</h2>
       <p class="mb-3 text-sm text-(--color-text-secondary)">{g.description}</p>
       <ul class="list-none my-2 mb-6 p-0 grid gap-3 sm:grid-cols-2">
-        {g.tags.map(([tag, count]) => (
+        {g.tags.map(({ tag, count, gloss }) => (
           <li>
             <a href={`${base}/tags/${tag}/`} class="no-underline flex items-baseline gap-2">
               <span class="tag">{tag}</span>
               <span class="text-xs text-(--color-text-secondary)">({count})</span>
             </a>
-            <div class="mt-0.5 text-sm text-(--color-text-secondary)">{registry.tagDescription(tag)}</div>
+            <div class="mt-0.5 text-sm text-(--color-text-secondary)">{gloss}</div>
           </li>
         ))}
       </ul>

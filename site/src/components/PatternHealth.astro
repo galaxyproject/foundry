@@ -1,11 +1,12 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteEntry, type NoteOf } from '../lib/notes';
 import HealthPanel from './HealthPanel.astro';
 import { resolveWikiLinkId, type WikiLinkTarget } from '../lib/wiki-links';
 
 interface Props {
-  entry: NoteEntry;
+  entry: NoteOf<'patterns'>;
   linkMap: Map<string, WikiLinkTarget>;
+  // The union, deliberately: map coverage is a search for OTHER patterns among every note there is.
   entryById: Map<string, NoteEntry>;
 }
 
@@ -16,17 +17,16 @@ interface HealthItem {
 }
 
 const { entry, linkMap, entryById } = Astro.props;
-const data = entry.data as any;
-const exemplars = Array.isArray(data.iwc_exemplars) ? data.iwc_exemplars : [];
-const verificationPaths = Array.isArray(data.verification_paths) ? data.verification_paths : [];
+const data = entry.data;
+const exemplars = data.iwc_exemplars ?? [];
+const verificationPaths = data.verification_paths ?? [];
 const generatedRefPattern = /(?:^|\/)(?:\$IWC_FORMAT2|\$IWC_SKELETONS|workflow-fixtures\/iwc-(?:format2|skeletons)|iwc-(?:format2|skeletons)\/)|\.(?:ga|gxwf\.ya?ml)$/;
 const lineRefPattern = /:\d+(?:-\d+)?$/;
 
 function exemplarState(): HealthItem {
-  const bad = exemplars.filter((exemplar: any) => {
-    const workflow = exemplar?.workflow;
-    return typeof workflow === 'string' && (generatedRefPattern.test(workflow) || lineRefPattern.test(workflow));
-  });
+  const bad = exemplars.filter(
+    ({ workflow }) => generatedRefPattern.test(workflow) || lineRefPattern.test(workflow),
+  );
   if (bad.length > 0) {
     return { label: 'IWC exemplar anchors', state: 'error', detail: `${bad.length} generated path or line citation${bad.length === 1 ? '' : 's'} in metadata.` };
   }
@@ -49,10 +49,9 @@ function verificationState(): HealthItem {
 
 function mapCoverageState(): HealthItem {
   const mocs = Array.from(entryById.values()).filter(candidate => {
-    const candidateData = candidate.data as any;
-    if (candidateData.type !== 'pattern' || candidateData.pattern_kind !== 'moc') return false;
-    const related = Array.isArray(candidateData.related_patterns) ? candidateData.related_patterns : [];
-    return related.some((link: string) => resolveWikiLinkId(link, linkMap) === entry.id);
+    const d = candidate.data;
+    if (d.type !== 'pattern' || d.pattern_kind !== 'moc') return false;
+    return (d.related_patterns ?? []).some(link => resolveWikiLinkId(link, linkMap) === entry.id);
   });
   if (mocs.length === 0) {
     return { label: 'Pattern map coverage', state: 'warn', detail: 'No pattern map links to this leaf yet.' };
@@ -61,7 +60,10 @@ function mapCoverageState(): HealthItem {
 }
 
 function metadataState(): HealthItem {
-  const missing = ['title', 'summary', 'evidence', 'pattern_kind'].filter(field => !data[field]);
+  // Named as keys of the pattern's own frontmatter, so a field renamed in the schema fails here
+  // rather than reporting itself permanently missing.
+  const REQUIRED = ['title', 'summary', 'evidence', 'pattern_kind'] as const satisfies readonly (keyof typeof data)[];
+  const missing = REQUIRED.filter(field => !data[field]);
   if (missing.length > 0) {
     return { label: 'Metadata contract', state: 'error', detail: `Missing ${missing.join(', ')}.` };
   }

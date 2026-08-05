@@ -5,13 +5,17 @@ import { type KindContext, defineKind } from "../context.js";
 
 // Pipeline-local: a phase is either a Mold to run or a branch over alternatives. Nothing
 // else composes Molds, so the phase grammar stays here.
-const branchItem: z.ZodType<unknown> = z.lazy(() =>
-  z.union([
-    z.string().regex(WIKI_LINK_RE),
-    z.string(), // free-text terminal like "user-supplied"
-    z.object({ fallthrough: z.string().regex(WIKI_LINK_RE) }).strict(),
-  ]),
-);
+//
+// The `z.lazy` wrapper and the `z.ZodType<unknown>` annotation are both gone, and neither was
+// load-bearing: this union does not refer to itself, so nothing needed deferring, and the
+// annotation was what erased the grammar on the way out. The site renders these — a phase's
+// `mold`, a branch's `branches` and `chain` — and under `unknown` the only way to read them was
+// a component prop typed `any[]`, which is what it was.
+const branchItem = z.union([
+  z.string().regex(WIKI_LINK_RE),
+  z.string(), // free-text terminal like "user-supplied"
+  z.object({ fallthrough: z.string().regex(WIKI_LINK_RE) }).strict(),
+]);
 
 const moldPhase = z
   .object({
@@ -33,6 +37,12 @@ const branchPhase = z
   });
 
 const phase = z.union([moldPhase, branchPhase]);
+
+/** One alternative under a branch phase: a `[[mold]]`, a free-text terminal, or a fallthrough. */
+export type PhaseBranchItem = z.infer<typeof branchItem>;
+
+/** One step of a pipeline — a Mold to run, or a branch over alternatives. */
+export type PipelinePhase = z.infer<typeof phase>;
 
 export const kind = defineKind({
   kind: "pipeline",

@@ -2,8 +2,8 @@
 import { getCollection } from 'astro:content';
 import { companionOf, readCompanion } from '../../lib/note-directory';
 import Base from '../../layouts/Base.astro';
+import { base } from '../../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const EVAL = companionOf('mold', 'eval.md');
 const molds = (await getCollection('molds')).filter(n => n.data.status !== 'archived');
 const evalCount = molds.filter(m => hasEval(m.id)).length;
@@ -29,9 +29,11 @@ function healthFor(m: typeof molds[number]): 'ok' | 'warn' | 'error' {
   if (d.axis === 'target-specific' && !d.target) return 'error';
   if (d.axis === 'tool-specific' && !d.tool) return 'error';
   if (!hasEval(m.id)) return 'warn';
-  const refs = Array.isArray(d.references) ? d.references : [];
-  if (refs.some((ref: any) => ref.evidence === 'hypothesis' && !ref.verification)) return 'error';
-  if (refs.some((ref: any) => ref.load === 'on-demand' && !ref.trigger)) return 'warn';
+  // The same two checks MoldHealth runs on a mold's own page. Both read the reference fields from
+  // the kind now; under `any` they were two private copies of a question with no wrong answer.
+  const refs = d.references ?? [];
+  if (refs.some(ref => ref.evidence === 'hypothesis' && !ref.verification)) return 'error';
+  if (refs.some(ref => ref.load === 'on-demand' && !ref.trigger)) return 'warn';
   return 'ok';
 }
 ---

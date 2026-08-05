@@ -1,10 +1,10 @@
 ---
-import { getAllNotes } from '../../lib/notes';
+import { getAllNotes, noteTitle } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import sections from '../../../../dashboard_sections.json';
 import { designDocsByCategory, designDocHref } from '../../lib/design-docs';
+import { base } from '../../lib/site-base';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getAllNotes();
 const infrastructureDocs = await designDocsByCategory('infrastructure');
 
@@ -24,12 +24,6 @@ function formatDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-function noteTitle(n: typeof allNotes[number]): string {
-  const data = n.data as any;
-  if (data.title) return data.title;
-  if (data.name) return data.name;
-  return n.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
 ---
 <Base title="Dashboard">
   <section class="page-hero bg-grain" aria-labelledby="dashboard-heading">

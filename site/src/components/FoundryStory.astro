@@ -1,5 +1,6 @@
 ---
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+import { base } from '../lib/site-base';
+
 const imageSrc = `${base}/images/casting-molds-story.png`;
 ---
 
@@ -57,7 +58,7 @@ const imageSrc = `${base}/images/casting-molds-story.png`;
   }
   .story-copy h3 {
     margin: 0.65rem 0 0.7rem;
-    color: var(--color-brand-dark);
+    color: var(--color-chrome);
     font-size: clamp(1.35rem, 2.4vw, 2rem);
     line-height: 1.08;
     letter-spacing: -0.015em;
@@ -84,7 +85,7 @@ const imageSrc = `${base}/images/casting-molds-story.png`;
     align-items: center;
     gap: 0.4rem;
     padding: 0.52rem 0.9rem;
-    background: var(--color-brand-dark);
+    background: var(--color-chrome);
     color: var(--color-text-on-dark);
     border-radius: 0.35rem;
     text-decoration: none;

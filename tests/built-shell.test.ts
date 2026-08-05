@@ -1,22 +1,22 @@
 // The document shell's contract, asserted on what the build actually emitted.
 //
-// Base.astro, Header.astro and Footer.astro have no unit behaviour worth testing — they are
-// markup. What they DO have is a contract with the reader that no other check can see: a skip
-// link that lands somewhere, a theme applied before first paint, and a stylesheet that actually
-// carries the utilities the markup names. Every one of those fails green. The page builds, the
-// HTML is well-formed, and the site is broken.
+// The shell has no unit behaviour worth testing — it is markup. What it DOES have is a contract
+// with the reader that no other check can see: a skip link that lands somewhere, a theme applied
+// before first paint, and a stylesheet that actually carries the utilities the markup names. Every
+// one of those fails green. The page builds, the HTML is well-formed, and the site is broken.
 //
-// This exists ahead of any attempt to share these components. A test written after a swap proves
-// nothing about what the swap changed, so it is written against the hand-rolled components first
-// and is expected to pass unaltered afterwards. If sharing them never happens, this is still the
-// only thing standing between the shell and a silent regression.
+// This was written against the hand-rolled Base/Header/Footer, deliberately BEFORE they moved to
+// @galaxy-foundry/site-kit, because a test written after a swap proves nothing about what the swap
+// changed. It passed unaltered afterwards — the assertions below are the ones that were here, and
+// the swap is what they were for.
 //
-// The stylesheet assertion is the one to understand before editing. Tailwind 4 emits a utility
-// only where it finds the class in a source file it was told to scan. Move the markup somewhere
-// unscanned — a package under node_modules, say — and the class disappears from the CSS while
-// every page still references it. Nothing errors. The page renders unstyled. `min-h-dvh` is the
-// canary because Base.astro is the only file in the repo that names it, so its presence in the
-// emitted CSS is evidence that the layout specifically was scanned.
+// The stylesheet assertion is the one to understand before editing, and the move is what armed it.
+// Tailwind 4 emits a utility only where it finds the class in a source file it was told to scan,
+// and it does not look inside node_modules — which is exactly where the shell now lives. So the
+// canary is no longer a hypothetical about markup that might one day move: `min-h-dvh` is named by
+// the KIT and by nothing in this repo, and its presence in the emitted CSS is the only evidence
+// that `@source` in global.css points where it claims to. Delete that line, or misspell it, and
+// every page still references the class while no rule for it exists. Nothing errors.
 //
 // WHICH MEANS THIS FILE'S LOCATION IS LOAD-BEARING. Automatic source detection scans the Vite
 // root, `site/`. This file sits above it, so naming the canary here does not create it. The
@@ -29,16 +29,23 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { FOOTER_LINKS, NAV_LINKS, REPO_URL } from "../site/src/lib/site-identity";
+import { SITE_IDENTITY } from "../site/src/lib/site-identity";
+
+// This file's assertions are ~100ms of disk reads on an idle machine and have still hit vitest's
+// 5s default in a full run, where sibling suites spawn child builds on the same cores. The budget
+// was never an assertion about speed; a genuine hang still fails, later.
+vi.setConfig({ testTimeout: 30_000 });
+
+const { footerLinks: FOOTER_LINKS, navLinks: NAV_LINKS, repoUrl: REPO_URL } = SITE_IDENTITY;
 
 const REPO_ROOT = new URL("../", import.meta.url).pathname;
 const SITE = path.join(REPO_ROOT, "site");
 const DIST = path.join(SITE, "dist");
 
-/** A utility class named by the layout and by nothing else — see the header comment. */
-const LAYOUT_ONLY_UTILITY = "min-h-dvh";
+/** A utility class named by the kit and by nothing in this repo — see the header comment. */
+const KIT_ONLY_UTILITY = "min-h-dvh";
 
 function newestMtime(dir: string): number {
   return readdirSync(dir).reduce((newest, entry) => {
@@ -86,7 +93,17 @@ function builtPages(dir: string = DIST): string[] {
 }
 
 const rel = (file: string) => path.relative(DIST, file);
-const read = (file: string) => readFileSync(file, "utf-8");
+
+// Memoized because five assertions below each walk all 374 emitted pages. Nothing writes to dist/
+// after beforeAll, so a page read twice is the same page.
+const cache = new Map<string, string>();
+const read = (file: string): string => {
+  const hit = cache.get(file);
+  if (hit !== undefined) return hit;
+  const text = readFileSync(file, "utf-8");
+  cache.set(file, text);
+  return text;
+};
 
 let pages: string[];
 let home: string;
@@ -156,15 +173,16 @@ const emittedCss = (): string =>
     .join("\n");
 
 describe("the stylesheet the shell depends on", () => {
-  it("emits a utility that only the layout names", () => {
+  it("emits a utility that only the kit names", () => {
     const css = emittedCss();
 
     expect(css).not.toHaveLength(0);
     expect(
-      css.includes(LAYOUT_ONLY_UTILITY),
-      `\n\`${LAYOUT_ONLY_UTILITY}\` is referenced by the built markup but has no rule in any` +
-        ` emitted stylesheet. Tailwind did not scan the file that declares it — see the header` +
-        ` comment. The pages will render unstyled, and nothing else reports this.`,
+      css.includes(KIT_ONLY_UTILITY),
+      `\n\`${KIT_ONLY_UTILITY}\` is referenced by the built markup but has no rule in any` +
+        ` emitted stylesheet. Tailwind did not scan the package that declares it — check the` +
+        ` \`@source\` line in global.css, and see the header comment. The pages will render` +
+        ` unstyled, and nothing else reports this.`,
     ).toBe(true);
   });
 });
@@ -315,9 +333,10 @@ describe("the footer", () => {
 });
 
 describe("the container width", () => {
-  // Base, Header and Footer each hardcode this, and until now nothing checked that the three
-  // agreed — a width changed in one place reads as a subtly misaligned page and as nothing else.
-  // It is one decision, so it is asserted as one.
+  // One decision, so it is asserted as one: the three regions have to agree, and a width that
+  // disagrees in one of them reads as a subtly misaligned page and as nothing else. The kit now
+  // holds the measure as a single constant, which is what makes them agree — so what this catches
+  // is a region that lost the class on the way to the page, not three copies drifting apart.
   const widthsIn = (html: string, open: string, close: string): string[] => {
     const region = html.slice(html.indexOf(open), html.indexOf(close) + close.length);
     return [...region.matchAll(/max-w-(\d?xl|none|full)/g)].map((m) => m[0]);

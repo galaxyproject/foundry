@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import yaml from "js-yaml";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
+import { groupTagsInUse } from "../site/src/lib/tag-browse";
 import { readMarkdown } from "../packages/build-cli/src/lib/frontmatter.js";
 import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";
 
@@ -45,13 +46,18 @@ describe("registry drift (authored vocabulary vs corpus)", () => {
     expect(dead, `\nregistered but unused: ${dead.join(", ")}`).toEqual([]);
   });
 
-  // A facet whose members are all unused renders as nothing on /tags — a browse axis that
-  // exists only in the registry.
+  // A facet whose members are all unused renders as nothing on /tags — a browse axis that exists
+  // only in the registry. Asked OF the grouping rather than recomputed alongside it: this check
+  // reasons about what the tags index shows, and it used to reach that conclusion by its own
+  // route, which is a second answer to the question dressed up as a test of the first.
   it("has no facet with zero members in use", () => {
+    const shown = new Set(
+      groupTagsInUse(registry, new Map([...tagsInUse].map((t) => [t, 1] as const))).map((g) => g.key),
+    );
     const empty = registry
       .facets()
       .map((f) => f.key)
-      .filter((key) => ![...tagsInUse].some((t) => registry.facetOf(t) === key));
+      .filter((key) => !shown.has(key));
     expect(empty, `\nfacets with no tags in use: ${empty.join(", ")}`).toEqual([]);
   });
 

@@ -6,12 +6,12 @@
 import { getCollection } from 'astro:content';
 import StopGapBanner from './StopGapBanner.astro';
 import { loadAssembly, assemblyStats } from '../lib/casts';
+import { base } from '../lib/site-base';
 
 interface Props {
   variant?: 'full' | 'text';
 }
 const { variant = 'full' } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const pipelines = (await getCollection('pipelines'))
   .filter(n => n.data.status !== 'archived')

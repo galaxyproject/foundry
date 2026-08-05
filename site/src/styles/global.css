@@ -5,13 +5,27 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* The shell lives in @galaxy-foundry/site-kit, and Tailwind's automatic source detection does not
+   look inside node_modules. Without this line every utility the shell writes — the container
+   measure, the header bar, the footer row — is missing from the emitted stylesheet: the build stays
+   green, all 374 pages render, and the site has no layout.
+
+   This line cannot be verified by reading it. A typo'd path resolves to nothing and Tailwind says
+   nothing about it; `site-kitt` builds exactly as cleanly as the correct spelling. What tells the
+   two apart is `tests/built-shell.test.ts`, which asserts that a utility only the KIT writes
+   reaches the stylesheet. */
+@source "../../node_modules/@galaxy-foundry/site-kit/src";
+
 @theme {
   /* The brand, which is Galaxy's. These NAMES say which colour, not whose — a shared component
      asking for a branded property name charges every instance that is not that brand with
      declaring someone else's identity to get a card rendered. Whose brand this is lives in
-     SITE_IDENTITY, where it is a value rather than a property name nothing can override. */
+     SITE_IDENTITY, where it is a value rather than a property name nothing can override.
+     `chrome` goes one step further and names the JOB rather than a relation to the colour above
+     it: it is what the header, footer and skip link are painted with. That is the name the kit
+     asks for, and a role is the only kind that can mean the same thing in a second instance. */
   --color-brand: #25537b;
-  --color-brand-dark: #2c3143;
+  --color-chrome: #2c3143;
 
   /* Neutral structure: graph stations, chip backgrounds. Equal to --color-text-secondary today,
      and kept apart from it because a repeated value is not a mapping — a graph's borders are not
@@ -39,7 +53,6 @@
 
   /* Accent — slightly desaturated from pure #ffd700 for less screaming gold */
   --color-accent: #e8c547;
-  --color-accent-dark: #d0bd2a;
 
   /* The rail of the subway-style phase graph; a lighter blue in dark. */
   --color-rail: #25537b;
@@ -55,9 +68,6 @@
   --color-badge-stale-text: #721c24;
   --color-badge-archived-bg: #d6d8db;
   --color-badge-archived-text: #383d41;
-
-  /* Tags. The chip's hover is the accent, not a lighter shade of its own background. */
-  --color-tag-bg: #edf4fa;
 
   /* Fonts */
   --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -86,7 +96,6 @@
   --color-badge-stale-text: #f85149;
   --color-badge-archived-bg: #21262d;
   --color-badge-archived-text: #8b949e;
-  --color-tag-bg: #21262d;
 }
 
 /* --- Grid background --- */
@@ -120,15 +129,29 @@
 
 .tag {
   @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-150;
-  background-color: var(--color-tag-bg);
+  background-color: var(--color-surface-hover);
   color: var(--color-link);
 }
 .dark .tag {
   color: #9bb8d6;
 }
-a:hover .tag {
+
+/* Both nestings, deliberately. An anchor sometimes IS the chip and sometimes WRAPS it — on the
+   tags index it covers the chip and the note count beside it, so there is nothing to collapse.
+   The rule used to be the descendant half alone, which meant `<a class="tag">` had a transition
+   and nothing to transition to: no hover, no error, and the two forms a line apart on the same
+   page behaved differently. Which nesting a call site needs is a layout question; whether the
+   chip lights up is not, and it should not follow from the answer. */
+a:hover .tag,
+a.tag:hover {
   background-color: var(--color-accent);
-  color: var(--color-brand-dark);
+  color: var(--color-chrome);
+}
+
+/* A count riding inside the chip. Opacity rather than a muted color token, so it stays legible
+   against the accent on hover instead of needing a second rule to undo the first. */
+.tag-count {
+  opacity: 0.7;
 }
 
 .dangling {
@@ -150,7 +173,7 @@ a:hover .tag {
   top: -3rem;
   z-index: 100;
   padding: 0.5rem 0.75rem;
-  background: var(--color-brand-dark);
+  background: var(--color-chrome);
   color: var(--color-text-on-dark);
   border-radius: 0.25rem;
   text-decoration: none;
@@ -212,7 +235,7 @@ a:hover .tag {
   text-decoration-color: var(--color-link-hover);
 }
 .prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  color: var(--color-brand-dark);
+  color: var(--color-chrome);
 }
 .dark .prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
   color: var(--color-text-primary);
@@ -245,7 +268,7 @@ a:hover .tag {
   content: none;
 }
 .prose :where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  background-color: var(--color-brand-dark);
+  background-color: var(--color-chrome);
   border-radius: 0.5rem;
 }
 .prose :where(th):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
@@ -533,4 +556,23 @@ a:hover .tag {
  * duplicate. */
 .prose > h1:first-child {
   display: none;
+}
+
+/* The accent bar on a reference card, keyed on which kind the reference is.
+ *
+ * WHICH kinds exist is this instance's to say — `cli-tool` and `schema` are ours and a sibling
+ * Foundry authors neither — so the kit ships the bar and reads `--color-kind-accent` off the card,
+ * and the three names below live here. A kind nobody tinted falls back to the brand, which is a
+ * real answer rather than a missing one; four of our seven take it.
+ *
+ * Custom properties inherit, so setting one on the article reaches the kit's scoped `::before`
+ * without this file naming a selector inside a package. */
+.reference-card[data-kind='research'] {
+  --color-kind-accent: var(--color-brand);
+}
+.reference-card[data-kind='schema'] {
+  --color-kind-accent: var(--color-accent);
+}
+.reference-card[data-kind='pattern'] {
+  --color-kind-accent: var(--color-link);
 }

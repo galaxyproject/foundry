@@ -1,19 +1,29 @@
 ---
-import { type NoteEntry } from '../lib/notes';
+import { type NoteEntry, type NoteField } from '../lib/notes';
 import { licenseIdFromFilePath, resolveLicenseRow } from '@galaxy-foundry/license-policy';
 import { licensePolicy } from '../lib/registries';
+import { base } from '../lib/site-base';
 
 interface Props {
   entry: NoteEntry;
 }
 
 const { entry } = Astro.props;
-const data = entry.data as any;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const data = entry.data;
 
-const license: string | undefined = data.license;
-const licenseFile: string | undefined = data.license_file;
-const upstream: string | undefined = data.upstream;
+// The union, not one kind: a license travels with redistributed material, and which kinds carry
+// redistributed material is not this component's to decide.
+//
+// The keys go through `satisfies NoteField` because `in` does not check them — `'nope' in data`
+// compiles — so a field renamed in every schema that declares it would leave this panel silently
+// empty on notes that do redistribute. The assertion is that some kind still answers the question.
+const LICENSE = 'license' satisfies NoteField;
+const LICENSE_FILE = 'license_file' satisfies NoteField;
+const UPSTREAM = 'upstream' satisfies NoteField;
+
+const license = LICENSE in data ? data.license : undefined;
+const licenseFile = LICENSE_FILE in data ? data.license_file : undefined;
+const upstream = UPSTREAM in data ? data.upstream : undefined;
 
 // Only rendered for notes that carry a license (third-party redistribution).
 const row = license ? resolveLicenseRow(licensePolicy, license) : undefined;
