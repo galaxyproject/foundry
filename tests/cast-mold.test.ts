@@ -1620,7 +1620,7 @@ license_file: LICENSES/test.LICENSE
 // re-casting every skill cannot exercise those branches — they are only covered here.
 describe("stripWikiLinks", () => {
   it("keeps the bare target, drops an anchor, and prefers an explicit alias", async () => {
-    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { stripWikiLinks } = await import("../packages/build-cli/src/lib/caster/skill.js");
     expect(stripWikiLinks("See [[summarize-nextflow]] first.")).toBe(
       "See summarize-nextflow first.",
     );
@@ -1634,14 +1634,14 @@ describe("stripWikiLinks", () => {
   });
 
   it("rewrites every link on a line and leaves text without links alone", async () => {
-    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { stripWikiLinks } = await import("../packages/build-cli/src/lib/caster/skill.js");
     expect(stripWikiLinks("Per [[a]] and [[b]], do the thing.")).toBe("Per a and b, do the thing.");
     expect(stripWikiLinks("No links here at all.")).toBe("No links here at all.");
   });
 
   // A payload that yields no text would otherwise delete itself silently.
   it("leaves a degenerate payload as authored rather than emitting nothing", async () => {
-    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { stripWikiLinks } = await import("../packages/build-cli/src/lib/caster/skill.js");
     expect(stripWikiLinks("An [[#anchor-only]] ref.")).toBe("An [[#anchor-only]] ref.");
   });
 });
@@ -1652,7 +1652,7 @@ describe("stripWikiLinks", () => {
 // and get exactly that back.
 describe("the skill document is the sections it was handed", () => {
   it("renders them in order, and nothing it was not given", async () => {
-    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { renderSkillMarkdown } = await import("../packages/build-cli/src/lib/caster/skill.js");
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: "Summarize a thing." },
@@ -1689,7 +1689,7 @@ describe("the skill document is the sections it was handed", () => {
   });
 
   it("takes the description from the summary, stripped of link syntax and quote-safe", async () => {
-    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { renderSkillMarkdown } = await import("../packages/build-cli/src/lib/caster/skill.js");
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: 'Handle a "quoted" [[thing|name]].' },
@@ -1702,7 +1702,7 @@ describe("the skill document is the sections it was handed", () => {
   // A skill that requires no tools has said something. A reader who finds no heading cannot
   // tell that from a caster that never asked.
   it("says so for an empty section rather than dropping the heading", async () => {
-    const { bulletSection } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { bulletSection } = await import("../packages/build-cli/src/lib/caster/skill.js");
     expect(bulletSection("Required Tools", []).body).toBe("- None declared.");
     expect(bulletSection("Required Tools", [], "- None, and none assumed.").body).toBe(
       "- None, and none assumed.",

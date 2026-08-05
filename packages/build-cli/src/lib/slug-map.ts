@@ -7,7 +7,7 @@
 
 import path from "node:path";
 
-import type { SlugAliases } from "./cast-hooks.js";
+import type { SlugAliases } from "./caster/hooks.js";
 import { readMarkdown } from "./frontmatter.js";
 import type { Frontmatter } from "./types.js";
 import { fileSlug, findMdFiles } from "./walk.js";

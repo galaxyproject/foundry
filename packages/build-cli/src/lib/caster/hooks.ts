@@ -1,12 +1,12 @@
 // Where instance knowledge attaches to a generic caster.
 //
 // Casting itself is domain-free: resolve each ref to a file, place its bytes, hash both ends,
-// report drift, write the provenance record. Everything this repo adds on top of that is Galaxy
-// knowledge — artifact contracts, CLI tooling, the shape of a planemo command — and it is
-// currently woven through cast-mold.ts rather than declared anywhere.
+// report drift, write the provenance record. Everything a Foundry adds on top of that is its own
+// knowledge — Galaxy's artifact contracts, CLI tooling and planemo command shape here, something
+// else entirely in the next instance — and it reaches the caster through this interface alone.
 //
-// This file names the attachment points so the generic half can eventually leave this repo
-// without carrying any of them along. The test of a point being in the right place is that this
+// The rest of this directory is that caster, which is why each point below is a value handed in
+// rather than a branch taken inside. The test of a point being in the right place is that this
 // instance supplies it and a second instance supplies nothing: a Foundry whose corpus is
 // research notes has no artifacts, no tools, and no commands, and should still cast.
 //
@@ -17,7 +17,7 @@
 
 import type { ProvenanceRefEntry } from "@galaxy-foundry/cast";
 
-import type { Frontmatter } from "./types.js";
+import type { Frontmatter } from "../types.js";
 
 export interface RefRenderInput {
   /** Absolute path to the ref's source file. */
