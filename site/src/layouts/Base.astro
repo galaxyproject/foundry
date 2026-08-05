@@ -30,8 +30,22 @@ import { SITE_IDENTITY } from '../lib/site-identity';
 interface Props {
   title: string;
   description?: string;
+  /**
+   * Whether this page's main content goes in the search index. Defaults to yes.
+   *
+   * Pagefind's rule is all-or-nothing and runs backwards from what the attribute looks like: mark
+   * no page and every page is indexed from its `<body>`, mark ONE and every unmarked page leaves
+   * the index entirely. So the default has to be yes — opt-in would leave each new route one
+   * forgotten prop away from being unfindable, with nothing on the page to see. Asserted against
+   * the built index in `tests/built-shell.test.ts`.
+   *
+   * Declared here and passed on UNSET, so the kit keeps the default. Restating `= true` on this
+   * side would put one rule in two places, and the day they disagree the wrong one is the one a
+   * reader of this file would trust.
+   */
+  searchable?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, searchable } = Astro.props;
 ---
 <SiteShell
   title={title}
@@ -39,6 +53,7 @@ const { title, description } = Astro.props;
   base={base}
   pathname={Astro.url.pathname}
   identity={SITE_IDENTITY}
+  searchable={searchable}
 >
   <slot />
 </SiteShell>

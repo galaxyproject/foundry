@@ -351,3 +351,56 @@ describe("the container width", () => {
     expect(new Set(widthsIn(home, "<footer", "</footer>"))).toEqual(new Set([mainWidth]));
   });
 });
+
+/**
+ * Pages the search box will never return, on purpose.
+ *
+ * Empty is a claim, not a stub: every route on this site is worth finding. The list exists because
+ * an absence has to be a DECISION — without one, "deliberately out of the index" and "nobody
+ * thought about this route" are the same observation, which is how 132 of them accumulated.
+ */
+const UNSEARCHABLE: string[] = [];
+
+describe("what the search box can find", () => {
+  // The contract nothing checked, and the one place where reading the source tells you nothing.
+  //
+  // Pagefind's rule is all-or-nothing and runs BACKWARDS from what the attribute looks like. Mark
+  // no page with `data-pagefind-body` and every page is indexed from its `<body>`. Mark ONE and
+  // every unmarked page leaves the index entirely. So an annotation that reads as "index this
+  // page" means "index only pages like this one", and putting it on a single route is strictly
+  // worse for the rest of the site than never adding it.
+  //
+  // Which is exactly what had happened here. One route carried it, and the index held 242 of these
+  // 374 pages — missing every artifact page, every tag page, the glossary, the dashboard and 48
+  // generated skill pages. The routes a reader is likeliest to arrive at by searching.
+  //
+  // Nothing reported it, and this is the part worth remembering: the build log prints
+  // "Pagefind indexed 374 pages" in BOTH states, because it counts pages processed rather than
+  // pages indexed. There is no warning, no diff and no page that looks wrong. The only symptom is
+  // a search answering "no results" for words plainly on the page.
+  //
+  // So this asserts on the emitted INDEX rather than on the markup. A source-level check would
+  // confirm the attribute is written; only the index confirms a reader can find the page.
+  const indexedPageCount = (): number => {
+    const entry = JSON.parse(read(path.join(DIST, "pagefind/pagefind-entry.json"))) as {
+      languages: Record<string, { page_count: number }>;
+    };
+    return Object.values(entry.languages).reduce((total, lang) => total + lang.page_count, 0);
+  };
+
+  it("holds every page the build emitted, less the ones declared unsearchable", () => {
+    expect(indexedPageCount()).toBe(pages.length - UNSEARCHABLE.length);
+  });
+
+  it("marks the main column rather than falling back to the whole body", () => {
+    // `<body>` is Pagefind's default when nothing is marked, and it pulls the nav and footer into
+    // every result's excerpt. Narrower is better, but narrower is also what makes the all-or-
+    // nothing rule apply at all — so having marked anything, every page has to be marked.
+    const unmarked = pages.filter((file) => !read(file).includes("data-pagefind-body"));
+    expect(unmarked.map(rel).sort(), "\nemitted but unfindable").toEqual(UNSEARCHABLE);
+  });
+
+  it("puts the attribute on <main>, so chrome stays out of the excerpt", () => {
+    expect(home).toMatch(/<main[^>]*\sdata-pagefind-body/);
+  });
+});
