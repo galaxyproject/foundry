@@ -2,7 +2,7 @@
 // This Foundry's `cast` command: find what a cast needs, hand it to the caster, report what
 // came back.
 //
-// The assembly is in lib/caster/. What is here is the three things it cannot know — where this
+// The assembly is in @galaxy-foundry/cast. What is here is the three things it cannot know — where this
 // repo keeps its Molds, its targets and its reference contract; what Galaxy puts in a bundle and
 // in a record; and how a CLI wants findings rendered. Assembly stays deterministic throughout:
 // there is no LLM phase, so a cast is byte-stable and --check-able.
@@ -23,18 +23,19 @@ import type {
   ProvenanceArtifactOutput,
   ProvenanceArtifacts,
 } from "../lib/artifact-contract.js";
-import { castMold, type CastOutcome } from "../lib/caster/cast.js";
-import type { CastHooks } from "../lib/caster/hooks.js";
 import {
   bulletSection,
+  castMold,
+  loadTargetConfig,
   refRows,
   runtimeProcedureBody,
   scalar,
   sentence,
   skillSummary,
   stripWikiLinks,
-} from "../lib/caster/skill.js";
-import { loadTargetConfig } from "../lib/caster/target.js";
+  type CastHooks,
+  type CastOutcome,
+} from "@galaxy-foundry/cast";
 import { payloadCompanionOf } from "../lib/dispositions.js";
 import { errorMessage } from "../lib/errors.js";
 import { readMarkdown } from "../lib/frontmatter.js";
@@ -263,6 +264,11 @@ const GALAXY_HOOKS: CastHooks = {
   // companion declarations, so a prompt bundle carries the prompt rather than the note framing
   // it — and so nothing here names the file.
   payloadCompanion: payloadCompanionOf,
+  // Which npm module a `package-export` ref means. It has to be imported from HERE: a bare
+  // `import(spec)` resolves relative to the file that runs it, and @galaxy-foundry/cast is
+  // installed somewhere this repo's own packages are not visible from. Written in this tree,
+  // resolution starts in this tree.
+  packageLoader: (spec) => import(spec) as Promise<Record<string, unknown>>,
   bundleChecks: [
     // Harvested sample runs, against the schema this Mold declares for its OWN output. Not
     // against whichever schema ref happens to come first: a Mold's runs contain what that Mold
@@ -489,7 +495,7 @@ export function readArtifactContracts(
 
 // ---- this Foundry's vocabulary, as a skill document reads it ----
 //
-// The document's shape ships in lib/caster/skill.ts. What is here is the nouns that go in it —
+// The document's shape ships in @galaxy-foundry/cast. What is here is the nouns that go in it —
 // what a kind is called, what a mode did to a file, how an artifact handoff reads as a line.
 // Every one of them is Galaxy's, which is why they are arguments to the row builders rather
 // than branches inside them.

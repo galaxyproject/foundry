@@ -72,5 +72,12 @@
   "dependencies": {
     "@galaxy-tool-util/cli": "^1.10.0",
     "@galaxy-tool-util/schema": "^1.7.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "@galaxy-foundry/cast": "link:/Users/jxc755/projects/worktrees/foundry-lib/branch/caster-move/packages/cast",
+      "@galaxy-foundry/reference-contract": "link:/Users/jxc755/projects/worktrees/foundry-lib/branch/caster-move/packages/reference-contract",
+      "@galaxy-foundry/wiki-links": "link:/Users/jxc755/projects/worktrees/foundry-lib/branch/caster-move/packages/wiki-links"
+    }
   }
 }

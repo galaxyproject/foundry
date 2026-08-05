@@ -72,9 +72,13 @@ export function routablePath(root: string, full: string): string {
  */
 export { listFilesUnder } from "@galaxy-foundry/cast";
 
-/** Slug used for wiki-link resolution: `index.md` → parent dir name; otherwise basename without extension. */
-export function fileSlug(filePath: string): string {
-  const base = path.basename(filePath, ".md");
-  if (base === "index") return path.basename(path.dirname(filePath));
-  return base;
-}
+/**
+ * Slug used for wiki-link resolution: `index.md` → parent dir name; otherwise basename without
+ * extension.
+ *
+ * Ships in @galaxy-foundry/wiki-links, beside the `slugify` it has to agree with — the map is
+ * built with this and queried with that, and held apart the pair can drift into a link that
+ * stops resolving for reasons neither file can show. Re-exported rather than re-imported at
+ * each call site, same as `listFilesUnder` above.
+ */
+export { fileSlug } from "@galaxy-foundry/wiki-links";
