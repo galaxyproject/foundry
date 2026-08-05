@@ -513,11 +513,9 @@ Wrapper body should not be copied.
   });
 });
 
-describe("cast-mold provenance schema version", () => {
-  it("emits the caster's version, not one the target claims", () => {
-    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provver-"));
-    seedReferenceContract(dir);
-    try {
+describe("the provenance record's shape is the caster's", () => {
+  function scaffold(dir: string, extraMoldFrontmatter = ""): void {
+    {
       mkdirSync(path.join(dir, "content/molds/m"), { recursive: true });
       mkdirSync(path.join(dir, "content/prompts/prompt-x"), { recursive: true });
       mkdirSync(path.join(dir, "casts/claude"), { recursive: true });
@@ -560,7 +558,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: corpus-observed
----
+${extraMoldFrontmatter}---
 
 # m
 
@@ -584,14 +582,113 @@ Wrapper body should not be copied.
 `,
       );
       writeFileSync(path.join(dir, "content/prompts/prompt-x/upstream.prompt"), "RAW PROMPT\n");
+    }
+  }
 
+  function castedRecord(dir: string): Record<string, unknown> {
+    return JSON.parse(
+      readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
+    ) as Record<string, unknown>;
+  }
+
+  it("emits the caster's version, not one the target claims", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provver-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(dir);
       const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
       expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
-      const prov = JSON.parse(
-        readFileSync(path.join(dir, "casts/claude/skills/m/_provenance.json"), "utf8"),
-      );
+      const prov = castedRecord(dir);
       expect(prov.provenance_schema_version).toBe(PROVENANCE_SCHEMA_VERSION);
       expect(prov.provenance_schema_version).toBe(4);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // `artifacts` is this Foundry's own block, and casting reserves one slot for it between what
+  // was compiled and what checking it concluded. Asserted on key ORDER, not membership: a record
+  // is compared by its bytes, so a field that moves rewrites every committed bundle while every
+  // value in it stays correct. `toEqual` on the parsed object is order-blind and would pass.
+  //
+  // The full corpus proves the same thing more strongly, but only for a shape it happens to
+  // contain. This pins the slot for a record built from nothing, including across the revision
+  // that `--note` opens — the one path that assigns fields after the record exists.
+  it("puts this Foundry's own block in the slot between refs and the verdicts", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-provslot-"));
+    seedReferenceContract(dir);
+    try {
+      scaffold(
+        dir,
+        [
+          "output_artifacts:",
+          "  - id: thing",
+          "    kind: json",
+          "    default_filename: thing.json",
+          "    description: What this Mold produces.",
+          "",
+        ].join("\n"),
+      );
+      const first = runTsx(foundryBuild, [
+        "cast",
+        "m",
+        "--target=claude",
+        "--root",
+        dir,
+        "--note=first cast",
+      ]);
+      expect(first.code, `stderr: ${first.stderr}`).toBe(0);
+
+      const prov = castedRecord(dir);
+      expect(prov.cast_revision).toBe(1);
+      expect(prov.artifacts).toEqual({
+        produces: [
+          {
+            id: "thing",
+            kind: "json",
+            default_filename: "thing.json",
+            description: "What this Mold produces.",
+          },
+        ],
+        consumes: [],
+      });
+
+      // The tail has to be non-empty for the slot to be observable at all. Absent fields are
+      // omitted from the JSON, so a record with no verdicts serializes the same whether the
+      // block sits in its slot or is appended last — and would pass an order assertion for the
+      // wrong reason. `open_questions` carries forward from the record on disk, so planting one
+      // here is what a second cast of a Mold with open questions actually looks like.
+      const planted = castedRecord(dir);
+      planted.open_questions = ["Does the slot hold?"];
+      writeFileSync(
+        path.join(dir, "casts/claude/skills/m/_provenance.json"),
+        JSON.stringify(planted, null, 2) + "\n",
+      );
+
+      const second = runTsx(foundryBuild, [
+        "cast",
+        "m",
+        "--target=claude",
+        "--root",
+        dir,
+        "--note=second cast",
+      ]);
+      expect(second.code, `stderr: ${second.stderr}`).toBe(0);
+      const revised = castedRecord(dir);
+      expect(Object.keys(revised)).toEqual([
+        "provenance_schema_version",
+        "cast_target",
+        "mold",
+        "cast_at",
+        "cast_date",
+        "cast_revision",
+        "cast_history",
+        "refs",
+        "artifacts",
+        "open_questions",
+      ]);
+      expect(revised.cast_revision).toBe(2);
+      expect((revised.cast_history as Array<{ rev: number }>).map((h) => h.rev)).toEqual([1, 2]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

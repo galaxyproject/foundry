@@ -10,8 +10,10 @@
 // instance supplies it and a second instance supplies nothing: a Foundry whose corpus is
 // research notes has no artifacts, no tools, and no commands, and should still cast.
 //
-// One point is still inline: the provenance `artifacts` block, which cannot move while
-// @galaxy-foundry/cast declares a typed `artifacts` field for it.
+// The provenance `artifacts` block is not among them, and does not need to be. Casting reserves
+// one slot in the record for whatever an instance records beyond the refs, so the block is
+// supplied at the call rather than declared as a point here — see lib/artifact-contract.ts for
+// the vocabulary and @galaxy-foundry/cast's `provenanceRecord` for where it lands.
 
 import type { ProvenanceRefEntry } from "@galaxy-foundry/cast";
 

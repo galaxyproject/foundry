@@ -27,13 +27,10 @@ import {
   applyLicensePolicy,
   copyVerbatim,
   gitHead,
+  provenanceRecord,
   readProvenanceCarryOver,
   recordedHash,
   PROVENANCE_SCHEMA_VERSION,
-  type Provenance,
-  type ProvenanceArtifactInput,
-  type ProvenanceArtifactOutput,
-  type ProvenanceArtifacts,
   type ProvenanceCarryOver,
   type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
@@ -44,6 +41,11 @@ import {
   type ReferenceContractTerm,
 } from "@galaxy-foundry/note-schema";
 
+import type {
+  ProvenanceArtifactInput,
+  ProvenanceArtifactOutput,
+  ProvenanceArtifacts,
+} from "../lib/artifact-contract.js";
 import type { BundleFile, CastHooks, SkillSection, RefRenderers } from "../lib/cast-hooks.js";
 import { payloadCompanionOf } from "../lib/dispositions.js";
 import { errorMessage } from "../lib/errors.js";
@@ -1370,39 +1372,55 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     );
     drift.push(...reconcileBundleFiles(contributed, stagedBundleRoot, false));
 
-    const next: Provenance = {
-      provenance_schema_version: PROVENANCE_SCHEMA_VERSION,
-      cast_target: args.target,
-      mold: {
-        name: args.moldName,
-        path: moldRel,
-        revision:
-          typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
-        content_hash: moldHash,
-        commit: gitHead(repoRoot),
-      },
-      cast_method: carry.cast_method,
-      cast_agent: carry.cast_agent,
-      cast_at: new Date().toISOString(),
-      cast_date: carry.cast_date,
-      cast_revision: carry.cast_revision,
-      cast_history: carry.cast_history,
-      refs: refEntries,
-      artifacts: artifactContracts,
-      validation_results: carry.validation_results,
-      open_questions: carry.open_questions,
-    };
+    // A `--note` opens a new cast revision. Decided before the record is assembled rather than
+    // assigned onto it after, so the numbering does not depend on where a later assignment
+    // would leave a key.
+    const history = carry.cast_history ?? [];
+    const revised = args.note
+      ? (() => {
+          const rev = history.reduce((m, h) => Math.max(m, h.rev), 0) + 1;
+          const today = new Date().toISOString().slice(0, 10);
+          return {
+            cast_date: today,
+            cast_revision: rev,
+            cast_history: [...history, { rev, date: today, note: args.note }],
+          };
+        })()
+      : {
+          cast_date: carry.cast_date,
+          cast_revision: carry.cast_revision,
+          cast_history: carry.cast_history,
+        };
 
-    if (args.note) {
-      const today = new Date().toISOString().slice(0, 10);
-      const lastRev = (carry.cast_history ?? []).reduce((m, h) => Math.max(m, h.rev), 0);
-      next.cast_history = [
-        ...(carry.cast_history ?? []),
-        { rev: lastRev + 1, date: today, note: args.note },
-      ];
-      next.cast_revision = lastRev + 1;
-      next.cast_date = today;
-    }
+    // `artifacts` is this Foundry's, not casting's — the package reserves the slot between
+    // `refs` and `validation_results` and takes whatever fills it. A Mold that declares no
+    // handoff passes `undefined` and the key is simply absent, which is what a Foundry with no
+    // artifacts at all gets for free.
+    const next = provenanceRecord<{ artifacts?: ProvenanceArtifacts }>({
+      head: {
+        provenance_schema_version: PROVENANCE_SCHEMA_VERSION,
+        cast_target: args.target,
+        mold: {
+          name: args.moldName,
+          path: moldRel,
+          revision:
+            typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
+          content_hash: moldHash,
+          commit: gitHead(repoRoot),
+        },
+        cast_method: carry.cast_method,
+        cast_agent: carry.cast_agent,
+        cast_at: new Date().toISOString(),
+        ...revised,
+      },
+      refs: refEntries,
+      extensions: { artifacts: artifactContracts },
+      tail: {
+        validation_results: carry.validation_results,
+        open_questions: carry.open_questions,
+      },
+    });
+
     const provenanceText = JSON.stringify(next, null, 2) + "\n";
     writeFileSync(path.join(stagedBundleRoot, "_provenance.json"), provenanceText);
 
