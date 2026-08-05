@@ -85,7 +85,6 @@ function stripFencedBlocks(markdown: string): string {
 }
 
 interface TargetConfig {
-  name: string;
   bundle_path?: string;
   required_outputs: string[];
   skill_constraints: {

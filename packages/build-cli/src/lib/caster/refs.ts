@@ -29,6 +29,8 @@ import type { TargetConfig, TargetKindConfig } from "./target.js";
 export interface RefResolution {
   slugMap: ReadonlyMap<string, string>;
   metaByPath: ReadonlyMap<string, Frontmatter>;
+  /** How the caller addresses the target — the only thing here that has to name it. */
+  targetName: string;
   target: TargetConfig;
   castContract: CastContract;
   refKinds: Record<string, ReferenceContractTerm & { ref_shape?: string }>;
@@ -80,7 +82,7 @@ export function resolveMoldRef(
   index: number,
   ctx: RefResolution,
 ): { resolved?: ResolvedRef; error?: string } {
-  const { slugMap, metaByPath, target, castContract, refKinds } = ctx;
+  const { slugMap, metaByPath, targetName, target, castContract, refKinds } = ctx;
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     return { error: `references[${index}]: not an object` };
   }
@@ -101,7 +103,7 @@ export function resolveMoldRef(
   }
   const kindCfg = target.kinds[kind];
   if (!kindCfg) {
-    return { error: `references[${index}]: target=${target.name} does not declare kind=${kind}` };
+    return { error: `references[${index}]: target=${targetName} does not declare kind=${kind}` };
   }
 
   const mode = (

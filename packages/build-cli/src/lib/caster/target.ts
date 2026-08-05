@@ -19,6 +19,10 @@ export interface TargetKindConfig {
 /**
  * What a `_target.yml` declares.
  *
+ * Deliberately no `name`. A target is addressed by the directory holding this file — that is
+ * what `--target=` names and what the site discovers — so a `name:` inside it could only be a
+ * second answer to a question the directory already settled.
+ *
  * Deliberately no `provenance_schema_version`. The record's shape is the CASTER's, not the
  * target's, so the version travels with the code that emits it — `PROVENANCE_SCHEMA_VERSION`
  * in @galaxy-foundry/cast. A target that declared its own could name a shape the caster does
@@ -27,7 +31,6 @@ export interface TargetKindConfig {
  * two are cross-checked rather than merely restated.
  */
 export interface TargetConfig {
-  name: string;
   /** Where bundles sit under the target directory; see @galaxy-foundry/cast's target-layout. */
   bundle_path?: string;
   required_outputs: string[];

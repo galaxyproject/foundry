@@ -436,7 +436,6 @@ describe("cast-mold prompt refs", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
@@ -522,7 +521,6 @@ describe("the provenance record's shape is the caster's", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           // A target cannot move the record's shape. If it could, this would produce a
           // document announcing a contract nothing writes and nothing validates.
           "provenance_schema_version: 99",
@@ -743,7 +741,6 @@ describe("cast-mold cli-command meta injection", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
@@ -848,7 +845,6 @@ describe("cast-mold companion files", () => {
     writeFileSync(
       path.join(dir, "casts/claude/_target.yml"),
       [
-        "name: claude",
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",
@@ -1369,7 +1365,6 @@ describe("cast-mold negative cases", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
@@ -1430,7 +1425,6 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
     writeFileSync(
       path.join(dir, "casts/claude/_target.yml"),
       [
-        "name: claude",
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",
@@ -1716,7 +1710,6 @@ describe("the skill document is the sections it was handed", () => {
 // Foundry's, so the answer arrives as a hook — and the caster must never spell the filename.
 describe("the payload a companion strategy ships is the instance's answer", () => {
   const target = {
-    name: "claude",
     required_outputs: [],
     kinds: { prompt: { dst_dir: "references/prompts", dst_extension: ".md", modes: ["verbatim"] } },
     skill_constraints: { frontmatter_required: [], forbidden_runtime_paths: [] },
@@ -1742,6 +1735,7 @@ describe("the payload a companion strategy ships is the instance's answer", () =
     const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
       slugMap,
       metaByPath,
+      targetName: "claude",
       target,
       castContract,
       refKinds,
@@ -1759,6 +1753,7 @@ describe("the payload a companion strategy ships is the instance's answer", () =
     const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
       slugMap,
       metaByPath,
+      targetName: "claude",
       target,
       castContract,
       refKinds,
@@ -1908,7 +1903,6 @@ describe("cast declarations the corpus does not currently exercise", () => {
     bundlePath = "skills/{mold}",
   ): string {
     return [
-      "name: claude",
       "provenance_schema_version: 4",
       `bundle_path: ${bundlePath}`,
       "required_outputs: [SKILL.md, _provenance.json]",
@@ -2319,7 +2313,6 @@ describe("cast declarations: stricter than before, on purpose", () => {
     writeFileSync(
       path.join(dir, "casts/claude/_target.yml"),
       [
-        "name: claude",
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",

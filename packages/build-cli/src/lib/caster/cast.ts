@@ -70,10 +70,9 @@ export interface CastRequest<Ext extends object = Record<string, never>> {
   /**
    * The target this cast is for, as the caller addresses it — `casts/<target>/` in this Foundry.
    *
-   * Deliberately not `target.name`, which is the same string restated inside `_target.yml`. What
-   * a record says is which target it was cast FOR, and that is the caller's question; a
-   * declaration disagreeing with the directory that holds it is a fact worth reporting rather
-   * than one worth quietly writing into every record.
+   * The target's identity is the directory holding its declaration, so it arrives from the
+   * caller rather than out of `_target.yml`. A `name:` inside that file would be a second
+   * answer, and nothing could make the two agree except reading only one of them.
    */
   targetName: string;
   /** What that target declares about placement and modes. */
