@@ -1,37 +1,20 @@
 #!/usr/bin/env tsx
-// Deterministic cast assembly. Reads the Mold's `index.md` frontmatter as the
-// source of truth for `references:` and resolves each ref to a concrete file
-// op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v4)
-// recording every resolved ref and its hash. Assembly is deterministic
-// throughout: there is no LLM phase, so a cast is byte-stable and --check-able.
+// This Foundry's `cast` command: find what a cast needs, hand it to the caster, report what
+// came back.
+//
+// The assembly is in lib/caster/. What is here is the three things it cannot know — where this
+// repo keeps its Molds, its targets and its reference contract; what Galaxy puts in a bundle and
+// in a record; and how a CLI wants findings rendered. Assembly stays deterministic throughout:
+// there is no LLM phase, so a cast is byte-stable and --check-able.
 //
 // Usage:
 //   foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]
 
-import {
-  cpSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import os from "node:os";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-import {
-  applyLicensePolicy,
-  castsTargetDir,
-  copyVerbatim,
-  gitHead,
-  provenanceRecord,
-  readProvenanceCarryOver,
-  PROVENANCE_SCHEMA_VERSION,
-  type ProvenanceCarryOver,
-  type ProvenanceRefEntry,
-} from "@galaxy-foundry/cast";
+import { castsTargetDir, type ProvenanceRefEntry } from "@galaxy-foundry/cast";
 
 import { loadCastReferenceContract } from "@galaxy-foundry/note-schema";
 
@@ -40,17 +23,11 @@ import type {
   ProvenanceArtifactOutput,
   ProvenanceArtifacts,
 } from "../lib/artifact-contract.js";
-import type { BundleFile, CastHooks } from "../lib/caster/hooks.js";
-import {
-  castOneRef,
-  expandCompanions,
-  resolveMoldRef,
-  type ResolvedRef,
-} from "../lib/caster/refs.js";
+import { castMold, type CastOutcome } from "../lib/caster/cast.js";
+import type { CastHooks } from "../lib/caster/hooks.js";
 import {
   bulletSection,
   refRows,
-  renderSkillMarkdown,
   runtimeProcedureBody,
   scalar,
   sentence,
@@ -60,7 +37,7 @@ import {
 import { loadTargetConfig } from "../lib/caster/target.js";
 import { errorMessage } from "../lib/errors.js";
 import { readMarkdown } from "../lib/frontmatter.js";
-import { reconcileAbsent, reconcileText, reconcileTreeTo, sha256File } from "../lib/reconcile.js";
+import { sha256File } from "../lib/reconcile.js";
 import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
 import { validateRuns } from "../lib/runs-check.js";
 import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
@@ -299,36 +276,6 @@ const GALAXY_HOOKS: CastHooks = {
   ],
 };
 
-/**
- * Compare every contributed file against the bundle, and bring it into line unless checking.
- *
- * Run twice per cast: once to report, before the error gate, and once to write, after it. The
- * second call's findings are discarded because the first already reported them. Splitting it
- * that way is what keeps a refused cast from leaving files behind — a cast that reports an
- * unresolved ref and exits must not have already written a manifest describing the bundle it
- * declined to finish.
- */
-function reconcileBundleFiles(
-  files: readonly BundleFile[],
-  bundleRoot: string,
-  check: boolean,
-): Array<{ file: string; reason: string }> {
-  const found: Array<{ file: string; reason: string }> = [];
-  for (const file of files) {
-    const abs = path.join(bundleRoot, file.path);
-    const outcome =
-      file.content === null
-        ? reconcileAbsent({
-            path: abs,
-            reason: file.absentReason ?? "stale (nothing declares it)",
-            check,
-          })
-        : reconcileText({ path: abs, expected: file.content, label: file.path, check });
-    if (outcome.reason) found.push({ file: file.path, reason: outcome.reason });
-  }
-  return found;
-}
-
 // ---- provenance ----
 //
 // The record's shape ships in @galaxy-foundry/cast. What stays here is what this Foundry puts
@@ -530,38 +477,6 @@ export function readArtifactContracts(
   return { produces: out, consumes: inp };
 }
 
-/** The hand-recorded fields of the record already on disk, or nothing on a first cast. */
-function readExistingProvenance(provenancePath: string): ProvenanceCarryOver {
-  return readProvenanceCarryOver(
-    existsSync(provenancePath) ? readFileSync(provenancePath, "utf8") : null,
-  );
-}
-
-/**
- * A record with the two fields that move on every cast held fixed, or null if it will not parse.
- *
- * `cast_at` is the clock and `mold.commit` is wherever HEAD happens to be. Comparing raw bytes
- * would report drift on every check of a bundle nothing changed, which is why the record was
- * never compared at all — and why it became the one file in a bundle whose drift a `--check`
- * could not see. These are the same two fields a regenerate has always been expected to move.
- *
- * Key order survives normalizing: `JSON.parse` preserves it and reassigning an existing key does
- * not move it, so a record whose fields were reshuffled still compares unequal here. That is the
- * case worth catching — every value stays correct while every committed record rewrites.
- */
-function comparableProvenance(text: string): string | null {
-  let doc: { cast_at?: unknown; mold?: { commit?: unknown } | null };
-  try {
-    doc = JSON.parse(text) as typeof doc;
-  } catch {
-    return null;
-  }
-  if (typeof doc !== "object" || doc === null) return null;
-  doc.cast_at = "";
-  if (typeof doc.mold === "object" && doc.mold !== null) doc.mold.commit = "";
-  return JSON.stringify(doc);
-}
-
 // The license → redistribution-policy check ships in @galaxy-foundry/cast. What stays this
 // Foundry's is the license_file PRESENCE rule — which notes must declare one at all — because
 // only the validator's `upstream` scoping can tell a Foundry-authored license annotation from
@@ -651,6 +566,40 @@ function schemaValidationRows(
 
 // ---- main ----
 
+/**
+ * Turn a cast's findings into stderr lines and an exit code.
+ *
+ * Every finding is printed before any verdict, so a reader sees what happened before being told
+ * what it added up to. `wrote` is consulted rather than re-deriving the publish rule from
+ * `errors`: whether a bundle was written is the caster's decision, and a second copy of that
+ * decision here could only ever disagree with the first.
+ */
+function reportCast(outcome: CastOutcome, check: boolean, repoRoot: string): void {
+  for (const e of outcome.errors) console.error(`error: ${e}`);
+  for (const d of outcome.drift) console.error(`drift: ${d.file} — ${d.reason}`);
+
+  if (check) {
+    if (outcome.errors.length || outcome.drift.length) {
+      console.error(
+        `check failed: ${outcome.errors.length} error(s), ${outcome.drift.length} drift(s)`,
+      );
+      process.exitCode = 1;
+      return;
+    }
+    console.log("clean: no drift, no errors");
+    return;
+  }
+
+  if (!outcome.wrote) {
+    console.error(`refusing to update provenance: ${outcome.errors.length} error(s)`);
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log(`wrote ${path.relative(repoRoot, outcome.wrote)}`);
+  if (outcome.drift.length) console.log(`reconciled ${outcome.drift.length} drifted file(s)`);
+}
+
 export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<void> {
   const args = parseArgs(argv);
   if (args.root) process.chdir(args.root);
@@ -681,18 +630,13 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       args.moldName,
     ),
   );
-  const provenancePath = path.join(bundleRoot, "_provenance.json");
-  const carry = readExistingProvenance(provenancePath);
-
   const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_HOOKS.slugAliases);
   const producerIndex = producerIndexFor(metaByPath);
 
-  const rawRefs = Array.isArray(moldParsed.meta.references)
-    ? (moldParsed.meta.references as unknown[])
-    : [];
   // A malformed contract is a authoring error in a YAML file, not a bug in the caster, so it
   // reports like every other bad input here rather than as a stack trace. Same reasoning as
-  // catching `payloadCompanionOf` below: the message is already good, the delivery was not.
+  // catching a broken companion declaration during resolution: the message is already good, the
+  // delivery was not.
   let refContract: ReturnType<typeof loadCastReferenceContract>["contract"];
   let castContract: ReturnType<typeof loadCastReferenceContract>["cast"];
   try {
@@ -704,275 +648,32 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     process.exit(2);
   }
 
-  const resolved: ResolvedRef[] = [];
-  const errors: string[] = [];
-  rawRefs.forEach((r, i) => {
-    const out = resolveMoldRef(r, i, slugMap, metaByPath, target, castContract, refContract.kinds);
-    if (out.error) errors.push(out.error);
-    if (out.resolved) resolved.push(out.resolved);
-  });
-
-  // Expand multi-file notes' declared companion files into sibling verbatim refs.
-  const expanded = expandCompanions(resolved, metaByPath, target, castContract);
-  resolved.length = 0;
-  resolved.push(...expanded);
-
-  // Stable ordering: by (kind, note, companions after the note they belong to).
-  //
-  // Keyed on `dst` rather than `src` because `dst` is what a reader of the bundle sees, and
-  // because a companion's place in the list is not a fact about where it is stored. Sorting on
-  // `src` put a companion after its note only while both were flat and `.md` sorted before
-  // `.yml`; under `<slug>/index.md` it sorted before instead, and the SKILL.md line saying
-  // "sibling of X — read it where that note directs" arrived above X.
-  const groupKey = (r: ResolvedRef): string => r.companion_of ?? r.dst;
-  resolved.sort((a, b) => {
-    if (a.kind !== b.kind) return a.kind.localeCompare(b.kind);
-    const group = groupKey(a).localeCompare(groupKey(b));
-    if (group !== 0) return group;
-    // Same note: it comes first, then its companions among themselves.
-    const companion = Number(Boolean(a.companion_of)) - Number(Boolean(b.companion_of));
-    return companion !== 0 ? companion : a.dst.localeCompare(b.dst);
-  });
-
-  // Assemble against a private copy of the current bundle. Every reconciliation therefore
-  // reports the same drift it would find on the real tree while leaving the checkout untouched,
-  // and hooks inspect the complete expected bundle — new refs, contributed files and provenance
-  // together. Only a cast that clears every error publishes the owned files below.
-  const stageDir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-stage-"));
-  const stagedBundleRoot = path.join(stageDir, "bundle");
-  if (existsSync(bundleRoot)) cpSync(bundleRoot, stagedBundleRoot, { recursive: true });
-  else mkdirSync(stagedBundleRoot, { recursive: true });
-
-  try {
-    const refEntries: ProvenanceRefEntry[] = [];
-    const drift: Array<{ file: string; reason: string }> = [];
-
-    // Every bundle-relative path this cast writes into the staged bundle, recorded beside the
-    // write that produces it. Publishing copies exactly this set, so the two halves cannot
-    // disagree about what a cast produces: a new kind of output is added here, at the write,
-    // rather than here AND again in a publish block that re-derives its own list.
-    const staged = new Set<string>();
-
-    for (const r of resolved) {
-      const result = await castOneRef(r, repoRoot, stagedBundleRoot, GALAXY_HOOKS.renderers);
-      refEntries.push(result.entry);
-      staged.add(result.entry.dst);
-      if (result.error) errors.push(result.error);
-      if (result.drift) drift.push({ file: r.src, reason: result.drift });
-    }
-
-    // License → redistribution-policy enforcement + license_file hashing.
-    errors.push(...applyLicensePolicy(refEntries, repoRoot));
-
-    const artifactContracts = readArtifactContracts(moldParsed.meta, producerIndex);
-    const skillText = renderSkillMarkdown({
-      moldName: args.moldName,
+  const outcome = await castMold<{ artifacts?: ProvenanceArtifacts }>({
+    repoRoot,
+    bundleRoot,
+    targetName: args.target,
+    target,
+    mold: {
+      name: args.moldName,
+      path: moldRel,
       meta: moldParsed.meta,
-      lede: GALAXY_HOOKS.skillLede,
-      sections: GALAXY_HOOKS.skillSections({
-        moldName: args.moldName,
-        meta: moldParsed.meta,
-        body: moldParsed.body,
-        refs: refEntries,
-        metaByPath,
-        slugMap,
-      }),
-    });
-    const skillDrift = reconcileText({
-      path: path.join(stagedBundleRoot, "SKILL.md"),
-      expected: skillText,
-      label: "SKILL.md",
-      check: false,
-    });
-    if (skillDrift.reason) drift.push({ file: "SKILL.md", reason: skillDrift.reason });
-    staged.add("SKILL.md");
+      body: moldParsed.body,
+      contentHash: moldHash,
+    },
+    castContract,
+    refKinds: refContract.kinds,
+    slugMap,
+    metaByPath,
+    hooks: GALAXY_HOOKS,
+    // What this Foundry records in the slot the record reserves beside `refs`. A Mold that
+    // declares no handoff supplies `undefined` and the key is simply absent — which is also what
+    // a Foundry with no artifacts at all gets, by passing no extensions.
+    extensions: { artifacts: readArtifactContracts(moldParsed.meta, producerIndex) },
+    check: args.check,
+    note: args.note,
+  });
 
-    // Reduce `references/` to exactly what provenance lists.
-    //
-    // Casting writes each ref and never looked at what was already there, so a file that stops
-    // being a ref stayed in the bundle forever. Undeclaring one companion was enough to prove it:
-    // provenance dropped `galaxy-collection-semantics.upstream.myst`, SKILL.md stopped naming it,
-    // and the file sat in nine bundles regardless — invisible to every check, and still the first
-    // thing an agent listing the directory would find.
-    //
-    // Scoped to `references/` because that subtree is the only part of a bundle casting owns —
-    // `runs/` is harvested output and is not ours to delete.
-    const declaredRefs = new Set(refEntries.map((entry) => entry.dst));
-    drift.push(
-      ...reconcileTreeTo({
-        root: path.join(stagedBundleRoot, "references"),
-        declared: declaredRefs,
-        relativeTo: stagedBundleRoot,
-        reason: () => "orphan (no ref claims it)",
-        check: false,
-      }),
-    );
-
-    // Bundle-root files this instance contributes are reconciled into the staged bundle before
-    // checks run. A checker therefore sees the bytes this cast proposes, never a stale manifest
-    // copied from the previous cast.
-    const contributed = GALAXY_HOOKS.bundleFiles.flatMap((contribute) =>
-      contribute({
-        moldName: args.moldName,
-        meta: moldParsed.meta,
-        refs: refEntries,
-        metaByPath,
-        slugMap,
-      }),
-    );
-    drift.push(...reconcileBundleFiles(contributed, stagedBundleRoot, false));
-    for (const file of contributed) if (file.content !== null) staged.add(file.path);
-
-    // A `--note` opens a new cast revision. Decided before the record is assembled rather than
-    // assigned onto it after, so the numbering does not depend on where a later assignment
-    // would leave a key.
-    const history = carry.cast_history ?? [];
-    const revised = args.note
-      ? (() => {
-          const rev = history.reduce((m, h) => Math.max(m, h.rev), 0) + 1;
-          const today = new Date().toISOString().slice(0, 10);
-          return {
-            cast_date: today,
-            cast_revision: rev,
-            cast_history: [...history, { rev, date: today, note: args.note }],
-          };
-        })()
-      : {
-          cast_date: carry.cast_date,
-          cast_revision: carry.cast_revision,
-          cast_history: carry.cast_history,
-        };
-
-    // `artifacts` is this Foundry's, not casting's — the package reserves the slot between
-    // `refs` and `validation_results` and takes whatever fills it. A Mold that declares no
-    // handoff passes `undefined` and the key is simply absent, which is what a Foundry with no
-    // artifacts at all gets for free.
-    const next = provenanceRecord<{ artifacts?: ProvenanceArtifacts }>({
-      head: {
-        provenance_schema_version: PROVENANCE_SCHEMA_VERSION,
-        cast_target: args.target,
-        mold: {
-          name: args.moldName,
-          path: moldRel,
-          revision:
-            typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
-          content_hash: moldHash,
-          commit: gitHead(repoRoot),
-        },
-        cast_method: carry.cast_method,
-        cast_agent: carry.cast_agent,
-        cast_at: new Date().toISOString(),
-        ...revised,
-      },
-      refs: refEntries,
-      extensions: { artifacts: artifactContracts },
-      tail: {
-        validation_results: carry.validation_results,
-        open_questions: carry.open_questions,
-      },
-    });
-
-    const provenanceText = JSON.stringify(next, null, 2) + "\n";
-
-    // The record is reconciled like everything else in the bundle. It used to be the one
-    // exception — written straight out, never compared — which made the file that IS the cast's
-    // contract the only one a `--check` could not see drift in.
-    const stagedProvenance = path.join(stagedBundleRoot, "_provenance.json");
-    const committed = existsSync(stagedProvenance)
-      ? comparableProvenance(readFileSync(stagedProvenance, "utf8"))
-      : undefined;
-    if (committed === undefined) {
-      drift.push({ file: "_provenance.json", reason: "missing (this Mold has not been cast)" });
-    } else if (committed === null) {
-      drift.push({ file: "_provenance.json", reason: "unreadable as JSON" });
-    } else if (committed !== comparableProvenance(provenanceText)) {
-      drift.push({
-        file: "_provenance.json",
-        reason: "changed (a re-cast records something else)",
-      });
-    }
-    writeFileSync(stagedProvenance, provenanceText);
-    staged.add("_provenance.json");
-
-    // Checks this instance runs over the finished staged bundle.
-    //
-    // Collected rather than thrown: a bundle that fails its own check is a finding about this
-    // cast, and the caller reports findings. Letting one escape ends the run with a stack trace
-    // instead — and a check that throws is itself a finding, not a reason to lose the others.
-    for (const check of GALAXY_HOOKS.bundleChecks) {
-      try {
-        errors.push(
-          ...check({
-            moldName: args.moldName,
-            meta: moldParsed.meta,
-            refs: refEntries,
-            metaByPath,
-            slugMap,
-            bundleRoot: stagedBundleRoot,
-          }),
-        );
-      } catch (e) {
-        errors.push(errorMessage(e));
-      }
-    }
-
-    // Report.
-    for (const e of errors) console.error(`error: ${e}`);
-    for (const d of drift) console.error(`drift: ${d.file} — ${d.reason}`);
-
-    if (args.check) {
-      if (errors.length || drift.length) {
-        console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
-        process.exitCode = 1;
-        return;
-      }
-      console.log("clean: no drift, no errors");
-      return;
-    }
-
-    if (errors.length) {
-      console.error(`refusing to update provenance: ${errors.length} error(s)`);
-      process.exitCode = 1;
-      return;
-    }
-
-    // Publish what was staged, and only that. `runs/` and any other harvested state stay exactly
-    // as found — casting did not write them and does not own them.
-    //
-    // The set is the one built alongside the staging writes, so this cannot fall behind them.
-    // It iterates in insertion order, which puts `_provenance.json` last because it is staged
-    // last — the record lands only after the files it describes.
-    //
-    // A path in it that is not on disk means a write was recorded and did not happen, which is a
-    // bug in this function rather than a condition to tolerate: publishing the rest would leave a
-    // bundle whose provenance names a file it does not contain.
-    mkdirSync(bundleRoot, { recursive: true });
-    for (const rel of staged) {
-      const from = path.join(stagedBundleRoot, rel);
-      if (!existsSync(from)) throw new Error(`staged but never written: ${rel}`);
-      copyVerbatim(from, path.join(bundleRoot, rel));
-    }
-
-    // Removals, which copying cannot express: refs that stopped being refs, and contributions
-    // whose declaration says the file must not be there.
-    reconcileTreeTo({
-      root: path.join(bundleRoot, "references"),
-      declared: declaredRefs,
-      relativeTo: bundleRoot,
-      reason: () => "orphan (no ref claims it)",
-      check: false,
-    });
-    reconcileBundleFiles(
-      contributed.filter((file) => file.content === null),
-      bundleRoot,
-      false,
-    );
-
-    console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
-    if (drift.length) console.log(`reconciled ${drift.length} drifted file(s)`);
-  } finally {
-    rmSync(stageDir, { recursive: true, force: true });
-  }
+  reportCast(outcome, args.check, repoRoot);
 }
 
 const isDirectInvocation = import.meta.url === `file://${process.argv[1]}`;
