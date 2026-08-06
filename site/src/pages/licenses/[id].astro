@@ -2,74 +2,40 @@
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
 import { getLicenses } from '../../lib/licenses';
-import { licenseIdFromFilePath, resolveLicenseRow } from '@galaxy-foundry/license-policy';
+import { redistributesUnder } from '@galaxy-foundry/license-policy';
+import type { LicenseFileUse } from '@galaxy-foundry/site-kit';
+import LicenseFileBody from '@galaxy-foundry/site-kit/LicenseFileBody.astro';
 import { licensePolicy } from '../../lib/registries';
 import { base } from '../../lib/site-base';
 
 export async function getStaticPaths() {
-  return getLicenses().map(license => ({
-    params: { id: license.licenseId },
-    props: { license },
+  return getLicenses().map(licenseFile => ({
+    params: { id: licenseFile.id },
+    props: { licenseFile },
   }));
 }
 
-const { license } = Astro.props;
+const { licenseFile } = Astro.props;
 
-// Notes that redistribute content under this LICENSES/ file, with their SPDX id.
+// Which notes redistribute under this copy is the per-instance half: our corpus is one flat
+// collection addressed as `/{id}/`, so this walk and these hrefs stay here. The membership test
+// does not — `redistributesUnder` compares a note's `license_file` path against a file id, which
+// this page used to spell as an equality between two things both called `licenseId`.
 const entries = await getAllNotes();
-const users = entries
-  .filter(
-    e =>
-      'license_file' in e.data &&
-      e.data.license_file !== undefined &&
-      licenseIdFromFilePath(e.data.license_file) === license.licenseId,
-  )
-  .map(e => ({ id: e.id, spdx: 'license' in e.data ? e.data.license : undefined }))
-  .sort((a, b) => a.id.localeCompare(b.id));
-
-// Distinct SPDX ids carried under this file, and their policy rows.
-const spdxIds = [...new Set(users.map(u => u.spdx).filter(Boolean) as string[])];
-const rows = spdxIds.map(id => ({ id, row: resolveLicenseRow(licensePolicy, id) }));
+const uses: LicenseFileUse[] = entries
+  .filter(e => 'license_file' in e.data && redistributesUnder(e.data.license_file, licenseFile.id))
+  .map(e => ({
+    href: `${base}/${e.id}/`,
+    label: e.id,
+    licenseId: 'license' in e.data ? e.data.license : undefined,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 ---
-<Base title={`license: ${license.licenseId}`}>
+<Base title={`license: ${licenseFile.id}`}>
   <header class="mb-4">
     <p class="text-xs font-mono uppercase tracking-widest text-(--color-text-muted) mb-1">license</p>
-    <h1 class="text-2xl font-mono font-semibold m-0">{license.filename}</h1>
+    <h1 class="text-2xl font-mono font-semibold m-0">{licenseFile.filename}</h1>
   </header>
 
-  {rows.length > 0 && (
-    <section class="mb-5 grid gap-2">
-      {rows.map(({ id, row }) => (
-        <div class="p-3 rounded-lg border border-(--color-border)">
-          <p class="m-0 mb-1">
-            <code class="mr-2">{id}</code>
-            <span class="text-sm text-(--color-text-secondary)">
-              {row.policy === 'own-words-only' ? 'own-words only' : 'verbatim OK'}
-              {row.copyleft ? ' · copyleft' : ''}
-            </span>
-          </p>
-          <p class="m-0 text-sm text-(--color-text-secondary)">{row.obligations}</p>
-        </div>
-      ))}
-    </section>
-  )}
-
-  {users.length > 0 && (
-    <section class="mb-5">
-      <h2 class="text-base font-semibold m-0 mb-2">Redistributed by <span class="text-sm font-normal text-(--color-text-secondary)">({users.length})</span></h2>
-      <ul class="list-none p-0 m-0 grid gap-1">
-        {users.map(u => (
-          <li>
-            <a href={`${base}/${u.id}/`} class="text-(--color-link) hover:underline font-mono text-sm">{u.id}</a>
-            {u.spdx && <span class="ml-2 text-xs text-(--color-text-muted) font-mono">{u.spdx}</span>}
-          </li>
-        ))}
-      </ul>
-    </section>
-  )}
-
-  <section>
-    <h2 class="text-base font-semibold m-0 mb-2">License text</h2>
-    <pre class="p-3 rounded-lg border border-(--color-border) overflow-x-auto text-xs leading-relaxed whitespace-pre-wrap">{license.text}</pre>
-  </section>
+  <LicenseFileBody licenseFile={licenseFile} policy={licensePolicy} uses={uses} />
 </Base>
