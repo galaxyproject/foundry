@@ -126,7 +126,7 @@ function main(): void {
   // Read through the same loader the caster uses, so what a target DECLARES has one reader.
   // A second parser here would answer `bundle_path: {mold}` — unquoted braces are a YAML
   // mapping — differently from the cast it is supposed to be checking.
-  let target;
+  let target: ReturnType<typeof loadTargetConfig>;
   try {
     target = loadTargetConfig(castsTargetDir(repoRoot, args.target));
   } catch (e) {
@@ -324,14 +324,14 @@ function main(): void {
     // INLINE code is deliberately still scanned. Every filename in this corpus is written in
     // backticks, so exempting inline code would retire the check rather than narrow it.
     const body = stripFencedBlocks(readFileSync(dstAbs, "utf8"));
-    const bundleDir = path.dirname(dstAbs);
+    const dstDir = path.dirname(dstAbs);
 
     for (const neighbour of listFilesUnder(srcDir, srcDir)) {
       if (neighbour === "index.md") continue; // the note itself
       // Cited by name, not merely a substring of some longer token.
       const cited = new RegExp(`(?<![A-Za-z0-9._/-])${escapeRegExp(neighbour)}(?![A-Za-z0-9_-])`);
       if (!cited.test(body)) continue;
-      if (existsSync(path.join(bundleDir, neighbour))) continue;
+      if (existsSync(path.join(dstDir, neighbour))) continue;
       errors.push(
         `ref ${r.src}: bundled note ${r.dst} tells the agent to read '${neighbour}', which is beside the note in the Foundry but not in the bundle (declare it in the note's 'companions:' frontmatter, or stop naming it in the body)`,
       );

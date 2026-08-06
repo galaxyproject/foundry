@@ -16,13 +16,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { PROVENANCE_SCHEMA_VERSION } from "@galaxy-foundry/cast";
+import { PROVENANCE_SCHEMA_VERSION, type CastHooks } from "@galaxy-foundry/cast";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 const castMold = path.join(repoRoot, "scripts", "cast-mold.ts");
 const foundryBuild = path.join(repoRoot, "packages", "build-cli", "src", "bin", "foundry-build.ts");
+const castSkillVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
 const castVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
 // Resolve the repo-local tsx binary by absolute path. Invoking `npx tsx` from a
 // temp-dir cwd can't see local node_modules and auto-installs tsx into the
@@ -46,10 +47,15 @@ function seedReferenceContract(dir: string): void {
   );
 }
 
-function runTsx(script: string, args: string[]): { code: number; stdout: string; stderr: string } {
+// `cwd` is for the readers that take their root from the process rather than a `--root` flag.
+function runTsx(
+  script: string,
+  args: string[],
+  cwd = repoRoot,
+): { code: number; stdout: string; stderr: string } {
   try {
     const stdout = execFileSync(tsxBin, [script, ...args], {
-      cwd: repoRoot,
+      cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -117,6 +123,47 @@ describe("cast-mold (summarize-nextflow integration)", () => {
       rmSync(root, { recursive: true, force: true });
     }
   });
+
+  // A target declaration is authored by hand, so getting it wrong is an authoring error and has
+  // to read like one. `modes: verbatim` is the mistake to pin: as a scalar rather than a list it
+  // is indistinguishable from the correct spelling by eye, and it used to pass — a string answers
+  // `.includes("verbatim")` the same way the list does. The loader now catches it, which is only
+  // an improvement if what reaches the author is a sentence rather than a stack trace, and both
+  // readers of the declaration have to agree about that.
+  for (const reader of ["the caster", "the verifier"] as const) {
+    it(`reports a malformed target declaration to ${reader} without a stack trace`, () => {
+      const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-target-"));
+      try {
+        mkdirSync(path.join(root, "casts/claude"), { recursive: true });
+        const declared = yaml.load(
+          readFileSync(path.join(repoRoot, "casts/claude/_target.yml"), "utf8"),
+        ) as { kinds: Record<string, { modes: unknown }> };
+        declared.kinds.schema!.modes = "verbatim";
+        writeFileSync(path.join(root, "casts/claude/_target.yml"), yaml.dump(declared));
+        seedReferenceContract(root);
+        for (const name of ["content", "LICENSES"]) {
+          symlinkSync(path.join(repoRoot, name), path.join(root, name));
+        }
+
+        // The caster takes its root from `--root`; the verifier takes it from the process.
+        const r =
+          reader === "the caster"
+            ? runTsx(foundryBuild, [
+                "cast",
+                "summarize-nextflow",
+                "--target=claude",
+                "--root",
+                root,
+              ])
+            : runTsx(castSkillVerify, ["summarize-nextflow", "--target=claude"], root);
+        expect(r.code).not.toBe(0);
+        expect(r.stderr).toContain("kinds.schema.modes");
+        expect(r.stderr).not.toMatch(/^\s+at /m);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+  }
 
   it("provenance is schema v4 and lists deterministic refs", () => {
     const provPath = path.join(
@@ -1722,13 +1769,14 @@ describe("the payload a companion strategy ships is the instance's answer", () =
   };
   const slugMap = new Map([["p", "content/prompts/p/index.md"]]);
   const metaByPath = new Map([["content/prompts/p/index.md", { type: "prompt" }]]);
-  // A Foundry that attaches nothing: no renderers, no contributions, no second addresses.
-  const bareHooks = {
+  // A Foundry that attaches nothing: no renderers, no contributions, no checks. Typed rather
+  // than inferred, so a hook that stops existing fails here instead of sitting on as a leftover
+  // an untyped object literal is free to carry.
+  const bareHooks: CastHooks = {
     renderers: {},
     bundleFiles: [],
     skillLede: "",
     skillSections: () => [],
-    slugAliases: () => [],
     bundleChecks: [],
   };
 

@@ -17,7 +17,6 @@ import process from "node:process";
 import {
   bulletSection,
   castMold,
-  castsTargetDir,
   loadTargetConfig,
   refRows,
   runtimeProcedureBody,
@@ -43,7 +42,7 @@ import { sha256File } from "../lib/reconcile.js";
 import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
 import { validateRuns } from "../lib/runs-check.js";
 import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
-import { bundlePathOf, resolveBundlePath } from "../lib/target-layout.js";
+import { bundleDir, castsTargetDir } from "../lib/target-layout.js";
 import type { Frontmatter } from "../lib/types.js";
 import { fileSlug } from "../lib/walk.js";
 import { resolveWikiLink } from "../lib/wiki-links.js";
@@ -618,7 +617,18 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   // Where this Foundry keeps its targets and its Molds. Both are layout facts about this repo,
   // stated here rather than reached for from inside the caster.
   const targetDir = castsTargetDir(repoRoot, args.target);
-  const target = loadTargetConfig(targetDir);
+
+  // A malformed target declaration is an authoring error in a YAML file, same as the contract
+  // below, and reports the same way. The loader checks the kind table nothing else did, so this
+  // catch is the difference between a named message and a stack trace for most of what it finds.
+  let target: ReturnType<typeof loadTargetConfig>;
+  try {
+    target = loadTargetConfig(targetDir);
+  } catch (e) {
+    console.error(errorMessage(e));
+    process.exit(2);
+  }
+
   const moldRel = path.posix.join("content", "molds", args.moldName, "index.md");
   const moldAbs = path.join(repoRoot, moldRel);
   if (!existsSync(moldAbs)) {
@@ -633,13 +643,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
   const moldHash = sha256File(moldAbs);
 
-  const bundleRoot = path.join(
-    targetDir,
-    resolveBundlePath(
-      bundlePathOf(target.bundle_path, path.join(targetDir, "_target.yml")),
-      args.moldName,
-    ),
-  );
+  const bundleRoot = bundleDir(repoRoot, args.target, args.moldName);
   const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES);
   const producerIndex = producerIndexFor(metaByPath);
 
