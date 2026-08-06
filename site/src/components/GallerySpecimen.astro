@@ -1,0 +1,38 @@
+---
+import { specimenPath, type Specimen, type SpecimenGroup } from "@galaxy-foundry/site-kit/specimens";
+
+/**
+ * The frame around one specimen: what it is called, what it is evidence of, and the thing itself.
+ *
+ * The `why` line is not decoration. Several of these cases render correctly as nothing much — a
+ * card with no accent bar, a header with no overflow button, a component that emits no markup at
+ * all — and a gallery that shows only the result cannot tell a reader which of those is the point
+ * and which is a fault.
+ */
+interface Props {
+  group: SpecimenGroup;
+  specimen: Specimen;
+}
+
+const { group, specimen } = Astro.props;
+// `/` is legal in an id and awkward in a fragment, so the address the kit derives is spelled once
+// more here rather than twice differently.
+const anchor = specimenPath(group, specimen).replace("/", "--");
+---
+
+<section id={anchor} class="not-prose mb-8 scroll-mt-24">
+  <header class="mb-3">
+    <h3 class="text-base font-bold" style="color: var(--color-text-primary)">
+      <a href={`#${anchor}`} class="no-underline hover:underline">{specimen.name}</a>
+    </h3>
+    <p class="mt-1 max-w-[70ch] text-sm leading-relaxed" style="color: var(--color-text-secondary)">
+      {specimen.why}
+    </p>
+  </header>
+  <div
+    class="rounded-lg border p-4"
+    style="border-color: var(--color-border-subtle); background: var(--color-surface)"
+  >
+    <slot />
+  </div>
+</section>

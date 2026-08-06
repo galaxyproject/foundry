@@ -106,12 +106,36 @@ const read = (file: string): string => {
   return text;
 };
 
+/**
+ * Pages that are one component in an empty document, on purpose.
+ *
+ * The gallery gives a page of its own to every specimen the kit marks `isolated` — its word for
+ * valid markup carrying document-unique ids, which two of on one page leaves silently half-dead —
+ * and the index shows them in frames. Wrapping those in the shell would put a header above the
+ * header being demonstrated, and the frame would be a picture of the site rather than of the
+ * component.
+ *
+ * Only the two assertions about the shell's own furniture skip these. The theme script is NOT
+ * excused: a framed header that ignores the theme the reader chose is wrong exactly the way any
+ * other page would be.
+ */
+const COMPONENT_PAGES = [
+  "gallery/site-header/active-below-a-section/index.html",
+  "gallery/site-header/active-under-more/index.html",
+  "gallery/site-header/everything-fits/index.html",
+  "gallery/site-header/long-wordmark/index.html",
+  "gallery/site-header/overflows/index.html",
+  "gallery/site-header/sibling-prefix/index.html",
+];
+
 let pages: string[];
+let sitePages: string[];
 let home: string;
 
 beforeAll(() => {
   ensureBuilt();
   pages = builtPages();
+  sitePages = pages.filter((file) => !COMPONENT_PAGES.includes(rel(file)));
   home = read(path.join(DIST, "index.html"));
 }, 600_000);
 
@@ -121,8 +145,18 @@ describe("the document shell, on every page the build emitted", () => {
     expect(pages.length).toBeGreaterThan(300);
   });
 
+  it("excuses only routes the build still emits", () => {
+    // An entry left behind after its route is renamed excuses a page that no longer exists, and
+    // goes on excusing whatever takes its path later.
+    const emitted = new Set(pages.map(rel));
+    expect(
+      COMPONENT_PAGES.filter((page) => !emitted.has(page)),
+      "\nstale exemptions",
+    ).toEqual([]);
+  });
+
   it("offers a skip link that lands on a target that exists", () => {
-    const broken = pages.filter((file) => {
+    const broken = sitePages.filter((file) => {
       const html = read(file);
       return !html.includes('href="#main"') || !html.includes('id="main"');
     });
@@ -149,7 +183,7 @@ describe("the document shell, on every page the build emitted", () => {
   });
 
   it("carries a header and a footer", () => {
-    const broken = pages.filter((file) => {
+    const broken = sitePages.filter((file) => {
       const html = read(file);
       return !html.includes("<header") || !html.includes("<footer");
     });
@@ -205,14 +239,20 @@ describe("the palette this stylesheet declares", () => {
   // from `:root`, used nowhere.
   it("declares no token that reaches no stylesheet", () => {
     const source = read(path.join(SITE, "src/styles/global.css"));
-    const block = source.slice(source.indexOf("@theme"), source.indexOf("\n}", source.indexOf("@theme")));
+    const block = source.slice(
+      source.indexOf("@theme"),
+      source.indexOf("\n}", source.indexOf("@theme")),
+    );
     const declared = [...block.matchAll(/^\s*(--[\w-]+):/gm)].map((m) => m[1]!);
 
     const css = emittedCss();
     const root = (css.match(/:root[^{]*\{[^}]*\}/g) ?? []).join("");
     const dead = declared.filter((token) => !root.includes(`${token}:`));
 
-    expect(declared.length, "\nno tokens parsed out of @theme — has the block moved?").toBeGreaterThan(20);
+    expect(
+      declared.length,
+      "\nno tokens parsed out of @theme — has the block moved?",
+    ).toBeGreaterThan(20);
     expect(
       dead,
       "\nthese are declared in `@theme` and referenced by nothing, so Tailwind emitted no" +
@@ -384,7 +424,24 @@ describe("the container width", () => {
  * an absence has to be a DECISION — without one, "deliberately out of the index" and "nobody
  * thought about this route" are the same observation, which is how 132 of them accumulated.
  */
-const UNSEARCHABLE: string[] = [];
+const UNSEARCHABLE: string[] = [
+  // The gallery. Its pages are the kit's components rendered against invented props — a contract
+  // with two made-up kinds, a nav of seven links that go nowhere, a note that moved. Every word on
+  // them is bait: a reader searching "trimming reads" wants the note, not the card that demonstrates
+  // what a card looks like. So the gallery index and the specimens that get a route of their own
+  // stay out of the site's own index.
+  //
+  // `gallery/site-shell/searchable` is deliberately NOT here. That specimen's whole case is that a
+  // searchable shell marks its column, and the way to be sure it does is that Pagefind finds it.
+  "gallery/index.html",
+  "gallery/site-header/active-below-a-section/index.html",
+  "gallery/site-header/active-under-more/index.html",
+  "gallery/site-header/everything-fits/index.html",
+  "gallery/site-header/long-wordmark/index.html",
+  "gallery/site-header/overflows/index.html",
+  "gallery/site-header/sibling-prefix/index.html",
+  "gallery/site-shell/unsearchable/index.html",
+];
 
 describe("what the search box can find", () => {
   // The contract nothing checked, and the one place where reading the source tells you nothing.
