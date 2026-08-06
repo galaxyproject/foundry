@@ -85,7 +85,7 @@ so the collection, not this list, is the authority on which records exist. Read 
 
 1. [`guiding-principles.md`](content/meta/guiding-principles.md) — why the Foundry prioritizes upstream authority, provenance, deterministic tooling, portability, actionable knowledge, and corpus grounding.
 2. [`architecture.md`](content/meta/architecture.md) — directory layout, types, validation pipeline, site rendering.
-3. [`molds.md`](content/meta/molds.md) — Mold inventory rationale and bucketing axes.
+3. [`molds.md`](content/meta/molds.md) — the axes a Mold buckets on and the boundary against reference content.
 4. [`mold-spec.md`](content/meta/mold-spec.md) — the Mold authoring contract: source layout, which files may sit beside `index.md`, and who enforces it.
 5. [`casting.md`](content/meta/casting.md) — how typed Mold references become target-specific cast artifacts with provenance.
 6. [`cast-walkthrough.md`](content/meta/cast-walkthrough.md) — one real committed cast annotated end to end.

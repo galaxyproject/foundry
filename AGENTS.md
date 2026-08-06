@@ -12,7 +12,7 @@
 - `content/meta/content-model.md` — note kinds, frontmatter, tags, links, references, and companions.
 - `content/meta/build-and-validation.md` — validation, generation, casting, assembly, site builds, and drift gates.
 - `content/meta/repository-layout.md` — physical placement and authored/generated ownership boundaries.
-- `content/meta/molds.md` — Mold inventory and bucketing axes.
+- `content/meta/molds.md` — Mold bucketing axes and the Mold-versus-reference boundary. Membership lives in `content/molds/`.
 - `content/meta/mold-spec.md` — Mold authoring contract (frontmatter, references, eval/usage/refinement). Load when authoring or editing a Mold or its `eval.md`.
 - `content/meta/harness-pipelines.md` — pipeline narrative behind `content/pipelines/`.
 - `content/meta/casting.md` — casting design.

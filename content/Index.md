@@ -264,7 +264,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[guiding-principles]] — The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding. *(reviewed)*
 - [[harness-pipelines]] — The source-to-target journeys that compose Molds, loops, and branch phases. *(reviewed)*
 - [[mold-spec]] — The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it. *(reviewed)*
-- [[molds]] — The Mold inventory, bucketing axes, and boundaries between Molds and reference content. *(reviewed)*
+- [[molds]] — The axes a Mold buckets on, the boundary against reference content, and where the Mold set is still uneven. *(reviewed)*
 - [[pattern-authorship]] — Developer-facing authorship rules for operation-named, corpus-grounded pattern pages. *(reviewed)*
 - [[repository-layout]] — Where authored source, implementation code, generated artifacts, fixtures, and site files belong. *(reviewed)*
 - [[schema-packages]] — Where a Mold IO schema lives, how cast resolves one through a schema note, and why there is no separate schema package. *(reviewed)*
