@@ -46,8 +46,8 @@ importers:
         specifier: workspace:*
         version: link:packages/planemo-test-report-schema
       '@galaxy-foundry/site-kit':
-        specifier: ^0.6.0
-        version: 0.6.0(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))
+        specifier: ^0.6.1
+        version: 0.6.1(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))
       '@galaxy-foundry/summarize-nextflow':
         specifier: workspace:*
         version: link:packages/summarize-nextflow
@@ -300,8 +300,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@galaxy-foundry/site-kit':
-        specifier: ^0.6.0
-        version: 0.6.0(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))
+        specifier: ^0.6.1
+        version: 0.6.1(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))
       '@galaxy-foundry/tag-registry':
         specifier: ^0.1.0
         version: 0.1.0
@@ -1046,8 +1046,8 @@ packages:
     resolution: {integrity: sha512-zneANKaNH1DgT47ibPwUq9magx5Xnlb/mm4LXLzcrrjhicmsBDgq7VA5lPYkmPZSc1wUNIJUvZSAjT0FrbFhKQ==}
     engines: {node: '>=20'}
 
-  '@galaxy-foundry/site-kit@0.6.0':
-    resolution: {integrity: sha512-NzgWC4ijju8Rwu5mDRZltvZL+bRObnX2tfRqJqTNSuaqo1zRNwBNwlM8bgYoaBM33ELLnHif3Z0SO69HBXI4tw==}
+  '@galaxy-foundry/site-kit@0.6.1':
+    resolution: {integrity: sha512-B7Z7aUsJ2Zla7isFB6Is3U5r4oo6wJryKrSGKLjbqoUyGdntpk/LIZuSIKcXrXbjggPHzshV4wd2lgyk0ohkSA==}
     engines: {node: '>=20'}
     peerDependencies:
       astro: '>=6'
@@ -4506,7 +4506,7 @@ snapshots:
     dependencies:
       js-yaml: 4.3.0
 
-  '@galaxy-foundry/site-kit@0.6.0(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))':
+  '@galaxy-foundry/site-kit@0.6.1(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@galaxy-foundry/license-policy': 0.4.0
       '@galaxy-foundry/reference-contract': 0.4.0

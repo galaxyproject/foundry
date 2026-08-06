@@ -18,7 +18,7 @@
     "@galaxy-foundry/license-policy": "^0.4.0",
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-foundry/reference-contract": "^0.3.0",
-    "@galaxy-foundry/site-kit": "^0.6.0",
+    "@galaxy-foundry/site-kit": "^0.6.1",
     "@galaxy-foundry/tag-registry": "^0.1.0",
     "@galaxy-foundry/wiki-links": "^0.3.0",
     "@galaxy-tool-util/cli": "^1.8.1",
