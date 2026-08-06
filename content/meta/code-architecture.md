@@ -27,11 +27,13 @@ This record answers one question: **how is the implementation divided, and which
                     ▼          ▼
        shared substrate     summarize-nextflow
 
-shared substrate = kind-schema, kind-manifest, tag-registry,
+shared substrate = cast, kind-schema, kind-manifest, tag-registry,
 reference-contract, wiki-links, and license-policy packages
 ```
 
 The arrows point toward dependencies. The site and build CLI are composition layers: they join instance contracts, shared substrate packages, and runtime packages into user-facing behavior. Lower layers do not import either application.
+
+`cast` is the load-bearing substrate package. It implements casting itself — reference resolution, placement, the skill renderer, the orphan sweep, the provenance record — and this Foundry's own knowledge reaches it through `CastHooks`. Both `build-cli` and `note-schema` depend on it: the first because it casts, the second because the `cast:` half of a reference kind is parsed there. The site therefore reaches it transitively, which costs nothing at build time and is worth knowing when reading the graph above.
 
 ## Components and ownership
 
@@ -53,7 +55,7 @@ The authoring and build application exposed as `foundry-build`. It owns reposito
 
 - static content validation and cross-note checks;
 - dashboard, index, README-stat, and kind-manifest generation;
-- Mold casting and cast verification;
+- what this Foundry contributes to a cast, and cast verification;
 - Pipeline assembly;
 - repository-wide registries and file walking.
 
@@ -107,7 +109,7 @@ gxwf and Planemo are not implementation layers in this repository. Molds describ
 | note definitions and collections | `packages/note-schema/src/types/` |
 | authoring CLI commands | `packages/build-cli/src/commands/` |
 | repository validation | `packages/build-cli/src/commands/validate.ts` |
-| casting | `packages/build-cli/src/commands/cast-mold.ts` |
+| what this Foundry contributes to a cast | `packages/build-cli/src/commands/cast-mold.ts` |
 | pipeline assembly | `packages/build-cli/src/commands/assemble-pipeline.ts` |
 | runtime artifact validation | `packages/foundry/src/` |
 | Nextflow summarization | `packages/summarize-nextflow/src/` |

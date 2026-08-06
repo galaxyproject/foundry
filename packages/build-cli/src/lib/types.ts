@@ -1,6 +1,11 @@
 // Shared types for the validator and tooling.
 
-export type Frontmatter = Record<string, unknown>;
+// What a note's frontmatter is, before any schema has looked at it. Re-exported from
+// @galaxy-foundry/cast rather than restated: the caster reads the same frontmatter this
+// validator does, and two structurally identical declarations agree only until one narrows.
+import type { Frontmatter } from "@galaxy-foundry/cast";
+
+export type { Frontmatter };
 
 export interface FileMeta {
   /** Absolute path to the .md file. */

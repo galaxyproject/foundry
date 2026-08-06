@@ -14,18 +14,10 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-import { castsTargetDir, type ProvenanceRefEntry } from "@galaxy-foundry/cast";
-
-import { loadCastReferenceContract } from "@galaxy-foundry/note-schema";
-
-import type {
-  ProvenanceArtifactInput,
-  ProvenanceArtifactOutput,
-  ProvenanceArtifacts,
-} from "../lib/artifact-contract.js";
 import {
   bulletSection,
   castMold,
+  castsTargetDir,
   loadTargetConfig,
   refRows,
   runtimeProcedureBody,
@@ -35,7 +27,15 @@ import {
   stripWikiLinks,
   type CastHooks,
   type CastOutcome,
+  type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
+import { loadCastReferenceContract } from "@galaxy-foundry/note-schema";
+
+import type {
+  ProvenanceArtifactInput,
+  ProvenanceArtifactOutput,
+  ProvenanceArtifacts,
+} from "../lib/artifact-contract.js";
 import { payloadCompanionOf } from "../lib/dispositions.js";
 import { errorMessage } from "../lib/errors.js";
 import { readMarkdown } from "../lib/frontmatter.js";
@@ -259,7 +259,6 @@ const GALAXY_HOOKS: CastHooks = {
       ]),
     ];
   },
-  slugAliases: GALAXY_SLUG_ALIASES,
   // Which file a `payload-companion` kind ships instead of its note. Read off the kind's own
   // companion declarations, so a prompt bundle carries the prompt rather than the note framing
   // it — and so nothing here names the file.
@@ -641,10 +640,10 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
       args.moldName,
     ),
   );
-  const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_HOOKS.slugAliases);
+  const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES);
   const producerIndex = producerIndexFor(metaByPath);
 
-  // A malformed contract is a authoring error in a YAML file, not a bug in the caster, so it
+  // A malformed contract is an authoring error in a YAML file, not a bug in the caster, so it
   // reports like every other bad input here rather than as a stack trace. Same reasoning as
   // catching a broken companion declaration during resolution: the message is already good, the
   // delivery was not.

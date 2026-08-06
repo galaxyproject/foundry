@@ -15,10 +15,12 @@ import path from "node:path";
 import process from "node:process";
 import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
-import yaml from "js-yaml";
+
+import { loadTargetConfig } from "@galaxy-foundry/cast";
 
 import { NEVER_PACKAGED } from "../packages/build-cli/src/lib/dispositions.js";
-import { bundlePathOf, resolveBundlePath } from "../packages/build-cli/src/lib/target-layout.js";
+import { errorMessage } from "../packages/build-cli/src/lib/errors.js";
+import { bundleDir, castsTargetDir } from "../packages/build-cli/src/lib/target-layout.js";
 import { listFilesUnder } from "../packages/build-cli/src/lib/walk.js";
 import { readMarkdown } from "./lib/frontmatter.js";
 
@@ -84,15 +86,6 @@ function stripFencedBlocks(markdown: string): string {
     .join("\n");
 }
 
-interface TargetConfig {
-  bundle_path?: string;
-  required_outputs: string[];
-  skill_constraints: {
-    frontmatter_required: string[];
-    forbidden_runtime_paths: string[];
-  };
-}
-
 interface ProvenanceRefEntry {
   kind: string;
   mode: string;
@@ -130,17 +123,18 @@ function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const repoRoot = process.cwd();
 
-  const targetCfgPath = path.join(repoRoot, "casts", args.target, "_target.yml");
-  if (!existsSync(targetCfgPath)) fail(`missing target config: ${targetCfgPath}`);
-  const target = yaml.load(readFileSync(targetCfgPath, "utf8")) as TargetConfig;
+  // Read through the same loader the caster uses, so what a target DECLARES has one reader.
+  // A second parser here would answer `bundle_path: {mold}` — unquoted braces are a YAML
+  // mapping — differently from the cast it is supposed to be checking.
+  let target;
+  try {
+    target = loadTargetConfig(castsTargetDir(repoRoot, args.target));
+  } catch (e) {
+    fail(errorMessage(e));
+  }
 
-  // Placement is the target's to declare; see packages/build-cli/src/lib/target-layout.ts.
-  const bundleRoot = path.join(
-    repoRoot,
-    "casts",
-    args.target,
-    resolveBundlePath(bundlePathOf(target.bundle_path, targetCfgPath), args.moldName),
-  );
+  // Placement is the target's to declare; `casts/` is this Foundry's, stated in target-layout.
+  const bundleRoot = bundleDir(repoRoot, args.target, args.moldName);
   if (!existsSync(bundleRoot)) fail(`missing bundle: ${bundleRoot}`);
 
   const errors: string[] = [];
