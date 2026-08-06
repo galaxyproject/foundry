@@ -16,8 +16,6 @@ import process from "node:process";
 
 import {
   bulletSection,
-  castMold,
-  loadTargetConfig,
   refRows,
   runtimeProcedureBody,
   scalar,
@@ -25,10 +23,9 @@ import {
   skillSummary,
   stripWikiLinks,
   type CastHooks,
-  type CastOutcome,
   type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
-import { loadCastReferenceContract } from "@galaxy-foundry/note-schema";
+import { castCommand } from "@galaxy-foundry/cast/command";
 
 import type {
   ProvenanceArtifactInput,
@@ -36,52 +33,13 @@ import type {
   ProvenanceArtifacts,
 } from "../lib/artifact-contract.js";
 import { payloadCompanionOf } from "../lib/dispositions.js";
-import { errorMessage } from "../lib/errors.js";
 import { readMarkdown } from "../lib/frontmatter.js";
-import { sha256File } from "../lib/reconcile.js";
 import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
 import { validateRuns } from "../lib/runs-check.js";
 import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
-import { bundleDir, castsTargetDir } from "../lib/target-layout.js";
 import type { Frontmatter } from "../lib/types.js";
 import { fileSlug } from "../lib/walk.js";
 import { resolveWikiLink } from "../lib/wiki-links.js";
-
-// ---- argv ----
-
-interface Args {
-  moldName: string;
-  target: string;
-  check: boolean;
-  note: string | null;
-  root: string | null;
-}
-
-function parseArgs(argv: string[]): Args {
-  const positional: string[] = [];
-  let target = "claude";
-  let check = false;
-  let note: string | null = null;
-  let root: string | null = null;
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i]!;
-    if (a === "--check") check = true;
-    else if (a.startsWith("--target=")) target = a.slice("--target=".length);
-    else if (a === "--target") target = argv[++i] ?? target;
-    else if (a.startsWith("--note=")) note = a.slice("--note=".length);
-    else if (a === "--note") note = argv[++i] ?? note;
-    else if (a.startsWith("--root=")) root = a.slice("--root=".length);
-    else if (a === "--root") root = argv[++i] ?? ".";
-    else if (!a.startsWith("--")) positional.push(a);
-    else throw new Error(`unknown flag: ${a}`);
-  }
-  if (positional.length !== 1) {
-    throw new Error(
-      'usage: foundry-build cast <mold-name> [--target=claude] [--check] [--note="..."]',
-    );
-  }
-  return { moldName: positional[0]!, target, check, note, root };
-}
 
 // ---- the sidecar this Foundry renders ----
 
@@ -583,111 +541,22 @@ function schemaValidationRows(
  * `errors`: whether a bundle was written is the caster's decision, and a second copy of that
  * decision here could only ever disagree with the first.
  */
-function reportCast(outcome: CastOutcome, check: boolean, repoRoot: string): void {
-  for (const e of outcome.errors) console.error(`error: ${e}`);
-  for (const d of outcome.drift) console.error(`drift: ${d.file} — ${d.reason}`);
-
-  if (check) {
-    if (outcome.errors.length || outcome.drift.length) {
-      console.error(
-        `check failed: ${outcome.errors.length} error(s), ${outcome.drift.length} drift(s)`,
-      );
-      process.exitCode = 1;
-      return;
-    }
-    console.log("clean: no drift, no errors");
-    return;
-  }
-
-  if (!outcome.wrote) {
-    console.error(`refusing to update provenance: ${outcome.errors.length} error(s)`);
-    process.exitCode = 1;
-    return;
-  }
-
-  console.log(`wrote ${path.relative(repoRoot, outcome.wrote)}`);
-  if (outcome.drift.length) console.log(`reconciled ${outcome.drift.length} drifted file(s)`);
-}
-
 export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<void> {
-  const args = parseArgs(argv);
-  if (args.root) process.chdir(args.root);
-  const repoRoot = process.cwd();
-
-  // Where this Foundry keeps its targets and its Molds. Both are layout facts about this repo,
-  // stated here rather than reached for from inside the caster.
-  const targetDir = castsTargetDir(repoRoot, args.target);
-
-  // A malformed target declaration is an authoring error in a YAML file, same as the contract
-  // below, and reports the same way. The loader checks the kind table nothing else did, so this
-  // catch is the difference between a named message and a stack trace for most of what it finds.
-  let target: ReturnType<typeof loadTargetConfig>;
-  try {
-    target = loadTargetConfig(targetDir);
-  } catch (e) {
-    console.error(errorMessage(e));
-    process.exit(2);
-  }
-
-  const moldRel = path.posix.join("content", "molds", args.moldName, "index.md");
-  const moldAbs = path.join(repoRoot, moldRel);
-  if (!existsSync(moldAbs)) {
-    console.error(`mold source missing: ${moldRel}`);
-    process.exit(2);
-  }
-
-  const moldParsed = readMarkdown(moldAbs);
-  if (moldParsed.meta.type !== "mold") {
-    console.error(`${moldRel}: type is not 'mold' (got ${String(moldParsed.meta.type)})`);
-    process.exit(2);
-  }
-  const moldHash = sha256File(moldAbs);
-
-  const bundleRoot = bundleDir(repoRoot, args.target, args.moldName);
-  const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES);
-  const producerIndex = producerIndexFor(metaByPath);
-
-  // A malformed contract is an authoring error in a YAML file, not a bug in the caster, so it
-  // reports like every other bad input here rather than as a stack trace. Same reasoning as
-  // catching a broken companion declaration during resolution: the message is already good, the
-  // delivery was not.
-  let refContract: ReturnType<typeof loadCastReferenceContract>["contract"];
-  let castContract: ReturnType<typeof loadCastReferenceContract>["cast"];
-  try {
-    ({ contract: refContract, cast: castContract } = loadCastReferenceContract(
-      path.join(repoRoot, "reference_contract.yml"),
-    ));
-  } catch (e) {
-    console.error(errorMessage(e));
-    process.exit(2);
-  }
-
-  const outcome = await castMold<{ artifacts?: ProvenanceArtifacts }>({
-    repoRoot,
-    bundleRoot,
-    targetName: args.target,
-    target,
-    mold: {
-      name: args.moldName,
-      path: moldRel,
-      meta: moldParsed.meta,
-      body: moldParsed.body,
-      contentHash: moldHash,
-    },
-    castContract,
-    refKinds: refContract.kinds,
-    slugMap,
-    metaByPath,
+  // Flags, target and contract loading, the Mold's own file, and which of four endings this run
+  // had are all the same for any Foundry that casts, and live in the package. What is left here
+  // is what only this one can answer.
+  await castCommand<{ artifacts?: ProvenanceArtifacts }>(argv, {
+    usage: "foundry-build cast",
+    defaultTarget: "claude",
     hooks: GALAXY_HOOKS,
+    corpus: (repoRoot) => buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES),
     // What this Foundry records in the slot the record reserves beside `refs`. A Mold that
     // declares no handoff supplies `undefined` and the key is simply absent — which is also what
     // a Foundry with no artifacts at all gets, by passing no extensions.
-    extensions: { artifacts: readArtifactContracts(moldParsed.meta, producerIndex) },
-    check: args.check,
-    note: args.note,
+    extensions: ({ meta, corpus }) => ({
+      artifacts: readArtifactContracts(meta, producerIndexFor(corpus.metaByPath)),
+    }),
   });
-
-  reportCast(outcome, args.check, repoRoot);
 }
 
 const isDirectInvocation = import.meta.url === `file://${process.argv[1]}`;
