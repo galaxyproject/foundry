@@ -18,8 +18,16 @@ casts run real binaries.
 
 ## Optional fields
 
-- **`package`** / **`upstream`** — where the command's implementation lives, for the reader who
-  needs to check the page against the source.
+- **`package`** — the distribution the command ships in.
+- **`source_url`** — the external document this page summarizes: the spec entry or the command
+  implementation, ideally at a pinned ref, so a reader can check the page against what it was
+  written from. It earns its place only where the page really is a summary of something else; a
+  command implemented in this repository has no upstream to name, and pointing the field back at
+  our own source says nothing a reader could act on.
+
+  The name is shared with the sibling Foundry, which spells the same idea `source_url` and
+  constrains it the same way. `upstream` on a `schema` note is a different field for a different
+  job — see that kind.
 
 ## Body convention
 

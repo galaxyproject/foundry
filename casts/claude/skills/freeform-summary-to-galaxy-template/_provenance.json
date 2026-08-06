@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "ef30eb8dfeee86c3f938b849bb3bbb95720027dab1189829919b8d4b55b4b816",
-    "commit": "aede1aeab8ceb890192c9606a6e967a36fcf2224"
+    "commit": "b9590579bec9fec7caeb35f2274c3a9639d665d6"
   },
-  "cast_at": "2026-08-03T23:37:54.185Z",
+  "cast_at": "2026-08-05T22:24:08.376Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off.",
       "trigger": "After writing or modifying the draft workflow file.",
       "verification": "Cast the skill, run on a representative paper-derived summary, confirm draft-validate diagnostics route back.",
-      "src_hash": "784ee3d6d8ac183370be6ec0d0fb7fb60baa8a0d9d4b4d55affc1217016db716",
+      "src_hash": "37cded427fbccf49ff19a6fe8b03f9e90857afe556e5db0e51a01402fbf33f1e",
       "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
       "source": "deterministic"
     },

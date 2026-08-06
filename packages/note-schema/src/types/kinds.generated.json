@@ -601,7 +601,7 @@
       "locations": [
         "content/cli"
       ],
-      "doc": "# CLI Command\n\nA **CLI Command** note is a manual page for one subcommand, authored so a cast reads the real\nflags instead of inventing plausible ones.\n\nThis is the kind that most directly buys correctness: hallucinated command-line flags are\nsyntactically perfect and completely wrong, and no amount of prompt care fixes that. Writing the\npage down and referencing it does.\n\nThis kind is **instance-specific**, and pairs with `cli-tool`: both exist because this Foundry's\ncasts run real binaries.\n\n## Why each required field is required\n\n- **`tool`** — the `cli-tool` slug this command belongs to. The join key.\n- **`command`** — the subcommand itself. Together with `tool` it identifies the page.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`package`** / **`upstream`** — where the command's implementation lives, for the reader who\n  needs to check the page against the source.\n\n## Body convention\n\nThe validator warns when the body omits a `## Gotchas` section. That is deliberate: the flags\nare recoverable from `--help`, but the failure modes are exactly what a cast cannot discover on\nits own, and they are the reason the note is worth its tokens.",
+      "doc": "# CLI Command\n\nA **CLI Command** note is a manual page for one subcommand, authored so a cast reads the real\nflags instead of inventing plausible ones.\n\nThis is the kind that most directly buys correctness: hallucinated command-line flags are\nsyntactically perfect and completely wrong, and no amount of prompt care fixes that. Writing the\npage down and referencing it does.\n\nThis kind is **instance-specific**, and pairs with `cli-tool`: both exist because this Foundry's\ncasts run real binaries.\n\n## Why each required field is required\n\n- **`tool`** — the `cli-tool` slug this command belongs to. The join key.\n- **`command`** — the subcommand itself. Together with `tool` it identifies the page.\n- The **base envelope** — as on every kind.\n\n## Optional fields\n\n- **`package`** — the distribution the command ships in.\n- **`source_url`** — the external document this page summarizes: the spec entry or the command\n  implementation, ideally at a pinned ref, so a reader can check the page against what it was\n  written from. It earns its place only where the page really is a summary of something else; a\n  command implemented in this repository has no upstream to name, and pointing the field back at\n  our own source says nothing a reader could act on.\n\n  The name is shared with the sibling Foundry, which spells the same idea `source_url` and\n  constrains it the same way. `upstream` on a `schema` note is a different field for a different\n  job — see that kind.\n\n## Body convention\n\nThe validator warns when the body omits a `## Gotchas` section. That is deliberate: the flags\nare recoverable from `--help`, but the failure modes are exactly what a cast cannot discover on\nits own, and they are the reason the note is worth its tokens.",
       "fields": [
         {
           "name": "command",
@@ -674,17 +674,17 @@
           "type": "string[]"
         },
         {
+          "name": "source_url",
+          "required": false,
+          "type": "string"
+        },
+        {
           "name": "sources",
           "required": false,
           "type": "string[]"
         },
         {
           "name": "title",
-          "required": false,
-          "type": "string"
-        },
-        {
-          "name": "upstream",
           "required": false,
           "type": "string"
         }

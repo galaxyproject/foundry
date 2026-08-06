@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 8,
     "content_hash": "45f5bb50f0fa56ee1e25b323b67f7c4eda64ef9b376b80a2fdc37f20e6a23e1c",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "b9590579bec9fec7caeb35f2274c3a9639d665d6"
   },
-  "cast_at": "2026-08-02T22:04:44.968Z",
+  "cast_at": "2026-08-05T22:29:23.592Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Validate the mutated draft against draft-contract rules; with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2.",
       "trigger": "After implementing or modifying a concrete tool step in the draft.",
       "verification": "Cast the skill, exercise on an IWC-derived draft with one drafty step, confirm both surfaces validate and diagnostics route back to the implemented step.",
-      "src_hash": "784ee3d6d8ac183370be6ec0d0fb7fb60baa8a0d9d4b4d55affc1217016db716",
+      "src_hash": "37cded427fbccf49ff19a6fe8b03f9e90857afe556e5db0e51a01402fbf33f1e",
       "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
       "source": "deterministic"
     },

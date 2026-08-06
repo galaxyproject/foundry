@@ -868,7 +868,7 @@ describe("validateDirectory (cross-file)", () => {
         tool: "gxwf",
         command: "validate",
         package: "@galaxy-tool-util/cli",
-        upstream:
+        source_url:
           "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
       }),
     });
@@ -913,7 +913,7 @@ describe("validateDirectory (cross-file)", () => {
         tool: "gxwf",
         command: "validate",
         package: "@galaxy-tool-util/cli",
-        upstream:
+        source_url:
           "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
       }),
     });
@@ -930,7 +930,7 @@ describe("validateDirectory (cross-file)", () => {
     ).toBeGreaterThanOrEqual(1);
   });
 
-  it("rejects CLI command notes missing upstream metadata", () => {
+  it("rejects a CLI command absent from the upstream CLI metadata", () => {
     writeFm(path.join(dir, "cli/gxwf/not-real.md"), {
       ...baseRequired({
         type: "cli-command",
@@ -938,7 +938,7 @@ describe("validateDirectory (cross-file)", () => {
         tool: "gxwf",
         command: "not-real",
         package: "@galaxy-tool-util/cli",
-        upstream:
+        source_url:
           "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
       }),
     });
@@ -948,6 +948,57 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  // `source_url` is owed by exactly the pages that summarize someone else's document, which is
+  // every cli-command except the ones this repository implements. Both directions are asserted
+  // because only one of them fails loudly: a missing field is a page a reader cannot check, and a
+  // present one on our own command is a link back to the tree the reader is already in.
+  it("rejects a CLI command with no source_url to check the page against", () => {
+    writeFm(path.join(dir, "cli/gxwf/validate.md"), {
+      ...baseRequired({
+        type: "cli-command",
+        tags: ["cli/gxwf"],
+        tool: "gxwf",
+        command: "validate",
+        package: "@galaxy-tool-util/cli",
+      }),
+    });
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("rejects a source_url on a command this repository implements", () => {
+    writeFm(path.join(dir, "cli/foundry/validate-tests-format.md"), {
+      ...baseRequired({
+        type: "cli-command",
+        tags: ["cli/foundry"],
+        tool: "foundry",
+        command: "validate-tests-format",
+        package: "@galaxy-foundry/foundry",
+        source_url:
+          "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/program.ts",
+      }),
+    });
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("accepts a command this repository implements with no source_url", () => {
+    writeFm(path.join(dir, "cli/foundry/validate-tests-format.md"), {
+      ...baseRequired({
+        type: "cli-command",
+        tags: ["cli/foundry"],
+        tool: "foundry",
+        command: "validate-tests-format",
+        package: "@galaxy-foundry/foundry",
+      }),
+    });
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBe(0);
   });
 
   it("rejects typed references that resolve to the wrong type", () => {

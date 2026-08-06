@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 8,
     "content_hash": "a53a303bff1d7ace3b44fb12af329b12695bfcd165933634b8fb6484c0c306f7",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "b9590579bec9fec7caeb35f2274c3a9639d665d6"
   },
-  "cast_at": "2026-08-02T22:05:07.494Z",
+  "cast_at": "2026-08-05T22:29:48.826Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first. Stock/built-in bare ids resolve against the shed but need an explicit `--tool-version`.",
       "trigger": "When the requested pin is not yet present in the configured cache directory.",
       "verification": "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted.",
-      "src_hash": "0090da3c49e1c39b81453a998db8faa7979b20f89443231c8e372ce5384324a5",
+      "src_hash": "6cb4b61fbdd1aa49a5052abb24020c43bdf57e0360643a65e55b23b42155f561",
       "dst_hash": "85e3bb884171beb69631186ca6f0f7552e6c6d0721383ab6653e7a32c84a1b71",
       "source": "deterministic"
     },
@@ -38,7 +38,7 @@
       "purpose": "Discover the concrete cached version of a stock/built-in bare id before `add`/`summarize`, since the shed's TRS version-list endpoint can't auto-resolve it; never hand-guess a stock version.",
       "trigger": "When the pin is a bare/stock id (no owner/repo) and its concrete version isn't already known.",
       "verification": "Cast the skill, populate a cache with a stock tool, run `list --json`, confirm the reported version feeds `add`/`summarize` for that bare id.",
-      "src_hash": "7b867a3b9293bd1425b6e0b7a49632c60551db6afcf0bdec1b335f36ff6b00b6",
+      "src_hash": "e352306726b54752ad63ac68b2a468d49eb22cebd7b367344ee6b10c8e790434",
       "dst_hash": "92d336667531c34180db6f75b9fdf87261923c1e85567dce3b21a6d87d9543bd",
       "source": "deterministic"
     },
@@ -54,7 +54,7 @@
       "purpose": "Emit the deterministic [[galaxy-tool-summary]] manifest for the cached pin; this Mold runs the command rather than hand-authoring the manifest.",
       "trigger": "Once the pin is confirmed present in the cache.",
       "verification": "Cast the skill, run `summarize` on a cached pin (e.g. staramr_search), confirm the emitted manifest validates against [[galaxy-tool-summary]].",
-      "src_hash": "5e8ac7fe768f902d311196fcecdc33c1c0bc0de176d52447639e99a679e6c1c6",
+      "src_hash": "96099b98e52244ac882066511a8ffa87c1fbbd6fb1c7acc98de3cca822f98277",
       "dst_hash": "b51364ad4d415f6047e3cf3d3052dea1598cd2197595be66697c9777918b2de7",
       "source": "deterministic"
     },

@@ -3,7 +3,7 @@ type: cli-command
 tool: planemo
 command: workflow_test_init
 package: "planemo"
-upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_workflow_test_init.py"
+source_url: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/commands/cmd_workflow_test_init.py"
 tags:
   - cli/planemo
 status: draft

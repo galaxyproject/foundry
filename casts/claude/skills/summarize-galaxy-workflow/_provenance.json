@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 2,
     "content_hash": "23b770bbbd5409a37a7a0ea457a10b2cfba21f36a6e7e892125735035ac36078",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "b9590579bec9fec7caeb35f2274c3a9639d665d6"
   },
-  "cast_at": "2026-08-02T22:05:09.135Z",
+  "cast_at": "2026-08-05T22:29:50.354Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,7 +22,7 @@
       "purpose": "Convert a legacy `.ga` workflow to gxformat2 before summarizing, and record the conversion under documents.converted_path.",
       "trigger": "When the supplied workflow is native `.ga` rather than gxformat2.",
       "verification": "Cast the skill, run on one `.ga` and one gxformat2 fixture; confirm the `.ga` case populates documents.converted_path and both summaries validate.",
-      "src_hash": "9945cc274f2b5ad1a77ea6b6d0c9d68f4163991b9d451ed9eeff2bd10c87349c",
+      "src_hash": "1bb19d20b4a39b1708d8f5346a0294616cdb9df83ba5255c4a90d97030d13b83",
       "dst_hash": "1cdf49f10f77039af6efc5b82fe79720bb18e50d1f57d653670697f7262c7640",
       "source": "deterministic"
     },
@@ -38,7 +38,7 @@
       "purpose": "Validate the gxformat2 workflow before extraction and record diagnostics under documents.validation.",
       "trigger": "Before extracting structure from the workflow document.",
       "verification": "Cast the skill, run on one valid and one malformed workflow; the malformed one surfaces gxwf validate diagnostics in the summary.",
-      "src_hash": "7f5b7f131c79ecdca31d890502b71940cae8319cd35c20041e3c285bc2ae9ac9",
+      "src_hash": "1bf4b4c50e9987f63e65ad36f6deefe6e399fe009280d4bee8533d6c451acf1e",
       "dst_hash": "ff10c49819b0f7af13f247ea03e4dd24ba2e5144da3beaa6b1ab96698c7e03b7",
       "source": "deterministic"
     },

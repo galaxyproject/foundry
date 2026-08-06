@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
     "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "b9590579bec9fec7caeb35f2274c3a9639d665d6"
   },
-  "cast_at": "2026-08-02T22:04:46.585Z",
+  "cast_at": "2026-08-05T22:29:28.474Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -30,7 +30,7 @@
       "evidence": "corpus-observed",
       "purpose": "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution.",
       "trigger": "After authoring or editing a Galaxy workflow test file and before Planemo invocation.",
-      "src_hash": "dc500585d94e675d1809707dc8585c4da8f6d8f3ac977c9027bb66d9480820ab",
+      "src_hash": "7157ef7750ead142086e0597d52d2ef6ef072e8ec2939f2ac6965bdccf04849d",
       "dst_hash": "973184698733ffb86bb5a15781902846afec311047f5684f779f8ad023e5d24c",
       "source": "deterministic"
     },

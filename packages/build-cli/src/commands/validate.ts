@@ -45,6 +45,16 @@ const CLI_METADATA_KEYS = new Set([
     .map((command) => `${planemoCliMeta.program}/${command.name}`),
 ]);
 
+/**
+ * The commands THIS repository implements, as opposed to the three programs whose metadata it
+ * merely reads. A page for one of these summarizes nothing: the code is in the same tree, and a
+ * `source_url` pointing back at our own `program.ts` gives a reader no second place to check.
+ * Every other cli-command page is a summary of an external document and owes one.
+ */
+const OWN_CLI_KEYS = new Set(
+  foundryCliMeta.commands.map((command) => `${foundryCliMeta.name}/${command.name}`),
+);
+
 /** Single-value vs array wiki-link fields. Schema's regex catches missing brackets; this catches whitespace-only inner text. */
 const WIKI_LINK_FIELDS: Record<string, "single" | "array"> = {
   parent_pattern: "single",
@@ -1044,11 +1054,21 @@ function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
         message: "cli-command must declare package for metadata-backed rendering",
       });
     }
-    if (typeof f.meta.upstream !== "string" || f.meta.upstream.length === 0) {
+    const sourceUrl = f.meta.source_url;
+    const hasSourceUrl = typeof sourceUrl === "string" && sourceUrl.length > 0;
+    if (OWN_CLI_KEYS.has(key)) {
+      if (hasSourceUrl) {
+        findings.push({
+          path: f.path,
+          severity: "error",
+          message: `cli-command ${key} is implemented in this repository and must not declare source_url`,
+        });
+      }
+    } else if (!hasSourceUrl) {
       findings.push({
         path: f.path,
         severity: "error",
-        message: "cli-command must declare upstream for metadata-backed rendering",
+        message: "cli-command must declare source_url — the external document this page summarizes",
       });
     }
     const body = readMarkdown(f.path).body;
