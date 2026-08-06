@@ -239,20 +239,14 @@ describe("the palette this stylesheet declares", () => {
   // from `:root`, used nowhere.
   it("declares no token that reaches no stylesheet", () => {
     const source = read(path.join(SITE, "src/styles/global.css"));
-    const block = source.slice(
-      source.indexOf("@theme"),
-      source.indexOf("\n}", source.indexOf("@theme")),
-    );
+    const block = source.slice(source.indexOf("@theme"), source.indexOf("\n}", source.indexOf("@theme")));
     const declared = [...block.matchAll(/^\s*(--[\w-]+):/gm)].map((m) => m[1]!);
 
     const css = emittedCss();
     const root = (css.match(/:root[^{]*\{[^}]*\}/g) ?? []).join("");
     const dead = declared.filter((token) => !root.includes(`${token}:`));
 
-    expect(
-      declared.length,
-      "\nno tokens parsed out of @theme — has the block moved?",
-    ).toBeGreaterThan(20);
+    expect(declared.length, "\nno tokens parsed out of @theme — has the block moved?").toBeGreaterThan(20);
     expect(
       dead,
       "\nthese are declared in `@theme` and referenced by nothing, so Tailwind emitted no" +
@@ -484,5 +478,34 @@ describe("what the search box can find", () => {
 
   it("puts the attribute on <main>, so chrome stays out of the excerpt", () => {
     expect(home).toMatch(/<main[^>]*\sdata-pagefind-body/);
+  });
+});
+
+describe("the gallery", () => {
+  // The one route on this site that nothing generates a link to. Every other page hangs off a
+  // collection, a tag or the nav, so an unreachable one would have to be built by hand — which is
+  // exactly what this is. It went out with no inbound link at all and looked completely finished:
+  // the routes emit, the frames render, and the only symptom is that no reader ever arrives.
+  const galleryIndex = () => read(path.join(DIST, "gallery/index.html"));
+
+  it("is linked from a page a reader can get to", () => {
+    const href = `${baseFrom(home)}/gallery/`;
+    const design = read(path.join(DIST, "design/index.html"));
+    expect(hrefsIn(design), "\nthe design record no longer links the gallery").toContain(href);
+  });
+
+  it("frames only routes the build emitted", () => {
+    // A frame whose src is a 404 renders as an empty box, which is indistinguishable from a
+    // specimen whose case is "renders nothing" — the ambiguity the specimens exist to remove.
+    const base = baseFrom(home);
+    const framed = [...galleryIndex().matchAll(/<iframe\s[^>]*src="([^"]+)"/g)].flatMap((m) =>
+      m[1] ? [m[1]] : [],
+    );
+
+    expect(framed.length, "\nno frames on the gallery index").toBeGreaterThan(0);
+    const missing = framed.filter(
+      (src) => !existsSync(path.join(DIST, src.slice(base.length), "index.html")),
+    );
+    expect(missing, "\nframed routes the build never emitted").toEqual([]);
   });
 });
