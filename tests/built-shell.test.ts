@@ -29,6 +29,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
+import { licenseBadgeStyleGaps, licenseFileStyleGaps } from "@galaxy-foundry/site-kit";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { SITE_IDENTITY } from "../site/src/lib/site-identity";
@@ -220,6 +221,30 @@ describe("the palette this stylesheet declares", () => {
         " actually spelled elsewhere.\n\n  " +
         dead.join("\n  ") +
         "\n",
+    ).toEqual([]);
+  });
+});
+
+describe("the tokens the licence components name", () => {
+  // The same failure the shell's `@source` line has, one layer in. `LicenseBadge` and
+  // `LicenseFileBody` bring their own scoped styles, so there are no classes to declare — but their
+  // rules read custom properties that this repo has to supply, and a property nothing declares
+  // resolves to nothing inside `color-mix()`. The chip renders with no background at all: legible
+  // text, no colour, and a page that looks designed rather than broken.
+  //
+  // Worth asserting here rather than trusting the move, because these three used to be literals
+  // INSIDE the component — `#16a34a`, `#d97706`, `#dc2626`. Nothing had to be declared for them to
+  // work, and the adoption is exactly the moment that stops being true.
+  it("declares every one, in the stylesheet the build emitted", () => {
+    const css = emittedCss();
+
+    expect(css).not.toHaveLength(0);
+    expect(licenseBadgeStyleGaps(css), "\ntokens the badge reads and this site never declares").toEqual(
+      [],
+    );
+    expect(
+      licenseFileStyleGaps(css),
+      "\ntokens the licence-file body reads and this site never declares",
     ).toEqual([]);
   });
 });

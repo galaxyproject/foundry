@@ -57,6 +57,14 @@
   /* The rail of the subway-style phase graph; a lighter blue in dark. */
   --color-rail: #25537b;
 
+  /* License chips. These three were literals inside the component that drew them, here and in a
+     sibling instance — the same three values, typed twice. The component moved to site-kit and
+     names them instead, which is what turned them from package opinion into instance theme.
+     `licenseBadgeStyleGaps` asserts they reach the stylesheet. */
+  --color-license-verbatim: #16a34a;
+  --color-license-own-words: #d97706;
+  --color-license-copyleft: #dc2626;
+
   /* Badges */
   --color-badge-draft-bg: #fff3cd;
   --color-badge-draft-text: #856404;

@@ -1,6 +1,8 @@
 ---
 import { type NoteEntry, type NoteField } from '../lib/notes';
-import { licenseIdFromFilePath, resolveLicenseRow } from '@galaxy-foundry/license-policy';
+import { resolveLicenseRow } from '@galaxy-foundry/license-policy';
+import { licenseFileHref } from '@galaxy-foundry/site-kit';
+import LicenseBadge from '@galaxy-foundry/site-kit/LicenseBadge.astro';
 import { licensePolicy } from '../lib/registries';
 import { base } from '../lib/site-base';
 
@@ -26,16 +28,17 @@ const licenseFile = LICENSE_FILE in data ? data.license_file : undefined;
 const upstream = UPSTREAM in data ? data.upstream : undefined;
 
 // Only rendered for notes that carry a license (third-party redistribution).
+//
+// The row is still resolved here for `obligations`, which is the box's own line rather than the
+// badge's: what the licence PERMITS travels with the licence, what this note owes for using it is
+// ours. See the badge's header comment for where that line is drawn.
 const row = license ? resolveLicenseRow(licensePolicy, license) : undefined;
-const licenseHref = licenseFile ? `${base}/licenses/${licenseIdFromFilePath(licenseFile)}/` : undefined;
-const policyLabel = row?.policy === 'own-words-only' ? 'own-words only' : 'verbatim OK';
+const licenseHref = licenseFile ? licenseFileHref(base, licenseFile) : undefined;
 ---
 {license && row && (
   <aside class="license-box not-prose">
     <div class="license-tags">
-      <span class="license-chip license-id">{license}</span>
-      <span class={`license-chip license-policy ${row.policy}`}>{policyLabel}</span>
-      {row.copyleft && <span class="license-chip license-copyleft">copyleft</span>}
+      <LicenseBadge license={license} policy={licensePolicy} />
     </div>
     <p class="license-obligations">{row.obligations}</p>
     <p class="license-links">
@@ -61,36 +64,9 @@ const policyLabel = row?.policy === 'own-words-only' ? 'own-words only' : 'verba
     background: var(--color-surface-raised);
     font-size: 0.85rem;
   }
+  /* The chips' own layout is the badge's; this is only the gap to the obligations line below. */
   .license-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
     margin-bottom: 0.5rem;
-  }
-  .license-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.16rem 0.5rem;
-    border-radius: 999px;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-  }
-  .license-id {
-    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-    color: var(--color-text-secondary);
-  }
-  .license-policy.verbatim-ok {
-    background: color-mix(in srgb, #16a34a 16%, transparent);
-    color: var(--color-text-secondary);
-  }
-  .license-policy.own-words-only {
-    background: color-mix(in srgb, #d97706 18%, transparent);
-    color: var(--color-text-secondary);
-  }
-  .license-copyleft {
-    background: color-mix(in srgb, #dc2626 16%, transparent);
-    color: var(--color-text-secondary);
   }
   .license-obligations {
     margin: 0 0 0.5rem;
