@@ -173,6 +173,16 @@ const emittedCss = (): string =>
     .map((entry) => read(path.join(DIST, "_astro", entry)))
     .join("\n");
 
+/**
+ * The `:root` declarations alone — the light theme, and the only place a "did this token survive"
+ * question can be asked honestly.
+ *
+ * `.dark` is a class, and a class is not tree-shaken. A token declared under it emits whether or
+ * not anything reads it, so the same token missing from `:root` is invisible to any search of the
+ * whole file. Both assertions that ask about tokens go through here.
+ */
+const rootCss = (): string => (emittedCss().match(/:root[^{]*\{[^}]*\}/g) ?? []).join("");
+
 describe("the stylesheet the shell depends on", () => {
   it("emits a utility that only the kit names", () => {
     const css = emittedCss();
@@ -208,9 +218,7 @@ describe("the palette this stylesheet declares", () => {
     const block = source.slice(source.indexOf("@theme"), source.indexOf("\n}", source.indexOf("@theme")));
     const declared = [...block.matchAll(/^\s*(--[\w-]+):/gm)].map((m) => m[1]!);
 
-    const css = emittedCss();
-    const root = (css.match(/:root[^{]*\{[^}]*\}/g) ?? []).join("");
-    const dead = declared.filter((token) => !root.includes(`${token}:`));
+    const dead = declared.filter((token) => !rootCss().includes(`${token}:`));
 
     expect(declared.length, "\nno tokens parsed out of @theme — has the block moved?").toBeGreaterThan(20);
     expect(
@@ -235,15 +243,22 @@ describe("the tokens the licence components name", () => {
   // Worth asserting here rather than trusting the move, because these three used to be literals
   // INSIDE the component — `#16a34a`, `#d97706`, `#dc2626`. Nothing had to be declared for them to
   // work, and the adoption is exactly the moment that stops being true.
-  it("declares every one, in the stylesheet the build emitted", () => {
-    const css = emittedCss();
+  it("declares every one where the light theme can reach it", () => {
+    // `:root`, for the reason the palette block above spells out, and this is the second time that
+    // trap has been walked into rather than the first. Asked of the whole emitted stylesheet, this
+    // passes with a token declared ONLY under `.dark`: the class is not tree-shaken, so the search
+    // finds the dark value and reports the light one healthy. Every chip on the site then renders
+    // backgroundless in light mode and correct in dark, which is close to the least likely
+    // combination to be noticed in review.
+    const root = rootCss();
 
-    expect(css).not.toHaveLength(0);
-    expect(licenseBadgeStyleGaps(css), "\ntokens the badge reads and this site never declares").toEqual(
-      [],
-    );
+    expect(root).not.toHaveLength(0);
     expect(
-      licenseFileStyleGaps(css),
+      licenseBadgeStyleGaps(root),
+      "\ntokens the badge reads and this site never declares",
+    ).toEqual([]);
+    expect(
+      licenseFileStyleGaps(root),
       "\ntokens the licence-file body reads and this site never declares",
     ).toEqual([]);
   });
