@@ -1,0 +1,155 @@
+---
+import type { ReferenceContractProps, SiteFooterProps } from "@galaxy-foundry/site-kit";
+import ReferenceContract from "@galaxy-foundry/site-kit/ReferenceContract.astro";
+import SiteFooter from "@galaxy-foundry/site-kit/SiteFooter.astro";
+import {
+  FOOTER_SPECIMENS,
+  HEADER_SPECIMENS,
+  REFERENCE_SPECIMENS,
+  SHELL_SPECIMENS,
+  SPECIMENS,
+  sharesPage,
+  specimenPath,
+  type Specimen,
+  type SpecimenGroup,
+} from "@galaxy-foundry/site-kit/specimens";
+
+import GallerySpecimen from "../../components/GallerySpecimen.astro";
+import Base from "../../layouts/Base.astro";
+import { KIND_TINT_SPECIMENS } from "../../lib/gallery";
+import { base } from "../../lib/site-base";
+
+// The shell's components, rendered in THIS instance's theme.
+//
+// Nothing on this page supplies a colour. The kit names six tokens and three classes and defines
+// none of them, so what a reader sees below is `global.css` — the same file every other page here
+// is drawn with. That is the whole of what makes this gallery ours rather than a copy of the
+// package's: run the same specimens under a sibling instance's stylesheet and the same data is a
+// different page.
+//
+// Which groups may share this page is the KIT's answer and not ours — `sharesPage`. A header
+// carries document-unique ids, so two on one page is one working overflow menu and one that binds
+// nothing at all, and it renders cleanly either way. Those go in frames.
+const referenceGroups: SpecimenGroup<ReferenceContractProps>[] = [
+  REFERENCE_SPECIMENS,
+  KIND_TINT_SPECIMENS,
+];
+const footerGroups: SpecimenGroup<SiteFooterProps>[] = [FOOTER_SPECIMENS];
+const framedGroups: SpecimenGroup[] = [HEADER_SPECIMENS, SHELL_SPECIMENS];
+const inlineGroups: SpecimenGroup[] = [...referenceGroups, ...footerGroups];
+
+// A group the kit adds, or one that changes its surface, belongs in exactly one of the lists above
+// and this page has nothing to say about it either way. Better a build that stops than a gallery
+// that quietly stops covering the kit.
+const covered = [...inlineGroups, ...framedGroups].map((group) => group.id);
+const uncovered = SPECIMENS.filter((group) => !covered.includes(group.id));
+if (uncovered.length > 0) {
+  throw new Error(`gallery has no section for: ${uncovered.map((g) => g.id).join(", ")}`);
+}
+for (const group of inlineGroups) {
+  if (!sharesPage(group)) {
+    throw new Error(`${group.id} declares \`${group.surface}\` and cannot share a page`);
+  }
+}
+
+// The same address the standalone route is built at. Derived from the kit rather than spelled
+// again, so a frame cannot point somewhere the route is not.
+const specimenHref = (group: SpecimenGroup, specimen: Specimen): string =>
+  `${base}/gallery/${specimenPath(group, specimen)}/`;
+
+// The group's own id, not its component name: this page renders two `ReferenceContract` groups —
+// the kit's cases and ours — and a name-derived anchor gave both the same one.
+const groupAnchor = (group: SpecimenGroup): string => group.id;
+const allGroups = [...inlineGroups, ...framedGroups];
+---
+
+<Base
+  title="Gallery"
+  description="The site-kit components, every case they handle, rendered in this instance's theme."
+  searchable={false}
+>
+  <h1>Gallery</h1>
+  <p>
+    Every case <code>@galaxy-foundry/site-kit</code> says its components handle, rendered here in this
+    instance's theme. The props come from the package; the colours, the type and the spacing are ours.
+    A sibling Foundry running the same specimens gets a different page from the same data.
+  </p>
+
+  <ul class="not-prose my-6 grid gap-2 sm:grid-cols-2">
+    {
+      allGroups.map((group) => (
+        <li
+          class="rounded-lg border p-3"
+          style="border-color: var(--color-border-subtle); background: var(--color-surface-raised)"
+        >
+          <a href={`#${groupAnchor(group)}`} class="font-bold no-underline hover:underline">
+            {group.component}
+          </a>
+          <span class="ml-2 text-xs uppercase tracking-wider" style="color: var(--color-text-muted)">
+            {group.specimens.length} · {group.surface}
+          </span>
+          <p class="mt-1 text-sm leading-snug" style="color: var(--color-text-secondary)">
+            {group.summary}
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+
+  {
+    referenceGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <ReferenceContract {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    footerGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <SiteFooter {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    framedGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>
+          {group.summary} Each is a page of its own — <code>{group.surface}</code> means it cannot
+          share this one — so the frames below are the real routes, at whatever width this column
+          gives them.
+        </p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <iframe
+              src={specimenHref(group, specimen)}
+              title={`${group.component}: ${specimen.name}`}
+              loading="lazy"
+              class="block h-96 w-full rounded border-0"
+              style="background: var(--color-surface)"
+            />
+            <p class="mt-2 text-xs">
+              <a href={specimenHref(group, specimen)}>
+                Open {specimenPath(group, specimen)} full width
+              </a>
+            </p>
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+</Base>

@@ -49,6 +49,23 @@ const groups = await Promise.all(
       </div>
     </section>
   ))}
+
+  <section class="design-doc-section" aria-labelledby="design-gallery">
+    <div class="design-section-heading">
+      <div>
+        <h2 id="design-gallery">The components these pages are drawn with</h2>
+        <p>
+          Every case <code>@galaxy-foundry/site-kit</code> says its components handle, rendered in
+          this instance's theme — plus one group that is ours alone: every kind we declare, one card
+          each, which is where a kind taking the brand fallback becomes visible.
+        </p>
+      </div>
+      <span class="font-mono">live</span>
+    </div>
+    <p>
+      <a href={`${base}/gallery/`}>Open the gallery</a>
+    </p>
+  </section>
 </Base>
 
 <style>
