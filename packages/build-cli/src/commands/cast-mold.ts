@@ -212,13 +212,13 @@ const GALAXY_HOOKS: CastHooks = {
   ],
   skillLede:
     "Follow the procedure below and use the artifact/reference sections as the runtime contract.",
-  skillSections: ({ moldName, meta, body, refs, metaByPath, slugMap }) => {
-    const summary = skillSummary(meta, moldName);
+  skillSections: ({ moldName, meta, body, noun, refs, metaByPath, slugMap }) => {
+    const summary = skillSummary(meta, moldName, noun);
     const artifacts = readArtifactContracts(meta, producerIndexFor(metaByPath));
     const produces = artifacts?.produces ?? [];
     const runtime = refs.filter((r) => r.used_at !== "cast-time");
     const describe = { kindLabel: refKindLabel, modePhrase: refModePhrase };
-    const procedure = runtimeProcedureBody(body, moldName);
+    const procedure = runtimeProcedureBody(body, moldName, noun);
     return [
       bulletSection("When To Use", [`- ${stripWikiLinks(summary)}`]),
       bulletSection(

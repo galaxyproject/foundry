@@ -18,11 +18,25 @@
 # bundle_path gets one directory per bundle, named for it.
 bundle_path: skills/{mold}
 
-# Required runtime artifacts the generated skill must produce.
-# The deterministic verifier checks these before any agentic review.
-required_outputs:
-  - SKILL.md
-  - _provenance.json
+# What a cast of a Mold is here: the file it writes, and the word it calls itself.
+#
+# Both are Claude's, not casting's. `SKILL.md` is the filename this harness looks for, and
+# `skill` is what it calls what it finds — the caster substitutes the noun for `Mold` through
+# the cast body, so a target shipping something else says so once, here.
+#
+# `_provenance.json` is deliberately absent. The record is the CASTER's account of what it did,
+# and everything that reads a bundle without knowing which target made it finds it by that name.
+document:
+  path: SKILL.md
+  noun: skill
+
+# Required runtime artifacts the generated skill must produce, checked by the deterministic
+# verifier before any agentic review.
+#
+# Not declared, because the default is exactly these two: `document.path` and the provenance
+# record. Spelling them out restated what casting always writes, and a target that merely agrees
+# with the caster has only created somewhere for the two to disagree. Declare this to require
+# something ELSE.
 
 # Per-reference-kind PLACEMENT: where this target puts each kind, and under what extension.
 # `dst` is computed from the source slug; the verifier enforces 1:1.
