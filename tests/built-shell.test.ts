@@ -523,4 +523,69 @@ describe("the gallery", () => {
     );
     expect(missing, "\nframed routes the build never emitted").toEqual([]);
   });
+
+  /** The badge subtree starting at `from`, to its balanced close — chips nest one deep. */
+  const spanAt = (html: string, from: number): string => {
+    const tags = /<\/?span\b[^>]*>/g;
+    tags.lastIndex = from;
+    let depth = 0;
+    for (let tag = tags.exec(html); tag; tag = tags.exec(html)) {
+      depth += tag[0].startsWith("</") ? -1 : 1;
+      if (depth === 0) return html.slice(from, tag.index + tag[0].length);
+    }
+    throw new Error(`unclosed <span> at ${from}`);
+  };
+
+  /**
+   * Every licence badge on a page, by the id its name chip carries in `title`.
+   *
+   * The class match allows a second class rather than requiring the attribute to be exactly this
+   * one: a badge that gained one would otherwise be found nowhere, and the test would fail saying
+   * the gallery has no badges — which is the wrong page to go looking at.
+   */
+  const badgesIn = (html: string): [string, string][] =>
+    [...html.matchAll(/<span class="license-badge[ "][^>]*>/g)].flatMap((open) => {
+      const markup = spanAt(html, open.index);
+      const id = /title="([^"]+)"/.exec(markup)?.[1];
+      return id ? [[id, markup] as [string, string]] : [];
+    });
+
+  it("shows the badge a note page shows, and not a copy of it", () => {
+    // What this instance's gallery can claim and the reference one cannot: the specimen and the
+    // production surface are the same rendering, out of one file, under one stylesheet.
+    //
+    // The failure it exists for is the plausible repair. `LicenseBadge` is four lines of markup,
+    // and a gallery that stopped compiling — a prop renamed, an export moved — is quickest fixed
+    // by writing those four lines here instead of importing them. Nothing then goes red: the
+    // section still renders chips, the notes still render chips, and the gallery has quietly
+    // become a picture of the component rather than the component.
+    //
+    // Only the ids both sides carry can be compared, which today is `MIT` and nothing else — the
+    // four cases the specimens exist for are the four this corpus does not declare. So this is a
+    // narrow claim honestly made, not the whole group checked. `LicenseFileBody` gets no version
+    // of it at all: the kit's file specimens invent four copies (`cc-by-4.0`, `upstream`,
+    // `vendored`, `terse`) and none of them is a file this repo redistributes, so there is no
+    // overlap to compare rather than an overlap left unchecked.
+    const specimens = new Map(badgesIn(galleryIndex()));
+    expect(specimens.size, "\nno licence badges on the gallery index").toBeGreaterThan(0);
+
+    // Every page, not the first one per id: sixteen notes render an MIT badge, and a hand-written
+    // copy on the second of them is the same defect one page further along.
+    const corpus = pages
+      .filter((file) => !rel(file).startsWith("gallery/"))
+      .flatMap((file) => badgesIn(read(file)).map(([id, markup]) => ({ id, markup, page: rel(file) })))
+      .filter(({ id }) => specimens.has(id));
+
+    expect(
+      [...new Set(corpus.map(({ id }) => id))],
+      "\nno licence in the kit's specimens is one this corpus declares, so the loop below compares" +
+        " nothing. Either the specimens changed which ids they use, or the last note declaring one" +
+        " of them left — declare a note under a specimen licence, or ask the kit for a specimen" +
+        " using one we carry.",
+    ).not.toEqual([]);
+
+    for (const { id, markup, page } of corpus) {
+      expect(markup, `\n${id}, against ${page}`).toBe(specimens.get(id));
+    }
+  });
 });

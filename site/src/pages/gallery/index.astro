@@ -1,10 +1,19 @@
 ---
-import type { ReferenceContractProps, SiteFooterProps } from "@galaxy-foundry/site-kit";
+import type {
+  LicenseBadgeProps,
+  LicenseFileBodyProps,
+  ReferenceContractProps,
+  SiteFooterProps,
+} from "@galaxy-foundry/site-kit";
+import LicenseBadge from "@galaxy-foundry/site-kit/LicenseBadge.astro";
+import LicenseFileBody from "@galaxy-foundry/site-kit/LicenseFileBody.astro";
 import ReferenceContract from "@galaxy-foundry/site-kit/ReferenceContract.astro";
 import SiteFooter from "@galaxy-foundry/site-kit/SiteFooter.astro";
 import {
   FOOTER_SPECIMENS,
   HEADER_SPECIMENS,
+  LICENSE_BADGE_SPECIMENS,
+  LICENSE_FILE_SPECIMENS,
   REFERENCE_SPECIMENS,
   SHELL_SPECIMENS,
   SPECIMENS,
@@ -34,9 +43,33 @@ const referenceGroups: SpecimenGroup<ReferenceContractProps>[] = [
   REFERENCE_SPECIMENS,
   KIND_TINT_SPECIMENS,
 ];
+// The licence components, on their shipped props, with nothing added here.
+//
+// The reverse of the choice above, and for a reason that only holds for these two. A reference
+// card's kinds are ours, so the kit's cases cannot show them and `KIND_TINT_SPECIMENS` exists. The
+// policy table is not ours: `registries.ts` gets it from `bundledPolicy()`, and so do these
+// specimens — the object below IS the one every note page resolves against. There is no second
+// group to author because there is no second table.
+//
+// What the group is for, then, is the ids: `GPL-3.0-only`, `CC-BY-NC-4.0`, a `LicenseRef` and one
+// the table does not have. Every note here that declares a licence names `MIT` or `Apache-2.0`, so
+// a page showing only what the corpus carries would show one chip in one colour and nothing about
+// the copyleft and own-words cases the other colours exist to tell apart.
+const badgeGroups: SpecimenGroup<LicenseBadgeProps>[] = [LICENSE_BADGE_SPECIMENS];
+
+// The body is a page's worth of document, and inline it brings its own `<h2>`s in under a specimen
+// card's `<h3>`. Left alone: the levels are right where the component belongs, on `/licenses/{id}/`
+// under that page's `<h1>`, and a gallery that renamed them would be showing something the site
+// does not ship. The kit calls the group `inline`, so four bodies on one page is its answer too.
+const licenseFileGroups: SpecimenGroup<LicenseFileBodyProps>[] = [LICENSE_FILE_SPECIMENS];
 const footerGroups: SpecimenGroup<SiteFooterProps>[] = [FOOTER_SPECIMENS];
 const framedGroups: SpecimenGroup[] = [HEADER_SPECIMENS, SHELL_SPECIMENS];
-const inlineGroups: SpecimenGroup[] = [...referenceGroups, ...footerGroups];
+const inlineGroups: SpecimenGroup[] = [
+  ...referenceGroups,
+  ...badgeGroups,
+  ...licenseFileGroups,
+  ...footerGroups,
+];
 
 // A group the kit adds, or one that changes its surface, belongs in exactly one of the lists above
 // and this page has nothing to say about it either way. Better a build that stops than a gallery
@@ -104,6 +137,42 @@ const allGroups = [...inlineGroups, ...framedGroups];
         {group.specimens.map((specimen) => (
           <GallerySpecimen group={group} specimen={specimen}>
             <ReferenceContract {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    badgeGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>
+          {group.summary} The same component a note's licence box renders: these chips and the ones
+          on any note that declares a licence come out of one file, so what differs between them is
+          the licence and nothing else.
+        </p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <LicenseBadge {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    licenseFileGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>
+          {group.summary} The body only — the heading above a real{" "}
+          <a href={`${base}/licenses/`}>licence page</a> and its wrapper are this site's, because
+          the wrapper is where Pagefind is told what to index.
+        </p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <LicenseFileBody {...specimen.props} />
           </GallerySpecimen>
         ))}
       </section>

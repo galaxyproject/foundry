@@ -51,7 +51,7 @@
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-foundry/planemo-cli-meta": "workspace:*",
     "@galaxy-foundry/planemo-test-report-schema": "workspace:*",
-    "@galaxy-foundry/site-kit": "^0.6.1",
+    "@galaxy-foundry/site-kit": "^0.7.0",
     "@galaxy-foundry/summarize-nextflow": "workspace:*",
     "@galaxy-foundry/tag-registry": "^0.1.0",
     "@galaxy-foundry/wiki-links": "^0.4.0",
