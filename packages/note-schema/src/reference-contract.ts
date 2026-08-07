@@ -11,13 +11,16 @@
 // What is left here is the composition, behind the signature callers already use.
 
 import {
+  CAST_BLOCK_KEY,
+  loadCastReferenceContract as loadBothHalves,
+  type CastContract,
+} from "@galaxy-foundry/cast";
+import {
   buildReferenceContract,
   loadInstanceKinds,
   findReferenceContractPath,
   type ReferenceContract,
 } from "@galaxy-foundry/reference-contract";
-
-import { loadCastContract, type CastContract } from "./cast-contract.js";
 
 export {
   contractKeys,
@@ -38,25 +41,32 @@ export {
  * Still takes a path to reference_contract.yml, unchanged from when that file held all
  * five vocabularies — every caller passes the repo root's copy, and the inherited half
  * needs no locating because it travels with the package.
+ *
+ * `cast` is delegated because it HAS a reader in this repo — @galaxy-foundry/cast parses it,
+ * on the other entry point below. Whether the block has a reader is a fact about this Foundry
+ * rather than about which loader was called, so both loaders say the same thing; a Foundry
+ * that runs no caster delegates nothing, and a `cast:` block in its contract is refused for
+ * being a declaration nothing acts on.
  */
 export function loadReferenceContract(
   contractPath = findReferenceContractPath(),
 ): ReferenceContract {
-  return buildReferenceContract({ kinds: loadInstanceKinds(contractPath) });
+  return buildReferenceContract({
+    kinds: loadInstanceKinds(contractPath, { delegatedFields: [CAST_BLOCK_KEY] }),
+  });
 }
 
 /**
  * The casting half of the same file — what the caster does with each kind.
  *
- * Separate entry point because the two halves have different readers: the site renders
- * `label`/`description`/`ref_shape` and has no use for a resolve strategy, while the
- * caster needs the strategy and never renders a pill. Both read one file, which is what
- * keeps them from disagreeing.
+ * Composed in @galaxy-foundry/cast, which is the only place that knows a kind has two readers:
+ * the site renders `label`/`description`/`ref_shape` and has no use for a resolve strategy,
+ * while the caster needs the strategy and never renders a pill. Behind the signature callers
+ * here already use, same as `loadReferenceContract` above.
  */
 export function loadCastReferenceContract(contractPath = findReferenceContractPath()): {
   contract: ReferenceContract;
   cast: CastContract;
 } {
-  const contract = loadReferenceContract(contractPath);
-  return { contract, cast: loadCastContract(contractPath, Object.keys(contract.modes)) };
+  return loadBothHalves(contractPath);
 }

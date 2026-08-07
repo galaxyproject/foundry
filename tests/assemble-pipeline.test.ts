@@ -158,7 +158,7 @@ describe("assemble-pipeline negative cases", () => {
       // Bundle placement is the target's declaration, so a temp repo has to make it.
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
-        ["name: claude", "bundle_path: skills/{mold}", ""].join("\n"),
+        ["bundle_path: skills/{mold}", ""].join("\n"),
       );
       writeFileSync(
         path.join(dir, "content/molds/mold-a/index.md"),
@@ -219,7 +219,7 @@ phases:
       // Bundle placement is the target's declaration, so a temp repo has to make it.
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
-        ["name: claude", "bundle_path: skills/{mold}", ""].join("\n"),
+        ["bundle_path: skills/{mold}", ""].join("\n"),
       );
       writeFileSync(
         path.join(dir, "content/molds/looper/index.md"),

@@ -16,13 +16,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { PROVENANCE_SCHEMA_VERSION } from "@galaxy-foundry/cast";
+import { PROVENANCE_SCHEMA_VERSION, type CastHooks } from "@galaxy-foundry/cast";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 const castMold = path.join(repoRoot, "scripts", "cast-mold.ts");
 const foundryBuild = path.join(repoRoot, "packages", "build-cli", "src", "bin", "foundry-build.ts");
+const castSkillVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
 const castVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
 // Resolve the repo-local tsx binary by absolute path. Invoking `npx tsx` from a
 // temp-dir cwd can't see local node_modules and auto-installs tsx into the
@@ -46,10 +47,15 @@ function seedReferenceContract(dir: string): void {
   );
 }
 
-function runTsx(script: string, args: string[]): { code: number; stdout: string; stderr: string } {
+// `cwd` is for the readers that take their root from the process rather than a `--root` flag.
+function runTsx(
+  script: string,
+  args: string[],
+  cwd = repoRoot,
+): { code: number; stdout: string; stderr: string } {
   try {
     const stdout = execFileSync(tsxBin, [script, ...args], {
-      cwd: repoRoot,
+      cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -117,6 +123,47 @@ describe("cast-mold (summarize-nextflow integration)", () => {
       rmSync(root, { recursive: true, force: true });
     }
   });
+
+  // A target declaration is authored by hand, so getting it wrong is an authoring error and has
+  // to read like one. `modes: verbatim` is the mistake to pin: as a scalar rather than a list it
+  // is indistinguishable from the correct spelling by eye, and it used to pass — a string answers
+  // `.includes("verbatim")` the same way the list does. The loader now catches it, which is only
+  // an improvement if what reaches the author is a sentence rather than a stack trace, and both
+  // readers of the declaration have to agree about that.
+  for (const reader of ["the caster", "the verifier"] as const) {
+    it(`reports a malformed target declaration to ${reader} without a stack trace`, () => {
+      const root = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-target-"));
+      try {
+        mkdirSync(path.join(root, "casts/claude"), { recursive: true });
+        const declared = yaml.load(
+          readFileSync(path.join(repoRoot, "casts/claude/_target.yml"), "utf8"),
+        ) as { kinds: Record<string, { modes: unknown }> };
+        declared.kinds.schema!.modes = "verbatim";
+        writeFileSync(path.join(root, "casts/claude/_target.yml"), yaml.dump(declared));
+        seedReferenceContract(root);
+        for (const name of ["content", "LICENSES"]) {
+          symlinkSync(path.join(repoRoot, name), path.join(root, name));
+        }
+
+        // The caster takes its root from `--root`; the verifier takes it from the process.
+        const r =
+          reader === "the caster"
+            ? runTsx(foundryBuild, [
+                "cast",
+                "summarize-nextflow",
+                "--target=claude",
+                "--root",
+                root,
+              ])
+            : runTsx(castSkillVerify, ["summarize-nextflow", "--target=claude"], root);
+        expect(r.code).not.toBe(0);
+        expect(r.stderr).toContain("kinds.schema.modes");
+        expect(r.stderr).not.toMatch(/^\s+at /m);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+  }
 
   it("provenance is schema v4 and lists deterministic refs", () => {
     const provPath = path.join(
@@ -436,7 +483,6 @@ describe("cast-mold prompt refs", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
@@ -522,7 +568,6 @@ describe("the provenance record's shape is the caster's", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           // A target cannot move the record's shape. If it could, this would produce a
           // document announcing a contract nothing writes and nothing validates.
           "provenance_schema_version: 99",
@@ -743,7 +788,6 @@ describe("cast-mold cli-command meta injection", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
@@ -848,7 +892,6 @@ describe("cast-mold companion files", () => {
     writeFileSync(
       path.join(dir, "casts/claude/_target.yml"),
       [
-        "name: claude",
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",
@@ -1369,7 +1412,6 @@ describe("cast-mold negative cases", () => {
       writeFileSync(
         path.join(dir, "casts/claude/_target.yml"),
         [
-          "name: claude",
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
           "required_outputs: [SKILL.md, _provenance.json]",
@@ -1430,7 +1472,6 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
     writeFileSync(
       path.join(dir, "casts/claude/_target.yml"),
       [
-        "name: claude",
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",
@@ -1620,7 +1661,7 @@ license_file: LICENSES/test.LICENSE
 // re-casting every skill cannot exercise those branches — they are only covered here.
 describe("stripWikiLinks", () => {
   it("keeps the bare target, drops an anchor, and prefers an explicit alias", async () => {
-    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { stripWikiLinks } = await import("@galaxy-foundry/cast");
     expect(stripWikiLinks("See [[summarize-nextflow]] first.")).toBe(
       "See summarize-nextflow first.",
     );
@@ -1634,14 +1675,14 @@ describe("stripWikiLinks", () => {
   });
 
   it("rewrites every link on a line and leaves text without links alone", async () => {
-    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { stripWikiLinks } = await import("@galaxy-foundry/cast");
     expect(stripWikiLinks("Per [[a]] and [[b]], do the thing.")).toBe("Per a and b, do the thing.");
     expect(stripWikiLinks("No links here at all.")).toBe("No links here at all.");
   });
 
   // A payload that yields no text would otherwise delete itself silently.
   it("leaves a degenerate payload as authored rather than emitting nothing", async () => {
-    const { stripWikiLinks } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { stripWikiLinks } = await import("@galaxy-foundry/cast");
     expect(stripWikiLinks("An [[#anchor-only]] ref.")).toBe("An [[#anchor-only]] ref.");
   });
 });
@@ -1652,7 +1693,7 @@ describe("stripWikiLinks", () => {
 // and get exactly that back.
 describe("the skill document is the sections it was handed", () => {
   it("renders them in order, and nothing it was not given", async () => {
-    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { renderSkillMarkdown } = await import("@galaxy-foundry/cast");
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: "Summarize a thing." },
@@ -1689,7 +1730,7 @@ describe("the skill document is the sections it was handed", () => {
   });
 
   it("takes the description from the summary, stripped of link syntax and quote-safe", async () => {
-    const { renderSkillMarkdown } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { renderSkillMarkdown } = await import("@galaxy-foundry/cast");
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: 'Handle a "quoted" [[thing|name]].' },
@@ -1702,12 +1743,76 @@ describe("the skill document is the sections it was handed", () => {
   // A skill that requires no tools has said something. A reader who finds no heading cannot
   // tell that from a caster that never asked.
   it("says so for an empty section rather than dropping the heading", async () => {
-    const { bulletSection } = await import("../packages/build-cli/src/commands/cast-mold.js");
+    const { bulletSection } = await import("@galaxy-foundry/cast");
     expect(bulletSection("Required Tools", []).body).toBe("- None declared.");
     expect(bulletSection("Required Tools", [], "- None, and none assumed.").body).toBe(
       "- None, and none assumed.",
     );
     expect(bulletSection("Required Tools", ["- a", "- b"]).body).toBe("- a\n- b");
+  });
+});
+
+// `payload-companion` is the last resolve strategy that has to ask the instance a question:
+// which file beside the note IS the payload. The kind layer holding that answer is this
+// Foundry's, so the answer arrives as a hook — and the caster must never spell the filename.
+describe("the payload a companion strategy ships is the instance's answer", () => {
+  const target = {
+    required_outputs: [],
+    kinds: { prompt: { dst_dir: "references/prompts", dst_extension: ".md", modes: ["verbatim"] } },
+    skill_constraints: { frontmatter_required: [], forbidden_runtime_paths: [] },
+  };
+  const castContract = {
+    prompt: { resolve: "payload-companion" as const, default_mode: "verbatim", companions: false },
+  };
+  const refKinds = {
+    prompt: { label: "Prompt", description: "", ref_shape: "wiki-link" as const },
+  };
+  const slugMap = new Map([["p", "content/prompts/p/index.md"]]);
+  const metaByPath = new Map([["content/prompts/p/index.md", { type: "prompt" }]]);
+  // A Foundry that attaches nothing: no renderers, no contributions, no checks. Typed rather
+  // than inferred, so a hook that stops existing fails here instead of sitting on as a leftover
+  // an untyped object literal is free to carry.
+  const bareHooks: CastHooks = {
+    renderers: {},
+    bundleFiles: [],
+    skillLede: "",
+    skillSections: () => [],
+    bundleChecks: [],
+  };
+
+  it("refuses a strategy nothing implements, rather than casting the wrapper", async () => {
+    const { resolveMoldRef } = await import("@galaxy-foundry/cast");
+    const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
+      slugMap,
+      metaByPath,
+      targetName: "claude",
+      target,
+      castContract,
+      refKinds,
+      hooks: bareHooks,
+    });
+    // Falling back to the note would package the file that FRAMES the payload and report
+    // success, which is the one outcome worse than an error.
+    expect(out.resolved).toBeUndefined();
+    expect(out.error).toContain("references[0]");
+    expect(out.error).toContain("payloadCompanion");
+  });
+
+  it("ships the file the hook names, and derives the bundled name from the note", async () => {
+    const { resolveMoldRef } = await import("@galaxy-foundry/cast");
+    const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
+      slugMap,
+      metaByPath,
+      targetName: "claude",
+      target,
+      castContract,
+      refKinds,
+      hooks: { ...bareHooks, payloadCompanion: () => "not-a-name-the-caster-knows.md" },
+    });
+    expect(out.error).toBeUndefined();
+    expect(out.resolved?.src).toBe("content/prompts/p/not-a-name-the-caster-knows.md");
+    // The bundle is named for the note that frames the payload, never for the payload's file.
+    expect(out.resolved?.dst).toBe("references/prompts/p.md");
   });
 });
 
@@ -1848,7 +1953,6 @@ describe("cast declarations the corpus does not currently exercise", () => {
     bundlePath = "skills/{mold}",
   ): string {
     return [
-      "name: claude",
       "provenance_schema_version: 4",
       `bundle_path: ${bundlePath}`,
       "required_outputs: [SKILL.md, _provenance.json]",
@@ -2259,7 +2363,6 @@ describe("cast declarations: stricter than before, on purpose", () => {
     writeFileSync(
       path.join(dir, "casts/claude/_target.yml"),
       [
-        "name: claude",
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
         "required_outputs: [SKILL.md, _provenance.json]",

@@ -28,8 +28,8 @@ importers:
         specifier: workspace:*
         version: link:packages/build-cli
       '@galaxy-foundry/cast':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.7.0
+        version: 0.7.1
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
@@ -55,8 +55,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-foundry/wiki-links':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -100,8 +100,8 @@ importers:
   packages/build-cli:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.7.0
+        version: 0.7.1
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
@@ -121,8 +121,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-foundry/wiki-links':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
@@ -182,6 +182,9 @@ importers:
 
   packages/note-schema:
     dependencies:
+      '@galaxy-foundry/cast':
+        specifier: ^0.7.0
+        version: 0.7.1
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -192,14 +195,14 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0
       '@galaxy-foundry/reference-contract':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       '@galaxy-foundry/tag-registry':
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-foundry/wiki-links':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.1
@@ -297,8 +300,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/note-schema
       '@galaxy-foundry/reference-contract':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       '@galaxy-foundry/site-kit':
         specifier: ^0.6.1
         version: 0.6.1(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))
@@ -306,8 +309,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@galaxy-foundry/wiki-links':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       '@galaxy-tool-util/cli':
         specifier: ^1.8.1
         version: 1.10.0
@@ -1014,8 +1017,8 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/cast@0.5.0':
-    resolution: {integrity: sha512-Wrc2hxSULPYBgxPqcs92j8oH7wXCwOyAQiIiY54vIaemjd1yLcrclEqnea6fhMkg8CtCwJy3YLu3KY1nhwxliQ==}
+  '@galaxy-foundry/cast@0.7.1':
+    resolution: {integrity: sha512-slykgtXCuRVdWvCQoJVr7M7t5rJn2up8+cl7wSdv4k1Txoh5sfydXb//NY0svRI1m4CYfsHUD0M3+pbYKvGbyw==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/kind-manifest@0.4.0':
@@ -1030,16 +1033,8 @@ packages:
     peerDependencies:
       zod: ^4.0.0
 
-  '@galaxy-foundry/license-policy@0.3.1':
-    resolution: {integrity: sha512-houCiFBc2X6bYwz4FIPIz2L9Jjw0L7ZloX7bDDQrtoGiqg0ki6+h0sKsPTLK9dvlZWeVBSYfx6A7+yPw/0hpvw==}
-    engines: {node: '>=20'}
-
   '@galaxy-foundry/license-policy@0.4.0':
     resolution: {integrity: sha512-CSLk8Joh2eaqWW13bYctK/69/iPCxHPXKgvuxtgAnIUYto8grbviLCD+IxXShOnc0f5Mw00ZT5TcD080jTjqyw==}
-    engines: {node: '>=20'}
-
-  '@galaxy-foundry/reference-contract@0.3.0':
-    resolution: {integrity: sha512-mBDCwB5VMxdoe8HvCWPxogqLELPJYGyQ3m/6nNvFLx5LgEHRDygO/iUpkIPQG8VykqYKKboIt7f/UAOhZ0//hg==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/reference-contract@0.4.0':
@@ -1057,8 +1052,8 @@ packages:
     resolution: {integrity: sha512-BhMI6R0QChol9+gnQZH0TFXcP7mM1145XElC2N3s6C3sXCpUIZ2shs7/l23buZLEMR6t/rQih3Tm1vY9IjK5Bw==}
     engines: {node: '>=20'}
 
-  '@galaxy-foundry/wiki-links@0.3.0':
-    resolution: {integrity: sha512-chM66WUqNpiCNG9gZ99fzTQ00o5/LH42Kzyjt4esE4M3YBo7RY7AtmE6YJpDF16vQOysS7x19s4IbBMDr8J3Zg==}
+  '@galaxy-foundry/wiki-links@0.4.0':
+    resolution: {integrity: sha512-/cRnofBRaoCv0ZmMJoHWOndMuVcX0+uALcgx/KHUgAVgcVdcyhMcRt3kt/zO1cyQLnoYJ5gFRQH5jF5EZPj94A==}
     engines: {node: '>=20'}
 
   '@galaxy-tool-util/cli@1.10.0':
@@ -4476,9 +4471,12 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/cast@0.5.0':
+  '@galaxy-foundry/cast@0.7.1':
     dependencies:
-      '@galaxy-foundry/license-policy': 0.3.1
+      '@galaxy-foundry/license-policy': 0.4.0
+      '@galaxy-foundry/reference-contract': 0.4.0
+      '@galaxy-foundry/wiki-links': 0.4.0
+      gray-matter: 4.0.3
       js-yaml: 4.3.0
 
   '@galaxy-foundry/kind-manifest@0.4.0(zod@4.4.3)':
@@ -4490,15 +4488,7 @@ snapshots:
       '@galaxy-foundry/kind-manifest': 0.4.0(zod@4.4.3)
       zod: 4.4.3
 
-  '@galaxy-foundry/license-policy@0.3.1':
-    dependencies:
-      js-yaml: 4.3.0
-
   '@galaxy-foundry/license-policy@0.4.0':
-    dependencies:
-      js-yaml: 4.3.0
-
-  '@galaxy-foundry/reference-contract@0.3.0':
     dependencies:
       js-yaml: 4.3.0
 
@@ -4517,7 +4507,7 @@ snapshots:
     dependencies:
       js-yaml: 4.1.1
 
-  '@galaxy-foundry/wiki-links@0.3.0': {}
+  '@galaxy-foundry/wiki-links@0.4.0': {}
 
   '@galaxy-tool-util/cli@1.10.0':
     dependencies:

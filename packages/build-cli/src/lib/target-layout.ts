@@ -13,6 +13,15 @@ import {
 
 export { bundlePathOf, DEFAULT_BUNDLE_PATH, resolveBundlePath } from "@galaxy-foundry/cast";
 
+/**
+ * The directory holding one target's declaration and its bundles: `casts/<target>/`.
+ *
+ * Re-exported so the `casts/` fact stays stated once. Reached past — by importing it from the
+ * package directly, or by joining the two segments by hand — it becomes the copies this module
+ * exists to prevent.
+ */
+export { castsTargetDir } from "@galaxy-foundry/cast";
+
 /** The `bundle_path` a target declares, or the default when it declares none. */
 export function bundlePathTemplate(repoRoot: string, target: string): string {
   return templateOf(castsTargetDir(repoRoot, target));

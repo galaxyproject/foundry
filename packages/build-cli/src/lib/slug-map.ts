@@ -7,11 +7,19 @@
 
 import path from "node:path";
 
-import type { SlugAliases } from "./cast-hooks.js";
 import { readMarkdown } from "./frontmatter.js";
 import type { Frontmatter } from "./types.js";
 import { fileSlug, findMdFiles } from "./walk.js";
 import { slugify } from "./wiki-links.js";
+
+/**
+ * Extra addresses a note answers to, beyond the slug of its own filename.
+ *
+ * Ours rather than the caster's, because a cast never asks the question — it is handed the
+ * finished map. How many ways a note can be named is settled while that map is built, which
+ * happens entirely on this side of the boundary.
+ */
+export type SlugAliases = (meta: Frontmatter) => readonly string[];
 
 /**
  * This instance's second addresses.

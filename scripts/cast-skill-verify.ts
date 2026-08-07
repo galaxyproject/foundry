@@ -15,10 +15,12 @@ import path from "node:path";
 import process from "node:process";
 import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
-import yaml from "js-yaml";
+
+import { loadTargetConfig } from "@galaxy-foundry/cast";
 
 import { NEVER_PACKAGED } from "../packages/build-cli/src/lib/dispositions.js";
-import { bundlePathOf, resolveBundlePath } from "../packages/build-cli/src/lib/target-layout.js";
+import { errorMessage } from "../packages/build-cli/src/lib/errors.js";
+import { bundleDir, castsTargetDir } from "../packages/build-cli/src/lib/target-layout.js";
 import { listFilesUnder } from "../packages/build-cli/src/lib/walk.js";
 import { readMarkdown } from "./lib/frontmatter.js";
 
@@ -84,16 +86,6 @@ function stripFencedBlocks(markdown: string): string {
     .join("\n");
 }
 
-interface TargetConfig {
-  name: string;
-  bundle_path?: string;
-  required_outputs: string[];
-  skill_constraints: {
-    frontmatter_required: string[];
-    forbidden_runtime_paths: string[];
-  };
-}
-
 interface ProvenanceRefEntry {
   kind: string;
   mode: string;
@@ -131,17 +123,18 @@ function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const repoRoot = process.cwd();
 
-  const targetCfgPath = path.join(repoRoot, "casts", args.target, "_target.yml");
-  if (!existsSync(targetCfgPath)) fail(`missing target config: ${targetCfgPath}`);
-  const target = yaml.load(readFileSync(targetCfgPath, "utf8")) as TargetConfig;
+  // Read through the same loader the caster uses, so what a target DECLARES has one reader.
+  // A second parser here would answer `bundle_path: {mold}` — unquoted braces are a YAML
+  // mapping — differently from the cast it is supposed to be checking.
+  let target: ReturnType<typeof loadTargetConfig>;
+  try {
+    target = loadTargetConfig(castsTargetDir(repoRoot, args.target));
+  } catch (e) {
+    fail(errorMessage(e));
+  }
 
-  // Placement is the target's to declare; see packages/build-cli/src/lib/target-layout.ts.
-  const bundleRoot = path.join(
-    repoRoot,
-    "casts",
-    args.target,
-    resolveBundlePath(bundlePathOf(target.bundle_path, targetCfgPath), args.moldName),
-  );
+  // Placement is the target's to declare; `casts/` is this Foundry's, stated in target-layout.
+  const bundleRoot = bundleDir(repoRoot, args.target, args.moldName);
   if (!existsSync(bundleRoot)) fail(`missing bundle: ${bundleRoot}`);
 
   const errors: string[] = [];
@@ -331,14 +324,14 @@ function main(): void {
     // INLINE code is deliberately still scanned. Every filename in this corpus is written in
     // backticks, so exempting inline code would retire the check rather than narrow it.
     const body = stripFencedBlocks(readFileSync(dstAbs, "utf8"));
-    const bundleDir = path.dirname(dstAbs);
+    const dstDir = path.dirname(dstAbs);
 
     for (const neighbour of listFilesUnder(srcDir, srcDir)) {
       if (neighbour === "index.md") continue; // the note itself
       // Cited by name, not merely a substring of some longer token.
       const cited = new RegExp(`(?<![A-Za-z0-9._/-])${escapeRegExp(neighbour)}(?![A-Za-z0-9_-])`);
       if (!cited.test(body)) continue;
-      if (existsSync(path.join(bundleDir, neighbour))) continue;
+      if (existsSync(path.join(dstDir, neighbour))) continue;
       errors.push(
         `ref ${r.src}: bundled note ${r.dst} tells the agent to read '${neighbour}', which is beside the note in the Foundry but not in the bundle (declare it in the note's 'companions:' frontmatter, or stop naming it in the body)`,
       );
