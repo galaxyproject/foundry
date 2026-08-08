@@ -16,11 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
-import {
-  PROVENANCE_SCHEMA_VERSION,
-  type CastHooks,
-  type TargetConfig,
-} from "@galaxy-foundry/cast";
+import { PROVENANCE_SCHEMA_VERSION, type CastHooks, type TargetConfig } from "@galaxy-foundry/cast";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));

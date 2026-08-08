@@ -79,6 +79,9 @@ jobs:
       - name: Check package formatting
         run: npm run packages-format
 
+      - name: Check test formatting
+        run: npm run tests-format
+
       - name: Lint packages
         run: npm run packages-lint
 

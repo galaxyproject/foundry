@@ -249,12 +249,18 @@ describe("the palette this stylesheet declares", () => {
   // from `:root`, used nowhere.
   it("declares no token that reaches no stylesheet", () => {
     const source = read(path.join(SITE, "src/styles/global.css"));
-    const block = source.slice(source.indexOf("@theme"), source.indexOf("\n}", source.indexOf("@theme")));
+    const block = source.slice(
+      source.indexOf("@theme"),
+      source.indexOf("\n}", source.indexOf("@theme")),
+    );
     const declared = [...block.matchAll(/^\s*(--[\w-]+):/gm)].map((m) => m[1]!);
 
     const dead = declared.filter((token) => !rootCss().includes(`${token}:`));
 
-    expect(declared.length, "\nno tokens parsed out of @theme — has the block moved?").toBeGreaterThan(20);
+    expect(
+      declared.length,
+      "\nno tokens parsed out of @theme — has the block moved?",
+    ).toBeGreaterThan(20);
     expect(
       dead,
       "\nthese are declared in `@theme` and referenced by nothing, so Tailwind emitted no" +

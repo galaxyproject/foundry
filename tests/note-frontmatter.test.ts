@@ -66,7 +66,7 @@ describe("a note's frontmatter", () => {
         " should narrow with `in` or on `type`. Under `any` a field no kind declares reads as" +
         " undefined and renders as nothing.\n\n  " +
         erasers.join("\n  ") +
-        "\n"
+        "\n",
     ).toEqual([]);
   });
 
@@ -85,7 +85,7 @@ describe("a note's frontmatter", () => {
         " If a new module genuinely walks a shape this repo does not define, add it to" +
         " WALKS_FOREIGN_SHAPES and say why in a comment there.\n\n  " +
         sayers.join("\n  ") +
-        "\n"
+        "\n",
     ).toEqual(WALKS_FOREIGN_SHAPES);
   });
 });
