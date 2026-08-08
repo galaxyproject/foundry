@@ -1,8 +1,9 @@
 ---
 import { getAllNotes } from '../../lib/notes';
 import Base from '../../layouts/Base.astro';
+import { groupTagsInUse } from '@galaxy-foundry/tag-registry';
+
 import { tags as registry } from '../../lib/registries';
-import { groupTagsInUse } from '../../lib/tag-browse';
 import { base } from '../../lib/site-base';
 
 const allNotes = await getAllNotes();
@@ -16,9 +17,9 @@ for (const note of allNotes) {
 }
 
 // What counts as a tagged thing belongs to this instance: a note that is not archived. How the
-// tags then browse does not, and used to be spelled out here — grouped by the facet that DECLARED
-// each tag rather than the one its text starts with, the registry's order kept, unused facets
-// dropped, glosses carried. See lib/tag-browse.ts for why that has exactly one reader.
+// tags then browse does not — grouped by the facet that DECLARED each tag rather than the one its
+// text starts with, the registry's order kept, unused facets dropped, glosses carried. That is
+// the registry's decision, and @galaxy-foundry/tag-registry now takes it for every instance.
 const groups = groupTagsInUse(registry, tagCounts);
 ---
 <Base title="Tags">

@@ -53,7 +53,7 @@
     "@galaxy-foundry/planemo-test-report-schema": "workspace:*",
     "@galaxy-foundry/site-kit": "^0.6.1",
     "@galaxy-foundry/summarize-nextflow": "workspace:*",
-    "@galaxy-foundry/tag-registry": "^0.1.0",
+    "@galaxy-foundry/tag-registry": "^0.1.1",
     "@galaxy-foundry/wiki-links": "^0.4.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
