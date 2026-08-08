@@ -67,7 +67,7 @@ Three triggers, in increasing automation:
 2. **CI on Mold change.** When a PR touches `molds/<name>/`, CI re-casts that Mold against all configured targets and surfaces the diff in review.
 3. **Watch-on-change** for development convenience.
 
-Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, schema violations, and missing or stale `SKILL.md`). `make check-casts` and `make check-verify` run each over every Mold.
+Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, schema violations, and missing or stale `SKILL.md`). `make check-casts` and `make check-verify` run each over every Mold — the first as `foundry-build cast-all --check`, which sweeps in one process and says nothing when nothing moved. The sweep is `@galaxy-foundry/cast`; the list of Molds it sweeps is this Foundry's, because every Mold here is expected to be cast.
 
 ## Input contract
 
