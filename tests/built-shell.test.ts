@@ -524,3 +524,31 @@ describe("the gallery", () => {
     expect(missing, "\nframed routes the build never emitted").toEqual([]);
   });
 });
+
+describe("the tag chips", () => {
+  // Every note page carries a chip per tag, archived notes included, and the chip is a link. What
+  // decides whether that link lands is `getStaticPaths` in tags/[...tag].astro, which builds from
+  // every note — while the tags index counts only the ones that are not archived. The two rules
+  // are already different and the difference is currently harmless; make getStaticPaths agree with
+  // the index, which reads like a correction, and every chip on an archived note 404s. The build
+  // stays green either way, because a page nothing generates is indistinguishable from a page
+  // nothing wants.
+  //
+  // Asserted from the emitted HTML rather than from the corpus: the question is whether the links
+  // the site SHIPS have destinations, and re-deriving the expected tag set here would ask the
+  // corpus the same question the pages already answered.
+  it("link to tag pages the build emitted", () => {
+    const base = baseFrom(home);
+    const emitted = new Set(pages.map(rel));
+    const linked = new Set(
+      pages
+        .flatMap((file) => hrefsIn(read(file)))
+        .filter((href) => href.startsWith(`${base}/tags/`))
+        .map((href) => href.slice(base.length + 1).replace(/\/$/, "")),
+    );
+
+    expect(linked.size, "\nno links to tag pages in the built site").toBeGreaterThan(0);
+    const missing = [...linked].filter((route) => !emitted.has(`${route}/index.html`)).sort();
+    expect(missing, `\nlinked tag routes with no built page: ${missing.join(", ")}`).toEqual([]);
+  });
+});
