@@ -28,8 +28,8 @@ importers:
         specifier: workspace:*
         version: link:packages/build-cli
       '@galaxy-foundry/cast':
-        specifier: ^0.7.0
-        version: 0.7.1
+        specifier: ^0.9.0
+        version: 0.9.0
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
@@ -100,8 +100,8 @@ importers:
   packages/build-cli:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.7.0
-        version: 0.7.1
+        specifier: ^0.9.0
+        version: 0.9.0
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
@@ -183,8 +183,8 @@ importers:
   packages/note-schema:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.7.0
-        version: 0.7.1
+        specifier: ^0.9.0
+        version: 0.9.0
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -1017,8 +1017,8 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/cast@0.7.1':
-    resolution: {integrity: sha512-slykgtXCuRVdWvCQoJVr7M7t5rJn2up8+cl7wSdv4k1Txoh5sfydXb//NY0svRI1m4CYfsHUD0M3+pbYKvGbyw==}
+  '@galaxy-foundry/cast@0.9.0':
+    resolution: {integrity: sha512-ydGGOm6NLwdpKD0uuNEni1AetIU692sSX1rzCToaf1PvglFYDP3+KwVSjZxqW4uzoOo0ASaAXF5EbJKXiBC9dQ==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/kind-manifest@0.4.0':
@@ -4471,7 +4471,7 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/cast@0.7.1':
+  '@galaxy-foundry/cast@0.9.0':
     dependencies:
       '@galaxy-foundry/license-policy': 0.4.0
       '@galaxy-foundry/reference-contract': 0.4.0

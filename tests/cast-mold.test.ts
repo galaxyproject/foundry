@@ -16,7 +16,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { PROVENANCE_SCHEMA_VERSION, type CastHooks } from "@galaxy-foundry/cast";
+import {
+  PROVENANCE_SCHEMA_VERSION,
+  type CastHooks,
+  type TargetConfig,
+} from "@galaxy-foundry/cast";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -485,7 +489,7 @@ describe("cast-mold prompt refs", () => {
         [
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
-          "required_outputs: [SKILL.md, _provenance.json]",
+          "document: { path: SKILL.md, noun: skill }",
           "kinds:",
           "  prompt:",
           "    dst_dir: references/prompts/",
@@ -572,7 +576,7 @@ describe("the provenance record's shape is the caster's", () => {
           // document announcing a contract nothing writes and nothing validates.
           "provenance_schema_version: 99",
           "bundle_path: skills/{mold}",
-          "required_outputs: [SKILL.md, _provenance.json]",
+          "document: { path: SKILL.md, noun: skill }",
           "kinds:",
           "  prompt:",
           "    dst_dir: references/prompts/",
@@ -790,7 +794,7 @@ describe("cast-mold cli-command meta injection", () => {
         [
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
-          "required_outputs: [SKILL.md, _provenance.json]",
+          "document: { path: SKILL.md, noun: skill }",
           "kinds:",
           "  cli-command:",
           "    dst_dir: references/cli/",
@@ -894,7 +898,7 @@ describe("cast-mold companion files", () => {
       [
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
-        "required_outputs: [SKILL.md, _provenance.json]",
+        "document: { path: SKILL.md, noun: skill }",
         "kinds:",
         "  research:",
         "    dst_dir: references/notes/",
@@ -1414,7 +1418,7 @@ describe("cast-mold negative cases", () => {
         [
           "provenance_schema_version: 4",
           "bundle_path: skills/{mold}",
-          "required_outputs: [SKILL.md, _provenance.json]",
+          "document: { path: SKILL.md, noun: skill }",
           "kinds: {}",
           "skill_constraints:",
           "  frontmatter_required: [name, description]",
@@ -1474,7 +1478,7 @@ describe("cast-mold license → redistribution-policy enforcement", () => {
       [
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
-        "required_outputs: [SKILL.md, _provenance.json]",
+        "document: { path: SKILL.md, noun: skill }",
         "kinds:",
         "  research:",
         "    dst_dir: references/notes/",
@@ -1697,6 +1701,7 @@ describe("the skill document is the sections it was handed", () => {
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: "Summarize a thing." },
+      noun: "skill",
       lede: "Lede line.",
       sections: [
         { title: "Second", body: "- b" },
@@ -1734,6 +1739,7 @@ describe("the skill document is the sections it was handed", () => {
     const doc = renderSkillMarkdown({
       moldName: "m",
       meta: { summary: 'Handle a "quoted" [[thing|name]].' },
+      noun: "skill",
       lede: "L",
       sections: [],
     });
@@ -1756,7 +1762,8 @@ describe("the skill document is the sections it was handed", () => {
 // which file beside the note IS the payload. The kind layer holding that answer is this
 // Foundry's, so the answer arrives as a hook — and the caster must never spell the filename.
 describe("the payload a companion strategy ships is the instance's answer", () => {
-  const target = {
+  const target: TargetConfig = {
+    document: { path: "SKILL.md", noun: "skill" },
     required_outputs: [],
     kinds: { prompt: { dst_dir: "references/prompts", dst_extension: ".md", modes: ["verbatim"] } },
     skill_constraints: { frontmatter_required: [], forbidden_runtime_paths: [] },
@@ -1955,7 +1962,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
     return [
       "provenance_schema_version: 4",
       `bundle_path: ${bundlePath}`,
-      "required_outputs: [SKILL.md, _provenance.json]",
+      "document: { path: SKILL.md, noun: skill }",
       "kinds:",
       `  ${kind}:`,
       `    dst_dir: ${dstDir}`,
@@ -2365,7 +2372,7 @@ describe("cast declarations: stricter than before, on purpose", () => {
       [
         "provenance_schema_version: 4",
         "bundle_path: skills/{mold}",
-        "required_outputs: [SKILL.md, _provenance.json]",
+        "document: { path: SKILL.md, noun: skill }",
         "kinds:",
         "  pattern:",
         "    dst_dir: references/patterns/",
