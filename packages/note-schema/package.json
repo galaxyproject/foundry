@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-foundry/note-schema",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Single source of truth for Galaxy Workflow Foundry note frontmatter — one zod contract shared by the validator and the site.",
   "type": "module",
   "exports": {
