@@ -3,8 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import yaml from "js-yaml";
-import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
-import { groupTagsInUse } from "../site/src/lib/tag-browse";
+import { groupTagsInUse, loadTagRegistry } from "@galaxy-foundry/tag-registry";
 import { readMarkdown } from "../packages/build-cli/src/lib/frontmatter.js";
 import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";
 
@@ -52,7 +51,9 @@ describe("registry drift (authored vocabulary vs corpus)", () => {
   // route, which is a second answer to the question dressed up as a test of the first.
   it("has no facet with zero members in use", () => {
     const shown = new Set(
-      groupTagsInUse(registry, new Map([...tagsInUse].map((t) => [t, 1] as const))).map((g) => g.key),
+      groupTagsInUse(registry, new Map([...tagsInUse].map((t) => [t, 1] as const))).map(
+        (g) => g.key,
+      ),
     );
     const empty = registry
       .facets()

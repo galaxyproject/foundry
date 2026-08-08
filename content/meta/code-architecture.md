@@ -81,7 +81,7 @@ A domain runtime package that summarizes Nextflow source and owns the schemas pr
 
 - **Kinds:** `@galaxy-foundry/kind-schema` defines the generic kind contract; this instance supplies concrete kinds and context through `note-schema`.
 - **Kind manifests:** `@galaxy-foundry/kind-manifest` derives and reads the portable description of those concrete kinds.
-- **Tags:** `@galaxy-foundry/tag-registry` owns the registry format; `meta_tags.yml` owns this instance's vocabulary.
+- **Tags:** `@galaxy-foundry/tag-registry` owns the registry format and how tags browse — grouping by declaring facet, facet labels; `meta_tags.yml` owns this instance's vocabulary, and the site owns only what counts as a tagged note.
 - **References:** `@galaxy-foundry/reference-contract` owns shared reference behavior; `reference_contract.yml` owns instance reference kinds and permitted combinations.
 - **Wiki links:** `@galaxy-foundry/wiki-links` owns parsing, slugging, resolution, and tree traversal; the site and validator supply the instance link map.
 - **Licenses:** `@galaxy-foundry/license-policy` answers general redistribution questions; instance validation owns coherence rules for its notes.

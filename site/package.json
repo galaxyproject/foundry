@@ -19,7 +19,7 @@
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-foundry/reference-contract": "^0.4.0",
     "@galaxy-foundry/site-kit": "^0.6.1",
-    "@galaxy-foundry/tag-registry": "^0.1.0",
+    "@galaxy-foundry/tag-registry": "^0.1.1",
     "@galaxy-foundry/wiki-links": "^0.4.0",
     "@galaxy-tool-util/cli": "^1.8.1",
     "@galaxy-tool-util/schema": "^1.7.2",

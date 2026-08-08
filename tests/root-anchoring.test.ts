@@ -46,7 +46,7 @@ describe("anchoring a site module to the repository root", () => {
       offenders,
       "\nThese resolve against a bundled chunk after `astro build`, not against their own source" +
         " path. Anchor on `root` from astro:config/server instead — see site/src/lib/repo-root.ts." +
-        `\n\n  ${offenders.join("\n  ")}\n`
+        `\n\n  ${offenders.join("\n  ")}\n`,
     ).toEqual([]);
   });
 });

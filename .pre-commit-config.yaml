@@ -45,11 +45,13 @@ repos:
   # repo's already-installed pnpm/node (run `pnpm install` first).
   - repo: local
     hooks:
+      # Root `tests/` is in, `scripts/` is not: `seed-mold-stubs.ts` keeps a hand-aligned
+      # record table that prettier would expand to four times the lines.
       - id: prettier
         name: prettier (write)
         entry: pnpm exec prettier --write
         language: system
-        files: ^packages/.*/(src|test)/.*\.ts$
+        files: ^(packages/.*/(src|test)|tests)/.*\.ts$
         pass_filenames: true
 
       - id: eslint

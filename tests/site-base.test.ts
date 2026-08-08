@@ -36,7 +36,7 @@ describe("the deployment base", () => {
       readers,
       `\nOnly ${READER} may read BASE_URL. Import \`base\` from it instead — the shell resolves` +
         ` its own links against that value, and a second reading of the environment is a second` +
-        ` answer that renders identically until it does not.\n\n  ${readers.join("\n  ")}\n`
+        ` answer that renders identically until it does not.\n\n  ${readers.join("\n  ")}\n`,
     ).toEqual([READER]);
   });
 });
