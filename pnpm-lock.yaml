@@ -28,8 +28,8 @@ importers:
         specifier: workspace:*
         version: link:packages/build-cli
       '@galaxy-foundry/cast':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: ^0.10.0
+        version: 0.10.0
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
@@ -100,8 +100,8 @@ importers:
   packages/build-cli:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: ^0.10.0
+        version: 0.10.0
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
@@ -183,8 +183,8 @@ importers:
   packages/note-schema:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: ^0.10.0
+        version: 0.10.0
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -1017,8 +1017,8 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/cast@0.9.0':
-    resolution: {integrity: sha512-ydGGOm6NLwdpKD0uuNEni1AetIU692sSX1rzCToaf1PvglFYDP3+KwVSjZxqW4uzoOo0ASaAXF5EbJKXiBC9dQ==}
+  '@galaxy-foundry/cast@0.10.0':
+    resolution: {integrity: sha512-p9ml9l2PkTSXcFWCF5GeyqOTGvEbKg6ZPD71g/o6k5YIz1LUtQE409/sJ0XpHg4ODqr5fofZIv5FB5P2IOMAiw==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/kind-manifest@0.4.0':
@@ -1035,6 +1035,10 @@ packages:
 
   '@galaxy-foundry/license-policy@0.4.0':
     resolution: {integrity: sha512-CSLk8Joh2eaqWW13bYctK/69/iPCxHPXKgvuxtgAnIUYto8grbviLCD+IxXShOnc0f5Mw00ZT5TcD080jTjqyw==}
+    engines: {node: '>=20'}
+
+  '@galaxy-foundry/license-policy@0.4.1':
+    resolution: {integrity: sha512-h2MHq9C47RYlkT+mwZeHisnEku0+1FCPS3WfWTVWwzaMWRcywfKUAjvVz7s/8I9gBu5tIu8k4vaonvVGBk2asQ==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/reference-contract@0.4.0':
@@ -4471,9 +4475,9 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/cast@0.9.0':
+  '@galaxy-foundry/cast@0.10.0':
     dependencies:
-      '@galaxy-foundry/license-policy': 0.4.0
+      '@galaxy-foundry/license-policy': 0.4.1
       '@galaxy-foundry/reference-contract': 0.4.0
       '@galaxy-foundry/wiki-links': 0.4.0
       gray-matter: 4.0.3
@@ -4489,6 +4493,10 @@ snapshots:
       zod: 4.4.3
 
   '@galaxy-foundry/license-policy@0.4.0':
+    dependencies:
+      js-yaml: 4.3.0
+
+  '@galaxy-foundry/license-policy@0.4.1':
     dependencies:
       js-yaml: 4.3.0
 

@@ -25,7 +25,7 @@ import {
   type CastHooks,
   type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
-import { castCommand } from "@galaxy-foundry/cast/command";
+import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command";
 
 import type {
   ProvenanceArtifactInput,
@@ -541,22 +541,32 @@ function schemaValidationRows(
  * `errors`: whether a bundle was written is the caster's decision, and a second copy of that
  * decision here could only ever disagree with the first.
  */
+/**
+ * What this Foundry contributes to a cast.
+ *
+ * Flags, target and contract loading, the Mold's own file, and which of four endings a run had
+ * are all the same for any Foundry that casts, and live in the package. What is left here is what
+ * only this one can answer.
+ *
+ * A named value rather than a literal inside the command, because there are two commands now:
+ * `cast` for one Mold and `cast-all` for the corpus. Two copies of it would be two chances to
+ * disagree about what this Foundry is.
+ */
+export const GALAXY_CAST_SPEC: CastCommandSpec<{ artifacts?: ProvenanceArtifacts }> = {
+  usage: "foundry-build cast",
+  defaultTarget: "claude",
+  hooks: GALAXY_HOOKS,
+  corpus: (repoRoot) => buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES),
+  // What this Foundry records in the slot the record reserves beside `refs`. A Mold that
+  // declares no handoff supplies `undefined` and the key is simply absent — which is also what
+  // a Foundry with no artifacts at all gets, by passing no extensions.
+  extensions: ({ meta, corpus }) => ({
+    artifacts: readArtifactContracts(meta, producerIndexFor(corpus.metaByPath)),
+  }),
+};
+
 export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<void> {
-  // Flags, target and contract loading, the Mold's own file, and which of four endings this run
-  // had are all the same for any Foundry that casts, and live in the package. What is left here
-  // is what only this one can answer.
-  await castCommand<{ artifacts?: ProvenanceArtifacts }>(argv, {
-    usage: "foundry-build cast",
-    defaultTarget: "claude",
-    hooks: GALAXY_HOOKS,
-    corpus: (repoRoot) => buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES),
-    // What this Foundry records in the slot the record reserves beside `refs`. A Mold that
-    // declares no handoff supplies `undefined` and the key is simply absent — which is also what
-    // a Foundry with no artifacts at all gets, by passing no extensions.
-    extensions: ({ meta, corpus }) => ({
-      artifacts: readArtifactContracts(meta, producerIndexFor(corpus.metaByPath)),
-    }),
-  });
+  await castCommand<{ artifacts?: ProvenanceArtifacts }>(argv, GALAXY_CAST_SPEC);
 }
 
 const isDirectInvocation = import.meta.url === `file://${process.argv[1]}`;

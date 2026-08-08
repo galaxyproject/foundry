@@ -23,25 +23,15 @@ check-generated:
 	npm run check:index
 	npm run check:readme
 
+# Both sweeps are one command. The loop and the report are @galaxy-foundry/cast;
+# which Molds to sweep, and what to tell a reader who finds drift, are ours and
+# are arguments. The rationale for sweeping every Mold rather than a
+# representative one moved to the command, beside the enumeration it explains.
 casts:
-	@for m in $(MOLD_SLUGS); do echo "cast $$m"; $(FOUNDRY_BUILD) cast --root . $$m || exit 1; done
+	@$(FOUNDRY_BUILD) cast-all --root .
 
-# Every Mold, not a representative one. A verbatim ref's guarantee is
-# src_hash == dst_hash, and a bundle whose source moved on satisfies it against
-# a note that no longer exists — self-consistent and stale. Only re-hashing the
-# source against the record catches that, and only over the whole corpus: seven
-# bundles carried a dead doc path for two weeks while the one Mold CI checked
-# stayed green.
 check-casts:
-	@fail=0; for m in $(MOLD_SLUGS); do \
-	  out=$$($(FOUNDRY_BUILD) cast --root . $$m --check 2>&1) || { \
-	    echo "$$m:"; echo "$$out" | sed 's/^/  /'; fail=1; }; \
-	done; \
-	if [ $$fail -ne 0 ]; then \
-	  echo "cast --check failed above. Drift is fixed by 'make casts' + commit;"; \
-	  echo "an error (unresolved ref, bad declaration) is fixed at the source."; \
-	  exit 1; \
-	fi
+	@$(FOUNDRY_BUILD) cast-all --root . --check
 
 # The other half of the same lesson, and it went unlearned twice. `cast --check`
 # re-derives a bundle from its sources; the verifier asks a different question —
