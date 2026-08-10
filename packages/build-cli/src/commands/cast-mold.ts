@@ -26,6 +26,7 @@ import {
   type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
 import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command";
+import { DEFINITIONS } from "@galaxy-foundry/note-schema";
 
 import type {
   ProvenanceArtifactInput,
@@ -557,6 +558,11 @@ export const GALAXY_CAST_SPEC: CastCommandSpec<{ artifacts?: ProvenanceArtifacts
   defaultTarget: "claude",
   hooks: GALAXY_HOOKS,
   corpus: (repoRoot) => buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES),
+  // Which siblings of a referenced note travel into the bundle. The kind definitions are handed
+  // over whole rather than projected onto a casting-shaped copy: `shape`, `companions` and
+  // `additionalCompanions` are the same declarations the validator and the site read, and a
+  // projection here would be a second thing to keep in step.
+  kindLayouts: DEFINITIONS,
   // What this Foundry records in the slot the record reserves beside `refs`. A Mold that
   // declares no handoff supplies `undefined` and the key is simply absent — which is also what
   // a Foundry with no artifacts at all gets, by passing no extensions.

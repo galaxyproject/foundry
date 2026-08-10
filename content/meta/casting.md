@@ -24,7 +24,7 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 
 | Reference kind | Source location | Casting transformation | Lands at | Status |
 |---|---|---|---|---|
-| `pattern` | `content/patterns/*.md` | Verbatim copy; may carry per-note companions | `references/patterns/<slug>.md` | v1 |
+| `pattern` | `content/patterns/*.md` | Verbatim copy | `references/patterns/<slug>.md` | v1 |
 | `cli-command` | `content/cli/<tool>/<cmd>.md` framing note plus registered upstream CLI metadata | Deterministic JSON sidecar sourced from registry metadata + framing markdown | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
 | `schema` | `[[wiki-link]]` to a `type: schema` note in `content/schemas/`. The note declares `package` + `package_export`; cast imports the named runtime export at build time and serializes it. Foundry-authored: schemas in `packages/<name>-schema/src/<name>.schema.json` (e.g. `summary-nextflow`, `galaxy-tool-discovery`). Vendored: schemas synced from upstream packages into `packages/<name>-schema/src/` (e.g. `tests-format` from `@galaxy-tool-util/schema`). | Verbatim copy of the imported export, JSON-serialized | `references/schemas/<note-slug>.schema.json` | v1 |
 | `research` | `content/research/<slug>/index.md` plus any companion files in that directory | Verbatim copy | `references/notes/<slug>.md` for the note; each companion keeps its own filename | v1 |
@@ -33,7 +33,9 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 | `eval` | `content/molds/<slug>/eval.md` | **Never packaged** | — (Foundry-only) | n/a |
 | `mold` (smell) | another Mold | Discouraged; factor shared content into other reference kinds | — | n/a |
 
-Every path above is deterministic. Which one a kind takes is not knowledge the caster holds: each kind's `cast:` block in `reference_contract.yml` declares its `resolve` strategy (`note`, `package-export`, `payload-companion`), its `default_mode`, an optional `slug_field`, and whether its notes may carry companions. A kind with no `cast:` block is not castable, which is how `example` is refused — stated where the kinds live rather than in a second list inside the caster.
+Every path above is deterministic. Which one a kind takes is not knowledge the caster holds: each kind's `cast:` block in `reference_contract.yml` declares its `resolve` strategy (`note`, `package-export`, `payload-companion`), its `default_mode`, and an optional `slug_field`. A kind with no `cast:` block is not castable, which is how `example` is refused — stated where the kinds live rather than in a second list inside the caster.
+
+Which files travel *beside* a referenced note is not in the contract at all. The caster is handed the kind definitions themselves (`DEFINITIONS`, the same ones the validator and the site read): a companion ships when its declared `disposition` is `bundled`, and a note may name extra ones only under a kind declaring `additionalCompanions: allow`. A note type the caster holds no layout for is an error rather than a silent omission.
 
 The inherited `mode` vocabulary is `verbatim` and `sidecar`, and this Foundry renders both — the copies above and the `cli-command` JSON. So it narrows nothing: every mode an author may spell here is one the caster can perform.
 
@@ -87,10 +89,10 @@ To cast a Mold, the casting process consumes:
 - **The cast bundle spec** — the deterministic Agent Skills assembly and reference layout declared in `casts/claude/_target.yml`. The historical target name remains for provenance compatibility; Claude Code and Codex package the resulting tree through separate thin manifests.
 
 Resolution policy is per-kind, not a single rule:
-- `pattern` — verbatim copy, and one of the two kinds whose notes may declare companions.
+- `pattern` — verbatim copy.
 - `cli-command` — always cast to JSON sidecar from registered upstream metadata plus the Foundry framing note; no token-budget condensation needed because the sidecar is loaded only when the agent needs that command.
 - `schema`, `example`, `prompt` — always verbatim copy unless the typed reference declares a future supported transformation.
-- `research` — operational background; copied verbatim, loaded according to `used_at` / `load`, and the other kind that may carry companions.
+- `research` — operational background; copied verbatim, loaded according to `used_at` / `load`. The one kind declaring `additionalCompanions: allow`, so its notes may name their own siblings.
 - `eval` — never packaged.
 
 ## Output contract
@@ -212,7 +214,7 @@ cast_mold(mold_name, target):
   # Per-kind dispatch:
   for ref in refs:
     case ref.kind:
-      pattern      -> verbatim copy (plus any declared companions)
+      pattern      -> verbatim copy
                       write to references/patterns/<source-basename>
       cli-command  -> deterministic JSON sidecar from registry metadata + framing body
                       write to references/cli/<source-slug>.json

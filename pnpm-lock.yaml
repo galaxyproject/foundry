@@ -28,14 +28,14 @@ importers:
         specifier: workspace:*
         version: link:packages/build-cli
       '@galaxy-foundry/cast':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.11.0
+        version: 0.11.2(zod@4.4.3)
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
       '@galaxy-foundry/license-policy':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.5.0
+        version: 0.5.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:packages/note-schema
@@ -100,8 +100,8 @@ importers:
   packages/build-cli:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.11.0
+        version: 0.11.2(zod@4.4.3)
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
@@ -109,8 +109,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.5.0
+        version: 0.5.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../note-schema
@@ -183,8 +183,8 @@ importers:
   packages/note-schema:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.11.0
+        version: 0.11.2(zod@4.4.3)
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -192,8 +192,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.5.0
+        version: 0.5.0
       '@galaxy-foundry/reference-contract':
         specifier: ^0.4.0
         version: 0.4.0
@@ -294,8 +294,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.5.0
+        version: 0.5.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../packages/note-schema
@@ -1017,8 +1017,8 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/cast@0.10.0':
-    resolution: {integrity: sha512-p9ml9l2PkTSXcFWCF5GeyqOTGvEbKg6ZPD71g/o6k5YIz1LUtQE409/sJ0XpHg4ODqr5fofZIv5FB5P2IOMAiw==}
+  '@galaxy-foundry/cast@0.11.2':
+    resolution: {integrity: sha512-FZPkGX9F8DRcIvWdT0UAYKnoJv8PHGDGIkbZlDXjUVRP8O9wkflciRKBAt6n44MCrPq+DT8sIrD2oPZpOWCwkA==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/kind-manifest@0.4.0':
@@ -1033,16 +1033,20 @@ packages:
     peerDependencies:
       zod: ^4.0.0
 
-  '@galaxy-foundry/license-policy@0.4.0':
-    resolution: {integrity: sha512-CSLk8Joh2eaqWW13bYctK/69/iPCxHPXKgvuxtgAnIUYto8grbviLCD+IxXShOnc0f5Mw00ZT5TcD080jTjqyw==}
-    engines: {node: '>=20'}
-
   '@galaxy-foundry/license-policy@0.4.1':
     resolution: {integrity: sha512-h2MHq9C47RYlkT+mwZeHisnEku0+1FCPS3WfWTVWwzaMWRcywfKUAjvVz7s/8I9gBu5tIu8k4vaonvVGBk2asQ==}
     engines: {node: '>=20'}
 
+  '@galaxy-foundry/license-policy@0.5.0':
+    resolution: {integrity: sha512-jQQzcPwxICvTWYjutgYOsuiIyZgIFB9Lz7yPp3uSqW4E9ffo1BVdL0nqCGot3zn3KfSaThXV60I0mSHsjyQoLA==}
+    engines: {node: '>=20'}
+
   '@galaxy-foundry/reference-contract@0.4.0':
     resolution: {integrity: sha512-zneANKaNH1DgT47ibPwUq9magx5Xnlb/mm4LXLzcrrjhicmsBDgq7VA5lPYkmPZSc1wUNIJUvZSAjT0FrbFhKQ==}
+    engines: {node: '>=20'}
+
+  '@galaxy-foundry/reference-contract@0.4.1':
+    resolution: {integrity: sha512-mLncnIqjbYtotl9RvSVuacsLnsv5y8G6dHIDZiErzzQrBneQ3BexKRToJ1rJfmSqRMlENGlOWBUZJpysOOSMYw==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/site-kit@0.6.1':
@@ -4475,13 +4479,16 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/cast@0.10.0':
+  '@galaxy-foundry/cast@0.11.2(zod@4.4.3)':
     dependencies:
-      '@galaxy-foundry/license-policy': 0.4.1
-      '@galaxy-foundry/reference-contract': 0.4.0
+      '@galaxy-foundry/kind-manifest': 0.4.0(zod@4.4.3)
+      '@galaxy-foundry/license-policy': 0.5.0
+      '@galaxy-foundry/reference-contract': 0.4.1
       '@galaxy-foundry/wiki-links': 0.4.0
       gray-matter: 4.0.3
       js-yaml: 4.3.0
+    transitivePeerDependencies:
+      - zod
 
   '@galaxy-foundry/kind-manifest@0.4.0(zod@4.4.3)':
     dependencies:
@@ -4492,11 +4499,11 @@ snapshots:
       '@galaxy-foundry/kind-manifest': 0.4.0(zod@4.4.3)
       zod: 4.4.3
 
-  '@galaxy-foundry/license-policy@0.4.0':
+  '@galaxy-foundry/license-policy@0.4.1':
     dependencies:
       js-yaml: 4.3.0
 
-  '@galaxy-foundry/license-policy@0.4.1':
+  '@galaxy-foundry/license-policy@0.5.0':
     dependencies:
       js-yaml: 4.3.0
 
@@ -4504,9 +4511,14 @@ snapshots:
     dependencies:
       js-yaml: 4.3.0
 
+  '@galaxy-foundry/reference-contract@0.4.1':
+    dependencies:
+      '@galaxy-foundry/wiki-links': 0.4.0
+      js-yaml: 4.3.0
+
   '@galaxy-foundry/site-kit@0.6.1(astro-pagefind@2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)))(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
-      '@galaxy-foundry/license-policy': 0.4.0
+      '@galaxy-foundry/license-policy': 0.4.1
       '@galaxy-foundry/reference-contract': 0.4.0
       astro: 7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3)
       astro-pagefind: 2.0.1(astro@7.1.6(@astrojs/markdown-remark@7.2.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@22.19.17)(jiti@2.7.0)(rollup@4.60.2)(tsx@4.21.0)(yaml@2.8.3))

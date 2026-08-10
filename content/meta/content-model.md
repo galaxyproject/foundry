@@ -75,13 +75,13 @@ Several notes are render-wrappers: the `.md` is human-facing, but the consumable
 | Mechanism | Payload source | Casting behavior | Declared by |
 |---|---|---|---|
 | `package_export` | npm runtime export | imported and serialized, schema-validated | note frontmatter (`schema`) |
-| `companions` | sibling file(s) | copied verbatim, hash parity | note frontmatter (`research`) |
+| `companions` | sibling file(s) | copied verbatim, hash parity | note frontmatter, admitted only where the kind declares `additionalCompanions: allow` (`research`) |
 | `license_file` | `LICENSES/<file>` | copied verbatim for redistribution | note frontmatter (any vendoring note) |
 | kind companion | fixed sibling at a fixed name | copied verbatim | the kind (e.g. Prompt `upstream.prompt`) |
 
 `package_export` and `companions` are one concept split by payload location; they stay separate fields because import-and-stringify with schema validation and verbatim-bytes-with-hash-parity are genuinely different behaviors. `companions` attaches to the **note**, not to the consuming Mold, so a note many Molds reference declares its siblings once.
 
-The kind-declared form is the cheapest and the default: wherever a kind admits a fixed set of payloads at fixed names, the kind says so and the validator asks whether the file is *there* rather than whether a declared path resolves. A per-note field in that position could only restate the kind's own layout. `companions:` frontmatter is correspondingly narrowing — it survives for `research`, whose notes have nowhere else to declare anything. **Before adding a fifth mechanism, check whether one of these four already fits.**
+The kind-declared form is the cheapest and the default: wherever a kind admits a fixed set of payloads at fixed names, the kind says so and the validator asks whether the file is *there* rather than whether a declared path resolves. A per-note field in that position could only restate the kind's own layout. `companions:` frontmatter is correspondingly narrowing — it survives for `research`, whose notes have nowhere else to declare anything, and the kind is still what admits it: casting reads `additionalCompanions` before it reads the note. **Before adding a fifth mechanism, check whether one of these four already fits.**
 
 ## Pipeline phases
 

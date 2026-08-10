@@ -37,10 +37,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@galaxy-foundry/cast": "^0.10.0",
+    "@galaxy-foundry/cast": "^0.11.0",
     "@galaxy-foundry/foundry": "workspace:*",
     "@galaxy-foundry/kind-schema": "^0.5.0",
-    "@galaxy-foundry/license-policy": "^0.4.0",
+    "@galaxy-foundry/license-policy": "^0.5.0",
     "@galaxy-foundry/note-schema": "workspace:*",
     "@galaxy-foundry/planemo-cli-meta": "workspace:*",
     "@galaxy-foundry/tag-registry": "^0.1.1",

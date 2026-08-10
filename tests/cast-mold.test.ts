@@ -16,7 +16,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { PROVENANCE_SCHEMA_VERSION, type CastHooks, type TargetConfig } from "@galaxy-foundry/cast";
+import {
+  PROVENANCE_SCHEMA_VERSION,
+  type CastHooks,
+  type CastKindLayout,
+  type Frontmatter,
+  type RefResolution,
+  type ResolvedRef,
+  type TargetConfig,
+} from "@galaxy-foundry/cast";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -1765,13 +1773,17 @@ describe("the payload a companion strategy ships is the instance's answer", () =
     skill_constraints: { frontmatter_required: [], forbidden_runtime_paths: [] },
   };
   const castContract = {
-    prompt: { resolve: "payload-companion" as const, default_mode: "verbatim", companions: false },
+    prompt: { resolve: "payload-companion" as const, default_mode: "verbatim" },
   };
   const refKinds = {
     prompt: { label: "Prompt", description: "", ref_shape: "wiki-link" as const },
   };
   const slugMap = new Map([["p", "content/prompts/p/index.md"]]);
   const metaByPath = new Map([["content/prompts/p/index.md", { type: "prompt" }]]);
+  // Resolution reads neither, and they are required because the same ctx also drives companion
+  // expansion. The real layouts are `DEFINITIONS`; a strategy that ships the note's payload
+  // rather than the note never reaches them.
+  const layoutContext = { repoRoot, kindLayouts: {} };
   // A Foundry that attaches nothing: no renderers, no contributions, no checks. Typed rather
   // than inferred, so a hook that stops existing fails here instead of sitting on as a leftover
   // an untyped object literal is free to carry.
@@ -1786,6 +1798,7 @@ describe("the payload a companion strategy ships is the instance's answer", () =
   it("refuses a strategy nothing implements, rather than casting the wrapper", async () => {
     const { resolveMoldRef } = await import("@galaxy-foundry/cast");
     const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
+      ...layoutContext,
       slugMap,
       metaByPath,
       targetName: "claude",
@@ -1804,6 +1817,7 @@ describe("the payload a companion strategy ships is the instance's answer", () =
   it("ships the file the hook names, and derives the bundled name from the note", async () => {
     const { resolveMoldRef } = await import("@galaxy-foundry/cast");
     const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
+      ...layoutContext,
       slugMap,
       metaByPath,
       targetName: "claude",
@@ -1927,19 +1941,82 @@ describe("reference_contract.yml cast declarations are load-bearing", () => {
     expect(r.code).not.toBe(0);
     expect(r.stderr).toContain("kind=research is not castable");
   });
+});
 
-  // Replaces `if (r.kind !== "research" && r.kind !== "pattern") continue`. With companions
-  // switched off for the kind, the files the note declares stop being claimed by any ref and
-  // the bundle's own orphan check is what reports them.
-  it("companions: false stops a kind's notes carrying their declared companions", () => {
-    const r = castWithMutatedContract("author-galaxy-tool-wrapper", (kinds) => {
-      kinds.research!.cast = {
-        ...(kinds.research!.cast as Record<string, unknown>),
-        companions: false,
-      };
-    });
-    expect(r.code).not.toBe(0);
-    expect(r.stderr).toContain("orphan (no ref claims it)");
+// Which siblings travel is the KIND's to say, and `reference_contract.yml` has no vote. Cast is
+// handed the layouts, and what a layout says is what travels.
+describe("companion membership answers to the kind layout", () => {
+  const noteRef: ResolvedRef = {
+    kind: "research",
+    mode: "verbatim",
+    ref: "[[bundled-note]]",
+    src: "content/research/bundled-note/index.md",
+    dst: "references/notes/bundled-note.md",
+    used_at: "runtime",
+    load: "on-demand",
+  };
+  const context = (kindLayouts: Record<string, CastKindLayout>): RefResolution => ({
+    repoRoot,
+    slugMap: new Map(),
+    metaByPath: new Map<string, Frontmatter>([
+      [noteRef.src, { type: "research", companions: ["bundled-note.spec.yml"] }],
+    ]),
+    targetName: "claude",
+    target: {
+      document: { path: "SKILL.md", noun: "skill" },
+      required_outputs: [],
+      kinds: {
+        research: { dst_dir: "references/notes", dst_extension: ".md", modes: ["verbatim"] },
+      },
+      skill_constraints: { frontmatter_required: [], forbidden_runtime_paths: [] },
+    },
+    castContract: { research: { resolve: "note", default_mode: "verbatim" } },
+    refKinds: { research: { label: "Research", description: "", ref_shape: "wiki-link" } },
+    hooks: {
+      renderers: {},
+      bundleFiles: [],
+      skillLede: "",
+      skillSections: () => [],
+      bundleChecks: [],
+    },
+    kindLayouts,
+  });
+
+  it("carries a note's own companions where the kind allows additional ones", async () => {
+    const { expandCompanions } = await import("@galaxy-foundry/cast");
+    const out = expandCompanions(
+      [noteRef],
+      context({ research: { shape: "directory", companions: [], additionalCompanions: "allow" } }),
+    );
+    expect(out.errors).toEqual([]);
+    expect(out.refs.map((r) => r.dst)).toContain("references/notes/bundled-note.spec.yml");
+    expect(out.refs.find((r) => r.dst.endsWith(".spec.yml"))?.companion_of).toBe(noteRef.dst);
+  });
+
+  it("leaves them behind where it does not, whatever the note declares", async () => {
+    const { expandCompanions } = await import("@galaxy-foundry/cast");
+    const out = expandCompanions(
+      [noteRef],
+      context({ research: { shape: "directory", companions: [] } }),
+    );
+    expect(out.errors).toEqual([]);
+    expect(out.refs).toEqual([noteRef]);
+  });
+
+  it("refuses a note type the caster was handed no layout for", async () => {
+    const { expandCompanions } = await import("@galaxy-foundry/cast");
+    const out = expandCompanions([noteRef], context({}));
+    expect(out.refs).toEqual([noteRef]);
+    expect(out.errors.join("\n")).toContain("no Kind layout");
+  });
+
+  // The layouts the caster actually runs with: a flat kind has nowhere to put a companion, and
+  // `research` is the one kind that lets a note name its own.
+  it("hands over the kind definitions this Foundry validates against", async () => {
+    const { DEFINITIONS } = await import("@galaxy-foundry/note-schema");
+    expect(DEFINITIONS.pattern.shape).toBe("file");
+    expect(DEFINITIONS.pattern.companions).toEqual([]);
+    expect(DEFINITIONS.research.additionalCompanions).toBe("allow");
   });
 });
 
@@ -2002,7 +2079,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
         );
         writeFileSync(
           path.join(dir, "reference_contract.yml"),
-          contractYml("cli-command", { resolve: "note", default_mode: mode, companions: false }),
+          contractYml("cli-command", { resolve: "note", default_mode: mode }),
         );
         writeFileSync(
           path.join(dir, "content/molds/m/index.md"),
@@ -2045,7 +2122,6 @@ describe("cast declarations the corpus does not currently exercise", () => {
           contractYml("cli-tool", {
             resolve: "note",
             default_mode: "verbatim",
-            companions: false,
             ...(slugField ? { slug_field: slugField } : {}),
           }),
         );
@@ -2090,7 +2166,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
       );
       writeFileSync(
         path.join(dir, "reference_contract.yml"),
-        contractYml("cli-tool", { resolve: "note", default_mode: "verbatim", companions: false }),
+        contractYml("cli-tool", { resolve: "note", default_mode: "verbatim" }),
       );
       writeFileSync(
         path.join(dir, "content/molds/m/index.md"),
@@ -2134,7 +2210,6 @@ describe("cast declarations the corpus does not currently exercise", () => {
           contractYml("pattern", {
             resolve: "note",
             default_mode: "verbatim",
-            companions: false,
           }),
         );
         writeFileSync(
@@ -2169,7 +2244,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
       );
       writeFileSync(
         path.join(dir, "reference_contract.yml"),
-        contractYml("pattern", { resolve: "note", default_mode: "verbatim", companions: false }),
+        contractYml("pattern", { resolve: "note", default_mode: "verbatim" }),
       );
       writeFileSync(
         path.join(dir, "content/molds/m/index.md"),
@@ -2205,7 +2280,6 @@ describe("cast declarations the corpus does not currently exercise", () => {
           contractYml("schema", {
             resolve: "note",
             default_mode: "verbatim",
-            companions: false,
           }),
         );
         writeFileSync(
@@ -2246,7 +2320,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
       );
       writeFileSync(
         path.join(dir, "reference_contract.yml"),
-        contractYml("schema", { resolve: "note", default_mode: "verbatim", companions: false }),
+        contractYml("schema", { resolve: "note", default_mode: "verbatim" }),
       );
       writeFileSync(
         path.join(dir, "content/molds/m/index.md"),
@@ -2290,7 +2364,6 @@ describe("cast declarations the corpus does not currently exercise", () => {
         contractYml("research", {
           resolve: "note",
           default_mode: "sidecar",
-          companions: false,
         }),
       );
       writeFileSync(
@@ -2334,7 +2407,7 @@ describe("cast declarations the corpus does not currently exercise", () => {
       );
       writeFileSync(
         path.join(dir, "reference_contract.yml"),
-        contractYml("research", { resolve: "note", default_mode: "paraphrase", companions: false }),
+        contractYml("research", { resolve: "note", default_mode: "paraphrase" }),
       );
       writeFileSync(
         path.join(dir, "content/molds/m/index.md"),
@@ -2388,7 +2461,7 @@ describe("cast declarations: stricter than before, on purpose", () => {
             label: "Pattern",
             description: "Pattern refs.",
             ref_shape: "wiki-link",
-            cast: { resolve: "note", default_mode: "verbatim", companions: false },
+            cast: { resolve: "note", default_mode: "verbatim" },
           },
         },
       }),
