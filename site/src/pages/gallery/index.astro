@@ -1,13 +1,28 @@
 ---
-import type { ReferenceContractProps, SiteFooterProps } from "@galaxy-foundry/site-kit";
+import type {
+  ContentNoteProps,
+  LicenseBadgeProps,
+  LicenseFileBodyProps,
+  ReferenceContractProps,
+  SiteFooterProps,
+  TagChipsProps,
+} from "@galaxy-foundry/site-kit";
+import ContentNote from "@galaxy-foundry/site-kit/ContentNote.astro";
+import LicenseBadge from "@galaxy-foundry/site-kit/LicenseBadge.astro";
+import LicenseFileBody from "@galaxy-foundry/site-kit/LicenseFileBody.astro";
 import ReferenceContract from "@galaxy-foundry/site-kit/ReferenceContract.astro";
 import SiteFooter from "@galaxy-foundry/site-kit/SiteFooter.astro";
+import TagChips from "@galaxy-foundry/site-kit/TagChips.astro";
 import {
+  CONTENT_NOTE_SPECIMENS,
   FOOTER_SPECIMENS,
   HEADER_SPECIMENS,
+  LICENSE_BADGE_SPECIMENS,
+  LICENSE_FILE_SPECIMENS,
   REFERENCE_SPECIMENS,
   SHELL_SPECIMENS,
   SPECIMENS,
+  TAG_CHIPS_SPECIMENS,
   sharesPage,
   specimenPath,
   type Specimen,
@@ -35,8 +50,23 @@ const referenceGroups: SpecimenGroup<ReferenceContractProps>[] = [
   KIND_TINT_SPECIMENS,
 ];
 const footerGroups: SpecimenGroup<SiteFooterProps>[] = [FOOTER_SPECIMENS];
+// One list per component rather than one registry keyed by group id: a registry would hand every
+// section the same `unknown` props and the spread below would need a cast, which is the one thing
+// these lists are here to make unnecessary. The group's type IS the claim that the kit's props fit
+// the component it names.
+const badgeGroups: SpecimenGroup<LicenseBadgeProps>[] = [LICENSE_BADGE_SPECIMENS];
+const licenseFileGroups: SpecimenGroup<LicenseFileBodyProps>[] = [LICENSE_FILE_SPECIMENS];
+const tagGroups: SpecimenGroup<TagChipsProps>[] = [TAG_CHIPS_SPECIMENS];
+const contentNoteGroups: SpecimenGroup<ContentNoteProps>[] = [CONTENT_NOTE_SPECIMENS];
 const framedGroups: SpecimenGroup[] = [HEADER_SPECIMENS, SHELL_SPECIMENS];
-const inlineGroups: SpecimenGroup[] = [...referenceGroups, ...footerGroups];
+const inlineGroups: SpecimenGroup[] = [
+  ...referenceGroups,
+  ...footerGroups,
+  ...badgeGroups,
+  ...licenseFileGroups,
+  ...tagGroups,
+  ...contentNoteGroups,
+];
 
 // A group the kit adds, or one that changes its surface, belongs in exactly one of the lists above
 // and this page has nothing to say about it either way. Better a build that stops than a gallery
@@ -118,6 +148,62 @@ const allGroups = [...inlineGroups, ...framedGroups];
         {group.specimens.map((specimen) => (
           <GallerySpecimen group={group} specimen={specimen}>
             <SiteFooter {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    badgeGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <LicenseBadge {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    licenseFileGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <LicenseFileBody {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    tagGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <TagChips {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    contentNoteGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <ContentNote {...specimen.props} />
           </GallerySpecimen>
         ))}
       </section>
