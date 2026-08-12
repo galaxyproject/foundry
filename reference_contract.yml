@@ -20,9 +20,11 @@
 #   default_mode  the transform applied when a `references[]` entry names no `mode`.
 #   slug_field    frontmatter field naming the bundled file, where the note's own slug is
 #                 the wrong name for a reader of the bundle.
-#   companions    whether this kind's notes may carry per-note `companions:` into a
-#                 bundle. Layout is the kind's, membership stays the note's — `true` says
-#                 notes of this kind are ALLOWED to declare companions, never which.
+#
+# Which sibling files travel with a note is NOT declared here. The kind's own layout in
+# packages/note-schema/src/types/<kind>/schema.ts is the sole source: a companion ships
+# when its `disposition` is `bundled`, and a note may name extra ones only where the kind
+# declares `additionalCompanions: allow`.
 #
 # A kind with NO `cast:` block is vocabulary the site renders and the caster refuses. That
 # is the whole mechanism: the caster has no list of castable kinds to keep in step with
@@ -35,13 +37,12 @@
 kinds:
   pattern:
     label: Pattern
-    description: Workflow-construction idiom. Copied verbatim; may carry companions.
+    description: Workflow-construction idiom. Copied verbatim.
     href: https://github.com/galaxyproject/foundry/blob/main/content/meta/mold-spec.md#typed-reference-manifest
     ref_shape: wiki-link
     cast:
       resolve: note
       default_mode: verbatim
-      companions: true
   cli-tool:
     label: CLI Tool
     description: Tool-level install metadata. Aggregated into the cast bundle's Required Tools section.
@@ -52,7 +53,6 @@ kinds:
       default_mode: verbatim
       # content/cli/<dir>/index.md, and the directory is not always the command.
       slug_field: tool
-      companions: false
   cli-command:
     label: CLI Command
     description: Command reference. Usually cast to a sidecar and loaded only when invoked.
@@ -61,7 +61,6 @@ kinds:
     cast:
       resolve: note
       default_mode: sidecar
-      companions: false
   schema:
     label: Schema
     description: Structured contract copied for validation or lookup.
@@ -70,7 +69,6 @@ kinds:
     cast:
       resolve: package-export
       default_mode: verbatim
-      companions: false
   prompt:
     label: Prompt
     description: Prompt fragment copied verbatim or inlined by the target adapter.
@@ -79,7 +77,6 @@ kinds:
     cast:
       resolve: payload-companion
       default_mode: verbatim
-      companions: false
   example:
     label: Example
     description: Fixture or exemplar copied verbatim.
@@ -95,4 +92,3 @@ kinds:
     cast:
       resolve: note
       default_mode: verbatim
-      companions: true

@@ -26,13 +26,13 @@ import {
   type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
 import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command";
+import { DEFINITIONS } from "@galaxy-foundry/note-schema";
 
 import type {
   ProvenanceArtifactInput,
   ProvenanceArtifactOutput,
   ProvenanceArtifacts,
 } from "../lib/artifact-contract.js";
-import { payloadCompanionOf } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
 import { validateRuns } from "../lib/runs-check.js";
@@ -216,10 +216,6 @@ const GALAXY_HOOKS: CastHooks = {
       ]),
     ];
   },
-  // Which file a `payload-companion` kind ships instead of its note. Read off the kind's own
-  // companion declarations, so a prompt bundle carries the prompt rather than the note framing
-  // it — and so nothing here names the file.
-  payloadCompanion: payloadCompanionOf,
   // Which npm module a `package-export` ref means. It has to be imported from HERE: a bare
   // `import(spec)` resolves relative to the file that runs it, and @galaxy-foundry/cast is
   // installed somewhere this repo's own packages are not visible from. Written in this tree,
@@ -557,6 +553,11 @@ export const GALAXY_CAST_SPEC: CastCommandSpec<{ artifacts?: ProvenanceArtifacts
   defaultTarget: "claude",
   hooks: GALAXY_HOOKS,
   corpus: (repoRoot) => buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES),
+  // Which siblings of a referenced note travel into the bundle. The kind definitions are handed
+  // over whole rather than projected onto a casting-shaped copy: `shape`, `companions` and
+  // `additionalCompanions` are the same declarations the validator and the site read, and a
+  // projection here would be a second thing to keep in step.
+  kindLayouts: DEFINITIONS,
   // What this Foundry records in the slot the record reserves beside `refs`. A Mold that
   // declares no handoff supplies `undefined` and the key is simply absent — which is also what
   // a Foundry with no artifacts at all gets, by passing no extensions.
