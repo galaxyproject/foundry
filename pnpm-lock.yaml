@@ -28,14 +28,14 @@ importers:
         specifier: workspace:*
         version: link:packages/build-cli
       '@galaxy-foundry/cast':
-        specifier: ^0.11.0
-        version: 0.11.2(zod@4.4.3)
+        specifier: ^0.12.2
+        version: 0.12.2(zod@4.4.3)
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
       '@galaxy-foundry/license-policy':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.8.0
+        version: 0.8.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:packages/note-schema
@@ -100,8 +100,8 @@ importers:
   packages/build-cli:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.11.0
-        version: 0.11.2(zod@4.4.3)
+        specifier: ^0.12.2
+        version: 0.12.2(zod@4.4.3)
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
@@ -109,8 +109,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.8.0
+        version: 0.8.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../note-schema
@@ -183,8 +183,8 @@ importers:
   packages/note-schema:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.11.0
-        version: 0.11.2(zod@4.4.3)
+        specifier: ^0.12.2
+        version: 0.12.2(zod@4.4.3)
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -192,8 +192,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.8.0
+        version: 0.8.0
       '@galaxy-foundry/reference-contract':
         specifier: ^0.4.0
         version: 0.4.0
@@ -294,8 +294,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.8.0
+        version: 0.8.0
       '@galaxy-foundry/note-schema':
         specifier: workspace:*
         version: link:../packages/note-schema
@@ -1017,8 +1017,8 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/cast@0.11.2':
-    resolution: {integrity: sha512-FZPkGX9F8DRcIvWdT0UAYKnoJv8PHGDGIkbZlDXjUVRP8O9wkflciRKBAt6n44MCrPq+DT8sIrD2oPZpOWCwkA==}
+  '@galaxy-foundry/cast@0.12.2':
+    resolution: {integrity: sha512-JBU1QwueejR09e3EID8as8hrpqttTpi2YccMjsOzNiG7bCP2xBMHle13EB7x7FB0Y7+5PPcJqOLHPBpRmSUW5g==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/kind-manifest@0.4.0':
@@ -1037,8 +1037,8 @@ packages:
     resolution: {integrity: sha512-h2MHq9C47RYlkT+mwZeHisnEku0+1FCPS3WfWTVWwzaMWRcywfKUAjvVz7s/8I9gBu5tIu8k4vaonvVGBk2asQ==}
     engines: {node: '>=20'}
 
-  '@galaxy-foundry/license-policy@0.5.0':
-    resolution: {integrity: sha512-jQQzcPwxICvTWYjutgYOsuiIyZgIFB9Lz7yPp3uSqW4E9ffo1BVdL0nqCGot3zn3KfSaThXV60I0mSHsjyQoLA==}
+  '@galaxy-foundry/license-policy@0.8.0':
+    resolution: {integrity: sha512-uVBZtyoLFK0eh2Wqh15onl5ot9QEpxECz7hmMCjRi9vJhuwTKM7z4gD+O52CseG9E9iP1fkHP9nxaghntloLFg==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/reference-contract@0.4.0':
@@ -4479,10 +4479,10 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/cast@0.11.2(zod@4.4.3)':
+  '@galaxy-foundry/cast@0.12.2(zod@4.4.3)':
     dependencies:
       '@galaxy-foundry/kind-manifest': 0.4.0(zod@4.4.3)
-      '@galaxy-foundry/license-policy': 0.5.0
+      '@galaxy-foundry/license-policy': 0.8.0
       '@galaxy-foundry/reference-contract': 0.4.1
       '@galaxy-foundry/wiki-links': 0.4.0
       gray-matter: 4.0.3
@@ -4503,7 +4503,7 @@ snapshots:
     dependencies:
       js-yaml: 4.3.0
 
-  '@galaxy-foundry/license-policy@0.5.0':
+  '@galaxy-foundry/license-policy@0.8.0':
     dependencies:
       js-yaml: 4.3.0
 

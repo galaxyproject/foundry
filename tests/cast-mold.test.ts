@@ -1762,10 +1762,10 @@ describe("the skill document is the sections it was handed", () => {
   });
 });
 
-// `payload-companion` is the last resolve strategy that has to ask the instance a question:
-// which file beside the note IS the payload. The kind layer holding that answer is this
-// Foundry's, so the answer arrives as a hook — and the caster must never spell the filename.
-describe("the payload a companion strategy ships is the instance's answer", () => {
+// `payload-companion` ships the file beside the note rather than the note. Which file that is,
+// the kind already declares as its one `bundled` companion — so the caster reads the layout it
+// was handed, and this Foundry answers by declaring, not by implementing.
+describe("the payload a companion strategy ships is the kind's declaration", () => {
   const target: TargetConfig = {
     document: { path: "SKILL.md", noun: "skill" },
     required_outputs: [],
@@ -1780,13 +1780,9 @@ describe("the payload a companion strategy ships is the instance's answer", () =
   };
   const slugMap = new Map([["p", "content/prompts/p/index.md"]]);
   const metaByPath = new Map([["content/prompts/p/index.md", { type: "prompt" }]]);
-  // Resolution reads neither, and they are required because the same ctx also drives companion
-  // expansion. The real layouts are `DEFINITIONS`; a strategy that ships the note's payload
-  // rather than the note never reaches them.
-  const layoutContext = { repoRoot, kindLayouts: {} };
   // A Foundry that attaches nothing: no renderers, no contributions, no checks. Typed rather
   // than inferred, so a hook that stops existing fails here instead of sitting on as a leftover
-  // an untyped object literal is free to carry.
+  // an untyped object literal is free to carry. The strategy needs none of them.
   const bareHooks: CastHooks = {
     renderers: {},
     bundleFiles: [],
@@ -1794,11 +1790,11 @@ describe("the payload a companion strategy ships is the instance's answer", () =
     skillSections: () => [],
     bundleChecks: [],
   };
-
-  it("refuses a strategy nothing implements, rather than casting the wrapper", async () => {
+  const resolve = async (kindLayouts: Readonly<Record<string, CastKindLayout>>) => {
     const { resolveMoldRef } = await import("@galaxy-foundry/cast");
-    const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
-      ...layoutContext,
+    return resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
+      repoRoot,
+      kindLayouts,
       slugMap,
       metaByPath,
       targetName: "claude",
@@ -1807,29 +1803,37 @@ describe("the payload a companion strategy ships is the instance's answer", () =
       refKinds,
       hooks: bareHooks,
     });
-    // Falling back to the note would package the file that FRAMES the payload and report
-    // success, which is the one outcome worse than an error.
-    expect(out.resolved).toBeUndefined();
-    expect(out.error).toContain("references[0]");
-    expect(out.error).toContain("payloadCompanion");
-  });
+  };
 
-  it("ships the file the hook names, and derives the bundled name from the note", async () => {
-    const { resolveMoldRef } = await import("@galaxy-foundry/cast");
-    const out = resolveMoldRef({ kind: "prompt", ref: "[[p]]" }, 0, {
-      ...layoutContext,
-      slugMap,
-      metaByPath,
-      targetName: "claude",
-      target,
-      castContract,
-      refKinds,
-      hooks: { ...bareHooks, payloadCompanion: () => "not-a-name-the-caster-knows.md" },
-    });
+  it("ships the companion the kind declares bundled, named for the note", async () => {
+    const { DEFINITIONS } = await import("@galaxy-foundry/note-schema");
+    const out = await resolve(DEFINITIONS);
     expect(out.error).toBeUndefined();
-    expect(out.resolved?.src).toBe("content/prompts/p/not-a-name-the-caster-knows.md");
+    expect(out.resolved?.src).toBe("content/prompts/p/upstream.prompt");
     // The bundle is named for the note that frames the payload, never for the payload's file.
     expect(out.resolved?.dst).toBe("references/prompts/p.md");
+  });
+
+  it("refuses a type it was handed no layout for, rather than casting the wrapper", async () => {
+    // Falling back to the note would package the file that FRAMES the payload and report
+    // success, which is the one outcome worse than an error.
+    const out = await resolve({});
+    expect(out.resolved).toBeUndefined();
+    expect(out.error).toContain("references[0]");
+    expect(out.error).toContain("prompt");
+  });
+
+  it("refuses a layout that names no payload, or names more than one", async () => {
+    const companion = (file: string) =>
+      ({ file, requirement: "required", purpose: "", disposition: "bundled" }) as const;
+    const layout = (...companions: ReturnType<typeof companion>[]): CastKindLayout => ({
+      shape: "directory",
+      companions,
+    });
+    expect((await resolve({ prompt: layout() })).error).toContain("0 bundled companions");
+    expect(
+      (await resolve({ prompt: layout(companion("a.prompt"), companion("b.prompt")) })).error,
+    ).toContain("2 bundled companions");
   });
 });
 

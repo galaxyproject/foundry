@@ -33,7 +33,6 @@ import type {
   ProvenanceArtifactOutput,
   ProvenanceArtifacts,
 } from "../lib/artifact-contract.js";
-import { payloadCompanionOf } from "../lib/dispositions.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
 import { validateRuns } from "../lib/runs-check.js";
@@ -217,10 +216,6 @@ const GALAXY_HOOKS: CastHooks = {
       ]),
     ];
   },
-  // Which file a `payload-companion` kind ships instead of its note. Read off the kind's own
-  // companion declarations, so a prompt bundle carries the prompt rather than the note framing
-  // it — and so nothing here names the file.
-  payloadCompanion: payloadCompanionOf,
   // Which npm module a `package-export` ref means. It has to be imported from HERE: a bare
   // `import(spec)` resolves relative to the file that runs it, and @galaxy-foundry/cast is
   // installed somewhere this repo's own packages are not visible from. Written in this tree,
