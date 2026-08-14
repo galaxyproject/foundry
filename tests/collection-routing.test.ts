@@ -13,6 +13,7 @@ import {
   nonNoteAllowanceOf,
 } from "@galaxy-foundry/note-schema";
 import { readMarkdown } from "../packages/build-cli/src/lib/frontmatter.js";
+import { GALAXY_SLUG_ALIASES, readContent } from "../packages/build-cli/src/lib/slug-map.js";
 import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";
 
 // The path→kind table and the corpus must agree BOTH ways, and the table must agree with
@@ -119,6 +120,19 @@ describe("collection routing (path table vs corpus)", () => {
       { missed, extra },
       `\nclaimed but not walked:\n  ${missed.join("\n  ")}\nwalked but not claimed:\n  ${extra.join("\n  ")}`,
     ).toEqual({ missed: [], extra: [] });
+  });
+
+  // Two walkers read this table now: `findMdFiles`, which the validator drives file by file so
+  // it can report a missing frontmatter block against a path, and the reader in
+  // `@galaxy-foundry/content-reader`, which answers addressing. Both route from COLLECTIONS, so
+  // they cannot disagree about the rule — but they match it with different code, and a glob
+  // corner one implements and the other does not is a note that is validated and unaddressable,
+  // or addressable and unvalidated. Neither is visible from the side that still works.
+  it("finds the same notes however the tree is walked", () => {
+    const read = readContent(path.join(repoRoot, CONTENT_DIR), GALAXY_SLUG_ALIASES)
+      .notes.map((note) => note.file)
+      .sort();
+    expect(read).toEqual([...corpusFiles].sort());
   });
 
   // A kind's `shape` and the glob its notes are found by are two statements of one fact, and

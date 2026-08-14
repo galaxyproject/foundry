@@ -28,7 +28,7 @@ This record answers one question: **how is the implementation divided, and which
        shared substrate     summarize-nextflow
 
 shared substrate = cast, kind-schema, kind-manifest, tag-registry,
-reference-contract, wiki-links, and license-policy packages
+reference-contract, wiki-links, content-reader, and license-policy packages
 ```
 
 The arrows point toward dependencies. The site and build CLI are composition layers: they join instance contracts, shared substrate packages, and runtime packages into user-facing behavior. Lower layers do not import either application.
@@ -84,6 +84,7 @@ A domain runtime package that summarizes Nextflow source and owns the schemas pr
 - **Tags:** `@galaxy-foundry/tag-registry` owns the registry format and how tags browse — grouping by declaring facet, facet labels; `meta_tags.yml` owns this instance's vocabulary, and the site owns only what counts as a tagged note.
 - **References:** `@galaxy-foundry/reference-contract` owns shared reference behavior; `reference_contract.yml` owns instance reference kinds and permitted combinations.
 - **Wiki links:** `@galaxy-foundry/wiki-links` owns parsing, slugging, resolution, and tree traversal; the site and validator supply the instance link map.
+- **Reading the content tree:** `@galaxy-foundry/content-reader` owns the walk, the frontmatter read, and the address-precedence rule that turns a routed note into the slugs reaching it. `build-cli` supplies the collection table and this instance's aliases, and the validator and the caster project their maps from one reader so a link one calls good cannot fail in the other. The site still builds its own map from `astro:content`, which is already loaded there.
 - **Licenses:** `@galaxy-foundry/license-policy` answers general redistribution questions; instance validation owns coherence rules for its notes.
 
 Composition happens at narrow adapters such as the schema context, registries, and site link-map builder. Application code imports the shared package directly when no instance-specific composition is required.

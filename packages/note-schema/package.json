@@ -39,7 +39,7 @@
   "dependencies": {
     "@galaxy-foundry/cast": "^0.12.2",
     "@galaxy-foundry/kind-manifest": "^0.4.0",
-    "@galaxy-foundry/kind-schema": "^0.5.2",
+    "@galaxy-foundry/kind-schema": "^0.6.0",
     "@galaxy-foundry/license-policy": "^0.8.1",
     "@galaxy-foundry/reference-contract": "^0.4.1",
     "@galaxy-foundry/tag-registry": "^0.1.1",
