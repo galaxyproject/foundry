@@ -1,15 +1,19 @@
 ---
 import type {
   ContentNoteProps,
+  KindCatalogProps,
   LicenseBadgeProps,
   LicenseFileBodyProps,
+  NoteHeaderProps,
   ReferenceContractProps,
   SiteFooterProps,
   TagChipsProps,
 } from "@galaxy-foundry/site-kit";
 import ContentNote from "@galaxy-foundry/site-kit/ContentNote.astro";
+import KindCatalog from "@galaxy-foundry/site-kit/KindCatalog.astro";
 import LicenseBadge from "@galaxy-foundry/site-kit/LicenseBadge.astro";
 import LicenseFileBody from "@galaxy-foundry/site-kit/LicenseFileBody.astro";
+import NoteHeader from "@galaxy-foundry/site-kit/NoteHeader.astro";
 import ReferenceContract from "@galaxy-foundry/site-kit/ReferenceContract.astro";
 import SiteFooter from "@galaxy-foundry/site-kit/SiteFooter.astro";
 import TagChips from "@galaxy-foundry/site-kit/TagChips.astro";
@@ -17,8 +21,11 @@ import {
   CONTENT_NOTE_SPECIMENS,
   FOOTER_SPECIMENS,
   HEADER_SPECIMENS,
+  KIND_CATALOG_SPECIMENS,
+  KIND_REFERENCE_SPECIMENS,
   LICENSE_BADGE_SPECIMENS,
   LICENSE_FILE_SPECIMENS,
+  NOTE_HEADER_SPECIMENS,
   REFERENCE_SPECIMENS,
   SHELL_SPECIMENS,
   SPECIMENS,
@@ -57,15 +64,23 @@ const footerGroups: SpecimenGroup<SiteFooterProps>[] = [FOOTER_SPECIMENS];
 const badgeGroups: SpecimenGroup<LicenseBadgeProps>[] = [LICENSE_BADGE_SPECIMENS];
 const licenseFileGroups: SpecimenGroup<LicenseFileBodyProps>[] = [LICENSE_FILE_SPECIMENS];
 const tagGroups: SpecimenGroup<TagChipsProps>[] = [TAG_CHIPS_SPECIMENS];
+const noteHeaderGroups: SpecimenGroup<NoteHeaderProps>[] = [NOTE_HEADER_SPECIMENS];
 const contentNoteGroups: SpecimenGroup<ContentNoteProps>[] = [CONTENT_NOTE_SPECIMENS];
-const framedGroups: SpecimenGroup[] = [HEADER_SPECIMENS, SHELL_SPECIMENS];
+const kindCatalogGroups: SpecimenGroup<KindCatalogProps>[] = [KIND_CATALOG_SPECIMENS];
+const framedGroups: SpecimenGroup[] = [
+  HEADER_SPECIMENS,
+  SHELL_SPECIMENS,
+  KIND_REFERENCE_SPECIMENS,
+];
 const inlineGroups: SpecimenGroup[] = [
   ...referenceGroups,
   ...footerGroups,
   ...badgeGroups,
   ...licenseFileGroups,
   ...tagGroups,
+  ...noteHeaderGroups,
   ...contentNoteGroups,
+  ...kindCatalogGroups,
 ];
 
 // A group the kit adds, or one that changes its surface, belongs in exactly one of the lists above
@@ -197,6 +212,20 @@ const allGroups = [...inlineGroups, ...framedGroups];
   }
 
   {
+    noteHeaderGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <NoteHeader {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
     contentNoteGroups.map((group) => (
       <section id={groupAnchor(group)} class="scroll-mt-24">
         <h2>{group.component}</h2>
@@ -204,6 +233,20 @@ const allGroups = [...inlineGroups, ...framedGroups];
         {group.specimens.map((specimen) => (
           <GallerySpecimen group={group} specimen={specimen}>
             <ContentNote {...specimen.props} />
+          </GallerySpecimen>
+        ))}
+      </section>
+    ))
+  }
+
+  {
+    kindCatalogGroups.map((group) => (
+      <section id={groupAnchor(group)} class="scroll-mt-24">
+        <h2>{group.component}</h2>
+        <p>{group.summary}</p>
+        {group.specimens.map((specimen) => (
+          <GallerySpecimen group={group} specimen={specimen}>
+            <KindCatalog {...specimen.props} />
           </GallerySpecimen>
         ))}
       </section>

@@ -55,8 +55,14 @@ const STATIC_CLASS = /class="([^"]*)"/g;
  * The count today. Its job is not the number: it is that a regex which quietly stops matching
  * would make every assertion below vacuously true, and a chip rule with no chips to check
  * reports the same PASS as a site with no drift.
+ *
+ * It went 5 → 4 when the note frame moved to `@galaxy-foundry/site-kit`, whose `TagChips` renders
+ * the chips above a note now. Those are out of this rule's reach on purpose — the kit's styles are
+ * scoped and no rule here could correct them — and the package asserts its own. The number falling
+ * because a call site moved upstream is the good case; it falling because one drifted is what this
+ * catches, and only the source in front of it can tell the two apart.
  */
-const MIN_TAG_LINKS = 5;
+const MIN_TAG_LINKS = 4;
 
 /** Every `<a … /tags/… >` in a file, paired with the markup it encloses and its own attributes. */
 function tagLinks(file: string): { file: string; markup: string; opening: string }[] {

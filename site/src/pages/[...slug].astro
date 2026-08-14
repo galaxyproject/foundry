@@ -2,7 +2,7 @@
 import { getAllNotes, noteTitle, type NoteField, type NoteType } from '../lib/notes';
 import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import NoteHeader from '../components/NoteHeader.astro';
+import NoteHeader from '@galaxy-foundry/site-kit/NoteHeader.astro';
 import NoteMeta from '../components/NoteMeta.astro';
 import IncomingRefs from '../components/IncomingRefs.astro';
 import MoldHealth from '../components/MoldHealth.astro';
@@ -16,6 +16,7 @@ import SchemaBody from '../components/SchemaBody.astro';
 import LicenseBox from '../components/LicenseBox.astro';
 import { buildWikiLinkMap, buildBacklinkMap } from '../lib/wiki-links';
 import { buildArtifactGraph } from '../lib/artifacts';
+import { base } from '../lib/site-base';
 
 export async function getStaticPaths() {
   const entries = await getAllNotes();
@@ -59,7 +60,6 @@ const TYPE_LABELS: Record<NoteType, string> = {
 };
 
 const pageTitle = noteTitle(entry);
-const typeLabel = TYPE_LABELS[data.type];
 
 function pipelineEyebrow(): string | undefined {
   if (data.type !== 'pipeline') return undefined;
@@ -68,20 +68,32 @@ function pipelineEyebrow(): string | undefined {
   if (!src || !tgt) return undefined;
   return `pipeline · ${src} → ${tgt}`;
 }
-const eyebrow = pipelineEyebrow();
+const eyebrow = pipelineEyebrow() ?? TYPE_LABELS[data.type];
 
 // `in` checks the value and not the key, so the key is asserted separately — otherwise renaming
 // `license` across the three kinds that declare it removes the box from every page it belongs on
 // and nothing reports it.
 const LICENSE = 'license' satisfies NoteField;
 
-const showActions = data.type === 'research';
+// The URL is the switch, not a flag beside one: the two can disagree, and disagreeing is a Raw
+// link pointing at nothing.
+const rawHref = data.type === 'research' ? `${base}/raw/${entry.id}.md` : undefined;
+
 const showMeta = data.type !== 'pipeline';
 const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' : 'full';
 ---
 <Base title={pageTitle}>
   <div>
-    <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} eyebrow={eyebrow} showActions={showActions} />
+    <NoteHeader
+      title={pageTitle}
+      eyebrow={eyebrow}
+      summary={data.summary}
+      status={data.status}
+      tags={data.tags}
+      tagBase={`${base}/tags`}
+      back={{ href: `${base}/`, label: 'Home' }}
+      rawHref={rawHref}
+    />
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
     {LICENSE in data && data.license && <LicenseBox entry={entry} />}
 
@@ -103,21 +115,3 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
     <IncomingRefs incoming={incoming} />
   </div>
 </Base>
-
-<script>
-  document.querySelectorAll<HTMLButtonElement>('button.copy-raw').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const url = btn.dataset.url!;
-      try {
-        const res = await fetch(url);
-        const text = await res.text();
-        await navigator.clipboard.writeText(text);
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
-      } catch {
-        btn.textContent = 'Failed';
-        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
-      }
-    });
-  });
-</script>

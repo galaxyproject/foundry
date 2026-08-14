@@ -29,7 +29,11 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
-import { licenseBadgeStyleGaps, licenseFileStyleGaps } from "@galaxy-foundry/site-kit";
+import {
+  licenseBadgeStyleGaps,
+  licenseFileStyleGaps,
+  noteHeaderStyleGaps,
+} from "@galaxy-foundry/site-kit";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { SITE_IDENTITY } from "../site/src/lib/site-identity";
@@ -273,7 +277,7 @@ describe("the palette this stylesheet declares", () => {
   });
 });
 
-describe("the tokens the licence components name", () => {
+describe("the tokens the kit's components name", () => {
   // The same failure the shell's `@source` line has, one layer in. `LicenseBadge` and
   // `LicenseFileBody` bring their own scoped styles, so there are no classes to declare — but their
   // rules read custom properties that this repo has to supply, and a property nothing declares
@@ -300,6 +304,12 @@ describe("the tokens the licence components name", () => {
     expect(
       licenseFileStyleGaps(root),
       "\ntokens the licence-file body reads and this site never declares",
+    ).toEqual([]);
+    // The widest blast radius of the three: the frame is above the body of every note here, so a
+    // token it reads and this site never declares is a rule missing on 300-odd pages at once.
+    expect(
+      noteHeaderStyleGaps(root),
+      "\ntokens the note frame reads and this site never declares",
     ).toEqual([]);
   });
 });
@@ -449,6 +459,9 @@ const UNSEARCHABLE: string[] = [
   // `gallery/site-shell/searchable` is deliberately NOT here. That specimen's whole case is that a
   // searchable shell marks its column, and the way to be sure it does is that Pagefind finds it.
   "gallery/index.html",
+  "gallery/kind-reference/directory-with-companions/index.html",
+  "gallery/kind-reference/flat-without-example/index.html",
+  "gallery/kind-reference/open-companion-set/index.html",
   "gallery/site-header/active-below-a-section/index.html",
   "gallery/site-header/active-under-more/index.html",
   "gallery/site-header/everything-fits/index.html",

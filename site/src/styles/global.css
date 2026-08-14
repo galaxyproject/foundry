@@ -129,11 +129,15 @@
 .badge {
   @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium;
 }
-.badge-draft     { background-color: var(--color-badge-draft-bg);    color: var(--color-badge-draft-text); }
-.badge-reviewed  { background-color: var(--color-badge-reviewed-bg); color: var(--color-badge-reviewed-text); }
-.badge-revised   { background-color: var(--color-badge-revised-bg);  color: var(--color-badge-revised-text); }
-.badge-stale     { background-color: var(--color-badge-stale-bg);    color: var(--color-badge-stale-text); }
-.badge-archived  { background-color: var(--color-badge-archived-bg); color: var(--color-badge-archived-text); }
+/* Two spellings of one status vocabulary, sharing a rule so they cannot drift. The class is ours,
+   for the lists and tables that draw a status themselves; `[data-status]` is the seam the kit's
+   note frame leaves open, since its own styles are scoped and give the pill everything but colour.
+   A status we add is a row here and costs no release upstream. */
+.badge-draft,    [data-status='draft']    { background-color: var(--color-badge-draft-bg);    color: var(--color-badge-draft-text); }
+.badge-reviewed, [data-status='reviewed'] { background-color: var(--color-badge-reviewed-bg); color: var(--color-badge-reviewed-text); }
+.badge-revised,  [data-status='revised']  { background-color: var(--color-badge-revised-bg);  color: var(--color-badge-revised-text); }
+.badge-stale,    [data-status='stale']    { background-color: var(--color-badge-stale-bg);    color: var(--color-badge-stale-text); }
+.badge-archived, [data-status='archived'] { background-color: var(--color-badge-archived-bg); color: var(--color-badge-archived-text); }
 
 .tag {
   @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-150;
