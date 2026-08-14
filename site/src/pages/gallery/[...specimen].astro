@@ -4,16 +4,19 @@
 // below IS the layout, and the other has to sit in a document with nothing else in it.
 import "../../styles/global.css";
 
+import KindReference from "@galaxy-foundry/site-kit/KindReference.astro";
 import SiteHeader from "@galaxy-foundry/site-kit/SiteHeader.astro";
 import SiteShell from "@galaxy-foundry/site-kit/SiteShell.astro";
 import {
   HEADER_SPECIMENS,
+  KIND_REFERENCE_SPECIMENS,
   SHELL_SPECIMENS,
   SPECIMENS,
   sharesPage,
   specimenPath,
 } from "@galaxy-foundry/site-kit/specimens";
 
+import Base from "../../layouts/Base.astro";
 import { base } from "../../lib/site-base";
 
 /**
@@ -44,13 +47,31 @@ const header =
   groupId === HEADER_SPECIMENS.id
     ? HEADER_SPECIMENS.specimens.find((specimen) => specimen.id === id)
     : undefined;
-if (!shell && !header) {
+// A page BODY rather than chrome, so this one goes through the layout every other page here uses.
+// The reasoning that keeps the header out of the shell — a header above the header being
+// demonstrated — says nothing about a reference, which is only ever seen inside a site.
+const reference =
+  groupId === KIND_REFERENCE_SPECIMENS.id
+    ? KIND_REFERENCE_SPECIMENS.specimens.find((specimen) => specimen.id === id)
+    : undefined;
+if (!shell && !header && !reference) {
   throw new Error(`gallery has no standalone route for ${groupId}/${id}`);
 }
 ---
 
 {
-  shell ? (
+  reference && (
+    <Base title={`${reference.name} - Foundry gallery`} searchable={false}>
+      <KindReference {...reference.props} />
+      <p>
+        <a href={`${base}/gallery/#${KIND_REFERENCE_SPECIMENS.id}`}>Back to the gallery</a>
+      </p>
+    </Base>
+  )
+}
+
+{
+  shell && (
     <SiteShell {...shell.props}>
       <h1>{shell.name}</h1>
       <p>{shell.why}</p>
@@ -62,12 +83,16 @@ if (!shell && !header) {
         <a href={`${base}/gallery/#${SHELL_SPECIMENS.id}`}>Back to the gallery</a>
       </p>
     </SiteShell>
-  ) : (
+  )
+}
+
+{
+  header && (
     <html lang="en">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{header?.name} - Foundry gallery</title>
+        <title>{header.name} - Foundry gallery</title>
         {/* Not in the search index, and there is no `<main>` here to mark. The list in
             `tests/built-shell.test.ts` is what makes that a decision rather than an oversight. */}
         <meta name="robots" content="noindex" />
@@ -82,7 +107,7 @@ document.documentElement.dataset.pfTheme = dark ? 'dark' : 'light';`}
         </script>
       </head>
       <body style="background: var(--color-surface)">
-        <SiteHeader {...header!.props} />
+        <SiteHeader {...header.props} />
       </body>
     </html>
   )
