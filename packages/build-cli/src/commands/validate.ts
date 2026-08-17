@@ -25,10 +25,10 @@ import { bundledPolicy, resolveLicenseRow } from "@galaxy-foundry/license-policy
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadTagRegistry } from "../lib/schema.js";
-import { GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
+import { GALAXY_SLUG_ALIASES, readContent } from "../lib/slug-map.js";
 import type { FileMeta, Frontmatter, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles, routablePath } from "../lib/walk.js";
-import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
+import { resolveWikiLink, WIKI_LINK_RE } from "../lib/wiki-links.js";
 
 interface CliArgs {
   directory: string;
@@ -158,13 +158,18 @@ interface CrossFileFinding {
 // the whole corpus. It lives in tests/registry-drift.test.ts instead.
 
 // Addressing has to match what casting resolves against, or a link this command calls good
-// fails at cast time. Same rule imported, rather than the same rule restated a third time —
-// assemble-pipeline's copy carried a comment claiming parity with cast's instead of holding it.
-function buildSlugMap(files: FileMeta[]): Map<string, string> {
+// fails at cast time. The whole map is taken from the same reader the caster's is projected
+// from, rather than the same rule restated a third time — assemble-pipeline's copy carried a
+// comment claiming parity with cast's instead of holding it.
+//
+// Narrowed to files that validated, which is this command's own rule and not the reader's: a
+// note whose frontmatter is broken should not be reachable by a link the same run calls good.
+function buildSlugMap(files: FileMeta[], contentRoot: string): Map<string, string> {
+  const valid = new Map(files.map((f) => [path.resolve(f.path), f.path]));
   const m = new Map<string, string>();
-  for (const f of files) {
-    m.set(slugify(f.slug), f.path);
-    for (const alias of GALAXY_SLUG_ALIASES(f.meta)) m.set(slugify(alias), f.path);
+  for (const [address, note] of readContent(contentRoot, GALAXY_SLUG_ALIASES).notesByAddress) {
+    const full = valid.get(path.resolve(contentRoot, path.relative(CONTENT_DIR, note.file)));
+    if (full) m.set(address, full);
   }
   return m;
 }
@@ -1444,7 +1449,7 @@ export function validateDirectory(opts: ValidateOptions): {
   }
 
   // Cross-file passes.
-  const slugMap = buildSlugMap(validFiles);
+  const slugMap = buildSlugMap(validFiles, opts.directory);
   const metaByPath = new Map<string, Frontmatter>();
   for (const f of validFiles) metaByPath.set(f.path, f.meta);
 

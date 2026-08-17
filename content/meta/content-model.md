@@ -24,7 +24,9 @@ The kinds fall into four groups. **`meta`** is the design record — the one kin
 
 Kind is never inferred from a tag, and every kind is its own literal rather than a member of one broad kind carrying a discriminating enum field. The literal is what makes the collection and the declared kind agree, or fail: a shared enum makes every field legal on every member, and would let a `cli-command` note sit at `content/cli/<tool>/index.md` — where a `cli-tool` belongs — and still validate. Paths route files into collections; the note's literal `type` must agree with the collection's declared kind.
 
-Identity is the note's basename — a link's target is slugified and matched against it. The instance's link map adds the kind-specific aliases — a Mold's `name`, a `tool command` pair — while the grammar and the lookup rule come from `@galaxy-foundry/wiki-links`.
+Identity is the note's path within its collection, slugified — `gxwf-validate` for `content/cli/gxwf/validate.md`, `summarize-nextflow` for a Mold that sits at the root of its own. A link's target is slugified and matched against that. Around it the instance registers aliases, which fill an address only if no note already holds it outright: the note's **basename**, which is how nearly every link in `content/` is written and the only address this corpus had for most of its life; and a `tool command` pair, because a Mold author writes `[[gxwf validate]]` rather than the slug. The walk, the precedence and the lookup come from `@galaxy-foundry/content-reader` and `@galaxy-foundry/wiki-links`; which aliases exist is ours.
+
+Precedence is why the qualified form is the primary. Two notes can share a basename — a Mold and a CLI page both called `summarize-nextflow` do — and under basename-only addressing which one `[[summarize-nextflow]]` reached depended on which collection was walked last. It now reaches the note whose identity that *is*, and the other keeps `foundry-summarize-nextflow`.
 
 ## Frontmatter envelope
 

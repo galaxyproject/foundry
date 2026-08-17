@@ -30,6 +30,9 @@ importers:
       '@galaxy-foundry/cast':
         specifier: ^0.12.2
         version: 0.12.2(zod@4.4.3)
+      '@galaxy-foundry/content-reader':
+        specifier: ^0.3.1
+        version: 0.3.1(zod@4.4.3)
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:packages/foundry
@@ -102,12 +105,15 @@ importers:
       '@galaxy-foundry/cast':
         specifier: ^0.12.2
         version: 0.12.2(zod@4.4.3)
+      '@galaxy-foundry/content-reader':
+        specifier: ^0.3.1
+        version: 0.3.1(zod@4.4.3)
       '@galaxy-foundry/foundry':
         specifier: workspace:*
         version: link:../foundry
       '@galaxy-foundry/kind-schema':
-        specifier: ^0.5.2
-        version: 0.5.2(zod@4.4.3)
+        specifier: ^0.6.0
+        version: 0.6.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
         specifier: ^0.8.1
         version: 0.8.1
@@ -189,8 +195,8 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
       '@galaxy-foundry/kind-schema':
-        specifier: ^0.5.2
-        version: 0.5.2(zod@4.4.3)
+        specifier: ^0.6.0
+        version: 0.6.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
         specifier: ^0.8.1
         version: 0.8.1
@@ -291,8 +297,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/foundry
       '@galaxy-foundry/kind-schema':
-        specifier: ^0.5.2
-        version: 0.5.2(zod@4.4.3)
+        specifier: ^0.6.0
+        version: 0.6.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
         specifier: ^0.8.1
         version: 0.8.1
@@ -1021,14 +1027,18 @@ packages:
     resolution: {integrity: sha512-JBU1QwueejR09e3EID8as8hrpqttTpi2YccMjsOzNiG7bCP2xBMHle13EB7x7FB0Y7+5PPcJqOLHPBpRmSUW5g==}
     engines: {node: '>=20'}
 
+  '@galaxy-foundry/content-reader@0.3.1':
+    resolution: {integrity: sha512-7IvNFS8umF14z6A2tUpCNcJDiqBBuQ1IULlmlJoMIgAXf+3ApwLe0bqB5NQyvAJ7oecZsvftcxDjhdtpfWSJow==}
+    engines: {node: '>=20'}
+
   '@galaxy-foundry/kind-manifest@0.4.0':
     resolution: {integrity: sha512-4u19jRuIyg4+FJfoDbGtZOeXVgTmPcuqDOx9plo2uLJxMegDh8sRnppXIVlzZq5zCm03UJA+ThQue2D9jFPCGg==}
     engines: {node: '>=20'}
     peerDependencies:
       zod: ^4.0.0
 
-  '@galaxy-foundry/kind-schema@0.5.2':
-    resolution: {integrity: sha512-zRBr5MgHpWTaHWUEQwDX61a4g/8ELO/9z/dr7qhk6igPEz9HkF2WR3hG7a/kuImxCeQ5yW3faIqatej13xrgWQ==}
+  '@galaxy-foundry/kind-schema@0.6.0':
+    resolution: {integrity: sha512-cVe5oSS74kKRWQwGp/su4nlfsKbz/cYZE0L6zeAY1VWp0GJyydDJpPKZso2ZkGa58fXR4MdaWAkKxIzluJvctg==}
     engines: {node: '>=20'}
     peerDependencies:
       zod: ^4.0.0
@@ -4482,11 +4492,19 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
+  '@galaxy-foundry/content-reader@0.3.1(zod@4.4.3)':
+    dependencies:
+      '@galaxy-foundry/kind-schema': 0.6.0(zod@4.4.3)
+      '@galaxy-foundry/wiki-links': 0.4.0
+      js-yaml: 4.3.0
+    transitivePeerDependencies:
+      - zod
+
   '@galaxy-foundry/kind-manifest@0.4.0(zod@4.4.3)':
     dependencies:
       zod: 4.4.3
 
-  '@galaxy-foundry/kind-schema@0.5.2(zod@4.4.3)':
+  '@galaxy-foundry/kind-schema@0.6.0(zod@4.4.3)':
     dependencies:
       '@galaxy-foundry/kind-manifest': 0.4.0(zod@4.4.3)
       zod: 4.4.3
