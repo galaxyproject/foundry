@@ -123,10 +123,11 @@ function fetchCliMetadata(bin: string, command: string): CliMetadata {
       throw new Error(
         `failed to invoke '${bin}': not found. Install pinned planemo:\n` +
           `  uvx --from planemo==${PIN.ref} planemo --version`,
+        { cause: err },
       );
     }
     const msg = e.stderr || e.message;
-    throw new Error(`'${bin} cli_metadata --command ${command}' failed: ${msg}`);
+    throw new Error(`'${bin} cli_metadata --command ${command}' failed: ${msg}`, { cause: err });
   }
   return JSON.parse(stdout) as CliMetadata;
 }
@@ -178,7 +179,13 @@ function renderOptionsTable(params: ClickParam[]): string {
 function renderArgumentsTable(params: ClickParam[]): string {
   const args = params.filter((p) => !p.hidden && p.kind === "argument");
   if (args.length === 0) return "";
-  const lines = ["", "## Arguments", "", "| Argument | Type | Required | Help |", "|---|---|---|---|"];
+  const lines = [
+    "",
+    "## Arguments",
+    "",
+    "| Argument | Type | Required | Help |",
+    "|---|---|---|---|",
+  ];
   for (const p of args) {
     lines.push(
       `| ${escapeCell(paramDisplay(p))} | ${escapeCell(paramType(p))} | ${p.required ? "yes" : "—"} | ${escapeCell(p.help ?? "—")} |`,
@@ -212,7 +219,8 @@ function renderFrontmatter(meta: CliMetadata, summary: string): string {
 }
 
 function deriveSummary(meta: CliMetadata): string {
-  const raw = meta.short_help || (meta.help ?? "").split(/\r?\n\r?\n/)[0] || `${meta.name} CLI command.`;
+  const raw =
+    meta.short_help || (meta.help ?? "").split(/\r?\n\r?\n/)[0] || `${meta.name} CLI command.`;
   const trimmed = raw.trim().replace(/\s+/g, " ");
   if (trimmed.length <= 155) return trimmed;
   return trimmed.slice(0, 152) + "...";
@@ -304,10 +312,14 @@ function main() {
       continue;
     }
     writeFileSync(target, next);
-    process.stdout.write(`${path.relative(REPO_ROOT, target)}: ${existing === null ? "created" : "updated"}\n`);
+    process.stdout.write(
+      `${path.relative(REPO_ROOT, target)}: ${existing === null ? "created" : "updated"}\n`,
+    );
   }
   if (opts.check && drift > 0) {
-    process.stderr.write(`\n${drift} planemo CLI page(s) out of date. Run without --check to regenerate.\n`);
+    process.stderr.write(
+      `\n${drift} planemo CLI page(s) out of date. Run without --check to regenerate.\n`,
+    );
     process.exit(1);
   }
 }

@@ -70,7 +70,7 @@ function newestMtime(dir: string): number {
  * as this file has existed. Nothing noticed until an assertion read an href.
  */
 function buildEnv(): NodeJS.ProcessEnv {
-  const { BASE_URL, MODE, DEV, PROD, SSR, ...rest } = process.env;
+  const { BASE_URL: _b, MODE: _m, DEV: _d, PROD: _p, SSR: _s, ...rest } = process.env;
   return rest;
 }
 

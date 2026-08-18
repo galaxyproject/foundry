@@ -9,8 +9,29 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 const pluginRoot = path.join(repoRoot, "casts", "claude");
 
-function readJson(relativePath: string): Record<string, any> {
-  return JSON.parse(readFileSync(path.join(repoRoot, relativePath), "utf8"));
+/**
+ * The fields of a manifest this suite reads. Not the whole file — a manifest is free to carry
+ * more, and a shape that claimed to be complete would fail on the next key either runtime adds.
+ */
+interface PluginManifest {
+  name: string;
+  version: string;
+  skills: string;
+}
+
+interface MarketplaceEntry {
+  name: string;
+  source: { source: string; path: string };
+  policy: { installation: string; authentication: string };
+  category: string;
+}
+
+interface Marketplace {
+  plugins: MarketplaceEntry[];
+}
+
+function readJson<T>(relativePath: string): T {
+  return JSON.parse(readFileSync(path.join(repoRoot, relativePath), "utf8")) as T;
 }
 
 function skillFiles(): string[] {
@@ -30,9 +51,9 @@ function skillDirectories(): string[] {
 }
 
 describe("dual-runtime plugin packaging", () => {
-  const claudeManifest = readJson("casts/claude/.claude-plugin/plugin.json");
-  const codexManifest = readJson("casts/claude/.codex-plugin/plugin.json");
-  const marketplace = readJson(".agents/plugins/marketplace.json");
+  const claudeManifest = readJson<PluginManifest>("casts/claude/.claude-plugin/plugin.json");
+  const codexManifest = readJson<PluginManifest>("casts/claude/.codex-plugin/plugin.json");
+  const marketplace = readJson<Marketplace>(".agents/plugins/marketplace.json");
 
   it("points both runtimes at one plugin identity and skill tree", () => {
     expect(codexManifest.name).toBe(claudeManifest.name);
@@ -43,14 +64,12 @@ describe("dual-runtime plugin packaging", () => {
   });
 
   it("publishes the shared plugin through the repo Codex marketplace", () => {
-    const entry = marketplace.plugins.find(
-      (candidate: { name?: string }) => candidate.name === codexManifest.name,
-    );
-    expect(entry).toBeDefined();
-    expect(entry.source).toEqual({ source: "local", path: "./casts/claude" });
-    expect(path.resolve(repoRoot, entry.source.path)).toBe(pluginRoot);
-    expect(entry.policy).toEqual({ installation: "AVAILABLE", authentication: "ON_INSTALL" });
-    expect(typeof entry.category).toBe("string");
+    const entry = marketplace.plugins.find((candidate) => candidate.name === codexManifest.name);
+    expect(entry, `no marketplace entry named ${codexManifest.name}`).toBeDefined();
+    expect(entry!.source).toEqual({ source: "local", path: "./casts/claude" });
+    expect(path.resolve(repoRoot, entry!.source.path)).toBe(pluginRoot);
+    expect(entry!.policy).toEqual({ installation: "AVAILABLE", authentication: "ON_INSTALL" });
+    expect(typeof entry!.category).toBe("string");
   });
 
   it("keeps generated skill frontmatter in the shared portable core", () => {

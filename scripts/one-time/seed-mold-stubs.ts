@@ -18,6 +18,9 @@ interface Stub {
   summary: string;
 }
 
+// One row per Mold; reflowed to a field per line it is four times as long and stops reading as
+// the inventory it is.
+// prettier-ignore
 const STUBS: Stub[] = [
   // Source summarization
   { slug: "summarize-paper", axis: "source-specific", source: "paper", summary: "Extract methods, tools, sample data, and references from a paper." },
@@ -71,13 +74,10 @@ function tagsFor(s: Stub): string[] {
 }
 
 function frontmatterFor(s: Stub): string {
-  const tags = tagsFor(s).map((t) => `  - ${t}`).join("\n");
-  const lines = [
-    "---",
-    "type: mold",
-    `name: ${s.slug}`,
-    `axis: ${s.axis}`,
-  ];
+  const tags = tagsFor(s)
+    .map((t) => `  - ${t}`)
+    .join("\n");
+  const lines = ["---", "type: mold", `name: ${s.slug}`, `axis: ${s.axis}`];
   if (s.source) lines.push(`source: ${s.source}`);
   if (s.target) lines.push(`target: ${s.target}`);
   if (s.tool) lines.push(`tool: ${s.tool}`);

@@ -42,15 +42,15 @@
 npm run validate           # schema + cross-file checks
 npm run test               # vitest (root: validator + content tests)
 npm run typecheck          # tsc --noEmit (foundry-internal scripts/)
-npm run tests-format       # prettier --check across tests/
+npm run format             # prettier --check across every formatted directory
+npm run format-fix         # prettier --write across the same
+npm run lint               # eslint across the same
 npm run packages-test      # vitest across packages/* via pnpm -r
 npm run packages-typecheck # tsc --noEmit across packages/* via pnpm -r
 npm run packages-build     # tsc emit across packages/*
-npm run packages-format    # prettier --check across packages/*
-npm run packages-lint      # eslint across packages/*
 ```
 
-Prettier covers `packages/*/{src,test}` and `tests/`; `scripts/` is deliberately outside it. Format/lint enforcement also runs via `pre-commit` (`.pre-commit-config.yaml`). Install once per clone with `pre-commit install`; mirrors the galaxy-tool-util setup.
+Prettier and eslint cover `packages/*/{src,test}`, `tests/` and `scripts/` — every TypeScript directory that is ours. The one carve-out is a `// prettier-ignore` on the aligned Mold table in `scripts/one-time/seed-mold-stubs.ts`, which is one table rather than one directory. Enforcement also runs via `pre-commit` (`.pre-commit-config.yaml`). Install once per clone with `pre-commit install`; mirrors the galaxy-tool-util setup.
 
 The top-level `Makefile` mirrors common entry points:
 
