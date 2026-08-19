@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-04
-revision: 9
+revised: 2026-08-19
+revision: 10
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring."
 input_artifacts:
   - id: nextflow-galaxy-interface
@@ -30,7 +30,7 @@ input_artifacts:
     role: galaxy-data-flow
     description: "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
   - id: open-requirements-ledger
-    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: iwc-comparison-notes
     kind: markdown
@@ -43,7 +43,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: research
     ref: "[[open-requirements-ledger]]"
@@ -51,7 +51,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    purpose: "Close the open entries a corpus exemplar answers — a collection idiom, a label convention, a structural shape the corpus already settles — and append the ones no exemplar covers, so a structural divergence with no corpus precedent reaches the template tier as a recorded obligation."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: cli-command
     ref: "[[convert]]"
@@ -148,5 +148,3 @@ Keep it size-bounded — a whole large workflow is noise; the relevant subgraph 
 - **No tool discovery.** Do not replace [[discover-shed-tool]].
 - **No automatic rewrite.** This Mold emits structural diff guidance; the harness or user decides which changes to apply.
 - **No forced nearest.** A no-match result is valid when IWC lacks a close exemplar.
-
-Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.

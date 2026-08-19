@@ -15,12 +15,12 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Read artifact `galaxy-tool-summary`. Schema: galaxy-tool-summary. Produced by `summarize-galaxy-tool`. Galaxy tool summary manifest from summarize-galaxy-tool conforming to galaxy-tool-summary; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`.
 - Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft.
-- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: read entries the design tier recorded against this step before implementing; append a blocking entry if its output can't be computed.
+- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.
 
 ## Outputs
 
 - Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. Schema: galaxy-workflow-draft. gxformat2 skeleton with one more abstract step replaced by a concrete tool step (loop iteration output).
-- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Ledger (open-requirements-ledger) with a blocking entry appended when a step's declared output can't be computed from its wired inputs; drives the fall-through to topology repair.
+- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact.
 
 ## Required Tools
 
@@ -31,7 +31,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
-- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs — the fall-through to topology repair, in place of fabricating the missing evidence.
 - `references/schemas/galaxy-tool-summary.schema.json`: Schema file copied verbatim into the bundle. Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape.
 - `references/schemas/galaxy-workflow-draft.schema.json`: Schema file copied verbatim into the bundle. In/out contract: the draft this Mold reads and mutates in place conforms to galaxy-workflow-draft. Cast bundles the JSON Schema alongside the draft-validate CLI checks.
 
@@ -70,7 +70,7 @@ Single step in scope. This skill owns the chosen step and the wiring that connec
 
 When the wrapper can't cleanly carry what the plan needs — wrong datatype, missing parameter, unsupported collection shape — record where a later failure should be investigated: tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue. Consult galaxy-tool-job-failure-reference when the selected wrapper has explicit failure semantics (exit-code rules, stdio regex, strict-shell, dynamic outputs); implement the step's labels and wiring so that evidence survives to runtime rather than being erased by the concretization.
 
-When the step's declared output cannot be computed from the inputs wired to it — the connection graph says the ports connect, but no wired input carries the evidence the output needs — do not fabricate it. Append a blocking entry to the open-requirements-ledger naming the step, the uncomputable output, and the missing evidence, and fall through to repair-galaxy-draft-topology rather than emitting a step that validates but can't run. A missing Tool Shed wrapper is not this case; that gap routes through the discover-or-author branch.
+When the step's declared output cannot be computed from the inputs wired to it — the connection graph says the ports connect, but no wired input carries the evidence the output needs — do not fabricate it. Append a **blocking** entry to the open-requirements-ledger and fall through to repair-galaxy-draft-topology rather than emitting a step that validates but can't run. A missing Tool Shed wrapper is not this case; that gap routes through the discover-or-author branch.
 
 ## Runtime Notes
 

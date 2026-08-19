@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-07-24
-revision: 5
+revised: 2026-08-19
+revision: 6
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
 input_artifacts:
   - id: summary-nextflow
@@ -20,7 +20,7 @@ input_artifacts:
   - id: nextflow-galaxy-interface
     description: "Preceding Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] that pins inputs, outputs, and labels."
   - id: open-requirements-ledger
-    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: nextflow-galaxy-data-flow
     kind: markdown
@@ -29,7 +29,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: research
     ref: "[[open-requirements-ledger]]"
@@ -37,7 +37,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    purpose: "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the channel topology leaves open — an operator with no Galaxy collection recipe, a value channel with no Galaxy carrier, a join whose key Galaxy can't reconstruct."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[summary-nextflow]]"
@@ -153,5 +153,3 @@ related_notes:
 Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
 
 The output is not gxformat2 and should not resolve exact Tool Shed tools. [[nextflow-summary-to-galaxy-template]] turns this handoff and the interface brief into a skeleton.
-
-Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.

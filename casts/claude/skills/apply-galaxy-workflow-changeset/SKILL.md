@@ -15,12 +15,12 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - Read artifact `starting-galaxy-workflow`. Produced by `summarize-galaxy-workflow`. The normalized concrete gxformat2 workflow being modified, emitted by summarize-galaxy-workflow (passthrough when already gxformat2, the `.ga`→gxformat2 conversion otherwise). The substrate edits apply to — untouched regions must survive byte-for-byte.
 - Read artifact `galaxy-workflow-changeset`. Produced by `interview-to-galaxy-workflow-changeset`. Reviewed, step-anchored change-set from interview-to-galaxy-workflow-changeset; the edit intents to realize.
-- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: read open entries bearing on the edits; append any an edit cannot satisfy and mark resolved the ones it closes.
+- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.
 
 ## Outputs
 
 - Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. Schema: galaxy-workflow-draft. gxformat2 draft (see galaxy-workflow-draft-format) of the whole workflow: untouched steps carried at Resolved tier verbatim; tool-introducing/replacing edits injected as drafty steps with _plan_* fields for the per-step loop; direct edits applied inline.
-- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Updated obligations ledger: new unmet needs an edit surfaces appended; prior entries its edits close marked resolved.
+- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact.
 
 ## Required Tools
 
@@ -32,7 +32,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/notes/galaxy-workflow-draft-format.md`: Research note copied verbatim into the bundle. Represent the whole workflow as a draft: carry untouched steps at Resolved tier, inject tool-introducing/replacing edits as drafty steps with _plan_state / _plan_context / _plan_in / _plan_out.
-- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Carry the open-requirements ledger: append an edit's unmet need (e.g. a rewire with no reachable producer) rather than fabricating a connection, and mark resolved the ones its edits close.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Close the open entries the change-set discharges, and append a blocking entry for an edited region whose output the rewired inputs cannot supply, so an edit-introduced gap is recorded rather than discovered downstream.
 - `references/schemas/galaxy-workflow-draft.schema.json`: Schema file copied verbatim into the bundle. Output contract: the emitted gxformat2 draft conforms to galaxy-workflow-draft. Cast bundles the JSON Schema so the skill carries its output shape alongside draft-validate checks.
 
 ## Load On Demand
@@ -60,7 +60,7 @@ Every step, input, and output the change-set does not name must survive byte-for
 
 ### Computability and the ledger
 
-An edit can create a gap the connection graph won't catch: a rewire whose source doesn't carry what the consumer needs, or a `replace-tool` whose new tool can't supply a downstream port. Before handing off, check each edited region is computable from what feeds it. Where you find a gap you can't wire, append a blocking entry to the open-requirements-ledger naming the edit, the uncomputable output, and the missing evidence — so the per-step loop or repair-galaxy-draft-topology acts on it rather than discovering it late. Never fabricate a connection to make the graph look complete. More generally, carry the ledger: read the entries bearing on the edits and mark resolved the ones the change-set closes.
+An edit can create a gap the connection graph won't catch: a rewire whose source doesn't carry what the consumer needs, or a `replace-tool` whose new tool can't supply a downstream port. Before handing off, check each edited region is computable from what feeds it. Where you find a gap you can't wire, append a **blocking** entry to the open-requirements-ledger naming the edit, the uncomputable output, and the missing evidence — so the per-step loop or repair-galaxy-draft-topology acts on it rather than discovering it late. Never fabricate a connection to make the graph look complete.
 
 ### Hand off
 

@@ -4,11 +4,11 @@
   "mold": {
     "name": "apply-galaxy-workflow-changeset",
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
-    "revision": 2,
-    "content_hash": "ad5df3bb1de89c558f5fa3cf34b0379131407180da0878eaf601caec48d6711c",
-    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
+    "revision": 3,
+    "content_hash": "82d8e6e440fc48fdb4e7c5a5e25591ecc8e8a248ea03cc950df5096256656b62",
+    "commit": "d9e0b09728425abfbafef050fcfb7d98ae642d39"
   },
-  "cast_at": "2026-08-24T15:20:44.647Z",
+  "cast_at": "2026-08-25T06:47:55.301Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -50,10 +50,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Carry the open-requirements ledger: append an edit's unmet need (e.g. a rewire with no reachable producer) rather than fabricating a connection, and mark resolved the ones its edits close.",
+      "purpose": "Close the open entries the change-set discharges, and append a blocking entry for an edited region whose output the rewired inputs cannot supply, so an edit-introduced gap is recorded rather than discovered downstream.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
-      "dst_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
+      "src_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
+      "dst_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
       "source": "deterministic"
     },
     {
@@ -87,7 +87,7 @@
         "id": "open-requirements-ledger",
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
-        "description": "Updated obligations ledger: new unmet needs an edit surfaces appended; prior entries its edits close marked resolved."
+        "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
       }
     ],
     "consumes": [
@@ -107,7 +107,7 @@
       },
       {
         "id": "open-requirements-ledger",
-        "description": "Carried obligations ledger [[open-requirements-ledger]]: read open entries bearing on the edits; append any an edit cannot satisfy and mark resolved the ones it closes.",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.",
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",

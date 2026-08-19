@@ -4,11 +4,11 @@
   "mold": {
     "name": "cwl-summary-to-galaxy-data-flow",
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
-    "revision": 2,
-    "content_hash": "d9ffbf76c60adbe4884615d70aa0de6b5a7fdc1c4385931ed01344ed3bc480f3",
-    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
+    "revision": 3,
+    "content_hash": "ed3f1d14cab3958ec321bcc108dd6274bec965cd502763ce0d5abd060a90f28b",
+    "commit": "d9e0b09728425abfbafef050fcfb7d98ae642d39"
   },
-  "cast_at": "2026-08-24T15:20:45.460Z",
+  "cast_at": "2026-08-25T06:47:56.026Z",
   "refs": [
     {
       "kind": "pattern",
@@ -175,10 +175,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the CWL summary can't settle — a scatter shape Galaxy can't express directly, an expression-derived value with no Galaxy equivalent, a `linkMerge`/`pickValue` fan-in with no settled Galaxy form.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
-      "dst_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
+      "src_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
+      "dst_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
       "source": "deterministic"
     },
     {
@@ -209,7 +209,7 @@
         "id": "open-requirements-ledger",
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
-        "description": "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
+        "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
       }
     ],
     "consumes": [
@@ -230,7 +230,7 @@
       },
       {
         "id": "open-requirements-ledger",
-        "description": "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve.",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.",
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",

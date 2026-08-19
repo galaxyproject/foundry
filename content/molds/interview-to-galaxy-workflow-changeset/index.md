@@ -9,14 +9,14 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-07-01
-revised: 2026-07-24
-revision: 2
+revised: 2026-08-19
+revision: 3
 summary: "Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set."
 input_artifacts:
   - id: summary-galaxy-workflow
     description: "Structured summary of the existing workflow from [[summarize-galaxy-workflow]]; the anchor set the change-set addresses (step labels, input labels, output names, tool_state keys)."
   - id: open-requirements-ledger
-    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; append requested changes the workflow cannot yet support."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: galaxy-workflow-changeset
     kind: markdown
@@ -25,7 +25,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Updated obligations ledger: requested changes the workflow cannot support appended as open entries; prior entries this interview resolves marked resolved."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: schema
     ref: "[[summary-galaxy-workflow]]"
@@ -40,7 +40,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Carry the open-requirements ledger: append requested changes the current workflow cannot support rather than inventing or dropping them, and mark resolved the ones this step closes."
+    purpose: "Record a requested change the workflow cannot support as described as an open entry, so an unsupportable request survives as a tracked obligation rather than a fabricated anchor or a silent drop."
     verification: "Promote after a worked run shows entries this Mold appends are consumed by apply-galaxy-workflow-changeset or a reviewer without re-derivation."
 related_molds:
   - "[[summarize-galaxy-workflow]]"

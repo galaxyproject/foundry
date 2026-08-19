@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-07-24
-revision: 5
+revised: 2026-08-19
+revision: 6
 summary: "gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief."
 input_artifacts:
   - id: freeform-summary
@@ -24,7 +24,7 @@ input_artifacts:
   - id: iwc-exemplar-gxformat2
     description: "Cleaned gxformat2 view of the nearest IWC exemplar's relevant subgraph from [[compare-against-iwc-exemplar]]; pattern-match the draft's input/collection shapes, map-over wiring, output promotion, and post-job actions against this concrete idiom. Absent when no nearest exemplar was found."
   - id: open-requirements-ledger
-    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
@@ -34,7 +34,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -58,7 +58,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    purpose: "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: research
     ref: "[[galaxy-workflow-draft-format]]"
@@ -160,6 +160,6 @@ Things worth a second look:
 
 Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see [[galaxy-workflow-comments]] for the convention.
 
-Before handing off, check each settled step is computable from what feeds it. The connection graph knows that ports connect, not what they carry — so a declared output that needs evidence no wired input supplies will validate yet can't be implemented. Where you find that gap, wire (or add) the producer; if you can't, append a blocking entry to the [[open-requirements-ledger]] naming the step, the uncomputable output, and the missing evidence (and record vague intent in `_plan_state`) so the per-step loop or [[repair-galaxy-draft-topology]] acts on it rather than discovering it late. More generally, carry the ledger: read the entries bearing on your topology decisions and mark resolved the ones you close.
+Before handing off, check each settled step is computable from what feeds it. The connection graph knows that ports connect, not what they carry — so a declared output that needs evidence no wired input supplies will validate yet can't be implemented. Where you find that gap, wire (or add) the producer; if you can't, record the vague intent in `_plan_state` and append a **blocking** entry to the [[open-requirements-ledger]] naming the step, the uncomputable output, and the missing evidence, so the per-step loop or [[repair-galaxy-draft-topology]] acts on it rather than discovering it late.
 
 Output shape is gxformat2 with wrapper-tier relaxations and `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` per tool step — see [[galaxy-workflow-draft-format]]. Refinement open work for those planning fields lives in `refinement.md`.

@@ -7,15 +7,15 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-06-02
-revised: 2026-07-24
-revision: 3
+revised: 2026-08-19
+revision: 4
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
   - id: galaxy-workflow-draft
     description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]) mutated in-place across iterations; topology is fully concrete, individual tool steps may still carry `TODO_*` sentinels and `_plan_*` planning fields."
   - id: open-requirements-ledger
-    description: "Carried obligations ledger [[open-requirements-ledger]]: after implementing the chosen step, read it for a new `open` blocking entry [[implement-galaxy-tool-step]] appended (the step's declared output can't be computed from its wired inputs), and count open blocking entries for the escalation convergence gate."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
@@ -29,7 +29,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Same ledger carried through the iteration: a blocking entry [[implement-galaxy-tool-step]] appended is routed to [[repair-galaxy-draft-topology]] and returns marked `resolved` or `surrendered`."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -87,7 +87,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Recognize the blocking entry [[implement-galaxy-tool-step]] appends (its shape and `open | resolved | surrendered` status) so the orchestrator can detect the raised computability gap, count open blocking entries for the convergence gate, and escalate to [[repair-galaxy-draft-topology]]."
+    purpose: "Read the ledger after each step implementation for a newly appended blocking entry, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on."
     verification: "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that strictly reduces the open count."
 related_molds:
   - "[[discover-shed-tool]]"
@@ -120,7 +120,7 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
      Either way, if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
 3. **Summarize the wrapper.** Invoke [[summarize-galaxy-tool]] on the resolved wrapper to produce a [[galaxy-tool-summary]] for the next phase.
 4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `tool_state`, and wrapper-determined port names.
-5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry [[implement-galaxy-tool-step]] appended against this step — a declared output that can't be computed from its wired inputs. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output); it marks the entry `resolved`, or `surrendered` when no producer is reachable. Each escalation must strictly reduce the open blocking-entry count, under a hard escalation cap; track both in the ledger's `topology_repair` block (increment `escalations`, append the post-repair open count to `open_history`, surrender once `escalations` reaches `cap`). A surrendered entry stays open and is written into the final draft as a labelled gap rather than fabricated. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
+5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry [[implement-galaxy-tool-step]] appended against this step. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
 6. **Validate.** Run [[draft-validate]] `--concrete` over the mutated draft. On green, return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
 
 ## Failure routing

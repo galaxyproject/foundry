@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-07-01
-revised: 2026-07-24
-revision: 2
+revised: 2026-08-19
+revision: 3
 summary: "Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps."
 input_artifacts:
   - id: starting-galaxy-workflow
@@ -16,7 +16,7 @@ input_artifacts:
   - id: galaxy-workflow-changeset
     description: "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]]; the edit intents to realize."
   - id: open-requirements-ledger
-    description: "Carried obligations ledger [[open-requirements-ledger]]: read open entries bearing on the edits; append any an edit cannot satisfy and mark resolved the ones it closes."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
@@ -26,7 +26,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Updated obligations ledger: new unmet needs an edit surfaces appended; prior entries its edits close marked resolved."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -58,7 +58,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Carry the open-requirements ledger: append an edit's unmet need (e.g. a rewire with no reachable producer) rather than fabricating a connection, and mark resolved the ones its edits close."
+    purpose: "Close the open entries the change-set discharges, and append a blocking entry for an edited region whose output the rewired inputs cannot supply, so an edit-introduced gap is recorded rather than discovered downstream."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
 related_molds:
   - "[[interview-to-galaxy-workflow-changeset]]"
@@ -86,7 +86,7 @@ Every step, input, and output the change-set does not name must survive byte-for
 
 ## Computability and the ledger
 
-An edit can create a gap the connection graph won't catch: a rewire whose source doesn't carry what the consumer needs, or a `replace-tool` whose new tool can't supply a downstream port. Before handing off, check each edited region is computable from what feeds it. Where you find a gap you can't wire, append a blocking entry to the [[open-requirements-ledger]] naming the edit, the uncomputable output, and the missing evidence — so the per-step loop or [[repair-galaxy-draft-topology]] acts on it rather than discovering it late. Never fabricate a connection to make the graph look complete. More generally, carry the ledger: read the entries bearing on the edits and mark resolved the ones the change-set closes.
+An edit can create a gap the connection graph won't catch: a rewire whose source doesn't carry what the consumer needs, or a `replace-tool` whose new tool can't supply a downstream port. Before handing off, check each edited region is computable from what feeds it. Where you find a gap you can't wire, append a **blocking** entry to the [[open-requirements-ledger]] naming the edit, the uncomputable output, and the missing evidence — so the per-step loop or [[repair-galaxy-draft-topology]] acts on it rather than discovering it late. Never fabricate a connection to make the graph look complete.
 
 ## Hand off
 
