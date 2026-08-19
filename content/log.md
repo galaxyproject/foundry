@@ -204,3 +204,50 @@ Two new fidelity cases to add to `content/molds/summarize-nextflow/eval.md`:
 ### Recommended next step
 
 File a follow-up issue: "summarize-nextflow resolver: walk all .nf files, support multi-process-per-file, auto-detect pipeline root." This is independent of issue #110 (per-module tests + meta.yml) and should land first — there's no point capturing per-module tests while the resolver finds zero modules.
+
+## 2026-08-19 — summarize-nextflow on ncbi/egapx (supersedes the 2026-05-03 hard-failure entry)
+
+The 2026-05-03 sweep recorded egapx as a **hard failure** — "sources under `nf/`,
+no `nextflow.config` at repo root; resolver throws `not a Nextflow pipeline
+root`." That is no longer true. Fix-list items 3 (pipeline-root auto-detect) and
+4 (entrypoint detection beyond `main.nf`) both landed. Re-run against the pinned
+fixture (`ncbi/egapx @ 40ec736`, v0.5.2):
+
+```
+warnings: auto-detected Nextflow pipeline root from workflow block: nf
+          selected Nextflow entrypoint: ui.nf
+```
+
+Exits 0, schema-valid. Counts: 95 `processes[]`, 68 `subworkflows[]`, 54 edges,
+6 conditionals.
+
+### What is still empty, and why it isn't the resolver's fault
+
+`params`, `tools`, `sample_sheets`, `profiles`, `reference_assets`, `nf_tests`
+all come back `[]`, and `container`/`conda` are null on all 95 processes. Two
+causes, both properties of egapx rather than resolver gaps:
+
+- **One global container, declared outside the detected root.**
+  `process.container = 'ncbi/egapx:0.5.2'` lives in
+  `ui/assets/config/docker_image.config` — under `ui/`, not the auto-detected
+  `nf/` root, and pulled in by the Python launcher rather than by a
+  `nextflow.config` the resolver would read. Per-process directives genuinely do
+  not exist; every step is a distinct NCBI C++ toolkit binary inside one image.
+- **No flat `params.*`.** The entrypoint reads `params.get('input', [:])` and
+  `params.get('tasks', [:])` — nested maps supplied by a YAML input file
+  (`examples/input_D_farinae_small.yaml`) plus `ui/assets/default_task_params.yaml`.
+  There is no `nextflow_schema.json` and nothing flat to extract.
+
+Worth naming as a resolver question rather than a bug: **root auto-detect and
+config discovery are now coupled.** Choosing `nf/` as the root is correct for
+process discovery and simultaneously puts `ui/assets/config/*.config` out of
+reach. Whether config discovery should search above the detected root is open.
+
+### Where this landed
+
+`content/pipelines/nextflow-to-galaxy/scenarios.md` gains a **ncbi/egapx**
+end-to-end case built around the empty summary — the journey's obligation is to
+treat empty `tools[]`/`params[]` as *absent evidence* and say so, not as "this
+pipeline has no tools". The mold-level case
+(`content/molds/summarize-nextflow/scenarios.md`, "pipeline-root auto-detect")
+already covered the exit-0-plus-warnings half and needs no change.
