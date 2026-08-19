@@ -141,3 +141,72 @@ Three caveats to keep the comparison honest:
 - expect: the branch control reaches the final workflow as an optional path or
   an explicit design decision; it is never silently folded away between the
   interface brief and the template.
+
+## Case: ncbi/egapx — non-academic provenance, monolithic container
+
+The hostile end of the ad-hoc corpus. Where nf-core/eager stresses *branch
+breadth*, egapx stresses *the absence of every nf-core affordance the pipeline's
+early phases lean on*: no `nextflow_schema.json`, no `meta.yml`, no nf-test, no
+flat `params.*`, no per-process container directives, and sources under `nf/`
+rather than the repository root. It is the case that answers "what does this
+journey do when the summary comes back mostly empty?"
+
+- fixture: `workflow-fixtures/pipelines/ncbi__egapx` (v0.5.2; large — 95
+  processes across 68 subworkflows, no `modules/` directory).
+- interface source: `examples/input_D_farinae_small.yaml` — the pipeline's real
+  user interface is a YAML input file (`genome` URL, `taxid`, `short_reads` SRA
+  accessions with public FTP mirrors, `locus_tag_prefix`, `cmsearch.enabled`,
+  `trnascan.enabled`), not a Nextflow schema. Per-task flag strings live in
+  `ui/assets/default_task_params.yaml`.
+
+- expect (summary phase): [[summarize-nextflow]] exits 0 from the repository
+  root with `warnings[]` naming both the auto-detected root (`nf`) and the
+  chosen entrypoint (`ui.nf`) — a wrong pick here silently mis-scopes every
+  downstream phase, so the choice must be reviewable, not implicit.
+
+- expect (empty-summary honesty): the summary comes back with `params`,
+  `tools`, `sample_sheets`, `profiles`, `reference_assets`, and `nf_tests` all
+  empty, and `container`/`conda` null on all 95 processes — egapx declares one
+  global `process.container = 'ncbi/egapx:0.5.2'`
+  (`ui/assets/config/docker_image.config`, which sits *outside* the detected
+  `nf/` root). Downstream phases must treat these as **absent evidence** and say
+  so, not as "this pipeline has no parameters" or "this pipeline needs no
+  tools". A journey that proceeds as if an empty `tools[]` meant zero tools has
+  failed this case regardless of what it produces.
+
+- expect (interface): the interface brief reaches egapx's actual inputs. Since
+  no `params[]` survives the summary, the brief must either mine the example
+  YAML as the interface source or record an explicit open requirement that the
+  interface is undetermined from the summary alone. Silently emitting a
+  parameterless Galaxy workflow is the failure mode this case exists to catch.
+
+- expect (conditionals): the five detected guards — `proteins`,
+  `short_reads_ids || short_reads`, `long_reads_ids || long_reads`,
+  `params?.tasks?.cmsearch?.enabled`, `params?.tasks?.trnascan?.enabled` —
+  reach the final workflow as optional inputs, gated steps, or a stated scope
+  decision. The last two correspond one-to-one with toggles the example YAML
+  actually sets, so they are user-facing choices by demonstration, not
+  inference.
+
+- expect (scope): 95 processes is not a Galaxy workflow. The journey must reach
+  a **stated scope decision** naming which annotation planes it carries
+  (`setup`, `rnaseq_short`, `rnaseq_long`, `target_proteins`, `gnomon`,
+  `annot_proc`, `busco`, `cmsearch`, `trna_scan`, `orthology`) and why, rather
+  than flattening or truncating silently.
+
+- expect (tool resolution): this is the case where discover-or-author is
+  expected to *mostly fall through to author*. egapx's steps are NCBI C++
+  toolkit binaries (`chainer_wnode`, `gnomon_wnode`, `align_sort_sa`,
+  `annot_builder_run`, …) shipped only inside `ncbi/egapx:0.5.2` — no
+  BioContainers, no bioconda, no Shed wrappers. Per `eval.md`, every carried
+  tool still needs a recorded decision; the interesting question is whether
+  [[author-galaxy-tool-wrapper]] can produce a defensible wrapper when its only
+  evidence is a `script:` block and one monolithic image, and whether it says so
+  when it cannot.
+
+- expect (test data): `test_fixtures` and `nf_tests` are empty, so
+  [[nextflow-to-test-data]] must fall through the `test-data-resolution` chain
+  rather than synthesize. `examples/input_D_farinae_small.yaml` is the intended
+  landing spot — a genuinely small subsampled *D. farinae* dataset on public
+  NCBI FTP — but nothing in the spine points a phase at it. Whether the chain
+  reaches it, and through which link, is the finding.
