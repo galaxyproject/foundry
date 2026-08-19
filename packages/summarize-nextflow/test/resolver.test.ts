@@ -40,8 +40,10 @@ interface SummaryLike {
         }[];
       } | null;
     }[];
-    inputs: unknown[];
-    outputs: unknown[];
+    inputs: { name: string; shape: string; topic: string | null }[];
+    outputs: { name: string; shape: string; topic: string | null }[];
+    script_summary?: string;
+    script_excerpt: string | null;
   }[];
   subworkflows: {
     name: string;
@@ -1836,6 +1838,165 @@ workflow PIPE {
     write(root, "main.nf", "include { M } from './modules/m'\nworkflow PIPE { main: M() }\n");
     const summary = (await summarize(root)) as unknown as { reference_assets: unknown[] };
     expect(summary.reference_assets).toEqual([]);
+  });
+
+  test("names process IO from quoted emit labels and space-separated declarations", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/io-names' }\n");
+    write(
+      root,
+      "modules/annot.nf",
+      `process ANNOT {
+  input:
+  path gencoll_asn, name: 'inp/*'
+  val max_intron
+  env(TOOL_VERSION)
+  each batch_id
+  output:
+  path "out/*", emit: "all"
+  path "out/ACCEPT/accept.asn", emit: 'accept_asn'
+  path "out/log.txt", emit: log
+  script:
+  'annot'
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { ANNOT } from './modules/annot'\nworkflow PIPE { main: ANNOT() }\n",
+    );
+
+    const summary = await summarize(root);
+    const annot = summary.processes.find((process) => process.name === "ANNOT");
+
+    expect(annot?.inputs.map((io) => io.name)).toEqual([
+      "gencoll_asn",
+      "max_intron",
+      "TOOL_VERSION",
+      "batch_id",
+    ]);
+    expect(annot?.outputs.map((io) => io.name)).toEqual(["all", "accept_asn", "log"]);
+  });
+
+  test("keeps naming tuple IO after its path element, not the leading val", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/tuple-io' }\n");
+    write(
+      root,
+      "modules/align.nf",
+      `process ALIGN {
+  input:
+  tuple val(meta), path(reads)
+  each path(fasta)
+  output:
+  tuple val(meta), path("*.bam"), emit: bam
+  path "versions.yml", emit: versions
+  script:
+  'align'
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { ALIGN } from './modules/align'\nworkflow PIPE { main: ALIGN() }\n",
+    );
+
+    const summary = await summarize(root);
+    const align = summary.processes.find((process) => process.name === "ALIGN");
+
+    expect(align?.inputs.map((io) => io.name)).toEqual(["reads", "fasta"]);
+    expect(align?.outputs.map((io) => io.name)).toEqual(["bam", "versions"]);
+  });
+
+  test("falls back to a synthesized name only when no identifier is declared", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/anonymous-io' }\n");
+    write(
+      root,
+      "modules/anon.nf",
+      `process ANON {
+  input:
+  path "reference/*"
+  output:
+  path("\${meta.id}.txt")
+  script:
+  'anon'
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { ANON } from './modules/anon'\nworkflow PIPE { main: ANON() }\n",
+    );
+
+    const summary = await summarize(root);
+    const anon = summary.processes.find((process) => process.name === "ANON");
+
+    expect(anon?.inputs[0]?.name).toMatch(/^input_[0-9]+$/u);
+    expect(anon?.outputs[0]?.name).toMatch(/^output_[0-9]+$/u);
+  });
+
+  test("carries the script body verbatim and dedented, without the stub block", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/script-excerpt' }\n");
+    write(
+      root,
+      "modules/divide.nf",
+      `process DIVIDE {
+  input:
+  path metadata_file
+  script:
+      """
+      mkdir -p output tmp
+      rnaseq_divide_by_strandedness -work-area tmp \\
+        -metadata $metadata_file -stranded-output output/stranded.list
+      """
+  stub:
+      """
+      touch output/stranded.list
+      """
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { DIVIDE } from './modules/divide'\nworkflow PIPE { main: DIVIDE() }\n",
+    );
+
+    const summary = await summarize(root);
+    const divide = summary.processes.find((process) => process.name === "DIVIDE");
+
+    expect(divide?.script_excerpt).toBe(
+      [
+        '"""',
+        "mkdir -p output tmp",
+        "rnaseq_divide_by_strandedness -work-area tmp \\",
+        "  -metadata $metadata_file -stranded-output output/stranded.list",
+        '"""',
+      ].join("\n"),
+    );
+    expect(divide?.script_excerpt).not.toContain("touch");
+  });
+
+  test("emits no script_summary and a null excerpt for a process with no script block", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/no-script' }\n");
+    write(root, "modules/bare.nf", "process BARE {\n  input:\n  val x\n}\n");
+    write(
+      root,
+      "main.nf",
+      "include { BARE } from './modules/bare'\nworkflow PIPE { main: BARE() }\n",
+    );
+
+    const summary = await summarize(root);
+    const bare = summary.processes.find((process) => process.name === "BARE");
+
+    expect(bare?.script_excerpt).toBeNull();
+    expect(bare).not.toHaveProperty("script_summary");
   });
 
   test("warns when an explicit mulled index path is missing", async () => {

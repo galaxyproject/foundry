@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-cwl-test-plan/index.md",
     "revision": 1,
     "content_hash": "6b2b5d921e5998debde2018e44ad2b117e7af6e538feddbff5a17ee21a9e256f",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "1d78353a524732d43051be70cbed34cc70b8d4f7"
   },
-  "cast_at": "2026-08-02T22:04:56.538Z",
+  "cast_at": "2026-08-19T19:03:46.825Z",
   "refs": [
     {
       "kind": "schema",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read summarized nf-test profiles, snapshot fixtures, selected test data, params, and expected outputs.",
       "license": "MIT",
-      "src_hash": "946330cc314556e77bb41725fa294e2496fe99b618888c660b7e8be7dc62ee5a",
-      "dst_hash": "946330cc314556e77bb41725fa294e2496fe99b618888c660b7e8be7dc62ee5a",
+      "src_hash": "201a42699572c0300cae59fb6b434c6a75fbc95f45d048132ec4299dd6741a4b",
+      "dst_hash": "201a42699572c0300cae59fb6b434c6a75fbc95f45d048132ec4299dd6741a4b",
       "source": "deterministic"
     }
   ],
