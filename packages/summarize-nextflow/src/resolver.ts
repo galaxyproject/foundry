@@ -198,7 +198,7 @@ interface Process {
   inputs: ChannelIO[];
   outputs: ChannelIO[];
   when: string | null;
-  script_summary: string;
+  script_excerpt: string | null;
   publish_dir: string | null;
 }
 
@@ -795,7 +795,7 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
       inputs: parseIoBlock(body, "input"),
       outputs: parseIoBlock(body, "output"),
       when: normalizeDirective(matchOne(body, /when:\s*\n([\s\S]*?)\n\s*script:/u)),
-      script_summary: summarizeScript(name),
+      script_excerpt: extractScript(body),
       publish_dir: normalizeDirective(matchOne(body, /publishDir\s+([^\n]+)/u)),
     };
   });
@@ -1730,11 +1730,14 @@ function parseIoBlock(text: string, blockName: "input" | "output"): ChannelIO[] 
     }));
 }
 
+// `path`/`val`/`env` bind an identifier; a quoted argument is a literal path, so it never names the channel.
 function parseIoName(line: string, blockName: "input" | "output"): string {
   return (
-    matchOne(line, /emit:\s*([A-Za-z0-9_]+)/u) ??
-    matchOne(line, /path\(?([A-Za-z0-9_]+)/u) ??
-    matchOne(line, /val\(([A-Za-z0-9_]+)/u) ??
+    matchOne(line, /emit:\s*['"]?([A-Za-z0-9_]+)/u) ??
+    matchOne(line, /\bpath\s*\(?\s*([A-Za-z0-9_]+)/u) ??
+    matchOne(line, /\bval\s*\(?\s*([A-Za-z0-9_]+)/u) ??
+    matchOne(line, /\benv\s*\(?\s*([A-Za-z0-9_]+)/u) ??
+    matchOne(line, /\beach\s+([A-Za-z0-9_]+)/u) ??
     `${blockName}_${Math.abs(hash(line))}`
   );
 }
@@ -2351,9 +2354,23 @@ function parseProseAssertions(text: string): string[] {
     .filter((assertion) => !assertion.startsWith("snapshot("));
 }
 
-function summarizeScript(name: string): string {
-  const tool = name.toLowerCase().replace(/_/gu, " ");
-  return `Run ${tool} and emit declared Nextflow outputs.`;
+const SCRIPT_EXCERPT_LIMIT = 4000;
+
+// Verbatim script body, dedented. Interpreting it is the consumer's job, not the parser's.
+function extractScript(body: string): string | null {
+  const block = matchOne(body, /(?:^|\n)[^\S\n]*(?:script|shell|exec):[^\S\n]*\n([\s\S]*)$/u);
+  if (block === null) return null;
+  const lines = block.replace(/\n[^\S\n]*stub:[^\S\n]*\n[\s\S]*$/u, "").split("\n");
+  while (lines.length && !lines[0]!.trim()) lines.shift();
+  while (lines.length && !lines[lines.length - 1]!.trim()) lines.pop();
+  if (lines.length === 0) return null;
+  const indent = Math.min(
+    ...lines.filter((line) => line.trim()).map((line) => line.length - line.trimStart().length),
+  );
+  const text = lines.map((line) => line.slice(indent)).join("\n");
+  return text.length > SCRIPT_EXCERPT_LIMIT
+    ? `${text.slice(0, SCRIPT_EXCERPT_LIMIT)}\n… [truncated]`
+    : text;
 }
 
 function extractNamedBlock(text: string, name: string): string | null {

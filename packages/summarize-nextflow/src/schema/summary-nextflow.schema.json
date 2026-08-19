@@ -176,7 +176,8 @@
         "inputs":          { "type": "array", "items": { "$ref": "#/$defs/ChannelIO" } },
         "outputs":         { "type": "array", "items": { "$ref": "#/$defs/ChannelIO" } },
         "when":            { "type": ["string", "null"], "description": "Verbatim `when:` guard expression, or null if absent." },
-        "script_summary":  { "type": "string", "description": "One-line LLM-derived summary of what the `script:` body does. Free text." },
+        "script_summary":  { "type": "string", "description": "One-line LLM-derived summary of what the `script:` body does. Free text. The deterministic CLI does not emit it — it emits `script_excerpt` instead, and the cast skill's LLM pass fills this in." },
+        "script_excerpt":  { "type": ["string", "null"], "description": "Verbatim `script:`/`shell:`/`exec:` body, dedented and truncated at 4000 characters, or null when the process declares none. Deterministic. For ad-hoc pipelines with no `meta.yml` this is the only evidence of what a process does." },
         "publish_dir":     { "type": ["string", "null"], "description": "`publishDir` value when the process publishes outputs (or null)." }
       }
     },

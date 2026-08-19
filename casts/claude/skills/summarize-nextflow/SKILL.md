@@ -120,7 +120,7 @@ A single JSON document conforming to summary-nextflow (`packages/summarize-nextf
       "outputs": [ { "name": "paf",      "shape": "tuple(val(meta), path(\"*.paf\")) optional", "description": "...", "topic": null },
                    { "name": "versions", "shape": "path(\"versions.yml\")",                     "description": "tool versions YAML", "topic": null } ],
       "when": null,
-      "script_summary": "Align reads against reference, emit PAF or BAM.",
+      "script_excerpt": "\"\"\"\n$args\nminimap2 -t $task.cpus $reference $reads > ${prefix}.paf\n\"\"\"",   // verbatim script body; script_summary is the LLM pass's job
       "publish_dir": null }
   ],
   "subworkflows": [
@@ -187,7 +187,7 @@ Field-name parity with gxy-sketches (`SketchSource`, `ToolSpec`, `TestDataRef`, 
 The skill is **not a single LLM prompt** over the source tree. It is a small program with one or two embedded LLM calls. The split is:
 
 - **Deterministic:** locate files, parse `nextflow.config` and `nextflow_schema.json`, regex-tokenize `process` blocks for typed fields (name, container, conda, declared IO channel names, `when:` guards, `publishDir`), read nf-core module `meta.yml` verbatim, enumerate `include { X } from '...'` for the call graph, resolve biocontainer image strings.
-- **LLM-driven:** one-line summary of each process `script:` body, reconciliation of operator-chained channel paths (`A | map | join(B) | groupTuple`) into the workflow `edges[]`, free-text `description` / `notes` fields, IO inference when `meta.yml` is absent and the script is the only signal.
+- **LLM-driven:** one-line `script_summary` of each process, over the verbatim `script_excerpt` the deterministic pass carries; reconciliation of operator-chained channel paths (`A | map | join(B) | groupTuple`) into the workflow `edges[]`, free-text `description` / `notes` fields, IO inference when `meta.yml` is absent and the script is the only signal.
 
 Everything the schema demands as a typed enum or path is deterministic. Free-text fields are LLM. The schema enforces that boundary by typing.
 
@@ -233,7 +233,8 @@ For each `process <NAME> { ... }` in `main.nf`, `workflows/`, `modules/**`, `sub
 - Sweep `include { ... }` statements across the pipeline (`main.nf`, `workflows/`, `subworkflows/**`) to populate `processes[].aliases`. `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS }` adds `MINIMAP2_CONSENSUS` to the `MINIMAP2_ALIGN` process's `aliases[]`. The same module can be re-imported under multiple aliases (bacass aliases `MINIMAP2_ALIGN` three times). Edges reference the alias name; the canonical `name` is the FK target.
 - Detect `topic: <name>` annotations on outputs (Nextflow 24+ channel topics — nf-core templates emit `tuple(val("${task.process}"), val('toolname'), eval(...)) topic: versions` for version aggregation). Record the topic name in `ChannelIO.topic`.
 - Where `meta.yml` exists, **use it** for `description` and IO documentation rather than parsing the `script:` block.
-- LLM call (one per process, batchable): summarize the `script:` body in one line. Pass the script verbatim plus the declared IO; ask only for what the tool *does*.
+- Carry the `script:`/`shell:`/`exec:` body verbatim into `script_excerpt` (dedented, truncated at 4000 characters, `stub:` dropped). For ad-hoc pipelines with no `meta.yml` this is the only evidence of what a process does.
+- LLM call (one per process, batchable): summarize `script_excerpt` in one line into `script_summary`. Ask only for what the tool *does*. Deterministic runs omit `script_summary` rather than emitting a placeholder.
 
 #### 5. Build the tool registry
 
