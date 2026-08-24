@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 2,
     "content_hash": "d9ffbf76c60adbe4884615d70aa0de6b5a7fdc1c4385931ed01344ed3bc480f3",
-    "commit": "aede1aeab8ceb890192c9606a6e967a36fcf2224"
+    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
   },
-  "cast_at": "2026-08-03T23:37:48.205Z",
+  "cast_at": "2026-08-24T15:20:45.460Z",
   "refs": [
     {
       "kind": "pattern",

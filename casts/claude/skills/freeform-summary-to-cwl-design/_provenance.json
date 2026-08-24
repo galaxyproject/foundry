@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-cwl-design/index.md",
     "revision": 1,
     "content_hash": "bdc96941ec75c70907bac77ab58b94da70923cb81ab28da3badd3410ce38a678",
-    "commit": "a56c6127966e59c75cf67d1d41ca03c8b4cf45dd"
+    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
   },
-  "cast_at": "2026-08-02T22:04:36.005Z",
+  "cast_at": "2026-08-24T15:20:45.944Z",
   "refs": [],
   "artifacts": {
     "produces": [
