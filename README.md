@@ -119,7 +119,7 @@ Forward work is quality and reach rather than existence. Review is underway rath
 | CLI tools | 6 |
 | CLI command pages | 26 |
 | Schema notes | 14 |
-| Research notes | 63 |
+| Research notes | 65 |
 <!-- /generated:corpus -->
 
 Counted from the corpus by `foundry-build generate-readme`, not by hand — `make check-generated` fails the build when they drift. Everything outside the markers is hand-written.
