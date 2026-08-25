@@ -25,14 +25,14 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
-- `references/prompts/custom-tool-structured.md`: prompt reference copied verbatim into the bundle. Generate a schema-shaped `GalaxyUserTool` YAML definition from missing-wrapper requirements and source-derived process evidence.
+- `references/notes/galaxy-user-tool-authoring.md`: Research note copied verbatim into the bundle. Field contract, expression syntax, script placement, and package inference for a `GalaxyUserTool` definition.
 - `references/schemas/summary-nextflow.schema.json`: Schema file copied verbatim into the bundle. Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.
 
 ## Load On Demand
 
-- `references/prompts/custom-tool-critic.md`: prompt reference copied verbatim into the bundle. Run the mandatory fuzzy quality review after structural validation passes. Use when: after the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.
 - `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Map Nextflow container/conda evidence to Galaxy UDT container and package provenance. Use when: a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.
 - `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
+- `references/notes/galaxy-user-tool-critique.md`: Research note copied verbatim into the bundle. Clarity and idiomaticity criteria, and the text-versus-structural test for each proposed fix. Use when: after the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.
 
 ## Validation
 
@@ -73,11 +73,13 @@ Extract the minimum executable contract:
 
 Prefer BioContainers or directly evidenced containers. If only Conda/package evidence exists, record what is known and avoid guessing an image tag.
 
+Nothing downstream of this skill re-resolves the container. Galaxy deployments can re-resolve a generated tool's image against verified biocontainers, but that is off by default upstream and absent here — the image written is the image that runs. Where the source evidences no container, infer packages from the command per §7 of the authoring note rather than deferring the choice.
+
 #### 3. Generate the structured draft
 
-Use `references/prompts/custom-tool-structured.md` to generate a `GalaxyUserTool` YAML draft from the requirements brief.
+Write the `GalaxyUserTool` YAML draft from the requirements brief, following `references/notes/galaxy-user-tool-authoring.md`.
 
-The draft must use `class: GalaxyUserTool`. Every variable referenced by `shell_command` must have a declared input or output. Escape shell variables that are not Galaxy expressions.
+Nothing constrains this draft to the schema as it is written, so the rules in that note are load-bearing rather than advisory. The ones that fail most often: `format` on a data input is a list even for a single format; the default field is `value` and never `default`; an output's `format` is a string while an input's is a list; `$(outputs.X.path)` is not valid syntax; and every `inputs.NAME` in `shell_command` must match a declared input exactly.
 
 #### 4. Validate structurally
 
@@ -87,9 +89,9 @@ Fix validation errors directly. Do not run the critic until the draft passes str
 
 #### 5. Run mandatory critic pass
 
-After structural validation passes, use `references/prompts/custom-tool-critic.md` with the original request, requirements brief, and drafted YAML.
+After structural validation passes, review the draft against `references/notes/galaxy-user-tool-critique.md`, with the original request and requirements brief in hand.
 
-Apply every concrete clarity or idiomaticity issue when `should_refine` is true. Re-validate the refined draft structurally after edits. If critic feedback conflicts with source evidence, keep the source evidence and record the conflict.
+Apply every concrete clarity or idiomaticity issue. Sort each fix into text-level or structural per that note: text-level fixes are applied to the named field directly; a structural one means regenerating from §3 rather than improvising an edit. Re-validate structurally after edits — a `shell_command` change can break name matching. If critique conflicts with source evidence, keep the source evidence and record the conflict.
 
 #### 6. Emit the UDT artifact
 

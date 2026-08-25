@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-cwl-data-flow/index.md",
     "revision": 1,
     "content_hash": "68a75d5f934610fd9bf95434c94c3965dc2c591ea33160e911a3662f1f290aaa",
-    "commit": "1d78353a524732d43051be70cbed34cc70b8d4f7"
+    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
   },
-  "cast_at": "2026-08-19T19:03:45.411Z",
+  "cast_at": "2026-08-24T15:20:46.784Z",
   "refs": [
     {
       "kind": "schema",

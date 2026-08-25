@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 4,
-    "content_hash": "f9c208c6c9e6cc4b6515ae68c3dcacb60b682eeee7e60d65d24c179faee75de2",
-    "commit": "1d78353a524732d43051be70cbed34cc70b8d4f7"
+    "revision": 5,
+    "content_hash": "cced8f068cd1ce81fefad23a62fdb4d52b3ce805b2231f64a7fe37f258bc1e09",
+    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
   },
-  "cast_at": "2026-08-19T19:03:40.477Z",
+  "cast_at": "2026-08-24T15:20:44.866Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -19,41 +19,6 @@
     }
   ],
   "refs": [
-    {
-      "kind": "prompt",
-      "mode": "verbatim",
-      "ref": "[[custom-tool-critic]]",
-      "src": "content/prompts/galaxy/custom-tool-critic/upstream.prompt",
-      "dst": "references/prompts/custom-tool-critic.md",
-      "used_at": "runtime",
-      "load": "on-demand",
-      "evidence": "corpus-observed",
-      "purpose": "Run the mandatory fuzzy quality review after structural validation passes.",
-      "trigger": "After the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.",
-      "license": "MIT",
-      "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "37060b2b3c751f3fc9f2b5fd77879471f86592ab95085aeeb68165d58c968a54",
-      "dst_hash": "37060b2b3c751f3fc9f2b5fd77879471f86592ab95085aeeb68165d58c968a54",
-      "source": "deterministic",
-      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
-    },
-    {
-      "kind": "prompt",
-      "mode": "verbatim",
-      "ref": "[[custom-tool-structured]]",
-      "src": "content/prompts/galaxy/custom-tool-structured/upstream.prompt",
-      "dst": "references/prompts/custom-tool-structured.md",
-      "used_at": "runtime",
-      "load": "upfront",
-      "evidence": "corpus-observed",
-      "purpose": "Generate a schema-shaped `GalaxyUserTool` YAML definition from missing-wrapper requirements and source-derived process evidence.",
-      "license": "MIT",
-      "license_file": "LICENSES/galaxy.LICENSE",
-      "src_hash": "4472436028751e661d7ea2d160b6efdd268848909a459173476020a4bd368da5",
-      "dst_hash": "4472436028751e661d7ea2d160b6efdd268848909a459173476020a4bd368da5",
-      "source": "deterministic",
-      "license_file_hash": "3fdd32b75cfad3266871456423f4d91529953629fe4bc803c3df2f445fd8a858"
-    },
     {
       "kind": "research",
       "mode": "verbatim",
@@ -84,6 +49,35 @@
       "companion_of": "references/notes/component-nextflow-containers-and-envs.md",
       "src_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
       "dst_hash": "d82f7b3ec3d5b3dfd7de97da1425438a8edcd65dcca169e94ce5baf326a66e8e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-user-tool-authoring]]",
+      "src": "content/research/galaxy-user-tool-authoring/index.md",
+      "dst": "references/notes/galaxy-user-tool-authoring.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Field contract, expression syntax, script placement, and package inference for a `GalaxyUserTool` definition.",
+      "src_hash": "365fad455369945a34bda537c8dbf409a0966f0f88da9fe78b61cff32d5b0d0d",
+      "dst_hash": "365fad455369945a34bda537c8dbf409a0966f0f88da9fe78b61cff32d5b0d0d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-user-tool-critique]]",
+      "src": "content/research/galaxy-user-tool-critique/index.md",
+      "dst": "references/notes/galaxy-user-tool-critique.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Clarity and idiomaticity criteria, and the text-versus-structural test for each proposed fix.",
+      "trigger": "After the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.",
+      "src_hash": "94b047cc268b0f788e8d596b9e809b4764c68b94e8bd4f819c2f9af59d559a11",
+      "dst_hash": "94b047cc268b0f788e8d596b9e809b4764c68b94e8bd4f819c2f9af59d559a11",
       "source": "deterministic"
     },
     {
