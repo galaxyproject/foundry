@@ -61,6 +61,13 @@ This skill is the first leg of the harness's `test-data-resolution` branch. It r
 
 Never invent a URL, accession, or path to make an input look resolved, and never emit a placeholder path (`sampleA.tabular`, `test-data/…`) for an input you could not resolve — an unresolved input stays `resolved: false` all the way through to the test, never papered over with a made-up path downstream. A wrong-but-plausible fixture reference is worse than an honest gap: it survives static checks and fails only at run time, far from this skill. Every emitted ref must point at data that exists (a real source, optionally plus a reproducible subset/split); everything else is a reported gap.
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete, upstreamable observations about canonical Foundry source assets; do not put ordinary workflow requirements in this ledger.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

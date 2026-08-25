@@ -67,6 +67,14 @@ export {
   type ReferenceContractTerm,
 } from "./reference-contract.js";
 
+export {
+  loadRuntimeArtifactRegistry,
+  requireRuntimeArtifactRegistry,
+  type RuntimeArtifactDefinition,
+  type RuntimeArtifactLoad,
+  type RuntimeArtifactRegistry,
+} from "./runtime-artifacts.js";
+
 // The license table is not ours: it ships in @galaxy-foundry/license-policy, shared
 // across Foundry instances. Only `LicensePolicy` is re-exported, because a caller
 // building the options object below has to name the type. Everything else about

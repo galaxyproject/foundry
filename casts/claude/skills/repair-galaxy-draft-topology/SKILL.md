@@ -53,6 +53,13 @@ Decide the *shape* of the fix from the missing evidence, the surrounding data-fl
 
 Then update the ledger. For each blocking entry your repair addresses, mark it `resolved` with a note on how (producer added, sub-path added, output narrowed). The loop's convergence gate counts open blocking entries and requires each escalation to strictly reduce that count, under a hard cap on escalations. If you cannot close an entry — no producer is discoverable and the output cannot be honestly narrowed — **surrender it**: leave it open with a note, so the terminal path writes it into the final draft as a labelled gap rather than spinning or fabricating. Never insert a producer whose own output is uncomputable from what feeds it; that grows the DAG without reducing the open count and the loop will not converge.
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete, upstreamable observations about canonical Foundry source assets; do not put ordinary workflow requirements in this ledger.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

@@ -4,11 +4,12 @@ import Base from '../../layouts/Base.astro';
 import { buildWikiLinkMap, resolveWikiLink } from '../../lib/wiki-links';
 import { buildArtifactGraph } from '../../lib/artifacts';
 import { base } from '../../lib/site-base';
+import { runtimeArtifacts } from '../../lib/registries';
 
 export async function getStaticPaths() {
   const entries = await getAllNotes();
   const linkMap = buildWikiLinkMap(entries);
-  const graph = buildArtifactGraph(entries, linkMap);
+  const graph = buildArtifactGraph(entries, linkMap, runtimeArtifacts);
   return Array.from(graph.values()).map(node => ({
     params: { id: node.id },
     props: { id: node.id },
@@ -18,7 +19,7 @@ export async function getStaticPaths() {
 const { id } = Astro.props;
 const entries = await getAllNotes();
 const linkMap = buildWikiLinkMap(entries);
-const graph = buildArtifactGraph(entries, linkMap);
+const graph = buildArtifactGraph(entries, linkMap, runtimeArtifacts);
 const node = graph.get(id);
 const entryById = new Map(entries.map(e => [e.id, e]));
 
@@ -48,13 +49,23 @@ function entryHref(entryId: string): string {
     <div class="grid gap-4">
       <section class="p-3 rounded-lg border border-(--color-border)">
         <h2 class="text-base font-semibold m-0 mb-2">Producers <span class="text-sm font-normal text-(--color-text-secondary)">({node.producers.length})</span></h2>
-        {node.producers.length === 0 && <p class="text-sm text-(--color-text-secondary) m-0">No Mold declares this artifact in <code>output_artifacts</code>.</p>}
+        {node.producers.length === 0 && <p class="text-sm text-(--color-text-secondary) m-0">No Mold or registered runtime mode produces this artifact.</p>}
         <ul class="list-none p-0 m-0 grid gap-2">
           {node.producers.map(p => (
             <li>
-              <a href={entryHref(p.moldId)} class="text-(--color-link) hover:underline font-semibold">{entryName(p.moldId)}</a>
-              <span class="ml-2 text-xs text-(--color-text-muted) font-mono">{p.decl.kind} · {p.decl.default_filename}</span>
-              <p class="m-0 text-sm text-(--color-text-secondary)">{p.decl.description}</p>
+              {p.kind === 'mold' ? (
+                <>
+                  <a href={entryHref(p.moldId)} class="text-(--color-link) hover:underline font-semibold">{entryName(p.moldId)}</a>
+                  <span class="ml-2 text-xs text-(--color-text-muted) font-mono">{p.decl.kind} · {p.decl.default_filename}</span>
+                  <p class="m-0 text-sm text-(--color-text-secondary)">{p.decl.description}</p>
+                </>
+              ) : (
+                <>
+                  <span class="font-semibold font-mono">{p.producerId}</span>
+                  <span class="ml-2 text-xs text-(--color-text-muted) font-mono">{p.artifactKind} · {p.defaultFilename}</span>
+                  <p class="m-0 text-sm text-(--color-text-secondary)">Protocol: <code>{p.protocol}</code></p>
+                </>
+              )}
             </li>
           ))}
         </ul>

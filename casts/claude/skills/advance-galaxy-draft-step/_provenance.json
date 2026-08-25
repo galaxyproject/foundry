@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 4,
     "content_hash": "1b210c9ae8dda41e59701ff4a87098be8c2c6dcb1947da026544392dc13e2b3f",
-    "commit": "d9e0b09728425abfbafef050fcfb7d98ae642d39"
+    "commit": "434cb89ca68296955430953901eef9b175bc07f8"
   },
-  "cast_at": "2026-08-25T06:47:55.230Z",
+  "cast_at": "2026-08-25T19:50:44.933Z",
   "refs": [
     {
       "kind": "cli-command",

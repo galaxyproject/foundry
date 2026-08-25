@@ -1729,6 +1729,109 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBe(0);
   });
 
+  it("accepts a consumer artifact produced by a registered runtime mode", () => {
+    writeFm(path.join(dir, "molds/consumer/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["target/galaxy"],
+        name: "consumer",
+        axis: "generic",
+        input_artifacts: [
+          {
+            id: "runtime-ledger",
+            description: "Runtime ledger initialized by an enabled harness mode.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "research/runtime-ledger/index.md"), {
+      ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
+    });
+    writeFileSync(
+      path.join(dir, "runtime_artifacts.yml"),
+      [
+        "version: 1",
+        "artifacts:",
+        "  runtime-ledger:",
+        "    kind: yaml",
+        "    default_filename: runtime.ledger.yml",
+        '    protocol: "[[runtime-ledger]]"',
+        "    producer:",
+        "      kind: runtime-mode",
+        "      option: feedback",
+        "      initializer: harness-or-first-skill",
+        "",
+      ].join("\n"),
+    );
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBe(0);
+  });
+
+  it("rejects a runtime artifact id that collides with a Mold producer", () => {
+    writeFm(path.join(dir, "molds/producer/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["target/galaxy"],
+        name: "producer",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "runtime-ledger",
+            kind: "yaml",
+            default_filename: "runtime.ledger.yml",
+            description: "Conflicting Mold output for the runtime-produced ledger.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "research/runtime-ledger/index.md"), {
+      ...baseRequired({ type: "research", tags: ["target/galaxy"] }),
+    });
+    writeFileSync(
+      path.join(dir, "runtime_artifacts.yml"),
+      [
+        "version: 1",
+        "artifacts:",
+        "  runtime-ledger:",
+        "    kind: yaml",
+        "    default_filename: runtime.ledger.yml",
+        '    protocol: "[[runtime-ledger]]"',
+        "    producer:",
+        "      kind: runtime-mode",
+        "      option: feedback",
+        "      initializer: harness-or-first-skill",
+        "",
+      ].join("\n"),
+    );
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("rejects unknown fields in the runtime artifact registry", () => {
+    writeFileSync(
+      path.join(dir, "runtime_artifacts.yml"),
+      [
+        "version: 1",
+        "artifacts:",
+        "  runtime-ledger:",
+        "    kind: yaml",
+        "    default_filename: runtime.ledger.yml",
+        '    protocol: "[[runtime-ledger]]"',
+        "    typo: true",
+        "    producer:",
+        "      kind: runtime-mode",
+        "      option: feedback",
+        "      initializer: harness-or-first-skill",
+        "",
+      ].join("\n"),
+    );
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
   it("rejects a consumer artifact with no producer", () => {
     writeFm(path.join(dir, "molds/consumer/index.md"), {
       ...baseRequired({

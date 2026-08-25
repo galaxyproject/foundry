@@ -2,7 +2,7 @@
   "source_pipeline": "cwl-to-galaxy",
   "source_revision": 2,
   "harness_name": "pipeline-cwl-to-galaxy",
-  "options": ["use-subagents", "checkpoint"],
+  "options": ["use-subagents", "checkpoint", "feedback"],
   "required_tools": [
     { "tool": "cwl-utils", "origin": "pypi", "package": "cwl-utils", "invoke": "cwl-normalizer", "invoke_fallback": "uvx --from cwl-utils cwl-normalizer", "availability_check": "cwl-normalizer --help", "docs_url": "https://github.com/common-workflow-language/cwl-utils", "source": "referenced" },
     { "tool": "cwltool", "origin": "pypi", "package": "cwltool", "invoke": "cwltool", "invoke_fallback": "uvx cwltool", "availability_check": "cwltool --version", "docs_url": "https://cwltool.readthedocs.io/", "source": "referenced" },

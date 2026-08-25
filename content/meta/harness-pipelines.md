@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-30
-revision: 17
+revised: 2026-08-25
+revision: 18
 summary: "The source-to-target journeys that compose Molds, loops, and branch phases."
 ---
 
@@ -38,6 +38,7 @@ Some recurring pipeline activities are **harness-level**, not Mold-shaped, and a
 - **Approval gates / scope confirmation / plan presentation.** Whether and when to pause for user confirmation (after planning, before authoring, after a partial cast) is a property of the harness's autonomy posture, not of any individual Mold. Different harnesses (interactive vs. batch vs. fully autonomous) want different gates around the same Molds; baking gates into Molds would either constrain that or duplicate logic. Harnesses own gates.
 - **Tool-discovery routing.** "Try `discover-shed-tool` (find an existing wrapper via the Tool Shed); if nothing acceptable, fall through to `author-galaxy-tool-wrapper`" is a routing decision the harness makes; the two underlying capabilities are clean Molds. (`discover-shed-tool` is named for the *mechanism* — the Galaxy Tool Shed — leaving room for siblings like `discover-tool-via-galaxy-api` or `discover-tool-on-github` if other discovery paths get wrapped.)
 - **State and resumption.** Persisting harness state across phases, resuming a partial run, and managing run history are harness concerns.
+- **Feedback-mode lifecycle.** When `--feedback` is enabled, the harness initializes the registered feedback ledger from its complete `_assembly.json` phase roster and owns run/phase status transitions. Skills preserve that state and append only observations. An empty ledger counts as a clean run only after the harness marks the run complete.
 
 ## Runtime tooling
 

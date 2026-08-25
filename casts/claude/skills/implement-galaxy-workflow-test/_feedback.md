@@ -1,0 +1,109 @@
+# Foundry feedback ledger
+
+The `foundry-feedback-ledger` is an opt-in runtime artifact for observations about the Foundry
+assets used during a real cast-skill or pipeline run. It records actionable gaps, defects,
+friction, and wishes about Molds and their authored references. It does not record unmet
+requirements in the workflow being built; those belong in the open-requirements ledger.
+
+The registered filename is `foundry-feedback.ledger.yml`. Feedback-aware callers pass the same
+file through every skill invocation in a run.
+
+## Ledger shape
+
+```yaml
+run:
+  pipeline: nextflow-to-galaxy
+  run_slug: sarek-galaxy
+  status: running
+  phases:
+    - { n: 1, kind: mold, skill: summarize-nextflow, status: done }
+    - { n: 2, kind: mold, skill: nextflow-summary-to-galaxy-interface, status: running }
+entries:
+  - id: channel-shape-note-silent-on-optional-outputs
+    raised_by: nextflow-summary-to-galaxy-interface
+    observed_in:
+      mold: nextflow-summary-to-galaxy-interface
+      path: content/molds/nextflow-summary-to-galaxy-interface/index.md
+      revision: 6
+      content_hash: 82d8...
+      foundry_head: d9e0b09
+    subject:
+      kind: research
+      label: nextflow-to-galaxy-channel-shape-mapping
+      locator: content/research/nextflow-to-galaxy-channel-shape-mapping/index.md
+      content_hash: a18c...
+    kind: gap
+    severity: major
+    what: "The note does not cover optional outputs."
+    expected: "State how an absent optional channel maps to the Galaxy interface."
+    evidence: "Interface design stopped at the optional output decision."
+    status: open
+    issue: null
+```
+
+Entry `kind` is `gap`, `defect`, `friction`, or `wish`. Severity is `blocker`, `major`, or
+`minor`. Status is `open`, `filed`, `duplicate`, or `wontfix`.
+
+## Run lifecycle
+
+For a pipeline run, the harness creates the file before phase 1 with `run.status: running`, an
+empty `entries` list, and the complete top-level phase roster from its assembly record. All
+phases begin `pending`. The harness changes a phase to `running` immediately before invocation
+and to `done` on success. A phase that terminates the run and the run itself become `failed`; a
+graceful user stop makes the run `cancelled`. A hard interruption naturally leaves the run
+`running`, which is distinguishable from success without a recovery write.
+
+Loop phases remain one row and increment `iterations` after each successful iteration. Branch
+phases remain one row and record the chosen path in `selected`. After every intended phase is
+done, the harness sets `run.status: complete`.
+
+For a standalone skill invocation, the first feedback-aware skill creates a ledger with
+`pipeline: null`, the caller's run slug when one exists, and one phase row for itself. It owns
+that row's lifecycle as well as any entry it appends.
+
+No ledger means feedback mode was off. An empty `entries` list is evidence of a clean run only
+when `run.status` is `complete`; an empty incomplete ledger is not a clean run.
+
+## When to append
+
+Append an entry only when all of these are true:
+
+- The observation concerns a Foundry-authored source asset that could be changed upstream.
+- `subject.locator` canonically identifies that source asset.
+- `what` names a concrete problem and `expected` states a proposed correction.
+- The entry is not already present in this ledger for the same locator and correction.
+
+Do not use feedback entries for ordinary workflow requirements, tool-selection uncertainty, or
+an unsupported preference with no source asset to change.
+
+## Canonical identity and provenance
+
+Use a repository-relative authored path for `subject.locator`. For package-export schemas, use
+`package://<package>#<export>`. Generated skills and harnesses are never subjects; identify the
+Mold, Pipeline, caster, assembler, or registry that must change.
+
+Initial subject kinds are `mold`, `pipeline`, `pattern`, `source-pattern`, `research`, `schema`,
+`prompt`, `cli-tool`, `cli-command`, `meta`, `implementation`, and `registry`. `label` is for
+display only; the locator is the identity and clustering key.
+
+For the running Mold, copy `mold.name`, `mold.path`, `mold.revision`, and `mold.content_hash`
+from `_provenance.json` into `observed_in`. Record its `mold.commit` value as `foundry_head`, but
+never use that commit as exact content identity: it can be null or predate the bytes in the cast.
+For a packaged reference, copy its `refs[].src` and `refs[].src_hash` into the subject locator and
+content hash. When the subject is the Mold itself, use its authored path and
+`observed_in.content_hash`.
+
+## Safe updates
+
+Read the complete ledger immediately before changing it. Preserve run state and all entries you
+do not own. Append a complete entry in one rewrite; do not leave a partial YAML document. The
+harness is the sole writer of pipeline lifecycle fields, while each skill writes only entries.
+
+Keep evidence concise and safe to upstream. Never copy credentials, tokens, private repository
+URLs, proprietary source text, patient or participant data, or user-identifying filesystem
+paths into the ledger. Replace a run-directory prefix with `<run>/` and summarize sensitive
+evidence instead of quoting it.
+
+The reporting skill may set an open entry to `filed`, `duplicate`, or `wontfix` and record the
+resolved issue URL after the corresponding disposition is confirmed. It never deletes an entry;
+the ledger remains the run audit trail.

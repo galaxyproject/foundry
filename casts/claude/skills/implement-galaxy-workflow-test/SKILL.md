@@ -77,6 +77,13 @@ The workflow is the contract: input and output labels in the test file must addr
 
 Author tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs (planemo-workflow-test-architecture) — that traceability is what makes the downstream debug skill able to locate failure evidence.
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete, upstreamable observations about canonical Foundry source assets; do not put ordinary workflow requirements in this ledger.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

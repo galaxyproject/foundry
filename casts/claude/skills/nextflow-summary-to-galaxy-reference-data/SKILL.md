@@ -55,6 +55,13 @@ The summary-nextflow schema surfaces reference-data evidence directly — read t
 
 If a needed signal is missing from the summary (e.g. RNA-seq's positive-form rebuild idiom is not yet detected), say so in the brief and flag the asset as *rebuild-unverified* rather than re-parsing source files.
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete, upstreamable observations about canonical Foundry source assets; do not put ordinary workflow requirements in this ledger.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

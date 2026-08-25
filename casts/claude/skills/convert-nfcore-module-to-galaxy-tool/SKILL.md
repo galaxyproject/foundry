@@ -260,6 +260,13 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the skill w
 - **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against planemo-test-report; pulled in `cli-tool`/`cli-command`/`schema` references for planemo, planemo-lint, planemo-test, planemo-test-report. Deferred-manpages caveat removed.
 - **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other skill; the prior condense was always a verbatim passthrough), so the cast is fully deterministic and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete, upstreamable observations about canonical Foundry source assets; do not put ordinary workflow requirements in this ledger.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

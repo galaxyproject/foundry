@@ -1,0 +1,38 @@
+{
+  "provenance_schema_version": 4,
+  "cast_target": "claude",
+  "mold": {
+    "name": "report-foundry-run-feedback",
+    "path": "content/molds/report-foundry-run-feedback/index.md",
+    "revision": 1,
+    "content_hash": "6cb2825e390be0c9d4c3a71a67a318833c44372bc52f4d347db30c8385d03758",
+    "commit": "434cb89ca68296955430953901eef9b175bc07f8"
+  },
+  "cast_at": "2026-08-25T19:50:49.289Z",
+  "refs": [],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "foundry-run-review",
+        "kind": "markdown",
+        "default_filename": "foundry-run-review.md",
+        "description": "Run coverage, ledger integrity findings, dispositions, and a concise summary of feedback triage results."
+      },
+      {
+        "id": "foundry-issue-drafts",
+        "kind": "markdown",
+        "default_filename": "foundry-issue-drafts.md",
+        "description": "One self-contained new-issue or existing-issue comment draft per surviving canonical subject cluster."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "foundry-feedback-ledger",
+        "description": "Runtime-produced ledger containing run coverage and actionable observations about canonical Foundry source assets.",
+        "producers": [
+          "runtime:feedback"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+version: 1
+
+artifacts:
+  foundry-feedback-ledger:
+    kind: yaml
+    default_filename: foundry-feedback.ledger.yml
+    protocol: "[[foundry-feedback-ledger]]"
+    producer:
+      kind: runtime-mode
+      option: feedback
+      initializer: harness-or-first-skill

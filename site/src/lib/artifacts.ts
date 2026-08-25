@@ -1,6 +1,10 @@
-import type { InputArtifact, OutputArtifact } from '@galaxy-foundry/note-schema';
-import { type NoteEntry } from './notes';
-import { resolveWikiLinkId, type WikiLinkTarget } from './wiki-links';
+import type {
+  InputArtifact,
+  OutputArtifact,
+  RuntimeArtifactRegistry,
+} from "@galaxy-foundry/note-schema";
+import { type NoteEntry } from "./notes";
+import { resolveWikiLinkId, type WikiLinkTarget } from "./wiki-links";
 
 // These two were spelled out here, field for field, copied from the mold schema by reading it —
 // the same re-description the reference manifest had, one level down. An interface beside a schema
@@ -9,10 +13,21 @@ import { resolveWikiLinkId, type WikiLinkTarget } from './wiki-links';
 export type OutputArtifactDecl = OutputArtifact;
 export type InputArtifactDecl = InputArtifact;
 
-export interface ArtifactProducer {
+export interface MoldArtifactProducer {
+  kind: "mold";
   moldId: string;
   decl: OutputArtifactDecl;
 }
+
+export interface RuntimeArtifactProducer {
+  kind: "runtime";
+  producerId: string;
+  artifactKind: string;
+  defaultFilename: string;
+  protocol: string;
+}
+
+export type ArtifactProducer = MoldArtifactProducer | RuntimeArtifactProducer;
 
 export interface ArtifactConsumer {
   moldId: string;
@@ -66,14 +81,14 @@ function pipelineUse(node: ArtifactNode, pipelineId: string): ArtifactPipelineUs
 function collectMoldRefsFromPhase(phase: unknown): string[] {
   const out: string[] = [];
   const visit = (node: unknown) => {
-    if (typeof node === 'string') {
+    if (typeof node === "string") {
       if (/^\[\[.+\]\]$/.test(node)) out.push(node);
       return;
     }
-    if (!node || typeof node !== 'object') return;
+    if (!node || typeof node !== "object") return;
     const obj = node as Record<string, unknown>;
-    if (typeof obj.mold === 'string') out.push(obj.mold);
-    if (typeof obj.fallthrough === 'string') out.push(obj.fallthrough);
+    if (typeof obj.mold === "string") out.push(obj.mold);
+    if (typeof obj.fallthrough === "string") out.push(obj.fallthrough);
     if (Array.isArray(obj.branches)) obj.branches.forEach(visit);
     if (Array.isArray(obj.chain)) obj.chain.forEach(visit);
   };
@@ -84,13 +99,14 @@ function collectMoldRefsFromPhase(phase: unknown): string[] {
 export function buildArtifactGraph(
   entries: NoteEntry[],
   linkMap: Map<string, WikiLinkTarget>,
+  runtimeArtifacts?: RuntimeArtifactRegistry,
 ): ArtifactGraph {
   const graph: ArtifactGraph = new Map();
   const moldDeclByEntry = new Map<string, { out: OutputArtifactDecl[]; in: InputArtifactDecl[] }>();
 
   for (const entry of entries) {
     const data = entry.data;
-    if (data.type !== 'mold') continue;
+    if (data.type !== "mold") continue;
     // The annotations are the point: they used to sit in front of `any` and assert nothing. With
     // the arm narrowed they compare the mold schema's shape against the one this module renders,
     // so a field renamed there fails here instead of arriving undefined.
@@ -99,7 +115,7 @@ export function buildArtifactGraph(
     moldDeclByEntry.set(entry.id, { out, in: inp });
     for (const o of out) {
       const node = ensure(graph, o.id);
-      node.producers.push({ moldId: entry.id, decl: o });
+      node.producers.push({ kind: "mold", moldId: entry.id, decl: o });
       if (o.schema) node.schemas.add(o.schema);
       if (o.default_filename) node.defaultFilenames.add(o.default_filename);
     }
@@ -109,11 +125,23 @@ export function buildArtifactGraph(
     }
   }
 
+  for (const [id, artifact] of runtimeArtifacts?.artifacts ?? []) {
+    const node = ensure(graph, id);
+    node.producers.push({
+      kind: "runtime",
+      producerId: `runtime:${artifact.producer.option}`,
+      artifactKind: artifact.kind,
+      defaultFilename: artifact.default_filename,
+      protocol: artifact.protocol,
+    });
+    node.defaultFilenames.add(artifact.default_filename);
+  }
+
   // Pipeline binding inference: walk phases in order, attribute artifact ids to phase indices
   // by following each phase's referenced Mold(s)' declared artifacts.
   for (const entry of entries) {
     const data = entry.data;
-    if (data.type !== 'pipeline') continue;
+    if (data.type !== "pipeline") continue;
     data.phases.forEach((phase, idx) => {
       const phaseNum = idx + 1;
       const moldRefs = collectMoldRefsFromPhase(phase);

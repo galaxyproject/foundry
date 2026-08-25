@@ -66,6 +66,13 @@ An edit can create a gap the connection graph won't catch: a rewire whose source
 
 Run draft-validate on the emitted draft (sentinel form, topology, `_plan_*` placement). On green, hand the draft to advance-galaxy-draft-step, which drains any injected drafty steps and extracts the concrete `galaxy-workflow.gxwf.yml`. If the change-set was all direct edits, the loop is a no-op and the workflow is already concrete.
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete, upstreamable observations about canonical Foundry source assets; do not put ordinary workflow requirements in this ledger.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

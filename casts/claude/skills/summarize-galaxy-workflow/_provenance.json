@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 2,
     "content_hash": "23b770bbbd5409a37a7a0ea457a10b2cfba21f36a6e7e892125735035ac36078",
-    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
+    "commit": "434cb89ca68296955430953901eef9b175bc07f8"
   },
-  "cast_at": "2026-08-24T15:20:48.715Z",
+  "cast_at": "2026-08-25T19:50:49.835Z",
   "refs": [
     {
       "kind": "cli-command",

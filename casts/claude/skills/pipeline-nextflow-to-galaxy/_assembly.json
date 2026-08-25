@@ -2,7 +2,7 @@
   "source_pipeline": "nextflow-to-galaxy",
   "source_revision": 4,
   "harness_name": "pipeline-nextflow-to-galaxy",
-  "options": ["use-subagents", "checkpoint"],
+  "options": ["use-subagents", "checkpoint", "feedback"],
   "required_tools": [
     { "tool": "foundry", "origin": "npm", "package": "@galaxy-foundry/foundry", "invoke": "foundry", "invoke_fallback": "npx --package @galaxy-foundry/foundry foundry", "availability_check": "foundry --help", "docs_url": "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md", "source": "referenced" },
     { "tool": "gxwf", "origin": "npm", "package": "@galaxy-tool-util/cli", "package_version": "^1.8.1", "invoke": "gxwf", "invoke_fallback": "npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf", "availability_check": "gxwf --help | grep -q draft-validate", "docs_url": "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli", "source": "implied", "implied_by": ["gxwf convert", "gxwf draft-validate", "gxwf draft-next-step", "gxwf draft-extract", "gxwf validate-tests", "gxwf validate"] },

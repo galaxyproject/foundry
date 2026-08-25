@@ -17,6 +17,7 @@ import LicenseBox from '../components/LicenseBox.astro';
 import { buildWikiLinkMap, buildBacklinkMap } from '../lib/wiki-links';
 import { buildArtifactGraph } from '../lib/artifacts';
 import { base } from '../lib/site-base';
+import { runtimeArtifacts } from '../lib/registries';
 
 export async function getStaticPaths() {
   const entries = await getAllNotes();
@@ -32,7 +33,7 @@ const { Content } = await render(entry);
 const allEntries = await getAllNotes();
 const linkMap = buildWikiLinkMap(allEntries);
 const backlinkMap = buildBacklinkMap(allEntries, linkMap);
-const artifactGraph = buildArtifactGraph(allEntries, linkMap);
+const artifactGraph = buildArtifactGraph(allEntries, linkMap, runtimeArtifacts);
 
 const entryMap = new Map(allEntries.map(e => [e.id, e]));
 const incoming = (backlinkMap.get(entry.id) ?? [])

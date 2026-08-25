@@ -46,6 +46,13 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a reviewable YAML handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so implement-galaxy-workflow-test can author the final Galaxy test artifact with the right labels and assertions. Because this plan is translated from real nf-test evidence, set `source.derived_from: test-evidence` and prefer `evidence: test-evidence` on the assertions it carries.
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete, upstreamable observations about canonical Foundry source assets; do not put ordinary workflow requirements in this ledger.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

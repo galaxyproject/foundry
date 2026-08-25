@@ -6,9 +6,9 @@
     "path": "content/molds/implement-cwl-tool-step/index.md",
     "revision": 2,
     "content_hash": "7d82c631c885eb9a1bb2039411b5ebc9fa5ec5fc88507f42e60836b7efc26f65",
-    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
+    "commit": "434cb89ca68296955430953901eef9b175bc07f8"
   },
-  "cast_at": "2026-08-24T15:20:46.362Z",
+  "cast_at": "2026-08-25T19:50:47.517Z",
   "refs": [],
   "artifacts": {
     "produces": [

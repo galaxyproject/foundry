@@ -51,6 +51,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. *(reviewed)*
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
+- [[report-foundry-run-feedback]] — Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. *(reviewed)*
 - [[summarize-cwl]] — Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation.
 - [[summarize-cwl-tool]] — Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target.
@@ -192,6 +193,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cwl-v1.2-schemas]] — Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization.
 - [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
 - [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
+- [[foundry-feedback-ledger]] — Runtime protocol for carrying actionable feedback about Foundry source assets from cast skills back to maintainers.
 - [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.
 - [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.

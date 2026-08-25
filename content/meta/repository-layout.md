@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-02
-revision: 1
+revised: 2026-08-25
+revision: 2
 summary: "Where authored source, implementation code, generated artifacts, fixtures, and site files belong."
 ---
 
@@ -30,6 +30,7 @@ foundry/
 ├── .github/workflows/   CI and deployment
 ├── meta_tags.yml        instance tag vocabulary
 ├── reference_contract.yml
+├── runtime_artifacts.yml
 └── vendored_upstreams.yml
 ```
 
@@ -88,6 +89,7 @@ Root registries are repository-wide contracts rather than notes:
 
 - `meta_tags.yml` declares instance tag facets and values;
 - `reference_contract.yml` declares typed-reference vocabulary and permitted use;
+- `runtime_artifacts.yml` declares artifacts initialized by explicit harness or skill runtime modes;
 - `vendored_upstreams.yml` records synchronized external artifacts;
 - `dashboard_sections.json` configures generated navigation;
 - `package.json`, `pnpm-workspace.yaml`, and `tsconfig.json` coordinate the workspace.
