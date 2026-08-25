@@ -7,7 +7,7 @@ status: draft
 created: 2026-08-25
 revised: 2026-08-25
 revision: 1
-summary: "Runtime protocol for carrying actionable feedback about Foundry source assets from cast skills back to maintainers."
+summary: "Runtime protocol for carrying actionable feedback about Foundry assets, and the related projects a run exercises, from cast skills back to Foundry maintainers."
 ---
 
 # Foundry feedback ledger
@@ -16,6 +16,12 @@ The `foundry-feedback-ledger` is an opt-in runtime artifact for observations abo
 assets used during a real cast-skill or pipeline run. It records actionable gaps, defects,
 friction, and wishes about Molds and their authored references. It does not record unmet
 requirements in the workflow being built; those belong in the open-requirements ledger.
+
+Every entry is destined for `galaxyproject/foundry`. When a run shows that a related project is
+at fault — Galaxy, a tool wrapper, the IWC corpus, a harness CLI — that observation still belongs
+here, recorded with the analysis that points at the upstream. The Foundry is where the run
+context lives, so it is where the issue is tracked; a maintainer forwards from there. Never tell
+a user to take an observation to another tracker instead.
 
 The registered filename is `foundry-feedback.ledger.yml`. Feedback-aware callers pass the same
 file through every skill invocation in a run.
@@ -78,25 +84,37 @@ when `run.status` is `complete`; an empty incomplete ledger is not a clean run.
 
 ## When to append
 
-Append an entry only when all of these are true:
+Two entry shapes are admissible. Both require that `what` names a concrete problem, `expected`
+states a proposed correction, and the entry is not already present in this ledger for the same
+subject and correction.
 
-- The observation concerns a Foundry-authored source asset that could be changed upstream.
-- `subject.locator` canonically identifies that source asset.
-- `what` names a concrete problem and `expected` states a proposed correction.
-- The entry is not already present in this ledger for the same locator and correction.
+**A Foundry source asset.** The observation concerns Foundry-authored content, implementation, or
+a registry that could be changed directly, and `subject.locator` canonically identifies it. This
+is the ordinary case and the one the clustering and hash checks are built for.
+
+**A related project.** The run showed that a project the Foundry drives or cites is at fault —
+Galaxy, a Tool Shed wrapper, the IWC corpus, `gxwf`, planemo. Use `subject.kind: related-project`,
+name the project and the specific component in `label`, and put its public identity in
+`locator` (a repository URL, a tool id, an IWC workflow id). There is no `content_hash`. State
+in `what` and `evidence` what the run actually observed, and in `expected` what the upstream
+would have to do. The entry is still filed against the Foundry.
 
 Do not use feedback entries for ordinary workflow requirements, tool-selection uncertainty, or
-an unsupported preference with no source asset to change.
+an unsupported preference with nothing concrete to change.
 
 ## Canonical identity and provenance
 
-Use a repository-relative authored path for `subject.locator`. For package-export schemas, use
-`package://<package>#<export>`. Generated skills and harnesses are never subjects; identify the
-Mold, Pipeline, caster, assembler, or registry that must change.
+For a Foundry subject, use a repository-relative authored path as `subject.locator`; for a
+package-export schema, use `package://<package>#<export>`. Generated skills and harnesses are
+never subjects; identify the Mold, Pipeline, caster, assembler, or registry that must change.
 
 Initial subject kinds are `mold`, `pipeline`, `pattern`, `source-pattern`, `research`, `schema`,
-`prompt`, `cli-tool`, `cli-command`, `meta`, `implementation`, and `registry`. `label` is for
-display only; the locator is the identity and clustering key.
+`prompt`, `cli-tool`, `cli-command`, `meta`, `implementation`, and `registry`, plus
+`related-project` for the upstream case above. `label` is for display only; the locator is the
+identity and clustering key.
+
+A `related-project` subject is the one kind whose locator is not a Foundry path: it is public
+upstream identity, carries no content hash, and is never checked against Foundry main.
 
 For the running Mold, copy `mold.name`, `mold.path`, `mold.revision`, and `mold.content_hash`
 from `_provenance.json` into `observed_in`. Record its `mold.commit` value as `foundry_head`, but

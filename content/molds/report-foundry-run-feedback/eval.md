@@ -18,9 +18,18 @@ partial, failed, and cancelled feedback runs.
 ## Property: current source and existing issues are checked
 
 - check: llm-judged
-- assertion: every upstream draft is preceded by inspection of the canonical asset on current
-  `galaxyproject/foundry/main` and a search of open and closed repository issues; fixed and
-  duplicate observations do not become new-issue drafts.
+- assertion: every draft with a Foundry subject is preceded by inspection of the canonical asset
+  on current `galaxyproject/foundry/main` and a search of open and closed repository issues;
+  fixed and duplicate observations do not become new-issue drafts. A `related-project` subject is
+  exempt from the source check and still subject to the duplicate search.
+
+## Property: related-project observations are filed here, not redirected
+
+- check: llm-judged
+- assertion: an entry whose root cause is Galaxy, a tool wrapper, the IWC corpus, or a harness
+  CLI produces a `galaxyproject/foundry` draft that names the suspected upstream and states what
+  the Foundry should do meanwhile. No output redirects the user to another tracker, and no draft
+  targets another repository.
 
 ## Property: sensitive evidence stays local
 

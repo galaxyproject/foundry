@@ -34,6 +34,14 @@ Concrete cases for the reporting Mold, evaluated against the properties in `eval
 - expect: the drafts file contains an existing-issue comment draft rather than a new issue, and
   nothing is posted before exact confirmation.
 
+## Case: related project at fault
+
+- fixture: an open entry with `subject.kind: related-project` — a harness CLI crashed on valid
+  input — carrying a repository URL as its locator and no content hash.
+- expect: a `galaxyproject/foundry` draft naming the suspected upstream, the observed behavior,
+  and the Foundry-side stopgap; no main-hash check is attempted; nothing is targeted at or
+  deferred to the upstream tracker.
+
 ## Case: unsafe evidence
 
 - fixture: an otherwise actionable entry whose evidence includes a token, private URL, patient

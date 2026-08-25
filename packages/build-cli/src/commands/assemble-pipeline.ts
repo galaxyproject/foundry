@@ -126,7 +126,7 @@ function runOptionsSection(feedback?: RuntimeArtifactDefinition): string[] {
     "- `--checkpoint` — commit after every phase so the run directory's git history is a per-step record (a data source for workflow-implementation visualizations). When set, `git init ./<run-slug>/` during working-directory setup — this is a standalone per-run repo; do not add it to any surrounding repo you are working inside. Then after each phase's artifact is confirmed run `git -C ./<run-slug>/ add -A && git -C ./<run-slug>/ commit -m \"phase <n>: <skill>\"`. Loop phases commit **once per iteration** (`phase <n> step <k>: <skill>`); for a MANUAL loop, commit once per by-hand step. With `--use-subagents`, the subagent does the work and returns; you make the commit.",
     ...(feedback
       ? [
-          `- \`--${feedback.producer.option}\` — create \`./<run-slug>/${feedback.default_filename}\` before phase 1. Copy the complete top-level roster from \`_assembly.json\` with \`run.status: running\` and every phase \`pending\`; set a phase \`running\` immediately before it starts and \`done\` after success. Keep one row per loop and increment \`iterations\`; record a branch's chosen path as \`selected\`. Pass the same ledger path to every skill and subagent. On a terminating error mark the phase and run \`failed\`; on a graceful stop mark the run \`cancelled\`; after every intended phase is done mark the run \`complete\`. Never describe an empty incomplete ledger as a clean run.`,
+          `- \`--${feedback.producer.option}\` — create \`./<run-slug>/${feedback.default_filename}\` before phase 1. Set \`run.pipeline\` to this pipeline's slug and \`run.run_slug\` to the chosen run slug. Copy the complete top-level roster from \`_assembly.json\` with \`run.status: running\` and every phase \`pending\`; set a phase \`running\` immediately before it starts and \`done\` after success. Keep one row per loop and increment \`iterations\`; record a branch's chosen path as \`selected\`. Pass the same ledger path to every skill and subagent. On a terminating error mark the phase and run \`failed\`; on a graceful stop mark the run \`cancelled\`; after every intended phase is done mark the run \`complete\`. Never describe an empty incomplete ledger as a clean run.`,
         ]
       : []),
     "",
@@ -364,6 +364,12 @@ function renderSkill(args: {
     "## Done",
     "",
     `Report the final artifacts in \`./<run-slug>/\`${doneTail}.`,
+    ...(args.feedback
+      ? [
+          "",
+          `If the run was invoked with \`--${args.feedback.producer.option}\`, close the ledger first: set the final \`run.status\`, then tell the user the ledger path \`./<run-slug>/${args.feedback.default_filename}\` and how many entries it holds. If it holds any, offer to run the \`report-foundry-run-feedback\` skill on it, which triages them into local drafts and files nothing without explicit confirmation. Report an empty ledger as "no feedback recorded", never as evidence the Foundry worked well.`,
+        ]
+      : []),
     "",
     "## Notes",
     "",

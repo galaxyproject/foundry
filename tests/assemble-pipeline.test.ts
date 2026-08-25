@@ -100,6 +100,20 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(skill).toContain("chosen path as `selected`");
     expect(skill).toContain("mark the run `complete`");
     expect(skill).toContain("empty incomplete ledger");
+    expect(skill).toContain("run.pipeline");
+    expect(skill).toContain("run.run_slug");
+  });
+
+  it("closes the feedback loop in the Done section", () => {
+    const skill = readFileSync(
+      path.join(repoRoot, "casts/claude/skills/pipeline-nextflow-to-galaxy/SKILL.md"),
+      "utf8",
+    );
+    const done = skill.slice(skill.indexOf("## Done"), skill.indexOf("## Notes"));
+    // A ledger nobody is told about is a ledger nobody triages (#473 review).
+    expect(done).toContain("report-foundry-run-feedback");
+    expect(done).toContain("foundry-feedback.ledger.yml");
+    expect(done).toContain("no feedback recorded");
   });
 
   it("_assembly.json surfaces the uniform run options", () => {

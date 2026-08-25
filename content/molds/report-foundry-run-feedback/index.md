@@ -29,8 +29,12 @@ Triage a `foundry-feedback.ledger.yml` produced by feedback mode. Produce a fact
 and a consolidated set of upstream drafts. Drafting is local by default; creating a GitHub issue
 or posting a comment is a separate, explicitly confirmed action.
 
-Always target `galaxyproject/foundry`. Do not prescribe a particular GitHub interface. If no
-GitHub-capable interface is available, complete the local outputs and stop.
+Always target `galaxyproject/foundry` — including observations whose root cause is a related
+project. An entry blaming Galaxy, a tool wrapper, the IWC corpus, or a harness CLI is filed here
+with its analysis so the run context stays attached; a maintainer forwards it upstream. Never
+redirect the user to another tracker and never file against another repository. Do not prescribe
+a particular GitHub interface. If no GitHub-capable interface is available, complete the local
+outputs and stop.
 
 ## Sequence
 
@@ -48,11 +52,12 @@ GitHub-capable interface is available, complete the local outputs and stop.
    observations about the same correction into one cluster while preserving the contributing
    entry ids, severities, observed content hashes, and evidence. Do not merge distinct requested
    corrections merely because they name the same subject.
-5. **Check current main.** Resolve each canonical locator against current
+5. **Check current main.** For a Foundry subject, resolve its canonical locator against current
    `galaxyproject/foundry/main`. An unchanged content hash proves only that the observed asset is
    unchanged. A changed hash requires inspection for the proposed correction. When a locator
    moved, use its kind, label, and old hash to find the successor. Mark an observation fixed only
-   when current source actually contains the correction.
+   when current source actually contains the correction. A `related-project` subject has no
+   Foundry locator and no hash; skip this step for it rather than inventing one.
 6. **Search for duplicates.** Search open and closed issues in `galaxyproject/foundry` using the
    canonical locator, label, and correction. Prefer a comment draft for a matching open issue;
    record a duplicate disposition for a closed issue that already resolved the correction. Do
@@ -63,7 +68,10 @@ GitHub-capable interface is available, complete the local outputs and stop.
 8. **Write `foundry-issue-drafts.md`.** Write one self-contained section per surviving correction
    cluster. Label it as either a new-issue draft or an existing-issue comment draft. Include the
    canonical locator, observed hash, affected Mold and Mold content hash, concise evidence, the
-   expected correction, and contributing entry ids. Do not include sections for fixed,
+   expected correction, and contributing entry ids. A `related-project` cluster is drafted the
+   same way, minus the hashes: name the suspected upstream project and component, state what the
+   run observed and why the upstream looks responsible, and say what the Foundry should do
+   meanwhile — carry a workaround, pin a version, or wait. Do not include sections for fixed,
    duplicate, unsafe, or `wontfix` observations.
 9. **Gate every remote mutation.** Present the local drafts and ask for explicit confirmation of
    the exact issues and comments to post. No confirmation means stop with the files. On
