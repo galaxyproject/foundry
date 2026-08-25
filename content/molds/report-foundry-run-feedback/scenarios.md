@@ -4,9 +4,17 @@ Concrete cases for the reporting Mold, evaluated against the properties in `eval
 
 ## Case: completed clean run
 
-- fixture: a valid ledger with `run.status: complete`, every phase `done`, and `entries: []`.
+- fixture: a valid ledger with `run.status: complete`, every phase `done` and `feedback_checked`,
+  and `entries: []`.
 - expect: the review calls the run clean, the drafts file contains no issue/comment sections, and
   no remote action is proposed.
+
+## Case: complete run that never looked
+
+- fixture: a ledger with `run.status: complete`, every phase `done`, `entries: []`, and
+  `feedback_checked` absent on four of twelve phases.
+- expect: the review reports the run complete but unreviewed, names the four phases, and does not
+  present the empty ledger as a clean result.
 
 ## Case: interrupted empty run
 

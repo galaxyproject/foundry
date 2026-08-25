@@ -42,8 +42,10 @@ outputs and stop.
    not infer missing fields. Preserve the original ledger until triage has produced complete
    local outputs.
 2. **Assess run coverage.** Summarize `run.status` and every top-level phase. Call an empty ledger
-   clean only when the run is `complete`. For `running`, `failed`, or `cancelled` runs, identify
-   the last running or failed phase and all phases that remained pending.
+   clean only when the run is `complete` and every phase is `feedback_checked`. Name the phases
+   that are not — a complete run with unchecked phases is reported as complete but unreviewed,
+   because nothing there looked for friction. For `running`, `failed`, or `cancelled` runs,
+   identify the last running or failed phase and all phases that remained pending.
 3. **Screen unsafe evidence.** Remove credentials, private URLs, proprietary source text,
    participant data, and user-identifying paths from review text and drafts. Replace the run
    directory prefix with `<run>/`. If redaction would make an observation unverifiable, keep it
@@ -62,8 +64,8 @@ outputs and stop.
    canonical locator, label, and correction. Prefer a comment draft for a matching open issue;
    record a duplicate disposition for a closed issue that already resolved the correction. Do
    not open a second issue for the same work.
-7. **Write `foundry-run-review.md`.** Include run status and phase coverage, ledger-integrity or
-   redaction concerns, every cluster's disposition (`fixed`, `duplicate`, `comment-draft`,
+7. **Write `foundry-run-review.md`.** Include run status, phase coverage and which phases went
+   unchecked, ledger-integrity or redaction concerns, every cluster's disposition (`fixed`, `duplicate`, `comment-draft`,
    `issue-draft`, or `local-only`), and the entry ids supporting it.
 8. **Write `foundry-issue-drafts.md`.** Write one self-contained section per surviving correction
    cluster. Label it as either a new-issue draft or an existing-issue comment draft. Include the

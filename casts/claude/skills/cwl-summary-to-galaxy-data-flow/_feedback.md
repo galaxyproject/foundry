@@ -22,7 +22,7 @@ run:
   run_slug: sarek-galaxy
   status: running
   phases:
-    - { n: 1, kind: mold, skill: summarize-nextflow, status: done }
+    - { n: 1, kind: mold, skill: summarize-nextflow, status: done, feedback_checked: true }
     - { n: 2, kind: mold, skill: nextflow-summary-to-galaxy-interface, status: running }
 entries:
   - id: channel-shape-note-silent-on-optional-outputs
@@ -59,6 +59,11 @@ and to `done` on success. A phase that terminates the run and the run itself bec
 graceful user stop makes the run `cancelled`. A hard interruption naturally leaves the run
 `running`, which is distinguishable from success without a recovery write.
 
+A phase also carries `feedback_checked`. The harness sets it true only when that phase reported a
+feedback outcome — entry ids it appended, or an explicit `no feedback`. It is absent or false
+otherwise, including for a phase that simply never said. This is what separates a run that looked
+for friction and found none from a run that never looked.
+
 Loop phases remain one row and increment `iterations` after each successful iteration. Branch
 phases remain one row and record the chosen path in `selected`. After every intended phase is
 done, the harness sets `run.status: complete`.
@@ -68,9 +73,20 @@ For a standalone skill invocation, the first feedback-aware skill creates a ledg
 that row's lifecycle as well as any entry it appends.
 
 No ledger means feedback mode was off. An empty `entries` list is evidence of a clean run only
-when `run.status` is `complete`; an empty incomplete ledger is not a clean run.
+when `run.status` is `complete` **and** every phase is `feedback_checked`. A complete run with
+unchecked phases is complete but unreviewed; an empty incomplete ledger is neither.
 
 ## When to append
+
+Appending is a deliberate pass, not a background reflex. Before a skill reports completion it
+recalls what actually happened during its work — where it guessed at something the instructions
+should have settled, needed information its bundle does not carry, hit an instruction that
+contradicted another or contradicted the artifacts in front of it, used a reference that did not
+cover the case, or did something its procedure never describes. Those are recallable events. "Was
+anything unclear?" is not a useful question to ask at that moment and reliably answers itself no.
+
+The pass ends in one of two outcomes, and the outcome is always stated: entries appended, or
+`no feedback`. A skill that says nothing has not reported a clean pass.
 
 Two entry shapes are admissible. Both require that `what` names a concrete problem, `expected`
 states a proposed correction, and the entry is not already present in this ledger for the same

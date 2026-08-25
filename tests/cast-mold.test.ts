@@ -304,6 +304,10 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
     expect(text).toContain("## Feedback Mode");
     expect(text).toContain("`_feedback.md`");
     expect(text).toContain("`foundry-feedback.ledger.yml`");
+    // Passive "append when you notice" yields nothing; the pass is explicit and so is its
+    // negative outcome (#473 review).
+    expect(text).toContain("Before reporting completion");
+    expect(text).toContain("`no feedback`");
     expect(text).toContain("Read a Nextflow pipeline source tree");
     expect(text).not.toContain("This skill was deterministically cast from its Mold");
     expect(text).not.toMatch(/\[\[[^\]]+\]\]/);
@@ -317,6 +321,7 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
     expect(protocol).toContain("# Foundry feedback ledger");
     expect(protocol).toContain("## Canonical identity and provenance");
     expect(protocol).toContain("Never copy credentials");
+    expect(protocol).toContain("feedback_checked");
   });
 
   it("records runtime:feedback as the reporting Mold's input producer", () => {

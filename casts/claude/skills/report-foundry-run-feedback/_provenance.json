@@ -5,10 +5,10 @@
     "name": "report-foundry-run-feedback",
     "path": "content/molds/report-foundry-run-feedback/index.md",
     "revision": 1,
-    "content_hash": "539030e2b268981a8571ed9d8e593b6acc4dd7a5ad3bc0a05b0b7b22090dd4b1",
-    "commit": "1878d3050ea526717ba9802fb7c4eeb613621e4a"
+    "content_hash": "cffa8d8103479a92dd7282c6964cccfb7fb73d95f673f52e53e7743a2cb270da",
+    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
   },
-  "cast_at": "2026-08-25T20:41:58.207Z",
+  "cast_at": "2026-08-25T21:03:48.403Z",
   "refs": [],
   "artifacts": {
     "produces": [

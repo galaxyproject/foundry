@@ -102,6 +102,9 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(skill).toContain("empty incomplete ledger");
     expect(skill).toContain("run.pipeline");
     expect(skill).toContain("run.run_slug");
+    // A phase is only done once it has said whether it found friction (#473 review).
+    expect(skill).toContain("feedback_checked: true");
+    expect(skill).toContain("no feedback");
   });
 
   it("closes the feedback loop in the Done section", () => {

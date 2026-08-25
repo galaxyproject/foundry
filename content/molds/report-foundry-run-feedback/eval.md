@@ -9,6 +9,13 @@ partial, failed, and cancelled feedback runs.
 - assertion: the run review calls an empty ledger clean only when `run.status` is `complete` and
   reports pending, running, or failed phase coverage for every incomplete run.
 
+## Property: unreviewed runs are distinguished from clean ones
+
+- check: llm-judged
+- assertion: an empty ledger whose run is `complete` but whose phases are not all
+  `feedback_checked` is reported as complete but unreviewed, naming the unchecked phases, and is
+  never described as evidence that the Foundry performed well.
+
 ## Property: drafts cluster by canonical correction
 
 - check: llm-judged
