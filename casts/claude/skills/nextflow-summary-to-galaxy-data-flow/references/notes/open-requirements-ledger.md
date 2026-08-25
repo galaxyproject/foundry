@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-06-16
-revision: 1
+revised: 2026-08-19
+revision: 2
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
@@ -33,6 +33,7 @@ Like the `_plan_*` family in [[galaxy-workflow-draft-format]], ledger entries ar
 ```yaml
 - id: sccmec-evidence-missing
   status: open                # open | resolved | surrendered
+  blocking: true              # true only for a computability gap; the convergence gate counts these
   raised_by: implement-galaxy-tool-step   # Mold that appended it
   step: classify_context       # draft step the obligation attaches to (if any)
   unmet: "SCCmec-region candidate output category"
@@ -43,11 +44,33 @@ Like the `_plan_*` family in [[galaxy-workflow-draft-format]], ledger entries ar
 
 Provenance (`raised_by`, `resolved_by`) is the audit trail for *when* each obligation entered and left — the traceability #281 asked for, and the evidence the convergence gate reads.
 
+`blocking` separates the two grades of obligation the pipeline carries. A plain entry is an unmet need the chain can keep working around — an unpinned parameter, a missing exemplar. A **blocking** entry is a computability gap: a declared step output no wired input can supply, which `gxwf` validation cannot see because the connection graph knows ports connect, not what they carry. Omit `blocking` (or set it `false`) for a plain obligation. Only blocking entries drive topology-repair escalation, and only they are counted by the decreasing-blocker invariant.
+
+## How to use the ledger
+
+This section is the runtime protocol for every Mold that carries the ledger. A Mold's own page states only what is local to it — what raises an entry there, and what it does when it reads one; the mechanics are here.
+
+**Read it before you decide.** Ahead of the decisions this step owns, read the `open` entries. Ones bearing on those decisions are the ones you may be able to close. Never re-derive an obligation the chain already recorded — that re-derivation is the failure this artifact exists to end.
+
+**Start one when none is supplied.** Every carrying Mold declares the ledger as an input, but the first Mold in a run receives none. Its absence is not an error: start an empty ledger at the declared filename and proceed.
+
+**Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies. Set `blocking: true` only for a computability gap.
+
+**Mark resolved what you close.** When a decision you make discharges an open entry, set `status: resolved`, `resolved_by` to your own Mold name, and `note` to how it closed. Resolving is not deleting — a resolved entry stays in the ledger as the audit trail.
+
+**Carry the rest untouched.** Entries you neither raise nor close pass through unchanged, statuses and provenance intact. Never renumber, re-word, or drop another Mold's entry.
+
+**Never fabricate around an entry.** An open obligation is the honest state. Inventing a connection, a tool id, or a value so the artifact looks complete converts a tracked gap into a silent defect — the specific failure the ledger replaces.
+
+**Record a surrender note; leave the status to the terminal.** When you cannot close an entry and nothing downstream can either — no producer is discoverable, the output cannot be honestly narrowed — leave it `open` and say so in `note`. `surrendered` is a terminal status, set at the end of a run: the escalation cap reached, or the final artifact emitted with the obligation still unmet. Either way the entry stays visible and is written into the final artifact as a labelled gap, never dropped.
+
+**Maintain the escalation budget** — loop Molds only. The `topology_repair` header is loop-level state, described under **Escalation budget (loop-level state)** below. On each escalation the orchestrator increments `escalations`, appends the post-repair open blocking-entry count to `open_history`, and surrenders the still-open blocking entries once `escalations` reaches `cap`.
+
 ## Role in topology repair
 
 In the Galaxy per-step loop, the ledger is the substrate the topology-repair escalation rides on (see [[galaxy-workflow-draft-format]] and [[repair-galaxy-draft-topology]]):
 
-- **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs — a defect invisible to `gxwf` structural validation, because the connection graph knows ports connect, not what they contain. Rather than fabricate, it appends a blocking entry and falls through to repair.
+- **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs. Rather than fabricate, it appends a blocking entry and falls through to repair.
 - **[[repair-galaxy-draft-topology]]** reads the open blocking entries, re-wires the affected region (template-tier authoring — one step or a small sub-path), and marks each entry it closes `resolved`; the existing discover-or-author → implement machinery then realizes the new steps.
 - The loop's **decreasing-blocker invariant** counts open blocking entries: each repair escalation must strictly reduce that count, under a hard cap on escalations. When the cap is hit with entries still open, those entries are **surrendered** into the final draft — the clean terminal that replaces spin-or-fabricate.
 
@@ -65,6 +88,7 @@ topology_repair:
 entries:
   - id: sccmec-evidence-missing
     status: open
+    blocking: true
     # … per-entry shape above
 ```
 
@@ -76,13 +100,15 @@ This block lives in the ledger as a v1 expedient: the ledger is already the carr
 
 ## Threaded through the whole design tier
 
-The ledger is not loop-only. It is a single artifact every design-tier Mold in the source→Galaxy pipelines **consumes and re-emits** — the interface, reference-data, data-flow, IWC-comparison, and template Molds (`*-summary-to-galaxy-interface`, `*-summary-to-galaxy-data-flow`, `*-summary-to-galaxy-reference-data`, `compare-against-iwc-exemplar`, `*-summary-to-galaxy-template`). The first design Mold in a run creates it; each subsequent Mold reads the open entries, **appends** the unknowns it newly surfaces, and **marks resolved** the ones its own decisions close (the template settling a topology choice the data-flow left open, the interface pinning a parameter, …). This is the direct answer to #281: the chain stops re-deriving the same unknowns because each Mold inherits them.
+The ledger is not loop-only. Every design-tier Mold in the source→Galaxy pipelines **consumes and re-emits** it — the interface, reference-data, data-flow, IWC-comparison, and template Molds (`*-summary-to-galaxy-interface`, `*-summary-to-galaxy-data-flow`, `*-summary-to-galaxy-reference-data`, `compare-against-iwc-exemplar`, `*-summary-to-galaxy-template`), alongside the change-set Molds on the update path. This is the direct answer to #281: the chain stops re-deriving the same unknowns because each Mold inherits them.
 
-The template Mold's computability review pass is one notable appender — `*-summary-to-galaxy-template` re-reads each settled step and, where an output needs evidence no input carries, wires the producer or records the gap as a blocking entry. Source-summary Molds upstream of the design tier keep their own free-text open-questions; the design tier is where those formalize into the ledger.
+The template Mold's computability review pass is the notable appender ahead of the loop — `*-summary-to-galaxy-template` re-reads each settled step and, where an output needs evidence no input carries, wires the producer or records the gap as a blocking entry. Source-summary Molds upstream of the design tier keep their own free-text open-questions; the design tier is where those formalize into the ledger.
 
 ## Open work
 
-- Decide whether entry structure should harden (typed `unmet` / `missing`, links back to source-summary evidence, machine-checkable `status` transitions) once two or three worked runs exercise it.
+- Decide whether entry structure should harden (typed `unmet` / `missing`, links back to source-summary evidence, machine-checkable `status` transitions) once two or three worked runs exercise it. Hardening it would also give the producing Molds an `output_artifacts[].schema` to cite, which none carry today.
+- Assign terminal surrender of *non-blocking* entries. [[advance-galaxy-draft-step]] surrenders open blocking entries at the escalation cap, but an unpinned-parameter entry the design tier appended and nobody closed currently rides out the run without ever being marked `surrendered`. Nothing owns that pass today.
+- Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. Every design Mold still emits both, with no rule for which destination an unresolved choice belongs in.
 - Decide whether the source-summary Molds should also emit structured entries, or keep their free-text open-questions until the design tier formalizes them.
 - Specify how surrendered entries surface in the runnable gxformat2 (a workflow-level annotation, a report output, or a sidecar) when the draft is stripped of `_plan_*` and TODO sentinels.
 - Move the `topology_repair` escalation budget out of the ledger and into the draft (a workflow-level annotation) so it travels with the artifact it bounds; the ledger home is a v1 expedient.

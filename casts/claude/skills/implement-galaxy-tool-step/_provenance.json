@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 8,
-    "content_hash": "45f5bb50f0fa56ee1e25b323b67f7c4eda64ef9b376b80a2fdc37f20e6a23e1c",
-    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
+    "revision": 9,
+    "content_hash": "bd96cf67a5478cab941c05e4997e403e40ee6d11ffb1472e3ecd0740fcf1baaf",
+    "commit": "d9e0b09728425abfbafef050fcfb7d98ae642d39"
   },
-  "cast_at": "2026-08-24T15:20:46.588Z",
+  "cast_at": "2026-08-25T06:47:57.292Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -162,10 +162,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces.",
+      "purpose": "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs — the fall-through to topology repair, in place of fabricating the missing evidence.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
-      "dst_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
+      "src_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
+      "dst_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
       "source": "deterministic"
     },
     {
@@ -213,7 +213,7 @@
         "id": "open-requirements-ledger",
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
-        "description": "Ledger ([[open-requirements-ledger]]) with a blocking entry appended when a step's declared output can't be computed from its wired inputs; drives the fall-through to topology repair."
+        "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
       }
     ],
     "consumes": [
@@ -241,7 +241,7 @@
       },
       {
         "id": "open-requirements-ledger",
-        "description": "Carried obligations ledger [[open-requirements-ledger]]: read entries the design tier recorded against this step before implementing; append a blocking entry if its output can't be computed.",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.",
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",

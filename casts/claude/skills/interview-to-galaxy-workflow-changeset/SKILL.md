@@ -14,12 +14,12 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `summary-galaxy-workflow`. Schema: summary-galaxy-workflow. Produced by `summarize-galaxy-workflow`. Structured summary of the existing workflow from summarize-galaxy-workflow; the anchor set the change-set addresses (step labels, input labels, output names, tool_state keys).
-- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: read prior open entries; append requested changes the workflow cannot yet support.
+- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.
 
 ## Outputs
 
 - Write artifact `galaxy-workflow-changeset` as `galaxy-workflow-changeset.md`. Format: `markdown`. Reviewable, ordered list of edit intents, each anchored to an existing step/input/output by label (or marked `new`), with edit kind, target, intent, and acceptance note. The human approval gate before any edits are applied.
-- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Updated obligations ledger: requested changes the workflow cannot support appended as open entries; prior entries this interview resolves marked resolved.
+- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact.
 
 ## Required Tools
 
@@ -27,7 +27,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
-- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Carry the open-requirements ledger: append requested changes the current workflow cannot support rather than inventing or dropping them, and mark resolved the ones this step closes.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Record a requested change the workflow cannot support as described as an open entry, so an unsupportable request survives as a tracked obligation rather than a fabricated anchor or a silent drop.
 - `references/schemas/summary-galaxy-workflow.schema.json`: Schema file copied verbatim into the bundle. Input contract: read the existing-workflow summary to anchor every change-set entry to a real step/input/output.
 
 ## Load On Demand

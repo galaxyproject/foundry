@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-07-24
-revision: 5
+revised: 2026-08-19
+revision: 6
 summary: "Map a Nextflow summary into a Galaxy workflow interface design brief."
 input_artifacts:
   - id: summary-nextflow
@@ -18,7 +18,7 @@ input_artifacts:
   - id: nextflow-galaxy-reference-data
     description: "Reference-data shape brief from [[nextflow-summary-to-galaxy-reference-data]] that pins per-asset reference inputs and rebuild-on-absence behavior."
   - id: open-requirements-ledger
-    description: "Carried obligations ledger [[open-requirements-ledger]]: read prior open entries; this design step appends new unmet needs and marks ones its decisions resolve."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: nextflow-galaxy-interface
     kind: markdown
@@ -27,7 +27,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Updated obligations ledger: new unmet needs this step surfaces appended; prior entries its decisions close marked resolved."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: research
     ref: "[[open-requirements-ledger]]"
@@ -35,7 +35,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Carry the open-requirements ledger: read open entries bearing on this step's decisions, mark resolved the ones it closes, and append any new unmet need it surfaces."
+    purpose: "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the pipeline leaves open — a params entry with no Galaxy input, an emitted-but-unpublished output, a channel shape no collection maps cleanly onto."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[summary-nextflow]]"
@@ -109,5 +109,3 @@ related_notes:
 Read a Nextflow summary and emit a reviewable Markdown interface brief for a Galaxy workflow. Capture workflow inputs, workflow outputs, labels, Galaxy collection shapes, checkpoint outputs worth exposing for tests, source-summary provenance, confidence, and open questions.
 
 The output is not a gxformat2 skeleton and not a workflow schema. It is a design handoff consumed by [[nextflow-summary-to-galaxy-data-flow]], [[nextflow-summary-to-galaxy-template]], and later test-plan work.
-
-Carry the [[open-requirements-ledger]] through this step: read the open entries that bear on the choices you make here, mark resolved any your decisions close, and append any new unmet need you surface — a declared output with no producer, an unpinned parameter, a tool with no corpus exemplar — so a later Mold inherits it instead of re-deriving it.

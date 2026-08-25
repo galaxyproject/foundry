@@ -7,14 +7,14 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-08-04
-revision: 2
+revised: 2026-08-19
+revision: 3
 summary: "Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs."
 input_artifacts:
   - id: galaxy-workflow-draft
     description: "Partially-realized gxformat2 draft (see [[galaxy-workflow-draft-format]]) whose topology can't support a declared step — the region to repair."
   - id: open-requirements-ledger
-    description: "Carried obligations from [[open-requirements-ledger]]; the open blocking entries name which step output is uncomputable and what evidence is missing."
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
@@ -24,7 +24,7 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: "Ledger with the addressed blocking entries marked resolved, or surrendered with a note when no producer can be found within the escalation budget."
+    description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -47,7 +47,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Read open blocking entries to scope the repair; mark each resolved or surrender it, feeding the loop's decreasing-blocker convergence gate."
+    purpose: "Scope the repair from the open blocking entries — each names the step, the uncomputable output, and the missing evidence — then mark resolved each one repaired, and leave any it cannot close open with a surrender note for the terminal path."
     verification: "Promote after a run closes a blocking entry and the loop terminates on the reduced open count."
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"

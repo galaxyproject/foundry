@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 3,
-    "content_hash": "f2852f94cb0101011ecfa991f09d551a8537bb3da02117a17e34ecba6e81c2a6",
-    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
+    "revision": 4,
+    "content_hash": "1b210c9ae8dda41e59701ff4a87098be8c2c6dcb1947da026544392dc13e2b3f",
+    "commit": "d9e0b09728425abfbafef050fcfb7d98ae642d39"
   },
-  "cast_at": "2026-08-24T15:20:44.588Z",
+  "cast_at": "2026-08-25T06:47:55.230Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -82,10 +82,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Recognize the blocking entry [[implement-galaxy-tool-step]] appends (its shape and `open | resolved | surrendered` status) so the orchestrator can detect the raised computability gap, count open blocking entries for the convergence gate, and escalate to [[repair-galaxy-draft-topology]].",
+      "purpose": "Read the ledger after each step implementation for a newly appended blocking entry, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.",
       "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that strictly reduces the open count.",
-      "src_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
-      "dst_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
+      "src_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
+      "dst_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
       "source": "deterministic"
     },
     {
@@ -140,7 +140,7 @@
         "id": "open-requirements-ledger",
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
-        "description": "Same ledger carried through the iteration: a blocking entry [[implement-galaxy-tool-step]] appended is routed to [[repair-galaxy-draft-topology]] and returns marked `resolved` or `surrendered`."
+        "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
       }
     ],
     "consumes": [
@@ -160,7 +160,7 @@
       },
       {
         "id": "open-requirements-ledger",
-        "description": "Carried obligations ledger [[open-requirements-ledger]]: after implementing the chosen step, read it for a new `open` blocking entry [[implement-galaxy-tool-step]] appended (the step's declared output can't be computed from its wired inputs), and count open blocking entries for the escalation convergence gate.",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.",
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",

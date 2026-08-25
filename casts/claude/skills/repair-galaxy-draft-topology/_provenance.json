@@ -4,11 +4,11 @@
   "mold": {
     "name": "repair-galaxy-draft-topology",
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
-    "revision": 2,
-    "content_hash": "3a8dc1be7f69285e4ef49ca02e43f272cae26ed5d8297a48aa468ffc8685c0d2",
-    "commit": "0f259e8516b9dfb282362c7dc98b7a47ac39884f"
+    "revision": 3,
+    "content_hash": "cafba235f3bb41612216f766eb390ee6fddcb1192ddf445b6d9eb7f2c132678c",
+    "commit": "d9e0b09728425abfbafef050fcfb7d98ae642d39"
   },
-  "cast_at": "2026-08-24T15:20:48.287Z",
+  "cast_at": "2026-08-25T06:47:59.737Z",
   "refs": [
     {
       "kind": "pattern",
@@ -116,10 +116,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Read open blocking entries to scope the repair; mark each resolved or surrender it, feeding the loop's decreasing-blocker convergence gate.",
+      "purpose": "Scope the repair from the open blocking entries — each names the step, the uncomputable output, and the missing evidence — then mark resolved each one repaired, and leave any it cannot close open with a surrender note for the terminal path.",
       "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
-      "src_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
-      "dst_hash": "2f7230cec69b4aebd5f8234cfab4d663b58cf93fa96b1106b3c373b93398b563",
+      "src_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
+      "dst_hash": "10e84fa97b4e5c14ca78320b25cb9e419b7e98e0f2e676c09dd4deaf68a801fc",
       "source": "deterministic"
     },
     {
@@ -153,7 +153,7 @@
         "id": "open-requirements-ledger",
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
-        "description": "Ledger with the addressed blocking entries marked resolved, or surrendered with a note when no producer can be found within the escalation budget."
+        "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
       }
     ],
     "consumes": [
@@ -173,7 +173,7 @@
       },
       {
         "id": "open-requirements-ledger",
-        "description": "Carried obligations from [[open-requirements-ledger]]; the open blocking entries name which step output is uncomputable and what evidence is missing.",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.",
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
