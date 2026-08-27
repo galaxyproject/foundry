@@ -4,10 +4,11 @@ import Base from '../../layouts/Base.astro';
 import { buildWikiLinkMap } from '../../lib/wiki-links';
 import { buildArtifactGraph, artifactHref } from '../../lib/artifacts';
 import { base } from '../../lib/site-base';
+import { runtimeArtifacts } from '../../lib/registries';
 
 const entries = await getAllNotes();
 const linkMap = buildWikiLinkMap(entries);
-const graph = buildArtifactGraph(entries, linkMap);
+const graph = buildArtifactGraph(entries, linkMap, runtimeArtifacts);
 
 const rows = Array.from(graph.values()).sort((a, b) => a.id.localeCompare(b.id));
 ---
@@ -16,7 +17,7 @@ const rows = Array.from(graph.values()).sort((a, b) => a.id.localeCompare(b.id))
     <p class="text-xs font-mono uppercase tracking-widest text-(--color-text-muted) mb-1">index</p>
     <h1 class="text-2xl font-semibold m-0">Artifacts</h1>
     <p class="text-sm text-(--color-text-secondary) mt-2 m-0">
-      Pipeline handoffs declared by Molds via <code>output_artifacts</code> / <code>input_artifacts</code>.
+      Pipeline handoffs declared by Molds and registered runtime modes.
     </p>
   </header>
 

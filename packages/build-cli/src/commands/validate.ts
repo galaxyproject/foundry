@@ -15,8 +15,10 @@ import {
   kindOf,
   KINDS_BY_NAME,
   loadReferenceContract,
+  loadRuntimeArtifactRegistry,
   nonNoteAllowanceOf,
   type NoteSchema,
+  type RuntimeArtifactRegistry,
 } from "@galaxy-foundry/note-schema";
 // Directly from the shared package rather than through the barrel, which is the arrangement
 // note-schema states for every other borrowed mechanism: one place to look, nothing to drift.
@@ -408,9 +410,9 @@ function validatePathReference(
 
 /**
  * Mold artifact handoff validation.
- *   - Every `input_artifacts[].id` must resolve to some `output_artifacts[].id`
- *     declared by another Mold (multi-producer is allowed; same id can come
- *     from a discover-or-author branch).
+ *   - Every `input_artifacts[].id` must resolve to a Mold output or a registered
+ *     runtime producer (multi-Mold production is allowed for branch alternatives).
+ *   - A runtime producer and a Mold cannot claim the same artifact id.
  *   - All producers of the same artifact id must declare the same schema, or
  *     none at all; consumers inherit the contract by id.
  *   - When `output_artifacts[].schema` is set, the wiki-link must resolve to a
@@ -420,6 +422,8 @@ function validateArtifactGraph(
   files: FileMeta[],
   slugMap: Map<string, string>,
   metaByPath: Map<string, Frontmatter>,
+  runtimeArtifacts: RuntimeArtifactRegistry,
+  runtimeArtifactsPath: string,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const producerIds = new Set<string>();
@@ -471,6 +475,27 @@ function validateArtifactGraph(
         path: producers[0]!.path,
         severity: "warning",
         message: `output_artifacts id '${id}' has mixed schema coverage across producers; consumers cannot inherit a guaranteed contract until every producer declares the same schema (${declared})`,
+      });
+    }
+  }
+  for (const [id, artifact] of runtimeArtifacts.artifacts) {
+    if (producerIds.has(id)) {
+      const moldProducers = producersById
+        .get(id)
+        ?.map((producer) => producer.path)
+        .join(", ");
+      findings.push({
+        path: runtimeArtifactsPath,
+        severity: "error",
+        message: `runtime artifact '${id}' collides with a Mold output producer (${moldProducers ?? "unknown Mold"})`,
+      });
+    }
+    producerIds.add(id);
+    if (!resolveWikiLink(artifact.protocol, slugMap)) {
+      findings.push({
+        path: runtimeArtifactsPath,
+        severity: "error",
+        message: `artifacts.${id}.protocol: wiki link ${artifact.protocol} did not resolve`,
       });
     }
   }
@@ -539,7 +564,7 @@ function validateArtifactGraph(
           findings.push({
             path: f.path,
             severity: "error",
-            message: `input_artifacts[${i}].id '${id}' has no producer (no Mold declares it in output_artifacts)`,
+            message: `input_artifacts[${i}].id '${id}' has no producer (no Mold output or registered runtime artifact declares it)`,
           });
         }
       });
@@ -1453,12 +1478,32 @@ export function validateDirectory(opts: ValidateOptions): {
   const metaByPath = new Map<string, Frontmatter>();
   for (const f of validFiles) metaByPath.set(f.path, f.meta);
 
+  const repoRoot =
+    path.basename(opts.directory) === CONTENT_DIR ? path.dirname(opts.directory) : opts.directory;
+  const runtimeArtifactsPath = path.join(repoRoot, "runtime_artifacts.yml");
+  const runtimeArtifacts = loadRuntimeArtifactRegistry(runtimeArtifactsPath);
+
   const crossFindings: CrossFileFinding[] = [];
+  crossFindings.push(
+    ...runtimeArtifacts.errors.map((message) => ({
+      path: runtimeArtifactsPath,
+      severity: "error" as const,
+      message,
+    })),
+  );
   crossFindings.push(...validateRelatedFields(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
-  crossFindings.push(...validateArtifactGraph(validFiles, slugMap, metaByPath));
+  crossFindings.push(
+    ...validateArtifactGraph(
+      validFiles,
+      slugMap,
+      metaByPath,
+      runtimeArtifacts.registry,
+      runtimeArtifactsPath,
+    ),
+  );
   crossFindings.push(...validateSchemaVendoring(validFiles, opts.directory));
   crossFindings.push(...validateSchemaValidatorBins(validFiles, opts.directory));
   crossFindings.push(

@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-03
-revision: 3
+revised: 2026-08-25
+revision: 4
 summary: "How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge."
 ---
 
@@ -43,6 +43,8 @@ Each kind adds only fields meaningful to that kind. Definitions are strict: an u
 Strictness is not only tidiness. An undeclared key is also an unvalidated key, and YAML will silently coerce it: a version pin left unquoted arrives as a float, where `1.20` and `1.2` are the same YAML number and two different pins. Declaring a field is what puts a type on it — the `id` on a Pattern's IWC exemplar step is a declared union of string-or-integer in `packages/note-schema/src/types/pattern/schema.ts`, because a Galaxy step id is sometimes `3` and sometimes `fastqc`, and declaring it makes that ambiguity a decision rather than a discovery.
 
 Mold IO schemas are a different contract. They validate artifacts passed between Molds; they do not validate note frontmatter. Their human-facing schema notes live under `content/schemas/`, while the JSON schema implementation stays with its producer package or the runtime `foundry` package. See [[schema-packages]].
+
+Artifact identity is shared across Mold outputs and registered runtime outputs. A normal producer is declared by a Mold's `output_artifacts[]`. A harness or skill mode that initializes a real artifact is declared once in root `runtime_artifacts.yml`, with its id, format, fixed filename, protocol-note wiki link, runtime option, and initializer. Consumers use the same ordinary `input_artifacts[]` declaration in either case. The graph requires every input to resolve to at least one producer and rejects a runtime/Mold collision on the same id; runtime producers appear as `runtime:<option>` in inherited cast provenance. The registry is instance configuration, not note frontmatter, and its protocol link must resolve into the authored corpus.
 
 ## Tags and facets
 

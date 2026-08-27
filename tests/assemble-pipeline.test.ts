@@ -77,7 +77,7 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(loop.skill).toBe("advance-galaxy-draft-step");
   });
 
-  it("documents the --use-subagents and --checkpoint run options", () => {
+  it("documents the uniform run options and feedback lifecycle", () => {
     const skill = readFileSync(
       path.join(repoRoot, "casts/claude/skills/pipeline-nextflow-to-galaxy/SKILL.md"),
       "utf8",
@@ -92,6 +92,31 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(skill).toContain("including MANUAL loop phases");
     // Standalone per-run repo, not added to a surrounding repo (S2).
     expect(skill).toContain("standalone per-run repo");
+    expect(skill).toContain("`--feedback`");
+    expect(skill).toContain("foundry-feedback.ledger.yml");
+    expect(skill).toContain("complete top-level roster from `_assembly.json`");
+    expect(skill).toContain("every phase `pending`");
+    expect(skill).toContain("increment `iterations`");
+    expect(skill).toContain("chosen path as `selected`");
+    expect(skill).toContain("mark the run `complete`");
+    expect(skill).toContain("empty incomplete ledger");
+    expect(skill).toContain("run.pipeline");
+    expect(skill).toContain("run.run_slug");
+    // A phase is only done once it has said whether it found friction (#473 review).
+    expect(skill).toContain("feedback_checked: true");
+    expect(skill).toContain("no feedback");
+  });
+
+  it("closes the feedback loop in the Done section", () => {
+    const skill = readFileSync(
+      path.join(repoRoot, "casts/claude/skills/pipeline-nextflow-to-galaxy/SKILL.md"),
+      "utf8",
+    );
+    const done = skill.slice(skill.indexOf("## Done"), skill.indexOf("## Notes"));
+    // A ledger nobody is told about is a ledger nobody triages (#473 review).
+    expect(done).toContain("report-foundry-run-feedback");
+    expect(done).toContain("foundry-feedback.ledger.yml");
+    expect(done).toContain("no feedback recorded");
   });
 
   it("_assembly.json surfaces the uniform run options", () => {
@@ -101,7 +126,7 @@ describe("assemble-pipeline (committed harnesses)", () => {
         "utf8",
       ),
     );
-    expect(assembly.options).toEqual(["use-subagents", "checkpoint"]);
+    expect(assembly.options).toEqual(["use-subagents", "checkpoint", "feedback"]);
   });
 
   it("rolls harness CLIs up into a deduped bootstrap manifest", () => {

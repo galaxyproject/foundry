@@ -260,6 +260,15 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the skill w
 - **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against planemo-test-report; pulled in `cli-tool`/`cli-command`/`schema` references for planemo, planemo-lint, planemo-test, planemo-test-report. Deferred-manpages caveat removed.
 - **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other skill; the prior condense was always a verbatim passthrough), so the cast is fully deterministic and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete observations about a canonical Foundry source asset or a related project that this run showed to be at fault; do not put ordinary workflow requirements in this ledger.
+- Before reporting completion, make one explicit pass over the work you just did. Do not ask yourself whether anything was unclear — recall what happened: where you guessed at something the instructions should have settled, needed information this bundle does not carry, hit an instruction that contradicted another or contradicted the artifacts in front of you, used a packaged reference that did not cover your case, or did something the procedure never describes.
+- Append an entry for each such event that clears the protocol's bar. If none do, append nothing and report `no feedback` explicitly. Silence and a clean pass are not the same thing, and nothing downstream can tell them apart unless you say which one it was.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

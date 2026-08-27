@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-02
-revision: 1
+revised: 2026-08-25
+revision: 2
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -49,6 +49,8 @@ The instance's content-contract package. It owns:
 
 It builds on the shared `@galaxy-foundry/*` substrate packages. The package exports the same assembled schemas and collection table to both the validator and the site, preventing a second frontmatter encoding.
 
+It also owns the strict loader and shared types for the repository-level runtime-artifact registry. The validator, caster, assembler, and site all consume that one interpretation of `runtime_artifacts.yml`.
+
 ### `@galaxy-foundry/build-cli`
 
 The authoring and build application exposed as `foundry-build`. It owns repository-wide operations:
@@ -57,7 +59,7 @@ The authoring and build application exposed as `foundry-build`. It owns reposito
 - dashboard, index, README-stat, and kind-manifest generation;
 - what this Foundry contributes to a cast, and cast verification;
 - Pipeline assembly;
-- repository-wide registries and file walking.
+- repository-wide registries and file walking, including runtime-artifact collision checks, producer validation, and inheritance.
 
 Root files under `scripts/` are thin compatibility wrappers, sync commands, or one-time maintenance utilities. New reusable authoring behavior belongs in `build-cli`, not in another root script.
 
@@ -83,6 +85,7 @@ A domain runtime package that summarizes Nextflow source and owns the schemas pr
 - **Kind manifests:** `@galaxy-foundry/kind-manifest` derives and reads the portable description of those concrete kinds.
 - **Tags:** `@galaxy-foundry/tag-registry` owns the registry format and how tags browse — grouping by declaring facet, facet labels; `meta_tags.yml` owns this instance's vocabulary, and the site owns only what counts as a tagged note.
 - **References:** `@galaxy-foundry/reference-contract` owns shared reference behavior; `reference_contract.yml` owns instance reference kinds and permitted combinations.
+- **Artifacts:** Mold `output_artifacts[]` and root `runtime_artifacts.yml` contribute to one producer graph. `note-schema` owns the runtime-registry format, loader, and shared types; `build-cli` owns collision checks, validator integration, harness behavior, and cast-provenance projection; the site renders both producer kinds from the same registry.
 - **Wiki links:** `@galaxy-foundry/wiki-links` owns parsing, slugging, resolution, and tree traversal; the site and validator supply the instance link map.
 - **Reading the content tree:** `@galaxy-foundry/content-reader` owns the walk, the frontmatter read, and the address-precedence rule that turns a routed note into the slugs reaching it. `build-cli` supplies the collection table and this instance's aliases, and the validator and the caster project their maps from one reader so a link one calls good cannot fail in the other. The site still builds its own map from `astro:content`, which is already loaded there.
 - **Licenses:** `@galaxy-foundry/license-policy` answers general redistribution questions; instance validation owns coherence rules for its notes.

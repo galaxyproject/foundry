@@ -2,14 +2,14 @@
 // for the whole site build. The loaders and the schema factory live in the
 // shared @galaxy-foundry/note-schema package — the single source of truth the
 // validator also uses — so the site and the validator can no longer drift.
-import path from 'node:path';
+import path from "node:path";
 
-import { bundledPolicy } from '@galaxy-foundry/license-policy';
-import { loadReferenceContract } from '@galaxy-foundry/note-schema';
-import { loadTagRegistry } from '@galaxy-foundry/tag-registry';
+import { bundledPolicy } from "@galaxy-foundry/license-policy";
+import { loadReferenceContract, requireRuntimeArtifactRegistry } from "@galaxy-foundry/note-schema";
+import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 // Astro builds run from the site/ directory; the registries live at the repo root.
-const repoRoot = path.resolve('..');
+const repoRoot = path.resolve("..");
 
 // The license table is the exception: it is shared across Foundry instances rather than
 // authored here, so it ships in @galaxy-foundry/license-policy instead of at our root.
@@ -23,9 +23,14 @@ export const licensePolicy = bundledPolicy();
 // only through the linked workspace package, Vite inlines it into an SSR chunk, and the
 // path resolves against site/dist/chunks/ instead of node_modules — an ENOENT that only
 // appears in `astro build`, never in tests or typecheck. Declaring it keeps it external.
-export const referenceContract = loadReferenceContract(path.join(repoRoot, 'reference_contract.yml'));
+export const referenceContract = loadReferenceContract(
+  path.join(repoRoot, "reference_contract.yml"),
+);
+export const runtimeArtifacts = requireRuntimeArtifactRegistry(
+  path.join(repoRoot, "runtime_artifacts.yml"),
+);
 // The facet vocabulary is ours, but the format is not: @galaxy-foundry/tag-registry parses
 // and validates it. The registry answers membership itself (declared by its facets, never
 // parsed off the `/` prefix) and carries the facet labels/descriptions the /tags pages
 // group and render by.
-export const tags = loadTagRegistry(path.join(repoRoot, 'meta_tags.yml'));
+export const tags = loadTagRegistry(path.join(repoRoot, "meta_tags.yml"));

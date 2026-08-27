@@ -57,6 +57,15 @@ Classify before repairing. The same red output can be a tool/job failure, a work
 5. **Read assertion failures honestly.** When the failure is an assertion, use planemo-asserts-idioms to decide whether it is an assertion-choice/tolerance problem or a real output regression. Before weakening an assertion, widening a delta, or switching to an existence check, confirm against iwc-shortcuts-anti-patterns that the relaxation is an accepted IWC shortcut and not masking a real failure.
 6. **Discover reference gaps.** When the failure cannot be classified confidently from the references above, recommend a focused follow-up — reference documentation, pattern capture, API verification, or eval coverage — rather than emitting a repair recipe built on a guess.
 
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete observations about a canonical Foundry source asset or a related project that this run showed to be at fault; do not put ordinary workflow requirements in this ledger.
+- Before reporting completion, make one explicit pass over the work you just did. Do not ask yourself whether anything was unclear — recall what happened: where you guessed at something the instructions should have settled, needed information this bundle does not carry, hit an instruction that contradicted another or contradicted the artifacts in front of you, used a packaged reference that did not cover your case, or did something the procedure never describes.
+- Append an entry for each such event that clears the protocol's bar. If none do, append nothing and report `no feedback` explicitly. Silence and a clean pass are not the same thing, and nothing downstream can tell them apart unless you say which one it was.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
 ## Runtime Notes
 
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.

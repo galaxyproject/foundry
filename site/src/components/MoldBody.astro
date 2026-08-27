@@ -55,12 +55,16 @@ function consumersOf(id: string): { moldId: string; description: string }[] {
     .map(c => ({ moldId: c.moldId, description: c.decl.description }));
 }
 
-function producersOf(id: string): { moldId: string; description: string }[] {
+function producersOf(id: string): { label: string; href?: string }[] {
   const node = artifactGraph?.get(id);
   if (!node) return [];
   return node.producers
-    .filter(p => p.moldId !== entry.id)
-    .map(p => ({ moldId: p.moldId, description: p.decl.description }));
+    .filter(p => p.kind === 'runtime' || p.moldId !== entry.id)
+    .map(p =>
+      p.kind === 'mold'
+        ? { label: entryName(p.moldId), href: entryHref(p.moldId) }
+        : { label: p.producerId },
+    );
 }
 ---
 <dl class="mold-strip">
@@ -215,7 +219,11 @@ function producersOf(id: string): { moldId: string; description: string }[] {
                     <dd>
                       <ul class="partner-list">
                         {producers.map(p => (
-                          <li><a href={entryHref(p.moldId)} class="text-(--color-link) hover:underline">{entryName(p.moldId)}</a></li>
+                          <li>
+                            {p.href
+                              ? <a href={p.href} class="text-(--color-link) hover:underline">{p.label}</a>
+                              : <span class="font-mono">{p.label}</span>}
+                          </li>
                         ))}
                       </ul>
                     </dd>

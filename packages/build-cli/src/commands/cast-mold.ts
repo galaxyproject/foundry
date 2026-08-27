@@ -26,7 +26,11 @@ import {
   type ProvenanceRefEntry,
 } from "@galaxy-foundry/cast";
 import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command";
-import { DEFINITIONS } from "@galaxy-foundry/note-schema";
+import {
+  DEFINITIONS,
+  requireRuntimeArtifactRegistry,
+  type RuntimeArtifactRegistry,
+} from "@galaxy-foundry/note-schema";
 
 import type {
   ProvenanceArtifactInput,
@@ -144,6 +148,18 @@ const GALAXY_HOOKS: CastHooks = {
       JSON.stringify(await buildCliSidecar(srcAbs, srcRel, meta), null, 2) + "\n",
   },
   bundleFiles: [
+    // Runtime feedback protocol, single-sourced from the registry's protocol note.
+    ({ metaByPath }) => {
+      const runtime = runtimeArtifactsByCorpus.get(metaByPath);
+      const content = runtime?.protocolBodies.get("foundry-feedback-ledger") ?? null;
+      return [
+        {
+          path: "_feedback.md",
+          content,
+          absentReason: "stale feedback protocol (runtime artifact not registered)",
+        },
+      ];
+    },
     // Which Galaxy tools a skill needs installed before it can run.
     ({ refs, metaByPath, slugMap }) => {
       const tools = aggregateRequiredTools([...refs], metaByPath, slugMap);
@@ -175,6 +191,17 @@ const GALAXY_HOOKS: CastHooks = {
     const artifacts = readArtifactContracts(meta, producerIndexFor(metaByPath));
     const produces = artifacts?.produces ?? [];
     const runtime = refs.filter((r) => r.used_at !== "cast-time");
+    const feedback = runtimeArtifactsByCorpus
+      .get(metaByPath)
+      ?.registry.artifacts.get("foundry-feedback-ledger");
+    const requiresFeedback =
+      Array.isArray(meta.input_artifacts) &&
+      meta.input_artifacts.some(
+        (artifact) =>
+          artifact &&
+          typeof artifact === "object" &&
+          (artifact as { id?: unknown }).id === "foundry-feedback-ledger",
+      );
     const describe = { kindLabel: refKindLabel, modePhrase: refModePhrase };
     const procedure = runtimeProcedureBody(body, moldName, noun);
     return [
@@ -206,6 +233,24 @@ const GALAXY_HOOKS: CastHooks = {
       ),
       bulletSection("Validation", schemaValidationRows(produces, slugMap, metaByPath)),
       { title: "Procedure", body: procedure || "No Mold body supplied." },
+      ...(feedback
+        ? [
+            bulletSection("Feedback Mode", [
+              requiresFeedback
+                ? `- This skill requires \`${feedback.default_filename}\`; read \`_feedback.md\` before doing the work even when the caller did not invoke a pipeline with \`--${feedback.producer.option}\`.`
+                : `- Feedback mode is off unless the caller explicitly enables \`--${feedback.producer.option}\` or supplies a feedback-ledger path.`,
+              ...(requiresFeedback
+                ? []
+                : [
+                    `- When enabled, read \`_feedback.md\` before doing the work and use its registered \`${feedback.default_filename}\` protocol.`,
+                  ]),
+              "- Preserve harness-owned run and phase state. Append only concrete observations about a canonical Foundry source asset or a related project that this run showed to be at fault; do not put ordinary workflow requirements in this ledger.",
+              "- Before reporting completion, make one explicit pass over the work you just did. Do not ask yourself whether anything was unclear — recall what happened: where you guessed at something the instructions should have settled, needed information this bundle does not carry, hit an instruction that contradicted another or contradicted the artifacts in front of you, used a packaged reference that did not cover your case, or did something the procedure never describes.",
+              "- Append an entry for each such event that clears the protocol's bar. If none do, append nothing and report `no feedback` explicitly. Silence and a clean pass are not the same thing, and nothing downstream can tell them apart unless you say which one it was.",
+              "- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.",
+            ]),
+          ]
+        : []),
       // Contributed whole rather than appended to a generic closing note. Two of the three
       // bullets name artifacts, and an instance that inherited the third would be unable to
       // reword or reorder around its own.
@@ -272,6 +317,15 @@ const producerIndexCache = new WeakMap<
   ReadonlyMap<string, Frontmatter>,
   Map<string, ProducerInfo>
 >();
+interface RuntimeArtifactContext {
+  registry: RuntimeArtifactRegistry;
+  protocolBodies: ReadonlyMap<string, string>;
+}
+
+const runtimeArtifactsByCorpus = new WeakMap<
+  ReadonlyMap<string, Frontmatter>,
+  RuntimeArtifactContext
+>();
 
 /**
  * The producer index for a corpus, built once per corpus.
@@ -284,13 +338,14 @@ const producerIndexCache = new WeakMap<
 function producerIndexFor(metaByPath: ReadonlyMap<string, Frontmatter>): Map<string, ProducerInfo> {
   const cached = producerIndexCache.get(metaByPath);
   if (cached) return cached;
-  const built = buildProducerIndex(metaByPath);
+  const built = buildProducerIndex(metaByPath, runtimeArtifactsByCorpus.get(metaByPath)?.registry);
   producerIndexCache.set(metaByPath, built);
   return built;
 }
 
 export function buildProducerIndex(
   metaByPath: ReadonlyMap<string, Frontmatter>,
+  runtimeArtifacts?: RuntimeArtifactRegistry,
 ): Map<string, ProducerInfo> {
   const idx = new Map<string, ProducerInfo>();
   for (const [rel, meta] of metaByPath) {
@@ -321,6 +376,16 @@ export function buildProducerIndex(
       }
       idx.set(o.id, info);
     }
+  }
+  for (const [id, artifact] of runtimeArtifacts?.artifacts ?? []) {
+    if (idx.has(id)) {
+      throw new Error(`runtime artifact '${id}' collides with a Mold output producer`);
+    }
+    idx.set(id, {
+      producers: [`runtime:${artifact.producer.option}`],
+      kind: artifact.kind,
+      default_filename: artifact.default_filename,
+    });
   }
   return idx;
 }
@@ -548,11 +613,31 @@ function schemaValidationRows(
  * `cast` for one Mold and `cast-all` for the corpus. Two copies of it would be two chances to
  * disagree about what this Foundry is.
  */
+function buildGalaxyCorpus(repoRoot: string) {
+  const corpus = buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES);
+  const registry = requireRuntimeArtifactRegistry(path.join(repoRoot, "runtime_artifacts.yml"));
+  const protocolBodies = new Map<string, string>();
+  for (const [id, artifact] of registry.artifacts) {
+    const protocolPath = resolveWikiLink(artifact.protocol, corpus.slugMap);
+    if (!protocolPath) {
+      throw new Error(
+        `runtime_artifacts.yml: artifacts.${id}.protocol ${artifact.protocol} did not resolve`,
+      );
+    }
+    const absolute = path.isAbsolute(protocolPath)
+      ? protocolPath
+      : path.join(repoRoot, protocolPath);
+    protocolBodies.set(id, `${readMarkdown(absolute).body.trim()}\n`);
+  }
+  runtimeArtifactsByCorpus.set(corpus.metaByPath, { registry, protocolBodies });
+  return corpus;
+}
+
 export const GALAXY_CAST_SPEC: CastCommandSpec<{ artifacts?: ProvenanceArtifacts }> = {
   usage: "foundry-build cast",
   defaultTarget: "claude",
   hooks: GALAXY_HOOKS,
-  corpus: (repoRoot) => buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES),
+  corpus: buildGalaxyCorpus,
   // Which siblings of a referenced note travel into the bundle. The kind definitions are handed
   // over whole rather than projected onto a casting-shaped copy: `shape`, `companions` and
   // `additionalCompanions` are the same declarations the validator and the site read, and a

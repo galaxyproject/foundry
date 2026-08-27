@@ -25,6 +25,10 @@ import {
   type RequiredTool,
   type RequiredToolRef,
 } from "../lib/required-tools.js";
+import {
+  requireRuntimeArtifactRegistry,
+  type RuntimeArtifactDefinition,
+} from "@galaxy-foundry/note-schema";
 import type { Frontmatter } from "../lib/types.js";
 
 // ---- argv ----
@@ -106,17 +110,28 @@ const SUPPORTED_BRANCH_PATTERNS = new Set(["test-data-resolution"]);
 // Runtime invocation options every assembled harness honors. Uniform across
 // pipelines (#291): documented as prose in `## Run options` and surfaced in
 // `_assembly.json` for the site / future visualization tooling.
-const HARNESS_OPTIONS = ["use-subagents", "checkpoint"] as const;
+const BASE_HARNESS_OPTIONS = ["use-subagents", "checkpoint"] as const;
 
-const RUN_OPTIONS_SECTION: string[] = [
-  "## Run options",
-  "",
-  "Optional flags, given as leading arguments. Strip any you recognize; treat the remaining positional argument as the run slug. Both default off and compose.",
-  "",
-  "- `--use-subagents` — run each cast phase in its own subagent to keep this orchestrator's context small. For each phase whose skill is cast, spawn a subagent, tell it the run directory and to invoke the named skill with every default filename prefixed by `./<run-slug>/`, and have it return a short report (artifacts written, assumptions, status) rather than its full transcript; carry only that report forward. A cast loop phase runs **one subagent per iteration** — each advances a single step and returns its done-signal, and you inspect that signal to decide whether to spawn the next iteration. Branch phases run their whole fallback chain in one subagent. MANUAL (un-cast) phases are never delegated — including MANUAL loop phases — so handle those yourself regardless of the per-iteration rule above.",
-  "- `--checkpoint` — commit after every phase so the run directory's git history is a per-step record (a data source for workflow-implementation visualizations). When set, `git init ./<run-slug>/` during working-directory setup — this is a standalone per-run repo; do not add it to any surrounding repo you are working inside. Then after each phase's artifact is confirmed run `git -C ./<run-slug>/ add -A && git -C ./<run-slug>/ commit -m \"phase <n>: <skill>\"`. Loop phases commit **once per iteration** (`phase <n> step <k>: <skill>`); for a MANUAL loop, commit once per by-hand step. With `--use-subagents`, the subagent does the work and returns; you make the commit.",
-  "",
-];
+function harnessOptions(feedback?: RuntimeArtifactDefinition): string[] {
+  return [...BASE_HARNESS_OPTIONS, ...(feedback ? [feedback.producer.option] : [])];
+}
+
+function runOptionsSection(feedback?: RuntimeArtifactDefinition): string[] {
+  return [
+    "## Run options",
+    "",
+    "Optional flags, given as leading arguments. Strip any you recognize; treat the remaining positional argument as the run slug. All default off and compose.",
+    "",
+    "- `--use-subagents` — run each cast phase in its own subagent to keep this orchestrator's context small. For each phase whose skill is cast, spawn a subagent, tell it the run directory and to invoke the named skill with every default filename prefixed by `./<run-slug>/`, and have it return a short report (artifacts written, assumptions, status) rather than its full transcript; carry only that report forward. A cast loop phase runs **one subagent per iteration** — each advances a single step and returns its done-signal, and you inspect that signal to decide whether to spawn the next iteration. Branch phases run their whole fallback chain in one subagent. MANUAL (un-cast) phases are never delegated — including MANUAL loop phases — so handle those yourself regardless of the per-iteration rule above.",
+    "- `--checkpoint` — commit after every phase so the run directory's git history is a per-step record (a data source for workflow-implementation visualizations). When set, `git init ./<run-slug>/` during working-directory setup — this is a standalone per-run repo; do not add it to any surrounding repo you are working inside. Then after each phase's artifact is confirmed run `git -C ./<run-slug>/ add -A && git -C ./<run-slug>/ commit -m \"phase <n>: <skill>\"`. Loop phases commit **once per iteration** (`phase <n> step <k>: <skill>`); for a MANUAL loop, commit once per by-hand step. With `--use-subagents`, the subagent does the work and returns; you make the commit.",
+    ...(feedback
+      ? [
+          `- \`--${feedback.producer.option}\` — create \`./<run-slug>/${feedback.default_filename}\` before phase 1. Set \`run.pipeline\` to this pipeline's slug and \`run.run_slug\` to the chosen run slug. Copy the complete top-level roster from \`_assembly.json\` with \`run.status: running\` and every phase \`pending\`; set a phase \`running\` immediately before it starts and \`done\` after success. Keep one row per loop and increment \`iterations\`; record a branch's chosen path as \`selected\`. Pass the same ledger path to every skill and subagent. Before marking a phase \`done\`, require its feedback outcome — appended entry ids or an explicit \`no feedback\` — and record \`feedback_checked: true\` on that row; under \`--use-subagents\` the subagent's short report carries that line. Do the same pass yourself for a MANUAL phase, naming the pipeline source as the subject when the harness is what needs to change. On a terminating error mark the phase and run \`failed\`; on a graceful stop mark the run \`cancelled\`; after every intended phase is done mark the run \`complete\`. Never describe an empty incomplete ledger as a clean run.`,
+        ]
+      : []),
+    "",
+  ];
+}
 
 interface Assembled {
   skill: string;
@@ -133,6 +148,7 @@ function assemble(
   metaByPath: ReadonlyMap<string, Frontmatter>,
   slugMap: ReadonlyMap<string, string>,
   repoRoot: string,
+  feedback?: RuntimeArtifactDefinition,
 ): Assembled {
   const errors: string[] = [];
   const title = scalar(pipelineMeta.title);
@@ -217,6 +233,7 @@ function assemble(
     hasManual,
     harnessNotes,
     requiredTools,
+    feedback,
   });
 
   return { skill, assemblyPhases, requiredTools, errors };
@@ -288,6 +305,7 @@ function renderSkill(args: {
   hasManual: boolean;
   harnessNotes: string[];
   requiredTools: RequiredTool[];
+  feedback?: RuntimeArtifactDefinition;
 }): string {
   const description = `${firstSentence(args.summary)} — orchestrates the Foundry skills of the ${args.title} pipeline in order, in a per-run working directory.`;
   const doneTail = args.hasManual ? " and any phases handled manually (marked MANUAL above)" : "";
@@ -326,7 +344,7 @@ function renderSkill(args: {
   }
   blocks.push(
     "",
-    ...RUN_OPTIONS_SECTION,
+    ...runOptionsSection(args.feedback),
     "## Working directory (do this first)",
     "",
     "Every constituent skill writes fixed filenames to its working directory. To keep one run's artifacts namespaced and avoid clobbering a prior run (foundry#282):",
@@ -346,6 +364,12 @@ function renderSkill(args: {
     "## Done",
     "",
     `Report the final artifacts in \`./<run-slug>/\`${doneTail}.`,
+    ...(args.feedback
+      ? [
+          "",
+          `If the run was invoked with \`--${args.feedback.producer.option}\`, close the ledger first: set the final \`run.status\`, then tell the user the ledger path \`./<run-slug>/${args.feedback.default_filename}\` and how many entries it holds. If it holds any, offer to run the \`report-foundry-run-feedback\` skill on it, which triages them into local drafts and files nothing without explicit confirmation. Report an empty ledger as "no feedback recorded", never as evidence the Foundry worked well.`,
+        ]
+      : []),
     "",
     "## Notes",
     "",
@@ -373,6 +397,7 @@ function renderAssembly(
   revision: number,
   phases: AssemblyPhase[],
   requiredTools: RequiredTool[],
+  feedback?: RuntimeArtifactDefinition,
 ): string {
   // JSON round-trip drops undefined-valued keys before the compact serializer.
   const tools = JSON.parse(JSON.stringify(requiredTools)) as unknown[];
@@ -381,7 +406,7 @@ function renderAssembly(
     `  "source_pipeline": ${JSON.stringify(slug)},`,
     `  "source_revision": ${revision},`,
     `  "harness_name": ${JSON.stringify(harnessName)},`,
-    `  "options": ${compactValue([...HARNESS_OPTIONS])},`,
+    `  "options": ${compactValue(harnessOptions(feedback))},`,
     `  "required_tools": [`,
     ...tools.map((t, i) => `    ${compactValue(t)}${i < tools.length - 1 ? "," : ""}`),
     `  ],`,
@@ -423,6 +448,10 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
 
   const harnessName = args.harnessName ?? `pipeline-${args.slug}`;
   const { slugMap, metaByPath } = buildSlugMap(repoRoot, GALAXY_SLUG_ALIASES);
+  const runtimeArtifacts = requireRuntimeArtifactRegistry(
+    path.join(repoRoot, "runtime_artifacts.yml"),
+  );
+  const feedback = runtimeArtifacts.artifacts.get("foundry-feedback-ledger");
   const parsedPhases = parsePhases(phases, slugMap, metaByPath, pipelineRel);
 
   const errors: string[] = [];
@@ -438,6 +467,7 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
     metaByPath,
     slugMap,
     repoRoot,
+    feedback,
   );
   errors.push(...result.errors);
 
@@ -448,6 +478,7 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
     revision,
     result.assemblyPhases,
     result.requiredTools,
+    feedback,
   );
 
   for (const e of errors) console.error(`error: ${e}`);

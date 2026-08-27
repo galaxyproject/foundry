@@ -282,6 +282,7 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
     expect(existsSync(path.join(bundle, "SKILL.md"))).toBe(true);
     expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(true);
     expect(existsSync(path.join(bundle, "_verify.json"))).toBe(true);
+    expect(existsSync(path.join(bundle, "_feedback.md"))).toBe(true);
   });
 
   it("SKILL.md is rendered from Mold metadata, references, and body", () => {
@@ -300,9 +301,42 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
     expect(text).toContain("`summary-nextflow`");
     expect(text).toContain("references/schemas/summary-nextflow.schema.json");
     expect(text).toContain("## Procedure");
+    expect(text).toContain("## Feedback Mode");
+    expect(text).toContain("`_feedback.md`");
+    expect(text).toContain("`foundry-feedback.ledger.yml`");
+    // Passive "append when you notice" yields nothing; the pass is explicit and so is its
+    // negative outcome (#473 review).
+    expect(text).toContain("Before reporting completion");
+    expect(text).toContain("`no feedback`");
     expect(text).toContain("Read a Nextflow pipeline source tree");
     expect(text).not.toContain("This skill was deterministically cast from its Mold");
     expect(text).not.toMatch(/\[\[[^\]]+\]\]/);
+  });
+
+  it("bundles the single-sourced feedback protocol", () => {
+    const protocol = readFileSync(
+      path.join(repoRoot, "casts/claude/skills/summarize-nextflow/_feedback.md"),
+      "utf8",
+    );
+    expect(protocol).toContain("# Foundry feedback ledger");
+    expect(protocol).toContain("## Canonical identity and provenance");
+    expect(protocol).toContain("Never copy credentials");
+    expect(protocol).toContain("feedback_checked");
+  });
+
+  it("records runtime:feedback as the reporting Mold's input producer", () => {
+    const provenance = JSON.parse(
+      readFileSync(
+        path.join(repoRoot, "casts/claude/skills/report-foundry-run-feedback/_provenance.json"),
+        "utf8",
+      ),
+    );
+    expect(provenance.artifacts.consumes).toContainEqual(
+      expect.objectContaining({
+        id: "foundry-feedback-ledger",
+        producers: ["runtime:feedback"],
+      }),
+    );
   });
 
   it("rejects unknown flags", () => {
@@ -348,6 +382,52 @@ describe("artifact-contract inheritance", () => {
         description: "Upstream summary used for binding.",
         inherited_schema: "[[schema-x]]",
         producers: ["producer"],
+      },
+    ]);
+  });
+
+  it("consumer input inherits a registered runtime producer", async () => {
+    const { buildProducerIndex, readArtifactContracts } =
+      await import("../packages/build-cli/src/commands/cast-mold.js");
+    const meta = new Map<string, any>([
+      [
+        "content/molds/consumer/index.md",
+        {
+          type: "mold",
+          input_artifacts: [
+            { id: "runtime-ledger", description: "Runtime-produced feedback ledger." },
+          ],
+        },
+      ],
+    ]);
+    const runtimeArtifacts = {
+      version: 1 as const,
+      artifacts: new Map([
+        [
+          "runtime-ledger",
+          {
+            id: "runtime-ledger",
+            kind: "yaml",
+            default_filename: "runtime.ledger.yml",
+            protocol: "[[runtime-ledger]]",
+            producer: {
+              kind: "runtime-mode" as const,
+              option: "feedback",
+              initializer: "harness-or-first-skill" as const,
+            },
+          },
+        ],
+      ]),
+    };
+    const contracts = readArtifactContracts(
+      meta.get("content/molds/consumer/index.md")!,
+      buildProducerIndex(meta, runtimeArtifacts),
+    );
+    expect(contracts!.consumes).toEqual([
+      {
+        id: "runtime-ledger",
+        description: "Runtime-produced feedback ledger.",
+        producers: ["runtime:feedback"],
       },
     ]);
   });
@@ -1910,6 +1990,10 @@ describe("reference_contract.yml cast declarations are load-bearing", () => {
       for (const name of ["content", "casts", "LICENSES"]) {
         symlinkSync(path.join(repoRoot, name), path.join(root, name));
       }
+      symlinkSync(
+        path.join(repoRoot, "runtime_artifacts.yml"),
+        path.join(root, "runtime_artifacts.yml"),
+      );
     };
     const run = (root: string) =>
       runTsx(foundryBuild, ["cast", moldName, "--target=claude", "--check", "--root", root]);

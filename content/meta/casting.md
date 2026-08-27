@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-02
-revision: 30
+revised: 2026-08-25
+revision: 31
 summary: "How typed Mold references become target-specific cast artifacts with provenance."
 ---
 
@@ -76,7 +76,7 @@ Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skil
 To cast a Mold, the casting process consumes:
 
 - **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. The cast renders the procedural body of `index.md` into `SKILL.md`. Which sibling files travel is not decided here: the `mold` kind declares a disposition per companion (`packages/note-schema/src/types/mold/schema.ts`), and the cast verifier refuses a bundle carrying one that is not `bundled`. `eval.md` and the other Foundry-only companions never leave the Foundry; `casting.md` and `cast-skill-verification.md` are read while casting but not shipped. Author-facing meta-content (changelog entries, casting open-questions) belongs in those sibling files, not in the body of `index.md` — anything in the body is runtime instruction.
-- **Artifact IO contracts** — `input_artifacts[]` and `output_artifacts[]` define what a skill consumes and produces. Producer-owned schemas declared on `output_artifacts[].schema` are surfaced to consumers by shared artifact `id`; cast provenance records the producer list and inherited schema hints for harnesses.
+- **Artifact IO contracts** — `input_artifacts[]` and `output_artifacts[]` define what a skill consumes and produces. Producer-owned schemas declared on `output_artifacts[].schema` are surfaced to consumers by shared artifact `id`; cast provenance records the producer list and inherited schema hints for harnesses. Root `runtime_artifacts.yml` contributes explicit runtime-mode producers to the same index, rendered as `runtime:<option>`, so a runtime-initialized ledger remains a normal declared input rather than a producer-validation exemption.
 - **All typed references declared in the manifest**, resolved by kind:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
@@ -101,6 +101,7 @@ Per cast: `casts/claude/skills/<mold-name>/`. The directory uses the portable Ag
 ```
 casts/claude/skills/<mold-name>/
 ├── SKILL.md                  # deterministic render of Mold body + artifacts + refs
+├── _feedback.md              # registered feedback protocol, when feedback mode exists
 ├── references/               # supporting content, organized by kind
 │   ├── schemas/              # verbatim *.schema.json
 │   ├── cli/                  # deterministic JSON sidecars (flat, <slug>.json)
@@ -115,7 +116,7 @@ Per-kind dst conventions are declared in `casts/claude/_target.yml` (`kinds.<kin
 
 Per-kind subdirectories under `references/` mirror the casting dispatch and let the generated skill's runtime locate any artifact deterministically.
 
-`SKILL.md` contains deterministic sections for when to use the skill, upstream artifact inputs, produced artifacts, upfront references, on-demand references and triggers, validation hints, the Mold procedure, and runtime notes. Raw Foundry wiki-links are stripped or resolved to packaged reference paths so the skill is self-contained. Its frontmatter stays in the shared `name`/`description` core; runtime-specific invocation syntax belongs in manifests and usage documentation.
+`SKILL.md` contains deterministic sections for when to use the skill, upstream artifact inputs, produced artifacts, upfront references, on-demand references and triggers, validation hints, the Mold procedure, optional feedback-mode behavior, and runtime notes. `_feedback.md` is rendered from the protocol note named by the registered feedback artifact rather than repeated in every Mold. Raw Foundry wiki-links are stripped or resolved to packaged reference paths so the skill is self-contained. Its frontmatter stays in the shared `name`/`description` core; runtime-specific invocation syntax belongs in manifests and usage documentation.
 
 The plugin root carries both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`, each pointing to the same `skills/` directory. Repo marketplace metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, while Codex reads `.agents/plugins/marketplace.json`. Neither duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
 

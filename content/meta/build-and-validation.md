@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-04
-revision: 4
+revised: 2026-08-25
+revision: 5
 summary: "How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current."
 ---
 
@@ -37,10 +37,10 @@ Authors change source notes, registries, schema implementations, or code. Genera
 1. discover notes through the shared collection table;
 2. parse frontmatter and validate the note against its kind's strict zod schema;
 3. check dates, paths, note shapes, and companion contracts;
-4. load tag and reference registries and enforce membership and coherence;
+4. load tag, reference, and runtime-artifact registries and enforce membership and coherence;
 5. build the shared wiki-link map and resolve frontmatter and body links; an unresolved link is an error wherever it is written, on every kind that declares the field;
 6. run kind-specific checks for Molds, Patterns, Pipelines, schemas, CLI notes, prompts, research notes, and artifacts;
-7. run cross-note checks such as typed-reference compatibility, pipeline phase resolution, and artifact producer/consumer ordering — where inputs sharing a `role` are alternatives one producer satisfies;
+7. run cross-note checks such as typed-reference compatibility, pipeline phase resolution, and artifact producer/consumer ordering — where inputs sharing a `role` are alternatives one producer satisfies, and a producer may be a Mold output or an explicitly registered runtime mode;
 8. run `validateUnroutedContent`, which errors on markdown under `content/` that no collection claims, no directory note owns, and `NOT_NOTES` does not declare.
 
 Step 8 is what closes the walk. Steps 1–7 check the files the routing table found; step 8 checks that the table found everything there was to find. [[content-model]] owns the three-way accounting it enforces.
@@ -66,13 +66,14 @@ Casting treats source and output as separate lifecycles:
 
 - Molds and referenced notes are durable authored source.
 - `SKILL.md`, copied references, sidecars, `_provenance.json`, and verification reports are generated outputs.
+- `_feedback.md` is generated from the registered feedback protocol note when the instance declares the feedback runtime artifact.
 - Evaluation and refinement companions remain Foundry-maintainer material unless their declared disposition says otherwise.
 
 [[casting]] and [[cast-walkthrough]] own the semantic details.
 
 ## Pipeline assembly
 
-`foundry-build assemble-pipeline` projects a Pipeline's phase spine into a lightweight `pipeline-<slug>` harness skill. It resolves phase Molds, expands supported branch routing, records `_assembly.json`, and prepares a per-run working-directory contract. The output is a test-drive convenience, not the production harness architecture described in [[harness-pipelines]].
+`foundry-build assemble-pipeline` projects a Pipeline's phase spine into a lightweight `pipeline-<slug>` harness skill. It resolves phase Molds, expands supported branch routing, records `_assembly.json`, and prepares a per-run working-directory contract. When the feedback runtime artifact is registered, the assembly also exposes `--feedback` and the ledger lifecycle derived from the same registry declaration. The output is a test-drive convenience, not the production harness architecture described in [[harness-pipelines]].
 
 `make check-assemble-pipelines` is the drift gate for committed assemblies.
 
