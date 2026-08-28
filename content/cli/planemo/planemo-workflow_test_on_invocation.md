@@ -40,7 +40,7 @@ planemo workflow_test_on_invocation [OPTIONS] TEST.YML INVOCATION_ID
 | --galaxy_url | text | — | yes | Remote Galaxy URL to use with external Galaxy engine. |
 | --galaxy_user_key | text | — | yes | User key to use with external Galaxy engine. |
 | --test_index | integer | 1 | — | Select which test to check. Counting starts at 1 |
-| --update_test_data | flag | false | — | Update test-data directory with job outputs (normally written to directory --job_output_files if specified.) |
+| --update_test_data | flag | — | — | Update test-data directory with job outputs (normally written to directory --job_output_files if specified.) |
 | --test_output | path | tool_test_output.html | — | Output test report (HTML - for humans) defaults to tool_test_output.html. |
 | --test_output_text | path | — | — | Output test report (Basic text - for display in CI) |
 | --test_output_markdown | path | — | — | Output test report (Markdown style - for humans & computers) |

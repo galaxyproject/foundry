@@ -36,7 +36,7 @@ planemo workflow_test_init [OPTIONS] WORKFLOW_PATH_OR_ID
 
 | Option | Type | Default | Required | Help |
 |---|---|---|---|---|
-| -f, --force | flag | false | — | Overwrite existing files if present. |
+| -f, --force | flag | — | — | Overwrite existing files if present. |
 | -o, --output | file | — | — | — |
 | --split_test, --no_split_test | flag | false | — | Write workflow job and test definitions to separate files. |
 | --galaxy_url | text | — | — | Remote Galaxy URL to use with external Galaxy engine. |
