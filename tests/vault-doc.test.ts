@@ -1,5 +1,5 @@
-// The glossary and the ops log render OUTSIDE the remark pipeline — `marked` over a file no
-// collection owns — so `[[Target]]` has to be resolved on the string, before parsing. That path
+// The glossary renders OUTSIDE the remark pipeline — `marked` over a file no collection owns —
+// so `[[Target]]` has to be resolved on the string, before parsing. That path
 // carried a local regex, and a regex over raw markdown rewrites inside code spans, where a
 // backtick means the syntax. The entry it corrupted is the glossary's definition of a Phase:
 //

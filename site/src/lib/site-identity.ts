@@ -45,7 +45,6 @@ export const SITE_IDENTITY: SiteIdentity = {
     { path: "/index/", label: "Index" },
     { path: "/tags/", label: "Tags" },
     { path: "/external/", label: "External" },
-    { path: "/log/", label: "Log" },
   ],
 
   /**

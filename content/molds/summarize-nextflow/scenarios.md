@@ -123,8 +123,9 @@ are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - expect: `nextflow-summary-to-galaxy-data-flow`'s cast skill consumes the JSON
   and produces a draft without "field missing" errors; `author-galaxy-tool-wrapper`
   produces UDT container or package-evidence decisions for every `tools[]` row.
-  Any field that proves underspecified is logged in `content/log.md` under
-  `gap:` and triggers an Open-gaps note update.
+  Any field that proves underspecified becomes an explicit feedback observation
+  against the producer Mold or schema. Under feedback mode, append it to the
+  registered `foundry-feedback-ledger`; never hide it in prose output.
 
 ## Case: bacass single process row standalone
 
@@ -132,7 +133,8 @@ are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - expect: `author-galaxy-tool-wrapper` produces a Galaxy UDT using only that
   process object (`meta`, `module_tests`, `container`, `conda`, declared IO); it
   does not consult summary-level `tools[]`, `workflow`, or `params`. Missing
-  fields become logged gaps rather than implicit lookups into the parent summary.
+  fields become explicit feedback observations rather than implicit lookups into
+  the parent summary.
 
 ## Case: nf-test to Galaxy test-plan translation
 

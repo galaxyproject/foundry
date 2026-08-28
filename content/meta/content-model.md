@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-25
-revision: 4
+revised: 2026-08-28
+revision: 5
 summary: "How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge."
 ---
 
@@ -122,7 +122,7 @@ No separate navigation-hub kind is required. Generated dashboard and index pages
 
 ## Deliberate non-notes
 
-`content/meta/glossary.md` shares the design-record directory but is deliberately excluded from the `meta` collection. It has its own renderer and term anchors. `content/log.md` is an append-only operations record excluded from normal note validation and collections. Sharing a directory is a filing decision, not a type declaration.
+`content/meta/glossary.md` shares the design-record directory but is deliberately excluded from the `meta` collection. It has its own renderer and term anchors. Sharing a directory is a filing decision, not a type declaration.
 
 Not being claimed by a collection is not the same as being accounted for: a file nobody meant to add is equally unclaimed. Every non-note is therefore *declared*, in `NOT_NOTES` beside `COLLECTIONS`, with the reason it is not a note. Markdown under `content/` must be one of exactly three things:
 

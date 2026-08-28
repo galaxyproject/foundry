@@ -1217,11 +1217,10 @@ function validateCompanionLayout(contentRoot: string, files: FileMeta[]): CrossF
  * Markdown under the content root that is neither a note, nor a companion, nor declared as
  * deliberately neither.
  *
- * The residue used to be accounted for by silence. Nothing claimed `content/log.md`, so the
- * walker skipped it — and skipped, by exactly the same rule, anything else nobody had routed.
- * `content/prompts/**` lived in that gap for as long as it existed: two notes, committed,
- * validated by nothing and published by nothing. This closes the set, so the residue is empty
- * by construction rather than by having been looked at recently.
+ * The residue used to be accounted for by silence: the walker skipped anything nobody had
+ * routed. `content/prompts/**` lived in that gap for as long as it existed: two notes, committed,
+ * validated by nothing and published by nothing. This closes the set, so the residue is empty by
+ * construction rather than by having been looked at recently.
  *
  * A directory-shaped note's own directory is left alone: `validateCompanionLayout` owns it, and
  * reports an undeclared file there against the KIND that failed to declare it, which is the

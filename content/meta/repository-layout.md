@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-25
-revision: 2
+revised: 2026-08-28
+revision: 3
 summary: "Where authored source, implementation code, generated artifacts, fixtures, and site files belong."
 ---
 
@@ -48,8 +48,7 @@ content/
 ├── prompts/          prompt wrappers with raw prompt companions
 ├── research/         background notes with owned source companions
 ├── Dashboard.md      generated browse surface
-├── Index.md          generated flat catalog
-└── log.md            append-only operations log
+└── Index.md          generated flat catalog
 ```
 
 The content root follows the Astro idiom and tells a contributor that these files are publishable knowledge. A directory under `content/` does not define its own semantics: the collection table and kind definition declare whether files are notes, what kind they carry, and whether companions are allowed.

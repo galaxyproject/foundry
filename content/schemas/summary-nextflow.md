@@ -77,7 +77,7 @@ Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by 
 
 ## Revision 2 — 2026-05-01
 
-First cast against `nf-core/demo @ 1.1.0` exposed gaps in the v1 shape (see `content/log.md`'s 2026-05-01 entry). Changes:
+First cast against `nf-core/demo @ 1.1.0` exposed gaps in the v1 shape. Changes:
 
 - **`Tool.biocontainer` description widened** to accept the docker.io alias `biocontainers/<name>:<version>--<build>` alongside `quay.io/biocontainers/...`. Modern nf-core modules publish the docker.io form in the docker branch and the `depot.galaxyproject.org/singularity/...` form in the singularity branch.
 - **`Tool.wave` field added** for Seqera Wave / community-cr registry images (`community.wave.seqera.io/...`, `https://community-cr-prod.seqera.io/...`). Kept distinct from `docker` because resolution rules and provenance differ.

@@ -626,14 +626,13 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   // The residue: markdown under the content root that no collection claims. It used to be
-  // accounted for by silence — nothing routed `log.md`, so the walker skipped it, and skipped
-  // anything else unrouted by the same rule.
+  // accounted for by silence, so the walker skipped anything nobody had routed.
   describe("markdown no collection claims", () => {
     it("errors on a file that is neither note, companion, nor declared non-note", () => {
       writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
       expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
 
-      writeFileSync(path.join(dir, "notes-to-self.md"), "# scratch\n");
+      writeFileSync(path.join(dir, "log.md"), "# retired global log\n");
       expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(1);
     });
 
@@ -649,7 +648,6 @@ describe("validateDirectory (cross-file)", () => {
       writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
       writeFileSync(path.join(dir, "Dashboard.md"), "# Dashboard\n");
       writeFileSync(path.join(dir, "Index.md"), "# Index\n");
-      writeFileSync(path.join(dir, "log.md"), "# Log\n");
       mkdirSync(path.join(dir, "meta"), { recursive: true });
       writeFileSync(path.join(dir, "meta/glossary.md"), "# Glossary\n");
       expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);

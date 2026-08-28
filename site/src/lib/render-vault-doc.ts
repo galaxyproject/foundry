@@ -20,8 +20,8 @@ export interface VaultDocTarget {
   summary: string;
 }
 
-// The glossary and the ops log live outside every collection, so they render through `marked`
-// rather than the remark pipeline — which means links resolve on the STRING, before parsing.
+// The glossary lives outside every collection, so it renders through `marked` rather than the
+// remark pipeline — which means links resolve on the STRING, before parsing.
 //
 // Neither half of that is ours. The grammar and the anchor minting both ship in
 // @galaxy-foundry/wiki-links, so this path and its remark twin cannot answer differently. What
@@ -37,8 +37,8 @@ export interface VaultDocTarget {
 const DEFAULT_CONTENT_DIR = path.resolve('../content');
 
 /**
- * Load a content-root markdown file (log.md, glossary.md), resolve [[wiki links]],
- * and render to HTML.
+ * Load a declared non-note markdown file such as the glossary, resolve [[wiki links]], and render
+ * to HTML.
  *
  * `contentDir` defaults to the corpus as seen from the site/ cwd an Astro build runs in. It is a
  * parameter for the same reason the LICENSES directory is one: an implicit relative path is
