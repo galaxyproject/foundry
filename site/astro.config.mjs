@@ -31,7 +31,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
     server: {
       watch: {
-        ignored: ['**/.obsidian/**', '**/content/log.md'],
+        ignored: ['**/.obsidian/**'],
       },
     },
   },

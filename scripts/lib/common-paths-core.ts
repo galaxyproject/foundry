@@ -46,7 +46,9 @@ export function citationGithubUrl(c: Citation): string | null {
   const { entry, relPath, lineStart, lineEnd } = c;
   if (!entry.repo) return null;
   const ref = entry.ref ?? "main";
-  const fullPath = entry.path_prefix ? `${entry.path_prefix.replace(/\/$/, "")}/${relPath}` : relPath;
+  const fullPath = entry.path_prefix
+    ? `${entry.path_prefix.replace(/\/$/, "")}/${relPath}`
+    : relPath;
   let url = `https://github.com/${entry.repo}/blob/${ref}/${fullPath}`;
   if (lineStart) url += `#L${lineStart}${lineEnd ? `-L${lineEnd}` : ""}`;
   return url;

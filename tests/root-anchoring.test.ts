@@ -31,7 +31,7 @@ import { repoRelative, siteSourceCode, siteSourceFiles } from "./site-sources";
 //
 // Comments are stripped before this is applied, so a module is free to DESCRIBE the mistake —
 // `note-directory.ts` and this file both do, at length, and neither is a violation.
-const PARENT_HOP = /(['"`])\.\.[\/'"`]/;
+const PARENT_HOP = /(['"`])\.\.[/'"`]/;
 
 describe("anchoring a site module to the repository root", () => {
   it("never counts ../ from import.meta.url", () => {

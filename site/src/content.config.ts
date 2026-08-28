@@ -30,8 +30,8 @@ function slugifyPath(entry: string): string {
 // its OWN base, so the base's path has to go back on before slugifying — without it every note
 // loses its leading segment and every URL on the site moves.
 //
-// The old glob's `!Dashboard.md` / `!Index.md` / `!log.md` exclusions are gone rather than
-// dropped: those files sit at content/ root, and no collection's base reaches them.
+// The old glob's `!Dashboard.md` / `!Index.md` exclusions are gone rather than dropped: those
+// files sit at content/ root, and no collection's base reaches them.
 //
 // `!meta/glossary.md` is the one that came BACK, and it is stated in COLLECTIONS rather than
 // here. The `meta` collection's base is `content/meta`, so that directory is reachable again —

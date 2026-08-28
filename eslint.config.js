@@ -16,6 +16,12 @@ export default tseslint.config(
     },
   },
   {
+    // Plain JS, so `no-undef` is live — typescript-eslint turns it off for .ts because the
+    // compiler already answers it. One script, one global.
+    files: ["**/*.mjs"],
+    languageOptions: { globals: { console: "readonly" } },
+  },
+  {
     files: ["packages/*/src/**/*.ts"],
     languageOptions: {
       parserOptions: {

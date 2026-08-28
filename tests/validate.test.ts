@@ -357,6 +357,29 @@ describe("validateData (per-file)", () => {
 
 // ---- Cross-file integration ----
 
+/**
+ * What the validator PRINTED while `body` ran.
+ *
+ * A warning is not in the returned counts — it is a line on stdout — so a rule about warnings has
+ * to read the stream. The restore is in a `finally` because a failed expectation inside `body`
+ * throws, and a suite that leaves the real `write` replaced reports every later test's output into
+ * a string nobody reads.
+ */
+function capturingStdout(body: () => void): string {
+  const before = process.stdout.write;
+  let captured = "";
+  process.stdout.write = (chunk: string | Uint8Array) => {
+    captured += String(chunk);
+    return true;
+  };
+  try {
+    body();
+  } finally {
+    process.stdout.write = before;
+  }
+  return captured;
+}
+
 function writeFm(file: string, fm: Record<string, unknown>): void {
   mkdirSync(path.dirname(file), { recursive: true });
   const yaml = Object.entries(fm)
@@ -603,14 +626,13 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   // The residue: markdown under the content root that no collection claims. It used to be
-  // accounted for by silence — nothing routed `log.md`, so the walker skipped it, and skipped
-  // anything else unrouted by the same rule.
+  // accounted for by silence, so the walker skipped anything nobody had routed.
   describe("markdown no collection claims", () => {
     it("errors on a file that is neither note, companion, nor declared non-note", () => {
       writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
       expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
 
-      writeFileSync(path.join(dir, "notes-to-self.md"), "# scratch\n");
+      writeFileSync(path.join(dir, "log.md"), "# retired global log\n");
       expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(1);
     });
 
@@ -626,7 +648,6 @@ describe("validateDirectory (cross-file)", () => {
       writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
       writeFileSync(path.join(dir, "Dashboard.md"), "# Dashboard\n");
       writeFileSync(path.join(dir, "Index.md"), "# Index\n");
-      writeFileSync(path.join(dir, "log.md"), "# Log\n");
       mkdirSync(path.join(dir, "meta"), { recursive: true });
       writeFileSync(path.join(dir, "meta/glossary.md"), "# Glossary\n");
       expect(validateDirectory({ directory: dir, tagsPath: TAGS_PATH }).errors).toBe(0);
@@ -1976,21 +1997,13 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
 
-    const before = process.stdout.write;
-    let captured = "";
-    process.stdout.write = (chunk: any) => {
-      captured += String(chunk);
-      return true;
-    };
-    try {
+    const captured = capturingStdout(() => {
       const r = validateDirectory({
         directory: dir,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBeGreaterThanOrEqual(1);
-    } finally {
-      process.stdout.write = before;
-    }
+    });
     expect(captured).toMatch(/inconsistent producer schemas/);
   });
 
@@ -2039,22 +2052,14 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
 
-    const before = process.stdout.write;
-    let captured = "";
-    process.stdout.write = (chunk: any) => {
-      captured += String(chunk);
-      return true;
-    };
-    try {
+    const captured = capturingStdout(() => {
       const r = validateDirectory({
         directory: dir,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBe(0);
       expect(r.warnings).toBeGreaterThanOrEqual(1);
-    } finally {
-      process.stdout.write = before;
-    }
+    });
     expect(captured).toMatch(/mixed schema coverage/);
   });
 
@@ -2086,21 +2091,13 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
 
-    const before = process.stdout.write;
-    let captured = "";
-    process.stdout.write = (chunk: any) => {
-      captured += String(chunk);
-      return true;
-    };
-    try {
+    const captured = capturingStdout(() => {
       const r = validateDirectory({
         directory: dir,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBeGreaterThanOrEqual(1);
-    } finally {
-      process.stdout.write = before;
-    }
+    });
     expect(captured).toMatch(/package_export/);
   });
 
@@ -2122,21 +2119,13 @@ describe("validateDirectory (cross-file)", () => {
       JSON.stringify({ name: "@galaxy-foundry/schema-x", bin: {} }, null, 2),
     );
 
-    const before = process.stdout.write;
-    let captured = "";
-    process.stdout.write = (chunk: any) => {
-      captured += String(chunk);
-      return true;
-    };
-    try {
+    const captured = capturingStdout(() => {
       const r = validateDirectory({
         directory: dir,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBeGreaterThanOrEqual(1);
-    } finally {
-      process.stdout.write = before;
-    }
+    });
     expect(captured).toMatch(/validator_bin 'validate-schema-x'/);
     expect(captured).toMatch(/package\.json bin map/);
   });
@@ -2177,21 +2166,13 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
 
-    const before = process.stdout.write;
-    let captured = "";
-    process.stdout.write = (chunk: any) => {
-      captured += String(chunk);
-      return true;
-    };
-    try {
+    const captured = capturingStdout(() => {
       const r = validateDirectory({
         directory: dir,
         tagsPath: TAGS_PATH,
       });
       expect(r.errors).toBe(0);
-    } finally {
-      process.stdout.write = before;
-    }
+    });
     expect(captured).toMatch(/input_artifact 'summary-x' has no prior phase producing it/);
   });
 
@@ -2260,18 +2241,10 @@ describe("validateDirectory (cross-file)", () => {
   };
 
   const captureValidate = () => {
-    const before = process.stdout.write;
-    let captured = "";
-    process.stdout.write = (chunk: any) => {
-      captured += String(chunk);
-      return true;
-    };
-    try {
+    const captured = capturingStdout(() => {
       const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
       expect(r.errors).toBe(0);
-    } finally {
-      process.stdout.write = before;
-    }
+    });
     return captured;
   };
 

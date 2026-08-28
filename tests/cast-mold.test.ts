@@ -349,7 +349,7 @@ describe("artifact-contract inheritance", () => {
   it("consumer input inherits schema and producers from the producer's output_artifact", async () => {
     const { buildProducerIndex, readArtifactContracts } =
       await import("../packages/build-cli/src/commands/cast-mold.js");
-    const meta = new Map<string, any>([
+    const meta = new Map<string, Frontmatter>([
       [
         "content/molds/producer/index.md",
         {
@@ -435,7 +435,7 @@ describe("artifact-contract inheritance", () => {
   it("builds a process-based verify manifest for output and inherited input schemas", async () => {
     const { buildProducerIndex, buildVerifyManifest } =
       await import("../packages/build-cli/src/commands/cast-mold.js");
-    const meta = new Map<string, any>([
+    const meta = new Map<string, Frontmatter>([
       [
         "content/molds/producer/index.md",
         {
@@ -514,7 +514,7 @@ describe("artifact-contract inheritance", () => {
   it("drops inherited_schema when producers disagree on the schema", async () => {
     const { buildProducerIndex, readArtifactContracts } =
       await import("../packages/build-cli/src/commands/cast-mold.js");
-    const meta = new Map<string, any>([
+    const meta = new Map<string, Frontmatter>([
       [
         "content/molds/producer-a/index.md",
         {

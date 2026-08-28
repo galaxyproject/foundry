@@ -39,9 +39,7 @@ export function loadVendoredUpstreams(
       throw new Error(`vendored entry ${i + 1} requires local, source, and pinned_ref`);
     }
     if (!value.license || !value.license_file) {
-      throw new Error(
-        `vendored entry ${i + 1} (${value.local}) requires license and license_file`,
-      );
+      throw new Error(`vendored entry ${i + 1} (${value.local}) requires license and license_file`);
     }
     // Assert the referenced LICENSES/ file exists at sync/check time, so a
     // license attaches at the point of sync rather than only when a downstream
@@ -115,8 +113,11 @@ export function findVendoredDrift(
     const source = isUrl(entry.source) ? null : resolveSource(repoRoot, entry.source);
     if (source && entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
     if (!fs.existsSync(localPath)) throw new Error(`Missing vendored file ${entry.local}`);
-    if (source && !fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
-    const sourceText = source ? fs.readFileSync(source.sourcePath, "utf-8") : fetchUrl(entry.source);
+    if (source && !fs.existsSync(source.sourcePath))
+      throw new Error(`Missing source file ${entry.source}`);
+    const sourceText = source
+      ? fs.readFileSync(source.sourcePath, "utf-8")
+      : fetchUrl(entry.source);
     if (fs.readFileSync(localPath, "utf-8") !== sourceText) {
       drift.push({
         entry,
@@ -139,7 +140,8 @@ export function syncVendoredUpstreams(
     const localPath = path.join(repoRoot, entry.local);
     const source = isUrl(entry.source) ? null : resolveSource(repoRoot, entry.source);
     if (source && entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
-    if (source && !fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
+    if (source && !fs.existsSync(source.sourcePath))
+      throw new Error(`Missing source file ${entry.source}`);
     fs.mkdirSync(path.dirname(localPath), { recursive: true });
     if (source) {
       fs.copyFileSync(source.sourcePath, localPath);

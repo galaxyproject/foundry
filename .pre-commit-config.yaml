@@ -45,18 +45,19 @@ repos:
   # repo's already-installed pnpm/node (run `pnpm install` first).
   - repo: local
     hooks:
-      # Root `tests/` is in, `scripts/` is not: `seed-mold-stubs.ts` keeps a hand-aligned
-      # record table that prettier would expand to four times the lines.
+      # Every TypeScript directory that is ours. `scripts/` used to sit outside prettier for one
+      # hand-aligned table in `seed-mold-stubs.ts`; the table carries `// prettier-ignore` now,
+      # which is the size the exception actually is.
       - id: prettier
         name: prettier (write)
         entry: pnpm exec prettier --write
         language: system
-        files: ^(packages/.*/(src|test)|tests)/.*\.ts$
+        files: ^(packages/.*/(src|test)|tests|scripts)/.*\.(ts|mjs)$
         pass_filenames: true
 
       - id: eslint
         name: eslint (fix)
         entry: pnpm exec eslint --fix
         language: system
-        files: ^packages/.*/(src|test)/.*\.ts$
+        files: ^(packages/.*/(src|test)|tests|scripts)/.*\.(ts|mjs)$
         pass_filenames: true
