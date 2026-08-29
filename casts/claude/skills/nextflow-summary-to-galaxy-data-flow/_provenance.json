@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-data-flow",
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
-    "revision": 6,
-    "content_hash": "fac99ab0c394f3a68e7cc4cb34c3a7ebb43063e0593486bc1a48318ecbd0bd0c",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "revision": 7,
+    "content_hash": "1f98fd5cf9a54fd81e48db957f7451760f5e97629748f3d39fd66dc59b2ac765",
+    "commit": "fd2fa33c5647f382c790996e2ec62edd541080c7"
   },
-  "cast_at": "2026-08-25T21:03:47.021Z",
+  "cast_at": "2026-08-29T20:32:54.275Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -244,7 +244,7 @@
         "id": "nextflow-galaxy-data-flow",
         "kind": "markdown",
         "default_filename": "nextflow-galaxy-data-flow.md",
-        "description": "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions."
+        "description": "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, Galaxy tool needs, confidence, open questions."
       },
       {
         "id": "open-requirements-ledger",

@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-08-19
-revision: 6
+revised: 2026-08-29
+revision: 7
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
 input_artifacts:
   - id: summary-nextflow
@@ -25,7 +25,7 @@ output_artifacts:
   - id: nextflow-galaxy-data-flow
     kind: markdown
     default_filename: nextflow-galaxy-data-flow.md
-    description: "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions."
+    description: "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, Galaxy tool needs, confidence, open questions."
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
@@ -150,6 +150,6 @@ related_notes:
 ---
 # nextflow-summary-to-galaxy-data-flow
 
-Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
+Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, Galaxy tool needs, confidence, and open questions.
 
-The output is not gxformat2 and should not resolve exact Tool Shed tools. [[nextflow-summary-to-galaxy-template]] turns this handoff and the interface brief into a skeleton.
+The output is not gxformat2 and should not resolve exact Tool Shed tools. Nor does it rule them out. Recording that a step's tool does not exist, will not be found, or must be authored is the same adjudication made negative, and it belongs to [[advance-galaxy-draft-step]], which owns routing. Say what each step needs a tool to *do*; let discovery report what exists. Justify step granularity from the source's own structure — subworkflow boundaries, the ratio of plumbing to scientific work. A guess about tool availability is not a justification.
