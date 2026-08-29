@@ -20,7 +20,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- Write artifact `nextflow-galaxy-data-flow` as `nextflow-galaxy-data-flow.md`. Format: `markdown`. Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions.
+- Write artifact `nextflow-galaxy-data-flow` as `nextflow-galaxy-data-flow.md`. Format: `markdown`. Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, Galaxy tool needs, confidence, open questions.
 - Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact.
 
 ## Required Tools
@@ -53,9 +53,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
+Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, Galaxy tool needs, confidence, and open questions.
 
-The output is not gxformat2 and should not resolve exact Tool Shed tools. nextflow-summary-to-galaxy-template turns this handoff and the interface brief into a skeleton.
+The output is not gxformat2 and should not resolve exact Tool Shed tools. Nor does it rule them out. Recording that a step's tool does not exist, will not be found, or must be authored is the same adjudication made negative, and it belongs to advance-galaxy-draft-step, which owns routing. Say what each step needs a tool to *do*; let discovery report what exists. Justify step granularity from the source's own structure — subworkflow boundaries, the ratio of plumbing to scientific work. A guess about tool availability is not a justification.
 
 ## Feedback Mode
 
