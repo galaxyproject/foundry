@@ -1,11 +1,11 @@
 [
   {
     "tool": "foundry",
-    "origin": "npm",
+    "origin": "workspace",
     "package": "@galaxy-foundry/foundry",
     "invoke": "foundry",
-    "invoke_fallback": "npx --package @galaxy-foundry/foundry foundry",
-    "availability_check": "foundry --help",
+    "invoke_fallback": "pnpm exec foundry",
+    "availability_check": "pnpm exec foundry --help",
     "docs_url": "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md",
     "reference": "references/cli/foundry.md",
     "source": "referenced"

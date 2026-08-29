@@ -70,6 +70,17 @@ describe("renderInstallCommand", () => {
     );
   });
 
+  it("sends a workspace tool to the checkout rather than a registry", () => {
+    expect(
+      renderInstallCommand(
+        tool({ tool: "foundry", origin: "workspace", package: "@galaxy-foundry/foundry" }),
+      ),
+    ).toBe(
+      "Not published — build `@galaxy-foundry/foundry` from a checkout of the repo that ships it " +
+        "(`pnpm install && pnpm -r build`).",
+    );
+  });
+
   it("renders npm installs", () => {
     expect(
       renderInstallCommand(

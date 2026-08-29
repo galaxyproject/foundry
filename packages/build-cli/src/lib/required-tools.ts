@@ -157,13 +157,22 @@ export function renderInstallCommand(tool: RequiredTool): string {
   if (tool.origin === "npm") {
     return `\`npm install -g ${spec}\`.`;
   }
+  // A workspace tool has no registry to install from; saying otherwise sends a clean machine
+  // to a 404, or worse to an unrelated package that happens to own the name.
+  if (tool.origin === "workspace") {
+    return `Not published — build \`${spec}\` from a checkout of the repo that ships it (\`pnpm install && pnpm -r build\`).`;
+  }
   return `Install ${spec} from ${tool.origin}.`;
 }
 
 export function requiredToolRows(tools: RequiredTool[]): string[] {
   return tools.map((t) => {
     const lines = [`- **\`${t.invoke}\`** (${t.tool}). ${renderInstallCommand(t)}`];
-    if (t.invoke_fallback) lines.push(`  Ephemeral run: \`${t.invoke_fallback}\`.`);
+    if (t.invoke_fallback) {
+      // "Ephemeral run" means a registry fetch, which a workspace tool has no way to do.
+      const label = t.origin === "workspace" ? "From the checkout" : "Ephemeral run";
+      lines.push(`  ${label}: \`${t.invoke_fallback}\`.`);
+    }
     if (t.availability_check) lines.push(`  Check: \`${t.availability_check}\`.`);
     if (t.docs_url) lines.push(`  Docs: ${t.docs_url}`);
     if (t.reference) lines.push(`  Bundled reference: \`${t.reference}\`.`);

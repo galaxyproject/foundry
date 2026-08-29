@@ -22,7 +22,7 @@ export const kind = defineKind({
       .object({
         type: z.literal("cli-tool"),
         tool: ctx.toolSlug,
-        origin: z.enum(["npm", "pypi"]),
+        origin: z.enum(["npm", "pypi", "workspace"]),
         package: z.string(),
         package_version: z.string().optional(),
         invoke: z.string().regex(/^[A-Za-z0-9._-]+$/),

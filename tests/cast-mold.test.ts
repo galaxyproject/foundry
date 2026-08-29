@@ -257,7 +257,7 @@ describe("required-tools manifest (summarize-cwl integration)", () => {
     for (const entry of manifest) {
       expect(entry.invoke.length).toBeGreaterThan(0);
       expect(["referenced", "implied"]).toContain(entry.source);
-      expect(["npm", "pypi"]).toContain(entry.origin);
+      expect(["npm", "pypi", "workspace"]).toContain(entry.origin);
     }
   });
 
@@ -266,7 +266,7 @@ describe("required-tools manifest (summarize-cwl integration)", () => {
     expect(skill).toContain("## Required Tools");
     expect(skill).toContain("uv tool install cwltool");
     expect(skill).toContain("uvx --from cwl-utils cwl-normalizer");
-    expect(skill).toContain("npx --package @galaxy-foundry/foundry foundry");
+    expect(skill).toContain("pnpm exec foundry");
   });
 });
 

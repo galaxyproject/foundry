@@ -579,13 +579,21 @@ function schemaValidationRows(
     // instance's CLI package name in the caster, and was wrong in principle for any Foundry
     // whose multi-command validator is not called @galaxy-foundry/foundry.
     const validatorPackage = scalar(meta?.validator_package) ?? scalar(meta?.package);
+    // The off-PATH fallback is whatever the cli-tool note declares. Synthesizing `npx --package
+    // <pkg>` here assumed every validator ships from a published registry package; for an
+    // unpublished one that is a 404, and `npx <bin>` alone can resolve to an unrelated package.
+    const toolNote = validator ? slugMap.get(validator) : undefined;
+    const toolMeta = toolNote ? metaByPath.get(toolNote) : undefined;
+    const fallbackBin =
+      toolMeta?.type === "cli-tool" ? scalar(toolMeta.invoke_fallback) : undefined;
+    const fallback = fallbackBin ? [fallbackBin, subcommand].filter(Boolean).join(" ") : undefined;
     const schemaName = stripWikiLinks(output.schema);
     const file = output.default_filename
       ? `\`${output.default_filename}\``
       : "the emitted artifact";
     rows.push(
       validator
-        ? `- Validate ${file} before returning it: run \`${command} ${output.default_filename ?? "<artifact-path>"}\`${validatorPackage ? ` from \`${validatorPackage}\`` : ""}. ${validatorPackage ? `If the command is not on PATH, run \`npx --package ${validatorPackage} ${command} ${output.default_filename ?? "<artifact-path>"}\`. ` : ""}This checks artifact \`${output.id}\` against the ${schemaName} schema.`
+        ? `- Validate ${file} before returning it: run \`${command} ${output.default_filename ?? "<artifact-path>"}\`${validatorPackage ? ` from \`${validatorPackage}\`` : ""}. ${fallback ? `If the command is not on PATH, run \`${fallback} ${output.default_filename ?? "<artifact-path>"}\`. ` : ""}This checks artifact \`${output.id}\` against the ${schemaName} schema.`
         : `- Validate ${file} for artifact \`${output.id}\` against the ${schemaName} schema when a validator is available.`,
     );
   }

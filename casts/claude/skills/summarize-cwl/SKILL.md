@@ -31,9 +31,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
   Check: `cwltool --version`.
   Docs: https://cwltool.readthedocs.io/
   Bundled reference: `references/cli/cwltool.md`.
-- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
-  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
-  Check: `foundry --help`.
+- **`foundry`** (foundry). Not published — build `@galaxy-foundry/foundry` from a checkout of the repo that ships it (`pnpm install && pnpm -r build`).
+  From the checkout: `pnpm exec foundry`.
+  Check: `pnpm exec foundry --help`.
   Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
   Bundled reference: `references/cli/foundry.md`.
 
@@ -58,7 +58,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-cwl.json` before returning it: run `foundry validate-summary-cwl summary-cwl.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry validate-summary-cwl summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
+- Validate `summary-cwl.json` before returning it: run `foundry validate-summary-cwl summary-cwl.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `pnpm exec foundry validate-summary-cwl summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
 
 ## Procedure
 

@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 14
+revised: 2026-08-29
+revision: 15
 output_artifacts:
   - id: summary-nextflow
     kind: json
@@ -337,7 +337,7 @@ Consult [[component-nextflow-testing]] when fixtures use a layout outside `conf/
 
 ### 8. Validate and emit
 
-Validate the assembled object before emitting: run `foundry validate-summary-nextflow summary-nextflow.json`. The subcommand is shipped by `@galaxy-foundry/foundry` and can be invoked from npm with `npx --package @galaxy-foundry/foundry foundry validate-summary-nextflow summary-nextflow.json`. The standalone `summarize-nextflow` bin (from `@galaxy-foundry/summarize-nextflow`) self-validates by default and is the better gate when the skill is also producing the summary. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
+Validate the assembled object before emitting: run `foundry validate-summary-nextflow summary-nextflow.json`. The subcommand is shipped by `@galaxy-foundry/foundry`, which is not published — build it from a Foundry checkout (`pnpm install && pnpm -r build`) and invoke it as `pnpm exec foundry validate-summary-nextflow summary-nextflow.json` when the bin is not on `PATH`. The standalone `summarize-nextflow` bin (from the same checkout's `@galaxy-foundry/summarize-nextflow`) self-validates by default and is the better gate when the skill is also producing the summary. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
 
 ## Caveats baked into the procedure
 

@@ -14,8 +14,12 @@ binaries. A Foundry whose skills invoke no external program needs neither this k
 
 - **`tool`** — the kebab slug the `cli-command` notes join on. This is the whole reason the two
   kinds can stay separate.
-- **`origin`** (`npm` | `pypi`) and **`package`** — how to install it. A tool a cast is told to
-  run but not told how to obtain is a runtime failure waiting for the first clean machine.
+- **`origin`** (`npm` | `pypi` | `workspace`) and **`package`** — how to install it. A tool a cast
+  is told to run but not told how to obtain is a runtime failure waiting for the first clean
+  machine. `workspace` is for a tool this repository builds and has not published: it renders a
+  build-from-checkout line instead of an install command, because naming a registry that does not
+  carry the package is worse than naming none — `npx <bin>` can resolve to an unrelated package
+  that owns the name.
 - **`invoke`** — the actual binary name, which is frequently *not* the package name.
 - The **base envelope** — as on every kind.
 

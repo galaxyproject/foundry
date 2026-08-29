@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 2,
     "content_hash": "23b770bbbd5409a37a7a0ea457a10b2cfba21f36a6e7e892125735035ac36078",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "7b2cb7d53366177b004557cadb4784fd699bf155"
   },
-  "cast_at": "2026-08-25T21:03:48.985Z",
+  "cast_at": "2026-08-29T15:15:10.804Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -52,8 +52,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-galaxy-workflow.json with `foundry validate-summary-galaxy-workflow` before returning it from the skill.",
-      "src_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
-      "dst_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
+      "src_hash": "ddeaa4a16235ab5bd30c0c423d8e142a3b0afd0d975ae32a5eb6e97d1685c99f",
+      "dst_hash": "ddeaa4a16235ab5bd30c0c423d8e142a3b0afd0d975ae32a5eb6e97d1685c99f",
       "source": "deterministic"
     },
     {
