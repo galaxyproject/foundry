@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-08-19
-revision: 2
+revised: 2026-08-29
+revision: 3
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
@@ -18,7 +18,7 @@ summary: "Carried unresolved-requirements artifact the source→Galaxy pipeline 
 
 # Open-requirements ledger
 
-The `open-requirements-ledger` is a single artifact threaded through the source→Galaxy pipeline that records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar. Each Mold that surfaces one **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact.
+The `open-requirements-ledger` is a single artifact threaded through the source→Galaxy pipeline that records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar. Each Mold that surfaces one **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact. Alongside the entries it carries one run-level count — how much of the source the run actually carried — because a list of individually reasonable gaps can still add up to a pipeline that translated almost none of its source.
 
 ## Framing: obligations the pipeline discharges, not questions a human answers
 
@@ -64,6 +64,12 @@ This section is the runtime protocol for every Mold that carries the ledger. A M
 
 **Record a surrender note; leave the status to the terminal.** When you cannot close an entry and nothing downstream can either — no producer is discoverable, the output cannot be honestly narrowed — leave it `open` and say so in `note`. `surrendered` is a terminal status, set at the end of a run: the escalation cap reached, or the final artifact emitted with the obligation still unmet. Either way the entry stays visible and is written into the final artifact as a labelled gap, never dropped.
 
+**Maintain coverage.** Whenever a decision you make changes what the run will carry from
+the source, move the affected units between `coverage` buckets — never let them vanish.
+Narrowing a design moves units from `carried` to `surrendered`; deciding the target
+subsumes a mechanism moves them to `subsumed` with a reason. The buckets must still sum to
+`source_units` when you re-emit the ledger. See **Coverage (run-level state)** below.
+
 **Maintain the escalation budget** — loop Molds only. The `topology_repair` header is loop-level state, described under **Escalation budget (loop-level state)** below. On each escalation the orchestrator increments `escalations`, appends the post-repair open blocking-entry count to `open_history`, and surrenders the still-open blocking entries once `escalations` reaches `cap`.
 
 ## Role in topology repair
@@ -98,6 +104,56 @@ entries:
 
 This block lives in the ledger as a v1 expedient: the ledger is already the carried, cast-visible state the loop reads each iteration. Its better long-term home is the **draft itself** — a workflow-level annotation that travels with the artifact it bounds, so the budget survives even when the ledger is stripped at the terminal. Recorded here for now; migrate when the draft grows a home for it.
 
+## Coverage (run-level state)
+
+The decreasing-blocker invariant guards one failure — spin-or-fabricate during repair. It
+is blind to the opposite one, and blind by construction: **a run satisfies "strictly reduce
+the open blocking count" by deleting the steps that carried the blockers.** Dropping work
+drives the count to zero faster than doing it. Every invariant the ledger had was monotone
+in the direction that rewards shrinking.
+
+`coverage` is the counterweight — a conservation rule rather than a reduction one, in a
+second header beside `topology_repair`:
+
+```yaml
+coverage:
+  unit: nextflow-process     # what a source unit is, for this source kind
+  source_units: 95           # fixed by the first Mold; never re-based
+  carried: 68                # unit's work lives inside some step of the design
+  subsumed: 21               # target does this itself — reason required
+  surrendered: 6             # not carried, and nothing downstream will
+entries:
+  - id: sccmec-evidence-missing
+    # … per-entry shape above
+```
+
+The invariant is arithmetic: `carried + subsumed + surrendered == source_units`, checked
+whenever the ledger is re-emitted. Shrinking cannot satisfy it. A phase that cuts 25 nodes
+does not reduce a count — it moves 25 units into `surrendered`, where the terminal readout
+states them.
+
+- `unit` — the source's own granularity (`nextflow-process`, `cwl-step`), named once so the
+  denominator is not silently re-based mid-run. A Mold that re-groups units into coarser
+  steps has not changed `source_units`; merging N processes into one tool leaves all N
+  `carried`, which is why this is a partition and not a step-count ratio. A ratio would
+  flag legitimate re-granularization as loss.
+- `source_units` — set by the first Mold from the source summary, then read-only. Nothing
+  downstream may lower it; a design that carries less lowers `carried`.
+- `carried` — the unit's work reaches the target design, at whatever granularity.
+- `subsumed` — the target performs this itself, so translating it would be wrong. Real and
+  necessary: a Nextflow pipeline's grid-dispatch scatter/gather substrate is work Galaxy's
+  scheduler already does. It requires a stated reason, because it is the bucket a lazy run
+  would reach for.
+- `surrendered` — not carried and nothing downstream will carry it. Unlike per-entry
+  `surrendered`, this is not terminal-only: a phase that cuts scope surrenders units at the
+  moment it cuts, because a count nobody may update until the terminal is a count nobody
+  checks.
+
+Coverage answers a question no entry can: not *is each obligation tracked* but *how much of
+the source came out the other end*. On the run that motivated this, the six scope-cut
+entries were individually well-written and collectively described dropping 92 of 95
+processes. No phase ever computed that product, and every phase was reading the ledger.
+
 ## Threaded through the whole design tier
 
 The ledger is not loop-only. Every design-tier Mold in the source→Galaxy pipelines **consumes and re-emits** it — the interface, reference-data, data-flow, IWC-comparison, and template Molds (`*-summary-to-galaxy-interface`, `*-summary-to-galaxy-data-flow`, `*-summary-to-galaxy-reference-data`, `compare-against-iwc-exemplar`, `*-summary-to-galaxy-template`), alongside the change-set Molds on the update path. This is the direct answer to #281: the chain stops re-deriving the same unknowns because each Mold inherits them.
@@ -106,6 +162,7 @@ The template Mold's computability review pass is the notable appender ahead of t
 
 ## Open work
 
+- Decide who sets `coverage.subsumed` reasons and where they live — a free-text field on the header, or `kind`-tagged entries the header counts. Left loose here, like the rest of v1.
 - Decide whether entry structure should harden (typed `unmet` / `missing`, links back to source-summary evidence, machine-checkable `status` transitions) once two or three worked runs exercise it. Hardening it would also give the producing Molds an `output_artifacts[].schema` to cite, which none carry today.
 - Assign terminal surrender of *non-blocking* entries. [[advance-galaxy-draft-step]] surrenders open blocking entries at the escalation cap, but an unpinned-parameter entry the design tier appended and nobody closed currently rides out the run without ever being marked `surrendered`. Nothing owns that pass today.
 - Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. Every design Mold still emits both, with no rule for which destination an unresolved choice belongs in.
