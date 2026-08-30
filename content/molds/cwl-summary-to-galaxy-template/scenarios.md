@@ -8,7 +8,7 @@ expected values; the `eval.md` oracle is applied to whatever the case produces.
 
 - fixture: a committed CWL summary plus its interface and data-flow briefs.
 - expect: emitted `galaxy-workflow-draft.gxwf.yml` **fails** `gxwf validate` and
-  `gxwf lint` on TODO-stub fields — unresolved tool IDs, placeholder tool_state,
+  `gxwf lint` on TODO-stub fields — unresolved tool IDs, placeholder state,
   unwired connections. A draft that passes lint clean is suspect, because it
   likely fabricated tool IDs or wiring to satisfy the linter.
 

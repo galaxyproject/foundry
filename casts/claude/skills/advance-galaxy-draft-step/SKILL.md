@@ -40,7 +40,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/cli/draft-extract.json`: CLI command reference packaged as a sidecar. At loop endstate, extract the concrete gxformat2 workflow from the fully-concretized draft — drop drafty steps, strip `_plan_*` fields, promote `class` to `GalaxyWorkflow` — and write it as the runnable `galaxy-workflow.gxwf.yml`. Use when: draft-next-step reports `draft: false` (no remaining drafty steps).
 - `references/cli/draft-validate.json`: CLI command reference packaged as a sidecar. Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2. Use when: after implementing or modifying the chosen step in the draft.
 - `references/notes/galaxy-tool-job-failure-reference.md`: Research note copied verbatim into the bundle. Classify draft-validate diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice). Use when: draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.
-- `references/schemas/galaxy-tool-summary.schema.json`: Schema file copied verbatim into the bundle. Bind the chosen step against the deterministic tool summary manifest emitted by summarize-galaxy-tool — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape. Use when: after a wrapper has been resolved for the chosen step and before implementing it.
+- `references/schemas/galaxy-tool-summary.schema.json`: Schema file copied verbatim into the bundle. Bind the chosen step against the deterministic tool summary manifest emitted by summarize-galaxy-tool — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `state` shape. Use when: after a wrapper has been resolved for the chosen step and before implementing it.
 
 ## Validation
 
@@ -63,7 +63,7 @@ This skill is **single-entry, single-exit**: it owns the loop oracle (draft-next
 
      Either way, if no acceptable shed candidate emerges, fall through to author-galaxy-tool-wrapper.
 3. **Summarize the wrapper.** Invoke summarize-galaxy-tool on the resolved wrapper to produce a galaxy-tool-summary for the next phase.
-4. **Implement.** Invoke implement-galaxy-tool-step with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `tool_state`, and wrapper-determined port names.
+4. **Implement.** Invoke implement-galaxy-tool-step with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `state`, and wrapper-determined port names.
 5. **Check computability.** Inspect the open-requirements-ledger for a new `open` blocking entry implement-galaxy-tool-step appended against this step. draft-validate cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to repair-galaxy-draft-topology for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
 6. **Validate.** Run draft-validate `--concrete` over the mutated draft. On green, return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
 
@@ -71,7 +71,7 @@ This skill is **single-entry, single-exit**: it owns the loop oracle (draft-next
 
 `draft-validate --concrete` failures fall into three buckets:
 
-- **Local to the just-implemented step** (sentinel violation, wrong port name, malformed `tool_state`) — re-enter implement-galaxy-tool-step with the diagnostic.
+- **Local to the just-implemented step** (sentinel violation, wrong port name, malformed `state`) — re-enter implement-galaxy-tool-step with the diagnostic.
 - **Wrapper-choice mismatch** (selected wrapper cannot satisfy the step's `_plan_*` contract — wrong datatype, missing parameter, incompatible collection shape) — back out to step 2 and pick a different wrapper, either via discover-shed-tool with refined criteria or by escalating to author-galaxy-tool-wrapper.
 - **Earlier-step defect surfaced by the growing concrete projection** (e.g. a connection that looked fine in isolation breaks once a downstream step pulls a previously-deferred port into scope) — flag to the user. The orchestrator does not unwind prior iterations on its own; cross-step rework belongs at the harness level. *Open question: at what threshold should this skill attempt to re-enter implement-galaxy-tool-step for an earlier step versus always escalating?*
 

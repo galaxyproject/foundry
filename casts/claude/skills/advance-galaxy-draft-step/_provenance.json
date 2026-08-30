@@ -5,10 +5,10 @@
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 4,
-    "content_hash": "1b210c9ae8dda41e59701ff4a87098be8c2c6dcb1947da026544392dc13e2b3f",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "content_hash": "c92d452f69a7b40bcab5fc8e63b03e1e2abf98f2a636abc4c93ad7f3c1d03082",
+    "commit": "bf25007befc4c590eb1177128565a74e952cd755"
   },
-  "cast_at": "2026-08-25T21:03:41.676Z",
+  "cast_at": "2026-09-02T15:41:25.502Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -97,7 +97,7 @@
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Bind the chosen step against the deterministic tool summary manifest emitted by [[summarize-galaxy-tool]] — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape.",
+      "purpose": "Bind the chosen step against the deterministic tool summary manifest emitted by [[summarize-galaxy-tool]] — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `state` shape.",
       "trigger": "After a wrapper has been resolved for the chosen step and before implementing it.",
       "src_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
       "dst_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
