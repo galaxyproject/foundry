@@ -32,7 +32,7 @@ planemo cli_metadata [OPTIONS]
 |---|---|---|---|---|
 | --format | choice | json | — | — |
 | --command | text | — | — | Only export metadata for the selected command. |
-| --include-internal | flag | false | — | Include internal commands not documented as public API. |
+| --include-internal | flag | — | — | Include internal commands not documented as public API. |
 
 <!-- planemo-cli-meta: END auto-generated -->
 ## Output

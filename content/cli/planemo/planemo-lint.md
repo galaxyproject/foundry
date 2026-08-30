@@ -41,7 +41,7 @@ planemo lint [OPTIONS] TOOL_PATH
 | --fail_level | choice | warn | — | — |
 | -s, --skip | text | — | — | Comma-separated list of lint tests to skip (e.g. passing --skip 'citations,xml_order' would skip linting of citations and best-practice XML ordering. |
 | --skip_file | file | — | — | File containing a list of lint tests to skip |
-| -r, --recursive | flag | false | — | Recursively perform command for subdirectories. |
+| -r, --recursive | flag | — | — | Recursively perform command for subdirectories. |
 | --urls | flag | false | — | Check validity of URLs in XML files |
 | --doi | flag | false | — | Check validity of DOIs in XML files |
 | --conda_requirements | flag | false | — | Check tool requirements for availability in best practice Conda channels. |

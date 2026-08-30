@@ -55,8 +55,11 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Install pinned planemo
-        run: python -m pip install "planemo==${{ steps.pin.outputs.version }}"
+      - name: Install pinned planemo with compatible Galaxy models
+        run: |
+          python -m pip install \
+            "planemo==${{ steps.pin.outputs.version }}" \
+            "galaxy-tool-util-models==26.0.1"
 
       - name: Check planemo CLI page drift
         run: npm run check:planemo-cli

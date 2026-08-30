@@ -389,7 +389,7 @@ describe("artifact-contract inheritance", () => {
   it("consumer input inherits a registered runtime producer", async () => {
     const { buildProducerIndex, readArtifactContracts } =
       await import("../packages/build-cli/src/commands/cast-mold.js");
-    const meta = new Map<string, any>([
+    const meta = new Map<string, Frontmatter>([
       [
         "content/molds/consumer/index.md",
         {
