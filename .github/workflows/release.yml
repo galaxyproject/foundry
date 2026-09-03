@@ -1,63 +1,110 @@
 name: Release
 
 # Changesets-driven flow:
-#   1. PRs land with `.changeset/*.md` entries describing their package impact.
-#   2. This workflow runs on `main`. If pending changesets exist, it opens (or
-#      updates) a "Version Packages" PR that bumps package.json versions and
-#      generates CHANGELOG.md entries.
-#   3. Merging the Version Packages PR triggers this workflow again with the
-#      versions already bumped and no remaining changesets. The publish step
-#      then ships the changed packages to npm with provenance.
+#   1. PRs land carrying `.changeset/*.md` entries describing their package impact.
+#   2. This workflow runs on `main`. With pending changesets it opens (or updates) a
+#      "Version Packages" PR bumping versions and writing CHANGELOG entries.
+#   3. Merging that PR runs this workflow again with versions bumped and no changesets
+#      left, so the publish step ships the changed packages to npm with provenance.
+#
+# There is no npm token. Authentication is OIDC trusted publishing — npm trusts this
+# repo/workflow/environment triple directly, so there is no long-lived credential to
+# leak or rotate. See docs/development/publication.md for the one-time per-package setup.
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
-  id-token: write # npm provenance
+permissions: {}
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
+  validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup
+
+      - run: pnpm packages-typecheck
+
+      - run: pnpm packages-build
+
+      # Reject malformed exports or declarations before publishing.
+      - run: pnpm lint:packages
+
+      - name: Cache Nextflow pipeline fixtures
+        id: fixture-cache
+        uses: actions/cache@v4
+        with:
+          path: workflow-fixtures/pipelines
+          key: nf-fixtures-v1-${{ hashFiles('workflow-fixtures/fixtures.yaml') }}
+
+      - name: Materialize required Nextflow fixtures
+        if: steps.fixture-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          for name in nf-core/demo nf-core/bacass nf-core/rnaseq; do
+            workflow-fixtures/scripts/fetch.sh "$name"
+          done
+
+      - run: pnpm packages-test
+
+      # Gate the publish on the artifact, not the source tree — a tarball missing a
+      # runtime asset passes every other check.
+      - run: pnpm smoke:packages
+
+      # Pass only generated package contents into the privileged job. The release job
+      # never runs repository build or test scripts while holding write/OIDC access.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: package-dist
+          path: packages/*/dist
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write # OIDC trusted publishing + provenance
+    # npm binds each package's trusted publisher to this environment name. Renaming
+    # it here without updating every package's Trusted Publishers entry on npmjs.com
+    # breaks the publish.
+    environment: npm-publish
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6.0.10
+
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
+          cache: pnpm
           registry-url: "https://registry.npmjs.org"
 
-      - name: Enable corepack
-        run: corepack enable
+      - run: pnpm install --frozen-lockfile
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Typecheck packages
-        run: npm run packages-typecheck
-
-      - name: Build packages
-        run: npm run packages-build
-
-      - name: Test packages
-        run: npm run packages-test
-
-      - name: Smoke-test package tarballs
-        run: npm run smoke:packages
+      - uses: actions/download-artifact@v8
+        with:
+          name: package-dist
+          path: packages
 
       - name: Create release PR or publish
         uses: changesets/action@v1
         with:
-          # When pending changesets exist on main, opens "Version Packages" PR.
-          # When that PR merges (no remaining changesets), `publish` ships
-          # the bumped packages to npm and creates per-package git tags.
           # `pnpm -r sync` regenerates the foundry meta's version.generated.ts
           # so the Version Packages PR commits a consistent meta version too.
           version: pnpm run version-packages
@@ -67,5 +114,4 @@ jobs:
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"

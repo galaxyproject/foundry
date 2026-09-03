@@ -76,6 +76,13 @@ npm run site:dev          # Astro dev server
 
 `--check` variants on the generators detect drift; CI runs them before deploy.
 
+## Package releases
+
+Public workspace packages are versioned with Changesets and published from
+GitHub Actions using npm OIDC trusted publishing and provenance. See
+[`docs/development/publication.md`](docs/development/publication.md) for the
+release flow and the one-time bootstrap required for a new npm package.
+
 ## Design docs
 
 Long-form design narrative under [`content/meta/`](content/meta/), as notes of kind `meta` —

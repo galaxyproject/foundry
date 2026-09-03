@@ -4,6 +4,27 @@ Vendored `planemo cli_metadata` command list. Parallels `@galaxy-tool-util/cli/m
 
 Only command names + modules + hidden/internal flags are vendored — the per-command param tables stay in upstream planemo and the per-page generator (`scripts/sync-planemo-cli.ts`) reads them live.
 
+## Install
+
+```sh
+pnpm add @galaxy-foundry/planemo-cli-meta
+```
+
+```ts
+import {
+  planemoCliMeta,
+  planemoCliMetaProvenance,
+} from "@galaxy-foundry/planemo-cli-meta";
+
+const publicCommands = planemoCliMeta.commands.filter(
+  ({ hidden, internal }) => !hidden && !internal,
+);
+```
+
+The package also exports the vendored files directly as
+`@galaxy-foundry/planemo-cli-meta/cli-meta.json` and
+`@galaxy-foundry/planemo-cli-meta/provenance.json`.
+
 ## Sync
 
 ```sh

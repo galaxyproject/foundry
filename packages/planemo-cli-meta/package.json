@@ -22,7 +22,8 @@
     "directory": "packages/planemo-cli-meta"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "sync": "node scripts/sync-meta.mjs",

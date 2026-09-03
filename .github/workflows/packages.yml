@@ -4,31 +4,34 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
-permissions:
-  contents: read
+concurrency:
+  group: packages-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
         with:
-          node-version: 24
+          persist-credentials: false
 
-      - name: Enable corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
 
       - name: Typecheck packages
         run: npm run packages-typecheck
 
       - name: Build packages
         run: npm run packages-build
+
+      - name: Check package exports and declarations
+        run: npm run lint:packages
 
       # Runs after build because the validator imports
       # @galaxy-foundry/foundry/meta to enumerate known CLI commands; the
@@ -90,3 +93,23 @@ jobs:
 
       - name: Build site
         run: npm run site:build
+
+  # A PR that changes a published package without a changeset merges green and then
+  # ships nothing — the release workflow sees no pending changesets and no-ops.
+  # The Version Packages PR is excluded because it has consumed the changesets.
+  changeset:
+    if: github.event_name == 'pull_request' && github.head_ref != 'changeset-release/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - run: pnpm changeset status --since="origin/${BASE_REF}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
