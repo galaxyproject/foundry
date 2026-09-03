@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 8,
     "content_hash": "a53a303bff1d7ace3b44fb12af329b12695bfcd165933634b8fb6484c0c306f7",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-08-25T21:03:48.892Z",
+  "cast_at": "2026-09-03T21:21:51.284Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -106,14 +106,14 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-summary]]",
-      "src": "package://@galaxy-foundry/foundry#galaxyToolSummarySchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#galaxyToolSummarySchema",
       "dst": "references/schemas/galaxy-tool-summary.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Validate the manifest emitted by `galaxy-tool-cache summarize` before handing it to downstream step Molds.",
-      "src_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
-      "dst_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
+      "src_hash": "bf77d0735410fa0028bc9bea08edaff3016580508bf27851fdcae65d038f2d94",
+      "dst_hash": "bf77d0735410fa0028bc9bea08edaff3016580508bf27851fdcae65d038f2d94",
       "source": "deterministic"
     },
     {

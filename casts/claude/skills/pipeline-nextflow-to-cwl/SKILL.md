@@ -15,10 +15,10 @@ Harness for the **NEXTFLOW → CWL** Foundry pipeline. Runs the constituent skil
 
 Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
 
-- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
-  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
   Check: `foundry --help`.
-  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
 - **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.

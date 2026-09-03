@@ -12,7 +12,7 @@ revision: 13
 summary: "The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it."
 ---
 
-This document is the source-layout contract for Mold authoring. The shared zod schema in `@galaxy-foundry/note-schema` (`buildNoteSchema`) is the frontmatter contract, and the reference contract remains the controlled vocabulary for typed references — `kinds` at `reference_contract.yml`, the other four vocabularies from `@galaxy-foundry/reference-contract`.
+This document is the source-layout contract for Mold authoring. The shared zod schema in `@galaxy-foundry/gxwf-foundry-note-schema` (`buildNoteSchema`) is the frontmatter contract, and the reference contract remains the controlled vocabulary for typed references — `kinds` at `reference_contract.yml`, the other four vocabularies from `@galaxy-foundry/reference-contract`.
 
 ## Source Layout
 
@@ -20,7 +20,7 @@ A Mold source unit is a directory under `content/molds/<slug>/`.
 
 Which files may sit beside `index.md`, which of them are expected, and which casting may carry into
 an artifact are **declared by the kind**, in
-`packages/note-schema/src/types/mold/schema.ts`. The validator checks a Mold directory against that
+`packages/gxwf-foundry-note-schema/src/types/mold/schema.ts`. The validator checks a Mold directory against that
 declaration, so it is the enforced answer rather than a description of one.
 
 - `index.md` — required, and the only frontmatter-bearing Mold source file. Owns the Mold contract

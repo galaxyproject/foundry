@@ -20,7 +20,7 @@ A **Note** is a Markdown source file whose frontmatter declares exactly one `typ
 
 The kinds fall into four groups. **`meta`** is the design record — the one kind whose subject is the Foundry itself rather than Galaxy workflow construction. **`mold` and `pipeline`** are what acts: an abstract action, and an ordered journey of actions. **`pattern`, `source-pattern`, `cli-tool`, `cli-command`, `schema`, and `prompt`** are the reference content a Mold cites, each carried into a bundle its own way. **`research`** is background synthesis holding its own vendored sources.
 
-`packages/note-schema/src/types/<kind>/` holds each kind's schema, its `kind.md` rationale, and a minimal `example.md`; `kinds.generated.json` beside them is the enumeration a consumer reads, derived from those definitions rather than restated. [[repository-layout]] owns where each kind's notes sit under `content/`.
+`packages/gxwf-foundry-note-schema/src/types/<kind>/` holds each kind's schema, its `kind.md` rationale, and a minimal `example.md`; `kinds.generated.json` beside them is the enumeration a consumer reads, derived from those definitions rather than restated. [[repository-layout]] owns where each kind's notes sit under `content/`.
 
 Kind is never inferred from a tag, and every kind is its own literal rather than a member of one broad kind carrying a discriminating enum field. The literal is what makes the collection and the declared kind agree, or fail: a shared enum makes every field legal on every member, and would let a `cli-command` note sit at `content/cli/<tool>/index.md` — where a `cli-tool` belongs — and still validate. Paths route files into collections; the note's literal `type` must agree with the collection's declared kind.
 
@@ -38,9 +38,9 @@ Every note carries the base lifecycle envelope:
 - `created`, `revised`, and integer `revision`;
 - a 20–160 character `summary`.
 
-Each kind adds only fields meaningful to that kind. Definitions are strict: an unknown key is an error rather than silently accumulated metadata. The zod definitions in `@galaxy-foundry/note-schema` are the single authority used by validation, the site, and kind-manifest generation.
+Each kind adds only fields meaningful to that kind. Definitions are strict: an unknown key is an error rather than silently accumulated metadata. The zod definitions in `@galaxy-foundry/gxwf-foundry-note-schema` are the single authority used by validation, the site, and kind-manifest generation.
 
-Strictness is not only tidiness. An undeclared key is also an unvalidated key, and YAML will silently coerce it: a version pin left unquoted arrives as a float, where `1.20` and `1.2` are the same YAML number and two different pins. Declaring a field is what puts a type on it — the `id` on a Pattern's IWC exemplar step is a declared union of string-or-integer in `packages/note-schema/src/types/pattern/schema.ts`, because a Galaxy step id is sometimes `3` and sometimes `fastqc`, and declaring it makes that ambiguity a decision rather than a discovery.
+Strictness is not only tidiness. An undeclared key is also an unvalidated key, and YAML will silently coerce it: a version pin left unquoted arrives as a float, where `1.20` and `1.2` are the same YAML number and two different pins. Declaring a field is what puts a type on it — the `id` on a Pattern's IWC exemplar step is a declared union of string-or-integer in `packages/gxwf-foundry-note-schema/src/types/pattern/schema.ts`, because a Galaxy step id is sometimes `3` and sometimes `fastqc`, and declaring it makes that ambiguity a decision rather than a discovery.
 
 Mold IO schemas are a different contract. They validate artifacts passed between Molds; they do not validate note frontmatter. Their human-facing schema notes live under `content/schemas/`, while the JSON schema implementation stays with its producer package or the runtime `foundry` package. See [[schema-packages]].
 

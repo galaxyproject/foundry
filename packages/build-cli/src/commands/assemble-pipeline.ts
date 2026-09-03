@@ -28,7 +28,7 @@ import {
 import {
   requireRuntimeArtifactRegistry,
   type RuntimeArtifactDefinition,
-} from "@galaxy-foundry/note-schema";
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 import type { Frontmatter } from "../lib/types.js";
 
 // ---- argv ----

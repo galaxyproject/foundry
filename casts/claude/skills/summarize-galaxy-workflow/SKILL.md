@@ -22,10 +22,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
-  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
   Check: `foundry --help`.
-  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
   Bundled reference: `references/cli/foundry.md`.
 - **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
@@ -44,7 +44,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-galaxy-workflow.json` before returning it: run `foundry validate-summary-galaxy-workflow summary-galaxy-workflow.json` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry validate-summary-galaxy-workflow summary-galaxy-workflow.json`. This checks artifact `summary-galaxy-workflow` against the summary-galaxy-workflow schema.
+- Validate `summary-galaxy-workflow.json` before returning it: run `foundry validate-summary-galaxy-workflow summary-galaxy-workflow.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-galaxy-workflow summary-galaxy-workflow.json`. This checks artifact `summary-galaxy-workflow` against the summary-galaxy-workflow schema.
 
 ## Procedure
 

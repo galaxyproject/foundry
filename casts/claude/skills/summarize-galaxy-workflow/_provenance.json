@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 2,
     "content_hash": "23b770bbbd5409a37a7a0ea457a10b2cfba21f36a6e7e892125735035ac36078",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-08-25T21:03:48.985Z",
+  "cast_at": "2026-09-03T21:21:51.337Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -52,23 +52,23 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-galaxy-workflow.json with `foundry validate-summary-galaxy-workflow` before returning it from the skill.",
-      "src_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
-      "dst_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
+      "src_hash": "85505b02785fea8bfb0429ac78224dfef0dce63c933140f087f7257a04e52a86",
+      "dst_hash": "85505b02785fea8bfb0429ac78224dfef0dce63c933140f087f7257a04e52a86",
       "source": "deterministic"
     },
     {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-galaxy-workflow]]",
-      "src": "package://@galaxy-foundry/foundry#summaryGalaxyWorkflowSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryGalaxyWorkflowSchema",
       "dst": "references/schemas/summary-galaxy-workflow.schema.json",
       "used_at": "both",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Galaxy workflow summary JSON and provide downstream consumers the output contract.",
       "license": "MIT",
-      "src_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
-      "dst_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
+      "src_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "dst_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
       "source": "deterministic"
     }
   ],

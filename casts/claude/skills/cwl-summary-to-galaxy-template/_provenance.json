@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-09-03T14:04:18.893Z",
+  "cast_at": "2026-09-03T21:21:47.753Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -270,15 +270,15 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-cwl]]",
-      "src": "package://@galaxy-foundry/foundry#summaryCwlSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryCwlSchema",
       "dst": "references/schemas/summary-cwl.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Read CWL source graph, step ids, command surfaces, scatter, conditionals, requirements, and warnings while emitting placeholder steps.",
       "license": "MIT",
-      "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
-      "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "src_hash": "6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef",
+      "dst_hash": "6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef",
       "source": "deterministic"
     }
   ],

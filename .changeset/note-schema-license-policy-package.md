@@ -1,5 +1,5 @@
 ---
-"@galaxy-foundry/note-schema": minor
+"@galaxy-foundry/gxwf-foundry-note-schema": minor
 ---
 
 Consume the shared license table from `@galaxy-foundry/license-policy` instead of loading a

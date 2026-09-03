@@ -16,7 +16,7 @@
 
 import type { z } from "zod";
 
-import type { NoteSchema } from "@galaxy-foundry/note-schema";
+import type { NoteSchema } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 type Note = z.infer<NoteSchema>;
 

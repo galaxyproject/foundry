@@ -1,6 +1,6 @@
 ---
-"@galaxy-foundry/foundry": patch
-"@galaxy-foundry/note-schema": patch
+"@galaxy-foundry/gxwf-foundry": patch
+"@galaxy-foundry/gxwf-foundry-note-schema": patch
 "@galaxy-foundry/planemo-cli-meta": minor
 "@galaxy-foundry/planemo-test-report-schema": minor
 "@galaxy-foundry/summarize-nextflow": patch

@@ -108,7 +108,7 @@ async function loadGxwfRegistry(): Promise<Record<string, CliRegistryEntry>> {
 }
 
 async function loadFoundryRegistry(): Promise<Record<string, CliRegistryEntry>> {
-  const packageName = '@galaxy-foundry/foundry';
+  const packageName = '@galaxy-foundry/gxwf-foundry';
   const packageVersion = readInstalledPackageVersion(packageName);
   try {
     const spec = `${packageName}/meta`;
@@ -118,7 +118,7 @@ async function loadFoundryRegistry(): Promise<Record<string, CliRegistryEntry>> 
           meta.foundryCliMeta,
           packageName,
           packageVersion,
-          'https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/program.ts',
+          'https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/src/program.ts',
         )
       : {};
   } catch {

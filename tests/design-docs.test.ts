@@ -17,7 +17,11 @@ import yaml from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import { COLLECTIONS, buildNoteSchema, loadReferenceContract } from "@galaxy-foundry/note-schema";
+import {
+  COLLECTIONS,
+  buildNoteSchema,
+  loadReferenceContract,
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");

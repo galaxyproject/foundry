@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import { companionsOf } from "@galaxy-foundry/kind-schema";
-import { DEFINITIONS } from "@galaxy-foundry/note-schema";
+import { DEFINITIONS } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 import {
   loadContentNotes,

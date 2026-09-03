@@ -74,7 +74,7 @@ kinds:
 # Generated-skill constraints checked by cast-skill-verify.ts.
 #
 # Which COMPANION files a cast may never carry is not listed here. Every kind declares a
-# disposition per companion (packages/note-schema/src/types/*/schema.ts) and the verifier reads
+# disposition per companion (packages/gxwf-foundry-note-schema/src/types/*/schema.ts) and the verifier reads
 # those directly. The hand-written `forbid_packaged_files` this file used to carry named `eval.md`
 # and `refinement.md` while the kinds declared six more; a target-level copy of a kind-level fact
 # is only ever a chance for the two to disagree.

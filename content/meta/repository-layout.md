@@ -53,7 +53,7 @@ content/
 
 The content root follows the Astro idiom and tells a contributor that these files are publishable knowledge. A directory under `content/` does not define its own semantics: the collection table and kind definition declare whether files are notes, what kind they carry, and whether companions are allowed.
 
-`content/schemas/` contains renderable references, not the JSON schema source of truth. Producer packages and `packages/foundry` own executable schema assets.
+`content/schemas/` contains renderable references, not the JSON schema source of truth. Producer packages and `packages/gxwf-foundry` own executable schema assets.
 
 ## `packages/`: implementation ownership
 

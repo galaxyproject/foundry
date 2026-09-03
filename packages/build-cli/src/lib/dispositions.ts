@@ -1,14 +1,14 @@
 // What the kind layer says about casting: which companions a cast must never contain.
 //
 // Nothing here decides anything. Each kind declares a `disposition` per companion in
-// `packages/note-schema/src/types/*/schema.ts`; this module reads those declarations and answers
+// `packages/gxwf-foundry-note-schema/src/types/*/schema.ts`; this module reads those declarations and answers
 // the question casting asks of them. The answer used to be written down a second time —
 // `_target.yml` carried `forbid_packaged_files` by hand, and it named two of the eight companions
 // the kinds declare a cast must not carry. A hand-maintained restatement of a declaration is a
 // thing that can disagree with the declaration, and that one did.
 
 import { companionsOf, type NormalizedCompanion } from "@galaxy-foundry/kind-schema";
-import { DEFINITIONS } from "@galaxy-foundry/note-schema";
+import { DEFINITIONS } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 /** A companion no cast may carry, with the kinds that say so. */
 export interface UnpackagedCompanion extends NormalizedCompanion {

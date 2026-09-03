@@ -1,5 +1,5 @@
 ---
-"@galaxy-foundry/note-schema": minor
+"@galaxy-foundry/gxwf-foundry-note-schema": minor
 ---
 
 Stop erasing three shapes on the way out of the package: a Mold's typed references, a Mold's

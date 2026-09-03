@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import { buildNoteSchema, loadReferenceContract } from "@galaxy-foundry/note-schema";
+import { buildNoteSchema, loadReferenceContract } from "@galaxy-foundry/gxwf-foundry-note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 import { validateData, validateDirectory } from "../packages/build-cli/src/commands/validate.js";
 
@@ -997,9 +997,9 @@ describe("validateDirectory (cross-file)", () => {
         tags: ["cli/foundry"],
         tool: "foundry",
         command: "validate-tests-format",
-        package: "@galaxy-foundry/foundry",
+        package: "@galaxy-foundry/gxwf-foundry",
         source_url:
-          "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/program.ts",
+          "https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/src/program.ts",
       }),
     });
 
@@ -1014,7 +1014,7 @@ describe("validateDirectory (cross-file)", () => {
         tags: ["cli/foundry"],
         tool: "foundry",
         command: "validate-tests-format",
-        package: "@galaxy-foundry/foundry",
+        package: "@galaxy-foundry/gxwf-foundry",
       }),
     });
 

@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 6,
     "content_hash": "ddce4858e472c7e4ff1cc74b48be4c18dffe9e732e254bd6e84c41aeab1eae75",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-08-25T21:03:48.509Z",
+  "cast_at": "2026-09-03T21:21:50.902Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -97,7 +97,7 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[tests-format]]",
-      "src": "package://@galaxy-foundry/foundry#testsFormatSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testsFormatSchema",
       "dst": "references/schemas/tests-format.schema.json",
       "used_at": "runtime",
       "load": "upfront",

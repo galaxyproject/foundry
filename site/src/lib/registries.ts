@@ -1,11 +1,11 @@
 // The controlled registries the frontmatter contract is built from, loaded once
 // for the whole site build. The loaders and the schema factory live in the
-// shared @galaxy-foundry/note-schema package — the single source of truth the
+// shared @galaxy-foundry/gxwf-foundry-note-schema package — the single source of truth the
 // validator also uses — so the site and the validator can no longer drift.
 import path from "node:path";
 
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import { loadReferenceContract, requireRuntimeArtifactRegistry } from "@galaxy-foundry/note-schema";
+import { loadReferenceContract, requireRuntimeArtifactRegistry } from "@galaxy-foundry/gxwf-foundry-note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 // Astro builds run from the site/ directory; the registries live at the repo root.

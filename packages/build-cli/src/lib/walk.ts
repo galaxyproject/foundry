@@ -1,6 +1,6 @@
 // File discovery for the validator and generators.
 //
-// Which files are notes is decided by ONE table: COLLECTIONS in @galaxy-foundry/note-schema.
+// Which files are notes is decided by ONE table: COLLECTIONS in @galaxy-foundry/gxwf-foundry-note-schema.
 // This module used to answer that question a second time — SKIP_FILES named the generated
 // files at the content root, DIR_NOTE_TYPES re-stated "molds and pipelines are directory
 // notes", and between them they approximated the site's globs closely enough to look
@@ -11,7 +11,7 @@
 
 import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import { CONTENT_DIR, collectionOf } from "@galaxy-foundry/note-schema";
+import { CONTENT_DIR, collectionOf } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 /**
  * Walk a content root and yield the files COLLECTIONS claims as notes, in sorted depth-first

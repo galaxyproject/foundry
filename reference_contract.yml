@@ -4,7 +4,7 @@
 # Only `kinds` lives here. The other four vocabularies a reference entry names —
 # `used_at`, `load`, `modes`, `evidence` — describe the compilation machinery rather
 # than any domain, so they are the same in every Foundry and ship as data in
-# @galaxy-foundry/reference-contract. packages/note-schema/src/reference-contract.ts
+# @galaxy-foundry/reference-contract. packages/gxwf-foundry-note-schema/src/reference-contract.ts
 # composes the two halves.
 #
 # `kinds` stays here because it is the half that genuinely varies. It is also the half
@@ -22,7 +22,7 @@
 #                 the wrong name for a reader of the bundle.
 #
 # Which sibling files travel with a note is NOT declared here. The kind's own layout in
-# packages/note-schema/src/types/<kind>/schema.ts is the sole source: a companion ships
+# packages/gxwf-foundry-note-schema/src/types/<kind>/schema.ts is the sole source: a companion ships
 # when its `disposition` is `bundled`, and a note may name extra ones only where the kind
 # declares `additionalCompanions: allow`.
 #

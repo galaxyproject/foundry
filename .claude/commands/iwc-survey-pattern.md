@@ -13,7 +13,7 @@ Write or refine exactly one pattern page under `content/patterns/` from a survey
 2. **`CLAUDE.md`** — local authoring rules.
 3. **`content/meta/pattern-authorship.md`** — operation-anchored naming, corpus-first rule, legacy-tool posture.
 4. **`content/meta/architecture.md`** §3, §5, §6 — note types, frontmatter, validation.
-5. **`packages/note-schema/src/types/<kind>/`** (one directory per note kind — `schema.ts`, `kind.md`, `example.md`) + **`meta_tags.yml`** — frontmatter contract and tags.
+5. **`packages/gxwf-foundry-note-schema/src/types/<kind>/`** (one directory per note kind — `schema.ts`, `kind.md`, `example.md`) + **`meta_tags.yml`** — frontmatter contract and tags.
 6. **`common_paths.yml.sample`** — citation prefix vocabulary; use `$IWC_FORMAT2/path:line` citations.
 7. **The survey at `$1`** — especially the candidate boundary, decisions, and open-question resolution relevant to `$2`.
 
@@ -55,7 +55,7 @@ Drop sections that do not earn their space. A thin “None surfaced” legacy se
 
 ## Frontmatter guidance
 
-- Required fields must conform to the `@galaxy-foundry/note-schema` contract; do not add ad-hoc fields.
+- Required fields must conform to the `@galaxy-foundry/gxwf-foundry-note-schema` contract; do not add ad-hoc fields.
 - Set `pattern_kind: operation` for concrete operation pages, `pattern_kind: recipe` for multi-step lifecycle pages, and `pattern_kind: moc` for map-of-content pages that route readers to operations and recipes.
 - `summary` is a compressed “what to do and when” line, not a mini abstract.
 - `related_notes` should name primary source notes only, usually the survey. Put secondary context notes in body or `See also` unless they are essential source material.

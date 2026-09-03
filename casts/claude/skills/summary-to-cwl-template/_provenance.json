@@ -6,9 +6,9 @@
     "path": "content/molds/summary-to-cwl-template/index.md",
     "revision": 2,
     "content_hash": "c33d8e3332f5794e0d836a02cb24855ac7f911d94d220d55f9f23fec44b7f65f",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-08-25T21:03:49.505Z",
+  "cast_at": "2026-09-03T21:21:51.523Z",
   "refs": [],
   "artifacts": {
     "produces": [

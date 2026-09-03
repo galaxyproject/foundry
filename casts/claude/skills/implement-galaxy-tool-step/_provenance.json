@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 9,
     "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
-    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-09-03T14:04:20.891Z",
+  "cast_at": "2026-09-03T21:21:49.484Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -172,14 +172,14 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-summary]]",
-      "src": "package://@galaxy-foundry/foundry#galaxyToolSummarySchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#galaxyToolSummarySchema",
       "dst": "references/schemas/galaxy-tool-summary.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `state` shape.",
-      "src_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
-      "dst_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
+      "src_hash": "bf77d0735410fa0028bc9bea08edaff3016580508bf27851fdcae65d038f2d94",
+      "dst_hash": "bf77d0735410fa0028bc9bea08edaff3016580508bf27851fdcae65d038f2d94",
       "source": "deterministic"
     },
     {

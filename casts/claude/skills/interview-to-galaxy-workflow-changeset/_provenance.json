@@ -6,9 +6,9 @@
     "path": "content/molds/interview-to-galaxy-workflow-changeset/index.md",
     "revision": 3,
     "content_hash": "9e2b8567ee121020d44ac03ff4e119393e799c6cb35a0f21b9d2ce1d4a21dce1",
-    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-09-03T14:04:21.237Z",
+  "cast_at": "2026-09-03T21:21:49.938Z",
   "refs": [
     {
       "kind": "research",
@@ -29,15 +29,15 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-galaxy-workflow]]",
-      "src": "package://@galaxy-foundry/foundry#summaryGalaxyWorkflowSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryGalaxyWorkflowSchema",
       "dst": "references/schemas/summary-galaxy-workflow.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Input contract: read the existing-workflow summary to anchor every change-set entry to a real step/input/output.",
       "license": "MIT",
-      "src_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
-      "dst_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
+      "src_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "dst_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
       "source": "deterministic"
     }
   ],

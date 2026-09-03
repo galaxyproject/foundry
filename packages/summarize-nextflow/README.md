@@ -8,7 +8,7 @@ Source-specific (Nextflow), target-agnostic. The summary is the input to downstr
 
 `v0.1.0` — initial public release. Local pipeline paths, remote git URLs, and `--pin <tag|branch|sha>` are all supported. A pinned or remote source is inspected from a detached temporary checkout outside the caller's repository; a caller-supplied checkout is never switched or reset, and `source.url` / `source.version` record the normalized remote and the resolved full commit SHA. See `content/molds/summarize-nextflow/` and the Nextflow component research notes for design context.
 
-Most consumers should install [`@galaxy-foundry/foundry`](https://www.npmjs.com/package/@galaxy-foundry/foundry) instead, which ships `summarize-nextflow` as a subcommand alongside the validators.
+Most consumers should install [`@galaxy-foundry/gxwf-foundry`](https://www.npmjs.com/package/@galaxy-foundry/gxwf-foundry) instead, which ships `summarize-nextflow` as a subcommand alongside the validators.
 
 ## Install
 

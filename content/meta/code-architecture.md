@@ -37,7 +37,7 @@ The arrows point toward dependencies. The site and build CLI are composition lay
 
 ## Components and ownership
 
-### `@galaxy-foundry/note-schema`
+### `@galaxy-foundry/gxwf-foundry-note-schema`
 
 The instance's content-contract package. It owns:
 
@@ -63,13 +63,13 @@ The authoring and build application exposed as `foundry-build`. It owns reposito
 
 Root files under `scripts/` are thin compatibility wrappers, sync commands, or one-time maintenance utilities. New reusable authoring behavior belongs in `build-cli`, not in another root script.
 
-### `@galaxy-foundry/foundry`
+### `@galaxy-foundry/gxwf-foundry`
 
 The runtime-facing CLI and schema bundle. It owns validation commands for structured Mold artifacts and exports schemas whose producer is not another in-repository package. It is distinct from `foundry-build`: the build CLI operates on the Foundry repository; the runtime CLI travels with or supports cast workflows.
 
 ### `@galaxy-foundry/summarize-nextflow`
 
-A domain runtime package that summarizes Nextflow source and owns the schemas produced by that operation. Producer-owned schemas remain with their producer; `@galaxy-foundry/foundry` holds the orphan schemas with no independent in-repository producer.
+A domain runtime package that summarizes Nextflow source and owns the schemas produced by that operation. Producer-owned schemas remain with their producer; `@galaxy-foundry/gxwf-foundry` holds the orphan schemas with no independent in-repository producer.
 
 ### Metadata packages
 
@@ -110,12 +110,12 @@ gxwf and Planemo are not implementation layers in this repository. Molds describ
 
 | Concern | Primary location |
 |---|---|
-| note definitions and collections | `packages/note-schema/src/types/` |
+| note definitions and collections | `packages/gxwf-foundry-note-schema/src/types/` |
 | authoring CLI commands | `packages/build-cli/src/commands/` |
 | repository validation | `packages/build-cli/src/commands/validate.ts` |
 | what this Foundry contributes to a cast | `packages/build-cli/src/commands/cast-mold.ts` |
 | pipeline assembly | `packages/build-cli/src/commands/assemble-pipeline.ts` |
-| runtime artifact validation | `packages/foundry/src/` |
+| runtime artifact validation | `packages/gxwf-foundry/src/` |
 | Nextflow summarization | `packages/summarize-nextflow/src/` |
 | site collection wiring | `site/src/content.config.ts` |
 | site registries and link maps | `site/src/lib/` |

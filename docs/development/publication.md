@@ -3,8 +3,8 @@
 The five public packages in this repository publish to the `@galaxy-foundry`
 npm scope from CI:
 
-- `@galaxy-foundry/foundry`
-- `@galaxy-foundry/note-schema`
+- `@galaxy-foundry/gxwf-foundry`
+- `@galaxy-foundry/gxwf-foundry-note-schema`
 - `@galaxy-foundry/planemo-cli-meta`
 - `@galaxy-foundry/planemo-test-report-schema`
 - `@galaxy-foundry/summarize-nextflow`

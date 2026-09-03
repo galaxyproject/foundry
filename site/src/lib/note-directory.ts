@@ -19,7 +19,7 @@
 import path from 'node:path';
 
 import type { NormalizedCompanion } from '@galaxy-foundry/kind-schema';
-import { CONTENT_DIR } from '@galaxy-foundry/note-schema';
+import { CONTENT_DIR } from '@galaxy-foundry/gxwf-foundry-note-schema';
 
 import {
   adjacentFiles,

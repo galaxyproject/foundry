@@ -2,7 +2,7 @@
 type: cli-command
 tool: foundry
 command: validate-summary-cwl
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 tags:
   - cli/foundry
 status: draft
@@ -16,7 +16,7 @@ related_notes:
 
 # `foundry validate-summary-cwl`
 
-Validate a JSON document against the [[summary-cwl]] schema bundled with `@galaxy-foundry/foundry`. The cwl summarizer itself is not yet shipped as a foundry subcommand; this gate exists so cwl-summary producers (current and future) can validate against a single canonical schema.
+Validate a JSON document against the [[summary-cwl]] schema bundled with `@galaxy-foundry/gxwf-foundry`. The cwl summarizer itself is not yet shipped as a foundry subcommand; this gate exists so cwl-summary producers (current and future) can validate against a single canonical schema.
 
 ## Output
 

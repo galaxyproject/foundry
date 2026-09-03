@@ -11,10 +11,10 @@
 // narrowing call at every use site.
 
 import { getCollection, type CollectionEntry } from 'astro:content';
-import type { CollectionName } from '@galaxy-foundry/note-schema';
+import type { CollectionName } from '@galaxy-foundry/gxwf-foundry-note-schema';
 
 /**
- * Every collection holding notes. Mirrors COLLECTIONS in @galaxy-foundry/note-schema.
+ * Every collection holding notes. Mirrors COLLECTIONS in @galaxy-foundry/gxwf-foundry-note-schema.
  *
  * The ORDER is load-bearing and matches the glob pattern order the single `content` collection
  * used. `buildWikiLinkMap` keys by basename and overwrites, so when two notes share a basename

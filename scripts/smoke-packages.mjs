@@ -50,12 +50,12 @@ function packTarball(packageName) {
 }
 
 const smokeScripts = {
-  "@galaxy-foundry/foundry": `
+  "@galaxy-foundry/gxwf-foundry": `
     import {
       summaryCwlValidator,
       galaxyToolDiscoveryValidator,
       summaryNextflowValidator,
-    } from "@galaxy-foundry/foundry";
+    } from "@galaxy-foundry/gxwf-foundry";
     for (const validator of [
       summaryCwlValidator,
       galaxyToolDiscoveryValidator,
@@ -65,8 +65,8 @@ const smokeScripts = {
       if (result.valid) throw new Error("expected empty object to fail validation");
     }
   `,
-  "@galaxy-foundry/note-schema": `
-    import { DEFINITIONS, KINDS } from "@galaxy-foundry/note-schema";
+  "@galaxy-foundry/gxwf-foundry-note-schema": `
+    import { DEFINITIONS, KINDS } from "@galaxy-foundry/gxwf-foundry-note-schema";
     if (KINDS.length === 0) throw new Error("note kinds are empty");
     if (DEFINITIONS.mold.kind !== "mold") throw new Error("mold definition missing");
   `,

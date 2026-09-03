@@ -59,7 +59,7 @@ Nothing in `references/` is freehand. Each file is the destination of exactly on
 
 `[[galaxy-tool-discovery]]` is a `type: schema` note whose JSON is owned by a package, not the content tree:
 
-- `src: package://@galaxy-foundry/foundry#galaxyToolDiscoverySchema` → `dst: references/schemas/galaxy-tool-discovery.schema.json`
+- `src: package://@galaxy-foundry/gxwf-foundry#galaxyToolDiscoverySchema` → `dst: references/schemas/galaxy-tool-discovery.schema.json`
 - `src_hash == dst_hash` — the named runtime export is imported and serialized verbatim. The `package://` source form (rather than a file path) records *which* package export, so a package bump that changes the schema shows up as a `src_hash` change on re-cast.
 - `evidence: cast-validated` and a `verification:` string ride along — this ref's correctness has been exercised, not just asserted.
 

@@ -2,7 +2,7 @@
 type: cli-command
 tool: foundry
 command: validate-galaxy-tool-summary
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 tags:
   - cli/foundry
 status: draft

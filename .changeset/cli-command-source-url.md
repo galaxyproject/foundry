@@ -1,5 +1,5 @@
 ---
-"@galaxy-foundry/note-schema": minor
+"@galaxy-foundry/gxwf-foundry-note-schema": minor
 ---
 
 `cli-command` names the document a page summarizes `source_url`, constrained to a URL, and owes

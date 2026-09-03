@@ -266,7 +266,7 @@ describe("required-tools manifest (summarize-cwl integration)", () => {
     expect(skill).toContain("## Required Tools");
     expect(skill).toContain("uv tool install cwltool");
     expect(skill).toContain("uvx --from cwl-utils cwl-normalizer");
-    expect(skill).toContain("npx --package @galaxy-foundry/foundry foundry");
+    expect(skill).toContain("npx --package @galaxy-foundry/gxwf-foundry foundry");
   });
 });
 
@@ -1886,7 +1886,7 @@ describe("the payload a companion strategy ships is the kind's declaration", () 
   };
 
   it("ships the companion the kind declares bundled, named for the note", async () => {
-    const { DEFINITIONS } = await import("@galaxy-foundry/note-schema");
+    const { DEFINITIONS } = await import("@galaxy-foundry/gxwf-foundry-note-schema");
     const out = await resolve(DEFINITIONS);
     expect(out.error).toBeUndefined();
     expect(out.resolved?.src).toBe("content/prompts/p/upstream.prompt");
@@ -2101,7 +2101,7 @@ describe("companion membership answers to the kind layout", () => {
   // The layouts the caster actually runs with: a flat kind has nowhere to put a companion, and
   // `research` is the one kind that lets a note name its own.
   it("hands over the kind definitions this Foundry validates against", async () => {
-    const { DEFINITIONS } = await import("@galaxy-foundry/note-schema");
+    const { DEFINITIONS } = await import("@galaxy-foundry/gxwf-foundry-note-schema");
     expect(DEFINITIONS.pattern.shape).toBe("file");
     expect(DEFINITIONS.pattern.companions).toEqual([]);
     expect(DEFINITIONS.research.additionalCompanions).toBe("allow");
