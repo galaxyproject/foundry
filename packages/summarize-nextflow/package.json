@@ -24,7 +24,8 @@
     "directory": "packages/summarize-nextflow"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "sync": "node scripts/sync-schema.mjs",
