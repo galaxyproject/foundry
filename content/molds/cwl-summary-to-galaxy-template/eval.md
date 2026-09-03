@@ -12,7 +12,7 @@ here is applied to whatever a scenario produces.
 - bucket: schema
 - check: deterministic + llm-judged
 - assertion: a draft carrying TODO-stub fields — unresolved tool IDs, placeholder
-  tool_state, unwired connections — is expected to **fail** `gxwf validate` and
+  state, unwired connections — is expected to **fail** `gxwf validate` and
   `gxwf lint`. A draft that passes lint clean is suspect, because it likely
   fabricated tool IDs or wiring to satisfy the linter.
 

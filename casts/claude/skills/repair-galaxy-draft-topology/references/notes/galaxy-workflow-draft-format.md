@@ -21,7 +21,7 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
-summary: "gxformat2 draft superset: wrapper-tier TODOs (tool_id, tool_state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step."
+summary: "gxformat2 draft superset: wrapper-tier TODOs (tool_id, state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step."
 ---
 
 # Galaxy workflow draft format
@@ -36,8 +36,8 @@ A step's declared `in:` arity is a topology decision and must be realizable by o
 
 Each tool step is resolved to the tier its evidence supports — **evidence-gated, not source-gated**. The source kind (free-form, nf-core, CWL) shifts how often a step reaches each tier but never caps it; each `*-summary-to-galaxy-template` Mold records its own source tendency.
 
-- **Resolved** — concrete `tool_id`, `tool_shed_repository` / changeset (or a stable built-in id), and bound `tool_state`; no `_plan_*`. Use when the evidence pins wrapper *and* parameters jointly: a built-in Galaxy tool with brief-determined params (`Filter1`, `Cut1`, a collection operation), or a pattern page / IWC exemplar worked example that supplies `tool_id`, changeset, and parameter values together. `draft-validate` rejects `_plan_*` on a fully-resolved step.
-- **Identity-pinned** — concrete `tool_id` with `tool_version: TODO` (changeset deferred); `tool_state` and `tool_shed_repository` absent; `_plan_state` (and any other open `_plan_*`) kept. The `tool_version: TODO` sentinel is load-bearing: it keeps the step drafty for [[draft-next-step]] and not-fully-resolved for [[draft-validate]], so the retained `_plan_state` is legal rather than a `semanticError`. (A step is "fully-resolved" — and so forbidden from carrying `_plan_*` — exactly when it has *no* remaining TODO sentinel in `tool_id`, `tool_version`, or any `in:` / `out:` port; pinning identity without this sentinel would trip that gate.) Use when the evidence confidently names *which* wrapper but not its settings or exact changeset for this context: a portion of an IWC exemplar that [[compare-against-iwc-exemplar]] flags as a high-confidence match, a pattern page's worked example, or a source summary that names a specific `tool_id` with evidence.
+- **Resolved** — concrete `tool_id`, `tool_shed_repository` / changeset (or a stable built-in id), and bound `state`; no `_plan_*`. Use when the evidence pins wrapper *and* parameters jointly: a built-in Galaxy tool with brief-determined params (`Filter1`, `Cut1`, a collection operation), or a pattern page / IWC exemplar worked example that supplies `tool_id`, changeset, and parameter values together. `draft-validate` rejects `_plan_*` on a fully-resolved step.
+- **Identity-pinned** — concrete `tool_id` with `tool_version: TODO` (changeset deferred); `state` and `tool_shed_repository` absent; `_plan_state` (and any other open `_plan_*`) kept. The `tool_version: TODO` sentinel is load-bearing: it keeps the step drafty for [[draft-next-step]] and not-fully-resolved for [[draft-validate]], so the retained `_plan_state` is legal rather than a `semanticError`. (A step is "fully-resolved" — and so forbidden from carrying `_plan_*` — exactly when it has *no* remaining TODO sentinel in `tool_id`, `tool_version`, or any `in:` / `out:` port; pinning identity without this sentinel would trip that gate.) Use when the evidence confidently names *which* wrapper but not its settings or exact changeset for this context: a portion of an IWC exemplar that [[compare-against-iwc-exemplar]] flags as a high-confidence match, a pattern page's worked example, or a source summary that names a specific `tool_id` with evidence.
 - **Deferred** — `tool_id: TODO`, full `_plan_*`. Use when the evidence is weak, multi-candidate, a domain-specific scientific tool with no covering pattern or exemplar, or a corpus gap.
 
 Pin identity only on strong evidence — a wrapper an exemplar actually uses for the same operation, a worked pattern example, or a tool the source names explicitly — never on plausibility: a wrong pinned `tool_id` lets [[discover-shed-tool]] resolve the wrong tool's changeset instead of searching afresh. Port names follow the wrapper: real on a Resolved step, `TODO_<hint>` sentinels until the step resolves.
@@ -50,16 +50,17 @@ For tool steps, when the wrapper has not been picked:
 
 - `tool_id` and `tool_version` MAY be the literal string `TODO`. Resolution belongs to [[discover-shed-tool]] and the per-step implementation Mold.
 - `tool_shed_repository` (the `{ changeset_revision, name, owner, tool_shed }` block) MAY be absent.
-- `tool_state` / `state` MAY be absent.
+- `state` MAY be absent. A draft is authored, so it uses `state` — never the export-side
+  `tool_state`; see [[gxformat2-schema]] for the distinction.
 - Step `out[].id` and `in[]` keys MAY be `TODO_<hint>` sentinels (e.g. `TODO_trimmed_paired`, `TODO_input`). Workflow `outputs[].outputSource` MAY reference such a sentinel via `step/TODO_<hint>` so the connection graph still resolves syntactically. The connection itself (which step's output feeds which step's input) is topology and MUST be present; only the wrapper-determined port names are deferred.
 
 Workflow inputs (types, collection shapes, formats, optionality), workflow outputs, step labels, and the producer→consumer edge set MUST be expressed in normal gxformat2 form with concrete values — never `TODO`. The template Mold is the locus where these decisions are made; if the upstream brief leaves a topology choice open, decide it here from source evidence, IWC exemplars, and pattern pages rather than punting downstream.
 
 ## Additions: `_plan_*` planning fields
 
-Free-text fields per tool step capture the template Mold's intent for the downstream per-step implementation Mold. All optional, but expected on any Identity-pinned or Deferred step (`tool_id` is `TODO`, or `tool_id` is pinned but `tool_state` is absent); a Resolved step carries none.
+Free-text fields per tool step capture the template Mold's intent for the downstream per-step implementation Mold. All optional, but expected on any Identity-pinned or Deferred step (`tool_id` is `TODO`, or `tool_id` is pinned but `state` is absent); a Resolved step carries none.
 
-- `_plan_state` — parameter binding intent: which knobs matter, value or range, why. Read by the per-step Mold to bind real `tool_state` once a wrapper is selected.
+- `_plan_state` — parameter binding intent: which knobs matter, value or range, why. Read by the per-step Mold to bind real `state` once a wrapper is selected.
 - `_plan_context` — extras the per-step Mold needs to pick a wrapper: source `command:` block, conda packages, Docker/Singularity images, environment variables, preconditions, postconditions, container entrypoints, scratch-disk needs.
 - `_plan_in` — wrapper input port mapping intent. The connection graph already says "this source feeds this step"; `_plan_in` records the semantic role of each port and likely wrapper-side names (`single_paired` vs `paired_input` vs `input`) so the per-step Mold can collapse `TODO_*` keys to the real ones.
 - `_plan_out` — wrapper output surface intent: which outputs downstream consumers depend on (with the existing edges as evidence) so the per-step Mold can pick a wrapper that exposes them, or insert a follow-up step if it does not.

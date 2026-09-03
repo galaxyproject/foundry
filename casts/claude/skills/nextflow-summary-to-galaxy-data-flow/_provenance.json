@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 7,
     "content_hash": "1f98fd5cf9a54fd81e48db957f7451760f5e97629748f3d39fd66dc59b2ac765",
-    "commit": "c908a5da7fe745ce42c0036fabcaf1e152ae54e5"
+    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
   },
-  "cast_at": "2026-08-30T18:57:46.414Z",
+  "cast_at": "2026-09-03T14:04:21.761Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -100,8 +100,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "af796dab52b38cba5edfbe3c1bf4e2d05af6605e43795f717cc11650d9902da0",
-      "dst_hash": "af796dab52b38cba5edfbe3c1bf4e2d05af6605e43795f717cc11650d9902da0",
+      "src_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
+      "dst_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
       "source": "deterministic"
     },
     {

@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 3,
     "content_hash": "cafba235f3bb41612216f766eb390ee6fddcb1192ddf445b6d9eb7f2c132678c",
-    "commit": "29f2b69632fb88926a3517de2e34b8c46ad5bd58"
+    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
   },
-  "cast_at": "2026-08-29T23:30:32.465Z",
+  "cast_at": "2026-09-03T14:04:22.856Z",
   "refs": [
     {
       "kind": "pattern",
@@ -88,8 +88,8 @@
       "evidence": "hypothesis",
       "purpose": "Re-wire the affected region consistently with the data-flow design that settled the surrounding topology.",
       "verification": "Promote after two repairs preserve the surrounding data-flow design without re-deriving it from the source.",
-      "src_hash": "af796dab52b38cba5edfbe3c1bf4e2d05af6605e43795f717cc11650d9902da0",
-      "dst_hash": "af796dab52b38cba5edfbe3c1bf4e2d05af6605e43795f717cc11650d9902da0",
+      "src_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
+      "dst_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
       "source": "deterministic"
     },
     {
@@ -103,8 +103,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit re-wired steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
       "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
-      "src_hash": "67763f5c05329f91151941e438c2c7ad9989e09ec68a73d7c0b1dbef24d6584a",
-      "dst_hash": "67763f5c05329f91151941e438c2c7ad9989e09ec68a73d7c0b1dbef24d6584a",
+      "src_hash": "93f3b231dd063bf059c550f18b2200c61909af0da9408e0d43351116e886bf7b",
+      "dst_hash": "93f3b231dd063bf059c550f18b2200c61909af0da9408e0d43351116e886bf7b",
       "source": "deterministic"
     },
     {

@@ -32,7 +32,7 @@ output_artifacts:
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
     schema: "[[galaxy-workflow-draft]]"
-    description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
+    description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
@@ -82,7 +82,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields."
+    purpose: "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields."
     verification: "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"

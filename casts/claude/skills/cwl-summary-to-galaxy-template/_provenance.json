@@ -5,10 +5,10 @@
     "name": "cwl-summary-to-galaxy-template",
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
-    "content_hash": "9e53cc268a919b22f0d481226224630b865005aaa990f9bbdd72711e7f5ebdc8",
-    "commit": "29f2b69632fb88926a3517de2e34b8c46ad5bd58"
+    "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
+    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
   },
-  "cast_at": "2026-08-29T23:30:29.205Z",
+  "cast_at": "2026-09-03T14:04:18.893Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -150,8 +150,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "af796dab52b38cba5edfbe3c1bf4e2d05af6605e43795f717cc11650d9902da0",
-      "dst_hash": "af796dab52b38cba5edfbe3c1bf4e2d05af6605e43795f717cc11650d9902da0",
+      "src_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
+      "dst_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
       "source": "deterministic"
     },
     {
@@ -178,10 +178,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional tool_state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
+      "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "67763f5c05329f91151941e438c2c7ad9989e09ec68a73d7c0b1dbef24d6584a",
-      "dst_hash": "67763f5c05329f91151941e438c2c7ad9989e09ec68a73d7c0b1dbef24d6584a",
+      "src_hash": "93f3b231dd063bf059c550f18b2200c61909af0da9408e0d43351116e886bf7b",
+      "dst_hash": "93f3b231dd063bf059c550f18b2200c61909af0da9408e0d43351116e886bf7b",
       "source": "deterministic"
     },
     {
@@ -211,8 +211,8 @@
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "8c2d9e8dbda69f094fc89102438863a7d004a68228e2963c5f45c7a65b037e33",
-      "dst_hash": "8c2d9e8dbda69f094fc89102438863a7d004a68228e2963c5f45c7a65b037e33",
+      "src_hash": "4fe42382f99655115c53c1afde0da0d0556ad77984da7d0ffa8ab725ea260aa3",
+      "dst_hash": "4fe42382f99655115c53c1afde0da0d0556ad77984da7d0ffa8ab725ea260aa3",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
@@ -289,7 +289,7 @@
         "kind": "yaml",
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
         "schema": "[[galaxy-workflow-draft]]",
-        "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / tool_state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
+        "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / state / tool_shed_repository and wrapper-determined port names may be TODO with free-text _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds."
       },
       {
         "id": "open-requirements-ledger",

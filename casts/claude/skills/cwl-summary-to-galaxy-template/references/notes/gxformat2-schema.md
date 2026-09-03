@@ -59,6 +59,25 @@ Producer-side output actions are separate from top-level `outputs`. Step `out:` 
 
 Each entry under `steps` (`WorkflowStepSchema`) carries `type` ∈ `{tool, subworkflow, pause, pick_value}`, plus `tool_id`, `tool_shed_repository`, `tool_version`, `in`, `out`, `state`, `tool_state`, `run`, `runtime_inputs`, `when`, `errors`, `uuid`, `label`, `doc`, `position`, `id`.
 
+### `state` vs `tool_state`
+
+Both hold the same thing — a map from tool parameter names to values — and a step should
+carry only one. Which one marks how the workflow was produced:
+
+- **`state` is the authoring key.** A typed map, with conditionals and repeats written as
+  nested YAML. Molds that *author* a workflow or draft write `state`. Upstream agrees: of
+  the twelve gxformat2 format2 examples that carry step state, ten use `state`, and the
+  schema's own field docs say `tool_state` "may be present in workflows exported from Galaxy
+  but shouldn't be written by humans."
+- **`tool_state` is the export key.** `gxwf convert --to format2` emits it for every tool
+  step, so any format2 view of a `.ga` workflow — the IWC corpus included — arrives carrying
+  `tool_state`. Molds that *read*, summarize, or preserve an existing workflow keep the key
+  they were given rather than rewriting it.
+
+Nothing enforces this. Galaxy and `gxwf` both accept a nested map under either key, so a
+hand-authored `tool_state` validates, converts, and runs; no gate reports the mismatch. It is
+a convention that keeps authored and exported workflows distinguishable on sight.
+
 ## Caveats
 
 - **Doc strings dropped.** Effect-TS `JSONSchema.make` does not preserve description fields. Narrative grounding for what each input/step type means lives in this note and in upstream gxformat2 SALAD (`$GXFORMAT2/schema/v19_09/workflow.yml`).
