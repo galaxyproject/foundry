@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-08-19
-revision: 2
+revised: 2026-08-29
+revision: 3
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
@@ -18,7 +18,7 @@ summary: "Carried unresolved-requirements artifact the source→Galaxy pipeline 
 
 # Open-requirements ledger
 
-The `open-requirements-ledger` is a single artifact threaded through the source→Galaxy pipeline that records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar. Each Mold that surfaces one **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact.
+The `open-requirements-ledger` is a single artifact threaded through the source→Galaxy pipeline that records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar — and **source work it decided not to carry**. Each Mold that surfaces one **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact.
 
 ## Framing: obligations the pipeline discharges, not questions a human answers
 
@@ -33,14 +33,54 @@ Like the `_plan_*` family in [[galaxy-workflow-draft-format]], ledger entries ar
 ```yaml
 - id: sccmec-evidence-missing
   status: open                # open | resolved | surrendered
+  kind: gap                   # gap | dropped — see below; omit for gap
   blocking: true              # true only for a computability gap; the convergence gate counts these
   raised_by: implement-galaxy-tool-step   # Mold that appended it
   step: classify_context       # draft step the obligation attaches to (if any)
   unmet: "SCCmec-region candidate output category"
   missing: "no wired input carries SCCmec cassette evidence"
   resolved_by: null            # Mold that closed it, once closed
+  supersedes: null             # id whose justification this entry refutes, once resolved
   note: ""                     # how it was closed or why surrendered
 ```
+
+`kind` separates the two things an open entry can mean, which v1 conflated. A **`gap`** is
+an obligation the pipeline cannot discharge: no producer is discoverable, Galaxy has no
+datatype for the format, the source pinned no value. A **`dropped`** entry is source work
+the pipeline *declined to carry* — a plane cut from the design, a parameter surface not
+exposed, an output the repair removed. Both are honest; they are not the same admission,
+and a reader cannot tell them apart from `unmet` / `missing` alone. Omit `kind` for a
+plain gap.
+
+A `dropped` entry carries two more fields:
+
+```yaml
+- id: annotation-planes-not-built
+  status: open
+  kind: dropped
+  raised_by: nextflow-summary-to-galaxy-data-flow
+  units: "25 of 31 designed nodes (rnaseq_short, gnomon, annot_proc, convert)"
+  because: "`gxwf tool-search asn1` returns no wrapper reading seq-submit; searched 2026-08-29"
+  unmet: "the pipeline's actual product — an annotated genome"
+  missing: "the carried spine masks an assembly; it does not annotate a genome"
+  note: ""
+```
+
+`units` names what was dropped in the source's own terms, so the drops can be totalled
+without re-reading the design.
+
+`because` says why, and **must carry its citation** — the source construct that is not
+there, the target limitation named specifically enough that someone could check it, the
+search actually run. A drop's reason is a claim about the world, and the first real run is
+why the burden exists: 25 of 31 planes were cut because "each needs an authored Galaxy
+wrapper for an undocumented binary available only inside the pipeline's container," and a
+Tool Shed search one phase later found the whole pipeline already wrapped at the exact
+pinned version. The claim was not dishonest. It was never checked, and nothing in the
+entry showed that it had not been.
+
+A reason you can cite, cite. A reason you cannot cite is still recorded — write it plainly
+and leave it uncited rather than dressing it as evidence — but an uncited drop is not a
+finding the run may reason from afterwards. It is a debt, and it should read as one.
 
 Provenance (`raised_by`, `resolved_by`) is the audit trail for *when* each obligation entered and left — the traceability #281 asked for, and the evidence the convergence gate reads.
 
@@ -61,6 +101,24 @@ This section is the runtime protocol for every Mold that carries the ledger. A M
 **Carry the rest untouched.** Entries you neither raise nor close pass through unchanged, statuses and provenance intact. Never renumber, re-word, or drop another Mold's entry.
 
 **Never fabricate around an entry.** An open obligation is the honest state. Inventing a connection, a tool id, or a value so the artifact looks complete converts a tracked gap into a silent defect — the specific failure the ledger replaces.
+
+**Record a drop as a drop.** When a decision removes source work from what the run will
+carry — narrowing a design, cutting a plane, dropping an output during repair — append a
+`kind: dropped` entry naming the `units` and a cited `because`. A cut recorded only as
+prose in a brief is invisible to every later Mold; a cut recorded as a `gap` reads as
+something the pipeline could not do rather than something it chose not to do. Recording
+the drop is not the same as discharging it, and a well-written entry is not a substitute
+for the work — an entry makes a cut *legible*, never *justified*.
+
+**A refuted justification reopens its decision.** When work you do contradicts the
+`because` another entry rests on — discovery finds the wrapper a drop assumed absent, a
+later brief supplies the evidence a narrowing assumed missing — set `supersedes` to that
+entry's `id` on your own resolved entry, and return the superseded entry to `status: open`
+with its `because` struck and the contradiction quoted in its `note`. Do not leave a
+refuted rationale standing: the terminal writes these into the final artifact, and a
+surrendered gap whose stated reason is known to be false is worse than an unexplained one.
+Reopening does not oblige *you* to do the dropped work — it obliges the run to stop
+claiming a settled reason it no longer has.
 
 **Record a surrender note; leave the status to the terminal.** When you cannot close an entry and nothing downstream can either — no producer is discoverable, the output cannot be honestly narrowed — leave it `open` and say so in `note`. `surrendered` is a terminal status, set at the end of a run: the escalation cap reached, or the final artifact emitted with the obligation still unmet. Either way the entry stays visible and is written into the final artifact as a labelled gap, never dropped.
 
@@ -106,7 +164,8 @@ The template Mold's computability review pass is the notable appender ahead of t
 
 ## Open work
 
-- Decide whether entry structure should harden (typed `unmet` / `missing`, links back to source-summary evidence, machine-checkable `status` transitions) once two or three worked runs exercise it. Hardening it would also give the producing Molds an `output_artifacts[].schema` to cite, which none carry today.
+- Decide whether the drops should be **counted**, not just labelled. `kind: dropped` and `units` make each cut legible one entry at a time; nothing totals them, so a run that drops a plane four times over still reports four reasonable-looking entries. A conservation rule — every source unit ends the run carried, subsumed, or surrendered, and the buckets sum to the source total — would make the aggregate visible the way `open_history` makes escalation visible. Deliberately not attempted here: labelling is cheap and may prove sufficient, counting needs a definition of "source unit" per source kind.
+- Decide whether entry structure should harden further (typed `unmet` / `missing`, links back to source-summary evidence, machine-checkable `status` transitions) once two or three worked runs exercise it. Hardening it would also give the producing Molds an `output_artifacts[].schema` to cite, which none carry today.
 - Assign terminal surrender of *non-blocking* entries. [[advance-galaxy-draft-step]] surrenders open blocking entries at the escalation cap, but an unpinned-parameter entry the design tier appended and nobody closed currently rides out the run without ever being marked `surrendered`. Nothing owns that pass today.
 - Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. Every design Mold still emits both, with no rule for which destination an unresolved choice belongs in.
 - Decide whether the source-summary Molds should also emit structured entries, or keep their free-text open-questions until the design tier formalizes them.
