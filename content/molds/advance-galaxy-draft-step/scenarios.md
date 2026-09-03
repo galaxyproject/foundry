@@ -67,7 +67,7 @@ the round-trip oracle. See that directory's `README.md`.
   `gxwf draft-extract`; oracle `expected.gxwf.yml`)
 - expect: the extracted, class-promoted result is structurally equivalent to
   `expected.gxwf.yml` modulo the deltas listed in the fixture README's
-  *Round-trip property* (tool_version / changeset drift, defensible `tool_state`
+  *Round-trip property* (tool_version / changeset drift, defensible `state`
   values, `hide` / `rename` UI choices, and the `unique_tools:` export block).
   The implemented wrapper should be the IUC `stringtie_merge` suite tool; a
   structurally different merge tool is acceptable only if it satisfies the step's

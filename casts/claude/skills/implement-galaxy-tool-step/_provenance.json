@@ -5,10 +5,10 @@
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 9,
-    "content_hash": "bd96cf67a5478cab941c05e4997e403e40ee6d11ffb1472e3ecd0740fcf1baaf",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
+    "commit": "bf25007befc4c590eb1177128565a74e952cd755"
   },
-  "cast_at": "2026-08-25T21:03:46.214Z",
+  "cast_at": "2026-09-02T15:41:36.305Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -177,7 +177,7 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "corpus-observed",
-      "purpose": "Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape.",
+      "purpose": "Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `state` shape.",
       "src_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
       "dst_hash": "3c4b6d377fd19e02eed6f057a5dfaa7d50e923cea30f6dc159a918831aff2307",
       "source": "deterministic"

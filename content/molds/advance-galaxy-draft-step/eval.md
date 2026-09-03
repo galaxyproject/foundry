@@ -83,7 +83,7 @@ Properties are tagged by bucket:
 - check: llm-judged
 - assertion: the extracted, class-promoted result is structurally equivalent to
   the fixture's round-trip oracle, modulo the deltas the fixture documents
-  (tool_version / changeset drift, defensible `tool_state` values,
+  (tool_version / changeset drift, defensible `state` values,
   `hide` / `rename` UI choices, and export-only blocks not produced by the
   per-step loop). A structurally different wrapper is acceptable only if it
   satisfies the chosen step's `_plan_*` contract.

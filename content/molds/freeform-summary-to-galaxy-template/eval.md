@@ -17,7 +17,7 @@ satisfy, independent of fixture. Properties are tagged by bucket:
   outputs, the full step set, and the producer→consumer edge graph are concrete
   gxformat2. No step, edge, input shape, or output is left as a TODO; only
   wrapper-tier fields (`tool_id` / `tool_version` / `tool_shed_repository` /
-  `tool_state` and wrapper-determined `in:`/`out:` port names) may be deferred.
+  `state` and wrapper-determined `in:`/`out:` port names) may be deferred.
 
 ## Property: draft validates against the draft contract
 
