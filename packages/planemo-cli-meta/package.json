@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-foundry/planemo-cli-meta",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Vendored `planemo cli_metadata` command list. Parallels `@galaxy-tool-util/cli/meta` and feeds the Foundry validator's cli-command coverage check.",
   "type": "module",
   "exports": {
