@@ -40,7 +40,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `galaxy-test-plan.yml` before returning it: run `foundry validate-galaxy-workflow-test-plan galaxy-test-plan.yml` from `@galaxy-foundry/foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/foundry foundry validate-galaxy-workflow-test-plan galaxy-test-plan.yml`. This checks artifact `galaxy-test-plan` against the galaxy-workflow-test-plan schema.
+- Validate `galaxy-test-plan.yml` before returning it: run `foundry validate-galaxy-workflow-test-plan galaxy-test-plan.yml` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-workflow-test-plan galaxy-test-plan.yml`. This checks artifact `galaxy-test-plan` against the galaxy-workflow-test-plan schema.
 
 ## Procedure
 

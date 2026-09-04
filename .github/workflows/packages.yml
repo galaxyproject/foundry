@@ -34,7 +34,7 @@ jobs:
         run: npm run lint:packages
 
       # Runs after build because the validator imports
-      # @galaxy-foundry/foundry/meta to enumerate known CLI commands; the
+      # @galaxy-foundry/gxwf-foundry/meta to enumerate known CLI commands; the
       # `./meta` subpath only resolves once `dist/` exists.
       - name: Validate content
         run: npm run validate

@@ -5,7 +5,7 @@ import {
   CONTENT_DIR,
   buildKindSchemas,
   type CollectionName,
-} from '@galaxy-foundry/note-schema';
+} from '@galaxy-foundry/gxwf-foundry-note-schema';
 import { licensePolicy, referenceContract, tags } from './lib/registries';
 
 // One collection per kind, routed by path. The directory a note lives in picks the schema it

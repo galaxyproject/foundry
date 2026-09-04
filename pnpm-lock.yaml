@@ -36,15 +36,15 @@ importers:
       '@galaxy-foundry/content-reader':
         specifier: ^0.3.1
         version: 0.3.1(zod@4.4.3)
-      '@galaxy-foundry/foundry':
+      '@galaxy-foundry/gxwf-foundry':
         specifier: workspace:*
-        version: link:packages/foundry
+        version: link:packages/gxwf-foundry
+      '@galaxy-foundry/gxwf-foundry-note-schema':
+        specifier: workspace:*
+        version: link:packages/gxwf-foundry-note-schema
       '@galaxy-foundry/license-policy':
         specifier: ^0.8.1
         version: 0.8.1
-      '@galaxy-foundry/note-schema':
-        specifier: workspace:*
-        version: link:packages/note-schema
       '@galaxy-foundry/planemo-cli-meta':
         specifier: workspace:*
         version: link:packages/planemo-cli-meta
@@ -114,18 +114,18 @@ importers:
       '@galaxy-foundry/content-reader':
         specifier: ^0.3.1
         version: 0.3.1(zod@4.4.3)
-      '@galaxy-foundry/foundry':
+      '@galaxy-foundry/gxwf-foundry':
         specifier: workspace:*
-        version: link:../foundry
+        version: link:../gxwf-foundry
+      '@galaxy-foundry/gxwf-foundry-note-schema':
+        specifier: workspace:*
+        version: link:../gxwf-foundry-note-schema
       '@galaxy-foundry/kind-schema':
         specifier: ^0.6.0
         version: 0.6.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
         specifier: ^0.8.1
         version: 0.8.1
-      '@galaxy-foundry/note-schema':
-        specifier: workspace:*
-        version: link:../note-schema
       '@galaxy-foundry/planemo-cli-meta':
         specifier: workspace:*
         version: link:../planemo-cli-meta
@@ -161,7 +161,7 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@22.19.17)(vite@8.2.0(@types/node@22.19.17)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3))
 
-  packages/foundry:
+  packages/gxwf-foundry:
     dependencies:
       '@galaxy-foundry/summarize-nextflow':
         specifier: workspace:*
@@ -192,7 +192,7 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@22.19.17)(vite@8.2.0(@types/node@22.19.17)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3))
 
-  packages/note-schema:
+  packages/gxwf-foundry-note-schema:
     dependencies:
       '@galaxy-foundry/cast':
         specifier: ^0.12.2
@@ -299,18 +299,18 @@ importers:
       '@fontsource/atkinson-hyperlegible':
         specifier: ^5.2.8
         version: 5.2.8
-      '@galaxy-foundry/foundry':
+      '@galaxy-foundry/gxwf-foundry':
         specifier: workspace:*
-        version: link:../packages/foundry
+        version: link:../packages/gxwf-foundry
+      '@galaxy-foundry/gxwf-foundry-note-schema':
+        specifier: workspace:*
+        version: link:../packages/gxwf-foundry-note-schema
       '@galaxy-foundry/kind-schema':
         specifier: ^0.6.0
         version: 0.6.0(zod@4.4.3)
       '@galaxy-foundry/license-policy':
         specifier: ^0.8.1
         version: 0.8.1
-      '@galaxy-foundry/note-schema':
-        specifier: workspace:*
-        version: link:../packages/note-schema
       '@galaxy-foundry/reference-contract':
         specifier: ^0.4.1
         version: 0.4.1

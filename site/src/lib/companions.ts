@@ -20,7 +20,7 @@ import {
   type DirectoryEntry,
   type NormalizedCompanion,
 } from '@galaxy-foundry/kind-schema';
-import { CONTENT_DIR, DEFINITIONS, kindOf } from '@galaxy-foundry/note-schema';
+import { CONTENT_DIR, DEFINITIONS, kindOf } from '@galaxy-foundry/gxwf-foundry-note-schema';
 
 export type NoteKind = keyof typeof DEFINITIONS;
 

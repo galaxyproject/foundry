@@ -2,7 +2,7 @@
 type: cli-command
 tool: foundry
 command: validate-summary-nextflow
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 tags:
   - cli/foundry
 status: draft
@@ -16,7 +16,7 @@ related_notes:
 
 # `foundry validate-summary-nextflow`
 
-Validate a JSON document against the [[summary-nextflow]] schema bundled with `@galaxy-foundry/foundry`. Useful when a summary was produced by a non-foundry tool or hand-edited and needs a schema gate before downstream consumption.
+Validate a JSON document against the [[summary-nextflow]] schema bundled with `@galaxy-foundry/gxwf-foundry`. Useful when a summary was produced by a non-foundry tool or hand-edited and needs a schema gate before downstream consumption.
 
 ## Output
 

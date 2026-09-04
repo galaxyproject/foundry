@@ -1,5 +1,5 @@
 ---
-"@galaxy-foundry/note-schema": minor
+"@galaxy-foundry/gxwf-foundry-note-schema": minor
 ---
 
 Consume the `meta_tags.yml` format from `@galaxy-foundry/tag-registry` instead of a

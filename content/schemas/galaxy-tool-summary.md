@@ -2,11 +2,11 @@
 type: schema
 name: galaxy-tool-summary
 title: Galaxy tool summary manifest
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 package_export: "galaxyToolSummarySchema"
 validator_bin: foundry
 validator_subcommand: validate-galaxy-tool-summary
-upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json"
+upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json"
 tags:
   - target/galaxy
 status: draft
@@ -26,9 +26,9 @@ This page is auto-rendered from the JSON Schema authored in this repo. Each `$de
 
 **Source-of-truth chain:**
 
-1. `packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json` — the canonical JSON, hand-edited alongside the Mold/cast loop around [[summarize-galaxy-tool]]. Mold frontmatter still cites it as `content/schemas/galaxy-tool-summary.schema.json`; cast and Astro resolve that back to the package source.
-2. `packages/foundry/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `galaxy-tool-summary.schema.generated.ts` const wrapper from the canonical JSON.
-3. Published as part of `@galaxy-foundry/foundry` (orphan schema bundled in the unified CLI). Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published CLI also ships `foundry validate-galaxy-tool-summary` for cast skills and downstream consumers.
+1. `packages/gxwf-foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json` — the canonical JSON, hand-edited alongside the Mold/cast loop around [[summarize-galaxy-tool]]. Mold frontmatter still cites it as `content/schemas/galaxy-tool-summary.schema.json`; cast and Astro resolve that back to the package source.
+2. `packages/gxwf-foundry/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `galaxy-tool-summary.schema.generated.ts` const wrapper from the canonical JSON.
+3. Published as part of `@galaxy-foundry/gxwf-foundry` (orphan schema bundled in the unified CLI). Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published CLI also ships `foundry validate-galaxy-tool-summary` for cast skills and downstream consumers.
 
 **At runtime in cast skills:** validation should happen through the CLI command:
 

@@ -12,7 +12,7 @@
 import path from "node:path";
 
 import { createContentReader, type ContentAliases } from "@galaxy-foundry/content-reader";
-import { COLLECTIONS, CONTENT_DIR } from "@galaxy-foundry/note-schema";
+import { COLLECTIONS, CONTENT_DIR } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 import type { Frontmatter } from "./types.js";
 

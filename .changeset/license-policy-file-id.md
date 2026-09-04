@@ -1,5 +1,5 @@
 ---
-"@galaxy-foundry/note-schema": patch
+"@galaxy-foundry/gxwf-foundry-note-schema": patch
 ---
 
 Take `@galaxy-foundry/license-policy` 0.4, which renames `licenseIdFromFilePath` to

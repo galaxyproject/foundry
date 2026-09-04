@@ -11,7 +11,7 @@ import {
   KINDS,
   NON_NOTE_NAMES,
   nonNoteAllowanceOf,
-} from "@galaxy-foundry/note-schema";
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 import { readMarkdown } from "../packages/build-cli/src/lib/frontmatter.js";
 import { GALAXY_SLUG_ALIASES, readContent } from "../packages/build-cli/src/lib/slug-map.js";
 import { findMdFiles } from "../packages/build-cli/src/lib/walk.js";

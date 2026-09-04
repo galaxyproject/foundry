@@ -7,8 +7,8 @@ package_export: "summaryNextflowSchema"
 validator_bin: foundry
 validator_subcommand: validate-summary-nextflow
 # The schema is exported by @galaxy-foundry/summarize-nextflow; the CLI that validates against
-# it ships in @galaxy-foundry/foundry. `package` names the first, this names the second.
-validator_package: "@galaxy-foundry/foundry"
+# it ships in @galaxy-foundry/gxwf-foundry. `package` names the first, this names the second.
+validator_package: "@galaxy-foundry/gxwf-foundry"
 upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/summarize-nextflow/src/schema/summary-nextflow.schema.json"
 license: MIT
 tags:
@@ -41,7 +41,7 @@ This page is auto-rendered from the JSON Schema authored in this repo and shippe
 
 1. `packages/summarize-nextflow/src/schema/summary-nextflow.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop ([[summarize-nextflow]]). Mold frontmatter cites it via [[summary-nextflow]] wiki-links; cast imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.
 2. `packages/summarize-nextflow/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `summary-nextflow.schema.generated.ts` const wrapper from the canonical JSON.
-3. Published as `@galaxy-foundry/summarize-nextflow` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateSummary()` and ships the standalone `summarize-nextflow` bin (self-validates by default). The unified `foundry` CLI in `@galaxy-foundry/foundry` exposes the same gate as `foundry validate-summary-nextflow` for downstream cast skills.
+3. Published as `@galaxy-foundry/summarize-nextflow` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateSummary()` and ships the standalone `summarize-nextflow` bin (self-validates by default). The unified `foundry` CLI in `@galaxy-foundry/gxwf-foundry` exposes the same gate as `foundry validate-summary-nextflow` for downstream cast skills.
 
 **At runtime in cast skills:** validation should happen through the CLI command:
 

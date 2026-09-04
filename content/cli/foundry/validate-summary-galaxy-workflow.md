@@ -2,7 +2,7 @@
 type: cli-command
 tool: foundry
 command: validate-summary-galaxy-workflow
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 tags:
   - cli/foundry
 status: draft
@@ -16,7 +16,7 @@ related_notes:
 
 # `foundry validate-summary-galaxy-workflow`
 
-Validate a JSON document against the [[summary-galaxy-workflow]] schema bundled with `@galaxy-foundry/foundry`. The Galaxy workflow summarizer is run by an LLM Mold rather than shipped as a foundry subcommand; this gate exists so [[summarize-galaxy-workflow]] can schema-check its output against a single canonical schema.
+Validate a JSON document against the [[summary-galaxy-workflow]] schema bundled with `@galaxy-foundry/gxwf-foundry`. The Galaxy workflow summarizer is run by an LLM Mold rather than shipped as a foundry subcommand; this gate exists so [[summarize-galaxy-workflow]] can schema-check its output against a single canonical schema.
 
 ## Output
 

@@ -2,7 +2,7 @@ import type {
   InputArtifact,
   OutputArtifact,
   RuntimeArtifactRegistry,
-} from "@galaxy-foundry/note-schema";
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 import { type NoteEntry } from "./notes";
 import { resolveWikiLinkId, type WikiLinkTarget } from "./wiki-links";
 

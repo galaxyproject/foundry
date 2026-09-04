@@ -59,7 +59,7 @@ Two flows feed the Foundry:
 
 Casting produces skill artifacts: `npm run cast -- <slug> --target=claude`.
 
-Frontmatter is contract-enforced by the shared zod schema in `@galaxy-foundry/note-schema` (used by both the validator and the site); every note carries a registered tag from `meta_tags.yml`. Validate before commit.
+Frontmatter is contract-enforced by the shared zod schema in `@galaxy-foundry/gxwf-foundry-note-schema` (used by both the validator and the site); every note carries a registered tag from `meta_tags.yml`. Validate before commit.
 
 ## Tooling
 

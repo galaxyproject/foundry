@@ -54,7 +54,7 @@ The authoring CLI generates several committed projections:
 - `content/Dashboard.md` from configured dashboard sections;
 - `content/Index.md` from the current note inventory;
 - the README corpus statistics block;
-- `packages/note-schema/src/types/kinds.generated.json` from assembled kind definitions.
+- `packages/gxwf-foundry-note-schema/src/types/kinds.generated.json` from assembled kind definitions.
 
 Each generator has a `--check` command (`check:dashboard`, `check:index`, `check:readme`, `check:kinds`) that regenerates in memory and fails on byte drift. The authored notes and kind definitions remain authoritative.
 

@@ -1,16 +1,16 @@
 // Registry of JSON Schemas, keyed by note `name` field.
 // Most schemas come from two packages: producer-co-located
 // (@galaxy-foundry/summarize-nextflow) or foundry-bundled
-// (@galaxy-foundry/foundry). `cast-provenance` is Foundry-authored and
+// (@galaxy-foundry/gxwf-foundry). `cast-provenance` is Foundry-authored and
 // repo-local — its contract lives in scripts/lib/schemas/, not a package.
 
-import galaxyToolDiscoverySchema from '../../../packages/foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json';
-import galaxyToolSummarySchema from '../../../packages/foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
-import galaxyWorkflowTestPlanSchema from '../../../packages/foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json';
-import summaryCwlSchema from '../../../packages/foundry/src/schemas/summary-cwl/summary-cwl.schema.json';
-import testsFormatSchema from '../../../packages/foundry/src/schemas/tests-format/tests.schema.json';
+import galaxyToolDiscoverySchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json';
+import galaxyToolSummarySchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
+import galaxyWorkflowTestPlanSchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json';
+import summaryCwlSchema from '../../../packages/gxwf-foundry/src/schemas/summary-cwl/summary-cwl.schema.json';
+import testsFormatSchema from '../../../packages/gxwf-foundry/src/schemas/tests-format/tests.schema.json';
 import castProvenanceSchema from '../../../scripts/lib/schemas/cast-provenance.schema.json';
-import foundryPkg from '../../../packages/foundry/package.json';
+import foundryPkg from '../../../packages/gxwf-foundry/package.json';
 import summaryNextflowSchema from '../../../packages/summarize-nextflow/src/schema/summary-nextflow.schema.json';
 import summarizeNextflowPkg from '../../../packages/summarize-nextflow/package.json';
 

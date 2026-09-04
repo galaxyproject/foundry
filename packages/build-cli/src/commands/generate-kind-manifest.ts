@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-// Generate packages/note-schema/src/types/kinds.generated.json — the machine-readable answer
+// Generate packages/gxwf-foundry-note-schema/src/types/kinds.generated.json — the machine-readable answer
 // to "what note kinds does this Foundry define, and what metadata does each require".
 //
 // `fields` are derived from the zod shapes, so the file cannot drift from the schema — only
@@ -15,12 +15,16 @@ import process from "node:process";
 
 import { loadKindDocs } from "@galaxy-foundry/kind-schema/docs";
 import { bundledPolicy } from "@galaxy-foundry/license-policy";
-import { KINDS, buildKindManifest, loadReferenceContract } from "@galaxy-foundry/note-schema";
+import {
+  KINDS,
+  buildKindManifest,
+  loadReferenceContract,
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 import { loadTagRegistry } from "@galaxy-foundry/tag-registry";
 
 import { writeOrCheck } from "../lib/content-notes.js";
 
-const TYPES_DIR = "packages/note-schema/src/types";
+const TYPES_DIR = "packages/gxwf-foundry-note-schema/src/types";
 const OUTPUT = `${TYPES_DIR}/kinds.generated.json`;
 const INSTANCE = "galaxy-workflow-foundry";
 

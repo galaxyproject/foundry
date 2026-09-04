@@ -6,7 +6,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta";
-import { foundryCliMeta } from "@galaxy-foundry/foundry/meta";
+import { foundryCliMeta } from "@galaxy-foundry/gxwf-foundry/meta";
 import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import {
   buildNoteSchema,
@@ -19,7 +19,7 @@ import {
   nonNoteAllowanceOf,
   type NoteSchema,
   type RuntimeArtifactRegistry,
-} from "@galaxy-foundry/note-schema";
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 // Directly from the shared package rather than through the barrel, which is the arrangement
 // note-schema states for every other borrowed mechanism: one place to look, nothing to drift.
 import { checkCompanions } from "@galaxy-foundry/kind-schema";

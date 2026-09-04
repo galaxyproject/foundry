@@ -23,10 +23,10 @@ Install the harness CLIs every constituent skill invokes before driving the pipe
   Ephemeral run: `uvx cwltool`.
   Check: `cwltool --version`.
   Docs: https://cwltool.readthedocs.io/
-- **`foundry`** (foundry). `npm install -g @galaxy-foundry/foundry`.
-  Ephemeral run: `npx --package @galaxy-foundry/foundry foundry`.
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
   Check: `foundry --help`.
-  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/foundry/README.md
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
 - **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.

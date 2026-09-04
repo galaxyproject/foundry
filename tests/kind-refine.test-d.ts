@@ -13,7 +13,7 @@
 
 import { z } from "zod";
 
-import { defineKind, type KindContext } from "@galaxy-foundry/note-schema";
+import { defineKind, type KindContext } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 const axes = ["source-specific", "target-specific", "tool-specific", "generic"] as const;
 

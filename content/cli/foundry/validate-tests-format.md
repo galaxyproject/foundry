@@ -2,7 +2,7 @@
 type: cli-command
 tool: foundry
 command: validate-tests-format
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 tags:
   - cli/foundry
 status: draft
@@ -16,7 +16,7 @@ related_notes:
 
 # `foundry validate-tests-format`
 
-Validate a Galaxy workflow tests YAML file (`*-tests.yml`, `*.gxwf-tests.yml`) against the [[tests-format]] schema vendored from `@galaxy-tool-util/schema`. Mirrors `gxwf validate-tests` so harnesses that already depend on `@galaxy-foundry/foundry` do not need a separate gxwf install.
+Validate a Galaxy workflow tests YAML file (`*-tests.yml`, `*.gxwf-tests.yml`) against the [[tests-format]] schema vendored from `@galaxy-tool-util/schema`. Mirrors `gxwf validate-tests` so harnesses that already depend on `@galaxy-foundry/gxwf-foundry` do not need a separate gxwf install.
 
 ## Output
 

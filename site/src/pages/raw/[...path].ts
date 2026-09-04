@@ -1,6 +1,6 @@
 import { getAllNotes } from '../../lib/notes';
 import { noteAdjacentFiles, readAdjacent } from '../../lib/note-directory';
-import { DEFINITIONS } from '@galaxy-foundry/note-schema';
+import { DEFINITIONS } from '@galaxy-foundry/gxwf-foundry-note-schema';
 import type { APIRoute, GetStaticPaths } from 'astro';
 
 // Raw text for everything in the corpus: every note, and every file sitting beside one.

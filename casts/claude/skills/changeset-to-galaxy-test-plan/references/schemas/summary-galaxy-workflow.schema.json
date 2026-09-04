@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://galaxyproject.org/foundry/schemas/summary-galaxy-workflow.schema.json",
-  "$comment": "Canonical source: packages/foundry/src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[summary-galaxy-workflow]] wiki-links; the cast pipeline imports the `summaryGalaxyWorkflowSchema` runtime export and serializes it into cast bundles.",
+  "$comment": "Canonical source: packages/gxwf-foundry/src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[summary-galaxy-workflow]] wiki-links; the cast pipeline imports the `summaryGalaxyWorkflowSchema` runtime export and serializes it into cast bundles.",
   "title": "Galaxy Workflow Summary",
   "description": "Structured summary emitted by the summarize-galaxy-workflow Mold. Galaxy gxformat2 is already a typed workflow language, so this schema records validated and normalized workflow structure (inputs, outputs, steps, edges, existing tests) rather than inferred pipeline semantics. When the user supplies a legacy .ga workflow it is converted to gxformat2 first and the conversion is recorded under documents.",
   "type": "object",

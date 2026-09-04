@@ -6,9 +6,9 @@
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "1a5f10ecf90158c4fdaf292055ca73dcd6dd39e7253fe417b62020c3c4ec8be9",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-08-25T21:03:42.204Z",
+  "cast_at": "2026-09-03T21:21:46.668Z",
   "refs": [
     {
       "kind": "research",
@@ -89,7 +89,7 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-workflow-test-plan]]",
-      "src": "package://@galaxy-foundry/foundry#galaxyWorkflowTestPlanSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#galaxyWorkflowTestPlanSchema",
       "dst": "references/schemas/galaxy-workflow-test-plan.schema.json",
       "used_at": "runtime",
       "load": "upfront",
@@ -97,30 +97,30 @@
       "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema so the skill carries its output shape; validate with `foundry validate-galaxy-workflow-test-plan`.",
       "verification": "Cast the skill, run on a summary with existing tests plus a change-set, confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it without re-reading the change-set.",
       "license": "MIT",
-      "src_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
-      "dst_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "src_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
+      "dst_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
       "source": "deterministic"
     },
     {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-galaxy-workflow]]",
-      "src": "package://@galaxy-foundry/foundry#summaryGalaxyWorkflowSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryGalaxyWorkflowSchema",
       "dst": "references/schemas/summary-galaxy-workflow.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Input contract: read the existing workflow's `tests[]` (the regression baseline) and its resolved input/output labels so baseline assertions bind to real labels.",
       "license": "MIT",
-      "src_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
-      "dst_hash": "eba7da0be524490192852b1eef112e1ab2323b21e7d738c9fe8aec602c41b63f",
+      "src_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "dst_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
       "source": "deterministic"
     },
     {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[tests-format]]",
-      "src": "package://@galaxy-foundry/foundry#testsFormatSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testsFormatSchema",
       "dst": "references/schemas/tests-format.schema.json",
       "used_at": "runtime",
       "load": "on-demand",

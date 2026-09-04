@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 7,
     "content_hash": "1f98fd5cf9a54fd81e48db957f7451760f5e97629748f3d39fd66dc59b2ac765",
-    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-09-03T14:04:21.761Z",
+  "cast_at": "2026-09-03T21:21:50.086Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [

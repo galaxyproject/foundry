@@ -1,5 +1,5 @@
 ---
-"@galaxy-foundry/foundry": minor
+"@galaxy-foundry/gxwf-foundry": minor
 "@galaxy-foundry/summarize-nextflow": minor
 ---
 

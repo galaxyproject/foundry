@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
     "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-08-25T21:03:46.385Z",
+  "cast_at": "2026-09-03T21:21:49.821Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -127,7 +127,7 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-workflow-test-plan]]",
-      "src": "package://@galaxy-foundry/foundry#galaxyWorkflowTestPlanSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#galaxyWorkflowTestPlanSchema",
       "dst": "references/schemas/galaxy-workflow-test-plan.schema.json",
       "used_at": "runtime",
       "load": "upfront",
@@ -135,15 +135,15 @@
       "purpose": "Input contract: read the schema-valid Galaxy test plan (job inputs, expected outputs, assertion intent, tolerances, label assumptions, unresolved mappings, omissions) and convert it into tests-format output, reconciling assumed labels and fixtures against the real draft.",
       "verification": "Consume a cast test plan from a *-test-to-galaxy-test-plan Mold and confirm tests-format output can be authored from it without re-reading the source summary.",
       "license": "MIT",
-      "src_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
-      "dst_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "src_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
+      "dst_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
       "source": "deterministic"
     },
     {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[tests-format]]",
-      "src": "package://@galaxy-foundry/foundry#testsFormatSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testsFormatSchema",
       "dst": "references/schemas/tests-format.schema.json",
       "used_at": "runtime",
       "load": "upfront",

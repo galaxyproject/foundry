@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 14,
-    "content_hash": "60659f52ed7278ed7ac66144c6706696b3880ee4d2db114afda7cedccde83e2e",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "content_hash": "eaed8c505554a55df2661c10139dd36ad7ffc5d60db40046f20dbb785fedc489",
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-08-25T21:03:49.131Z",
+  "cast_at": "2026-09-03T21:21:51.412Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -81,8 +81,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Schema-check summary-nextflow.json before returning it from the skill.",
-      "src_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
-      "dst_hash": "a396a324b1b4e722e374a3bb8f10497afe5c75e5ca6c99dafde4b72abf743705",
+      "src_hash": "85505b02785fea8bfb0429ac78224dfef0dce63c933140f087f7257a04e52a86",
+      "dst_hash": "85505b02785fea8bfb0429ac78224dfef0dce63c933140f087f7257a04e52a86",
       "source": "deterministic"
     },
     {

@@ -12,7 +12,7 @@ Review the note at `$1` and return a structured report. Do **not** edit files �
 1. **`content/meta/glossary.md`** — pinned vocabulary (Mold, Pipeline, Pattern, Cast, axis, …). Misreading these terms breaks the review.
 2. **`CLAUDE.md`** — authoring rules (`additionalProperties: false`, registered tags, wiki-link conventions, "don't weaken the schema").
 3. **`content/meta/architecture.md`** §3 (note types), §5 (frontmatter contract), §6 (validation pipeline). Skim the rest only if needed.
-4. **`packages/note-schema/src/types/pattern/`** (`schema.ts`, `kind.md`, `example.md`; shared primitives in `types/context.ts`) + **`meta_tags.yml`** — frontmatter and tag enums.
+4. **`packages/gxwf-foundry-note-schema/src/types/pattern/`** (`schema.ts`, `kind.md`, `example.md`; shared primitives in `types/context.ts`) + **`meta_tags.yml`** — frontmatter and tag enums.
 5. **`common_paths.yml.sample`** — the citation prefix vocabulary. Logical names (`$IWC`, `$IWC_FORMAT2`, `$GALAXY`, `$TOOLS_IUC`, `$PLANEMO`, `$GXFORMAT2`) map to filesystem paths and (when set) GitHub repos. Resolve every `$NAME/...` citation in the note via this file before checking it.
 6. **The note's `related_notes` and survey/research companions** — pinned decisions live in `## Decisions` sections (e.g. `iwc-tabular-operations-survey.md` §7). Treat those as binding unless the review surfaces a reason they're wrong; if so, flag for both the note *and* the source decision record.
 
@@ -32,7 +32,7 @@ For research notes:
 
 1. **Correctness vs tool source** — anything the wrapper contradicts is a fix-before-merge.
 2. **Correctness vs corpus** — citations resolve, ranges are tight, paraphrases are faithful.
-3. **Schema / tag conformance** — frontmatter validates against the `@galaxy-foundry/note-schema` contract, all tags appear in `meta_tags.yml`. Note: per-type members are `.strict()`, so unknown frontmatter fields are blockers.
+3. **Schema / tag conformance** — frontmatter validates against the `@galaxy-foundry/gxwf-foundry-note-schema` contract, all tags appear in `meta_tags.yml`. Note: per-type members are `.strict()`, so unknown frontmatter fields are blockers.
 4. **Survey decision conformance** — `## Decisions` sections in companion research notes are binding. Drift between page and decision record is a flag on both.
 5. **Form quality for casting** — pattern pages are copied **verbatim** into cast skills, so what you see here is exactly what the agent gets: no summarization step will tighten it later. Reference content should be "do this," not "what we considered." Pitfalls concrete; wiki-links meaningful.
 

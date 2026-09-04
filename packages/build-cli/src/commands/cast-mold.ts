@@ -30,7 +30,7 @@ import {
   DEFINITIONS,
   requireRuntimeArtifactRegistry,
   type RuntimeArtifactRegistry,
-} from "@galaxy-foundry/note-schema";
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 import type {
   ProvenanceArtifactInput,
@@ -577,7 +577,7 @@ function schemaValidationRows(
     // The package that ships the bin, which the note declares when it differs from the
     // package the export comes from. Inferring it from "has a subcommand" hardcoded one
     // instance's CLI package name in the caster, and was wrong in principle for any Foundry
-    // whose multi-command validator is not called @galaxy-foundry/foundry.
+    // whose multi-command validator is not called @galaxy-foundry/gxwf-foundry.
     const validatorPackage = scalar(meta?.validator_package) ?? scalar(meta?.package);
     const schemaName = stripWikiLinks(output.schema);
     const file = output.default_filename

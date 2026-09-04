@@ -2,11 +2,11 @@
 type: schema
 name: galaxy-workflow-test-plan
 title: Galaxy workflow test plan
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 package_export: "galaxyWorkflowTestPlanSchema"
 validator_bin: foundry
 validator_subcommand: validate-galaxy-workflow-test-plan
-upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json"
+upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json"
 license: MIT
 tags:
   - target/galaxy
@@ -30,9 +30,9 @@ The on-disk artifact is **YAML**, so it stays a reviewable handoff while remaini
 
 **Source-of-truth chain:**
 
-1. `packages/foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json` — canonical JSON, hand-edited as part of the Mold/cast loop.
-2. `packages/foundry/scripts/sync-schema.mjs` regenerates the typed `galaxy-workflow-test-plan.schema.generated.ts` const wrapper at `prebuild`.
-3. Published as part of `@galaxy-foundry/foundry`, exporting `galaxyWorkflowTestPlanSchema` and the `foundry validate-galaxy-workflow-test-plan` subcommand.
+1. `packages/gxwf-foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json` — canonical JSON, hand-edited as part of the Mold/cast loop.
+2. `packages/gxwf-foundry/scripts/sync-schema.mjs` regenerates the typed `galaxy-workflow-test-plan.schema.generated.ts` const wrapper at `prebuild`.
+3. Published as part of `@galaxy-foundry/gxwf-foundry`, exporting `galaxyWorkflowTestPlanSchema` and the `foundry validate-galaxy-workflow-test-plan` subcommand.
 
 Generated skills should validate emitted plans with:
 

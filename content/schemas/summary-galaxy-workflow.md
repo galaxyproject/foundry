@@ -2,11 +2,11 @@
 type: schema
 name: summary-galaxy-workflow
 title: Galaxy workflow summary
-package: "@galaxy-foundry/foundry"
+package: "@galaxy-foundry/gxwf-foundry"
 package_export: "summaryGalaxyWorkflowSchema"
 validator_bin: foundry
 validator_subcommand: validate-summary-galaxy-workflow
-upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/foundry/src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json"
+upstream: "https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json"
 license: MIT
 tags:
   - source/galaxy
@@ -20,13 +20,13 @@ related_notes:
 summary: "JSON Schema for the structured summary emitted by the summarize-galaxy-workflow Mold."
 ---
 
-This page points to the JSON Schema authored in this repo and shipped as part of `@galaxy-foundry/foundry` (orphan schema — no TypeScript producer Mold owns it; the producer is the LLM-run [[summarize-galaxy-workflow]] Mold). The schema is intentionally lighter than [[summary-nextflow]] because gxformat2 already carries typed workflow structure, mirroring [[summary-cwl]] on the Galaxy-as-source side.
+This page points to the JSON Schema authored in this repo and shipped as part of `@galaxy-foundry/gxwf-foundry` (orphan schema — no TypeScript producer Mold owns it; the producer is the LLM-run [[summarize-galaxy-workflow]] Mold). The schema is intentionally lighter than [[summary-nextflow]] because gxformat2 already carries typed workflow structure, mirroring [[summary-cwl]] on the Galaxy-as-source side.
 
 **Source-of-truth chain:**
 
-1. `packages/foundry/src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json` — canonical JSON, hand-edited as part of the Mold/cast loop.
-2. `packages/foundry/scripts/sync-schema.mjs` regenerates the typed `summary-galaxy-workflow.schema.generated.ts` const wrapper at `prebuild`.
-3. Published as part of `@galaxy-foundry/foundry`, exporting `summaryGalaxyWorkflowSchema` and the `foundry validate-summary-galaxy-workflow` subcommand.
+1. `packages/gxwf-foundry/src/schemas/summary-galaxy-workflow/summary-galaxy-workflow.schema.json` — canonical JSON, hand-edited as part of the Mold/cast loop.
+2. `packages/gxwf-foundry/scripts/sync-schema.mjs` regenerates the typed `summary-galaxy-workflow.schema.generated.ts` const wrapper at `prebuild`.
+3. Published as part of `@galaxy-foundry/gxwf-foundry`, exporting `summaryGalaxyWorkflowSchema` and the `foundry validate-summary-galaxy-workflow` subcommand.
 
 Generated skills should validate emitted summaries with:
 

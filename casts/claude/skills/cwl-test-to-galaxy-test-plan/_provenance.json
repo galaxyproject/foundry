@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "b708f94d8cbc0698ed076f62ff6d6194da5ae34c3cdb6443597c433eeca625e3",
-    "commit": "95b5659f39847237122809c4eda2b71b89bd38e7"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-08-25T21:03:43.855Z",
+  "cast_at": "2026-09-03T21:21:47.828Z",
   "refs": [
     {
       "kind": "research",
@@ -89,7 +89,7 @@
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-workflow-test-plan]]",
-      "src": "package://@galaxy-foundry/foundry#galaxyWorkflowTestPlanSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#galaxyWorkflowTestPlanSchema",
       "dst": "references/schemas/galaxy-workflow-test-plan.schema.json",
       "used_at": "runtime",
       "load": "upfront",
@@ -97,30 +97,30 @@
       "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema; validate with `foundry validate-galaxy-workflow-test-plan`.",
       "verification": "Cast the skill on a CWL summary carrying tests and confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it.",
       "license": "MIT",
-      "src_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
-      "dst_hash": "7378ea527dd18279bd0c2426ed189cb2975dff7948ba1fc98796ac5bc9ce6bc0",
+      "src_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
+      "dst_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
       "source": "deterministic"
     },
     {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-cwl]]",
-      "src": "package://@galaxy-foundry/foundry#summaryCwlSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryCwlSchema",
       "dst": "references/schemas/summary-cwl.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Read the CWL summary's test cases, job inputs, expected outputs, and assertion evidence.",
       "license": "MIT",
-      "src_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
-      "dst_hash": "0bb5e164d5a7328481dc6ca1225f90666c758603566427512838bf565413c4e0",
+      "src_hash": "6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef",
+      "dst_hash": "6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef",
       "source": "deterministic"
     },
     {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[tests-format]]",
-      "src": "package://@galaxy-foundry/foundry#testsFormatSchema",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testsFormatSchema",
       "dst": "references/schemas/tests-format.schema.json",
       "used_at": "runtime",
       "load": "on-demand",

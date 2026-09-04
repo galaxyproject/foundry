@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 3,
     "content_hash": "cafba235f3bb41612216f766eb390ee6fddcb1192ddf445b6d9eb7f2c132678c",
-    "commit": "6be00e80572b6a425f6c2bf6f9b8df003d2529db"
+    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
   },
-  "cast_at": "2026-09-03T14:04:22.856Z",
+  "cast_at": "2026-09-03T21:21:50.804Z",
   "refs": [
     {
       "kind": "pattern",

@@ -13,10 +13,10 @@
   "dependencies": {
     "@astrojs/markdown-remark": "^7.2.2",
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
-    "@galaxy-foundry/foundry": "workspace:*",
+    "@galaxy-foundry/gxwf-foundry": "workspace:*",
     "@galaxy-foundry/kind-schema": "^0.6.0",
     "@galaxy-foundry/license-policy": "^0.8.1",
-    "@galaxy-foundry/note-schema": "workspace:*",
+    "@galaxy-foundry/gxwf-foundry-note-schema": "workspace:*",
     "@galaxy-foundry/reference-contract": "^0.4.1",
     "@galaxy-foundry/site-kit": "^0.10.0",
     "@galaxy-foundry/tag-registry": "^0.1.1",

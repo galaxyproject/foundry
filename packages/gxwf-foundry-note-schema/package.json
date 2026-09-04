@@ -1,0 +1,60 @@
+{
+  "name": "@galaxy-foundry/gxwf-foundry-note-schema",
+  "version": "0.0.0",
+  "description": "Single source of truth for Galaxy Workflow Foundry note frontmatter — one zod contract shared by the validator and the site.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galaxyproject/foundry.git",
+    "directory": "packages/gxwf-foundry-note-schema"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "galaxy",
+    "foundry",
+    "frontmatter",
+    "zod",
+    "schema"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@galaxy-foundry/cast": "^0.12.2",
+    "@galaxy-foundry/kind-manifest": "^0.4.0",
+    "@galaxy-foundry/kind-schema": "^0.6.0",
+    "@galaxy-foundry/license-policy": "^0.8.1",
+    "@galaxy-foundry/reference-contract": "^0.4.1",
+    "@galaxy-foundry/tag-registry": "^0.1.1",
+    "@galaxy-foundry/wiki-links": "^0.4.0",
+    "js-yaml": "^4.1.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
