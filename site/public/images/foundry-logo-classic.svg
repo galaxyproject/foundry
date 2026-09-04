@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 340" width="1600" height="340">
+  <defs>
+    <linearGradient id="ffade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d0bd2a"/>
+      <stop offset="1" stop-color="#d0bd2a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===== icon: the Galaxy, forged — top bars being cast onto an anvil whose face is the mustard bar ===== -->
+  <rect x="100" y="64" width="112" height="30" rx="9" fill="#58585a"/>
+  <rect x="100" y="104" width="68" height="30" rx="9" fill="#58585a"/>
+  <!-- anvil face = third galaxy bar -->
+  <rect x="80" y="152" width="180" height="36" rx="10" fill="url(#ffade)"/>
+  <!-- anvil waist + base -->
+  <path d="M 132,188 h 76 c -4,22 -18,30 -18,44 h -40 c 0,-14 -14,-22 -18,-44 z" fill="#58585a"/>
+  <rect x="106" y="240" width="128" height="28" rx="9" fill="#58585a"/>
+
+  <!-- ===== wordmark: FOUNDRY, thin rounded geometric strokes ===== -->
+  <g fill="none" stroke="#58585a" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <!-- F -->
+    <path d="M 400,270 V 70 H 510"/>
+    <path d="M 400,168 H 485"/>
+    <!-- O -->
+    <ellipse cx="617" cy="170" rx="59" ry="100"/>
+    <!-- U -->
+    <path d="M 716,70 V 182 a 55,86 0 0 0 110,0 V 70"/>
+    <!-- N -->
+    <path d="M 874,270 V 70 L 984,270 V 70"/>
+    <!-- D -->
+    <path d="M 1032,270 V 70 h 34 a 76,100 0 0 1 0,200 h -34"/>
+    <!-- R -->
+    <path d="M 1190,270 V 70"/>
+    <path d="M 1190,70 h 60 a 50,50 0 0 1 0,100 h -60"/>
+    <path d="M 1245,172 L 1300,270"/>
+    <!-- Y -->
+    <path d="M 1348,70 L 1403,168 M 1458,70 L 1403,168 V 270"/>
+  </g>
+</svg>
