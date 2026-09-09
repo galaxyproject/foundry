@@ -7,6 +7,7 @@ import process from "node:process";
 import {
   defaultPiTestAuthDir,
   expectedArtifactsFromSkill,
+  PI_TEST_AUTH_PROVIDER,
   runPiSkill,
   type ContainerNetworkPolicy,
   type ExpectedArtifact,
@@ -14,7 +15,7 @@ import {
   type SandboxMode,
 } from "@galaxy-foundry/gxwf-pi-harness";
 
-interface Args {
+export interface TestSkillCliArgs {
   skill: string;
   root: string | null;
   prompt: string;
@@ -31,6 +32,7 @@ interface Args {
   sandboxNetwork: ContainerNetworkPolicy;
   credentialEnv: string[];
   piTestAuth: boolean;
+  piTestAuthDir: string | null;
 }
 
 const THINKING_LEVELS = new Set<PiThinkingLevel>([
@@ -64,7 +66,7 @@ function parseThinking(value: string): PiThinkingLevel {
   return value as PiThinkingLevel;
 }
 
-function parseArgs(argv: string[]): Args {
+export function parseTestSkillArgs(argv: string[]): TestSkillCliArgs {
   const positional: string[] = [];
   const inputs: string[] = [];
   const expected: ExpectedArtifact[] = [];
@@ -82,6 +84,7 @@ function parseArgs(argv: string[]): Args {
   let sandboxNetwork: ContainerNetworkPolicy = "bridge";
   const credentialEnv: string[] = [];
   let piTestAuth = false;
+  let piTestAuthDir: string | null = null;
 
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i]!;
@@ -149,6 +152,12 @@ function parseArgs(argv: string[]): Args {
       credentialEnv.push(value.slice("--credential-env=".length));
     } else if (value === "--pi-test-auth") {
       piTestAuth = true;
+    } else if (value === "--auth-dir" || value === "--pi-test-auth-dir") {
+      piTestAuthDir = takeValue(argv, i++, value);
+    } else if (value.startsWith("--auth-dir=")) {
+      piTestAuthDir = value.slice("--auth-dir=".length);
+    } else if (value.startsWith("--pi-test-auth-dir=")) {
+      piTestAuthDir = value.slice("--pi-test-auth-dir=".length);
     } else if (!value.startsWith("--")) positional.push(value);
     else throw new Error(`unknown flag: ${value}`);
   }
@@ -172,8 +181,11 @@ function parseArgs(argv: string[]): Args {
   if (piTestAuth && sandbox !== "local") {
     throw new Error("--pi-test-auth requires --sandbox local");
   }
-  if (piTestAuth && provider !== "openai-codex") {
-    throw new Error("--pi-test-auth requires --provider openai-codex");
+  if (piTestAuth && provider !== PI_TEST_AUTH_PROVIDER) {
+    throw new Error(`--pi-test-auth requires --provider ${PI_TEST_AUTH_PROVIDER}`);
+  }
+  if (piTestAuthDir && !piTestAuth) {
+    throw new Error("--auth-dir requires --pi-test-auth");
   }
   return {
     skill: positional[0]!,
@@ -192,6 +204,7 @@ function parseArgs(argv: string[]): Args {
     sandboxNetwork,
     credentialEnv,
     piTestAuth,
+    piTestAuthDir: piTestAuth ? path.resolve(piTestAuthDir ?? defaultPiTestAuthDir()) : null,
   };
 }
 
@@ -201,7 +214,8 @@ export function defaultTestSkillRunDir(skill: string, now = new Date(), id = ran
 }
 
 export async function runTestSkillCommand(argv = process.argv.slice(2)): Promise<void> {
-  const args = parseArgs(argv);
+  const args = parseTestSkillArgs(argv);
+  const piTestAuthDir = args.piTestAuthDir ?? undefined;
   if (args.root) process.chdir(args.root);
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(args.skill)) {
     throw new Error(`invalid cast skill name: ${args.skill}`);
@@ -222,7 +236,7 @@ export async function runTestSkillCommand(argv = process.argv.slice(2)): Promise
     sandboxImage: args.sandboxImage,
     sandboxNetwork: args.sandboxNetwork,
     credentialEnv: args.credentialEnv,
-    piTestAuthDir: args.piTestAuth ? defaultPiTestAuthDir() : undefined,
+    piTestAuthDir,
   });
   process.stdout.write(`${JSON.stringify(record, null, 2)}\n`);
   if (record.status !== "passed") process.exitCode = 1;

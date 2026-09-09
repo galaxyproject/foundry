@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -11,6 +11,17 @@ import { defaultTestPipelineRunDir, runLinearPipeline } from "../src/commands/te
 function writeJson(filePath: string, value: unknown): void {
   mkdirSync(path.dirname(filePath), { recursive: true });
   writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function writeOAuthStore(authDir: string): void {
+  writeJson(path.join(authDir, "auth.json"), {
+    "openai-codex": {
+      type: "oauth",
+      access: "access-secret",
+      refresh: "refresh-secret",
+      expires: Date.now() + 60_000,
+    },
+  });
 }
 
 function writeSkill(
@@ -36,7 +47,7 @@ function fixtureRepo(): string {
   mkdirSync(pipelineDir, { recursive: true });
   writeFileSync(
     path.join(pipelineDir, "scenarios.md"),
-    "# Scenarios\n\n## Case: tiny journey\n\n- fixture: `workflow-fixtures/pipelines/tiny`\n- expect: success\n",
+    "# Scenarios\n\n##  Case: tiny journey\n\n- fixture: workflow-fixtures/pipelines/tiny\n- expect: success\n",
   );
   mkdirSync(path.join(root, "workflow-fixtures", "pipelines", "tiny"), { recursive: true });
   writeFileSync(
@@ -137,6 +148,8 @@ test("test-pipeline defaults to a unique OS-temporary run directory", () => {
 test("runs a linear prefix in fresh workers with declared artifact handoffs", async () => {
   const root = fixtureRepo();
   const runDir = path.join(root, "runs", "linear");
+  const authDir = path.join(root, "pi-test-auth");
+  writeOAuthStore(authDir);
   const calls: RunPiSkillOptions[] = [];
 
   const record = await runLinearPipeline(
@@ -153,7 +166,7 @@ test("runs a linear prefix in fresh workers with declared artifact handoffs", as
       timeoutMs: 1000,
       credentialEnv: [],
       sandboxNetwork: "none",
-      piTestAuthDir: "/test/pi-test-auth",
+      piTestAuthDir: authDir,
     },
     {
       runSkill: async (options) => {
@@ -184,7 +197,7 @@ test("runs a linear prefix in fresh workers with declared artifact handoffs", as
     }),
   ]);
   expect(calls).toHaveLength(4);
-  expect(calls.every((call) => call.piTestAuthDir === "/test/pi-test-auth")).toBe(true);
+  expect(calls.every((call) => call.piTestAuthDir === authDir)).toBe(true);
   expect(record.sandbox.credential_auth_store).toBe("pi-test-auth");
   expect(calls[0]?.inputPaths).toEqual([path.join(root, "workflow-fixtures", "pipelines", "tiny")]);
   expect(calls[1]?.inputPaths).toEqual([
@@ -233,4 +246,161 @@ test("preflights unsupported control flow before launching a worker", async () =
     "phase 3 uses unsupported branch control flow; select an earlier --through phase",
   );
   expect(launched).toBe(false);
+});
+
+test("selects --through by a unique skill name", async () => {
+  const root = fixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(
+    {
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "design",
+      trials: 1,
+      runDir: path.join(root, "runs", "skill-through"),
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    },
+    {
+      runSkill: async (options) => {
+        calls.push(options);
+        const workspace = path.join(options.runDir, "workspace");
+        mkdirSync(workspace, { recursive: true });
+        for (const artifact of options.expectedArtifacts ?? []) {
+          mkdirSync(path.dirname(path.join(workspace, artifact.path)), { recursive: true });
+          writeFileSync(path.join(workspace, artifact.path), artifact.id);
+        }
+        return fakeRecord(options, path.basename(options.skillDir));
+      },
+    },
+  );
+  expect(record.through_phase).toBe(2);
+  expect(calls).toHaveLength(2);
+});
+
+test("rejects an ambiguous --through skill name during preflight", async () => {
+  const root = fixtureRepo();
+  const assemblyPath = path.join(root, "casts/claude/skills/pipeline-demo-pipeline/_assembly.json");
+  const assembly = JSON.parse(readFileSync(assemblyPath, "utf8"));
+  assembly.phases[1].skill = "summarize";
+  writeJson(assemblyPath, assembly);
+  const runDir = path.join(root, "runs", "ambiguous-through");
+
+  await expect(
+    runLinearPipeline({
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "summarize",
+      trials: 1,
+      runDir,
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    }),
+  ).rejects.toThrow("--through skill must match one phase: summarize");
+  expect(existsSync(runDir)).toBe(false);
+});
+
+test("rejects a hash-mismatched promoted artifact distinctly from worker failure", async () => {
+  const root = fixtureRepo();
+  const record = await runLinearPipeline(
+    {
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "1",
+      trials: 1,
+      runDir: path.join(root, "runs", "hash-mismatch"),
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    },
+    {
+      runSkill: async (options) => {
+        const workspace = path.join(options.runDir, "workspace");
+        mkdirSync(workspace, { recursive: true });
+        for (const artifact of options.expectedArtifacts ?? []) {
+          writeFileSync(path.join(workspace, artifact.path), "does-not-match-recorded-hash");
+        }
+        return fakeRecord(options, "summarize");
+      },
+    },
+  );
+  expect(record.status).toBe("failed");
+  expect(record.trials[0]?.phases[0]).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "artifact_promotion",
+      error: "declared artifact was not promotable: summary",
+    }),
+  );
+});
+
+test("preflights missing pi-test-auth and staged basename collisions before creating a run", async () => {
+  const root = fixtureRepo();
+  const missingAuthRun = path.join(root, "runs", "missing-auth");
+  await expect(
+    runLinearPipeline({
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "1",
+      trials: 1,
+      runDir: missingAuthRun,
+      provider: "openai-codex",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+      piTestAuthDir: path.join(root, "missing-auth"),
+    }),
+  ).rejects.toThrow("pi-test-auth is not configured");
+  expect(existsSync(missingAuthRun)).toBe(false);
+
+  writeSkill(
+    root,
+    "summarize",
+    [],
+    [
+      { id: "summary", default_filename: "one/shared.json" },
+      { id: "unused", default_filename: "two/shared.json" },
+    ],
+  );
+  writeSkill(
+    root,
+    "design",
+    ["summary", "unused"],
+    [{ id: "design", default_filename: "design.md" }],
+  );
+  const collisionRun = path.join(root, "runs", "basename-collision");
+  await expect(
+    runLinearPipeline({
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "2",
+      trials: 1,
+      runDir: collisionRun,
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    }),
+  ).rejects.toThrow("phase 2 declared inputs share staged basename 'shared.json'");
+  expect(existsSync(collisionRun)).toBe(false);
 });

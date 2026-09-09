@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -7,16 +7,22 @@ import process from "node:process";
 import {
   defaultPiTestAuthDir,
   expectedArtifactsFromSkill,
+  inspectPiTestAuth,
+  PI_TEST_AUTH_PROVIDER,
   runPiSkill,
   sha256Path,
   type ArtifactResult,
   type ContainerNetworkPolicy,
+  type ExpectedArtifact,
   type PiSkillRunRecord,
   type PiThinkingLevel,
   type RunPiSkillOptions,
   type RunStatus,
   type SandboxMode,
 } from "@galaxy-foundry/gxwf-pi-harness";
+import type { ProvenanceArtifactInput } from "../lib/artifact-contract.js";
+import { readMarkdown } from "../lib/frontmatter.js";
+import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const THINKING_LEVELS = new Set<PiThinkingLevel>([
@@ -44,13 +50,9 @@ interface AssemblyManifest {
   phases: AssemblyPhase[];
 }
 
-interface ProvenanceArtifact {
-  id?: unknown;
-}
-
 interface ProvenanceManifest {
   artifacts?: {
-    consumes?: ProvenanceArtifact[];
+    consumes?: Partial<ProvenanceArtifactInput>[];
   };
 }
 
@@ -96,6 +98,7 @@ export interface PipelinePhaseRunRecord {
   phase: number;
   skill: string;
   status: RunStatus;
+  failure_kind?: "worker" | "artifact_promotion";
   error?: string;
   run_dir: string;
   worker_run_id?: string;
@@ -161,7 +164,7 @@ export interface PipelineRunnerDependencies {
   id?: () => string;
 }
 
-interface CliArgs extends Omit<TestPipelineOptions, "repoRoot" | "runDir"> {
+export interface TestPipelineCliArgs extends Omit<TestPipelineOptions, "repoRoot" | "runDir"> {
   root: string | null;
   runDir: string | null;
 }
@@ -187,7 +190,7 @@ function parseThinking(value: string): PiThinkingLevel {
   return value as PiThinkingLevel;
 }
 
-function parseArgs(argv: string[]): CliArgs {
+export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
   const positional: string[] = [];
   let root: string | null = null;
   let scenario: string | null = null;
@@ -204,6 +207,7 @@ function parseArgs(argv: string[]): CliArgs {
   let sandboxNetwork: ContainerNetworkPolicy = "bridge";
   const credentialEnv: string[] = [];
   let piTestAuth = false;
+  let piTestAuthDir: string | undefined;
 
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i]!;
@@ -275,6 +279,12 @@ function parseArgs(argv: string[]): CliArgs {
       credentialEnv.push(value.slice("--credential-env=".length));
     } else if (value === "--pi-test-auth") {
       piTestAuth = true;
+    } else if (value === "--auth-dir" || value === "--pi-test-auth-dir") {
+      piTestAuthDir = takeValue(argv, i++, value);
+    } else if (value.startsWith("--auth-dir=")) {
+      piTestAuthDir = value.slice("--auth-dir=".length);
+    } else if (value.startsWith("--pi-test-auth-dir=")) {
+      piTestAuthDir = value.slice("--pi-test-auth-dir=".length);
     } else if (!value.startsWith("--")) positional.push(value);
     else throw new Error(`unknown flag: ${value}`);
   }
@@ -296,8 +306,11 @@ function parseArgs(argv: string[]): CliArgs {
   if (piTestAuth && sandbox !== "local") {
     throw new Error("--pi-test-auth requires --sandbox local");
   }
-  if (piTestAuth && provider !== "openai-codex") {
-    throw new Error("--pi-test-auth requires --provider openai-codex");
+  if (piTestAuth && provider !== PI_TEST_AUTH_PROVIDER) {
+    throw new Error(`--pi-test-auth requires --provider ${PI_TEST_AUTH_PROVIDER}`);
+  }
+  if (piTestAuthDir && !piTestAuth) {
+    throw new Error("--auth-dir requires --pi-test-auth");
   }
   return {
     root,
@@ -315,7 +328,7 @@ function parseArgs(argv: string[]): CliArgs {
     sandboxImage,
     sandboxNetwork,
     credentialEnv,
-    piTestAuthDir: piTestAuth ? defaultPiTestAuthDir() : undefined,
+    piTestAuthDir: piTestAuth ? path.resolve(piTestAuthDir ?? defaultPiTestAuthDir()) : undefined,
   };
 }
 
@@ -402,36 +415,22 @@ function selectLinearPhases(manifest: AssemblyManifest, through?: string): Assem
 function resolveScenario(repoRoot: string, pipeline: string, name: string): ResolvedScenario {
   const scenarioPath = path.join(repoRoot, "content", "pipelines", pipeline, "scenarios.md");
   if (!existsSync(scenarioPath)) throw new Error(`pipeline scenarios not found: ${scenarioPath}`);
-  const source = readFileSync(scenarioPath, "utf8");
-  const heading = /^## Case:\s*(.+?)\s*$/gm;
-  let match: RegExpExecArray | null;
-  let body: string | null = null;
-  while ((match = heading.exec(source)) !== null) {
-    const start = heading.lastIndex;
-    const next = source.slice(start).search(/^## Case:/m);
-    if (match[1]?.trim() === name) {
-      body = source.slice(start, next < 0 ? source.length : start + next);
-      break;
-    }
-  }
-  if (body === null) throw new Error(`scenario not found for ${pipeline}: ${name}`);
-  const fixture = body.match(/^-\s*fixture:\s*`([^`]+)`/m)?.[1];
-  if (!fixture) throw new Error(`scenario '${name}' does not declare a backtick-quoted fixture`);
-  if (path.isAbsolute(fixture))
-    throw new Error(`scenario fixture must be repository-relative: ${fixture}`);
-  const fixturePath = path.resolve(repoRoot, fixture);
-  const relation = path.relative(repoRoot, fixturePath);
-  if (relation.startsWith("..") || path.isAbsolute(relation)) {
-    throw new Error(`scenario fixture escapes repository root: ${fixture}`);
-  }
-  if (!existsSync(fixturePath)) {
+  const matches = parseScenarioCases(readMarkdown(scenarioPath).body).filter(
+    (scenario) => scenario.name === name,
+  );
+  if (matches.length === 0) throw new Error(`scenario not found for ${pipeline}: ${name}`);
+  if (matches.length > 1) throw new Error(`scenario must match exactly one case: ${name}`);
+  const fixture = matches[0]!.fixturePath;
+  if (!fixture) throw new Error(`scenario '${name}' does not declare a fixture`);
+  const resolution = resolveScenarioFixture(repoRoot, scenarioPath, fixture);
+  if (!resolution.materialized) {
     throw new Error(`scenario fixture is not materialized: ${fixture}`);
   }
   return {
     name,
     source_path: path.relative(repoRoot, scenarioPath).split(path.sep).join("/"),
-    fixture_path: fixture,
-    fixture_sha256: sha256Path(fixturePath),
+    fixture_path: resolution.repositoryPath,
+    fixture_sha256: sha256Path(resolution.absolutePath),
   };
 }
 
@@ -452,24 +451,19 @@ function phasePrompt(
   pipeline: string,
   scenario: string,
   phase: AssemblyPhase,
-  fixturePath: string | null,
+  hasScenarioInput: boolean,
   resolvedInputs: PromotedArtifact[],
   missingInputIds: string[],
-  sandbox: SandboxMode,
 ): string {
-  const inputRoot = sandbox === "container" ? "/inputs" : "inputs";
   const lines = [
     `Execute phase ${phase.phase} (${phase.skill}) of Pipeline '${pipeline}' for scenario '${scenario}'.`,
     "Use only the staged declared inputs. Write every declared output at its exact default filename in the worker workspace.",
   ];
-  if (fixturePath) {
-    lines.push(`The scenario fixture is staged at ${inputRoot}/${path.basename(fixturePath)}.`);
+  if (hasScenarioInput) {
+    lines.push("The first staged declared input is the scenario fixture.");
   }
   if (resolvedInputs.length) {
-    lines.push(
-      "Declared artifact inputs:",
-      ...resolvedInputs.map((input) => `- ${input.id}: ${inputRoot}/${path.basename(input.path)}`),
-    );
+    lines.push("Declared artifact inputs:", ...resolvedInputs.map((input) => `- ${input.id}`));
   }
   if (missingInputIds.length) {
     lines.push(
@@ -477,6 +471,36 @@ function phasePrompt(
     );
   }
   return lines.join("\n");
+}
+
+function preflightInputBasenames(
+  phasePlans: Array<{
+    phase: AssemblyPhase;
+    consumes: string[];
+    produces: ExpectedArtifact[];
+  }>,
+  fixturePath: string,
+): void {
+  const available = new Map<string, string>();
+  phasePlans.forEach((plan, index) => {
+    const basenames = [
+      ...(index === 0 ? [path.basename(realpathSync(fixturePath))] : []),
+      ...plan.consumes.flatMap((id) => {
+        const producedPath = available.get(id);
+        return producedPath ? [path.basename(producedPath)] : [];
+      }),
+    ];
+    const seen = new Set<string>();
+    for (const basename of basenames) {
+      if (seen.has(basename)) {
+        throw new Error(
+          `phase ${plan.phase.phase} declared inputs share staged basename '${basename}'`,
+        );
+      }
+      seen.add(basename);
+    }
+    for (const produced of plan.produces) available.set(produced.id, produced.path);
+  });
 }
 
 function emptyUsage(): PipelineRunRecord["usage"] {
@@ -535,8 +559,11 @@ export async function runLinearPipeline(
   if (options.piTestAuthDir && options.sandbox !== "local") {
     throw new Error("pi-test-auth requires sandbox=local");
   }
-  if (options.piTestAuthDir && options.provider !== "openai-codex") {
-    throw new Error("pi-test-auth requires provider=openai-codex");
+  if (options.piTestAuthDir && options.provider !== PI_TEST_AUTH_PROVIDER) {
+    throw new Error(`pi-test-auth requires provider=${PI_TEST_AUTH_PROVIDER}`);
+  }
+  if (options.piTestAuthDir && !inspectPiTestAuth(options.piTestAuthDir).configured) {
+    throw new Error("pi-test-auth is not configured; run foundry-build pi-test-auth login first");
   }
 
   const assembly = loadAssembly(repoRoot, options.pipeline);
@@ -561,6 +588,7 @@ export async function runLinearPipeline(
       produces: expectedArtifactsFromSkill(skillDir),
     };
   });
+  preflightInputBasenames(phasePlans, fixturePath);
   const started = now();
   const record: PipelineRunRecord = {
     pipeline_run_schema_version: 1,
@@ -611,7 +639,7 @@ export async function runLinearPipeline(
         return artifact ? [artifact.record] : [];
       });
       const missingInputIds = plan.consumes.filter((artifactId) => !promoted.has(artifactId));
-      const scenarioInput = phase === phases[0] ? fixturePath : null;
+      const scenarioInput = plan === phasePlans[0] ? fixturePath : null;
       const inputPaths = [
         ...(scenarioInput ? [scenarioInput] : []),
         ...plan.consumes.flatMap((artifactId) => {
@@ -628,10 +656,9 @@ export async function runLinearPipeline(
             options.pipeline,
             options.scenario,
             phase,
-            scenarioInput,
+            scenarioInput !== null,
             resolvedInputs,
             missingInputIds,
-            options.sandbox,
           ),
           inputPaths,
           expectedArtifacts: plan.produces,
@@ -669,6 +696,7 @@ export async function runLinearPipeline(
         phase: phase.phase,
         skill: phase.skill!,
         status: worker.status,
+        failure_kind: worker.status === "passed" ? undefined : "worker",
         error: worker.error,
         run_dir: path.relative(runDir, phaseRunDir).split(path.sep).join("/"),
         worker_run_id: worker.run_id,
@@ -708,6 +736,7 @@ export async function runLinearPipeline(
           artifact.sha256 !== actualSha256
         ) {
           phaseRecord.status = "failed";
+          phaseRecord.failure_kind = "artifact_promotion";
           phaseRecord.error = `declared artifact was not promotable: ${expected.id}`;
           trial.status = "failed";
           break;
@@ -738,7 +767,7 @@ export async function runLinearPipeline(
 }
 
 export async function runTestPipelineCommand(argv = process.argv.slice(2)): Promise<void> {
-  const args = parseArgs(argv);
+  const args = parseTestPipelineArgs(argv);
   const repoRoot = path.resolve(args.root ?? process.cwd());
   const runDir = path.resolve(args.runDir ?? defaultTestPipelineRunDir(args.pipeline));
   const record = await runLinearPipeline({ ...args, repoRoot, runDir });

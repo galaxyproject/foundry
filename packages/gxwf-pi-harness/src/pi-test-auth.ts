@@ -1,13 +1,12 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { createInterface } from "node:readline/promises";
 
 import { type AuthEvent, type AuthInteraction, type AuthPrompt } from "@earendil-works/pi-ai";
-import { registerBunOAuthFlows } from "@earendil-works/pi-ai/bun-oauth";
-import { ModelRuntime, readStoredCredential } from "@earendil-works/pi-coding-agent";
+import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 
 export const PI_TEST_AUTH_PROVIDER = "openai-codex";
 
@@ -17,9 +16,10 @@ export interface PiTestAuthStatus {
   auth_dir: string;
   provider: typeof PI_TEST_AUTH_PROVIDER;
   configured: boolean;
-  type?: "oauth";
+  type?: "oauth" | "api_key";
   account_id?: string;
   expires_at?: string;
+  problem?: string;
 }
 
 export interface PiTestAuthLoginOptions {
@@ -31,6 +31,18 @@ export interface PiTestAuthInteractionOptions extends PiTestAuthLoginOptions {
   write?: (message: string) => void;
   openExternal?: (url: string) => void;
   ask?: (prompt: AuthPrompt) => Promise<string>;
+}
+
+interface PiTestAuthRuntime {
+  login(providerId: string, type: "oauth", interaction: AuthInteraction): Promise<unknown>;
+  logout(providerId: string): Promise<void>;
+}
+
+interface PiTestAuthManagerDependencies {
+  createRuntime?: (options: {
+    authPath: string;
+    refreshOnCreate: false;
+  }) => Promise<PiTestAuthRuntime>;
 }
 
 export function defaultPiTestAuthDir(
@@ -58,7 +70,26 @@ export function inspectPiTestAuth(authDir = defaultPiTestAuthDir()): PiTestAuthS
       configured: false,
     };
   }
-  const credential = readStoredCredential(PI_TEST_AUTH_PROVIDER, authPath);
+  let data: unknown;
+  try {
+    data = JSON.parse(readFileSync(authPath, "utf8"));
+  } catch {
+    return {
+      auth_dir: resolvedAuthDir,
+      provider: PI_TEST_AUTH_PROVIDER,
+      configured: false,
+      problem: "auth.json is unreadable or invalid JSON",
+    };
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return {
+      auth_dir: resolvedAuthDir,
+      provider: PI_TEST_AUTH_PROVIDER,
+      configured: false,
+      problem: "invalid auth store: expected a JSON object",
+    };
+  }
+  const credential = (data as Record<string, unknown>)[PI_TEST_AUTH_PROVIDER];
   if (!credential) {
     return {
       auth_dir: resolvedAuthDir,
@@ -66,19 +97,45 @@ export function inspectPiTestAuth(authDir = defaultPiTestAuthDir()): PiTestAuthS
       configured: false,
     };
   }
-  if (credential.type !== "oauth") {
-    throw new Error(`${authPath}: expected an OAuth credential for ${PI_TEST_AUTH_PROVIDER}`);
+  if (typeof credential !== "object" || Array.isArray(credential)) {
+    return {
+      auth_dir: resolvedAuthDir,
+      provider: PI_TEST_AUTH_PROVIDER,
+      configured: false,
+      problem: `invalid credential for ${PI_TEST_AUTH_PROVIDER}`,
+    };
+  }
+  const fields = credential as Record<string, unknown>;
+  if (fields.type !== "oauth") {
+    return {
+      auth_dir: resolvedAuthDir,
+      provider: PI_TEST_AUTH_PROVIDER,
+      configured: false,
+      type: fields.type === "api_key" ? "api_key" : undefined,
+      problem: `expected an OAuth credential for ${PI_TEST_AUTH_PROVIDER}`,
+    };
+  }
+  if (
+    typeof fields.access !== "string" ||
+    typeof fields.refresh !== "string" ||
+    typeof fields.expires !== "number" ||
+    !Number.isFinite(fields.expires)
+  ) {
+    return {
+      auth_dir: resolvedAuthDir,
+      provider: PI_TEST_AUTH_PROVIDER,
+      configured: false,
+      type: "oauth",
+      problem: `invalid OAuth credential for ${PI_TEST_AUTH_PROVIDER}`,
+    };
   }
   return {
     auth_dir: resolvedAuthDir,
     provider: PI_TEST_AUTH_PROVIDER,
     configured: true,
     type: "oauth",
-    account_id: typeof credential.accountId === "string" ? credential.accountId : undefined,
-    expires_at:
-      Number.isFinite(credential.expires) && credential.expires > 0
-        ? new Date(credential.expires).toISOString()
-        : undefined,
+    account_id: typeof fields.accountId === "string" ? fields.accountId : undefined,
+    expires_at: fields.expires > 0 ? new Date(fields.expires).toISOString() : undefined,
   };
 }
 
@@ -147,9 +204,11 @@ export function createPiTestAuthInteraction(
 
 export class PiTestAuthManager {
   readonly authDir: string;
+  private readonly createRuntime: NonNullable<PiTestAuthManagerDependencies["createRuntime"]>;
 
-  constructor(authDir = defaultPiTestAuthDir()) {
+  constructor(authDir = defaultPiTestAuthDir(), dependencies: PiTestAuthManagerDependencies = {}) {
     this.authDir = path.resolve(authDir);
+    this.createRuntime = dependencies.createRuntime ?? ((options) => ModelRuntime.create(options));
   }
 
   status(): PiTestAuthStatus {
@@ -158,8 +217,7 @@ export class PiTestAuthManager {
 
   async login(options: PiTestAuthLoginOptions): Promise<PiTestAuthStatus> {
     mkdirSync(this.authDir, { recursive: true, mode: 0o700 });
-    registerBunOAuthFlows();
-    const runtime = await ModelRuntime.create({
+    const runtime = await this.createRuntime({
       authPath: piTestAuthPath(this.authDir),
       refreshOnCreate: false,
     });
@@ -169,8 +227,7 @@ export class PiTestAuthManager {
 
   async logout(): Promise<void> {
     if (!existsSync(piTestAuthPath(this.authDir))) return;
-    registerBunOAuthFlows();
-    const runtime = await ModelRuntime.create({
+    const runtime = await this.createRuntime({
       authPath: piTestAuthPath(this.authDir),
       refreshOnCreate: false,
     });

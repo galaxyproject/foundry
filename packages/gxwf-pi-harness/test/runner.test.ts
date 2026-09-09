@@ -1,10 +1,12 @@
 import {
   chmodSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -269,6 +271,42 @@ describe("runPiSkill", () => {
         piTestAuthDir: path.join(root, "pi-test-auth"),
       }),
     ).rejects.toThrow("pi-test-auth requires the local sandbox");
+  });
+
+  test("removes the worker auth link even if its target disappears during the run", async () => {
+    const root = fixtureRoot();
+    const authDir = path.join(root, "pi-test-auth");
+    mkdirSync(authDir, { mode: 0o700 });
+    const sourceAuthPath = path.join(authDir, "auth.json");
+    writeFileSync(
+      sourceAuthPath,
+      JSON.stringify({
+        "openai-codex": {
+          type: "oauth",
+          access: "access-secret",
+          refresh: "refresh-secret",
+          expires: Date.now() + 60_000,
+        },
+      }),
+      { mode: 0o600 },
+    );
+    const runDir = path.join(root, "run");
+
+    const record = await runPiSkill(
+      {
+        skillDir: makeSkill(root),
+        prompt: "Do the work.",
+        expectedArtifacts: [],
+        runDir,
+        provider: "openai-codex",
+        model: "gpt-test",
+        piTestAuthDir: authDir,
+      },
+      fakeDependencies(() => unlinkSync(sourceAuthPath)),
+    );
+
+    expect(record.status).toBe("passed");
+    expect(() => lstatSync(path.join(runDir, "pi-agent", "auth.json"))).toThrow();
   });
 
   test("container mode exposes only the selected skill, declared inputs, and output mount", async () => {

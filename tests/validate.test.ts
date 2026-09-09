@@ -580,10 +580,30 @@ describe("validateDirectory (cross-file)", () => {
     );
     writeFileSync(
       path.join(dir, "pipelines/p/scenarios.md"),
-      "# P scenarios\n\n## Case: demo\n\n- fixture: nf-core/demo\n- expect: validates\n",
+      "# P scenarios\n\n##  Case: demo\n\n- fixture: nf-core/demo\n- expect: validates\n",
     );
     const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(r.errors).toBe(0);
+  });
+
+  it("rejects a pipeline scenario fixture that escapes the repository", () => {
+    writeFm(path.join(dir, "molds/mold-a/index.md"), {
+      ...baseRequired({ type: "mold", tags: ["target/galaxy"], name: "mold-a", axis: "generic" }),
+    });
+    writeFm(path.join(dir, "pipelines/p/index.md"), {
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "P",
+        phases: [{ mold: "[[mold-a]]" }],
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "pipelines/p/scenarios.md"),
+      "# P scenarios\n\n## Case: escape\n\n- fixture: `../outside`\n",
+    );
+    const result = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(result.errors).toBeGreaterThanOrEqual(1);
   });
 
   it("errors on frontmatter in a pipeline sibling", () => {

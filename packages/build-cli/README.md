@@ -29,6 +29,12 @@ foundry-build pi-test-auth login
 foundry-build test-pipeline nextflow-to-galaxy --root . \
   --scenario "nf-core/demo end to end" --engine pi --sandbox local \
   --provider openai-codex --model MODEL_ID --pi-test-auth
+
+# A non-default store can be selected consistently for login and execution.
+foundry-build pi-test-auth login --auth-dir /secure/foundry-eval-auth
+foundry-build test-skill summarize-nextflow --root . --prompt "Summarize it" \
+  --provider openai-codex --model MODEL_ID --pi-test-auth \
+  --auth-dir /secure/foundry-eval-auth
 ```
 
 ## Commands

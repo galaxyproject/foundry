@@ -389,6 +389,16 @@ function writeRecord(runDir: string, record: PiSkillRunRecord): void {
   writeFileSync(path.join(runDir, "run.json"), `${JSON.stringify(record, null, 2)}\n`);
 }
 
+function unlinkIfPresent(filePath: string | undefined): void {
+  if (!filePath) return;
+  try {
+    lstatSync(filePath);
+    unlinkSync(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+}
+
 const ENVIRONMENT_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 function resolveCredentialEnv(names: string[]): string[] {
@@ -642,10 +652,13 @@ export async function runPiSkill(
   };
   let client: PiClient;
   try {
+    // Pi is exactly pinned at 0.84.4, whose FileAuthStorageBackend updates auth.json in place.
+    // Refresh therefore follows this link into the shared store. Re-audit this assumption with
+    // any Pi version bump; unlinkIfPresent also removes a broken or unexpectedly replaced link.
     if (authLinkPath) symlinkSync(piTestAuthPath(options.piTestAuthDir!), authLinkPath);
     client = (dependencies.createClient ?? ((value) => new RpcClient(value)))(clientOptions);
   } catch (error) {
-    if (authLinkPath && existsSync(authLinkPath)) unlinkSync(authLinkPath);
+    unlinkIfPresent(authLinkPath);
     throw error;
   }
   const events: JsonAgentSessionEvent[] = [];
@@ -745,6 +758,6 @@ export async function runPiSkill(
     unsubscribe();
     await client.stop().catch(() => undefined);
     writeFileSync(stderrPath, client.getStderr());
-    if (authLinkPath && existsSync(authLinkPath)) unlinkSync(authLinkPath);
+    unlinkIfPresent(authLinkPath);
   }
 }
