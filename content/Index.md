@@ -262,11 +262,11 @@ Generated from content frontmatter. Do not edit by hand.
 - [[code-architecture]] — Implementation components, dependency direction, entry points, and contracts across the Foundry codebase. *(reviewed)*
 - [[comparisons]] — Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) — a dated snapshot. *(reviewed)*
 - [[casting]] — How typed Mold references become target-specific cast artifacts with provenance. *(reviewed)*
-- [[content-model]] — How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge. *(reviewed)*
+- [[content-model]] — How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge. *(revised)*
 - [[corpus]] — How IWC grounding works without turning the Foundry into an upstream workflow mirror. *(reviewed)*
 - [[eval-philosophy]] — Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/refinement split. *(reviewed)*
 - [[guiding-principles]] — The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding. *(reviewed)*
-- [[harness-pipelines]] — The source-to-target journeys that compose Molds, loops, and branch phases. *(reviewed)*
+- [[harness-pipelines]] — The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior. *(revised)*
 - [[mold-spec]] — The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it. *(reviewed)*
 - [[molds]] — The axes a Mold buckets on, the boundary against reference content, and where the Mold set is still uneven. *(reviewed)*
 - [[pattern-authorship]] — Developer-facing authorship rules for operation-named, corpus-grounded pattern pages. *(reviewed)*

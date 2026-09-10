@@ -106,4 +106,14 @@ describe("closed-registry invariant", () => {
     expect(registry.isValidTag("target/not-a-real-thing")).toBe(false);
     expect(registry.allTags().length).toBeGreaterThan(10);
   });
+
+  it("keeps the lifecycle vocabulary closed to review and publication", () => {
+    const lifecycleTags = registry
+      .allTags()
+      .filter((tag) => registry.facetOf(tag) === "lifecycle")
+      .sort();
+    expect(lifecycleTags).toEqual(["lifecycle/publication", "lifecycle/review"]);
+    expect(registry.facetOf("lifecycle/review")).toBe("lifecycle");
+    expect(registry.facetOf("lifecycle/publication")).toBe("lifecycle");
+  });
 });

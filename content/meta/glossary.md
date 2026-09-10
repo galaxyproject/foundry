@@ -54,6 +54,8 @@ Alphabetical.
 
 **Knowledge Base (KB)** — the inspectable, human-readable source of truth at the center of the instance: the standalone site where Pipelines, Molds, pattern pages, CLI manual pages, and IO schemas live and from which casting reads. Authored to be *read and learned by a human*, not merely stored for an agent to retrieve. The KB is the source; a **skill artifact** is the package. Colloquially *the Foundry* (see **Foundry**).
 
+**Lifecycle pipeline** — a Pipeline that operates on an existing workflow or workflow submission after construction. Carries `lifecycle/review` for advisory assessment or `lifecycle/publication` for maturation and publication handoff. The facet is orthogonal to `source/*` and `target/*`; harness-owned approval, state, and external mutations remain outside its Mold phases.
+
 **Loop** *(`[loop]` annotation)* — a phase-level flag (`loop: true` in frontmatter) marking a phase that runs once per step in the workflow being constructed. Applied to orchestrator Molds that advance the workflow by one step (`advance-galaxy-draft-step`). Renders on a subway map as a decorated station.
 
 **Mold** — an abstract, structured template inside the Foundry that describes a workflow-construction action. Authored as a **typed reference manifest with a presentation layer**: a `.md` file whose frontmatter declares typed references to heterogeneous artifacts (pattern pages, CLI manual pages, IO schemas, prompt fragments, examples), and whose body is a procedural skeleton that ties them together. Rendered as a navigable Foundry page; cast into one or more cast artifacts via casting's per-kind dispatch over those references.

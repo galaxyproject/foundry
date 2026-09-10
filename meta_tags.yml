@@ -66,6 +66,14 @@ facets:
       target/galaxy: "Mold targets Galaxy"
       target/cwl: "Mold targets CWL"
 
+  lifecycle:
+    label: Lifecycle
+    description: >-
+      Post-construction work performed on an existing workflow or workflow submission.
+    values:
+      lifecycle/review: "Evaluate an existing workflow or submission and produce advisory review findings"
+      lifecycle/publication: "Mature, package, and hand an existing workflow to a publication destination"
+
   tool:
     label: Tool
     description: >-

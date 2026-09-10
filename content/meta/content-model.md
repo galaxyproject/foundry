@@ -5,10 +5,10 @@ record_kind: infrastructure
 order: 5
 tags:
   - meta
-status: reviewed
+status: revised
 created: 2026-08-02
-revised: 2026-08-28
-revision: 5
+revised: 2026-09-10
+revision: 6
 summary: "How Foundry notes, kinds, metadata, tags, links, references, and companions represent knowledge."
 ---
 
@@ -48,7 +48,9 @@ Artifact identity is shared across Mold outputs and registered runtime outputs. 
 
 ## Tags and facets
 
-`meta_tags.yml` is a closed controlled vocabulary. A tag is valid because a declared facet lists it, not because its text resembles a prefix. Facets are cross-cutting browse axes—currently including source, target, tool, CLI, topic, prompt, and Foundry-meta concerns. Note kind remains the `type` discriminator and is never duplicated as a tag.
+`meta_tags.yml` is a closed controlled vocabulary. A tag is valid because a declared facet lists it, not because its text resembles a prefix. Facets are cross-cutting browse axes—currently including source, target, lifecycle, tool, CLI, topic, prompt, and Foundry-meta concerns. Note kind remains the `type` discriminator and is never duplicated as a tag.
+
+`source/*` and `target/*` classify workflow translation. `lifecycle/*` is orthogonal and classifies post-construction work such as review and publication. [[harness-pipelines]] owns the corresponding Pipeline-family distinction.
 
 The registry has two corpus-level drift rules: a note may not use an undeclared tag, and a declared instance tag or facet may not remain unused. Shared inherited vocabularies are not treated as instance-authored dead vocabulary.
 
