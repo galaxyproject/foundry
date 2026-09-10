@@ -246,6 +246,9 @@ importers:
       '@earendil-works/pi-coding-agent':
         specifier: 0.84.4
         version: 0.84.4(ws@8.21.3)(zod@4.4.3)
+      '@galaxy-foundry/gxwf-foundry':
+        specifier: workspace:*
+        version: link:../gxwf-foundry
     devDependencies:
       '@types/node':
         specifier: ^22.10.0

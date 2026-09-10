@@ -310,6 +310,15 @@ function substituteArtifactPath(args: string[], artifactPath: string): string[] 
     : [artifactPath];
 }
 
+function validatorCommand(bin: string): { executable: string; prefixArgs: string[] } {
+  if (bin !== "foundry") return { executable: bin, prefixArgs: [] };
+  const packageEntry = fileURLToPath(import.meta.resolve("@galaxy-foundry/gxwf-foundry"));
+  return {
+    executable: process.execPath,
+    prefixArgs: [path.join(path.dirname(packageEntry), "bin", "foundry.js")],
+  };
+}
+
 function validateArtifacts(
   expected: ExpectedArtifact[],
   workspace: string,
@@ -332,11 +341,13 @@ function validateArtifacts(
     const entry = verify.get(artifact.id);
     if (!entry) return result;
     mkdirSync(validationDir, { recursive: true });
-    const executed = spawnSync(
-      entry.validator_bin,
-      substituteArtifactPath(entry.args, artifactPath),
-      { cwd: workspace, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
-    );
+    const command = validatorCommand(entry.validator_bin);
+    const validatorArgs = substituteArtifactPath(entry.args, artifactPath);
+    const executed = spawnSync(command.executable, [...command.prefixArgs, ...validatorArgs], {
+      cwd: workspace,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     const stdoutPath = path.join(validationDir, `${artifact.id}.stdout`);
     const stderrPath = path.join(validationDir, `${artifact.id}.stderr`);
     writeFileSync(stdoutPath, executed.stdout ?? "");

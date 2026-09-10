@@ -192,6 +192,51 @@ describe("runPiSkill", () => {
     expect(readFileSync(path.join(runDir, "stderr.log"), "utf8")).toBe("diagnostic stderr");
   });
 
+  test("runs the bundled Foundry validator without relying on ambient PATH", async () => {
+    const root = fixtureRoot();
+    const skillDir = makeSkill(root);
+    writeFileSync(
+      path.join(skillDir, "_verify.json"),
+      JSON.stringify({
+        verify_schema_version: 1,
+        entries: [
+          {
+            artifact_id: "example-output",
+            validator_bin: "foundry",
+            args: ["--help"],
+          },
+        ],
+      }),
+    );
+    const originalPath = process.env.PATH;
+    process.env.PATH = "";
+    try {
+      const record = await runPiSkill(
+        {
+          skillDir,
+          prompt: "Do the work.",
+          runDir: path.join(root, "run"),
+          provider: "test-provider",
+          model: "test-model",
+        },
+        fakeDependencies((_prompt, options) => {
+          writeFileSync(path.join(options.cwd!, "output.json"), '{"ok":true}\n');
+        }),
+      );
+
+      expect(record.status).toBe("passed");
+      expect(record.artifacts[0]).toEqual(
+        expect.objectContaining({
+          status: "passed",
+          validator: expect.objectContaining({ bin: "foundry", exit_code: 0 }),
+        }),
+      );
+    } finally {
+      if (originalPath === undefined) delete process.env.PATH;
+      else process.env.PATH = originalPath;
+    }
+  });
+
   test("classifies a missing declared artifact as a skill failure", async () => {
     const root = fixtureRoot();
     const record = await runPiSkill(
