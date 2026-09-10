@@ -27,3 +27,15 @@ export {
   type ContainerNetworkPolicy,
 } from "./container.js";
 export { resolveDeclaredInput, resolveInstalledSkill } from "./skill-resolution.js";
+export {
+  createPiTestAuthInteraction,
+  defaultPiTestAuthDir,
+  inspectPiTestAuth,
+  PI_TEST_AUTH_PROVIDER,
+  PiTestAuthManager,
+  piTestAuthPath,
+  type PiTestAuthInteractionOptions,
+  type PiTestAuthLoginMethod,
+  type PiTestAuthLoginOptions,
+  type PiTestAuthStatus,
+} from "./pi-test-auth.js";

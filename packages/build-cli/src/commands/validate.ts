@@ -27,6 +27,7 @@ import { bundledPolicy, resolveLicenseRow } from "@galaxy-foundry/license-policy
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadTagRegistry } from "../lib/schema.js";
+import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
 import { GALAXY_SLUG_ALIASES, readContent } from "../lib/slug-map.js";
 import type { FileMeta, Frontmatter, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles, routablePath } from "../lib/walk.js";
@@ -152,6 +153,47 @@ interface CrossFileFinding {
   path: string;
   message: string;
   severity: "error" | "warning";
+}
+
+function validateScenariosCompanion(
+  scenariosPath: string,
+  findings: CrossFileFinding[],
+  repoRoot?: string,
+): void {
+  const cases = parseScenarioCases(readMarkdown(scenariosPath).body);
+  if (cases.length === 0) {
+    findings.push({
+      path: scenariosPath,
+      severity: "warning",
+      message: "scenarios.md should declare at least one '## Case:' section",
+    });
+  } else if (!cases.some((scenario) => scenario.fixture)) {
+    findings.push({
+      path: scenariosPath,
+      severity: "warning",
+      message: "scenarios.md cases should bind a fixture",
+    });
+  }
+  if (!repoRoot) return;
+  for (const scenario of cases) {
+    if (!scenario.fixturePath) continue;
+    try {
+      const resolution = resolveScenarioFixture(repoRoot, scenariosPath, scenario.fixturePath);
+      if (!resolution.materialized) {
+        findings.push({
+          path: scenariosPath,
+          severity: "warning",
+          message: `scenario '${scenario.name}' fixture is not materialized: ${scenario.fixturePath}`,
+        });
+      }
+    } catch (error) {
+      findings.push({
+        path: scenariosPath,
+        severity: "error",
+        message: `scenario '${scenario.name}' ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  }
 }
 
 // Registry drift — "is a registered tag carried by nothing?" — is deliberately NOT checked
@@ -843,20 +885,7 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
 
     const scenariosPath = path.join(moldDir, "scenarios.md");
     if (existsSync(scenariosPath)) {
-      const scenariosBody = readMarkdown(scenariosPath).body;
-      if (!/^##\s+Case:/m.test(scenariosBody)) {
-        findings.push({
-          path: scenariosPath,
-          severity: "warning",
-          message: "scenarios.md should declare at least one '## Case:' section",
-        });
-      } else if (!/\bfixture\b/i.test(scenariosBody)) {
-        findings.push({
-          path: scenariosPath,
-          severity: "warning",
-          message: "scenarios.md cases should bind a fixture",
-        });
-      }
+      validateScenariosCompanion(scenariosPath, findings);
     }
 
     // Whether eval.md is PRESENT is the companion declaration's business — `recommended` there
@@ -895,6 +924,7 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
 function validatePipelineSourceLayout(
   contentRoot: string,
   pipelineFiles: FileMeta[],
+  repoRoot: string,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const pipelinesRoot = path.join(contentRoot, "pipelines");
@@ -936,20 +966,7 @@ function validatePipelineSourceLayout(
 
     const scenariosPath = path.join(pdir, "scenarios.md");
     if (existsSync(scenariosPath)) {
-      const scenariosBody = readMarkdown(scenariosPath).body;
-      if (!/^##\s+Case:/m.test(scenariosBody)) {
-        findings.push({
-          path: scenariosPath,
-          severity: "warning",
-          message: "scenarios.md should declare at least one '## Case:' section",
-        });
-      } else if (!/\bfixture\b/i.test(scenariosBody)) {
-        findings.push({
-          path: scenariosPath,
-          severity: "warning",
-          message: "scenarios.md cases should bind a fixture",
-        });
-      }
+      validateScenariosCompanion(scenariosPath, findings, repoRoot);
     }
 
     const evalPath = path.join(pdir, "eval.md");
@@ -1515,6 +1532,7 @@ export function validateDirectory(opts: ValidateOptions): {
     ...validatePipelineSourceLayout(
       opts.directory,
       validFiles.filter((f) => f.meta.type === "pipeline"),
+      repoRoot,
     ),
   );
   crossFindings.push(...validateCliCommandDocs(validFiles));

@@ -1,4 +1,14 @@
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -198,6 +208,105 @@ describe("runPiSkill", () => {
     expect(record.status).toBe("failed");
     expect(record.failure_kind).toBe("skill");
     expect(record.artifacts[0]?.status).toBe("missing");
+  });
+
+  test("links an explicit pi-test-auth store only for the lifetime of a local worker", async () => {
+    const root = fixtureRoot();
+    const authDir = path.join(root, "pi-test-auth");
+    mkdirSync(authDir, { mode: 0o700 });
+    writeFileSync(
+      path.join(authDir, "auth.json"),
+      JSON.stringify({
+        "openai-codex": {
+          type: "oauth",
+          access: "access-secret",
+          refresh: "refresh-secret",
+          expires: Date.now() + 60_000,
+          accountId: "account-123",
+        },
+      }),
+      { mode: 0o600 },
+    );
+    const runDir = path.join(root, "run");
+    let linkedDuringRun = false;
+
+    const record = await runPiSkill(
+      {
+        skillDir: makeSkill(root),
+        prompt: "Do the work.",
+        expectedArtifacts: [],
+        runDir,
+        provider: "openai-codex",
+        model: "gpt-test",
+        piTestAuthDir: authDir,
+      },
+      fakeDependencies((_prompt, options) => {
+        const authPath = path.join(options.env?.PI_CODING_AGENT_DIR ?? "", "auth.json");
+        linkedDuringRun = existsSync(authPath);
+        expect(readFileSync(authPath, "utf8")).toContain("access-secret");
+      }),
+    );
+
+    expect(record.status).toBe("passed");
+    expect(linkedDuringRun).toBe(true);
+    expect(record.sandbox).toEqual(
+      expect.objectContaining({ credential_auth_store: "pi-test-auth" }),
+    );
+    expect(existsSync(path.join(runDir, "pi-agent", "auth.json"))).toBe(false);
+    expect(JSON.stringify(record)).not.toContain(authDir);
+    expect(JSON.stringify(record)).not.toContain("access-secret");
+  });
+
+  test("rejects pi-test-auth in the whole-process container sandbox", async () => {
+    const root = fixtureRoot();
+    await expect(
+      runPiSkill({
+        skillDir: makeSkill(root),
+        prompt: "Do the work.",
+        expectedArtifacts: [],
+        runDir: path.join(root, "run"),
+        provider: "openai-codex",
+        model: "gpt-test",
+        sandbox: "container",
+        piTestAuthDir: path.join(root, "pi-test-auth"),
+      }),
+    ).rejects.toThrow("pi-test-auth requires the local sandbox");
+  });
+
+  test("removes the worker auth link even if its target disappears during the run", async () => {
+    const root = fixtureRoot();
+    const authDir = path.join(root, "pi-test-auth");
+    mkdirSync(authDir, { mode: 0o700 });
+    const sourceAuthPath = path.join(authDir, "auth.json");
+    writeFileSync(
+      sourceAuthPath,
+      JSON.stringify({
+        "openai-codex": {
+          type: "oauth",
+          access: "access-secret",
+          refresh: "refresh-secret",
+          expires: Date.now() + 60_000,
+        },
+      }),
+      { mode: 0o600 },
+    );
+    const runDir = path.join(root, "run");
+
+    const record = await runPiSkill(
+      {
+        skillDir: makeSkill(root),
+        prompt: "Do the work.",
+        expectedArtifacts: [],
+        runDir,
+        provider: "openai-codex",
+        model: "gpt-test",
+        piTestAuthDir: authDir,
+      },
+      fakeDependencies(() => unlinkSync(sourceAuthPath)),
+    );
+
+    expect(record.status).toBe("passed");
+    expect(() => lstatSync(path.join(runDir, "pi-agent", "auth.json"))).toThrow();
   });
 
   test("container mode exposes only the selected skill, declared inputs, and output mount", async () => {

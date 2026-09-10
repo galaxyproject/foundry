@@ -24,6 +24,8 @@
     "cast": "tsx packages/build-cli/src/bin/foundry-build.ts cast --root .",
     "assemble-pipeline": "tsx packages/build-cli/src/bin/foundry-build.ts assemble-pipeline --root .",
     "test-skill": "tsx packages/build-cli/src/bin/foundry-build.ts test-skill --root .",
+    "test-pipeline": "tsx packages/build-cli/src/bin/foundry-build.ts test-pipeline --root .",
+    "pi-test-auth": "tsx packages/build-cli/src/bin/foundry-build.ts pi-test-auth",
     "gxwf-pi-harness:container-build": "docker build -t galaxy-foundry/gxwf-pi-harness:pi-0.84.4-foundry-0.1.0 packages/gxwf-pi-harness",
     "gxwf-pi-harness:container-test": "pnpm --filter @galaxy-foundry/gxwf-pi-harness test:container",
     "packages-build": "pnpm --filter \"./packages/*\" build",

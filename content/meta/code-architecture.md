@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-29
-revision: 3
+revised: 2026-09-09
+revision: 4
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -73,7 +73,7 @@ A domain runtime package that summarizes Nextflow source and owns the schemas pr
 
 ### `@galaxy-foundry/gxwf-pi-harness`
 
-The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker, normalized run records, declared-input staging, artifact verification, and the `foundry_subagent` Pi extension. `foundry-build test-skill` supplies the repository-facing command, but both trace-mode callers and the extension use this package's one runner. The package accepts a published skill bundle; it does not read authored Molds, select Pipeline phases, or grade qualitative properties.
+The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker, normalized run records, declared-input staging, artifact verification, the `foundry_subagent` Pi extension, and the public `pi-test-auth` adapter for isolated OpenAI/Codex OAuth credentials. `foundry-build test-skill` and `test-pipeline` supply the repository-facing commands, but trace-mode callers and the extension use this package's one runner. Pipeline phase selection remains in `build-cli`; the harness accepts one published skill bundle and does not read authored Molds, select Pipeline phases, or grade qualitative properties. OAuth is available only to explicitly local diagnostic workers, while whole-process container workers continue to receive only allowlisted API-key environment variables.
 
 ### Metadata packages
 
@@ -119,7 +119,8 @@ gxwf, Planemo, and Pi are not implementation layers in this repository. Molds de
 | repository validation | `packages/build-cli/src/commands/validate.ts` |
 | what this Foundry contributes to a cast | `packages/build-cli/src/commands/cast-mold.ts` |
 | pipeline assembly | `packages/build-cli/src/commands/assemble-pipeline.ts` |
-| Pi skill evaluation | `packages/gxwf-pi-harness/src/` and `packages/build-cli/src/commands/test-skill.ts` |
+| Pi skill and Pipeline evaluation | `packages/gxwf-pi-harness/src/`, `packages/build-cli/src/commands/test-skill.ts`, and `packages/build-cli/src/commands/test-pipeline.ts` |
+| Pi test authentication | `packages/gxwf-pi-harness/src/pi-test-auth.ts` and `packages/build-cli/src/commands/pi-test-auth.ts` |
 | runtime artifact validation | `packages/gxwf-foundry/src/` |
 | Nextflow summarization | `packages/summarize-nextflow/src/` |
 | site collection wiring | `site/src/content.config.ts` |

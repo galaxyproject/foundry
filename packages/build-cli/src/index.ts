@@ -4,6 +4,21 @@ export { runGenerateDashboardCommand } from "./commands/generate-dashboard.js";
 export { runGenerateIndexCommand } from "./commands/generate-index.js";
 export { runTestSkillCommand } from "./commands/test-skill.js";
 export {
+  runPiTestAuthCommand,
+  type PiTestAuthCommandDependencies,
+  type PiTestAuthCommandManager,
+} from "./commands/pi-test-auth.js";
+export {
+  defaultTestPipelineRunDir,
+  runLinearPipeline,
+  runTestPipelineCommand,
+  type PipelinePhaseRunRecord,
+  type PipelineRunRecord,
+  type PipelineRunnerDependencies,
+  type PipelineTrialRunRecord,
+  type TestPipelineOptions,
+} from "./commands/test-pipeline.js";
+export {
   runValidateCommand,
   validateData,
   validateDirectory,
