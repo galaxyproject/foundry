@@ -50,7 +50,7 @@ Artifact identity is shared across Mold outputs and registered runtime outputs. 
 
 `meta_tags.yml` is a closed controlled vocabulary. A tag is valid because a declared facet lists it, not because its text resembles a prefix. Facets are cross-cutting browse axes—currently including source, target, lifecycle, tool, CLI, topic, prompt, and Foundry-meta concerns. Note kind remains the `type` discriminator and is never duplicated as a tag.
 
-`source/*` and `target/*` classify workflow translation: the input shape and the workflow system produced. `lifecycle/*` is orthogonal and classifies post-construction work on an existing workflow or submission. A review report is therefore `lifecycle/review`, not a fictional `target/review`; handing an unchanged Galaxy workflow to a publication repository is `lifecycle/publication`, not a new workflow target format. [[harness-pipelines]] owns the corresponding Pipeline-family distinction.
+`source/*` and `target/*` classify workflow translation. `lifecycle/*` is orthogonal and classifies post-construction work such as review and publication. [[harness-pipelines]] owns the corresponding Pipeline-family distinction.
 
 The registry has two corpus-level drift rules: a note may not use an undeclared tag, and a declared instance tag or facet may not remain unused. Shared inherited vocabularies are not treated as instance-authored dead vocabulary.
 

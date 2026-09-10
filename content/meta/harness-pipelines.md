@@ -29,9 +29,7 @@ shape and a target workflow system, such as `NEXTFLOW → GALAXY`. They produce 
 the target format, so `source/*` and `target/*` are the relevant browse facets.
 
 Some journeys instead operate on an existing workflow after construction. These are
-**lifecycle pipelines**. Their result may be a review, a publication handoff, or another
-workflow-lifecycle outcome rather than a workflow in a new format. Use `lifecycle/*` for that
-purpose instead of inventing a report or repository as a `target/*` value:
+**lifecycle pipelines**. Use `lifecycle/*` to classify their purpose:
 
 - `lifecycle/review` — evaluate an existing workflow or submission and emit advisory findings;
 - `lifecycle/publication` — mature, package, and hand an existing workflow to a publication destination.
