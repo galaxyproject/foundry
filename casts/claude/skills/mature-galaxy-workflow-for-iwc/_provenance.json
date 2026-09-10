@@ -5,28 +5,11 @@
     "name": "mature-galaxy-workflow-for-iwc",
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 1,
-    "content_hash": "020dd4aaaad5dc4c1dc0d9a46f0ca57baf9f830987e359b790a7dc2ade010119",
-    "commit": "984d4401c25c3f18d05caf76f29a5bcb83d1da79"
+    "content_hash": "38d9fed5e83bcb02cdc044ac1a0858d2b3f5ce42af5905bea2b920451bacca6b",
+    "commit": "4e910ae19c1d9febf0b2fa8c0f1ba2b911a89f68"
   },
-  "cast_at": "2026-09-10T17:13:41.208Z",
+  "cast_at": "2026-09-10T19:31:32.376Z",
   "refs": [
-    {
-      "kind": "prompt",
-      "mode": "verbatim",
-      "ref": "[[copilot-workflow-review-instructions]]",
-      "src": "content/prompts/iwc/copilot-workflow-review-instructions/upstream.prompt",
-      "dst": "references/prompts/copilot-workflow-review-instructions.md",
-      "used_at": "runtime",
-      "load": "upfront",
-      "evidence": "corpus-observed",
-      "purpose": "Use the complementary pinned IWC repository instructions for Dockstore, genericity, annotation, documentation, release, and test-file expectations.",
-      "license": "MIT",
-      "license_file": "LICENSES/iwc.LICENSE",
-      "src_hash": "3e310a0d18d413a46a10cd72c6cbf0273dbe94ecc6cd6781fd9ba2ea6e2ff5b3",
-      "dst_hash": "3e310a0d18d413a46a10cd72c6cbf0273dbe94ecc6cd6781fd9ba2ea6e2ff5b3",
-      "source": "deterministic",
-      "license_file_hash": "f817504ef73a0b04fca81604e214ed2bdb0d5b96b8f5cf6a8c5bba7b787c98f0"
-    },
     {
       "kind": "prompt",
       "mode": "verbatim",
@@ -39,8 +22,8 @@
       "purpose": "Use the pinned upstream IWC reviewer checklist and its explicit output-label and naming checks as the primary review sequence before applying supported corrections.",
       "license": "MIT",
       "license_file": "LICENSES/iwc.LICENSE",
-      "src_hash": "52fc4247ed9f54bc7f643cb8a4912590cb6154825fe4cd1f863d6dddd8fcb262",
-      "dst_hash": "52fc4247ed9f54bc7f643cb8a4912590cb6154825fe4cd1f863d6dddd8fcb262",
+      "src_hash": "fc8b084d829491f31d3ec0ed026340f4deab164bd0165dd42d1eaf61de9f82d8",
+      "dst_hash": "fc8b084d829491f31d3ec0ed026340f4deab164bd0165dd42d1eaf61de9f82d8",
       "source": "deterministic",
       "license_file_hash": "f817504ef73a0b04fca81604e214ed2bdb0d5b96b8f5cf6a8c5bba7b787c98f0"
     },

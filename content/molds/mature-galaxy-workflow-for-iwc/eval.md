@@ -10,7 +10,7 @@ A valid concrete `starting-galaxy-workflow` is sufficient to begin. Missing summ
 
 - check: deterministic + llm-judged
 
-Every applicable check in both bundled IWC policy resources receives exactly one `pass`, `changed`, `needs-user-input`, or reasoned `not-applicable` result with a file/field or section citation.
+Every applicable check in the bundled IWC review prompt receives exactly one `pass`, `changed`, `needs-user-input`, or reasoned `not-applicable` result with a file/field or section citation.
 
 ## Property: evidence-bounded edits
 

@@ -38,7 +38,6 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
-- `references/prompts/copilot-workflow-review-instructions.md`: prompt reference copied verbatim into the bundle. Use the complementary pinned IWC repository instructions for Dockstore, genericity, annotation, documentation, release, and test-file expectations.
 - `references/prompts/workflow-pr-review-command.md`: prompt reference copied verbatim into the bundle. Use the pinned upstream IWC reviewer checklist and its explicit output-label and naming checks as the primary review sequence before applying supported corrections.
 - `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Initialize, preserve, and append precise unresolved maturation obligations rather than guessing authorship, licensing, or scientific intent.
 - `references/schemas/summary-galaxy-workflow.schema.json`: Schema file copied verbatim into the bundle. Interpret a supplied workflow summary without making that convenience artifact mandatory for direct use of this Mold.
@@ -56,7 +55,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 Take one concrete gxformat2 workflow and prepare an inspectable IWC-oriented revision. This is a single cohesive maturation action: read the upstream policy, fill what the evidence supports, make obvious purpose-preserving generalizations, keep an existing test aligned, prepare the normal companion files, and explain both the edits and the decisions that remain open.
 
-The workflow is the only required input. A summary, test, prior companions, ledger, and contributor context all improve the result but must not be prerequisites. Their absence changes what can be concluded; it does not prevent the skill from starting.
+The workflow is the only required input. A summary, test, prior companions, ledger, and contributor context all improve the result but must not be prerequisites.
 
 ### Procedure
 
@@ -69,7 +68,7 @@ The workflow is the only required input. A summary, test, prior companions, ledg
 
 #### 2. Apply the pinned IWC policy
 
-Read both bundled IWC prompt resources and apply the union of their applicable checks. The Claude command provides the review sequence; the Copilot instructions add concrete conventions. When they disagree, retain the stricter rule in the report as a conflict instead of silently weakening it.
+Read the bundled IWC review prompt and apply every applicable check. Treat its pinned revision as the upstream policy source for this run, record that revision in the report, and never imply that newer policy was evaluated.
 
 For every checklist item, record exactly one status:
 
@@ -96,19 +95,15 @@ When no test exists, emit no `galaxy-workflow-test` artifact. Record `needs-user
 
 #### 5. Prepare ordinary IWC companions
 
-- Write a README from evidenced workflow purpose, valid inputs, and expected outputs. Preserve useful supplied material. State unknown comparisons or tutorial links as unresolved; do not invent them.
-- Preserve changelog history and add only an evidence-backed entry. If the release cannot be chosen safely, make that a ledger item rather than fabricating a version history.
-- Align `.dockstore.yml` paths with the emitted filenames. Copy creator information only from workflow metadata or supplied context. Missing authorship is unresolved, not a license to guess.
+- Create or update a README from evidenced workflow purpose, valid inputs, and expected outputs. Preserve useful supplied material. State unknown comparisons or tutorial links as unresolved; do not invent them.
+- Create or update the changelog, preserving existing history and adding only an evidence-backed entry. If the release cannot be chosen safely, make that a ledger item rather than fabricating a version history.
+- Create or update `.dockstore.yml` and align its paths with the emitted filenames. Preserve existing metadata and copy creator information only from workflow metadata or supplied context. Missing authorship is unresolved, not a license to guess.
 
 #### 6. Report and hand off
 
 Write `iwc-maturation-report.md` with the pinned IWC source revisions from the bundled references, supplied-input inventory, per-item status and evidence, concise before/after descriptions, unresolved ledger ids, and the exact emitted files. End with an explicit statement that this skill did not run terminal validation or workflow tests and did not create or update a GitHub pull request.
 
 The downstream path owns validate-galaxy-workflow, run-workflow-test, repair/retest, and publication automation.
-
-### Upstream prompt status
-
-The bundled IWC prompts are ready to use as pinned policy resources, but the currently vendored Claude command predates the still-pending expanded upstream review command. Record the bundled pin in every report and refresh it after that upstream change is accepted; do not claim that this first cast represents policy newer than its provenance says.
 
 ### Non-goals
 
