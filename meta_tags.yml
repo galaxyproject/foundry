@@ -33,6 +33,7 @@ facets:
     description: Reusable upstream or Foundry-authored prompt families.
     values:
       prompt/galaxy-internal: "Prompt sourced from Galaxy's internal agent prompt library"
+      prompt/iwc-internal: "Prompt sourced from IWC's contributor and reviewer automation"
 
   cli:
     label: CLI

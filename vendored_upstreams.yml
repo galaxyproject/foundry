@@ -135,3 +135,17 @@
   framing: content/prompts/galaxy/custom-tool-structured/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
+
+- local: content/prompts/iwc/workflow-pr-review-command/upstream.prompt
+  source: https://raw.githubusercontent.com/galaxyproject/iwc/b80bc92780089b54773f558c224a27b38baa8a06/.claude/commands/review.md
+  pinned_ref: b80bc92780089b54773f558c224a27b38baa8a06
+  framing: content/prompts/iwc/workflow-pr-review-command/index.md
+  license: MIT
+  license_file: LICENSES/iwc.LICENSE
+
+- local: content/prompts/iwc/copilot-workflow-review-instructions/upstream.prompt
+  source: https://raw.githubusercontent.com/galaxyproject/iwc/b80bc92780089b54773f558c224a27b38baa8a06/.github/copilot-instructions.md
+  pinned_ref: b80bc92780089b54773f558c224a27b38baa8a06
+  framing: content/prompts/iwc/copilot-workflow-review-instructions/index.md
+  license: MIT
+  license_file: LICENSES/iwc.LICENSE

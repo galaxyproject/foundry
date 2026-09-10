@@ -278,3 +278,5 @@ Generated from content frontmatter. Do not edit by hand.
 - [[custom-tool-container-critic]] — Vendored Galaxy internal prompt inferring the conda packages a generated custom tool needs.
 - [[custom-tool-critic]] — Vendored Galaxy internal prompt for critiquing generated custom tool definitions.
 - [[custom-tool-structured]] — Vendored Galaxy internal prompt for generating structured custom tool definitions.
+- [[copilot-workflow-review-instructions]] — Vendored IWC repository instructions that guide Copilot reviews of workflow contributions.
+- [[workflow-pr-review-command]] — Vendored IWC Claude command for reviewing a workflow pull request against the contributor and reviewer checklist.
