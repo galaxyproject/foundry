@@ -1,0 +1,235 @@
+{
+  "provenance_schema_version": 4,
+  "cast_target": "claude",
+  "mold": {
+    "name": "mature-galaxy-workflow-for-iwc",
+    "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
+    "revision": 1,
+    "content_hash": "020dd4aaaad5dc4c1dc0d9a46f0ca57baf9f830987e359b790a7dc2ade010119",
+    "commit": "984d4401c25c3f18d05caf76f29a5bcb83d1da79"
+  },
+  "cast_at": "2026-09-10T17:13:41.208Z",
+  "refs": [
+    {
+      "kind": "prompt",
+      "mode": "verbatim",
+      "ref": "[[copilot-workflow-review-instructions]]",
+      "src": "content/prompts/iwc/copilot-workflow-review-instructions/upstream.prompt",
+      "dst": "references/prompts/copilot-workflow-review-instructions.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Use the complementary pinned IWC repository instructions for Dockstore, genericity, annotation, documentation, release, and test-file expectations.",
+      "license": "MIT",
+      "license_file": "LICENSES/iwc.LICENSE",
+      "src_hash": "3e310a0d18d413a46a10cd72c6cbf0273dbe94ecc6cd6781fd9ba2ea6e2ff5b3",
+      "dst_hash": "3e310a0d18d413a46a10cd72c6cbf0273dbe94ecc6cd6781fd9ba2ea6e2ff5b3",
+      "source": "deterministic",
+      "license_file_hash": "f817504ef73a0b04fca81604e214ed2bdb0d5b96b8f5cf6a8c5bba7b787c98f0"
+    },
+    {
+      "kind": "prompt",
+      "mode": "verbatim",
+      "ref": "[[workflow-pr-review-command]]",
+      "src": "content/prompts/iwc/workflow-pr-review-command/upstream.prompt",
+      "dst": "references/prompts/workflow-pr-review-command.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Use the pinned upstream IWC reviewer checklist and its explicit output-label and naming checks as the primary review sequence before applying supported corrections.",
+      "license": "MIT",
+      "license_file": "LICENSES/iwc.LICENSE",
+      "src_hash": "52fc4247ed9f54bc7f643cb8a4912590cb6154825fe4cd1f863d6dddd8fcb262",
+      "dst_hash": "52fc4247ed9f54bc7f643cb8a4912590cb6154825fe4cd1f863d6dddd8fcb262",
+      "source": "deterministic",
+      "license_file_hash": "f817504ef73a0b04fca81604e214ed2bdb0d5b96b8f5cf6a8c5bba7b787c98f0"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design/index.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Keep workflow interface and test addressing aligned when a safe genericity or human-readable-label correction changes the workflow interface.",
+      "trigger": "When maturation changes an input, promoted output, collection identifier, or workflow-output label referenced by a supplied test.",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions/index.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Apply current IWC conventions for test labels, durable remote fixtures, creator identifiers, release changes, and companion-file naming.",
+      "trigger": "When a supplied test, test-data reference, creator record, or release decision must be checked or updated.",
+      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Initialize, preserve, and append precise unresolved maturation obligations rather than guessing authorship, licensing, or scientific intent.",
+      "verification": "Exercise the ambiguous-reference fixture and confirm the emitted ledger carries a focused unresolved entry without a speculative workflow edit.",
+      "src_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "dst_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-galaxy-workflow]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryGalaxyWorkflowSchema",
+      "dst": "references/schemas/summary-galaxy-workflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Interpret a supplied workflow summary without making that convenience artifact mandatory for direct use of this Mold.",
+      "license": "MIT",
+      "src_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "dst_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow.gxwf.yml",
+        "description": "Matured concrete gxformat2 workflow with supported IWC metadata, naming, annotation, and purpose-preserving genericity corrections applied."
+      },
+      {
+        "id": "galaxy-workflow-test",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow.gxwf-tests.yml",
+        "optional": true,
+        "description": "Updated or unchanged supplied workflow test; absent when no test was provided because this Mold must not invent expected results."
+      },
+      {
+        "id": "iwc-workflow-readme",
+        "kind": "markdown",
+        "default_filename": "README.md",
+        "description": "Proposed IWC workflow README describing evidenced purpose, valid inputs, expected outputs, and relevant comparisons or resources."
+      },
+      {
+        "id": "iwc-workflow-changelog",
+        "kind": "markdown",
+        "default_filename": "CHANGELOG.md",
+        "description": "Proposed IWC changelog preserving prior history and recording only the release and maturation changes supported by available evidence."
+      },
+      {
+        "id": "iwc-dockstore-metadata",
+        "kind": "yaml",
+        "default_filename": ".dockstore.yml",
+        "description": "Proposed Dockstore metadata whose workflow and test paths and evidenced creators agree with the emitted submission files."
+      },
+      {
+        "id": "iwc-maturation-report",
+        "kind": "markdown",
+        "default_filename": "iwc-maturation-report.md",
+        "description": "Per-checklist status report with evidence, before-and-after changes, unresolved decisions, source pin, and explicit downstream validation disclaimer."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Carried or initialized obligations ledger with unresolved IWC maturation decisions appended and all prior entries preserved."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "starting-galaxy-workflow",
+        "description": "The normalized concrete gxformat2 workflow to mature, normally emitted by [[summarize-galaxy-workflow]]; this is the only required input.",
+        "producers": [
+          "summarize-galaxy-workflow"
+        ]
+      },
+      {
+        "id": "summary-galaxy-workflow",
+        "description": "Optional structured summary from [[summarize-galaxy-workflow]]; derive the needed facts from the workflow when this artifact is absent.",
+        "optional": true,
+        "inherited_schema": "[[summary-galaxy-workflow]]",
+        "producers": [
+          "summarize-galaxy-workflow"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-test",
+        "description": "Optional existing workflow test; preserve its assertions and update only keys that must follow supported workflow-label changes.",
+        "optional": true,
+        "producers": [
+          "implement-galaxy-workflow-test",
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Optional carried obligations ledger [[open-requirements-ledger]]; initialize an empty ledger when it is absent and append unresolved maturation decisions.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
+        ]
+      },
+      {
+        "id": "iwc-publication-context",
+        "description": "Optional user or harness context for intended use, repository slug, creators, ORCIDs, citations, license, release, and durable test-data URLs.",
+        "optional": true
+      },
+      {
+        "id": "iwc-workflow-readme",
+        "description": "Optional existing workflow README to update while preserving accurate material that remains relevant after maturation.",
+        "optional": true,
+        "producers": [
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      },
+      {
+        "id": "iwc-workflow-changelog",
+        "description": "Optional existing workflow changelog to extend without rewriting or discarding prior release history.",
+        "optional": true,
+        "producers": [
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      },
+      {
+        "id": "iwc-dockstore-metadata",
+        "description": "Optional existing Dockstore metadata to align with the workflow, test, and evidence-backed creator metadata.",
+        "optional": true,
+        "producers": [
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      }
+    ]
+  }
+}

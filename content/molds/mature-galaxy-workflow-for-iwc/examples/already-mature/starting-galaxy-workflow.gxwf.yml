@@ -1,0 +1,16 @@
+class: GalaxyWorkflow
+label: Short-read quality control
+doc: This workflow performs quality control on short-read sequencing data to generate a summarized quality report.
+creator:
+  - class: Person
+    name: Example Contributor
+    identifier: https://orcid.org/0000-0002-1825-0097
+license: MIT
+release: "0.1"
+inputs:
+  - id: Raw reads
+    type: data
+    format:
+      - fastqsanger
+outputs: []
+steps: []

@@ -29,7 +29,9 @@ These are optional in the schema but they are where a Mold's weight sits.
   Molds be composed into a pipeline phase without reading their bodies. An output may name a
   `schema` note, making the handoff machine-checkable. Inputs sharing a `role` are alternatives:
   a source-agnostic Mold names one role once per source flavor, and a pipeline that supplies any
-  one of them has satisfied it.
+  one of them has satisfied it. An individual input or output may set `optional: true`: absent
+  optional inputs do not require a producer, and absent optional outputs do not fail harness
+  verification. Omitted `optional` means required.
 - **`loop_endstate`** — for a Mold that runs until a condition holds, the condition. Prose,
   but *required* prose once the Mold loops: "until it passes" is not an end state.
 

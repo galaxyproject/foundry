@@ -16,6 +16,7 @@ export interface ProvenanceArtifactOutput {
   kind: string;
   default_filename: string;
   schema?: string;
+  optional?: boolean;
   description: string;
 }
 
@@ -29,6 +30,7 @@ export interface ProvenanceArtifactOutput {
 export interface ProvenanceArtifactInput {
   id: string;
   description: string;
+  optional?: boolean;
   inherited_schema?: string;
   producers?: string[];
 }

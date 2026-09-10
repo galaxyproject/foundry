@@ -1,0 +1,11 @@
+- doc: Existing regression case
+  job:
+    raw_reads:
+      class: File
+      path: test-data/reads.fastq
+      filetype: fastqsanger
+  outputs:
+    multiqc_html_report:
+      asserts:
+        has_text:
+          text: "MultiQC"

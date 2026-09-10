@@ -482,6 +482,7 @@ export function readArtifactContracts(
         kind: typeof o.kind === "string" ? o.kind : "other",
         default_filename: typeof o.default_filename === "string" ? o.default_filename : "",
         schema: typeof o.schema === "string" ? o.schema : undefined,
+        optional: o.optional === true ? true : undefined,
         description: typeof o.description === "string" ? o.description : "",
       });
     }
@@ -496,6 +497,7 @@ export function readArtifactContracts(
       inp.push({
         id: o.id,
         description: typeof o.description === "string" ? o.description : "",
+        optional: o.optional === true ? true : undefined,
         inherited_schema: info?.schema,
         producers: info && info.producers.length > 0 ? [...info.producers].sort() : undefined,
       });
@@ -549,6 +551,7 @@ function artifactRows(
       "default_filename" in a && a.default_filename ? `\`${a.default_filename}\`` : undefined;
     const action = direction === "output" ? "Write" : "Read";
     const parts = [`- ${action} artifact \`${a.id}\`${filename ? ` as ${filename}` : ""}.`];
+    if (a.optional) parts.push("Optional; absence is allowed and must be reported honestly.");
     if ("kind" in a && a.kind) parts.push(`Format: \`${a.kind}\`.`);
     const schema =
       "schema" in a ? a.schema : "inherited_schema" in a ? a.inherited_schema : undefined;

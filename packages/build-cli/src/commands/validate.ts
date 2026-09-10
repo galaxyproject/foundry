@@ -600,9 +600,9 @@ function validateArtifactGraph(
     if (Array.isArray(inp)) {
       inp.forEach((a, i) => {
         if (!a || typeof a !== "object") return;
-        const id = (a as { id?: unknown }).id;
+        const { id, optional } = a as { id?: unknown; optional?: unknown };
         if (typeof id !== "string") return;
-        if (!producerIds.has(id)) {
+        if (optional !== true && !producerIds.has(id)) {
           findings.push({
             path: f.path,
             severity: "error",
@@ -771,11 +771,14 @@ function validatePipelineArtifactBindings(
   metaByPath: Map<string, Frontmatter>,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
-  const phaseDecls: { out: Set<string>; in: { id: string; role?: string }[] }[] = [];
+  const phaseDecls: {
+    out: Set<string>;
+    in: { id: string; role?: string; optional?: boolean }[];
+  }[] = [];
 
   phases.forEach((phase) => {
     const out = new Set<string>();
-    const inputs: { id: string; role?: string }[] = [];
+    const inputs: { id: string; role?: string; optional?: boolean }[] = [];
     for (const moldPath of phaseMoldPaths(phase)) {
       const meta = metaByPath.get(moldPath);
       if (!meta) continue;
@@ -791,8 +794,16 @@ function validatePipelineArtifactBindings(
       if (Array.isArray(inp)) {
         for (const a of inp) {
           if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
-            const { id, role } = a as { id: string; role?: unknown };
-            inputs.push({ id, role: typeof role === "string" ? role : undefined });
+            const { id, role, optional } = a as {
+              id: string;
+              role?: unknown;
+              optional?: unknown;
+            };
+            inputs.push({
+              id,
+              role: typeof role === "string" ? role : undefined,
+              optional: optional === true ? true : undefined,
+            });
           }
         }
       }
@@ -809,7 +820,7 @@ function validatePipelineArtifactBindings(
     for (const inp of decl.in) {
       if (inp.role) {
         roles.set(inp.role, [...(roles.get(inp.role) ?? []), inp.id]);
-      } else if (!bound(inp.id)) {
+      } else if (!inp.optional && !bound(inp.id)) {
         findings.push({
           path: file.path,
           severity: "warning",
@@ -818,7 +829,8 @@ function validatePipelineArtifactBindings(
       }
     }
     for (const [role, ids] of roles) {
-      if (!ids.some(bound)) {
+      const members = decl.in.filter((input) => input.role === role);
+      if (members.some((input) => !input.optional) && !ids.some(bound)) {
         findings.push({
           path: file.path,
           severity: "warning",

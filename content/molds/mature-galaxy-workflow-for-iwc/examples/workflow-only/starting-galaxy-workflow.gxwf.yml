@@ -1,0 +1,10 @@
+class: GalaxyWorkflow
+label: sample_reads_qc
+doc: Run the tutorial quality-control workflow for sample A.
+inputs:
+  - id: raw_reads
+    type: data
+    format:
+      - fastqsanger
+outputs: []
+steps: []

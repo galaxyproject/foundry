@@ -360,6 +360,7 @@ describe("artifact-contract inheritance", () => {
               kind: "json",
               default_filename: "summary-x.json",
               schema: "[[schema-x]]",
+              optional: true,
               description: "Producer output that downstream consumers bind to.",
             },
           ],
@@ -369,7 +370,13 @@ describe("artifact-contract inheritance", () => {
         "content/molds/consumer/index.md",
         {
           type: "mold",
-          input_artifacts: [{ id: "summary-x", description: "Upstream summary used for binding." }],
+          input_artifacts: [
+            {
+              id: "summary-x",
+              optional: true,
+              description: "Upstream summary used for binding.",
+            },
+          ],
         },
       ],
     ]);
@@ -380,6 +387,7 @@ describe("artifact-contract inheritance", () => {
       {
         id: "summary-x",
         description: "Upstream summary used for binding.",
+        optional: true,
         inherited_schema: "[[schema-x]]",
         producers: ["producer"],
       },

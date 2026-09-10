@@ -47,6 +47,7 @@ export type PiThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "x
 export interface ExpectedArtifact {
   id: string;
   path: string;
+  optional?: boolean;
 }
 
 export interface StagedInput {
@@ -195,6 +196,7 @@ interface VerifyManifest {
 interface ProvenanceArtifact {
   id?: unknown;
   default_filename?: unknown;
+  optional?: unknown;
 }
 
 interface ProvenanceManifest {
@@ -467,7 +469,13 @@ export function expectedArtifactsFromSkill(skillDir: string): ExpectedArtifact[]
   const produces = provenance.artifacts?.produces ?? [];
   return produces.flatMap((artifact) =>
     typeof artifact.id === "string" && typeof artifact.default_filename === "string"
-      ? [{ id: artifact.id, path: artifact.default_filename }]
+      ? [
+          {
+            id: artifact.id,
+            path: artifact.default_filename,
+            optional: artifact.optional === true ? true : undefined,
+          },
+        ]
       : [],
   );
 }
@@ -702,8 +710,13 @@ export async function runPiSkill(
     stats = await client.getSessionStats();
     finalOutput = (await client.getLastAssistantText()) ?? undefined;
     const artifacts = validateArtifacts(expectedArtifacts, workspace, runDir, skillDir);
-    const artifactFailure = artifacts.some((artifact) =>
-      ["missing", "failed", "error"].includes(artifact.status),
+    const optionalIds = new Set(
+      expectedArtifacts.filter((artifact) => artifact.optional).map((artifact) => artifact.id),
+    );
+    const artifactFailure = artifacts.some(
+      (artifact) =>
+        ["failed", "error"].includes(artifact.status) ||
+        (artifact.status === "missing" && !optionalIds.has(artifact.id)),
     );
     const agentFailure = isAgentFailure(events);
     status = artifactFailure || agentFailure ? "failed" : "passed";

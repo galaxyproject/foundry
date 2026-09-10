@@ -726,6 +726,7 @@ export async function runLinearPipeline(
 
       for (const expected of plan.produces) {
         const artifact = worker.artifacts.find((candidate) => candidate.id === expected.id);
+        if (expected.optional && artifact?.status === "missing") continue;
         const artifactPath = path.join(phaseRunDir, "workspace", expected.path);
         const actualSha256 = existsSync(artifactPath) ? sha256Path(artifactPath) : undefined;
         if (
