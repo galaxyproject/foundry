@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 3,
     "content_hash": "cafba235f3bb41612216f766eb390ee6fddcb1192ddf445b6d9eb7f2c132678c",
-    "commit": "351623a6d3e96e9bdee421a3ef61df4306489e32"
+    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
   },
-  "cast_at": "2026-09-08T18:03:25.860Z",
+  "cast_at": "2026-09-10T20:38:35.827Z",
   "refs": [
     {
       "kind": "pattern",
@@ -186,6 +186,7 @@
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
           "nextflow-summary-to-galaxy-data-flow",
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",

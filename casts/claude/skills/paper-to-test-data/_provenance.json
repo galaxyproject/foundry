@@ -6,9 +6,9 @@
     "path": "content/molds/paper-to-test-data/index.md",
     "revision": 2,
     "content_hash": "863d7b503a77fa63449899f124d1669e181fdfd9a72f81f516a219cdc89cb6bb",
-    "commit": "351623a6d3e96e9bdee421a3ef61df4306489e32"
+    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
   },
-  "cast_at": "2026-09-08T18:03:25.780Z",
+  "cast_at": "2026-09-10T20:38:35.572Z",
   "refs": [],
   "artifacts": {
     "produces": [

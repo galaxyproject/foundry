@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
     "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "351623a6d3e96e9bdee421a3ef61df4306489e32"
+    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
   },
-  "cast_at": "2026-09-08T18:03:24.046Z",
+  "cast_at": "2026-09-10T20:38:33.763Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -182,7 +182,8 @@
         "id": "galaxy-workflow",
         "description": "Concrete gxformat2 workflow being tested — the loop-endstate `galaxy-workflow.gxwf.yml` from [[advance-galaxy-draft-step]] (`class: GalaxyWorkflow`); provides the real input/output labels, outputs, and collection shapes the test must assert against.",
         "producers": [
-          "advance-galaxy-draft-step"
+          "advance-galaxy-draft-step",
+          "mature-galaxy-workflow-for-iwc"
         ]
       },
       {
