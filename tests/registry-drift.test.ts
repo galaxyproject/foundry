@@ -106,4 +106,11 @@ describe("closed-registry invariant", () => {
     expect(registry.isValidTag("target/not-a-real-thing")).toBe(false);
     expect(registry.allTags().length).toBeGreaterThan(10);
   });
+
+  it("declares review and publication as lifecycle purposes, not targets", () => {
+    expect(registry.facetOf("lifecycle/review")).toBe("lifecycle");
+    expect(registry.facetOf("lifecycle/publication")).toBe("lifecycle");
+    expect(registry.isValidTag("target/review")).toBe(false);
+    expect(registry.isValidTag("target/publication")).toBe(false);
+  });
 });

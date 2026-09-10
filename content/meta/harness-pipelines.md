@@ -5,11 +5,13 @@ record_kind: foundation
 order: 9
 tags:
   - meta
-status: reviewed
+  - lifecycle/review
+  - lifecycle/publication
+status: revised
 created: 2026-04-30
-revised: 2026-08-25
-revision: 18
-summary: "The source-to-target journeys that compose Molds, loops, and branch phases."
+revised: 2026-09-10
+revision: 19
+summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
 
 Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase corresponds to one atomic, harness-step-sized Mold. The union of phases is not the Mold set: leaf Molds invoked inside an orchestrator are independently castable without appearing as a phase. `content/molds/` is the membership; [[molds]] owns the axes and the boundary.
@@ -19,6 +21,27 @@ Harness pipelines for the Galaxy Workflow Foundry. Each named pipeline phase cor
 - A **harness** is hand-authored orchestration glue. Harnesses sequence Molds, manage user-approval gates, and maintain run state. They are *not* cast from Molds and live outside the Foundry's casting pipeline. Some harnesses are heavyweight (Archon-style); some are simple orchestration skills.
 - Each phase below is intended to be a **Mold** — atomic, cast from the Foundry, LLM-driven content, reusable across harnesses where the phase recurs.
 - "atomic" means *atomic relative to harness pipeline phases*, not necessarily small. `summarize-nextflow` and `implement-tool-step` are both atomic at this tier even though they differ in LOC.
+
+## Translation and lifecycle pipelines
+
+The original Pipelines are **translation pipelines**: their names and tags identify a source
+shape and a target workflow system, such as `NEXTFLOW → GALAXY`. They produce a workflow in
+the target format, so `source/*` and `target/*` are the relevant browse facets.
+
+Some journeys instead operate on an existing workflow after construction. These are
+**lifecycle pipelines**. Their result may be a review, a publication handoff, or another
+workflow-lifecycle outcome rather than a workflow in a new format. Use `lifecycle/*` for that
+purpose instead of inventing a report or repository as a `target/*` value:
+
+- `lifecycle/review` — evaluate an existing workflow or submission and emit advisory findings;
+- `lifecycle/publication` — mature, package, and hand an existing workflow to a publication destination.
+
+The lifecycle facet is orthogonal to source and target. A Galaxy workflow review can carry
+`source/galaxy` + `lifecycle/review`; a Galaxy publication journey can carry `source/galaxy` +
+`target/galaxy` + `lifecycle/publication` when it preserves Galaxy as the workflow system.
+Lifecycle tags classify the journey's purpose. They do not change Mold `source:` / `target:`
+frontmatter, redefine the cast target, or move harness-level state and external mutations into
+Molds.
 
 ## CWL as intermediate (one option, not the path)
 
