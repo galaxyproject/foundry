@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-09-09
-revision: 4
+revised: 2026-09-10
+revision: 5
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -22,10 +22,10 @@ This record answers one question: **how is the implementation divided, and which
                  build-cli (authoring)
                  │        │          │
                  ▼        ▼          ▼
-          note-schema  gxwf-pi-harness  foundry CLI
-                 │        │          │
-                 ▼        ▼          ▼
-  shared substrate        Pi     summarize-nextflow
+          note-schema  gxwf-pi-harness ──▶ foundry CLI
+                 │        │                  │
+                 ▼        ▼                  ▼
+  shared substrate        Pi          summarize-nextflow
 
 shared substrate = cast, kind-schema, kind-manifest, tag-registry,
 reference-contract, wiki-links, content-reader, and license-policy packages
@@ -73,7 +73,7 @@ A domain runtime package that summarizes Nextflow source and owns the schemas pr
 
 ### `@galaxy-foundry/gxwf-pi-harness`
 
-The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker, normalized run records, declared-input staging, artifact verification, the `foundry_subagent` Pi extension, and the public `pi-test-auth` adapter for isolated OpenAI/Codex OAuth credentials. `foundry-build test-skill` and `test-pipeline` supply the repository-facing commands, but trace-mode callers and the extension use this package's one runner. Pipeline phase selection remains in `build-cli`; the harness accepts one published skill bundle and does not read authored Molds, select Pipeline phases, or grade qualitative properties. OAuth is available only to explicitly local diagnostic workers, while whole-process container workers continue to receive only allowlisted API-key environment variables.
+The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker, normalized run records, declared-input staging, artifact verification, the `foundry_subagent` Pi extension, and the public `pi-test-auth` adapter for isolated OpenAI/Codex OAuth credentials. It depends on the runtime-facing `foundry` CLI and resolves that package directly for independent artifact validation rather than relying on an ambient executable. `foundry-build test-skill` and `test-pipeline` supply the repository-facing commands, but trace-mode callers and the extension use this package's one runner. Pipeline phase selection remains in `build-cli`; the harness accepts one published skill bundle and does not read authored Molds, select Pipeline phases, or grade qualitative properties. OAuth is available only to explicitly local diagnostic workers, while whole-process container workers continue to receive only allowlisted API-key environment variables.
 
 ### Metadata packages
 
