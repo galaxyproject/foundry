@@ -1,14 +1,5 @@
 # GALAXY WORKFLOW MATURATION pipeline eval
 
-Pipeline-level oracle for the maturation journey. This judges the **end-to-end**
-and **cross-phase** properties no single Mold owns; each member Mold's own
-`eval.md` still applies to its phase's output (composition). In particular, the
-checklist's own completeness, evidence-boundedness, and downstream-boundary
-claims belong to `content/molds/mature-galaxy-workflow-for-iwc/eval.md` and are
-not restated here. What this file does own of that territory is the cross-phase
-half: whether an edit made at phase 2 survives to phase 4 intact. Properties are
-abstract — concrete journeys live in `scenarios.md`.
-
 ## Property: starting-format normalization is lossless
 
 - check: deterministic
