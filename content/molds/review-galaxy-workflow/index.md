@@ -10,7 +10,7 @@ status: draft
 created: 2026-09-12
 revised: 2026-09-12
 revision: 1
-summary: "Apply the pinned upstream IWC review policy to one Galaxy workflow or PR and emit one evidenced advisory Markdown review."
+summary: "Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review."
 input_artifacts:
   - id: starting-galaxy-workflow
     role: galaxy-workflow-subject
@@ -29,10 +29,10 @@ input_artifacts:
     description: "The workflow's test file when one exists; absent when the submission ships no test, which is a reviewable finding rather than an error."
   - id: galaxy-workflow-pr-context
     optional: true
-    description: "Harness-supplied pull-request context: repository, PR number, title and body, base and head SHAs, changed-file list, base-to-head diff, and the complete relevant files."
+    description: "Harness-supplied pull-request context: repository, pull request number, title and body, base and head SHAs, changed-file list, base-to-head diff, and the complete relevant files."
   - id: iwc-dockstore-metadata
     optional: true
-    description: "The submission's Dockstore metadata when present; it names the primary Galaxy descriptor under the IWC-Lab repository profile, which may be a gxformat2 file."
+    description: "The submission's `.dockstore.yml` when present; it names the primary Galaxy descriptor under the IWC-Lab repository profile, which may be a `.gxwf.yml` file."
   - id: iwc-comparison-notes
     optional: true
     description: "Existing structural diff from [[compare-against-iwc-exemplar]] when a Foundry run already produced one. Consume it; never rerun that comparison inside this Mold."
@@ -43,7 +43,7 @@ output_artifacts:
   - id: galaxy-workflow-review
     kind: markdown
     default_filename: galaxy-workflow-review.md
-    description: "Advisory IWC-policy review of one Galaxy workflow PR subject, citing structural validation, Planemo test evidence, and optional Foundry context."
+    description: "Advisory IWC-policy review of one Galaxy workflow pull-request subject, citing structural validation, Planemo test evidence, and optional Foundry context."
 references:
   - kind: prompt
     ref: "[[workflow-pr-review-command]]"
@@ -119,8 +119,8 @@ Review one Galaxy workflow submission under the pinned upstream IWC review polic
 ### 2. Select the repository profile
 
 - **IWC**: the primary descriptor is the native `.ga` workflow; apply the upstream checklist to it.
-- **IWC-Lab**: the primary Galaxy descriptor is the one named by the submission's Dockstore metadata, which may be a gxformat2 file. Apply the same descriptor-level checks to that file.
-- When no Dockstore metadata was supplied, state which profile was assumed and why.
+- **IWC-Lab**: the primary Galaxy descriptor is the one named by the submission's `.dockstore.yml`, which may be a `.gxwf.yml` file. Apply the same descriptor-level checks to that file.
+- When no `.dockstore.yml` was supplied, state which profile was assumed and why.
 
 ### 3. Apply the pinned IWC policy
 

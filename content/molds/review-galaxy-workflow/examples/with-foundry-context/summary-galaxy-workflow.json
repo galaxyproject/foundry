@@ -1,8 +1,182 @@
 {
-  "source": { "format": "gxformat2", "converted_from": null },
-  "workflow": { "label": "Short Read Quality Control", "license": "MIT", "release": "0.1" },
-  "inputs": [{ "id": "Sequencing Reads", "type": "data", "formats": ["fastqsanger"] }],
-  "outputs": [{ "id": "MultiQC Report", "source": "aggregate_reports/html_report" }],
-  "steps": [],
-  "tests": { "present": true, "path": "galaxy-workflow.gxwf-tests.yml", "cases": 1 }
+  "summary_version": "1",
+  "source": {
+    "ecosystem": "galaxy",
+    "workflow": "Short Read Quality Control",
+    "url": "starting-galaxy-workflow.gxwf.yml",
+    "version": null,
+    "license": "MIT",
+    "slug": "short-read-quality-control",
+    "format": "gxformat2",
+    "original_format": "gxformat2",
+    "release": "0.1",
+    "annotation": "This workflow runs FastQC on one short-read sequencing dataset and aggregates the report with MultiQC to generate a single quality-control summary."
+  },
+  "documents": {
+    "entrypoint": "starting-galaxy-workflow.gxwf.yml",
+    "converted_path": null,
+    "validation": {
+      "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
+      "status": "valid",
+      "diagnostics": []
+    }
+  },
+  "workflow_inputs": [
+    {
+      "id": "Sequencing Reads",
+      "label": "Sequencing Reads",
+      "type": "data",
+      "collection_type": null,
+      "optional": false,
+      "default": null,
+      "format": [
+        "fastqsanger"
+      ],
+      "doc": null
+    }
+  ],
+  "workflow_outputs": [
+    {
+      "id": "MultiQC Report",
+      "label": "MultiQC Report",
+      "source": "aggregate_reports/html_report",
+      "type": "html",
+      "doc": null
+    }
+  ],
+  "steps": [
+    {
+      "id": "quality_control",
+      "label": null,
+      "type": "tool",
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy1",
+      "tool_version": "0.74+galaxy1",
+      "tool_shed_repository": {
+        "name": "fastqc",
+        "owner": "devteam",
+        "changeset_revision": null,
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": {},
+      "in": [
+        {
+          "name": "input_file",
+          "source": "Sequencing Reads",
+          "default": null,
+          "value_from": null
+        }
+      ],
+      "out": [
+        {
+          "id": "html_file",
+          "actions": null
+        },
+        {
+          "id": "text_file",
+          "actions": null
+        }
+      ],
+      "when": null,
+      "annotation": null
+    },
+    {
+      "id": "aggregate_reports",
+      "label": null,
+      "type": "tool",
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.24.1+galaxy0",
+      "tool_version": "1.24.1+galaxy0",
+      "tool_shed_repository": {
+        "name": "multiqc",
+        "owner": "iuc",
+        "changeset_revision": null,
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": {
+        "results": [
+          {
+            "software_cond": {
+              "software": "fastqc"
+            }
+          }
+        ]
+      },
+      "in": [
+        {
+          "name": "results_0|software_cond|output_0|input",
+          "source": "quality_control/text_file",
+          "default": null,
+          "value_from": null
+        }
+      ],
+      "out": [
+        {
+          "id": "html_report",
+          "actions": null
+        }
+      ],
+      "when": null,
+      "annotation": null
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "Sequencing Reads",
+        "kind": "workflow-input",
+        "label": "Sequencing Reads"
+      },
+      {
+        "id": "quality_control",
+        "kind": "step",
+        "label": null
+      },
+      {
+        "id": "aggregate_reports",
+        "kind": "step",
+        "label": null
+      },
+      {
+        "id": "MultiQC Report",
+        "kind": "workflow-output",
+        "label": "MultiQC Report"
+      }
+    ],
+    "edges": [
+      {
+        "from": "Sequencing Reads",
+        "to": "quality_control",
+        "via": []
+      },
+      {
+        "from": "quality_control",
+        "to": "aggregate_reports",
+        "via": []
+      },
+      {
+        "from": "aggregate_reports",
+        "to": "MultiQC Report",
+        "via": []
+      }
+    ]
+  },
+  "tests": [
+    {
+      "name": "Aggregate FastQC output into a MultiQC report.",
+      "job_path": "galaxy-workflow.gxwf-tests.yml",
+      "expected_outputs": [
+        {
+          "id": "MultiQC Report",
+          "path": null,
+          "url": null,
+          "filetype": null,
+          "checksum": null,
+          "assertions": [
+            "has_text: General Statistics"
+          ]
+        }
+      ],
+      "provenance": "sibling tests file galaxy-workflow.gxwf-tests.yml"
+    }
+  ],
+  "warnings": []
 }

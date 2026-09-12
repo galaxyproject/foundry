@@ -4,10 +4,9 @@ Abstract oracle for one review. Fixture-independent: every property below states
 something that could fail for any submission, and the concrete cases live in
 `scenarios.md`.
 
-Most checks here are `llm-judged` on purpose. A `deterministic` check is one that
-is actually run by a mechanical oracle — emulating one is not a weaker pass, it is
-no evaluation at all — and the review is Markdown with no schema, so only file
-presence and closed-set string membership have a real oracle to run.
+Most checks here are `llm-judged` because the review is Markdown with no schema,
+so only file presence and closed-set string membership have a mechanical oracle to
+run.
 
 ## Property: evidence is cited, never asserted
 
@@ -73,20 +72,33 @@ presence and closed-set string membership have a real oracle to run.
   provenance record it was cast from, and makes no claim that upstream policy has
   moved past that pin. A correctly pinned cast is never described as stale.
 
-## Property: the verdict is separated and singular
+## Property: the recommendation is singular and in the closed set
 
 - check: deterministic
-- assertion: required fixes, optional improvements, and unavailable evidence
-  appear as distinct sections, and exactly one advisory recommendation from
-  `approve` / `request changes` / `needs discussion` is present. Two
-  recommendations, none, or a value outside the set is a failure. Collapsing
-  required and optional into one list is a failure even when every finding is
-  individually correct.
+- assertion: the review carries exactly one advisory recommendation, and its value
+  is one of `approve` / `request changes` / `needs discussion`. Two
+  recommendations, none, or a value outside the set is a failure. Oracle: grep the
+  emitted `galaxy-workflow-review.md` for the three strings and count the
+  recommendation line.
+
+## Property: the verdict is separated
+
+- check: llm-judged
+- assertion: required fixes, optional improvements, and unavailable evidence appear
+  as distinct sections. Collapsing required and optional into one list is a failure
+  even when every finding is individually correct, and so is filing an unverified
+  item among the optional improvements.
 
 ## Property: read-only
 
 - check: deterministic
 - assertion: the run emits `galaxy-workflow-review.md` and no other artifact, and
-  performs no GitHub mutation, workflow edit, test edit, or approval. A review
-  that *claims* to have approved, commented, or merged fails this property even if
-  nothing actually happened.
+  performs no GitHub mutation, workflow edit, or test edit. Oracle: diff the run
+  directory and the repository working tree before and after.
+
+## Property: the review claims no authority it does not have
+
+- check: llm-judged
+- assertion: a review that *claims* to have approved, commented, labelled, pushed,
+  or merged fails even when nothing actually happened, and so does one that
+  presents its advisory recommendation as a posted verdict.

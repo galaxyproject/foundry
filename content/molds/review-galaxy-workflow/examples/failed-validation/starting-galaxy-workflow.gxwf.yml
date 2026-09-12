@@ -23,7 +23,7 @@ steps:
       input_file: Sequencing Reads
   - id: aggregate_reports
     tool_id: toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.24.1+galaxy0
-    tool_version: "1.24.1+galaxy0"
+    tool_version: "1.24.1"
     in:
       results_0|software_cond|output_0|input: quality_control/text_file
     state:

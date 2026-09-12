@@ -5,10 +5,10 @@
     "name": "review-galaxy-workflow",
     "path": "content/molds/review-galaxy-workflow/index.md",
     "revision": 1,
-    "content_hash": "26e864cdf5684e1288d42cd40217145f0f880d4de50e85775f9c1ad9f4e976ef",
-    "commit": "cbbf7c7ae54736cfd054621709b02fdaac9e9e9f"
+    "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
+    "commit": "79bf5c3ab98eec3a67948d8bdebb9dba7d8a2359"
   },
-  "cast_at": "2026-09-12T18:51:07.869Z",
+  "cast_at": "2026-09-12T19:19:46.936Z",
   "refs": [
     {
       "kind": "prompt",
@@ -110,7 +110,7 @@
         "id": "galaxy-workflow-review",
         "kind": "markdown",
         "default_filename": "galaxy-workflow-review.md",
-        "description": "Advisory IWC-policy review of one Galaxy workflow PR subject, citing structural validation, Planemo test evidence, and optional Foundry context."
+        "description": "Advisory IWC-policy review of one Galaxy workflow pull-request subject, citing structural validation, Planemo test evidence, and optional Foundry context."
       }
     ],
     "consumes": [
@@ -162,12 +162,12 @@
       },
       {
         "id": "galaxy-workflow-pr-context",
-        "description": "Harness-supplied pull-request context: repository, PR number, title and body, base and head SHAs, changed-file list, base-to-head diff, and the complete relevant files.",
+        "description": "Harness-supplied pull-request context: repository, pull request number, title and body, base and head SHAs, changed-file list, base-to-head diff, and the complete relevant files.",
         "optional": true
       },
       {
         "id": "iwc-dockstore-metadata",
-        "description": "The submission's Dockstore metadata when present; it names the primary Galaxy descriptor under the IWC-Lab repository profile, which may be a gxformat2 file.",
+        "description": "The submission's `.dockstore.yml` when present; it names the primary Galaxy descriptor under the IWC-Lab repository profile, which may be a `.gxwf.yml` file.",
         "optional": true,
         "producers": [
           "mature-galaxy-workflow-for-iwc"
