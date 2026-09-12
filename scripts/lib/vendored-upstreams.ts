@@ -98,6 +98,42 @@ function isUrl(source: string): boolean {
   return /^https?:\/\//.test(source);
 }
 
+export interface VendoredSkip {
+  entry: VendoredUpstreamEntry;
+  reason: string;
+}
+
+// A `$NAME/path` source resolves through `common_paths.yml`, which is local to a
+// developer's machine — CI and a fresh clone have neither the file nor the
+// upstream checkouts it points at. Those entries are unreachable rather than
+// wrong, so partition them out and let the caller report them. The URL-sourced
+// entries need nothing local and are checkable anywhere.
+export function partitionCheckable(
+  repoRoot: string,
+  entries = loadVendoredUpstreams(repoRoot),
+): { checkable: VendoredUpstreamEntry[]; skipped: VendoredSkip[] } {
+  const checkable: VendoredUpstreamEntry[] = [];
+  const skipped: VendoredSkip[] = [];
+  const paths = loadCommonPaths(repoRoot);
+  for (const entry of entries) {
+    if (isUrl(entry.source)) {
+      checkable.push(entry);
+      continue;
+    }
+    const citation = parseCitation(entry.source, paths);
+    if (!citation) {
+      skipped.push({ entry, reason: `no common_paths entry resolves ${entry.source}` });
+      continue;
+    }
+    if (!fs.existsSync(citation.entry.path)) {
+      skipped.push({ entry, reason: `upstream checkout absent at ${citation.entry.path}` });
+      continue;
+    }
+    checkable.push(entry);
+  }
+  return { checkable, skipped };
+}
+
 function fetchUrl(source: string): string {
   return execFileSync("curl", ["-L", "--fail", "--silent", source], { encoding: "utf-8" });
 }

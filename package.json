@@ -20,6 +20,7 @@
     "check:kinds": "tsx packages/build-cli/src/bin/foundry-build.ts generate-kinds --root . --check",
     "check:readme": "tsx packages/build-cli/src/bin/foundry-build.ts generate-readme --root . --check",
     "check:vendored": "tsx scripts/sync-vendored-upstreams.ts --check",
+    "check:fixtures": "tsx scripts/check-fixtures.ts",
     "sync:vendored": "tsx scripts/sync-vendored-upstreams.ts --update",
     "cast": "tsx packages/build-cli/src/bin/foundry-build.ts cast --root .",
     "assemble-pipeline": "tsx packages/build-cli/src/bin/foundry-build.ts assemble-pipeline --root .",

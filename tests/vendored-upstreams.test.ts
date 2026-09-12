@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   findVendoredDrift,
   loadVendoredUpstreams,
+  partitionCheckable,
   syncVendoredUpstreams,
   updateVendoredManifestRefs,
 } from "../scripts/lib/vendored-upstreams";
@@ -145,5 +146,78 @@ describe("vendored_upstreams.yml (the committed manifest)", () => {
         true,
       );
     }
+  });
+});
+
+// check:vendored sat outside both `make check` and CI because half its entries
+// resolve through common_paths.yml, which is local to a developer's machine — on
+// a fresh clone it threw rather than reporting. Partitioning first is what lets
+// the check run everywhere: the URL half is verified, the local half is named
+// and skipped, and the scope it actually covered is printed rather than assumed.
+describe("vendored checkability", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const licensed = { license: "MIT", license_file: "LICENSES/galaxy.LICENSE" };
+
+  it("checks a URL-sourced entry anywhere, with nothing local required", () => {
+    const { checkable, skipped } = partitionCheckable(repoRoot, [
+      {
+        local: "content/x.yml",
+        source: "https://example.invalid/x.yml",
+        pinned_ref: "abc",
+        ...licensed,
+      },
+    ]);
+    expect(checkable).toHaveLength(1);
+    expect(skipped).toHaveLength(0);
+  });
+
+  it("skips a citation whose upstream checkout is absent, and says which path", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-partition-"));
+    const missing = path.join(dir, "no-such-upstream");
+    writeFileSync(path.join(dir, "common_paths.yml"), `upstream:\n  path: ${missing}\n`);
+    const { checkable, skipped } = partitionCheckable(dir, [
+      {
+        local: "content/x.yml",
+        source: "$UPSTREAM/docs/x.yml",
+        pinned_ref: "abc",
+        ...licensed,
+      },
+    ]);
+    expect(checkable).toHaveLength(0);
+    expect(skipped[0]?.reason).toContain(missing);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("checks a citation whose upstream checkout is present", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-partition-"));
+    const upstream = path.join(dir, "upstream");
+    mkdirSync(upstream, { recursive: true });
+    writeFileSync(path.join(dir, "common_paths.yml"), `upstream:\n  path: ${upstream}\n`);
+    const { checkable, skipped } = partitionCheckable(dir, [
+      {
+        local: "content/x.yml",
+        source: "$UPSTREAM/docs/x.yml",
+        pinned_ref: "abc",
+        ...licensed,
+      },
+    ]);
+    expect(checkable).toHaveLength(1);
+    expect(skipped).toHaveLength(0);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("skips a citation root no common_paths entry declares", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-partition-"));
+    writeFileSync(path.join(dir, "common_paths.yml"), "upstream:\n  path: /tmp\n");
+    const { skipped } = partitionCheckable(dir, [
+      {
+        local: "content/x.yml",
+        source: "$NOWHERE/docs/x.yml",
+        pinned_ref: "abc",
+        ...licensed,
+      },
+    ]);
+    expect(skipped[0]?.reason).toContain("$NOWHERE");
+    rmSync(dir, { recursive: true, force: true });
   });
 });

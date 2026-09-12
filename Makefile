@@ -1,4 +1,4 @@
-.PHONY: validate test typecheck generated check-generated check casts check-casts check-verify assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli check-planemo-pin
+.PHONY: validate test typecheck generated check-generated check casts check-casts check-verify assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli check-planemo-pin check-fixtures check-vendored
 
 FOUNDRY_BUILD := npx tsx packages/build-cli/src/bin/foundry-build.ts
 PIPELINE_SLUGS := $(patsubst content/pipelines/%/index.md,%,$(wildcard content/pipelines/*/index.md))
@@ -56,7 +56,19 @@ assemble-pipelines:
 check-assemble-pipelines:
 	@for p in $(PIPELINE_SLUGS); do $(FOUNDRY_BUILD) assemble-pipeline --root . $$p --check || exit 1; done
 
-check: validate check-generated check-planemo-pin check-casts check-verify check-assemble-pipelines test
+# The corpus, the casts and the generated notes were all gated; the example
+# artifacts committed beside a Mold were not. Each one claims to be what that
+# Mold emits, and each cast already names the validator that settles the claim.
+check-fixtures:
+	npm run check:fixtures
+
+# Half the vendored entries resolve through common_paths.yml, which is local to a
+# developer's machine; those are skipped and reported rather than failing a fresh
+# clone. The URL-sourced half needs nothing local and is checked everywhere.
+check-vendored:
+	npm run check:vendored
+
+check: validate check-generated check-planemo-pin check-vendored check-casts check-verify check-assemble-pipelines check-fixtures test
 
 fixtures:
 	$(MAKE) -C workflow-fixtures all
