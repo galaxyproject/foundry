@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
     "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
+    "commit": "92e924df540acbbf07b05f6f0d6a20cdf567e1b2"
   },
-  "cast_at": "2026-09-10T20:38:33.763Z",
+  "cast_at": "2026-09-12T17:18:14.290Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -44,8 +44,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation.",
-      "src_hash": "c34ea1722fa3b6b34ba206bc167aecd1ad16d6d05b224597a67501fce9f8d5d4",
-      "dst_hash": "c34ea1722fa3b6b34ba206bc167aecd1ad16d6d05b224597a67501fce9f8d5d4",
+      "src_hash": "7fe121e37097dc885196fa5a27fe673f826e0134c0fa4f3514dc410fdca9f7ad",
+      "dst_hash": "7fe121e37097dc885196fa5a27fe673f826e0134c0fa4f3514dc410fdca9f7ad",
       "source": "deterministic"
     },
     {

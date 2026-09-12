@@ -23,7 +23,7 @@ Galaxy's runtime testing and authoring CLI. Foundry Molds invoke `planemo test`,
 
 ## Pin
 
-`package_version` pins to the released `planemo==0.75.45` from PyPI — base upstream planemo, no fork.
+`package_version` pins to the released `planemo==0.75.45` from PyPI — base upstream planemo, no fork. It is the single source of truth: the sync scripts carry no pin of their own and stamp whichever planemo they invoked, and `make check-planemo-pin` fails if any recorded copy of the version disagrees with this field.
 
 [galaxyproject/planemo#1636](https://github.com/galaxyproject/planemo/pull/1636) merged 2026-05-14 and first shipped in released **0.75.42**, so `planemo cli_metadata` and `planemo output_schema` are available in every release at or above this pin. Every Foundry consumer runs off this base pin: the workflow-test phases ([[run-workflow-test]], [[implement-galaxy-workflow-test]]) which need only `planemo test --test_output_json`, the convergence loop in [[convert-nfcore-module-to-galaxy-tool]], and the vendored-artifact regeneration story (`packages/planemo-cli-meta/`, `packages/planemo-test-report-schema/`). No fork pin is required.
 

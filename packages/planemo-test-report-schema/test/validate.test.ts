@@ -30,10 +30,12 @@ describe("planemoTestReportSchema", () => {
 });
 
 describe("planemoTestReportProvenance", () => {
-  it("records the upstream planemo source pin", () => {
+  // As in planemo-cli-meta: `source` is provenance, `planemo_version` is observation, and the
+  // comparison against the note's pin lives in `make check-planemo-pin`.
+  it("records the upstream planemo it was generated from", () => {
     expect(planemoTestReportProvenance.schema_name).toBe("test-report");
     expect(planemoTestReportProvenance.source.repo).toBe("galaxyproject/planemo");
-    expect(planemoTestReportProvenance.source.release).toMatch(/^\d+\.\d+\.\d+/);
+    expect(planemoTestReportProvenance.planemo_version).toMatch(/^\d+\.\d+\.\d+/);
   });
 });
 

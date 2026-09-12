@@ -1,4 +1,4 @@
-.PHONY: validate test typecheck generated check-generated check casts check-casts check-verify assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli
+.PHONY: validate test typecheck generated check-generated check casts check-casts check-verify assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli check-planemo-pin
 
 FOUNDRY_BUILD := npx tsx packages/build-cli/src/bin/foundry-build.ts
 PIPELINE_SLUGS := $(patsubst content/pipelines/%/index.md,%,$(wildcard content/pipelines/*/index.md))
@@ -56,7 +56,7 @@ assemble-pipelines:
 check-assemble-pipelines:
 	@for p in $(PIPELINE_SLUGS); do $(FOUNDRY_BUILD) assemble-pipeline --root . $$p --check || exit 1; done
 
-check: validate check-generated check-casts check-verify check-assemble-pipelines test
+check: validate check-generated check-planemo-pin check-casts check-verify check-assemble-pipelines test
 
 fixtures:
 	$(MAKE) -C workflow-fixtures all
@@ -90,6 +90,11 @@ sync-planemo-cli:
 
 check-planemo-cli:
 	npm run check:planemo-cli
+
+# check-planemo-cli shells out to planemo, so it can only run where planemo is installed.
+# This one only reads files, so it runs everywhere and sits in the default `check`.
+check-planemo-pin:
+	npm run check:planemo-pin
 
 sync-planemo-test-report-schema:
 	pnpm --filter @galaxy-foundry/planemo-test-report-schema run sync:from-planemo

@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 6,
     "content_hash": "ddce4858e472c7e4ff1cc74b48be4c18dffe9e732e254bd6e84c41aeab1eae75",
-    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
+    "commit": "92e924df540acbbf07b05f6f0d6a20cdf567e1b2"
   },
-  "cast_at": "2026-09-10T20:38:35.970Z",
+  "cast_at": "2026-09-12T17:18:15.318Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -44,8 +44,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that executes the Galaxy or CWL workflow test; install before driving the harness.",
-      "src_hash": "c34ea1722fa3b6b34ba206bc167aecd1ad16d6d05b224597a67501fce9f8d5d4",
-      "dst_hash": "c34ea1722fa3b6b34ba206bc167aecd1ad16d6d05b224597a67501fce9f8d5d4",
+      "src_hash": "7fe121e37097dc885196fa5a27fe673f826e0134c0fa4f3514dc410fdca9f7ad",
+      "dst_hash": "7fe121e37097dc885196fa5a27fe673f826e0134c0fa4f3514dc410fdca9f7ad",
       "source": "deterministic"
     },
     {

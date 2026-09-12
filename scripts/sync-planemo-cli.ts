@@ -23,6 +23,8 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { readPinnedPlanemoVersion } from "./lib/planemo-pin.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(__filename), "..");
 const OUTPUT_DIR = path.join(REPO_ROOT, "content/cli/planemo");
@@ -36,9 +38,13 @@ const SEED_COMMANDS = [
   "output_schema",
 ];
 
+// The ref the generated `source_url`s point at is the note's pin, read at run time. Writing it
+// here again is how content/schemas/planemo-test-report.md went stale in #359.
 const PIN = {
   repo: "galaxyproject/planemo",
-  ref: "0.75.45",
+  get ref(): string {
+    return readPinnedPlanemoVersion(REPO_ROOT);
+  },
 };
 
 const AUTO_BEGIN = "<!-- planemo-cli-meta: BEGIN auto-generated -->";
