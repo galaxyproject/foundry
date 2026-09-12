@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-foundry/gxwf-pi-harness",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Pi-backed isolated worker runner and extension for testing Galaxy Workflow Foundry skills.",
   "type": "module",
   "exports": {
