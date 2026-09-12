@@ -17,14 +17,14 @@ Properties are abstract; concrete journeys live in `scenarios.md`.
 
 ## Property: red evidence does not terminate the journey
 
-- check: deterministic
+- check: llm-judged
 - assertion: a failing phase 2 or phase 3 leaves the journey running. The result
   artifact is retained and the review still runs and cites it. Losing the review
   because the evidence was bad is the failure mode this guards.
 
 ## Property: the review's cited statuses equal the emitted ones
 
-- check: deterministic
+- check: llm-judged
 - assertion: the validation and test statuses quoted in the final review are
   byte-equal to the `status` values in the artifacts phases 2 and 3 emitted. A
   paraphrase that changes the status, or a softening of `fail` into a caveat, is a
@@ -47,7 +47,7 @@ Properties are abstract; concrete journeys live in `scenarios.md`.
 
 ## Property: the journey mutates nothing
 
-- check: deterministic
+- check: llm-judged
 - assertion: the run produces the review artifact and the phase artifacts and
   nothing else. No GitHub state is written, no workflow, test, or companion file
   is edited, and no output claims that any of those happened.

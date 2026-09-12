@@ -6,9 +6,9 @@
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 5,
     "content_hash": "74e3743fc376f33c1eb37832ab4869c327d48f87e015c7a38597cf4c4ca939cd",
-    "commit": "cbbf7c7ae54736cfd054621709b02fdaac9e9e9f"
+    "commit": "79bf5c3ab98eec3a67948d8bdebb9dba7d8a2359"
   },
-  "cast_at": "2026-09-12T18:51:08.218Z",
+  "cast_at": "2026-09-12T19:19:47.237Z",
   "refs": [
     {
       "kind": "cli-command",

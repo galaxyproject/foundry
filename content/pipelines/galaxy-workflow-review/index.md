@@ -10,7 +10,7 @@ revised: 2026-09-12
 revision: 1
 summary: "Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy."
 harness_notes:
-  - "Resolve the pull request or local worktree first and record repository, PR number, base and head SHAs, workflow directory, primary descriptor, and the matching workflow test file."
+  - "Resolve the pull request or local worktree first and record repository, pull request number, base and head SHAs, workflow directory, primary descriptor, and the matching workflow test file."
   - "The local worktree commit must equal the reviewed head SHA. On mismatch, stop before phase 3 rather than mixing test evidence from one revision with a review of another."
   - "Phase 3 executes the checkout, so require the caller's explicit confirmation that this checkout is trusted for Planemo execution, and record that decision, before phase 3 runs."
   - "v1 has no privileged hosted execution of arbitrary fork heads. A user may inspect such a pull request without this Pipeline; running phase 3 always needs the explicit trusted-worktree decision."
@@ -32,18 +32,18 @@ related_notes:
 
 # GALAXY WORKFLOW REVIEW
 
-A post-construction review journey. An existing Galaxy workflow — normally the subject of a pull request — is summarized, structurally validated, and actually run, and only then reviewed against the pinned upstream IWC policy. The output is one advisory Markdown review. Lifted from the proposal in galaxyproject/foundry#491.
+A post-construction review journey. An existing Galaxy workflow — normally the subject of a pull request — is summarized, structurally validated, and actually run, and only then reviewed against the pinned upstream IWC policy. The output is one advisory Markdown review.
 
 The name deliberately carries no source-to-target arrow: review produces a report, not a new workflow format. `lifecycle/review` is the purpose; `source/galaxy` is what it reads.
 
 ## Invocation and trust
 
-The primary invocation is a pull request plus a local worktree parked at the reviewed head. Before anything runs, the harness resolves and records the repository, the PR, the base and head SHAs, the workflow directory, the primary descriptor, the matching test file, and the local worktree commit.
+The primary invocation is a pull request plus a local worktree parked at the reviewed head. Before anything runs, the harness resolves and records the repository, the pull request, the base and head SHAs, the workflow directory, the primary descriptor, the matching test file, and the local worktree commit.
 
 Two gates sit ahead of phase 3, and both stop the run rather than degrading it:
 
 - **Exact head.** The worktree commit must equal the reviewed head SHA. A mismatch stops the run before any test executes, because test evidence from one revision attached to a review of another is worse than no evidence.
-- **Explicit trust.** Phase 3 runs the checkout's workflow through Planemo, which means executing code from the pull request. The caller must explicitly confirm the checkout is trusted, and that decision is recorded. There is no privileged hosted execution of arbitrary fork heads in v1; a reviewer who wants to read an untrusted PR can do so without this Pipeline.
+- **Explicit trust.** Phase 3 runs the checkout's workflow through Planemo, which means executing code from the pull request. The caller must explicitly confirm the checkout is trusted, and that decision is recorded. There is no privileged hosted execution of arbitrary fork heads in v1; a reviewer who wants to read an untrusted pull request can do so without this Pipeline.
 
 ## Why four phases
 

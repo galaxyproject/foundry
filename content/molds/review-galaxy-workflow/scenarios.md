@@ -6,6 +6,12 @@ declared filenames — `starting-galaxy-workflow.gxwf.yml`,
 `summary-galaxy-workflow.json`, `galaxy-workflow-validation-result.json`,
 `workflow-test-result.json` — plus the optional ones the case needs.
 
+A case whose expectation depends on a repository-level checklist item also
+carries the companions that item reads — `.dockstore.yml`, `README.md`,
+`CHANGELOG.md`, and a `galaxy-workflow-pr-context.json` — because an item whose
+evidence was never supplied must stay `unverified`, and a fixture that withholds
+it cannot be used to demand a verdict it makes unreachable.
+
 The fixtures are committed and hand-written rather than drawn from
 `workflow-fixtures/iwc-*`, which is generated and gitignored: a fixture a reviewer
 or CI cannot reach is not evidence. They are hand-authored, not harvested from a
@@ -31,8 +37,9 @@ real run — nothing here has been walked yet.
 ## Case: hard-coded sample value
 
 - fixture: `content/molds/review-galaxy-workflow/examples/hardcoded-sample-value/`
-- expect: a genericity finding citing the literal value's file and field, with an
-  explicit classification as required or optional rather than an unplaced remark.
+- expect: a genericity finding citing the literal value's file and the
+  `steps[].tool_state` field that carries it, with an explicit classification as
+  required or optional rather than an unplaced remark.
 
 ## Case: no test file in the submission
 
@@ -40,6 +47,14 @@ real run — nothing here has been walked yet.
 - expect: the review completes. The test item is a finding citing
   `status: test-definition-missing` from the supplied result; nothing claims a
   passing test; the recommendation is not `approve`.
+
+## Case: structural validation failed
+
+- fixture: `content/molds/review-galaxy-workflow/examples/failed-validation/`
+- expect: the review quotes `status: fail` from the supplied validation result and
+  raises its diagnostic as a required fix. The Planemo result is green, so nothing
+  in the review converts the structural failure into a runtime one, and the
+  recommendation is not `approve`.
 
 ## Case: Planemo failure cited accurately
 

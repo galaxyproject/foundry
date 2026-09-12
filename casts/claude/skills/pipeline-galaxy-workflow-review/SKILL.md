@@ -53,7 +53,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 1. **summarize-galaxy-workflow** — invoke the `summarize-galaxy-workflow` skill. Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps.
 2. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 3. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
-4. **review-galaxy-workflow** — invoke the `review-galaxy-workflow` skill. Apply the pinned upstream IWC review policy to one Galaxy workflow or PR and emit one evidenced advisory Markdown review.
+4. **review-galaxy-workflow** — invoke the `review-galaxy-workflow` skill. Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review.
 
 ## Done
 
@@ -65,7 +65,7 @@ If the run was invoked with `--feedback`, close the ledger first: set the final 
 
 - Do not re-implement any skill's internal logic here; this harness only sequences and routes.
 - Carry unresolved assumptions forward as notes rather than inventing missing inputs.
-- Resolve the pull request or local worktree first and record repository, PR number, base and head SHAs, workflow directory, primary descriptor, and the matching workflow test file.
+- Resolve the pull request or local worktree first and record repository, pull request number, base and head SHAs, workflow directory, primary descriptor, and the matching workflow test file.
 - The local worktree commit must equal the reviewed head SHA. On mismatch, stop before phase 3 rather than mixing test evidence from one revision with a review of another.
 - Phase 3 executes the checkout, so require the caller's explicit confirmation that this checkout is trusted for Planemo execution, and record that decision, before phase 3 runs.
 - v1 has no privileged hosted execution of arbitrary fork heads. A user may inspect such a pull request without this Pipeline; running phase 3 always needs the explicit trusted-worktree decision.

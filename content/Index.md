@@ -54,7 +54,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
 - [[report-foundry-run-feedback]] — Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts.
-- [[review-galaxy-workflow]] — Apply the pinned upstream IWC review policy to one Galaxy workflow or PR and emit one evidenced advisory Markdown review.
+- [[review-galaxy-workflow]] — Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. *(reviewed)*
 - [[summarize-cwl]] — Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation.
 - [[summarize-cwl-tool]] — Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target.

@@ -204,11 +204,11 @@ The Foundry's first `lifecycle/review` journey, and the first pipeline whose out
 3. `run-workflow-test` — execute the test via Planemo and hand on an honest result, including the `test-definition-missing` and `not-run` states that keep a review possible when nothing could run.
 4. `review-galaxy-workflow` — apply the pinned IWC policy item by item, citing the preceding evidence wherever it answers a checklist question, and emit one advisory recommendation.
 
-Only phase 4 is new. The three ahead of it already produced exactly the evidence a review needs; the two small additive changes to phases 2 and 3 exist so that evidence is *citable* rather than merely available.
+Only phase 4 is new. The three ahead of it already produced exactly the evidence a review needs, and the two small additive changes to phases 2 and 3 close different gaps. `validate-galaxy-workflow` declared no artifacts at all, so its change is what makes its findings *citable* rather than merely spoken. `run-workflow-test` already emitted its result; its change is about honesty, adding the `test-definition-missing` and `not-run` states so a run that could not execute hands on that fact instead of nothing.
 
 Two harness-owned gates sit ahead of phase 3, and both stop the run rather than degrading it: the local worktree commit must equal the reviewed head SHA, and the caller must explicitly confirm the checkout is trusted for Planemo execution. There is no privileged hosted execution of arbitrary fork heads in v1. A red phase 2 or phase 3, by contrast, does *not* stop the journey — losing the review because the evidence was bad would discard the finding a reviewer most needs.
 
-The pipeline is read-only end to end. It cannot approve, comment, push, mark ready, or merge, and it cannot edit the workflow it reviews. An accepted edit belongs to the `GALAXY WORKFLOW MATURATION` harness and is routed through `apply-galaxy-workflow-changeset` where applicable.
+The pipeline is read-only end to end. It cannot approve, comment, push, mark ready, or merge, and it cannot edit the workflow it reviews. An accepted edit belongs to the maturation harness proposed in galaxyproject/foundry#492, not to this journey, and is routed through `apply-galaxy-workflow-changeset` where applicable.
 
 ## Cross-pipeline observations
 

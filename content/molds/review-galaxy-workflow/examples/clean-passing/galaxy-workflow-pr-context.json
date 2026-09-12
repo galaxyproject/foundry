@@ -1,0 +1,74 @@
+{
+  "repository": "galaxyproject/iwc-lab",
+  "repository_profile": "iwc-lab",
+  "pull_request": {
+    "number": 1412,
+    "title": "Add short read quality control workflow",
+    "body": "Adds a single-dataset quality-control workflow: FastQC over one short-read sequencing dataset, aggregated into one MultiQC report.\n\nContributor checklist:\n\n- [x] `.dockstore.yml` added\n- [x] `license` set on the workflow\n- [x] CODEOWNERS entry added\n- [x] README and CHANGELOG added\n- [x] Test output names match the workflow output labels\n",
+    "state": "open",
+    "draft": false,
+    "author": "example-contributor"
+  },
+  "base": {
+    "ref": "main",
+    "sha": "0d1c2b3a49586776859493020100f1e2d3c4b5a6"
+  },
+  "head": {
+    "ref": "add-short-read-quality-control",
+    "sha": "7f6e5d4c3b2a19080706050403020100f1e2d3c4"
+  },
+  "workflow_directory": "workflows/sequence-analysis/short-read-quality-control",
+  "primary_descriptor": "workflows/sequence-analysis/short-read-quality-control/starting-galaxy-workflow.gxwf.yml",
+  "changed_files": [
+    {
+      "path": "workflows/sequence-analysis/short-read-quality-control/.dockstore.yml",
+      "status": "added",
+      "local_copy": ".dockstore.yml"
+    },
+    {
+      "path": "workflows/sequence-analysis/short-read-quality-control/CHANGELOG.md",
+      "status": "added",
+      "local_copy": "CHANGELOG.md"
+    },
+    {
+      "path": "workflows/sequence-analysis/short-read-quality-control/README.md",
+      "status": "added",
+      "local_copy": "README.md"
+    },
+    {
+      "path": "workflows/sequence-analysis/short-read-quality-control/galaxy-workflow.gxwf-tests.yml",
+      "status": "added",
+      "local_copy": "galaxy-workflow.gxwf-tests.yml"
+    },
+    {
+      "path": "workflows/sequence-analysis/short-read-quality-control/starting-galaxy-workflow.gxwf.yml",
+      "status": "added",
+      "local_copy": "starting-galaxy-workflow.gxwf.yml"
+    },
+    {
+      "path": ".github/CODEOWNERS",
+      "status": "modified",
+      "local_copy": null
+    }
+  ],
+  "diff_summary": "Six files, all additions except one appended line in .github/CODEOWNERS. No file outside workflows/ changes except that CODEOWNERS line. This is a new workflow folder, so no existing input or output label is renamed.",
+  "base_branch_files": {
+    ".github/CODEOWNERS": "workflows/sequence-analysis/short-read-quality-control/ @example-contributor\n",
+    ".github/PULL_REQUEST_TEMPLATE.md": "## Contributor checklist\n\n- [ ] The workflow folder contains a `.dockstore.yml` whose authors match the workflow creator metadata and whose workflow and test paths resolve.\n- [ ] The workflow declares a `license` that permits unrestricted educational and commercial use.\n- [ ] The workflow folder has an entry in `.github/CODEOWNERS`.\n- [ ] README and CHANGELOG are present and updated, and the changelog entry heading carries a version and a date.\n- [ ] Input, output, and workflow names are human-readable, and test output names match the workflow output labels exactly.\n- [ ] Test data larger than 100 KB is referenced by a durable Zenodo URL.\n",
+    ".github/copilot-instructions.md": "Workflow review requirements on this base branch are the ones carried by the reviewer checklist bundled with the review command. This file is unchanged in the pull request, so the base-branch policy and the proposed policy are identical and there is no conflict to escalate.\n"
+  },
+  "checks": [
+    {
+      "name": "workflow lint (planemo workflow_lint --iwc)",
+      "status": "completed",
+      "conclusion": "success",
+      "detail": "The workflow `release` field 0.1 matches the changelog entry heading [0.1]."
+    },
+    {
+      "name": "workflow test (planemo test)",
+      "status": "completed",
+      "conclusion": "success",
+      "detail": "1 test, 1 passed."
+    }
+  ]
+}

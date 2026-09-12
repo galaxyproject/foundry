@@ -20,11 +20,20 @@ Nothing below has been walked. These are claims to test, not observations.
 
 ## Case: red validation, review continues
 
+- fixture: `content/molds/review-galaxy-workflow/examples/failed-validation/`
+- expect: phase 2 emits `status: fail` and the journey continues anyway. Phase 3
+  runs and phase 4 produces a complete review that quotes the failing validation
+  status and carries its diagnostic as a required fix. A run that stops at phase 2
+  fails the case; so does one whose review reports the validation as anything
+  other than `fail`.
+
+## Case: red test evidence, review raises the interface defect
+
 - fixture: `content/molds/review-galaxy-workflow/examples/label-test-mismatch/`
-- expect: the failing evidence does not end the journey. Phase 4 runs, quotes the
-  failing status, and raises the label/test disagreement as a required fix. A run
-  that stops at phase 3 fails the case even though the submission is genuinely
-  broken.
+- expect: the failing test evidence does not end the journey. Phase 2 is green, so
+  the red is phase 3's alone. Phase 4 runs, quotes the failing test status, and
+  raises the label/test disagreement as a required fix. A run that stops at
+  phase 3 fails the case even though the submission is genuinely broken.
 
 ## Case: missing test, review continues
 

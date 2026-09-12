@@ -1,6 +1,6 @@
 ---
 name: review-galaxy-workflow
-description: "Apply the pinned upstream IWC review policy to one Galaxy workflow or PR and emit one evidenced advisory Markdown review."
+description: "Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review."
 ---
 
 # review-galaxy-workflow
@@ -9,7 +9,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## When To Use
 
-- Apply the pinned upstream IWC review policy to one Galaxy workflow or PR and emit one evidenced advisory Markdown review.
+- Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review.
 
 ## Inputs
 
@@ -19,14 +19,14 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - Read artifact `galaxy-workflow-validation-result`. Produced by `validate-galaxy-workflow`. Terminal structural validation handoff from validate-galaxy-workflow: the command run, its status, and its diagnostics. Cite it; never restate a validation claim this Mold did not receive.
 - Read artifact `workflow-test-result`. Produced by `run-workflow-test`. Planemo execution handoff from run-workflow-test, including its honest test-definition-missing and not-run states. Cite its status; never infer a passing test from inspection.
 - Read artifact `galaxy-workflow-test`. Optional; absence is allowed and must be reported honestly. Produced by `implement-galaxy-workflow-test`, `mature-galaxy-workflow-for-iwc`. The workflow's test file when one exists; absent when the submission ships no test, which is a reviewable finding rather than an error.
-- Read artifact `galaxy-workflow-pr-context`. Optional; absence is allowed and must be reported honestly. Harness-supplied pull-request context: repository, PR number, title and body, base and head SHAs, changed-file list, base-to-head diff, and the complete relevant files.
-- Read artifact `iwc-dockstore-metadata`. Optional; absence is allowed and must be reported honestly. Produced by `mature-galaxy-workflow-for-iwc`. The submission's Dockstore metadata when present; it names the primary Galaxy descriptor under the IWC-Lab repository profile, which may be a gxformat2 file.
+- Read artifact `galaxy-workflow-pr-context`. Optional; absence is allowed and must be reported honestly. Harness-supplied pull-request context: repository, pull request number, title and body, base and head SHAs, changed-file list, base-to-head diff, and the complete relevant files.
+- Read artifact `iwc-dockstore-metadata`. Optional; absence is allowed and must be reported honestly. Produced by `mature-galaxy-workflow-for-iwc`. The submission's `.dockstore.yml` when present; it names the primary Galaxy descriptor under the IWC-Lab repository profile, which may be a `.gxwf.yml` file.
 - Read artifact `iwc-comparison-notes`. Optional; absence is allowed and must be reported honestly. Produced by `compare-against-iwc-exemplar`. Existing structural diff from compare-against-iwc-exemplar when a Foundry run already produced one. Consume it; never rerun that comparison inside this Mold.
 - Read artifact `open-requirements-ledger`. Optional; absence is allowed and must be reported honestly. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger when a Foundry run supplied one; read-only here, used to report unresolved intent and surrendered work.
 
 ## Outputs
 
-- Write artifact `galaxy-workflow-review` as `galaxy-workflow-review.md`. Format: `markdown`. Advisory IWC-policy review of one Galaxy workflow PR subject, citing structural validation, Planemo test evidence, and optional Foundry context.
+- Write artifact `galaxy-workflow-review` as `galaxy-workflow-review.md`. Format: `markdown`. Advisory IWC-policy review of one Galaxy workflow pull-request subject, citing structural validation, Planemo test evidence, and optional Foundry context.
 
 ## Required Tools
 
@@ -64,8 +64,8 @@ Review one Galaxy workflow submission under the pinned upstream IWC review polic
 #### 2. Select the repository profile
 
 - **IWC**: the primary descriptor is the native `.ga` workflow; apply the upstream checklist to it.
-- **IWC-Lab**: the primary Galaxy descriptor is the one named by the submission's Dockstore metadata, which may be a gxformat2 file. Apply the same descriptor-level checks to that file.
-- When no Dockstore metadata was supplied, state which profile was assumed and why.
+- **IWC-Lab**: the primary Galaxy descriptor is the one named by the submission's `.dockstore.yml`, which may be a `.gxwf.yml` file. Apply the same descriptor-level checks to that file.
+- When no `.dockstore.yml` was supplied, state which profile was assumed and why.
 
 #### 3. Apply the pinned IWC policy
 

@@ -17,8 +17,10 @@
     "converted_path": null,
     "validation": {
       "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
-      "status": "valid",
-      "diagnostics": []
+      "status": "invalid",
+      "diagnostics": [
+        "steps.aggregate_reports: tool_version '1.24.1' does not match the version encoded in tool_id 'toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.24.1+galaxy0' ('1.24.1+galaxy0')."
+      ]
     }
   },
   "workflow_inputs": [
@@ -84,7 +86,7 @@
       "label": null,
       "type": "tool",
       "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.24.1+galaxy0",
-      "tool_version": "1.24.1+galaxy0",
+      "tool_version": "1.24.1",
       "tool_shed_repository": {
         "name": "multiqc",
         "owner": "iuc",
@@ -165,7 +167,7 @@
       "job_path": "galaxy-workflow.gxwf-tests.yml",
       "expected_outputs": [
         {
-          "id": "multiqc_html_report",
+          "id": "MultiQC Report",
           "path": null,
           "url": null,
           "filetype": null,
@@ -178,5 +180,11 @@
       "provenance": "sibling tests file galaxy-workflow.gxwf-tests.yml"
     }
   ],
-  "warnings": []
+  "warnings": [
+    {
+      "code": "tool-version-mismatch",
+      "message": "Recorded verbatim: the step's tool_version omits the +galaxyN revision suffix carried by its tool_id.",
+      "path": "steps.aggregate_reports.tool_version"
+    }
+  ]
 }

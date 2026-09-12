@@ -1,8 +1,12 @@
 class: GalaxyWorkflow
 label: Short Read Quality Control
-doc: Run FastQC over paired sequencing reads and aggregate the results into one MultiQC report.
+doc: This workflow runs FastQC on one short-read sequencing dataset and aggregates the report with MultiQC to generate a single quality-control summary.
 license: MIT
 release: "0.1"
+creator:
+  - class: Person
+    identifier: https://orcid.org/0000-0002-1825-0097
+    name: Example Contributor
 inputs:
   - id: Sequencing Reads
     type: data
@@ -11,4 +15,18 @@ inputs:
 outputs:
   - id: MultiQC Report
     outputSource: aggregate_reports/html_report
-steps: []
+steps:
+  - id: quality_control
+    tool_id: toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy1
+    tool_version: "0.74+galaxy1"
+    in:
+      input_file: Sequencing Reads
+  - id: aggregate_reports
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.24.1+galaxy0
+    tool_version: "1.24.1+galaxy0"
+    in:
+      results_0|software_cond|output_0|input: quality_control/text_file
+    state:
+      results:
+        - software_cond:
+            software: fastqc
