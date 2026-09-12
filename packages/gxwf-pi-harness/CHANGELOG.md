@@ -1,5 +1,12 @@
 # @galaxy-foundry/gxwf-pi-harness
 
+## 0.3.0
+
+### Minor Changes
+
+- [#498](https://github.com/galaxyproject/foundry/pull/498) [`4e910ae`](https://github.com/galaxyproject/foundry/commit/4e910ae19c1d9febf0b2fa8c0f1ba2b911a89f68) Thanks [@jmchilton](https://github.com/jmchilton)! - Allow Molds to declare optional input and output artifacts. Cast provenance now preserves
+  optionality, and the harness permits declared optional outputs to be absent without failing a run.
+
 ## 0.2.0
 
 ### Minor Changes

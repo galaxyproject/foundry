@@ -1,5 +1,12 @@
 # foundry-site
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`4e910ae`](https://github.com/galaxyproject/foundry/commit/4e910ae19c1d9febf0b2fa8c0f1ba2b911a89f68)]:
+  - @galaxy-foundry/gxwf-foundry-note-schema@0.2.0
+
 ## 0.0.3
 
 ### Patch Changes
