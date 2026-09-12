@@ -27,6 +27,13 @@ export {
 } from "./collections.js";
 
 export {
+  GALAXY_SLUG_ALIASES,
+  collectionPrefix,
+  readGalaxyContent,
+  type SlugAliases,
+} from "./addressing.js";
+
+export {
   DEFINITIONS,
   KINDS,
   KINDS_BY_NAME,

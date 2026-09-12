@@ -200,6 +200,9 @@ importers:
       '@galaxy-foundry/cast':
         specifier: ^0.12.2
         version: 0.12.2(zod@4.4.3)
+      '@galaxy-foundry/content-reader':
+        specifier: ^0.3.1
+        version: 0.3.1(zod@4.4.3)
       '@galaxy-foundry/kind-manifest':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -324,6 +327,9 @@ importers:
       '@fontsource/atkinson-hyperlegible':
         specifier: ^5.2.8
         version: 5.2.8
+      '@galaxy-foundry/content-reader':
+        specifier: ^0.3.1
+        version: 0.3.1(zod@4.4.3)
       '@galaxy-foundry/gxwf-foundry':
         specifier: workspace:*
         version: link:../packages/gxwf-foundry
