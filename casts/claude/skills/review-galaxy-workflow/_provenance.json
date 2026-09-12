@@ -1,0 +1,210 @@
+{
+  "provenance_schema_version": 4,
+  "cast_target": "claude",
+  "mold": {
+    "name": "review-galaxy-workflow",
+    "path": "content/molds/review-galaxy-workflow/index.md",
+    "revision": 1,
+    "content_hash": "26e864cdf5684e1288d42cd40217145f0f880d4de50e85775f9c1ad9f4e976ef",
+    "commit": "cbbf7c7ae54736cfd054621709b02fdaac9e9e9f"
+  },
+  "cast_at": "2026-09-12T18:51:07.869Z",
+  "refs": [
+    {
+      "kind": "prompt",
+      "mode": "verbatim",
+      "ref": "[[workflow-pr-review-command]]",
+      "src": "content/prompts/iwc/workflow-pr-review-command/upstream.prompt",
+      "dst": "references/prompts/workflow-pr-review-command.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "corpus-observed",
+      "purpose": "Apply the pinned upstream IWC review command as the primary checklist and procedure, adapting repository terminology without changing policy.",
+      "license": "MIT",
+      "license_file": "LICENSES/iwc.LICENSE",
+      "src_hash": "fc8b084d829491f31d3ec0ed026340f4deab164bd0165dd42d1eaf61de9f82d8",
+      "dst_hash": "fc8b084d829491f31d3ec0ed026340f4deab164bd0165dd42d1eaf61de9f82d8",
+      "source": "deterministic",
+      "license_file_hash": "f817504ef73a0b04fca81604e214ed2bdb0d5b96b8f5cf6a8c5bba7b787c98f0"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-testability-design]]",
+      "src": "content/research/galaxy-workflow-testability-design/index.md",
+      "dst": "references/notes/galaxy-workflow-testability-design.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Distinguish a genuine workflow-interface or test-addressing defect from a stylistic preference when a label and a test key disagree.",
+      "trigger": "When an input, promoted output, collection identifier, or workflow-output label does not agree with the supplied test.",
+      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-shortcuts-anti-patterns]]",
+      "src": "content/research/iwc-shortcuts-anti-patterns/index.md",
+      "dst": "references/notes/iwc-shortcuts-anti-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Recognize corpus-observed shortcuts so a finding cites an observed IWC anti-pattern rather than reviewer taste.",
+      "trigger": "When a structural choice looks like a shortcut and the finding needs corpus grounding before it is raised as required.",
+      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[iwc-test-data-conventions]]",
+      "src": "content/research/iwc-test-data-conventions/index.md",
+      "dst": "references/notes/iwc-test-data-conventions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Judge test labels, durable remote fixtures, creator identifiers, and companion-file naming against current IWC conventions.",
+      "trigger": "When assessing the submission's test file, test-data references, creator metadata, or release entry.",
+      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Read a supplied ledger's open and surrendered entries into the clearly labeled Foundry context section without treating their absence as an IWC failure.",
+      "trigger": "When the harness supplied an open-requirements ledger and the review needs to report unresolved intent or surrendered work as Foundry context.",
+      "verification": "Run the with-foundry-context and without-foundry-context scenarios; confirm the labeled section appears in one, is omitted or explicitly stated absent in the other, and that the IWC checklist verdicts are identical between them.",
+      "src_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "dst_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-galaxy-workflow]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryGalaxyWorkflowSchema",
+      "dst": "references/schemas/summary-galaxy-workflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Read the supplied workflow summary rather than re-deriving inputs, outputs, tool pins, defaults, connections, labels, and existing tests.",
+      "license": "MIT",
+      "src_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "dst_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-review",
+        "kind": "markdown",
+        "default_filename": "galaxy-workflow-review.md",
+        "description": "Advisory IWC-policy review of one Galaxy workflow PR subject, citing structural validation, Planemo test evidence, and optional Foundry context."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "starting-galaxy-workflow",
+        "description": "The normalized concrete gxformat2 workflow under review, as emitted by [[summarize-galaxy-workflow]]; the reviewed subject in the standard pipeline.",
+        "producers": [
+          "summarize-galaxy-workflow"
+        ]
+      },
+      {
+        "id": "galaxy-workflow",
+        "description": "The equivalent concrete gxformat2 workflow when a Foundry run supplies one directly instead of routing through the summarizer.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      },
+      {
+        "id": "summary-galaxy-workflow",
+        "description": "Structured summary of the reviewed workflow: inputs, outputs, tool ids and versions, defaults, connections, labels, annotations, and existing tests. Read it instead of re-extracting them.",
+        "inherited_schema": "[[summary-galaxy-workflow]]",
+        "producers": [
+          "summarize-galaxy-workflow"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-validation-result",
+        "description": "Terminal structural validation handoff from [[validate-galaxy-workflow]]: the command run, its status, and its diagnostics. Cite it; never restate a validation claim this Mold did not receive.",
+        "producers": [
+          "validate-galaxy-workflow"
+        ]
+      },
+      {
+        "id": "workflow-test-result",
+        "description": "Planemo execution handoff from [[run-workflow-test]], including its honest test-definition-missing and not-run states. Cite its status; never infer a passing test from inspection.",
+        "producers": [
+          "run-workflow-test"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-test",
+        "description": "The workflow's test file when one exists; absent when the submission ships no test, which is a reviewable finding rather than an error.",
+        "optional": true,
+        "producers": [
+          "implement-galaxy-workflow-test",
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-pr-context",
+        "description": "Harness-supplied pull-request context: repository, PR number, title and body, base and head SHAs, changed-file list, base-to-head diff, and the complete relevant files.",
+        "optional": true
+      },
+      {
+        "id": "iwc-dockstore-metadata",
+        "description": "The submission's Dockstore metadata when present; it names the primary Galaxy descriptor under the IWC-Lab repository profile, which may be a gxformat2 file.",
+        "optional": true,
+        "producers": [
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      },
+      {
+        "id": "iwc-comparison-notes",
+        "description": "Existing structural diff from [[compare-against-iwc-exemplar]] when a Foundry run already produced one. Consume it; never rerun that comparison inside this Mold.",
+        "optional": true,
+        "producers": [
+          "compare-against-iwc-exemplar"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]] when a Foundry run supplied one; read-only here, used to report unresolved intent and surrendered work.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology"
+        ]
+      }
+    ]
+  }
+}

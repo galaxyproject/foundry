@@ -7,8 +7,8 @@ tags:
   - tool/planemo
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 6
+revised: 2026-09-12
+revision: 7
 summary: "Execute a workflow's tests via Planemo; emit structured pass/fail and outputs."
 related_notes:
   - "[[tests-format]]"
@@ -16,7 +16,7 @@ output_artifacts:
   - id: workflow-test-result
     kind: json
     default_filename: workflow-test-result.json
-    description: "Structured pass/fail plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output."
+    description: "Structured status plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output. Also the faithful handoff when no test exists or none could be run."
 references:
   - kind: schema
     ref: "[[tests-format]]"
@@ -71,11 +71,12 @@ Execute an assembled workflow's test file via [[planemo]] and emit a structured 
 
 ## Sequence
 
+0. **Establish the test definition.** Locate the workflow's test file before anything else. If none can be found, do not abort: emit `workflow-test-result.json` with `status: test-definition-missing`, the paths searched, and the workflow it was searched for, then stop. Emit `status: not-run` plus a `not_run_reason` instead when a test exists but cannot be executed — a static [[validate-tests]] failure, missing test data, an unavailable Galaxy, an uninstallable tool, a timeout, or a checkout the caller has not confirmed as trusted. A downstream consumer needs to know that nothing ran; it must never have to infer it from a missing file.
 1. **Validate before running.** When a test file is present, run [[validate-tests]] for the static schema and workflow-label checks first. A run is expensive; do not spend one on a test file that fails static validation.
 2. **Pick the Galaxy mode.** Run against a Planemo-managed Galaxy or an existing/external Galaxy. **Planemo-managed** is the default and needs no pre-provisioned server: `planemo test` bootstraps its own Galaxy and installs the workflow's tools from the Tool Shed/conda — so the absence of a running Galaxy is not a reason to skip the run. Use an existing/external Galaxy only when you deliberately want to target one (shared instance, pre-installed heavy tools/reference data, specific credentials). The real cost of the managed path is install/runtime weight (large tools or multi-GB reference databases), which is a deliberate deferral, not an impossibility. Record which mode was used, how tools, workflows, and test data were staged, and the URLs or API credentials a follow-up inspection would need. The choice and its consequences are guided by [[planemo-workflow-test-architecture]].
 3. **Do not pin a Galaxy version.** Leave `--galaxy_branch` off the command unless the user or the harness supplied a specific branch, and never guess a `release_*` value — Planemo's default targets the newest Galaxy, which is the only version guaranteed to understand every construct a freshly authored workflow can contain. If a branch was supplied, record it in the output so a later failure can be read against it.
 4. **Run and capture.** Drive `planemo test` with structured output enabled. Preserve the invocation id, history id, workflow id, the Planemo structured result, and any test-output artifact paths — these are the inputs the debug Mold consumes.
 5. **Classify on failure.** When the run exits non-zero or reports failed assertions, failed jobs, a failed invocation, missing outputs, or upload/staging problems, identify the observed failure modality and the single next reference surface to open: Planemo result, Galaxy job API, Galaxy invocation API, history contents, or the test assertion report. Use [[planemo-asserts-idioms]] to read assertion failures and [[galaxy-workflow-invocation-failure-reference]] to preserve invocation identifiers and state.
-6. **Hand off.** Emit the structured summary — green, or red with modality + captured artifacts + the named next surface — for [[debug-galaxy-workflow-output]].
+6. **Hand off.** Emit the structured summary carrying a `status` from the closed set `pass | fail | test-definition-missing | not-run` — green, or red with modality + captured artifacts + the named next surface — for [[debug-galaxy-workflow-output]]. A `test-definition-missing` or `not-run` result is never reported as a pass and never as a Planemo failure: neither carries a failure modality or a next reference surface, because nothing ran. A consumer must read those two states as *no runtime evidence*, not as a debug target.
 
 Keep this Mold's output a faithful record of what happened, not a diagnosis. Mislabeling a staging failure as an assertion failure here sends the debug pass to the wrong reference surface.

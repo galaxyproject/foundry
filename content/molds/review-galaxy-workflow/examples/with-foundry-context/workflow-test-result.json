@@ -1,0 +1,8 @@
+{
+  "status": "pass",
+  "planemo_result": { "tests": 1, "passed": 1, "failed": 0, "errors": 0 },
+  "galaxy_mode": "managed",
+  "invocation_id": "f2db41e1fa331b3e",
+  "history_id": "a799d38679e985db",
+  "artifacts": { "test_output_json": "planemo-test-report.json" }
+}

@@ -1,0 +1,14 @@
+class: GalaxyWorkflow
+label: Short Read Quality Control
+doc: Run FastQC over paired sequencing reads and aggregate the results into one MultiQC report.
+license: MIT
+release: "0.1"
+inputs:
+  - id: Sequencing Reads
+    type: data
+    format:
+      - fastqsanger
+outputs:
+  - id: MultiQC Report
+    outputSource: aggregate_reports/html_report
+steps: []

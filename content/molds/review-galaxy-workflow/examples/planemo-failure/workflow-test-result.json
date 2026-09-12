@@ -1,0 +1,11 @@
+{
+  "status": "fail",
+  "planemo_result": { "tests": 1, "passed": 0, "failed": 1, "errors": 0 },
+  "galaxy_mode": "managed",
+  "invocation_id": "d4e5f60718b1a2c3",
+  "history_id": "2c3d4e5f60710a1b",
+  "failure_modality": "assertion-failure",
+  "failure_detail": "Output 'MultiQC Report' did not contain expected text 'General Statistics'; the job succeeded and produced a 412-byte report.",
+  "next_reference_surface": "planemo-asserts-idioms",
+  "artifacts": { "test_output_json": "planemo-test-report.json" }
+}

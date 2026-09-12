@@ -4,11 +4,11 @@
   "mold": {
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
-    "revision": 6,
-    "content_hash": "ddce4858e472c7e4ff1cc74b48be4c18dffe9e732e254bd6e84c41aeab1eae75",
-    "commit": "92e924df540acbbf07b05f6f0d6a20cdf567e1b2"
+    "revision": 7,
+    "content_hash": "259675e41c65f7622049cc9ef5f64b7d9f7ac5edb005555a09045e747708218c",
+    "commit": "cbbf7c7ae54736cfd054621709b02fdaac9e9e9f"
   },
-  "cast_at": "2026-09-12T17:18:15.318Z",
+  "cast_at": "2026-09-12T18:51:07.891Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -117,7 +117,7 @@
         "id": "workflow-test-result",
         "kind": "json",
         "default_filename": "workflow-test-result.json",
-        "description": "Structured pass/fail plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output."
+        "description": "Structured status plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output. Also the faithful handoff when no test exists or none could be run."
       }
     ],
     "consumes": []

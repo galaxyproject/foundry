@@ -1,0 +1,18 @@
+topology_repair:
+  escalations: 1
+  cap: 5
+  open_history: [2, 1]
+entries:
+  - id: adapter-trimming-dropped
+    kind: dropped
+    status: surrendered
+    blocking: false
+    units: 1
+    because: "The source pipeline trimmed adapters before QC; no Galaxy step was wired for it and no exemplar settled the idiom."
+    raised_by: nextflow-summary-to-galaxy-data-flow
+  - id: multiqc-config-unpinned
+    kind: gap
+    status: open
+    blocking: false
+    because: "The MultiQC module config was left at tool default; the source supplied a custom config no input carries."
+    raised_by: nextflow-summary-to-galaxy-template

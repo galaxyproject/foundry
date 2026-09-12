@@ -1,0 +1,11 @@
+- doc: Aggregate FastQC output into a MultiQC report.
+  job:
+    Sequencing Reads:
+      class: File
+      location: https://zenodo.org/records/0000000/files/reads.fastqsanger
+      filetype: fastqsanger
+  outputs:
+    multiqc_html_report:
+      asserts:
+        has_text:
+          text: "General Statistics"

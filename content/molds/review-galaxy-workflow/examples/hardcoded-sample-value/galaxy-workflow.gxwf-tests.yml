@@ -1,0 +1,11 @@
+- doc: Call variants for the tutorial sample.
+  job:
+    Aligned Reads:
+      class: File
+      location: https://zenodo.org/records/0000000/files/sample.bam
+      filetype: bam
+  outputs:
+    Variant Calls:
+      asserts:
+        has_text:
+          text: "#CHROM"
