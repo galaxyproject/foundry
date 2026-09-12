@@ -34,17 +34,6 @@ related_notes:
 
 A post-construction review journey. An existing Galaxy workflow — normally the subject of a pull request — is summarized, structurally validated, and actually run, and only then reviewed against the pinned upstream IWC policy. The output is one advisory Markdown review.
 
-The name deliberately carries no source-to-target arrow: review produces a report, not a new workflow format. `lifecycle/review` is the purpose; `source/galaxy` is what it reads.
-
-## Invocation and trust
-
-The primary invocation is a pull request plus a local worktree parked at the reviewed head. Before anything runs, the harness resolves and records the repository, the pull request, the base and head SHAs, the workflow directory, the primary descriptor, the matching test file, and the local worktree commit.
-
-Two gates sit ahead of phase 3, and both stop the run rather than degrading it:
-
-- **Exact head.** The worktree commit must equal the reviewed head SHA. A mismatch stops the run before any test executes, because test evidence from one revision attached to a review of another is worse than no evidence.
-- **Explicit trust.** Phase 3 runs the checkout's workflow through Planemo, which means executing code from the pull request. The caller must explicitly confirm the checkout is trusted, and that decision is recorded. There is no privileged hosted execution of arbitrary fork heads in v1; a reviewer who wants to read an untrusted pull request can do so without this Pipeline.
-
 ## Why four phases
 
 Phase 4 is the only new Mold. The three ahead of it already exist and already produce exactly the evidence a review needs, so the pipeline reuses them rather than teaching the reviewer to re-derive their answers:
