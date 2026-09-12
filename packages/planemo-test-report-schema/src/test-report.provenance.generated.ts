@@ -6,7 +6,6 @@ export const planemoTestReportProvenance = {
   "schema_version": "0.1",
   "source": {
     "note": "Released on PyPI; includes merged PR galaxyproject/planemo#1636.",
-    "release": "0.75.45",
     "repo": "galaxyproject/planemo"
   }
 } as const;

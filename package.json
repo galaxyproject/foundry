@@ -34,6 +34,7 @@
     "packages-typecheck": "pnpm --filter @galaxy-foundry/gxwf-foundry-note-schema build && pnpm --filter @galaxy-foundry/summarize-nextflow build && pnpm --filter @galaxy-foundry/gxwf-foundry build && pnpm --filter @galaxy-foundry/planemo-test-report-schema build && pnpm --filter @galaxy-foundry/planemo-cli-meta build && pnpm --filter @galaxy-foundry/gxwf-pi-harness build && pnpm --filter \"./packages/*\" typecheck",
     "sync:planemo-cli": "tsx scripts/sync-planemo-cli.ts",
     "check:planemo-cli": "tsx scripts/sync-planemo-cli.ts --check",
+    "check:planemo-pin": "tsx scripts/check-planemo-pin.ts",
     "format": "prettier --check 'packages/*/src/**/*.ts' 'packages/*/test/**/*.ts' 'tests/**/*.ts' 'scripts/**/*.{ts,mjs}'",
     "format-fix": "prettier --write 'packages/*/src/**/*.ts' 'packages/*/test/**/*.ts' 'tests/**/*.ts' 'scripts/**/*.{ts,mjs}'",
     "lint": "eslint packages/*/src/ packages/*/test/ tests/ scripts/",

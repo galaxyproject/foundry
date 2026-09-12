@@ -22,8 +22,11 @@ describe("planemoCliMeta", () => {
 });
 
 describe("planemoCliMetaProvenance", () => {
-  it("pins to a galaxyproject/planemo release", () => {
+  // `source` names where the metadata came from; the version is whatever planemo reported
+  // when the sync ran. Agreement with the intended pin is checked by `make check-planemo-pin`,
+  // which can see the note this package cannot.
+  it("records the planemo it was generated from", () => {
     expect(planemoCliMetaProvenance.source.repo).toBe("galaxyproject/planemo");
-    expect(planemoCliMetaProvenance.source.release).toMatch(/^\d+\.\d+\.\d+/);
+    expect(planemoCliMetaProvenance.planemo_version).toMatch(/^\d+\.\d+\.\d+/);
   });
 });
