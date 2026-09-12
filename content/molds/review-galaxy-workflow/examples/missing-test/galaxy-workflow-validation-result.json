@@ -1,0 +1,12 @@
+{
+  "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
+  "workflow_path": "starting-galaxy-workflow.gxwf.yml",
+  "status": "pass",
+  "diagnostics": [],
+  "residual_runtime_risks": [
+    {
+      "risk": "No runtime evidence exists for this workflow because it ships no test.",
+      "settled_by": "workflow-test-result"
+    }
+  ]
+}

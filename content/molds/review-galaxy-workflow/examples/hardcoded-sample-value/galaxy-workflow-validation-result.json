@@ -1,0 +1,12 @@
+{
+  "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
+  "workflow_path": "starting-galaxy-workflow.gxwf.yml",
+  "status": "pass",
+  "diagnostics": [],
+  "residual_runtime_risks": [
+    {
+      "risk": "A literal filesystem path in tool_state validates statically but is not portable to another Galaxy.",
+      "settled_by": "workflow-test-result"
+    }
+  ]
+}

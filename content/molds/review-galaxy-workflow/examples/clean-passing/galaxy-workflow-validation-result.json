@@ -1,0 +1,12 @@
+{
+  "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
+  "workflow_path": "starting-galaxy-workflow.gxwf.yml",
+  "status": "pass",
+  "diagnostics": [],
+  "residual_runtime_risks": [
+    {
+      "risk": "Remote test fixture availability is not checked by static validation.",
+      "settled_by": "workflow-test-result"
+    }
+  ]
+}

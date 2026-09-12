@@ -1,0 +1,8 @@
+{
+  "source": { "format": "gxformat2", "converted_from": null },
+  "workflow": { "label": "Short Read Quality Control", "license": "MIT", "release": "0.1" },
+  "inputs": [{ "id": "Sequencing Reads", "type": "data", "formats": ["fastqsanger"] }],
+  "outputs": [{ "id": "MultiQC Report", "source": "aggregate_reports/html_report" }],
+  "steps": [],
+  "tests": { "present": false, "path": null, "cases": 0 }
+}

@@ -208,6 +208,21 @@ Entry is deliberately an existing workflow rather than a construction run: a wor
 
 Two contract gaps are open. Phases 3 and 4 declare no `input_artifacts`, so nothing in the artifact graph binds them to phase 2's output — the binding is a `harness_notes` obligation judged by the pipeline's `eval.md`. And galaxyproject/foundry#491 is adding a result artifact to `validate-galaxy-workflow`, which narrows the evidence gap without closing the binding one.
 
+### GALAXY WORKFLOW REVIEW
+
+The Foundry's first `lifecycle/review` journey, and the first pipeline whose output is a report rather than a workflow. An existing Galaxy workflow — normally the subject of a pull request — is summarized, structurally validated, and actually run, and only then reviewed against the pinned upstream IWC review command. The name carries no source-to-target arrow because review emits advisory findings, not a new workflow format.
+
+1. `summarize-galaxy-workflow` — normalize the descriptor and inventory the interface, steps, labels, and existing tests, so the reviewer cites a summary instead of re-extracting one.
+2. `validate-galaxy-workflow` — terminal structural validation, now emitting a citable `galaxy-workflow-validation-result` handoff rather than leaving its findings as prose.
+3. `run-workflow-test` — execute the test via Planemo and hand on an honest result, including the `test-definition-missing` and `not-run` states that keep a review possible when nothing could run.
+4. `review-galaxy-workflow` — apply the pinned IWC policy item by item, citing the preceding evidence wherever it answers a checklist question, and emit one advisory recommendation.
+
+Only phase 4 is new. The three ahead of it already produced exactly the evidence a review needs; the two small additive changes to phases 2 and 3 exist so that evidence is *citable* rather than merely available.
+
+Two harness-owned gates sit ahead of phase 3, and both stop the run rather than degrading it: the local worktree commit must equal the reviewed head SHA, and the caller must explicitly confirm the checkout is trusted for Planemo execution. There is no privileged hosted execution of arbitrary fork heads in v1. A red phase 2 or phase 3, by contrast, does *not* stop the journey — losing the review because the evidence was bad would discard the finding a reviewer most needs.
+
+The pipeline is read-only end to end. It cannot approve, comment, push, mark ready, or merge, and it cannot edit the workflow it reviews. An accepted edit belongs to the `GALAXY WORKFLOW MATURATION` harness and is routed through `apply-galaxy-workflow-changeset` where applicable.
+
 ## Cross-pipeline observations
 
 - **Source-specific (one per source)**: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`, `summarize-galaxy-workflow`. Paper and interview share the `freeform-summary` handoff; Nextflow, CWL, and Galaxy-as-source keep structured source-specific schemas (`summarize-galaxy-workflow` reads an existing Galaxy workflow for the edit pipeline).
@@ -221,7 +236,7 @@ Two contract gaps are open. Phases 3 and 4 declare no `input_artifacts`, so noth
   - Per-step (CWL): `summarize-cwl-tool`, `implement-cwl-tool-step`.
   - Validate: `validate-galaxy-workflow`, `validate-cwl`. (Per-step Galaxy validation moved into `advance-galaxy-draft-step` via `gxwf draft-validate --concrete`.)
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
-- **Lifecycle (post-construction)**: `GALAXY WORKFLOW MATURATION` is the first journey that needed only one new Mold — `summarize-galaxy-workflow` plus the validate/run tail are reused unchanged, and the checklist pass (`mature-galaxy-workflow-for-iwc`, landed by #496) is the single addition. A lifecycle pipeline needs no new spine; it needs one action and a reason to run the existing tail afterwards.
+- **Lifecycle (post-construction)**: `GALAXY WORKFLOW MATURATION` and `GALAXY WORKFLOW REVIEW` each needed exactly one new Mold — `summarize-galaxy-workflow` plus the validate/run tail are reused unchanged in both. Maturation adds a corrective pass (`mature-galaxy-workflow-for-iwc`, landed by #496) and runs the tail *afterwards*, to check its own edits; review adds a Mold that only reads (`review-galaxy-workflow`) and runs the tail *first*, as evidence producers. A lifecycle pipeline needs no new spine; it needs one action and a reason to run the existing tail on one side of it.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
 - **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` derives fixtures from a paper-origin `freeform-summary`; `nextflow-to-test-data` and `cwl-to-test-data` resolve the source's own declared fixtures (`test_fixtures` / `tests[]`) into `test-data-refs`. Each is the first leg of its pipeline's `test-data-resolution` chain, falling through to `find-test-data` (search) then user-supplied data. Interview starts skip directly to `find-test-data` / user-supplied data until a real interview-specific fixture derivation Mold exists.
