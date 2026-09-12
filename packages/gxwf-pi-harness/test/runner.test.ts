@@ -255,6 +255,47 @@ describe("runPiSkill", () => {
     expect(record.artifacts[0]?.status).toBe("missing");
   });
 
+  test("permits a declared optional artifact to be absent", async () => {
+    const root = fixtureRoot();
+    const record = await runPiSkill(
+      {
+        skillDir: makeSkill(root),
+        prompt: "Do the work.",
+        expectedArtifacts: [{ id: "optional-output", path: "optional.json", optional: true }],
+        runDir: path.join(root, "run"),
+        provider: "test-provider",
+        model: "test-model",
+      },
+      fakeDependencies(() => undefined),
+    );
+
+    expect(record.status).toBe("passed");
+    expect(record.artifacts[0]).toEqual(
+      expect.objectContaining({ id: "optional-output", status: "missing" }),
+    );
+  });
+
+  test("reads optionality from a cast skill's provenance", () => {
+    const root = fixtureRoot();
+    const skillDir = makeSkill(root);
+    writeFileSync(
+      path.join(skillDir, "_provenance.json"),
+      JSON.stringify({
+        artifacts: {
+          produces: [
+            { id: "required-output", default_filename: "required.json" },
+            { id: "optional-output", default_filename: "optional.json", optional: true },
+          ],
+        },
+      }),
+    );
+
+    expect(expectedArtifactsFromSkill(skillDir)).toEqual([
+      { id: "required-output", path: "required.json" },
+      { id: "optional-output", path: "optional.json", optional: true },
+    ]);
+  });
+
   test("links an explicit pi-test-auth store only for the lifetime of a local worker", async () => {
     const root = fixtureRoot();
     const authDir = path.join(root, "pi-test-auth");

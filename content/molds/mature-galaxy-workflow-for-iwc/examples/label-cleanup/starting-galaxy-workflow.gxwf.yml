@@ -1,0 +1,12 @@
+class: GalaxyWorkflow
+label: short_read_qc
+doc: This workflow performs quality control on sequencing reads to generate an HTML report.
+inputs:
+  - id: raw_reads
+    type: data
+    format:
+      - fastqsanger
+outputs:
+  - id: multiqc_html_report
+    outputSource: quality_control/report
+steps: []

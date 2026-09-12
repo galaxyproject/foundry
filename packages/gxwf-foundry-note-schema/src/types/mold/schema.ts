@@ -13,6 +13,7 @@ const outputArtifact = z
     kind: z.enum(["json", "markdown", "yaml", "text", "other"]),
     default_filename: z.string().min(1),
     schema: z.string().regex(WIKI_LINK_RE).optional(),
+    optional: z.boolean().optional(),
     description: z.string().min(20),
   })
   .strict();
@@ -23,6 +24,7 @@ const inputArtifact = z
     // Inputs sharing a role are alternatives — a source-agnostic Mold names one role
     // once per source flavor, and any one flavor satisfies it.
     role: artifactId.optional(),
+    optional: z.boolean().optional(),
     description: z.string().min(20),
   })
   .strict();

@@ -116,6 +116,35 @@ describe("validateData (per-file)", () => {
     expect(msg).toMatch(/output_artifacts\[\]\.schema/);
   });
 
+  it("accepts optional Mold input and output artifacts", () => {
+    const r = validateData(
+      baseRequired({
+        type: "mold",
+        tags: ["target/galaxy"],
+        name: "optional-artifacts",
+        axis: "generic",
+        input_artifacts: [
+          {
+            id: "optional-input",
+            optional: true,
+            description: "Additional evidence used only when it is available.",
+          },
+        ],
+        output_artifacts: [
+          {
+            id: "optional-output",
+            kind: "markdown",
+            default_filename: "optional.md",
+            optional: true,
+            description: "A companion report emitted only when evidence supports it.",
+          },
+        ],
+      }),
+      schema,
+    );
+    expect(r.errors).toEqual([]);
+  });
+
   it("rejects pipeline missing phases", () => {
     const r = validateData(
       baseRequired({ type: "pipeline", tags: ["target/galaxy"], title: "X" }),
@@ -2194,6 +2223,38 @@ describe("validateDirectory (cross-file)", () => {
       expect(r.errors).toBe(0);
     });
     expect(captured).toMatch(/input_artifact 'summary-x' has no prior phase producing it/);
+  });
+
+  it("does not warn when an optional pipeline input has no prior producer", () => {
+    writeFm(path.join(dir, "molds/optional-consumer/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["target/galaxy"],
+        name: "optional-consumer",
+        axis: "generic",
+        input_artifacts: [
+          {
+            id: "optional-context",
+            optional: true,
+            description: "Additional context used only when a prior phase supplies it.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "pipelines/optional-input/index.md"), {
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "Optional Input",
+        phases: [{ mold: "[[optional-consumer]]" }],
+      }),
+    });
+
+    const captured = capturingStdout(() => {
+      const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+      expect(r.errors).toBe(0);
+    });
+    expect(captured).not.toMatch(/optional-context.*no prior phase producing/);
   });
 
   const writeRoleFixture = (pipelinePhases: unknown[]) => {

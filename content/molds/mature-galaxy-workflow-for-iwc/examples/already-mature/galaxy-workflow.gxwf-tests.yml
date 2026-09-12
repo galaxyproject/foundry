@@ -1,0 +1,7 @@
+- doc: Existing regression case
+  job:
+    Raw reads:
+      class: File
+      path: test-data/reads.fastq
+      filetype: fastqsanger
+  outputs: {}

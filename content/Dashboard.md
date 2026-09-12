@@ -18,6 +18,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[mature-galaxy-workflow-for-iwc]] | Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set. | draft | 2026-09-10 | 1 |
 | [[summarize-nextflow]] | Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds. | reviewed | 2026-09-08 | 15 |
 | [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-08-29 | 7 |
 | [[report-foundry-run-feedback]] | Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts. | draft | 2026-08-25 | 1 |
@@ -173,8 +174,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only. | draft | 2026-09-10 | 4 |
 | [[summary-nextflow]] | JSON Schema for the structured summary emitted by the summarize-nextflow Mold. | draft | 2026-09-08 | 11 |
-| [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only. | draft | 2026-08-04 | 3 |
 | [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-08-03 | 2 |
 | [[planemo-test-report]] | JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo. | draft | 2026-07-20 | 3 |
 | [[summary-galaxy-workflow]] | JSON Schema for the structured summary emitted by the summarize-galaxy-workflow Mold. | draft | 2026-07-01 | 1 |

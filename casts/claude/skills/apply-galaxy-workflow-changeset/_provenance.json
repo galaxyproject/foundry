@@ -6,9 +6,9 @@
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 3,
     "content_hash": "82d8e6e440fc48fdb4e7c5a5e25591ecc8e8a248ea03cc950df5096256656b62",
-    "commit": "351623a6d3e96e9bdee421a3ef61df4306489e32"
+    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
   },
-  "cast_at": "2026-09-08T18:03:18.506Z",
+  "cast_at": "2026-09-10T20:38:30.814Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -120,6 +120,7 @@
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
           "nextflow-summary-to-galaxy-data-flow",
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",

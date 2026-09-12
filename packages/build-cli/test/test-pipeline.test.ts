@@ -28,7 +28,7 @@ function writeSkill(
   root: string,
   name: string,
   consumes: string[],
-  produces: Array<{ id: string; default_filename: string }>,
+  produces: Array<{ id: string; default_filename: string; optional?: boolean }>,
 ): void {
   const skillDir = path.join(root, "casts", "claude", "skills", name);
   mkdirSync(skillDir, { recursive: true });
@@ -214,6 +214,55 @@ test("runs a linear prefix in fresh workers with declared artifact handoffs", as
   const written = JSON.parse(readFileSync(path.join(runDir, "run.json"), "utf8"));
   expect(written.run_id).toBe("pipeline-run-id");
   expect(written.through_phase).toBe(2);
+});
+
+test("does not fail promotion when an optional output is absent", async () => {
+  const root = fixtureRepo();
+  writeSkill(
+    root,
+    "summarize",
+    [],
+    [
+      { id: "summary", default_filename: "summary.json" },
+      { id: "unused", default_filename: "unused.txt", optional: true },
+    ],
+  );
+
+  const record = await runLinearPipeline(
+    {
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "1",
+      trials: 1,
+      runDir: path.join(root, "runs", "optional-output"),
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    },
+    {
+      runSkill: async (options) => {
+        const workspace = path.join(options.runDir, "workspace");
+        mkdirSync(workspace, { recursive: true });
+        writeFileSync(path.join(workspace, "summary.json"), "summary");
+        const worker = fakeRecord(options, "summarize");
+        worker.artifacts = worker.artifacts.map((artifact) =>
+          artifact.id === "unused"
+            ? { id: artifact.id, path: artifact.path, status: "missing" }
+            : artifact,
+        );
+        return worker;
+      },
+    },
+  );
+
+  expect(record.status).toBe("passed");
+  expect(record.trials[0]?.phases[0]?.artifacts).toContainEqual(
+    expect.objectContaining({ id: "unused", status: "missing" }),
+  );
 });
 
 test("preflights unsupported control flow before launching a worker", async () => {

@@ -40,6 +40,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions. *(reviewed)*
 - [[interview-to-freeform-summary]] — Normalize a free-form user interview into the shared freeform-summary workflow handoff. *(reviewed)*
 - [[interview-to-galaxy-workflow-changeset]] — Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. *(reviewed)*
+- [[mature-galaxy-workflow-for-iwc]] — Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set.
 - [[nextflow-summary-to-cwl-data-flow]] — Translate a Nextflow summary into a CWL data-flow design brief.
 - [[nextflow-summary-to-cwl-interface]] — Map a Nextflow summary into a CWL Workflow interface design brief.
 - [[nextflow-summary-to-galaxy-data-flow]] — Translate a Nextflow summary into a Galaxy data-flow design brief. *(reviewed)*
@@ -279,4 +280,4 @@ Generated from content frontmatter. Do not edit by hand.
 - [[custom-tool-critic]] — Vendored Galaxy internal prompt for critiquing generated custom tool definitions.
 - [[custom-tool-structured]] — Vendored Galaxy internal prompt for generating structured custom tool definitions.
 - [[copilot-workflow-review-instructions]] — Vendored IWC repository instructions that guide Copilot reviews of workflow contributions.
-- [[workflow-pr-review-command]] — Vendored IWC Claude command for reviewing a workflow pull request against the contributor and reviewer checklist.
+- [[workflow-pr-review-command]] — Vendored IWC command for reviewing a workflow pull request against the contributor and reviewer checklist.

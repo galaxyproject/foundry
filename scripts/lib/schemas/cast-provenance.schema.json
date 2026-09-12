@@ -65,6 +65,7 @@
               "kind": { "type": "string" },
               "default_filename": { "type": "string" },
               "schema": { "type": "string" },
+              "optional": { "type": "boolean" },
               "description": { "type": "string" }
             }
           }
@@ -78,6 +79,7 @@
             "properties": {
               "id": { "type": "string" },
               "description": { "type": "string" },
+              "optional": { "type": "boolean" },
               "inherited_schema": { "type": "string" },
               "producers": {
                 "type": "array",

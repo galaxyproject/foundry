@@ -1,0 +1,13 @@
+class: GalaxyWorkflow
+label: Filter reads
+doc: This workflow filters sequencing reads to generate a cleaned read set.
+inputs: []
+outputs: []
+steps:
+  - id: filter
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/cutadapt/cutadapt/4.9+galaxy0
+    tool_version: 4.9+galaxy0
+    in: []
+    out: []
+    tool_state:
+      input_path: /data/sample-A.fastq

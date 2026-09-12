@@ -7,8 +7,8 @@ tags:
   - meta
 status: draft
 created: 2026-05-17
-revised: 2026-08-04
-revision: 3
+revised: 2026-09-10
+revision: 4
 summary: "_provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only."
 ---
 
@@ -26,7 +26,7 @@ Every cast bundle carries a sibling `_provenance.json`: the forensic record of *
 - **`refs[]`** — one entry per resolved typed reference, sorted by `(kind, src)` for stable diffs. Each records `mode` (`verbatim` / `sidecar`), resolved `src` and bundle `dst`, `src_hash` / `dst_hash` (sha256 at cast time), and **`source`**, which is `deterministic` and nothing else. `source` is retained rather than dropped because it is the claim the record *makes*; a reader should not have to infer determinism from the absence of a field.
 - **The verbatim guarantee** — a `verbatim` entry proves itself: `src_hash == dst_hash`, checked over the whole corpus by `make check-verify` and by the deterministic-end-to-end tests. A bundle whose source has since moved on still satisfies that equality against the note *as it used to be*, which is why `make check-casts` re-derives from live sources as well.
 - **License lineage** — a ref that draws on licensed upstream work carries `license` and, for an authored note, its `derived` posture. `derived` says whether upstream expression survives into the bundled bytes; an own-words note remains Foundry-authored prose even when copied verbatim by the caster. Raw vendored payloads omit `derived` and are pass-through by definition. When present, `license_file` and `license_file_hash` bind the record to the exact licence text. Enforcement comes from `@galaxy-foundry/cast` and the shared `@galaxy-foundry/license-policy` table (foundry-pattern#4).
-- **`artifacts`** — the pipeline handoff contract copied from the Mold's frontmatter: `produces[]` (with producer-owned `schema`) and `consumes[]` (with `inherited_schema` and resolved `producers`), so a harness can wire a prior step's output path to a stable `id`.
+- **`artifacts`** — the pipeline handoff contract copied from the Mold's frontmatter: `produces[]` (with producer-owned `schema`) and `consumes[]` (with `inherited_schema` and resolved `producers`), so a harness can wire a prior step's output path to a stable `id`. Either direction may carry `optional: true`; omission means required.
 - **`validation_results[]`** — process evidence from artifact-validator CLI runs: `validator_bin`, `status` (`passed` / `failed` / `error`), `exit_code` (authoritative), and captured `stdout` / `stderr` plus their hashes (opaque diagnostics).
 
 ## Why it exists

@@ -339,6 +339,25 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
     );
   });
 
+  it("verifier accepts optional inputs and outputs in cast provenance", () => {
+    const r = runTsx(castVerify, ["mature-galaxy-workflow-for-iwc", "--target=claude"]);
+    expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+    expect(r.stdout).toContain("verify clean");
+
+    const provenance = JSON.parse(
+      readFileSync(
+        path.join(repoRoot, "casts/claude/skills/mature-galaxy-workflow-for-iwc/_provenance.json"),
+        "utf8",
+      ),
+    );
+    expect(provenance.artifacts.produces).toContainEqual(
+      expect.objectContaining({ id: "galaxy-workflow-test", optional: true }),
+    );
+    expect(provenance.artifacts.consumes).toContainEqual(
+      expect.objectContaining({ id: "galaxy-workflow-test", optional: true }),
+    );
+  });
+
   it("rejects unknown flags", () => {
     const r = runTsx(castVerify, ["summarize-nextflow", "--target=claude", "--bogus"]);
     expect(r.code).not.toBe(0);
@@ -360,6 +379,7 @@ describe("artifact-contract inheritance", () => {
               kind: "json",
               default_filename: "summary-x.json",
               schema: "[[schema-x]]",
+              optional: true,
               description: "Producer output that downstream consumers bind to.",
             },
           ],
@@ -369,7 +389,13 @@ describe("artifact-contract inheritance", () => {
         "content/molds/consumer/index.md",
         {
           type: "mold",
-          input_artifacts: [{ id: "summary-x", description: "Upstream summary used for binding." }],
+          input_artifacts: [
+            {
+              id: "summary-x",
+              optional: true,
+              description: "Upstream summary used for binding.",
+            },
+          ],
         },
       ],
     ]);
@@ -380,6 +406,7 @@ describe("artifact-contract inheritance", () => {
       {
         id: "summary-x",
         description: "Upstream summary used for binding.",
+        optional: true,
         inherited_schema: "[[schema-x]]",
         producers: ["producer"],
       },

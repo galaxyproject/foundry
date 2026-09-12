@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-cwl/index.md",
     "revision": 2,
     "content_hash": "7d83e5522f8a478186cb2c8c0585261342357c4e79ec2a17139096b5346acb12",
-    "commit": "351623a6d3e96e9bdee421a3ef61df4306489e32"
+    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
   },
-  "cast_at": "2026-09-08T18:03:26.586Z",
+  "cast_at": "2026-09-10T20:38:36.255Z",
   "refs": [
     {
       "kind": "cli-tool",
