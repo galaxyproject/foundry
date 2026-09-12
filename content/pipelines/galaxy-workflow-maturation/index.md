@@ -31,7 +31,7 @@ related_notes:
 
 # GALAXY WORKFLOW MATURATION
 
-A lifecycle journey, not a translation. An existing Galaxy workflow enters, the pinned IWC publication checklist is applied to it, and the matured result is validated and run before anyone looks at it. Lifted from the proposal in galaxyproject/foundry#492.
+An existing Galaxy workflow enters, the pinned IWC publication checklist is applied to it, and the matured result is validated and run before anyone looks at it. Lifted from `content/meta/harness-pipelines.md` §"GALAXY WORKFLOW MATURATION".
 
 **Lifecycle, not translation.** The workflow enters and leaves as a Galaxy workflow, so `target/galaxy` stays accurate; `lifecycle/publication` says *why* it is being changed. IWC-Lab is a publication profile and a destination, not a workflow target format — which is why this pipeline does not borrow the `<source>-to-<target>` naming the translation pipelines use.
 

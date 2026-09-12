@@ -197,7 +197,7 @@ Test-plan handoff: like every Galaxy-targeting pipeline, this one places a dedic
 
 ### GALAXY WORKFLOW MATURATION
 
-The Foundry's first `lifecycle/publication` journey, and the first pipeline whose purpose is not to produce a new workflow format. An existing Galaxy workflow enters, the pinned IWC contributor and reviewer checklist is applied to it, and the matured result is validated and run before a human reads it. The workflow is both input and output, as in `UPDATE-INTERVIEW → GALAXY` — but the change driver is a published checklist rather than an interview, so the name carries no source-to-target arrow. IWC-Lab is a publication profile and destination, not a workflow target format.
+The Foundry's first `lifecycle/publication` journey, and the first pipeline whose change driver is a published policy checklist rather than user intent or a source workflow. An existing Galaxy workflow enters, the pinned IWC contributor and reviewer checklist is applied to it, and the matured result is validated and run before a human reads it. The workflow is both input and output, as in `UPDATE-INTERVIEW → GALAXY` — but the change driver is a published checklist rather than an interview, so the name carries no source-to-target arrow. IWC-Lab is a publication profile and destination, not a workflow target format.
 
 1. `summarize-galaxy-workflow` — read the existing workflow (convert `.ga` → gxformat2 first if needed) and emit the normalized substrate plus a `summary-galaxy-workflow` the checklist pass can cite instead of re-deriving.
 2. `mature-galaxy-workflow-for-iwc` — walk the pinned IWC checklist item by item, apply the evidence-supported corrections, keep the workflow and its test labels aligned, prepare the ordinary IWC companions, and emit an `iwc-maturation-report` recording what passed, what changed, and what still needs a human decision.
@@ -206,7 +206,7 @@ The Foundry's first `lifecycle/publication` journey, and the first pipeline whos
 
 Entry is deliberately an existing workflow rather than a construction run: a workflow that never came from a Foundry pipeline is a first-class input, and a prior `workflow-test-result` is optional enrichment that turns a red phase-4 into a named regression rather than a first observation.
 
-Two contract gaps are known and stated rather than papered over. Phases 3 and 4 declare no `input_artifacts`, so nothing in the artifact graph binds them to phase 2's output — the binding is a `harness_notes` obligation judged by the pipeline's `eval.md`. And galaxyproject/foundry#491 is adding a result artifact to `validate-galaxy-workflow`, which narrows the evidence gap without closing the binding one.
+Two contract gaps are open. Phases 3 and 4 declare no `input_artifacts`, so nothing in the artifact graph binds them to phase 2's output — the binding is a `harness_notes` obligation judged by the pipeline's `eval.md`. And galaxyproject/foundry#491 is adding a result artifact to `validate-galaxy-workflow`, which narrows the evidence gap without closing the binding one.
 
 ## Cross-pipeline observations
 
@@ -221,7 +221,7 @@ Two contract gaps are known and stated rather than papered over. Phases 3 and 4 
   - Per-step (CWL): `summarize-cwl-tool`, `implement-cwl-tool-step`.
   - Validate: `validate-galaxy-workflow`, `validate-cwl`. (Per-step Galaxy validation moved into `advance-galaxy-draft-step` via `gxwf draft-validate --concrete`.)
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
-- **Lifecycle (post-construction)**: `GALAXY WORKFLOW MATURATION` is the first journey whose phases all already existed — `summarize-galaxy-workflow` plus the validate/run tail are reused unchanged, and only the checklist pass (`mature-galaxy-workflow-for-iwc`) is new. A lifecycle pipeline needs no new spine; it needs one action and a reason to run the existing tail afterwards.
+- **Lifecycle (post-construction)**: `GALAXY WORKFLOW MATURATION` is the first journey that needed only one new Mold — `summarize-galaxy-workflow` plus the validate/run tail are reused unchanged, and the checklist pass (`mature-galaxy-workflow-for-iwc`, landed by #496) is the single addition. A lifecycle pipeline needs no new spine; it needs one action and a reason to run the existing tail afterwards.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
 - **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` derives fixtures from a paper-origin `freeform-summary`; `nextflow-to-test-data` and `cwl-to-test-data` resolve the source's own declared fixtures (`test_fixtures` / `tests[]`) into `test-data-refs`. Each is the first leg of its pipeline's `test-data-resolution` chain, falling through to `find-test-data` (search) then user-supplied data. Interview starts skip directly to `find-test-data` / user-supplied data until a real interview-specific fixture derivation Mold exists.

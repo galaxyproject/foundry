@@ -3,10 +3,11 @@
 Pipeline-level oracle for the maturation journey. This judges the **end-to-end**
 and **cross-phase** properties no single Mold owns; each member Mold's own
 `eval.md` still applies to its phase's output (composition). In particular, the
-checklist's own completeness, evidence-boundedness, purpose preservation, and
-downstream-boundary claims belong to
-`content/molds/mature-galaxy-workflow-for-iwc/eval.md` and are not restated here.
-Properties are abstract — concrete journeys live in `scenarios.md`.
+checklist's own completeness, evidence-boundedness, and downstream-boundary
+claims belong to `content/molds/mature-galaxy-workflow-for-iwc/eval.md` and are
+not restated here. What this file does own of that territory is the cross-phase
+half: whether an edit made at phase 2 survives to phase 4 intact. Properties are
+abstract — concrete journeys live in `scenarios.md`.
 
 ## Property: starting-format normalization is lossless
 
@@ -50,10 +51,10 @@ Properties are abstract — concrete journeys live in `scenarios.md`.
 ## Property: no assertion is weakened to reach green
 
 - check: llm-judged
-- assertion: comparing the test file phase 4 ran against the one supplied to
-  phase 2, no assertion is removed or loosened and no expected output is
-  manufactured. The only permitted test edits are the key renames property 3
-  requires. A red phase 4 stays red.
+- assertion: the test file phase 4 ran differs from the one supplied to phase 2
+  only by the key renames property 3 requires. No assertion is removed or
+  loosened on the way across that boundary, and no expected output is
+  manufactured. A red phase 4 stays red.
 
 ## Property: regression against a prior baseline is named
 
