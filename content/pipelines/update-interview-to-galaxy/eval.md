@@ -1,10 +1,5 @@
 # UPDATE-INTERVIEW → GALAXY pipeline eval
 
-Pipeline-level oracle for the UPDATE-INTERVIEW → GALAXY journey. This judges the
-**end-to-end** and **cross-step** properties no single Mold owns; each member
-Mold's own `eval.md` still applies to its step's output (composition). Properties
-are abstract — concrete journeys live in `scenarios.md`.
-
 An update journey is judged against **two artifacts**: the emitted workflow and
 the **starting** workflow it modified. Several properties below are only
 meaningful as a comparison between the two — the distinguishing feature of an

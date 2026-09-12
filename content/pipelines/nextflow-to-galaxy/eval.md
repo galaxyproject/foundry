@@ -1,10 +1,5 @@
 # NEXTFLOW → GALAXY pipeline eval
 
-Pipeline-level oracle for the NEXTFLOW → GALAXY journey. This judges the
-**end-to-end** and **cross-step** properties no single Mold owns; each member
-Mold's own `eval.md` still applies to its step's output (composition). Properties
-are abstract — concrete journeys live in `scenarios.md`.
-
 ## Property: the final workflow validates and round-trips
 
 - check: deterministic
