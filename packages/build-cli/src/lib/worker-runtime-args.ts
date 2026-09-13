@@ -10,6 +10,8 @@ import {
   type SandboxMode,
 } from "@galaxy-foundry/gxwf-pi-harness";
 
+import { takeValue } from "./cli-args.js";
+
 const THINKING_LEVELS = new Set<PiThinkingLevel>([
   "off",
   "minimal",
@@ -43,32 +45,6 @@ export interface WorkerRuntimeArgs {
   credentialEnv: string[];
   piTestAuth: boolean;
   piTestAuthDir: string | null;
-}
-
-function takeValue(argv: string[], index: number, flag: string): string {
-  const value = argv[index + 1];
-  if (!value || value.startsWith("--")) throw new Error(`${flag} requires a value`);
-  return value;
-}
-
-/**
- * Reads `--flag value` and `--flag=value` for one flag name.
- *
- * `lastIndex` is the last argv index this flag consumed -- `index + 1` for the spaced
- * form, `index` for the inline one. Assign it to the loop variable and let the `for`
- * loop's own `i++` move past it; continuing *from* it would reparse the token.
- * Returns `null` when the current token is not that flag.
- */
-export function readOption(
-  argv: string[],
-  index: number,
-  flag: string,
-): { value: string; lastIndex: number } | null {
-  const token = argv[index]!;
-  if (token === flag) return { value: takeValue(argv, index, flag), lastIndex: index + 1 };
-  if (token.startsWith(`${flag}=`))
-    return { value: token.slice(flag.length + 1), lastIndex: index };
-  return null;
 }
 
 function parseThinking(value: string): PiThinkingLevel {
