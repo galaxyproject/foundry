@@ -2426,4 +2426,41 @@ describe("validateDirectory (cross-file)", () => {
     const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
     expect(r.errors).toBe(0);
   });
+
+  // The cross-collection shape of the same contest, and the one a Pipeline author can walk into
+  // by naming a Pipeline after the Mold it runs. Collections share one flat address space, so
+  // the two ids are already equal before slugify runs — no nesting needed to make them meet.
+  // `pipelines` is walked after `molds`, so the Pipeline takes the address and the Mold that
+  // `phases[0].mold` names stops being what that link resolves to.
+  //
+  // Both errors matter. The first says the Mold is unreachable, which is the damage; the second
+  // says the Pipeline's own phase reference landed on the wrong kind, which is how the author
+  // finds out without reading the address map.
+  it("rejects a pipeline that takes the address of the mold it runs", () => {
+    writeFm(path.join(dir, "molds/mature-x/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["target/galaxy"],
+        name: "mature-x",
+        axis: "generic",
+      }),
+    });
+    writeFm(path.join(dir, "pipelines/mature-x/index.md"), {
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["target/galaxy"],
+        title: "Mature X",
+        phases: [{ mold: "[[mature-x]]" }],
+      }),
+    });
+
+    const captured = capturingStdout(() => {
+      const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+      expect(r.errors).toBe(2);
+    });
+    expect(captured).toMatch(
+      /wiki-link address 'mature-x' is also claimed by content\/pipelines\/mature-x\/index\.md/,
+    );
+    expect(captured).toMatch(/phases\[0\]\.mold: \[\[mature-x\]\] resolves to type=pipeline/);
+  });
 });

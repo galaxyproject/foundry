@@ -36,5 +36,3 @@ An existing Galaxy workflow enters, the pinned IWC publication checklist is appl
 **Why validate-then-run follows the checklist pass.** Checklist edits rename interface labels and can promote a hard-coded value into a real input — precisely the edits that break a test. Static validation catches structural damage cheaply; Planemo catches the rest. Running them *after* the checklist pass, rather than trusting it, is the point.
 
 **What it deliberately does not do.** No autonomous remediation loop, no GitHub mutation, no publication claim, no bundle or manifest artifact. The checklist pass may leave a decision unresolved; surfacing it is a correct outcome, not a failure.
-
-A note on naming, so the next reader does not "fix" it: the slug cannot be `mature-galaxy-workflow-for-iwc`. Wiki-link addressing is one flat namespace in which `pipelines` is registered after `molds`, so a pipeline of that name silently steals the Mold's address — `phases[1].mold` then resolves to `type=pipeline`, and `tests/wiki-addressing.test.ts` reports the Mold unreachable.
