@@ -10,41 +10,39 @@ Nothing below has been walked. These are claims to test, not observations.
 ## Case: clean submission, green end to end
 
 - fixture: `content/molds/review-galaxy-workflow/examples/clean-passing/`
-- expect: all four phases run; the review cites `status: pass` from both the
-  validation and test results, byte-equal to what phases 2 and 3 emitted; the
-  advisory recommendation is `approve`.
+- expect: all four phases execute in order, and the statuses phase 4 quotes are
+  byte-equal to the ones phases 2 and 3 emitted **in this run**. The Mold's own
+  case is judged against supplied artifacts; this one is judged against produced
+  ones, which is the whole of the difference.
 
 ## Case: red validation, review continues
 
 - fixture: `content/molds/review-galaxy-workflow/examples/failed-validation/`
-- expect: phase 2 emits `status: fail` and the journey continues anyway. Phase 3
-  runs and phase 4 produces a complete review that quotes the failing validation
-  status and carries its diagnostic as a required fix. A run that stops at phase 2
-  fails the case; so does one whose review reports the validation as anything
-  other than `fail`.
+- expect: phase 2 emits `status: fail` and phase 3 still runs. A journey that
+  stops at phase 2 fails the case, and so does one where phase 4 works from
+  anything other than the result phase 2 actually emitted.
 
-## Case: red test evidence, review raises the interface defect
+## Case: red test evidence, review continues
 
 - fixture: `content/molds/review-galaxy-workflow/examples/label-test-mismatch/`
-- expect: the failing test evidence does not end the journey. Phase 2 is green, so
-  the red is phase 3's alone. Phase 4 runs, quotes the failing test status, and
-  raises the label/test disagreement as a required fix. A run that stops at
-  phase 3 fails the case even though the submission is genuinely broken.
+- expect: phase 2 is green, so the red is phase 3's alone — and it does not end
+  the journey either. A run that stops at phase 3 fails the case even though the
+  submission is genuinely broken.
 
 ## Case: missing test, review continues
 
 - fixture: `content/molds/review-galaxy-workflow/examples/missing-test/`
-- expect: phase 3 hands on `status: test-definition-missing` rather than
-  aborting; phase 4 produces a complete review whose test item is a finding citing
-  that status; no output reads as though tests passed; the recommendation is not
-  `approve`.
+- expect: phase 3 hands on `status: test-definition-missing` rather than aborting,
+  and phase 4 runs on it. The absence crosses the phase boundary as a result
+  artifact; a journey that ends at phase 3 because nothing ran fails the case.
 
-## Case: Planemo failure, cited not diagnosed
+## Case: Planemo failure, modality survives the handoff
 
 - fixture: `content/molds/review-galaxy-workflow/examples/planemo-failure/`
-- expect: the review quotes the failing status and the observed modality from the
-  test result, and does not convert a runtime failure into a structural finding it
-  has no evidence for.
+- expect: the `failure_modality` phase 4 cites is the one phase 3 emitted, not one
+  re-derived by inspecting the workflow. Phase 3's classification is the only
+  runtime evidence in the journey, so a review that regenerates it is unsourced
+  even when it lands on the same answer.
 
 ## Case: worktree SHA does not match the reviewed head
 

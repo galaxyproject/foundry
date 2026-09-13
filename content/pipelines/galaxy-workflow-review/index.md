@@ -34,17 +34,6 @@ related_notes:
 
 A post-construction review journey. An existing Galaxy workflow — normally the subject of a pull request — is summarized, structurally validated, and actually run, and only then reviewed against the pinned upstream IWC policy. The output is one advisory Markdown review.
 
-## Why four phases
+**Why a red phase does not end the journey.** Losing the review because validation or the test failed would discard exactly the finding a reviewer most needs. A red phase 2 or phase 3 is retained as evidence and the review reports it, which is why the evidence phases run *before* the reviewer rather than gating it.
 
-Phase 4 is the only new Mold. The three ahead of it already exist and already produce exactly the evidence a review needs, so the pipeline reuses them rather than teaching the reviewer to re-derive their answers:
-
-1. [[summarize-galaxy-workflow]] normalizes the descriptor and inventories the interface, steps, labels, and existing tests.
-2. [[validate-galaxy-workflow]] runs terminal structural validation and now hands on a citable result.
-3. [[run-workflow-test]] executes the test and hands on an honest result — including when no test exists or none could run.
-4. [[review-galaxy-workflow]] applies the pinned IWC policy, citing all three rather than inspecting its way to a verdict.
-
-A red phase 2 or phase 3 does not end the journey. Losing the review because a test failed would discard exactly the finding a reviewer most needs, so the result is retained and the review reports it.
-
-## Edit authority
-
-The Pipeline and its Molds are read-only. They may recommend changes; they cannot apply one, and they cannot approve, comment, push, mark ready, or merge. When a human accepts a recommended workflow edit, that work belongs to the [[mature-galaxy-workflow-for-iwc]] harness and is routed through [[apply-galaxy-workflow-changeset]] where applicable. Nothing here grants this reviewer write authority.
+**What it deliberately does not do.** No edit, no GitHub mutation, no approval. The Pipeline and its Molds are read-only: they may recommend a change, they cannot apply one, and they cannot approve, comment, push, mark ready, or merge. When a human accepts a recommended workflow edit, that work belongs to [[galaxy-workflow-maturation]] and is routed through [[apply-galaxy-workflow-changeset]] where applicable.

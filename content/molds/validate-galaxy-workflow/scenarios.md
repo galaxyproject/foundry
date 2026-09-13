@@ -34,8 +34,17 @@ artifact rather than a description of one.
   the validation-versus-runtime boundary: the defect is real and this Mold is
   not the one that finds it.
 
+## Case: a version pin that disagrees with its own tool id fails
+
+- fixture: `content/molds/review-galaxy-workflow/examples/failed-validation/starting-galaxy-workflow.gxwf.yml`
+- command: `gxwf validate --json starting-galaxy-workflow.gxwf.yml`
+- expect: `status: "fail"` with one `error` diagnostic on
+  `steps.aggregate_reports.tool_version`, naming both the declared `1.24.1` and
+  the `1.24.1+galaxy0` its `tool_id` encodes, and routing to
+  [[implement-galaxy-tool-step]]. `residual_runtime_risks` is empty — a
+  structural failure is not also a deferred runtime question.
+
 ## Coverage gaps
 
-No committed fixture exercises `status: "fail"` or `status: "not-run"`. Both
-states are declared by the Mold's output artifact, and neither has a fixture to
-bind, so no case asserts them yet.
+No committed fixture exercises `status: "not-run"`. That state is declared by the
+Mold's output artifact and has no fixture to bind, so no case asserts it yet.
