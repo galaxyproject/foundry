@@ -31,8 +31,8 @@ importers:
         specifier: workspace:*
         version: link:packages/build-cli
       '@galaxy-foundry/cast':
-        specifier: ^0.12.2
-        version: 0.12.2(zod@4.4.3)
+        specifier: ^0.12.3
+        version: 0.12.3(zod@4.4.3)
       '@galaxy-foundry/content-reader':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -109,8 +109,8 @@ importers:
   packages/build-cli:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.12.2
-        version: 0.12.2(zod@4.4.3)
+        specifier: ^0.12.3
+        version: 0.12.3(zod@4.4.3)
       '@galaxy-foundry/content-reader':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -198,8 +198,8 @@ importers:
   packages/gxwf-foundry-note-schema:
     dependencies:
       '@galaxy-foundry/cast':
-        specifier: ^0.12.2
-        version: 0.12.2(zod@4.4.3)
+        specifier: ^0.12.3
+        version: 0.12.3(zod@4.4.3)
       '@galaxy-foundry/content-reader':
         specifier: ^0.4.0
         version: 0.4.0(zod@4.4.3)
@@ -1215,8 +1215,8 @@ packages:
   '@fontsource/atkinson-hyperlegible@5.2.8':
     resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
-  '@galaxy-foundry/cast@0.12.2':
-    resolution: {integrity: sha512-JBU1QwueejR09e3EID8as8hrpqttTpi2YccMjsOzNiG7bCP2xBMHle13EB7x7FB0Y7+5PPcJqOLHPBpRmSUW5g==}
+  '@galaxy-foundry/cast@0.12.3':
+    resolution: {integrity: sha512-NyuF9gRgZd4Iwj4DVrT76TMsG6pbnNyYTxa9p5CY0mJ2Iy8fw64UJ+1CxCBPRZigNb3K99ASIm58WP4bNhRNwA==}
     engines: {node: '>=20'}
 
   '@galaxy-foundry/content-reader@0.4.0':
@@ -5483,14 +5483,14 @@ snapshots:
 
   '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
-  '@galaxy-foundry/cast@0.12.2(zod@4.4.3)':
+  '@galaxy-foundry/cast@0.12.3(zod@4.4.3)':
     dependencies:
       '@galaxy-foundry/kind-manifest': 0.4.0(zod@4.4.3)
       '@galaxy-foundry/license-policy': 0.8.1
       '@galaxy-foundry/reference-contract': 0.4.1
       '@galaxy-foundry/wiki-links': 0.4.0
       gray-matter: 4.0.3
-      js-yaml: 4.3.0
+      js-yaml: 4.1.1
     transitivePeerDependencies:
       - zod
 
