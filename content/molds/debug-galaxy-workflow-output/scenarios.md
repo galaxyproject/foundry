@@ -1,10 +1,5 @@
 # debug-galaxy-workflow-output scenarios
 
-Concrete cases for `debug-galaxy-workflow-output`, exercised against the
-abstract properties in `eval.md`. Each case binds a failing-run fixture and
-states its expected diagnosis; the `eval.md` oracle is applied to whatever the
-case produces.
-
 ## Case: distinguish failure surfaces
 
 - fixture: failed Planemo workflow test with structured output, invocation id,

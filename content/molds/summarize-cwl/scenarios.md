@@ -1,10 +1,7 @@
 # summarize-cwl scenarios
 
-Concrete cases for `summarize-cwl`, exercised against the abstract properties in
-`eval.md`. Each case binds a fixture and states its expected values; the
-`eval.md` oracle is applied to whatever the case produces. Fixtures are pinned in
-`workflow-fixtures/fixtures.yaml`; materialize with `make fixtures-cwl` before
-running.
+Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
+`make fixtures-cwl` before running.
 
 ## Case: official user-guide simple workflow validates
 

@@ -1,10 +1,8 @@
 # advance-galaxy-draft-step scenarios
 
-Concrete cases for `advance-galaxy-draft-step`, exercised against the abstract
-properties in `eval.md`. Each case binds a fixture and states its expected
-values; the `eval.md` oracle is applied to whatever the case produces. Fixtures
-live under `examples/`; the MVP fixture is `brew3r-1step-degraded/` — the IWC
-`transcriptomics/brew3r/BREW3R` workflow with its `merge assembled transcripts`
+Fixtures live under `examples/`; the MVP fixture is `brew3r-1step-degraded/` —
+the IWC `transcriptomics/brew3r/BREW3R` workflow with its
+`merge assembled transcripts`
 (StringTie merge) step hand-degraded to draft form, plus `expected.gxwf.yml` as
 the round-trip oracle. See that directory's `README.md`.
 

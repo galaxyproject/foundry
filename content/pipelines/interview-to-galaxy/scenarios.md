@@ -1,10 +1,5 @@
 # INTERVIEW → GALAXY pipeline scenarios
 
-Concrete end-to-end journeys for the INTERVIEW → GALAXY pipeline. A pipeline
-scenario names the journey input **once**; each member Mold's `eval.md` applies
-to its step's output as the journey advances (it does not re-list the per-Mold
-scenarios).
-
 All fixtures for these cases are vendored under `examples/` beside this file, so
 the cases are self-contained — no GitHub fetch or external checkout is required
 to drive a run. Each `examples/*_issue.md` carries a provenance header noting the

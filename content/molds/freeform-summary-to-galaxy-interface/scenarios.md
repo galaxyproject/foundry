@@ -1,10 +1,7 @@
 # freeform-summary-to-galaxy-interface scenarios
 
-Concrete cases for `freeform-summary-to-galaxy-interface`, exercised against the
-abstract properties in `eval.md`. Each case binds an input shape and states its
-expected brief content; the `eval.md` oracle is applied to whatever the case
-produces. Free-form sources are narrative- or interview-derived, so these cases
-bind described input shapes rather than pinned corpus paths.
+Free-form sources are narrative- or interview-derived, so these cases bind
+described input shapes rather than pinned corpus paths.
 
 ## Case: source naming sample, reference, and control choices
 

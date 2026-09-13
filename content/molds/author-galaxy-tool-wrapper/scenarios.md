@@ -1,9 +1,5 @@
 # author-galaxy-tool-wrapper scenarios
 
-Concrete cases for `author-galaxy-tool-wrapper`, exercised against the abstract
-properties in `eval.md`. Each case binds a fixture and states its expected
-values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: conda-only Nextflow process
 
 - fixture: Nextflow process summary with a bioconda-only environment directive,

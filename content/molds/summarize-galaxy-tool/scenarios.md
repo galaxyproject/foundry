@@ -1,9 +1,7 @@
 # summarize-galaxy-tool scenarios
 
-Concrete cases for `summarize-galaxy-tool`, exercised against the abstract
-properties in `eval.md`. Each case binds a fixture and states its expected
-values; the `eval.md` oracle is applied to whatever the case produces. The v1
-input source is cached ParsedTool JSON per [[galaxy-tool-summary-input-source]].
+The v1 input source is cached ParsedTool JSON per
+[[galaxy-tool-summary-input-source]].
 
 ## Case: FastQC simple wrapper
 

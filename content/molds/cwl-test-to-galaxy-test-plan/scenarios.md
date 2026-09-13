@@ -1,7 +1,5 @@
 # cwl-test-to-galaxy-test-plan scenarios
 
-Concrete cases for `cwl-test-to-galaxy-test-plan`, exercised against the abstract properties in `eval.md`. Each case binds a fixture and states what it exercises; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: schema-valid translated test plan
 
 - fixture: CWL workflow with job input object, expected outputs, secondary files, and collection-like array inputs.
