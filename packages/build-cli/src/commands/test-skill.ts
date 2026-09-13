@@ -8,10 +8,10 @@ import {
   type ExpectedArtifact,
 } from "@galaxy-foundry/gxwf-pi-harness";
 
+import { readOption } from "../lib/cli-args.js";
 import {
   createWorkerRuntimeArgScanner,
   defaultWorkerRunDir,
-  readOption,
   type WorkerRuntimeArgs,
 } from "../lib/worker-runtime-args.js";
 
