@@ -1,7 +1,5 @@
 # validate-galaxy-workflow scenarios
 
-Concrete cases for `validate-galaxy-workflow`, exercised against the abstract properties in `eval.md`. Each case binds a fixture and states its expected values.
-
 Fixtures are the committed review fixtures under
 `content/molds/review-galaxy-workflow/examples/`. Each ships the
 `galaxy-workflow-validation-result.json` this Mold is expected to produce for

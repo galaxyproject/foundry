@@ -1,9 +1,5 @@
 # run-workflow-test scenarios
 
-Concrete cases for `run-workflow-test`, exercised against the abstract properties
-in `eval.md`. Each case binds a fixture and states its expected values; the
-`eval.md` oracle is applied to whatever the case produces.
-
 Fixtures are the committed review fixtures under
 `content/molds/review-galaxy-workflow/examples/`. Each ships the
 `workflow-test-result.json` this Mold is expected to produce, so a run is

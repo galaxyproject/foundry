@@ -1,9 +1,5 @@
 # GALAXY WORKFLOW REVIEW pipeline scenarios
 
-Concrete end-to-end journeys, exercised against the properties in `eval.md`. A
-pipeline scenario names the journey input **once**; each phase's Mold oracle
-applies to that phase's output as the journey advances.
-
 Where a case can be pre-staged from a committed fixture, it binds the review
 Mold's `examples/` directory by repo-relative path. The two harness-gate cases
 have no artifact to bind — they are about what happens *before* any phase

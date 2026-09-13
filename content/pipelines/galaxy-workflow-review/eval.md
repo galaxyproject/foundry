@@ -1,11 +1,8 @@
 # GALAXY WORKFLOW REVIEW pipeline eval
 
-Pipeline-level oracle for the review journey. This judges the **end-to-end** and
-**cross-phase** properties no single Mold owns; each member Mold's own `eval.md`
-still applies to its phase's output. In particular, the review's internal quality
-— citation discipline, checklist coverage, verdict separation — belongs to
-`content/molds/review-galaxy-workflow/eval.md` and is not restated here.
-Properties are abstract; concrete journeys live in `scenarios.md`.
+The review's internal quality — citation discipline, checklist coverage, verdict
+separation — belongs to `content/molds/review-galaxy-workflow/eval.md` and is not
+restated here.
 
 ## Property: every phase runs, and each hands on before the next begins
 

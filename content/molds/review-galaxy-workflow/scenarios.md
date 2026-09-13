@@ -1,10 +1,10 @@
 # review-galaxy-workflow scenarios
 
-Concrete cases run against the properties in `eval.md`. Each `examples/<case>/`
-directory carries the artifacts this Mold declares as required inputs, at their
-declared filenames — `starting-galaxy-workflow.gxwf.yml`,
-`summary-galaxy-workflow.json`, `galaxy-workflow-validation-result.json`,
-`workflow-test-result.json` — plus the optional ones the case needs.
+Each `examples/<case>/` directory carries the artifacts this Mold declares as
+required inputs, at their declared filenames —
+`starting-galaxy-workflow.gxwf.yml`, `summary-galaxy-workflow.json`,
+`galaxy-workflow-validation-result.json`, `workflow-test-result.json` — plus the
+optional ones the case needs.
 
 A case whose expectation depends on a repository-level checklist item also
 carries the companions that item reads — `.dockstore.yml`, `README.md`,
