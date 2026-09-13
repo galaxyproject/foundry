@@ -1,15 +1,10 @@
 # GALAXY WORKFLOW MATURATION pipeline scenarios
 
-Concrete end-to-end journeys for the maturation pipeline, exercised against the
-properties in `eval.md`. A pipeline scenario names the journey input **once**;
-each phase's Mold oracle applies to that phase's output as the journey advances.
-
 The fixtures are the ones [[mature-galaxy-workflow-for-iwc]] already ships, cited
-by repo-relative path. They are committed, so a reviewer and CI can both reach
-them — unlike `workflow-fixtures/`, which is generated and gitignored. Fixture
-ownership stays with the Mold; nothing is copied into this directory.
+by repo-relative path. Fixture ownership stays with the Mold; nothing is copied
+into this directory.
 
-They are also checklist-shaped skeletons rather than runnable workflows: empty
+They are checklist-shaped skeletons rather than runnable workflows: empty
 `steps`, empty `outputs`, and test jobs pointing at test data that does not exist.
 That is the right shape for judging a checklist pass, and it is enough for phase 3
 — `gxwf validate` passes on all five. It is not enough for phase 4. No case below
@@ -19,23 +14,16 @@ is authored.
 ## Case: missing publication metadata, no companion test
 
 - fixture: `content/molds/mature-galaxy-workflow-for-iwc/examples/workflow-only/starting-galaxy-workflow.gxwf.yml`
-- expect: with no companion test, summary, or context supplied, the journey still
-  completes, and every creator, license, and release value becomes
-  `needs-user-input` with a ledger entry rather than an invented one. When the
-  caller does supply `iwc-publication-context`, those values are written to the
-  workflow and agree with the emitted README, CHANGELOG, and `.dockstore.yml`.
-- expect: the tutorial-specific label and "sample A" wording are replaced with
-  descriptions usable on lab data, and the workflow label becomes human-readable.
-- expect: no `galaxy-workflow-test` is fabricated. Phase 3 validates the matured
-  workflow; phase 4 reports "no test supplied" and the journey does not render
-  that as a pass.
+- expect: no `galaxy-workflow-test` is fabricated to give phase 4 something to
+  run. Phase 3 validates the matured workflow; phase 4 reports "no test supplied"
+  and the journey does not render that as a pass.
 
 ## Case: human-readable interface, test keys follow
 
 - fixture: `content/molds/mature-galaxy-workflow-for-iwc/examples/label-cleanup/`
-- expect: the machine-shaped labels — `short_read_qc`, `raw_reads`,
-  `multiqc_html_report` — become human-readable in the workflow and in the
-  supplied test **together**, with the test's original assertion unchanged.
+- expect: every key phase 2 renames is addressed by the same key in the test
+  phase 4 runs; an orphaned key surfacing as a phase-4 error is attributed to
+  phase 2, not reported as a test failure.
 - expect: phase 3 validates the matured workflow. Phase 4 executes the updated
   test and its outcome is reported with its evidence; this fixture ships no test
   data, so a walk must supply it.
@@ -43,9 +31,9 @@ is authored.
 ## Case: safe generalization of a hard-coded sample path
 
 - fixture: `content/molds/mature-galaxy-workflow-for-iwc/examples/safe-generalization/`
-- expect: the literal `/data/sample-A.fastq` in `tool_state` becomes an ordinary
-  workflow input, the updated test supplies the same path, and tool identity and
-  the remaining `tool_state` are unchanged.
+- expect: the workflow input phase 2 introduces in place of the literal path is
+  addressed by the test phase 4 runs, supplying the same path — the same
+  cross-phase survival as the label case, on an added input rather than a rename.
 - expect: phase 3 validates; phase 4's outcome is reported with its evidence.
 
 ## Case: red phases are attributed, not smoothed over
@@ -61,24 +49,19 @@ is authored.
 ## Case: ambiguous reference strategy is escalated, not guessed
 
 - fixture: `content/molds/mature-galaxy-workflow-for-iwc/examples/ambiguous-reference/starting-galaxy-workflow.gxwf.yml`
-- expect: the built-in reference setting (`reference_source_selector: cached`,
-  `ref_file: hg38`) is left unchanged; the report records a `needs-user-input`
-  item naming the portability decision required.
-- expect: phase 3 validates the matured workflow and its evidence is retained.
-  This fixture ships no test, so phase 4 reports the absence rather than a pass.
+- expect: the portability decision phase 2 leaves open is still reported as open
+  after phases 3 and 4 — a clean validation is not reported as having resolved
+  it. This fixture ships no test, so phase 4 reports the absence rather than a
+  pass.
 
 ## Case: documentation and packaging on an already-mature workflow
 
 - fixture: `content/molds/mature-galaxy-workflow-for-iwc/examples/already-mature/`
-- expect: little or no workflow diff; the supplied README and CHANGELOG are
-  preserved except where consistency demands a change; the emitted `.dockstore.yml`
-  addresses the emitted workflow and test; the report is complete, with `pass`
-  items citing their evidence.
-- expect: this is also the case that carries the green-test half of the
-  missing-metadata scenario — supplied metadata is written **and** phase 4
-  executes a real test rather than reporting an absence, which the test-less
-  `workflow-only/` case cannot show. Reaching a *green* phase 4 additionally
-  requires test data this fixture does not ship.
+- expect: this is the case that carries the green-test half of the journey —
+  supplied metadata is written **and** phase 4 executes a real test rather than
+  reporting an absence, which the test-less `workflow-only/` case cannot show.
+  Reaching a *green* phase 4 additionally requires test data this fixture does
+  not ship.
 
 ## Tier maturity — what would gate the walk
 
