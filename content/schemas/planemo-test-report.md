@@ -5,7 +5,7 @@ title: Planemo test report (JSON)
 package: "@galaxy-foundry/planemo-test-report-schema"
 package_export: "planemoTestReportSchema"
 validator_bin: validate-planemo-test-report
-upstream: "https://github.com/galaxyproject/planemo/blob/0.75.45/planemo/test/models.py"
+upstream: "https://github.com/galaxyproject/planemo/blob/0.75.47/planemo/test/models.py"
 license: MIT
 license_file: LICENSES/planemo.LICENSE
 tags:
@@ -26,10 +26,10 @@ This page describes the JSON Schema that `planemo test --test_output_json out.js
 
 **Source-of-truth chain:**
 
-1. `planemo/test/models.py` (`PlanemoTestReport` Pydantic model) in [galaxyproject/planemo](https://github.com/galaxyproject/planemo) — sourced from released `planemo==0.75.45`, which carries the merged [PR #1636](https://github.com/galaxyproject/planemo/pull/1636).
+1. `planemo/test/models.py` (`PlanemoTestReport` Pydantic model) in [galaxyproject/planemo](https://github.com/galaxyproject/planemo) — sourced from released `planemo==0.75.47`, which carries the merged [PR #1636](https://github.com/galaxyproject/planemo/pull/1636).
 2. `planemo output_schema --schema test-report` emits a versioned envelope (`schema_version`, `planemo_version`, `schemas`). `@galaxy-foundry/planemo-test-report-schema`'s `scripts/sync-from-planemo.mjs` shells out, unwraps, and writes `src/test-report.schema.json` (AJV-ready) + `src/test-report.provenance.json` (planemo_version + schema_version + source release) — mirrors `tests-format-schema`'s integrity-sidecar pattern.
 3. `scripts/sync-schema.mjs` regenerates the TS mirrors from the JSON; contributor laptops never need planemo. The cast pipeline imports `planemoTestReportSchema` and serializes it into cast bundles per the casting policy in `content/meta/casting.md`.
 
 **At runtime in cast skills:** the convergence loop in [[convert-nfcore-module-to-galaxy-tool]] (and any other Mold that runs `planemo test`) consumes `--test_output_json` output, AJV-validates it against this schema, and classifies failures from structured keys instead of free-text parsing. `validate-planemo-test-report` wraps the AJV gate as a CLI for cast skills.
 
-**Pin.** The schema is sourced from released `planemo==0.75.45` (carries the merged [galaxyproject/planemo#1636](https://github.com/galaxyproject/planemo/pull/1636)). The single source of truth for which planemo that is, is `package_version` in `content/cli/planemo/index.md`; `planemo_version` in `src/test-report.provenance.json` records the version the binary actually reported when the schema was last regenerated. `make check-planemo-pin` fails if the two — or any other copy, including the one in this sentence — disagree.
+**Pin.** The schema is sourced from released `planemo==0.75.47` (carries the merged [galaxyproject/planemo#1636](https://github.com/galaxyproject/planemo/pull/1636)). The single source of truth for which planemo that is, is `package_version` in `content/cli/planemo/index.md`; `planemo_version` in `src/test-report.provenance.json` records the version the binary actually reported when the schema was last regenerated. `make check-planemo-pin` fails if the two — or any other copy, including the one in this sentence — disagree.

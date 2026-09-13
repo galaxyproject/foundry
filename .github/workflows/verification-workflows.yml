@@ -28,7 +28,7 @@ jobs:
           channel-priority: strict
 
       - name: Install Planemo
-        run: python -m pip install planemo==0.75.41
+        run: python -m pip install planemo==0.75.47
 
       - name: Lint verified workflow
         continue-on-error: true

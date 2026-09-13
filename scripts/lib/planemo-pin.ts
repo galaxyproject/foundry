@@ -19,6 +19,8 @@ import { readMarkdown } from "./frontmatter.js";
 
 export const PLANEMO_PIN_NOTE = "content/cli/planemo/index.md";
 export const PLANEMO_SCHEMA_NOTE = "content/schemas/planemo-test-report.md";
+/** CI installs planemo by pip spec, so the workflow file repeats the pin like any note does. */
+export const PLANEMO_CI_WORKFLOW = ".github/workflows/verification-workflows.yml";
 export const PLANEMO_PROVENANCE = [
   "packages/planemo-cli-meta/src/cli-meta.provenance.json",
   "packages/planemo-test-report-schema/src/test-report.provenance.json",
@@ -109,13 +111,18 @@ export function findPlanemoPinDrift(repoRoot: string): PlanemoPinDrift[] {
     ),
   );
 
-  for (const rel of [PLANEMO_SCHEMA_NOTE, ...listCliPages(repoRoot)]) {
+  const repeats: [rel: string, detail: string][] = [
+    [PLANEMO_SCHEMA_NOTE, "note"],
+    [PLANEMO_CI_WORKFLOW, "CI install step"],
+    ...listCliPages(repoRoot).map((rel): [string, string] => [rel, "note"]),
+  ];
+  for (const [rel, detail] of repeats) {
     drift.push(
       ...scanText(
         rel,
         readFileSync(path.join(repoRoot, rel), "utf8"),
         expected,
-        "note",
+        detail,
         TEXT_PATTERNS,
       ),
     );

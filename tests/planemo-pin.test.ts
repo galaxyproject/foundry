@@ -25,6 +25,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 
 const COPIED = [
+  ".github/workflows/verification-workflows.yml",
   "content/cli/planemo",
   "content/schemas/planemo-test-report.md",
   "packages/planemo-cli-meta/src/cli-meta.provenance.json",
@@ -101,6 +102,16 @@ describe("findPlanemoPinDrift", () => {
     const drift = findPlanemoPinDrift(dir);
     expect(drift.map((d) => d.file)).toEqual([rel]);
     expect(drift[0]?.found).toBe("0.75.2");
+  });
+
+  it("catches the CI install step left behind by a bump", () => {
+    const dir = fixture();
+    const rel = ".github/workflows/verification-workflows.yml";
+    edit(dir, rel, `planemo==${readPinnedPlanemoVersion(dir)}`, "planemo==0.75.41");
+
+    const drift = findPlanemoPinDrift(dir);
+    expect(drift.map((d) => d.file)).toEqual([rel]);
+    expect(drift[0]?.found).toBe("0.75.41");
   });
 
   it("catches a stale version left in prose", () => {

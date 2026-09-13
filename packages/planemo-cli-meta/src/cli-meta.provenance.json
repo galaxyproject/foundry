@@ -1,5 +1,5 @@
 {
-  "planemo_version": "0.75.45",
+  "planemo_version": "0.75.47",
   "schema_version": "0.1",
   "source": {
     "note": "Released on PyPI; includes merged PR galaxyproject/planemo#1636.",
