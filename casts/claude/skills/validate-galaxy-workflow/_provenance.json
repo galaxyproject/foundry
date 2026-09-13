@@ -4,11 +4,11 @@
   "mold": {
     "name": "validate-galaxy-workflow",
     "path": "content/molds/validate-galaxy-workflow/index.md",
-    "revision": 4,
-    "content_hash": "02f24bacec6166da30493ac9b6a56e5e2ce1fda6b12ec3ad82001ad053512478",
-    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
+    "revision": 5,
+    "content_hash": "74e3743fc376f33c1eb37832ab4869c327d48f87e015c7a38597cf4c4ca939cd",
+    "commit": "79bf5c3ab98eec3a67948d8bdebb9dba7d8a2359"
   },
-  "cast_at": "2026-09-10T20:38:37.469Z",
+  "cast_at": "2026-09-12T19:19:47.237Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -56,5 +56,16 @@
       "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
       "source": "deterministic"
     }
-  ]
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-validation-result",
+        "kind": "json",
+        "default_filename": "galaxy-workflow-validation-result.json",
+        "description": "Terminal gxwf validation handoff: the exact command run, a pass/fail/not-run status, the classified workflow-level diagnostics, and the residual runtime risks static validation cannot settle."
+      }
+    ],
+    "consumes": []
+  }
 }

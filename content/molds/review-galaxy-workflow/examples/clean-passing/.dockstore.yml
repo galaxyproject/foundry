@@ -1,0 +1,11 @@
+version: 1.2
+workflows:
+  - name: main
+    subclass: Galaxy
+    publish: true
+    primaryDescriptorPath: /starting-galaxy-workflow.gxwf.yml
+    testParameterFiles:
+      - /galaxy-workflow.gxwf-tests.yml
+    authors:
+      - name: Example Contributor
+        orcid: 0000-0002-1825-0097

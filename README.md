@@ -24,7 +24,7 @@ Hand-authored, monolithic conversion skills are brittle, hard to test, and don't
 
 ## What's here
 
-- **Pipelines** (`content/pipelines/`) — ordered Mold sequences composing into an end-to-end conversion (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `interview-to-galaxy`, `update-interview-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`). Build artifact and primary navigation surface.
+- **Pipelines** (`content/pipelines/`) — ordered Mold sequences composing into an end-to-end conversion (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `interview-to-galaxy`, `update-interview-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`) or a post-construction lifecycle journey (`galaxy-workflow-review`). Build artifact and primary navigation surface.
 - **Molds** (`content/molds/`) — abstract templates describing a workflow-construction action. Each Mold is a typed reference manifest: it declares the patterns, CLI manual pages, schemas, prompts, and examples it depends on, and casts into one or more skill artifacts.
 - **Patterns** (`content/patterns/`) — Galaxy workflow construction reference (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring). Wiki-linked from action Molds; pulled into cast skills via casting's pattern-kind dispatch.
 - **CLI manual pages** (`content/cli/<tool>/`) — one note per command or subcommand, covering `gxwf`, `planemo`, `cwltool`, `cwl-utils`, `foundry`, and `galaxy-tool-cache`. Cast to JSON sidecars by action Molds that reference exact commands.
@@ -121,10 +121,10 @@ Forward work is quality and reach rather than existence. Review is underway rath
 <!-- generated:corpus -->
 |  | count |
 | --- | --- |
-| Pipelines | 7 |
-| Molds | 49 — 27 reviewed, 22 draft |
-| … with `eval.md` | 35 |
-| … with `scenarios.md` | 30 |
+| Pipelines | 8 |
+| Molds | 50 — 27 reviewed, 23 draft |
+| … with `eval.md` | 36 |
+| … with `scenarios.md` | 31 |
 | Pattern pages | 54 |
 | Source-pattern pages | 7 |
 | CLI tools | 6 |

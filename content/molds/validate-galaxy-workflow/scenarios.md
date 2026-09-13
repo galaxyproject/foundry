@@ -2,17 +2,42 @@
 
 Concrete cases for `validate-galaxy-workflow`, exercised against the abstract properties in `eval.md`. Each case binds a fixture and states its expected values.
 
-## Case: complete valid workflow
+Fixtures are the committed review fixtures under
+`content/molds/review-galaxy-workflow/examples/`. Each ships the
+`galaxy-workflow-validation-result.json` this Mold is expected to produce for
+its `starting-galaxy-workflow.gxwf.yml`, so a run is checked against a real
+artifact rather than a description of one.
 
-- fixture: a complete gxformat2 workflow expected to pass gxwf validation.
-- expect: reports a clean validation result and allows the harness to proceed to [[run-workflow-test]].
+## Case: clean workflow validates with no diagnostics
 
-## Case: cross-step workflow error
+- fixture: `content/molds/review-galaxy-workflow/examples/clean-passing/starting-galaxy-workflow.gxwf.yml`
+- command: `gxwf validate --json starting-galaxy-workflow.gxwf.yml`
+- expect: emits `galaxy-workflow-validation-result` with `status: "pass"` and
+  `diagnostics: []`, matching that directory's committed
+  `galaxy-workflow-validation-result.json`. The harness proceeds to
+  [[run-workflow-test]].
 
-- fixture: a complete gxformat2 workflow with a workflow-level connection or output problem.
-- expect: classifies the failure as terminal workflow validation, identifies the likely responsible phase, and does not treat it as a Planemo runtime failure.
+## Case: static pass still records the portability risk it cannot settle
 
-## Case: validation versus runtime boundary
+- fixture: `content/molds/review-galaxy-workflow/examples/hardcoded-sample-value/starting-galaxy-workflow.gxwf.yml`
+- command: `gxwf validate --json starting-galaxy-workflow.gxwf.yml`
+- expect: `status: "pass"` with empty `diagnostics[]` — the literal filesystem
+  path in `tool_state` is structurally legal — and one `residual_runtime_risks[]`
+  entry naming that non-portability, with `settled_by: "workflow-test-result"`.
+  A clean structural result is not reported as an all-clear.
 
-- fixture: a gxformat2 workflow that passes static validation but still has a plausible runtime failure risk (missing tool runtime behavior, optional output assumptions, or collection element mismatch).
-- expect: records why static validation is insufficient and names the runtime artifact that should prove or disprove the risk (invocation messages, job details, output collections, or Planemo structured test output).
+## Case: label/test mismatch is out of scope for static validation
+
+- fixture: `content/molds/review-galaxy-workflow/examples/label-test-mismatch/starting-galaxy-workflow.gxwf.yml`
+- expect: `status: "pass"`; the mismatch between the test's
+  `multiqc_html_report` key and the workflow's promoted `MultiQC Report` output
+  is **not** reported as a diagnostic, and instead appears as a
+  `residual_runtime_risks[]` entry pointing at `workflow-test-result`. This is
+  the validation-versus-runtime boundary: the defect is real and this Mold is
+  not the one that finds it.
+
+## Coverage gaps
+
+No committed fixture exercises `status: "fail"` or `status: "not-run"`. Both
+states are declared by the Mold's output artifact, and neither has a fixture to
+bind, so no case asserts them yet.

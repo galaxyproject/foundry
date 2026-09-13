@@ -17,7 +17,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- None declared.
+- Write artifact `galaxy-workflow-validation-result` as `galaxy-workflow-validation-result.json`. Format: `json`. Terminal gxwf validation handoff: the exact command run, a pass/fail/not-run status, the classified workflow-level diagnostics, and the residual runtime risks static validation cannot settle.
 
 ## Required Tools
 
@@ -45,6 +45,18 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 Validate the assembled Galaxy workflow before runtime testing. The skill owns the terminal validation pass: run gxwf validate, classify workflow-level diagnostics, and route failures back to the responsible authoring phase when possible.
 
 This is separate from advance-galaxy-draft-step (which runs `gxwf draft-validate --concrete` inside the per-step loop) because terminal validation no longer has only one fresh step in scope and should reason over cross-step workflow structure.
+
+### Emit the result
+
+Write `galaxy-workflow-validation-result.json` on every run — clean or failing — so a downstream reviewer can cite what was actually checked rather than re-deriving it:
+
+- `command` — the exact gxwf validate invocation, including flags (prefer `--json`);
+- `workflow_path` — the file validated;
+- `status` — `pass`, `fail`, or `not-run`, with a `not_run_reason` whenever validation could not execute;
+- `diagnostics[]` — one entry per finding: severity, message, the step or field it addresses, and the authoring phase it routes back to;
+- `residual_runtime_risks[]` — for a clean run, the risks static validation cannot settle and the runtime artifact that would prove or disprove each.
+
+A `not-run` status is never reported as a pass.
 
 ## Feedback Mode
 

@@ -1,27 +1,55 @@
 # run-workflow-test scenarios
 
 Concrete cases for `run-workflow-test`, exercised against the abstract properties
-in `eval.md`. Each case binds an input condition and states its expected values;
-the `eval.md` oracle is applied to whatever the case produces.
+in `eval.md`. Each case binds a fixture and states its expected values; the
+`eval.md` oracle is applied to whatever the case produces.
 
-## Case: structured Planemo artifact capture
+Fixtures are the committed review fixtures under
+`content/molds/review-galaxy-workflow/examples/`. Each ships the
+`workflow-test-result.json` this Mold is expected to produce, so a run is
+checked against a real artifact rather than a description of one.
 
-- fixture: workflow test run with Planemo configured to emit structured test output.
-- expect: preserves the invocation id, history id, workflow id, Planemo
-  structured result, and any test output artifact paths needed by debug molds.
+## Case: passing test preserves the Galaxy handles a debug Mold needs
 
-## Case: existing versus managed Galaxy mode
+- fixture: `content/molds/review-galaxy-workflow/examples/clean-passing/`
+  (`starting-galaxy-workflow.gxwf.yml` + `galaxy-workflow.gxwf-tests.yml`)
+- expect: `status: "pass"` with `planemo_result` `{tests: 1, passed: 1,
+  failed: 0, errors: 0}`; `galaxy_mode: "managed"`; `invocation_id` and
+  `history_id` both present; `artifacts.test_output_json` names the structured
+  Planemo report. No `failure_modality` is set on a pass.
 
-- fixture: workflow test configuration that can run against either an existing
-  Galaxy or a Planemo-managed Galaxy.
-- expect: records which Galaxy mode was used, how tools/workflows/test data were
-  staged, and which API credentials or URLs are needed for follow-up failure
-  inspection.
+## Case: assertion failure names its modality and next surface
 
-## Case: failure modality handoff
+- fixture: `content/molds/review-galaxy-workflow/examples/planemo-failure/`
+- expect: `status: "fail"`, `planemo_result.failed == 1`,
+  `failure_modality: "assertion-failure"`, and
+  `next_reference_surface: "planemo-asserts-idioms"`. `failure_detail` names the
+  output and the unmet assertion rather than restating the exit code. The job
+  succeeded, so the modality is not a job failure.
 
-- fixture: workflow test run that exits non-zero or reports failed assertions,
-  failed jobs, failed invocation, missing outputs, or upload/staging problems.
-- expect: hands off a structured summary that identifies the observed failure
-  modality and the next reference surface to inspect: Planemo result, Galaxy job
-  API, Galaxy invocation API, history contents, or test assertion report.
+## Case: unaddressable output is a different modality from a failed assertion
+
+- fixture: `content/molds/review-galaxy-workflow/examples/label-test-mismatch/`
+- expect: `status: "fail"` with
+  `failure_modality: "unaddressable-output"` and
+  `next_reference_surface: "galaxy-workflow-testability-design"` — not
+  `assertion-failure`. `failure_detail` names both the test key
+  (`multiqc_html_report`) and the workflow's actual promoted output
+  (`MultiQC Report`), so the reader can see which side is wrong.
+
+## Case: no test file hands off honestly instead of aborting
+
+- fixture: `content/molds/review-galaxy-workflow/examples/missing-test/`
+  (ships no `galaxy-workflow.gxwf-tests.yml`)
+- expect: `status: "test-definition-missing"` with `paths_searched[]` listing
+  the three candidate filenames tried, `planemo_result: null`,
+  `failure_modality: null`, and `next_reference_surface: null`. The absence of a
+  test is never reported as a pass, and the result artifact is still emitted so
+  [[review-galaxy-workflow]] can cite it.
+
+## Coverage gaps
+
+No committed fixture exercises `status: "not-run"`, or a run against an
+existing rather than a Planemo-managed Galaxy (`galaxy_mode: "existing"`);
+every fixture records `galaxy_mode: "managed"`. No case asserts either until a
+fixture binds them.

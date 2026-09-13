@@ -1,0 +1,136 @@
+{
+  "summary_version": "1",
+  "source": {
+    "ecosystem": "galaxy",
+    "workflow": "Variant Calling Tutorial",
+    "url": "starting-galaxy-workflow.gxwf.yml",
+    "version": null,
+    "license": "MIT",
+    "slug": "variant-calling-tutorial",
+    "format": "gxformat2",
+    "original_format": "gxformat2",
+    "release": "0.1",
+    "annotation": "Call variants for the tutorial sample against the tutorial reference."
+  },
+  "documents": {
+    "entrypoint": "starting-galaxy-workflow.gxwf.yml",
+    "converted_path": null,
+    "validation": {
+      "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
+      "status": "valid",
+      "diagnostics": []
+    }
+  },
+  "workflow_inputs": [
+    {
+      "id": "Aligned Reads",
+      "label": "Aligned Reads",
+      "type": "data",
+      "collection_type": null,
+      "optional": false,
+      "default": null,
+      "format": [
+        "bam"
+      ],
+      "doc": null
+    }
+  ],
+  "workflow_outputs": [
+    {
+      "id": "Variant Calls",
+      "label": "Variant Calls",
+      "source": "call_variants/vcf",
+      "type": "vcf",
+      "doc": null
+    }
+  ],
+  "steps": [
+    {
+      "id": "call_variants",
+      "label": null,
+      "type": "tool",
+      "tool_id": "toolshed.g2.bx.psu.edu/repos/iuc/freebayes/freebayes/1.3.6+galaxy0",
+      "tool_version": "1.3.6+galaxy0",
+      "tool_shed_repository": {
+        "name": "freebayes",
+        "owner": "iuc",
+        "changeset_revision": null,
+        "tool_shed": "toolshed.g2.bx.psu.edu"
+      },
+      "tool_state": {
+        "reference_source": {
+          "reference_source_selector": "history",
+          "ref_file": "/data/tutorials/mrsa/reference_GCF_000008985.1.fasta"
+        },
+        "target_region": "NC_002951.2:100000-200000"
+      },
+      "in": [
+        {
+          "name": "alignment",
+          "source": "Aligned Reads",
+          "default": null,
+          "value_from": null
+        }
+      ],
+      "out": [
+        {
+          "id": "vcf",
+          "actions": null
+        }
+      ],
+      "when": null,
+      "annotation": null
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "Aligned Reads",
+        "kind": "workflow-input",
+        "label": "Aligned Reads"
+      },
+      {
+        "id": "call_variants",
+        "kind": "step",
+        "label": null
+      },
+      {
+        "id": "Variant Calls",
+        "kind": "workflow-output",
+        "label": "Variant Calls"
+      }
+    ],
+    "edges": [
+      {
+        "from": "Aligned Reads",
+        "to": "call_variants",
+        "via": []
+      },
+      {
+        "from": "call_variants",
+        "to": "Variant Calls",
+        "via": []
+      }
+    ]
+  },
+  "tests": [
+    {
+      "name": "Call variants for the tutorial sample.",
+      "job_path": "galaxy-workflow.gxwf-tests.yml",
+      "expected_outputs": [
+        {
+          "id": "Variant Calls",
+          "path": null,
+          "url": null,
+          "filetype": null,
+          "checksum": null,
+          "assertions": [
+            "has_text: #CHROM"
+          ]
+        }
+      ],
+      "provenance": "sibling tests file galaxy-workflow.gxwf-tests.yml"
+    }
+  ],
+  "warnings": []
+}

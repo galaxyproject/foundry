@@ -9,8 +9,8 @@ tags:
   - lifecycle/publication
 status: revised
 created: 2026-04-30
-revised: 2026-09-10
-revision: 19
+revised: 2026-09-12
+revision: 20
 summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
 
@@ -195,6 +195,21 @@ The Foundry's first `GALAXY → GALAXY` (edit) pipeline: it consumes an existing
 
 Test-plan handoff: like every Galaxy-targeting pipeline, this one places a dedicated `*-to-galaxy-test-plan` producer before `implement-galaxy-workflow-test`. The update case gets its own — `changeset-to-galaxy-test-plan` — rather than reusing the freeform one, because its inputs and semantics are update-specific: it carries the existing workflow's tests forward as a regression baseline (`source.derived_from: mixed`) and only augments for the change-set's deltas, where the freeform Mold synthesizes a plan from scratch. `test-data-refs` come from the baseline's existing fixtures, with `find-test-data` reached only when a change-set-added input needs new data.
 
+### GALAXY WORKFLOW REVIEW
+
+The Foundry's first `lifecycle/review` journey, and the first pipeline whose output is a report rather than a workflow. An existing Galaxy workflow — normally the subject of a pull request — is summarized, structurally validated, and actually run, and only then reviewed against the pinned upstream IWC review command. The name carries no source-to-target arrow because review emits advisory findings, not a new workflow format.
+
+1. `summarize-galaxy-workflow` — normalize the descriptor and inventory the interface, steps, labels, and existing tests, so the reviewer cites a summary instead of re-extracting one.
+2. `validate-galaxy-workflow` — terminal structural validation, now emitting a citable `galaxy-workflow-validation-result` handoff rather than leaving its findings as prose.
+3. `run-workflow-test` — execute the test via Planemo and hand on an honest result, including the `test-definition-missing` and `not-run` states that keep a review possible when nothing could run.
+4. `review-galaxy-workflow` — apply the pinned IWC policy item by item, citing the preceding evidence wherever it answers a checklist question, and emit one advisory recommendation.
+
+Only phase 4 is new. The three ahead of it already produced exactly the evidence a review needs, and the two small additive changes to phases 2 and 3 close different gaps. `validate-galaxy-workflow` declared no artifacts at all, so its change is what makes its findings *citable* rather than merely spoken. `run-workflow-test` already emitted its result; its change is about honesty, adding the `test-definition-missing` and `not-run` states so a run that could not execute hands on that fact instead of nothing.
+
+Two harness-owned gates sit ahead of phase 3, and both stop the run rather than degrading it: the local worktree commit must equal the reviewed head SHA, and the caller must explicitly confirm the checkout is trusted for Planemo execution. There is no privileged hosted execution of arbitrary fork heads in v1. A red phase 2 or phase 3, by contrast, does *not* stop the journey — losing the review because the evidence was bad would discard the finding a reviewer most needs.
+
+The pipeline is read-only end to end. It cannot approve, comment, push, mark ready, or merge, and it cannot edit the workflow it reviews. An accepted edit belongs to the maturation harness proposed in galaxyproject/foundry#492, not to this journey, and is routed through `apply-galaxy-workflow-changeset` where applicable.
+
 ## Cross-pipeline observations
 
 - **Source-specific (one per source)**: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`, `summarize-galaxy-workflow`. Paper and interview share the `freeform-summary` handoff; Nextflow, CWL, and Galaxy-as-source keep structured source-specific schemas (`summarize-galaxy-workflow` reads an existing Galaxy workflow for the edit pipeline).
@@ -208,6 +223,7 @@ Test-plan handoff: like every Galaxy-targeting pipeline, this one places a dedic
   - Per-step (CWL): `summarize-cwl-tool`, `implement-cwl-tool-step`.
   - Validate: `validate-galaxy-workflow`, `validate-cwl`. (Per-step Galaxy validation moved into `advance-galaxy-draft-step` via `gxwf draft-validate --concrete`.)
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
+- **Lifecycle (post-construction)**: `GALAXY WORKFLOW REVIEW` reuses `summarize-galaxy-workflow` and the validate/run pair as *evidence producers* rather than as construction steps, and adds one Mold that reads them. The pattern generalizes: a lifecycle pipeline needs no new spine, only one action and a reason to run the existing tail first.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
 - **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` derives fixtures from a paper-origin `freeform-summary`; `nextflow-to-test-data` and `cwl-to-test-data` resolve the source's own declared fixtures (`test_fixtures` / `tests[]`) into `test-data-refs`. Each is the first leg of its pipeline's `test-data-resolution` chain, falling through to `find-test-data` (search) then user-supplied data. Interview starts skip directly to `find-test-data` / user-supplied data until a real interview-specific fixture derivation Mold exists.

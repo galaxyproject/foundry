@@ -6,6 +6,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-workflow-review]] | Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy. | draft | 2026-09-12 | 1 |
 | [[interview-to-galaxy]] | Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. | reviewed | 2026-07-24 | 2 |
 | [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | reviewed | 2026-07-24 | 4 |
 | [[update-interview-to-galaxy]] | Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. | reviewed | 2026-07-24 | 2 |
@@ -18,6 +19,9 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[review-galaxy-workflow]] | Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review. | draft | 2026-09-12 | 1 |
+| [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-09-12 | 7 |
+| [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | reviewed | 2026-09-12 | 5 |
 | [[mature-galaxy-workflow-for-iwc]] | Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set. | draft | 2026-09-10 | 1 |
 | [[summarize-nextflow]] | Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds. | reviewed | 2026-09-08 | 15 |
 | [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-08-29 | 7 |
@@ -51,13 +55,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | reviewed | 2026-07-24 | 5 |
 | [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-07-24 | 2 |
 | [[paper-to-test-data]] | Derive workflow test inputs and expected outputs from a paper. | draft | 2026-07-24 | 2 |
-| [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-07-24 | 6 |
 | [[summarize-cwl-tool]] | Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target. | draft | 2026-07-24 | 2 |
 | [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | reviewed | 2026-07-24 | 8 |
 | [[summarize-galaxy-workflow]] | Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps. | reviewed | 2026-07-24 | 2 |
 | [[summarize-paper]] | Extract methods, tools, sample data, and references from a paper. | draft | 2026-07-24 | 2 |
 | [[validate-cwl]] | Run cwltool --validate / schema lint, classify failures, recommend fixes. | draft | 2026-07-24 | 3 |
-| [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | reviewed | 2026-07-24 | 4 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-07-17 | 1 |
 | [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-06-19 | 4 |
 | [[summarize-cwl]] | Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation. | draft | 2026-05-10 | 2 |

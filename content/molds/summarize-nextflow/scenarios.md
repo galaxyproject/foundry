@@ -159,7 +159,7 @@ are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 
 ## Case: bacass regression pin
 
-- fixture: `casts/claude/summarize-nextflow/runs/nf-core__bacass/summary.json`
+- fixture: `casts/claude/skills/summarize-nextflow/runs/nf-core__bacass/summary.json`
   (current committed run).
 - expect: re-running the CLI against the pinned bacass fixture produces a JSON
   whose normalized form (sorted keys, stable ordering) is byte-identical to the
@@ -168,5 +168,5 @@ are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 
 ## Case: demo regression pin
 
-- fixture: `casts/claude/summarize-nextflow/runs/nf-core__demo/summary.json`.
+- fixture: `casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json`.
 - expect: same contract as bacass.
