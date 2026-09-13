@@ -5,6 +5,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Pipelines
 
 - [[cwl-to-galaxy]] — Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction.
+- [[galaxy-workflow-maturation]] — Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result.
 - [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. *(reviewed)*
 - [[nextflow-to-cwl]] — Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
 - [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. *(reviewed)*
