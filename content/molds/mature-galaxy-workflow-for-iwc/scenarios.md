@@ -1,7 +1,5 @@
 # mature-galaxy-workflow-for-iwc scenarios
 
-Concrete cases for the Mold, evaluated against the abstract properties in `eval.md`.
-
 ## Case: workflow-only input
 
 - fixture: examples/workflow-only/starting-galaxy-workflow.gxwf.yml

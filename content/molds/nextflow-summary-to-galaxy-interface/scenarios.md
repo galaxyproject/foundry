@@ -1,7 +1,5 @@
 # nextflow-summary-to-galaxy-interface scenarios
 
-Concrete cases for `nextflow-summary-to-galaxy-interface`, exercised against the abstract properties in `eval.md`. Each case binds a fixture and states its expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: demo interface identifies the real public surface
 
 - fixture: committed `summarize-nextflow` output for `nf-core__demo`.

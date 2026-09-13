@@ -1,7 +1,5 @@
 # report-foundry-run-feedback scenarios
 
-Concrete cases for the reporting Mold, evaluated against the properties in `eval.md`.
-
 ## Case: completed clean run
 
 - fixture: a valid ledger with `run.status: complete`, every phase `done` and `feedback_checked`,

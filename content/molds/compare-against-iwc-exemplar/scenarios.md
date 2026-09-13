@@ -1,11 +1,5 @@
 # compare-against-iwc-exemplar scenarios
 
-Concrete cases for `compare-against-iwc-exemplar`, exercised against the abstract
-properties in `eval.md`. Each case binds the upstream Galaxy interface and
-data-flow design briefs (the fixture) and states the expected exemplar,
-confidence, and cited alignments; the `eval.md` oracle is applied to whatever the
-case produces.
-
 ## Case: nf-core rnaseq nearest exemplar
 
 - fixture: Galaxy interface + data-flow design briefs derived from nf-core/rnaseq.

@@ -1,8 +1,5 @@
 # NEXTFLOW → CWL pipeline scenarios
 
-Concrete end-to-end journeys for the NEXTFLOW → CWL pipeline, exercised against
-the properties in `eval.md`. A pipeline scenario names the journey input **once**;
-each step's Mold oracle applies to that step's output as the journey advances.
 Materialize Nextflow fixtures with `make fixtures-nextflow`; CWL tool-library
 fixtures with `make fixtures-cwl`.
 

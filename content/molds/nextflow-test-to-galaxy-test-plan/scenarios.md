@@ -1,9 +1,5 @@
 # nextflow-test-to-galaxy-test-plan scenarios
 
-Concrete cases for `nextflow-test-to-galaxy-test-plan`, exercised against the
-abstract properties in `eval.md`. Each case binds a fixture and states its
-expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: schema-valid translated test plan
 
 - fixture: nf-core/bacass or minimal demo Nextflow summary containing nf-test profiles, params, input fixtures, expected outputs, and snapshot evidence.
