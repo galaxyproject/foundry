@@ -38,7 +38,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@galaxy-foundry/cast": "^0.12.2",
+    "@galaxy-foundry/cast": "^0.12.3",
     "@galaxy-foundry/content-reader": "^0.4.0",
     "@galaxy-foundry/kind-manifest": "^0.4.0",
     "@galaxy-foundry/kind-schema": "^0.6.0",
