@@ -96,6 +96,18 @@ jobs:
       - name: Cast bundle verification
         run: make check-verify
 
+      - name: Assembled pipeline harness drift check
+        run: make check-assemble-pipelines
+
+      - name: Planemo pin check
+        run: make check-planemo-pin
+
+      - name: Vendored upstream drift check
+        run: make check-vendored
+
+      - name: Artifact fixture validation
+        run: make check-fixtures
+
       - name: Build site
         run: npm run site:build
 

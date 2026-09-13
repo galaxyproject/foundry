@@ -26,6 +26,7 @@
 - **Never wrap a body wiki-link in backticks.** A backtick means *this is the syntax*, not *this is a link* — that is how `content/meta/architecture.md` names the token and how `content/research/gxy-sketches-alignment/index.md` writes the template slot `[[summary-<source>]]`. The remark transform rewrites text nodes only, so a backticked citation never becomes a link. Write `[[Target]]` bare in prose.
 - **Polished IWC references should survive corpus churn.** Pattern pages, Mold pages, and other polished content should cite abstract IWC workflow IDs without generated extensions or fixture roots, e.g. `transcriptomics/rnaseq-pe/rnaseq-pe`, plus step labels or step IDs when needed. Do not cite generated `.ga`/`.gxwf.yml` paths or line numbers in polished pages; reserve those for surveys, ad-hoc research notes, and local debugging evidence.
 - **Validate before commit.** `npm run validate` checks schema + cross-file resolution. Errors block; warnings are advisory.
+- **A fixture is a claim, so check it.** Any artifact you commit under `examples/` asserts "this is what that Mold emits". `make check-fixtures` settles the schema half against the validator the Mold's cast declares — fix the fixture when it fails, never the schema. The other half no gate can settle: a fixture must also be able to *produce* the outcome the scenario bound to it claims. A schema-valid example that withholds what the Mold needs to reach its stated verdict is still a defect.
 - **Mold IO schemas live in their packages.** Source of truth for Foundry-authored schemas (`summary-nextflow`, `galaxy-tool-discovery`) is `packages/<name>-schema/src/<name>.schema.json`. The vendored test schema (`tests`) lives in `packages/tests-format-schema/src/`, synced from `@galaxy-tool-util/schema`. Mold frontmatter cites schemas via `[[wiki-link]]` to a `type: schema` note in `content/schemas/<name>.md`; the note declares `package` and `package_export`, and cast imports the named runtime export at build time and serializes it into the bundle. Producer Molds attach a schema to their output via `output_artifacts[].schema`; consumers inherit via shared `id`. There is no `content/schemas/*.schema.json` mirror — only the human-readable schema notes live there.
 - **Don't edit generated files by hand.** `Dashboard.md` and `Index.md` are produced by `scripts/generate-*.ts`. Cast bundles under `casts/` (`SKILL.md`, `_provenance.json`, `_verify.json`, copied references) are produced by `foundry-build cast` / `scripts/cast-mold.ts`; change the Mold, caster, schema package, or reference source and regenerate instead. Assembled pipeline harnesses under `casts/claude/skills/pipeline-*/` (`SKILL.md`, `_assembly.json`) are produced by `foundry-build assemble-pipeline <slug>` / `make assemble-pipelines`; they project the Pipeline note's `phases:` spine plus each Mold's `summary`/`loop_endstate` and the pipeline's `harness_notes` — edit those sources and regenerate, don't hand-edit the harness. `make check-assemble-pipelines` is the byte-diff drift gate. If generated cast files conflict during cherry-pick/merge, prefer rerunning the caster after resolving source files, not hand-patching generated JSON. `glossary.md` is hand-curated and skipped by the validator.
 
@@ -66,6 +67,18 @@ make fixtures-skeletons # materialize workflow-fixtures/iwc-skeletons from iwc-f
 make fixtures-verify   # verify materialized fixture SHAs
 make fixtures-clean    # remove generated fixture dirs
 ```
+
+`make check` is the full gate, and CI runs every part of it:
+
+```sh
+make check   # validate check-generated check-planemo-pin check-vendored
+             # check-casts check-verify check-assemble-pipelines check-fixtures test
+```
+
+Two of those are worth knowing separately:
+
+- `make check-fixtures` runs every committed artifact fixture through the validator its Mold's cast declares, resolved from that cast's `_verify.json`. Nothing else looks at `examples/` — a green `validate` says the *notes* are well formed, never that a fixture is what it claims to be. It also prints which declared artifacts have no committed fixture at all.
+- `make check-vendored` checks the URL-sourced vendored files everywhere, and skips the ones resolving through `common_paths.yml` when the upstream checkout is absent, naming each. It reports the scope it actually covered; `npm run check:vendored -- --strict` fails instead of skipping, for a machine that has every upstream cloned.
 
 ## Vendored planemo artifacts
 
