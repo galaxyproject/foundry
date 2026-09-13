@@ -1,9 +1,5 @@
 # interview-to-freeform-summary scenarios
 
-Concrete cases for `interview-to-freeform-summary`, exercised against the
-abstract properties in `eval.md`. Each case binds a fixture and states its
-expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: rich interview round-trips
 
 - fixture: an interview transcript that names methods, at least one tool,

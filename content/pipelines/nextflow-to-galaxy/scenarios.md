@@ -1,10 +1,6 @@
 # NEXTFLOW → GALAXY pipeline scenarios
 
-Concrete end-to-end journeys for the NEXTFLOW → GALAXY pipeline, exercised
-against the properties in `eval.md`. A pipeline scenario names the journey input
-**once**; each step's Mold oracle applies to that step's output as the journey
-advances (it does not re-list the per-Mold scenarios). Materialize Nextflow
-fixtures with `make fixtures-nextflow`.
+Materialize Nextflow fixtures with `make fixtures-nextflow`.
 
 ## Case: nf-core/demo end to end
 

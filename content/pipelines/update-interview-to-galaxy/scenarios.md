@@ -1,9 +1,8 @@
 # UPDATE-INTERVIEW → GALAXY pipeline scenarios
 
-Concrete end-to-end journeys for the UPDATE-INTERVIEW → GALAXY pipeline. Unlike
-the greenfield `→ GALAXY` pipelines, an update scenario names **two** inputs: an
-existing Galaxy workflow (the thing being modified) and an interview result (the
-requested change). The journey emits a modified workflow.
+Unlike the greenfield `→ GALAXY` pipelines, an update scenario names **two**
+inputs: an existing Galaxy workflow (the thing being modified) and an interview
+result (the requested change). The journey emits a modified workflow.
 
 For update scenarios the oracle carries two properties greenfield pipelines
 don't have:

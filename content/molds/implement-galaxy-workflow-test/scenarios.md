@@ -1,9 +1,5 @@
 # implement-galaxy-workflow-test scenarios
 
-Concrete cases for `implement-galaxy-workflow-test`, exercised against the
-abstract properties in `eval.md`. Each case binds a fixture and states its
-expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: tests-format schema gate
 
 - fixture: Galaxy workflow test plan for an IWC-style workflow such as SARS-CoV-2 variant calling, ChIPseq-SR, or RNAseq.

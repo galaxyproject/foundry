@@ -1,7 +1,5 @@
 # convert-nfcore-module-to-galaxy-tool scenarios
 
-Concrete cases for `convert-nfcore-module-to-galaxy-tool`, exercised against the abstract properties in `eval.md`. Each case binds a module-source fixture and states what its cast output is expected to contain; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: generated wrapper readiness
 
 - fixture: cast output for one nf-core module directory with `main.nf`, `meta.yml`, `environment.yml`, and at least one usable nf-test fixture.

@@ -1,9 +1,5 @@
 # cwl-summary-to-galaxy-template scenarios
 
-Concrete cases for `cwl-summary-to-galaxy-template`, exercised against the
-abstract properties in `eval.md`. Each case binds a fixture and states its
-expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: demo skeleton is a stub, not a runnable workflow
 
 - fixture: a committed CWL summary plus its interface and data-flow briefs.

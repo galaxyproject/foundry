@@ -1,9 +1,5 @@
 # find-test-data scenarios
 
-Concrete cases for `find-test-data`, exercised against the abstract properties
-in `eval.md`. Each case binds a fixture and states its expected values; the
-`eval.md` oracle is applied to whatever the case produces.
-
 ## Case: no fabricated references
 
 - fixture: data-flow brief naming several workflow inputs where at least one has no obvious public test dataset.

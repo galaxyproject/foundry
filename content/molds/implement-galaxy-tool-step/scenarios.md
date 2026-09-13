@@ -1,7 +1,5 @@
 # implement-galaxy-tool-step scenarios
 
-Concrete cases for `implement-galaxy-tool-step`, exercised against the abstract properties in `eval.md`. Each case binds a fixture and states its expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: concrete step preserves failure evidence
 
 - fixture: abstract step plus Galaxy tool summary where the wrapper defines exit-code, stdio regex, strict-shell, or dynamic output behavior.

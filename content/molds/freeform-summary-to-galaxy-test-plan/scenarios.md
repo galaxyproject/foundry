@@ -1,9 +1,5 @@
 # freeform-summary-to-galaxy-test-plan scenarios
 
-Concrete cases for `freeform-summary-to-galaxy-test-plan`, exercised against the
-abstract properties in `eval.md`. Each case binds a fixture and states its
-expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: schema-valid synthesized test plan
 
 - fixture: a paper- or interview-derived free-form summary plus the freeform-to-Galaxy interface and data-flow briefs for the same workflow.

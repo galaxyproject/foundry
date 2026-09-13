@@ -1,9 +1,5 @@
 # cwl-summary-to-galaxy-interface scenarios
 
-Concrete cases for `cwl-summary-to-galaxy-interface`, exercised against the
-abstract properties in `eval.md`. Each case binds a fixture and states its
-expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: secondaryFiles are flagged, not dropped
 
 - fixture: a summary with at least one input or output declaring required `secondaryFiles`.

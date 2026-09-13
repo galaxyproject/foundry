@@ -1,9 +1,5 @@
 # cwl-summary-to-galaxy-data-flow scenarios
 
-Concrete cases for `cwl-summary-to-galaxy-data-flow`, exercised against the
-abstract properties in `eval.md`. Each case binds a fixture shape and states its
-expected values; the `eval.md` oracle is applied to whatever the case produces.
-
 ## Case: secondaryFiles plumbing visible
 
 - fixture: a summary where at least one step input or workflow output requires `secondaryFiles`.

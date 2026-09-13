@@ -1,10 +1,7 @@
 # repair-galaxy-draft-topology scenarios
 
-Concrete cases for `repair-galaxy-draft-topology`, exercised against the abstract
-properties in `eval.md`. Each case binds a blocked-draft shape and states what it
-should yield; the oracle applies to whatever the case produces. No fixtures are
-materialized under `examples/` yet — each case describes the draft and ledger
-pair to build.
+No fixtures are materialized under `examples/` yet — each case describes the
+draft and ledger pair to build.
 
 ## Case: blocked step with a reachable producer
 
