@@ -2403,4 +2403,27 @@ describe("validateDirectory (cross-file)", () => {
     ]);
     expect(blocks.get(path.join(dir, "molds/producer-x/index.md"))).toHaveLength(2);
   });
+  // Two notes, one wiki-link address. `patterns/foo/bar.md` and `patterns/foo-bar.md` have
+  // distinct ids and distinct pages, but an address is an id flattened and slugified, so both
+  // land on `foo-bar` — the later one takes it and the earlier becomes unreachable by link.
+  //
+  // Nothing used to say so. The map is last-wins by construction, so the losing note kept its
+  // page, kept validating, and simply stopped being linkable; every `[[foo-bar]]` in the corpus
+  // resolved, just not always to the note its author meant. The reader reports the contest now,
+  // and whether a corpus may hold an unaddressable note is this instance's answer to give.
+  it("rejects two notes claiming one wiki-link address", () => {
+    writeFm(path.join(dir, "patterns/foo/bar.md"), patternRequired({ title: "Nested" }));
+    writeFm(path.join(dir, "patterns/foo-bar.md"), patternRequired({ title: "Flat" }));
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("accepts two notes whose addresses differ only after slugifying distinct ids", () => {
+    writeFm(path.join(dir, "patterns/foo/bar.md"), patternRequired({ title: "Nested" }));
+    writeFm(path.join(dir, "patterns/foo-baz.md"), patternRequired({ title: "Flat" }));
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBe(0);
+  });
 });

@@ -208,14 +208,43 @@ function validateScenariosCompanion(
 //
 // Narrowed to files that validated, which is this command's own rule and not the reader's: a
 // note whose frontmatter is broken should not be reachable by a link the same run calls good.
-function buildSlugMap(files: FileMeta[], contentRoot: string): Map<string, string> {
+function buildSlugMap(
+  files: FileMeta[],
+  contentRoot: string,
+): { slugMap: Map<string, string>; contested: CrossFileFinding[] } {
   const valid = new Map(files.map((f) => [path.resolve(f.path), f.path]));
-  const m = new Map<string, string>();
-  for (const [address, note] of readContent(contentRoot, GALAXY_SLUG_ALIASES).notesByAddress) {
-    const full = valid.get(path.resolve(contentRoot, path.relative(CONTENT_DIR, note.file)));
-    if (full) m.set(address, full);
+  const validPath = (file: string): string | undefined =>
+    valid.get(path.resolve(contentRoot, path.relative(CONTENT_DIR, file)));
+
+  const index = readContent(contentRoot, GALAXY_SLUG_ALIASES);
+  const slugMap = new Map<string, string>();
+  for (const [address, note] of index.notesByAddress) {
+    const full = validPath(note.file);
+    if (full) slugMap.set(address, full);
   }
-  return m;
+
+  // An address is an id flattened and slugified, so two notes with distinct ids and distinct
+  // pages can meet on one — `a/b.md` and `a-b.md`. The reader keeps both routed and hands the
+  // address to the last of them, which is a page that exists and cannot be linked to. Whether
+  // that is allowed is ours to say, and the answer is no: every note in this corpus is reachable
+  // by the address its own id spells.
+  //
+  // Narrowed the same way the map is. A note whose frontmatter is broken is already reported,
+  // and naming it a second time as the winner of a contest it may not be in reads as a cause.
+  const contested: CrossFileFinding[] = [];
+  for (const { address, notes } of index.duplicateAddresses) {
+    const claimants = notes.filter((note) => validPath(note.file));
+    if (claimants.length < 2) continue;
+    const holder = claimants[claimants.length - 1]!;
+    for (const loser of claimants.slice(0, -1)) {
+      contested.push({
+        path: validPath(loser.file)!,
+        severity: "error",
+        message: `wiki-link address '${address}' is also claimed by ${holder.file}, which holds it — this note is unreachable by wiki-link`,
+      });
+    }
+  }
+  return { slugMap, contested };
 }
 
 /** `related_patterns` and `related_molds` resolve to a note of the kind the field names. */
@@ -1502,7 +1531,7 @@ export function validateDirectory(opts: ValidateOptions): {
   }
 
   // Cross-file passes.
-  const slugMap = buildSlugMap(validFiles, opts.directory);
+  const { slugMap, contested } = buildSlugMap(validFiles, opts.directory);
   const metaByPath = new Map<string, Frontmatter>();
   for (const f of validFiles) metaByPath.set(f.path, f.meta);
 
@@ -1519,6 +1548,7 @@ export function validateDirectory(opts: ValidateOptions): {
       message,
     })),
   );
+  crossFindings.push(...contested);
   crossFindings.push(...validateRelatedFields(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
