@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Collection: swap nesting with Apply Rules"
 aliases:
   - "regroup list:list by inner identifier"
@@ -12,8 +12,8 @@ tags:
   - topic/collection-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-13
+revision: 3
 summary: "Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns."
 related_notes:
   - "[[iwc-transformations-survey]]"
@@ -24,6 +24,8 @@ related_patterns:
   - "[[relabel-via-rules-and-find-replace]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/collection-swap-nesting-with-apply-rules/swap-nesting.gxwf-test.yml
 iwc_exemplars:
   - workflow: virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping
     steps:

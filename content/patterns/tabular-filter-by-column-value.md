@@ -1,14 +1,14 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Tabular: filter rows by column value"
 tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-13
+revision: 3
 summary: "Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
@@ -18,6 +18,8 @@ related_patterns:
   - "[[tabular-sql-query]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/tabular-filter-by-column-value/filter-by-column-value.gxwf-test.yml
 iwc_exemplars:
   - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
     why: "Shows a literal Filter1 predicate over a string status column with one header line."

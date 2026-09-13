@@ -1,0 +1,48 @@
+- doc: "sample -> segment becomes segment -> sample; every leaf dataset lands in the transposed cell"
+  job:
+    sample_by_segment:
+      class: Collection
+      collection_type: "list:list"
+      elements:
+        - identifier: sampleA
+          class: Collection
+          elements:
+            - identifier: seg1
+              class: File
+              path: test-data/a1.txt
+              filetype: txt
+            - identifier: seg2
+              class: File
+              path: test-data/a2.txt
+              filetype: txt
+        - identifier: sampleB
+          class: Collection
+          elements:
+            - identifier: seg1
+              class: File
+              path: test-data/b1.txt
+              filetype: txt
+            - identifier: seg2
+              class: File
+              path: test-data/b2.txt
+              filetype: txt
+  outputs:
+    segment_by_sample:
+      attributes:
+        type: "list:list"
+      element_count: 2
+      element_tests:
+        seg1:
+          count: 2
+          element_tests:
+            sampleA:
+              file: test-data/a1.txt
+            sampleB:
+              file: test-data/b1.txt
+        seg2:
+          count: 2
+          element_tests:
+            sampleA:
+              file: test-data/a2.txt
+            sampleB:
+              file: test-data/b2.txt

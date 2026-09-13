@@ -1,0 +1,30 @@
+class: GalaxyWorkflow
+name: "Swap collection nesting with Apply Rules"
+inputs:
+  - id: sample_by_segment
+    type: collection
+    collection_type: "list:list"
+outputs:
+  - id: segment_by_sample
+    outputSource: swap_axes/output
+steps:
+  - id: swap_axes
+    label: swap_axes
+    tool_id: __APPLY_RULES__
+    in:
+      - id: input
+        source: sample_by_segment
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      rules:
+        rules:
+          - type: add_column_metadata
+            value: identifier0
+          - type: add_column_metadata
+            value: identifier1
+        mapping:
+          - type: list_identifiers
+            columns: [1, 0]

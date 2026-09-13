@@ -1,0 +1,27 @@
+- doc: "Singleton unboxes to a dataset; a multi-element list silently yields only the first element"
+  job:
+    singleton:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: only
+          class: File
+          path: test-data/only.txt
+          filetype: txt
+    multi:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: first
+          class: File
+          path: test-data/first.txt
+          filetype: txt
+        - identifier: second
+          class: File
+          path: test-data/second.txt
+          filetype: txt
+  outputs:
+    unboxed:
+      file: test-data/only.txt
+    unboxed_from_multi:
+      file: test-data/first.txt

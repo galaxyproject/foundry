@@ -1,0 +1,47 @@
+- doc: "list:list flattens to list; outer and inner identifiers are joined, not discarded"
+  job:
+    nested:
+      class: Collection
+      collection_type: "list:list"
+      elements:
+        - identifier: sampleA
+          class: Collection
+          elements:
+            - identifier: seg1
+              class: File
+              path: test-data/a1.txt
+              filetype: txt
+            - identifier: seg2
+              class: File
+              path: test-data/a2.txt
+              filetype: txt
+        - identifier: sampleB
+          class: Collection
+          elements:
+            - identifier: seg1
+              class: File
+              path: test-data/b1.txt
+              filetype: txt
+  outputs:
+    flat_underscore:
+      attributes:
+        type: list
+      element_count: 3
+      element_tests:
+        sampleA_seg1:
+          file: test-data/a1.txt
+        sampleA_seg2:
+          file: test-data/a2.txt
+        sampleB_seg1:
+          file: test-data/b1.txt
+    flat_dash:
+      attributes:
+        type: list
+      element_count: 3
+      element_tests:
+        sampleA-seg1:
+          file: test-data/a1.txt
+        sampleA-seg2:
+          file: test-data/a2.txt
+        sampleB-seg1:
+          file: test-data/b1.txt

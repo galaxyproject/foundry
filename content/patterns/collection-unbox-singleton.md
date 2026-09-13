@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Collection: unbox singleton"
 aliases:
   - "extract first dataset"
@@ -12,14 +12,16 @@ tags:
   - topic/collection-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-13
+revision: 3
 summary: "Use __EXTRACT_DATASET__ with which: first when a one-element collection must become a dataset."
 related_notes:
   - "[[iwc-transformations-survey]]"
   - "[[galaxy-apply-rules-dsl]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/collection-unbox-singleton/unbox-singleton.gxwf-test.yml
 iwc_exemplars:
   - workflow: VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8
     why: "Repeatedly unboxes singleton QC/report outputs such as alignment scores, alignment stats, and snapshots."

@@ -1,0 +1,41 @@
+class: GalaxyWorkflow
+name: "Unbox singleton collection"
+inputs:
+  - id: singleton
+    type: collection
+    collection_type: list
+  - id: multi
+    type: collection
+    collection_type: list
+outputs:
+  - id: unboxed
+    outputSource: unbox_singleton/output
+  - id: unboxed_from_multi
+    outputSource: unbox_multi/output
+steps:
+  - id: unbox_singleton
+    label: unbox_singleton
+    tool_id: __EXTRACT_DATASET__
+    in:
+      - id: input
+        source: singleton
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      which:
+        which_dataset: first
+  - id: unbox_multi
+    label: unbox_multi
+    tool_id: __EXTRACT_DATASET__
+    in:
+      - id: input
+        source: multi
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      which:
+        which_dataset: first

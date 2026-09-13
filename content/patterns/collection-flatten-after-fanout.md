@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Collection: flatten after fan-out"
 aliases:
   - "collection flatten after fanout"
@@ -13,8 +13,8 @@ tags:
   - topic/collection-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-13
+revision: 3
 summary: "Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters."
 related_notes:
   - "[[iwc-transformations-survey]]"
@@ -24,6 +24,8 @@ related_patterns:
   - "[[harmonize-by-sortlist-from-identifiers]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/collection-flatten-after-fanout/flatten-after-fanout.gxwf-test.yml
 iwc_exemplars:
   - workflow: microbiome/mags-building/MAGs-generation
     why: "Flattens a list:list of bins from all samples for pool-level processing."

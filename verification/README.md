@@ -17,6 +17,23 @@ Each workflow directory should contain:
 
 Pattern pages link directly to the workflow test case through `verification_paths` frontmatter.
 
+## Asserting collection outputs
+
+Planemo 0.75.47 checks a workflow output as a collection only when its test block carries an `element_tests` key. The newer `class: Collection` / `elements:` spelling used by Galaxy's own framework workflow tests is **silently ignored** here — the output falls back to a dataset comparison and the test fails with "No path specified for expected output file". Collection type and element count live under `attributes.type` and `element_count`; a top-level `collection_type` is dropped without complaint.
+
+```yaml
+outputs:
+  flat:
+    attributes:
+      type: list
+    element_count: 3
+    element_tests:
+      sampleA_seg1:
+        file: test-data/a1.txt
+```
+
+Nest `element_tests` inside an element to reach into a `list:list`, and use `count` (not `element_count`) at that inner level.
+
 ## Local runs
 
 From a workflow directory, run Planemo directly:
