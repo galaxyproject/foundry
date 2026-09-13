@@ -31,11 +31,7 @@ related_notes:
 
 # GALAXY WORKFLOW MATURATION
 
-An existing Galaxy workflow enters, the pinned IWC publication checklist is applied to it, and the matured result is validated and run before anyone looks at it. Lifted from `content/meta/harness-pipelines.md` §"GALAXY WORKFLOW MATURATION".
-
-**Lifecycle, not translation.** The workflow enters and leaves as a Galaxy workflow, so `target/galaxy` stays accurate; `lifecycle/publication` says *why* it is being changed. IWC-Lab is a publication profile and a destination, not a workflow target format — which is why this pipeline does not borrow the `<source>-to-<target>` naming the translation pipelines use.
-
-**Why it starts at an existing workflow.** No construction pipeline is rerun. Phase 1 exists only to normalize and inventory: `.ga` becomes gxformat2, and a `summary-galaxy-workflow` gives phase 2 the interface, step, and label facts it would otherwise re-derive. A workflow that never came from a Foundry run is a first-class input here.
+An existing Galaxy workflow enters, the pinned IWC publication checklist is applied to it, and the matured result is validated and run before anyone looks at it.
 
 **Why validate-then-run follows the checklist pass.** Checklist edits rename interface labels and can promote a hard-coded value into a real input — precisely the edits that break a test. Static validation catches structural damage cheaply; Planemo catches the rest. Running them *after* the checklist pass, rather than trusting it, is the point.
 
