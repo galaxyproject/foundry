@@ -1,11 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 
 import {
-  defaultPiTestAuthDir,
   expectedArtifactsFromSkill,
   inspectPiTestAuth,
   PI_TEST_AUTH_PROVIDER,
@@ -23,17 +21,14 @@ import {
 import type { ProvenanceArtifactInput } from "../lib/artifact-contract.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
+import {
+  createWorkerRuntimeArgScanner,
+  defaultWorkerRunDir,
+  parsePositiveInteger,
+  readOption,
+} from "../lib/worker-runtime-args.js";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const THINKING_LEVELS = new Set<PiThinkingLevel>([
-  "off",
-  "minimal",
-  "low",
-  "medium",
-  "high",
-  "xhigh",
-  "max",
-]);
 
 interface AssemblyPhase {
   phase: number;
@@ -169,123 +164,45 @@ export interface TestPipelineCliArgs extends Omit<TestPipelineOptions, "repoRoot
   runDir: string | null;
 }
 
-function takeValue(argv: string[], index: number, flag: string): string {
-  const value = argv[index + 1];
-  if (!value || value.startsWith("--")) throw new Error(`${flag} requires a value`);
-  return value;
-}
-
-function parsePositiveInteger(value: string, flag: string): number {
-  const parsed = Number(value);
-  if (!Number.isSafeInteger(parsed) || parsed < 1) {
-    throw new Error(`${flag} must be a positive integer`);
-  }
-  return parsed;
-}
-
-function parseThinking(value: string): PiThinkingLevel {
-  if (!THINKING_LEVELS.has(value as PiThinkingLevel)) {
-    throw new Error(`invalid --thinking value: ${value}`);
-  }
-  return value as PiThinkingLevel;
-}
-
 export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
+  const runtime = createWorkerRuntimeArgScanner();
   const positional: string[] = [];
-  let root: string | null = null;
   let scenario: string | null = null;
   let through: string | undefined;
   let trials = 1;
-  let runDir: string | null = null;
-  let provider: string | null = null;
-  let model: string | null = null;
-  let thinking: PiThinkingLevel | undefined;
-  let timeoutMs = 10 * 60 * 1000;
-  let tools: string[] | undefined;
-  let sandbox: SandboxMode = "local";
-  let sandboxImage: string | undefined;
-  let sandboxNetwork: ContainerNetworkPolicy = "bridge";
-  const credentialEnv: string[] = [];
-  let piTestAuth = false;
-  let piTestAuthDir: string | undefined;
 
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i]!;
-    if (value === "--root") root = takeValue(argv, i++, value);
-    else if (value.startsWith("--root=")) root = value.slice("--root=".length);
-    else if (value === "--scenario") scenario = takeValue(argv, i++, value);
-    else if (value.startsWith("--scenario=")) scenario = value.slice("--scenario=".length);
-    else if (value === "--through") through = takeValue(argv, i++, value);
-    else if (value.startsWith("--through=")) through = value.slice("--through=".length);
-    else if (value === "--trials")
-      trials = parsePositiveInteger(takeValue(argv, i++, value), value);
-    else if (value.startsWith("--trials=")) {
-      trials = parsePositiveInteger(value.slice("--trials=".length), "--trials");
-    } else if (value === "--run-dir") runDir = takeValue(argv, i++, value);
-    else if (value.startsWith("--run-dir=")) runDir = value.slice("--run-dir=".length);
-    else if (value === "--engine") {
-      const engine = takeValue(argv, i++, value);
-      if (engine !== "pi") throw new Error("--engine currently supports only pi");
-    } else if (value.startsWith("--engine=")) {
-      if (value.slice("--engine=".length) !== "pi") {
-        throw new Error("--engine currently supports only pi");
-      }
-    } else if (value === "--provider") provider = takeValue(argv, i++, value);
-    else if (value.startsWith("--provider=")) provider = value.slice("--provider=".length);
-    else if (value === "--model") model = takeValue(argv, i++, value);
-    else if (value.startsWith("--model=")) model = value.slice("--model=".length);
-    else if (value === "--thinking") thinking = parseThinking(takeValue(argv, i++, value));
-    else if (value.startsWith("--thinking=")) {
-      thinking = parseThinking(value.slice("--thinking=".length));
-    } else if (value === "--timeout-seconds") {
-      timeoutMs = Number(takeValue(argv, i++, value)) * 1000;
-    } else if (value.startsWith("--timeout-seconds=")) {
-      timeoutMs = Number(value.slice("--timeout-seconds=".length)) * 1000;
-    } else if (value === "--tools") {
-      tools = takeValue(argv, i++, value).split(",").filter(Boolean);
-    } else if (value.startsWith("--tools=")) {
-      tools = value.slice("--tools=".length).split(",").filter(Boolean);
-    } else if (value === "--sandbox") {
-      const requested = takeValue(argv, i++, value);
-      if (requested !== "local" && requested !== "container") {
-        throw new Error("--sandbox must be local or container");
-      }
-      sandbox = requested;
-    } else if (value.startsWith("--sandbox=")) {
-      const requested = value.slice("--sandbox=".length);
-      if (requested !== "local" && requested !== "container") {
-        throw new Error("--sandbox must be local or container");
-      }
-      sandbox = requested;
-    } else if (value === "--sandbox-image") {
-      sandboxImage = takeValue(argv, i++, value);
-    } else if (value.startsWith("--sandbox-image=")) {
-      sandboxImage = value.slice("--sandbox-image=".length);
-    } else if (value === "--sandbox-network") {
-      const requested = takeValue(argv, i++, value);
-      if (requested !== "bridge" && requested !== "none") {
-        throw new Error("--sandbox-network must be bridge or none");
-      }
-      sandboxNetwork = requested;
-    } else if (value.startsWith("--sandbox-network=")) {
-      const requested = value.slice("--sandbox-network=".length);
-      if (requested !== "bridge" && requested !== "none") {
-        throw new Error("--sandbox-network must be bridge or none");
-      }
-      sandboxNetwork = requested;
-    } else if (value === "--credential-env") {
-      credentialEnv.push(takeValue(argv, i++, value));
-    } else if (value.startsWith("--credential-env=")) {
-      credentialEnv.push(value.slice("--credential-env=".length));
-    } else if (value === "--pi-test-auth") {
-      piTestAuth = true;
-    } else if (value === "--auth-dir" || value === "--pi-test-auth-dir") {
-      piTestAuthDir = takeValue(argv, i++, value);
-    } else if (value.startsWith("--auth-dir=")) {
-      piTestAuthDir = value.slice("--auth-dir=".length);
-    } else if (value.startsWith("--pi-test-auth-dir=")) {
-      piTestAuthDir = value.slice("--pi-test-auth-dir=".length);
-    } else if (!value.startsWith("--")) positional.push(value);
+    let option = readOption(argv, i, "--scenario");
+    if (option) {
+      scenario = option.value;
+      i = option.index;
+      continue;
+    }
+    option = readOption(argv, i, "--through");
+    if (option) {
+      through = option.value;
+      i = option.index;
+      continue;
+    }
+    option = readOption(argv, i, "--trials");
+    if (option) {
+      trials = parsePositiveInteger(option.value, "--trials");
+      i = option.index;
+      continue;
+    }
+    option = readOption(argv, i, "--engine");
+    if (option) {
+      if (option.value !== "pi") throw new Error("--engine currently supports only pi");
+      i = option.index;
+      continue;
+    }
+    const consumed = runtime.consume(argv, i);
+    if (consumed !== null) {
+      i = consumed;
+      continue;
+    }
+    if (!value.startsWith("--")) positional.push(value);
     else throw new Error(`unknown flag: ${value}`);
   }
 
@@ -295,50 +212,20 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     );
   }
   if (!scenario) throw new Error("--scenario is required");
-  if (!provider) throw new Error("--provider is required so the worker runtime is pinned");
-  if (!model) throw new Error("--model is required so the worker runtime is pinned");
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-    throw new Error("--timeout-seconds must be a positive number");
-  }
-  if (sandbox === "local" && (sandboxImage || credentialEnv.length)) {
-    throw new Error("--sandbox-image and --credential-env require --sandbox container");
-  }
-  if (piTestAuth && sandbox !== "local") {
-    throw new Error("--pi-test-auth requires --sandbox local");
-  }
-  if (piTestAuth && provider !== PI_TEST_AUTH_PROVIDER) {
-    throw new Error(`--pi-test-auth requires --provider ${PI_TEST_AUTH_PROVIDER}`);
-  }
-  if (piTestAuthDir && !piTestAuth) {
-    throw new Error("--auth-dir requires --pi-test-auth");
-  }
+
+  const { piTestAuth, piTestAuthDir, ...options } = runtime.finish();
   return {
-    root,
+    ...options,
     pipeline: positional[0]!,
     scenario,
     through,
     trials,
-    runDir,
-    provider,
-    model,
-    thinking,
-    timeoutMs,
-    tools,
-    sandbox,
-    sandboxImage,
-    sandboxNetwork,
-    credentialEnv,
-    piTestAuthDir: piTestAuth ? path.resolve(piTestAuthDir ?? defaultPiTestAuthDir()) : undefined,
+    piTestAuthDir: piTestAuth ? (piTestAuthDir ?? undefined) : undefined,
   };
 }
 
-export function defaultTestPipelineRunDir(
-  pipeline: string,
-  now = new Date(),
-  id = randomUUID(),
-): string {
-  const stamp = now.toISOString().replaceAll(":", "-").replaceAll(".", "-");
-  return path.join(tmpdir(), `foundry-pi-pipeline-run-${pipeline}-${stamp}-${id}`);
+export function defaultTestPipelineRunDir(pipeline: string, now?: Date, id?: string): string {
+  return defaultWorkerRunDir("foundry-pi-pipeline-run", pipeline, now, id);
 }
 
 function loadAssembly(repoRoot: string, pipeline: string): AssemblyManifest {
