@@ -126,6 +126,9 @@ describe.each(COMMANDS)("$name worker runtime flags", ({ parse, ownFlag, otherCo
     const enabled = parse([...RUNTIME_REQUIRED, "--pi-test-auth"]);
     expect(enabled.piTestAuthDir).toBe(path.resolve(defaultPiTestAuthDir()));
 
+    const relative = parse([...RUNTIME_REQUIRED, "--pi-test-auth", "--auth-dir=relative/dir"]);
+    expect(relative.piTestAuthDir).toBe(path.resolve("relative/dir"));
+
     const custom = path.resolve("custom-eval-auth");
     const authDir = parse([...RUNTIME_REQUIRED, "--pi-test-auth", "--auth-dir", custom]);
     const aliasSpaced = parse([
@@ -193,6 +196,25 @@ describe.each(COMMANDS)("$name worker runtime flags", ({ parse, ownFlag, otherCo
     );
   });
 
+  test("treats Object.prototype keys as ordinary tokens, not flags", () => {
+    for (const token of ["constructor", "__proto__", "toString", "valueOf", "hasOwnProperty"]) {
+      // A second positional, exactly as any other bare word would be.
+      expect(() => parse([...RUNTIME_REQUIRED, token])).toThrow(/^usage: foundry-build /);
+      expect(() => parse([...RUNTIME_REQUIRED, `${token}=x`])).toThrow(/^usage: foundry-build /);
+      expect(() => parse([...RUNTIME_REQUIRED, `--${token}`])).toThrow(`unknown flag: --${token}`);
+      expect(() => parse([...RUNTIME_REQUIRED, `--${token}=x`])).toThrow(
+        `unknown flag: --${token}=x`,
+      );
+    }
+  });
+
+  test("pins the order of the runtime validation errors", () => {
+    expect(() => parse([])).toThrow("--provider is required so the worker runtime is pinned");
+    expect(() =>
+      parse([...RUNTIME_REQUIRED, "--timeout-seconds=0", "--sandbox-image=img"]),
+    ).toThrow("--timeout-seconds must be a positive number");
+  });
+
   test("keeps command-specific flags owned by their own command", () => {
     expect(() => parse([...RUNTIME_REQUIRED, otherCommandFlag, "value"])).toThrow(
       `unknown flag: ${otherCommandFlag}`,
@@ -247,6 +269,16 @@ test("disabled pi-test-auth keeps each command's own empty representation", () =
   expect(
     parseTestPipelineArgs([...PIPELINE_REQUIRED, ...RUNTIME_REQUIRED]).piTestAuthDir,
   ).toBeUndefined();
+});
+
+test("the piTestAuth flag stays internal to the parser", () => {
+  const pipeline = parseTestPipelineArgs([
+    ...PIPELINE_REQUIRED,
+    ...RUNTIME_REQUIRED,
+    "--pi-test-auth",
+  ]);
+  expect(pipeline).not.toHaveProperty("piTestAuth");
+  expect(pipeline.piTestAuthDir).toBe(path.resolve(defaultPiTestAuthDir()));
 });
 
 test("run directories stay distinct per command", () => {

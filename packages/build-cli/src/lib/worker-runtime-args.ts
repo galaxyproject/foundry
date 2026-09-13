@@ -54,26 +54,21 @@ function takeValue(argv: string[], index: number, flag: string): string {
 /**
  * Reads `--flag value` and `--flag=value` for one flag name.
  *
- * Returns the value plus the argv index the caller's loop should continue from, or
- * `null` when the current token is not that flag.
+ * `lastIndex` is the last argv index this flag consumed -- `index + 1` for the spaced
+ * form, `index` for the inline one. Assign it to the loop variable and let the `for`
+ * loop's own `i++` move past it; continuing *from* it would reparse the token.
+ * Returns `null` when the current token is not that flag.
  */
 export function readOption(
   argv: string[],
   index: number,
   flag: string,
-): { value: string; index: number } | null {
+): { value: string; lastIndex: number } | null {
   const token = argv[index]!;
-  if (token === flag) return { value: takeValue(argv, index, flag), index: index + 1 };
-  if (token.startsWith(`${flag}=`)) return { value: token.slice(flag.length + 1), index };
+  if (token === flag) return { value: takeValue(argv, index, flag), lastIndex: index + 1 };
+  if (token.startsWith(`${flag}=`))
+    return { value: token.slice(flag.length + 1), lastIndex: index };
   return null;
-}
-
-export function parsePositiveInteger(value: string, flag: string): number {
-  const parsed = Number(value);
-  if (!Number.isSafeInteger(parsed) || parsed < 1) {
-    throw new Error(`${flag} must be a positive integer`);
-  }
-  return parsed;
 }
 
 function parseThinking(value: string): PiThinkingLevel {
@@ -99,8 +94,9 @@ function parseSandboxNetwork(value: string): ContainerNetworkPolicy {
 
 export interface WorkerRuntimeArgScanner {
   /**
-   * Consumes the token at `index` if it is a worker-runtime flag. Returns the argv
-   * index to continue from, or `null` so the caller can handle its own flags.
+   * Consumes the token at `index` if it is a worker-runtime flag. Returns the last
+   * argv index consumed -- assign it to the loop variable, as with {@link readOption}
+   * -- or `null` so the caller can handle its own flags.
    */
   consume(argv: string[], index: number): number | null;
   /** Applies cross-flag validation and returns the runtime options. */
@@ -122,40 +118,47 @@ export function createWorkerRuntimeArgScanner(): WorkerRuntimeArgScanner {
   let piTestAuth = false;
   let piTestAuthDir: string | null = null;
 
-  // One entry per value-taking runtime flag. Aliases share a setter, so adding or
-  // renaming a flag touches this table rather than two command parsers.
-  const setters: Record<string, (value: string) => void> = {
-    "--root": (value) => void (root = value),
-    "--run-dir": (value) => void (runDir = value),
-    "--provider": (value) => void (provider = value),
-    "--model": (value) => void (model = value),
-    "--thinking": (value) => void (thinking = parseThinking(value)),
-    "--timeout-seconds": (value) => void (timeoutMs = Number(value) * 1000),
-    "--tools": (value) => void (tools = value.split(",").filter(Boolean)),
-    "--sandbox": (value) => void (sandbox = parseSandbox(value)),
-    "--sandbox-image": (value) => void (sandboxImage = value),
-    "--sandbox-network": (value) => void (sandboxNetwork = parseSandboxNetwork(value)),
-    "--credential-env": (value) => void credentialEnv.push(value),
-    "--auth-dir": (value) => void (piTestAuthDir = value),
-    "--pi-test-auth-dir": (value) => void (piTestAuthDir = value),
-  };
+  // One row per runtime flag, so adding or renaming one touches a declaration rather
+  // than two command parsers. Aliases share a setter. Maps, not object literals: an
+  // object-literal lookup inherits `constructor`, `__proto__` and friends from
+  // Object.prototype, which would mistake those positionals for known flags.
+  const valueFlags = new Map<string, (value: string) => void>([
+    ["--root", (value) => void (root = value)],
+    ["--run-dir", (value) => void (runDir = value)],
+    ["--provider", (value) => void (provider = value)],
+    ["--model", (value) => void (model = value)],
+    ["--thinking", (value) => void (thinking = parseThinking(value))],
+    ["--timeout-seconds", (value) => void (timeoutMs = Number(value) * 1000)],
+    ["--tools", (value) => void (tools = value.split(",").filter(Boolean))],
+    ["--sandbox", (value) => void (sandbox = parseSandbox(value))],
+    ["--sandbox-image", (value) => void (sandboxImage = value)],
+    ["--sandbox-network", (value) => void (sandboxNetwork = parseSandboxNetwork(value))],
+    ["--credential-env", (value) => void credentialEnv.push(value)],
+    ["--auth-dir", (value) => void (piTestAuthDir = value)],
+    ["--pi-test-auth-dir", (value) => void (piTestAuthDir = value)],
+  ]);
+
+  const booleanFlags = new Map<string, () => void>([
+    ["--pi-test-auth", () => void (piTestAuth = true)],
+  ]);
 
   return {
     consume(argv, index) {
       const token = argv[index]!;
-      if (token === "--pi-test-auth") {
-        piTestAuth = true;
+      const setFlag = booleanFlags.get(token);
+      if (setFlag) {
+        setFlag();
         return index;
       }
       const separator = token.indexOf("=");
       const flag = separator > 0 ? token.slice(0, separator) : token;
-      const setter = setters[flag];
-      if (!setter) return null;
+      const setValue = valueFlags.get(flag);
+      if (!setValue) return null;
       if (separator > 0) {
-        setter(token.slice(separator + 1));
+        setValue(token.slice(separator + 1));
         return index;
       }
-      setter(takeValue(argv, index, flag));
+      setValue(takeValue(argv, index, flag));
       return index + 1;
     },
 
@@ -190,6 +193,8 @@ export function createWorkerRuntimeArgScanner(): WorkerRuntimeArgScanner {
         sandboxNetwork,
         credentialEnv,
         piTestAuth,
+        // Resolved here, before `test-skill` chdirs into --root, so a relative
+        // --auth-dir keeps pointing at the directory the user typed it from.
         piTestAuthDir: piTestAuth ? path.resolve(piTestAuthDir ?? defaultPiTestAuthDir()) : null,
       };
     },

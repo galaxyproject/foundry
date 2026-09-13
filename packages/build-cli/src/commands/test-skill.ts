@@ -5,36 +5,21 @@ import process from "node:process";
 import {
   expectedArtifactsFromSkill,
   runPiSkill,
-  type ContainerNetworkPolicy,
   type ExpectedArtifact,
-  type PiThinkingLevel,
-  type SandboxMode,
 } from "@galaxy-foundry/gxwf-pi-harness";
 
 import {
   createWorkerRuntimeArgScanner,
   defaultWorkerRunDir,
   readOption,
+  type WorkerRuntimeArgs,
 } from "../lib/worker-runtime-args.js";
 
-export interface TestSkillCliArgs {
+export interface TestSkillCliArgs extends WorkerRuntimeArgs {
   skill: string;
-  root: string | null;
   prompt: string;
   inputs: string[];
   expected: ExpectedArtifact[] | null;
-  runDir: string | null;
-  provider: string;
-  model: string;
-  thinking?: PiThinkingLevel;
-  timeoutMs: number;
-  tools?: string[];
-  sandbox: SandboxMode;
-  sandboxImage?: string;
-  sandboxNetwork: ContainerNetworkPolicy;
-  credentialEnv: string[];
-  piTestAuth: boolean;
-  piTestAuthDir: string | null;
 }
 
 function parseExpected(value: string): ExpectedArtifact {
@@ -58,25 +43,25 @@ export function parseTestSkillArgs(argv: string[]): TestSkillCliArgs {
     let option = readOption(argv, i, "--prompt");
     if (option) {
       prompt = option.value;
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     option = readOption(argv, i, "--prompt-file");
     if (option) {
       promptFile = option.value;
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     option = readOption(argv, i, "--input");
     if (option) {
       inputs.push(option.value);
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     option = readOption(argv, i, "--expect");
     if (option) {
       expected.push(parseExpected(option.value));
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     const consumed = runtime.consume(argv, i);

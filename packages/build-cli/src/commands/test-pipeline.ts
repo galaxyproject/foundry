@@ -24,7 +24,6 @@ import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js"
 import {
   createWorkerRuntimeArgScanner,
   defaultWorkerRunDir,
-  parsePositiveInteger,
   readOption,
 } from "../lib/worker-runtime-args.js";
 
@@ -164,6 +163,14 @@ export interface TestPipelineCliArgs extends Omit<TestPipelineOptions, "repoRoot
   runDir: string | null;
 }
 
+function parsePositiveInteger(value: string, flag: string): number {
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) {
+    throw new Error(`${flag} must be a positive integer`);
+  }
+  return parsed;
+}
+
 export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
   const runtime = createWorkerRuntimeArgScanner();
   const positional: string[] = [];
@@ -176,25 +183,25 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     let option = readOption(argv, i, "--scenario");
     if (option) {
       scenario = option.value;
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     option = readOption(argv, i, "--through");
     if (option) {
       through = option.value;
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     option = readOption(argv, i, "--trials");
     if (option) {
       trials = parsePositiveInteger(option.value, "--trials");
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     option = readOption(argv, i, "--engine");
     if (option) {
       if (option.value !== "pi") throw new Error("--engine currently supports only pi");
-      i = option.index;
+      i = option.lastIndex;
       continue;
     }
     const consumed = runtime.consume(argv, i);
