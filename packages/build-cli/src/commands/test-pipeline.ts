@@ -21,11 +21,8 @@ import {
 import type { ProvenanceArtifactInput } from "../lib/artifact-contract.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
-import {
-  createWorkerRuntimeArgScanner,
-  defaultWorkerRunDir,
-  readOption,
-} from "../lib/worker-runtime-args.js";
+import { readOption } from "../lib/cli-args.js";
+import { createWorkerRuntimeArgScanner, defaultWorkerRunDir } from "../lib/worker-runtime-args.js";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
