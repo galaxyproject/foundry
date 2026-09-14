@@ -1,0 +1,37 @@
+class: GalaxyWorkflow
+name: "Cut and reorder tabular columns"
+inputs:
+  - id: rows
+    type: data
+outputs:
+  - id: reordered
+    outputSource: reorder/out_file1
+  - id: comma_delimiter
+    outputSource: comma_delimiter/out_file1
+steps:
+  - id: reorder
+    label: reorder
+    tool_id: Cut1
+    in:
+      - id: input
+        source: rows
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      columnList: c3,c1
+      delimiter: T
+  - id: comma_delimiter
+    label: comma_delimiter
+    tool_id: Cut1
+    in:
+      - id: input
+        source: rows
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      columnList: c1,c2
+      delimiter: C

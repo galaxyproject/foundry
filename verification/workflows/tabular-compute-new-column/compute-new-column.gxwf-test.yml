@@ -1,0 +1,11 @@
+- doc: "Same expression, two auto_col_types settings: numeric addition at true, string concatenation at false"
+  job:
+    values:
+      class: File
+      path: test-data/values.tabular
+      filetype: tabular
+  outputs:
+    numeric:
+      file: test-data/expected_numeric.tabular
+    concatenated:
+      file: test-data/expected_concatenated.tabular

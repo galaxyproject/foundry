@@ -1,0 +1,47 @@
+- doc: "Left branch gated on, right branch gated off: the route yields the left output"
+  job:
+    left_source:
+      class: File
+      path: test-data/left.txt
+      filetype: txt
+    right_source:
+      class: File
+      path: test-data/right.txt
+      filetype: txt
+    use_left: true
+    use_right: false
+  outputs:
+    routed:
+      file: test-data/left.txt
+
+- doc: "Right branch gated on, left branch gated off: the route yields the right output"
+  job:
+    left_source:
+      class: File
+      path: test-data/left.txt
+      filetype: txt
+    right_source:
+      class: File
+      path: test-data/right.txt
+      filetype: txt
+    use_left: false
+    use_right: true
+  outputs:
+    routed:
+      file: test-data/right.txt
+
+- doc: "Both branches gated on: pick_style 'first' takes the earlier pick_from slot, not an error"
+  job:
+    left_source:
+      class: File
+      path: test-data/left.txt
+      filetype: txt
+    right_source:
+      class: File
+      path: test-data/right.txt
+      filetype: txt
+    use_left: true
+    use_right: true
+  outputs:
+    routed:
+      file: test-data/left.txt

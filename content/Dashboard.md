@@ -73,6 +73,10 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[collection-build-named-bundle]] | Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in. | draft | 2026-09-14 | 3 |
+| [[conditional-route-between-alternative-outputs]] | Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value. | draft | 2026-09-14 | 4 |
+| [[tabular-compute-new-column]] | Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule. | draft | 2026-09-14 | 4 |
+| [[tabular-cut-and-reorder-columns]] | Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom. | draft | 2026-09-14 | 3 |
 | [[collection-flatten-after-fanout]] | Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters. | draft | 2026-09-13 | 3 |
 | [[collection-swap-nesting-with-apply-rules]] | Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns. | draft | 2026-09-13 | 3 |
 | [[collection-unbox-singleton]] | Use __EXTRACT_DATASET__ with which: first when a one-element collection must become a dataset. | draft | 2026-09-13 | 3 |
@@ -97,12 +101,10 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[manifest-to-mapped-collection-lifecycle]] | Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs. | draft | 2026-05-04 | 1 |
 | [[reshape-relabel-remap-by-collection-axis]] | Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis. | draft | 2026-05-04 | 1 |
 | [[collection-build-list-paired-with-apply-rules]] | Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first. | draft | 2026-05-03 | 2 |
-| [[collection-build-named-bundle]] | Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in. | draft | 2026-05-03 | 2 |
 | [[collection-cleanup-after-mapover-failure]] | Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps. | draft | 2026-05-03 | 2 |
 | [[collection-split-identifier-via-rules]] | Use Apply Rules regex columns to split one collection identifier into nested list identifiers. | draft | 2026-05-03 | 2 |
 | [[compose-runtime-text-parameter]] | Use compose_text_param to build connected text expressions from constants plus runtime scalar values. | draft | 2026-05-03 | 3 |
 | [[conditional-gate-on-nonempty-result]] | Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps. | draft | 2026-05-03 | 3 |
-| [[conditional-route-between-alternative-outputs]] | Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value. | draft | 2026-05-03 | 3 |
 | [[conditional-run-optional-step]] | Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch. | draft | 2026-05-03 | 4 |
 | [[conditional-transform-or-pass-through]] | Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise. | draft | 2026-05-03 | 2 |
 | [[derive-parameter-from-file]] | Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters. | draft | 2026-05-03 | 3 |
@@ -111,9 +113,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[regex-relabel-via-tabular]] | Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE. | draft | 2026-05-03 | 2 |
 | [[relabel-via-rules-and-find-replace]] | Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup. | draft | 2026-05-03 | 2 |
 | [[sync-collections-by-identifier]] | Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections. | draft | 2026-05-03 | 2 |
-| [[tabular-compute-new-column]] | Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule. | draft | 2026-05-03 | 3 |
 | [[tabular-concatenate-collection-to-table]] | Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe. | draft | 2026-05-03 | 2 |
-| [[tabular-cut-and-reorder-columns]] | Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom. | draft | 2026-05-03 | 2 |
 | [[tabular-filter-by-regex]] | Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative. | draft | 2026-05-03 | 2 |
 | [[tabular-group-and-aggregate-with-datamash]] | Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions. | draft | 2026-05-03 | 2 |
 | [[tabular-join-on-key]] | Use tp_easyjoin_tool for two-tabular key joins; use tp_multijoin_tool for many files and query_tabular for SQL joins. | draft | 2026-05-03 | 2 |

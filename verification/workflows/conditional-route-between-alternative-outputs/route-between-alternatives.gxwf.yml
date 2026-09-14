@@ -1,0 +1,71 @@
+class: GalaxyWorkflow
+name: "Route between alternative outputs"
+inputs:
+  - id: left_source
+    type: data
+  - id: right_source
+    type: data
+  - id: use_left
+    type: boolean
+  - id: use_right
+    type: boolean
+outputs:
+  - id: routed
+    outputSource: route/data_param
+steps:
+  - id: branch_left
+    label: branch_left
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: left_source
+      - id: when
+        source: use_left
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: branch_right
+    label: branch_right
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: right_source
+      - id: when
+        source: use_right
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: route
+    label: route
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: b19e21af9c52
+      name: pick_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: style_cond|type_cond|pick_from_0|value
+        source: branch_left/out_file1
+      - id: style_cond|type_cond|pick_from_1|value
+        source: branch_right/out_file1
+    out:
+      - id: data_param
+    tool_state:
+      style_cond:
+        pick_style: first
+        type_cond:
+          param_type: data
+          pick_from:
+            - value:
+                __class__: ConnectedValue
+            - value:
+                __class__: ConnectedValue

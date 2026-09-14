@@ -1,0 +1,49 @@
+- doc: "One pair of datasets, three id_select settings: manual names, inherited identifiers, and 0-based indexes"
+  job:
+    sources:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: alpha
+          class: File
+          path: test-data/alpha.txt
+          filetype: txt
+        - identifier: beta
+          class: File
+          path: test-data/beta.txt
+          filetype: txt
+  outputs:
+    manual_ids:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        first_result:
+          file: test-data/alpha.txt
+        second_result:
+          file: test-data/beta.txt
+    inherited_ids:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        alpha:
+          file: test-data/alpha.txt
+        beta:
+          file: test-data/beta.txt
+    index_ids:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        "0":
+          file: test-data/alpha.txt
+        "1":
+          file: test-data/beta.txt
+    collapsed_ids:
+      class: Collection
+      collection_type: list
+      element_count: 1
+      element_tests:
+        same:
+          file: test-data/beta.txt

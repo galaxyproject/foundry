@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Collection: build named bundle"
 aliases:
   - "collection build list named outputs"
@@ -13,8 +13,8 @@ tags:
   - topic/collection-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-14
+revision: 3
 summary: "Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in."
 related_notes:
   - "[[iwc-transformations-survey]]"
@@ -24,6 +24,8 @@ related_patterns:
   - "[[tabular-concatenate-collection-to-table]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/collection-build-named-bundle/build-named-bundle.gxwf-test.yml
 iwc_exemplars:
   - workflow: amplicon/qiime2/qiime2-III-VI-downsteam/QIIME2-VI-diversity-metrics-and-estimations
     why: "Groups QIIME2 plots, PCoA results, distance matrices, and richness vectors into named output collections."
@@ -56,25 +58,28 @@ Do not use this to concatenate file contents. Use [[tabular-concatenate-collecti
 
 ## Parameters
 
-The main knob is the element identifier source:
+`datasets` is a repeat. Each entry pairs the connected `input` with an `id_cond` naming where that element's identifier comes from:
 
 ```yaml
 tool_id: __BUILD_LIST__
 tool_state:
-  elements:
-    - src: { __class__: ConnectedValue }
+  datasets:
+    - input: { __class__: ConnectedValue }
       id_cond:
         id_select: manual
         identifier: bray_curtis_pcoa_results
 ```
 
-- `id_select: manual`: human-authored names for output bundles.
-- `id_select: identifier`: inherit source identifiers for downstream fan-in.
-- `id_select: idx`: positional/default style; avoid when element identity matters.
+Connect slot N through `datasets_N|input`.
+
+- `id_select: manual`: human-authored names for output bundles. Carries an `identifier` sub-field.
+- `id_select: identifier`: inherit the source element identifier, falling back to the dataset name. `__EXTRACT_DATASET__` renames its output after the element it pulled, so identifiers survive that hop.
+- `id_select: idx`: the repeat index, numbered from `0`. The default; avoid when element identity matters.
 
 ## Pitfalls
 
 - Manual identifiers become collection element identifiers and may appear in output histories or reports.
+- Two entries sharing one identifier collapse to a single element holding the later dataset. Identifiers are dictionary keys — no duplicate, no error.
 - Manual bundles group outputs; they do not align rows, merge contents, or validate common keys.
 - Use inherited identifiers only when source names are meaningful.
 - Prefer `__MERGE_COLLECTION__` only when inputs are already collections.
