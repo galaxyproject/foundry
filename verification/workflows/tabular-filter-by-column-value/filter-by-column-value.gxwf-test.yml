@@ -1,0 +1,11 @@
+- doc: "Same predicate, two header_lines settings: the header survives at '1' and is silently dropped at '0'"
+  job:
+    rows:
+      class: File
+      path: test-data/rows.tabular
+      filetype: tabular
+  outputs:
+    header_aware:
+      file: test-data/expected_header_aware.tabular
+    header_blind:
+      file: test-data/expected_header_blind.tabular

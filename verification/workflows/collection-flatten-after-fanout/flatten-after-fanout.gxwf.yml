@@ -1,0 +1,36 @@
+class: GalaxyWorkflow
+name: "Flatten nested collection after fan-out"
+inputs:
+  - id: nested
+    type: collection
+    collection_type: "list:list"
+outputs:
+  - id: flat_underscore
+    outputSource: flatten_underscore/output
+  - id: flat_dash
+    outputSource: flatten_dash/output
+steps:
+  - id: flatten_underscore
+    label: flatten_underscore
+    tool_id: __FLATTEN__
+    in:
+      - id: input
+        source: nested
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      join_identifier: "_"
+  - id: flatten_dash
+    label: flatten_dash
+    tool_id: __FLATTEN__
+    in:
+      - id: input
+        source: nested
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      join_identifier: "-"

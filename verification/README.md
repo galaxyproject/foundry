@@ -17,6 +17,24 @@ Each workflow directory should contain:
 
 Pattern pages link directly to the workflow test case through `verification_paths` frontmatter.
 
+## Asserting collection outputs
+
+Assert collection outputs the way IWC does — `class: Collection` alongside `element_tests`:
+
+```yaml
+outputs:
+  flat:
+    class: Collection
+    collection_type: list
+    element_count: 3
+    element_tests:
+      sampleA_seg1:
+        file: test-data/a1.txt
+```
+
+Reach into a `list:list` by nesting `element_tests` inside an element, giving that element its own
+`class: Collection` and using `count` for its size.
+
 ## Local runs
 
 From a workflow directory, run Planemo directly:

@@ -1,0 +1,37 @@
+class: GalaxyWorkflow
+name: "Filter tabular rows by column value"
+inputs:
+  - id: rows
+    type: data
+outputs:
+  - id: header_aware
+    outputSource: filter_header_aware/out_file1
+  - id: header_blind
+    outputSource: filter_header_blind/out_file1
+steps:
+  - id: filter_header_aware
+    label: filter_header_aware
+    tool_id: Filter1
+    in:
+      - id: input
+        source: rows
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      cond: c2=='PASS'
+      header_lines: "1"
+  - id: filter_header_blind
+    label: filter_header_blind
+    tool_id: Filter1
+    in:
+      - id: input
+        source: rows
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      cond: c2=='PASS'
+      header_lines: "0"
