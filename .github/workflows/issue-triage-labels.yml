@@ -1,0 +1,79 @@
+name: Issue Triage Labels
+
+# Flags open issues that are missing a `roadmap/*` or `priority/*` label by
+# applying `needs-triage`, and removes it once both are present.
+#
+# A label rather than a comment: an issue has no terminal moment the way a
+# merged PR does, so a one-shot nag would either fire before triage has had a
+# chance to happen or never un-say itself once the labels land. Label state
+# reconciles on every run, in both directions.
+#
+# The event trigger keeps `needs-triage` honest as labels change; the weekly
+# sweep backfills issues that predate this workflow and catches anything a
+# missed or failed event run left stale. Issue events run in the repo's own
+# context, so the default GITHUB_TOKEN is enough — no `pull_request_target`,
+# no fork-controlled input. Labels applied by GITHUB_TOKEN do not start new
+# workflow runs, so the `labeled`/`unlabeled` triggers cannot loop.
+
+on:
+  issues:
+    types: [opened, reopened, labeled, unlabeled]
+  schedule:
+    - cron: "17 13 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  triage:
+    name: Reconcile needs-triage
+    if: github.repository_owner == 'galaxyproject'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const NEEDS = 'needs-triage';
+
+            const isTagged = (names) =>
+              names.some((n) => n.startsWith('roadmap/')) &&
+              names.some((n) => n.startsWith('priority/'));
+
+            async function reconcile(issue) {
+              const names = issue.labels.map((l) => l.name ?? l);
+              const flagged = names.includes(NEEDS);
+              const tagged = isTagged(names);
+              if (tagged && flagged) {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  name: NEEDS,
+                });
+                core.info(`#${issue.number}: cleared ${NEEDS}`);
+              } else if (!tagged && !flagged) {
+                await github.rest.issues.addLabel({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  labels: [NEEDS],
+                });
+                core.info(`#${issue.number}: applied ${NEEDS}`);
+              }
+            }
+
+            if (context.eventName === 'issues') {
+              await reconcile(context.payload.issue);
+            } else {
+              // listForRepo returns pull requests too; they carry their own
+              // label conventions and are checked by a separate workflow.
+              const items = await github.paginate(github.rest.issues.listForRepo, {
+                ...context.repo,
+                state: 'open',
+                per_page: 100,
+              });
+              for (const item of items) {
+                if (item.pull_request) continue;
+                await reconcile(item);
+              }
+            }
