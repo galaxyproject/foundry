@@ -1,25 +1,38 @@
 name: Issue Triage Labels
 
-# Flags open issues that are missing a `roadmap/*` or `priority/*` label by
-# applying `needs-triage`, and removes it once both are present.
+# Flags open issues that violate the roadmap labelling contract by applying
+# `needs-triage`, and removes it once the issue conforms. The rules:
+#
+#   1. Every issue carries a `roadmap/*` and a `priority/*` label.
+#   2. A `roadmap/substep` hangs off exactly one parent, and that parent is
+#      `roadmap/main`.
+#   3. A `roadmap/main` or `roadmap/off` has no parent — the spine and the
+#      off-roadmap pile both sit at top level.
+#
+# Rules 2 and 3 together also pin the shape from above: a child of a
+# `roadmap/main` can only be a `roadmap/substep`, because any other roadmap
+# label on it trips rule 3 and no roadmap label at all trips rule 1.
 #
 # A label rather than a comment: an issue has no terminal moment the way a
 # merged PR does, so a one-shot nag would either fire before triage has had a
 # chance to happen or never un-say itself once the labels land. Label state
-# reconciles on every run, in both directions.
+# reconciles on every run, in both directions. The label says only that
+# something is wrong; the run summary says which rule and why.
 #
-# The event trigger keeps `needs-triage` honest as labels change; the weekly
-# sweep backfills issues that predate this workflow and catches anything a
-# missed or failed event run left stale. Issue events run in the repo's own
-# context, so the default GITHUB_TOKEN is enough — no `pull_request_target`,
-# no fork-controlled input. Labels applied by GITHUB_TOKEN do not start new
-# workflow runs, so the `labeled`/`unlabeled` triggers cannot loop.
+# Parentage is read over GraphQL because REST's issue payload has no `parent`
+# field — `sub_issues_summary` counts children but never names the parent.
+# GitHub has no issue-event activity type this workflow can rely on for
+# re-parenting either, so the schedule, not the event trigger, is what
+# actually holds rules 2 and 3: it runs daily to bound how long a bad parent
+# link can sit unflagged. The event trigger is for fast feedback while you are
+# labelling, and it re-checks the whole graph rather than just the issue that
+# fired, because relabelling a parent invalidates its children.
 
 on:
   issues:
     types: [opened, reopened, labeled, unlabeled]
   schedule:
-    - cron: "17 13 * * 1"
+    - cron: "17 13 * * *"
   workflow_dispatch:
 
 permissions: {}
@@ -37,43 +50,82 @@ jobs:
           script: |
             const NEEDS = 'needs-triage';
 
-            const isTagged = (names) =>
-              names.some((n) => n.startsWith('roadmap/')) &&
-              names.some((n) => n.startsWith('priority/'));
+            const QUERY = `
+              query($owner: String!, $repo: String!, $cursor: String) {
+                repository(owner: $owner, name: $repo) {
+                  issues(first: 100, states: OPEN, after: $cursor) {
+                    pageInfo { hasNextPage endCursor }
+                    nodes {
+                      number
+                      labels(first: 50) { nodes { name } }
+                      parent { number labels(first: 50) { nodes { name } } }
+                    }
+                  }
+                }
+              }`;
 
-            async function reconcile(issue) {
-              const names = issue.labels.map((l) => l.name ?? l);
-              const flagged = names.includes(NEEDS);
-              const tagged = isTagged(names);
-              if (tagged && flagged) {
-                await github.rest.issues.removeLabel({
-                  ...context.repo,
-                  issue_number: issue.number,
-                  name: NEEDS,
-                });
-                core.info(`#${issue.number}: cleared ${NEEDS}`);
-              } else if (!tagged && !flagged) {
-                await github.rest.issues.addLabel({
-                  ...context.repo,
-                  issue_number: issue.number,
-                  labels: [NEEDS],
-                });
-                core.info(`#${issue.number}: applied ${NEEDS}`);
-              }
-            }
-
-            if (context.eventName === 'issues') {
-              await reconcile(context.payload.issue);
-            } else {
-              // listForRepo returns pull requests too; they carry their own
-              // label conventions and are checked by a separate workflow.
-              const items = await github.paginate(github.rest.issues.listForRepo, {
-                ...context.repo,
-                state: 'open',
-                per_page: 100,
+            const issues = [];
+            let cursor = null;
+            do {
+              const page = await github.graphql(QUERY, {
+                ...context.repo, cursor,
               });
-              for (const item of items) {
-                if (item.pull_request) continue;
-                await reconcile(item);
+              const conn = page.repository.issues;
+              issues.push(...conn.nodes);
+              cursor = conn.pageInfo.hasNextPage ? conn.pageInfo.endCursor : null;
+            } while (cursor);
+
+            const names = (node) => node.labels.nodes.map((l) => l.name);
+            const roadmap = (node) => names(node).filter((n) => n.startsWith('roadmap/'));
+
+            // Returns the reasons an issue is out of contract; empty means it conforms.
+            function violations(issue) {
+              const own = names(issue);
+              const road = roadmap(issue);
+              const out = [];
+
+              if (road.length === 0) out.push('no roadmap/* label');
+              if (!own.some((n) => n.startsWith('priority/'))) out.push('no priority/* label');
+
+              if (road.includes('roadmap/substep')) {
+                if (!issue.parent) {
+                  out.push('roadmap/substep with no parent');
+                } else if (!roadmap(issue.parent).includes('roadmap/main')) {
+                  out.push(`parent #${issue.parent.number} is not roadmap/main`);
+                }
               }
+
+              for (const top of ['roadmap/main', 'roadmap/off']) {
+                if (road.includes(top) && issue.parent) {
+                  out.push(`${top} must not have a parent (has #${issue.parent.number})`);
+                }
+              }
+
+              return out;
             }
+
+            const rows = [];
+            for (const issue of issues) {
+              const flagged = names(issue).includes(NEEDS);
+              const reasons = violations(issue);
+              if (reasons.length && !flagged) {
+                await github.rest.issues.addLabel({
+                  ...context.repo, issue_number: issue.number, labels: [NEEDS],
+                });
+              } else if (!reasons.length && flagged) {
+                await github.rest.issues.removeLabel({
+                  ...context.repo, issue_number: issue.number, name: NEEDS,
+                });
+              }
+              if (reasons.length) rows.push([`#${issue.number}`, reasons.join('; ')]);
+            }
+
+            core.summary.addHeading(
+              `${rows.length} of ${issues.length} open issues out of contract`, 2);
+            if (rows.length) {
+              core.summary.addTable([
+                [{ data: 'issue', header: true }, { data: 'why', header: true }],
+                ...rows,
+              ]);
+            }
+            await core.summary.write();
