@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -38,6 +39,11 @@ jobs:
       # `./meta` subpath only resolves once `dist/` exists.
       - name: Validate content
         run: npm run validate
+
+      - name: Validate roadmap against GitHub issues
+        run: npm run validate:roadmap
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Check the kind manifest is current
         run: npm run check:kinds

@@ -10,9 +10,11 @@ import { runGenerateKindManifestCommand } from "../commands/generate-kind-manife
 import { runGenerateReadmeStatsCommand } from "../commands/generate-readme-stats.js";
 import { runValidateArtifactCommand } from "../commands/validate-artifact.js";
 import { runValidateCommand } from "../commands/validate.js";
+import { runValidateRoadmapCommand } from "../commands/validate-roadmap.js";
 
 const COMMANDS = [
   "validate",
+  "validate-roadmap",
   "generate-index",
   "generate-dashboard",
   "generate-kinds",
@@ -34,6 +36,7 @@ async function main(argv = process.argv.slice(2)): Promise<void> {
   }
 
   if (command === "validate") runValidateCommand(rest);
+  else if (command === "validate-roadmap") await runValidateRoadmapCommand(rest);
   else if (command === "generate-index") runGenerateIndexCommand(rest);
   else if (command === "generate-dashboard") runGenerateDashboardCommand(rest);
   else if (command === "generate-kinds") runGenerateKindManifestCommand(rest);
