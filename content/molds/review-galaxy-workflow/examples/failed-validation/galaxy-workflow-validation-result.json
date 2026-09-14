@@ -1,0 +1,14 @@
+{
+  "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
+  "workflow_path": "starting-galaxy-workflow.gxwf.yml",
+  "status": "fail",
+  "diagnostics": [
+    {
+      "severity": "error",
+      "message": "Step 'aggregate_reports' declares tool_version '1.24.1', but its tool_id 'toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.24.1+galaxy0' encodes '1.24.1+galaxy0'. The +galaxyN revision suffix is part of the pinned version and must match.",
+      "path": "steps.aggregate_reports.tool_version",
+      "routes_to": "implement-galaxy-tool-step"
+    }
+  ],
+  "residual_runtime_risks": []
+}

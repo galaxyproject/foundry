@@ -1,0 +1,12 @@
+{
+  "command": "gxwf validate --json starting-galaxy-workflow.gxwf.yml",
+  "workflow_path": "starting-galaxy-workflow.gxwf.yml",
+  "status": "pass",
+  "diagnostics": [],
+  "residual_runtime_risks": [
+    {
+      "risk": "Structural validation does not compare workflow output labels against test output keys.",
+      "settled_by": "workflow-test-result"
+    }
+  ]
+}

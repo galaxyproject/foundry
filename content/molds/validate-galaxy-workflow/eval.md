@@ -16,3 +16,8 @@ Evaluation oracle for the `validate-galaxy-workflow` Mold. This file is the **ab
 
 - check: llm-judged
 - assertion: when a workflow passes static validation but still carries a plausible runtime-failure risk (missing tool runtime behavior, optional-output assumptions, collection element mismatch), the run records why static validation is insufficient and names the runtime artifact that should prove or disprove the risk (invocation messages, job details, output collections, or Planemo structured test output).
+
+## Property: the result artifact is always emitted
+
+- check: deterministic
+- assertion: every run writes `galaxy-workflow-validation-result.json` — clean, failing, or unable to execute — carrying a `status` from the closed set `pass | fail | not-run` and a `not_run_reason` whenever the status is `not-run`. A run that validates something and hands nothing on fails this property even when its prose conclusion is correct, because a downstream reviewer then has nothing to cite.

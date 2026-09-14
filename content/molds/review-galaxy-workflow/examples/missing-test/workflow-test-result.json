@@ -1,0 +1,12 @@
+{
+  "status": "test-definition-missing",
+  "workflow_path": "starting-galaxy-workflow.gxwf.yml",
+  "paths_searched": [
+    "galaxy-workflow.gxwf-tests.yml",
+    "starting-galaxy-workflow-tests.yml",
+    "tests.yml"
+  ],
+  "planemo_result": null,
+  "failure_modality": null,
+  "next_reference_surface": null
+}
