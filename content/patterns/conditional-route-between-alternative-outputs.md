@@ -44,7 +44,7 @@ iwc_exemplars:
 
 Use Galaxy `when:` gates on each alternative-producing step, then use `pick_value` to collapse the possible outputs into one downstream value.
 
-`pick_value` here is `toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0` — 63 corpus steps, all of them the toolshed tool rather than the Galaxy built-in.
+Prefer Galaxy's built-in `pick_value` where it is available — it is the forward-looking choice and the tool state is identical either way. It ships in the Galaxy tree, but `tool_conf.xml.sample` registers only `parse_values_from_file` under Expression Tools, so most deployments expose only the toolshed copy. That is why all 63 corpus steps are `toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0`, and why the shapes below use it.
 
 This is a graph-visible route pattern: each alternative stays as its own Galaxy step or subworkflow, and `pick_value` is the merge point. It is not a wrapper-internal conditional hidden inside one tool state.
 

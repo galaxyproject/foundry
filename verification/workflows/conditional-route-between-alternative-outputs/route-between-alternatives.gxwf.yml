@@ -12,6 +12,8 @@ inputs:
 outputs:
   - id: routed
     outputSource: route/data_param
+  - id: routed_implicit_state
+    outputSource: route_implicit_state/data_param
 steps:
   - id: branch_left
     label: branch_left
@@ -69,3 +71,24 @@ steps:
                 __class__: ConnectedValue
             - value:
                 __class__: ConnectedValue
+  - id: route_implicit_state
+    label: route_implicit_state
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: b19e21af9c52
+      name: pick_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: style_cond|type_cond|pick_from_0|value
+        source: branch_left/out_file1
+      - id: style_cond|type_cond|pick_from_1|value
+        source: branch_right/out_file1
+    out:
+      - id: data_param
+    tool_state:
+      style_cond:
+        pick_style: first
+        type_cond:
+          param_type: data

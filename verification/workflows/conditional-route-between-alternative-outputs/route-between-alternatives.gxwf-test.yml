@@ -13,6 +13,8 @@
   outputs:
     routed:
       file: test-data/left.txt
+    routed_implicit_state:
+      file: test-data/left.txt
 
 - doc: "Right branch gated on, left branch gated off: the route yields the right output"
   job:
@@ -29,6 +31,8 @@
   outputs:
     routed:
       file: test-data/right.txt
+    routed_implicit_state:
+      file: test-data/right.txt
 
 - doc: "Both branches gated on: pick_style 'first' takes the earlier pick_from slot, not an error"
   job:
@@ -44,4 +48,6 @@
     use_right: true
   outputs:
     routed:
+      file: test-data/left.txt
+    routed_implicit_state:
       file: test-data/left.txt
