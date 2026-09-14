@@ -24,8 +24,8 @@
               filetype: txt
   outputs:
     flat_underscore:
-      attributes:
-        type: list
+      class: Collection
+      collection_type: list
       element_count: 3
       element_tests:
         sampleA_seg1:
@@ -35,8 +35,8 @@
         sampleB_seg1:
           file: test-data/b1.txt
     flat_dash:
-      attributes:
-        type: list
+      class: Collection
+      collection_type: list
       element_count: 3
       element_tests:
         sampleA-seg1:

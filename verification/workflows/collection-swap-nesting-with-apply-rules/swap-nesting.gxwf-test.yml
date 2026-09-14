@@ -28,11 +28,12 @@
               filetype: txt
   outputs:
     segment_by_sample:
-      attributes:
-        type: "list:list"
+      class: Collection
+      collection_type: "list:list"
       element_count: 2
       element_tests:
         seg1:
+          class: Collection
           count: 2
           element_tests:
             sampleA:
@@ -40,6 +41,7 @@
             sampleB:
               file: test-data/b1.txt
         seg2:
+          class: Collection
           count: 2
           element_tests:
             sampleA:
