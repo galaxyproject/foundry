@@ -7,6 +7,7 @@
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "validate": "tsx packages/build-cli/src/bin/foundry-build.ts validate --root .",
+    "validate:roadmap": "tsx packages/build-cli/src/bin/foundry-build.ts validate-roadmap --root .",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit && pnpm --filter foundry-site typecheck",

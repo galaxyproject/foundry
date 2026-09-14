@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-29
-revision: 7
+revised: 2026-09-14
+revision: 8
 summary: "How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current."
 ---
 
@@ -46,6 +46,10 @@ Authors change source notes, registries, schema implementations, or code. Genera
 Step 8 is what closes the walk. Steps 1–7 check the files the routing table found; step 8 checks that the table found everything there was to find. [[content-model]] owns the three-way accounting it enforces.
 
 Errors block. Warnings identify advisory quality concerns. Casting refuses to proceed from a Mold that fails static validation.
+
+### Roadmap validation
+
+`npm run validate:roadmap` checks [[roadmap]] against live `galaxyproject/foundry` issue metadata. GitHub labels select the main, substep, and excluded issue sets; native sub-issue relationships define hierarchy; issue state drives substep checkboxes. The page retains authored ordering and prose, while the validator requires every main in both its topline and detailed regions, every substep under its native parent, exact issue titles, matching region order, and no `roadmap/off` links. The command reads public REST endpoints and uses `GH_TOKEN` or `GITHUB_TOKEN` when available; CI grants only `contents: read` and `issues: read`.
 
 ## Generated navigation and manifests
 
@@ -108,6 +112,7 @@ Vendored upstream artifacts have explicit sync commands and checked provenance. 
 Pull requests and `main` run proportional checks across:
 
 - content validation and drift generators;
+- live roadmap coverage and native sub-issue consistency;
 - root and package Vitest suites;
 - TypeScript and Astro type checking;
 - package builds, formatting, and linting;

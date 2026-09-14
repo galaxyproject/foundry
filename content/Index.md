@@ -275,6 +275,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[molds]] — The axes a Mold buckets on, the boundary against reference content, and where the Mold set is still uneven. *(reviewed)*
 - [[pattern-authorship]] — Developer-facing authorship rules for operation-named, corpus-grounded pattern pages. *(reviewed)*
 - [[repository-layout]] — Where authored source, implementation code, generated artifacts, fixtures, and site files belong. *(reviewed)*
+- [[roadmap]] — The current development direction of the Galaxy Workflow Foundry, grounded in live GitHub issue metadata.
 - [[schema-packages]] — Where a Mold IO schema lives, how cast resolves one through a schema note, and why there is no separate schema package. *(reviewed)*
 
 ## Prompt

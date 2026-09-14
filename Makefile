@@ -1,4 +1,4 @@
-.PHONY: validate test typecheck generated check-generated check casts check-casts check-verify assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli check-planemo-pin check-fixtures check-vendored
+.PHONY: validate validate-roadmap test typecheck generated check-generated check casts check-casts check-verify assemble-pipelines check-assemble-pipelines fixtures fixtures-nextflow fixtures-cwl fixtures-iwc fixtures-skeletons fixtures-verify fixtures-clean sync-planemo sync-planemo-cli sync-planemo-test-report-schema sync-planemo-cli-meta check-planemo-cli check-planemo-pin check-fixtures check-vendored
 
 FOUNDRY_BUILD := npx tsx packages/build-cli/src/bin/foundry-build.ts
 PIPELINE_SLUGS := $(patsubst content/pipelines/%/index.md,%,$(wildcard content/pipelines/*/index.md))
@@ -6,6 +6,9 @@ MOLD_SLUGS := $(patsubst content/molds/%/index.md,%,$(wildcard content/molds/*/i
 
 validate:
 	npm run validate
+
+validate-roadmap:
+	npm run validate:roadmap
 
 test:
 	npm run test
@@ -68,7 +71,7 @@ check-fixtures:
 check-vendored:
 	npm run check:vendored
 
-check: validate check-generated check-planemo-pin check-vendored check-casts check-verify check-assemble-pipelines check-fixtures test
+check: validate validate-roadmap check-generated check-planemo-pin check-vendored check-casts check-verify check-assemble-pipelines check-fixtures test
 
 fixtures:
 	$(MAKE) -C workflow-fixtures all
