@@ -6,9 +6,9 @@
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 4,
     "content_hash": "0f8a5fb3ffc3434b6daec33aa7317e217de81b2c2655da5325154e7ab209e117",
-    "commit": "92e924df540acbbf07b05f6f0d6a20cdf567e1b2"
+    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
   },
-  "cast_at": "2026-09-12T17:18:12.664Z",
+  "cast_at": "2026-09-13T20:58:26.590Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -36,7 +36,7 @@
       "purpose": "Reference for `planemo lint` flags and output classification; first gate in the convergence loop.",
       "trigger": "Step 10.1 — after every <command>/<inputs>/<outputs> emission.",
       "verification": "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses.",
-      "src_hash": "834951954537bac2399241090b78353d21a2daad0a92f5ecdc5ec4613a6a8b8f",
+      "src_hash": "d129ae09924ec895ad6350184f5e364b5bc4972f4ce5103badc71a4bc4196593",
       "dst_hash": "d3251d1d2925f375c0446213b1e1abf3abc13fd6d1d860641fe55bf6332c4072",
       "source": "deterministic"
     },
@@ -52,7 +52,7 @@
       "purpose": "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path.",
       "trigger": "Step 10.2 — after lint clears.",
       "verification": "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout.",
-      "src_hash": "1317a46e152a22296dd452dc1aab69d72df1d33a41ed975e3d971346a0500938",
+      "src_hash": "fec237a064746d57c800f4f55c96bfc54ed375debda518649ad66e47a1d27c8f",
       "dst_hash": "42790a9b0ab08912dda7119da3dfd00dfd791531467ae633747a50248aadc9cb",
       "source": "deterministic"
     },
@@ -68,8 +68,8 @@
       "purpose": "Install metadata for the planemo CLI invoked by the convergence loop.",
       "trigger": "Always — the cast skill needs planemo on PATH before running lint/test.",
       "verification": "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command.",
-      "src_hash": "7fe121e37097dc885196fa5a27fe673f826e0134c0fa4f3514dc410fdca9f7ad",
-      "dst_hash": "7fe121e37097dc885196fa5a27fe673f826e0134c0fa4f3514dc410fdca9f7ad",
+      "src_hash": "12e8cac3ffb4ab7f007ced7a8d4f01e6b3785d06a55926496bbacc0a8f3fc5c5",
+      "dst_hash": "12e8cac3ffb4ab7f007ced7a8d4f01e6b3785d06a55926496bbacc0a8f3fc5c5",
       "source": "deterministic"
     },
     {

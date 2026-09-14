@@ -6,11 +6,11 @@
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 15,
     "content_hash": "1f63d428bd8f4fa52db509e9bf5e055b47f7052968a88df7bd6fcf0bf74b3cad",
-    "commit": "594d729e94272601bd7f5626f8c608b4a920901a"
+    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-09-10T20:38:37.199Z",
+  "cast_at": "2026-09-13T20:58:30.099Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [

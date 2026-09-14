@@ -192,6 +192,12 @@ export const planemoCliMeta = {
     {
       "hidden": false,
       "internal": false,
+      "module": "planemo.commands.cmd_list_workflows",
+      "name": "list_workflows"
+    },
+    {
+      "hidden": false,
+      "internal": false,
       "module": "planemo.commands.cmd_merge_test_reports",
       "name": "merge_test_reports"
     },
@@ -442,7 +448,7 @@ export const planemoCliMeta = {
       "name": "workflow_upload"
     }
   ],
-  "planemo_version": "0.75.45",
+  "planemo_version": "0.75.47",
   "program": "planemo",
   "schema_version": "0.1"
 } as const;
