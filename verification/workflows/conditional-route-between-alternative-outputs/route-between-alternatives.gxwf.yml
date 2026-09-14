@@ -12,8 +12,8 @@ inputs:
 outputs:
   - id: routed
     outputSource: route/data_param
-  - id: routed_implicit_state
-    outputSource: route_implicit_state/data_param
+  - id: routed_missing_pick_from
+    outputSource: route_missing_pick_from/data_param
 steps:
   - id: branch_left
     label: branch_left
@@ -71,8 +71,8 @@ steps:
                 __class__: ConnectedValue
             - value:
                 __class__: ConnectedValue
-  - id: route_implicit_state
-    label: route_implicit_state
+  - id: route_missing_pick_from
+    label: route_missing_pick_from
     tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
     tool_version: 0.2.0
     tool_shed_repository:

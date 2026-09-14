@@ -82,7 +82,7 @@ On each alternative step:
 
 On the merge step:
 
-- connect every possible branch output into the `pick_from` repeat, through `style_cond|type_cond|pick_from_N|value`;
+- connect every possible branch output into the `pick_from` repeat, through `style_cond|type_cond|pick_from_N|value`, **and give each one its own `pick_from` entry in `tool_state`**;
 - set `style_cond.type_cond.param_type` to the kind being merged and read the matching output — `data_param`, `text_param`, `integer_param`, `float_param`, `boolean_param`. Corpus: 49 `data`, 10 `integer`, 3 `boolean`, 1 `float`;
 - set `style_cond.pick_style` deliberately;
 - connect all downstream consumers to the `pick_value` output.
@@ -154,6 +154,7 @@ One-of-N route: same merge step with one `pick_from` slot per mode, one `map_par
 
 - Forgetting the merge. A gated branch output may be absent. Downstream steps should consume `pick_value`, not one branch directly.
 - Non-exclusive booleans. Under `pick_style: first` two live branches resolve to the earlier `pick_from` slot, silently. `only` turns that into a job failure.
+- Omitting the `pick_from` entries. The repeat is what creates the input terminals, so connections alone leave the tool with zero candidates. The job still succeeds and writes the text `null` into the output dataset.
 - Mismatched output semantics. `pick_value` can merge present values, but it does not make incompatible outputs equivalent. Branches should produce the same logical artifact.
 - Hiding the route in one wrapper. IWC evidence favors graph-visible `when` branches plus merge for these route operations.
 - Duplicating enum comparisons inside every downstream tool. Normalize once with `map_param_value`, then connect the resulting boolean to `id: when`.
