@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Collection: split identifier via rules"
 aliases:
   - "Apply Rules split identifier into nesting"
@@ -12,8 +12,8 @@ tags:
   - topic/collection-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-15
+revision: 3
 summary: "Use Apply Rules regex columns to split one collection identifier into nested list identifiers."
 related_notes:
   - "[[iwc-transformations-survey]]"
@@ -23,6 +23,8 @@ related_patterns:
   - "[[collection-build-list-paired-with-apply-rules]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/collection-split-identifier-via-rules/split-identifier.gxwf-test.yml
 iwc_exemplars:
   - workflow: epigenetics/average-bigwig-between-replicates/average-bigwig-between-replicates
     why: "Splits flat bigWig identifiers into sample-prefix and replicate-suffix nesting with two regex-derived columns."
@@ -45,34 +47,40 @@ This page is about deriving list nesting from one identifier. Use [[regex-relabe
 
 ## Parameters
 
-The corpus shape uses two parallel `add_column_regex` rules, each with one capture result. Do not encode this as one `group_count: 2` rule when following the IWC exemplar.
+`rules` is one parameter holding two lists: the `rules:` that build columns and the `mapping:` that says which columns become identifiers. Each mapping entry is an object with `columns`, not a bare array.
 
-Conceptual Apply Rules shape:
+The corpus shape uses two parallel `add_column_regex` rules, each with one capture result:
 
 ```yaml
 tool_id: __APPLY_RULES__
 tool_state:
+  input: { __class__: ConnectedValue }
   rules:
-    - type: add_column_metadata
-      value: identifier0
-    - type: add_column_regex
-      target_column: 0
-      expression: "^(.*)_([^_]*)$"
-      replacement: "\\1"
-    - type: add_column_regex
-      target_column: 0
-      expression: "^(.*)_([^_]*)$"
-      replacement: "\\2"
-  mapping:
-    list_identifiers: [1, 2]
+    rules:
+      - type: add_column_metadata
+        value: identifier0
+      - type: add_column_regex
+        target_column: 0
+        expression: "^(.*)_([^_]*)$"
+        replacement: "\\1"
+      - type: add_column_regex
+        target_column: 0
+        expression: "^(.*)_([^_]*)$"
+        replacement: "\\2"
+    mapping:
+      - type: list_identifiers
+        columns: [1, 2]
 ```
+
+Column 0 is the original identifier; the two regex rules append columns 1 and 2, which the mapping turns into the outer and inner list identifiers.
 
 ## Pitfalls
 
-- Use two regex rules, not one `group_count: 2` rule, for corpus parity.
+- Flattening the `rules` parameter. `rules` nests its own `rules:` and `mapping:`; a top-level `rules:` list with a sibling `mapping:` is not the serialized shape and will not run.
+- Two regex rules and one `group_count: 2` rule are equivalent. Both append the same two columns, and the verified workflow asserts identical output for each. Prefer two rules for corpus parity, not for correctness.
 - Target the original identifier column both times.
 - `^(.*)_([^_]*)$` splits on the last underscore; use a stricter regex if identifiers can contain multiple separators.
-- Validate unmatched behavior instead of silently creating empty nesting keys.
+- Unmatched identifiers fail the job, they do not create empty keys. `apply_regex` raises when the expression does not match. The empty nesting key only appears if you set `allow_unmatched: true`, which no corpus instance does.
 
 ## See also
 

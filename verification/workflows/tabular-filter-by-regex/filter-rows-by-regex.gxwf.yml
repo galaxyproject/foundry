@@ -1,0 +1,110 @@
+class: GalaxyWorkflow
+name: "Filter tabular rows by regex"
+inputs:
+  - id: rows
+    type: data
+outputs:
+  - id: kept_with_header
+    outputSource: grep_keep_header/out_file1
+  - id: kept_without_header
+    outputSource: grep_drop_header/out_file1
+  - id: kept_foreign_invert
+    outputSource: grep_foreign_invert/out_file1
+  - id: kept_case_sensitive
+    outputSource: tp_grep_case_sensitive/output
+  - id: kept_corpus_default
+    outputSource: tp_grep_corpus_default/output
+steps:
+  - id: grep_keep_header
+    label: grep_keep_header
+    tool_id: Grep1
+    tool_version: 1.0.4
+    in:
+      - id: input
+        source: rows
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      pattern: "^[a-z]"
+      invert: ""
+      keep_header: true
+  - id: grep_drop_header
+    label: grep_drop_header
+    tool_id: Grep1
+    tool_version: 1.0.4
+    in:
+      - id: input
+        source: rows
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      pattern: "^[a-z]"
+      invert: ""
+      keep_header: false
+  - id: grep_foreign_invert
+    label: grep_foreign_invert
+    tool_id: Grep1
+    tool_version: 1.0.4
+    in:
+      - id: input
+        source: rows
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      pattern: "^[a-z]"
+      invert: "true"
+      keep_header: false
+  - id: tp_grep_case_sensitive
+    label: tp_grep_case_sensitive
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3
+    tool_version: 9.5+galaxy3
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: rows
+    out:
+      - id: output
+    tool_state:
+      infile:
+        __class__: ConnectedValue
+      url_paste: "^[a-z]"
+      regex_type: "-P"
+      invert: ""
+      case_sensitive: ""
+      lines_before: "0"
+      lines_after: "0"
+      color: NOCOLOR
+  - id: tp_grep_corpus_default
+    label: tp_grep_corpus_default
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3
+    tool_version: 9.5+galaxy3
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: rows
+    out:
+      - id: output
+    tool_state:
+      infile:
+        __class__: ConnectedValue
+      url_paste: "^[a-z]"
+      regex_type: "-P"
+      invert: ""
+      case_sensitive: "-i"
+      lines_before: "0"
+      lines_after: "0"
+      color: NOCOLOR

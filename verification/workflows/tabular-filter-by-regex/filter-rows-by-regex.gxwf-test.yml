@@ -1,0 +1,17 @@
+- doc: "One pattern, five filters: keep_header on and off, an invert value from the other Grep1 version, and tp_grep_tool with and without the corpus-default -i"
+  job:
+    rows:
+      class: File
+      path: test-data/rows.tabular
+      filetype: tabular
+  outputs:
+    kept_with_header:
+      file: test-data/expected_with_header.tabular
+    kept_without_header:
+      file: test-data/expected_rows_only.tabular
+    kept_foreign_invert:
+      file: test-data/expected_rows_only.tabular
+    kept_case_sensitive:
+      file: test-data/expected_rows_only.tabular
+    kept_corpus_default:
+      file: test-data/expected_case_insensitive.tabular
