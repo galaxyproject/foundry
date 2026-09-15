@@ -1,0 +1,66 @@
+- doc: "Identifiers from the cleaned collection filter a sibling; the filtered output keeps the sibling's order, and txt relabeling is positional"
+  job:
+    kept:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: s1
+          class: File
+          path: test-data/kept.txt
+          filetype: txt
+        - identifier: s3
+          class: File
+          path: test-data/kept.txt
+          filetype: txt
+    sibling:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: s3
+          class: File
+          path: test-data/sib-s3.txt
+          filetype: txt
+        - identifier: s2
+          class: File
+          path: test-data/sib-s2.txt
+          filetype: txt
+        - identifier: s1
+          class: File
+          path: test-data/sib-s1.txt
+          filetype: txt
+    labels:
+      class: File
+      path: test-data/labels.txt
+      filetype: txt
+  outputs:
+    kept_ids:
+      file: test-data/expected_kept_ids.txt
+    synced:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        s1:
+          file: test-data/sib-s1.txt
+        s3:
+          file: test-data/sib-s3.txt
+    discarded:
+      class: Collection
+      collection_type: list
+      element_count: 1
+      element_tests:
+        s2:
+          file: test-data/sib-s2.txt
+    synced_first:
+      file: test-data/sib-s3.txt
+    relabeled:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        one:
+          file: test-data/sib-s3.txt
+        two:
+          file: test-data/sib-s2.txt
+        three:
+          file: test-data/sib-s1.txt

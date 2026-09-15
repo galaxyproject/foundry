@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Collection: sync collections by identifier"
 aliases:
   - "collection sync by identifier"
@@ -13,8 +13,8 @@ tags:
   - topic/collection-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-15
+revision: 3
 summary: "Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections."
 related_notes:
   - "[[iwc-transformations-survey]]"
@@ -24,6 +24,8 @@ related_patterns:
   - "[[harmonize-by-sortlist-from-identifiers]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/sync-collections-by-identifier/sync-by-identifier.gxwf-test.yml
 iwc_exemplars:
   - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
     why: "Cleaned SSU and LSU BED identifiers drive filtering of processed sequence collections."
@@ -63,7 +65,7 @@ Do not use this to detect empty or failed datasets. Run [[collection-cleanup-aft
 
 For `__FILTER_FROM_FILE__`, the key corpus shape is `how_filter: remove_if_absent`: keep elements whose identifiers appear in the file. Wire downstream steps to `output_filtered`, not `output_discarded`.
 
-For `__RELABEL_FROM_FILE__`, the survey examples use a connected labels file and non-strict relabeling. Prefer stricter mapping when the relabel file should cover every element exactly.
+For `__RELABEL_FROM_FILE__`, `how_select` picks the file shape. `txt` reads one new identifier per line and assigns them **by position** — it never looks at the old identifier. `tabular` and `tabular_extended` map old to new by name and are the only modes that survive a reordering upstream. The survey examples use a connected labels file with non-strict relabeling; prefer a tabular mapping, or `strict: true`, when the relabel file should cover every element exactly.
 
 ## Idiomatic shape
 
@@ -84,7 +86,9 @@ tool_state:
 
 ## Pitfalls
 
-- Identifier sync is not necessarily order sync. If downstream zip-like behavior depends on order, verify order or use [[harmonize-by-sortlist-from-identifiers]].
+- Identifier sync is not order sync. `__FILTER_FROM_FILE__` walks the input collection and treats the file as a membership set only, so the filtered output keeps the *sibling's* order and the file's order is discarded. If downstream zip-like behavior depends on order, use [[harmonize-by-sortlist-from-identifiers]].
+- `how_select: txt` relabeling is positional. The i-th line renames the i-th element, so a labels file written against a different ordering relabels every element wrongly and still succeeds.
+- A labels file longer than the collection is accepted. Only *fewer* lines than elements is an error, and only `strict: true` checks the count both ways; otherwise surplus lines are dropped without comment.
 - Extract identifiers from the collection that represents truth after cleanup. In MGnify examples, BED hits drive filtering of processed sequences, not the reverse.
 - Relabeling can hide mismatches when strict checks are off. Use only when the upstream shape guarantees correspondence.
 - `__FILTER_FROM_FILE__` filters by names in a file; it does not inspect whether files are empty or failed.
