@@ -666,7 +666,14 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
     const validation = validateSummary(data);
     expect(validation.valid).toBe(true);
     expect(data.source.workflow).toBe("demo");
-    expect(data.profiles).toContain("test");
+    expect(data.profiles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "test", kinds: ["test"] }),
+        expect.objectContaining({ name: "test_full", kinds: ["test"] }),
+        expect.objectContaining({ name: "docker", kinds: ["container"] }),
+        expect.objectContaining({ name: "debug", kinds: ["dev"] }),
+      ]),
+    );
     expect(data.processes.map((p: { name: string }) => p.name)).toEqual(
       expect.arrayContaining(["FASTQC", "SEQTK_TRIM", "MULTIQC"]),
     );

@@ -363,29 +363,301 @@
     }
   ],
   "profiles": [
-    "debug",
-    "conda",
-    "mamba",
-    "docker",
-    "arm",
-    "singularity",
-    "podman",
-    "shifter",
-    "charliecloud",
-    "apptainer",
-    "wave",
-    "gitpod",
-    "gpu",
-    "test",
-    "test_dfast",
-    "test_liftoff",
-    "test_hybrid",
-    "test_hybrid_dragonflye",
-    "test_long",
-    "test_long_miniasm",
-    "test_long_miniasm_prokka",
-    "test_long_dragonflye",
-    "test_full"
+    {
+      "name": "debug",
+      "kinds": [
+        "dev"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "dev-profile-name"
+      ]
+    },
+    {
+      "name": "conda",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "mamba",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "docker",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "arm",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "singularity",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "podman",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "shifter",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "charliecloud",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "apptainer",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "wave",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "gitpod",
+      "kinds": [
+        "executor",
+        "dev"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "executor-keys",
+        "dev-profile-name"
+      ]
+    },
+    {
+      "name": "gpu",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "test",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_dfast",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_dfast.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_liftoff",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_liftoff.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_hybrid",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_hybrid.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_hybrid_dragonflye",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_hybrid_dragonflye.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_long",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_long.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_long_miniasm",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_long_miniasm.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_long_miniasm_prokka",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_long_miniasm_prokka.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_long_dragonflye",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_long_dragonflye.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_full",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_full.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    }
   ],
   "tools": [
     {

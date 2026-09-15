@@ -274,20 +274,179 @@
     }
   ],
   "profiles": [
-    "debug",
-    "conda",
-    "mamba",
-    "docker",
-    "singularity",
-    "podman",
-    "shifter",
-    "charliecloud",
-    "apptainer",
-    "wave",
-    "arm64",
-    "gpu",
-    "test",
-    "test_full"
+    {
+      "name": "debug",
+      "kinds": [
+        "dev"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "dev-profile-name"
+      ]
+    },
+    {
+      "name": "conda",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "mamba",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "docker",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "arm64",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "emulate_amd64",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "singularity",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "podman",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "shifter",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "charliecloud",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "apptainer",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "wave",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "gpu",
+      "kinds": [
+        "container"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [],
+      "signals": [
+        "container-keys"
+      ]
+    },
+    {
+      "name": "test",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    },
+    {
+      "name": "test_full",
+      "kinds": [
+        "test"
+      ],
+      "source_path": "nextflow.config",
+      "includes": [
+        "conf/test_full.config"
+      ],
+      "signals": [
+        "include:test-config",
+        "sets-input-data",
+        "params-assignment"
+      ]
+    }
   ],
   "tools": [
     {

@@ -15,8 +15,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-09-08
-revision: 11
+revised: 2026-09-15
+revision: 12
 related_notes:
   - "[[summarize-nextflow]]"
   - "[[nextflow-workflow-io-semantics]]"
@@ -74,6 +74,54 @@ Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by 
 - **Structured channel typing.** `processes[].inputs[].shape` is a string (`"tuple(meta, [path,path])"`), not a structured type. NF channel typing is a research project; a string is enough for downstream Molds to reason about and an LLM to emit.
 - **Operator-chain semantics.** `Edge.via` records the literal operator chain (`["map", "join", "groupTuple"]`). Reconciling what the chain *does* to channel shapes is left to the LLM step that fills `Edge.notes` when confidence is low.
 - **Multi-tool processes outside decomposed mulled-v2 containers.** A process can run multiple tools (a shell pipeline of two binaries). `Process.tool` is nullable; multi-tool processes set it null and surface tool details in `script_excerpt` and `container`. A `tools[]` foreign-key array on `Process` would be cleaner; deferred until downstream use forces it.
+
+## Revision 12 — 2026-09-15
+
+`profiles[]` became a classified list instead of bare names. Resolves
+galaxyproject/foundry#67 (a).
+
+- **`Profile` shape added; `profiles[]` items are now objects, not strings.**
+  Each entry carries `name`, `kinds[]`, `source_path`, `includes[]`, and
+  `signals[]`. This is a breaking change to the field; the two committed cast
+  run artifacts were regenerated.
+- **`kinds` is an array, not a scalar enum.** 25 of the 371 corpus profiles
+  select a container engine *and* an executor in one block — seven of
+  `biocorecrg/MOP2`'s eight do, as does `CRG-CNAG/CalliNGS-NF`'s `cluster`,
+  which sets `process.container`, `singularity.enabled`, and a `process { }`
+  block carrying `executor = 'crg'`. A single `kind` would have had to lie
+  about one of them.
+- **`test`, `container`, `executor`, and `dev` accumulate; `mode` and
+  `resources` do not.** The latter two are assigned only when none of the
+  former matched, because `params`-assignment and process-directive evidence is
+  much weaker — nf-core's `docker` profile assigns `params.use_gpu` inside a
+  ternary, and most test profiles set resource caps. `signals[]` keeps the
+  suppressed evidence visible.
+- **Classification reads the profile body, never the name.** The
+  `startsWith("test")` heuristic consumers were forced into fails both
+  directions: `replikation/What_the_Phage`'s `test` profile only flips
+  `fasta = true` (now `mode`), while `nf-core/sarek`'s `mutect` includes
+  `conf/test_mutect2.config` and `nf-core/references`'s `cloud` assigns
+  `params.input` (both now `test`). Corpus split over 371 profiles: 103 `test`,
+  195 `container`, 25 `container`+`executor`, 24 `dev` (7 of them alongside
+  `executor`), 12 `mode`, 6 `executor`, 6 `resources`, 0 `unknown`.
+- **`test_full` is not its own kind.** It is `kinds: ["test"]` like any other
+  test profile; `includes` carries `conf/test_full.config`, which is what a
+  consumer separating cheap from release-scale candidates actually needs. 15 of
+  16 nf-core fixtures declare it.
+- **`NfTest.profiles[]` stays `string[]`.** Those are references to profile
+  names, not declarations.
+
+- **`test` detection is scoped to nf-core input conventions.** All 103 corpus
+  `test` profiles are in the 16 nf-core fixtures; none are in the 10 ad-hoc
+  ones, whose inputs are named `reads` / `genome` / `variants`. Absence of a
+  `test` kind means 'not detected', not 'none declared', and the `kinds`
+  description says so.
+
+The enumeration fix this depended on shipped in the same change — see the
+`summarize-nextflow` rev 16 entry. A `kind` on a wrong name list would have
+been worse than no `kind` at all. One pipeline is still not fully enumerated:
+`ncbi/egapx` declares a profile in `ui/assets/config/user/`, outside the
+detected pipeline root, and reports none.
 
 ## Revision 11 — 2026-09-08
 

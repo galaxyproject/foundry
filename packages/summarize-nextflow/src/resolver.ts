@@ -28,11 +28,21 @@ interface SampleSheet {
   columns: SampleSheetColumn[];
 }
 
+type ProfileKind = "test" | "container" | "executor" | "resources" | "mode" | "dev" | "unknown";
+
+interface Profile {
+  name: string;
+  kinds: ProfileKind[];
+  source_path: string;
+  includes: string[];
+  signals: string[];
+}
+
 interface Summary {
   source: Record<string, unknown>;
   params: Param[];
   sample_sheets: SampleSheet[];
-  profiles: string[];
+  profiles: Profile[];
   tools: Tool[];
   processes: Process[];
   subworkflows: Subworkflow[];
@@ -355,7 +365,7 @@ export async function resolveNextflowSummary(
     },
     params,
     sample_sheets: parseSampleSheets(pipelineRoot),
-    profiles: parseProfiles(config),
+    profiles: parseProfiles(pipelineRoot),
     tools,
     processes: processes.map((process) => ({
       ...process,
@@ -563,12 +573,232 @@ function parseWorkflowName(config: string): string {
   );
 }
 
-function parseProfiles(config: string): string[] {
-  const block = extractNamedBlock(config, "profiles");
-  if (!block) return [];
-  return [...block.matchAll(/^\s*([A-Za-z0-9_]+)\s*\{/gmu)]
-    .map((match) => match[1]!)
-    .filter((name) => name && name !== "profiles");
+/**
+ * Config keys that select a container or package-management engine. Presence of
+ * any of these makes a profile a `container` profile regardless of what else it
+ * sets — nf-core's `docker` profile assigns `params.use_gpu` inside a ternary,
+ * so a bare `params.` sighting cannot outrank this.
+ */
+const CONTAINER_PROFILE_KEYS =
+  /\b(?:docker|singularity|apptainer|podman|shifter|charliecloud|conda|wave|spack)\s*\.\s*(?:enabled|autoMounts|registry|cacheDir|runOptions|ociMode|useMicromamba|channels|strategy|freeze|pullTimeout|createTimeout|temp|envWhitelist|fixOwnership|engineOptions|libraryDir|noHttps|builder|endpoint)|^\s*(?:docker|singularity|apptainer|podman|shifter|charliecloud|conda|wave)\s*\{|\bprocess\s*\.\s*(?:container|containerOptions|conda|arch)\b|\bcontainerEngine\b/mu;
+
+/**
+ * Config keys that select an executor, cloud backend, or work directory.
+ * `executor`, `queue`, and `clusterOptions` each need both the dotted form and
+ * the bare form, because a profile may set them inside a `process { }` block
+ * (`biocorecrg/MOP2`'s `conf/slurm.config` uses `executor = 'slurm'`,
+ * `labsyspharm/mcmicro`'s `GPU` uses `queue = 'gpu'` under a `withName:`
+ * selector). `workDir` is line-anchored so `params.workDir` does not match.
+ */
+const EXECUTOR_PROFILE_KEYS =
+  /\bprocess\s*\.\s*(?:executor|queue|clusterOptions)\b|^\s*executor\s*[.={]|^\s*(?:queue|clusterOptions)\s*=|^\s*(?:aws|google|azure|k8s|tower|fusion)\s*\{|^\s*workDir\s*=/mu;
+
+/**
+ * Process-directive tuning with no engine, executor, or input-data signal.
+ * Deliberately only process-scoped: `resourceLimits` and `max_cpus`/`max_memory`
+ * live inside `params { }`, so a profile setting them is already `mode` by the
+ * time this is consulted.
+ */
+const RESOURCE_PROFILE_KEYS =
+  /^\s*process\s*[{.]|\bprocess\s*\.\s*(?:memory|cpus|time|maxForks|scratch)\b/mu;
+
+/**
+ * Params assignments that supply the pipeline's primary input data.
+ *
+ * The leading boundary is a character class rather than `^`, because a whole
+ * profile is often written on one line — and once `expandIncludes` inlines an
+ * included config, line anchoring would see `params { input = ... }` only when
+ * the author happened to wrap it.
+ *
+ * The negative lookahead rejects a *declaration* from an unassigned default
+ * (`input = null` in a shared base config) and keeps it from reading as test
+ * data. `expandIncludes` inlines whole files, so the two are otherwise
+ * indistinguishable.
+ */
+const INPUT_DATA_PARAMS =
+  /(?:^|[{;,\s])(?:params\s*\.\s*)?(?:input|input_paths|samplesheet)\s*=\s*(?!null\b|''|""|$)\S/mu;
+
+const PARAMS_ASSIGNMENT = /^\s*params\s*[{.]/mu;
+
+/** nf-core template profiles that exist to change developer ergonomics only. */
+const DEV_PROFILE_NAMES = new Set(["debug", "gitpod", "dev"]);
+
+const MAX_INCLUDE_CONFIG_DEPTH = 4;
+
+const INCLUDE_CONFIG = /includeConfig\s*['"]([^'"]+)['"]/gu;
+
+/** Path segments whose `.config` files are fixtures or CI harnesses, not pipeline config. */
+const NON_PIPELINE_CONFIG_DIR = /(?:^|\/)(?:tests?|\.github)\//u;
+
+function includeConfigTargets(body: string): string[] {
+  return unique([...body.matchAll(INCLUDE_CONFIG)].map((match) => match[1]!));
+}
+
+/**
+ * Inline the bodies of `includeConfig`-referenced files so a profile whose whole
+ * definition is a single include still classifies. Interpolated paths are left
+ * alone — the value is only known at config-load time.
+ */
+function expandIncludes(body: string, baseDir: string, seen: Set<string>, depth = 0): string {
+  if (depth >= MAX_INCLUDE_CONFIG_DEPTH) return body;
+  let expanded = body;
+  for (const target of includeConfigTargets(body)) {
+    if (target.includes("$")) continue;
+    const path = resolve(baseDir, target);
+    if (seen.has(path) || !existsSync(path)) continue;
+    seen.add(path);
+    const included = maskNextflowComments(readText(path));
+    expanded += `\n${expandIncludes(included, dirname(path), seen, depth + 1)}`;
+  }
+  return expanded;
+}
+
+function classifyProfile(
+  name: string,
+  expandedBody: string,
+  includes: string[],
+): {
+  kinds: ProfileKind[];
+  signals: string[];
+} {
+  const includesTestConfig = includes.some((target) => /(?:^|\/)test[^/]*\.config$/u.test(target));
+  const setsInputData = INPUT_DATA_PARAMS.test(expandedBody);
+  const isContainer = CONTAINER_PROFILE_KEYS.test(expandedBody);
+  const isExecutor = EXECUTOR_PROFILE_KEYS.test(expandedBody);
+  const setsParams = PARAMS_ASSIGNMENT.test(expandedBody);
+
+  const signals: string[] = [];
+  if (includesTestConfig) signals.push("include:test-config");
+  if (setsInputData) signals.push("sets-input-data");
+  if (isContainer) signals.push("container-keys");
+  if (isExecutor) signals.push("executor-keys");
+  if (setsParams) signals.push("params-assignment");
+
+  const kinds: ProfileKind[] = [];
+  // Test-data evidence first: a profile that supplies input is a test candidate
+  // whatever it is named, and a name-shaped guess mislabels both directions —
+  // What_the_Phage's `test` sets no data, sarek's `mutect` includes
+  // conf/test_mutect2.config.
+  if (includesTestConfig || setsInputData) kinds.push("test");
+  if (isContainer) kinds.push("container");
+  if (isExecutor) kinds.push("executor");
+  // `dev` is additive: the name list is short and exact, so it never adds
+  // noise, and a profile can genuinely be both — `nf-core/references`'s
+  // `gitpod` sets `executor.name` yet exists only for a dev environment.
+  if (DEV_PROFILE_NAMES.has(name)) {
+    kinds.push("dev");
+    signals.push("dev-profile-name");
+  }
+  // `mode` and `resources` are fallbacks, not additive roles. Their signals are
+  // far weaker — nf-core's `docker` profile assigns `params.use_gpu` inside a
+  // ternary, and most test profiles set process resource caps — so adding them
+  // alongside a positive test / container / executor finding would label most
+  // of the corpus `mode`. A consumer that needs the suppressed evidence reads
+  // `signals[]`, where `params-assignment` and `process-directives` survive.
+  if (kinds.length === 0 && setsParams) kinds.push("mode");
+  if (kinds.length === 0 && RESOURCE_PROFILE_KEYS.test(expandedBody)) {
+    kinds.push("resources");
+    signals.push("process-directives");
+  }
+  if (kinds.length === 0) kinds.push("unknown");
+
+  return { kinds, signals };
+}
+
+/**
+ * Enumerate the depth-1 children of a `profiles { ... }` body. Brace depth is
+ * tracked so nested `params { }` / `process { }` blocks are not mistaken for
+ * profile names.
+ *
+ * The declaration is matched *sticky at the cursor*, never searched for ahead.
+ * A searching regex resyncs on the first identifier-brace it can find, which
+ * for an unrecognized declaration form is a scope inside the body it failed to
+ * parse — emitting `docker` as a top-level profile and losing the real one.
+ * Matching at the cursor means an unrecognized form stops enumeration instead
+ * of corrupting it.
+ */
+function profileBlocks(block: string): { name: string; body: string }[] {
+  const blocks: { name: string; body: string }[] = [];
+  // Quoted names are legal Groovy config keys and the form hyphenated profile
+  // names have to use.
+  const declaration = /\s*,?\s*(?:['"]([^'"]+)['"]|([A-Za-z_][A-Za-z0-9_]*))\s*\{/uy;
+  let cursor = 0;
+  while (cursor < block.length) {
+    declaration.lastIndex = cursor;
+    const match = declaration.exec(block);
+    if (!match) break;
+    const openIndex = cursor + match[0].length - 1;
+    const body = extractBlockAt(block, openIndex);
+    if (body === null) break;
+    blocks.push({ name: match[1] ?? match[2]!, body });
+    cursor = openIndex + body.length + 2;
+  }
+  return blocks;
+}
+
+/**
+ * Config files that may declare a `profiles { }` block, in precedence order —
+ * the first declaration of a name wins.
+ *
+ * Nextflow only reads the root `nextflow.config`, so the root and its
+ * `includeConfig` chain come first. The bounded scan afterwards catches
+ * pipelines whose profiles live in a config selected by launch-time `-c`
+ * (`biocorecrg/MOP2`'s `nextflow.global.config`). Those pipelines usually have
+ * no root `nextflow.config` at all, in which case precedence degrades to
+ * alphabetical walk order — there is nothing better to go on.
+ *
+ * The scan is confined to the detected pipeline root, so a `profiles { }` block
+ * outside it is not found: `ncbi/egapx` keeps one in
+ * `ui/assets/config/user/process_resources.config` while its pipeline root
+ * resolves to `nf/`, and reports no profiles. Those are launcher-side configs
+ * for egapx's Python wrapper rather than pipeline profiles, so this is left
+ * as-is.
+ */
+function profileConfigSources(pipelineRoot: string): string[] {
+  const rootConfig = join(pipelineRoot, "nextflow.config");
+  const sources: string[] = [];
+  const seen = new Set<string>();
+  const queue = existsSync(rootConfig) ? [rootConfig] : [];
+  while (queue.length > 0) {
+    const path = queue.shift()!;
+    if (seen.has(path)) continue;
+    seen.add(path);
+    sources.push(path);
+    for (const target of includeConfigTargets(maskNextflowComments(readText(path)))) {
+      if (target.includes("$")) continue;
+      const included = resolve(dirname(path), target);
+      if (existsSync(included)) queue.push(included);
+    }
+  }
+  for (const path of walk(pipelineRoot, { maxDepth: 4 })) {
+    if (!path.endsWith(".config") || seen.has(path)) continue;
+    // A config under tests/ or .github/ is a fixture or a CI harness, not a
+    // pipeline config. Reading one injects profiles the pipeline does not have.
+    if (NON_PIPELINE_CONFIG_DIR.test(relative(pipelineRoot, path))) continue;
+    seen.add(path);
+    sources.push(path);
+  }
+  return sources;
+}
+
+function parseProfiles(pipelineRoot: string): Profile[] {
+  const profiles: Profile[] = [];
+  const claimed = new Set<string>();
+  for (const configPath of profileConfigSources(pipelineRoot)) {
+    const block = extractNamedBlockBody(maskNextflowComments(readText(configPath)), "profiles");
+    if (!block) continue;
+    const baseDir = dirname(configPath);
+    const source_path = relative(pipelineRoot, configPath);
+    for (const { name, body } of profileBlocks(block)) {
+      if (claimed.has(name)) continue;
+      claimed.add(name);
+      const includes = includeConfigTargets(body);
+      const expanded = expandIncludes(body, baseDir, new Set([configPath]));
+      const { kinds, signals } = classifyProfile(name, expanded, includes);
+      profiles.push({ name, kinds, source_path, includes, signals });
+    }
+  }
+  return profiles;
 }
 
 function parseParams(pipelineRoot: string): Param[] {
@@ -2488,12 +2718,27 @@ function extractScript(body: string): string | null {
     : text;
 }
 
-function extractNamedBlock(text: string, name: string): string | null {
+/** Locate a `name { ... }` block and return its offsets and body, or null. */
+function findNamedBlock(
+  text: string,
+  name: string,
+): { start: number; openIndex: number; body: string } | null {
   const startMatch = new RegExp(`\\b${name}\\s*\\{`, "u").exec(text);
   if (!startMatch) return null;
   const openIndex = text.indexOf("{", startMatch.index);
-  const block = extractBlockAt(text, openIndex);
-  return block === null ? null : text.slice(startMatch.index, openIndex + block.length + 2);
+  const body = extractBlockAt(text, openIndex);
+  return body === null ? null : { start: startMatch.index, openIndex, body };
+}
+
+/** The whole `name { ... }` block, header and braces included. */
+function extractNamedBlock(text: string, name: string): string | null {
+  const found = findNamedBlock(text, name);
+  return found === null ? null : text.slice(found.start, found.openIndex + found.body.length + 2);
+}
+
+/** Only the block body, without the `name {` header or the closing brace. */
+function extractNamedBlockBody(text: string, name: string): string | null {
+  return findNamedBlock(text, name)?.body ?? null;
 }
 
 function extractBlockAt(text: string, openIndex: number): string | null {

@@ -100,7 +100,18 @@ A single JSON document conforming to summary-nextflow (`packages/summarize-nextf
           "enum": ["forward", "reverse", "unstranded", "auto"] }
       ] }
   ],
-  "profiles": ["test", "test_full", "docker", "singularity", "conda"],
+  "profiles": [                                // classified from the body, never the name
+    { "name": "test",      "kinds": ["test"],      "source_path": "nextflow.config",
+      "includes": ["conf/test.config"],
+      "signals": ["include:test-config", "sets-input-data", "params-assignment"] },
+    { "name": "test_full", "kinds": ["test"],      "source_path": "nextflow.config",
+      "includes": ["conf/test_full.config"],
+      "signals": ["include:test-config", "sets-input-data", "params-assignment"] },
+    { "name": "docker",    "kinds": ["container"], "source_path": "nextflow.config",
+      "includes": [], "signals": ["container-keys"] },
+    { "name": "debug",     "kinds": ["dev"],       "source_path": "nextflow.config",
+      "includes": [], "signals": ["dev-profile-name"] }
+  ],
   "tools": [                                   // mirrors gxy-sketches ToolSpec, augmented
     { "name": "fastp", "version": "0.23.4",
       "biocontainer": "biocontainers/fastp:0.23.4--h5f740d0_0",   // accepts quay.io/ or docker.io biocontainers/ alias
@@ -208,7 +219,27 @@ Populate `source` from `git remote get-url`, `git rev-parse HEAD` (or the user-s
 
 #### 3. Parse parameters and profiles
 
-Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schema.json` exists (nf-core), prefer it as the source of truth for `type`, `description`, and `required` — it is real JSON Schema, copy verbatim. Some params are computed at config-load time (for example `params.fasta = getGenomeAttribute('fasta')` in `main.nf`) and will not appear in `nextflow_schema.json`; include them with a description noting the dynamic source. Enumerate `profiles { ... }` keys.
+Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schema.json` exists (nf-core), prefer it as the source of truth for `type`, `description`, and `required` — it is real JSON Schema, copy verbatim. Some params are computed at config-load time (for example `params.fasta = getGenomeAttribute('fasta')` in `main.nf`) and will not appear in `nextflow_schema.json`; include them with a description noting the dynamic source.
+
+**`profiles[]`** — enumerate the `profiles { ... }` block and classify each entry by role. Track brace depth: a profile body contains nested `params { }` and `process { }` blocks, and a flat regex over the block emits those as profile names. The block is not always in `nextflow.config` — follow the root `includeConfig` chain (`epi2me-labs/wf-human-variation` declares all six profiles in `base.config`), and fall back to a bounded scan for other `*.config` files carrying a `profiles { }` block (`biocorecrg/MOP2` keeps them in `nextflow.global.config`, selected at launch with `-c`).
+
+Classify from the profile *body*, resolving its `includeConfig` targets first — never from the name. The name heuristic fails both ways: `replikation/What_the_Phage`'s `test` profile only flips `fasta = true`, a mode switch with no test data, while `nf-core/sarek`'s `mutect` profile includes `conf/test_mutect2.config` and is a real test candidate. Profiles that pair a container engine with an executor are common outside nf-core — seven of `biocorecrg/MOP2`'s eight do, and `CRG-CNAG/CalliNGS-NF`'s `cluster` sets `process.container`, `singularity.enabled`, and `executor = 'crg'` in one block — so record every role, not just the first.
+
+| `kinds` entry | evidence in the profile body |
+|---|---|
+| `test` | includes a `conf/test*.config`, or assigns a non-null `params.input` / `samplesheet` |
+| `container` | `docker.enabled`, `conda.enabled`, `process.container`, `process.conda`, `process.arch`, … |
+| `executor` | `executor.*`, `workDir`, `executor` / `queue` / `clusterOptions` inside `process { }`, an `aws {}` / `google {}` / `k8s {}` block |
+| `resources` | process directives only — `memory`, `cpus`, `time`, `withLabel:` selectors |
+| `mode` | params that change behavior without supplying input data (`nf-core/rnaseq`'s `prokaryotic`) |
+| `dev` | `debug`, `gitpod` |
+| `unknown` | no classifying signal |
+
+`test`, `container`, `executor`, and `dev` accumulate. `mode` and `resources` are assigned **only when none of those matched** — their signals are much weaker, since nf-core's `docker` profile assigns `params.use_gpu` inside a ternary and most test profiles set process resource caps, so accumulating them would label most of a pipeline `mode`. Record the suppressed evidence in `signals[]` instead.
+
+Two limits worth stating plainly rather than leaving for a consumer to discover. `test` detection keys on nf-core input conventions, so an ad-hoc pipeline naming its inputs `reads` / `genome` gets no `test` profile even where one exists in spirit — across the fixture corpus all 103 `test` profiles are in the 16 nf-core pipelines and none in the 10 ad-hoc ones. And a `profiles { }` block outside the detected pipeline root is not found at all: `ncbi/egapx` keeps one in `ui/assets/config/user/`, which is launcher-side config for its Python wrapper rather than pipeline profiles.
+
+`test_full` is `kinds: ["test"]` like any other; a consumer separates it by reading `includes`. Populate `signals[]` with the evidence acted on so a surprising classification is auditable, and `source_path` with the config file that declared the profile.
 
 #### 3.5. Resolve sample-sheet schemas
 
