@@ -15,7 +15,14 @@ anything else. It is an array because profiles genuinely combine roles — 25 of
 are fallbacks assigned only when none of those matched, with the suppressed
 evidence kept in `signals[]`.
 
+The `test` kind is deliberately profile-level evidence, not a final selection:
+pipeline-level `nf_tests[]` remain the higher-fidelity candidate unit because
+they preserve per-test parameter overrides. The kind does not claim that a
+profile is cheap or representative, and `mode` profiles may still encode
+science-scope choices that a target translation must surface.
+
 Profile enumeration was fixed in the same change: brace-depth tracking (nested
 `params { }` / `process { }` blocks were emitted as profile names), root
 `includeConfig` following, and a bounded scan for launch-time `-c` configs. 11
-of 26 corpus pipelines previously reported a wrong profile list.
+of 26 corpus pipelines previously reported a wrong profile list. Structural
+braces inside quoted config values are ignored by the depth tracker.

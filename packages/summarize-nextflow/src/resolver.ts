@@ -675,10 +675,11 @@ function classifyProfile(
   if (setsParams) signals.push("params-assignment");
 
   const kinds: ProfileKind[] = [];
-  // Test-data evidence first: a profile that supplies input is a test candidate
-  // whatever it is named, and a name-shaped guess mislabels both directions —
-  // What_the_Phage's `test` sets no data, sarek's `mutect` includes
-  // conf/test_mutect2.config.
+  // Profile-level test-data evidence first. This identifies a useful fallback
+  // candidate, not the selected test case: nf_tests[] carries the higher-fidelity
+  // unit when pipeline-level nf-test cases exist. A name-shaped guess still
+  // mislabels both directions — What_the_Phage's `test` sets no data, while
+  // sarek's `mutect` includes conf/test_mutect2.config.
   if (includesTestConfig || setsInputData) kinds.push("test");
   if (isContainer) kinds.push("container");
   if (isExecutor) kinds.push("executor");
@@ -2743,8 +2744,37 @@ function extractNamedBlockBody(text: string, name: string): string | null {
 
 function extractBlockAt(text: string, openIndex: number): string | null {
   let depth = 0;
+  let quote: "'" | '"' | "'''" | '"""' | null = null;
   for (let index = openIndex; index < text.length; index += 1) {
-    const char = text[index];
+    const char = text[index]!;
+    const next = text[index + 1];
+    const nextTwo = text[index + 2];
+
+    if (quote) {
+      if ((quote === "'" || quote === '"') && char === "\\") {
+        index += 1;
+        continue;
+      }
+      if (quote.length === 3) {
+        if (char === quote[0] && next === quote[0] && nextTwo === quote[0]) {
+          quote = null;
+          index += 2;
+        }
+      } else if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if ((char === "'" || char === '"') && next === char && nextTwo === char) {
+      quote = char === "'" ? "'''" : '"""';
+      index += 2;
+      continue;
+    }
+    if (char === "'" || char === '"') {
+      quote = char;
+      continue;
+    }
     if (char === "{") depth += 1;
     if (char === "}") {
       depth -= 1;

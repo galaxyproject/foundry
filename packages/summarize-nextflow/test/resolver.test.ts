@@ -2474,6 +2474,27 @@ profiles {
     expect(summary.profiles[0]?.kinds).toEqual(["container"]);
   });
 
+  test("ignores structural braces inside quoted profile values", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/quoted-braces' }
+profiles {
+    templated { params.template = 'literal } brace' }
+    docker    { docker.enabled = true }
+}
+`,
+    );
+    write(root, "main.nf", "workflow QUOTED_BRACES { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles.map((profile) => profile.name)).toEqual(["templated", "docker"]);
+    expect(summary.profiles[0]?.kinds).toEqual(["mode"]);
+    expect(summary.profiles[1]?.kinds).toEqual(["container"]);
+  });
+
   test("classifies a one-line params block reached through includeConfig", async () => {
     const root = tempPipelineRoot();
     write(

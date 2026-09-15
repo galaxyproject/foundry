@@ -101,7 +101,8 @@ galaxyproject/foundry#67 (a).
   directions: `replikation/What_the_Phage`'s `test` profile only flips
   `fasta = true` (now `mode`), while `nf-core/sarek`'s `mutect` includes
   `conf/test_mutect2.config` and `nf-core/references`'s `cloud` assigns
-  `params.input` (both now `test`). Corpus split over 371 profiles: 103 `test`,
+  `params.input` (both now carry `test` evidence). Corpus split over 371
+  profiles: 103 `test`,
   195 `container`, 25 `container`+`executor`, 24 `dev` (7 of them alongside
   `executor`), 12 `mode`, 6 `executor`, 6 `resources`, 0 `unknown`.
 - **`test_full` is not its own kind.** It is `kinds: ["test"]` like any other
@@ -110,6 +111,13 @@ galaxyproject/foundry#67 (a).
   16 nf-core fixtures declare it.
 - **`NfTest.profiles[]` stays `string[]`.** Those are references to profile
   names, not declarations.
+- **`test` is profile evidence, not the final selection.** Pipeline-level
+  `nf_tests[]` entries remain the higher-fidelity candidate unit because they
+  preserve per-test parameter overrides. An input-bearing profile is the
+  fallback when no such test case exists; its kind alone says nothing about
+  runtime cost or representative coverage. Mode profiles may also carry
+  target-scope choices, so they must not be treated like disposable executor or
+  container settings.
 
 - **`test` detection is scoped to nf-core input conventions.** All 103 corpus
   `test` profiles are in the 16 nf-core fixtures; none are in the 10 ad-hoc
