@@ -21,6 +21,9 @@ export const PLANEMO_PIN_NOTE = "content/cli/planemo/index.md";
 export const PLANEMO_SCHEMA_NOTE = "content/schemas/planemo-test-report.md";
 /** CI installs planemo by pip spec, so the workflow file repeats the pin like any note does. */
 export const PLANEMO_CI_WORKFLOW = ".github/workflows/verification-workflows.yml";
+export const PLANEMO_CONTAINER_DOCKERFILE = "packages/gxwf-pi-harness/Dockerfile";
+export const PLANEMO_CONTAINER_RUNTIME = "packages/gxwf-pi-harness/src/container.ts";
+export const PLANEMO_CONTAINER_BUILD = "package.json";
 export const PLANEMO_PROVENANCE = [
   "packages/planemo-cli-meta/src/cli-meta.provenance.json",
   "packages/planemo-test-report-schema/src/test-report.provenance.json",
@@ -54,6 +57,9 @@ export function readPinnedPlanemoVersion(repoRoot: string): string {
 // pattern captures the version so a mismatch can report what it actually found.
 const SPEC_RE = /planemo==(\d+\.\d+\.\d+(?:[.\w]*))/g;
 const BLOB_RE = /github\.com\/galaxyproject\/planemo\/blob\/(\d+\.\d+\.\d+(?:[.\w]*))\//g;
+const DOCKER_ARG_RE = /ARG PLANEMO_VERSION=(\d+\.\d+\.\d+(?:[.\w]*))/g;
+const RUNTIME_CONST_RE = /PLANEMO_VERSION = "(\d+\.\d+\.\d+(?:[.\w]*))"/g;
+const IMAGE_TAG_RE = /planemo-(\d+\.\d+\.\d+(?:[.\w]*))/g;
 
 function scanText(
   file: string,
@@ -125,6 +131,19 @@ export function findPlanemoPinDrift(repoRoot: string): PlanemoPinDrift[] {
         detail,
         TEXT_PATTERNS,
       ),
+    );
+  }
+
+  const containerRepeats: [rel: string, detail: string, re: RegExp, label: string][] = [
+    [PLANEMO_CONTAINER_DOCKERFILE, "container build", DOCKER_ARG_RE, "PLANEMO_VERSION ARG"],
+    [PLANEMO_CONTAINER_RUNTIME, "container runtime", RUNTIME_CONST_RE, "PLANEMO_VERSION constant"],
+    [PLANEMO_CONTAINER_BUILD, "container image tag", IMAGE_TAG_RE, "planemo-<version> tag"],
+  ];
+  for (const [rel, detail, re, label] of containerRepeats) {
+    drift.push(
+      ...scanText(rel, readFileSync(path.join(repoRoot, rel), "utf8"), expected, detail, [
+        { re, label },
+      ]),
     );
   }
 

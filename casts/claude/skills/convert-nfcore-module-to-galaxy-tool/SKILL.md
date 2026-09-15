@@ -1,6 +1,6 @@
 ---
 name: convert-nfcore-module-to-galaxy-tool
-description: "Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks)."
+description: "Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests."
 ---
 
 # convert-nfcore-module-to-galaxy-tool
@@ -9,7 +9,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## When To Use
 
-- Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks).
+- Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests.
 
 ## Inputs
 
@@ -54,7 +54,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 Convert **one nf-core module directory** into a Galaxy tool wrapper. Input is a path to `modules/nf-core/<name>/` (or any directory of the same shape: `main.nf` + `meta.yml` + `environment.yml` + optional `tests/`). Output is a self-contained tool dir: `tool.xml`, `macros.xml`, `_provenance.yml`, with `<test>` blocks pinned to remote `nf-core/test-datasets` URLs.
 
-The skill authors a Galaxy tool XML wrapper directly from the nf-core module shape — the regular structure (`tuple(meta, path)` channels, `task.ext.args` escape hatch, versions emit, environment.yml bioconda pin) makes a mechanical mapping practical. It does **not** depend on summarize-nextflow — that skill summarizes whole pipelines, the wrong granularity for one module.
+The skill authors a Galaxy tool XML wrapper directly from the nf-core module shape. Recurring conventions (`tuple(meta, path)` channels, the `task.ext.args` escape hatch, versions emits, and environment.yml package pins) provide useful evidence, but they do not make the translation mechanical. It does **not** depend on summarize-nextflow — that skill summarizes whole pipelines, the wrong granularity for one module.
 
 The skill is run per module by an outer harness (a script or human loop). Cross-module batches are not its concern.
 
@@ -134,12 +134,9 @@ overrides: []
 
 ### Procedure
 
-The skill is **not a single LLM prompt**. It is a small program with embedded LLM calls:
+The skill is an **agent procedure**, not a parser or code generator. No implementation exists that can reliably tokenize arbitrary Groovy/Nextflow and emit a Galaxy wrapper. The agent must interpret the module as a whole, reconcile `meta.yml` with `main.nf`, and make contextual decisions about command behavior, input and output cardinality, conditional interfaces, test fixtures, and Galaxy conventions.
 
-- **Deterministic:** read meta.yml / main.nf / environment.yml / tests/main.nf.test; tokenize the `process` block for input/output channels; resolve container directive into bioconda packages; compute file hashes; resolve git SHAs; emit `_provenance.yml` and the static portions of `<requirements>`, `<citations>`, `<version_command>`.
-- **LLM-driven:** translate the `script:` body into Galaxy `<command>` Cheetah; pick `<inputs>` shapes (data vs collection; conditional gating); name and document outputs; humanize `<help>`; place `<test>` block fixtures.
-
-The boundary mirrors summarize-nextflow §Procedure: enumerated artifacts deterministic, free-text fields LLM.
+Use ordinary tools for operations they can settle exactly: calculate file hashes, resolve supplied or repository SHAs, read simple YAML values, copy unambiguous dependency pins or DOIs, and run validation commands. These mechanical operations support the translation; they do not make the translation itself deterministic. Record ambiguity and unsupported syntax in `_provenance.yml.overrides` instead of presenting an inference as parser output.
 
 #### 1. Read the module
 
@@ -258,7 +255,8 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the skill w
 
 - **rev 1 (2026-05-10)** — initial draft. Procedure sketched against the trimmed plan; no cast runs yet. Pattern + CLI references all `evidence: hypothesis`.
 - **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against planemo-test-report; pulled in `cli-tool`/`cli-command`/`schema` references for planemo, planemo-lint, planemo-test, planemo-test-report. Deferred-manpages caveat removed.
-- **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other skill; the prior condense was always a verbatim passthrough), so the cast is fully deterministic and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
+- **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other skill; the prior condense was always a verbatim passthrough), so reference packaging is reproducible and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
+- **rev 5 (2026-09-15)** — removed the unimplemented deterministic-parser boundary. The cast is explicitly an agent-authored translation with mechanical hashing, pinning, and validation support.
 
 ## Feedback Mode
 

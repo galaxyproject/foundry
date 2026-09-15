@@ -69,11 +69,13 @@ container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.
 
 — from [`nf_core/module-template/main.nf`](https://github.com/nf-core/tools/blob/master/nf_core/module-template/main.nf) lines 27-30.
 
-The Mold body §5 currently encodes the **older** form `workflow.containerEngine == 'singularity'`. Both forms appear in the field today because modules have been generated across multiple template eras. **The cast skill's tokenizer must accept both.** Concretely, a reasonable predicate-detection pattern is:
+The Mold body §5 currently encodes the **older** form `workflow.containerEngine == 'singularity'`. Both forms appear in the field today because modules have been generated across multiple template eras. **The conversion agent must recognize both.** The following expression is a search aid for common cases, not a parser or proof that the complete directive has been interpreted correctly:
 
 ```
 workflow\.containerEngine\s*(?:==\s*'singularity'|in\s*\[\s*'singularity'(?:\s*,\s*'apptainer')?\s*\])
 ```
+
+Read the complete directive before choosing requirements or recording container provenance. Unfamiliar predicates and nested Groovy expressions require review rather than an increasingly permissive regular expression.
 
 Beyond the predicate, every nf-core module the validator has seen in 2025+ shares the `&& !task.ext.singularity_pull_docker_container` clause. The semantics of that clause are documented inline with the resolution rules below.
 
