@@ -4,11 +4,11 @@
   "mold": {
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
-    "revision": 6,
-    "content_hash": "4f2a41200f691f8355348a52510a545287b7fee9a2922db04bac857f61b814a1",
-    "commit": "a25693215c565bef2d2fd7fed6abd4fb1b2393bf"
+    "revision": 7,
+    "content_hash": "4caff3e340d28db70ae245abd2ba5338877973178d7b5cdc8892a391b1a4fe45",
+    "commit": "0fa5fc9933b64ca8348a87c97dda6d9547c6830f"
   },
-  "cast_at": "2026-09-15T19:01:31.576Z",
+  "cast_at": "2026-09-15T22:37:38.656Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -132,8 +132,8 @@
       "purpose": "Reference for the <discover_datasets> XML element: attributes, named/regex patterns, <data> vs <collection> contexts, test-side <discovered_dataset>.",
       "trigger": "When translating a Nextflow output: channel that uses a glob path or runtime-interpolated filenames into a Galaxy <collection> or multi-output <data>.",
       "verification": "Cast against a glob-output module (samtools/index); confirm the emitted <collection><discover_datasets pattern=...> shape resolves the glob correctly under planemo test.",
-      "src_hash": "da0109a5aa94cd3c54ecbe5e750000be518794e90666e64e91b9cc432efa909b",
-      "dst_hash": "da0109a5aa94cd3c54ecbe5e750000be518794e90666e64e91b9cc432efa909b",
+      "src_hash": "f661572946ebefdede346586d11fa863415a71259a6a2dbe4ffc125724ec44d8",
+      "dst_hash": "f661572946ebefdede346586d11fa863415a71259a6a2dbe4ffc125724ec44d8",
       "source": "deterministic"
     },
     {

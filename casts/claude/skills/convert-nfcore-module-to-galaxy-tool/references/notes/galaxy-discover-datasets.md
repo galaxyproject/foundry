@@ -6,8 +6,8 @@ tags:
 component: "Galaxy <discover_datasets> XML element"
 status: draft
 created: 2026-05-10
-revised: 2026-06-10
-revision: 2
+revised: 2026-09-15
+revision: 3
 summary: "Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions."
 related_molds:
   - "[[convert-nfcore-module-to-galaxy-tool]]"
@@ -223,7 +223,13 @@ The channel emits **one** file; the extension depends on input format (CRAM → 
         $extra_args
         'input.${input.ext}'
     &&
-    mv 'input.${input.ext}'.{bai,csi,crai} '$index'
+    #if $input.ext == 'cram':
+        mv 'input.${input.ext}.crai' '$index'
+    #elif $index_format == 'csi':
+        mv 'input.${input.ext}.csi' '$index'
+    #else:
+        mv 'input.${input.ext}.bai' '$index'
+    #end if
 ]]></command>
 <outputs>
     <data name="index" format="bai">
@@ -239,11 +245,11 @@ Three moves:
 
 1. **`ln -s` to a deterministic name preserving the input's extension.** Lets upstream extension-derivation logic fire identically to the nf-core module (CRAM input → CRAI output, etc.).
 2. **Call the tool with the same positional / flag shape as the upstream `script:` body.** No extra output-path argument, no fork in the invocation. The reviewer's command-parity dimension passes trivially.
-3. **`mv <tight-glob> '$output_name'` to capture into Galaxy's per-output staging path.** Use a bash brace glob (`{bai,csi,crai}`) rather than `.*` so the move can't sweep unrelated cwd files.
+3. **Select one concrete source path, then `mv` it to Galaxy's per-output staging path.** Reuse the input/parameter conditions that determine the output extension. Do not use either a broad `.*` glob or brace expansion: the former can sweep unrelated files, while `mv prefix.{bai,csi,crai} '$output_name'` expands to three source operands and therefore treats the Galaxy output file as a directory.
 
 The `<data>`'s declared `format=` is the default datatype; `<change_format>` (XSD: `OutputDataElement → change_format`) flips it based on the responsible input/param. Galaxy doesn't care what extension the on-disk file has — datatype is metadata, not filename inspection.
 
-The canonical cited case is the nf-core `samtools/index` module: `path("*.{bai,csi,crai}")` → one Galaxy `<data name="index" format="bai">` with `<change_format>`, captured with `mv input.bam.{bai,csi,crai} '$index'`.
+The canonical cited case is the nf-core `samtools/index` module: `path("*.{bai,csi,crai}")` → one Galaxy `<data name="index" format="bai">` with `<change_format>`, captured by conditionally moving exactly one of `input.bam.bai`, `input.bam.csi`, or `input.cram.crai` to `'$index'`.
 
 **Anti-pattern.** Mapping this shape to `<collection type="list">` + `<discover_datasets>` produces a single-element collection wrapping a degenerate list — wrong cardinality contract for downstream workflow tools, wrong test shape (`<output_collection>` instead of `<output>`), and pulls in discovery overhead for a deterministic single file. If you find yourself writing `<discover_datasets pattern=".+\.(bai|csi|crai)"/>` inside a `<collection>` for a single-file emit, you are in this anti-pattern; rewrite to Rule 2.
 
