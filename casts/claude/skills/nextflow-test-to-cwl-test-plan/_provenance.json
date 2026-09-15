@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-cwl-test-plan/index.md",
     "revision": 2,
     "content_hash": "4191bc74bac3d2026a042e0c61a94be2f3197621562e45531c9d0357a211df00",
-    "commit": "aa7fdd382344977821b3cabd6d0f5e2649024c9c"
+    "commit": "a19027071bc24272a04f44215af1957dcf9bd760"
   },
-  "cast_at": "2026-09-15T19:15:01.450Z",
+  "cast_at": "2026-09-15T19:43:30.229Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve the selected candidate's scope and keep bootstrap-only, reference-scale, and deferred cases distinct.",
       "trigger": "When the selected case is minimal, tiny, full-scale, stub-only, or accompanied by deferred whole-pipeline candidates.",
-      "src_hash": "f1ff50ef3fc594d6b0422e784f850f06b8851a33bdde3a71d4b64169a0fc19cf",
-      "dst_hash": "f1ff50ef3fc594d6b0422e784f850f06b8851a33bdde3a71d4b64169a0fc19cf",
+      "src_hash": "cb3d72f0052a4a2e9619b0a927ed3086f3ab020ae57c222cedfec886e55866ff",
+      "dst_hash": "cb3d72f0052a4a2e9619b0a927ed3086f3ab020ae57c222cedfec886e55866ff",
       "source": "deterministic"
     },
     {

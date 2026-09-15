@@ -116,28 +116,34 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 
 ## Case: canonical whole-pipeline nf-test selection
 
-- fixture: a pinned nf-core pipeline containing one eligible pipeline test in
-  `tests/default.nf.test` or `tests/main.nf.test` plus other named cases.
-- expect: absent an explicit caller choice, the canonical case is selected and
-  its effective profile chain includes nf-test configuration, suite/test-level
-  profile directives, and any CLI override using nf-test replacement/extension
-  semantics.
+- fixture: `workflow-fixtures/pipelines/nf-core__demo` at the
+  `workflow-fixtures/fixtures.yaml` pin; `tests/default.nf.test` contains the
+  `nextflow_pipeline` suite `Test pipeline` with the single case
+  `test("-profile test")`, and `nf-test.config` declares `profile "test"`.
+- expect: absent an explicit caller choice, selection resolves to
+  `tests/default.nf.test::-profile test` with effective profile `test`; the
+  duplicate textual `-profile test` in the case label is not used as
+  configuration evidence, and no `nf-test` executable is invoked.
 
 ## Case: non-canonical pipeline tests remain ambiguous
 
 - fixture: `workflow-fixtures/pipelines/nf-core__references`, whose pipeline
-  tests have neither `default.nf.test` nor `main.nf.test` in the issue #67 pin.
-- expect: the result reports that a scope choice is needed and preserves the
-  candidates; it does not select the first filename or infer `test_full` from a
-  config file that is not a resolved profile.
+  tests at the `workflow-fixtures/fixtures.yaml` pin are the ten files
+  `tests/{hisat2,kallisto,multiple,rnaseq,rsem,salmon,samtools,sarek,tabix,wbcel235}.nf.test`;
+  there is no pipeline-level `default.nf.test` or `main.nf.test`.
+- expect: the result reports that a scope choice is needed and preserves all
+  ten candidates; it does not select `hisat2.nf.test` by filename order or
+  infer `test_full` from a config file that is not a resolved profile.
 
 ## Case: ad-hoc no-profile fallback is checked for runnability
 
-- fixture: an ad-hoc DSL2 pipeline with no whole-pipeline nf-test and no
-  resolved `profiles[]` entry whose `kinds` contains `test`.
-- expect: pipeline defaults form the fallback candidate; it is selected only
-  when required launch inputs resolve, otherwise selection remains explicit and
-  unresolved.
+- fixture: `workflow-fixtures/pipelines/CRG-CNAG__CalliNGS-NF` at the
+  `workflow-fixtures/fixtures.yaml` pin; it has no nf-test, no test-kind profile,
+  and defaults `genome`, `variants`, `denylist`, and paired `reads` to files
+  below the repository's bundled `data/` directory.
+- expect: the no-profile candidate is selected because all four required launch
+  inputs resolve to those bundled files; its source kind is `pipeline-defaults`
+  and its effective profile list is empty.
 
 ## Case: test-fixture localization round-trip
 
