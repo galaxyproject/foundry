@@ -6,11 +6,11 @@
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 17,
     "content_hash": "4586fdcac47d1cd43f9ed7aa929f1b115045c25a3e341c2dc7d1817351d2dc70",
-    "commit": "aa7fdd382344977821b3cabd6d0f5e2649024c9c"
+    "commit": "a19027071bc24272a04f44215af1957dcf9bd760"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-09-15T19:15:04.694Z",
+  "cast_at": "2026-09-15T19:43:31.404Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -175,8 +175,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose the first whole-pipeline test candidate without equating a profile name with runnability or scientific coverage.",
       "trigger": "When no explicit profile was supplied, multiple pipeline-level nf-tests exist, or the apparent candidate is full-scale, minimal, tiny, or stub-only.",
-      "src_hash": "f1ff50ef3fc594d6b0422e784f850f06b8851a33bdde3a71d4b64169a0fc19cf",
-      "dst_hash": "f1ff50ef3fc594d6b0422e784f850f06b8851a33bdde3a71d4b64169a0fc19cf",
+      "src_hash": "cb3d72f0052a4a2e9619b0a927ed3086f3ab020ae57c222cedfec886e55866ff",
+      "dst_hash": "cb3d72f0052a4a2e9619b0a927ed3086f3ab020ae57c222cedfec886e55866ff",
       "source": "deterministic"
     },
     {
