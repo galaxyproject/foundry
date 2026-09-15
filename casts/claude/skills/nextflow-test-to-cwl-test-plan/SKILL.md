@@ -29,7 +29,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
-- None declared.
+- `references/notes/nextflow-test-case-selection.md`: Research note copied verbatim into the bundle. Preserve the selected candidate's scope and keep bootstrap-only, reference-scale, and deferred cases distinct. Use when: the selected case is minimal, tiny, full-scale, stub-only, or accompanied by deferred whole-pipeline candidates.
 
 ## Validation
 
@@ -38,6 +38,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Procedure
 
 Translate Nextflow test evidence into a CWL workflow test plan. This preserves the `NEXTFLOW → CWL` pipeline after the Galaxy-specific test-plan split; concrete CWL test artifact assembly remains owned by implement-cwl-workflow-test.
+
+Consume the candidate selected by summarize-nextflow rather than choosing a profile again. nextflow-test-case-selection supplies the scope classification and the rule for keeping deferred whole-pipeline candidates visible.
 
 ## Feedback Mode
 

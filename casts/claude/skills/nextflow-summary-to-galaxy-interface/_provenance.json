@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 6,
     "content_hash": "43966773391578490688098c9333f6eb2eaa94574755f5b6554e7f9b72a605c0",
-    "commit": "990978bbe2b62e0a5d0092b18ff0741371705c78"
+    "commit": "aa7fdd382344977821b3cabd6d0f5e2649024c9c"
   },
-  "cast_at": "2026-09-15T18:32:07.625Z",
+  "cast_at": "2026-09-15T19:15:00.496Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -157,8 +157,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.",
       "license": "MIT",
-      "src_hash": "0f4a3d3616d514aca0fd3ae6918e2de8bbc1ea52daf8df957b39cf70e32d5595",
-      "dst_hash": "0f4a3d3616d514aca0fd3ae6918e2de8bbc1ea52daf8df957b39cf70e32d5595",
+      "src_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
+      "dst_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
       "source": "deterministic"
     }
   ],

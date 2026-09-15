@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 5
+revised: 2026-09-15
+revision: 6
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 input_artifacts:
   - id: summary-nextflow
@@ -53,6 +53,14 @@ references:
     trigger: "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan."
     verification: "Translate nf-core/bacass nf-test snapshots into a Galaxy test plan and confirm this note improves profile/snapshot extraction."
   - kind: research
+    ref: "[[nextflow-test-case-selection]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Preserve the upstream candidate-selection rationale and distinguish primary coverage from bootstrap-only or reference-scale cases."
+    trigger: "When the selected case is minimal, tiny, full-scale, stub-only, or accompanied by deferred whole-pipeline candidates."
+  - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
     load: on-demand
@@ -92,3 +100,5 @@ related_notes:
 # nextflow-test-to-galaxy-test-plan
 
 Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a reviewable YAML handoff conforming to [[galaxy-workflow-test-plan]], not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact with the right labels and assertions. Because this plan is translated from real nf-test evidence, set `source.derived_from: test-evidence` and prefer `evidence: test-evidence` on the assertions it carries.
+
+Consume the candidate selected by [[summarize-nextflow]]; do not re-rank profiles here. Use [[nextflow-test-case-selection]] to preserve whether that case is primary coverage, a topology bootstrap, or reference-scale evidence, and to keep deferred science branches visible rather than presenting one translated test as exhaustive.
