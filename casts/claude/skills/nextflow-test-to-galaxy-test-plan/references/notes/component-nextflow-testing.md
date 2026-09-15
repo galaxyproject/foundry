@@ -5,8 +5,8 @@ tags:
 component: "Nextflow Testing and Test Fixtures"
 status: draft
 created: 2026-05-01
-revised: 2026-08-03
-revision: 3
+revised: 2026-09-15
+revision: 5
 summary: "nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7."
 companions:
   - "component-nextflow-testing.yml"
@@ -26,6 +26,7 @@ related_molds:
   - "[[nextflow-test-to-cwl-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
 related_notes:
+  - "[[nextflow-test-case-selection]]"
   - "[[planemo-asserts-idioms]]"
   - "[[tests-format]]"
   - "[[iwc-test-data-conventions]]"
@@ -36,17 +37,19 @@ related_notes:
 
 Operational grounding for three Molds:
 
-- [[summarize-nextflow]] §7 — extract `nf_tests[]` and `test_fixtures` from a real nf-core or DSL2 pipeline.
+- [[summarize-nextflow]] §7 — enumerate whole-pipeline `test_candidates[]` and make the default `test_selection` from a real nf-core or DSL2 pipeline.
 - [[nextflow-test-to-galaxy-test-plan]] — translate nf-test fixtures + assertions into Galaxy equivalents.
 - [[nextflow-test-to-cwl-test-plan]] — the same translation, toward CWL.
 
 The summarize side is mostly *enumeration*: walk `tests/*.nf.test`, extract structured fields per the Mold §7 spec. The translation side is *mapping*: each nf-test assertion pattern has a (sometimes lossy) Galaxy or CWL equivalent.
 
+Candidate selection is deliberately separate: [[nextflow-test-case-selection]] decides which whole-pipeline case is the first translation target and how to classify full-scale, minimal, tiny, and stub-only cases. This note interprets the selected case's fixtures and assertions.
+
 Companion structured form: `component-nextflow-testing.yml`. Per-pattern entries with `nf_test_pattern`, `description`, `galaxy_equivalent`, `cwl_equivalent`, `notes`, plus `assertion` (the precise nf-test syntax) and `target_link` (deep-links into [[tests-format]] or planemo idioms when applicable).
 
 ## What `summarize-nextflow` §7 already encodes
 
-The Mold body's §7 lists the structural fields per nf-test file: `name`, `path`, `profiles[]`, `params_overrides`, `assert_workflow_success`, `snapshot` (with `captures`, `helpers`, `ignore_files`, `ignore_globs`, `snap_path`), `prose_assertions[]`. The schema is `summary-nextflow.schema.json`'s `NfTest` and `SnapshotFixture`.
+The Mold body's §7 lists the structural fields per whole-pipeline candidate: `id`, `kind`, `name`, `path`, `effective_profiles[]`, `params_delta`, `inputs[]`, `outputs[]`, `execution_mode`, `scope`, `disposition`, `assert_workflow_success`, `snapshot`, and `prose_assertions[]`. The schema is `summary-nextflow.schema.json`'s `TestCandidate`, `TestSelection`, and `SnapshotFixture`. Module and subworkflow summaries retain their local `NfTest[]` evidence.
 
 This note's contribution: the *interpretation* layer that turns those structured fields into target-shaped tests.
 

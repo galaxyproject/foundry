@@ -4,12 +4,27 @@
   "mold": {
     "name": "nextflow-test-to-cwl-test-plan",
     "path": "content/molds/nextflow-test-to-cwl-test-plan/index.md",
-    "revision": 1,
-    "content_hash": "6b2b5d921e5998debde2018e44ad2b117e7af6e538feddbff5a17ee21a9e256f",
-    "commit": "990978bbe2b62e0a5d0092b18ff0741371705c78"
+    "revision": 3,
+    "content_hash": "d06d87fce9160be3e5d69485d310bf3e51bff90a9752540de6431302ffb97424",
+    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
   },
-  "cast_at": "2026-09-15T18:32:08.418Z",
+  "cast_at": "2026-09-15T23:16:25.154Z",
   "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-test-case-selection]]",
+      "src": "content/research/nextflow-test-case-selection/index.md",
+      "dst": "references/notes/nextflow-test-case-selection.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve the selected candidate's scope and keep bootstrap-only, reference-scale, and deferred cases distinct.",
+      "trigger": "When the selected case is minimal, tiny, full-scale, stub-only, or accompanied by deferred whole-pipeline candidates.",
+      "src_hash": "28a2c267d8fb26ce97b3472cca8a0a09c2295365c56600a2c0811c4be2752623",
+      "dst_hash": "28a2c267d8fb26ce97b3472cca8a0a09c2295365c56600a2c0811c4be2752623",
+      "source": "deterministic"
+    },
     {
       "kind": "schema",
       "mode": "verbatim",
@@ -21,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read summarized nf-test profiles, snapshot fixtures, selected test data, params, and expected outputs.",
       "license": "MIT",
-      "src_hash": "0f4a3d3616d514aca0fd3ae6918e2de8bbc1ea52daf8df957b39cf70e32d5595",
-      "dst_hash": "0f4a3d3616d514aca0fd3ae6918e2de8bbc1ea52daf8df957b39cf70e32d5595",
+      "src_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
+      "dst_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
       "source": "deterministic"
     }
   ],
@@ -38,7 +53,7 @@
     "consumes": [
       {
         "id": "summary-nextflow",
-        "description": "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence.",
+        "description": "Structured Nextflow summary from [[summarize-nextflow]]; carries test_candidates, test_selection, and snapshot evidence.",
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"

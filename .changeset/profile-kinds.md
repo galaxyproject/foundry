@@ -15,11 +15,13 @@ anything else. It is an array because profiles genuinely combine roles — 25 of
 are fallbacks assigned only when none of those matched, with the suppressed
 evidence kept in `signals[]`.
 
-The `test` kind is deliberately profile-level evidence, not a final selection:
-pipeline-level `nf_tests[]` remain the higher-fidelity candidate unit because
-they preserve per-test parameter overrides. The kind does not claim that a
-profile is cheap or representative, and `mode` profiles may still encode
-science-scope choices that a target translation must surface.
+The `test` kind is deliberately profile-level evidence, not a final selection.
+Whole-pipeline nf-test cases remain the higher-fidelity candidate unit because
+they preserve per-test parameter overrides. `test_candidates[]` now unifies
+those cases with profile and pipeline-default fallbacks, while `test_selection`
+records either one selected candidate or an explicit scope choice. The former
+singular `test_fixtures` and top-level `nf_tests[]` fields are removed, and the
+CLI no longer silently defaults `--profile` to `test`.
 
 Profile enumeration was fixed in the same change: brace-depth tracking (nested
 `params { }` / `process { }` blocks were emitted as profile names), root

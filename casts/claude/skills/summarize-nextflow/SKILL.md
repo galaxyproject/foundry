@@ -40,8 +40,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence. Use when: extracting tools, versions, containers, conda directives, or environment equivalences.
 - `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
 - `references/notes/component-nextflow-pipeline-anatomy.md`: Research note copied verbatim into the bundle. Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology. Use when: walking pipeline structure or resolving process aliases and channel flow.
-- `references/notes/component-nextflow-testing.md`: Research note copied verbatim into the bundle. Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions. Use when: filling test_fixtures or nf_tests sections of the summary.
+- `references/notes/component-nextflow-testing.md`: Research note copied verbatim into the bundle. Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions. Use when: filling test_candidates and test_selection sections of the summary.
 - `references/notes/component-nextflow-testing.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-testing.md`; read it where that note directs.
+- `references/notes/nextflow-test-case-selection.md`: Research note copied verbatim into the bundle. Choose the first whole-pipeline test candidate without equating a profile name with runnability or scientific coverage. Use when: no explicit profile was supplied, multiple pipeline-level nf-tests exist, or the apparent candidate is full-scale, minimal, tiny, or stub-only.
 
 ## Validation
 
@@ -61,8 +62,8 @@ The skill expects:
 
 - A **path or git URL** to the NF pipeline. Local clone is preferred; a git URL triggers a shallow clone the skill manages.
 - Optional **pin**: tag, branch, or commit SHA. Mirrors `SketchSource` semantics from gxy-sketches.
-- Optional **profile hint** (`test`, `test_full`, …) selecting which `conf/<profile>.config` to read for fixtures. Defaults to `test`.
-- Optional **test-data directory**. When provided with fixture fetching, remote samplesheets and referenced files are downloaded under that directory and their local paths are recorded in `test_fixtures.inputs[].path`.
+- Optional explicit **profile override** (`test`, `test_full`, …) applied while resolving each candidate's effective profile chain. It does not identify a test case. When omitted, there is no silent profile default.
+- Optional **test-data directory**. When provided with fixture fetching, remote samplesheets and referenced files are downloaded under that directory and their local paths are recorded in each candidate's `inputs[].path`.
 
 Whole-pipeline only. The skill does **not** accept "summarize this single subworkflow" subset hints; subset summarization is an open question — see Non-goals.
 
@@ -170,16 +171,19 @@ A single JSON document conforming to summary-nextflow (`packages/summarize-nextf
         "affects": ["STAR_ALIGN"] }
     ]
   },
-  "test_fixtures": {
-    "profile": "test",
-    "inputs":  [ /* TestDataRef-shaped */ ],
-    "outputs": [ /* ExpectedOutputRef-shaped */ ]
-  },
-  "nf_tests": [
-    { "name": "-profile test_dfast",
+  "test_candidates": [
+    { "id": "tests/dfast.nf.test::-profile test_dfast",
+      "kind": "nf-test",
+      "name": "-profile test_dfast",
       "path": "tests/dfast.nf.test",
-      "profiles": ["test_dfast"],
-      "params_overrides": { "outdir": "$outputDir" },
+      "effective_profiles": ["test_dfast"],
+      "params_delta": { "outdir": "$outputDir" },
+      "inputs": [ /* TestDataRef-shaped */ ],
+      "outputs": [ /* ExpectedOutputRef-shaped */ ],
+      "execution_mode": "real",
+      "scope": "primary",
+      "disposition": "eligible",
+      "rationale": "whole-pipeline nf-test case from tests/dfast.nf.test",
       "assert_workflow_success": true,
       "snapshot": {
         "captures":     ["succeeded_task_count", "versions_yml", "stable_names", "stable_paths"],
@@ -189,7 +193,12 @@ A single JSON document conforming to summary-nextflow (`packages/summarize-nextf
         "snap_path":    "tests/dfast.nf.test.snap"
       },
       "prose_assertions": [] }
-  ]
+  ],
+  "test_selection": {
+    "status": "needs-scope-choice",
+    "selected_candidate_id": null,
+    "rationale": "multiple primary-coverage cases remain incomparable"
+  }
 }
 ```
 
@@ -237,7 +246,7 @@ Classify from the profile *body*, resolving its `includeConfig` targets first �
 
 `test`, `container`, `executor`, and `dev` accumulate. `mode` and `resources` are assigned **only when none of those matched** — their signals are much weaker, since nf-core's `docker` profile assigns `params.use_gpu` inside a ternary and most test profiles set process resource caps, so accumulating them would label most of a pipeline `mode`. Record the suppressed evidence in `signals[]` instead.
 
-`kinds: ["test"]` is profile-level candidate evidence, not the test-selection decision. When pipeline-level `nf_tests[]` entries exist, those test cases are the higher-fidelity candidate unit because they also carry per-test parameter overrides; only fall back to an input-bearing profile when no pipeline-level nf-test case exists. The kind does not establish cost or representative coverage. `test_full` remains input-bearing but is commonly realistic-scale, while `test_minimal` / `test_tiny` may disable the science stages that the target translation must cover. Mode profiles can likewise encode scope choices that a target translation needs to surface; only execution-environment roles such as container and executor are intrinsically irrelevant to target workflow semantics.
+`kinds: ["test"]` is profile-level candidate evidence, not the test-selection decision. When pipeline-level nf-test-derived `test_candidates[]` entries exist, those test cases are the higher-fidelity unit because they also carry per-test parameter overrides; only fall back to an input-bearing profile when no pipeline-level nf-test case exists. The kind does not establish cost or representative coverage. `test_full` remains input-bearing but is commonly realistic-scale, while `test_minimal` / `test_tiny` may disable the science stages that the target translation must cover. Mode profiles can likewise encode scope choices that a target translation needs to surface; only execution-environment roles such as container and executor are intrinsically irrelevant to target workflow semantics.
 
 Two limits worth stating plainly rather than leaving for a consumer to discover. `test` detection keys on nf-core input conventions, so an ad-hoc pipeline naming its inputs `reads` / `genome` gets no `test` profile even where one exists in spirit — across the fixture corpus all 103 `test` profiles are in the 16 nf-core pipelines and none in the 10 ad-hoc ones. And a `profiles { }` block outside the detected pipeline root is not found at all: `ncbi/egapx` keeps one in `ui/assets/config/user/`, which is launcher-side config for its Python wrapper rather than pipeline profiles.
 
@@ -310,22 +319,29 @@ Parse only live `workflow` declarations. Definitions, includes, processes, and c
 
 Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVersionsToYAML`, `methodsDescriptionText`) are not modeled as processes or subworkflows. Their channel outputs flow into the primary workflow's `channels[]`; the function names are nf-core template idiom, not pipeline-specific signal. Operator chains with deeply nested closures may produce edges flagged with low confidence in `notes`.
 
-#### 7. Surface test fixtures and nf-tests
+#### 7. Enumerate and select whole-pipeline test candidates
 
-**Two artifacts come out of this step:** `test_fixtures` (data shape of the selected profile's input) and `nf_tests[]` (every `tests/*.nf.test` file).
+Emit one `test_candidates[]` list and one `test_selection` result. Do not emit a parallel singular fixture record or a second top-level nf-test list.
 
-**`test_fixtures`** — read `conf/<profile>.config` (default `conf/test.config`) for `params.input` (samplesheet URL) and any other URL-shaped params. For nf-core pipelines, follow the samplesheet URL into the `nf-core/test-datasets` repo if a single fetch is enough to enumerate the file paths it references; otherwise emit the samplesheet URL alone as the input. The samplesheet URL may be a runtime concatenation (`params.pipelines_testdata_base_path + 'foo.csv'`); resolve at config-load semantics and record the resolved URL.
+Apply nextflow-test-case-selection in fidelity order:
 
-When fixture fetching is enabled, hash each fetched remote file with SHA-1. When a test-data directory is provided, write the samplesheet and every referenced remote file under that directory using a deterministic URL-derived path and record that local filesystem path in `path` while preserving the original `url`.
+1. Statically enumerate every literal `test(...)` block inside a live pipeline-level `nextflow_pipeline {}` suite under `tests/`. Resolve `effective_profiles[]` from the root `nf-test.config` directive, file/test-level directives, then the optional caller override. Replacement and `+name` extension semantics matter; the descriptive test name is never configuration evidence. When Groovy generates cases dynamically, preserve one `dynamically-generated` aggregate candidate for the file and emit a warning.
+2. If there are no pipeline nf-tests, emit every `profiles[]` entry whose body-derived `kinds` contains `test`; an explicit caller profile is a candidate even when its body could not be classified.
+3. Otherwise emit one `pipeline-defaults` candidate from the selected entrypoint's declared defaults. Select it only if required launch parameters resolve.
 
-Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field names verbatim. The `path` vs `url` rules from gxy-sketches' `TestDataRef` carry over, with one extension: `path` may be the local fetched path for a remote URL. The "must be under `test_data/`" constraint does **not** — see gxy-sketches-alignment §1.
+For every candidate, populate its stable `id`, source `kind`, `path`, resolved profiles, `params_delta`, inputs, outputs, execution mode, scope, disposition, rationale, and assertion fields. Read each effective profile's static `includeConfig` targets and conventional `conf/<profile>.config`; merge per-test `when { params { ... } }` overrides last. Extract remote URLs and repo-relative paths into that candidate's own `inputs[]`.
 
-**`nf_tests[]`** — enumerate every `tests/*.nf.test` file. Real pipelines have one .nf.test per test profile (bacass has 9). For each:
+When fixture fetching is enabled, hash each fetched remote file with SHA-1. When a test-data directory is provided, write the samplesheet and every referenced remote file under that directory using a deterministic URL-derived path and record that local filesystem path in `path` while preserving the original `url`. Fetch and expand samplesheets per candidate so alternatives do not share or overwrite one singular fixture list.
+
+Each input/output entry follows `TestDataRef` / `ExpectedOutputRef` field names verbatim. The `path` vs `url` rules from gxy-sketches' `TestDataRef` carry over, with one extension: `path` may be the local fetched path for a remote URL. The "must be under `test_data/`" constraint does **not** — see gxy-sketches-alignment §1.
+
+For nf-test-derived candidates:
 
 - `name` = the description string passed to `test("...")`.
 - `path` = repo-relative file path.
-- `profiles[]` = file-level `profile "<name>"` declaration plus any per-test config overrides.
-- `params_overrides` = the `when { params { ... } }` block as a key→value map.
+- `effective_profiles[]` = resolved nf-test/profile chain, never text scraped from `name`.
+- `params_delta` = profile changes plus the `when { params { ... } }` block.
+- `execution_mode` = `real`, `stub`, `mixed`, or `unknown` from the case options.
 - `assert_workflow_success` = `true` when an `assert workflow.success` (or equivalent) clause is present.
 - `snapshot` = structured `SnapshotFixture` when an `assert snapshot(...).match()` clause is present, else `null`. nf-core templates use a near-uniform snapshot pattern; extract:
   - `captures[]` = logical names of values passed into `snapshot(...)` (typical set: `succeeded_task_count`, `versions_yml`, `stable_names`, `stable_paths`).
@@ -334,6 +350,8 @@ Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field 
   - `ignore_globs[]` = inline `ignore: [...]` glob list from helpers.
   - `snap_path` = repo-relative path of the corresponding `.nf.test.snap` file.
 - `prose_assertions[]` = any other complex/non-snapshot assertions, summarized to prose strings. Empty for snapshot-only tests (the common nf-core case).
+
+Classify full-scale candidates as `reference-scale` and minimal/tiny/stub-only candidates as `bootstrap-only`; neither wins by name alone. Select exactly one primary candidate in `default.nf.test` or `main.nf.test`, otherwise the sole primary candidate. For profile fallbacks, prefer a body-classified primary profile named `test`, otherwise the sole primary profile. When several primary candidates remain, set `test_selection.status: needs-scope-choice`, keep every candidate, and select none.
 
 Consult component-nextflow-testing when fixtures use a layout outside `conf/test.config` + nf-test (e.g. legacy `test/` scripts, external test harnesses) or when assertions are non-snapshot equality / regex / `containsString` checks.
 
@@ -358,6 +376,7 @@ The procedure assumes — and the skill must surface in `warnings[]` when releva
 - component-nextflow-pipeline-anatomy — consult on ad-hoc DSL2 layouts that do not match nf-core conventions, or on workflow-block patterns the multi-workflow selection rule does not resolve.
 - component-nextflow-containers-and-envs — consult on container/conda directives outside the resolver patterns above, including mulled-v2, custom registries, env modules, Wave, and multi-dependency `environment.yml` files.
 - component-nextflow-testing — consult on test fixture layouts outside `conf/test.config` + nf-test, or on snapshot/assertion patterns the structured fallback does not capture well.
+- nextflow-test-case-selection — consult while enumerating `test_candidates[]` and deciding `test_selection`; a profile override changes candidate configuration but does not identify a test case.
 
 ### Non-goals
 

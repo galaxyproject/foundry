@@ -107,18 +107,51 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
   `bioconda`, `singularity`, `docker`, or `wave`. Unresolved directives appear
   in `warnings[]` with the directive verbatim.
 
-## Case: nf-test enumeration matches filesystem
+## Case: nf-test case enumeration matches source
 
 - fixture: each pipeline's `tests/*.nf.test` file tree.
-- expect: `nf_tests[].length` equals the file count; each entry has `path`,
-  `profiles[]`, and a `snapshot` block when the file contains
-  `assert snapshot(...).match()`.
+- expect: nf-test-kind `test_candidates[]` has one entry per literal pipeline
+  `test(...)` block, or one warned aggregate per dynamically generated file;
+  each entry has `path`, `effective_profiles[]`, and a `snapshot` block when its
+  case contains `assert snapshot(...).match()`.
+
+## Case: canonical whole-pipeline nf-test selection
+
+- fixture: `workflow-fixtures/pipelines/nf-core__demo` at the
+  `workflow-fixtures/fixtures.yaml` pin; `tests/default.nf.test` contains the
+  `nextflow_pipeline` suite `Test pipeline` with the single case
+  `test("-profile test")`, and `nf-test.config` declares `profile "test"`.
+- expect: absent an explicit caller choice, selection resolves to
+  `tests/default.nf.test::-profile test` with effective profile `test`; the
+  duplicate textual `-profile test` in the case label is not used as
+  configuration evidence, and no `nf-test` executable is invoked.
+
+## Case: non-canonical pipeline tests remain ambiguous
+
+- fixture: `workflow-fixtures/pipelines/nf-core__references`, whose pipeline
+  tests at the `workflow-fixtures/fixtures.yaml` pin are the ten files
+  `tests/{hisat2,kallisto,multiple,rnaseq,rsem,salmon,samtools,sarek,tabix,wbcel235}.nf.test`;
+  there is no pipeline-level `default.nf.test` or `main.nf.test`.
+- expect: the result reports that a scope choice is needed and preserves all
+  ten candidates; it does not select `hisat2.nf.test` by filename order or
+  infer `test_full` from a config file that is not a resolved profile.
+
+## Case: ad-hoc no-profile fallback is checked for runnability
+
+- fixture: `workflow-fixtures/pipelines/CRG-CNAG__CalliNGS-NF` at the
+  `workflow-fixtures/fixtures.yaml` pin; it has no nf-test, no test-kind profile,
+  and defaults `genome`, `variants`, `denylist`, and paired `reads` to files
+  below the repository's bundled `data/` directory.
+- expect: the no-profile candidate is selected because all four required launch
+  inputs resolve to those bundled files; its source kind is `pipeline-defaults`
+  and its effective profile list is empty.
 
 ## Case: test-fixture localization round-trip
 
 - fixture: any pipeline run with `--fetch-test-data --test-data-dir=<tmp>`.
-- expect: every remote `test_fixtures.inputs[].url` has a corresponding on-disk
-  `path`; SHA-1 hashes are stable across two runs.
+- expect: every remote `test_candidates[].inputs[].url` has a corresponding
+  on-disk `path`; SHA-1 hashes are stable across two runs and candidate input
+  lists remain independent.
 
 ## Case: ad-hoc DSL2 fallback
 
@@ -148,8 +181,8 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 
 ## Case: nf-test to Galaxy test-plan translation
 
-- fixture: a pipeline with a representative `nf_tests[]` entry containing
-  `snapshot.captures[]`.
+- fixture: a pipeline with a representative nf-test-kind `test_candidates[]`
+  entry containing `snapshot.captures[]`.
 - expect: `nextflow-test-to-galaxy-test-plan` maps each capture to a Galaxy
   assertion intent or to an explicit "untranslatable" entry; no captures are
   silently elided.

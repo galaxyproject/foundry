@@ -12,218 +12,474 @@
       "name": "input",
       "type": "string",
       "default": null,
-      "description": "Path to a samplesheet CSV.",
-      "required": true
+      "description": "Path to a metadata file containing information about the samples in the experiment.",
+      "required": true,
+      "format": "file-path",
+      "hidden": null,
+      "mimetype": "text/csv",
+      "schema_group": "Input/output options",
+      "fa_icon": "fas fa-terminal",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
       "name": "outdir",
       "type": "string",
       "default": null,
-      "description": "Output directory.",
-      "required": true
-    },
-    {
-      "name": "genome",
-      "type": "string",
-      "default": null,
-      "description": "iGenomes reference key.",
-      "required": false
-    },
-    {
-      "name": "fasta",
-      "type": "string",
-      "default": null,
-      "description": "Reference FASTA. Computed dynamically in main.nf via getGenomeAttribute('fasta'); not declared in nextflow_schema.json.",
-      "required": false
-    },
-    {
-      "name": "igenomes_base",
-      "type": "string",
-      "default": "s3://ngi-igenomes/igenomes/",
-      "description": "iGenomes S3 base path.",
-      "required": false
-    },
-    {
-      "name": "igenomes_ignore",
-      "type": "boolean",
-      "default": false,
-      "description": "Skip iGenomes lookups.",
-      "required": false
-    },
-    {
-      "name": "skip_trim",
-      "type": "boolean",
-      "default": false,
-      "description": "Skip the SEQTK_TRIM step.",
-      "required": false
-    },
-    {
-      "name": "multiqc_config",
-      "type": "string",
-      "default": null,
-      "description": "Custom MultiQC config.",
-      "required": false
-    },
-    {
-      "name": "multiqc_title",
-      "type": "string",
-      "default": null,
-      "description": "Custom MultiQC report title.",
-      "required": false
-    },
-    {
-      "name": "multiqc_logo",
-      "type": "string",
-      "default": null,
-      "description": "Custom MultiQC logo.",
-      "required": false
-    },
-    {
-      "name": "max_multiqc_email_size",
-      "type": "string",
-      "default": "25.MB",
-      "description": "Max size of MultiQC email attachment.",
-      "required": false
-    },
-    {
-      "name": "multiqc_methods_description",
-      "type": "string",
-      "default": null,
-      "description": "Custom MultiQC methods description text.",
-      "required": false
-    },
-    {
-      "name": "publish_dir_mode",
-      "type": "string",
-      "default": "copy",
-      "description": "How files are published to outdir.",
-      "required": false
+      "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+      "required": true,
+      "format": "directory-path",
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Input/output options",
+      "fa_icon": "fas fa-terminal",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
       "name": "email",
       "type": "string",
       "default": null,
       "description": "Email address for completion summary.",
-      "required": false
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Input/output options",
+      "fa_icon": "fas fa-terminal",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
-      "name": "email_on_fail",
+      "name": "multiqc_title",
       "type": "string",
       "default": null,
-      "description": "Email address for failure notifications.",
-      "required": false
+      "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Input/output options",
+      "fa_icon": "fas fa-terminal",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
-      "name": "plaintext_email",
-      "type": "boolean",
-      "default": false,
-      "description": "Send plaintext rather than HTML email.",
-      "required": false
-    },
-    {
-      "name": "monochrome_logs",
-      "type": "boolean",
-      "default": false,
-      "description": "Disable ANSI color in logs.",
-      "required": false
-    },
-    {
-      "name": "hook_url",
+      "name": "genome",
       "type": "string",
       "default": null,
-      "description": "Webhook URL (Slack/MS Teams) for completion notifications.",
-      "required": false
+      "description": "Name of iGenomes reference.",
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Reference genome options",
+      "fa_icon": "fas fa-dna",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
-      "name": "help",
-      "type": "boolean",
-      "default": false,
-      "description": "Show help and exit.",
-      "required": false
-    },
-    {
-      "name": "help_full",
-      "type": "boolean",
-      "default": false,
-      "description": "Show full help and exit.",
-      "required": false
-    },
-    {
-      "name": "show_hidden",
-      "type": "boolean",
-      "default": false,
-      "description": "Show hidden parameters in help.",
-      "required": false
-    },
-    {
-      "name": "version",
-      "type": "boolean",
-      "default": false,
-      "description": "Show pipeline version and exit.",
-      "required": false
-    },
-    {
-      "name": "validate_params",
-      "type": "boolean",
-      "default": true,
-      "description": "Validate parameters against the JSON schema.",
-      "required": false
-    },
-    {
-      "name": "pipelines_testdata_base_path",
-      "type": "string",
-      "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
-      "description": "Base URL for pipeline test data.",
-      "required": false
-    },
-    {
-      "name": "trace_report_suffix",
-      "type": "string",
-      "default": "<runtime-timestamp>",
-      "description": "Suffix appended to trace report filenames.",
-      "required": false
-    },
-    {
-      "name": "config_profile_name",
+      "name": "fasta",
       "type": "string",
       "default": null,
-      "description": "Profile name (set by config profiles).",
-      "required": false
+      "description": "Path to FASTA genome file.",
+      "required": false,
+      "format": "file-path",
+      "hidden": null,
+      "mimetype": "text/plain",
+      "schema_group": "Reference genome options",
+      "fa_icon": "fas fa-dna",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
-      "name": "config_profile_description",
-      "type": "string",
+      "name": "igenomes_ignore",
+      "type": "boolean",
       "default": null,
-      "description": "Profile description (set by config profiles).",
-      "required": false
+      "description": "Do not load the iGenomes reference config.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Reference genome options",
+      "fa_icon": "fas fa-dna",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
-      "name": "config_profile_contact",
+      "name": "igenomes_base",
       "type": "string",
-      "default": null,
-      "description": "Profile contact (set by config profiles).",
-      "required": false
+      "default": "s3://ngi-igenomes/igenomes/",
+      "description": "The base path to the igenomes reference files",
+      "required": false,
+      "format": "directory-path",
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Reference genome options",
+      "fa_icon": "fas fa-dna",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
-      "name": "config_profile_url",
-      "type": "string",
+      "name": "skip_trim",
+      "type": "boolean",
       "default": null,
-      "description": "Profile URL (set by config profiles).",
-      "required": false
+      "description": "Skip trimming fastq files with seqtk",
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Process skipping options",
+      "fa_icon": "fas fa-forward",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
       "name": "custom_config_version",
       "type": "string",
       "default": "master",
-      "description": "Version of nf-core/configs to load.",
-      "required": false
+      "description": "Git commit id for Institutional configs.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Institutional config options",
+      "fa_icon": "fas fa-university",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     },
     {
       "name": "custom_config_base",
       "type": "string",
-      "default": "https://raw.githubusercontent.com/nf-core/configs/${params.custom_config_version}",
-      "description": "Base URL for nf-core/configs.",
-      "required": false
+      "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+      "description": "Base directory for Institutional configs.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Institutional config options",
+      "fa_icon": "fas fa-university",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "config_profile_name",
+      "type": "string",
+      "default": null,
+      "description": "Institutional config name.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Institutional config options",
+      "fa_icon": "fas fa-university",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "config_profile_description",
+      "type": "string",
+      "default": null,
+      "description": "Institutional config description.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Institutional config options",
+      "fa_icon": "fas fa-university",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "config_profile_contact",
+      "type": "string",
+      "default": null,
+      "description": "Institutional config contact information.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Institutional config options",
+      "fa_icon": "fas fa-university",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "config_profile_url",
+      "type": "string",
+      "default": null,
+      "description": "Institutional config URL link.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Institutional config options",
+      "fa_icon": "fas fa-university",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "version",
+      "type": "boolean",
+      "default": null,
+      "description": "Display version and exit.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "publish_dir_mode",
+      "type": "string",
+      "default": "copy",
+      "description": "Method used to save pipeline results to output directory.",
+      "required": false,
+      "enum": [
+        "symlink",
+        "rellink",
+        "link",
+        "copy",
+        "copyNoFollow",
+        "move"
+      ],
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "email_on_fail",
+      "type": "string",
+      "default": null,
+      "description": "Email address for completion summary, only when pipeline fails.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "plaintext_email",
+      "type": "boolean",
+      "default": null,
+      "description": "Send plain-text email instead of HTML.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "max_multiqc_email_size",
+      "type": "string",
+      "default": "25.MB",
+      "description": "File size limit when attaching MultiQC reports to summary emails.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "monochrome_logs",
+      "type": "boolean",
+      "default": null,
+      "description": "Do not use coloured log outputs.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "hook_url",
+      "type": "string",
+      "default": null,
+      "description": "Incoming hook URL for messaging service",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "multiqc_config",
+      "type": "string",
+      "default": null,
+      "description": "Custom config file to supply to MultiQC.",
+      "required": false,
+      "format": "file-path",
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "multiqc_logo",
+      "type": "string",
+      "default": null,
+      "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "multiqc_methods_description",
+      "type": "string",
+      "default": null,
+      "description": "Custom MultiQC yaml file containing HTML including a methods description.",
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "validate_params",
+      "type": "boolean",
+      "default": true,
+      "description": "Boolean whether to validate parameters against the schema at runtime",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "pipelines_testdata_base_path",
+      "type": "string",
+      "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+      "description": "Base URL or local path to location of pipeline test dataset files",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "trace_report_suffix",
+      "type": "string",
+      "default": null,
+      "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
+      "required": false,
+      "format": null,
+      "hidden": true,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "help",
+      "type": "boolean",
+      "default": null,
+      "description": "Display the help message.",
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "help_full",
+      "type": "boolean",
+      "default": null,
+      "description": "Display the full detailed help message.",
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
+    },
+    {
+      "name": "show_hidden",
+      "type": "boolean",
+      "default": null,
+      "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided).",
+      "required": false,
+      "format": null,
+      "hidden": null,
+      "mimetype": null,
+      "schema_group": "Generic options",
+      "fa_icon": "fas fa-file-import",
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "source_path": "nextflow_schema.json"
     }
   ],
   "sample_sheets": [
@@ -240,6 +496,7 @@
           "kind": "meta",
           "format": null,
           "required": true,
+          "default": null,
           "description": null,
           "enum": [],
           "pattern": "^\\S+$",
@@ -252,6 +509,7 @@
           "kind": "data",
           "format": "file-path",
           "required": true,
+          "default": null,
           "description": null,
           "enum": [],
           "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
@@ -264,6 +522,7 @@
           "kind": "data",
           "format": "file-path",
           "required": false,
+          "default": null,
           "description": null,
           "enum": [],
           "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
@@ -452,6 +711,7 @@
     {
       "name": "fastqc",
       "version": "0.12.1",
+      "version_constraint": null,
       "biocontainer": "biocontainers/fastqc:0.12.1--hdfd78af_0",
       "bioconda": "bioconda::fastqc=0.12.1",
       "docker": null,
@@ -459,191 +719,2606 @@
       "wave": null
     },
     {
-      "name": "seqtk",
-      "version": "1.4",
-      "biocontainer": "biocontainers/seqtk:1.4--he4a0461_1",
-      "bioconda": "bioconda::seqtk=1.4",
-      "docker": null,
-      "singularity": "https://depot.galaxyproject.org/singularity/seqtk:1.4--he4a0461_1",
-      "wave": null
-    },
-    {
       "name": "multiqc",
       "version": "1.33",
+      "version_constraint": null,
       "biocontainer": null,
       "bioconda": "bioconda::multiqc=1.33",
       "docker": null,
       "singularity": "https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/34/34e733a9ae16a27e80fe00f863ea1479c96416017f24a907996126283e7ecd4d/data",
       "wave": "community.wave.seqera.io/library/multiqc:1.33--ee7739d47738383b"
+    },
+    {
+      "name": "seqtk",
+      "version": "1.4",
+      "version_constraint": null,
+      "biocontainer": "biocontainers/seqtk:1.4--he4a0461_1",
+      "bioconda": "bioconda::seqtk=1.4",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/seqtk:1.4--he4a0461_1",
+      "wave": null
     }
   ],
   "processes": [
     {
       "name": "FASTQC",
       "aliases": [],
+      "in_subworkflows": [],
       "module_path": "modules/nf-core/fastqc/main.nf",
+      "meta": {
+        "description": "Run FastQC on sequenced reads",
+        "keywords": [
+          "quality control",
+          "qc",
+          "adapters",
+          "fastq"
+        ],
+        "authors": [
+          "@drpatelh",
+          "@grst",
+          "@ewels",
+          "@FelixKrueger"
+        ],
+        "maintainers": [
+          "@drpatelh",
+          "@grst",
+          "@ewels",
+          "@FelixKrueger"
+        ],
+        "tools": [
+          {
+            "name": "fastqc",
+            "description": "FastQC gives general quality metrics about your reads.\nIt provides information about the quality score distribution\nacross your reads, the per base sequence content (%A/C/G/T).\n\nYou get information about adapter contamination and other\noverrepresented sequences.\n",
+            "homepage": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/",
+            "documentation": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/",
+            "licence": [
+              "GPL-2.0-only"
+            ],
+            "identifier": "biotools:fastqc"
+          }
+        ],
+        "input": [],
+        "output": []
+      },
+      "module_tests": [
+        {
+          "name": "sarscov2 paired-end [fastq]",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 paired-end [fastq]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.html[0][1][0] ==~ \".*/test_1_fastqc.html\"",
+            "process.out.html[0][1][1] ==~ \".*/test_2_fastqc.html\"",
+            "process.out.zip[0][1][0] ==~ \".*/test_1_fastqc.zip\"",
+            "process.out.zip[0][1][1] ==~ \".*/test_2_fastqc.zip\"",
+            "path(process.out.html[0][1][0]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")"
+          ]
+        },
+        {
+          "name": "sarscov2 interleaved [fastq]",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 interleaved [fastq]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.html[0][1] ==~ \".*/test_fastqc.html\"",
+            "process.out.zip[0][1] ==~ \".*/test_fastqc.zip\"",
+            "path(process.out.html[0][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")"
+          ]
+        },
+        {
+          "name": "sarscov2 paired-end [bam]",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 paired-end [bam]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.html[0][1] ==~ \".*/test_fastqc.html\"",
+            "process.out.zip[0][1] ==~ \".*/test_fastqc.zip\"",
+            "path(process.out.html[0][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")"
+          ]
+        },
+        {
+          "name": "sarscov2 multiple [fastq]",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 multiple [fastq]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.html[0][1][0] ==~ \".*/test_1_fastqc.html\"",
+            "process.out.html[0][1][1] ==~ \".*/test_2_fastqc.html\"",
+            "process.out.html[0][1][2] ==~ \".*/test_3_fastqc.html\"",
+            "process.out.html[0][1][3] ==~ \".*/test_4_fastqc.html\"",
+            "process.out.zip[0][1][0] ==~ \".*/test_1_fastqc.zip\"",
+            "process.out.zip[0][1][1] ==~ \".*/test_2_fastqc.zip\"",
+            "process.out.zip[0][1][2] ==~ \".*/test_3_fastqc.zip\"",
+            "process.out.zip[0][1][3] ==~ \".*/test_4_fastqc.zip\"",
+            "path(process.out.html[0][1][0]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][2]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][3]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")"
+          ]
+        },
+        {
+          "name": "sarscov2 custom_prefix",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 custom_prefix",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.html[0][1] ==~ \".*/mysample_fastqc.html\"",
+            "process.out.zip[0][1] ==~ \".*/mysample_fastqc.zip\"",
+            "path(process.out.html[0][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")"
+          ]
+        },
+        {
+          "name": "sarscov2 single-end [fastq] - stub",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 single-end [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        },
+        {
+          "name": "sarscov2 paired-end [fastq] - stub",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 paired-end [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        },
+        {
+          "name": "sarscov2 interleaved [fastq] - stub",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 interleaved [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        },
+        {
+          "name": "sarscov2 paired-end [bam] - stub",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 paired-end [bam] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        },
+        {
+          "name": "sarscov2 multiple [fastq] - stub",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 multiple [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        },
+        {
+          "name": "sarscov2 custom_prefix - stub",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 custom_prefix - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "mysample.html",
+                        "basename": "mysample.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "mysample.zip",
+                        "basename": "mysample.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "mysample.html",
+                        "basename": "mysample.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "mysample.zip",
+                        "basename": "mysample.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        },
+        {
+          "name": "dynamically-generated",
+          "path": "modules/nf-core/fastqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/fastqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 custom_prefix",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 single-end [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 custom_prefix - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "mysample.html",
+                        "basename": "mysample.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "mysample.zip",
+                        "basename": "mysample.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "mysample.html",
+                        "basename": "mysample.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "mysample.zip",
+                        "basename": "mysample.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "mysample",
+                        "single_end": true
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 interleaved [fastq]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 paired-end [bam]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 multiple [fastq]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 paired-end [fastq]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 paired-end [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 multiple [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 single-end [fastq]",
+                "channels": [
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 interleaved [fastq] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "sarscov2 paired-end [bam] - stub",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "2",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "html",
+                    "files": [
+                      {
+                        "path": "test.html",
+                        "basename": "test.html",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_fastqc",
+                    "files": [],
+                    "values": [
+                      [
+                        "FASTQC",
+                        "fastqc",
+                        "0.12.1"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "zip",
+                    "files": [
+                      {
+                        "path": "test.zip",
+                        "basename": "test.zip",
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "stub": true
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.html[0][1] ==~ \".*/test_fastqc.html\"",
+            "process.out.zip[0][1] ==~ \".*/test_fastqc.zip\"",
+            "path(process.out.html[0][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "process.success",
+            "process.out.html[0][1][0] ==~ \".*/test_1_fastqc.html\"",
+            "process.out.html[0][1][1] ==~ \".*/test_2_fastqc.html\"",
+            "process.out.zip[0][1][0] ==~ \".*/test_1_fastqc.zip\"",
+            "process.out.zip[0][1][1] ==~ \".*/test_2_fastqc.zip\"",
+            "path(process.out.html[0][1][0]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "process.success",
+            "process.out.html[0][1] ==~ \".*/test_fastqc.html\"",
+            "process.out.zip[0][1] ==~ \".*/test_fastqc.zip\"",
+            "path(process.out.html[0][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "process.success",
+            "process.out.html[0][1] ==~ \".*/test_fastqc.html\"",
+            "process.out.zip[0][1] ==~ \".*/test_fastqc.zip\"",
+            "path(process.out.html[0][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "process.success",
+            "process.out.html[0][1][0] ==~ \".*/test_1_fastqc.html\"",
+            "process.out.html[0][1][1] ==~ \".*/test_2_fastqc.html\"",
+            "process.out.html[0][1][2] ==~ \".*/test_3_fastqc.html\"",
+            "process.out.html[0][1][3] ==~ \".*/test_4_fastqc.html\"",
+            "process.out.zip[0][1][0] ==~ \".*/test_1_fastqc.zip\"",
+            "process.out.zip[0][1][1] ==~ \".*/test_2_fastqc.zip\"",
+            "process.out.zip[0][1][2] ==~ \".*/test_3_fastqc.zip\"",
+            "process.out.zip[0][1][3] ==~ \".*/test_4_fastqc.zip\"",
+            "path(process.out.html[0][1][0]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][2]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "path(process.out.html[0][1][3]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "process.success",
+            "process.out.html[0][1] ==~ \".*/mysample_fastqc.html\"",
+            "process.out.zip[0][1] ==~ \".*/mysample_fastqc.zip\"",
+            "path(process.out.html[0][1]).text.contains(\"<tr><td>File type</td><td>Conventional base calls</td></tr>\")",
+            "process.success",
+            "process.success",
+            "process.success",
+            "process.success",
+            "process.success",
+            "process.success"
+          ]
+        }
+      ],
       "tool": "fastqc",
       "container": "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0' : 'biocontainers/fastqc:0.12.1--hdfd78af_0' }",
       "conda": "${moduleDir}/environment.yml",
       "inputs": [
         {
           "name": "reads",
-          "shape": "tuple(val(meta), path(reads))",
-          "description": "Input FASTQ files (single-end or paired-end). meta is a Groovy map with id and single_end keys.",
+          "shape": "tuple val(meta), path(reads)",
           "topic": null
         }
       ],
       "outputs": [
         {
           "name": "html",
-          "shape": "tuple(val(meta), path(\"*.html\"))",
-          "description": "FastQC HTML report per sample.",
+          "shape": "tuple val(meta) , path(\"*.html\") , emit: html",
           "topic": null
         },
         {
           "name": "zip",
-          "shape": "tuple(val(meta), path(\"*.zip\"))",
-          "description": "FastQC report archive per sample.",
+          "shape": "tuple val(meta) , path(\"*.zip\") , emit: zip",
           "topic": null
         },
         {
           "name": "versions_fastqc",
-          "shape": "tuple(val(\"${task.process}\"), val('fastqc'), eval('fastqc --version | sed ...'))",
-          "description": "Tool version triple emitted to the 'versions' channel topic.",
+          "shape": "tuple val(\"${task.process}\"), val('fastqc'), eval('fastqc --version | sed \"/FastQC v/!d; s/.*v//\"'), emit: versions_fastqc, topic: versions",
           "topic": "versions"
         }
       ],
       "when": "task.ext.when == null || task.ext.when",
-      "script_summary": "Symlink reads to prefix-renamed names, then run fastqc with --threads and --memory derived from task resources.",
-      "publish_dir": null,
-      "meta": null,
-      "module_tests": []
-    },
-    {
-      "name": "SEQTK_TRIM",
-      "aliases": [],
-      "module_path": "modules/nf-core/seqtk/trim/main.nf",
-      "tool": "seqtk",
-      "container": "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'https://depot.galaxyproject.org/singularity/seqtk:1.4--he4a0461_1' : 'biocontainers/seqtk:1.4--he4a0461_1' }",
-      "conda": "${moduleDir}/environment.yml",
-      "inputs": [
-        {
-          "name": "reads",
-          "shape": "tuple(val(meta), path(reads))",
-          "description": "Input FASTQ files.",
-          "topic": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "reads",
-          "shape": "tuple(val(meta), path(\"*.fastq.gz\"))",
-          "description": "Trimmed gzipped FASTQ output.",
-          "topic": null
-        },
-        {
-          "name": "versions_seqtk",
-          "shape": "tuple(val(\"${task.process}\"), val('seqtk'), eval('seqtk 2>&1 | sed ...'))",
-          "description": "Tool version triple emitted to the 'versions' channel topic.",
-          "topic": "versions"
-        }
-      ],
-      "when": "task.ext.when == null || task.ext.when",
-      "script_summary": "Pipe each input read file through `seqtk trimfq` and gzip-write to a prefixed output.",
-      "publish_dir": null,
-      "meta": null,
-      "module_tests": []
+      "script_excerpt": "def args          = task.ext.args ?: ''\ndef prefix        = task.ext.prefix ?: \"${meta.id}\"\n                                                                                      \ndef old_new_pairs = reads instanceof Path || reads.size() == 1 ? [[ reads, \"${prefix}.${reads.extension}\" ]] : reads.withIndex().collect { entry, index -> [ entry, \"${prefix}_${index + 1}.${entry.extension}\" ] }\ndef rename_to     = old_new_pairs*.join(' ').join(' ')\ndef renamed_files = old_new_pairs.collect{ _old_name, new_name -> new_name }.join(' ')\n\n                                                                                                                                              \n                                                                                                     \n                                                                                               \ndef memory_in_mb = task.memory ? task.memory.toUnit('MB') / task.cpus : null\n                                                  \ndef fastqc_memory = memory_in_mb > 10000 ? 10000 : (memory_in_mb < 100 ? 100 : memory_in_mb)\n\n\"\"\"\nprintf \"%s %s\\\\n\" ${rename_to} | while read old_name new_name; do\n    [ -f \"\\${new_name}\" ] || ln -s \\$old_name \\$new_name\ndone\n\nfastqc \\\\\n    ${args} \\\\\n    --threads ${task.cpus} \\\\\n    --memory ${fastqc_memory} \\\\\n    ${renamed_files}\n\"\"\"",
+      "publish_dir": null
     },
     {
       "name": "MULTIQC",
       "aliases": [],
+      "in_subworkflows": [],
       "module_path": "modules/nf-core/multiqc/main.nf",
+      "meta": {
+        "description": "Aggregate results from bioinformatics analyses across many samples into a single report",
+        "keywords": [
+          "QC",
+          "bioinformatics tools",
+          "Beautiful stand-alone HTML report"
+        ],
+        "authors": [
+          "@abhi18av",
+          "@bunop",
+          "@drpatelh",
+          "@jfy133"
+        ],
+        "maintainers": [
+          "@abhi18av",
+          "@bunop",
+          "@drpatelh",
+          "@jfy133"
+        ],
+        "tools": [
+          {
+            "name": "multiqc",
+            "description": "MultiQC searches a given directory for analysis logs and compiles a HTML report.\nIt's a general use tool, perfect for summarising the output from numerous bioinformatics tools.\n",
+            "homepage": "https://multiqc.info/",
+            "documentation": "https://multiqc.info/docs/",
+            "licence": [
+              "GPL-3.0-or-later"
+            ],
+            "identifier": "biotools:multiqc"
+          }
+        ],
+        "input": [
+          {
+            "name": "multiqc_files",
+            "description": "List of reports / files recognised by MultiQC, for example the html and zip output of FastQC\n",
+            "licence": [],
+            "type": "file"
+          },
+          {
+            "name": "multiqc_config",
+            "description": "Optional config yml for MultiQC",
+            "licence": [],
+            "type": "file",
+            "pattern": "*.{yml,yaml}"
+          },
+          {
+            "name": "extra_multiqc_config",
+            "description": "Second optional config yml for MultiQC. Will override common sections in multiqc_config.",
+            "licence": [],
+            "type": "file",
+            "pattern": "*.{yml,yaml}"
+          },
+          {
+            "name": "multiqc_logo",
+            "description": "Optional logo file for MultiQC",
+            "licence": [],
+            "type": "file",
+            "pattern": "*.{png}"
+          },
+          {
+            "name": "replace_names",
+            "description": "Optional two-column sample renaming file. First column a set of\npatterns, second column a set of corresponding replacements. Passed via\nMultiQC's `--replace-names` option.\n",
+            "licence": [],
+            "type": "file",
+            "pattern": "*.{tsv}"
+          },
+          {
+            "name": "sample_names",
+            "description": "Optional TSV file with headers, passed to the MultiQC --sample_names\nargument.\n",
+            "licence": [],
+            "type": "file",
+            "pattern": "*.{tsv}"
+          }
+        ],
+        "output": []
+      },
+      "module_tests": [
+        {
+          "name": "sarscov2 single-end [fastqc]",
+          "path": "modules/nf-core/multiqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/multiqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 single-end [fastqc]",
+                "channels": [
+                  {
+                    "key": "versions",
+                    "files": [],
+                    "values": [
+                      [
+                        "MULTIQC",
+                        "multiqc",
+                        "1.33"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.report[0] ==~ \".*/multiqc_report.html\"",
+            "process.out.data[0] ==~ \".*/multiqc_data\""
+          ]
+        },
+        {
+          "name": "sarscov2 single-end [fastqc] - custom prefix",
+          "path": "modules/nf-core/multiqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": null,
+          "prose_assertions": [
+            "process.success",
+            "process.out.report[0] ==~ \".*/custom_prefix.html\"",
+            "process.out.data[0] ==~ \".*/custom_prefix_data\""
+          ]
+        },
+        {
+          "name": "sarscov2 single-end [fastqc] [config]",
+          "path": "modules/nf-core/multiqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/multiqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 single-end [fastqc] [config]",
+                "channels": [
+                  {
+                    "key": "versions",
+                    "files": [],
+                    "values": [
+                      [
+                        "MULTIQC",
+                        "multiqc",
+                        "1.33"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success",
+            "process.out.report[0] ==~ \".*/multiqc_report.html\"",
+            "process.out.data[0] ==~ \".*/multiqc_data\""
+          ]
+        },
+        {
+          "name": "sarscov2 single-end [fastqc] - stub",
+          "path": "modules/nf-core/multiqc/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/multiqc/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "sarscov2 single-end [fastqc] - stub",
+                "channels": [
+                  {
+                    "key": null,
+                    "files": [],
+                    "values": [
+                      "multiqc_report.html",
+                      "multiqc_data",
+                      "multiqc_plots",
+                      {
+                        "versions": [
+                          [
+                            "MULTIQC",
+                            "multiqc",
+                            "1.33"
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        }
+      ],
       "tool": "multiqc",
       "container": "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/34/34e733a9ae16a27e80fe00f863ea1479c96416017f24a907996126283e7ecd4d/data' : 'community.wave.seqera.io/library/multiqc:1.33--ee7739d47738383b' }",
       "conda": "${moduleDir}/environment.yml",
       "inputs": [
         {
           "name": "multiqc_files",
-          "shape": "path(stageAs:\"?/*\")",
-          "description": "All accumulated reports and version YAMLs.",
+          "shape": "path multiqc_files, stageAs: \"?/*\"",
           "topic": null
         },
         {
           "name": "multiqc_config",
-          "shape": "path",
-          "description": "Default MultiQC config from assets/.",
+          "shape": "path(multiqc_config)",
           "topic": null
         },
         {
           "name": "extra_multiqc_config",
-          "shape": "path",
-          "description": "Optional --multiqc_config override.",
+          "shape": "path(extra_multiqc_config)",
           "topic": null
         },
         {
           "name": "multiqc_logo",
-          "shape": "path",
-          "description": "Optional custom logo.",
+          "shape": "path(multiqc_logo)",
           "topic": null
         },
         {
           "name": "replace_names",
-          "shape": "path",
-          "description": "Optional sample-name replacement table.",
+          "shape": "path(replace_names)",
           "topic": null
         },
         {
           "name": "sample_names",
-          "shape": "path",
-          "description": "Optional sample-name table.",
+          "shape": "path(sample_names)",
           "topic": null
         }
       ],
       "outputs": [
         {
           "name": "report",
-          "shape": "path(\"*.html\")",
-          "description": "MultiQC HTML report.",
+          "shape": "path \"*.html\" , emit: report",
           "topic": null
         },
         {
           "name": "data",
-          "shape": "path(\"*_data\")",
-          "description": "MultiQC data directory.",
+          "shape": "path \"*_data\" , emit: data",
           "topic": null
         },
         {
           "name": "plots",
-          "shape": "path(\"*_plots\") optional",
-          "description": "MultiQC plots directory (optional).",
+          "shape": "path \"*_plots\" , optional:true, emit: plots",
           "topic": null
         },
         {
           "name": "versions",
-          "shape": "tuple(val(\"${task.process}\"), val('multiqc'), eval('multiqc --version ...'))",
-          "description": "Tool version triple. Deliberately NOT emitted to the versions topic — multiqc consumes versions and would deadlock.",
+          "shape": "tuple val(\"${task.process}\"), val('multiqc'), eval('multiqc --version | sed \"s/.* //g\"'), emit: versions",
           "topic": null
         }
       ],
       "when": "task.ext.when == null || task.ext.when",
-      "script_summary": "Run multiqc on the staged inputs, optionally with a custom config, logo, and sample-name replacements.",
-      "publish_dir": null,
-      "meta": null,
-      "module_tests": []
+      "script_excerpt": "def args = task.ext.args ?: ''\ndef prefix = task.ext.prefix ? \"--filename ${task.ext.prefix}.html\" : ''\ndef config = multiqc_config ? \"--config ${multiqc_config}\" : ''\ndef extra_config = extra_multiqc_config ? \"--config ${extra_multiqc_config}\" : ''\ndef logo = multiqc_logo ? \"--cl-config 'custom_logo: \\\"${multiqc_logo}\\\"'\" : ''\ndef replace = replace_names ? \"--replace-names ${replace_names}\" : ''\ndef samples = sample_names ? \"--sample-names ${sample_names}\" : ''\n\"\"\"\nmultiqc \\\\\n    --force \\\\\n    ${args} \\\\\n    ${config} \\\\\n    ${prefix} \\\\\n    ${extra_config} \\\\\n    ${logo} \\\\\n    ${replace} \\\\\n    ${samples} \\\\\n    .\n\"\"\"",
+      "publish_dir": null
+    },
+    {
+      "name": "SEQTK_TRIM",
+      "aliases": [],
+      "in_subworkflows": [],
+      "module_path": "modules/nf-core/seqtk/trim/main.nf",
+      "meta": {
+        "description": "Trim low quality bases from FastQ files",
+        "keywords": [
+          "trimfq",
+          "fastq",
+          "seqtk"
+        ],
+        "authors": [
+          "@laramiellindsey"
+        ],
+        "maintainers": [],
+        "tools": [
+          {
+            "name": "seqtk",
+            "description": "Seqtk is a fast and lightweight tool for processing sequences in the FASTA or FASTQ format",
+            "homepage": "https://github.com/lh3/seqtk",
+            "documentation": "https://docs.csc.fi/apps/seqtk/",
+            "tool_dev_url": "https://github.com/lh3/seqtk",
+            "licence": [
+              "MIT"
+            ],
+            "identifier": "biotools:seqtk"
+          }
+        ],
+        "input": [],
+        "output": []
+      },
+      "module_tests": [
+        {
+          "name": "Single-end",
+          "path": "modules/nf-core/seqtk/trim/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "outdir": "$outputDir"
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/seqtk/trim/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Single-end",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test_test_1.fastq.gz",
+                        "basename": "test_test_1.fastq.gz",
+                        "md5": "4161df271f9bfcd25d5845a1e220dbec",
+                        "stub": false
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [],
+                    "values": [
+                      [
+                        "SEQTK_TRIM",
+                        "seqtk",
+                        "1.4-r122"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "reads",
+                    "files": [
+                      {
+                        "path": "test_test_1.fastq.gz",
+                        "basename": "test_test_1.fastq.gz",
+                        "md5": "4161df271f9bfcd25d5845a1e220dbec",
+                        "stub": false
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": true
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_seqtk",
+                    "files": [],
+                    "values": [
+                      [
+                        "SEQTK_TRIM",
+                        "seqtk",
+                        "1.4-r122"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        },
+        {
+          "name": "Paired-end",
+          "path": "modules/nf-core/seqtk/trim/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "outdir": "$outputDir"
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "modules/nf-core/seqtk/trim/tests/main.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Paired-end",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [
+                      {
+                        "path": "test_test_1.fastq.gz",
+                        "basename": "test_test_1.fastq.gz",
+                        "md5": "4161df271f9bfcd25d5845a1e220dbec",
+                        "stub": false
+                      },
+                      {
+                        "path": "test_test_2.fastq.gz",
+                        "basename": "test_test_2.fastq.gz",
+                        "md5": "2ebae722295ea66d84075a3b042e2b42",
+                        "stub": false
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "1",
+                    "files": [],
+                    "values": [
+                      [
+                        "SEQTK_TRIM",
+                        "seqtk",
+                        "1.4-r122"
+                      ]
+                    ]
+                  },
+                  {
+                    "key": "reads",
+                    "files": [
+                      {
+                        "path": "test_test_1.fastq.gz",
+                        "basename": "test_test_1.fastq.gz",
+                        "md5": "4161df271f9bfcd25d5845a1e220dbec",
+                        "stub": false
+                      },
+                      {
+                        "path": "test_test_2.fastq.gz",
+                        "basename": "test_test_2.fastq.gz",
+                        "md5": "2ebae722295ea66d84075a3b042e2b42",
+                        "stub": false
+                      }
+                    ],
+                    "values": [
+                      {
+                        "id": "test",
+                        "single_end": false
+                      }
+                    ]
+                  },
+                  {
+                    "key": "versions_seqtk",
+                    "files": [],
+                    "values": [
+                      [
+                        "SEQTK_TRIM",
+                        "seqtk",
+                        "1.4-r122"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "process.success"
+          ]
+        }
+      ],
+      "tool": "seqtk",
+      "container": "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'https://depot.galaxyproject.org/singularity/seqtk:1.4--he4a0461_1' : 'biocontainers/seqtk:1.4--he4a0461_1' }",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple val(meta), path(reads)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "reads",
+          "shape": "tuple val(meta), path(\"*.fastq.gz\"), emit: reads",
+          "topic": null
+        },
+        {
+          "name": "versions_seqtk",
+          "shape": "tuple val(\"${task.process}\"), val('seqtk'), eval(\"seqtk 2>&1 | sed -n 's/^Version: //p'\"), emit: versions_seqtk, topic: versions",
+          "topic": "versions"
+        }
+      ],
+      "when": "task.ext.when == null || task.ext.when",
+      "script_excerpt": "def args   = task.ext.args ?: ''\ndef prefix = task.ext.prefix ?: \"${meta.id}\"\n\"\"\"\nprintf \"%s\\\\n\" $reads | while read f;\ndo\n    seqtk \\\\\n        trimfq \\\\\n        $args \\\\\n        \\$f \\\\\n        | gzip --no-name > ${prefix}_\\$(basename \\$f)\ndone\n\"\"\"",
+      "publish_dir": null
     }
   ],
   "subworkflows": [
     {
+      "name": "NFCORE_DEMO",
+      "path": "main.nf",
+      "kind": "pipeline",
+      "aliases": [],
+      "calls": [
+        "DEMO"
+      ],
+      "inputs": [
+        {
+          "name": "samplesheet",
+          "shape": "samplesheet",
+          "topic": null,
+          "description": "channel: samplesheet read in from --input"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "multiqc_report",
+          "shape": "multiqc_report = DEMO.out.multiqc_report",
+          "topic": null,
+          "description": "channel: /path/to/multiqc_report.html"
+        }
+      ],
+      "tests": [
+        {
+          "name": "-profile test",
+          "path": "tests/default.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "outdir": "$outputDir"
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": {
+            "captures": [
+              "versions_yml",
+              "stable_names",
+              "stable_paths"
+            ],
+            "helpers": [
+              "getAllFilesFromDir",
+              "removeNextflowVersion"
+            ],
+            "ignore_files": [
+              "tests/.nftignore"
+            ],
+            "ignore_globs": [
+              "pipeline_info/*.{html,json,txt}"
+            ],
+            "snap_path": "tests/default.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "-profile test",
+                "channels": [
+                  {
+                    "key": "FASTQC",
+                    "files": [],
+                    "values": [
+                      {
+                        "fastqc": "0.12.1"
+                      }
+                    ]
+                  },
+                  {
+                    "key": "SEQTK_TRIM",
+                    "files": [],
+                    "values": [
+                      {
+                        "seqtk": "1.4-r122"
+                      }
+                    ]
+                  },
+                  {
+                    "key": "Workflow",
+                    "files": [],
+                    "values": [
+                      {
+                        "nf-core/demo": "v1.1.0"
+                      }
+                    ]
+                  },
+                  {
+                    "key": null,
+                    "files": [],
+                    "values": [
+                      "fastqc",
+                      "fastqc/SAMPLE1_PE",
+                      "fastqc/SAMPLE1_PE/SAMPLE1_PE_1_fastqc.html",
+                      "fastqc/SAMPLE1_PE/SAMPLE1_PE_2_fastqc.html",
+                      "fastqc/SAMPLE2_PE",
+                      "fastqc/SAMPLE2_PE/SAMPLE2_PE_1_fastqc.html",
+                      "fastqc/SAMPLE2_PE/SAMPLE2_PE_2_fastqc.html",
+                      "fastqc/SAMPLE3_SE",
+                      "fastqc/SAMPLE3_SE/SAMPLE3_SE_1_fastqc.html",
+                      "fastqc/SAMPLE3_SE/SAMPLE3_SE_2_fastqc.html",
+                      "fq",
+                      "fq/SAMPLE1_PE",
+                      "fq/SAMPLE1_PE/SAMPLE1_PE_sample1_R1.fastq.gz",
+                      "fq/SAMPLE1_PE/SAMPLE1_PE_sample1_R2.fastq.gz",
+                      "fq/SAMPLE2_PE",
+                      "fq/SAMPLE2_PE/SAMPLE2_PE_sample2_R1.fastq.gz",
+                      "fq/SAMPLE2_PE/SAMPLE2_PE_sample2_R2.fastq.gz",
+                      "fq/SAMPLE3_SE",
+                      "fq/SAMPLE3_SE/SAMPLE3_SE_sample1_R1.fastq.gz",
+                      "fq/SAMPLE3_SE/SAMPLE3_SE_sample2_R1.fastq.gz",
+                      "multiqc",
+                      "multiqc/multiqc_data",
+                      "multiqc/multiqc_data/fastqc-status-check-heatmap.txt",
+                      "multiqc/multiqc_data/fastqc_overrepresented_sequences_plot.txt",
+                      "multiqc/multiqc_data/fastqc_per_base_n_content_plot.txt",
+                      "multiqc/multiqc_data/fastqc_per_base_sequence_quality_plot.txt",
+                      "multiqc/multiqc_data/fastqc_per_sequence_gc_content_plot_Counts.txt",
+                      "multiqc/multiqc_data/fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                      "multiqc/multiqc_data/fastqc_per_sequence_quality_scores_plot.txt",
+                      "multiqc/multiqc_data/fastqc_sequence_counts_plot.txt",
+                      "multiqc/multiqc_data/fastqc_sequence_duplication_levels_plot.txt",
+                      "multiqc/multiqc_data/fastqc_sequence_length_distribution_plot.txt",
+                      "multiqc/multiqc_data/fastqc_top_overrepresented_sequences_table.txt",
+                      "multiqc/multiqc_data/llms-full.txt",
+                      "multiqc/multiqc_data/multiqc.log",
+                      "multiqc/multiqc_data/multiqc.parquet",
+                      "multiqc/multiqc_data/multiqc_citations.txt",
+                      "multiqc/multiqc_data/multiqc_data.json",
+                      "multiqc/multiqc_data/multiqc_fastqc.txt",
+                      "multiqc/multiqc_data/multiqc_general_stats.txt",
+                      "multiqc/multiqc_data/multiqc_software_versions.txt",
+                      "multiqc/multiqc_data/multiqc_sources.txt",
+                      "multiqc/multiqc_plots",
+                      "multiqc/multiqc_plots/pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc-status-check-heatmap.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_overrepresented_sequences_plot.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_per_base_n_content_plot.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_per_base_sequence_quality_plot.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_per_sequence_gc_content_plot_Counts.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_per_sequence_gc_content_plot_Percentages.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_per_sequence_quality_scores_plot.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_sequence_counts_plot-cnt.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_sequence_counts_plot-pct.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_sequence_duplication_levels_plot.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_sequence_length_distribution_plot.pdf",
+                      "multiqc/multiqc_plots/pdf/fastqc_top_overrepresented_sequences_table.pdf",
+                      "multiqc/multiqc_plots/png",
+                      "multiqc/multiqc_plots/png/fastqc-status-check-heatmap.png",
+                      "multiqc/multiqc_plots/png/fastqc_overrepresented_sequences_plot.png",
+                      "multiqc/multiqc_plots/png/fastqc_per_base_n_content_plot.png",
+                      "multiqc/multiqc_plots/png/fastqc_per_base_sequence_quality_plot.png",
+                      "multiqc/multiqc_plots/png/fastqc_per_sequence_gc_content_plot_Counts.png",
+                      "multiqc/multiqc_plots/png/fastqc_per_sequence_gc_content_plot_Percentages.png",
+                      "multiqc/multiqc_plots/png/fastqc_per_sequence_quality_scores_plot.png",
+                      "multiqc/multiqc_plots/png/fastqc_sequence_counts_plot-cnt.png",
+                      "multiqc/multiqc_plots/png/fastqc_sequence_counts_plot-pct.png",
+                      "multiqc/multiqc_plots/png/fastqc_sequence_duplication_levels_plot.png",
+                      "multiqc/multiqc_plots/png/fastqc_sequence_length_distribution_plot.png",
+                      "multiqc/multiqc_plots/png/fastqc_top_overrepresented_sequences_table.png",
+                      "multiqc/multiqc_plots/svg",
+                      "multiqc/multiqc_plots/svg/fastqc-status-check-heatmap.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_overrepresented_sequences_plot.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_per_base_n_content_plot.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_per_base_sequence_quality_plot.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_per_sequence_gc_content_plot_Counts.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_per_sequence_gc_content_plot_Percentages.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_per_sequence_quality_scores_plot.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_sequence_counts_plot-cnt.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_sequence_counts_plot-pct.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_sequence_duplication_levels_plot.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_sequence_length_distribution_plot.svg",
+                      "multiqc/multiqc_plots/svg/fastqc_top_overrepresented_sequences_table.svg",
+                      "multiqc/multiqc_report.html",
+                      "pipeline_info",
+                      "pipeline_info/nf_core_demo_software_mqc_versions.yml"
+                    ]
+                  },
+                  {
+                    "key": null,
+                    "files": [
+                      {
+                        "path": "SAMPLE1_PE_sample1_R1.fastq.gz",
+                        "basename": "SAMPLE1_PE_sample1_R1.fastq.gz",
+                        "md5": "7dd2fd0d542d9259d9aed53550907fae",
+                        "stub": false
+                      },
+                      {
+                        "path": "SAMPLE1_PE_sample1_R2.fastq.gz",
+                        "basename": "SAMPLE1_PE_sample1_R2.fastq.gz",
+                        "md5": "1995fe8488384d801807805f26ceca8a",
+                        "stub": false
+                      },
+                      {
+                        "path": "SAMPLE2_PE_sample2_R1.fastq.gz",
+                        "basename": "SAMPLE2_PE_sample2_R1.fastq.gz",
+                        "md5": "05dba9c26396cbdbe0e6da26f037106e",
+                        "stub": false
+                      },
+                      {
+                        "path": "SAMPLE2_PE_sample2_R2.fastq.gz",
+                        "basename": "SAMPLE2_PE_sample2_R2.fastq.gz",
+                        "md5": "63d5e4ac37927c2ecec4b74d2ff99a10",
+                        "stub": false
+                      },
+                      {
+                        "path": "SAMPLE3_SE_sample1_R1.fastq.gz",
+                        "basename": "SAMPLE3_SE_sample1_R1.fastq.gz",
+                        "md5": "7dd2fd0d542d9259d9aed53550907fae",
+                        "stub": false
+                      },
+                      {
+                        "path": "SAMPLE3_SE_sample2_R1.fastq.gz",
+                        "basename": "SAMPLE3_SE_sample2_R1.fastq.gz",
+                        "md5": "05dba9c26396cbdbe0e6da26f037106e",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc-status-check-heatmap.txt",
+                        "basename": "fastqc-status-check-heatmap.txt",
+                        "md5": "0f1975c565a16bf09be08a05c204ded7",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_overrepresented_sequences_plot.txt",
+                        "basename": "fastqc_overrepresented_sequences_plot.txt",
+                        "md5": "4b23cea39c4e23deef6b97810bc1ee46",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_per_base_n_content_plot.txt",
+                        "basename": "fastqc_per_base_n_content_plot.txt",
+                        "md5": "037692101c0130c72493d3bbfa3afac1",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_per_base_sequence_quality_plot.txt",
+                        "basename": "fastqc_per_base_sequence_quality_plot.txt",
+                        "md5": "bfe735f3e31befe13bdf6761bb297d6e",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_per_sequence_gc_content_plot_Counts.txt",
+                        "basename": "fastqc_per_sequence_gc_content_plot_Counts.txt",
+                        "md5": "7108d19c46ef7883e864ba274c457d2e",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                        "basename": "fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                        "md5": "23f527c80a148e4f34e5a43f6e520a90",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_per_sequence_quality_scores_plot.txt",
+                        "basename": "fastqc_per_sequence_quality_scores_plot.txt",
+                        "md5": "a0cc0e6df7bfb05257da1cfc88b13c50",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_sequence_counts_plot.txt",
+                        "basename": "fastqc_sequence_counts_plot.txt",
+                        "md5": "c6e4e1588e6765fe8df27812a1322fbd",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_sequence_duplication_levels_plot.txt",
+                        "basename": "fastqc_sequence_duplication_levels_plot.txt",
+                        "md5": "3cde2db4033f6c64648976d1174db925",
+                        "stub": false
+                      },
+                      {
+                        "path": "fastqc_sequence_length_distribution_plot.txt",
+                        "basename": "fastqc_sequence_length_distribution_plot.txt",
+                        "md5": "e82b9b14a7e24c0c5f27af97cebb6870",
+                        "stub": false
+                      },
+                      {
+                        "path": "multiqc_citations.txt",
+                        "basename": "multiqc_citations.txt",
+                        "md5": "4c806e63a283ec1b7e78cdae3a923d4f",
+                        "stub": false
+                      },
+                      {
+                        "path": "multiqc_fastqc.txt",
+                        "basename": "multiqc_fastqc.txt",
+                        "md5": "1a41c2158adc9947bff9232962f70110",
+                        "stub": false
+                      },
+                      {
+                        "path": "multiqc_general_stats.txt",
+                        "basename": "multiqc_general_stats.txt",
+                        "md5": "0b54e4e764665bd57fe0f95216744a78",
+                        "stub": false
+                      }
+                    ],
+                    "values": []
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": []
+        }
+      ]
+    },
+    {
       "name": "PIPELINE_INITIALISATION",
       "path": "subworkflows/local/utils_nfcore_demo_pipeline/main.nf",
-      "kind": "utility",
-      "calls": [],
-      "inputs": [],
+      "kind": "pipeline",
+      "aliases": [],
+      "calls": [
+        "UTILS_NEXTFLOW_PIPELINE",
+        "UTILS_NFCORE_PIPELINE",
+        "UTILS_NFSCHEMA_PLUGIN",
+        "samplesheetToList"
+      ],
+      "inputs": [
+        {
+          "name": "version",
+          "shape": "version",
+          "topic": null,
+          "description": "boolean: Display version and exit"
+        },
+        {
+          "name": "validate_params",
+          "shape": "validate_params",
+          "topic": null,
+          "description": "boolean: Boolean whether to validate parameters against the schema at runtime"
+        },
+        {
+          "name": "nextflow_cli_args",
+          "shape": "nextflow_cli_args",
+          "topic": null,
+          "description": "array: List of positional nextflow CLI args"
+        },
+        {
+          "name": "outdir",
+          "shape": "outdir",
+          "topic": null,
+          "description": "string: The output directory where the results will be saved"
+        },
+        {
+          "name": "help",
+          "shape": "help",
+          "topic": null,
+          "description": "boolean: Display help message and exit"
+        },
+        {
+          "name": "help_full",
+          "shape": "help_full",
+          "topic": null,
+          "description": "boolean: Show the full help message"
+        },
+        {
+          "name": "show_hidden",
+          "shape": "show_hidden",
+          "topic": null,
+          "description": "boolean: Show hidden parameters in the help message"
+        }
+      ],
       "outputs": [
         {
           "name": "samplesheet",
-          "shape": "tuple(val(meta), path(reads))",
-          "description": "Validated samplesheet read from --input via plugin/nf-schema's samplesheetToList.",
+          "shape": "samplesheet = ch_samplesheet",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "versions = ch_versions",
           "topic": null
         }
       ],
@@ -652,38 +3327,1383 @@
     {
       "name": "PIPELINE_COMPLETION",
       "path": "subworkflows/local/utils_nfcore_demo_pipeline/main.nf",
-      "kind": "utility",
-      "calls": [],
-      "inputs": [],
+      "kind": "pipeline",
+      "aliases": [],
+      "calls": [
+        "completionEmail",
+        "completionSummary",
+        "imNotification",
+        "paramsSummaryMap"
+      ],
+      "inputs": [
+        {
+          "name": "email",
+          "shape": "email",
+          "topic": null,
+          "description": "string: email address"
+        },
+        {
+          "name": "email_on_fail",
+          "shape": "email_on_fail",
+          "topic": null,
+          "description": "string: email address sent on pipeline failure"
+        },
+        {
+          "name": "plaintext_email",
+          "shape": "plaintext_email",
+          "topic": null,
+          "description": "boolean: Send plain-text email instead of HTML"
+        },
+        {
+          "name": "outdir",
+          "shape": "outdir",
+          "topic": null,
+          "description": "path: Path to output directory where results will be published"
+        },
+        {
+          "name": "monochrome_logs",
+          "shape": "monochrome_logs",
+          "topic": null,
+          "description": "boolean: Disable ANSI colour codes in log output"
+        },
+        {
+          "name": "hook_url",
+          "shape": "hook_url",
+          "topic": null,
+          "description": "string: hook URL for notifications"
+        },
+        {
+          "name": "multiqc_report",
+          "shape": "multiqc_report",
+          "topic": null,
+          "description": "string: Path to MultiQC report"
+        }
+      ],
       "outputs": [],
       "tests": []
     },
     {
-      "name": "NFCORE_DEMO",
-      "path": "main.nf",
-      "kind": "pipeline",
-      "calls": [
-        "DEMO"
+      "name": "UTILS_NEXTFLOW_PIPELINE",
+      "path": "subworkflows/nf-core/utils_nextflow_pipeline/main.nf",
+      "kind": "utility",
+      "aliases": [],
+      "calls": [],
+      "inputs": [
+        {
+          "name": "print_version",
+          "shape": "print_version",
+          "topic": null,
+          "description": "boolean: print version"
+        },
+        {
+          "name": "dump_parameters",
+          "shape": "dump_parameters",
+          "topic": null,
+          "description": "boolean: dump parameters"
+        },
+        {
+          "name": "outdir",
+          "shape": "outdir",
+          "topic": null,
+          "description": "path: base directory used to publish pipeline results"
+        },
+        {
+          "name": "check_conda_channels",
+          "shape": "check_conda_channels",
+          "topic": null,
+          "description": "boolean: check conda channels"
+        }
       ],
-      "inputs": [],
       "outputs": [
         {
-          "name": "multiqc_report",
-          "shape": "path",
-          "description": "MultiQC HTML report.",
+          "name": "dummy_emit",
+          "shape": "dummy_emit = true",
           "topic": null
         }
       ],
-      "tests": []
+      "tests": [
+        {
+          "name": "Test Function getWorkflowVersion",
+          "path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.function.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Test Function getWorkflowVersion",
+                "channels": [
+                  {
+                    "key": null,
+                    "files": [],
+                    "values": [
+                      "v9.9.9"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "function.success"
+          ]
+        },
+        {
+          "name": "Test Function dumpParametersToJSON",
+          "path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": null,
+          "prose_assertions": [
+            "function.success"
+          ]
+        },
+        {
+          "name": "Test Function checkCondaChannels",
+          "path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.function.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Test Function checkCondaChannels",
+                "channels": [
+                  {
+                    "key": null,
+                    "files": [],
+                    "values": [
+                      null
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "function.success"
+          ]
+        },
+        {
+          "name": "Should run no inputs",
+          "path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.workflow.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": null,
+          "prose_assertions": []
+        },
+        {
+          "name": "Should print version",
+          "path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.workflow.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": null,
+          "prose_assertions": [
+            "success",
+            "\"nextflow_workflow v9.9.9\" in stdout"
+          ]
+        },
+        {
+          "name": "Should dump params",
+          "path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.workflow.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": null,
+          "prose_assertions": []
+        },
+        {
+          "name": "Should not create params JSON if no output directory",
+          "path": "subworkflows/nf-core/utils_nextflow_pipeline/tests/main.workflow.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": null,
+          "prose_assertions": []
+        }
+      ],
+      "invocations": [
+        {
+          "caller": "PIPELINE_INITIALISATION",
+          "caller_path": "subworkflows/local/utils_nfcore_demo_pipeline/main.nf",
+          "arguments": [
+            "version",
+            "true",
+            "outdir",
+            "workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1"
+          ],
+          "bindings": [
+            {
+              "take": "print_version",
+              "argument": "version"
+            },
+            {
+              "take": "dump_parameters",
+              "argument": "true"
+            },
+            {
+              "take": "outdir",
+              "argument": "outdir"
+            },
+            {
+              "take": "check_conda_channels",
+              "argument": "workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "UTILS_NFCORE_PIPELINE",
+      "path": "subworkflows/nf-core/utils_nfcore_pipeline/main.nf",
+      "kind": "utility",
+      "aliases": [],
+      "calls": [],
+      "inputs": [
+        {
+          "name": "nextflow_cli_args",
+          "shape": "nextflow_cli_args",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valid_config",
+          "shape": "valid_config",
+          "topic": null
+        }
+      ],
+      "tests": [
+        {
+          "name": "Test Function checkConfigProvided",
+          "path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Test Function checkConfigProvided",
+                "channels": [
+                  {
+                    "key": null,
+                    "files": [],
+                    "values": [
+                      true
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "function.success"
+          ]
+        },
+        {
+          "name": "Test Function checkProfileProvided",
+          "path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Test Function checkProfileProvided",
+                "channels": [
+                  {
+                    "key": null,
+                    "files": [],
+                    "values": [
+                      null
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "function.success"
+          ]
+        },
+        {
+          "name": "Test Function without logColours",
+          "path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Test Function without logColours",
+                "channels": [
+                  {
+                    "key": "reset",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bold",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "dim",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "underlined",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "blink",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "reverse",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "hidden",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "black",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "red",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "green",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "yellow",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "blue",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "purple",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "cyan",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "white",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bblack",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bred",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bgreen",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "byellow",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bblue",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bpurple",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bcyan",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bwhite",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "ublack",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "ured",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "ugreen",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "uyellow",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "ublue",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "upurple",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "ucyan",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "uwhite",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "iblack",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "ired",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "igreen",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "iyellow",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "iblue",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "ipurple",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "icyan",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "iwhite",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "biblack",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bired",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bigreen",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "biyellow",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "biblue",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bipurple",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "bicyan",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  },
+                  {
+                    "key": "biwhite",
+                    "files": [],
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "function.success"
+          ]
+        },
+        {
+          "name": "Test Function with logColours",
+          "path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Test Function with logColours",
+                "channels": [
+                  {
+                    "key": "reset",
+                    "files": [],
+                    "values": [
+                      "\u001b[0m"
+                    ]
+                  },
+                  {
+                    "key": "bold",
+                    "files": [],
+                    "values": [
+                      "\u001b[1m"
+                    ]
+                  },
+                  {
+                    "key": "dim",
+                    "files": [],
+                    "values": [
+                      "\u001b[2m"
+                    ]
+                  },
+                  {
+                    "key": "underlined",
+                    "files": [],
+                    "values": [
+                      "\u001b[4m"
+                    ]
+                  },
+                  {
+                    "key": "blink",
+                    "files": [],
+                    "values": [
+                      "\u001b[5m"
+                    ]
+                  },
+                  {
+                    "key": "reverse",
+                    "files": [],
+                    "values": [
+                      "\u001b[7m"
+                    ]
+                  },
+                  {
+                    "key": "hidden",
+                    "files": [],
+                    "values": [
+                      "\u001b[8m"
+                    ]
+                  },
+                  {
+                    "key": "black",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;30m"
+                    ]
+                  },
+                  {
+                    "key": "red",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;31m"
+                    ]
+                  },
+                  {
+                    "key": "green",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;32m"
+                    ]
+                  },
+                  {
+                    "key": "yellow",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;33m"
+                    ]
+                  },
+                  {
+                    "key": "blue",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;34m"
+                    ]
+                  },
+                  {
+                    "key": "purple",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;35m"
+                    ]
+                  },
+                  {
+                    "key": "cyan",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;36m"
+                    ]
+                  },
+                  {
+                    "key": "white",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;37m"
+                    ]
+                  },
+                  {
+                    "key": "bblack",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;30m"
+                    ]
+                  },
+                  {
+                    "key": "bred",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;31m"
+                    ]
+                  },
+                  {
+                    "key": "bgreen",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;32m"
+                    ]
+                  },
+                  {
+                    "key": "byellow",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;33m"
+                    ]
+                  },
+                  {
+                    "key": "bblue",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;34m"
+                    ]
+                  },
+                  {
+                    "key": "bpurple",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;35m"
+                    ]
+                  },
+                  {
+                    "key": "bcyan",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;36m"
+                    ]
+                  },
+                  {
+                    "key": "bwhite",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;37m"
+                    ]
+                  },
+                  {
+                    "key": "ublack",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;30m"
+                    ]
+                  },
+                  {
+                    "key": "ured",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;31m"
+                    ]
+                  },
+                  {
+                    "key": "ugreen",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;32m"
+                    ]
+                  },
+                  {
+                    "key": "uyellow",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;33m"
+                    ]
+                  },
+                  {
+                    "key": "ublue",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;34m"
+                    ]
+                  },
+                  {
+                    "key": "upurple",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;35m"
+                    ]
+                  },
+                  {
+                    "key": "ucyan",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;36m"
+                    ]
+                  },
+                  {
+                    "key": "uwhite",
+                    "files": [],
+                    "values": [
+                      "\u001b[4;37m"
+                    ]
+                  },
+                  {
+                    "key": "iblack",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;90m"
+                    ]
+                  },
+                  {
+                    "key": "ired",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;91m"
+                    ]
+                  },
+                  {
+                    "key": "igreen",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;92m"
+                    ]
+                  },
+                  {
+                    "key": "iyellow",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;93m"
+                    ]
+                  },
+                  {
+                    "key": "iblue",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;94m"
+                    ]
+                  },
+                  {
+                    "key": "ipurple",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;95m"
+                    ]
+                  },
+                  {
+                    "key": "icyan",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;96m"
+                    ]
+                  },
+                  {
+                    "key": "iwhite",
+                    "files": [],
+                    "values": [
+                      "\u001b[0;97m"
+                    ]
+                  },
+                  {
+                    "key": "biblack",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;90m"
+                    ]
+                  },
+                  {
+                    "key": "bired",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;91m"
+                    ]
+                  },
+                  {
+                    "key": "bigreen",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;92m"
+                    ]
+                  },
+                  {
+                    "key": "biyellow",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;93m"
+                    ]
+                  },
+                  {
+                    "key": "biblue",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;94m"
+                    ]
+                  },
+                  {
+                    "key": "bipurple",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;95m"
+                    ]
+                  },
+                  {
+                    "key": "bicyan",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;96m"
+                    ]
+                  },
+                  {
+                    "key": "biwhite",
+                    "files": [],
+                    "values": [
+                      "\u001b[1;97m"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": [
+            "function.success"
+          ]
+        },
+        {
+          "name": "Test Function getSingleReport with a single file",
+          "path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": null,
+          "prose_assertions": [
+            "function.success",
+            "function.result.contains(\"test.tsv\")"
+          ]
+        },
+        {
+          "name": "Test Function getSingleReport with multiple files",
+          "path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": null,
+          "prose_assertions": [
+            "function.success",
+            "function.result.contains(\"test.tsv\")",
+            "!function.result.contains(\"network.tsv\")",
+            "!function.result.contains(\"expression.tsv\")"
+          ]
+        },
+        {
+          "name": "Should run without failures",
+          "path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test",
+          "profiles": [],
+          "params_overrides": {},
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": {
+            "captures": [],
+            "helpers": [],
+            "ignore_files": [],
+            "ignore_globs": [],
+            "snap_path": "subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test.snap",
+            "parsed_content": [
+              {
+                "name": "Should run without failures",
+                "channels": [
+                  {
+                    "key": "0",
+                    "files": [],
+                    "values": [
+                      true
+                    ]
+                  },
+                  {
+                    "key": "valid_config",
+                    "files": [],
+                    "values": [
+                      true
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "prose_assertions": []
+        }
+      ],
+      "invocations": [
+        {
+          "caller": "PIPELINE_INITIALISATION",
+          "caller_path": "subworkflows/local/utils_nfcore_demo_pipeline/main.nf",
+          "arguments": [
+            "nextflow_cli_args"
+          ],
+          "bindings": [
+            {
+              "take": "nextflow_cli_args",
+              "argument": "nextflow_cli_args"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "UTILS_NFSCHEMA_PLUGIN",
+      "path": "subworkflows/nf-core/utils_nfschema_plugin/main.nf",
+      "kind": "pipeline",
+      "aliases": [],
+      "calls": [
+        "paramsHelp",
+        "paramsSummaryLog",
+        "validateParameters"
+      ],
+      "inputs": [
+        {
+          "name": "input_workflow",
+          "shape": "input_workflow",
+          "topic": null,
+          "description": "workflow: the workflow object used by nf-schema to get metadata from the workflow"
+        },
+        {
+          "name": "validate_params",
+          "shape": "validate_params",
+          "topic": null,
+          "description": "boolean:  validate the parameters"
+        },
+        {
+          "name": "parameters_schema",
+          "shape": "parameters_schema",
+          "topic": null,
+          "description": "string:   path to the parameters JSON schema."
+        },
+        {
+          "name": "help",
+          "shape": "help",
+          "topic": null,
+          "description": "boolean:  show help message"
+        },
+        {
+          "name": "help_full",
+          "shape": "help_full",
+          "topic": null,
+          "description": "boolean:  show full help message"
+        },
+        {
+          "name": "show_hidden",
+          "shape": "show_hidden",
+          "topic": null,
+          "description": "boolean:  show hidden parameters in help message"
+        },
+        {
+          "name": "before_text",
+          "shape": "before_text",
+          "topic": null,
+          "description": "string:   text to show before the help message and parameters summary"
+        },
+        {
+          "name": "after_text",
+          "shape": "after_text",
+          "topic": null,
+          "description": "string:   text to show after the help message and parameters summary"
+        },
+        {
+          "name": "command",
+          "shape": "command",
+          "topic": null,
+          "description": "string:   an example command of the pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "dummy_emit",
+          "shape": "dummy_emit = true",
+          "topic": null
+        }
+      ],
+      "tests": [
+        {
+          "name": "Should run nothing",
+          "path": "subworkflows/nf-core/utils_nfschema_plugin/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "test_data": ""
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": null,
+          "prose_assertions": []
+        },
+        {
+          "name": "Should validate params",
+          "path": "subworkflows/nf-core/utils_nfschema_plugin/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "test_data": "",
+            "outdir": null
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": null,
+          "prose_assertions": [
+            "workflow.failed",
+            "workflow.stdout.any { it.contains('ERROR ~ Validation of pipeline parameters failed!')"
+          ]
+        },
+        {
+          "name": "Should run nothing - custom schema",
+          "path": "subworkflows/nf-core/utils_nfschema_plugin/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "test_data": ""
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": null,
+          "prose_assertions": []
+        },
+        {
+          "name": "Should validate params - custom schema",
+          "path": "subworkflows/nf-core/utils_nfschema_plugin/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "test_data": "",
+            "outdir": null
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": false,
+          "snapshot": null,
+          "prose_assertions": [
+            "workflow.failed",
+            "workflow.stdout.any { it.contains('ERROR ~ Validation of pipeline parameters failed!')"
+          ]
+        },
+        {
+          "name": "Should create a help message",
+          "path": "subworkflows/nf-core/utils_nfschema_plugin/tests/main.nf.test",
+          "profiles": [],
+          "params_overrides": {
+            "test_data": "",
+            "outdir": null
+          },
+          "execution_mode": "real",
+          "assert_workflow_success": true,
+          "snapshot": null,
+          "prose_assertions": []
+        }
+      ],
+      "invocations": [
+        {
+          "caller": "PIPELINE_INITIALISATION",
+          "caller_path": "subworkflows/local/utils_nfcore_demo_pipeline/main.nf",
+          "arguments": [
+            "workflow",
+            "validate_params",
+            "null",
+            "help",
+            "help_full",
+            "show_hidden",
+            "before_text",
+            "after_text",
+            "command"
+          ],
+          "bindings": [
+            {
+              "take": "input_workflow",
+              "argument": "workflow"
+            },
+            {
+              "take": "validate_params",
+              "argument": "validate_params"
+            },
+            {
+              "take": "parameters_schema",
+              "argument": "null"
+            },
+            {
+              "take": "help",
+              "argument": "help"
+            },
+            {
+              "take": "help_full",
+              "argument": "help_full"
+            },
+            {
+              "take": "show_hidden",
+              "argument": "show_hidden"
+            },
+            {
+              "take": "before_text",
+              "argument": "before_text"
+            },
+            {
+              "take": "after_text",
+              "argument": "after_text"
+            },
+            {
+              "take": "command",
+              "argument": "command"
+            }
+          ]
+        }
+      ]
     }
   ],
   "workflow": {
     "name": "DEMO",
     "channels": [
       {
-        "name": "ch_samplesheet",
-        "source": "PIPELINE_INITIALISATION.out.samplesheet",
-        "shape": "tuple(val(meta), path(reads))",
+        "name": "ch_collated_versions",
+        "source": "ch_samplesheet ) } def topic_versions = channel.topic(\"versions\").distinct().branch { entry -> versions_file: entry instanceof Path versions_tuple: true } def topic_versions_string = topic_versions.versions_tuple.map { process, tool, version -> [ process[process.lastIndexOf(':')+1..-1], \" ${tool}: ${version}\" ] }.groupTuple(by:0).map { process, tool_versions -> tool_versions.unique().sort() \"${process}:\\n${tool_versions.join('\\n')}\" } softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file)).mix(topic_versions_string).collectFile( storeDir: \"${params.outdir}/pipeline_info\", name: 'nf_core_' + 'demo_software_' + 'mqc_' + 'versions.yml', sort: true, newLine: true )",
+        "shape": "branch|map|map|join|mix|mix",
+        "construct": "topic",
+        "from_param": null,
+        "required_runtime": false
+      },
+      {
+        "name": "ch_methods_description",
+        "source": "channel.value(",
+        "shape": "channel",
+        "construct": "value",
+        "from_param": null,
+        "required_runtime": false
+      },
+      {
+        "name": "ch_multiqc_config",
+        "source": "channel.fromPath(",
+        "shape": "channel",
+        "construct": "fromPath",
+        "from_param": null,
+        "required_runtime": false
+      },
+      {
+        "name": "ch_multiqc_custom_config",
+        "source": "params.multiqc_config ?",
+        "shape": "channel",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
+      },
+      {
+        "name": "ch_multiqc_custom_methods_description",
+        "source": "params.multiqc_methods_description ?",
+        "shape": "channel",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
+      },
+      {
+        "name": "ch_multiqc_files",
+        "source": "ch_multiqc_files.mix(FASTQC.out.zip.collect{ _meta, zip -> zip })",
+        "shape": "mix",
+        "construct": "other",
+        "from_param": null,
+        "required_runtime": false
+      },
+      {
+        "name": "ch_multiqc_logo",
+        "source": "params.multiqc_logo ?",
+        "shape": "channel",
         "construct": "other",
         "from_param": null,
         "required_runtime": false
@@ -691,31 +4711,31 @@
       {
         "name": "ch_versions",
         "source": "channel.empty()",
-        "shape": "path",
+        "shape": "channel",
         "construct": "empty",
         "from_param": null,
         "required_runtime": false
       },
       {
-        "name": "ch_multiqc_files",
-        "source": "channel.empty() then accumulated via .mix(FASTQC.out.zip, ch_workflow_summary, ch_methods_description, ch_collated_versions)",
-        "shape": "path",
-        "construct": "empty",
+        "name": "ch_workflow_summary",
+        "source": "channel.value(paramsSummaryMultiqc(summary_params))",
+        "shape": "channel",
+        "construct": "value",
         "from_param": null,
         "required_runtime": false
       },
       {
-        "name": "ch_multiqc_config",
-        "source": "channel.fromPath(\"$projectDir/assets/multiqc_config.yml\")",
-        "shape": "path",
-        "construct": "fromPath",
+        "name": "topic_versions",
+        "source": "channel.topic(\"versions\").distinct().branch { entry ->",
+        "shape": "branch",
+        "construct": "topic",
         "from_param": null,
         "required_runtime": false
       },
       {
-        "name": "ch_collated_versions",
-        "source": "softwareVersionsToYAML(ch_versions.mix(channel.topic('versions').versions_file)).mix(...).collectFile(...)",
-        "shape": "path",
+        "name": "topic_versions_string",
+        "source": "topic_versions.versions_tuple.map { process, tool, version ->",
+        "shape": "map",
         "construct": "other",
         "from_param": null,
         "required_runtime": false
@@ -725,31 +4745,42 @@
       {
         "from": "ch_samplesheet",
         "to": "FASTQC",
-        "via": [],
-        "notes": ""
+        "via": []
       },
       {
         "from": "ch_samplesheet",
         "to": "SEQTK_TRIM",
-        "via": [],
-        "notes": "Gated by !params.skip_trim conditional."
+        "via": []
       },
       {
-        "from": "FASTQC.out.zip",
+        "from": "ch_multiqc_files.collect()",
         "to": "MULTIQC",
-        "via": [
-          "collect",
-          "mix"
-        ],
-        "notes": "Mixed into ch_multiqc_files alongside workflow_summary, methods_description, and collated versions."
+        "via": []
       },
       {
-        "from": "ch_multiqc_files",
+        "from": "ch_multiqc_config.toList()",
         "to": "MULTIQC",
-        "via": [
-          "collect"
-        ],
-        "notes": ""
+        "via": []
+      },
+      {
+        "from": "ch_multiqc_custom_config.toList()",
+        "to": "MULTIQC",
+        "via": []
+      },
+      {
+        "from": "ch_multiqc_logo.toList()",
+        "to": "MULTIQC",
+        "via": []
+      },
+      {
+        "from": "[]",
+        "to": "MULTIQC",
+        "via": []
+      },
+      {
+        "from": "[]",
+        "to": "MULTIQC",
+        "via": []
       }
     ],
     "conditionals": [
@@ -762,42 +4793,54 @@
       }
     ]
   },
-  "test_fixtures": {
-    "profile": "test",
-    "inputs": [
-      {
-        "role": "samplesheet",
-        "path": null,
-        "url": "https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv",
-        "sha1": null,
-        "filetype": "csv",
-        "description": "Illumina amplicon samplesheet borrowed from the viralrecon test-dataset branch."
-      }
-    ],
-    "outputs": [
-      {
-        "role": "pipeline_outputs",
-        "path": null,
-        "url": null,
-        "kind": "other",
-        "description": "nf-test snapshot match against ${params.outdir}: stable file names + stable file contents (excluding pipeline_info HTML/JSON/TXT). Snapshot lives at tests/default.nf.test.snap.",
-        "assertions": [
-          "workflow.success",
-          "snapshot(removeNextflowVersion(versions.yml), stable_name, stable_path).match() — lossy summary of the nf-test snapshot fixture (helpers: getAllFilesFromDir, removeNextflowVersion, ignoreFile=tests/.nftignore)."
-        ]
-      }
-    ]
-  },
-  "nf_tests": [
+  "reference_assets": [
     {
+      "param": "fasta",
+      "asset_kind": "fasta",
+      "format_hint": "file-path",
+      "required": false,
+      "source_kind": "nextflow_schema",
+      "source_expression": null,
+      "schema_group": "Reference genome options",
+      "used_by": [],
+      "evidence": {
+        "source_path": "nextflow_schema.json",
+        "confidence": "medium",
+        "evidence": []
+      }
+    }
+  ],
+  "reference_rebuilds": [],
+  "test_candidates": [
+    {
+      "id": "tests/default.nf.test::-profile test",
+      "kind": "nf-test",
       "name": "-profile test",
       "path": "tests/default.nf.test",
-      "profiles": [
+      "effective_profiles": [
         "test"
       ],
-      "params_overrides": {
+      "params_delta": {
+        "config_profile_name": "Test profile",
+        "config_profile_description": "Minimal test dataset to check pipeline function",
+        "input": "https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv",
         "outdir": "$outputDir"
       },
+      "inputs": [
+        {
+          "role": "samplesheet",
+          "path": null,
+          "url": "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv",
+          "sha1": null,
+          "filetype": "csv",
+          "description": "input from test"
+        }
+      ],
+      "outputs": [],
+      "execution_mode": "real",
+      "scope": "primary",
+      "disposition": "selected",
+      "rationale": "whole-pipeline nf-test case from tests/default.nf.test",
       "assert_workflow_success": true,
       "snapshot": {
         "captures": [
@@ -815,14 +4858,263 @@
         "ignore_globs": [
           "pipeline_info/*.{html,json,txt}"
         ],
-        "snap_path": "tests/default.nf.test.snap"
+        "snap_path": "tests/default.nf.test.snap",
+        "parsed_content": [
+          {
+            "name": "-profile test",
+            "channels": [
+              {
+                "key": "FASTQC",
+                "files": [],
+                "values": [
+                  {
+                    "fastqc": "0.12.1"
+                  }
+                ]
+              },
+              {
+                "key": "SEQTK_TRIM",
+                "files": [],
+                "values": [
+                  {
+                    "seqtk": "1.4-r122"
+                  }
+                ]
+              },
+              {
+                "key": "Workflow",
+                "files": [],
+                "values": [
+                  {
+                    "nf-core/demo": "v1.1.0"
+                  }
+                ]
+              },
+              {
+                "key": null,
+                "files": [],
+                "values": [
+                  "fastqc",
+                  "fastqc/SAMPLE1_PE",
+                  "fastqc/SAMPLE1_PE/SAMPLE1_PE_1_fastqc.html",
+                  "fastqc/SAMPLE1_PE/SAMPLE1_PE_2_fastqc.html",
+                  "fastqc/SAMPLE2_PE",
+                  "fastqc/SAMPLE2_PE/SAMPLE2_PE_1_fastqc.html",
+                  "fastqc/SAMPLE2_PE/SAMPLE2_PE_2_fastqc.html",
+                  "fastqc/SAMPLE3_SE",
+                  "fastqc/SAMPLE3_SE/SAMPLE3_SE_1_fastqc.html",
+                  "fastqc/SAMPLE3_SE/SAMPLE3_SE_2_fastqc.html",
+                  "fq",
+                  "fq/SAMPLE1_PE",
+                  "fq/SAMPLE1_PE/SAMPLE1_PE_sample1_R1.fastq.gz",
+                  "fq/SAMPLE1_PE/SAMPLE1_PE_sample1_R2.fastq.gz",
+                  "fq/SAMPLE2_PE",
+                  "fq/SAMPLE2_PE/SAMPLE2_PE_sample2_R1.fastq.gz",
+                  "fq/SAMPLE2_PE/SAMPLE2_PE_sample2_R2.fastq.gz",
+                  "fq/SAMPLE3_SE",
+                  "fq/SAMPLE3_SE/SAMPLE3_SE_sample1_R1.fastq.gz",
+                  "fq/SAMPLE3_SE/SAMPLE3_SE_sample2_R1.fastq.gz",
+                  "multiqc",
+                  "multiqc/multiqc_data",
+                  "multiqc/multiqc_data/fastqc-status-check-heatmap.txt",
+                  "multiqc/multiqc_data/fastqc_overrepresented_sequences_plot.txt",
+                  "multiqc/multiqc_data/fastqc_per_base_n_content_plot.txt",
+                  "multiqc/multiqc_data/fastqc_per_base_sequence_quality_plot.txt",
+                  "multiqc/multiqc_data/fastqc_per_sequence_gc_content_plot_Counts.txt",
+                  "multiqc/multiqc_data/fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                  "multiqc/multiqc_data/fastqc_per_sequence_quality_scores_plot.txt",
+                  "multiqc/multiqc_data/fastqc_sequence_counts_plot.txt",
+                  "multiqc/multiqc_data/fastqc_sequence_duplication_levels_plot.txt",
+                  "multiqc/multiqc_data/fastqc_sequence_length_distribution_plot.txt",
+                  "multiqc/multiqc_data/fastqc_top_overrepresented_sequences_table.txt",
+                  "multiqc/multiqc_data/llms-full.txt",
+                  "multiqc/multiqc_data/multiqc.log",
+                  "multiqc/multiqc_data/multiqc.parquet",
+                  "multiqc/multiqc_data/multiqc_citations.txt",
+                  "multiqc/multiqc_data/multiqc_data.json",
+                  "multiqc/multiqc_data/multiqc_fastqc.txt",
+                  "multiqc/multiqc_data/multiqc_general_stats.txt",
+                  "multiqc/multiqc_data/multiqc_software_versions.txt",
+                  "multiqc/multiqc_data/multiqc_sources.txt",
+                  "multiqc/multiqc_plots",
+                  "multiqc/multiqc_plots/pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc-status-check-heatmap.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_overrepresented_sequences_plot.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_per_base_n_content_plot.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_per_base_sequence_quality_plot.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_per_sequence_gc_content_plot_Counts.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_per_sequence_gc_content_plot_Percentages.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_per_sequence_quality_scores_plot.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_sequence_counts_plot-cnt.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_sequence_counts_plot-pct.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_sequence_duplication_levels_plot.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_sequence_length_distribution_plot.pdf",
+                  "multiqc/multiqc_plots/pdf/fastqc_top_overrepresented_sequences_table.pdf",
+                  "multiqc/multiqc_plots/png",
+                  "multiqc/multiqc_plots/png/fastqc-status-check-heatmap.png",
+                  "multiqc/multiqc_plots/png/fastqc_overrepresented_sequences_plot.png",
+                  "multiqc/multiqc_plots/png/fastqc_per_base_n_content_plot.png",
+                  "multiqc/multiqc_plots/png/fastqc_per_base_sequence_quality_plot.png",
+                  "multiqc/multiqc_plots/png/fastqc_per_sequence_gc_content_plot_Counts.png",
+                  "multiqc/multiqc_plots/png/fastqc_per_sequence_gc_content_plot_Percentages.png",
+                  "multiqc/multiqc_plots/png/fastqc_per_sequence_quality_scores_plot.png",
+                  "multiqc/multiqc_plots/png/fastqc_sequence_counts_plot-cnt.png",
+                  "multiqc/multiqc_plots/png/fastqc_sequence_counts_plot-pct.png",
+                  "multiqc/multiqc_plots/png/fastqc_sequence_duplication_levels_plot.png",
+                  "multiqc/multiqc_plots/png/fastqc_sequence_length_distribution_plot.png",
+                  "multiqc/multiqc_plots/png/fastqc_top_overrepresented_sequences_table.png",
+                  "multiqc/multiqc_plots/svg",
+                  "multiqc/multiqc_plots/svg/fastqc-status-check-heatmap.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_overrepresented_sequences_plot.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_per_base_n_content_plot.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_per_base_sequence_quality_plot.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_per_sequence_gc_content_plot_Counts.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_per_sequence_gc_content_plot_Percentages.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_per_sequence_quality_scores_plot.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_sequence_counts_plot-cnt.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_sequence_counts_plot-pct.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_sequence_duplication_levels_plot.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_sequence_length_distribution_plot.svg",
+                  "multiqc/multiqc_plots/svg/fastqc_top_overrepresented_sequences_table.svg",
+                  "multiqc/multiqc_report.html",
+                  "pipeline_info",
+                  "pipeline_info/nf_core_demo_software_mqc_versions.yml"
+                ]
+              },
+              {
+                "key": null,
+                "files": [
+                  {
+                    "path": "SAMPLE1_PE_sample1_R1.fastq.gz",
+                    "basename": "SAMPLE1_PE_sample1_R1.fastq.gz",
+                    "md5": "7dd2fd0d542d9259d9aed53550907fae",
+                    "stub": false
+                  },
+                  {
+                    "path": "SAMPLE1_PE_sample1_R2.fastq.gz",
+                    "basename": "SAMPLE1_PE_sample1_R2.fastq.gz",
+                    "md5": "1995fe8488384d801807805f26ceca8a",
+                    "stub": false
+                  },
+                  {
+                    "path": "SAMPLE2_PE_sample2_R1.fastq.gz",
+                    "basename": "SAMPLE2_PE_sample2_R1.fastq.gz",
+                    "md5": "05dba9c26396cbdbe0e6da26f037106e",
+                    "stub": false
+                  },
+                  {
+                    "path": "SAMPLE2_PE_sample2_R2.fastq.gz",
+                    "basename": "SAMPLE2_PE_sample2_R2.fastq.gz",
+                    "md5": "63d5e4ac37927c2ecec4b74d2ff99a10",
+                    "stub": false
+                  },
+                  {
+                    "path": "SAMPLE3_SE_sample1_R1.fastq.gz",
+                    "basename": "SAMPLE3_SE_sample1_R1.fastq.gz",
+                    "md5": "7dd2fd0d542d9259d9aed53550907fae",
+                    "stub": false
+                  },
+                  {
+                    "path": "SAMPLE3_SE_sample2_R1.fastq.gz",
+                    "basename": "SAMPLE3_SE_sample2_R1.fastq.gz",
+                    "md5": "05dba9c26396cbdbe0e6da26f037106e",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc-status-check-heatmap.txt",
+                    "basename": "fastqc-status-check-heatmap.txt",
+                    "md5": "0f1975c565a16bf09be08a05c204ded7",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_overrepresented_sequences_plot.txt",
+                    "basename": "fastqc_overrepresented_sequences_plot.txt",
+                    "md5": "4b23cea39c4e23deef6b97810bc1ee46",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_per_base_n_content_plot.txt",
+                    "basename": "fastqc_per_base_n_content_plot.txt",
+                    "md5": "037692101c0130c72493d3bbfa3afac1",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_per_base_sequence_quality_plot.txt",
+                    "basename": "fastqc_per_base_sequence_quality_plot.txt",
+                    "md5": "bfe735f3e31befe13bdf6761bb297d6e",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_per_sequence_gc_content_plot_Counts.txt",
+                    "basename": "fastqc_per_sequence_gc_content_plot_Counts.txt",
+                    "md5": "7108d19c46ef7883e864ba274c457d2e",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                    "basename": "fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                    "md5": "23f527c80a148e4f34e5a43f6e520a90",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_per_sequence_quality_scores_plot.txt",
+                    "basename": "fastqc_per_sequence_quality_scores_plot.txt",
+                    "md5": "a0cc0e6df7bfb05257da1cfc88b13c50",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_sequence_counts_plot.txt",
+                    "basename": "fastqc_sequence_counts_plot.txt",
+                    "md5": "c6e4e1588e6765fe8df27812a1322fbd",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_sequence_duplication_levels_plot.txt",
+                    "basename": "fastqc_sequence_duplication_levels_plot.txt",
+                    "md5": "3cde2db4033f6c64648976d1174db925",
+                    "stub": false
+                  },
+                  {
+                    "path": "fastqc_sequence_length_distribution_plot.txt",
+                    "basename": "fastqc_sequence_length_distribution_plot.txt",
+                    "md5": "e82b9b14a7e24c0c5f27af97cebb6870",
+                    "stub": false
+                  },
+                  {
+                    "path": "multiqc_citations.txt",
+                    "basename": "multiqc_citations.txt",
+                    "md5": "4c806e63a283ec1b7e78cdae3a923d4f",
+                    "stub": false
+                  },
+                  {
+                    "path": "multiqc_fastqc.txt",
+                    "basename": "multiqc_fastqc.txt",
+                    "md5": "1a41c2158adc9947bff9232962f70110",
+                    "stub": false
+                  },
+                  {
+                    "path": "multiqc_general_stats.txt",
+                    "basename": "multiqc_general_stats.txt",
+                    "md5": "0b54e4e764665bd57fe0f95216744a78",
+                    "stub": false
+                  }
+                ],
+                "values": []
+              }
+            ]
+          }
+        ]
       },
       "prose_assertions": []
     }
   ],
+  "test_selection": {
+    "status": "selected",
+    "selected_candidate_id": "tests/default.nf.test::-profile test",
+    "rationale": "one primary case is in the canonical default.nf.test or main.nf.test file"
+  },
   "warnings": [
-    "MULTIQC.out.versions is intentionally NOT emitted to the 'versions' channel topic (the module would deadlock since multiqc consumes that topic). Topic field correctly null."
-  ],
-  "reference_assets": [],
-  "reference_rebuilds": []
+    "workflow graph extraction is intentionally partial in resolver v1",
+    "selected Nextflow entrypoint: main.nf"
+  ]
 }
