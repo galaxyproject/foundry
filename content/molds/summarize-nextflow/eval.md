@@ -103,6 +103,15 @@ whatever a scenario produces. Properties are tagged by bucket:
   carries `path`, `profiles[]`, and a `snapshot` block whenever the file
   contains `assert snapshot(...).match()`.
 
+## Property: test selection never hides ambiguity
+
+- bucket: fidelity
+- check: deterministic
+- assertion: absent an explicit caller choice, the selected whole-pipeline test
+  follows [[nextflow-test-case-selection]]; when several science branches remain
+  incomparable, the output reports the unresolved selection instead of choosing
+  by filename order or assuming a conventional profile name proves coverage.
+
 ## Property: test-fixture localization round-trips with stable hashes
 
 - bucket: fidelity

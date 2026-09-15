@@ -114,6 +114,31 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
   `profiles[]`, and a `snapshot` block when the file contains
   `assert snapshot(...).match()`.
 
+## Case: canonical whole-pipeline nf-test selection
+
+- fixture: a pinned nf-core pipeline containing one eligible pipeline test in
+  `tests/default.nf.test` or `tests/main.nf.test` plus other named cases.
+- expect: absent an explicit caller choice, the canonical case is selected and
+  its effective profile chain includes nf-test configuration, suite/test-level
+  profile directives, and any CLI override using nf-test replacement/extension
+  semantics.
+
+## Case: non-canonical pipeline tests remain ambiguous
+
+- fixture: `workflow-fixtures/pipelines/nf-core__references`, whose pipeline
+  tests have neither `default.nf.test` nor `main.nf.test` in the issue #67 pin.
+- expect: the result reports that a scope choice is needed and preserves the
+  candidates; it does not select the first filename or infer `test_full` from a
+  config file that is not a resolved profile.
+
+## Case: ad-hoc no-profile fallback is checked for runnability
+
+- fixture: an ad-hoc DSL2 pipeline with no whole-pipeline nf-test and no
+  resolved `profiles[]` entry whose `kinds` contains `test`.
+- expect: pipeline defaults form the fallback candidate; it is selected only
+  when required launch inputs resolve, otherwise selection remains explicit and
+  unresolved.
+
 ## Case: test-fixture localization round-trip
 
 - fixture: any pipeline run with `--fetch-test-data --test-data-dir=<tmp>`.

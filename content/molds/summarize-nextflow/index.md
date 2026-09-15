@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-04-30
 revised: 2026-09-15
-revision: 16
+revision: 17
 output_artifacts:
   - id: summary-nextflow
     kind: json
@@ -77,6 +77,14 @@ references:
     purpose: "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions."
     trigger: "When filling test_fixtures or nf_tests sections of the summary."
     verification: "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction."
+  - kind: research
+    ref: "[[nextflow-test-case-selection]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Choose the first whole-pipeline test candidate without equating a profile name with runnability or scientific coverage."
+    trigger: "When no explicit profile was supplied, multiple pipeline-level nf-tests exist, or the apparent candidate is full-scale, minimal, tiny, or stub-only."
 related_notes:
   - "[[summary-nextflow]]"
 summary: "Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds."
@@ -96,7 +104,7 @@ The Mold expects:
 
 - A **path or git URL** to the NF pipeline. Local clone is preferred; a git URL triggers a shallow clone the cast skill manages.
 - Optional **pin**: tag, branch, or commit SHA. Mirrors `SketchSource` semantics from gxy-sketches.
-- Optional **profile hint** (`test`, `test_full`, …) selecting which `conf/<profile>.config` to read for fixtures. Defaults to `test`.
+- Optional explicit **profile hint** (`test`, `test_full`, …) selecting which resolved configuration to read for fixtures. When omitted, apply [[nextflow-test-case-selection]]; the current CLI's silent `test` default is implementation debt, not the selection policy.
 - Optional **test-data directory**. When provided with fixture fetching, remote samplesheets and referenced files are downloaded under that directory and their local paths are recorded in `test_fixtures.inputs[].path`.
 
 Whole-pipeline only. The Mold does **not** accept "summarize this single subworkflow" subset hints; subset summarization is an open question — see Non-goals.
@@ -349,6 +357,8 @@ Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVe
 
 **Two artifacts come out of this step:** `test_fixtures` (data shape of the selected profile's input) and `nf_tests[]` (every `tests/*.nf.test` file).
 
+Before populating the singular `test_fixtures`, apply [[nextflow-test-case-selection]]. An explicit caller test-case selection wins; a CLI profile override changes that case's effective profiles but does not identify the case. Otherwise prefer a uniquely canonical pipeline-level nf-test case, then an eligible `profiles[]` entry whose `kinds` contains `test`, then a verified-runnable no-profile launch. Prefer the conventional name `test` only after its body-derived classification and coverage have been checked. Full-scale, minimal, tiny, and stub-only names or options are classification evidence rather than absolute exclusions. When multiple science branches remain incomparable, do not silently select one; report that the current summary schema cannot yet represent the unresolved candidate set.
+
 **`test_fixtures`** — read `conf/<profile>.config` (default `conf/test.config`) for `params.input` (samplesheet URL) and any other URL-shaped params. For nf-core pipelines, follow the samplesheet URL into the `nf-core/test-datasets` repo if a single fetch is enough to enumerate the file paths it references; otherwise emit the samplesheet URL alone as the input. The samplesheet URL may be a runtime concatenation (`params.pipelines_testdata_base_path + 'foo.csv'`); resolve at config-load semantics and record the resolved URL.
 
 When fixture fetching is enabled, hash each fetched remote file with SHA-1. When a test-data directory is provided, write the samplesheet and every referenced remote file under that directory using a deterministic URL-derived path and record that local filesystem path in `path` while preserving the original `url`.
@@ -393,6 +403,7 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 - [[component-nextflow-pipeline-anatomy]] — consult on ad-hoc DSL2 layouts that do not match nf-core conventions, or on workflow-block patterns the multi-workflow selection rule does not resolve.
 - [[component-nextflow-containers-and-envs]] — consult on container/conda directives outside the resolver patterns above, including mulled-v2, custom registries, env modules, Wave, and multi-dependency `environment.yml` files.
 - [[component-nextflow-testing]] — consult on test fixture layouts outside `conf/test.config` + nf-test, or on snapshot/assertion patterns the structured fallback does not capture well.
+- [[nextflow-test-case-selection]] — consult before committing the singular `test_fixtures` field when the caller did not explicitly select a profile or test case.
 
 ## Non-goals
 

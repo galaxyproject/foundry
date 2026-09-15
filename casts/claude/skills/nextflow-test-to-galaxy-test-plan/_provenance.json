@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-test-to-galaxy-test-plan",
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
-    "revision": 5,
-    "content_hash": "4507e5ff7ffaa9751cf80e33c28fec403766dc95197c0813821362711f603732",
-    "commit": "ac92d2713fb01b07049027e584b8610e07c88d82"
+    "revision": 6,
+    "content_hash": "bee6cbcf0bfaabec982333ecda2d85b1c497a195502e16e4c633200aef6d0af4",
+    "commit": "aa7fdd382344977821b3cabd6d0f5e2649024c9c"
   },
-  "cast_at": "2026-09-16T14:18:37.392Z",
+  "cast_at": "2026-09-15T19:15:01.700Z",
   "refs": [
     {
       "kind": "research",
@@ -22,8 +22,8 @@
       "purpose": "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them.",
       "trigger": "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan.",
       "verification": "Translate nf-core/bacass nf-test snapshots into a Galaxy test plan and confirm this note improves profile/snapshot extraction.",
-      "src_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
-      "dst_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
+      "src_hash": "4ec1df0930a7769d0e1c6776a027700c69c7478d80bad2c0ba10ee3bbcc95cdd",
+      "dst_hash": "4ec1df0930a7769d0e1c6776a027700c69c7478d80bad2c0ba10ee3bbcc95cdd",
       "source": "deterministic"
     },
     {
@@ -85,6 +85,21 @@
       "trigger": "When converting nf-test snapshot fixtures, .snap sidecars, ignore files, ignore globs, or pipeline-level stable path/name captures.",
       "src_hash": "6d1009543d1bf433706ce0da23a6ef1bf352721cb65b390e2c20142d4a0f0e5c",
       "dst_hash": "6d1009543d1bf433706ce0da23a6ef1bf352721cb65b390e2c20142d4a0f0e5c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-test-case-selection]]",
+      "src": "content/research/nextflow-test-case-selection/index.md",
+      "dst": "references/notes/nextflow-test-case-selection.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve the upstream candidate-selection rationale and distinguish primary coverage from bootstrap-only or reference-scale cases.",
+      "trigger": "When the selected case is minimal, tiny, full-scale, stub-only, or accompanied by deferred whole-pipeline candidates.",
+      "src_hash": "f1ff50ef3fc594d6b0422e784f850f06b8851a33bdde3a71d4b64169a0fc19cf",
+      "dst_hash": "f1ff50ef3fc594d6b0422e784f850f06b8851a33bdde3a71d4b64169a0fc19cf",
       "source": "deterministic"
     },
     {

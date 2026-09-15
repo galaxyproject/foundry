@@ -35,6 +35,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/notes/iwc-shortcuts-anti-patterns.md`: Research note copied verbatim into the bundle. Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests. Use when: deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.
 - `references/notes/iwc-test-data-conventions.md`: Research note copied verbatim into the bundle. Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes. Use when: writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS.
 - `references/notes/nextflow-snapshot-to-galaxy-assertions.md`: Research note copied verbatim into the bundle. Translate nf-test snapshot captures, helper-pruned file lists, and snapshot checksums into Galaxy workflow-test assertion intent. Use when: converting nf-test snapshot fixtures, .snap sidecars, ignore files, ignore globs, or pipeline-level stable path/name captures.
+- `references/notes/nextflow-test-case-selection.md`: Research note copied verbatim into the bundle. Preserve the upstream candidate-selection rationale and distinguish primary coverage from bootstrap-only or reference-scale cases. Use when: the selected case is minimal, tiny, full-scale, stub-only, or accompanied by deferred whole-pipeline candidates.
 - `references/notes/planemo-asserts-idioms.md`: Research note copied verbatim into the bundle. Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs. Use when: turning Nextflow expected outputs or snapshots into Galaxy test-plan assertions.
 - `references/schemas/tests-format.schema.json`: Schema file copied verbatim into the bundle. Use the Galaxy workflow tests schema as the assertion vocabulary when translating Nextflow test evidence into a Galaxy test plan. Use when: mapping expected outputs, tolerances, snapshots, or fixture assertions into Galaxy workflow-test assertion intent.
 
@@ -45,6 +46,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Procedure
 
 Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a reviewable YAML handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so implement-galaxy-workflow-test can author the final Galaxy test artifact with the right labels and assertions. Because this plan is translated from real nf-test evidence, set `source.derived_from: test-evidence` and prefer `evidence: test-evidence` on the assertions it carries.
+
+Consume the candidate selected by summarize-nextflow; do not re-rank profiles here. Use nextflow-test-case-selection to preserve whether that case is primary coverage, a topology bootstrap, or reference-scale evidence, and to keep deferred science branches visible rather than presenting one translated test as exhaustive.
 
 ## Feedback Mode
 
