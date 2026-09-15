@@ -434,6 +434,7 @@ describe("runPiSkill", () => {
             repo_digests: ["example/foundry-pi@sha256:resolved"],
             pi_version: "0.84.4",
             foundry_cli_version: "0.1.0",
+            planemo_version: "0.75.47",
           }),
         },
       );

@@ -20,6 +20,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests. | draft | 2026-09-15 | 5 |
 | [[summarize-nextflow]] | Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds. | reviewed | 2026-09-15 | 16 |
 | [[review-galaxy-workflow]] | Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review. | draft | 2026-09-12 | 1 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-09-12 | 7 |
@@ -62,7 +63,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[summarize-paper]] | Extract methods, tools, sample data, and references from a paper. | draft | 2026-07-24 | 2 |
 | [[validate-cwl]] | Run cwltool --validate / schema lint, classify failures, recommend fixes. | draft | 2026-07-24 | 3 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-07-17 | 1 |
-| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module dir into a Galaxy tool wrapper (tool.xml + macros.xml + _provenance.yml + remote-URL <test> blocks). | draft | 2026-06-19 | 4 |
 | [[summarize-cwl]] | Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation. | draft | 2026-05-10 | 2 |
 | [[freeform-summary-to-cwl-design]] | Translate a free-form source summary into a CWL workflow design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-cwl-data-flow]] | Translate a Nextflow summary into a CWL data-flow design brief. | draft | 2026-05-05 | 1 |

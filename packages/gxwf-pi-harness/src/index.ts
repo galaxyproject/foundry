@@ -15,11 +15,13 @@ export {
 export {
   buildDockerRunArgs,
   CONTAINER_FOUNDRY_VERSION_LABEL,
+  CONTAINER_PLANEMO_VERSION_LABEL,
   CONTAINER_PI_VERSION_LABEL,
   CONTAINER_RPC_VERSION,
   CONTAINER_RPC_VERSION_LABEL,
   DEFAULT_CONTAINER_IMAGE,
   FOUNDRY_CLI_VERSION,
+  PLANEMO_VERSION,
   inspectContainerImage,
   type ContainerImageResolution,
   type ContainerLaunchConfig,

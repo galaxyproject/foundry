@@ -30,6 +30,18 @@ test.skipIf(!enabled)("the Docker worker cannot see checkout-only resources", ()
   mkdirSync(output);
   writeFileSync(path.join(skill, "SKILL.md"), "---\nname: example-skill\n---\n");
   writeFileSync(path.join(inputs, "input.txt"), "declared\n");
+  writeFileSync(
+    path.join(inputs, "minimal-tool.xml"),
+    [
+      '<tool id="minimal" name="Minimal" version="1.0.0">',
+      '  <command detect_errors="exit_code"><![CDATA[echo hello > "$output"]]></command>',
+      "  <inputs />",
+      '  <outputs><data name="output" format="txt" /></outputs>',
+      "  <help><![CDATA[Test fixture.]]></help>",
+      "</tool>",
+      "",
+    ].join("\n"),
+  );
   cpSync(skill, stagedSkill, { recursive: true, dereference: true });
 
   const dockerBin = process.env.FOUNDRY_DOCKER_BIN ?? "docker";
@@ -48,6 +60,9 @@ test.skipIf(!enabled)("the Docker worker cannot see checkout-only resources", ()
     "test ! -e /content/molds",
     "test ! -e /_emulated-runs",
     "foundry --help >/dev/null",
+    "python3 --version >/dev/null",
+    'test "$(planemo --version)" = "planemo, version 0.75.47"',
+    "planemo lint --fail_level error /inputs/minimal-tool.xml >/dev/null",
     "! touch /skill/forbidden",
     "! touch /inputs/forbidden",
     "printf isolated > /workspace/probe.txt",
