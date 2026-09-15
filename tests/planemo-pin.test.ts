@@ -28,6 +28,9 @@ const COPIED = [
   ".github/workflows/verification-workflows.yml",
   "content/cli/planemo",
   "content/schemas/planemo-test-report.md",
+  "package.json",
+  "packages/gxwf-pi-harness/Dockerfile",
+  "packages/gxwf-pi-harness/src/container.ts",
   "packages/planemo-cli-meta/src/cli-meta.provenance.json",
   "packages/planemo-test-report-schema/src/test-report.provenance.json",
 ];
@@ -108,6 +111,21 @@ describe("findPlanemoPinDrift", () => {
     const dir = fixture();
     const rel = ".github/workflows/verification-workflows.yml";
     edit(dir, rel, `planemo==${readPinnedPlanemoVersion(dir)}`, "planemo==0.75.41");
+
+    const drift = findPlanemoPinDrift(dir);
+    expect(drift.map((d) => d.file)).toEqual([rel]);
+    expect(drift[0]?.found).toBe("0.75.41");
+  });
+
+  it("catches a stale Planemo version in the worker image", () => {
+    const dir = fixture();
+    const rel = "packages/gxwf-pi-harness/Dockerfile";
+    edit(
+      dir,
+      rel,
+      `ARG PLANEMO_VERSION=${readPinnedPlanemoVersion(dir)}`,
+      "ARG PLANEMO_VERSION=0.75.41",
+    );
 
     const drift = findPlanemoPinDrift(dir);
     expect(drift.map((d) => d.file)).toEqual([rel]);

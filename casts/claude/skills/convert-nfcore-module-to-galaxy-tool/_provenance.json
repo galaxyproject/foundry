@@ -4,11 +4,11 @@
   "mold": {
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
-    "revision": 4,
-    "content_hash": "0f8a5fb3ffc3434b6daec33aa7317e217de81b2c2655da5325154e7ab209e117",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "revision": 5,
+    "content_hash": "175640a47b7b7dd1228ad23ea541ab55718a2ddaa6b987d303cadd8b89c8685f",
+    "commit": "091c7df1acf479b0f5f5543c5653cdfeb781e933"
   },
-  "cast_at": "2026-09-13T20:58:26.590Z",
+  "cast_at": "2026-09-15T18:34:08.159Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -84,8 +84,8 @@
       "purpose": "Resolve the container directive (mulled, biocontainer, Wave) and environment.yml into a Galaxy <requirements> block with matching bioconda pins.",
       "trigger": "When emitting <requirements> and the module's container directive is non-trivial (ternary or mulled).",
       "verification": "Cast against a mulled-container module (multiqc); confirm <requirements> declares all packages from environment.yml.",
-      "src_hash": "a720bc706423ea601b127fb9e2bcf7e09c439ab59d4ecbb8e3e71b6a827288e1",
-      "dst_hash": "a720bc706423ea601b127fb9e2bcf7e09c439ab59d4ecbb8e3e71b6a827288e1",
+      "src_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
+      "dst_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
       "source": "deterministic"
     },
     {
