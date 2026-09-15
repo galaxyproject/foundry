@@ -38,7 +38,8 @@ function metadata(): RoadmapMetadata {
   };
 }
 
-const link = (number: number) => `[Issue ${number}](https://github.com/${REPO}/issues/${number})`;
+const link = (number: number) =>
+  `[#${number} — Issue ${number}](https://github.com/${REPO}/issues/${number})`;
 
 const VALID = `---
 type: meta
@@ -63,10 +64,6 @@ This is one descriptive paragraph for the first work area.
 ### ${link(20)}
 
 This is one descriptive paragraph for the second work area.
-
-**Substeps**
-
-_No tracked substeps._
 `;
 
 describe("validateRoadmap", () => {
@@ -97,6 +94,15 @@ describe("validateRoadmap", () => {
     ).toBe(true);
   });
 
+  it("requires the issue number in link text", () => {
+    const markdown = VALID.replaceAll(`#11 — Issue 11`, "Issue 11");
+    expect(
+      validateRoadmap(markdown, metadata()).some((error) =>
+        error.includes("expected '#11 — Issue 11'"),
+      ),
+    ).toBe(true);
+  });
+
   it("requires exactly one paragraph per main", () => {
     const markdown = VALID.replace(
       "This is one descriptive paragraph for the first work area.",
@@ -120,14 +126,26 @@ describe("validateRoadmap", () => {
 
   it("checks native parent placement", () => {
     const markdown = VALID.replace(`- [ ] ${link(11)}\n`, "").replace(
-      "_No tracked substeps._",
-      `- [ ] ${link(11)}`,
+      "This is one descriptive paragraph for the second work area.",
+      `This is one descriptive paragraph for the second work area.\n\n- [ ] ${link(11)}`,
     );
     const errors = validateRoadmap(markdown, metadata());
     expect(errors.some((error) => error.includes("not a native child of main #20"))).toBe(true);
     expect(errors.some((error) => error.includes("main #10 is missing native substep #11"))).toBe(
       true,
     );
+  });
+
+  it("omits empty substep sections", () => {
+    const markdown = VALID.replace(
+      "This is one descriptive paragraph for the second work area.",
+      "This is one descriptive paragraph for the second work area.\n\n**Substeps**\n\n_No tracked substeps._",
+    );
+    expect(
+      validateRoadmap(markdown, metadata()).some((error) =>
+        error.includes("must omit the Substeps section"),
+      ),
+    ).toBe(true);
   });
 
   it("rejects labeled substeps without a native main parent", () => {

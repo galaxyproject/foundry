@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-09-14
-revision: 8
+revised: 2026-09-15
+revision: 9
 summary: "How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current."
 ---
 
@@ -49,7 +49,7 @@ Errors block. Warnings identify advisory quality concerns. Casting refuses to pr
 
 ### Roadmap validation
 
-`npm run validate:roadmap` checks [[roadmap]] against live `galaxyproject/foundry` issue metadata. GitHub labels select the main, substep, and excluded issue sets; native sub-issue relationships define hierarchy; issue state drives substep checkboxes. The page retains authored ordering and prose, while the validator requires every main in both its topline and detailed regions, every substep under its native parent, exact issue titles, matching region order, and no `roadmap/off` links. The command reads public REST endpoints and uses `GH_TOKEN` or `GITHUB_TOKEN` when available; CI grants only `contents: read` and `issues: read`.
+`npm run validate:roadmap` checks [[roadmap]] against live `galaxyproject/foundry` issue metadata. GitHub labels select the main, substep, and excluded issue sets; native sub-issue relationships define hierarchy; issue state drives substep checkboxes. The page retains authored ordering and prose, while the validator requires every main in both its topline and detailed regions, every substep under its native parent, issue-number-prefixed exact titles, matching region order, no empty substep sections, and no `roadmap/off` links. The command reads public REST endpoints and uses `GH_TOKEN` or `GITHUB_TOKEN` when available; CI grants only `contents: read` and `issues: read`.
 
 ## Generated navigation and manifests
 
