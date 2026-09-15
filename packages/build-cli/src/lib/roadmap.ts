@@ -313,6 +313,22 @@ function validateWorkAreaBody(
   const markers = lines
     .map((line, index) => (line.trim() === "**Substeps**" ? index : -1))
     .filter((index) => index >= 0);
+
+  if (children.length === 0) {
+    validateDescription(lines, lineOffset, main, errors);
+    if (markers.length > 0) {
+      errors.push(
+        `roadmap:${lineOffset}: main #${main.number} must omit the Substeps section when it has no native substeps`,
+      );
+    }
+    for (const link of extractIssueLinks(lines, repo, lineOffset)) {
+      errors.push(
+        `roadmap:${link.line}: substep #${link.number} is not a native child of main #${main.number}`,
+      );
+    }
+    return;
+  }
+
   if (markers.length !== 1) {
     errors.push(
       `roadmap:${lineOffset}: main #${main.number} must contain exactly one '**Substeps**' marker`,
@@ -320,33 +336,12 @@ function validateWorkAreaBody(
     return;
   }
   const marker = markers[0] as number;
-  const description = lines.slice(0, marker).join("\n").trim();
-  const paragraphs = description.split(/\n\s*\n/).filter((paragraph) => paragraph.trim());
-  if (paragraphs.length !== 1) {
-    errors.push(
-      `roadmap:${lineOffset}: main #${main.number} needs exactly one descriptive paragraph`,
-    );
-  }
+  validateDescription(lines.slice(0, marker), lineOffset, main, errors);
 
   const childLines = lines
     .slice(marker + 1)
     .map((line, index) => ({ line, number: lineOffset + marker + index + 2 }))
     .filter(({ line }) => line.trim());
-  if (children.length === 0) {
-    if (childLines.length !== 1 || childLines[0]?.line.trim() !== "_No tracked substeps._") {
-      for (const entry of childLines) {
-        for (const link of extractIssueLinks([entry.line], repo, entry.number - 1)) {
-          errors.push(
-            `roadmap:${entry.number}: substep #${link.number} is not a native child of main #${main.number}`,
-          );
-        }
-      }
-      errors.push(
-        `roadmap:${lineOffset + marker + 1}: main #${main.number} must say '_No tracked substeps._'`,
-      );
-    }
-    return;
-  }
 
   const expected = new Map(children.map((child) => [child.number, child]));
   const seen = new Set<number>();
@@ -394,6 +389,21 @@ function validateWorkAreaBody(
   }
 }
 
+function validateDescription(
+  lines: string[],
+  lineOffset: number,
+  main: RoadmapIssue,
+  errors: string[],
+): void {
+  const description = lines.join("\n").trim();
+  const paragraphs = description.split(/\n\s*\n/).filter((paragraph) => paragraph.trim());
+  if (paragraphs.length !== 1) {
+    errors.push(
+      `roadmap:${lineOffset}: main #${main.number} needs exactly one descriptive paragraph`,
+    );
+  }
+}
+
 function metadataChildren(model: RoadmapModel, mainNumber: number): RoadmapIssue[] {
   return [...model.parentBySubstep]
     .filter(([, parent]) => parent === mainNumber)
@@ -402,9 +412,10 @@ function metadataChildren(model: RoadmapModel, mainNumber: number): RoadmapIssue
 }
 
 function validateLinkTitle(link: IssueLink, issue: RoadmapIssue, errors: string[]): void {
-  if (normalizeTitle(link.title) !== normalizeTitle(issue.title)) {
+  const expected = `#${issue.number} — ${issue.title.trim()}`;
+  if (normalizeTitle(link.title) !== normalizeTitle(expected)) {
     errors.push(
-      `roadmap:${link.line}: link text for #${issue.number} is '${link.title}', expected '${issue.title.trim()}'`,
+      `roadmap:${link.line}: link text for #${issue.number} is '${link.title}', expected '${expected}'`,
     );
   }
 }
