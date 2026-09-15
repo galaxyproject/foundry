@@ -1,4 +1,4 @@
-- doc: "One pattern, five filters: keep_header on and off, the 1.0.1 Grep1 pin, and tp_grep_tool with and without the corpus-default -i"
+- doc: "One pattern, five filters: keep_header on and off, an invert value from the other Grep1 version, and tp_grep_tool with and without the corpus-default -i"
   job:
     rows:
       class: File
@@ -9,7 +9,7 @@
       file: test-data/expected_with_header.tabular
     kept_without_header:
       file: test-data/expected_rows_only.tabular
-    kept_legacy_pin:
+    kept_foreign_invert:
       file: test-data/expected_rows_only.tabular
     kept_case_sensitive:
       file: test-data/expected_rows_only.tabular

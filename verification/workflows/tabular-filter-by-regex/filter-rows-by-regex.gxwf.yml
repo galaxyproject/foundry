@@ -8,8 +8,8 @@ outputs:
     outputSource: grep_keep_header/out_file1
   - id: kept_without_header
     outputSource: grep_drop_header/out_file1
-  - id: kept_legacy_pin
-    outputSource: grep_legacy_pin/out_file1
+  - id: kept_foreign_invert
+    outputSource: grep_foreign_invert/out_file1
   - id: kept_case_sensitive
     outputSource: tp_grep_case_sensitive/output
   - id: kept_corpus_default
@@ -45,10 +45,10 @@ steps:
       pattern: "^[a-z]"
       invert: ""
       keep_header: false
-  - id: grep_legacy_pin
-    label: grep_legacy_pin
+  - id: grep_foreign_invert
+    label: grep_foreign_invert
     tool_id: Grep1
-    tool_version: 1.0.1
+    tool_version: 1.0.4
     in:
       - id: input
         source: rows
@@ -58,7 +58,8 @@ steps:
       input:
         __class__: ConnectedValue
       pattern: "^[a-z]"
-      invert: "false"
+      invert: "true"
+      keep_header: false
   - id: tp_grep_case_sensitive
     label: tp_grep_case_sensitive
     tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3

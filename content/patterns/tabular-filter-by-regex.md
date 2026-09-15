@@ -103,7 +103,8 @@ Anchored by the VGP purge-duplicates IWC exemplar.
 
 - **No header preservation.** Whole-line regex sees the header as a normal row; if your pattern matches data but not the header, you silently drop the header. Strip-then-rebind, switch to `Grep1` with `keep_header: true`, or accept that the output is headerless.
 - **`url_paste` is the pattern field.** The misleading name is a wrapper artifact (text/file dual input). Don't treat it as a URL; don't escape it as one.
-- **`case_sensitive` and `invert` values are the flag literals.** `case_sensitive: true` will not work — set `-i` for insensitive, `""` for sensitive. Same for `invert: -v` vs `""`. On `Grep1` the literals depend on the version pin — see the table below.
+- **`case_sensitive` and `invert` values are the flag literals.** `case_sensitive: true` will not work — set `-i` for insensitive, `""` for sensitive. Same for `invert: -v` vs `""`. On `Grep1` the literals depend on the version — see the table below.
+- **A wrong `invert` value is silently accepted.** An unrecognized select value falls back to the first option rather than erroring, so carrying `invert: "true"` from a `Grep1` 1.0.1 step onto a 1.0.4 step reverses the filter's meaning with a green job. Copy the `invert` spelling that belongs to the version you are on.
 - **The corpus default `case_sensitive: -i` is case-*in*sensitive.** Every surveyed `tp_grep_tool` step sets it. Copying a corpus shape without touching that field turns a case-anchored pattern like `^[a-z]` into one that matches uppercase rows and headers too.
 - **PCRE vs ERE.** `regex_type: -P` is the corpus default and matches `Grep1`'s flavor. ERE / BRE are available but unattested in the survey; switching flavors mid-workflow makes patterns harder to reason about.
 - **No column awareness.** A pattern like `\tPASS\t` is the closest you can get to "column 4 equals PASS" — and it's brittle (depends on tab counts, breaks on the first/last column). Use [[tabular-filter-by-column-value]] for column predicates.
@@ -123,6 +124,8 @@ Two versions ship under the same `Grep1` id and `tool_conf.xml.sample` registers
 `pattern` is the regex on both (text, PCRE only — both wrappers hardcode `grep -P`). `keep_header: true` peels the first line through unchanged and `grep`s the remainder, which makes 1.0.4 the **only** built-in header-preserving regex filter on the row-text path.
 
 The version numbers do not order the files: 1.0.1 carries `profile 24.2` against 1.0.4's `20.05`, so it is the later addition despite the lower number. An unpinned step resolves to 1.0.4.
+
+Sending one version's `invert` value to the other does not fail. The select falls back to its first option, so 1.0.1's `invert: "true"` — its spelling of NOT Matching — becomes Matching on a 1.0.4 step, and the job succeeds with the filter reversed.
 
 When reading older IWC workflows you will encounter `Grep1` regularly; preserve it as-is. For new authoring, prefer `tp_grep_tool` unless `keep_header: true` is genuinely needed.
 
