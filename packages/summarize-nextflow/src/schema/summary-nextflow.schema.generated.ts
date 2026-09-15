@@ -24,8 +24,8 @@ export const summaryNextflowSchema = {
         "workflow",
         "reference_assets",
         "reference_rebuilds",
-        "test_fixtures",
-        "nf_tests"
+        "test_candidates",
+        "test_selection"
       ],
       "properties": {
         "source": {
@@ -86,16 +86,17 @@ export const summaryNextflowSchema = {
           },
           "description": "Compute-if-missing rebuild branches detected in workflow/subworkflow bodies. Each entry binds an asset param to the guard and builder process that recomputes it when absent. Empty when no rebuild idioms are found. Source evidence only — Galaxy in-tool-rebuild decisions live downstream."
         },
-        "test_fixtures": {
-          "$ref": "#/$defs/TestFixtures",
-          "description": "Test-input data shape for the *selected* profile (the cast's `profile` argument, default `test`). For pipelines with multiple test profiles, see `nf_tests[]` for the full enumeration."
-        },
-        "nf_tests": {
+        "test_candidates": {
           "type": "array",
+          "minItems": 1,
           "items": {
-            "$ref": "#/$defs/NfTest"
+            "$ref": "#/$defs/TestCandidate"
           },
-          "description": "All `tests/*.nf.test` files in the pipeline. Each entry captures one test-program — its profile, params overrides, and structured assertions. Empty array when the pipeline has no nf-test fixtures."
+          "description": "The maximally useful statically recoverable whole-pipeline test cases. When pipeline-level nf-test exists, each literal `test(...)` block is a candidate (dynamically generated files retain one explicit aggregate candidate and a warning). Otherwise input-bearing profiles are candidates; otherwise pipeline defaults form the fallback candidate. Every candidate carries its own resolved profiles, parameter delta, inputs, assertions, scale/coverage classification, and selection disposition."
+        },
+        "test_selection": {
+          "$ref": "#/$defs/TestSelection",
+          "description": "The deterministic selection result over `test_candidates[]`. A null selected id is an explicit scope-choice result, never an implicit fallback to the first filename or to a profile named `test`."
         },
         "warnings": {
           "type": "array",
@@ -155,7 +156,7 @@ export const summaryNextflowSchema = {
     },
     "Profile": {
       "title": "Profile",
-      "description": "One entry from a `profiles { }` block, classified by role. A `test` kind supplies profile-level candidate evidence without claiming that the profile is the selected, cheapest, or most representative test case. Pipeline-level `nf_tests[]` entries are the higher-fidelity candidate unit because they preserve per-test parameter overrides.",
+      "description": "One entry from a `profiles { }` block, classified by role. A `test` kind supplies profile-level candidate evidence without claiming that the profile is the selected, cheapest, or most representative test case. Pipeline-level `test_candidates[]` entries derived from nf-test are the higher-fidelity candidate unit because they preserve per-test parameter overrides.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -185,7 +186,7 @@ export const summaryNextflowSchema = {
               "unknown"
             ]
           },
-          "description": "The roles the profile body evidences. An array rather than a scalar because real profiles combine roles — 25 of the 371 corpus profiles select a container engine *and* an executor in one block (`CRG-CNAG/CalliNGS-NF`'s `cluster` sets `process.container`, `singularity.enabled`, and a `process { }` block with `executor = 'crg'`; seven of `biocorecrg/MOP2`'s eight profiles do the same).\n\nValues: `test` supplies input data matching the recognized test conventions — includes a `conf/test*.config`, or assigns `params.input` / `samplesheet` to a non-null value; `test_full` is this kind too, with its config family visible in `includes`. `container` selects a container or package-management engine (`docker.enabled`, `process.conda`, `process.arch`, ...). `executor` selects an executor, cloud backend, or `workDir`. `resources` tunes process directives only (`memory`, `cpus`, `time`, `withLabel:` selectors). `mode` assigns params that change pipeline behavior without supplying input data (`nf-core/rnaseq`'s `prokaryotic`, `nf-core/smrnaseq`'s protocol presets). `dev` is a developer-ergonomics profile (`debug`, `gitpod`). `unknown` means no classifying signal was found.\n\nNot every role is additive. `test`, `container`, `executor`, and `dev` accumulate. `mode` and `resources` are assigned **only when none of those matched**, because their signals are far weaker — nf-core's `docker` profile assigns `params.use_gpu` inside a ternary, and most test profiles set process resource caps, so accumulating them would label most of a corpus `mode`. A consumer that needs the suppressed evidence reads `signals[]`, where `params-assignment` and `process-directives` survive regardless.\n\n`test` is profile-level candidate evidence, not a final selection or a claim about cost or representative coverage. Prefer pipeline-level `nf_tests[]` candidates when present because they preserve per-test parameter overrides; use an input-bearing profile as a fallback when no pipeline-level nf-test case exists. Mode profiles may encode science-scope choices that target translation must surface, unlike execution-only container and executor profiles.\n\n`test` detection keys on the nf-core input conventions (`conf/test*.config`, `params.input`, `params.samplesheet`). All 103 corpus `test` profiles are in the 16 nf-core fixtures and none in the 10 ad-hoc ones — an ad-hoc pipeline naming its inputs `reads` / `genome` yields no `test` profile even where one exists in spirit. Absence of a `test` kind therefore means 'not detected', not 'none declared'."
+          "description": "The roles the profile body evidences. An array rather than a scalar because real profiles combine roles — 25 of the 371 corpus profiles select a container engine *and* an executor in one block (`CRG-CNAG/CalliNGS-NF`'s `cluster` sets `process.container`, `singularity.enabled`, and a `process { }` block with `executor = 'crg'`; seven of `biocorecrg/MOP2`'s eight profiles do the same).\n\nValues: `test` supplies input data matching the recognized test conventions — includes a `conf/test*.config`, or assigns `params.input` / `samplesheet` to a non-null value; `test_full` is this kind too, with its config family visible in `includes`. `container` selects a container or package-management engine (`docker.enabled`, `process.conda`, `process.arch`, ...). `executor` selects an executor, cloud backend, or `workDir`. `resources` tunes process directives only (`memory`, `cpus`, `time`, `withLabel:` selectors). `mode` assigns params that change pipeline behavior without supplying input data (`nf-core/rnaseq`'s `prokaryotic`, `nf-core/smrnaseq`'s protocol presets). `dev` is a developer-ergonomics profile (`debug`, `gitpod`). `unknown` means no classifying signal was found.\n\nNot every role is additive. `test`, `container`, `executor`, and `dev` accumulate. `mode` and `resources` are assigned **only when none of those matched**, because their signals are far weaker — nf-core's `docker` profile assigns `params.use_gpu` inside a ternary, and most test profiles set process resource caps, so accumulating them would label most of a corpus `mode`. A consumer that needs the suppressed evidence reads `signals[]`, where `params-assignment` and `process-directives` survive regardless.\n\n`test` is profile-level candidate evidence, not a final selection or a claim about cost or representative coverage. Prefer nf-test-derived `test_candidates[]` entries when present because they preserve per-test parameter overrides; use an input-bearing profile as a fallback when no pipeline-level nf-test case exists. Mode profiles may encode science-scope choices that target translation must surface, unlike execution-only container and executor profiles.\n\n`test` detection keys on the nf-core input conventions (`conf/test*.config`, `params.input`, `params.samplesheet`). All 103 corpus `test` profiles are in the 16 nf-core fixtures and none in the 10 ad-hoc ones — an ad-hoc pipeline naming its inputs `reads` / `genome` yields no `test` profile even where one exists in spirit. Absence of a `test` kind therefore means 'not detected', not 'none declared'."
         },
         "source_path": {
           "type": "string",
@@ -1203,32 +1204,160 @@ export const summaryNextflowSchema = {
         }
       ]
     },
-    "TestFixtures": {
-      "title": "TestFixtures",
-      "description": "Test fixtures derived from a `conf/<profile>.config` for the cast's selected profile. Pipelines with multiple test profiles (bacass has 10) record only the selected profile here; the full nf-test enumeration lives in `nf_tests[]`.",
+    "TestCandidate": {
+      "title": "TestCandidate",
+      "description": "One whole-pipeline execution candidate. The shape unifies nf-test cases, input-bearing profiles, and the no-profile defaults fallback so inputs and assertions never live in a separate singular record.",
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "profile",
+        "id",
+        "kind",
+        "name",
+        "path",
+        "effective_profiles",
+        "params_delta",
         "inputs",
-        "outputs"
+        "outputs",
+        "execution_mode",
+        "scope",
+        "disposition",
+        "rationale",
+        "assert_workflow_success",
+        "snapshot",
+        "prose_assertions"
       ],
       "properties": {
-        "profile": {
+        "id": {
           "type": "string",
-          "description": "Which `conf/<profile>.config` produced these fixtures (typically `test`)."
+          "description": "Stable candidate identifier: `<path>::<test-name>` for nf-test, `profile:<name>` for a profile, or `pipeline-defaults`. Duplicate names in one file receive a numeric suffix."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "nf-test",
+            "profile",
+            "pipeline-defaults"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable test name, profile name, or `pipeline defaults`."
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative `.nf.test`, profile-declaring config, or selected entrypoint path."
+        },
+        "effective_profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Resolved profile chain after nf-test.config, file/test directives, and an explicit caller override. `+name` directives append; other directives replace."
+        },
+        "params_delta": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Candidate-specific parameter assignments after profile config and per-test overrides, excluding unchanged pipeline defaults."
         },
         "inputs": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/TestDataRef"
-          }
+          },
+          "description": "Input fixtures resolved for this candidate, including fetched samplesheet members when requested."
         },
         "outputs": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/ExpectedOutputRef"
           }
+        },
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "real",
+            "stub",
+            "mixed",
+            "unknown"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "bootstrap-only",
+            "reference-scale",
+            "unknown"
+          ],
+          "description": "Coverage/scale classification used by selection. Names are evidence: full-scale is deferred by default; minimal/tiny/stub is bootstrap-only."
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "selected",
+            "eligible",
+            "deferred"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Why the candidate exists and how its disposition was classified."
+        },
+        "assert_workflow_success": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "nf-test workflow-success assertion, or null for profile/default candidates."
+        },
+        "snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SnapshotFixture"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prose_assertions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TestSelection": {
+      "title": "TestSelection",
+      "description": "Selection outcome over the complete candidate list.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "selected_candidate_id",
+        "rationale"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "selected",
+            "needs-scope-choice"
+          ]
+        },
+        "selected_candidate_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Foreign key into `test_candidates[].id`; null exactly when status is needs-scope-choice."
+        },
+        "rationale": {
+          "type": "string"
         }
       }
     },
@@ -1241,7 +1370,10 @@ export const summaryNextflowSchema = {
         "name",
         "path",
         "profiles",
+        "params_overrides",
+        "execution_mode",
         "assert_workflow_success",
+        "snapshot",
         "prose_assertions"
       ],
       "properties": {
@@ -1264,6 +1396,16 @@ export const summaryNextflowSchema = {
           "type": "object",
           "additionalProperties": true,
           "description": "The `when { params { ... } }` block as a key→value map. Most templates set only `outdir`; pipeline-specific overrides land here."
+        },
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "real",
+            "stub",
+            "mixed",
+            "unknown"
+          ],
+          "description": "Whether the test requests real execution, stub execution, or mixes both."
         },
         "assert_workflow_success": {
           "type": "boolean",

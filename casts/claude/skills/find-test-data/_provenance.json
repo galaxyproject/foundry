@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 4,
-    "content_hash": "109bf96b1180534c6c117fc79eb11c7ff562679c862482e3545991672bd6bfa7",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "revision": 5,
+    "content_hash": "dab7a03bc9d3382c07b335054c5e1d4b63ddc9ba50a8a703a5895573d44318be",
+    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
   },
-  "cast_at": "2026-09-13T20:58:27.373Z",
+  "cast_at": "2026-09-15T23:16:21.017Z",
   "refs": [
     {
       "kind": "research",
@@ -61,7 +61,7 @@
       },
       {
         "id": "summary-nextflow",
-        "description": "Source summary from [[summarize-nextflow]]; mine its test_fixtures / sample-data evidence when running the NEXTFLOW → GALAXY pipeline.",
+        "description": "Source summary from [[summarize-nextflow]]; mine its test candidate set, explicit selection, and sample-data evidence when running the NEXTFLOW → GALAXY pipeline.",
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"

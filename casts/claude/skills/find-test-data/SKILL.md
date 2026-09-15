@@ -14,7 +14,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`. Source summary from summarize-paper / interview-to-freeform-summary; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it).
-- Read artifact `summary-nextflow`. Schema: summary-nextflow. Produced by `summarize-nextflow`. Source summary from summarize-nextflow; mine its test_fixtures / sample-data evidence when running the NEXTFLOW → GALAXY pipeline.
+- Read artifact `summary-nextflow`. Schema: summary-nextflow. Produced by `summarize-nextflow`. Source summary from summarize-nextflow; mine its test candidate set, explicit selection, and sample-data evidence when running the NEXTFLOW → GALAXY pipeline.
 - Read artifact `summary-cwl`. Schema: summary-cwl. Produced by `summarize-cwl`. Source summary from summarize-cwl; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline.
 - Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines.
 - Read artifact `nextflow-galaxy-interface`. Produced by `nextflow-summary-to-galaxy-interface`. Galaxy interface brief from nextflow-summary-to-galaxy-interface pinning input labels, collection shapes, and datatypes for the NEXTFLOW → GALAXY pipeline.

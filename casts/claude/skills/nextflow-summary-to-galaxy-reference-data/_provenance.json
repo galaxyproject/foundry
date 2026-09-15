@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
     "revision": 5,
     "content_hash": "b49bae31e3b8918b45f852b8f50e1101e71837380b97f8e8ec237a5dd2955f7f",
-    "commit": "aa7fdd382344977821b3cabd6d0f5e2649024c9c"
+    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
   },
-  "cast_at": "2026-09-15T19:15:00.690Z",
+  "cast_at": "2026-09-15T23:16:24.569Z",
   "refs": [
     {
       "kind": "research",
@@ -79,8 +79,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read `reference_assets[]` (curated path-typed inputs with `used_by` attribution to consuming subworkflows), `reference_rebuilds[]` (compute-if-missing rebuild rules with builder process and guard), and `params[]` provenance (`source_kind`, including `getGenomeAttribute` for nf-core key-expanded bundles) to determine which reference assets the source pipeline consumes and how it rebuilds them when absent.",
       "license": "MIT",
-      "src_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
-      "dst_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
+      "src_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
+      "dst_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
       "source": "deterministic"
     }
   ],

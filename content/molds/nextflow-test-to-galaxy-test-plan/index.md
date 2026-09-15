@@ -8,11 +8,11 @@ tags:
 status: reviewed
 created: 2026-04-30
 revised: 2026-09-15
-revision: 6
+revision: 7
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 input_artifacts:
   - id: summary-nextflow
-    description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence."
+    description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_candidates, test_selection, and snapshot evidence."
 output_artifacts:
   - id: galaxy-test-plan
     kind: yaml
@@ -50,7 +50,7 @@ references:
     mode: verbatim
     evidence: hypothesis
     purpose: "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them."
-    trigger: "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan."
+    trigger: "When converting test_candidates, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan."
     verification: "Translate nf-core/bacass nf-test snapshots into a Galaxy test plan and confirm this note improves profile/snapshot extraction."
   - kind: research
     ref: "[[nextflow-test-case-selection]]"

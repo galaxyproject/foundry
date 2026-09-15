@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `summary-nextflow`. Schema: summary-nextflow. Produced by `summarize-nextflow`. Structured Nextflow summary from summarize-nextflow; carries test_fixtures, nf_tests, snapshot evidence.
+- Read artifact `summary-nextflow`. Schema: summary-nextflow. Produced by `summarize-nextflow`. Structured Nextflow summary from summarize-nextflow; carries test_candidates, test_selection, and snapshot evidence.
 
 ## Outputs
 
@@ -30,7 +30,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
-- `references/notes/component-nextflow-testing.md`: Research note copied verbatim into the bundle. Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them. Use when: converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan.
+- `references/notes/component-nextflow-testing.md`: Research note copied verbatim into the bundle. Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them. Use when: converting test_candidates, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan.
 - `references/notes/component-nextflow-testing.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-testing.md`; read it where that note directs.
 - `references/notes/iwc-shortcuts-anti-patterns.md`: Research note copied verbatim into the bundle. Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests. Use when: deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.
 - `references/notes/iwc-test-data-conventions.md`: Research note copied verbatim into the bundle. Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes. Use when: writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS.

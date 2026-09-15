@@ -63,6 +63,18 @@ interface SummaryLike {
     tests: { name: string; path: string }[];
   }[];
   workflow: { name: string };
+  test_candidates?: {
+    id: string;
+    kind: string;
+    name: string;
+    effective_profiles: string[];
+    scope: string;
+    disposition: string;
+  }[];
+  test_selection?: {
+    status: string;
+    selected_candidate_id: string | null;
+  };
   warnings: string[];
 }
 
@@ -446,19 +458,21 @@ nextflow_pipeline {
     const summary = await summarize(root);
     const tests = (
       summary as SummaryLike & {
-        nf_tests: {
+        test_candidates: {
           name: string;
-          profiles: string[];
-          params_overrides: Record<string, unknown>;
+          effective_profiles: string[];
+          params_delta: Record<string, unknown>;
         }[];
       }
-    ).nf_tests;
+    ).test_candidates;
 
     expect(tests).toEqual([
       expect.objectContaining({
         name: '-profile "test,test_full"',
-        profiles: ["test", "test_full"],
-        params_overrides: {
+        // The caller's explicit `profile: test` override replaces the file-level
+        // `test_full`; the descriptive test name is never parsed as config.
+        effective_profiles: ["test"],
+        params_delta: {
           input: "samplesheet.csv",
           skip_multiqc: true,
           min_reads: 25,
@@ -468,6 +482,147 @@ nextflow_pipeline {
     ]);
   });
 
+  test("keeps file-level and per-case profile directives scoped correctly", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/profile-precedence' }\nprofiles { base {} first {} second {} }\n",
+    );
+    write(root, "main.nf", "workflow PROFILE_PRECEDENCE { }\n");
+    write(root, "nf-test.config", 'config {\n  profile "base"\n}\n');
+    write(
+      root,
+      "tests/default.nf.test",
+      `profile "+first"
+nextflow_pipeline {
+  test("inherits file profiles") {
+    then { assert workflow.success }
+  }
+  test("replaces within this case only") {
+    profile "second"
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = (await buildSummary(root, {
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike;
+
+    expect(summary.test_candidates?.map((candidate) => candidate.effective_profiles)).toEqual([
+      ["base", "first"],
+      ["second"],
+    ]);
+  });
+
+  test("resolves inline profile params without treating them as pipeline defaults", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/inline-profile' }
+params { input = 'data/default.csv' }
+profiles {
+  compact {
+    params { input = 'data/compact.csv' }
+  }
+}
+`,
+    );
+    write(root, "main.nf", "workflow INLINE_PROFILE { }\n");
+
+    const summary = (await buildSummary(root, {
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike & {
+      test_candidates: {
+        kind: string;
+        name: string;
+        params_delta: Record<string, unknown>;
+        inputs: { path: string | null }[];
+      }[];
+    };
+
+    expect(summary.test_candidates).toEqual([
+      expect.objectContaining({
+        kind: "profile",
+        name: "compact",
+        params_delta: { input: "data/compact.csv" },
+        inputs: [expect.objectContaining({ path: "data/compact.csv" })],
+      }),
+    ]);
+  });
+
+  test("emits one warned aggregate candidate for dynamically generated cases", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/generated-tests' }\n");
+    write(root, "main.nf", "workflow GENERATED_TESTS { }\n");
+    write(
+      root,
+      "tests/default.nf.test",
+      `nextflow_pipeline {
+  ["one", "two"].each { caseName ->
+    test(caseName) {
+      then { assert workflow.success }
+    }
+  }
+}
+`,
+    );
+
+    const summary = (await buildSummary(root, {
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike;
+
+    expect(summary.test_candidates).toEqual([
+      expect.objectContaining({
+        id: "tests/default.nf.test::dynamically-generated",
+        name: "dynamically-generated",
+      }),
+    ]);
+    expect(summary.warnings).toContain(
+      "could not statically enumerate generated nf-test cases in tests/default.nf.test; preserved one file-level candidate",
+    );
+  });
+
+  test("uses a selected pipeline-default candidate when no whole-pipeline test or test profile exists", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'adhoc/defaults' }\nparams { input = 'data/example.csv' }\n",
+    );
+    write(root, "main.nf", "workflow DEFAULTS { }\n");
+
+    const summary = (await buildSummary(root, {
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike & Record<string, unknown>;
+
+    expect(summary.test_candidates).toEqual([
+      expect.objectContaining({
+        id: "pipeline-defaults",
+        kind: "pipeline-defaults",
+        disposition: "selected",
+      }),
+    ]);
+    expect(summary.test_selection).toEqual({
+      status: "selected",
+      selected_candidate_id: "pipeline-defaults",
+      rationale: "pipeline defaults form a statically runnable fallback",
+    });
+    expect(summary).not.toHaveProperty("test_fixtures");
+    expect(summary).not.toHaveProperty("nf_tests");
+  });
+
   test("parses compact nf-test snapshot sidecars", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/compact-snapshots' }\n");
@@ -475,8 +630,10 @@ nextflow_pipeline {
     write(
       root,
       "tests/compact.nf.test",
-      `test("compact snapshot") {
+      `nextflow_pipeline {
+  test("compact snapshot") {
   then { assert snapshot(workflow.out).match() }
+}
 }
 `,
     );
@@ -494,7 +651,7 @@ nextflow_pipeline {
     const summary = await summarize(root);
     const snapshot = (
       summary as SummaryLike & {
-        nf_tests: {
+        test_candidates: {
           snapshot: {
             parsed_content: {
               channels: {
@@ -506,7 +663,7 @@ nextflow_pipeline {
           } | null;
         }[];
       }
-    ).nf_tests[0]!.snapshot;
+    ).test_candidates[0]!.snapshot;
 
     expect(snapshot?.parsed_content).toEqual([
       {

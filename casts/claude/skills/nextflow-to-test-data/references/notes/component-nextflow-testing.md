@@ -6,7 +6,7 @@ component: "Nextflow Testing and Test Fixtures"
 status: draft
 created: 2026-05-01
 revised: 2026-09-15
-revision: 4
+revision: 5
 summary: "nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7."
 companions:
   - "component-nextflow-testing.yml"
@@ -37,7 +37,7 @@ related_notes:
 
 Operational grounding for three Molds:
 
-- [[summarize-nextflow]] §7 — extract `nf_tests[]` and `test_fixtures` from a real nf-core or DSL2 pipeline.
+- [[summarize-nextflow]] §7 — enumerate whole-pipeline `test_candidates[]` and make the default `test_selection` from a real nf-core or DSL2 pipeline.
 - [[nextflow-test-to-galaxy-test-plan]] — translate nf-test fixtures + assertions into Galaxy equivalents.
 - [[nextflow-test-to-cwl-test-plan]] — the same translation, toward CWL.
 
@@ -49,7 +49,7 @@ Companion structured form: `component-nextflow-testing.yml`. Per-pattern entries
 
 ## What `summarize-nextflow` §7 already encodes
 
-The Mold body's §7 lists the structural fields per nf-test file: `name`, `path`, `profiles[]`, `params_overrides`, `assert_workflow_success`, `snapshot` (with `captures`, `helpers`, `ignore_files`, `ignore_globs`, `snap_path`), `prose_assertions[]`. The schema is `summary-nextflow.schema.json`'s `NfTest` and `SnapshotFixture`.
+The Mold body's §7 lists the structural fields per whole-pipeline candidate: `id`, `kind`, `name`, `path`, `effective_profiles[]`, `params_delta`, `inputs[]`, `outputs[]`, `execution_mode`, `scope`, `disposition`, `assert_workflow_success`, `snapshot`, and `prose_assertions[]`. The schema is `summary-nextflow.schema.json`'s `TestCandidate`, `TestSelection`, and `SnapshotFixture`. Module and subworkflow summaries retain their local `NfTest[]` evidence.
 
 This note's contribution: the *interpretation* layer that turns those structured fields into target-shaped tests.
 

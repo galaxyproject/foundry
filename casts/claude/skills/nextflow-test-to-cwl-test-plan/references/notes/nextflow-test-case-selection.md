@@ -6,7 +6,7 @@ tags:
 status: draft
 created: 2026-09-15
 revised: 2026-09-15
-revision: 1
+revision: 2
 summary: "A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage."
 sources:
   - "https://github.com/galaxyproject/foundry/issues/67"
@@ -27,7 +27,7 @@ related_notes:
 
 The first translated test should be small enough to run during workflow construction while still exercising the scientific path the translated workflow claims to implement. Profile names help find candidates, but they do not establish either property.
 
-This note owns **selection**. [[component-nextflow-testing]] owns fixture and assertion interpretation after a case has been selected. [[summarize-nextflow]] owns applying the selection policy because its singular `test_fixtures` field already commits downstream Molds to one candidate. The two Nextflow test-plan Molds consume that decision; they must not silently choose a different case. [[run-workflow-test]] is downstream of translation and sees a Galaxy or CWL test artifact, not a Nextflow profile, so it does not use this note.
+This note owns **selection**. [[component-nextflow-testing]] owns fixture and assertion interpretation after cases have been enumerated. [[summarize-nextflow]] owns applying the selection policy and emits both the candidate set and the decision. The two Nextflow test-plan Molds consume that decision; they must not silently choose a different case. [[run-workflow-test]] is downstream of translation and sees a Galaxy or CWL test artifact, not a Nextflow profile, so it does not use this note.
 
 ## Unit of selection
 
@@ -63,15 +63,9 @@ Profile candidacy comes from the structured `profiles[]` inventory emitted by [[
 
 These rules generalize the corpus result: prefer bounded, repeatable, real-output evidence that crosses the claimed science path. Names are useful priors for cost and intent, never substitutes for checking the resolved params and enabled stages.
 
-## Corpus grounding
+## Summary representation
 
-The issue #67 survey measured 26 pinned pipelines: 16 nf-core and 10 ad hoc. All 16 nf-core pipelines exposed an input-bearing `test` profile, 15 exposed pipeline-level nf-test, and the only ad-hoc profile named `test` was a mode switch rather than a test-data profile. Fourteen of the 15 nf-core pipelines with pipeline nf-tests had `default.nf.test` or `main.nf.test`; `nf-core/references` was the important counterexample. The ad-hoc majority therefore needs the no-profile branch, while the references counterexample requires an explicit ambiguity result rather than another silent filename heuristic.
-
-The same survey found that `test_full` was oriented toward cloud or release-scale runs and usually lacked the resource caps present in `test`, while several `test_minimal` profiles disabled the pipeline's central scientific stages. Those observations justify ranking and coverage checks. They do not justify treating the three names as reserved words with universal meaning.
-
-## Representation needed in the summary
-
-The current [[summary-nextflow]] contract now classifies profile declarations in `profiles[]`, but it retains one singular `test_fixtures` object and an unranked `nf_tests[]` enumeration. It can identify input-bearing profile candidates without a name heuristic; it still cannot say which whole-pipeline test case was selected, why it won, or why alternatives were deferred. A future schema revision should add:
+The [[summary-nextflow]] contract exposes the complete statically recoverable candidate set rather than a singular fixture record plus a second nf-test list:
 
 ```yaml
 test_candidates:
@@ -79,6 +73,8 @@ test_candidates:
     kind: nf-test # nf-test | profile | pipeline-defaults
     effective_profiles: [test]
     params_delta: {}
+    inputs: []
+    outputs: []
     execution_mode: real # real | stub | mixed | unknown
     scope: primary # primary | bootstrap-only | reference-scale | unknown
     disposition: selected # selected | eligible | deferred
@@ -89,9 +85,9 @@ test_selection:
   rationale: "one primary candidate in the canonical test file"
 ```
 
-`test_fixtures` should remain singular and resolve the selected candidate. Alternatives belong in `test_candidates[]`; a target test-plan Mold can translate additional candidates into additional test entries later. On the Galaxy path, intentionally omitted scientific branches can become `kind: dropped` entries in [[open-requirements-ledger]] once the design tier begins carrying that artifact.
+Each `test_candidates[]` entry owns its resolved profiles, parameter delta, inputs, outputs, execution mode, scope, disposition, and assertion evidence. Literal whole-pipeline nf-test cases are the preferred unit. If Groovy generates cases dynamically, static analysis preserves one clearly named file-level aggregate candidate and emits a warning instead of requiring the `nf-test` runtime. When no pipeline nf-test exists, the same array carries the input-bearing profile candidates or the pipeline-defaults fallback. `test_selection` either points to one candidate or records `needs-scope-choice`; there is no parallel singular `test_fixtures` field and no silent `test` default.
 
-Until that schema revision lands, a cast must not imply that the existing default `profile: test` was selected by this policy. It should either receive an explicit profile from its caller or report the unresolved selection limitation in `warnings[]`.
+A target test-plan Mold can translate additional eligible candidates into additional test entries later. On the Galaxy path, intentionally omitted scientific branches can become `kind: dropped` entries in [[open-requirements-ledger]] once the design tier begins carrying that artifact.
 
 ## Evidence boundary
 
