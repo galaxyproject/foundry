@@ -10,6 +10,8 @@ outputs:
   - id: nested_group_count
     outputSource: split_group_count/output
 steps:
+  # rules.rules is not a typo: the param is named rules and its value is a rule
+  # set, which carries its own rules list plus a mapping list
   - id: split_two_rules
     label: split_two_rules
     tool_id: __APPLY_RULES__

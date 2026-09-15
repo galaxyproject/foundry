@@ -3,12 +3,6 @@
 Verifies `[[collection-split-identifier-via-rules]]`: `__APPLY_RULES__` turns a flat `list` whose identifiers
 encode two axes into a `list:list` keyed `sample -> replicate`.
 
-The pattern page carried a *conceptual* Apply Rules block that could not have run. It put `rules:` at the top of
-`tool_state` as a bare list and wrote the mapping as `mapping: {list_identifiers: [1, 2]}`. The serialized
-parameter is a `rules` object holding its own `rules:` list plus a `mapping:` list, and each mapping entry is
-`{type: list_identifiers, columns: [...]}` — the same shape already pinned by
-`[[collection-swap-nesting-with-apply-rules]]`.
-
 Two steps consume the identical input and differ only in how the split is expressed:
 
 - `split_two_rules` is the corpus shape — two `add_column_regex` rules over column 0, one per capture group,
