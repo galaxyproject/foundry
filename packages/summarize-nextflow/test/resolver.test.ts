@@ -5,6 +5,13 @@ import { afterEach, describe, expect, test } from "vitest";
 import { buildSummary } from "../src/index.js";
 
 interface SummaryLike {
+  profiles: {
+    name: string;
+    kinds: string[];
+    source_path: string;
+    includes: string[];
+    signals: string[];
+  }[];
   tools: {
     name: string;
     version: string;
@@ -2112,6 +2119,491 @@ workflow PIPE {
 
     expect(bare?.script_excerpt).toBeNull();
     expect(bare).not.toHaveProperty("script_summary");
+  });
+
+  test("classifies profiles by kind rather than emitting bare names", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/kinds' }
+profiles {
+    docker {
+        docker.enabled          = true
+        docker.runOptions       = params.use_gpu ? '--gpus all' : '-u $(id -u):$(id -g)'
+        conda.enabled           = false
+    }
+    arm64 {
+        params.arm              = true
+        process.arch            = 'arm64'
+    }
+    slurm {
+        process.executor        = 'slurm'
+        process.queue           = 'short'
+    }
+    test      { includeConfig 'conf/test.config'      }
+    test_full { includeConfig 'conf/test_full.config' }
+    mutect    { includeConfig 'conf/test_mutect2.config' }
+    prokaryotic {
+        params {
+            gtf                 = null
+            featurecounts_group_type = null
+        }
+    }
+    debug {
+        cleanup                 = false
+    }
+    stubrun {
+        process {
+            memory = 1.GB
+            cpus   = 1
+        }
+    }
+}
+`,
+    );
+    write(root, "main.nf", "workflow KINDS { }\n");
+    write(root, "conf/test.config", "params { input = 'samplesheet.csv' }\n");
+    write(root, "conf/test_full.config", "params { input = 'full.csv' }\n");
+    write(root, "conf/test_mutect2.config", "params { input = 'mutect.csv' }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.profiles.map((profile) => [profile.name, profile]));
+
+    expect(byName.get("docker")?.kinds).toEqual(["container"]);
+    expect(byName.get("arm64")?.kinds).toEqual(["container"]);
+    expect(byName.get("slurm")?.kinds).toEqual(["executor"]);
+    expect(byName.get("test")?.kinds).toEqual(["test"]);
+    expect(byName.get("test_full")?.kinds).toEqual(["test"]);
+    // A test profile not named test*: only the resolved includeConfig reveals it.
+    expect(byName.get("mutect")?.kinds).toEqual(["test"]);
+    expect(byName.get("prokaryotic")?.kinds).toEqual(["mode"]);
+    expect(byName.get("debug")?.kinds).toEqual(["dev"]);
+    expect(byName.get("stubrun")?.kinds).toEqual(["resources"]);
+  });
+
+  test("records every kind a multi-role profile carries", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'multi/role' }
+profiles {
+    aws {
+        process.memory    = 8.GB
+        process.container = 'quay.io/nextflow/callings-nf:gatk4'
+        process.executor  = 'awsbatch'
+    }
+}
+`,
+    );
+    write(root, "main.nf", "workflow MULTI { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles).toEqual([
+      expect.objectContaining({ name: "aws", kinds: ["container", "executor"] }),
+    ]);
+  });
+
+  test("does not emit nested params/process blocks as profile names", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nested/blocks' }
+profiles {
+    test {
+        params {
+            input = 'samplesheet.csv'
+        }
+        process {
+            withName: FOO { cpus = 1 }
+        }
+    }
+    docker { docker.enabled = true }
+}
+`,
+    );
+    write(root, "main.nf", "workflow NESTED { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles.map((profile) => profile.name)).toEqual(["test", "docker"]);
+  });
+
+  test("finds a profiles block reached through a root includeConfig", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'included/profiles' }
+includeConfig "base.config"
+`,
+    );
+    write(
+      root,
+      "base.config",
+      `profiles {
+    singularity { singularity.enabled = true }
+    local       { process.executor = 'local' }
+}
+`,
+    );
+    write(root, "main.nf", "workflow INCLUDED { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles).toEqual([
+      expect.objectContaining({
+        name: "singularity",
+        kinds: ["container"],
+        source_path: "base.config",
+      }),
+      expect.objectContaining({ name: "local", kinds: ["executor"], source_path: "base.config" }),
+    ]);
+  });
+
+  test("records resolved includeConfig targets per profile", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/includes' }
+profiles {
+    test_full { includeConfig 'conf/test_full.config' }
+}
+`,
+    );
+    write(root, "conf/test_full.config", "params { input = 'full.csv' }\n");
+    write(root, "main.nf", "workflow INCLUDES { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles[0]).toEqual(
+      expect.objectContaining({ name: "test_full", includes: ["conf/test_full.config"] }),
+    );
+  });
+
+  test("accumulates test/container/executor/dev but not mode or resources", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/accumulate' }
+profiles {
+    gitpod {
+        executor.name           = 'local'
+        executor.cpus           = 4
+    }
+    arm64 {
+        params.arm              = true
+        process.arch            = 'arm64'
+    }
+    cluster {
+        process.container       = 'quay.io/example/pipe:1'
+        singularity.enabled     = true
+        process {
+            executor = 'crg'
+            queue    = 'cn-el7'
+        }
+    }
+}
+`,
+    );
+    write(root, "main.nf", "workflow ACCUMULATE { }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.profiles.map((profile) => [profile.name, profile]));
+
+    // dev is additive: gitpod really does select an executor and really is a
+    // dev-environment profile.
+    expect(byName.get("gitpod")?.kinds).toEqual(["executor", "dev"]);
+    // mode is suppressed by a positive container finding, but its evidence
+    // survives in signals[].
+    expect(byName.get("arm64")?.kinds).toEqual(["container"]);
+    expect(byName.get("arm64")?.signals).toContain("params-assignment");
+    // executor keys inside a process { } block still count.
+    expect(byName.get("cluster")?.kinds).toEqual(["container", "executor"]);
+  });
+
+  test("records the evidence behind each classification", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/signals' }
+profiles {
+    test   { includeConfig 'conf/test.config' }
+    docker { docker.enabled = true }
+}
+`,
+    );
+    write(root, "conf/test.config", "params {\n    input = 'samplesheet.csv'\n}\n");
+    write(root, "main.nf", "workflow SIGNALS { }\n");
+
+    const summary = await summarize(root);
+    const byName = new Map(summary.profiles.map((profile) => [profile.name, profile]));
+
+    expect(byName.get("test")?.signals).toEqual([
+      "include:test-config",
+      "sets-input-data",
+      "params-assignment",
+    ]);
+    expect(byName.get("docker")?.signals).toEqual(["container-keys"]);
+  });
+
+  test("reports unknown with no signals when nothing classifies", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'opaque/pipeline' }
+profiles {
+    mystery { cleanup = false }
+}
+`,
+    );
+    write(root, "main.nf", "workflow OPAQUE { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles).toEqual([
+      expect.objectContaining({ name: "mystery", kinds: ["unknown"], signals: [] }),
+    ]);
+  });
+
+  test("finds a profiles block in a launch-time -c config and prefers the root", async () => {
+    const root = tempPipelineRoot();
+    // No profiles block in nextflow.config at all — MOP2's shape.
+    write(root, "nextflow.config", "manifest { name = 'adhoc/global-config' }\n");
+    write(
+      root,
+      "nextflow.global.config",
+      `profiles {
+    slurm    { process.executor = 'slurm' }
+    standard { process.container = 'quay.io/example/pipe:1' }
+}
+`,
+    );
+    write(root, "main.nf", "workflow GLOBAL { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles).toEqual([
+      expect.objectContaining({
+        name: "slurm",
+        kinds: ["executor"],
+        source_path: "nextflow.global.config",
+      }),
+      expect.objectContaining({
+        name: "standard",
+        kinds: ["container"],
+        source_path: "nextflow.global.config",
+      }),
+    ]);
+  });
+
+  test("lets the root config win when two files declare the same profile", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/precedence' }
+profiles {
+    docker { docker.enabled = true }
+}
+`,
+    );
+    write(root, "alternate.config", "profiles {\n    docker { process.executor = 'slurm' }\n}\n");
+    write(root, "main.nf", "workflow PRECEDENCE { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles).toEqual([
+      expect.objectContaining({
+        name: "docker",
+        kinds: ["container"],
+        source_path: "nextflow.config",
+      }),
+    ]);
+  });
+
+  test("ignores profiles declared in test fixture and CI configs", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/fixtures' }
+profiles {
+    test { includeConfig 'conf/test.config' }
+}
+`,
+    );
+    write(root, "conf/test.config", "params {\n    input = 'samplesheet.csv'\n}\n");
+    write(root, "tests/fixtures/bogus.config", "profiles {\n    NOT_A_PROFILE { }\n}\n");
+    write(root, ".github/ci.config", "profiles {\n    ALSO_NOT { }\n}\n");
+    write(root, "main.nf", "workflow FIXTURES { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles.map((profile) => profile.name)).toEqual(["test"]);
+  });
+
+  test("keeps a quoted profile name and does not leak its nested scopes", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/quoted' }
+profiles {
+    'my-profile' {
+        docker { enabled = true }
+    }
+    test { includeConfig 'conf/test.config' }
+}
+`,
+    );
+    write(root, "conf/test.config", "params {\n    input = 'samplesheet.csv'\n}\n");
+    write(root, "main.nf", "workflow QUOTED { }\n");
+
+    const summary = await summarize(root);
+
+    // `docker` is a scope inside 'my-profile', not a sibling profile.
+    expect(summary.profiles.map((profile) => profile.name)).toEqual(["my-profile", "test"]);
+    expect(summary.profiles[0]?.kinds).toEqual(["container"]);
+  });
+
+  test("ignores structural braces inside quoted profile values", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/quoted-braces' }
+profiles {
+    templated { params.template = 'literal } brace' }
+    docker    { docker.enabled = true }
+}
+`,
+    );
+    write(root, "main.nf", "workflow QUOTED_BRACES { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles.map((profile) => profile.name)).toEqual(["templated", "docker"]);
+    expect(summary.profiles[0]?.kinds).toEqual(["mode"]);
+    expect(summary.profiles[1]?.kinds).toEqual(["container"]);
+  });
+
+  test("classifies a one-line params block reached through includeConfig", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/oneline' }
+profiles {
+    minimal { includeConfig 'conf/minimal.config' }
+}
+`,
+    );
+    // One line, and the file name does not match test*.config — only the
+    // assignment itself can reveal this is a test profile.
+    write(root, "conf/minimal.config", "params { input = 'samplesheet.csv' }\n");
+    write(root, "main.nf", "workflow ONELINE { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles).toEqual([
+      expect.objectContaining({ name: "minimal", kinds: ["test"] }),
+    ]);
+  });
+
+  test("does not read an unassigned input default as test data", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/nulldefault' }
+profiles {
+    docker {
+        docker.enabled = true
+        includeConfig 'conf/base.config'
+    }
+}
+`,
+    );
+    write(root, "conf/base.config", "params {\n    input  = null\n    outdir = null\n}\n");
+    write(root, "main.nf", "workflow NULLDEFAULT { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles[0]?.kinds).toEqual(["container"]);
+  });
+
+  test("follows a multi-level includeConfig chain", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/chain' }
+profiles {
+    deep { includeConfig 'conf/one.config' }
+}
+`,
+    );
+    write(root, "conf/one.config", "includeConfig 'two.config'\n");
+    write(root, "conf/two.config", "params {\n    samplesheet = 'sheet.csv'\n}\n");
+    write(root, "main.nf", "workflow CHAIN { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles[0]).toEqual(
+      expect.objectContaining({ name: "deep", kinds: ["test"], includes: ["conf/one.config"] }),
+    );
+  });
+
+  test("survives a cyclic includeConfig pair", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/cycle' }
+profiles {
+    looped { includeConfig 'conf/a.config' }
+}
+`,
+    );
+    write(root, "conf/a.config", "includeConfig 'b.config'\nprocess.executor = 'slurm'\n");
+    write(root, "conf/b.config", "includeConfig 'a.config'\n");
+    write(root, "main.nf", "workflow CYCLE { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles[0]?.kinds).toEqual(["executor"]);
+  });
+
+  test("leaves an interpolated includeConfig target unresolved", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'adhoc/interpolated' }
+profiles {
+    dynamic { includeConfig "\${params.custom_config_base}/pipeline.config" }
+}
+`,
+    );
+    write(root, "main.nf", "workflow INTERPOLATED { }\n");
+
+    const summary = await summarize(root);
+
+    expect(summary.profiles[0]).toEqual(
+      expect.objectContaining({
+        name: "dynamic",
+        kinds: ["unknown"],
+        includes: ["${params.custom_config_base}/pipeline.config"],
+      }),
+    );
   });
 
   test("warns when an explicit mulled index path is missing", async () => {
