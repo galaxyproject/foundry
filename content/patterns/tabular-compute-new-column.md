@@ -1,14 +1,14 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Tabular: compute a new column"
 tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 3
+revised: 2026-09-14
+revision: 4
 summary: "Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
@@ -20,6 +20,8 @@ related_patterns:
   - "[[derive-parameter-from-file]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/tabular-compute-new-column/compute-new-column.gxwf-test.yml
 iwc_exemplars:
   - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
     steps:

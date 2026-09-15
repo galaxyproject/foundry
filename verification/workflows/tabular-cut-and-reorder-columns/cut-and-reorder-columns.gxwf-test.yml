@@ -1,0 +1,11 @@
+- doc: "Column order follows the columnList order, and a mismatched delimiter silently fills missing columns with '.'"
+  job:
+    rows:
+      class: File
+      path: test-data/rows.tabular
+      filetype: tabular
+  outputs:
+    reordered:
+      file: test-data/expected_reordered.tabular
+    comma_delimiter:
+      file: test-data/expected_comma_delimiter.tabular

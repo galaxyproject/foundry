@@ -1,0 +1,128 @@
+class: GalaxyWorkflow
+name: "Build a named collection bundle"
+inputs:
+  - id: sources
+    type: collection
+    collection_type: list
+outputs:
+  - id: manual_ids
+    outputSource: bundle_manual/output
+  - id: inherited_ids
+    outputSource: bundle_identifier/output
+  - id: index_ids
+    outputSource: bundle_idx/output
+  - id: collapsed_ids
+    outputSource: bundle_duplicate_ids/output
+steps:
+  - id: extract_alpha
+    label: extract_alpha
+    tool_id: __EXTRACT_DATASET__
+    in:
+      - id: input
+        source: sources
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      which:
+        which_dataset: by_identifier
+        identifier: alpha
+  - id: extract_beta
+    label: extract_beta
+    tool_id: __EXTRACT_DATASET__
+    in:
+      - id: input
+        source: sources
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      which:
+        which_dataset: by_identifier
+        identifier: beta
+  - id: bundle_manual
+    label: bundle_manual
+    tool_id: __BUILD_LIST__
+    in:
+      - id: datasets_0|input
+        source: extract_alpha/output
+      - id: datasets_1|input
+        source: extract_beta/output
+    out:
+      - id: output
+    tool_state:
+      datasets:
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: manual
+            identifier: first_result
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: manual
+            identifier: second_result
+  - id: bundle_identifier
+    label: bundle_identifier
+    tool_id: __BUILD_LIST__
+    in:
+      - id: datasets_0|input
+        source: extract_alpha/output
+      - id: datasets_1|input
+        source: extract_beta/output
+    out:
+      - id: output
+    tool_state:
+      datasets:
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: identifier
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: identifier
+  - id: bundle_idx
+    label: bundle_idx
+    tool_id: __BUILD_LIST__
+    in:
+      - id: datasets_0|input
+        source: extract_alpha/output
+      - id: datasets_1|input
+        source: extract_beta/output
+    out:
+      - id: output
+    tool_state:
+      datasets:
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: idx
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: idx
+  - id: bundle_duplicate_ids
+    label: bundle_duplicate_ids
+    tool_id: __BUILD_LIST__
+    in:
+      - id: datasets_0|input
+        source: extract_alpha/output
+      - id: datasets_1|input
+        source: extract_beta/output
+    out:
+      - id: output
+    tool_state:
+      datasets:
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: manual
+            identifier: same
+        - input:
+            __class__: ConnectedValue
+          id_cond:
+            id_select: manual
+            identifier: same

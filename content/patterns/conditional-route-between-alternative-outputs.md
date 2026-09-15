@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Conditional: route between alternative outputs"
 aliases:
   - "when-gated alternatives with pick_value"
@@ -11,8 +11,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 3
+revised: 2026-09-14
+revision: 4
 summary: "Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value."
 related_notes:
   - "[[iwc-conditionals-survey]]"
@@ -24,6 +24,8 @@ related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/conditional-route-between-alternative-outputs/route-between-alternatives.gxwf-test.yml
 iwc_exemplars:
   - workflow: scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy
     why: "Shows a binary 10x import route with legacy and v3 AnnData branches merged by pick_value."
@@ -41,6 +43,8 @@ iwc_exemplars:
 ## Tool
 
 Use Galaxy `when:` gates on each alternative-producing step, then use `pick_value` to collapse the possible outputs into one downstream value.
+
+The shapes below use the toolshed tool `toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0` — that is the established pattern, and all 63 corpus steps use it. Galaxy's built-in `pick_value` module will generally be preferred in the future.
 
 This is a graph-visible route pattern: each alternative stays as its own Galaxy step or subworkflow, and `pick_value` is the merge point. It is not a wrapper-internal conditional hidden inside one tool state.
 
@@ -78,9 +82,21 @@ On each alternative step:
 
 On the merge step:
 
-- connect every possible branch output to `pick_value`;
-- order candidates so the intended selected value appears first among present outputs;
+- connect every possible branch output into the `pick_from` repeat, through `style_cond|type_cond|pick_from_N|value`, **and give each one its own `pick_from` entry in `tool_state`**;
+- set `style_cond.type_cond.param_type` to the kind being merged and read the matching output — `data_param`, `text_param`, `integer_param`, `float_param`, `boolean_param`. Corpus: 49 `data`, 10 `integer`, 3 `boolean`, 1 `float`;
+- set `style_cond.pick_style` deliberately;
 - connect all downstream consumers to the `pick_value` output.
+
+`pick_style` decides what happens when the number of non-null inputs is not one:
+
+| `pick_style` | Not exactly one non-null | Corpus |
+|---|---|---|
+| `first` | Takes the earliest non-null by `pick_from` order. Returns null if all are null. | 48 |
+| `first_or_default` | As `first`, but substitutes `type_cond.default_value` when all are null. | 8 |
+| `first_or_error` | As `first`, but fails the job when all are null. | 0 |
+| `only` | Fails the job unless exactly one input is non-null. | 7 |
+
+Ordering candidates only settles the outcome under `first`. If exactly one branch is supposed to run, say so with `only` and let a routing bug surface as a failure.
 
 If authoring inverse or mode booleans, use a small mapper step such as `map_param_value` rather than duplicating branch logic inside downstream tools.
 
@@ -92,65 +108,53 @@ One-of-N route: create one `map_param_value` step per mode. Each mapper turns on
 
 ## Idiomatic Shapes
 
-Binary route, conceptual shape:
+Binary route. Two gated peers and the merge, in gxformat2:
 
 ```yaml
-- label: Import legacy 10x matrix
-  tool_id: anndata_import
+- id: branch_left
+  tool_id: cat1
   in:
+    - id: input1
+      source: left_source
     - id: when
-      source: use_legacy_10x_boolean
+      source: use_left
   when: $(inputs.when)
 
-- label: Import 10x v3 matrix
-  tool_id: anndata_import
+- id: branch_right
+  tool_id: cat1
   in:
+    - id: input1
+      source: right_source
     - id: when
-      source: use_v3_10x_boolean
+      source: use_right
   when: $(inputs.when)
 
-- label: Pick imported AnnData
-  tool_id: pick_value
+- id: route
+  tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
   in:
-    - source: Import legacy 10x matrix/anndata
-    - source: Import 10x v3 matrix/anndata
+    - id: style_cond|type_cond|pick_from_0|value
+      source: branch_left/out_file1
+    - id: style_cond|type_cond|pick_from_1|value
+      source: branch_right/out_file1
+  out:
+    - id: data_param
+  tool_state:
+    style_cond:
+      pick_style: first
+      type_cond:
+        param_type: data
+        pick_from:
+          - value: { __class__: ConnectedValue }
+          - value: { __class__: ConnectedValue }
 ```
 
-One-of-N route, conceptual shape:
-
-```yaml
-- label: Run mode A
-  in:
-    - id: when
-      source: mode_a_boolean
-  when: $(inputs.when)
-
-- label: Run mode B
-  in:
-    - id: when
-      source: mode_b_boolean
-  when: $(inputs.when)
-
-- label: Run mode C
-  in:
-    - id: when
-      source: mode_c_boolean
-  when: $(inputs.when)
-
-- label: Pick routed output
-  tool_id: pick_value
-  in:
-    - source: Run mode A/output
-    - source: Run mode B/output
-    - source: Run mode C/output
-```
-
-These snippets are conceptual. Use the cited gxformat2 exemplars for exact serialized shapes.
+One-of-N route: same merge step with one `pick_from` slot per mode, one `map_param_value` mapper per mode producing that mode's boolean, and `pick_style: only` when the modes are meant to be exclusive.
 
 ## Pitfalls
 
 - Forgetting the merge. A gated branch output may be absent. Downstream steps should consume `pick_value`, not one branch directly.
-- Non-exclusive booleans. If two branches can run at once, `pick_value` chooses by input order. That may hide an upstream routing bug.
+- Non-exclusive booleans. Under `pick_style: first` two live branches resolve to the earlier `pick_from` slot, silently. `only` turns that into a job failure.
+- Omitting the `pick_from` entries. The repeat is what creates the input terminals, so connections alone leave the tool with zero candidates. The job still succeeds and writes the text `null` into the output dataset.
 - Mismatched output semantics. `pick_value` can merge present values, but it does not make incompatible outputs equivalent. Branches should produce the same logical artifact.
 - Hiding the route in one wrapper. IWC evidence favors graph-visible `when` branches plus merge for these route operations.
 - Duplicating enum comparisons inside every downstream tool. Normalize once with `map_param_value`, then connect the resulting boolean to `id: when`.

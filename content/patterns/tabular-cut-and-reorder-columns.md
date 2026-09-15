@@ -1,14 +1,14 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Tabular: cut and reorder columns"
 tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-14
+revision: 3
 summary: "Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
@@ -18,6 +18,8 @@ related_patterns:
   - "[[tabular-sql-query]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/tabular-cut-and-reorder-columns/cut-and-reorder-columns.gxwf-test.yml
 iwc_exemplars:
   - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
     steps:
@@ -73,6 +75,7 @@ Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 ## Pitfalls
 
 - **No header awareness.** The header row is cut and reordered identically to data rows. Usually what you want; flagging only because `Filter1` / `Grouping1` *do* take `header_lines`.
+- **`#` lines vanish.** The wrapper skips any line beginning with `#` before splitting. A `#`-prefixed header or comment block is dropped from the output entirely, not cut like a data row.
 - **`delimiter` must match the input.** Mismatched delimiter (e.g. `delimiter: T` on comma-separated input) treats each line as a single field — `c1` echoes the whole row, `c2…` produce a `.` (the wrapper's missing-column fill) per row. Silent.
 - **Cut breaks Galaxy column metadata.** The wrapper warns: re-cutting may invalidate column-assignment metadata (chrom/start/end for interval/BED). Re-establish via the dataset's "edit attributes" if downstream tools need it.
 - **Reorder-then-rename** is *not* `Cut1`'s job. Renaming columns means rewriting the header row — handle that with [[tabular-compute-new-column]] or with a `tp_replace_in_line` pass.

@@ -1,0 +1,73 @@
+class: GalaxyWorkflow
+name: "Compute a new tabular column"
+inputs:
+  - id: values
+    type: data
+outputs:
+  - id: numeric
+    outputSource: auto_col_types_true/out_file1
+  - id: concatenated
+    outputSource: auto_col_types_false/out_file1
+steps:
+  - id: auto_col_types_true
+    label: auto_col_types_true
+    tool_id: toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1
+    tool_version: "2.1"
+    tool_shed_repository:
+      changeset_revision: aff5135563c6
+      name: column_maker
+      owner: devteam
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input
+        source: values
+    out:
+      - id: out_file1
+    tool_state:
+      avoid_scientific_notation: false
+      error_handling:
+        auto_col_types: true
+        fail_on_non_existent_columns: true
+        non_computable:
+          action: --fail-on-non-computable
+      input:
+        __class__: ConnectedValue
+      ops:
+        header_lines_select: "yes"
+        expressions:
+          - cond: c1 + c2
+            add_column:
+              mode: ""
+              pos: ""
+            new_column_name: total
+  - id: auto_col_types_false
+    label: auto_col_types_false
+    tool_id: toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1
+    tool_version: "2.1"
+    tool_shed_repository:
+      changeset_revision: aff5135563c6
+      name: column_maker
+      owner: devteam
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input
+        source: values
+    out:
+      - id: out_file1
+    tool_state:
+      avoid_scientific_notation: false
+      error_handling:
+        auto_col_types: false
+        fail_on_non_existent_columns: true
+        non_computable:
+          action: --fail-on-non-computable
+      input:
+        __class__: ConnectedValue
+      ops:
+        header_lines_select: "yes"
+        expressions:
+          - cond: c1 + c2
+            add_column:
+              mode: ""
+              pos: ""
+            new_column_name: total
