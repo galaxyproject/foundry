@@ -107,12 +107,13 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
   `bioconda`, `singularity`, `docker`, or `wave`. Unresolved directives appear
   in `warnings[]` with the directive verbatim.
 
-## Case: nf-test enumeration matches filesystem
+## Case: nf-test case enumeration matches source
 
 - fixture: each pipeline's `tests/*.nf.test` file tree.
-- expect: `nf_tests[].length` equals the file count; each entry has `path`,
-  `profiles[]`, and a `snapshot` block when the file contains
-  `assert snapshot(...).match()`.
+- expect: nf-test-kind `test_candidates[]` has one entry per literal pipeline
+  `test(...)` block, or one warned aggregate per dynamically generated file;
+  each entry has `path`, `effective_profiles[]`, and a `snapshot` block when its
+  case contains `assert snapshot(...).match()`.
 
 ## Case: canonical whole-pipeline nf-test selection
 
@@ -148,8 +149,9 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 ## Case: test-fixture localization round-trip
 
 - fixture: any pipeline run with `--fetch-test-data --test-data-dir=<tmp>`.
-- expect: every remote `test_fixtures.inputs[].url` has a corresponding on-disk
-  `path`; SHA-1 hashes are stable across two runs.
+- expect: every remote `test_candidates[].inputs[].url` has a corresponding
+  on-disk `path`; SHA-1 hashes are stable across two runs and candidate input
+  lists remain independent.
 
 ## Case: ad-hoc DSL2 fallback
 
@@ -179,8 +181,8 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 
 ## Case: nf-test to Galaxy test-plan translation
 
-- fixture: a pipeline with a representative `nf_tests[]` entry containing
-  `snapshot.captures[]`.
+- fixture: a pipeline with a representative nf-test-kind `test_candidates[]`
+  entry containing `snapshot.captures[]`.
 - expect: `nextflow-test-to-galaxy-test-plan` maps each capture to a Galaxy
   assertion intent or to an explicit "untranslatable" entry; no captures are
   silently elided.

@@ -39,7 +39,7 @@ export const nextflowParametersMetaSchema = readVendoredSchema(
 );
 
 export interface SummarizeNextflowOptions {
-  profile: string;
+  profile?: string;
   pin?: string;
   out?: string;
   withNextflow: boolean;

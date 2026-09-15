@@ -95,13 +95,14 @@ whatever a scenario produces. Properties are tagged by bucket:
   bioconda, singularity, docker, or wave; unresolved directives appear in
   `warnings[]` with the directive verbatim.
 
-## Property: nf-test enumeration matches the filesystem
+## Property: nf-test case enumeration matches source
 
 - bucket: fidelity
 - check: deterministic
-- assertion: `nf_tests[].length` equals the `*.nf.test` file count; each entry
-  carries `path`, `profiles[]`, and a `snapshot` block whenever the file
-  contains `assert snapshot(...).match()`.
+- assertion: nf-test-kind `test_candidates[].length` equals the statically
+  recoverable literal pipeline-case count, with one warned aggregate for each
+  dynamically generated file; every entry carries its path, effective profiles,
+  parameter delta, inputs, and assertions.
 
 ## Property: test selection never hides ambiguity
 
@@ -116,9 +117,9 @@ whatever a scenario produces. Properties are tagged by bucket:
 
 - bucket: fidelity
 - check: deterministic
-- assertion: under `--fetch-test-data`, every remote `test_fixtures.inputs[].url`
-  gets a corresponding on-disk `path`, and SHA-1 hashes are stable across two
-  runs.
+- assertion: under `--fetch-test-data`, every remote
+  `test_candidates[].inputs[].url` gets a corresponding on-disk `path` on that
+  same candidate, and SHA-1 hashes are stable across two runs.
 
 ## Property: ad-hoc DSL2 IO is inferred, not invented
 

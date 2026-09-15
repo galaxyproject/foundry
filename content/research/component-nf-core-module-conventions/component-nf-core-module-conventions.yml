@@ -135,7 +135,7 @@ rules:
     description: "Module ships at least one tests/main.nf.test file with required tags. Snapshot file (tests/main.nf.test.snap) is mandatory when assertions use snapshot(...).match()."
     lint_check: "module_tests"
     evidence: "nf_core/modules/lint/module_tests.py"
-    affects: ["summarize-nextflow §7 (nf_tests[] enumeration); nextflow-test-to-target-tests"]
+    affects: ["summarize-nextflow §7 (test_candidates[] enumeration); nextflow-test-to-target-tests"]
 
   - id: tests.required_tags
     level: MUST

@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-04
-revision: 4
+revised: 2026-09-15
+revision: 5
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:
   - id: freeform-summary
@@ -15,7 +15,7 @@ input_artifacts:
     description: "Source summary from [[summarize-paper]] / [[interview-to-freeform-summary]]; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it)."
   - id: summary-nextflow
     role: source-summary
-    description: "Source summary from [[summarize-nextflow]]; mine its test_fixtures / sample-data evidence when running the NEXTFLOW → GALAXY pipeline."
+    description: "Source summary from [[summarize-nextflow]]; mine its test candidate set, explicit selection, and sample-data evidence when running the NEXTFLOW → GALAXY pipeline."
   - id: summary-cwl
     role: source-summary
     description: "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline."

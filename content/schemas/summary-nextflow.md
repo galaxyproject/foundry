@@ -16,7 +16,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-09-15
-revision: 12
+revision: 13
 related_notes:
   - "[[summarize-nextflow]]"
   - "[[nextflow-workflow-io-semantics]]"
@@ -74,6 +74,27 @@ Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by 
 - **Structured channel typing.** `processes[].inputs[].shape` is a string (`"tuple(meta, [path,path])"`), not a structured type. NF channel typing is a research project; a string is enough for downstream Molds to reason about and an LLM to emit.
 - **Operator-chain semantics.** `Edge.via` records the literal operator chain (`["map", "join", "groupTuple"]`). Reconciling what the chain *does* to channel shapes is left to the LLM step that fills `Edge.notes` when confidence is low.
 - **Multi-tool processes outside decomposed mulled-v2 containers.** A process can run multiple tools (a shell pipeline of two binaries). `Process.tool` is nullable; multi-tool processes set it null and surface tool details in `script_excerpt` and `container`. A `tools[]` foreign-key array on `Process` would be cleaner; deferred until downstream use forces it.
+
+## Revision 13 — 2026-09-15
+
+Whole-pipeline test evidence is now one candidate model rather than two
+competing top-level representations.
+
+- **`test_candidates[]` replaces `test_fixtures` and top-level `nf_tests[]`.**
+  Every candidate owns its resolved profile chain, parameter delta, inputs,
+  outputs, execution mode, scope, disposition, rationale, and assertions.
+- **`test_selection` makes ambiguity data.** It either foreign-keys one selected
+  candidate or records `needs-scope-choice`; consumers no longer infer a
+  selection from array order or a profile named `test`.
+- **Enumeration follows evidence fidelity.** Literal whole-pipeline nf-test
+  cases win, body-classified input profiles are the fallback, and pipeline
+  defaults are the last candidate. Dynamically generated nf-test files retain a
+  warned aggregate candidate instead of disappearing or requiring an nf-test
+  runtime.
+- **No silent CLI profile.** `--profile` is optional and acts as a configuration
+  override. Test description strings are not parsed for `-profile` text.
+- **`NfTest.execution_mode` added.** Module and subworkflow test evidence now
+  records real/stub/mixed/unknown execution consistently with candidates.
 
 ## Revision 12 — 2026-09-15
 

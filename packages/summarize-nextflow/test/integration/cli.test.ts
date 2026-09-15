@@ -147,8 +147,9 @@ profiles { test {} }
       const validation = validateSummary(summary);
       expect(validation.valid).toBe(true);
 
-      const inputs = (summary as { test_fixtures: { inputs: { role: string; path: string }[] } })
-        .test_fixtures.inputs;
+      const inputs = (
+        summary as { test_candidates: { inputs: { role: string; path: string }[] }[] }
+      ).test_candidates[0]!.inputs;
       expect(inputs.map((input) => input.role)).toEqual(
         expect.arrayContaining(["samplesheet", "reference_fasta", "reads"]),
       );
@@ -338,6 +339,7 @@ profiles { test {} test_alt {} }
       join(root, "tests", "default.nf.test"),
       `nextflow_pipeline {
   test("-profile test") {
+    profile "test"
     when { params { outdir = "$outputDir" } }
     then {
       def stable_name = getAllFilesFromDir(params.outdir, relative: true, ignoreFile: 'tests/.nftignore_files_entirely')
@@ -349,6 +351,7 @@ profiles { test {} test_alt {} }
     }
   }
   test("-profile test_alt") {
+    profile "test_alt"
     when { params { outdir = "$outputDir" } }
     then { assert workflow.success }
   }
@@ -360,7 +363,6 @@ profiles { test {} test_alt {} }
       buildSummary: typeof import("../../src/index.js").buildSummary;
     };
     const summary = await buildSummary(root, {
-      profile: "test",
       withNextflow: false,
       fetchTestData: false,
       validate: false,
@@ -370,8 +372,8 @@ profiles { test {} test_alt {} }
 
     const tests = (
       summary as {
-        nf_tests: {
-          profiles: string[];
+        test_candidates: {
+          effective_profiles: string[];
           snapshot: {
             captures: string[];
             helpers: string[];
@@ -380,9 +382,9 @@ profiles { test {} test_alt {} }
           } | null;
         }[];
       }
-    ).nf_tests;
+    ).test_candidates;
     expect(tests).toHaveLength(2);
-    expect(tests.map((test) => test.profiles[0])).toEqual(["test", "test_alt"]);
+    expect(tests.map((test) => test.effective_profiles[0])).toEqual(["test", "test_alt"]);
     expect(tests[0]?.snapshot?.captures).toEqual([
       "succeeded_task_count",
       "versions_yml",
@@ -680,8 +682,11 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
     expect(data.tools.map((t: { name: string }) => t.name)).toEqual(
       expect.arrayContaining(["fastqc", "seqtk", "multiqc"]),
     );
-    expect(data.test_fixtures.inputs[0].url).toContain("samplesheet_test_illumina_amplicon.csv");
-    expect(data.nf_tests[0].profiles).toContain("test");
+    expect(data.test_candidates[0].inputs[0].url).toContain(
+      "samplesheet_test_illumina_amplicon.csv",
+    );
+    expect(data.test_candidates[0].effective_profiles).toContain("test");
+    expect(data.test_selection.selected_candidate_id).toBe("tests/default.nf.test::-profile test");
   });
 
   itIfDemoFixture("uses nextflow inspect by default when available", () => {
@@ -714,7 +719,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
     expect(r.status).toBe(0);
 
     const data = JSON.parse(r.stdout);
-    const inputs = data.test_fixtures.inputs as {
+    const inputs = data.test_candidates[0].inputs as {
       role: string;
       url: string;
       sha1: string;
@@ -886,19 +891,20 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     const validation = validateSummary(data);
     expect(validation.valid).toBe(true);
     expect(data.source.workflow).toBe("bacass");
-    expect(data.nf_tests.length).toBeGreaterThanOrEqual(9);
-    expect(data.nf_tests[0].snapshot.captures).toEqual([
+    expect(data.test_candidates.length).toBeGreaterThanOrEqual(9);
+    expect(data.test_candidates[0].snapshot.captures).toEqual([
       "succeeded_task_count",
       "versions_yml",
       "stable_names",
       "stable_paths",
     ]);
     expect(
-      data.nf_tests.find((test: { name: string }) => test.name.includes("test_hybrid_dragonflye"))
-        ?.snapshot.ignore_globs,
+      data.test_candidates.find((test: { name: string }) =>
+        test.name.includes("test_hybrid_dragonflye"),
+      )?.snapshot.ignore_globs,
     ).toContain("Prokka/**");
 
-    const inputs = data.test_fixtures.inputs as {
+    const inputs = data.test_candidates[0].inputs as {
       role: string;
       path: string;
       url: string;
@@ -1055,6 +1061,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/sarek)", () => 
         "subworkflows/local/prepare_genome/main.nf",
       );
     },
+    30_000,
   );
 });
 

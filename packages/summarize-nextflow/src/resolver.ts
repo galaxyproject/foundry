@@ -49,9 +49,38 @@ interface Summary {
   workflow: { name: string; channels: Channel[]; edges: Edge[]; conditionals: Conditional[] };
   reference_assets: ReferenceAsset[];
   reference_rebuilds: ReferenceRebuildRule[];
-  test_fixtures: { profile: string; inputs: TestDataRef[]; outputs: unknown[] };
-  nf_tests: NfTest[];
+  test_candidates: TestCandidate[];
+  test_selection: TestSelection;
   warnings: string[];
+}
+
+type TestCandidateKind = "nf-test" | "profile" | "pipeline-defaults";
+type TestExecutionMode = "real" | "stub" | "mixed" | "unknown";
+type TestScope = "primary" | "bootstrap-only" | "reference-scale" | "unknown";
+type TestDisposition = "selected" | "eligible" | "deferred";
+
+interface TestCandidate {
+  id: string;
+  kind: TestCandidateKind;
+  name: string;
+  path: string | null;
+  effective_profiles: string[];
+  params_delta: Record<string, unknown>;
+  inputs: TestDataRef[];
+  outputs: unknown[];
+  execution_mode: TestExecutionMode;
+  scope: TestScope;
+  disposition: TestDisposition;
+  rationale: string;
+  assert_workflow_success: boolean | null;
+  snapshot: NfTest["snapshot"];
+  prose_assertions: string[];
+}
+
+interface TestSelection {
+  status: "selected" | "needs-scope-choice";
+  selected_candidate_id: string | null;
+  rationale: string;
 }
 
 interface InvocationBinding {
@@ -250,6 +279,7 @@ interface NfTest {
   path: string;
   profiles: string[];
   params_overrides: Record<string, unknown>;
+  execution_mode: TestExecutionMode;
   assert_workflow_success: boolean;
   snapshot: {
     captures: string[];
@@ -288,7 +318,7 @@ interface SnapshotParts {
 const MAX_SNAPSHOT_SIDECAR_BYTES = 200_000;
 
 export interface ResolveOptions {
-  profile: string;
+  profile?: string;
   withNextflow: boolean;
   fetchTestData: boolean;
   testDataDir?: string;
@@ -391,10 +421,24 @@ export async function resolveNextflowSummary(
     },
     reference_assets: [],
     reference_rebuilds: detectReferenceRebuilds(workflows, invocationsByCallee, params),
-    test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
-    nf_tests: parseNfTests(pipelineRoot),
+    test_candidates: [],
+    test_selection: {
+      status: "needs-scope-choice",
+      selected_candidate_id: null,
+      rationale: "test candidates have not been resolved",
+    },
     warnings: [...root.warnings, ...warnings],
   };
+
+  const resolvedTests = resolveTestCandidates(
+    pipelineRoot,
+    summary.params,
+    summary.profiles,
+    options.profile,
+  );
+  summary.test_candidates = resolvedTests.candidates;
+  summary.test_selection = resolvedTests.selection;
+  summary.warnings.push(...resolvedTests.warnings);
 
   summary.reference_assets = buildReferenceAssets(
     summary.params,
@@ -534,12 +578,11 @@ function commandOutput(command: string, args: string[], cwd: string): string | n
   }
 }
 
-function mergeNextflowInspect(summary: Summary, pipelineRoot: string, profile: string): void {
-  const output = commandOutput(
-    "nextflow",
-    ["inspect", pipelineRoot, "-profile", profile, "-format", "json"],
-    pipelineRoot,
-  );
+function mergeNextflowInspect(summary: Summary, pipelineRoot: string, profile?: string): void {
+  const args = ["inspect", pipelineRoot];
+  if (profile) args.push("-profile", profile);
+  args.push("-format", "json");
+  const output = commandOutput("nextflow", args, pipelineRoot);
   if (!output) {
     summary.warnings.push("nextflow inspect unavailable or failed; static container parsing used");
     return;
@@ -676,7 +719,7 @@ function classifyProfile(
 
   const kinds: ProfileKind[] = [];
   // Profile-level test-data evidence first. This identifies a useful fallback
-  // candidate, not the selected test case: nf_tests[] carries the higher-fidelity
+  // candidate, not the selected test case: nf-test-derived test_candidates[] carry the higher-fidelity
   // unit when pipeline-level nf-test cases exist. A name-shaped guess still
   // mislabels both directions — What_the_Phage's `test` sets no data, while
   // sarek's `mutect` includes conf/test_mutect2.config.
@@ -2323,51 +2366,316 @@ function isKnownContainer(value: string): boolean {
   );
 }
 
-function parseTestFixtures(pipelineRoot: string, profile: string): Summary["test_fixtures"] {
-  const configPath = join(pipelineRoot, "conf", `${profile}.config`);
-  const text = existsSync(configPath) ? readText(configPath) : "";
-  const baseParams = parseParamAssignments(
-    existsSync(join(pipelineRoot, "nextflow.config"))
-      ? readText(join(pipelineRoot, "nextflow.config"))
-      : "",
-    new Map(),
-  );
-  const profileParams = parseParamAssignments(text, baseParams);
-  const remoteInputs = [...profileParams.entries()]
-    .filter(([name]) => isFixtureParam(name))
-    .map(([name, value]) => ({ name, url: normalizeTestDataUrl(value) }))
-    .filter((input): input is { name: string; url: string } => Boolean(input.url));
-  return {
-    profile,
-    inputs: remoteInputs.map(({ name, url }) => ({
-      role: inferParamRole(name, url),
-      path: null,
-      url,
-      sha1: null,
-      filetype: inferFiletype(url),
-      description: `${name} from conf/${profile}.config`,
-    })),
+function resolveTestCandidates(
+  pipelineRoot: string,
+  params: Param[],
+  profiles: Profile[],
+  explicitProfile?: string,
+): { candidates: TestCandidate[]; selection: TestSelection; warnings: string[] } {
+  const warnings: string[] = [];
+  const nfTests = parseNfTests(pipelineRoot, explicitProfile);
+  if (nfTests.length > 0) {
+    const ids = new Map<string, number>();
+    const candidates = nfTests.map((test) => {
+      const baseId = `${test.path}::${test.name}`;
+      const occurrence = (ids.get(baseId) ?? 0) + 1;
+      ids.set(baseId, occurrence);
+      const id = occurrence === 1 ? baseId : `${baseId}#${occurrence}`;
+      const data = candidateParamData(pipelineRoot, profiles, test.profiles, test.params_overrides);
+      if (test.name === "dynamically-generated") {
+        warnings.push(
+          `could not statically enumerate generated nf-test cases in ${test.path}; preserved one file-level candidate`,
+        );
+      }
+      return {
+        id,
+        kind: "nf-test" as const,
+        name: test.name,
+        path: test.path,
+        effective_profiles: test.profiles,
+        params_delta: data.delta,
+        inputs: data.inputs,
+        outputs: [],
+        execution_mode: test.execution_mode,
+        scope: classifyTestScope(test.name, test.profiles, test.execution_mode),
+        disposition: "eligible" as const,
+        rationale: `whole-pipeline nf-test case from ${test.path}`,
+        assert_workflow_success: test.assert_workflow_success,
+        snapshot: test.snapshot,
+        prose_assertions: test.prose_assertions,
+      };
+    });
+    return { candidates, selection: selectTestCandidate(candidates, "nf-test"), warnings };
+  }
+
+  const candidateProfiles = explicitProfile
+    ? [
+        profiles.find((profile) => profile.name === explicitProfile) ?? {
+          name: explicitProfile,
+          kinds: ["unknown" as const],
+          source_path: "",
+          includes: [],
+          signals: [],
+        },
+      ]
+    : profiles.filter((profile) => profile.kinds.includes("test"));
+  if (candidateProfiles.length > 0) {
+    const candidates = candidateProfiles.map((profile) => {
+      const data = candidateParamData(pipelineRoot, profiles, [profile.name], {});
+      return {
+        id: `profile:${profile.name}`,
+        kind: "profile" as const,
+        name: profile.name,
+        path: profile.source_path || null,
+        effective_profiles: [profile.name],
+        params_delta: data.delta,
+        inputs: data.inputs,
+        outputs: [],
+        execution_mode: "real" as const,
+        scope: classifyTestScope(profile.name, [profile.name], "real"),
+        disposition: "eligible" as const,
+        rationale: explicitProfile
+          ? "explicit caller profile override"
+          : `profile body carries test-input evidence: ${profile.signals.join(", ")}`,
+        assert_workflow_success: null,
+        snapshot: null,
+        prose_assertions: [],
+      };
+    });
+    return { candidates, selection: selectTestCandidate(candidates, "profile"), warnings };
+  }
+
+  const defaults = pipelineDefaultParams(pipelineRoot);
+  const unresolvedRequired = params
+    .filter((param) => param.required && !hasUsableParamValue(defaults.get(param.name)))
+    .map((param) => param.name);
+  const candidate: TestCandidate = {
+    id: "pipeline-defaults",
+    kind: "pipeline-defaults",
+    name: "pipeline defaults",
+    path: selectEntrypoint(pipelineRoot),
+    effective_profiles: [],
+    params_delta: {},
+    inputs: testDataRefs(defaults, "pipeline defaults"),
     outputs: [],
+    execution_mode: "real",
+    scope: unresolvedRequired.length === 0 ? "primary" : "unknown",
+    disposition: unresolvedRequired.length === 0 ? "selected" : "eligible",
+    rationale:
+      unresolvedRequired.length === 0
+        ? "no whole-pipeline nf-test or test-input profile; required launch parameters have defaults"
+        : `required launch parameters have no defaults: ${unresolvedRequired.join(", ")}`,
+    assert_workflow_success: null,
+    snapshot: null,
+    prose_assertions: [],
+  };
+  return {
+    candidates: [candidate],
+    selection:
+      unresolvedRequired.length === 0
+        ? {
+            status: "selected",
+            selected_candidate_id: candidate.id,
+            rationale: "pipeline defaults form a statically runnable fallback",
+          }
+        : {
+            status: "needs-scope-choice",
+            selected_candidate_id: null,
+            rationale: `pipeline defaults leave required parameters unresolved: ${unresolvedRequired.join(", ")}`,
+          },
+    warnings,
   };
 }
 
-function parseParamAssignments(
+function selectTestCandidate(
+  candidates: TestCandidate[],
+  kind: "nf-test" | "profile",
+): TestSelection {
+  const primary = candidates.filter((candidate) => candidate.scope === "primary");
+  const canonical =
+    kind === "nf-test"
+      ? primary.filter((candidate) =>
+          /(?:^|\/)(?:default|main)\.nf\.test$/u.test(candidate.path ?? ""),
+        )
+      : primary.filter((candidate) => candidate.name === "test");
+  const selected = canonical.length === 1 ? canonical[0] : primary.length === 1 ? primary[0] : null;
+  for (const candidate of candidates) {
+    candidate.disposition =
+      candidate === selected ? "selected" : candidate.scope === "primary" ? "eligible" : "deferred";
+  }
+  if (selected) {
+    return {
+      status: "selected",
+      selected_candidate_id: selected.id,
+      rationale:
+        canonical.length === 1
+          ? kind === "nf-test"
+            ? "one primary case is in the canonical default.nf.test or main.nf.test file"
+            : "the conventional test profile carries test-input evidence and primary coverage"
+          : "exactly one primary-coverage candidate remains",
+    };
+  }
+  return {
+    status: "needs-scope-choice",
+    selected_candidate_id: null,
+    rationale:
+      primary.length === 0
+        ? "no primary-coverage candidate was identified"
+        : `${primary.length} primary-coverage candidates remain incomparable`,
+  };
+}
+
+function classifyTestScope(
+  name: string,
+  profiles: string[],
+  executionMode: TestExecutionMode,
+): TestScope {
+  const evidence = [name, ...profiles].join(" ").toLowerCase();
+  if (/(?:^|[^a-z])test[_-]?full(?:$|[^a-z])/u.test(evidence)) return "reference-scale";
+  if (executionMode === "stub" || /(?:test[_-]?(?:minimal|tiny))/u.test(evidence)) {
+    return "bootstrap-only";
+  }
+  return "primary";
+}
+
+function candidateParamData(
+  pipelineRoot: string,
+  profiles: Profile[],
+  effectiveProfiles: string[],
+  overrides: Record<string, unknown>,
+): { delta: Record<string, unknown>; inputs: TestDataRef[] } {
+  const values = pipelineDefaultParams(pipelineRoot);
+  const delta: Record<string, unknown> = {};
+  for (const profileName of effectiveProfiles) {
+    const profile = profiles.find((candidate) => candidate.name === profileName);
+    const config = expandedProfileConfig(pipelineRoot, profileName, profile);
+    const changed = parseAllParamAssignments(config, values, { changedOnly: true });
+    for (const [name, value] of changed) delta[name] = parseNfTestParamValue(value);
+  }
+  for (const [name, value] of Object.entries(overrides)) {
+    delta[name] = value;
+    if (typeof value === "string") values.set(name, value);
+  }
+  return {
+    delta,
+    inputs: testDataRefs(values, effectiveProfiles.join(", ") || "pipeline defaults"),
+  };
+}
+
+function expandedProfileConfig(
+  pipelineRoot: string,
+  profileName: string,
+  profile?: Profile,
+): string {
+  const fragments: string[] = [];
+  if (profile) {
+    const sourcePath = resolve(pipelineRoot, profile.source_path);
+    if (existsSync(sourcePath)) {
+      const source = maskNextflowComments(readText(sourcePath));
+      const profilesBlock = extractNamedBlockBody(source, "profiles");
+      const body = profilesBlock
+        ? profileBlocks(profilesBlock).find((candidate) => candidate.name === profileName)?.body
+        : undefined;
+      if (body !== undefined) {
+        fragments.push(expandIncludes(body, dirname(sourcePath), new Set([sourcePath])));
+      }
+    }
+  }
+
+  // Preserve the established nf-core convention as a fallback for incomplete
+  // or synthetic configs that declare `test {}` without an explicit include.
+  const conventional = join(pipelineRoot, "conf", `${profileName}.config`);
+  if (existsSync(conventional)) fragments.push(maskNextflowComments(readText(conventional)));
+  return fragments.join("\n");
+}
+
+function pipelineDefaultParams(pipelineRoot: string): Map<string, string> {
+  const values = new Map<string, string>();
+  const configPath = join(pipelineRoot, "nextflow.config");
+  if (existsSync(configPath)) {
+    parseAllParamAssignments(maskNamedBlocks(readText(configPath), "profiles"), values);
+  }
+  const entrypoint = selectEntrypoint(pipelineRoot);
+  if (entrypoint) parseAllParamAssignments(readText(join(pipelineRoot, entrypoint)), values);
+  return values;
+}
+
+function parseAllParamAssignments(
   text: string,
   baseParams: Map<string, string>,
   options: { changedOnly?: boolean } = {},
 ): Map<string, string> {
   const params = new Map(baseParams);
   const changed = new Map<string, string>();
-  const block = extractNamedBlock(text, "params");
-  if (!block) return options.changedOnly ? changed : params;
-  for (const match of block.matchAll(/^\s*([A-Za-z0-9_]+)\s*=\s*([^\n]+)$/gmu)) {
-    const value = resolveParamExpression(match[2]!.trim(), params);
-    if (value) {
-      params.set(match[1]!, value);
-      changed.set(match[1]!, value);
+  const masked = maskNextflowComments(text);
+  const assignments: { index: number; name: string; expression: string }[] = [];
+  for (const match of masked.matchAll(/\bparams\s*\{/gu)) {
+    const openIndex = match.index + match[0].lastIndexOf("{");
+    const block = extractBlockAt(masked, openIndex);
+    if (block === null) continue;
+    for (const assignment of block.matchAll(/^\s*([A-Za-z0-9_]+)\s*=\s*([^\n]+)$/gmu)) {
+      assignments.push({
+        index: openIndex + 1 + assignment.index,
+        name: assignment[1]!,
+        expression: assignment[2]!.trim(),
+      });
     }
   }
+  for (const match of masked.matchAll(/^\s*params\.([A-Za-z0-9_]+)\s*=\s*([^\n]+)$/gmu)) {
+    assignments.push({ index: match.index, name: match[1]!, expression: match[2]!.trim() });
+  }
+  assignments.sort((left, right) => left.index - right.index);
+  for (const assignment of assignments) {
+    const value = resolveParamExpression(assignment.expression, params);
+    if (!value) continue;
+    params.set(assignment.name, value);
+    changed.set(assignment.name, value);
+  }
+  for (const [name, value] of params) baseParams.set(name, value);
   return options.changedOnly ? changed : params;
+}
+
+function hasUsableParamValue(value: string | undefined): boolean {
+  return value !== undefined && value !== "" && value !== "null";
+}
+
+function testDataRefs(values: Map<string, string>, source: string): TestDataRef[] {
+  return [...values.entries()].flatMap(([name, rawValue]) => {
+    if (!isCandidateInputParam(name, rawValue)) return [];
+    const url = normalizeTestDataUrl(rawValue);
+    const path = url ? null : normalizeCandidatePath(rawValue);
+    if (!url && !path) return [];
+    const location = url ?? path!;
+    return [
+      {
+        role: inferParamRole(name, location),
+        path,
+        url,
+        sha1: null,
+        filetype: inferFiletype(location),
+        description: `${name} from ${source}`,
+      },
+    ];
+  });
+}
+
+function isCandidateInputParam(name: string, value: string): boolean {
+  if (!hasUsableParamValue(value)) return false;
+  if (/^(?:outdir|output|results?|publish_dir|email|help)$/u.test(name)) return false;
+  return (
+    isFixtureParam(name) ||
+    /(?:^|_)(?:input|reads?|genome|reference|variants?|denylist|samplesheet|fasta|fastq|bam|cram|vcf|gff|gtf|bed|proteins?|database|db)(?:_|$)/u.test(
+      name,
+    )
+  );
+}
+
+function normalizeCandidatePath(value: string): string | null {
+  const normalized = value
+    .replace(/^\$\{?(?:baseDir|projectDir)\}?\//u, "")
+    .replace(/^file:\/\//u, "");
+  if (normalized === value && !/[/.{}*]/u.test(value)) return null;
+  return normalized;
 }
 
 function isFixtureParam(name: string): boolean {
@@ -2403,44 +2711,40 @@ function normalizeTestDataUrl(value: string): string | null {
 }
 
 async function fetchTestData(summary: Summary, testDataDir?: string): Promise<void> {
-  const urls = new Set<string>();
-  for (const input of summary.test_fixtures.inputs) {
-    if (input.url) urls.add(input.url);
-  }
-
-  for (const input of summary.test_fixtures.inputs) {
-    if (!input.url) continue;
-    try {
-      const content = await fetchText(input.url);
-      input.sha1 = sha1(content);
-      if (testDataDir) input.path = writeFetchedTestData(testDataDir, input.url, content);
-      for (const url of extractRemoteUrls(content)) urls.add(url);
-    } catch (err) {
-      summary.warnings.push(`failed to fetch test fixture ${input.url}: ${formatError(err)}`);
+  const cache = new Map<string, Uint8Array>();
+  for (const candidate of summary.test_candidates) {
+    const referencedUrls = new Set<string>();
+    for (const input of candidate.inputs) {
+      if (!input.url) continue;
+      try {
+        const bytes = cache.get(input.url) ?? (await fetchBytes(input.url));
+        cache.set(input.url, bytes);
+        input.sha1 = sha1(bytes);
+        if (testDataDir) input.path = writeFetchedTestData(testDataDir, input.url, bytes);
+        for (const url of extractRemoteUrls(new TextDecoder().decode(bytes))) {
+          referencedUrls.add(url);
+        }
+      } catch (err) {
+        summary.warnings.push(`failed to fetch test fixture ${input.url}: ${formatError(err)}`);
+      }
     }
-  }
 
-  for (const url of urls) {
-    if (
-      summary.test_fixtures.inputs.some(
-        (input) => input.url === url && input.role !== "samplesheet",
-      )
-    ) {
-      continue;
-    }
-    if (summary.test_fixtures.inputs.some((input) => input.url === url && input.sha1)) continue;
-    try {
-      const bytes = await fetchBytes(url);
-      summary.test_fixtures.inputs.push({
-        role: inferTestDataRole(url),
-        path: testDataDir ? writeFetchedTestData(testDataDir, url, bytes) : null,
-        url,
-        sha1: sha1(bytes),
-        filetype: inferFiletype(url),
-        description: "Referenced by fetched samplesheet",
-      });
-    } catch (err) {
-      summary.warnings.push(`failed to fetch test data ${url}: ${formatError(err)}`);
+    for (const url of referencedUrls) {
+      if (candidate.inputs.some((input) => input.url === url)) continue;
+      try {
+        const bytes = cache.get(url) ?? (await fetchBytes(url));
+        cache.set(url, bytes);
+        candidate.inputs.push({
+          role: inferTestDataRole(url),
+          path: testDataDir ? writeFetchedTestData(testDataDir, url, bytes) : null,
+          url,
+          sha1: sha1(bytes),
+          filetype: inferFiletype(url),
+          description: "Referenced by fetched samplesheet",
+        });
+      } catch (err) {
+        summary.warnings.push(`failed to fetch test data ${url}: ${formatError(err)}`);
+      }
     }
   }
 }
@@ -2456,12 +2760,6 @@ function localTestDataPath(url: string): string {
   const parsed = new URL(url);
   const parts = parsed.pathname.split("/").filter(Boolean).map(safePathPart);
   return join(safePathPart(parsed.hostname), ...parts);
-}
-
-async function fetchText(url: string): Promise<string> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-  return response.text();
 }
 
 async function fetchBytes(url: string): Promise<Uint8Array> {
@@ -2510,32 +2808,66 @@ function formatError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-function parseNfTests(pipelineRoot: string): NfTest[] {
-  return parseNfTestsInDir(pipelineRoot, join(pipelineRoot, "tests"));
+function parseNfTests(pipelineRoot: string, explicitProfile?: string): NfTest[] {
+  return parseNfTestsInDir(
+    pipelineRoot,
+    join(pipelineRoot, "tests"),
+    parseNfTestConfigProfiles(pipelineRoot),
+    explicitProfile,
+    true,
+  );
 }
 
-function parseNfTestsInDir(pipelineRoot: string, testsRoot: string): NfTest[] {
+function parseNfTestsInDir(
+  pipelineRoot: string,
+  testsRoot: string,
+  baseProfiles: string[] = [],
+  explicitProfile?: string,
+  pipelineOnly = false,
+): NfTest[] {
   return walk(testsRoot)
     .filter((path) => path.endsWith(".nf.test"))
     .flatMap((path) => {
       const text = readText(path);
+      if (pipelineOnly && !/\bnextflow_pipeline\s*\{/u.test(maskNextflowComments(text))) return [];
       const relPath = relative(pipelineRoot, path);
       const fileProfiles = parseNfTestFileProfiles(text);
       const blocks = extractNfTestBlocks(text);
-      return blocks.map((block) => ({
-        name: block.name,
-        path: relPath,
-        profiles: unique([...parseNfTestProfiles(block.body, block.name), ...fileProfiles]),
-        params_overrides: parseParamsOverrides(block.body),
-        assert_workflow_success: block.body.includes("workflow.success"),
-        snapshot: parseSnapshot(path, relPath, block.body, block.name),
-        prose_assertions: parseProseAssertions(block.body),
-      }));
+      return blocks.map((block) => {
+        let profiles = [...baseProfiles];
+        for (const directive of [...fileProfiles, ...parseNfTestProfiles(block.body)]) {
+          profiles = applyProfileDirective(profiles, directive);
+        }
+        if (explicitProfile) profiles = applyProfileDirective(profiles, explicitProfile);
+        return {
+          name: block.name,
+          path: relPath,
+          profiles,
+          params_overrides: parseParamsOverrides(block.body),
+          execution_mode: parseNfTestExecutionMode(block.body),
+          assert_workflow_success: block.body.includes("workflow.success"),
+          snapshot: parseSnapshot(path, relPath, block.body, block.name),
+          prose_assertions: parseProseAssertions(block.body),
+        };
+      });
     });
 }
 
+function parseNfTestConfigProfiles(pipelineRoot: string): string[] {
+  const path = join(pipelineRoot, "nf-test.config");
+  if (!existsSync(path)) return [];
+  let profiles: string[] = [];
+  for (const directive of parseNfTestFileProfiles(readText(path))) {
+    profiles = applyProfileDirective(profiles, directive);
+  }
+  return profiles;
+}
+
 function parseNfTestFileProfiles(text: string): string[] {
-  return unique([...text.matchAll(/^\s*profile\s+["']([^"']+)["']/gmu)].map((match) => match[1]!));
+  const fileScope = maskNfTestBlocks(text);
+  return unique(
+    [...fileScope.matchAll(/^\s*profile\s+["']([^"']+)["']/gmu)].map((match) => match[1]!),
+  );
 }
 
 function extractNfTestBlocks(text: string): { name: string; body: string }[] {
@@ -2543,25 +2875,69 @@ function extractNfTestBlocks(text: string): { name: string; body: string }[] {
   for (const match of text.matchAll(/\btest\(\s*(["'])(.*?)\1\s*\)\s*\{/gu)) {
     const openIndex = match.index + match[0].lastIndexOf("{");
     const body = extractBlockAt(text, openIndex);
-    if (body !== null) blocks.push({ name: match[2]!, body });
+    if (body !== null) {
+      const name = match[2]!.includes("$") ? "dynamically-generated" : match[2]!;
+      blocks.push({ name, body });
+    }
   }
-  return blocks.length > 0 ? blocks : [{ name: "unnamed", body: text }];
+  const testCallCount = [...maskNextflowComments(text).matchAll(/\btest\s*\(/gu)].length;
+  if (testCallCount > blocks.length) blocks.push({ name: "dynamically-generated", body: text });
+  return blocks.length > 0 ? blocks : [{ name: "dynamically-generated", body: text }];
 }
 
-function parseNfTestProfiles(text: string, name: string): string[] {
-  const profiles = new Set<string>();
-  for (const source of [text, name]) {
-    for (const match of source.matchAll(/-profile\s+(?:["']([^"']+)["']|([A-Za-z0-9_,.-]+))/gu)) {
-      for (const profile of (match[1] ?? match[2]!).split(",")) {
-        const trimmed = profile.trim();
-        if (trimmed) profiles.add(trimmed);
-      }
-    }
-    for (const match of source.matchAll(/(?:^|[^-])\bprofile\s+["']([^"']+)["']/gu)) {
-      profiles.add(match[1]!);
+function maskNfTestBlocks(text: string): string {
+  const chars = text.split("");
+  for (const match of text.matchAll(/\btest\s*\([^)]*\)\s*\{/gu)) {
+    const openIndex = match.index + match[0].lastIndexOf("{");
+    const block = extractBlockAt(text, openIndex);
+    if (block === null) continue;
+    const endIndex = openIndex + block.length + 2;
+    for (let index = match.index; index < endIndex; index += 1) {
+      if (chars[index] !== "\n") chars[index] = " ";
     }
   }
-  return [...profiles];
+  return chars.join("");
+}
+
+function maskNamedBlocks(text: string, name: string): string {
+  const chars = text.split("");
+  const declaration = new RegExp(`\\b${name}\\s*\\{`, "gu");
+  for (const match of text.matchAll(declaration)) {
+    const openIndex = match.index + match[0].lastIndexOf("{");
+    const block = extractBlockAt(text, openIndex);
+    if (block === null) continue;
+    const endIndex = openIndex + block.length + 2;
+    for (let index = match.index; index < endIndex; index += 1) {
+      if (chars[index] !== "\n") chars[index] = " ";
+    }
+  }
+  return chars.join("");
+}
+
+function parseNfTestProfiles(text: string): string[] {
+  return unique(
+    [...text.matchAll(/(?:^|[^-])\bprofile\s+["']([^"']+)["']/gu)].map((match) => match[1]!),
+  );
+}
+
+function applyProfileDirective(current: string[], directive: string): string[] {
+  const trimmed = directive.trim();
+  const append = trimmed.startsWith("+");
+  const profiles = (append ? trimmed.slice(1) : trimmed)
+    .split(",")
+    .map((profile) => profile.trim())
+    .filter(Boolean);
+  return append ? unique([...current, ...profiles]) : unique(profiles);
+}
+
+function parseNfTestExecutionMode(text: string): TestExecutionMode {
+  const stubValues = [...text.matchAll(/\bstub\s*(?:=\s*)?(true|false)/gu)].map(
+    (match) => match[1] === "true",
+  );
+  if (stubValues.length === 0) return "real";
+  if (stubValues.every(Boolean)) return "stub";
+  if (stubValues.some(Boolean)) return "mixed";
+  return "real";
 }
 
 function parseParamsOverrides(text: string): Record<string, unknown> {

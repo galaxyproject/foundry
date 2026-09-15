@@ -9,11 +9,11 @@ tags:
 status: draft
 created: 2026-05-03
 revised: 2026-09-15
-revision: 2
+revision: 3
 summary: "Translate Nextflow test evidence into a CWL workflow test plan."
 input_artifacts:
   - id: summary-nextflow
-    description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence."
+    description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_candidates, test_selection, and snapshot evidence."
 output_artifacts:
   - id: cwl-test-plan
     kind: markdown
