@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-05-10
 revised: 2026-09-15
-revision: 5
+revision: 6
 summary: "Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests."
 references:
   - kind: research
@@ -325,10 +325,3 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the cast sk
 - `cli-command` → [[planemo-lint]] and [[planemo-test]] cast to JSON sidecars; consulted on-demand inside the §10 loop.
 - `schema` → [[planemo-test-report]] copied verbatim into the cast bundle; the convergence loop AJV-validates `--test_output_json` output against it before classifying failures.
 - `examples` — pending: 3 hand-picked Wave 1 modules (one trivial, one paired-aware, one with conditional). Used for round-trip smoke testing before this Mold ships.
-
-## Revision history
-
-- **rev 1 (2026-05-10)** — initial draft. Procedure sketched against the trimmed plan; no cast runs yet. Pattern + CLI references all `evidence: hypothesis`.
-- **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against [[planemo-test-report]]; pulled in `cli-tool`/`cli-command`/`schema` references for [[planemo]], [[planemo-lint]], [[planemo-test]], [[planemo-test-report]]. Deferred-manpages caveat removed.
-- **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other Mold; the prior condense was always a verbatim passthrough), so reference packaging is reproducible and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
-- **rev 5 (2026-09-15)** — removed the unimplemented deterministic-parser boundary. The cast is explicitly an agent-authored translation with mechanical hashing, pinning, and validation support.
