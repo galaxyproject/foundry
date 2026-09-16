@@ -70,7 +70,6 @@ Connect the identifier file through `sort_type|sort_file`. It must be the identi
 
 ## Pitfalls
 
-- Flattening the conditional. `sort_type: file` as a plain string with a sibling `sort_file:` is not the serialized shape; the connection address is `sort_type|sort_file`.
 - This cannot drop elements, it fails instead. `SortTool` requires the file's line count to equal the element count, and every line to name an element that exists — otherwise the job errors. A sort file that has drifted out of sync stops the workflow rather than quietly shrinking the collection.
 - The reference collection defines truth. If the identifier file comes from the wrong sibling, downstream pairing silently follows the wrong axis.
 - Extract identifiers after upstream relabel, filter, or flatten operations, not before.
