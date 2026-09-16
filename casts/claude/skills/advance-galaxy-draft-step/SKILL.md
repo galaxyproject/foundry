@@ -24,6 +24,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
+- **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 galaxy-tool-cache`.
+  Check: `galaxy-tool-cache --help | grep -q summarize`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 - **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.
@@ -37,8 +41,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
+- `references/cli/add.json`: CLI command reference packaged as a sidecar. Populate the tool cache for the chosen step's resolved wrapper (bare stock id or Tool Shed pin) before validation: draft-validate --concrete only produces a real tool-state verdict when the step's tool is cached, and a stock id needs an explicit --tool-version fetched here. Use when: after a wrapper (and, for stock ids, a concrete version) has been resolved for the chosen step in step 2, before running draft-validate --concrete in step 6.
 - `references/cli/draft-extract.json`: CLI command reference packaged as a sidecar. At loop endstate, extract the concrete gxformat2 workflow from the fully-concretized draft — drop drafty steps, strip `_plan_*` fields, promote `class` to `GalaxyWorkflow` — and write it as the runnable `galaxy-workflow.gxwf.yml`. Use when: draft-next-step reports `draft: false` (no remaining drafty steps).
 - `references/cli/draft-validate.json`: CLI command reference packaged as a sidecar. Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2. Use when: after implementing or modifying the chosen step in the draft.
+- `references/cli/list.json`: CLI command reference packaged as a sidecar. Resolve a stock/built-in tool's concrete version from a populated cache before add — the shed's TRS version-list endpoint can't auto-resolve it, so a stock version is never hand-guessed. Use when: in step 2, when the chosen step's tool is a bare/stock id and its concrete version isn't already known from a step-plan pin.
 - `references/notes/galaxy-tool-job-failure-reference.md`: Research note copied verbatim into the bundle. Classify draft-validate diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice). Use when: draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.
 - `references/schemas/galaxy-tool-summary.schema.json`: Schema file copied verbatim into the bundle. Bind the chosen step against the deterministic tool summary manifest emitted by summarize-galaxy-tool — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `state` shape. Use when: after a wrapper has been resolved for the chosen step and before implementing it.
 
@@ -62,10 +68,12 @@ This skill is **single-entry, single-exit**: it owns the loop oracle (draft-next
      - **Deferred** — `tool_id` is `TODO`. Search fresh: run discover-shed-tool against the step's `_plan_*` context.
 
      Either way, if no acceptable shed candidate emerges, fall through to author-galaxy-tool-wrapper.
+
+   Whichever branch resolved the step's tool identity, **populate the cache now, before validation**: run add `<tool_id> --tool-version <v> --cache-dir <dir>` for the step's resolved (and, for stock ids, version-confirmed) pin. Carry that same `--cache-dir` through to draft-validate `--concrete` in step 6 — without a cached entry, tool-state validation for this step does not run at all; it does not fail, it silently skips.
 3. **Summarize the wrapper.** Invoke summarize-galaxy-tool on the resolved wrapper to produce a galaxy-tool-summary for the next phase.
 4. **Implement.** Invoke implement-galaxy-tool-step with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `state`, and wrapper-determined port names.
 5. **Check computability.** Inspect the open-requirements-ledger for a new `open` blocking entry implement-galaxy-tool-step appended against this step. draft-validate cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to repair-galaxy-draft-topology for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
-6. **Validate.** Run draft-validate `--concrete` over the mutated draft. On green, return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
+6. **Validate.** Run draft-validate `--concrete` over the mutated draft, passing the `--cache-dir` populated in step 2 so tool-state validation actually runs for the step just implemented. **A skipped tool-state check is not green.** If the step's tool was not found in the cache, the tool-state bucket reports the check did not run at all — not that it passed — and treating that as green lets the loop advance on a step nothing has verified; populate the cache (step 2) and re-run before proceeding. Only on a genuine green — tool-state validation ran for the implemented step and reported no failures — return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
 
 ### Failure routing
 
