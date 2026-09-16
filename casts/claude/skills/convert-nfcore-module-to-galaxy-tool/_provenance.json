@@ -4,11 +4,11 @@
   "mold": {
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
-    "revision": 7,
-    "content_hash": "4caff3e340d28db70ae245abd2ba5338877973178d7b5cdc8892a391b1a4fe45",
-    "commit": "0fa5fc9933b64ca8348a87c97dda6d9547c6830f"
+    "revision": 8,
+    "content_hash": "2293453c5ca2af7bac5cce7830297f56452b1279b64c59fcadea01cc3c578605",
+    "commit": "d2b99e65f5eda6d603abcb4239fd2e048656bf08"
   },
-  "cast_at": "2026-09-15T22:37:38.656Z",
+  "cast_at": "2026-09-16T02:21:26.090Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -123,6 +123,38 @@
     {
       "kind": "research",
       "mode": "verbatim",
+      "ref": "[[galaxy-datatypes-conf]]",
+      "src": "content/research/galaxy-datatypes-conf/index.md",
+      "dst": "references/notes/galaxy-datatypes-conf.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Consult the pinned Galaxy datatype registry and its raw XML companion when the concise mapping guide cannot establish a valid wrapper format.",
+      "trigger": "When a datatype is absent or ambiguous in the mapping guide, when alternatives have different datatype support, or when Planemo rejects a format value.",
+      "verification": "Cast and confirm the bundle contains both the registry note and datatypes_conf.xml.sample; test an absent extension such as csi or crai and confirm the wrapper uses the documented generic fallback.",
+      "src_hash": "8f212f1cd4f0018b211e9a98856cb0d8a7dbfc7479f129d4d5e899c4f03f8027",
+      "dst_hash": "8f212f1cd4f0018b211e9a98856cb0d8a7dbfc7479f129d4d5e899c4f03f8027",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-datatypes-conf]]",
+      "src": "content/research/galaxy-datatypes-conf/datatypes_conf.xml.sample",
+      "dst": "references/notes/datatypes_conf.xml.sample",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Consult the pinned Galaxy datatype registry and its raw XML companion when the concise mapping guide cannot establish a valid wrapper format.",
+      "trigger": "When a datatype is absent or ambiguous in the mapping guide, when alternatives have different datatype support, or when Planemo rejects a format value.",
+      "companion_of": "references/notes/galaxy-datatypes-conf.md",
+      "src_hash": "d714a1cf28ad605ec52126caaf100db6d110cdedde5d1b47429bfb219542e044",
+      "dst_hash": "d714a1cf28ad605ec52126caaf100db6d110cdedde5d1b47429bfb219542e044",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
       "ref": "[[galaxy-discover-datasets]]",
       "src": "content/research/galaxy-discover-datasets/index.md",
       "dst": "references/notes/galaxy-discover-datasets.md",
@@ -134,6 +166,22 @@
       "verification": "Cast against a glob-output module (samtools/index); confirm the emitted <collection><discover_datasets pattern=...> shape resolves the glob correctly under planemo test.",
       "src_hash": "f661572946ebefdede346586d11fa863415a71259a6a2dbe4ffc125724ec44d8",
       "dst_hash": "f661572946ebefdede346586d11fa863415a71259a6a2dbe4ffc125724ec44d8",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-path-glob-to-galaxy-datatype]]",
+      "src": "content/research/nextflow-path-glob-to-galaxy-datatype/index.md",
+      "dst": "references/notes/nextflow-path-glob-to-galaxy-datatype.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Map Nextflow paths, globs, and filename evidence to registered Galaxy datatype extensions without guessing from names alone.",
+      "trigger": "When choosing format attributes for Galaxy inputs and outputs.",
+      "verification": "Cast against samtools/index; confirm known mappings are used and absent csi/crai mappings fall back to generic data rather than invented extensions.",
+      "src_hash": "04d728aef2d113ff01cd00789cc7980cb808d5bc51bdf9752ef7ee53af486419",
+      "dst_hash": "04d728aef2d113ff01cd00789cc7980cb808d5bc51bdf9752ef7ee53af486419",
       "source": "deterministic"
     },
     {

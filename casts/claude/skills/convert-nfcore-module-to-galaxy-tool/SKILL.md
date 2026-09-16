@@ -30,6 +30,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/cli/planemo.md`: CLI tool reference copied verbatim into the bundle. Install metadata for the planemo CLI invoked by the convergence loop. Use when: always — the cast skill needs planemo on PATH before running lint/test.
+- `references/notes/nextflow-path-glob-to-galaxy-datatype.md`: Research note copied verbatim into the bundle. Map Nextflow paths, globs, and filename evidence to registered Galaxy datatype extensions without guessing from names alone. Use when: choosing format attributes for Galaxy inputs and outputs.
 - `references/notes/nfcore-channel-input-to-galaxy-collection.md`: Research note copied verbatim into the bundle. Map process input channels (tuple(meta, path)) to Galaxy <param type="data"> / <param type="data_collection">. Use when: emitting <inputs> for a module.
 - `references/notes/nfcore-meta-map-to-galaxy-params.md`: Research note copied verbatim into the bundle. Triage meta-map keys: behavior-driving keys become Galaxy <param>s; identity keys are dropped. Use when: a process consumes a meta-map and any meta keys influence the script: body.
 - `references/notes/nfcore-stub-block-to-galaxy-noop-test.md`: Research note copied verbatim into the bundle. Document the intentional drop of stub: blocks; rely on planemo test for fixture coverage. Use when: the module's main.nf contains a stub: block.
@@ -43,6 +44,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Resolve the container directive (mulled, biocontainer, Wave) and environment.yml into a Galaxy <requirements> block with matching bioconda pins. Use when: emitting <requirements> and the module's container directive is non-trivial (ternary or mulled).
 - `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
 - `references/notes/component-nf-core-tools.md`: Research note copied verbatim into the bundle. Reference for nf-core module conventions: meta.yml shape, modules.json, environment.yml posture, test layout, container directive idioms. Use when: parsing meta.yml, environment.yml, or main.nf and a convention is unclear; when populating _provenance.yml.
+- `references/notes/galaxy-datatypes-conf.md`: Research note copied verbatim into the bundle. Consult the pinned Galaxy datatype registry and its raw XML companion when the concise mapping guide cannot establish a valid wrapper format. Use when: a datatype is absent or ambiguous in the mapping guide, when alternatives have different datatype support, or when Planemo rejects a format value.
+- `references/notes/datatypes_conf.xml.sample`: Companion file copied verbatim into the bundle. Sibling of `references/notes/galaxy-datatypes-conf.md`; read it where that note directs.
 - `references/notes/galaxy-discover-datasets.md`: Research note copied verbatim into the bundle. Reference for the <discover_datasets> XML element: attributes, named/regex patterns, <data> vs <collection> contexts, test-side <discovered_dataset>. Use when: translating a Nextflow output: channel that uses a glob path or runtime-interpolated filenames into a Galaxy <collection> or multi-output <data>.
 - `references/schemas/planemo-test-report.schema.json`: Schema file copied verbatim into the bundle. Validate `planemo test --test_output_json` output before classifying failures; the JSON gate that replaces free-text parsing. Use when: step 10.2 — after every `planemo test` invocation.
 
@@ -125,10 +128,10 @@ nfcore_source:
   test_datasets_sha: <sha of nf-core/test-datasets pin>
 generated:
   by_mold: convert-nfcore-module-to-galaxy-tool
-  mold_revision: 1
-  cast_target: claude
+  mold_revision: <copy _provenance.json.mold.revision>
+  cast_target: <copy _provenance.json.cast_target>
   cast_artifact_sha: <sha of cast bundle used>
-  on_date: 2026-05-10
+  on_date: <conversion date, YYYY-MM-DD>
 overrides: []
 ```
 
@@ -160,8 +163,10 @@ Emit a final `extra_args` text param per nfcore-task-ext-args-to-galaxy-addition
 
 For each `output:` channel that isn't the `versions` emit, **decide cardinality first, then shape** (per galaxy-discover-datasets §*Convert skill posture*). The Nextflow glob alone is not enough — `path('*.bam')` (N files, one per element of an upstream collection) and `path('*.{bai,csi,crai}')` (exactly one file, alternation across mutually-exclusive extensions) look the same but map to different Galaxy idioms.
 
+Choose every `format` value from nextflow-path-glob-to-galaxy-datatype. When that guide does not settle the value, when an alternation contains differently supported extensions, or when Planemo rejects a candidate, consult galaxy-datatypes-conf and its `datatypes_conf.xml.sample` companion. Never emit an extension merely because it appears in a filename. If no suitable registered datatype exists, use `format="data"` for an XML `<data>` output or collection element; for an input `<param type="data">`, omitting `format` is also legal and avoids a false constraint. Record the original extension, the registry lookup, and the generic fallback in `_provenance.yml.overrides` so the loss of datatype specificity is visible.
+
 - **Single output, deterministic name** (`path("${prefix}.json")`) → `<data name="..." format="json" from_work_dir="${prefix}.json"/>`. No `<discover_datasets>`.
-- **Single output, variable extension** (alternation glob like `path("*.{bai,csi,crai}")`, or `path("${prefix}.${ext}")` where `ext` is computed): the channel emits **one** file whose extension depends on inputs or args. Map to a `<data>` with the most-common extension as `format=`, plus a `<change_format>` block that flips on the input ext or the responsible param. **Preserve the upstream invocation byte-for-byte** and capture the result with a tight `mv` — `ln -s '$input' 'input.${input.ext}'` to stage with the upstream-expected name, run the tool exactly as the nf-core `script:` body does, then select the one concrete output path using the same input/parameter conditions and move it to `'$output_name'`. Do **not** use brace expansion such as `mv 'input.${input.ext}'.{bai,csi,crai} '$output_name'`: the shell supplies three source operands even when only one file exists, so `mv` requires the Galaxy output path to be a directory. **Do not** use `<collection>` + `<discover_datasets>` for this shape — there is no list. Direct write to `'$output_name'` (instead of `mv`) is the secondary form, used only when the upstream `script:` body itself passes an output-path arg to the tool. See galaxy-discover-datasets §*Convert skill posture* Rule 2 for the conditional-move example, including the explicit-output variant and the `from_work_dir` callout.
+- **Single output, variable extension** (alternation glob like `path("*.{bai,csi,crai}")`, or `path("${prefix}.${ext}")` where `ext` is computed): the channel emits **one** file whose extension depends on inputs or args. Map to a `<data>` with the most-common **registered** extension as `format=`, plus a `<change_format>` block that flips on the input ext or the responsible param. If the variants do not all have registered Galaxy datatypes, the generic `data` fallback above is acceptable; add `<change_format>` rules only for registered variants when they materially improve downstream behavior. **Preserve the upstream invocation byte-for-byte** and capture the result with a tight `mv` — `ln -s '$input' 'input.${input.ext}'` to stage with the upstream-expected name, run the tool exactly as the nf-core `script:` body does, then select the one concrete output path using the same input/parameter conditions and move it to `'$output_name'`. Do **not** use brace expansion such as `mv 'input.${input.ext}'.{bai,csi,crai} '$output_name'`: the shell supplies three source operands even when only one file exists, so `mv` requires the Galaxy output path to be a directory. **Do not** use `<collection>` + `<discover_datasets>` for this shape — there is no list. Direct write to `'$output_name'` (instead of `mv`) is the secondary form, used only when the upstream `script:` body itself passes an output-path arg to the tool. See galaxy-discover-datasets §*Convert skill posture* Rule 2 for the conditional-move example, including the explicit-output variant and the `from_work_dir` callout.
 - **Multi-output, list cardinality** (true glob like `path('*.bam')` where the upstream process emits N files keyed by element identifier) → `<collection type="list" name="..." format="bam">` with `<discover_datasets pattern="__name_and_ext__" visible="true"/>`.
 - **Multi-output, paired cardinality** (`tuple val(meta), path("*_R{1,2}.fastp.fastq.gz")`) → `<collection type="paired" ...>` with a custom `(?P<name>...)_R(?P<identifier_1>[12])...` regex.
 - **`versions` channel** → drop; the `<version_command>` carries that load (per nfcore-versions-emit-to-galaxy-version-command).
@@ -199,6 +204,8 @@ When `tests/main.nf.test` has no usable fixture (stub-only coverage, missing tes
 #### 9. Emit `_provenance.yml`
 
 Collect: nf-core module source (repo, path, branch, git_sha), file hashes, test-datasets pin, mold metadata, any overrides (forced divergence from upstream container, dropped stub block, hand-edits the skill chose to apply).
+
+Read the cast bundle's sibling `_provenance.json` when filling `generated`. Copy `mold.revision` to `mold_revision` and its top-level `cast_target` to `cast_target`. `cast_target` identifies the bundle adapter that produced this skill; it is not the provider or model executing the conversion. Put execution provider/model details in the harness run record, not in `_provenance.yml`.
 
 #### 10. Convergence loop: lint, test, fix
 
@@ -245,7 +252,7 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the skill w
 
 ### Reference dispatch (for casting)
 
-- `research` → the 5 nf-core→Galaxy translation notes (nfcore-channel-input-to-galaxy-collection, nfcore-meta-map-to-galaxy-params, nfcore-task-ext-args-to-galaxy-additional-options, nfcore-versions-emit-to-galaxy-version-command, nfcore-stub-block-to-galaxy-noop-test) plus component-nf-core-tools, component-nextflow-containers-and-envs, galaxy-discover-datasets. All copied verbatim into the cast bundle under `references/notes/`, loaded per each ref's `used_at`/`load`.
+- `research` → the 5 nf-core→Galaxy translation notes (nfcore-channel-input-to-galaxy-collection, nfcore-meta-map-to-galaxy-params, nfcore-task-ext-args-to-galaxy-additional-options, nfcore-versions-emit-to-galaxy-version-command, nfcore-stub-block-to-galaxy-noop-test) plus nextflow-path-glob-to-galaxy-datatype, galaxy-datatypes-conf, component-nf-core-tools, component-nextflow-containers-and-envs, and galaxy-discover-datasets. All are copied verbatim into the cast bundle under `references/notes/`, loaded per each ref's `used_at`/`load`; the raw datatype registry travels as the on-demand companion `references/notes/datatypes_conf.xml.sample`.
 - `cli-tool` → planemo carries the pinned install metadata; flows into the cast bundle's `_required_tools.json` via the PR #235 mechanism.
 - `cli-command` → planemo-lint and planemo-test cast to JSON sidecars; consulted on-demand inside the §10 loop.
 - `schema` → planemo-test-report copied verbatim into the cast bundle; the convergence loop AJV-validates `--test_output_json` output against it before classifying failures.
