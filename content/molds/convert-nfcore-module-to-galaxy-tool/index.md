@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-05-10
 revised: 2026-09-16
-revision: 9
+revision: 10
 summary: "Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests."
 references:
   - kind: research
@@ -303,7 +303,9 @@ Read `tests/main.nf.test`. For each test that asserts a successful run with a no
 
 - Resolve every input fixture path to a `raw.githubusercontent.com/nf-core/test-datasets/<test_datasets_sha>/...` URL. Pin `<test_datasets_sha>` upfront — never use a branch ref.
 - Emit Galaxy `<param ... location="https://..."/>` for inputs.
-- For outputs, prefer `<output name="..." location="https://..." checksum="sha256$..."/>` (compute checksum from the upstream snapshot file when one exists; omit if not).
+- For outputs, prefer `<output name="..." location="https://..." checksum="sha256$..."/>` when expected output bytes are available; compute SHA-256 from those bytes, not the nf-test snapshot JSON. An upstream snapshot's MD5 can instead be used as `<output name="..." md5="..."/>` without an expected-output file ([Galaxy test attributes](https://docs.galaxyproject.org/en/release_26.1/dev/schema.html#tool-tests-test-output)). Reuse a hash only when the Galaxy output should be byte-identical; renamed input files can change embedded filenames. Otherwise use meaningful content assertions and record the verification divergence in `_provenance.yml.overrides`.
+
+Account for every eligible upstream test by name: emit its Galaxy test, or record its omission and reason in `_provenance.yml.overrides` and report coverage as incomplete. Do not silently drop distinct input shapes or parameter settings. The at-least-one-test shipment requirement below is a minimum, not a coverage-completion criterion.
 
 When `tests/main.nf.test` has no usable fixture (stub-only coverage, missing test file), the convert Mold **does not ship a placeholder `<test>`**. It surfaces the gap in `_provenance.yml.overrides` and exits with a non-zero status; the harness escalates to human review. Every shipped wrapper carries at least one `<test>` block backed by a real fixture (per [[nfcore-stub-block-to-galaxy-noop-test]] and the reviewer Mold's dimension #6).
 
@@ -337,7 +339,7 @@ After the run:
    - `tests[].data.status == "failure"`, and `data.job.stderr` (when present) carries upstream tool stderr → inspect `data.job.command_line` when available before revising the `<command>` Cheetah translation; check for backslash-space arguments and missing shell separators as well as tool options.
    - `tests[].data.status == "error"` with HTTP/URL signals → fixture-availability fault; verify the `nf-core/test-datasets` URL resolves and consider a local `test-data/` fallback, recording the divergence in `_provenance.yml.overrides`.
    - Any other failure shape → human triage.
-3. **Stop** when lint and test both clear.
+3. **Stop** when lint and test both clear and every eligible upstream test is either covered or explicitly recorded as omitted. Passing emitted tests does not resolve recorded coverage gaps; report them as incomplete coverage.
 
 The convergence loop is bounded (default 3 attempts). On exhaustion, the cast skill writes whatever it has and surfaces the final `_planemo_test_report.json` (plus the lint diagnostics) for human triage.
 
