@@ -1,5 +1,12 @@
 # @galaxy-foundry/gxwf-foundry
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`ff73ded`](https://github.com/galaxyproject/foundry/commit/ff73dede87b0bd662a52a4705764529ffa5053c6)]:
+  - @galaxy-foundry/summarize-nextflow@0.3.0
+
 ## 0.1.1
 
 ### Patch Changes

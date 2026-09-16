@@ -1,5 +1,12 @@
 # foundry-site
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @galaxy-foundry/gxwf-foundry@0.1.2
+
 ## 0.0.5
 
 ### Patch Changes
