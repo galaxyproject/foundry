@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-06-02
-revised: 2026-08-19
-revision: 4
+revised: 2026-09-16
+revision: 6
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
@@ -53,7 +53,7 @@ references:
     load: on-demand
     mode: sidecar
     evidence: hypothesis
-    purpose: "Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2."
+    purpose: "Validate the draft and its concrete subset with --concrete --strict-state --json; skipped tool-state checks must fail the gate."
     trigger: "After implementing or modifying the chosen step in the draft."
     verification: "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched."
   - kind: cli-command
@@ -65,6 +65,24 @@ references:
     purpose: "At loop endstate, extract the concrete gxformat2 workflow from the fully-concretized draft — drop drafty steps, strip `_plan_*` fields, promote `class` to `GalaxyWorkflow` — and write it as the runnable `galaxy-workflow.gxwf.yml`."
     trigger: "When [[draft-next-step]] reports `draft: false` (no remaining drafty steps)."
     verification: "Cast the skill, run the loop to endstate on an IWC-derived draft, confirm draft-extract emits a `class: GalaxyWorkflow` file that passes terminal `gxwf validate` with no `_plan_*` fields or drafty steps."
+  - kind: cli-command
+    ref: "[[add]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Cache the resolved wrapper for summarization and validation, using its confirmed tool version."
+    trigger: "After resolving the wrapper and version, if the shared cache lacks that pin."
+    verification: "Confirm add caches the resolved pin and draft-validate --concrete --strict-state --json validates its state using the same --cache-dir."
+  - kind: cli-command
+    ref: "[[list]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Read a stock tool's cached version when the step plan has no version pin."
+    trigger: "In step 2, when the chosen step's tool is a bare/stock id and its concrete version isn't already known from a step-plan pin."
+    verification: "Cast the skill, populate a cache with a stock tool, run list --json, confirm the reported version is what add's --tool-version uses for that bare id."
   - kind: schema
     ref: "[[galaxy-tool-summary]]"
     used_at: runtime
@@ -110,6 +128,8 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
 
 ## Sequence
 
+Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <dir>` to cache commands, wrapper summarization, and validation.
+
 1. **Pick.** Run [[draft-next-step]]. If `draft: false`, the loop is done: run [[draft-extract]] to emit the concrete `galaxy-workflow.gxwf.yml` (drafty steps dropped, `_plan_*` stripped, `class` promoted to `GalaxyWorkflow`), then return. Otherwise carry the chosen step id forward.
 2. **Resolve a wrapper.** First split on whether the step's tool is a **built-in / stock** Galaxy tool — a bare id with no `owner/repo` path (`Filter1`, `sort1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`):
    - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through [[discover-shed-tool]] (Tool Shed search) or [[author-galaxy-tool-wrapper]]. Only its concrete version needs resolving: the shed serves stock tools by bare id, but its TRS version-list endpoint can't auto-resolve the version, so read it from a populated cache via `galaxy-tool-cache list` or take a known pin from the step plan — never hand-guess a stock version. [[summarize-galaxy-tool]] then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
@@ -118,14 +138,16 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
      - **Deferred** — `tool_id` is `TODO`. Search fresh: run [[discover-shed-tool]] against the step's `_plan_*` context.
 
      Either way, if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
+
+   If the resolved pin is absent from the cache, run [[add]] `<tool_id> --tool-version <v> --cache-dir <dir>` before summarization. In `@galaxy-tool-util/cli` 1.10.0, validation also fetches and caches missing metadata unless `--offline` is set; offline validation requires a populated cache.
 3. **Summarize the wrapper.** Invoke [[summarize-galaxy-tool]] on the resolved wrapper to produce a [[galaxy-tool-summary]] for the next phase.
 4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `state`, and wrapper-determined port names.
 5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry [[implement-galaxy-tool-step]] appended against this step. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
-6. **Validate.** Run [[draft-validate]] `--concrete` over the mutated draft. On green, return; the next iteration starts at step 1. On red, route per the failure-routing rules below.
+6. **Validate.** Run [[draft-validate]] `<draft> --concrete --strict-state --json --cache-dir <dir>`. `--strict-state` makes skipped tool-state checks fail validation; draft structure and topology checks still run. If metadata is unavailable, resolve the cache or fetch error and retry. Return on exit 0; route other failures using the JSON diagnostics and the rules below.
 
 ## Failure routing
 
-`draft-validate --concrete` failures fall into three buckets:
+`draft-validate --concrete --strict-state --json` failures, after resolving metadata availability, fall into three buckets:
 
 - **Local to the just-implemented step** (sentinel violation, wrong port name, malformed `state`) — re-enter [[implement-galaxy-tool-step]] with the diagnostic.
 - **Wrapper-choice mismatch** (selected wrapper cannot satisfy the step's `_plan_*` contract — wrong datatype, missing parameter, incompatible collection shape) — back out to step 2 and pick a different wrapper, either via [[discover-shed-tool]] with refined criteria or by escalating to [[author-galaxy-tool-wrapper]].

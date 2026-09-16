@@ -112,3 +112,11 @@ Properties are tagged by bucket:
   (datatype, collection shape, or missing parameter), the skill classifies the
   failure per the failure-routing rules in `index.md` and re-enters wrapper
   resolution, not step implementation.
+
+## Property: skipped tool-state checks block advancement
+
+- bucket: validation
+- check: deterministic + llm-judged
+- assertion: validation uses `--concrete --strict-state --json` with the run's
+  cache directory. A skipped tool-state check produces a nonzero exit status;
+  the loop resolves the metadata failure and reruns validation before advancing.

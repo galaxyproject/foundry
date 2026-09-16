@@ -133,8 +133,7 @@ describe("assemble-pipeline (committed harnesses)", () => {
     const dir = "casts/claude/skills/pipeline-nextflow-to-galaxy";
     const assembly = JSON.parse(readFileSync(path.join(repoRoot, dir, "_assembly.json"), "utf8"));
     const tools = assembly.required_tools.map((t: { tool: string }) => t.tool);
-    // foundry (summarize-nextflow), gxwf (validate/draft/discover), planemo (run-workflow-test).
-    expect(tools).toEqual(["foundry", "gxwf", "planemo"]);
+    expect(tools).toEqual(["foundry", "galaxy-tool-cache", "gxwf", "planemo"]);
     // planemo proves the run-workflow-test backfill flows into the pipeline manifest.
     const planemo = assembly.required_tools.find((t: { tool: string }) => t.tool === "planemo");
     expect(planemo.source).toBe("referenced");
