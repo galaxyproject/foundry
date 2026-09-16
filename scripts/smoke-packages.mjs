@@ -2,9 +2,18 @@
 // consumer, and exercise each package's runtime surface. This catches regressions
 // in `files`, exports, bins, and workspace dependency rewriting.
 
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
+import process from "node:process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -50,6 +59,39 @@ function packTarball(packageName) {
 }
 
 const smokeScripts = {
+  "@galaxy-foundry/nfcore-tool-lab": `
+    import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+    import { join } from "node:path";
+    import { prepareLabTool, packageVersion } from "@galaxy-foundry/nfcore-tool-lab";
+    const inputDir = join(process.cwd(), "lab-conversion");
+    const outputDir = join(process.cwd(), "lab-prepared");
+    mkdirSync(inputDir);
+    writeFileSync(join(inputDir, "tool.xml"), '<tool id="stats" name="Stats" version="1"><command><![CDATA[  seqkit stats  ]]></command></tool>');
+    writeFileSync(join(inputDir, "macros.xml"), '<macros/>');
+    writeFileSync(join(inputDir, "_provenance.yml"), JSON.stringify({
+      nfcore_source: {
+        modules_repo: "nf-core/modules", module_path: "modules/nf-core/seqkit/stats",
+        git_sha: "1".repeat(40), test_datasets_sha: "2".repeat(40),
+      },
+      generated: {
+        by_mold: "convert-nfcore-module-to-galaxy-tool", mold_revision: 11,
+        cast_target: "claude", cast_artifact_sha: "3".repeat(64),
+      },
+      overrides: [],
+    }));
+    const metadata = {
+      description: "Sequence statistics", categories: ["Sequence Analysis"],
+      homepage_url: "https://bioinf.shenwei.me/seqkit/",
+    };
+    writeFileSync(join(inputDir, "metadata.json"), JSON.stringify(metadata));
+    const record = prepareLabTool({ inputDir, outputDir, metadata });
+    if (record.tool.id !== "nfcore_compat_seqkit_stats") throw new Error("lab identity missing");
+    if (record.prepared_by.version !== packageVersion) throw new Error("package version mismatch");
+    const xml = readFileSync(join(outputDir, "tool.xml"), "utf8");
+    if (!xml.includes("<![CDATA[  seqkit stats  ]]>") || !xml.includes("(Nextflow Module Automated Conversion)")) {
+      throw new Error("tool command or lab name changed incorrectly");
+    }
+  `,
   "@galaxy-foundry/gxwf-foundry": `
     import {
       summaryCwlValidator,
@@ -195,6 +237,55 @@ try {
   run("npx", ["--no-install", "validate-planemo-test-report", "--help"], {
     cwd: consumerDir,
   });
+  run(
+    "npx",
+    [
+      "--no-install",
+      "nfcore-tool-lab",
+      "prepare",
+      "--input",
+      "lab-conversion",
+      "--output",
+      "lab-cli-prepared",
+      "--metadata",
+      "lab-conversion/metadata.json",
+    ],
+    { cwd: consumerDir },
+  );
+  const labCliRecord = JSON.parse(
+    readFileSync(join(consumerDir, "lab-cli-prepared", "_publication.json"), "utf8"),
+  );
+  if (labCliRecord.tool.id !== "nfcore_compat_seqkit_stats")
+    throw new Error("lab CLI preparation failed");
+  const labBin = join(
+    consumerDir,
+    "node_modules/@galaxy-foundry/nfcore-tool-lab/dist/bin/nfcore-tool-lab.js",
+  );
+  const labArgs = [
+    labBin,
+    "prepare",
+    "--input",
+    "lab-conversion",
+    "--metadata",
+    "lab-conversion/metadata.json",
+  ];
+  const preview = spawnSync(
+    process.execPath,
+    [...labArgs, "--output", "lab-preview", "--dry-run"],
+    { cwd: consumerDir, encoding: "utf8" },
+  );
+  if (
+    preview.status !== 0 ||
+    JSON.parse(preview.stdout).tool.id !== "nfcore_compat_seqkit_stats" ||
+    existsSync(join(consumerDir, "lab-preview"))
+  )
+    throw new Error("lab CLI dry-run failed");
+  const rejected = spawnSync(process.execPath, [...labArgs, "--output", "lab-cli-prepared"], {
+    cwd: consumerDir,
+    encoding: "utf8",
+  });
+  if (rejected.status !== 1 || rejected.stdout || !rejected.stderr.includes("already exists"))
+    throw new Error("lab CLI must refuse overwrite with nonzero exit status");
 
   console.log(`smoke install ok: ${packageNames.join(", ")}`);
 } finally {

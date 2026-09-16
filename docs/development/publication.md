@@ -1,6 +1,6 @@
 # Publication
 
-The five public packages in this repository publish to the `@galaxy-foundry`
+The public packages in this repository publish to the `@galaxy-foundry`
 npm scope from CI:
 
 - `@galaxy-foundry/gxwf-foundry`
@@ -8,6 +8,8 @@ npm scope from CI:
 - `@galaxy-foundry/planemo-cli-meta`
 - `@galaxy-foundry/planemo-test-report-schema`
 - `@galaxy-foundry/summarize-nextflow`
+- `@galaxy-foundry/gxwf-pi-harness`
+- `@galaxy-foundry/nfcore-tool-lab`
 
 There is no npm token in this repository. Authentication uses npm OIDC trusted
 publishing: npm trusts this repository, the release workflow, and its GitHub
@@ -52,9 +54,10 @@ Changesets release restores `latest` to the real version.
 
 Publish independent packages first, then their dependents:
 
-1. `planemo-cli-meta`, `planemo-test-report-schema`, `note-schema`, and
-   `summarize-nextflow` (any order)
+1. `planemo-cli-meta`, `planemo-test-report-schema`, `note-schema`,
+   `summarize-nextflow`, and `nfcore-tool-lab` (any order)
 2. `foundry` (depends on `summarize-nextflow`)
+3. `gxwf-pi-harness` (depends on `foundry`)
 
 ### Configure trusted publishing
 

@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-09-10
-revision: 5
+revised: 2026-09-16
+revision: 6
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -75,6 +75,18 @@ A domain runtime package that summarizes Nextflow source and owns the schemas pr
 
 The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker, normalized run records, declared-input staging, artifact verification, the `foundry_subagent` Pi extension, and the public `pi-test-auth` adapter for isolated OpenAI/Codex OAuth credentials. It depends on the runtime-facing `foundry` CLI and resolves that package directly for independent artifact validation rather than relying on an ambient executable. `foundry-build test-skill` and `test-pipeline` supply the repository-facing commands, but trace-mode callers and the extension use this package's one runner. Pipeline phase selection remains in `build-cli`; the harness accepts one published skill bundle and does not read authored Molds, select Pipeline phases, or grade qualitative properties. OAuth is available only to explicitly local diagnostic workers, while whole-process container workers continue to receive only allowlisted API-key environment variables.
 
+### `@galaxy-foundry/nfcore-tool-lab`
+
+A standalone domain runtime CLI and typed API that prepares an already converted
+nf-core tool for `galaxyproject/tools-iwc-lab`. It owns mechanical experimental
+naming, lab Tool Shed metadata, documentation, explicit asset copying, and a
+separate preparation record with input/output content hashes. It preserves the
+conversion provenance and all XML bytes outside the tool's root identity values.
+It does not depend on repository authoring code, invoke an agent, validate wrapper
+behavior, open pull requests, or publish to a Tool Shed. Pipeline sequencing,
+final-package tests, license review, and credential-bearing publication remain
+harness concerns.
+
 ### Metadata packages
 
 `@galaxy-foundry/planemo-cli-meta` and `@galaxy-foundry/planemo-test-report-schema` are generated, version-pinned views of Planemo interfaces. Normal validation consumes the checked-in artifacts without requiring Planemo to be installed.
@@ -123,6 +135,7 @@ gxwf, Planemo, and Pi are not implementation layers in this repository. Molds de
 | Pi test authentication | `packages/gxwf-pi-harness/src/pi-test-auth.ts` and `packages/build-cli/src/commands/pi-test-auth.ts` |
 | runtime artifact validation | `packages/gxwf-foundry/src/` |
 | Nextflow summarization | `packages/summarize-nextflow/src/` |
+| nf-core tool lab preparation | `packages/nfcore-tool-lab/src/` |
 | site collection wiring | `site/src/content.config.ts` |
 | site registries and link maps | `site/src/lib/` |
 | specialized rendering | `site/src/components/` and `site/src/pages/` |
