@@ -1,5 +1,16 @@
 # @galaxy-foundry/gxwf-pi-harness
 
+## 0.4.0
+
+### Minor Changes
+
+- [#530](https://github.com/galaxyproject/foundry/pull/530) [`a256932`](https://github.com/galaxyproject/foundry/commit/a25693215c565bef2d2fd7fed6abd4fb1b2393bf) Thanks [@jmchilton](https://github.com/jmchilton)! - Install and record the pinned Planemo runtime in the clean-room worker image so Galaxy artifact skills can lint and test their outputs.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @galaxy-foundry/gxwf-foundry@0.1.2
+
 ## 0.3.0
 
 ### Minor Changes
