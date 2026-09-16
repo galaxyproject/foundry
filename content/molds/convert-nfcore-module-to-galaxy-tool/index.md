@@ -9,8 +9,21 @@ tags:
 status: draft
 created: 2026-05-10
 revised: 2026-09-16
-revision: 10
+revision: 11
 summary: "Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests."
+output_artifacts:
+  - id: galaxy-tool
+    kind: other
+    default_filename: tool.xml
+    description: "Primary Galaxy tool XML wrapper with remote fixture-backed tests."
+  - id: galaxy-tool-macros
+    kind: other
+    default_filename: macros.xml
+    description: "Local Galaxy XML macros for dependency pins, version reporting, and citations."
+  - id: galaxy-tool-provenance
+    kind: yaml
+    default_filename: _provenance.yml
+    description: "Conversion source pins, file hashes, cast bundle identity, and intentional divergences."
 references:
   - kind: research
     ref: "[[nfcore-channel-input-to-galaxy-collection]]"
@@ -169,7 +182,7 @@ Three files in a sibling output directory the harness specifies:
 
 ```
 <output_dir>/
-  <name>.xml          # primary wrapper
+  tool.xml           # primary wrapper (harness may specify another filename)
   macros.xml          # tool-local macros (token, requirements, version_command, citations)
   _provenance.yml     # nfcore source SHA, file hashes, mold revision, generated_at
 ```
@@ -222,7 +235,7 @@ generated:
   by_mold: convert-nfcore-module-to-galaxy-tool
   mold_revision: <copy _provenance.json.mold.revision>
   cast_target: <copy _provenance.json.cast_target>
-  cast_artifact_sha: <sha of cast bundle used>
+  cast_artifact_sha: <copy harness cast_bundle_sha256; null if unavailable>
   on_date: <conversion date, YYYY-MM-DD>
 overrides: []
 ```
@@ -314,6 +327,8 @@ When `tests/main.nf.test` has no usable fixture (stub-only coverage, missing tes
 Collect: nf-core module source (repo, path, branch, git_sha), file hashes, test-datasets pin, mold metadata, any overrides (forced divergence from upstream container, dropped stub block, hand-edits the cast skill chose to apply).
 
 Read the cast bundle's sibling `_provenance.json` when filling `generated`. Copy `mold.revision` to `mold_revision` and its top-level `cast_target` to `cast_target`. `cast_target` identifies the bundle adapter that produced this skill; it is not the provider or model executing the conversion. Put execution provider/model details in the harness run record, not in `_provenance.yml`.
+
+Copy the harness runtime metadata's `cast_bundle_sha256` into `cast_artifact_sha`. It identifies the frozen bundle actually loaded, including packaged references and cast provenance; `_provenance.json.mold.content_hash` hashes only the authored `index.md`, not the generated bundle, and must not be substituted. The Pi harness checks equality against its run record. Without supplied bundle metadata, use YAML `null` and record the unavailable bundle identity in `overrides` rather than guessing.
 
 ### 10. Convergence loop: lint, test, fix
 

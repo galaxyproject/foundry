@@ -4,11 +4,11 @@
   "mold": {
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
-    "revision": 10,
-    "content_hash": "796060f2091ba7f9ef00305829b599129a09b65643ef11312166b9657dff844c",
-    "commit": "ac92d2713fb01b07049027e584b8610e07c88d82"
+    "revision": 11,
+    "content_hash": "35e945843889b66b1e87b894db30670959431d4eb871cce5e74b541b7f527098",
+    "commit": "ddf54ebebb28dad664e9e95e57f6ed4d6f157ef3"
   },
-  "cast_at": "2026-09-16T14:10:45.388Z",
+  "cast_at": "2026-09-16T15:17:06.396Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -283,5 +283,28 @@
       "source": "deterministic",
       "license_file_hash": "c4da7f2ad8a3dba26b8292ac27b1f66764550d8143265a74cddfeeaf35823842"
     }
-  ]
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-tool",
+        "kind": "other",
+        "default_filename": "tool.xml",
+        "description": "Primary Galaxy tool XML wrapper with remote fixture-backed tests."
+      },
+      {
+        "id": "galaxy-tool-macros",
+        "kind": "other",
+        "default_filename": "macros.xml",
+        "description": "Local Galaxy XML macros for dependency pins, version reporting, and citations."
+      },
+      {
+        "id": "galaxy-tool-provenance",
+        "kind": "yaml",
+        "default_filename": "_provenance.yml",
+        "description": "Conversion source pins, file hashes, cast bundle identity, and intentional divergences."
+      }
+    ],
+    "consumes": []
+  }
 }

@@ -127,6 +127,95 @@ function fakeDependencies(
 }
 
 describe("runPiSkill", () => {
+  test("hands off the frozen bundle hash outside the bundle", async () => {
+    const root = fixtureRoot();
+    const skillDir = makeSkill(root);
+    const originalHash = sha256Path(skillDir);
+    const runDir = path.join(root, "run");
+    let suppliedHash: string | undefined;
+    const record = await runPiSkill(
+      { skillDir, prompt: "Do the work.", runDir, provider: "test-provider", model: "test-model" },
+      fakeDependencies((prompt, options) => {
+        suppliedHash = JSON.parse(prompt.slice(prompt.lastIndexOf("\n") + 1)).cast_bundle_sha256;
+        expect(suppliedHash).toBe(sha256Path(path.join(runDir, "skill")));
+        writeFileSync(path.join(skillDir, "SKILL.md"), "changed source checkout\n");
+        writeFileSync(path.join(skillDir, "_verify.json"), "changed source manifest\n");
+        writeFileSync(path.join(options.cwd!, "output.json"), '{"ok":true}\n');
+      }),
+    );
+
+    expect(record.status).toBe("passed");
+    expect(record.invocation.skill_sha256).toBe(originalHash);
+    expect(record.invocation.skill_sha256).toBe(suppliedHash);
+    expect(sha256Path(path.join(runDir, "skill"))).toBe(originalHash);
+    expect(sha256Path(skillDir)).not.toBe(originalHash);
+  });
+
+  test.each([
+    { name: "matching bundle hash", value: "bundle", status: "passed" },
+    { name: "Mold source hash", value: "mold", status: "failed" },
+    { name: "missing hash", value: "missing", status: "failed" },
+    { name: "missing artifact", value: "absent", status: "failed" },
+    { name: "null hash", value: "null", status: "failed" },
+    { name: "malformed YAML", value: "malformed", status: "failed" },
+  ])("checks conversion provenance: $name", async ({ value, status }) => {
+    const root = fixtureRoot();
+    const skillDir = makeSkill(root);
+    const moldHash = "a".repeat(64);
+    writeFileSync(
+      path.join(skillDir, "_provenance.json"),
+      JSON.stringify({
+        mold: { content_hash: moldHash },
+        artifacts: {
+          produces: [
+            { id: "example-output", default_filename: "output.json" },
+            { id: "galaxy-tool-provenance", default_filename: "conversion.yml" },
+          ],
+        },
+      }),
+    );
+    const bundleHash = sha256Path(skillDir);
+    const record = await runPiSkill(
+      {
+        skillDir,
+        prompt: "Write conversion provenance.",
+        runDir: path.join(root, "run"),
+        provider: "test-provider",
+        model: "test-model",
+      },
+      fakeDependencies((prompt, options) => {
+        const metadata = JSON.parse(prompt.slice(prompt.lastIndexOf("\n") + 1));
+        const hash = value === "bundle" ? metadata.cast_bundle_sha256 : moldHash;
+        const contents =
+          value === "missing"
+            ? "generated: {}\n"
+            : value === "null"
+              ? "generated:\n  cast_artifact_sha: null\n"
+              : value === "malformed"
+                ? "generated: [\n"
+                : `generated:\n  cast_artifact_sha: ${hash}\n`;
+        writeFileSync(path.join(options.cwd!, "output.json"), '{"ok":true}\n');
+        if (value !== "absent") writeFileSync(path.join(options.cwd!, "conversion.yml"), contents);
+      }),
+    );
+
+    expect(record.status).toBe(status);
+    if (status === "failed") expect(record.failure_kind).toBe("skill");
+    const artifact = record.artifacts.find((entry) => entry.id === "galaxy-tool-provenance");
+    expect(artifact?.status).toBe(value === "absent" ? "missing" : status);
+    if (value === "absent") {
+      expect(artifact?.provenance_check).toBeUndefined();
+      return;
+    }
+    expect(artifact?.provenance_check?.expected_sha256).toBe(bundleHash);
+    if (value === "bundle") {
+      expect(artifact?.provenance_check?.actual_sha256).toBe(bundleHash);
+      expect(artifact?.provenance_check?.error).toBeUndefined();
+    } else {
+      expect(artifact?.provenance_check?.error).toBeTruthy();
+    }
+  });
+
   test("runs one explicitly loaded skill with ambient discovery disabled", async () => {
     const root = fixtureRoot();
     const skillDir = makeSkill(root);
@@ -478,6 +567,10 @@ describe("runPiSkill", () => {
       expect(manifest).not.toContain("/_emulated-runs");
       expect(manifest).not.toContain("unrelated-skill");
       expect(capture.prompt).toContain("/inputs/fixture");
+      expect(JSON.parse(capture.prompt!.slice(capture.prompt!.lastIndexOf("\n") + 1))).toEqual({
+        cast_bundle_sha256: record.invocation.skill_sha256,
+      });
+      expect(record.invocation.skill_sha256).toBe(sha256Path(path.join(runDir, "skill")));
       expect(capture.options?.args).toContain("/skill");
       const launch = JSON.parse(
         capture.options?.env?.FOUNDRY_CONTAINER_LAUNCH_CONFIG ?? "null",
