@@ -15,7 +15,18 @@ import {
 
 const enabled = process.env.FOUNDRY_TEST_CONTAINER === "1";
 
-test.skipIf(!enabled)("the Docker worker cannot see checkout-only resources", () => {
+// Vitest 4 enforces `testTimeout` on synchronous tests, and this one never got a
+// budget, so it inherits the 5s default. It boots a container and waits on
+// planemo's startup inside it, which lands near that line — green on one runner
+// and "Test timed out in 5000ms" on the next, for a run that completed fine.
+// Applied as a wrapper rather than a third argument to `test`, because the third
+// argument makes prettier reindent the whole body and buries the change.
+const CONTAINER_TEST_TIMEOUT_MS = 120_000;
+
+const testInContainer = (name: string, body: () => void): void =>
+  test.skipIf(!enabled)(name, body, CONTAINER_TEST_TIMEOUT_MS);
+
+testInContainer("the Docker worker cannot see checkout-only resources", () => {
   const root = mkdtempSync(path.join(tmpdir(), "foundry-pi-container-test-"));
   const checkout = path.join(root, "checkout");
   const skill = path.join(checkout, "casts", "claude", "skills", "example-skill");
