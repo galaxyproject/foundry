@@ -1,0 +1,62 @@
+class: GalaxyWorkflow
+name: "Split element identifiers into nested lists with Apply Rules"
+inputs:
+  - id: flat
+    type: collection
+    collection_type: list
+outputs:
+  - id: nested_two_rules
+    outputSource: split_two_rules/output
+  - id: nested_group_count
+    outputSource: split_group_count/output
+steps:
+  # rules.rules is not a typo: the param is named rules and its value is a rule
+  # set, which carries its own rules list plus a mapping list
+  - id: split_two_rules
+    label: split_two_rules
+    tool_id: __APPLY_RULES__
+    in:
+      - id: input
+        source: flat
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      rules:
+        rules:
+          - type: add_column_metadata
+            value: identifier0
+          - type: add_column_regex
+            target_column: 0
+            expression: "^(.*)_([^_]*)$"
+            replacement: "\\1"
+          - type: add_column_regex
+            target_column: 0
+            expression: "^(.*)_([^_]*)$"
+            replacement: "\\2"
+        mapping:
+          - type: list_identifiers
+            columns: [1, 2]
+  - id: split_group_count
+    label: split_group_count
+    tool_id: __APPLY_RULES__
+    in:
+      - id: input
+        source: flat
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      rules:
+        rules:
+          - type: add_column_metadata
+            value: identifier0
+          - type: add_column_regex
+            target_column: 0
+            expression: "^(.*)_([^_]*)$"
+            group_count: 2
+        mapping:
+          - type: list_identifiers
+            columns: [1, 2]

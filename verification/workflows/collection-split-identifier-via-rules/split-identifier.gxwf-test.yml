@@ -1,0 +1,57 @@
+- doc: "Two replacement rules and one group_count rule split the same identifiers into the same list:list"
+  job:
+    flat:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sampleA_rep1
+          class: File
+          path: test-data/a-rep1.txt
+          filetype: txt
+        - identifier: sampleA_rep2
+          class: File
+          path: test-data/a-rep2.txt
+          filetype: txt
+        - identifier: sampleB_rep1
+          class: File
+          path: test-data/b-rep1.txt
+          filetype: txt
+  outputs:
+    nested_two_rules:
+      class: Collection
+      collection_type: "list:list"
+      element_count: 2
+      element_tests:
+        sampleA:
+          class: Collection
+          count: 2
+          element_tests:
+            rep1:
+              file: test-data/a-rep1.txt
+            rep2:
+              file: test-data/a-rep2.txt
+        sampleB:
+          class: Collection
+          count: 1
+          element_tests:
+            rep1:
+              file: test-data/b-rep1.txt
+    nested_group_count:
+      class: Collection
+      collection_type: "list:list"
+      element_count: 2
+      element_tests:
+        sampleA:
+          class: Collection
+          count: 2
+          element_tests:
+            rep1:
+              file: test-data/a-rep1.txt
+            rep2:
+              file: test-data/a-rep2.txt
+        sampleB:
+          class: Collection
+          count: 1
+          element_tests:
+            rep1:
+              file: test-data/b-rep1.txt

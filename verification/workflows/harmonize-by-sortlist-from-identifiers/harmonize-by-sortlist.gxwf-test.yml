@@ -1,0 +1,52 @@
+- doc: "A sibling list in s1,s2,s3 order is reordered to the reference's s3,s1,s2 order, losing nothing"
+  job:
+    reference:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: s3
+          class: File
+          path: test-data/ref.txt
+          filetype: txt
+        - identifier: s1
+          class: File
+          path: test-data/ref.txt
+          filetype: txt
+        - identifier: s2
+          class: File
+          path: test-data/ref.txt
+          filetype: txt
+    sibling:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: s1
+          class: File
+          path: test-data/sib-s1.txt
+          filetype: txt
+        - identifier: s2
+          class: File
+          path: test-data/sib-s2.txt
+          filetype: txt
+        - identifier: s3
+          class: File
+          path: test-data/sib-s3.txt
+          filetype: txt
+  outputs:
+    order_file:
+      file: test-data/expected_order.txt
+    harmonized:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        s1:
+          file: test-data/sib-s1.txt
+        s2:
+          file: test-data/sib-s2.txt
+        s3:
+          file: test-data/sib-s3.txt
+    harmonized_first:
+      file: test-data/sib-s3.txt
+    harmonized_last:
+      file: test-data/sib-s2.txt

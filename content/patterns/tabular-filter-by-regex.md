@@ -1,14 +1,14 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Tabular: filter rows by regex"
 tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 2
+revised: 2026-09-15
+revision: 3
 summary: "Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
@@ -18,6 +18,8 @@ related_patterns:
   - "[[tabular-sql-query]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/tabular-filter-by-regex/filter-rows-by-regex.gxwf-test.yml
 iwc_exemplars:
   - workflow: epigenetics/atacseq/atacseq
     why: "Drops comment lines from a fragment-length histogram with tp_grep_tool and invert mode."
@@ -101,18 +103,26 @@ Anchored by the VGP purge-duplicates IWC exemplar.
 
 - **No header preservation.** Whole-line regex sees the header as a normal row; if your pattern matches data but not the header, you silently drop the header. Strip-then-rebind, switch to `Grep1` with `keep_header: true`, or accept that the output is headerless.
 - **`url_paste` is the pattern field.** The misleading name is a wrapper artifact (text/file dual input). Don't treat it as a URL; don't escape it as one.
-- **`case_sensitive` and `invert` values are the flag literals.** `case_sensitive: true` will not work — set `-i` for insensitive, `""` for sensitive. Same for `invert: -v` vs `""`.
+- **`case_sensitive` and `invert` values are the flag literals.** `case_sensitive: true` will not work — set `-i` for insensitive, `""` for sensitive. Same for `invert: -v` vs `""`. `Grep1` 1.0.4 uses the same `invert` literals; its 1.0.1 sibling does not.
+- **A wrong `invert` value is silently accepted.** An unrecognized select value falls back to the first option rather than erroring, so a 1.0.1-style `invert: "true"` on a 1.0.4 step reverses the filter's meaning with a green job.
+- **The corpus default `case_sensitive: -i` is case-*in*sensitive.** Every surveyed `tp_grep_tool` step sets it. Copying a corpus shape without touching that field turns a case-anchored pattern like `^[a-z]` into one that matches uppercase rows and headers too.
 - **PCRE vs ERE.** `regex_type: -P` is the corpus default and matches `Grep1`'s flavor. ERE / BRE are available but unattested in the survey; switching flavors mid-workflow makes patterns harder to reason about.
 - **No column awareness.** A pattern like `\tPASS\t` is the closest you can get to "column 4 equals PASS" — and it's brittle (depends on tab counts, breaks on the first/last column). Use [[tabular-filter-by-column-value]] for column predicates.
 - **Version pin sprawl.** Four pins coexist in the corpus (`1.1.1`, `9.3+galaxy1`, `9.5+galaxy2`, `9.5+galaxy3` — `9.5+galaxy3` dominates) with the same parameter shape. Pick the highest pin already present in the workflow you're touching; do not block PRs for older pins on cleanup grounds.
 
 ## Legacy alternative
 
-`Grep1` ("Select lines that match an expression"; Galaxy core, `$GALAXY/tools/filters/grep.xml`). 26 step occurrences — slightly more frequent than `tp_grep_tool` but loses the consistency argument. Distinguishing parameters:
+`Grep1` ("Select lines that match an expression"; Galaxy core). 47 step occurrences — slightly more frequent than `tp_grep_tool` but loses the consistency argument.
 
-- `pattern`: the regex (text, sanitizer off; PCRE only — wrapper hardcodes `grep -P`).
-- `invert`: select; `""` Matching / `-v` NOT Matching.
-- `keep_header`: boolean (`true` / `false`). `true` peels the first line through unchanged, then `grep`s the remainder — the **only** built-in header-preserving regex filter on the row-text path.
+**Pin `tool_version: 1.0.4`, even though a 1.0.1 ships alongside it.** Two wrappers register under the same `Grep1` id, and the lower number is the later addition — `filters/grep_1.0.1.xml` carries `profile 24.2` against `filters/grep.xml`'s `20.05`. 1.0.4 is what an unpinned step resolves to, and it is the one with `keep_header`.
+
+Its parameters:
+
+- `pattern` — the regex (text; PCRE only, the wrapper hardcodes `grep -P`).
+- `invert` — `""` Matching / `-v` NOT Matching.
+- `keep_header` — boolean. `true` peels the first line through unchanged and `grep`s the remainder, which makes 1.0.4 the **only** built-in header-preserving regex filter on the row-text path.
+
+1.0.1 has no `keep_header` and spells `invert` as `"false"` / `"true"`. That matters even if you never pin it: sending `invert: "true"` to a 1.0.4 step does not fail. The select falls back to its first option, so NOT Matching silently becomes Matching and the job goes green with the filter reversed.
 
 When reading older IWC workflows you will encounter `Grep1` regularly; preserve it as-is. For new authoring, prefer `tp_grep_tool` unless `keep_header: true` is genuinely needed.
 

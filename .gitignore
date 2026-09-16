@@ -13,3 +13,5 @@ coverage/
 .playwright-mcp/
 /*.png
 common_paths.yml
+tool_test_output.html
+tool_test_output.json
