@@ -1,0 +1,17 @@
+nextflow_workflow {
+  name "scenario snapshots"
+  script "../main.nf"
+  profile "test"
+  test("first") {
+    when { params { input = 'first.csv' } }
+    then {
+      // The report can't be compared byte-for-byte.
+      assert workflow.success
+      assert snapshot(workflow.trace.succeeded().size(), removeNextflowVersion("$outputDir/versions.yml")).match()
+    }
+  }
+  test("second") {
+    when { params { input = 'second.csv' } }
+    then { assert workflow.success }
+  }
+}

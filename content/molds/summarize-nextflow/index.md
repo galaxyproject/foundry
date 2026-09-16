@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-15
-revision: 16
+revised: 2026-09-16
+revision: 17
 output_artifacts:
   - id: summary-nextflow
     kind: json
@@ -380,7 +380,7 @@ Validate the assembled object before emitting: run `foundry validate-summary-nex
 
 The procedure assumes — and the cast skill must surface in `warnings[]` when relevant — the following NF realities:
 
-- **DSL1 pipelines are out of scope.** Detected via the absence of DSL2 syntax (`workflow { ... }` block); emit a single warning and exit with the provenance block only.
+- **DSL1 pipelines are out of scope.** An explicit `nextflow.enable.dsl = 1` declaration short-circuits process/workflow extraction with a DSL1 warning. Emit the source provenance plus the required schema envelope with empty extraction arrays. Absence of named workflow blocks alone is ambiguous: anonymous DSL2 workflows and partial trees also occur, so surface the manifest-name fallback warning rather than inventing a DSL version.
 - **`meta.yml` may lie.** nf-core module `meta.yml` is hand-authored and can drift from the actual `script:` IO. When the LLM-inferred IO disagrees with `meta.yml`, prefer `meta.yml` and surface the disagreement as a warning rather than overriding it.
 - **Channel shapes are strings, not structured types.** `"tuple(meta, [path,path])"` is enough for downstream Molds to reason about; structured channel typing is a research project. Downstream Molds that need structure must parse the string.
 - **Operator chains are summarized, not executed.** The LLM reconciliation pass is best-effort. Workflows with deeply nested closures (`map { ... }` with substantial Groovy logic) may produce edges flagged with low confidence in `notes`.

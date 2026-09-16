@@ -1,0 +1,30 @@
+{
+  "source": {
+    "ecosystem": "nf-core",
+    "url": "https://github.com/nf-core/demo.git",
+    "version": "45904cb9d12db3d89900e6c479fe604ef71b297b",
+    "license": "MIT",
+    "slug": "nf-core-demo"
+  },
+  "params": [],
+  "sample_sheets": [],
+  "profiles": [],
+  "tools": [],
+  "processes": [],
+  "subworkflows": [],
+  "workflow": {
+    "name": "INVALID",
+    "channels": [],
+    "edges": [],
+    "conditionals": []
+  },
+  "test_fixtures": {
+    "profile": "test",
+    "inputs": [],
+    "outputs": []
+  },
+  "nf_tests": [],
+  "warnings": [],
+  "reference_assets": [],
+  "reference_rebuilds": []
+}

@@ -48,6 +48,23 @@ JSON to stdout (or `--out=`). Stderr is human-readable progress. Exit codes:
 - `3` — schema validation failure
 - `64` — not yet implemented (no input reaches this today)
 
+## Scenario verification
+
+From the repository root, build the workspace with `pnpm packages-build` and
+materialize the manifest-pinned corpus with `make fixtures-nextflow`. Then run:
+
+```sh
+FOUNDRY_REQUIRE_NEXTFLOW_FIXTURES=1 pnpm --filter @galaxy-foundry/summarize-nextflow test
+```
+
+`test/scenarios.test.ts` exercises committed package fixtures, including schema
+failure output preservation, DSL1, layouts, directive evidence, nf-test blocks,
+and deterministic test-data localization. `test/corpus-scenarios.test.ts` checks
+all 26 manifest pins and the fixture-bound expectations in the Mold scenarios.
+Without the environment flag, missing or wrong-pinned corpus clones are skipped;
+with it, they fail. Existing integration tests also download real remote data.
+Downstream cast translation/authoring cases require separate manual skill runs.
+
 ## License
 
 MIT.

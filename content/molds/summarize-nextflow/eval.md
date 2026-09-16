@@ -29,14 +29,17 @@ whatever a scenario produces. Properties are tagged by bucket:
 
 - bucket: schema
 - check: deterministic
-- assertion: a tree with no `workflow { ... }` block emits the `source` block
-  plus a `warnings[]` entry naming DSL1; it invents no processes or channels.
+- assertion: an explicitly declared DSL1 tree emits `source` provenance
+  plus the required schema envelope and a DSL1 warning; process, tool and
+  workflow extraction arrays remain empty. Absence of a named workflow alone
+  does not establish DSL1, since anonymous DSL2 and incomplete trees also exist.
 
 ## Property: process inventory is complete vs ground truth
 
 - bucket: fidelity
 - check: deterministic
-- assertion: `processes[].length` is at least 80% of grep ground truth and
+- assertion: for supported DSL2 pipelines, `processes[].length` is at least
+  80% of grep ground truth within the selected pipeline root and
   ideally exact modulo comments/false positives; every `include { X as Y }`
   alias is merged into one `processes[]` entry with renames recorded under
   `aliases[]`.
@@ -47,7 +50,7 @@ whatever a scenario produces. Properties are tagged by bucket:
 - check: deterministic
 - assertion: `processes[]` is non-empty for every layout class (root
   `modules.nf`, flat `modules/<name>.nf`, inline in `main.nf`, files under
-  `workflows/`/`lib/`/`modules/local/`); no input silently succeeds with zero
+  `workflows/`/`lib/`/`modules/local/`); no supported DSL2 input silently succeeds with zero
   processes when grep sees `process` blocks.
 
 ## Property: pipeline-root and entrypoint choices are reviewable
@@ -63,18 +66,19 @@ whatever a scenario produces. Properties are tagged by bucket:
 
 - bucket: fidelity
 - check: deterministic
-- assertion: every `processes[]` row under `modules/nf-core/` has `meta != null`
-  normalized from the vendored `meta.yml` (`meta.tools[]`/`input[]`/`output[]`),
-  and `module_tests[].length` equals the on-disk `*.nf.test` count for that
-  module; every `modules/local/` row has `meta == null` and `module_tests == []`.
+- assertion: every `processes[]` row under `modules/nf-core/` with a sibling
+  `meta.yml` has non-null normalized metadata (`meta.tools[]`/`input[]`/`output[]`),
+  and `module_tests[]` retains one entry per live `test(...)` block in that
+  module's `tests/*.nf.test` files; every `modules/local/` row has `meta == null` and `module_tests == []`.
 
 ## Property: subworkflow tests are enumerated structurally
 
 - bucket: fidelity
 - check: deterministic
 - assertion: every `subworkflows[]` row under `subworkflows/nf-core/` has
-  `tests[].length` matching its on-disk `*.nf.test` count; local or untested
-  subworkflows emit `tests == []`; no snapshot contents are inlined.
+  `tests[]` matching its live `test(...)` blocks, with repo-relative test paths;
+  local or untested subworkflows emit `tests == []`. Existing snapshot sidecars
+  retain paths and compact parsed evidence rather than raw JSON text.
 
 ## Property: subworkflow topology is source-faithful
 
@@ -90,7 +94,7 @@ whatever a scenario produces. Properties are tagged by bucket:
 
 - bucket: fidelity
 - check: deterministic
-- assertion: every `processes[].tool` is a foreign key into a `tools[]` entry,
+- assertion: every non-null `processes[].tool` is a foreign key into a `tools[]` entry,
   and every container/conda directive resolves to at least one of biocontainer,
   bioconda, singularity, docker, or wave; unresolved directives appear in
   `warnings[]` with the directive verbatim.
@@ -99,9 +103,10 @@ whatever a scenario produces. Properties are tagged by bucket:
 
 - bucket: fidelity
 - check: deterministic
-- assertion: `nf_tests[].length` equals the `*.nf.test` file count; each entry
-  carries `path`, `profiles[]`, and a `snapshot` block whenever the file
-  contains `assert snapshot(...).match()`.
+- assertion: `nf_tests[]` retains one entry per live `test(...)` block in
+  pipeline-level `tests/*.nf.test` files; each entry carries `path`,
+  `profiles[]`, and a `snapshot` block whenever that test contains a snapshot
+  assertion. Multiple tests in one file remain distinct.
 
 ## Property: test-fixture localization round-trips with stable hashes
 
@@ -116,9 +121,9 @@ whatever a scenario produces. Properties are tagged by bucket:
 - bucket: fidelity
 - check: llm-judged
 - assertion: for a pipeline lacking `nextflow_schema.json` and per-module
-  `meta.yml`, process IO is inferred from `script:` blocks rather than
-  fabricated from absent metadata, and `warnings[]` notes the missing nf-core
-  affordances.
+  `meta.yml`, process IO remains grounded in source declarations
+  and script evidence rather than fabricated from absent metadata. Warnings
+  expose incomplete extraction or manifest-name fallback when those occur.
 
 ## Property: data-flow Mold binds without holes
 

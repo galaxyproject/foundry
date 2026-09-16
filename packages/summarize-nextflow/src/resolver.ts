@@ -305,9 +305,10 @@ export async function resolveNextflowSummary(
   const configPath = join(pipelineRoot, "nextflow.config");
   const config = existsSync(configPath) ? readText(configPath) : "";
   const workflowName = parseWorkflowName(config);
-  const processFiles = discoverProcessFiles(pipelineRoot);
+  const isDsl1 = /\bnextflow\.enable\.dsl\s*=\s*1\b/u.test(maskNextflowComments(config));
+  const processFiles = isDsl1 ? [] : discoverProcessFiles(pipelineRoot);
   const processes = processFiles.flatMap((path) => parseProcessFile(pipelineRoot, path));
-  const aliases = discoverAliases(pipelineRoot);
+  const aliases = isDsl1 ? new Map<string, string[]>() : discoverAliases(pipelineRoot);
   const warnings =
     options.mulledIndexPath && !existsSync(options.mulledIndexPath)
       ? [`mulled index path not found: ${options.mulledIndexPath}`]
@@ -318,11 +319,13 @@ export async function resolveNextflowSummary(
     warnings: toolWarnings,
   } = buildTools(pipelineRoot, processes, options.mulledIndexPath);
   warnings.push(...toolWarnings);
-  const workflows = parseWorkflows(
-    pipelineRoot,
-    processes.map((process) => process.name),
-    aliases,
-  );
+  const workflows = isDsl1
+    ? []
+    : parseWorkflows(
+        pipelineRoot,
+        processes.map((process) => process.name),
+        aliases,
+      );
   const primaryWorkflow = selectPrimaryWorkflow(
     workflows,
     processes.map((process) => process.name),
@@ -401,6 +404,20 @@ export async function resolveNextflowSummary(
     workflows,
     summary.reference_rebuilds,
   );
+
+  if (isDsl1) {
+    summary.processes = [];
+    summary.tools = [];
+    summary.subworkflows = [];
+    summary.workflow = { name: summary.workflow.name, channels: [], edges: [], conditionals: [] };
+    summary.reference_assets = [];
+    summary.reference_rebuilds = [];
+    summary.warnings = [
+      ...root.warnings,
+      "DSL1 pipeline is out of scope; process and workflow extraction skipped",
+    ];
+    return summary;
+  }
 
   const entrypoint = selectEntrypoint(pipelineRoot);
   if (entrypoint) summary.warnings.push(`selected Nextflow entrypoint: ${entrypoint}`);
@@ -2195,6 +2212,16 @@ function buildTools(
     );
     if (declared.length > 1) tool.versions = declared.sort();
   }
+  for (const process of processes) {
+    if (!process.container) continue;
+    const represented = [...tools.values()].some((tool) =>
+      [tool.biocontainer, tool.singularity, tool.docker, tool.wave].some(
+        (container) => container !== null && process.container!.includes(container),
+      ),
+    );
+    if (!represented)
+      warnings.push(`unresolved container directive in ${process.name}: ${process.container}`);
+  }
   return { tools: [...tools.values()], perProcessSingleton, warnings };
 }
 
@@ -2518,7 +2545,7 @@ function parseNfTestsInDir(pipelineRoot: string, testsRoot: string): NfTest[] {
   return walk(testsRoot)
     .filter((path) => path.endsWith(".nf.test"))
     .flatMap((path) => {
-      const text = readText(path);
+      const text = maskNextflowComments(readText(path));
       const relPath = relative(pipelineRoot, path);
       const fileProfiles = parseNfTestFileProfiles(text);
       const blocks = extractNfTestBlocks(text);
