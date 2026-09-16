@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 5,
-    "content_hash": "cced8f068cd1ce81fefad23a62fdb4d52b3ce805b2231f64a7fe37f258bc1e09",
-    "commit": "ac92d2713fb01b07049027e584b8610e07c88d82"
+    "revision": 6,
+    "content_hash": "0050c1f8684b8ed39214dd39e57e30256972da417b9ed9c2b395ce3a97051469",
+    "commit": "715cd2c3f3d997bfe54c091f477590c400e1ecb8"
   },
-  "cast_at": "2026-09-16T14:18:33.900Z",
+  "cast_at": "2026-09-16T18:05:59.577Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -81,15 +81,64 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-path-glob-to-galaxy-datatype]]",
+      "src": "content/research/nextflow-path-glob-to-galaxy-datatype/index.md",
+      "dst": "references/notes/nextflow-path-glob-to-galaxy-datatype.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Choose datatypes from Nextflow path/glob evidence and its confidence rules; use the UDT field contract for final input/output syntax.",
+      "trigger": "When supplied Nextflow paths or output globs provide datatype evidence.",
+      "verification": "Confirm weak variable-name hints do not become invented formats and evidenced formats use UDT input lists and output strings.",
+      "src_hash": "04d728aef2d113ff01cd00789cc7980cb808d5bc51bdf9752ef7ee53af486419",
+      "dst_hash": "04d728aef2d113ff01cd00789cc7980cb808d5bc51bdf9752ef7ee53af486419",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nfcore-channel-input-to-galaxy-collection]]",
+      "src": "content/research/nfcore-channel-input-to-galaxy-collection/index.md",
+      "dst": "references/notes/nfcore-channel-input-to-galaxy-collection.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Interpret nf-core tuple/path input roles and cardinality; express the result using UDT-supported input shapes rather than copying XML examples.",
+      "trigger": "When supplied Nextflow evidence contains nf-core tuple(meta, path) inputs or single/paired branching.",
+      "verification": "Author from single-file and paired nf-core evidence; preserve cardinality or explicitly report an unsupported UDT shape.",
+      "src_hash": "7d05b687a00b56892c8ec53ea2fc9390d4fe0ade3c791037b538e9c6c0c0952c",
+      "dst_hash": "7d05b687a00b56892c8ec53ea2fc9390d4fe0ade3c791037b538e9c6c0c0952c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nfcore-meta-map-to-galaxy-params]]",
+      "src": "content/research/nfcore-meta-map-to-galaxy-params/index.md",
+      "dst": "references/notes/nfcore-meta-map-to-galaxy-params.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Distinguish behavior-driving meta keys from identity and naming metadata when building the UDT requirements brief.",
+      "trigger": "When supplied Nextflow script evidence reads meta-map keys.",
+      "verification": "Confirm identity-only keys do not become required UDT inputs and behavior-driving keys are retained or their narrowing is recorded.",
+      "src_hash": "29a810d59e1d3ca6b8ab6de7e24c6b52dc1921aaba0dbe704121bcabb771eb5e",
+      "dst_hash": "29a810d59e1d3ca6b8ab6de7e24c6b52dc1921aaba0dbe704121bcabb771eb5e",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[summary-nextflow]]",
       "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
       "dst": "references/schemas/summary-nextflow.schema.json",
       "used_at": "runtime",
-      "load": "upfront",
+      "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.",
+      "purpose": "Interpret a supplied whole-pipeline Nextflow summary and resolve process evidence within it.",
+      "trigger": "When the optional summary-nextflow artifact is supplied; do not require a whole summary or apply its envelope schema to standalone process evidence.",
       "license": "MIT",
       "src_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
       "dst_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
@@ -108,7 +157,8 @@
     "consumes": [
       {
         "id": "summary-nextflow",
-        "description": "Source pipeline summary from [[summarize-nextflow]]; provides process command, inputs, outputs, and container or conda evidence for UDT authoring.",
+        "description": "Optional whole-pipeline Nextflow summary from [[summarize-nextflow]], when available; other source descriptions and standalone process evidence can supply the authoring context directly.",
+        "optional": true,
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
