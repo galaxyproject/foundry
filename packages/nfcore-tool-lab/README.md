@@ -44,6 +44,14 @@ are rejected. Selecting assets is a trusted caller decision: the command cannot
 determine whether arbitrary selected file contents contain secrets. Executable
 assets retain executable permissions.
 
+Macro imports must use safe relative filenames and resolve to a file in the
+prepared package. Missing imports fail with an explicit `--asset` suggestion;
+the command never automatically copies an imported file. Transitive imports are
+checked too, relative to the tool directory as in Galaxy (not the importing
+file's directory). Empty or unsafe paths, malformed imported XML, and import
+cycles are rejected, including during dry runs. Comments, command CDATA, and
+literal `<import>` elements nested in macro templates are not file imports.
+
 The output directory must be new and outside the input tree, including through
 symlinked parent paths. No in-place update or overwrite mode is provided.
 
@@ -68,7 +76,8 @@ The two root attribute values are patched without XML serialization. Everything
 else in the wrapper, including CDATA, command indentation, line endings, profile,
 and version, stays byte-for-byte unchanged. XML must be well formed; DOCTYPEs and
 custom entities are unsupported. Naming is idempotent, and an already prefixed
-tool ID must match the source module.
+tool ID must match the source module. The patched XML is re-parsed to verify its
+ID and name match the preparation record.
 
 Outputs are `tool.xml`, unchanged `macros.xml` and `_provenance.yml`, selected
 assets, `.shed.yml`, `README.md`, and `_publication.json`. The publication record

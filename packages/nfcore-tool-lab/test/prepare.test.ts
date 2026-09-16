@@ -13,7 +13,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { parse, stringify } from "yaml";
 
 import { packageVersion, prepareLabTool } from "../src/index.js";
@@ -84,6 +84,149 @@ afterEach(() => {
 });
 
 describe("prepareLabTool", () => {
+  test("rejects a patch that does not produce the intended XML identity", () => {
+    const options = fixture();
+    const replace = String.prototype.replace;
+    const patcher = vi.spyOn(String.prototype, "replace").mockImplementation(function (
+      this: string,
+      ...args: Parameters<typeof replace>
+    ) {
+      if (args[0] instanceof RegExp && args[0].source.startsWith("([^\\s=/>]+)"))
+        return String(this);
+      return replace.apply(this, args);
+    });
+    try {
+      expect(() => prepareLabTool(options)).toThrow(/prepared XML identity/);
+      expect(existsSync(options.outputDir)).toBe(false);
+    } finally {
+      patcher.mockRestore();
+    }
+  });
+
+  test.each(["tool.xml", "macros.xml", "_provenance.yml"])(
+    "explains a missing required file %s",
+    (filename) => {
+      const options = fixture();
+      rmSync(path.join(options.inputDir, filename));
+      expect(() => prepareLabTool(options)).toThrow(`input file does not exist: ${filename}`);
+      expect(existsSync(options.outputDir)).toBe(false);
+    },
+  );
+
+  test("explains a missing input directory", () => {
+    const options = fixture();
+    expect(() =>
+      prepareLabTool({ ...options, inputDir: path.join(options.root, "missing") }),
+    ).toThrow(/input directory does not exist/);
+    expect(existsSync(options.outputDir)).toBe(false);
+  });
+
+  test("rejects an unselected direct macro import and suggests explicit selection", () => {
+    const options = fixture();
+    writeFileSync(path.join(options.inputDir, "tool.xml"), tool.replace("macros.xml", "extra.xml"));
+    writeFileSync(path.join(options.inputDir, "extra.xml"), "<macros/>");
+    expect(() => prepareLabTool(options)).toThrow(/tool.xml.*--asset extra.xml/);
+    expect(existsSync(options.outputDir)).toBe(false);
+    prepareLabTool({ ...options, assets: ["extra.xml"] });
+    expect(readFileSync(path.join(options.outputDir, "extra.xml"), "utf8")).toBe("<macros/>");
+  });
+
+  test("checks transitive imports relative to the tool directory and preserves their bytes", () => {
+    const options = fixture();
+    mkdirSync(path.join(options.inputDir, "shared"));
+    const macroFiles = {
+      "macros.xml": "<macros><import>shared/extra.xml</import></macros>",
+      "shared/extra.xml": "<macros><import><![CDATA[common.xml]]></import></macros>",
+      "common.xml": '<macros><token name="@EXTRA@">&amp;</token></macros>',
+    };
+    for (const [filename, xml] of Object.entries(macroFiles))
+      writeFileSync(path.join(options.inputDir, filename), xml);
+    expect(() => prepareLabTool({ ...options, assets: ["shared"] })).toThrow(
+      /shared\/extra.xml.*--asset common.xml/,
+    );
+    expect(existsSync(options.outputDir)).toBe(false);
+    prepareLabTool({ ...options, assets: ["shared", "common.xml"] });
+    for (const [filename, xml] of Object.entries(macroFiles))
+      expect(readFileSync(path.join(options.outputDir, filename), "utf8")).toBe(xml);
+  });
+
+  test.each(["../outside.xml", "/outside.xml", "", " extra.xml "])(
+    "rejects unsafe or empty macro import %j even in dry-run",
+    (target) => {
+      const options = fixture();
+      writeFileSync(
+        path.join(options.inputDir, "macros.xml"),
+        `<macros><import>${target}</import></macros>`,
+      );
+      expect(() => prepareLabTool({ ...options, dryRun: true })).toThrow(/macro import/);
+      expect(existsSync(options.outputDir)).toBe(false);
+    },
+  );
+
+  test.each(["<macros>", "<tool/>"])("rejects invalid selected macro XML %s", (xml) => {
+    const options = fixture();
+    writeFileSync(
+      path.join(options.inputDir, "macros.xml"),
+      "<macros><import>extra.xml</import></macros>",
+    );
+    writeFileSync(path.join(options.inputDir, "extra.xml"), xml);
+    expect(() => prepareLabTool({ ...options, assets: ["extra.xml"] })).toThrow(/extra.xml/);
+    expect(existsSync(options.outputDir)).toBe(false);
+  });
+
+  test("rejects macro import cycles", () => {
+    const options = fixture();
+    writeFileSync(
+      path.join(options.inputDir, "macros.xml"),
+      "<macros><import>extra.xml</import></macros>",
+    );
+    writeFileSync(
+      path.join(options.inputDir, "extra.xml"),
+      "<macros><import>macros.xml</import></macros>",
+    );
+    expect(() => prepareLabTool({ ...options, assets: ["extra.xml"] })).toThrow(
+      /macro import cycle/,
+    );
+    expect(existsSync(options.outputDir)).toBe(false);
+  });
+
+  test("accepts shared imports without mistaking repeated dependencies for cycles", () => {
+    const options = fixture();
+    writeFileSync(
+      path.join(options.inputDir, "macros.xml"),
+      "<macros><import>extra.xml</import><import>common.xml</import></macros>",
+    );
+    writeFileSync(
+      path.join(options.inputDir, "extra.xml"),
+      "<macros><import>common&#46;xml</import></macros>",
+    );
+    writeFileSync(path.join(options.inputDir, "common.xml"), "<macros/>");
+    expect(() => prepareLabTool({ ...options, assets: ["extra.xml", "common.xml"] })).not.toThrow();
+  });
+
+  test("rejects elements nested inside a macro import", () => {
+    const options = fixture();
+    writeFileSync(
+      path.join(options.inputDir, "macros.xml"),
+      "<macros><import><file>extra.xml</file></import></macros>",
+    );
+    expect(() => prepareLabTool(options)).toThrow(/macro import must contain only a filename/);
+    expect(existsSync(options.outputDir)).toBe(false);
+  });
+
+  test("ignores import lookalikes inside macro templates, comments, and command CDATA", () => {
+    const options = fixture();
+    writeFileSync(
+      path.join(options.inputDir, "macros.xml"),
+      '<macros><!-- <import>decoy.xml</import> --><xml name="example"><import>not-a-file.xml</import></xml></macros>',
+    );
+    writeFileSync(
+      path.join(options.inputDir, "tool.xml"),
+      tool.replace("seqkit stats", "<import>decoy.xml</import> seqkit stats"),
+    );
+    expect(() => prepareLabTool(options)).not.toThrow();
+  });
+
   test("changes only the root identity attributes and preserves conversion evidence", () => {
     const options = fixture();
     const before = snapshot(options.inputDir);

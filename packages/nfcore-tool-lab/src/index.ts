@@ -8,6 +8,7 @@ import {
   realpathSync,
   rmSync,
   writeFileSync,
+  type Stats,
 } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -163,10 +164,20 @@ function safeInputPath(inputDir: string, filename: string): string {
   let current = inputDir;
   for (const segment of filename.split("/")) {
     current = path.join(current, segment);
-    if (lstatSync(current).isSymbolicLink())
+    if (inputStat(current, `input file does not exist: ${filename}`).isSymbolicLink())
       throw new Error(`symbolic links are not accepted: ${filename}`);
   }
   return current;
+}
+
+function inputStat(filename: string, missingMessage: string): Stats {
+  try {
+    return lstatSync(filename);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT")
+      throw new Error(missingMessage, { cause: error });
+    throw error;
+  }
 }
 
 function readFile(inputDir: string, filename: string): FileEntry {
@@ -200,6 +211,40 @@ function canonicalOutput(filename: string): string {
   return path.join(canonicalOutput(parent), path.basename(filename));
 }
 
+function validateMacroImports(entries: Map<string, FileEntry>): void {
+  const validated = new Set<string>();
+  const active = new Set<string>();
+  const visit = (filename: string, expectedRoot: string): void => {
+    if (active.has(filename)) throw new Error(`macro import cycle involving ${filename}`);
+    if (validated.has(filename)) return;
+    active.add(filename);
+    const imports: string[] = [];
+    try {
+      inspectXml(decode(entries.get(filename)!.bytes), expectedRoot, imports);
+    } catch (error) {
+      throw new Error(`invalid XML in ${filename}: ${(error as Error).message}`, { cause: error });
+    }
+    for (const target of imports) {
+      try {
+        relativeFilename(target);
+      } catch (error) {
+        throw new Error(`unsafe macro import in ${filename}: ${JSON.stringify(target)}`, {
+          cause: error,
+        });
+      }
+      if (!entries.has(target))
+        throw new Error(
+          `macro import in ${filename} is not packaged: ${target}; select --asset ${target}`,
+        );
+      visit(target, "macros");
+    }
+    active.delete(filename);
+    validated.add(filename);
+  };
+  visit("tool.xml", "tool");
+  visit("macros.xml", "macros");
+}
+
 function readme(source: NfcoreSource, toolName: string, overrides: unknown[]): string {
   const url = `https://github.com/nf-core/modules/tree/${source.git_sha}/${source.module_path}`;
   const warnings = stringify(overrides);
@@ -212,7 +257,7 @@ function readme(source: NfcoreSource, toolName: string, overrides: unknown[]): s
 export function prepareLabTool(options: PrepareLabToolOptions): LabPublicationRecord {
   const metadata = validateMetadata(options.metadata);
   const inputDir = path.resolve(options.inputDir);
-  if (!lstatSync(inputDir).isDirectory())
+  if (!inputStat(inputDir, `input directory does not exist: ${inputDir}`).isDirectory())
     throw new Error("input must be a directory, not a symbolic link");
   const outputDir = canonicalOutput(path.resolve(options.outputDir));
   const insideInput = path.relative(realpathSync(inputDir), outputDir);
@@ -243,6 +288,7 @@ export function prepareLabTool(options: PrepareLabToolOptions): LabPublicationRe
   ]);
   for (const filename of [...(options.assets ?? [])].sort())
     collectAsset(inputDir, filename, entries);
+  validateMacroImports(entries);
   const input_sha256 = Object.fromEntries([
     [toolFilename, hash(originalTool.bytes)],
     ["macros.xml", hash(macros.bytes)],

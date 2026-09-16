@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-08-02
 revised: 2026-09-16
-revision: 6
+revision: 7
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -77,15 +77,7 @@ The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker,
 
 ### `@galaxy-foundry/nfcore-tool-lab`
 
-A standalone domain runtime CLI and typed API that prepares an already converted
-nf-core tool for `galaxyproject/tools-iwc-lab`. It owns mechanical experimental
-naming, lab Tool Shed metadata, documentation, explicit asset copying, and a
-separate preparation record with input/output content hashes. It preserves the
-conversion provenance and all XML bytes outside the tool's root identity values.
-It does not depend on repository authoring code, invoke an agent, validate wrapper
-behavior, open pull requests, or publish to a Tool Shed. Pipeline sequencing,
-final-package tests, license review, and credential-bearing publication remain
-harness concerns.
+A standalone domain runtime CLI and typed API that prepares an already converted nf-core tool for `galaxyproject/tools-iwc-lab`. It owns mechanical experimental naming, lab Tool Shed metadata, documentation, explicit asset copying, macro-import completeness checks, and a separate preparation record with input/output content hashes. It preserves the conversion provenance and all XML bytes outside the tool's root identity values. It does not depend on repository authoring code, invoke an agent, validate wrapper behavior, open pull requests, or publish to a Tool Shed. Pipeline sequencing, final-package tests, license review, and credential-bearing publication remain harness concerns.
 
 ### Metadata packages
 

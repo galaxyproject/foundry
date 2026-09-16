@@ -2,9 +2,17 @@ import { SaxesParser } from "saxes";
 
 const suffix = " (Nextflow Module Automated Conversion)";
 
-export function inspectXml(xml: string, expectedRoot: string): Record<string, string> {
+export function inspectXml(
+  xml: string,
+  expectedRoot: string,
+  imports?: string[],
+): Record<string, string> {
   const parser = new SaxesParser({ xmlns: false });
   let root: Record<string, string> | undefined;
+  const elements: string[] = [];
+  let importText: string | undefined;
+  const isImport = (): boolean =>
+    elements.join("/") === (expectedRoot === "tool" ? "tool/macros/import" : "macros/import");
   parser.on("xmldecl", (declaration) => {
     if (declaration.encoding && !/^utf-?8$/i.test(declaration.encoding))
       throw new Error("XML must use UTF-8 encoding");
@@ -13,9 +21,25 @@ export function inspectXml(xml: string, expectedRoot: string): Record<string, st
     throw new Error("DOCTYPE declarations are not accepted");
   });
   parser.on("opentag", (tag) => {
-    if (root) return;
-    if (tag.name !== expectedRoot) throw new Error(`XML root must be <${expectedRoot}>`);
-    root = tag.attributes;
+    if (importText !== undefined) throw new Error("macro import must contain only a filename");
+    elements.push(tag.name);
+    if (!root) {
+      if (tag.name !== expectedRoot) throw new Error(`XML root must be <${expectedRoot}>`);
+      root = tag.attributes;
+    }
+    if (imports && isImport()) importText = "";
+  });
+  const appendImportText = (text: string): void => {
+    if (importText !== undefined) importText += text;
+  };
+  parser.on("text", appendImportText);
+  parser.on("cdata", appendImportText);
+  parser.on("closetag", () => {
+    if (imports && isImport()) {
+      imports.push(importText!);
+      importText = undefined;
+    }
+    elements.pop();
   });
   parser.write(xml).close();
   if (!root) throw new Error(`XML root must be <${expectedRoot}>`);
@@ -85,6 +109,8 @@ export function prepareToolIdentity(
       },
     );
   const result = xml.slice(0, start) + opening + xml.slice(end);
-  inspectXml(result, "tool");
+  const prepared = inspectXml(result, "tool");
+  if (prepared.id !== id || prepared.name !== name)
+    throw new Error("prepared XML identity does not match the requested tool ID and name");
   return { xml: result, originalId, originalName, name };
 }
