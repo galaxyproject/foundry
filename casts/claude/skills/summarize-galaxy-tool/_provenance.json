@@ -4,11 +4,11 @@
   "mold": {
     "name": "summarize-galaxy-tool",
     "path": "content/molds/summarize-galaxy-tool/index.md",
-    "revision": 8,
-    "content_hash": "a53a303bff1d7ace3b44fb12af329b12695bfcd165933634b8fb6484c0c306f7",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "revision": 9,
+    "content_hash": "2883d2d320b00f8075445c894c5c52e18d9153194f193821032d124aeb3a0659",
+    "commit": "715cd2c3f3d997bfe54c091f477590c400e1ecb8"
   },
-  "cast_at": "2026-09-13T20:58:29.970Z",
+  "cast_at": "2026-09-16T19:40:42.707Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first. Stock/built-in bare ids resolve against the shed but need an explicit `--tool-version`.",
       "trigger": "When the requested pin is not yet present in the configured cache directory.",
       "verification": "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted.",
-      "src_hash": "6cb4b61fbdd1aa49a5052abb24020c43bdf57e0360643a65e55b23b42155f561",
-      "dst_hash": "85e3bb884171beb69631186ca6f0f7552e6c6d0721383ab6653e7a32c84a1b71",
+      "src_hash": "02fdb89184a98f2400e0e33804ad8558a7d79acc5454343575ddeebd912059ca",
+      "dst_hash": "82f6cf92e15e9381153efe30cd1e8cfbbcfca11d2511c87dd6dfb9bb20925ce3",
       "source": "deterministic"
     },
     {
@@ -54,8 +54,8 @@
       "purpose": "Emit the deterministic [[galaxy-tool-summary]] manifest for the cached pin; this Mold runs the command rather than hand-authoring the manifest.",
       "trigger": "Once the pin is confirmed present in the cache.",
       "verification": "Cast the skill, run `summarize` on a cached pin (e.g. staramr_search), confirm the emitted manifest validates against [[galaxy-tool-summary]].",
-      "src_hash": "96099b98e52244ac882066511a8ffa87c1fbbd6fb1c7acc98de3cca822f98277",
-      "dst_hash": "b51364ad4d415f6047e3cf3d3052dea1598cd2197595be66697c9777918b2de7",
+      "src_hash": "bc9dbeab0c9276a82092bc62cbe1d13cb81ccd9caa3a74d6f551d805e8af0b8a",
+      "dst_hash": "eb17ed1ff06509e1bfa468adaccd76bb7a7d71a823a533f4f47b3c98fffc0977",
       "source": "deterministic"
     },
     {

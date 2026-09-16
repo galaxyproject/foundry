@@ -8,8 +8,8 @@ tags:
   - cli/galaxy-tool-cache
 status: draft
 created: 2026-06-16
-revised: 2026-06-18
-revision: 2
+revised: 2026-09-16
+revision: 3
 summary: "Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool."
 ---
 
@@ -38,4 +38,5 @@ galaxy-tool-cache summarize "Show beginning1" --tool-version 1.0.2 --cache-dir ~
 
 - Deterministic by design: same cached pin → byte-identical manifest. Re-run after re-`add`ing if the wrapper revision changed.
 - Wrapper facts not yet exposed by the upstream `ParsedTool` (requirements, containers, stdio) surface additively as Galaxy extends `ParsedTool`; absence is a coverage gap, not a wrapper without those declarations — cross-check against raw XML when the manifest's `warnings` flag a lossy surface.
+- That raw-XML cross-check has no supported route at a pinned changeset today: `artifacts.raw_tool_source_path` is `null` for toolshed-sourced tools, and the Tool Shed exposes no supported raw-source endpoint per (tool id, version) either (`raw-file` 403, `raw_tool_source` 404). An upstream GitHub fetch from the default branch is unpinned and must not be recorded as evidence for a specific pinned version — see [[add]]'s Gotchas and [galaxy-tool-util-ts#82](https://github.com/jmchilton/galaxy-tool-util-ts/issues/82).
 - For just the input JSON Schema (not the full manifest), use the `schema` subcommand instead; `summarize` already embeds it under `input_schemas`.

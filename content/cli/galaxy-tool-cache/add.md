@@ -8,8 +8,8 @@ tags:
   - cli/galaxy-tool-cache
 status: draft
 created: 2026-06-16
-revised: 2026-06-18
-revision: 2
+revised: 2026-09-16
+revision: 3
 summary: "Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema."
 ---
 
@@ -42,3 +42,4 @@ galaxy-tool-cache add "Show beginning1" --tool-version 1.0.2 --cache-dir ~/.cach
 - **Stock ids need an explicit `--tool-version`.** Auto-version discovery routes through the shed's TRS version-list endpoint (`…/api/ga4gh/trs/v2/tools/<id>/versions`), which currently 500s, so a bare `add Filter1` fails with "Failed to fetch tool". Pass the concrete version (`add Filter1 --tool-version 1.1.1`); never hand-guess a stock version — confirm it (e.g. from a populated cache via `list`, or a known pin). Requires `@galaxy-tool-util/cli >= 1.8.1`.
 - Network-bound: requires Tool Shed (or `--galaxy-url`) reachability. Offline runs must reuse a pre-populated `--cache-dir`.
 - Pass the same `--cache-dir` to `add`, `summarize`, and `schema` — they share one cache; `summarize`/`schema` read what `add` wrote.
+- `add` does not retain the raw wrapper source it downloads for a toolshed pin: [[summarize]]'s emitted `artifacts.raw_tool_source_path` is `null`. No sanctioned Tool Shed route serves the wrapper XML at a pinned changeset either — `repos/<owner>/<repo>/raw-file/<changeset>/<path>` answers 403, and `/api/tools/<trs-id>/versions/<v>/raw_tool_source` answers 404. Fetching the file from the upstream repository's default branch on GitHub can work, but it is unpinned — it only matches the pinned version by luck, when upstream hasn't moved since. Never record that fetch as evidence for the pinned version. Tracked upstream at [galaxy-tool-util-ts#82](https://github.com/jmchilton/galaxy-tool-util-ts/issues/82).

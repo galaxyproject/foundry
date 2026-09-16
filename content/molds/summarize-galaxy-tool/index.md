@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 8
+revised: 2026-09-16
+revision: 9
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
 input_artifacts:
   - id: galaxy-tool-pin
@@ -100,7 +100,7 @@ The Mold expects:
 
 - A Tool Shed pin from [[discover-shed-tool]]: `tool_shed_url`, `owner`, `repo`, `tool_id`, `version`, and `changeset_revision`; **or** a bare/stock id for a built-in tool (`Filter1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`) plus a concrete version.
 - A `galaxy-tool-cache` directory containing the cached ParsedTool JSON for that pin.
-- Optional raw XML source for ambiguity checks, normally fetched through cache metadata rather than treated as the primary input.
+- Optional raw XML source for ambiguity checks, used only as supporting evidence, never as the primary input — and not reliably obtainable at the pinned changeset today. `galaxy-tool-cache summarize`'s `artifacts.raw_tool_source_path` is `null` for toolshed-sourced tools ([galaxy-tool-util-ts#82](https://github.com/jmchilton/galaxy-tool-util-ts/issues/82) tracks retention), and the Tool Shed exposes no supported raw-source route per (tool id, version) either. When this evidence is genuinely needed and unreachable through those, record the gap; do not substitute an unpinned fetch (e.g. GitHub's default branch) as if it answered for the pinned version.
 - Optional step intent from the caller, used only to prioritize which wrapper details to explain; it must not change the wrapper facts.
 
 ## Outputs
