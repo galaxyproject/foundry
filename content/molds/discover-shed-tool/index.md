@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 5
+revised: 2026-09-16
+revision: 6
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 output_artifacts:
   - id: galaxy-tool-pin
@@ -117,6 +117,8 @@ Issue [[tool-search]] with the need's keywords. Start narrow:
 ```
 gxwf tool-search "<keywords>" --json --max-results 10
 ```
+
+The explicit `--max-results` is load-bearing, not stylistic: dropping it reintroduces the default-page-size triplication that inflates hit counts and can be misread as candidate ambiguity in step 2 (see [[tool-search]] Gotchas).
 
 If an owner hint is present, add `--owner <owner>`. If an exact-name hint is present, add `--match-name`. Lowercase the query (the tool index does not lowercase, see [[component-tool-shed-search]] §6).
 

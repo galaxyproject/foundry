@@ -98,6 +98,8 @@ Issue tool-search with the need's keywords. Start narrow:
 gxwf tool-search "<keywords>" --json --max-results 10
 ```
 
+The explicit `--max-results` is load-bearing, not stylistic: dropping it reintroduces the default-page-size triplication that inflates hit counts and can be misread as candidate ambiguity in step 2 (see tool-search Gotchas).
+
 If an owner hint is present, add `--owner <owner>`. If an exact-name hint is present, add `--match-name`. Lowercase the query (the tool index does not lowercase, see component-tool-shed-search §6).
 
 **Normalize a tool-id-shaped need before searching.** A caller (e.g. a template `_plan_context` that guessed a candidate) may hand this skill an XML-id token rather than a human name — `iuc/integron_finder`, `integron_finder`. The lexical index does **not** reliably match the underscored token: `tool-search integron_finder` returns no hits while `integron finder` and `integron` both score. So derive query variants instead of feeding the token verbatim: strip any `owner/` prefix, split on `_` / `-` into space-separated words, and also try the bare significant word. A `miss` is only honest after the name variants have been tried — a no-hit on the raw underscored token alone is a search artifact, not evidence the tool is absent.

@@ -8,8 +8,8 @@ tags:
   - cli/gxwf
 status: draft
 created: 2026-04-30
-revised: 2026-05-06
-revision: 2
+revised: 2026-09-16
+revision: 3
 summary: "Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence."
 related_notes:
   - "[[component-tool-shed-search]]"
@@ -73,6 +73,7 @@ gxwf tool-search fastqc --json --max-results 5 \
 - **No exact-id matching**. The shed indexes `id` as `TEXT`, not Whoosh `ID`, so it tokenizes — you cannot pin a hit to an exact GUID via search.
 - **Same XML id across repos**. The same logical tool (e.g., `bwa`) can be wrapped and published in multiple independent repos. Hits collapse only by `(repoName, owner)`; expect duplicates that need human triage.
 - **Repo-level discovery is a different command**. For "find me a *package* about X" with server-side `owner:` / `category:` keywords and popularity-boosted ranking, use `gxwf repo-search` instead.
+- **Default page size triples every hit.** With no explicit `--max-results`, both the table rendering and `--json` return each hit three times over (confirmed live against CLI 1.10.1: `gxwf tool-search "cutadapt" --json` returns 50 rows, 20 distinct `trsToolId` values, each repeated). Passing any explicit `--max-results` (5, 10, 20 all confirmed) returns exactly that many rows, all distinct — the duplication is confined to the default page size, not the search itself. This is more than noisy output: a triage rule that counts hits to detect ambiguity (e.g. "multiple plausible hits → weak") will misread a single dominant candidate as a cluster of look-alikes. Always pass an explicit `--max-results` and never rely on the default page.
 
 ## Pairs with
 
