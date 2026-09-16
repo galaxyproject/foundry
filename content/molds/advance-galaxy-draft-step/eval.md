@@ -104,6 +104,18 @@ Properties are tagged by bucket:
   skill falls through to [[author-galaxy-tool-wrapper]] rather than guessing a
   wrapper.
 
+## Property: a wrapper already pinned elsewhere in the draft is reused, not re-resolved
+
+- bucket: routing
+- check: llm-judged
+- assertion: when the chosen step's `tool_id` matches a `tool_id` already concrete
+  on another step of the same draft, the skill adopts that sibling's `tool_id`
+  and `tool_version` and reuses its tool summary, without invoking
+  [[discover-shed-tool]], a bare-id cache/version lookup, or
+  [[summarize-galaxy-tool]] again for that identity. Fails if an iteration
+  re-derives an identity or re-summarizes a wrapper another step of the same
+  draft has already settled.
+
 ## Property: a --concrete failure routes to the right surface
 
 - bucket: routing
