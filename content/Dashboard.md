@@ -20,7 +20,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests. | draft | 2026-09-15 | 5 |
+| [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests. | draft | 2026-09-16 | 9 |
 | [[summarize-nextflow]] | Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds. | reviewed | 2026-09-15 | 16 |
 | [[review-galaxy-workflow]] | Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review. | draft | 2026-09-12 | 1 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-09-12 | 7 |
@@ -196,6 +196,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-datatypes-conf]] | Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications. | draft | 2026-09-15 | 3 |
+| [[galaxy-discover-datasets]] | Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions. | draft | 2026-09-15 | 3 |
 | [[open-requirements-ledger]] | Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously. | draft | 2026-08-29 | 3 |
 | [[foundry-feedback-ledger]] | Runtime protocol for carrying actionable feedback about Foundry assets, and the related projects a run exercises, from cast skills back to Foundry maintainers. | draft | 2026-08-25 | 1 |
 | [[galaxy-user-tool-authoring]] | What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — derived from Galaxy's own generator prompts. | draft | 2026-08-24 | 1 |
@@ -205,7 +207,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[component-claude-dynamic-workflows]] | Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate. | draft | 2026-06-15 | 1 |
 | [[galaxy-workflow-comments]] | How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative. | draft | 2026-06-12 | 1 |
 | [[iwc-comments-survey]] | How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention. | draft | 2026-06-12 | 1 |
-| [[galaxy-discover-datasets]] | Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions. | draft | 2026-06-10 | 2 |
 | [[iwc-interval-operations-survey]] | IWC corpus survey of coordinate-aware genomic interval operations; sizing and candidate boundaries for a galaxy-interval-patterns MOC, with hold-if-thin gate. | draft | 2026-06-10 | 1 |
 | [[iwc-sequence-operations-survey]] | IWC survey of record-level FASTA manipulation (interconversion, reformat, merge/dedup, subset, extract-at-intervals); sizes a galaxy-sequence-patterns MOC. | draft | 2026-06-10 | 1 |
 | [[nfcore-channel-input-to-galaxy-collection]] | Map an nf-core process's tuple(meta, path) input channel to a Galaxy <param type="data"> or paired/list collection input. | draft | 2026-06-10 | 3 |
@@ -227,7 +228,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-conditional-to-galaxy-subworkflow-when]] | Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule. | draft | 2026-05-08 | 1 |
 | [[nextflow-params-to-galaxy-inputs]] | Rules for translating Nextflow params, sample sheets, channels, and control flags into gxformat2 inputs. | draft | 2026-05-08 | 4 |
 | [[nextflow-workflow-io-semantics]] | Defines Nextflow workflow inputs and outputs from docs plus observed fixture pipeline structures. | draft | 2026-05-08 | 4 |
-| [[galaxy-datatypes-conf]] | Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications. | draft | 2026-05-06 | 2 |
 | [[galaxy-sample-sheet-collections]] | Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist. | draft | 2026-05-06 | 2 |
 | [[galaxy-workflow-testability-design]] | Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible. | draft | 2026-05-06 | 2 |
 | [[gxformat2-schema]] | Vendored structural JSON Schema for gxformat2 workflows: vocabulary for inputs, outputs, steps, and step subtypes. | draft | 2026-05-06 | 2 |
