@@ -4,13 +4,13 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 16,
-    "content_hash": "3371ced2f460f0ebee85ac40bfd7da6eb4270dbafae6892dbcfa31147af11966",
-    "commit": "ac92d2713fb01b07049027e584b8610e07c88d82"
+    "revision": 18,
+    "content_hash": "fb19fff9162cc36fae916a456cfbbe31a33c4565063a522846c48222d02f7c37",
+    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-09-16T14:18:38.244Z",
+  "cast_at": "2026-09-15T23:16:27.772Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -142,10 +142,10 @@
       "load": "on-demand",
       "evidence": "hypothesis",
       "purpose": "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions.",
-      "trigger": "When filling test_fixtures or nf_tests sections of the summary.",
-      "verification": "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction.",
-      "src_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
-      "dst_hash": "b3f6dd5de325f8b9d85cc597b928df70b9f842eb2d1d2652aa68bde8e2c325c7",
+      "trigger": "When filling test_candidates and test_selection sections of the summary.",
+      "verification": "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves candidate enumeration and snapshot fixture extraction.",
+      "src_hash": "1a429a25165e8ab3621aaef1c481db563f6280bf1f090b5257f937805346bc67",
+      "dst_hash": "1a429a25165e8ab3621aaef1c481db563f6280bf1f090b5257f937805346bc67",
       "source": "deterministic"
     },
     {
@@ -158,10 +158,25 @@
       "load": "on-demand",
       "evidence": "hypothesis",
       "purpose": "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions.",
-      "trigger": "When filling test_fixtures or nf_tests sections of the summary.",
+      "trigger": "When filling test_candidates and test_selection sections of the summary.",
       "companion_of": "references/notes/component-nextflow-testing.md",
       "src_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
       "dst_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[nextflow-test-case-selection]]",
+      "src": "content/research/nextflow-test-case-selection/index.md",
+      "dst": "references/notes/nextflow-test-case-selection.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose the first whole-pipeline test candidate without equating a profile name with runnability or scientific coverage.",
+      "trigger": "When no explicit profile was supplied, multiple pipeline-level nf-tests exist, or the apparent candidate is full-scale, minimal, tiny, or stub-only.",
+      "src_hash": "28a2c267d8fb26ce97b3472cca8a0a09c2295365c56600a2c0811c4be2752623",
+      "dst_hash": "28a2c267d8fb26ce97b3472cca8a0a09c2295365c56600a2c0811c4be2752623",
       "source": "deterministic"
     },
     {
@@ -226,8 +241,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
       "license": "MIT",
-      "src_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
-      "dst_hash": "6489309caa1d8f96c457cbc7da03d8a3fd5b5a873989e917b5e09080ff101527",
+      "src_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
+      "dst_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
       "source": "deterministic"
     }
   ],

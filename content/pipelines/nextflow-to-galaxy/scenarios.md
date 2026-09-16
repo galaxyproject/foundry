@@ -161,8 +161,10 @@ journey do when the summary comes back mostly empty?"
   downstream phase, so the choice must be reviewable, not implicit.
 
 - expect (empty-summary honesty): the summary comes back with `params`,
-  `tools`, `sample_sheets`, `profiles`, `reference_assets`, and `nf_tests` all
-  empty, and `container`/`conda` null on all 95 processes — egapx declares one
+  `tools`, `sample_sheets`, `profiles`, and `reference_assets` empty,
+  `test_candidates` containing only the honest pipeline-default fallback, and
+  `test_selection.selected_candidate_id` pointing to it; `container`/`conda`
+  remain null on all 95 processes — egapx declares one
   global `process.container = 'ncbi/egapx:0.5.2'`
   (`ui/assets/config/docker_image.config`, which sits *outside* the detected
   `nf/` root). Downstream phases must treat these as **absent evidence** and say
@@ -200,9 +202,10 @@ journey do when the summary comes back mostly empty?"
   evidence is a `script:` block and one monolithic image, and whether it says so
   when it cannot.
 
-- expect (test data): `test_fixtures` and `nf_tests` are empty, so
-  [[nextflow-to-test-data]] must fall through the `test-data-resolution` chain
-  rather than synthesize. `examples/input_D_farinae_small.yaml` is the intended
+- expect (test data): the selected pipeline-default candidate has no resolved
+  inputs, so [[nextflow-to-test-data]] must fall through the
+  `test-data-resolution` chain rather than synthesize.
+  `examples/input_D_farinae_small.yaml` is the intended
   landing spot — a genuinely small subsampled *D. farinae* dataset on public
   NCBI FTP — but nothing in the spine points a phase at it. Whether the chain
   reaches it, and through which link, is the finding.

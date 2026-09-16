@@ -18,7 +18,7 @@ program
   .description("Statically introspect a Nextflow / nf-core pipeline and emit a JSON summary.")
   .version(VERSION)
   .argument("<path-or-url>", "Path to a local pipeline clone, or a git URL")
-  .option("--profile <name>", "Profile to resolve config under", "test")
+  .option("--profile <name>", "Explicit profile override for candidate resolution")
   .option("--pin <ref>", "Tag, branch, or commit SHA")
   .option("--out <path>", "Write JSON to this path instead of stdout")
   .option("--no-with-nextflow", "Disable Nextflow shell-out; static parse only (default: enabled)")
