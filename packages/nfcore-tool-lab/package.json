@@ -1,0 +1,49 @@
+{
+  "name": "@galaxy-foundry/nfcore-tool-lab",
+  "version": "0.0.0",
+  "description": "Prepare converted nf-core Galaxy tools for the experimental tools-iwc-lab repository.",
+  "type": "module",
+  "bin": {
+    "nfcore-tool-lab": "dist/bin/nfcore-tool-lab.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galaxyproject/foundry.git",
+    "directory": "packages/nfcore-tool-lab"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "saxes": "^6.0.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
