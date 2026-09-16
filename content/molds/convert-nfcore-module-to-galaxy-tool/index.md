@@ -8,8 +8,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-05-10
-revised: 2026-09-15
-revision: 8
+revised: 2026-09-16
+revision: 9
 summary: "Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests."
 references:
   - kind: research
@@ -275,6 +275,20 @@ LLM step. Pass:
 
 Ask only for the Cheetah-flavored Galaxy command. Wrap in `<![CDATA[...]]>`. Set `detect_errors="exit_code"` unless a comment in the original `script:` argues otherwise.
 
+**Command whitespace:** after rendering Cheetah, Galaxy trims each line and replaces newlines with spaces ([implementation](https://github.com/galaxyproject/galaxy/blob/bf895c717567dddc767f79ccde9df7447c846694/lib/galaxy/tools/evaluation.py#L767-L776)). Do not copy Nextflow's end-of-line shell continuation backslashes into `<command>`: a backslash followed by a newline becomes a backslash followed by a space, changing argument parsing. A single invocation can span plain argument lines without continuations; keep Cheetah `#if`, `#for`, and `#set` directives on their own lines. Separate distinct shell commands explicitly with `&&` when the next depends on success, or `;` when unconditional sequencing is intended. This does not prohibit Cheetah escapes such as `\${GALAXY_SLOTS:-1}`.
+
+For example, staging and invocation remain distinct after whitespace normalization:
+
+```cheetah
+ln -s '$input' staged_input &&
+seqkit stats
+    --tabular
+    --threads \${GALAXY_SLOTS:-1}
+    $extra_args
+    staged_input
+    > '$stats'
+```
+
 ### 6. Emit `<version_command>`
 
 Per [[nfcore-versions-emit-to-galaxy-version-command]]: extract the primary tool's version-emit line from the heredoc or `topic: versions` annotation, strip Nextflow escaping (`\$( → $(` etc.), and wrap in `<![CDATA[...]]>`.
@@ -320,7 +334,7 @@ After the run:
 2. **Classify** from schema fields, not free-text. `tests[].data.job` is `dict[str, Any]` (extra-allow) — its inner keys come from the Galaxy job state and are not constrained by [[planemo-test-report]], so treat them as best-effort signals:
    - `tests[].data.status == "success"` → pass.
    - `tests[].data.status == "failure"` + `data.problem_log` matches an output-discovery pattern (`<discover_datasets>` mismatch, missing dataset name, format mismatch) → adjust the corresponding `<output>` / `<discover_datasets>` block.
-   - `tests[].data.status == "failure"`, and `data.job.stderr` (when present) carries upstream tool stderr → the `<command>` Cheetah translation is wrong; LLM revises.
+   - `tests[].data.status == "failure"`, and `data.job.stderr` (when present) carries upstream tool stderr → inspect `data.job.command_line` when available before revising the `<command>` Cheetah translation; check for backslash-space arguments and missing shell separators as well as tool options.
    - `tests[].data.status == "error"` with HTTP/URL signals → fixture-availability fault; verify the `nf-core/test-datasets` URL resolves and consider a local `test-data/` fallback, recording the divergence in `_provenance.yml.overrides`.
    - Any other failure shape → human triage.
 3. **Stop** when lint and test both clear.
