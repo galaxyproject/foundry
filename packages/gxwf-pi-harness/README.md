@@ -11,6 +11,8 @@ The extension derives the worker's expected artifacts exclusively from the selec
 
 Local mode is process and context isolation, not a security boundary. The trace CLI defaults each local run to a unique directory under the operating system's temporary directory, and both local and container workers load a dereferenced staged copy of the selected skill rather than its checkout path. An explicit `--run-dir` still overrides that diagnostic default.
 
+The runner hashes that frozen copy once and supplies `cast_bundle_sha256` as runtime metadata in the worker prompt, outside the hashed bundle. It records the same value as `run.json.invocation.skill_sha256`. For a declared `galaxy-tool-provenance` artifact, it checks that `generated.cast_artifact_sha` equals this value; missing, malformed, or mismatched provenance is a skill failure. This identifies the whole loaded bundle, not `_provenance.json.mold.content_hash` (the Mold source hash).
+
 OpenAI subscription-backed diagnostics can opt into the Foundry-specific `pi-test-auth` store. Login, refresh, and logout use Pi's public authentication API; Foundry does not interpret or copy tokens. For each local run, the fresh Pi configuration temporarily links to the store's `auth.json`, then removes that link before retaining the run directory. Run records contain only the label `pi-test-auth`, never the store path or credential values.
 
 Container mode runs the whole Pi RPC worker inside a disposable Docker container. It mounts the staged skill bundle and copied declared inputs read-only, mounts only the run's output directory read-write, and uses tmpfs for Pi configuration and temporary files. The checkout itself is never mounted.

@@ -24,6 +24,7 @@ import {
   type RpcSessionState,
   type SessionStats,
 } from "@earendil-works/pi-coding-agent";
+import { parse as parseYaml } from "yaml";
 
 import {
   DEFAULT_CONTAINER_IMAGE,
@@ -61,6 +62,11 @@ export interface ArtifactResult {
   path: string;
   status: "passed" | "present" | "missing" | "failed" | "error";
   sha256?: string;
+  provenance_check?: {
+    expected_sha256: string;
+    actual_sha256?: string;
+    error?: string;
+  };
   validator?: {
     bin: string;
     args: string[];
@@ -326,6 +332,7 @@ function validateArtifacts(
   workspace: string,
   runDir: string,
   skillDir: string,
+  castBundleSha256: string,
 ): ArtifactResult[] {
   const verify = loadVerifyEntries(skillDir);
   const validationDir = path.join(runDir, "validation");
@@ -340,6 +347,27 @@ function validateArtifacts(
       status: "present",
       sha256: sha256Path(artifactPath),
     };
+    if (artifact.id === "galaxy-tool-provenance") {
+      result.provenance_check = { expected_sha256: castBundleSha256 };
+      try {
+        const provenance = parseYaml(readFileSync(artifactPath, "utf8")) as {
+          generated?: { cast_artifact_sha?: unknown };
+        } | null;
+        const actual = provenance?.generated?.cast_artifact_sha;
+        if (typeof actual === "string") result.provenance_check.actual_sha256 = actual;
+        if (actual !== castBundleSha256) {
+          result.status = "failed";
+          result.provenance_check.error =
+            "generated.cast_artifact_sha must match the harness cast_bundle_sha256";
+          return result;
+        }
+        result.status = "passed";
+      } catch (error) {
+        result.status = "failed";
+        result.provenance_check.error = error instanceof Error ? error.message : String(error);
+        return result;
+      }
+    }
     const entry = verify.get(artifact.id);
     if (!entry) return result;
     mkdirSync(validationDir, { recursive: true });
@@ -374,11 +402,17 @@ function isAgentFailure(events: JsonAgentSessionEvent[]): boolean {
   });
 }
 
-function invocationPrompt(skill: string, prompt: string, inputs: StagedInput[]): string {
+function invocationPrompt(
+  skill: string,
+  prompt: string,
+  inputs: StagedInput[],
+  castBundleSha256: string,
+): string {
   const inputNote = inputs.length
     ? `\n\nDeclared inputs staged in this worker:\n${inputs.map((input) => `- ${input.staged_path}`).join("\n")}`
     : "";
-  return `/skill:${skill}\n\n${prompt}${inputNote}`;
+  const metadata = JSON.stringify({ cast_bundle_sha256: castBundleSha256 });
+  return `/skill:${skill}\n\n${prompt}${inputNote}\n\nHarness runtime metadata (outside the cast bundle):\n${metadata}`;
 }
 
 function prepareRunDirectory(
@@ -556,19 +590,20 @@ export async function runPiSkill(
     force: false,
   });
   makeReadOnly(workerSkillDir);
+  const castBundleSha256 = sha256Path(workerSkillDir);
   for (const artifact of expectedArtifacts) {
     if (!ARTIFACT_ID.test(artifact.id)) throw new Error(`invalid artifact id: ${artifact.id}`);
     resolveWorkspacePath(workspace, artifact.path);
   }
   const inputPaths = options.inputPaths ?? [];
   const inputs = stageInputs(inputPaths, inputsDir, sandbox === "container" ? "/inputs" : "inputs");
-  const prompt = invocationPrompt(skill, options.prompt, inputs);
+  const prompt = invocationPrompt(skill, options.prompt, inputs, castBundleSha256);
   const tracePath = path.join(runDir, "trace.jsonl");
   const stderrPath = path.join(runDir, "stderr.log");
   writeFileSync(tracePath, "");
   writeFileSync(stderrPath, "");
 
-  const provenancePath = path.join(skillDir, "_provenance.json");
+  const provenancePath = path.join(workerSkillDir, "_provenance.json");
   const mounts =
     sandbox === "container"
       ? containerMounts(workerSkillDir, inputsDir, workspace, inputPaths.length > 0)
@@ -588,7 +623,7 @@ export async function runPiSkill(
     invocation: {
       skill,
       skill_path: skillDir,
-      skill_sha256: sha256Path(skillDir),
+      skill_sha256: castBundleSha256,
       provenance_sha256: existsSync(provenancePath) ? sha256Path(provenancePath) : undefined,
       prompt_sha256: sha256Text(prompt),
       explicit_activation: `/skill:${skill}`,
@@ -720,7 +755,13 @@ export async function runPiSkill(
     state = await client.getState();
     stats = await client.getSessionStats();
     finalOutput = (await client.getLastAssistantText()) ?? undefined;
-    const artifacts = validateArtifacts(expectedArtifacts, workspace, runDir, skillDir);
+    const artifacts = validateArtifacts(
+      expectedArtifacts,
+      workspace,
+      runDir,
+      workerSkillDir,
+      castBundleSha256,
+    );
     const optionalIds = new Set(
       expectedArtifacts.filter((artifact) => artifact.optional).map((artifact) => artifact.id),
     );
@@ -764,7 +805,13 @@ export async function runPiSkill(
     error = caught instanceof Error ? caught.message : String(caught);
     status = timedOut ? "timed_out" : cancelled || options.signal?.aborted ? "cancelled" : "error";
     failureKind = status === "error" ? "infrastructure" : undefined;
-    const artifacts = validateArtifacts(expectedArtifacts, workspace, runDir, skillDir);
+    const artifacts = validateArtifacts(
+      expectedArtifacts,
+      workspace,
+      runDir,
+      workerSkillDir,
+      castBundleSha256,
+    );
     const finished = now();
     const record: PiSkillRunRecord = {
       ...baseRecord,
