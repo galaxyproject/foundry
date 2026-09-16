@@ -109,7 +109,7 @@ jobs:
               const flagged = names(issue).includes(NEEDS);
               const reasons = violations(issue);
               if (reasons.length && !flagged) {
-                await github.rest.issues.addLabel({
+                await github.rest.issues.addLabels({
                   ...context.repo, issue_number: issue.number, labels: [NEEDS],
                 });
               } else if (!reasons.length && flagged) {
