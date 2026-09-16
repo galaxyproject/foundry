@@ -7,8 +7,8 @@ tags:
   - meta
 status: draft
 created: 2026-09-14
-revised: 2026-09-15
-revision: 2
+revised: 2026-09-16
+revision: 3
 summary: "The current development direction of the Galaxy Workflow Foundry, grounded in live GitHub issue metadata."
 ---
 
@@ -28,7 +28,9 @@ The roadmap is an editorial view over the Foundry's GitHub issues. The checked-i
 - [#504 — Improve Pattern Pages](https://github.com/galaxyproject/foundry/issues/504).
 - [#476 — Build a Pi-backed black-box Pipeline evaluation harness](https://github.com/galaxyproject/foundry/issues/476).
 - [#491 — Add IWC-policy workflow review pipeline with conditional Foundry quality checks](https://github.com/galaxyproject/foundry/issues/491).
+- [#535 — Prove the IWC review pipeline on a real PR and accept its policy pin](https://github.com/galaxyproject/foundry/issues/535).
 - [#492 — Add a checklist-driven Galaxy workflow maturation pipeline for IWC publication](https://github.com/galaxyproject/foundry/issues/492).
+- [#531 — Prove the IWC maturation pipeline with runnable fixtures and a .ga entry case](https://github.com/galaxyproject/foundry/issues/531).
 - [#90 — Survey: Galaxy reporting and publishing patterns](https://github.com/galaxyproject/foundry/issues/90).
 - [#306 — Pipeline construction for Loom/Orbit: a `loom` cast target that lowers pipelines into Loom plans](https://github.com/galaxyproject/foundry/issues/306).
 - [#499 — First Class CWL Support](https://github.com/galaxyproject/foundry/issues/499).
@@ -101,6 +103,10 @@ Build a repeatable black-box harness that runs published Pipeline and skill arti
 
 Compose summarization, structural validation, execution, and one advisory review Mold into a Galaxy workflow review Pipeline grounded in accepted IWC policy, with additional Foundry quality checks applied only where the available evidence supports them.
 
+### [#535 — Prove the IWC review pipeline on a real PR and accept its policy pin](https://github.com/galaxyproject/foundry/issues/535)
+
+Convert the structurally complete review Pipeline into scored evidence: land the upstream policy revision so the vendored review command is pinned to an accepted commit rather than a proposal, record how the Claude and Copilot review policies relate, and run all four phases against a real IWC pull request so the eval properties and harness gates are observed rather than asserted.
+
 ### [#492 — Add a checklist-driven Galaxy workflow maturation pipeline for IWC publication](https://github.com/galaxyproject/foundry/issues/492)
 
 Provide a lifecycle Pipeline that applies the accepted IWC contributor checklist to an existing Galaxy workflow, makes well-supported metadata and generalization improvements, preserves ambiguous decisions for users, and validates and reruns the result before presenting it as publication-ready.
@@ -108,6 +114,10 @@ Provide a lifecycle Pipeline that applies the accepted IWC contributor checklist
 **Substeps**
 
 - [x] [#496 — Implement the mature-galaxy-workflow-for-iwc Mold](https://github.com/galaxyproject/foundry/issues/496)
+
+### [#531 — Prove the IWC maturation pipeline with runnable fixtures and a .ga entry case](https://github.com/galaxyproject/foundry/issues/531)
+
+Close the evidence gap beneath the maturation Pipeline by authoring a runnable checklist fixture with real steps, outputs, and committed test data, walking it green and then deliberately red through all four phases with the failure attributed instead of any assertion weakened, and binding the lossless-normalization property to a committed `.ga` entry case.
 
 ### [#90 — Survey: Galaxy reporting and publishing patterns](https://github.com/galaxyproject/foundry/issues/90)
 
