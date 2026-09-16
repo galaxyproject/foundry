@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 4,
     "content_hash": "c92d452f69a7b40bcab5fc8e63b03e1e2abf98f2a636abc4c93ad7f3c1d03082",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "715cd2c3f3d997bfe54c091f477590c400e1ecb8"
   },
-  "cast_at": "2026-09-13T20:58:25.956Z",
+  "cast_at": "2026-09-16T19:37:36.909Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -54,8 +54,8 @@
       "purpose": "Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2.",
       "trigger": "After implementing or modifying the chosen step in the draft.",
       "verification": "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched.",
-      "src_hash": "37cded427fbccf49ff19a6fe8b03f9e90857afe556e5db0e51a01402fbf33f1e",
-      "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
+      "src_hash": "658e0dc3ee9e262f839a7cdf4410f74fbf433118b29e9219416046ab7523dd32",
+      "dst_hash": "d7da9990d8bd8d7845b2644ce978fa197f12bccd81acc08dfac5b53f6f525a17",
       "source": "deterministic"
     },
     {
