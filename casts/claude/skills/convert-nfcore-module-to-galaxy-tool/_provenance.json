@@ -4,11 +4,11 @@
   "mold": {
     "name": "convert-nfcore-module-to-galaxy-tool",
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
-    "revision": 9,
-    "content_hash": "d8e752dfcf5e3367319c19a51e14288ffa99de54c07a9f154caa9d03a62751b4",
-    "commit": "f19ad2e0c7949c8583981a3a6fe296bac26b2174"
+    "revision": 10,
+    "content_hash": "796060f2091ba7f9ef00305829b599129a09b65643ef11312166b9657dff844c",
+    "commit": "ac92d2713fb01b07049027e584b8610e07c88d82"
   },
-  "cast_at": "2026-09-16T13:36:39.511Z",
+  "cast_at": "2026-09-16T14:10:45.388Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
