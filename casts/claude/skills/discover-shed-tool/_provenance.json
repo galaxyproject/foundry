@@ -6,9 +6,9 @@
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 6,
     "content_hash": "39f950e003c95074f221ac4b4edf38dcba96adfc1d13970935f2218bb0ca9ce9",
-    "commit": "715cd2c3f3d997bfe54c091f477590c400e1ecb8"
+    "commit": "f27823addf528e6196453b8d2634414cea5d0c3a"
   },
-  "cast_at": "2026-09-16T19:38:32.578Z",
+  "cast_at": "2026-09-16T19:46:56.675Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -65,8 +65,8 @@
       "evidence": "corpus-observed",
       "purpose": "Search the Tool Shed for candidate wrappers matching a step's tool need.",
       "trigger": "When resolving a workflow step to an installable Galaxy tool wrapper.",
-      "src_hash": "ec166c9b204ad79905618b7852f79fe3fce5df2feec61d5146bea8993ed4189f",
-      "dst_hash": "4fd44c60b4b17253f722f77013c89d0b2a5c8aa27806b5cf78bb5124ad465f8d",
+      "src_hash": "85634fa76112c6b73c4a1e123be6cebbe95d2dd23622e87b8742fbdaca6e55fb",
+      "dst_hash": "d9b37e27481fc7daaee860c7854249153e4ad637cae576785811a82e805d34ca",
       "source": "deterministic"
     },
     {

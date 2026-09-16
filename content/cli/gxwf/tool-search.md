@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-09-16
-revision: 3
+revision: 4
 summary: "Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence."
 related_notes:
   - "[[component-tool-shed-search]]"
@@ -73,7 +73,7 @@ gxwf tool-search fastqc --json --max-results 5 \
 - **No exact-id matching**. The shed indexes `id` as `TEXT`, not Whoosh `ID`, so it tokenizes — you cannot pin a hit to an exact GUID via search.
 - **Same XML id across repos**. The same logical tool (e.g., `bwa`) can be wrapped and published in multiple independent repos. Hits collapse only by `(repoName, owner)`; expect duplicates that need human triage.
 - **Repo-level discovery is a different command**. For "find me a *package* about X" with server-side `owner:` / `category:` keywords and popularity-boosted ranking, use `gxwf repo-search` instead.
-- **Default page size triples every hit.** With no explicit `--max-results`, both the table rendering and `--json` return each hit three times over (confirmed live against CLI 1.10.1: `gxwf tool-search "cutadapt" --json` returns 50 rows, 20 distinct `trsToolId` values, each repeated). Passing any explicit `--max-results` (5, 10, 20 all confirmed) returns exactly that many rows, all distinct — the duplication is confined to the default page size, not the search itself. This is more than noisy output: a triage rule that counts hits to detect ambiguity (e.g. "multiple plausible hits → weak") will misread a single dominant candidate as a cluster of look-alikes. Always pass an explicit `--max-results` and never rely on the default page.
+- **Default page fetch duplicates hits — an unfixed release, not a paging property.** With no explicit `--max-results`, both the table rendering and `--json` return each hit two or three times over (confirmed live against the released CLI `1.10.1`, published 2026-07-13: `gxwf tool-search "cutadapt" --json` returns 50 rows, 20 distinct `trsToolId` values, most repeated). The cause is page-iteration overlap: this release's `tool-search` command walks Tool Shed result pages itself, with no dedup, and pushes every raw hit it sees before it stops at the `--max-results` cap; a small explicit `--max-results` (5, 10, 20 all confirmed distinct) only *looks* like a fix because the loop halts inside the first page, before the overlapping later pages are ever fetched. This is more than noisy output: a triage rule that counts hits to detect ambiguity (e.g. "multiple plausible hits → weak") will misread a single dominant candidate as a cluster of look-alikes. Upstream has already fixed the root cause — `galaxy-tool-util-ts` PR #170 (merged 2026-09-04 as `0ed90f7a`) routes the CLI through `ToolSearchService.searchTools`, which dedupes on `(repoOwnerUsername, repoName, toolId)` — but no release containing it exists yet, and the Foundry's recorded floor (`^1.8.1`) predates it by months. Until a release with #170 ships and the Foundry's pin is bumped to it, always pass an explicit `--max-results`; this Gotcha can be dropped once that happens.
 
 ## Pairs with
 
