@@ -6,9 +6,9 @@
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 3,
     "content_hash": "82d8e6e440fc48fdb4e7c5a5e25591ecc8e8a248ea03cc950df5096256656b62",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "4b38067fec099262a05a78b7208ec878b598ae7e"
   },
-  "cast_at": "2026-09-13T20:58:26.175Z",
+  "cast_at": "2026-09-16T19:46:43.320Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off to the per-step loop.",
       "trigger": "After writing the modified draft workflow file.",
       "verification": "Cast the skill, run on a representative workflow + change-set, confirm draft-validate diagnostics route back.",
-      "src_hash": "37cded427fbccf49ff19a6fe8b03f9e90857afe556e5db0e51a01402fbf33f1e",
-      "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
+      "src_hash": "ed602eb5169f3362cfe8fc45552bc11b902b8bbb6bd2813c2e6b06d2826382dc",
+      "dst_hash": "f816912a2e4c98ead3ad367319a2aa229c43f50760e485925bae822492b9ab40",
       "source": "deterministic"
     },
     {

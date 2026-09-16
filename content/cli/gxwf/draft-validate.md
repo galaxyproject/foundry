@@ -8,8 +8,8 @@ tags:
   - cli/gxwf
 status: draft
 created: 2026-05-27
-revised: 2026-05-27
-revision: 1
+revised: 2026-09-16
+revision: 3
 related_notes:
   - "[[galaxy-workflow-draft]]"
 summary: "Validate a `class: GalaxyWorkflowDraft` workflow against draft-contract rules; with --concrete, also validate the extracted concrete subset."
@@ -61,3 +61,4 @@ gxwf draft-validate workflow.gxwf.yml --report-html report.html
 - Subworkflow draft roots are validated recursively; diagnostics carry the outer step path.
 - `TODO`, `TODO_x`, `TODO-x` are sentinels; `TODONE` and `TODOLIST` are not.
 - Prefer `--json` whenever a cast skill or harness needs to classify diagnostics.
+- A tool-cache miss under `--concrete` renders the full expected `ParsedTool` type declaration instead of a short message — one occurrence runs ~19 KB of text, and a per-step loop that hits several misses per iteration turns this into the dominant source of context noise. Populate the tool cache (`galaxy-tool-cache add`, or a `--cache-dir` warmed ahead of time) before validating so the miss doesn't fire. The rendering lives in `@galaxy-tool-util/cli` / `@galaxy-tool-util/schema` (`packages/core/src/tool-info.ts`), upstream of this manual page — a released `@galaxy-tool-util/cli` at 1.10.1 (2026-07-13) or earlier interleaves the dump into stdout ahead of `--json` output; upstream `main` has since moved these diagnostics off stdout via a `DiagnosticSink`, but the dump itself (a decode-failure `Error.message` interpolated whole) is still unfixed there. Check the installed CLI's version against these dates before assuming either half is patched.
