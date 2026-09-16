@@ -270,6 +270,33 @@ describe("required-tools manifest (summarize-cwl integration)", () => {
   });
 });
 
+describe("author-galaxy-tool-wrapper source-independent contract", () => {
+  it("keeps Nextflow input optional and source-specific references on demand", () => {
+    const bundle = path.join(repoRoot, "casts/claude/skills/author-galaxy-tool-wrapper");
+    const provenance = JSON.parse(readFileSync(path.join(bundle, "_provenance.json"), "utf8"));
+    expect(provenance.artifacts.consumes).toContainEqual(
+      expect.objectContaining({ id: "summary-nextflow", optional: true }),
+    );
+    for (const ref of provenance.refs.filter(
+      (ref: { ref: string }) =>
+        ref.ref === "[[summary-nextflow]]" ||
+        ref.ref === "[[component-nextflow-containers-and-envs]]" ||
+        ref.ref.startsWith("[[nfcore-") ||
+        ref.ref === "[[nextflow-path-glob-to-galaxy-datatype]]",
+    )) {
+      expect(ref.load).toBe("on-demand");
+      expect(ref.trigger).toEqual(expect.any(String));
+    }
+    expect(provenance.refs).toContainEqual(
+      expect.objectContaining({ ref: "[[galaxy-user-tool-authoring]]", load: "upfront" }),
+    );
+    const cast = runTsx(castMold, ["author-galaxy-tool-wrapper", "--target=claude", "--check"]);
+    expect(cast.code, cast.stderr).toBe(0);
+    const verify = runTsx(castVerify, ["author-galaxy-tool-wrapper", "--target=claude"]);
+    expect(verify.code, verify.stderr).toBe(0);
+  });
+});
+
 describe("cast-skill-verify (summarize-nextflow integration)", () => {
   it("verifier passes against committed cast", () => {
     const r = runTsx(castVerify, ["summarize-nextflow", "--target=claude"]);

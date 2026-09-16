@@ -7,15 +7,16 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-24
-revision: 5
+revised: 2026-09-16
+revision: 6
 related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
 summary: "Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable."
 input_artifacts:
   - id: summary-nextflow
-    description: "Source pipeline summary from [[summarize-nextflow]]; provides process command, inputs, outputs, and container or conda evidence for UDT authoring."
+    optional: true
+    description: "Optional whole-pipeline Nextflow summary from [[summarize-nextflow]], when available; other source descriptions and standalone process evidence can supply the authoring context directly."
 output_artifacts:
   - id: galaxy-user-tool-definition
     kind: yaml
@@ -25,10 +26,11 @@ references:
   - kind: schema
     ref: "[[summary-nextflow]]"
     used_at: runtime
-    load: upfront
+    load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary."
+    purpose: "Interpret a supplied whole-pipeline Nextflow summary and resolve process evidence within it."
+    trigger: "When the optional summary-nextflow artifact is supplied; do not require a whole summary or apply its envelope schema to standalone process evidence."
   - kind: research
     ref: "[[galaxy-user-tool-authoring]]"
     used_at: runtime
@@ -44,6 +46,33 @@ references:
     evidence: corpus-observed
     purpose: "Clarity and idiomaticity criteria, and the text-versus-structural test for each proposed fix."
     trigger: "After the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`."
+  - kind: research
+    ref: "[[nfcore-channel-input-to-galaxy-collection]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Interpret nf-core tuple/path input roles and cardinality; express the result using UDT-supported input shapes rather than copying XML examples."
+    trigger: "When supplied Nextflow evidence contains nf-core tuple(meta, path) inputs or single/paired branching."
+    verification: "Author from single-file and paired nf-core evidence; preserve cardinality or explicitly report an unsupported UDT shape."
+  - kind: research
+    ref: "[[nfcore-meta-map-to-galaxy-params]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Distinguish behavior-driving meta keys from identity and naming metadata when building the UDT requirements brief."
+    trigger: "When supplied Nextflow script evidence reads meta-map keys."
+    verification: "Confirm identity-only keys do not become required UDT inputs and behavior-driving keys are retained or their narrowing is recorded."
+  - kind: research
+    ref: "[[nextflow-path-glob-to-galaxy-datatype]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Choose datatypes from Nextflow path/glob evidence and its confidence rules; use the UDT field contract for final input/output syntax."
+    trigger: "When supplied Nextflow paths or output globs provide datatype evidence."
+    verification: "Confirm weak variable-name hints do not become invented formats and evidenced formats use UDT input lists and output strings."
   - kind: research
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
@@ -62,12 +91,18 @@ The output is a single `GalaxyUserTool` YAML document, not Galaxy XML. Preserve 
 
 ## Inputs
 
-Use the source summary and branch fallthrough context to identify:
+Use the supplied tool need and discovery fallthrough context to identify:
 
-- The process or abstract step that needs a tool.
+- The command or abstract step that needs a tool.
 - Command intent, required inputs, expected outputs, and test fixture evidence.
-- Container, Bioconda, Conda, or environment evidence from the source pipeline.
+- Container, Bioconda, Conda, or environment evidence from the supplied source.
 - Why Tool Shed discovery did not supply an acceptable existing wrapper.
+
+The source may be a CWL tool description, an interview or paper-derived executable brief, Nextflow process evidence, or another description with sufficient command and interface detail. Nextflow is not a prerequisite. An abstract step still needs enough executable evidence to author a truthful tool.
+
+A whole [[summary-nextflow]] is optional. When supplied, use its schema and resolve the selected process's tool or container references within that summary. A standalone process row or source excerpt is task evidence, not a whole `summary-nextflow` artifact: do not validate it against the whole-summary envelope, require its parent pipeline, or invent registry entries to satisfy foreign keys. Use evidence present in the row itself; request missing command, dependency, or interface details when those are needed.
+
+Load Nextflow-specific notes only for the evidence their triggers describe. Reuse their source interpretation rules for cardinality, metadata, dependencies, and datatype confidence. Their XML/Cheetah examples do not define the UDT syntax or supported shapes: follow [[galaxy-user-tool-authoring]], and report unsupported behavior or any intentional narrowing instead of copying XML fields into YAML. [[convert-nfcore-module-to-galaxy-tool]] remains a separate XML conversion procedure.
 
 ## Procedure
 
