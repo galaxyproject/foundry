@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 5,
-    "content_hash": "8ca625caf17ada86efddf56fd4f76c8906e2cbfc060c12db1865689af9a867e9",
-    "commit": "715cd2c3f3d997bfe54c091f477590c400e1ecb8"
+    "revision": 6,
+    "content_hash": "d34b126bd934c2571b370fe79a6ef33eb35c67fd37982a2b3009b9d075a7bc7b",
+    "commit": "89106ffe543ceba4f74e2d680a6fe407d9adbdb7"
   },
-  "cast_at": "2026-09-16T19:39:33.025Z",
+  "cast_at": "2026-09-16T20:46:45.506Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -19,9 +19,9 @@
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Populate the tool cache for the chosen step's resolved wrapper (bare stock id or Tool Shed pin) before validation: draft-validate --concrete only produces a real tool-state verdict when the step's tool is cached, and a stock id needs an explicit --tool-version fetched here.",
-      "trigger": "After a wrapper (and, for stock ids, a concrete version) has been resolved for the chosen step in step 2, before running draft-validate --concrete in step 6.",
-      "verification": "Cast the skill, add the resolved pin for a chosen step's tool, confirm draft-validate --concrete against the same --cache-dir reports a real tool_state verdict for that step instead of a skipped one.",
+      "purpose": "Cache the resolved wrapper for summarization and validation, using its confirmed tool version.",
+      "trigger": "After resolving the wrapper and version, if the shared cache lacks that pin.",
+      "verification": "Confirm add caches the resolved pin and draft-validate --concrete --strict-state --json validates its state using the same --cache-dir.",
       "src_hash": "6cb4b61fbdd1aa49a5052abb24020c43bdf57e0360643a65e55b23b42155f561",
       "dst_hash": "85e3bb884171beb69631186ca6f0f7552e6c6d0721383ab6653e7a32c84a1b71",
       "source": "deterministic"
@@ -67,7 +67,7 @@
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "hypothesis",
-      "purpose": "Validate the mutated draft against draft-contract rules and, with --concrete, also gate the extracted concrete subset (including the step just implemented) against full gxformat2.",
+      "purpose": "Validate the draft and its concrete subset with --concrete --strict-state --json; skipped tool-state checks must fail the gate.",
       "trigger": "After implementing or modifying the chosen step in the draft.",
       "verification": "Cast the skill, exercise on an IWC-derived draft, confirm both draft-contract diagnostics and concrete-projection diagnostics route back to the step the iteration touched.",
       "src_hash": "37cded427fbccf49ff19a6fe8b03f9e90857afe556e5db0e51a01402fbf33f1e",
@@ -83,7 +83,7 @@
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Resolve a stock/built-in tool's concrete version from a populated cache before add — the shed's TRS version-list endpoint can't auto-resolve it, so a stock version is never hand-guessed.",
+      "purpose": "Read a stock tool's cached version when the step plan has no version pin.",
       "trigger": "In step 2, when the chosen step's tool is a bare/stock id and its concrete version isn't already known from a step-plan pin.",
       "verification": "Cast the skill, populate a cache with a stock tool, run list --json, confirm the reported version is what add's --tool-version uses for that bare id.",
       "src_hash": "e352306726b54752ad63ac68b2a468d49eb22cebd7b367344ee6b10c8e790434",

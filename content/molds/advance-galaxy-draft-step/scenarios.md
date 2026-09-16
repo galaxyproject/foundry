@@ -70,3 +70,11 @@ the round-trip oracle. See that directory's `README.md`.
   The implemented wrapper should be the IUC `stringtie_merge` suite tool; a
   structurally different merge tool is acceptable only if it satisfies the step's
   `_plan_*` contract.
+
+## Case: an empty offline cache fails strict state validation
+
+- fixture: `examples/brew3r-1step-degraded/draft.gxwf.yml`; an empty cache directory.
+- command: `gxwf draft-validate draft.gxwf.yml --concrete --strict-state --json --offline --cache-dir <empty-dir>`
+- expect: exit 1; `concrete.strict_state_errors` names skipped tool-state checks
+  and `concrete.ok` is false. Draft structure and topology checks still pass.
+  Without `--strict-state`, the same offline command exits 0 despite the skips.
