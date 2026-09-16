@@ -1,5 +1,11 @@
 # @galaxy-foundry/gxwf-pi-harness
 
+## 0.4.1
+
+### Patch Changes
+
+- [#542](https://github.com/galaxyproject/foundry/pull/542) [`b73ef1f`](https://github.com/galaxyproject/foundry/commit/b73ef1ffc5f803987daedd358250c0bbc60288e6) Thanks [@jmchilton](https://github.com/jmchilton)! - Supply the frozen cast bundle hash as worker runtime metadata and verify that conversion provenance records that same identity. Read cast provenance and artifact validators from the frozen bundle rather than the mutable source checkout.
+
 ## 0.4.0
 
 ### Minor Changes
