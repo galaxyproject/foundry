@@ -7,6 +7,10 @@
     "nfcore-tool-lab": "dist/bin/nfcore-tool-lab.js"
   },
   "exports": {
+    "./stage": {
+      "types": "./dist/stage.d.ts",
+      "import": "./dist/stage.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
@@ -34,6 +38,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@galaxy-foundry/planemo-test-report-schema": "workspace:*",
     "commander": "^12.1.0",
     "saxes": "^6.0.0",
     "yaml": "^2.9.0"

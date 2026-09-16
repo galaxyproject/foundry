@@ -55,8 +55,9 @@ Changesets release restores `latest` to the real version.
 Publish independent packages first, then their dependents:
 
 1. `planemo-cli-meta`, `planemo-test-report-schema`, `note-schema`,
-   `summarize-nextflow`, and `nfcore-tool-lab` (any order)
-2. `foundry` (depends on `summarize-nextflow`)
+   and `summarize-nextflow` (any order)
+2. `foundry` (depends on `summarize-nextflow`) and `nfcore-tool-lab`
+   (depends on `planemo-test-report-schema`)
 3. `gxwf-pi-harness` (depends on `foundry`)
 
 ### Configure trusted publishing
