@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-05-10
 revised: 2026-09-15
-revision: 5
+revision: 7
 summary: "Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests."
 references:
   - kind: research
@@ -236,7 +236,7 @@ Emit a final `extra_args` text param per [[nfcore-task-ext-args-to-galaxy-additi
 For each `output:` channel that isn't the `versions` emit, **decide cardinality first, then shape** (per [[galaxy-discover-datasets]] §*Convert Mold posture*). The Nextflow glob alone is not enough — `path('*.bam')` (N files, one per element of an upstream collection) and `path('*.{bai,csi,crai}')` (exactly one file, alternation across mutually-exclusive extensions) look the same but map to different Galaxy idioms.
 
 - **Single output, deterministic name** (`path("${prefix}.json")`) → `<data name="..." format="json" from_work_dir="${prefix}.json"/>`. No `<discover_datasets>`.
-- **Single output, variable extension** (alternation glob like `path("*.{bai,csi,crai}")`, or `path("${prefix}.${ext}")` where `ext` is computed): the channel emits **one** file whose extension depends on inputs or args. Map to a `<data>` with the most-common extension as `format=`, plus a `<change_format>` block that flips on the input ext or the responsible param. **Preserve the upstream invocation byte-for-byte** and capture the result with a tight `mv` — `ln -s '$input' 'input.${input.ext}'` to stage with the upstream-expected name, run the tool exactly as the nf-core `script:` body does, then `mv 'input.${input.ext}'.{bai,csi,crai} '$output_name'`. **Do not** use `<collection>` + `<discover_datasets>` for this shape — there is no list. Direct write to `'$output_name'` (instead of `mv`) is the secondary form, used only when the upstream `script:` body itself passes an output-path arg to the tool. See [[galaxy-discover-datasets]] §*Convert Mold posture* Rule 2 for the full pattern, including the variant and the `from_work_dir` callout.
+- **Single output, variable extension** (alternation glob like `path("*.{bai,csi,crai}")`, or `path("${prefix}.${ext}")` where `ext` is computed): the channel emits **one** file whose extension depends on inputs or args. Map to a `<data>` with the most-common extension as `format=`, plus a `<change_format>` block that flips on the input ext or the responsible param. **Preserve the upstream invocation byte-for-byte** and capture the result with a tight `mv` — `ln -s '$input' 'input.${input.ext}'` to stage with the upstream-expected name, run the tool exactly as the nf-core `script:` body does, then select the one concrete output path using the same input/parameter conditions and move it to `'$output_name'`. Do **not** use brace expansion such as `mv 'input.${input.ext}'.{bai,csi,crai} '$output_name'`: the shell supplies three source operands even when only one file exists, so `mv` requires the Galaxy output path to be a directory. **Do not** use `<collection>` + `<discover_datasets>` for this shape — there is no list. Direct write to `'$output_name'` (instead of `mv`) is the secondary form, used only when the upstream `script:` body itself passes an output-path arg to the tool. See [[galaxy-discover-datasets]] §*Convert Mold posture* Rule 2 for the conditional-move example, including the explicit-output variant and the `from_work_dir` callout.
 - **Multi-output, list cardinality** (true glob like `path('*.bam')` where the upstream process emits N files keyed by element identifier) → `<collection type="list" name="..." format="bam">` with `<discover_datasets pattern="__name_and_ext__" visible="true"/>`.
 - **Multi-output, paired cardinality** (`tuple val(meta), path("*_R{1,2}.fastp.fastq.gz")`) → `<collection type="paired" ...>` with a custom `(?P<name>...)_R(?P<identifier_1>[12])...` regex.
 - **`versions` channel** → drop; the `<version_command>` carries that load (per [[nfcore-versions-emit-to-galaxy-version-command]]).
@@ -325,10 +325,3 @@ The convergence loop is bounded (default 3 attempts). On exhaustion, the cast sk
 - `cli-command` → [[planemo-lint]] and [[planemo-test]] cast to JSON sidecars; consulted on-demand inside the §10 loop.
 - `schema` → [[planemo-test-report]] copied verbatim into the cast bundle; the convergence loop AJV-validates `--test_output_json` output against it before classifying failures.
 - `examples` — pending: 3 hand-picked Wave 1 modules (one trivial, one paired-aware, one with conditional). Used for round-trip smoke testing before this Mold ships.
-
-## Revision history
-
-- **rev 1 (2026-05-10)** — initial draft. Procedure sketched against the trimmed plan; no cast runs yet. Pattern + CLI references all `evidence: hypothesis`.
-- **rev 2 (2026-05-11)** — convergence loop rewritten against the JSON test-report gate: §10.2 now consumes `planemo test --test_output_json` validated against [[planemo-test-report]]; pulled in `cli-tool`/`cli-command`/`schema` references for [[planemo]], [[planemo-lint]], [[planemo-test]], [[planemo-test-report]]. Deferred-manpages caveat removed.
-- **rev 4 (2026-06-19)** — brought in line with the rest of the inventory: the 7 research refs switched `mode: condense` → `mode: verbatim` (matching every other Mold; the prior condense was always a verbatim passthrough), so reference packaging is reproducible and the notes land under `references/notes/`. planemo ref now sources released `0.75.44` (jmchilton fork retired).
-- **rev 5 (2026-09-15)** — removed the unimplemented deterministic-parser boundary. The cast is explicitly an agent-authored translation with mechanical hashing, pinning, and validation support.
