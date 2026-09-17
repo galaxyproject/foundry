@@ -15,14 +15,16 @@ describe("Markdown Workflow Brief", () => {
     expect(workflowBriefValidator.validate(markdown)).toEqual({ valid: true, errors: [] });
     const parsed = parseWorkflowBrief(markdown);
     expect(parsed.title).toBe("Workflow Brief: Read alignment subset");
-    expect(parsed.sections.find((section) => section.heading === "Constraints")?.body).toContain(
-      "Preserve sample identifiers",
-    );
     expect(
       parsed.sections
-        .find((section) => section.heading === "Environment")
+        .find((section) => section.heading === "Workflow")
+        ?.sections.find((section) => section.heading === "Requirements and preferences")?.body,
+    ).toContain("Preserve sample identifiers");
+    expect(
+      parsed.sections
+        .find((section) => section.heading === "Agent Environment")
         ?.sections.map((section) => section.heading),
-    ).toEqual(["Authoring", "Execution"]);
+    ).toEqual(["Tooling", "Constraints", "Containerization", "Blockers"]);
   });
 
   it.each(workflowBriefSchema.sections.filter((section) => (section.min ?? 0) > 0))(
@@ -40,30 +42,46 @@ describe("Markdown Workflow Brief", () => {
     },
   );
 
-  it("requires nonempty sections and Scope/Environment subsections", () => {
+  it("requires the objective and content in recognized optional subsections", () => {
     const markdown = loadBrief()
+      .replace("### Objective", "### Other objective")
       .replace(
-        /## Constraints[\s\S]*?(?=## Environment)/,
-        "## Constraints\n\n<!-- fill later -->\n\n",
-      )
-      .replace("### Excluded", "### Elsewhere");
-    const result = workflowBriefValidator.validate(markdown);
-    expect(result.errors).toEqual(
+        /### Requirements and preferences[\s\S]*?(?=### Acceptance criteria)/,
+        "### Requirements and preferences\n\n<!-- fill later -->\n\n",
+      );
+    expect(workflowBriefValidator.validate(markdown).errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          keyword: "section-content",
-          message: expect.stringContaining("Constraints"),
+          keyword: "required-section",
+          message: expect.stringContaining("Objective"),
         }),
         expect.objectContaining({
-          keyword: "required-section",
-          message: expect.stringContaining("Excluded"),
+          keyword: "section-content",
+          message: expect.stringContaining("Requirements and preferences"),
         }),
       ]),
     );
   });
 
+  it.each(
+    workflowBriefSchema.sections.flatMap(
+      (parent) =>
+        parent.sections
+          ?.filter((section) => !section.min)
+          .map((section) => ({ parent: parent.heading, heading: section.heading })) ?? [],
+    ),
+  )("permits omitted $parent/$heading", ({ heading }) => {
+    expect(
+      workflowBriefValidator.validate(
+        loadBrief().replace(`### ${heading}\n`, `### Other ${heading}\n`),
+      ).valid,
+    ).toBe(true);
+  });
+
   it("rejects duplicate sections and reports their line numbers", () => {
-    const result = workflowBriefValidator.validate(loadBrief() + "\n## Scope\n\nRepeated scope.\n");
+    const result = workflowBriefValidator.validate(
+      loadBrief().replace("### Scope", "### Scope\n\nRepeated scope.\n\n### Scope"),
+    );
     expect(result.errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -74,21 +92,21 @@ describe("Markdown Workflow Brief", () => {
     );
   });
 
-  it("keeps the final subsection inside its parent and detects an empty Execution subsection", () => {
+  it("keeps the final subsection inside its parent and detects empty optional content", () => {
     const parsed = parseWorkflowBrief(loadBrief());
-    const execution = parsed.sections
-      .find((section) => section.heading === "Environment")
-      ?.sections.find((section) => section.heading === "Execution");
-    expect(execution?.body).not.toContain("Acceptance criteria");
+    const requirements = parsed.sections
+      .find((section) => section.heading === "Workflow")
+      ?.sections.find((section) => section.heading === "Requirements and preferences");
+    expect(requirements?.body).not.toContain("Acceptance criteria");
     const markdown = loadBrief().replace(
-      /### Execution[\s\S]*?(?=## Acceptance criteria)/,
-      "### Execution\n\n",
+      /### Containerization[\s\S]*?(?=### Blockers)/,
+      "### Containerization\n\n",
     );
     expect(workflowBriefValidator.validate(markdown).errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           keyword: "section-content",
-          message: expect.stringContaining("Execution"),
+          message: expect.stringContaining("Containerization"),
         }),
       ]),
     );
@@ -96,13 +114,13 @@ describe("Markdown Workflow Brief", () => {
 
   it("does not mistake fenced, quoted, or commented headings for document sections", () => {
     const markdown =
-      loadBrief().replace("## Constraints\n", "## Other constraints\n") +
-      "\n```markdown\n## Constraints\nExample only.\n```\n\n> ## Constraints\n> Quoted only.\n\n<!--\n## Constraints\nComment only.\n-->\n";
+      loadBrief().replace("### Objective\n", "### Other objective\n") +
+      "\n```markdown\n### Objective\nExample only.\n```\n\n> ### Objective\n> Quoted only.\n\n<!--\n### Objective\nComment only.\n-->\n";
     expect(workflowBriefValidator.validate(markdown).errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           keyword: "required-section",
-          message: expect.stringContaining("Constraints"),
+          message: expect.stringContaining("Objective"),
         }),
       ]),
     );
@@ -110,7 +128,7 @@ describe("Markdown Workflow Brief", () => {
 
   it("allows extra sections, arbitrary prose and tables, reordered sections, and case variation", () => {
     const markdown =
-      loadBrief().replace("## Objective", "## OBJECTIVE") +
+      loadBrief().replace("### Objective", "### OBJECTIVE") +
       "\n## Additional context\n\n| Detail | Value |\n| --- | --- |\n| Note | More context |\n";
     expect(workflowBriefValidator.validate(markdown).valid).toBe(true);
     const parsed = parseWorkflowBrief(markdown);
@@ -129,8 +147,9 @@ describe("Markdown Workflow Brief", () => {
     expect(workflowBriefValidator.validate(loadBrief() + "\n# Another title\n").valid).toBe(false);
     expect(workflowBriefValidator.validate({ scope: {} }).valid).toBe(false);
     expect(
-      workflowBriefValidator.validate(loadBrief().replace(/## Decisions and learning[\s\S]*$/, ""))
-        .valid,
+      workflowBriefValidator.validate(
+        "# Brief\n\n## Workflow\n\n### Objective\n\nAnalyze the data.\n\n## Agent Environment\n\nPreflight pending.\n",
+      ).valid,
     ).toBe(true);
   });
 });

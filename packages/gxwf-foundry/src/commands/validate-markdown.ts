@@ -13,7 +13,7 @@ export function runValidateMarkdown(name: string, path: string): never {
   return runValidateMarkdownFile(path, entry[1]);
 }
 
-export function runValidateMarkdownFile(path: string, schema: MarkdownDocumentSchema): never {
+export function readMarkdownFile(path: string): string {
   let markdown: string;
   try {
     markdown = readFileSync(path, "utf8");
@@ -23,7 +23,11 @@ export function runValidateMarkdownFile(path: string, schema: MarkdownDocumentSc
     );
     process.exit(1);
   }
-  const result = validateMarkdownDocument(markdown, schema);
+  return markdown;
+}
+
+export function runValidateMarkdownFile(path: string, schema: MarkdownDocumentSchema): never {
+  const result = validateMarkdownDocument(readMarkdownFile(path), schema);
   if (result.valid) {
     process.stdout.write(`${path}: valid\n`);
     process.exit(0);

@@ -11,6 +11,9 @@ export {
   workflowBriefSchema,
   parseWorkflowBrief,
   validateWorkflowBrief,
+  checkWorkflowBrief,
+  type WorkflowBriefBlocker,
+  type WorkflowBriefReadinessResult,
   type WorkflowBrief,
   type WorkflowBriefSection,
 } from "./workflow-brief.js";
@@ -33,6 +36,7 @@ export { galaxyWorkflowTestPlanValidator } from "./commands/validate-galaxy-work
 export { validateTestsFormat } from "./commands/validate-tests-format.js";
 
 export {
+  hasMarkdownContent,
   parseMarkdownDocument,
   validateMarkdownDocument,
   matchesMarkdownHeading,

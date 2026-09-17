@@ -6,7 +6,7 @@ tags:
 status: draft
 created: 2026-09-17
 revised: 2026-09-17
-revision: 1
+revision: 2
 summary: "Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation."
 ---
 
@@ -80,6 +80,8 @@ foundry validate-markdown eval content/molds/implement-galaxy-tool-step/eval.md
 foundry validate-markdown workflow-brief workflow-brief.md
 ```
 
-The [[workflow-brief-design]] contract uses the same engine for required sections, uniqueness, content, and Scope/Environment children. `foundry validate-workflow-brief` is a convenience command using that schema.
+The [[workflow-brief-design]] contract uses the same engine for required sections, uniqueness, content, and Workflow/Agent Environment children. `foundry validate-workflow-brief` is a convenience command using that schema.
+
+`foundry check-workflow-brief` adds a domain readiness check for the brief’s explicit workflow and environment blockers.
 
 Structural validity establishes document shape. It does not establish semantic completeness, expert review, stage readiness, or successful runtime preflight.

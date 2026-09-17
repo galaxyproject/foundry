@@ -6,74 +6,81 @@ tags:
 status: draft
 created: 2026-09-17
 revised: 2026-09-17
-revision: 3
-summary: "Markdown Workflow Brief definition and section contract for scope, constraints, execution context, and workflow-specific learning."
+revision: 4
+summary: "Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers."
 ---
 
 # Workflow Brief
 
-A Workflow Brief is an expert-editable document describing what a workflow should achieve, what it should leave out, and the constraints under which it will be built and run. It is the durable input to implementation and the place where workflow-specific decisions and learning accumulate.
-
-The brief captures intent and boundaries. The draft workflow captures the proposed implementation: steps, wiring, and tool state. The brief remains useful as implementations change or new attempts reveal constraints.
+A Workflow Brief is an expert-editable document describing what a workflow should achieve, what it should leave out, and the constraints under which an agent will build and run it. It is an input to design and implementation. The draft workflow captures the proposed steps, wiring, and tool state.
 
 ## Document shape
 
-The brief is Markdown with a document title and named sections. Prose, lists, tables, diagrams, and links can express requirements and evidence. No YAML frontmatter or serialized requirement records are required by this contract.
+The brief is Markdown with a title and two sections: `## Workflow` and `## Agent Environment`. The workflow needs an objective; most details are optional. The agent environment must contain a description, which can explicitly record what still needs to be checked.
 
-The `workflowBriefSchema` declaration uses the shared engine described in [[markdown-document-contract]]. The section declaration lives in `packages/gxwf-foundry/src/workflow-brief.ts`. The illustrative document lives in `packages/gxwf-foundry/test/fixtures/workflow-brief/read-alignment.md`.
+The `workflowBriefSchema` declaration uses the shared engine described in [[markdown-document-contract]] and lives in `packages/gxwf-foundry/src/workflow-brief.ts`. An illustrative document lives in `packages/gxwf-foundry/test/fixtures/workflow-brief/read-alignment.md`.
 
 | Heading | Required | Content |
 | --- | --- | --- |
-| `## Objective` | Yes | Scientific goal and desired outcome. |
-| `## Sources` | Yes | Papers, interviews, repositories, source pins where relevant, selected analyses, and evidence availability. |
-| `## Scope` | Yes | `### Included` and `### Excluded` identify the selected work and its explicit boundaries. |
-| `## Inputs and outputs` | Yes | Required inputs and outputs, their logical roles, and relevant shape or datatype requirements. These need not be final Galaxy labels. |
-| `## Constraints` | Yes | Mandatory requirements and preferences, with rationale and supporting evidence. State their strength in prose. |
-| `## Environment` | Yes | `### Authoring` covers the agent's tooling, versions, workspace, and access. `### Execution` covers the intended runtime, Galaxy mode, container policy, reference assets, writable paths, and resource limits. |
-| `## Acceptance criteria` | Yes | Observable behaviors that establish success and test data if known. Detailed cases remain in the test-plan handoff. |
-| `## Open questions` | Yes | Decisions still needed, which stage they block, and their eventual resolution. State explicitly when none remain. |
-| `## Decisions and learning` | No | Expert choices with rationale, and findings from identified implementation attempts with links to evidence. |
-| `## Related artifacts` | No | Source summaries, detailed design handoffs, draft workflow, and test plan. |
+| `## Workflow` | Yes | Scientific intent and scope. |
+| `### Objective` | Yes, under Workflow | Scientific goal and desired outcome. |
+| `### Sources` | No | Papers, interviews, repositories, relevant source pins, and evidence availability. |
+| `### Scope` | No | Optional `#### Included` and `#### Excluded` describe selected work and boundaries. |
+| `### Inputs and outputs` | No | Scientific roles and source-supported formats or organization. |
+| `### Requirements and preferences` | No | Expert or source requirements, their strength, rationale, and evidence. |
+| `### Acceptance criteria` | No | High-level behaviors that establish success. |
+| `### Open questions` | No | Questions that do not prevent work from proceeding. |
+| `### Decisions` | No | Expert decisions and rationale. |
+| `### Related artifacts` | No | Links to source evidence and other relevant inputs. |
+| `### Blockers` | No, under Workflow | Unresolved issues that prevent design or implementation. Any content blocks work. |
+| `## Agent Environment` | Yes | Agent tooling and operating conditions. |
+| `### Tooling` | No | Expected Foundry tooling and versions, and what is known about availability. |
+| `### Constraints` | No | Agent workspace, network, installation, resource, and access restrictions. |
+| `### Containerization` | No | Container preference and Docker, Singularity, or Apptainer availability. |
+| `### Blockers` | No, under Agent Environment | Environment issues that prevent work. Any content blocks work. |
 
-Headings are case-insensitive and need not follow a fixed order. Additional sections and deeper subsections are allowed. Recognized sections must occur at most once and contain text beyond their headings; HTML comments and separators alone do not count. Unknowns and “none” are legitimate content when stated explicitly.
+Headings are case-insensitive; section order is flexible and additional sections are allowed. Recognized sections are unique within their parent. If present, ordinary sections need content beyond headings, comments, or separators. Blockers may be empty. Scope's Included and Excluded subsections are optional.
 
-The brief need not contain a step graph, concrete tool state, or the final test file. Source-specific evidence can stay in linked summaries and design handoffs, including Nextflow processes, profiles, containers, and nf-tests.
+## Workflow content
 
-## Validation and types
+The writing agent must record evidence and expert intent without making Galaxy design choices. It must not assume Galaxy datatypes, dataset collection structures, tool availability, interface labels, or concrete tool versions. Source formats and explicitly named source tools can be cited as evidence; they do not establish a Galaxy mapping or an installed wrapper. An expert may supply specific Galaxy requirements here, and the agent must identify them as expert-provided rather than inferred.
+
+The agent must not write a step graph, concrete tool state, or final test declarations into the brief. Interface design, data-flow design, tool discovery, and test development belong to the downstream design and implementation Molds. Inputs and outputs stay at scientific roles and source-supported descriptions. Acceptance criteria stay high-level; detailed fixtures and assertions belong to test development.
+
+Requirements and preferences describe what the expert or source asks for. Agent Environment Constraints describe restrictions on the agent's work. Uncertainty that prevents proceeding belongs in Blockers; other questions can remain in Open questions.
+
+## Agent environment
+
+Tooling records whether expected tools such as `gxwf`, `foundry`, and `planemo` are available at the required versions. Distinguish intended requirements from observed availability. Containerization records the preference and whether Docker, Singularity, or Apptainer is actually usable, rather than assuming that an executable name proves a working engine.
+
+A separate preflight result should record observed versions, container availability, source/reference access, writable paths, timestamps, and diagnostics. A requested installation strategy is not evidence of an installed executable.
+
+## Validation and blockers
 
 ```sh
 foundry validate-workflow-brief workflow-brief.md
+foundry check-workflow-brief workflow-brief.md --json
 ```
 
-The validator parses Markdown syntax and checks the title, required sections, duplicate recognized headings, nonempty content, and required subsections within their parent. Headings inside code fences, block quotes, and HTML comments do not satisfy the contract.
+Validation checks the title, required sections, unique recognized headings, content, and parent-scoped subsections. Example headings in fences, quotes, lists, or comments do not satisfy requirements. Success exits `0`, structural failures exit `3`, and input read failures exit `1`.
 
-Success prints `<path>: valid` and exits `0`. Structural failures produce diagnostics and exit `3`. Input read failures exit `1`. Markdown itself is permissive; an incomplete document fails the section contract rather than a YAML parse.
+The static readiness check adds a check for `### Blockers` under both Workflow and Agent Environment. A structurally valid document with content in either section exits `4`; a structurally valid document without blockers exits `0`. Omit or leave Blockers empty when there are no blockers. Do not write “none” there: any content, including that word, is blocking. Comments and separators alone are empty. The JSON result includes `valid`, `ready`, `errors`, and blocker bodies with their parent and source line.
 
-The exported `WorkflowBrief` and `WorkflowBriefSection` interfaces describe the parsed title, section headings, source line numbers, preserved Markdown bodies, and nested sections. They do not turn narrative requirements into structured records or claim that a paragraph is semantically correct.
+A clear static check only establishes structure and the absence of declared blockers. It does not establish semantic completeness, expert approval, or successful environment preflight. The harness must stop on declared blockers and apply its own review and preflight checks before implementation.
 
-## Readiness
-
-A structurally valid brief may still be unready to implement or execute. A question can block execution without blocking implementation. Stage readiness and expert approval belong to the harness and need their own explicit checks.
-
-Environment descriptions record intended requirements. A separate preflight result should record observed versions, container availability, source/reference access, writable paths, timestamps, and diagnostics. A requested installation strategy is not evidence of an installed executable.
-
-Bind review and implementation attempts to the exact brief revision or content hash. When accepted learning changes scope or requirements, retain the rationale and identify the new document revision.
+The exported `WorkflowBrief` and `WorkflowBriefSection` types describe the parsed document. `WorkflowBriefReadinessResult` describes the static check. These checks read the document without changing it.
 
 ## Lifecycle
 
-1. A source-to-brief producer assembles evidence, proposed scope, requirements, and unanswered questions.
-2. The expert edits the brief and settles decisions needed for the next stage.
-3. The harness records review of that exact document revision.
-4. Brief-to-Galaxy consumes the document and referenced evidence, creates or updates detailed design handoffs, then runs the existing draft/implementation/test chain.
-5. Implementation attempts contribute observations with evidence. Accepted changes update the brief; failure alone does not authorize broader scope or weaker acceptance criteria.
+1. A source-to-brief producer assembles evidence, proposed scope, and unanswered questions without Galaxy design assumptions.
+2. The expert edits the brief and settles blockers needed before the next stage.
+3. The harness checks structure, declared blockers, review, and environment readiness.
+4. Brief-to-Galaxy consumes the brief and referenced evidence, then runs design, draft, implementation, and test development.
 
-A hand-authored brief is a first-class input. Implementation should work in a fresh session using the document and its referenced artifacts. The `workflow-brief` handoff can be declared as a Markdown artifact when producer and consumer Molds are introduced.
+Brief-to-Galaxy and every design or implementation step must leave the brief unchanged. Record progress, learning, unresolved obligations, and recommended brief changes in the run's ledger. Updating the brief belongs to a separate expert editing step; an implementation agent must not resolve a blocker by rewriting its input.
+
+A hand-authored brief is a first-class input. Implementation should work in a fresh session using the document and its referenced artifacts.
 
 ## Open design questions
 
-- Which sections should be required for an initial brief?
-- Should any fields need stronger validation than section presence and content?
-- Is the split between authoring and execution environments sufficient?
 - Should expert questions live here or link to a separate decision record?
-- How should requirements, the open-requirements ledger, and attempt learning interact?
-- What evidence should establish readiness to implement or execute?

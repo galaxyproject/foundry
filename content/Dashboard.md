@@ -146,8 +146,9 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[check-workflow-brief]] | Check Workflow Brief structure and stop on explicit workflow or agent environment blockers. | draft | 2026-09-17 | 1 |
 | [[validate-markdown]] | Validate Markdown sections with the schemas shared by Foundry build and runtime consumers. | draft | 2026-09-17 | 1 |
-| [[validate-workflow-brief]] | Validate the title and required sections of a Markdown Workflow Brief. | draft | 2026-09-17 | 2 |
+| [[validate-workflow-brief]] | Validate the title and required sections of a Markdown Workflow Brief. | draft | 2026-09-17 | 3 |
 | [[validate-galaxy-tool-discovery]] | AJV gate for discover-shed-tool recommendation documents. | draft | 2026-08-04 | 2 |
 | [[validate-galaxy-tool-summary]] | AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree. | draft | 2026-08-04 | 2 |
 | [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-08-04 | 2 |
@@ -198,8 +199,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[markdown-document-contract]] | Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation. | draft | 2026-09-17 | 1 |
-| [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, execution context, and workflow-specific learning. | draft | 2026-09-17 | 3 |
+| [[markdown-document-contract]] | Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation. | draft | 2026-09-17 | 2 |
+| [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-09-17 | 4 |
 | [[component-nextflow-testing]] | nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7. | draft | 2026-09-15 | 5 |
 | [[galaxy-datatypes-conf]] | Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications. | draft | 2026-09-15 | 3 |
 | [[galaxy-discover-datasets]] | Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions. | draft | 2026-09-15 | 3 |

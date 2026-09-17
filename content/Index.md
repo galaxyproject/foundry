@@ -137,6 +137,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## CLI Commands
 
 - [[add]] — Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema.
+- [[check-workflow-brief]] — Check Workflow Brief structure and stop on explicit workflow or agent environment blockers.
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
 - [[draft-extract]] — Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved.
 - [[draft-next-step]] — Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak.
@@ -252,7 +253,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
 - [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 - [[nextflow-test-case-selection]] — A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage.
-- [[workflow-brief-design]] — Markdown Workflow Brief definition and section contract for scope, constraints, execution context, and workflow-specific learning.
+- [[workflow-brief-design]] — Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers.
 
 ## Cli Tool
 

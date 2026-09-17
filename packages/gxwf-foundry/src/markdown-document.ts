@@ -66,7 +66,7 @@ export function parseMarkdownDocument(markdown: string): MarkdownDocument {
   return { title: title ? toString(title) : "", sections: sections(markdown, nodes, 2) };
 }
 
-function hasContent(markdown: string): boolean {
+export function hasMarkdownContent(markdown: string): boolean {
   return fromMarkdown(markdown).children.some((node) => {
     if (node.type === "heading" || node.type === "thematicBreak") return false;
     if (node.type === "html") return node.value.replace(/<!--[\s\S]*?-->/g, "").trim().length > 0;
@@ -158,7 +158,7 @@ export function validateMarkdownDocument(
         }
       }
       for (const section of matches) {
-        if (rule.content && !hasContent(section.body)) {
+        if (rule.content && !hasMarkdownContent(section.body)) {
           report(
             `line ${section.line}`,
             `${rule.heading} needs content; state unknowns or none explicitly`,

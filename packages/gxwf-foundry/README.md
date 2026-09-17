@@ -27,6 +27,7 @@ foundry validate-galaxy-tool-summary <manifest.json>
 foundry validate-tests-format <tests.yml> [--workflow <wf>] [--json]
 foundry validate-markdown <schema> <document.md>   # shared section schemas
 foundry validate-workflow-brief <brief.md>         # experimental RFC/WIP
+foundry check-workflow-brief <brief.md> [--json]    # exit 4 for declared blockers
 ```
 
 `summarize-nextflow` wraps `@galaxy-foundry/summarize-nextflow`. The validators exit `0` for valid input, `3` for schema-validation failure, and `1` for input errors (missing file, malformed JSON/YAML).
@@ -63,7 +64,7 @@ const { valid, errors } = validateMarkdownDocument(markdown, workflowBriefSchema
 
 ## Schema sources
 
-The experimental Markdown Workflow Brief records scope, constraints, intended environments, acceptance criteria, and workflow-specific learning. Exported types describe the parsed Markdown title and sections; `workflowBriefSchema` declares the required headings. The validator checks section presence, uniqueness, content, and the Scope/Environment subsections. Approval, runtime preflight, and stage readiness remain follow-up work. See [the definition](../../content/research/workflow-brief-design/index.md).
+The experimental Markdown Workflow Brief separates `Workflow` intent from the `Agent Environment`. Most detail is optional; the workflow needs an objective. Agents writing the brief must not infer Galaxy design choices. `workflowBriefSchema` declares the section contract, and `checkWorkflowBrief` additionally reports nonempty Blockers under either parent. The readiness CLI exits `4` for declared blockers, `3` for structural failures, `1` for input failures, and `0` for a clear static check. Design and implementation treat the brief as input and record progress or recommended changes in a separate ledger. See [the definition](../../content/research/workflow-brief-design/index.md).
 
 - `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary` — Foundry-authored, JSON in `src/schemas/<name>/`.
 - `tests-format` — vendored from `@galaxy-tool-util/schema`; refresh via `pnpm sync`.

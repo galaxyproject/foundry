@@ -1,79 +1,72 @@
 # Workflow Brief: Read alignment subset
 
-## Objective
+## Workflow
 
-Produce aligned reads and basic quality reports for each sample. This example is
-illustrative; the source and environment have not been verified.
+### Objective
 
-## Sources
+Produce aligned reads and basic quality reports attributable to each sample.
+This is an illustrative interview-derived brief, not a verified environment.
 
-The interview in `interview.md` requests paired-end read processing through
-alignment. Confirm this source is available before relying on it. The exact
-reference assembly is still unknown.
+### Sources
 
-## Scope
+The interview requests paired-end read processing through alignment against a
+caller-supplied reference. The exact reference assembly remains undecided.
 
-### Included
+### Scope
 
-- Quality reports for paired-end reads.
+#### Included
+
+- Read quality reporting.
 - Alignment against a supplied reference.
 
-### Excluded
+#### Excluded
 
 - Variant calling.
 - Reference database construction.
 
-## Inputs and outputs
+### Inputs and outputs
 
-| Role | Required shape | Notes |
-| --- | --- | --- |
-| Reads | Paired-end reads grouped by sample | Prefer a Galaxy list of pairs. |
-| Reference | One reference FASTA | Assembly and exact file remain undecided. |
-| Alignments | One coordinate-sorted BAM per sample | Preserve sample identifiers. |
-| Quality reports | Per-sample read quality reports | Keep reports attributable to the input samples. |
+The caller describes paired-end reads grouped by sample and a reference
+sequence file. Desired results are sample-attributable alignments and quality
+reports. The Galaxy datatypes, collection structure, and interface labels are
+to be determined during design.
 
-## Constraints
+### Requirements and preferences
 
-Preserve sample identifiers in the output collections. This is mandatory so
-reports and alignments remain attributable to the same sample.
+Preserve sample identifiers so reports and alignments remain attributable to
+the same sample. The reference is supplied by the caller; keep reference
+construction outside scope.
 
-The reference is supplied by the caller; do not expand this brief into a
-reference construction workflow. Propose tool substitutions for review before
-changing the scientific behavior.
+### Acceptance criteria
 
-## Environment
+The selected samples yield interpretable alignments and quality reports with
+sample identity preserved. Test development will choose fixtures and assertions.
 
-### Authoring
+### Open questions
 
-The agent needs Foundry and gxwf. Required versions, installation method,
-writable workspace, and network access have not been established.
+Would an aggregate quality report be useful in addition to individual reports?
+This optional report does not prevent proceeding with the selected scope.
 
-### Execution
+### Blockers
 
-The target is Galaxy. Managed versus external Galaxy, Galaxy version,
-container policy, writable paths, and resource limits remain undecided.
-The reference genome must be supplied before execution. These are intended
-requirements, not claims that an environment has passed preflight.
+- The expert must select the reference assembly and exact reference file.
 
-## Acceptance criteria
+## Agent Environment
 
-Each input sample yields one readable, coordinate-sorted BAM and a quality
-report, preserving identifiers. Use a small paired-end fixture; its location
-is still unknown. Agree on the fixture and expected results before reporting
-runtime success.
+### Tooling
 
-## Open questions
+Expected tooling is Foundry, gxwf, and Planemo. Versions and availability have
+not been checked. A separate preflight must record observed availability.
 
-- **Blocks execution:** Which assembly and exact reference file should be used?
-- **Blocks execution:** Which Galaxy mode and container policy apply?
-- **Blocks execution:** Which small fixture establishes the acceptance criteria?
+### Constraints
 
-## Decisions and learning
+Workspace permissions and network access have not been established.
 
-No implementation attempt has been made yet. Record expert decisions with their
-rationale, and link findings from each attempt to the evidence that supports them.
+### Containerization
 
-## Related artifacts
+The caller prefers containers. Docker, Singularity, and Apptainer usability
+have not been checked.
 
-None yet. Link source summaries, detailed design handoffs, the draft workflow,
-and the test plan as they become available.
+### Blockers
+
+- Establish a usable agent environment before implementation.
