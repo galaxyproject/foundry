@@ -3,6 +3,7 @@
 // the three Foundry-authored schemas; for tests-format the source of truth is
 // upstream `@galaxy-tool-util/schema` (re-fetched each sync).
 
+import "./generate-workflow-brief-types.mjs";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -54,6 +55,7 @@ regenerateFromJson("summary-galaxy-workflow", "summaryGalaxyWorkflowSchema");
 regenerateFromJson("galaxy-tool-discovery", "galaxyToolDiscoverySchema");
 regenerateFromJson("galaxy-tool-summary", "galaxyToolSummarySchema");
 regenerateFromJson("galaxy-workflow-test-plan", "galaxyWorkflowTestPlanSchema");
+regenerateFromJson("workflow-brief", "workflowBriefSchema");
 regenerateFromUpstream(
   "tests-format",
   "tests.schema",

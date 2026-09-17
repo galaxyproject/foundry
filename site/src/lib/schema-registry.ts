@@ -4,6 +4,7 @@
 // (@galaxy-foundry/gxwf-foundry). `cast-provenance` is Foundry-authored and
 // repo-local — its contract lives in scripts/lib/schemas/, not a package.
 
+import workflowBriefSchema from '../../../packages/gxwf-foundry/src/schemas/workflow-brief/workflow-brief.schema.json';
 import galaxyToolDiscoverySchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json';
 import galaxyToolSummarySchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
 import galaxyWorkflowTestPlanSchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json';
@@ -23,6 +24,10 @@ const foundryVersion = (foundryPkg as { version?: string }).version ?? '';
 const summarizeNextflowVersion = (summarizeNextflowPkg as { version?: string }).version ?? '';
 
 export const schemaRegistry: Record<string, SchemaEntry> = {
+  'workflow-brief': {
+    schema: workflowBriefSchema as unknown as Record<string, unknown>,
+    version: foundryVersion,
+  },
   'tests-format': {
     schema: testsFormatSchema as unknown as Record<string, unknown>,
     version: foundryVersion,

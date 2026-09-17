@@ -1,0 +1,100 @@
+# Illustrative example; paths and requirements are not verified observations.
+brief_version: "1"
+id: read-alignment-subset
+revision: 1
+title: Read alignment subset
+
+sources:
+  - id: interview
+    kind: interview
+    location: interview.md
+    pin: null
+    availability: unverified
+    selected_sections:
+      - Paired-end reads through alignment; downstream analyses excluded
+
+scope:
+  objective: Produce aligned reads and basic quality reports for each sample.
+  in_scope:
+    - Quality reports for paired-end reads
+    - Alignment against a supplied reference
+  out_of_scope:
+    - Variant calling
+    - Reference database construction
+
+interface:
+  inputs:
+    - id: reads
+      description: Paired-end reads grouped by sample
+      datatype: fastqsanger.gz
+      shape: list:paired
+      evidence_ids: [interview]
+    - id: reference
+      description: Reference genome supplied by the caller
+      datatype: fasta
+      shape: dataset
+      evidence_ids: [interview]
+  outputs:
+    - id: alignments
+      description: Coordinate-sorted alignments for each sample
+      datatype: bam
+      shape: list
+      evidence_ids: [interview]
+
+constraints:
+  - id: sample-identity
+    requirement: Preserve sample identifiers in the output collections.
+    strength: must
+    rationale: Reports and alignments must be attributable to the same sample.
+    evidence_ids: [interview]
+
+environment:
+  authoring:
+    tools:
+      - name: foundry
+        version: null
+        provisioning: undecided
+      - name: gxwf
+        version: null
+        provisioning: undecided
+    workspace: null
+    network_policy: null
+  execution:
+    target: galaxy
+    galaxy_mode: undecided
+    galaxy_location: null
+    galaxy_version: null
+    container_policy: undecided
+    tools: []
+    reference_assets:
+      - id: reference-genome
+        description: Genome assembly to use for alignment
+        location: null
+        pin: null
+        provisioning: provided
+    writable_locations: []
+    resource_limits: null
+
+acceptance:
+  - id: per-sample-outputs
+    description: Each input sample yields one readable sorted BAM.
+    basis: expert-requirement
+    fixture: null
+    expected: One BAM per sample, preserving identifiers
+    evidence_ids: [interview]
+
+questions:
+  - id: reference-choice
+    question: Which assembly and exact reference file should be used?
+    blocks: [execution]
+    resolution: null
+    evidence_ids: [interview]
+  - id: execution-profile
+    question: Which Galaxy instance or managed environment and container policy apply?
+    blocks: [execution]
+    resolution: null
+    evidence_ids: [interview]
+
+decisions: []
+learning: []
+artifacts: []
