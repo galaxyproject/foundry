@@ -1,5 +1,18 @@
 # @galaxy-foundry/gxwf-foundry
 
+## 0.2.0
+
+### Minor Changes
+
+- [#565](https://github.com/galaxyproject/foundry/pull/565) [`6365a99`](https://github.com/galaxyproject/foundry/commit/6365a99ed1e18e0526cb0d0d4b3b4ba4c527cca8) Thanks [@jmchilton](https://github.com/jmchilton)! - Add shared declarative Markdown document schemas and structural validation for build and runtime consumers. Migrate CLI pages, evals, and scenarios to the shared parser, and introduce an experimental Workflow Brief schema and validation commands.
+
+  Workflow Briefs separate workflow intent from the agent environment, keep most details optional, and expose a static blocker check through `foundry check-workflow-brief`.
+
+### Patch Changes
+
+- Updated dependencies [[`9814cec`](https://github.com/galaxyproject/foundry/commit/9814ceca9fa98d1c26e74f6c46c0f66bff538dc2)]:
+  - @galaxy-foundry/summarize-nextflow@0.4.0
+
 ## 0.1.2
 
 ### Patch Changes
