@@ -6,9 +6,9 @@
     "path": "content/molds/find-test-data/index.md",
     "revision": 5,
     "content_hash": "dab7a03bc9d3382c07b335054c5e1d4b63ddc9ba50a8a703a5895573d44318be",
-    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-15T23:16:21.017Z",
+  "cast_at": "2026-09-17T19:19:47.332Z",
   "refs": [
     {
       "kind": "research",
@@ -56,7 +56,8 @@
         "description": "Source summary from [[summarize-paper]] / [[interview-to-freeform-summary]]; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it).",
         "producers": [
           "interview-to-freeform-summary",
-          "summarize-paper"
+          "summarize-paper",
+          "workflow-brief-to-freeform-summary"
         ]
       },
       {

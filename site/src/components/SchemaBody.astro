@@ -1,6 +1,7 @@
 ---
 import { type NoteOf } from '../lib/notes';
-import { schemaRegistry } from '../lib/schema-registry';
+import { schemaRegistry, markdownSchemaRegistry } from '../lib/schema-registry';
+import MarkdownSchemaBody from './MarkdownSchemaBody.astro';
 
 interface Props {
   entry: NoteOf<'schemas'>;
@@ -9,6 +10,7 @@ interface Props {
 const { entry } = Astro.props;
 const data = entry.data;
 const reg = schemaRegistry[data.name];
+const markdownReg = markdownSchemaRegistry[data.name];
 
 interface Property {
   name: string;
@@ -103,7 +105,7 @@ const rootTitle = root?.title as string | undefined;
   <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">{data.name}</span>
   {data.package && (
     <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">
-      {data.package}{reg && ` @ ${reg.version}`}
+      {data.package}{(reg || markdownReg) && ` @ ${(reg || markdownReg).version}`}
     </span>
   )}
   {data.upstream && (
@@ -111,11 +113,13 @@ const rootTitle = root?.title as string | undefined;
   )}
 </div>
 
-{!reg && (
+{!reg && !markdownReg && (
   <div class="mb-6 p-3 rounded-lg border border-(--color-border) bg-(--color-surface-raised) text-sm">
     No schema registered for <code>{data.name}</code>. Add an entry to <code>site/src/lib/schema-registry.ts</code>.
   </div>
 )}
+
+{markdownReg && <MarkdownSchemaBody schema={markdownReg.schema} />}
 
 {reg && (
   <section class="mb-8 p-4 rounded-lg border border-(--color-border) bg-(--color-surface-raised)">

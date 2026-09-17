@@ -1,0 +1,13 @@
+{
+  "source_pipeline": "nextflow-to-workflow-brief",
+  "source_revision": 1,
+  "harness_name": "pipeline-nextflow-to-workflow-brief",
+  "options": ["use-subagents", "checkpoint", "feedback"],
+  "required_tools": [
+    { "tool": "foundry", "origin": "npm", "package": "@galaxy-foundry/gxwf-foundry", "invoke": "foundry", "invoke_fallback": "npx --package @galaxy-foundry/gxwf-foundry foundry", "availability_check": "foundry --help", "docs_url": "https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md", "source": "referenced", "implied_by": ["foundry validate-workflow-brief", "foundry check-workflow-brief"] }
+  ],
+  "phases": [
+    { "phase": 1, "kind": "mold", "skill": "summarize-nextflow", "cast_present": true, "loop": false },
+    { "phase": 2, "kind": "mold", "skill": "nextflow-summary-to-workflow-brief", "cast_present": true, "loop": false }
+  ]
+}

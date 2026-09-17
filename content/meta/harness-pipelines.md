@@ -9,8 +9,8 @@ tags:
   - lifecycle/publication
 status: revised
 created: 2026-04-30
-revised: 2026-09-12
-revision: 20
+revised: 2026-09-17
+revision: 21
 summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
 
@@ -222,6 +222,14 @@ Only phase 4 is new. The three ahead of it already produced exactly the evidence
 Two harness-owned gates sit ahead of phase 3, and both stop the run rather than degrading it: the local worktree commit must equal the reviewed head SHA, and the caller must explicitly confirm the checkout is trusted for Planemo execution. There is no privileged hosted execution of arbitrary fork heads in v1. A red phase 2 or phase 3, by contrast, does *not* stop the journey — losing the review because the evidence was bad would discard the finding a reviewer most needs.
 
 The pipeline is read-only end to end. It cannot approve, comment, push, mark ready, or merge, and it cannot edit the workflow it reviews. An accepted edit belongs to the maturation harness proposed in galaxyproject/foundry#492, not to this journey, and is routed through `apply-galaxy-workflow-changeset` where applicable.
+
+## Workflow Brief journeys
+
+[[paper-to-workflow-brief]], [[interview-to-workflow-brief]], and [[nextflow-to-workflow-brief]] stop at an expert-editable [[workflow-brief-design]]. Paper and interview reuse their narrative summarizers and [[freeform-summary-to-workflow-brief]]; Nextflow reuses its structured summarizer and [[nextflow-summary-to-workflow-brief]]. These producers capture selected scientific intent and the agent environment without making Galaxy design choices.
+
+[[workflow-brief-to-galaxy]] is a separate journey, including for hand-authored briefs. Before phase 1, the harness checks declared blockers, records expert review, and verifies the current environment. [[workflow-brief-to-freeform-summary]] projects the selected scientific intent into the existing freeform Galaxy design and implementation chain. The initial route uses shared freeform test development rather than dispatching to the specialized Nextflow reference-data and test-translation tier.
+
+Every implementation phase leaves the brief unchanged. The harness checks its hash after phases and loop iterations and on resumption; progress, learning, obligations, and recommendations go to the run ledger. A required brief change returns to a separate expert editing step. These review, preflight, and preservation rules are harness obligations; an assembled skill carries their instructions and is not an executable enforcement engine.
 
 ## Cross-pipeline observations
 

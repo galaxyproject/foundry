@@ -8,11 +8,15 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-workflow-maturation]] — Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result.
 - [[galaxy-workflow-review]] — Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy.
 - [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. *(reviewed)*
+- [[interview-to-workflow-brief]] — Summarize a interview source and produce a scoped Workflow Brief for expert review.
 - [[nextflow-to-cwl]] — Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
 - [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. *(reviewed)*
+- [[nextflow-to-workflow-brief]] — Summarize a nextflow source and produce a scoped Workflow Brief for expert review.
 - [[paper-to-cwl]] — Direct path from a paper to a CWL Workflow + CommandLineTool set.
 - [[paper-to-galaxy]] — Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate.
+- [[paper-to-workflow-brief]] — Summarize a paper source and produce a scoped Workflow Brief for expert review.
 - [[update-interview-to-galaxy]] — Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. *(reviewed)*
+- [[workflow-brief-to-galaxy]] — Consume an expert-reviewed, unchanged Workflow Brief through readiness checks and the existing Galaxy design and implementation chain.
 
 ## Molds
 
@@ -36,6 +40,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[freeform-summary-to-galaxy-interface]] — Map a free-form source summary into a Galaxy workflow interface design brief. *(reviewed)*
 - [[freeform-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. *(reviewed)*
 - [[freeform-summary-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs. *(reviewed)*
+- [[freeform-summary-to-workflow-brief]] — Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions.
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary. *(reviewed)*
@@ -49,6 +54,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief. *(reviewed)*
 - [[nextflow-summary-to-galaxy-reference-data]] — Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline. *(reviewed)*
 - [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. *(reviewed)*
+- [[nextflow-summary-to-workflow-brief]] — Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan. *(reviewed)*
 - [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. *(reviewed)*
@@ -66,6 +72,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from source and design handoffs.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
 - [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. *(reviewed)*
+- [[workflow-brief-to-freeform-summary]] — Check an unchanged Workflow Brief and project its approved intent into the existing freeform Galaxy design handoff.
 
 ## Patterns
 
@@ -182,6 +189,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nf-core-module-meta]] — JSON Schema (Draft-07) validating nf-core module meta.yml — channel IO, tools, containers, conda lockfiles. Upstream from nf-core/modules.
 - [[nf-core-subworkflow-meta]] — JSON Schema (Draft-07) validating nf-core subworkflow meta.yml — channel IO, components dependencies, authors. Upstream from nf-core/modules.
 - [[planemo-test-report]] — JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo.
+- [[workflow-brief-schema]] — Markdown section declaration and structural validator for the workflow-brief handoff.
 
 ## Research
 

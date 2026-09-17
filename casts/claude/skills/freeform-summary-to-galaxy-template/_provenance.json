@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "0a95f8c04465d48131ace523e0b27af53f1ade6e525a9173c5ff1e936ddc3366",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-13T20:58:27.750Z",
+  "cast_at": "2026-09-17T19:19:48.006Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -239,7 +239,8 @@
         "description": "Free-form source summary emitted by [[summarize-paper]] or [[interview-to-freeform-summary]]; consulted while emitting placeholder steps.",
         "producers": [
           "interview-to-freeform-summary",
-          "summarize-paper"
+          "summarize-paper",
+          "workflow-brief-to-freeform-summary"
         ]
       },
       {
@@ -290,7 +291,8 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-freeform-summary"
         ]
       }
     ]

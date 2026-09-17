@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-cwl-design/index.md",
     "revision": 1,
     "content_hash": "bdc96941ec75c70907bac77ab58b94da70923cb81ab28da3badd3410ce38a678",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-13T20:58:27.416Z",
+  "cast_at": "2026-09-17T19:19:47.373Z",
   "refs": [],
   "artifacts": {
     "produces": [
@@ -25,7 +25,8 @@
         "description": "Free-form source summary emitted by [[summarize-paper]] or [[interview-to-freeform-summary]]; methods, tools, sample data, references, and workflow intent.",
         "producers": [
           "interview-to-freeform-summary",
-          "summarize-paper"
+          "summarize-paper",
+          "workflow-brief-to-freeform-summary"
         ]
       }
     ]
