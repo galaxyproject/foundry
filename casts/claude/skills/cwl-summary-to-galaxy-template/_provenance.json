@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-13T20:58:26.922Z",
+  "cast_at": "2026-09-17T19:19:46.732Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -355,7 +355,8 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-freeform-summary"
         ]
       }
     ]

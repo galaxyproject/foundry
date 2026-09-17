@@ -6,9 +6,9 @@
     "path": "content/molds/review-galaxy-workflow/index.md",
     "revision": 1,
     "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
-    "commit": "79bf5c3ab98eec3a67948d8bdebb9dba7d8a2359"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-12T19:19:46.936Z",
+  "cast_at": "2026-09-17T19:19:50.270Z",
   "refs": [
     {
       "kind": "prompt",
@@ -202,7 +202,8 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-freeform-summary"
         ]
       }
     ]

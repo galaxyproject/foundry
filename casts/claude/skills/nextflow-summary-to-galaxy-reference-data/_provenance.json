@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
     "revision": 5,
     "content_hash": "b49bae31e3b8918b45f852b8f50e1101e71837380b97f8e8ec237a5dd2955f7f",
-    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-15T23:16:24.569Z",
+  "cast_at": "2026-09-17T19:19:49.392Z",
   "refs": [
     {
       "kind": "research",
@@ -128,7 +128,8 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-freeform-summary"
         ]
       }
     ]

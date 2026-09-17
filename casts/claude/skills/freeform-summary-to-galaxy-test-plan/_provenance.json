@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "9c1d56e625a5dd26cb7a82082ac8f4eeb7db287a626bf00e73457c8dd491ad6d",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-13T20:58:27.957Z",
+  "cast_at": "2026-09-17T19:19:48.078Z",
   "refs": [
     {
       "kind": "research",
@@ -136,7 +136,8 @@
         "description": "Free-form source summary from [[summarize-paper]] or [[interview-to-freeform-summary]]; carries methods, sample data, parameters, and expected outputs that seed test intent.",
         "producers": [
           "interview-to-freeform-summary",
-          "summarize-paper"
+          "summarize-paper",
+          "workflow-brief-to-freeform-summary"
         ]
       },
       {

@@ -121,15 +121,15 @@ Forward work is quality and reach rather than existence. Review is underway rath
 <!-- generated:corpus -->
 |  | count |
 | --- | --- |
-| Pipelines | 9 |
-| Molds | 50 — 27 reviewed, 23 draft |
-| … with `eval.md` | 36 |
-| … with `scenarios.md` | 31 |
+| Pipelines | 13 |
+| Molds | 53 — 27 reviewed, 26 draft |
+| … with `eval.md` | 39 |
+| … with `scenarios.md` | 34 |
 | Pattern pages | 54 |
 | Source-pattern pages | 7 |
 | CLI tools | 6 |
 | CLI command pages | 29 |
-| Schema notes | 14 |
+| Schema notes | 15 |
 | Research notes | 69 |
 <!-- /generated:corpus -->
 

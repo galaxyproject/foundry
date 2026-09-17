@@ -6,9 +6,9 @@
     "path": "content/molds/paper-to-test-data/index.md",
     "revision": 2,
     "content_hash": "863d7b503a77fa63449899f124d1669e181fdfd9a72f81f516a219cdc89cb6bb",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
   },
-  "cast_at": "2026-09-13T20:58:29.564Z",
+  "cast_at": "2026-09-17T19:19:50.001Z",
   "refs": [],
   "artifacts": {
     "produces": [
@@ -25,7 +25,8 @@
         "description": "Free-form summary from [[summarize-paper]]; sample data and reference evidence the test fixtures derive from.",
         "producers": [
           "interview-to-freeform-summary",
-          "summarize-paper"
+          "summarize-paper",
+          "workflow-brief-to-freeform-summary"
         ]
       }
     ]

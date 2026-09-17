@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`. Free-form source summary from summarize-paper or interview-to-freeform-summary; carries methods, sample data, parameters, and expected outputs that seed test intent.
+- Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`, `workflow-brief-to-freeform-summary`. Free-form source summary from summarize-paper or interview-to-freeform-summary; carries methods, sample data, parameters, and expected outputs that seed test intent.
 - Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface that pins workflow inputs, outputs, and labels the plan binds assertions to.
 - Read artifact `freeform-galaxy-data-flow`. Produced by `freeform-summary-to-galaxy-data-flow`. Galaxy data-flow brief from freeform-summary-to-galaxy-data-flow that pins abstract operations and collection choices the plan must respect.
 - Read artifact `iwc-comparison-notes`. Produced by `compare-against-iwc-exemplar`. Structural diff guidance from compare-against-iwc-exemplar; steers the plan toward IWC-aligned testable checkpoints and fixture shapes.
