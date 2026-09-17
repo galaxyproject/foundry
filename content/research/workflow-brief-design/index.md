@@ -6,7 +6,7 @@ tags:
 status: draft
 created: 2026-09-17
 revised: 2026-09-17
-revision: 2
+revision: 3
 summary: "Markdown Workflow Brief definition and section contract for scope, constraints, execution context, and workflow-specific learning."
 ---
 
@@ -20,7 +20,7 @@ The brief captures intent and boundaries. The draft workflow captures the propos
 
 The brief is Markdown with a document title and named sections. Prose, lists, tables, diagrams, and links can express requirements and evidence. No YAML frontmatter or serialized requirement records are required by this contract.
 
-The section declaration lives in `packages/gxwf-foundry/src/workflow-brief.ts`. The illustrative document lives in `packages/gxwf-foundry/test/fixtures/workflow-brief/read-alignment.md`.
+The `workflowBriefSchema` declaration uses the shared engine described in [[markdown-document-contract]]. The section declaration lives in `packages/gxwf-foundry/src/workflow-brief.ts`. The illustrative document lives in `packages/gxwf-foundry/test/fixtures/workflow-brief/read-alignment.md`.
 
 | Heading | Required | Content |
 | --- | --- | --- |

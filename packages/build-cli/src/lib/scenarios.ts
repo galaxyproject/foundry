@@ -1,3 +1,8 @@
+import {
+  matchesMarkdownHeading,
+  parseMarkdownDocument,
+  scenariosMarkdownSchema,
+} from "@galaxy-foundry/gxwf-foundry";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
@@ -55,14 +60,12 @@ export function resolveScenarioFixture(
 
 /** Parse the shared `scenarios.md` Case/fixture vocabulary after frontmatter is stripped. */
 export function parseScenarioCases(source: string): ScenarioCase[] {
-  const heading = /^##[ \t]+Case:[ \t]*(.+?)[ \t]*$/gm;
-  const matches = [...source.matchAll(heading)];
-  return matches.flatMap((match, index) => {
-    const name = match[1]?.trim();
-    if (!name) return [];
-    const start = (match.index ?? 0) + match[0].length;
-    const end = matches[index + 1]?.index ?? source.length;
-    const body = source.slice(start, end);
+  const rule = scenariosMarkdownSchema.sections[0]!;
+  return parseMarkdownDocument(source).sections.flatMap((section) => {
+    if (!matchesMarkdownHeading(section.heading, rule, scenariosMarkdownSchema.caseSensitive))
+      return [];
+    const name = section.heading.slice(rule.heading.length).trim();
+    const body = section.body;
     return [{ name, body, ...fixtureFromBody(body) }];
   });
 }

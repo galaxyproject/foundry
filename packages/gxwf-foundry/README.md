@@ -25,6 +25,7 @@ foundry validate-summary-cwl <summary.json>
 foundry validate-galaxy-tool-discovery <recommendation.json>
 foundry validate-galaxy-tool-summary <manifest.json>
 foundry validate-tests-format <tests.yml> [--workflow <wf>] [--json]
+foundry validate-markdown <schema> <document.md>   # shared section schemas
 foundry validate-workflow-brief <brief.md>         # experimental RFC/WIP
 ```
 
@@ -50,9 +51,19 @@ import { foundryCliMeta } from "@galaxy-foundry/gxwf-foundry/meta";
 
 Browser-safe; no commander or node-only deps.
 
+The shared Markdown API accepts declarative section schemas:
+
+```ts
+import { validateMarkdownDocument, workflowBriefSchema } from "@galaxy-foundry/gxwf-foundry";
+
+const { valid, errors } = validateMarkdownDocument(markdown, workflowBriefSchema);
+```
+
+`MarkdownDocumentSchema` declares heading matching, minimum/maximum counts, nonempty content, and nested sections. The same parser backs Foundry's build checks for CLI pages, evals, and scenarios. `markdownDocumentSchemas` exposes the built-in declarations; library callers can also supply custom schemas. See [the declaration format](../../content/research/markdown-document-contract/index.md).
+
 ## Schema sources
 
-The experimental Markdown Workflow Brief records scope, constraints, intended environments, acceptance criteria, and workflow-specific learning. Exported types describe the parsed Markdown title and sections; `workflowBriefSections` declares the required headings. The validator checks section presence, uniqueness, content, and the Scope/Environment subsections. Approval, runtime preflight, and stage readiness remain follow-up work. See [the definition](../../content/research/workflow-brief-design/index.md).
+The experimental Markdown Workflow Brief records scope, constraints, intended environments, acceptance criteria, and workflow-specific learning. Exported types describe the parsed Markdown title and sections; `workflowBriefSchema` declares the required headings. The validator checks section presence, uniqueness, content, and the Scope/Environment subsections. Approval, runtime preflight, and stage readiness remain follow-up work. See [the definition](../../content/research/workflow-brief-design/index.md).
 
 - `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary` — Foundry-authored, JSON in `src/schemas/<name>/`.
 - `tests-format` — vendored from `@galaxy-tool-util/schema`; refresh via `pnpm sync`.

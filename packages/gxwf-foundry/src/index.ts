@@ -8,12 +8,11 @@ export { galaxyToolDiscoverySchema } from "./schemas/galaxy-tool-discovery/galax
 export { galaxyToolSummarySchema } from "./schemas/galaxy-tool-summary/galaxy-tool-summary.schema.generated.js";
 export { galaxyWorkflowTestPlanSchema } from "./schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.generated.js";
 export {
-  workflowBriefSections,
+  workflowBriefSchema,
   parseWorkflowBrief,
   validateWorkflowBrief,
   type WorkflowBrief,
   type WorkflowBriefSection,
-  type WorkflowBriefSectionDefinition,
 } from "./workflow-brief.js";
 export { workflowBriefValidator } from "./commands/validate-workflow-brief.js";
 export { testsFormatSchema } from "./schemas/tests-format/tests.schema.generated.js";
@@ -32,3 +31,20 @@ export { galaxyToolSummaryValidator } from "./commands/validate-galaxy-tool-summ
 export { summaryNextflowValidator } from "./commands/validate-summary-nextflow.js";
 export { galaxyWorkflowTestPlanValidator } from "./commands/validate-galaxy-workflow-test-plan.js";
 export { validateTestsFormat } from "./commands/validate-tests-format.js";
+
+export {
+  parseMarkdownDocument,
+  validateMarkdownDocument,
+  matchesMarkdownHeading,
+  type MarkdownDocument,
+  type MarkdownSection,
+  type MarkdownDocumentSchema,
+  type MarkdownSectionSchema,
+} from "./markdown-document.js";
+export {
+  markdownDocumentSchemas,
+  cliCommandMarkdownSchema,
+  evalMarkdownSchema,
+  scenariosMarkdownSchema,
+  type MarkdownDocumentSchemaName,
+} from "./markdown-document-schemas.js";

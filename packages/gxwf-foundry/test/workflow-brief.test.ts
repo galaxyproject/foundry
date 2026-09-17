@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { workflowBriefValidator } from "../src/commands/validate-workflow-brief.js";
-import { parseWorkflowBrief, workflowBriefSections } from "../src/workflow-brief.js";
+import { parseWorkflowBrief, workflowBriefSchema } from "../src/workflow-brief.js";
 
 const fixture = resolve(__dirname, "fixtures/workflow-brief/read-alignment.md");
 const loadBrief = () => readFileSync(fixture, "utf8");
@@ -25,7 +25,7 @@ describe("Markdown Workflow Brief", () => {
     ).toEqual(["Authoring", "Execution"]);
   });
 
-  it.each(workflowBriefSections.filter((section) => section.required))(
+  it.each(workflowBriefSchema.sections.filter((section) => (section.min ?? 0) > 0))(
     "requires $heading",
     ({ heading }) => {
       const markdown = loadBrief().replace(`## ${heading}\n`, `## Other ${heading}\n`);

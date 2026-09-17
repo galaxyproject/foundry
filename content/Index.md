@@ -157,6 +157,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[validate-galaxy-tool-discovery]] — AJV gate for discover-shed-tool recommendation documents.
 - [[validate-galaxy-tool-summary]] — AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree.
 - [[validate-galaxy-workflow-test-plan]] — AJV gate for Galaxy workflow test-plan YAML documents.
+- [[validate-markdown]] — Validate Markdown sections with the schemas shared by Foundry build and runtime consumers.
 - [[validate-summary-cwl]] — AJV gate for summarize-cwl JSON documents.
 - [[validate-summary-galaxy-workflow]] — AJV gate for summarize-galaxy-workflow JSON documents.
 - [[validate-summary-nextflow]] — AJV gate for summarize-nextflow JSON documents.
@@ -231,6 +232,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-test-data-conventions]] — How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.
 - [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
+- [[markdown-document-contract]] — Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation.
 - [[nextflow-conditional-to-galaxy-subworkflow-when]] — Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule.
 - [[nextflow-snapshot-to-galaxy-assertions]] — Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape.
 - [[nextflow-operators-to-galaxy-collection-recipes]] — Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.

@@ -1,3 +1,4 @@
+import { runValidateMarkdown } from "./commands/validate-markdown.js";
 import { runValidateWorkflowBrief } from "./commands/validate-workflow-brief.js";
 import { Command } from "commander";
 import { attachSummarizeNextflow } from "./commands/summarize-nextflow.js";
@@ -58,6 +59,13 @@ export function buildProgram(): Command {
     .description("Validate a Galaxy workflow test-plan YAML document.")
     .argument("<test-plan.yml>")
     .action((path: string) => runValidateGalaxyWorkflowTestPlan(path));
+
+  program
+    .command("validate-markdown")
+    .description("Validate Markdown sections against a named document schema.")
+    .argument("<schema>")
+    .argument("<document.md>")
+    .action((schema: string, path: string) => runValidateMarkdown(schema, path));
 
   program
     .command("validate-workflow-brief")
