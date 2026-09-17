@@ -63,6 +63,8 @@ const smokeScripts = {
     import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
     import { join } from "node:path";
     import { prepareLabTool, packageVersion } from "@galaxy-foundry/nfcore-tool-lab";
+    import { stageLabTool } from "@galaxy-foundry/nfcore-tool-lab/stage";
+    if (typeof stageLabTool !== "function") throw new Error("lab staging export missing");
     const inputDir = join(process.cwd(), "lab-conversion");
     const outputDir = join(process.cwd(), "lab-prepared");
     mkdirSync(inputDir);
@@ -91,6 +93,19 @@ const smokeScripts = {
     if (!xml.includes("<![CDATA[  seqkit stats  ]]>") || !xml.includes("(Nextflow Module Automated Conversion)")) {
       throw new Error("tool command or lab name changed incorrectly");
     }
+    const destinationDir = join(process.cwd(), "lab-destination");
+    const castBundleDir = join(process.cwd(), "lab-cast");
+    const conversionRunFile = join(process.cwd(), "lab-run.json");
+    mkdirSync(destinationDir); mkdirSync(castBundleDir);
+    writeFileSync(conversionRunFile, '{}');
+    const staged = await stageLabTool({
+      inputDir, outputDir: join(process.cwd(), "lab-staged"), metadata,
+      destinationDir, castBundleDir, conversionRunFile,
+      planemoCommand: [join(process.cwd(), "absent-planemo")],
+    });
+    if (staged.ready_for_draft_pr || staged.status !== "blocked") throw new Error("staging must report missing gates");
+    const proposal = JSON.parse(readFileSync(join(process.cwd(), "lab-staged/pr-proposal.json"), "utf8"));
+    if (!proposal.draft || proposal.repository !== "galaxyproject/tools-iwc-lab") throw new Error("draft proposal missing");
   `,
   "@galaxy-foundry/gxwf-foundry": `
     import {
@@ -286,6 +301,34 @@ try {
   });
   if (rejected.status !== 1 || rejected.stdout || !rejected.stderr.includes("already exists"))
     throw new Error("lab CLI must refuse overwrite with nonzero exit status");
+  const staged = spawnSync(
+    process.execPath,
+    [
+      labBin,
+      "stage",
+      "--input",
+      "lab-conversion",
+      "--output",
+      "lab-cli-staged",
+      "--metadata",
+      "lab-conversion/metadata.json",
+      "--destination",
+      "lab-destination",
+      "--cast-bundle",
+      "lab-cast",
+      "--conversion-run",
+      "lab-run.json",
+      "--planemo",
+      join(consumerDir, "absent-planemo"),
+    ],
+    { cwd: consumerDir, encoding: "utf8" },
+  );
+  if (
+    staged.status !== 1 ||
+    staged.stderr ||
+    JSON.parse(staged.stdout).ready_for_draft_pr !== false
+  )
+    throw new Error("lab staging CLI must retain a blocked report with nonzero exit status");
 
   console.log(`smoke install ok: ${packageNames.join(", ")}`);
 } finally {

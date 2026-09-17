@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-08-02
 revised: 2026-09-16
-revision: 7
+revision: 8
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -77,7 +77,7 @@ The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker,
 
 ### `@galaxy-foundry/nfcore-tool-lab`
 
-A standalone domain runtime CLI and typed API that prepares an already converted nf-core tool for `galaxyproject/tools-iwc-lab`. It owns mechanical experimental naming, lab Tool Shed metadata, documentation, explicit asset copying, macro-import completeness checks, and a separate preparation record with input/output content hashes. It preserves the conversion provenance and all XML bytes outside the tool's root identity values. It does not depend on repository authoring code, invoke an agent, validate wrapper behavior, open pull requests, or publish to a Tool Shed. Pipeline sequencing, final-package tests, license review, and credential-bearing publication remain harness concerns.
+A standalone domain runtime CLI and typed API that prepares an already converted nf-core tool for `galaxyproject/tools-iwc-lab`. Its offline `prepare` operation owns mechanical experimental naming, lab Tool Shed metadata, documentation, explicit asset copying, macro-import completeness checks, and a separate preparation record with input/output content hashes. It preserves conversion provenance and all XML bytes outside the tool's root identity values. The opt-in `stage` controller and separate `/stage` API reuse preparation, run final-payload Planemo lint/Shed metadata/Galaxy tests, verify local converter-bundle/run consistency and destination-name collisions, and require hash-bound human license/coverage attestations. Staging emits a separate validation record and draft PR proposal; it depends on the published Planemo test-report schema but not repository authoring code or the Pi/model runtime. Local execution is not a security boundary. Model conversion sequencing, upstream authentication, destination CI confirmation, credential-bearing GitHub writes, and Tool Shed deployment remain later harness responsibilities.
 
 ### Metadata packages
 
