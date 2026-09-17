@@ -7,6 +7,13 @@ import path from "node:path";
 import process from "node:process";
 import { galaxyToolCacheCliMeta, gxwfCliMeta } from "@galaxy-tool-util/cli/meta";
 import { foundryCliMeta } from "@galaxy-foundry/gxwf-foundry/meta";
+import {
+  cliCommandMarkdownSchema,
+  evalMarkdownSchema,
+  scenariosMarkdownSchema,
+  validateMarkdownDocument,
+  type MarkdownDocumentSchema,
+} from "@galaxy-foundry/gxwf-foundry";
 import { planemoCliMeta } from "@galaxy-foundry/planemo-cli-meta";
 import {
   buildNoteSchema,
@@ -155,19 +162,26 @@ interface CrossFileFinding {
   severity: "error" | "warning";
 }
 
+function validateMarkdownSections(
+  filePath: string,
+  body: string,
+  schema: MarkdownDocumentSchema,
+  findings: CrossFileFinding[],
+): void {
+  for (const error of validateMarkdownDocument(body, schema).errors) {
+    findings.push({ path: filePath, severity: "warning", message: error.message });
+  }
+}
+
 function validateScenariosCompanion(
   scenariosPath: string,
   findings: CrossFileFinding[],
   repoRoot?: string,
 ): void {
-  const cases = parseScenarioCases(readMarkdown(scenariosPath).body);
-  if (cases.length === 0) {
-    findings.push({
-      path: scenariosPath,
-      severity: "warning",
-      message: "scenarios.md should declare at least one '## Case:' section",
-    });
-  } else if (!cases.some((scenario) => scenario.fixture)) {
+  const body = readMarkdown(scenariosPath).body;
+  validateMarkdownSections(scenariosPath, body, scenariosMarkdownSchema, findings);
+  const cases = parseScenarioCases(body);
+  if (cases.length > 0 && !cases.some((scenario) => scenario.fixture)) {
     findings.push({
       path: scenariosPath,
       severity: "warning",
@@ -935,21 +949,7 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
     if (!existsSync(evalPath)) continue;
 
     const evalBody = readMarkdown(evalPath).body;
-    if (!/^##\s+Property:/m.test(evalBody)) {
-      findings.push({
-        path: evalPath,
-        severity: "warning",
-        message: "eval.md should declare at least one '## Property:' section",
-      });
-    }
-    if (/^##\s+Case:/m.test(evalBody)) {
-      findings.push({
-        path: evalPath,
-        severity: "warning",
-        message:
-          "eval.md should not use '## Case:' sections — concrete cases belong in scenarios.md",
-      });
-    }
+    validateMarkdownSections(evalPath, evalBody, evalMarkdownSchema, findings);
     if (!/\b(deterministic|llm-judged)\b/.test(evalBody)) {
       findings.push({
         path: evalPath,
@@ -1013,21 +1013,7 @@ function validatePipelineSourceLayout(
     const evalPath = path.join(pdir, "eval.md");
     if (existsSync(evalPath)) {
       const evalBody = readMarkdown(evalPath).body;
-      if (!/^##\s+Property:/m.test(evalBody)) {
-        findings.push({
-          path: evalPath,
-          severity: "warning",
-          message: "eval.md should declare at least one '## Property:' section",
-        });
-      }
-      if (/^##\s+Case:/m.test(evalBody)) {
-        findings.push({
-          path: evalPath,
-          severity: "warning",
-          message:
-            "eval.md should not use '## Case:' sections — concrete cases belong in scenarios.md",
-        });
-      }
+      validateMarkdownSections(evalPath, evalBody, evalMarkdownSchema, findings);
     }
   }
 
@@ -1124,7 +1110,6 @@ function validateMoldStubBody(files: FileMeta[]): CrossFileFinding[] {
 
 function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
-  const requiredSections = ["Output", "Examples", "Gotchas"];
   for (const f of files) {
     if (f.meta.type !== "cli-command") continue;
     const key = `${String(f.meta.tool)}/${String(f.meta.command)}`;
@@ -1160,14 +1145,7 @@ function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
       });
     }
     const body = readMarkdown(f.path).body;
-    for (const section of requiredSections) {
-      if (new RegExp(`^##\\s+${section}\\b`, "m").test(body)) continue;
-      findings.push({
-        path: f.path,
-        severity: "warning",
-        message: `cli-command should include ## ${section}`,
-      });
-    }
+    validateMarkdownSections(f.path, body, cliCommandMarkdownSchema, findings);
   }
   return findings;
 }

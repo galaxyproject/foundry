@@ -1,3 +1,9 @@
+import {
+  runCheckWorkflowBrief,
+  type WorkflowBriefCheckOptions,
+} from "./commands/check-workflow-brief.js";
+import { runValidateMarkdown } from "./commands/validate-markdown.js";
+import { runValidateWorkflowBrief } from "./commands/validate-workflow-brief.js";
 import { Command } from "commander";
 import { attachSummarizeNextflow } from "./commands/summarize-nextflow.js";
 import { runValidateSummaryNextflow } from "./commands/validate-summary-nextflow.js";
@@ -57,6 +63,28 @@ export function buildProgram(): Command {
     .description("Validate a Galaxy workflow test-plan YAML document.")
     .argument("<test-plan.yml>")
     .action((path: string) => runValidateGalaxyWorkflowTestPlan(path));
+
+  program
+    .command("validate-markdown")
+    .description("Validate Markdown sections against a named document schema.")
+    .argument("<schema>")
+    .argument("<document.md>")
+    .action((schema: string, path: string) => runValidateMarkdown(schema, path));
+
+  program
+    .command("validate-workflow-brief")
+    .description("Validate a Workflow Brief Markdown document (experimental RFC).")
+    .argument("<brief.md>")
+    .action((path: string) => runValidateWorkflowBrief(path));
+
+  program
+    .command("check-workflow-brief")
+    .description("Check Workflow Brief structure and explicit workflow/environment blockers.")
+    .argument("<brief.md>")
+    .option("--json", "Emit machine-readable structure and blocker diagnostics", false)
+    .action((path: string, options: WorkflowBriefCheckOptions) =>
+      runCheckWorkflowBrief(path, options),
+    );
 
   program
     .command("validate-tests-format")

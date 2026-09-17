@@ -137,6 +137,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## CLI Commands
 
 - [[add]] — Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema.
+- [[check-workflow-brief]] — Check Workflow Brief structure and stop on explicit workflow or agent environment blockers.
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
 - [[draft-extract]] — Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved.
 - [[draft-next-step]] — Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak.
@@ -157,11 +158,13 @@ Generated from content frontmatter. Do not edit by hand.
 - [[validate-galaxy-tool-discovery]] — AJV gate for discover-shed-tool recommendation documents.
 - [[validate-galaxy-tool-summary]] — AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree.
 - [[validate-galaxy-workflow-test-plan]] — AJV gate for Galaxy workflow test-plan YAML documents.
+- [[validate-markdown]] — Validate Markdown sections with the schemas shared by Foundry build and runtime consumers.
 - [[validate-summary-cwl]] — AJV gate for summarize-cwl JSON documents.
 - [[validate-summary-galaxy-workflow]] — AJV gate for summarize-galaxy-workflow JSON documents.
 - [[validate-summary-nextflow]] — AJV gate for summarize-nextflow JSON documents.
 - [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
 - [[validate-tests-format]] — AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check.
+- [[validate-workflow-brief]] — Validate the title and required sections of a Markdown Workflow Brief.
 
 ## Schemas
 
@@ -230,6 +233,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-test-data-conventions]] — How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.
 - [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
+- [[markdown-document-contract]] — Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation.
 - [[nextflow-conditional-to-galaxy-subworkflow-when]] — Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule.
 - [[nextflow-snapshot-to-galaxy-assertions]] — Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape.
 - [[nextflow-operators-to-galaxy-collection-recipes]] — Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.
@@ -249,6 +253,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
 - [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 - [[nextflow-test-case-selection]] — A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage.
+- [[workflow-brief-design]] — Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers.
 
 ## Cli Tool
 

@@ -213,6 +213,46 @@ export const foundryCliMeta: CliProgramSpec = {
       commands: [],
     },
     {
+      name: "validate-markdown",
+      fullName: "foundry validate-markdown",
+      description: "Validate Markdown sections against a named document schema.",
+      synopsis: "foundry validate-markdown <schema> <document.md>",
+      args: [
+        { raw: "schema", name: "schema", required: true, variadic: false },
+        { raw: "document.md", name: "document.md", required: true, variadic: false },
+      ],
+      options: [],
+      commands: [],
+    },
+    {
+      name: "validate-workflow-brief",
+      fullName: "foundry validate-workflow-brief",
+      description: "Validate a Workflow Brief Markdown document (experimental RFC).",
+      synopsis: "foundry validate-workflow-brief <brief.md>",
+      args: [{ raw: "brief.md", name: "brief.md", required: true, variadic: false }],
+      options: [],
+      commands: [],
+    },
+    {
+      name: "check-workflow-brief",
+      fullName: "foundry check-workflow-brief",
+      description: "Check Workflow Brief structure and explicit workflow/environment blockers.",
+      synopsis: "foundry check-workflow-brief [options] <brief.md>",
+      args: [{ raw: "brief.md", name: "brief.md", required: true, variadic: false }],
+      options: [
+        {
+          flags: "--json",
+          name: "json",
+          description: "Emit machine-readable structure and blocker diagnostics",
+          takesArgument: false,
+          optionalArgument: false,
+          negatable: false,
+          defaultValue: false,
+        },
+      ],
+      commands: [],
+    },
+    {
       name: "validate-tests-format",
       fullName: "foundry validate-tests-format",
       description:

@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -991,6 +991,30 @@ describe("validateDirectory (cross-file)", () => {
     expect(validateDirectory({ directory: contentRoot, tagsPath: TAGS_PATH }).errors).toBe(0);
   });
 
+  it("uses the shared CLI schema and ignores headings in a code example", () => {
+    const contentRoot = cliVault();
+    const file = path.join(contentRoot, "cli/gxwf/validate.md");
+    const fm = baseRequired({
+      type: "cli-command",
+      tags: ["cli/gxwf"],
+      tool: "gxwf",
+      command: "validate",
+      package: "@galaxy-tool-util/cli",
+      source_url:
+        "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli/spec/gxwf.json",
+    });
+    const body = "## Output\n\nA.\n\n## Examples\n\nB.\n\n## Gotchas\n\nC.\n";
+    writeFm(file, fm);
+    appendFileSync(file, body);
+    const baseline = validateDirectory({ directory: contentRoot, tagsPath: TAGS_PATH });
+    expect(baseline.errors).toBe(0);
+    writeFm(file, fm);
+    appendFileSync(file, "```md\n" + body + "```\n");
+    const exampleOnly = validateDirectory({ directory: contentRoot, tagsPath: TAGS_PATH });
+    expect(exampleOnly.errors).toBe(0);
+    expect(exampleOnly.warnings).toBe(baseline.warnings + 3);
+  });
+
   it("does flag a non-note file beside a cli-tool, which declares no companions", () => {
     const contentRoot = cliVault();
     writeFileSync(path.join(contentRoot, "cli/gxwf/gxwf.json"), "{}\n");
@@ -1325,6 +1349,41 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBeGreaterThanOrEqual(1);
     expect(r.warnings).toBeGreaterThanOrEqual(1);
   });
+
+  it.each(["molds", "pipelines"])(
+    "uses shared section rules for %s instead of headings inside examples",
+    (collection) => {
+      writeFm(
+        path.join(dir, "molds/m/index.md"),
+        baseRequired({ type: "mold", tags: ["target/galaxy"], name: "m", axis: "generic" }),
+      );
+      const folder = collection === "molds" ? "molds/m" : "pipelines/p";
+      if (collection === "pipelines") {
+        writeFm(
+          path.join(dir, folder, "index.md"),
+          baseRequired({
+            type: "pipeline",
+            tags: ["target/galaxy"],
+            title: "P",
+            phases: [{ mold: "[[m]]" }],
+          }),
+        );
+      }
+      const evalPath = path.join(dir, folder, "eval.md");
+      const scenariosPath = path.join(dir, folder, "scenarios.md");
+      const evalBody = "## Property: identity\n\n- check: deterministic\n";
+      const scenariosBody = "## Case: sample\n\n- fixture: synthetic inputs\n";
+      writeFileSync(evalPath, evalBody);
+      writeFileSync(scenariosPath, scenariosBody);
+      const baseline = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+      expect(baseline.errors).toBe(0);
+      writeFileSync(evalPath, "```md\n" + evalBody + "```\n");
+      writeFileSync(scenariosPath, "```md\n" + scenariosBody + "```\n");
+      const exampleOnly = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+      expect(exampleOnly.errors).toBe(0);
+      expect(exampleOnly.warnings).toBe(baseline.warnings + 2);
+    },
+  );
 
   it("accepts a Mold eval plan without frontmatter", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {

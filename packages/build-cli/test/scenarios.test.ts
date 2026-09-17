@@ -24,6 +24,12 @@ test("parses Case sections and quoted or unquoted fixture values consistently", 
   ]);
 });
 
+test("ignores example headings and stops a case at the next document section", () => {
+  const source =
+    "```md\n## Case: example\n- fixture: fake\n```\n\n> ## Case: quoted\n\n<!--\n## Case: hidden\n-->\n\n## Case: real\n\nRun this.\n\n## Other\n\n- fixture: unrelated\n";
+  expect(parseScenarioCases(source)).toEqual([{ name: "real", body: "Run this." }]);
+});
+
 test("resolves repository-relative and scenarios-relative fixtures without leaving the repo", () => {
   const root = mkdtempSync(path.join(tmpdir(), "foundry-scenarios-"));
   const scenariosPath = path.join(root, "content/pipelines/demo/scenarios.md");
