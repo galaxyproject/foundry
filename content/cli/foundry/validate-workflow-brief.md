@@ -8,18 +8,26 @@ tags:
 status: draft
 created: 2026-09-17
 revised: 2026-09-17
-revision: 1
-summary: "RFC/WIP structural validator for Workflow Brief YAML documents."
+revision: 2
+summary: "Validate the title and required sections of a Markdown Workflow Brief."
 ---
 
 # `foundry validate-workflow-brief`
 
-Validate YAML or JSON against the experimental [[workflow-brief]] schema. This is an agent-written rough draft for GitHub review in [issue #563](https://github.com/galaxyproject/foundry/issues/563).
+Validate a Markdown document against the section contract described in [[workflow-brief-design]].
+
+## Output
+
+Prints `<path>: valid` to stdout on success (exit `0`). Missing, duplicate, or empty required sections produce diagnostics on stderr and exit `3`. Input read failures exit `1`.
+
+## Examples
 
 ```sh
-foundry validate-workflow-brief workflow-brief.yml
+foundry validate-workflow-brief workflow-brief.md
 ```
 
-Success prints `<path>: valid` to stdout and exits `0`. Schema failures print field diagnostics to stderr and exit `3`. Missing files and malformed YAML exit `1`.
+## Gotchas
 
-Validation covers required sections, nested fields, enum values, and explicit unknowns. It does not establish expert approval or readiness to implement or execute; referential validation and environment preflight remain follow-up work.
+- This checks the document title, required sections, their content, and Scope/Environment subsections. It does not verify semantic completeness, expert approval, or environment readiness.
+- Headings inside code fences, block quotes, and HTML comments do not satisfy section requirements.
+- Additional sections, prose, tables, and explicit unknowns are allowed. Heading case and section order are flexible.

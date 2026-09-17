@@ -1,69 +1,137 @@
 import { readFileSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import YAML from "yaml";
 import { workflowBriefValidator } from "../src/commands/validate-workflow-brief.js";
-import type { WorkflowBrief } from "../src/schemas/workflow-brief/workflow-brief.types.generated.js";
+import { parseWorkflowBrief, workflowBriefSections } from "../src/workflow-brief.js";
 
-const fixture = resolve(__dirname, "fixtures/workflow-brief/read-alignment.yml");
-const loadBrief = (): WorkflowBrief => YAML.parse(readFileSync(fixture, "utf8"));
+const fixture = resolve(__dirname, "fixtures/workflow-brief/read-alignment.md");
+const loadBrief = () => readFileSync(fixture, "utf8");
 
-describe("workflow brief validation", () => {
-  it("keeps generated declarations and the runtime wrapper in sync with the canonical schema", async () => {
-    expect(() =>
-      execFileSync(process.execPath, [
-        resolve(__dirname, "../scripts/generate-workflow-brief-types.mjs"),
-        "--check",
-      ]),
-    ).not.toThrow();
-    const { workflowBriefSchema } =
-      await import("../src/schemas/workflow-brief/workflow-brief.schema.generated.js");
-    expect(workflowBriefSchema).toEqual(
-      JSON.parse(
-        readFileSync(
-          resolve(__dirname, "../src/schemas/workflow-brief/workflow-brief.schema.json"),
-          "utf8",
-        ),
-      ),
+describe("Markdown Workflow Brief", () => {
+  it("accepts a prose brief with explicit unknowns and parses sections without losing their text", () => {
+    const markdown = loadBrief();
+    expect(workflowBriefValidator.validate(markdown)).toEqual({ valid: true, errors: [] });
+    const parsed = parseWorkflowBrief(markdown);
+    expect(parsed.title).toBe("Workflow Brief: Read alignment subset");
+    expect(parsed.sections.find((section) => section.heading === "Constraints")?.body).toContain(
+      "Preserve sample identifiers",
     );
-  });
-  it("accepts a draft with explicit unknowns and unresolved execution questions", () => {
-    expect(workflowBriefValidator.validate(loadBrief())).toEqual({ valid: true, errors: [] });
+    expect(
+      parsed.sections
+        .find((section) => section.heading === "Environment")
+        ?.sections.map((section) => section.heading),
+    ).toEqual(["Authoring", "Execution"]);
   });
 
-  it("requires scope and rejects an unknown nested constraint field", () => {
-    const missing = loadBrief() as Partial<WorkflowBrief>;
-    delete missing.scope;
-    expect(workflowBriefValidator.validate(missing).errors).toEqual(
+  it.each(workflowBriefSections.filter((section) => section.required))(
+    "requires $heading",
+    ({ heading }) => {
+      const markdown = loadBrief().replace(`## ${heading}\n`, `## Other ${heading}\n`);
+      expect(workflowBriefValidator.validate(markdown).errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            keyword: "required-section",
+            message: expect.stringContaining(heading),
+          }),
+        ]),
+      );
+    },
+  );
+
+  it("requires nonempty sections and Scope/Environment subsections", () => {
+    const markdown = loadBrief()
+      .replace(
+        /## Constraints[\s\S]*?(?=## Environment)/,
+        "## Constraints\n\n<!-- fill later -->\n\n",
+      )
+      .replace("### Excluded", "### Elsewhere");
+    const result = workflowBriefValidator.validate(markdown);
+    expect(result.errors).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ keyword: "required", params: { missingProperty: "scope" } }),
-      ]),
-    );
-    const brief = loadBrief();
-    Object.assign(brief.constraints[0]!, { silently_optional: true });
-    expect(workflowBriefValidator.validate(brief).errors).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ path: "/constraints/0", keyword: "additionalProperties" }),
+        expect.objectContaining({
+          keyword: "section-content",
+          message: expect.stringContaining("Constraints"),
+        }),
+        expect.objectContaining({
+          keyword: "required-section",
+          message: expect.stringContaining("Excluded"),
+        }),
       ]),
     );
   });
 
-  it("rejects invalid execution policy, empty acceptance, and numeric schema versions", () => {
-    const brief = loadBrief();
-    Object.assign(brief.environment.execution, { container_policy: "maybe" });
-    brief.acceptance = [];
-    Object.assign(brief, { brief_version: 1 });
-    const result = workflowBriefValidator.validate(brief);
-    expect(result.valid).toBe(false);
-    expect(result.errors.map((error) => error.path)).toEqual(
+  it("rejects duplicate sections and reports their line numbers", () => {
+    const result = workflowBriefValidator.validate(loadBrief() + "\n## Scope\n\nRepeated scope.\n");
+    expect(result.errors).toEqual(
       expect.arrayContaining([
-        "/environment/execution/container_policy",
-        "/acceptance",
-        "/brief_version",
+        expect.objectContaining({
+          keyword: "duplicate-section",
+          path: expect.stringMatching(/^line \d+/),
+        }),
       ]),
     );
+  });
+
+  it("keeps the final subsection inside its parent and detects an empty Execution subsection", () => {
+    const parsed = parseWorkflowBrief(loadBrief());
+    const execution = parsed.sections
+      .find((section) => section.heading === "Environment")
+      ?.sections.find((section) => section.heading === "Execution");
+    expect(execution?.body).not.toContain("Acceptance criteria");
+    const markdown = loadBrief().replace(
+      /### Execution[\s\S]*?(?=## Acceptance criteria)/,
+      "### Execution\n\n",
+    );
+    expect(workflowBriefValidator.validate(markdown).errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          keyword: "section-content",
+          message: expect.stringContaining("Execution"),
+        }),
+      ]),
+    );
+  });
+
+  it("does not mistake fenced, quoted, or commented headings for document sections", () => {
+    const markdown =
+      loadBrief().replace("## Constraints\n", "## Other constraints\n") +
+      "\n```markdown\n## Constraints\nExample only.\n```\n\n> ## Constraints\n> Quoted only.\n\n<!--\n## Constraints\nComment only.\n-->\n";
+    expect(workflowBriefValidator.validate(markdown).errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          keyword: "required-section",
+          message: expect.stringContaining("Constraints"),
+        }),
+      ]),
+    );
+  });
+
+  it("allows extra sections, arbitrary prose and tables, reordered sections, and case variation", () => {
+    const markdown =
+      loadBrief().replace("## Objective", "## OBJECTIVE") +
+      "\n## Additional context\n\n| Detail | Value |\n| --- | --- |\n| Note | More context |\n";
+    expect(workflowBriefValidator.validate(markdown).valid).toBe(true);
+    const parsed = parseWorkflowBrief(markdown);
+    const reordered =
+      `# ${parsed.title}\n\n` +
+      parsed.sections
+        .slice()
+        .reverse()
+        .map((section) => `## ${section.heading}\n\n${section.body}`)
+        .join("\n\n");
+    expect(workflowBriefValidator.validate(reordered).valid).toBe(true);
+  });
+
+  it("requires one document title, rejects non-text input, and permits omitted optional sections", () => {
+    expect(workflowBriefValidator.validate(loadBrief().replace(/^# .*\n/, "")).valid).toBe(false);
+    expect(workflowBriefValidator.validate(loadBrief() + "\n# Another title\n").valid).toBe(false);
+    expect(workflowBriefValidator.validate({ scope: {} }).valid).toBe(false);
+    expect(
+      workflowBriefValidator.validate(loadBrief().replace(/## Decisions and learning[\s\S]*$/, ""))
+        .valid,
+    ).toBe(true);
   });
 });
 
@@ -80,26 +148,20 @@ describe("validate-workflow-brief CLI", () => {
       ],
       { encoding: "utf8" },
     );
-
-  it("validates YAML and JSON and reports schema/parse/input failures", () => {
+  it("validates Markdown and reports section and input failures", () => {
     const dir = mkdtempSync(resolve(tmpdir(), "workflow-brief-cli-"));
     try {
       const valid = run(fixture);
       expect(valid.status).toBe(0);
       expect(valid.stdout).toContain(": valid");
       expect(valid.stderr).toBe("");
-      const json = resolve(dir, "brief.json");
-      writeFileSync(json, JSON.stringify(loadBrief()));
-      expect(run(json).status).toBe(0);
-      const invalid = resolve(dir, "invalid.yml");
-      writeFileSync(invalid, "scope: {}\n");
+      const invalid = resolve(dir, "invalid.md");
+      writeFileSync(invalid, "# Brief\n\n## Scope\n\nSome scope.\n");
       const failed = run(invalid);
       expect(failed.status).toBe(3);
       expect(failed.stdout).toBe("");
-      expect(failed.stderr).toContain("required");
-      writeFileSync(invalid, "scope: [\n");
-      expect(run(invalid).status).toBe(1);
-      expect(run(resolve(dir, "absent.yml")).status).toBe(1);
+      expect(failed.stderr).toContain("required-section");
+      expect(run(resolve(dir, "absent.md")).status).toBe(1);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

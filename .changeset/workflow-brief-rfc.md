@@ -2,4 +2,4 @@
 "@galaxy-foundry/gxwf-foundry": minor
 ---
 
-Add an experimental Workflow Brief schema, generated TypeScript declarations, and structural YAML validation command for RFC review.
+Add an experimental Workflow Brief Markdown section contract, TypeScript declarations, and structural Markdown validation command for RFC review.

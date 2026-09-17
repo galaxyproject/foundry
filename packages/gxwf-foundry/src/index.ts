@@ -7,8 +7,14 @@ export { summaryGalaxyWorkflowSchema } from "./schemas/summary-galaxy-workflow/s
 export { galaxyToolDiscoverySchema } from "./schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.generated.js";
 export { galaxyToolSummarySchema } from "./schemas/galaxy-tool-summary/galaxy-tool-summary.schema.generated.js";
 export { galaxyWorkflowTestPlanSchema } from "./schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.generated.js";
-export { workflowBriefSchema } from "./schemas/workflow-brief/workflow-brief.schema.generated.js";
-export type { WorkflowBrief } from "./schemas/workflow-brief/workflow-brief.types.generated.js";
+export {
+  workflowBriefSections,
+  parseWorkflowBrief,
+  validateWorkflowBrief,
+  type WorkflowBrief,
+  type WorkflowBriefSection,
+  type WorkflowBriefSectionDefinition,
+} from "./workflow-brief.js";
 export { workflowBriefValidator } from "./commands/validate-workflow-brief.js";
 export { testsFormatSchema } from "./schemas/tests-format/tests.schema.generated.js";
 

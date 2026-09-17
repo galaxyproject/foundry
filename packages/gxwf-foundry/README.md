@@ -25,7 +25,7 @@ foundry validate-summary-cwl <summary.json>
 foundry validate-galaxy-tool-discovery <recommendation.json>
 foundry validate-galaxy-tool-summary <manifest.json>
 foundry validate-tests-format <tests.yml> [--workflow <wf>] [--json]
-foundry validate-workflow-brief <brief.yml>         # experimental RFC/WIP
+foundry validate-workflow-brief <brief.md>         # experimental RFC/WIP
 ```
 
 `summarize-nextflow` wraps `@galaxy-foundry/summarize-nextflow`. The validators exit `0` for valid input, `3` for schema-validation failure, and `1` for input errors (missing file, malformed JSON/YAML).
@@ -52,7 +52,7 @@ Browser-safe; no commander or node-only deps.
 
 ## Schema sources
 
-The experimental Workflow Brief records scope, constraints, intended environments, acceptance criteria, and workflow-specific learning. Its schema and exported `WorkflowBrief` type are an agent-written rough draft for [GitHub review](https://github.com/galaxyproject/foundry/issues/563). The validator checks structure only; approval, referential validation, runtime preflight, and stage readiness remain follow-up work. Package sync regenerates the TypeScript declarations from the canonical JSON Schema.
+The experimental Markdown Workflow Brief records scope, constraints, intended environments, acceptance criteria, and workflow-specific learning. Exported types describe the parsed Markdown title and sections; `workflowBriefSections` declares the required headings. The validator checks section presence, uniqueness, content, and the Scope/Environment subsections. Approval, runtime preflight, and stage readiness remain follow-up work. See [the definition](../../content/research/workflow-brief-design/index.md).
 
 - `summary-cwl`, `galaxy-tool-discovery`, `galaxy-tool-summary` — Foundry-authored, JSON in `src/schemas/<name>/`.
 - `tests-format` — vendored from `@galaxy-tool-util/schema`; refresh via `pnpm sync`.

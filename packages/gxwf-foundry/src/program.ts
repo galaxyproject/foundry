@@ -61,8 +61,8 @@ export function buildProgram(): Command {
 
   program
     .command("validate-workflow-brief")
-    .description("Validate a Workflow Brief YAML document (experimental RFC).")
-    .argument("<brief.yml>")
+    .description("Validate a Workflow Brief Markdown document (experimental RFC).")
+    .argument("<brief.md>")
     .action((path: string) => runValidateWorkflowBrief(path));
 
   program

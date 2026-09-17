@@ -215,9 +215,9 @@ export const foundryCliMeta: CliProgramSpec = {
     {
       name: "validate-workflow-brief",
       fullName: "foundry validate-workflow-brief",
-      description: "Validate a Workflow Brief YAML document (experimental RFC).",
-      synopsis: "foundry validate-workflow-brief <brief.yml>",
-      args: [{ raw: "brief.yml", name: "brief.yml", required: true, variadic: false }],
+      description: "Validate a Workflow Brief Markdown document (experimental RFC).",
+      synopsis: "foundry validate-workflow-brief <brief.md>",
+      args: [{ raw: "brief.md", name: "brief.md", required: true, variadic: false }],
       options: [],
       commands: [],
     },

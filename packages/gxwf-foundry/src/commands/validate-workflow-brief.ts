@@ -1,9 +1,25 @@
-import { workflowBriefSchema } from "../schemas/workflow-brief/workflow-brief.schema.generated.js";
-import { createValidator } from "../lib/validator.js";
-import { runYamlValidator } from "../lib/run-yaml-validator.js";
+import { readFileSync } from "node:fs";
+import { validateWorkflowBrief } from "../workflow-brief.js";
 
-export const workflowBriefValidator = createValidator(workflowBriefSchema as object);
+export const workflowBriefValidator = { validate: validateWorkflowBrief };
 
 export function runValidateWorkflowBrief(path: string): never {
-  runYamlValidator(path, workflowBriefValidator);
+  let markdown: string;
+  try {
+    markdown = readFileSync(path, "utf8");
+  } catch (error) {
+    process.stderr.write(
+      `error reading ${path}: ${error instanceof Error ? error.message : String(error)}\n`,
+    );
+    process.exit(1);
+  }
+  const result = validateWorkflowBrief(markdown);
+  if (result.valid) {
+    process.stdout.write(`${path}: valid\n`);
+    process.exit(0);
+  }
+  for (const error of result.errors)
+    process.stderr.write(`  ${error.path}: ${error.message} (${error.keyword})\n`);
+  process.stderr.write(`${path}: ${result.errors.length} error(s)\n`);
+  process.exit(3);
 }

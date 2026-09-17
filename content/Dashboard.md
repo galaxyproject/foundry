@@ -146,7 +146,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[validate-workflow-brief]] | RFC/WIP structural validator for Workflow Brief YAML documents. | draft | 2026-09-17 | 1 |
+| [[validate-workflow-brief]] | Validate the title and required sections of a Markdown Workflow Brief. | draft | 2026-09-17 | 2 |
 | [[validate-galaxy-tool-discovery]] | AJV gate for discover-shed-tool recommendation documents. | draft | 2026-08-04 | 2 |
 | [[validate-galaxy-tool-summary]] | AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree. | draft | 2026-08-04 | 2 |
 | [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-08-04 | 2 |
@@ -178,7 +178,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[workflow-brief]] | RFC/WIP structural YAML contract for a Workflow Brief; agent-written rough draft awaiting GitHub review. | draft | 2026-09-17 | 1 |
 | [[summary-nextflow]] | JSON Schema for the structured summary emitted by the summarize-nextflow Mold. | draft | 2026-09-15 | 13 |
 | [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only. | draft | 2026-09-10 | 4 |
 | [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-08-03 | 2 |
@@ -198,7 +197,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[workflow-brief-design]] | Agent-written rough draft of a versioned Workflow Brief for scope, constraints, execution context, and workflow-specific learning; intended for GitHub review. | draft | 2026-09-17 | 1 |
+| [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, execution context, and workflow-specific learning. | draft | 2026-09-17 | 2 |
 | [[component-nextflow-testing]] | nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7. | draft | 2026-09-15 | 5 |
 | [[galaxy-datatypes-conf]] | Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications. | draft | 2026-09-15 | 3 |
 | [[galaxy-discover-datasets]] | Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions. | draft | 2026-09-15 | 3 |

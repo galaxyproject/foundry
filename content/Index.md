@@ -162,11 +162,10 @@ Generated from content frontmatter. Do not edit by hand.
 - [[validate-summary-nextflow]] — AJV gate for summarize-nextflow JSON documents.
 - [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
 - [[validate-tests-format]] — AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check.
-- [[validate-workflow-brief]] — RFC/WIP structural validator for Workflow Brief YAML documents.
+- [[validate-workflow-brief]] — Validate the title and required sections of a Markdown Workflow Brief.
 
 ## Schemas
 
-- [[workflow-brief]] — RFC/WIP structural YAML contract for a Workflow Brief; agent-written rough draft awaiting GitHub review.
 - [[cast-provenance]] — _provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only.
 - [[summary-cwl]] — JSON Schema for the structured summary emitted by the summarize-cwl Mold.
 - [[parsed-tool]] — JSON Schema for the upstream Galaxy `ParsedTool` model, vendored from `@galaxy-tool-util/schema`.
@@ -184,7 +183,6 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Research
 
-- [[workflow-brief-design]] — Agent-written rough draft of a versioned Workflow Brief for scope, constraints, execution context, and workflow-specific learning; intended for GitHub review.
 - [[gxy-sketches-alignment]] — Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not.
 - [[component-archon]] — Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap.
 - [[component-claude-dynamic-workflows]] — Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate.
@@ -252,6 +250,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
 - [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 - [[nextflow-test-case-selection]] — A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage.
+- [[workflow-brief-design]] — Markdown Workflow Brief definition and section contract for scope, constraints, execution context, and workflow-specific learning.
 
 ## Cli Tool
 
