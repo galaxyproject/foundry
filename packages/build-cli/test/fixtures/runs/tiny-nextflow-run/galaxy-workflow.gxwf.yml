@@ -1,0 +1,15 @@
+class: GalaxyWorkflow
+label: "Tiny demo"
+inputs:
+  - id: reads
+    type: collection
+outputs:
+  counts:
+    outputSource: count/out_file1
+steps:
+  trim:
+    tool_id: toolshed.g2.bx.psu.edu/repos/x/cutadapt/4.9
+    label: Trim reads
+  count:
+    tool_id: toolshed.g2.bx.psu.edu/repos/y/featurecounts/2.0.6
+    label: Count features

@@ -1,0 +1,5 @@
+{
+  "pipeline": "tiny-demo",
+  "processes": 2,
+  "profiles": ["test"]
+}

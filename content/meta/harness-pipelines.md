@@ -9,8 +9,8 @@ tags:
   - lifecycle/publication
 status: revised
 created: 2026-04-30
-revised: 2026-09-12
-revision: 20
+revised: 2026-09-18
+revision: 21
 summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
 
@@ -58,7 +58,8 @@ Some recurring pipeline activities are **harness-level**, not Mold-shaped, and a
 
 - **Approval gates / scope confirmation / plan presentation.** Whether and when to pause for user confirmation (after planning, before authoring, after a partial cast) is a property of the harness's autonomy posture, not of any individual Mold. Different harnesses (interactive vs. batch vs. fully autonomous) want different gates around the same Molds; baking gates into Molds would either constrain that or duplicate logic. Harnesses own gates.
 - **Tool-discovery routing.** "Try `discover-shed-tool` (find an existing wrapper via the Tool Shed); if nothing acceptable, fall through to `author-galaxy-tool-wrapper`" is a routing decision the harness makes; the two underlying capabilities are clean Molds. (`discover-shed-tool` is named for the *mechanism* — the Galaxy Tool Shed — leaving room for siblings like `discover-tool-via-galaxy-api` or `discover-tool-on-github` if other discovery paths get wrapped.)
-- **State and resumption.** Persisting harness state across phases, resuming a partial run, and managing run history are harness concerns.
+- **Execution state and resumption.** Persisting live harness state across phases, resuming a partial run, and managing a history of past runs are harness concerns. The Foundry describes what a run should do, never how a particular harness survives being interrupted.
+- **Run-directory layout and the run record.** Not a harness concern, despite sitting next to one. The Foundry already authors the run directory's shape: `assemble-pipeline` emits the per-run working-directory contract and the checkpoint commit grammar, `runtime_artifacts.yml` registers the files that land there, and every Mold's `output_artifacts[].default_filename` is a run-directory filename. The always-on [[foundry-run-manifest]] makes that contract explicit rather than implied, and `foundry-build run-dashboard` reads it. Describing the layout is ours; executing against it is not.
 - **Feedback-mode lifecycle.** When `--feedback` is enabled, the harness initializes the registered feedback ledger from its complete `_assembly.json` phase roster and owns run/phase status transitions. Skills preserve that state and append only observations. An empty ledger counts as a clean run only after the harness marks the run complete.
 
 ## Runtime tooling
@@ -95,10 +96,11 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 5. `freeform-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from free-form source evidence, the interface and data-flow briefs, and exemplar comparison notes.
 6. `[loop]` `advance-galaxy-draft-step` — one full iteration: pick next drafty step via `gxwf draft-next-step`, route through the discover-or-author branch (try `discover-shed-tool`, fall through to `author-galaxy-tool-wrapper`), summarize the wrapper, implement the step, validate via `gxwf draft-validate --concrete`. Loop terminates on `draft: false`.
 7. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
-8. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
-9. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
-10. `run-workflow-test` — execute via Planemo.
-11. `debug-galaxy-workflow-output` — triage failures, propose fixes.
+8. `freeform-summary-to-galaxy-test-plan` — synthesize a Galaxy workflow test plan from the free-form summary and the design briefs.
+9. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
+10. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
+11. `run-workflow-test` — execute via Planemo.
+12. `debug-galaxy-workflow-output` — triage failures, propose fixes.
 
 ### PAPER → CWL
 

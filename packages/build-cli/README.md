@@ -35,6 +35,13 @@ foundry-build pi-test-auth login --auth-dir /secure/foundry-eval-auth
 foundry-build test-skill summarize-nextflow --root . --prompt "Summarize it" \
   --provider openai-codex --model MODEL_ID --pi-test-auth \
   --auth-dir /secure/foundry-eval-auth
+
+# Read a finished conversion run, writing the page beside its artifacts.
+foundry-build run-dashboard ./sarek-galaxy --root .
+
+# Read an older run that predates the run record, naming the pipeline by hand.
+foundry-build run-dashboard ~/src/foundry-runs/sarek --root . \
+  --reconstruct --pipeline nextflow-to-galaxy --out /tmp/sarek-dash
 ```
 
 ## Commands
@@ -45,6 +52,7 @@ foundry-build test-skill summarize-nextflow --root . --prompt "Summarize it" \
 - `generate-dashboard` — write or check `content/Dashboard.md` from `dashboard_sections.json`.
 - `test-skill` — run one cast skill in a fresh Pi worker and retain its trace and validated artifacts.
 - `test-pipeline` — run a linear prefix of an assembled Pipeline with one fresh Pi worker per phase. It resolves a named Pipeline scenario, carries forward only artifact IDs declared by the next skill, supports `--through <phase-or-skill>` and `--trials N`, and writes an aggregate `run.json` beside each phase's worker record and raw trace. Branches and loops are rejected during preflight until their controller-owned predicates are implemented.
+- `run-dashboard` — read a conversion run's working directory and emit `run-manifest.json` plus a self-contained `dashboard.html` beside it. It resolves the run against the harness `_assembly.json`, each skill's `_provenance.json`, the run's own `foundry-run.yml`, both YAML ledgers, and the checkpoint git history. `--reconstruct` reads a run made before the run record existed, degraded and labelled; `--pipeline` settles a run whose filenames cannot name it; `--offline` drops every link back to the published site. There is no `--check` mode because the output is never committed.
 - `pi-test-auth` — manage an isolated OpenAI/Codex OAuth credential for local diagnostic test runs. Supports `login`, `status`, and `logout`; `login --method device-code --no-open` works on a headless host. Status output contains metadata only.
 
 `--pi-test-auth` is opt-in and valid only with `--sandbox local`, `--provider openai-codex`. Local mode is not a security boundary: the Pi process keeps the credential on the host while its enabled tools also execute on the host. The container sandbox deliberately does not accept this OAuth store; continue to pass narrowly allowlisted API-key environment variables to container runs until host-side tool sandboxing is implemented.
