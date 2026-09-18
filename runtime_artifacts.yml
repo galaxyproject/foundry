@@ -1,6 +1,14 @@
 version: 1
 
 artifacts:
+  foundry-run-manifest:
+    kind: yaml
+    default_filename: foundry-run.yml
+    protocol: "[[foundry-run-manifest]]"
+    producer:
+      kind: harness
+      initializer: harness
+
   foundry-feedback-ledger:
     kind: yaml
     default_filename: foundry-feedback.ledger.yml

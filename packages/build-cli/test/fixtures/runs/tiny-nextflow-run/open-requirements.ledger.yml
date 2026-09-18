@@ -1,0 +1,34 @@
+topology_repair:
+  escalations: 1
+  cap: 5
+  open_history: [3, 2]
+entries:
+  - id: featurecounts-wrapper-unresolved
+    status: open
+    blocking: true
+    raised_by: advance-galaxy-draft-step
+    step: count
+    unmet: "a concrete featureCounts wrapper for the counting step"
+    missing: "tool-search returned no wrapper reading the trimmed collection"
+    resolved_by: null
+    supersedes: null
+    note: ""
+  - id: reference-annotation-shape
+    status: resolved
+    raised_by: nextflow-summary-to-galaxy-interface
+    unmet: "the annotation input's Galaxy shape"
+    missing: "the source pinned no GTF"
+    resolved_by: nextflow-summary-to-galaxy-reference-data
+    supersedes: null
+    note: "settled as a plain dataset input"
+  - id: multiqc-report-dropped
+    status: surrendered
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-data-flow
+    units: "1 of 3 designed reporting nodes"
+    because: "no Galaxy wrapper consumes the per-process logs this pipeline emits"
+    unmet: "the pipeline's aggregate QC report"
+    missing: "the carried spine reports per sample only"
+    resolved_by: null
+    supersedes: null
+    note: "surrendered at the cap"

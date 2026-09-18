@@ -1,0 +1,12 @@
+a1b2c3d4e5f60718293a4b5c6d7e8f90123456712026-09-18T10:07:32Zphase 12: run-workflow-test (1 of 2 cases FAILED)
+1	0	workflow-test-result.json
+118	0	planemo-run.log
+b2c3d4e5f60718293a4b5c6d7e8f90123456712a2026-09-18T10:03:10Zphase 7 step 4: advance-galaxy-draft-step (featureCounts endpoint)
+12	3	galaxy-workflow-draft.gxwf.yml
+20	0	galaxy-workflow.gxwf.yml
+c3d4e5f60718293a4b5c6d7e8f90123456712ab32026-09-18T10:02:40Zdrop a stray editor swap file
+0	4	.trim.swp
+d4e5f60718293a4b5c6d7e8f90123456712ab3c42026-09-18T10:02:00Zphase 6: nextflow-summary-to-galaxy-template
+18	0	galaxy-workflow-draft.gxwf.yml
+e5f60718293a4b5c6d7e8f90123456712ab3c4d52026-09-18T10:00:30Zphase 1: summarize-nextflow
+5	0	summary-nextflow.json

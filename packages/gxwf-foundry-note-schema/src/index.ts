@@ -77,8 +77,11 @@ export {
 export {
   loadRuntimeArtifactRegistry,
   requireRuntimeArtifactRegistry,
+  runtimeModeOption,
+  runtimeProducerId,
   type RuntimeArtifactDefinition,
   type RuntimeArtifactLoad,
+  type RuntimeArtifactProducer,
   type RuntimeArtifactRegistry,
 } from "./runtime-artifacts.js";
 

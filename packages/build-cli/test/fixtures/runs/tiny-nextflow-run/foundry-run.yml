@@ -1,0 +1,77 @@
+run_record_version: 1
+pipeline: nextflow-to-galaxy
+run_slug: tiny-nextflow-run
+source_revision: 4
+harness_name: pipeline-nextflow-to-galaxy
+foundry_head: beef0001beef0001beef0001beef0001beef0001
+started_at: 2026-09-18T10:00:00Z
+finished_at: 2026-09-18T10:07:32Z
+status: failed
+phases:
+  - n: 1
+    kind: mold
+    skill: summarize-nextflow
+    status: done
+    artifacts:
+      - { id: summary-nextflow, file: summary-nextflow.json, at: 2026-09-18T10:00:30Z }
+  - n: 2
+    kind: mold
+    skill: nextflow-summary-to-galaxy-reference-data
+    status: done
+    artifacts:
+      - { id: open-requirements-ledger, file: open-requirements.ledger.yml, at: 2026-09-18T10:00:50Z }
+  - n: 3
+    kind: mold
+    skill: nextflow-summary-to-galaxy-interface
+    status: done
+    artifacts:
+      - { id: nextflow-galaxy-interface, file: nextflow-galaxy-interface.md, at: 2026-09-18T10:01:10Z }
+  - n: 4
+    kind: mold
+    skill: nextflow-summary-to-galaxy-data-flow
+    status: done
+  - n: 5
+    kind: mold
+    skill: compare-against-iwc-exemplar
+    status: done
+  - n: 6
+    kind: mold
+    skill: nextflow-summary-to-galaxy-template
+    status: done
+    artifacts:
+      - { id: galaxy-workflow-draft, file: galaxy-workflow-draft.gxwf.yml, at: 2026-09-18T10:02:00Z }
+  - n: 7
+    kind: mold
+    skill: advance-galaxy-draft-step
+    status: done
+    iterations: 4
+    artifacts:
+      - { id: galaxy-workflow-draft, file: galaxy-workflow-draft.gxwf.yml, at: 2026-09-18T10:03:00Z, iteration: 4 }
+      - { id: galaxy-workflow, file: galaxy-workflow.gxwf.yml, at: 2026-09-18T10:03:10Z }
+  - n: 8
+    kind: branch
+    pattern: test-data-resolution
+    selected: nextflow-to-test-data
+    status: done
+  - n: 9
+    kind: mold
+    skill: nextflow-test-to-galaxy-test-plan
+    status: done
+  - n: 10
+    kind: mold
+    skill: implement-galaxy-workflow-test
+    status: done
+  - n: 11
+    kind: mold
+    skill: validate-galaxy-workflow
+    status: done
+  - n: 12
+    kind: mold
+    skill: run-workflow-test
+    status: failed
+    artifacts:
+      - { id: workflow-test-result, file: workflow-test-result.json, at: 2026-09-18T10:07:32Z }
+  - n: 13
+    kind: mold
+    skill: debug-galaxy-workflow-output
+    status: pending

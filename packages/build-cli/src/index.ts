@@ -39,3 +39,42 @@ export {
 export { loadTagRegistry, type TagRegistry } from "./lib/schema.js";
 export { fileSlug, findMdFiles } from "./lib/walk.js";
 export { resolveWikiLink, slugify, stripBrackets, WIKI_LINK_RE } from "./lib/wiki-links.js";
+export { runRunDashboardCommand, parseRunDashboardArgs } from "./commands/run-dashboard.js";
+export {
+  declaredOutputs,
+  listPipelineSlugs,
+  loadAllAssemblies,
+  loadAssembly,
+  loadSkillProvenance,
+  phaseSkills,
+  type AssemblyManifest,
+  type AssemblyPhase,
+  type DeclaredOutput,
+  type SkillProvenance,
+} from "./lib/cast-registry.js";
+export {
+  buildRunModel,
+  serializeRunManifest,
+  RunRecordMissingError,
+  type BuildRunModelOptions,
+  type SiteLinker,
+} from "./lib/run-manifest.js";
+export {
+  buildPipelineIndex,
+  detectPipeline,
+  scorePipelines,
+  PipelineUndeterminedError,
+  type PipelineCandidateScore,
+  type PipelineDetection,
+} from "./lib/run-reconstruct.js";
+export { createSiteLinker, DEFAULT_SITE_BASE } from "./lib/run-links.js";
+export {
+  isTestPipelineRunDir,
+  runModelFromTestPipeline,
+  type TestPipelineAdapterOptions,
+} from "./lib/run-adapter-test-pipeline.js";
+export { parseGitLog, parseCommitSubject, type GitExec } from "./lib/run-git.js";
+export { classifyEntries, variantParent } from "./lib/run-classify.js";
+export { parseRunRecord, readRunRecord, RUN_RECORD_FILENAME } from "./lib/run-record.js";
+export { renderRunDashboard, GENERATOR_MARKER } from "./render/run-dashboard-html.js";
+export * from "./lib/run-model.js";

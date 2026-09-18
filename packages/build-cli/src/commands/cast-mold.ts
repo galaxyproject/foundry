@@ -29,6 +29,8 @@ import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command"
 import {
   DEFINITIONS,
   requireRuntimeArtifactRegistry,
+  runtimeModeOption,
+  runtimeProducerId,
   type RuntimeArtifactRegistry,
 } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
@@ -237,8 +239,8 @@ const GALAXY_HOOKS: CastHooks = {
         ? [
             bulletSection("Feedback Mode", [
               requiresFeedback
-                ? `- This skill requires \`${feedback.default_filename}\`; read \`_feedback.md\` before doing the work even when the caller did not invoke a pipeline with \`--${feedback.producer.option}\`.`
-                : `- Feedback mode is off unless the caller explicitly enables \`--${feedback.producer.option}\` or supplies a feedback-ledger path.`,
+                ? `- This skill requires \`${feedback.default_filename}\`; read \`_feedback.md\` before doing the work even when the caller did not invoke a pipeline with \`--${runtimeModeOption(feedback)}\`.`
+                : `- Feedback mode is off unless the caller explicitly enables \`--${runtimeModeOption(feedback)}\` or supplies a feedback-ledger path.`,
               ...(requiresFeedback
                 ? []
                 : [
@@ -382,7 +384,7 @@ export function buildProducerIndex(
       throw new Error(`runtime artifact '${id}' collides with a Mold output producer`);
     }
     idx.set(id, {
-      producers: [`runtime:${artifact.producer.option}`],
+      producers: [runtimeProducerId(artifact)],
       kind: artifact.kind,
       default_filename: artifact.default_filename,
     });
