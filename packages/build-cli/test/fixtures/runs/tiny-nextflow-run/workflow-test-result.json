@@ -1,0 +1,10 @@
+{
+  "artifact": "workflow-test-result",
+  "result": "red",
+  "executed_end_to_end": true,
+  "summary": { "num_tests": 2, "num_errors": 0, "num_failures": 1, "num_skips": 0 },
+  "tests": [
+    { "id": "case-one", "data": { "status": "success" } },
+    { "id": "case-two", "data": { "status": "failure" } }
+  ]
+}

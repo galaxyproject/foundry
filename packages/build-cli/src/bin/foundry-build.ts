@@ -26,6 +26,7 @@ const COMMANDS = [
   "test-skill",
   "test-pipeline",
   "pi-test-auth",
+  "run-dashboard",
 ] as const;
 
 async function main(argv = process.argv.slice(2)): Promise<void> {
@@ -54,6 +55,9 @@ async function main(argv = process.argv.slice(2)): Promise<void> {
   } else if (command === "pi-test-auth") {
     const { runPiTestAuthCommand } = await import("../commands/pi-test-auth.js");
     await runPiTestAuthCommand(rest);
+  } else if (command === "run-dashboard") {
+    const { runRunDashboardCommand } = await import("../commands/run-dashboard.js");
+    runRunDashboardCommand(rest);
   } else {
     process.stderr.write(`unknown command: ${command}\n\n`);
     printHelp();
