@@ -16,12 +16,12 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - Read artifact `workflow-brief`. Schema: workflow-brief-schema. Produced by `freeform-summary-to-workflow-brief`, `nextflow-summary-to-workflow-brief`. Expert-reviewed brief input; workflow and environment blockers must be clear before projection.
 - Read artifact `freeform-summary`. Optional; absence is allowed and must be reported honestly. Produced by `interview-to-freeform-summary`, `summarize-paper`, `workflow-brief-to-freeform-summary`. Optional original narrative source evidence; selected brief scope controls what is carried forward.
 - Read artifact `summary-nextflow`. Optional; absence is allowed and must be reported honestly. Schema: summary-nextflow. Produced by `summarize-nextflow`. Optional structured Nextflow source evidence linked by the brief; retain source pins and relevant evidence.
-- Read artifact `open-requirements-ledger`. Optional; absence is allowed and must be reported honestly. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-freeform-summary`. Optional existing run obligations; preserve entries and append findings or recommended brief changes.
+- Read artifact `open-requirements-ledger`. Optional; absence is allowed and must be reported honestly. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-freeform-summary`. Optional existing workflow-run knowledge; preserve obligations, discoveries, decisions, and recommended brief changes.
 
 ## Outputs
 
 - Write artifact `freeform-summary` as `freeform-summary.md`. Format: `markdown`. Derived scientific intent and selected source evidence for the existing freeform Galaxy design Molds; the brief remains unchanged.
-- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Run obligations, evidence gaps, and recommended brief changes recorded separately from the input brief.
+- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Workflow obligations, discoveries, decisions, and recommended brief changes recorded separately from the input brief.
 
 ## Required Tools
 
@@ -32,7 +32,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
-- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Initialize run obligations and record recommended brief changes without applying them.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Initialize workflow-run knowledge and record recommended brief changes without applying them.
 - `references/notes/workflow-brief-design.md`: Research note copied verbatim into the bundle. Apply the brief boundaries: evidence and expert intent, no inferred Galaxy design, and separate workflow/environment blockers.
 - `references/schemas/workflow-brief-schema.schema.json`: Schema file copied verbatim into the bundle. Carry the Markdown section declaration and its structural validator.
 
@@ -59,7 +59,7 @@ Retain original evidence at a separate path before writing this derived summary.
 
 ### Record obligations outside the brief
 
-Initialize or carry forward `open-requirements.ledger.yml`. Preserve existing entries and record missing evidence and recommended brief changes there. Do not mark a recommendation accepted or apply it to the brief. Design steps may choose Galaxy mappings within the approved scope; they must record unsupported obligations in the ledger rather than widening the brief.
+Initialize or carry forward `open-requirements.ledger.yml`. Preserve every existing collection. Record source or implementation facts needed downstream as discoveries, authorized choices within the approved scope as decisions, missing actionable needs as obligation entries, and changes to expert intent as brief-change recommendations. A recommendation begins and remains `proposed`: do not mark it accepted or apply it to the brief. If correctness depends on it, stop and return it to the separate expert editing step. Design steps may choose Galaxy mappings within the approved scope; they must record unsupported obligations rather than widening the brief.
 
 Hand the derived summary and ledger to the existing design chain. Leave agent environment instructions in the brief for the harness to enforce, rather than converting them into scientific workflow steps. Confirm the brief's bytes remain unchanged before completing this step.
 

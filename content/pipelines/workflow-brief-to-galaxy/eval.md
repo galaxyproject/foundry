@@ -15,7 +15,7 @@
 - check: llm-judged
 - assertion: Downstream design and implementation respect included/excluded work and expert requirements. Original source evidence cannot silently add analyses.
 
-## Property: progress and recommendations stay in the ledger
+## Property: workflow-run knowledge is classified and required changes return to expert editing
 
 - check: llm-judged
-- assertion: The run records evidence and recommended brief changes outside the input brief. An implementation agent does not accept or apply a brief change.
+- assertion: The run classifies durable workflow evidence, decisions, obligations, and proposed brief changes in open-requirements.ledger.yml. Harness progress and Foundry feedback remain outside that artifact. An implementation agent does not accept or apply a brief change.

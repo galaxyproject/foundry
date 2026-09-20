@@ -257,7 +257,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nfcore-task-ext-args-to-galaxy-additional-options]] — Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments.
 - [[nfcore-versions-emit-to-galaxy-version-command]] — Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel.
 - [[nf-schema-samplesheet-galaxy-gaps]] — nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary.
-- [[open-requirements-ledger]] — Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously.
+- [[open-requirements-ledger]] — Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state.
 - [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
 - [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 - [[nextflow-test-case-selection]] — A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage.

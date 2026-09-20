@@ -4,11 +4,11 @@
   "mold": {
     "name": "workflow-brief-to-freeform-summary",
     "path": "content/molds/workflow-brief-to-freeform-summary/index.md",
-    "revision": 1,
-    "content_hash": "4ae398a401f3ec8dfedd65302b84aedd84e1523654205d139eb174ee15ef6f17",
-    "commit": "fb1e516a5497b681500497821ac2c1e6e25805d4"
+    "revision": 2,
+    "content_hash": "d6581c56b49caa0620d3e659a9320fd27f05554a973fed356d8a3d4a98f97c11",
+    "commit": "7d015813dba17edb113b3cd3880044dc8a31dae3"
   },
-  "cast_at": "2026-09-17T19:22:41.269Z",
+  "cast_at": "2026-09-20T16:34:29.261Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -51,10 +51,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Initialize run obligations and record recommended brief changes without applying them.",
+      "purpose": "Initialize workflow-run knowledge and record recommended brief changes without applying them.",
       "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
-      "src_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
-      "dst_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "src_hash": "2c0180b4fa8a562e71c016cd529f58a9d0b6a102c77b688520f0f5a0ff3ecd1d",
+      "dst_hash": "2c0180b4fa8a562e71c016cd529f58a9d0b6a102c77b688520f0f5a0ff3ecd1d",
       "source": "deterministic"
     },
     {
@@ -68,8 +68,8 @@
       "evidence": "hypothesis",
       "purpose": "Apply the brief boundaries: evidence and expert intent, no inferred Galaxy design, and separate workflow/environment blockers.",
       "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
-      "src_hash": "b6c55f96b60ae4c6187614e5200c0538848bc06bbe026dcd80595d6ba03b019e",
-      "dst_hash": "b6c55f96b60ae4c6187614e5200c0538848bc06bbe026dcd80595d6ba03b019e",
+      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
       "source": "deterministic"
     },
     {
@@ -99,7 +99,7 @@
         "id": "open-requirements-ledger",
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
-        "description": "Run obligations, evidence gaps, and recommended brief changes recorded separately from the input brief."
+        "description": "Workflow obligations, discoveries, decisions, and recommended brief changes recorded separately from the input brief."
       }
     ],
     "consumes": [
@@ -133,7 +133,7 @@
       },
       {
         "id": "open-requirements-ledger",
-        "description": "Optional existing run obligations; preserve entries and append findings or recommended brief changes.",
+        "description": "Optional existing workflow-run knowledge; preserve obligations, discoveries, decisions, and recommended brief changes.",
         "optional": true,
         "producers": [
           "advance-galaxy-draft-step",

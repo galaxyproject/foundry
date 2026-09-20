@@ -5,7 +5,7 @@ description: "Consume an expert-reviewed, unchanged Workflow Brief through readi
 
 # pipeline-workflow-brief-to-galaxy
 
-Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 1) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -83,6 +83,6 @@ If the run was invoked with `--feedback`, close the ledger first: set the final 
 - Before phase 1, record expert review of the supplied brief and perform current environment preflight for required tooling, versions, workspace access, and usable container engines. Missing review or failed preflight stops the run.
 - Before phase 1 and whenever resuming, run foundry check-workflow-brief workflow-brief.md --json. Exit 1, 3, or 4 stops before design; exit 0 establishes only structure and no declared blockers.
 - Treat workflow-brief.md as unchanged input through every design, draft, implementation, test, and debug phase. Record its initial hash and check it after each phase and loop iteration and on resumption; a mismatch stops the run.
-- Record progress, learning, obligations, and recommended brief changes in the run ledger. Do not apply a recommendation to the brief or change its scope; return a required brief change to the separate expert editing step.
+- Record durable workflow knowledge in open-requirements.ledger.yml: evidence as discoveries, authorized choices as decisions, unmet needs as obligations, and changes to expert intent as proposed brief-change recommendations. Harness progress remains harness state. Do not apply a recommendation to the brief; return a required change to the separate expert editing step.
 - The selected brief governs scientific scope. Reuse the existing freeform Galaxy design and implementation chain after projection; links to Nextflow evidence do not require porting every source process.
 - Phase 7 resolves test data with find-test-data then caller-supplied fixtures. Phase 8 develops the test plan; the brief itself never contains final fixture/assertion declarations.

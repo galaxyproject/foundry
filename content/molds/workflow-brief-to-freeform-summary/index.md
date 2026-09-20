@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: '2026-09-17'
-revised: '2026-09-17'
-revision: 1
+revised: '2026-09-20'
+revision: 2
 summary: Check an unchanged Workflow Brief and project its approved intent into the existing freeform
   Galaxy design handoff.
 input_artifacts:
@@ -25,8 +25,8 @@ input_artifacts:
       and relevant evidence.
   - id: open-requirements-ledger
     optional: true
-    description: Optional existing run obligations; preserve entries and append findings or recommended
-      brief changes.
+    description: Optional existing workflow-run knowledge; preserve obligations, discoveries, decisions,
+      and recommended brief changes.
 output_artifacts:
   - id: freeform-summary
     kind: markdown
@@ -36,8 +36,8 @@ output_artifacts:
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
-    description: Run obligations, evidence gaps, and recommended brief changes recorded separately from
-      the input brief.
+    description: Workflow obligations, discoveries, decisions, and recommended brief changes recorded
+      separately from the input brief.
 references:
   - kind: schema
     ref: '[[workflow-brief-schema]]'
@@ -82,7 +82,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: Initialize run obligations and record recommended brief changes without applying them.
+    purpose: Initialize workflow-run knowledge and record recommended brief changes without applying them.
     verification: Check the committed fixtures and review a worked run for faithful evidence and unchanged
       brief input.
 ---
@@ -101,6 +101,6 @@ Retain original evidence at a separate path before writing this derived summary.
 
 ## Record obligations outside the brief
 
-Initialize or carry forward `open-requirements.ledger.yml`. Preserve existing entries and record missing evidence and recommended brief changes there. Do not mark a recommendation accepted or apply it to the brief. Design steps may choose Galaxy mappings within the approved scope; they must record unsupported obligations in the ledger rather than widening the brief.
+Initialize or carry forward `open-requirements.ledger.yml`. Preserve every existing collection. Record source or implementation facts needed downstream as discoveries, authorized choices within the approved scope as decisions, missing actionable needs as obligation entries, and changes to expert intent as brief-change recommendations. A recommendation begins and remains `proposed`: do not mark it accepted or apply it to the brief. If correctness depends on it, stop and return it to the separate expert editing step. Design steps may choose Galaxy mappings within the approved scope; they must record unsupported obligations rather than widening the brief.
 
 Hand the derived summary and ledger to the existing design chain. Leave agent environment instructions in the brief for the harness to enforce, rather than converting them into scientific workflow steps. Confirm the brief's bytes remain unchanged before completing this step.

@@ -15,7 +15,7 @@
 - check: llm-judged
 - assertion: The derived summary carries approved scientific intent and provenance, excludes unselected source work, and preserves uncertainty without inventing Galaxy design choices.
 
-## Property: recommendations are separate from acceptance
+## Property: workflow-run knowledge is classified and recommendations are separate from acceptance
 
 - check: llm-judged
-- assertion: Progress, obligations, and recommended brief changes are recorded in the ledger. The projection does not edit the brief or treat a recommendation as expert approval.
+- assertion: Evidence is recorded as discoveries, authorized choices as decisions, missing actionable needs as obligations, and changes to expert intent as proposed brief-change recommendations in open-requirements.ledger.yml. The projection does not use it as a progress journal, edit the brief, or treat a recommendation as expert approval.

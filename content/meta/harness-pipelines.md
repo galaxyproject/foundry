@@ -9,8 +9,8 @@ tags:
   - lifecycle/publication
 status: revised
 created: 2026-04-30
-revised: 2026-09-17
-revision: 21
+revised: 2026-09-20
+revision: 22
 summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
 
@@ -229,7 +229,7 @@ The pipeline is read-only end to end. It cannot approve, comment, push, mark rea
 
 [[workflow-brief-to-galaxy]] is a separate journey, including for hand-authored briefs. Before phase 1, the harness checks declared blockers, records expert review, and verifies the current environment. [[workflow-brief-to-freeform-summary]] projects the selected scientific intent into the existing freeform Galaxy design and implementation chain. The initial route uses shared freeform test development rather than dispatching to the specialized Nextflow reference-data and test-translation tier.
 
-Every implementation phase leaves the brief unchanged. The harness checks its hash after phases and loop iterations and on resumption; progress, learning, obligations, and recommendations go to the run ledger. A required brief change returns to a separate expert editing step. These review, preflight, and preservation rules are harness obligations; an assembled skill carries their instructions and is not an executable enforcement engine.
+Every implementation phase leaves the brief unchanged. The harness checks its hash after phases and loop iterations and on resumption. Durable workflow knowledge goes to `open-requirements.ledger.yml`: evidence as discoveries, authorized choices as decisions, unmet needs as obligations, and changes to expert intent as proposed brief-change recommendations. Ordinary phase progress remains harness state. A required brief change returns to a separate expert editing step. These review, preflight, and preservation rules are harness obligations; an assembled skill carries their instructions and is not an executable enforcement engine.
 
 ## Cross-pipeline observations
 
