@@ -5,10 +5,10 @@
     "name": "repair-galaxy-draft-topology",
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 3,
-    "content_hash": "cafba235f3bb41612216f766eb390ee6fddcb1192ddf445b6d9eb7f2c132678c",
-    "commit": "7d015813dba17edb113b3cd3880044dc8a31dae3"
+    "content_hash": "16584e8690dd06006294d6db5637d55419fa39cb9b6abadbd6a6ebc64a2763df",
+    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
   },
-  "cast_at": "2026-09-20T16:34:28.442Z",
+  "cast_at": "2026-09-20T17:29:33.931Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested collection recipe when the missing producer is a collection construction, reshape, or bridge.",
       "trigger": "When the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge.",
-      "src_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
-      "dst_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
+      "src_hash": "b08c68ec91fabba6712dfc33574a1c78dd9715d75e4eebef0970267769cb6790",
+      "dst_hash": "b08c68ec91fabba6712dfc33574a1c78dd9715d75e4eebef0970267769cb6790",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce.",
       "trigger": "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on.",
-      "src_hash": "e580e71fabec9132fbdf3165cc092fcdb96a8b9bf7996b3b9b6a4b0a627065cb",
-      "dst_hash": "e580e71fabec9132fbdf3165cc092fcdb96a8b9bf7996b3b9b6a4b0a627065cb",
+      "src_hash": "48061066a14a59a1f7078a5e152fc5b56245b5a175006e24a9910ae0c72a2250",
+      "dst_hash": "48061066a14a59a1f7078a5e152fc5b56245b5a175006e24a9910ae0c72a2250",
       "source": "deterministic"
     },
     {
@@ -88,8 +88,8 @@
       "evidence": "hypothesis",
       "purpose": "Re-wire the affected region consistently with the data-flow design that settled the surrounding topology.",
       "verification": "Promote after two repairs preserve the surrounding data-flow design without re-deriving it from the source.",
-      "src_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
-      "dst_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
+      "src_hash": "c0ccd299f30681b8a01125ccfc03ca941f0667719e7742bb427ed1e56aa0e19f",
+      "dst_hash": "c0ccd299f30681b8a01125ccfc03ca941f0667719e7742bb427ed1e56aa0e19f",
       "source": "deterministic"
     },
     {
@@ -103,8 +103,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit re-wired steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
       "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
-      "src_hash": "93f3b231dd063bf059c550f18b2200c61909af0da9408e0d43351116e886bf7b",
-      "dst_hash": "93f3b231dd063bf059c550f18b2200c61909af0da9408e0d43351116e886bf7b",
+      "src_hash": "76bb8a3735e448f4ea46af2f0980b059b54604f7e529a4eacd534fddf2159e6d",
+      "dst_hash": "76bb8a3735e448f4ea46af2f0980b059b54604f7e529a4eacd534fddf2159e6d",
       "source": "deterministic"
     },
     {
@@ -118,8 +118,8 @@
       "evidence": "hypothesis",
       "purpose": "Scope the repair from the open blocking entries — each names the step, the uncomputable output, and the missing evidence — then mark resolved each one repaired, and leave any it cannot close open with a surrender note for the terminal path.",
       "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
-      "src_hash": "2c0180b4fa8a562e71c016cd529f58a9d0b6a102c77b688520f0f5a0ff3ecd1d",
-      "dst_hash": "2c0180b4fa8a562e71c016cd529f58a9d0b6a102c77b688520f0f5a0ff3ecd1d",
+      "src_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
+      "dst_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
       "source": "deterministic"
     },
     {
@@ -165,10 +165,10 @@
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-template"
         ]
       },
       {
@@ -181,9 +181,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
@@ -192,7 +189,9 @@
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
           "repair-galaxy-draft-topology",
-          "workflow-brief-to-freeform-summary"
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

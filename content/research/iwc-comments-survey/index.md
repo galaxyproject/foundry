@@ -190,7 +190,7 @@ note rather than a `content/patterns/` page:
 
 The actionable conventions here were distilled into [[galaxy-workflow-comments]]
 — a concrete how-to-use note. That note is what the three Galaxy-targeting
-template Molds reference ([[freeform-summary-to-galaxy-template]],
+template Molds reference ([[workflow-brief-to-galaxy-template]],
 [[nextflow-summary-to-galaxy-template]], [[cwl-summary-to-galaxy-template]]) so
 the template stage can optionally group the settled step set into titled stage
 frames. This survey is the corpus-evidence trail behind that guidance. No

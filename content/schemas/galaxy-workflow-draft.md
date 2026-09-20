@@ -23,7 +23,7 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[freeform-summary-to-galaxy-template]]"
+  - "[[workflow-brief-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
 summary: "JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step."
 ---

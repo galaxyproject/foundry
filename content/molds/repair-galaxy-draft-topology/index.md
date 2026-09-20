@@ -82,7 +82,7 @@ references:
     purpose: "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce."
     trigger: "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on."
 related_molds:
-  - "[[freeform-summary-to-galaxy-template]]"
+  - "[[workflow-brief-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[compare-against-iwc-exemplar]]"
 ---

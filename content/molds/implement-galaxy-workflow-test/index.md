@@ -11,7 +11,7 @@ revised: 2026-07-24
 revision: 8
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
-  - "[[freeform-summary-to-galaxy-test-plan]]"
+  - "[[workflow-brief-to-galaxy-test-plan]]"
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"

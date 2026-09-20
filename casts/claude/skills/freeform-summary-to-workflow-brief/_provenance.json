@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-workflow-brief/index.md",
     "revision": 1,
     "content_hash": "e353ee588f69cd37c8f3a2c19c6d672d29c096684b885f9d62d1f8f35d9397ff",
-    "commit": "7d015813dba17edb113b3cd3880044dc8a31dae3"
+    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
   },
-  "cast_at": "2026-09-20T16:29:12.741Z",
+  "cast_at": "2026-09-20T17:29:30.750Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -88,8 +88,7 @@
         "description": "Source evidence supplied by the preceding summarizer; preserve uncertainty and the caller’s selected scope.",
         "producers": [
           "interview-to-freeform-summary",
-          "summarize-paper",
-          "workflow-brief-to-freeform-summary"
+          "summarize-paper"
         ]
       }
     ]

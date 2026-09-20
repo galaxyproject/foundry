@@ -16,7 +16,7 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[freeform-summary-to-galaxy-template]]"
+  - "[[workflow-brief-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[advance-galaxy-draft-step]]"

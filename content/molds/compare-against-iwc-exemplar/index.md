@@ -23,12 +23,12 @@ input_artifacts:
   - id: cwl-galaxy-data-flow
     role: galaxy-data-flow
     description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] when running the CWL → GALAXY pipeline."
-  - id: freeform-galaxy-interface
+  - id: workflow-brief-galaxy-interface
     role: galaxy-interface
-    description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
-  - id: freeform-galaxy-data-flow
+    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
+  - id: workflow-brief-galaxy-data-flow
     role: galaxy-data-flow
-    description: "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
+    description: "Galaxy data-flow brief from [[workflow-brief-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
   - id: open-requirements-ledger
     description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:

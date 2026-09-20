@@ -5,10 +5,10 @@
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
-    "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "content_hash": "35fe064968ac2450aba7e3b58e7d526c050f8fb7a32ccfec26ae1bd0fa82d3bf",
+    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
   },
-  "cast_at": "2026-09-13T20:58:28.168Z",
+  "cast_at": "2026-09-20T17:29:31.156Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -174,8 +174,8 @@
         "producers": [
           "changeset-to-galaxy-test-plan",
           "cwl-test-to-galaxy-test-plan",
-          "freeform-summary-to-galaxy-test-plan",
-          "nextflow-test-to-galaxy-test-plan"
+          "nextflow-test-to-galaxy-test-plan",
+          "workflow-brief-to-galaxy-test-plan"
         ]
       },
       {

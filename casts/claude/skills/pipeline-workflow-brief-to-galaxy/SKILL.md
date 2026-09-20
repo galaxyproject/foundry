@@ -1,24 +1,20 @@
 ---
 name: pipeline-workflow-brief-to-galaxy
-description: "Consume an expert-reviewed, unchanged Workflow Brief through readiness checks and the existing Galaxy design and implementation chain — orchestrates the Foundry skills of the WORKFLOW BRIEF → GALAXY pipeline in order, in a per-run working directory."
+description: "Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain — orchestrates the Foundry skills of the WORKFLOW BRIEF → GALAXY pipeline in order, in a per-run working directory."
 ---
 
 # pipeline-workflow-brief-to-galaxy
 
-Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
-- Consume an expert-reviewed, unchanged Workflow Brief through readiness checks and the existing Galaxy design and implementation chain.
+- Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain.
 
 ## Bootstrap (install these CLIs first)
 
 Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
 
-- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
-  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
-  Check: `foundry --help`.
-  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
 - **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 galaxy-tool-cache`.
   Check: `galaxy-tool-cache --help | grep -q summarize`.
@@ -54,20 +50,19 @@ Announce the chosen directory before starting.
 
 Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
 
-1. **workflow-brief-to-freeform-summary** — invoke the `workflow-brief-to-freeform-summary` skill. Check an unchanged Workflow Brief and project its approved intent into the existing freeform Galaxy design handoff.
-2. **freeform-summary-to-galaxy-interface** — invoke the `freeform-summary-to-galaxy-interface` skill. Map a free-form source summary into a Galaxy workflow interface design brief.
-3. **freeform-summary-to-galaxy-data-flow** — invoke the `freeform-summary-to-galaxy-data-flow` skill. Translate a free-form source summary into a Galaxy data-flow design brief.
-4. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
-5. **freeform-summary-to-galaxy-template** — invoke the `freeform-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
-6. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
-7. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
+1. **workflow-brief-to-galaxy-interface** — invoke the `workflow-brief-to-galaxy-interface` skill. Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available.
+2. **workflow-brief-to-galaxy-data-flow** — invoke the `workflow-brief-to-galaxy-data-flow` skill. Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief.
+3. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
+4. **workflow-brief-to-galaxy-template** — invoke the `workflow-brief-to-galaxy-template` skill. Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence.
+5. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
+6. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
    - Try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
-8. **freeform-summary-to-galaxy-test-plan** — invoke the `freeform-summary-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs.
-9. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
-10. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
-11. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
-12. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
+7. **workflow-brief-to-galaxy-test-plan** — invoke the `workflow-brief-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence.
+8. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
+9. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
+10. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
+11. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
 
 ## Done
 
@@ -84,5 +79,5 @@ If the run was invoked with `--feedback`, close the ledger first: set the final 
 - Before phase 1 and whenever resuming, run foundry check-workflow-brief workflow-brief.md --json. Exit 1, 3, or 4 stops before design; exit 0 establishes only structure and no declared blockers.
 - Treat workflow-brief.md as unchanged input through every design, draft, implementation, test, and debug phase. Record its initial hash and check it after each phase and loop iteration and on resumption; a mismatch stops the run.
 - Record durable workflow knowledge in open-requirements.ledger.yml: evidence as discoveries, authorized choices as decisions, unmet needs as obligations, and changes to expert intent as proposed brief-change recommendations. Harness progress remains harness state. Do not apply a recommendation to the brief; return a required change to the separate expert editing step.
-- The selected brief governs scientific scope. Reuse the existing freeform Galaxy design and implementation chain after projection; links to Nextflow evidence do not require porting every source process.
-- Phase 7 resolves test data with find-test-data then caller-supplied fixtures. Phase 8 develops the test plan; the brief itself never contains final fixture/assertion declarations.
+- The selected brief governs scientific scope. Design Molds consume it directly and may consult retained freeform or Nextflow summaries only as source evidence; linked evidence does not broaden scope.
+- Phase 6 resolves test data with find-test-data then caller-supplied fixtures. Phase 7 develops the test plan; the brief itself never contains final fixture/assertion declarations.

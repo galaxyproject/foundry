@@ -47,7 +47,7 @@ describe("Workflow Brief pipeline artifact validation", () => {
   );
 
   it("separates input structure from the implementation blocker gate", () => {
-    const entry = briefValidator("workflow-brief-to-freeform-summary", "input");
+    const entry = briefValidator("workflow-brief-to-galaxy-interface", "input");
     expect(runProcessValidation(entry, blocked, root).status).toBe("passed");
     const gate = {
       ...entry,

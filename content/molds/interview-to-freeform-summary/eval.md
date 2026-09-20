@@ -37,4 +37,4 @@ bucket:
   sections (methods, tools, inputs, outputs, parameters, open questions) under
   the `freeform-summary` artifact id — structurally what [[summarize-paper]]
   emits, with nothing interview-specific that
-  [[freeform-summary-to-galaxy-interface]] would have to special-case.
+  [[workflow-brief-to-galaxy-interface]] would have to special-case.

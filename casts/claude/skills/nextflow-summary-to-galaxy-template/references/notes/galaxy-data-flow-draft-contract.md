@@ -14,10 +14,10 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
-  - "[[freeform-summary-to-galaxy-data-flow]]"
+  - "[[workflow-brief-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[freeform-summary-to-galaxy-template]]"
+  - "[[workflow-brief-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
   - "[[advance-galaxy-draft-step]]"
 sources:

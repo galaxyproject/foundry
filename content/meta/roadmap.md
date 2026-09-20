@@ -43,7 +43,7 @@ The roadmap is an editorial view over the Foundry's GitHub issues. The checked-i
 
 ### [#500 — Implement actual interviews.](https://github.com/galaxyproject/foundry/issues/500)
 
-Replace the interview path's current placeholder behavior with a useful guided exchange that can discover a user's workflow intent, constraints, evidence, and unresolved choices before producing the free-form summary consumed by downstream Molds.
+Replace the interview path's current placeholder behavior with a useful guided exchange that can discover a user's workflow intent, constraints, evidence, and unresolved choices before producing the free-form evidence summary used to author a Workflow Brief.
 
 **Substeps**
 

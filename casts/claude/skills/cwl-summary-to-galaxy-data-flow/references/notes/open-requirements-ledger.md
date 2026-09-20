@@ -95,13 +95,13 @@ Not every fact learned during a run is an unmet requirement. Keep the existing `
 ```yaml
 discoveries:
   - id: source-requires-paired-reads
-    raised_by: workflow-brief-to-freeform-summary
+    raised_by: workflow-brief-to-galaxy-interface
     evidence: "The selected source method consumes paired reads."
     impact: "The interface design must preserve pairing."
 
 decisions:
   - id: expose-pairing-as-collection
-    decided_by: freeform-summary-to-galaxy-interface
+    decided_by: workflow-brief-to-galaxy-interface
     decision: "Represent each sample as a paired collection."
     rationale: "This implements the approved sample-attributable objective."
     evidence:
@@ -109,7 +109,7 @@ decisions:
 
 brief_change_recommendations:
   - id: require-paired-inputs
-    raised_by: freeform-summary-to-galaxy-interface
+    raised_by: workflow-brief-to-galaxy-interface
     proposed_change: "State that inputs must be paired-end reads."
     reason: "The selected method cannot meet the accepted outcome from single-end reads."
     evidence:

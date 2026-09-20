@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`, `workflow-brief-to-freeform-summary`. Free-form summary from summarize-paper; sample data and reference evidence the test fixtures derive from.
+- Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`. Free-form summary from summarize-paper; sample data and reference evidence the test fixtures derive from.
 
 ## Outputs
 

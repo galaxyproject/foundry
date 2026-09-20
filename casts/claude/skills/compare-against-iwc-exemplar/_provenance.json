@@ -5,10 +5,10 @@
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 10,
-    "content_hash": "5b198e9b87cf554cb01aceaa14a5aaa3ab24c6a35afc35dab7d09ce154cc3a77",
-    "commit": "7d015813dba17edb113b3cd3880044dc8a31dae3"
+    "content_hash": "9900ccce54c16921076714dc1726b4f5de74c8ba95ca1d5ac71f89f15f7ea3aa",
+    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
   },
-  "cast_at": "2026-09-20T16:34:24.266Z",
+  "cast_at": "2026-09-20T17:29:28.844Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -56,8 +56,8 @@
       "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
       "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
       "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
-      "src_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
-      "dst_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
+      "src_hash": "c0ccd299f30681b8a01125ccfc03ca941f0667719e7742bb427ed1e56aa0e19f",
+      "dst_hash": "c0ccd299f30681b8a01125ccfc03ca941f0667719e7742bb427ed1e56aa0e19f",
       "source": "deterministic"
     },
     {
@@ -101,8 +101,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries a corpus exemplar answers — a collection idiom, a label convention, a structural shape the corpus already settles — and append the ones no exemplar covers, so a structural divergence with no corpus precedent reaches the template tier as a recorded obligation.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "2c0180b4fa8a562e71c016cd529f58a9d0b6a102c77b688520f0f5a0ff3ecd1d",
-      "dst_hash": "2c0180b4fa8a562e71c016cd529f58a9d0b6a102c77b688520f0f5a0ff3ecd1d",
+      "src_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
+      "dst_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
       "source": "deterministic"
     }
   ],
@@ -157,17 +157,17 @@
         ]
       },
       {
-        "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
+        "id": "workflow-brief-galaxy-interface",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
         "producers": [
-          "freeform-summary-to-galaxy-interface"
+          "workflow-brief-to-galaxy-interface"
         ]
       },
       {
-        "id": "freeform-galaxy-data-flow",
-        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
+        "id": "workflow-brief-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[workflow-brief-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
         "producers": [
-          "freeform-summary-to-galaxy-data-flow"
+          "workflow-brief-to-galaxy-data-flow"
         ]
       },
       {
@@ -180,9 +180,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
@@ -191,7 +188,9 @@
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
           "repair-galaxy-draft-topology",
-          "workflow-brief-to-freeform-summary"
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

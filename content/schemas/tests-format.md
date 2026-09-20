@@ -20,7 +20,7 @@ related_notes:
   - "[[implement-galaxy-workflow-test]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[cwl-test-to-galaxy-test-plan]]"
-  - "[[freeform-summary-to-galaxy-test-plan]]"
+  - "[[workflow-brief-to-galaxy-test-plan]]"
   - "[[planemo-asserts-idioms]]"
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"

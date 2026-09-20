@@ -5,10 +5,10 @@
     "name": "changeset-to-galaxy-test-plan",
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 2,
-    "content_hash": "1a5f10ecf90158c4fdaf292055ca73dcd6dd39e7253fe417b62020c3c4ec8be9",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "content_hash": "d34f53dc4b8916732ecb35613544596611311e08e5106bcaeb523e7f08a3acc2",
+    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
   },
-  "cast_at": "2026-09-13T20:58:26.449Z",
+  "cast_at": "2026-09-20T17:29:28.768Z",
   "refs": [
     {
       "kind": "research",

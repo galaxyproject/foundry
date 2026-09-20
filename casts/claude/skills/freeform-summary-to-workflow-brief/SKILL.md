@@ -13,7 +13,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`, `workflow-brief-to-freeform-summary`. Source evidence supplied by the preceding summarizer; preserve uncertainty and the caller’s selected scope.
+- Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`. Source evidence supplied by the preceding summarizer; preserve uncertainty and the caller’s selected scope.
 
 ## Outputs
 
