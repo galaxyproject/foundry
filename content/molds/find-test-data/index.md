@@ -6,7 +6,7 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-20
+revised: 2026-09-21
 revision: 6
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:
@@ -28,7 +28,7 @@ input_artifacts:
     description: "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline."
   - id: workflow-brief-galaxy-interface
     role: galaxy-interface
-    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines."
+    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path."
   - id: nextflow-galaxy-interface
     role: galaxy-interface
     description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the NEXTFLOW → GALAXY pipeline."

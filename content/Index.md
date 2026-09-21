@@ -8,10 +8,10 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-workflow-maturation]] — Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result.
 - [[galaxy-workflow-review]] — Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy.
 - [[interview-to-galaxy]] — Interview-driven path through a reviewed Workflow Brief to a Galaxy gxformat2 workflow.
-- [[interview-to-workflow-brief]] — Summarize a interview source and produce a scoped Workflow Brief for expert review.
+- [[interview-to-workflow-brief]] — Summarize an interview source and produce a scoped Workflow Brief for expert review.
 - [[nextflow-to-cwl]] — Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
 - [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. *(reviewed)*
-- [[nextflow-to-workflow-brief]] — Summarize a nextflow source and produce a scoped Workflow Brief for expert review.
+- [[nextflow-to-workflow-brief]] — Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review.
 - [[paper-to-cwl]] — Direct path from a paper to a CWL Workflow + CommandLineTool set.
 - [[paper-to-galaxy]] — Direct path from paper evidence through a reviewed Workflow Brief to a Galaxy gxformat2 workflow.
 - [[paper-to-workflow-brief]] — Summarize a paper source and produce a scoped Workflow Brief for expert review.

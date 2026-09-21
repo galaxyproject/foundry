@@ -7,8 +7,8 @@ tags:
   - meta
 status: draft
 created: 2026-09-14
-revised: 2026-09-16
-revision: 3
+revised: 2026-09-21
+revision: 4
 summary: "The current development direction of the Galaxy Workflow Foundry, grounded in live GitHub issue metadata."
 ---
 

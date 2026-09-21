@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-06-16
-revision: 1
+revised: 2026-09-21
+revision: 2
 related_notes:
   - "[[tests-format]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"

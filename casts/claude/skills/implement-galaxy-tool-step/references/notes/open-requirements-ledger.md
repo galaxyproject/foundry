@@ -5,7 +5,7 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-09-20
+revised: 2026-09-21
 revision: 4
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
@@ -206,6 +206,5 @@ The template Mold's computability review pass is the notable appender ahead of t
 - Assign terminal surrender of *non-blocking* entries. [[advance-galaxy-draft-step]] surrenders open blocking entries at the escalation cap, but an unpinned-parameter entry the design tier appended and nobody closed currently rides out the run without ever being marked `surrendered`. Nothing owns that pass today.
 - Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. Every design Mold still emits both, with no rule for which destination an unresolved choice belongs in.
 - Decide whether the source-summary Molds should also emit structured entries, or keep their free-text open-questions until the design tier formalizes them.
-- Decide whether the workflow-run knowledge collections should harden into a versioned schema after worked Workflow Brief runs exercise their boundaries. Until then, their names and authority rules above are the contract; adding fields is safer than collapsing categories.
 - Specify how surrendered entries surface in the runnable gxformat2 (a workflow-level annotation, a report output, or a sidecar) when the draft is stripped of `_plan_*` and TODO sentinels.
 - Move the `topology_repair` escalation budget out of the ledger and into the draft (a workflow-level annotation) so it travels with the artifact it bounds; the ledger home is a v1 expedient.

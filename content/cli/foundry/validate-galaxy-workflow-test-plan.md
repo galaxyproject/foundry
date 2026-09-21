@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-06-16
-revised: 2026-08-04
-revision: 2
+revised: 2026-09-21
+revision: 3
 summary: "AJV gate for Galaxy workflow test-plan YAML documents."
 related_notes:
   - "[[galaxy-workflow-test-plan]]"

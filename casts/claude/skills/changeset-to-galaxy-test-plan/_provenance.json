@@ -4,11 +4,11 @@
   "mold": {
     "name": "changeset-to-galaxy-test-plan",
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
-    "revision": 2,
-    "content_hash": "d34f53dc4b8916732ecb35613544596611311e08e5106bcaeb523e7f08a3acc2",
-    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
+    "revision": 3,
+    "content_hash": "0eb3f32535056d4d287abe8fd5f01db7ad1af170a7dadae359a720ee9ddc5728",
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-20T17:29:28.768Z",
+  "cast_at": "2026-09-21T17:25:32.582Z",
   "refs": [
     {
       "kind": "research",

@@ -9,7 +9,7 @@ tags:
   - lifecycle/publication
 status: revised
 created: 2026-04-30
-revised: 2026-09-20
+revised: 2026-09-21
 revision: 22
 summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
@@ -89,16 +89,18 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 ### PAPER → GALAXY
 
 1. `summarize-paper` — extract methods, named tools/algorithms, sample data, metrics, references to existing pipelines; emit `freeform-summary`.
-2. `workflow-brief-to-galaxy-interface` — Galaxy workflow interface design brief.
-3. `workflow-brief-to-galaxy-data-flow` — Galaxy abstract data-flow design brief from the summary plus interface brief.
-4. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
-5. `workflow-brief-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from free-form source evidence, the interface and data-flow briefs, and exemplar comparison notes.
-6. `[loop]` `advance-galaxy-draft-step` — one full iteration: pick next drafty step via `gxwf draft-next-step`, route through the discover-or-author branch (try `discover-shed-tool`, fall through to `author-galaxy-tool-wrapper`), summarize the wrapper, implement the step, validate via `gxwf draft-validate --concrete`. Loop terminates on `draft: false`.
-7. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
-8. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
-9. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
-10. `run-workflow-test` — execute via Planemo.
-11. `debug-galaxy-workflow-output` — triage failures, propose fixes.
+2. `freeform-summary-to-workflow-brief` — turn the selected scientific intent into a Workflow Brief for expert review.
+3. `workflow-brief-to-galaxy-interface` — Galaxy workflow interface design brief.
+4. `workflow-brief-to-galaxy-data-flow` — Galaxy abstract data-flow design brief from the reviewed brief plus interface brief.
+5. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
+6. `workflow-brief-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from the Workflow Brief, retained source evidence, the interface and data-flow briefs, and exemplar comparison notes.
+7. `[loop]` `advance-galaxy-draft-step` — one full iteration: pick next drafty step via `gxwf draft-next-step`, route through the discover-or-author branch (try `discover-shed-tool`, fall through to `author-galaxy-tool-wrapper`), summarize the wrapper, implement the step, validate via `gxwf draft-validate --concrete`. Loop terminates on `draft: false`.
+8. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
+9. `workflow-brief-to-galaxy-test-plan` — derive the Galaxy workflow test plan from the reviewed brief and downstream design artifacts.
+10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
+11. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
+12. `run-workflow-test` — execute via Planemo.
+13. `debug-galaxy-workflow-output` — triage failures, propose fixes.
 
 ### PAPER → CWL
 
@@ -166,16 +168,18 @@ CWL is already structured; the upstream extraction work is much lighter.
 The interview path is a Galaxy-targeting pipeline, named to match the other `→ GALAXY` pipelines. Unlike them it starts from workflow intent gathered in an interview rather than an existing technical artifact, normalized into the shared `freeform-summary` handoff.
 
 1. `interview-to-freeform-summary` — normalize a user interview transcript or interactive session into the shared `freeform-summary` handoff.
-2. `workflow-brief-to-galaxy-interface`
-3. `workflow-brief-to-galaxy-data-flow`
-4. `compare-against-iwc-exemplar`
-5. `workflow-brief-to-galaxy-template`
-6. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
-7. `[branch]` test-data resolution chain: try `find-test-data` → on failure, harness gates to user-supplied data.
-8. `implement-galaxy-workflow-test`
-9. `validate-galaxy-workflow`
-10. `run-workflow-test`
-11. `debug-galaxy-workflow-output`
+2. `freeform-summary-to-workflow-brief` — turn the selected scientific intent into a Workflow Brief for expert review.
+3. `workflow-brief-to-galaxy-interface`
+4. `workflow-brief-to-galaxy-data-flow`
+5. `compare-against-iwc-exemplar`
+6. `workflow-brief-to-galaxy-template`
+7. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
+8. `[branch]` test-data resolution chain: try `find-test-data` → on failure, harness gates to user-supplied data.
+9. `workflow-brief-to-galaxy-test-plan`
+10. `implement-galaxy-workflow-test`
+11. `validate-galaxy-workflow`
+12. `run-workflow-test`
+13. `debug-galaxy-workflow-output`
 
 ### UPDATE-INTERVIEW → GALAXY
 

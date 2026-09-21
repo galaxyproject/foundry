@@ -10,13 +10,13 @@ tags:
   - meta
 status: draft
 created: '2026-09-17'
-revised: '2026-09-17'
+revised: '2026-09-21'
 revision: 1
 summary: Markdown section declaration and structural validator for the workflow-brief handoff.
 ---
 
 # Workflow Brief Markdown Schema
 
-The package export `workflowBriefSchema` is a declarative Markdown section contract, not JSON Schema for a serialized workflow. Casting copies this JSON-serializable declaration into a schema sidecar and records `foundry validate-workflow-brief` as its artifact validator.
+The package export `workflowBriefSchema` declares the required Markdown sections for a Workflow Brief. Casting copies the declaration into a schema sidecar and records `foundry validate-workflow-brief` as its artifact validator.
 
 See [[workflow-brief-design]] for the document definition and [[markdown-document-contract]] for the shared declaration format. Structural validation accepts a brief with blockers so it can be reviewed. The harness separately runs `foundry check-workflow-brief` and stops before implementation on declared blockers; expert review and current preflight are also required.

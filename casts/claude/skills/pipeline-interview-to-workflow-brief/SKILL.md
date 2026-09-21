@@ -1,6 +1,6 @@
 ---
 name: pipeline-interview-to-workflow-brief
-description: "Summarize a interview source and produce a scoped Workflow Brief for expert review — orchestrates the Foundry skills of the INTERVIEW → WORKFLOW BRIEF pipeline in order, in a per-run working directory."
+description: "Summarize an interview source and produce a scoped Workflow Brief for expert review — orchestrates the Foundry skills of the INTERVIEW → WORKFLOW BRIEF pipeline in order, in a per-run working directory."
 ---
 
 # pipeline-interview-to-workflow-brief
@@ -9,7 +9,7 @@ Harness for the **INTERVIEW → WORKFLOW BRIEF** Foundry pipeline. Runs the cons
 
 ## When To Use
 
-- Summarize a interview source and produce a scoped Workflow Brief for expert review.
+- Summarize an interview source and produce a scoped Workflow Brief for expert review.
 
 ## Bootstrap (install these CLIs first)
 

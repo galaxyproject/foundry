@@ -6,9 +6,9 @@
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 3,
     "content_hash": "82d8e6e440fc48fdb4e7c5a5e25591ecc8e8a248ea03cc950df5096256656b62",
-    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-20T17:29:28.146Z",
+  "cast_at": "2026-09-21T17:25:32.326Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "hypothesis",
       "purpose": "Represent the whole workflow as a draft: carry untouched steps at Resolved tier, inject tool-introducing/replacing edits as drafty steps with _plan_state / _plan_context / _plan_in / _plan_out.",
       "verification": "Promote after a downstream advance-galaxy-draft-step run drains the injected drafty steps without round-tripping back through the change-set.",
-      "src_hash": "76bb8a3735e448f4ea46af2f0980b059b54604f7e529a4eacd534fddf2159e6d",
-      "dst_hash": "76bb8a3735e448f4ea46af2f0980b059b54604f7e529a4eacd534fddf2159e6d",
+      "src_hash": "33c89b9cb425e382b5c416870e67ee4b314966389f6f2ea27274c2a84fb707ce",
+      "dst_hash": "33c89b9cb425e382b5c416870e67ee4b314966389f6f2ea27274c2a84fb707ce",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the change-set discharges, and append a blocking entry for an edited region whose output the rewired inputs cannot supply, so an edit-introduced gap is recorded rather than discovered downstream.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
-      "dst_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
+      "src_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "dst_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
       "source": "deterministic"
     },
     {

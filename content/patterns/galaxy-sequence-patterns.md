@@ -13,8 +13,8 @@ tags:
   - topic/sequence-transform
 status: draft
 created: 2026-06-10
-revised: 2026-08-03
-revision: 2
+revised: 2026-09-21
+revision: 3
 summary: "Use this MOC to choose corpus-grounded Galaxy operations on sequence records (FASTA) — interconvert, reformat, merge, length, extract/mask by region."
 related_notes:
   - "[[iwc-sequence-operations-survey]]"

@@ -11,8 +11,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-27
-revised: 2026-08-03
-revision: 2
+revised: 2026-09-21
+revision: 3
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
   - "[[galaxy-data-flow-draft-contract]]"

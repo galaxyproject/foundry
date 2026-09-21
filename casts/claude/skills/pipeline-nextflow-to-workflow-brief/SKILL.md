@@ -1,6 +1,6 @@
 ---
 name: pipeline-nextflow-to-workflow-brief
-description: "Summarize a nextflow source and produce a scoped Workflow Brief for expert review — orchestrates the Foundry skills of the NEXTFLOW → WORKFLOW BRIEF pipeline in order, in a per-run working directory."
+description: "Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review — orchestrates the Foundry skills of the NEXTFLOW → WORKFLOW BRIEF pipeline in order, in a per-run working directory."
 ---
 
 # pipeline-nextflow-to-workflow-brief
@@ -9,7 +9,7 @@ Harness for the **NEXTFLOW → WORKFLOW BRIEF** Foundry pipeline. Runs the const
 
 ## When To Use
 
-- Summarize a nextflow source and produce a scoped Workflow Brief for expert review.
+- Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review.
 
 ## Bootstrap (install these CLIs first)
 

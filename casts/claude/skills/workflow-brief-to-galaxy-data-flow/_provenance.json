@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
     "revision": 4,
     "content_hash": "ce9672837d2b670a64e838b2dbe634b3b07aec40d172d01fb3a7504b6d7294cd",
-    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-20T17:29:35.805Z",
+  "cast_at": "2026-09-21T17:25:37.107Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
       "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
-      "src_hash": "b08c68ec91fabba6712dfc33574a1c78dd9715d75e4eebef0970267769cb6790",
-      "dst_hash": "b08c68ec91fabba6712dfc33574a1c78dd9715d75e4eebef0970267769cb6790",
+      "src_hash": "0703d7f07898e68c1ad00ca7c6fadd41fe349a90416ee7c79840003c64b9eeb8",
+      "dst_hash": "0703d7f07898e68c1ad00ca7c6fadd41fe349a90416ee7c79840003c64b9eeb8",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
       "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "aa9dbc17c0476de3ca6aff4178134e5ed554ae7ab0c303c53d2d9ba4c6aa211a",
-      "dst_hash": "aa9dbc17c0476de3ca6aff4178134e5ed554ae7ab0c303c53d2d9ba4c6aa211a",
+      "src_hash": "9edb312e418455ab94acf6a1a24c0ff2b3d151b8970cf00df1aeaca83d90a982",
+      "dst_hash": "9edb312e418455ab94acf6a1a24c0ff2b3d151b8970cf00df1aeaca83d90a982",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
       "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
-      "src_hash": "e141b164b401da15e9d388dad9a369e9ef2948988abecf01b67e615ae755af79",
-      "dst_hash": "e141b164b401da15e9d388dad9a369e9ef2948988abecf01b67e615ae755af79",
+      "src_hash": "ca7b0b2e1a9613a89f4f779976386890452f712320b1f6b0965a56dd8e3da247",
+      "dst_hash": "ca7b0b2e1a9613a89f4f779976386890452f712320b1f6b0965a56dd8e3da247",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns.",
       "trigger": "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges.",
-      "src_hash": "48061066a14a59a1f7078a5e152fc5b56245b5a175006e24a9910ae0c72a2250",
-      "dst_hash": "48061066a14a59a1f7078a5e152fc5b56245b5a175006e24a9910ae0c72a2250",
+      "src_hash": "dab2839eb13ea543ceb44883e518ff077bcee5e1f3abc11a503ec39d71b0d207",
+      "dst_hash": "dab2839eb13ea543ceb44883e518ff077bcee5e1f3abc11a503ec39d71b0d207",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked brief-to-Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "c0ccd299f30681b8a01125ccfc03ca941f0667719e7742bb427ed1e56aa0e19f",
-      "dst_hash": "c0ccd299f30681b8a01125ccfc03ca941f0667719e7742bb427ed1e56aa0e19f",
+      "src_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
+      "dst_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
       "source": "deterministic"
     },
     {
@@ -111,8 +111,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the narrative leaves open — a described transformation with no named tool, an implied intermediate the source never states, an ordering the prose doesn't fix.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
-      "dst_hash": "773eb6c33db2ff45e7817efb9de749b9da763ea383d658945dac210a77556cf0",
+      "src_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "dst_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
       "source": "deterministic"
     },
     {

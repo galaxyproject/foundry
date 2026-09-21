@@ -13,8 +13,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-05
-revision: 4
+revised: 2026-09-21
+revision: 5
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"

@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-12
-revised: 2026-06-12
-revision: 1
+revised: 2026-09-21
+revision: 2
 related_notes:
   - "[[galaxy-workflow-comments]]"
   - "[[galaxy-native-workflow-schema]]"

@@ -5,9 +5,9 @@ tags:
   - source/interview
 status: draft
 created: '2026-09-17'
-revised: '2026-09-17'
+revised: '2026-09-21'
 revision: 1
-summary: Summarize a interview source and produce a scoped Workflow Brief for expert review.
+summary: Summarize an interview source and produce a scoped Workflow Brief for expert review.
 harness_notes:
   - Brief production ends with workflow-brief.md for expert editing and review; it does not continue into
     Galaxy design or implementation.

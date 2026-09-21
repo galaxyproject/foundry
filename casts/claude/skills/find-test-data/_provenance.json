@@ -5,10 +5,10 @@
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
     "revision": 6,
-    "content_hash": "15ac63ba43bffa9d3185728fdeec184bcfd6c5c131a875432ea36c7e6d05d753",
-    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
+    "content_hash": "c8679c4890f5cec760b1852f5aadcaade0912397b1f4180b912f7a3d3ff86081",
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-20T17:29:30.411Z",
+  "cast_at": "2026-09-21T17:25:33.665Z",
   "refs": [
     {
       "kind": "research",
@@ -90,7 +90,7 @@
       },
       {
         "id": "workflow-brief-galaxy-interface",
-        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines.",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path.",
         "producers": [
           "workflow-brief-to-galaxy-interface"
         ]
