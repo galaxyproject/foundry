@@ -6,8 +6,8 @@ tags:
   - target/cwl
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+revised: 2026-09-22
+revision: 3
 summary: "Direct path from a paper to a CWL Workflow + CommandLineTool set."
 harness_notes:
   - "CWL targeting has no `discover-or-author` branch — CommandLineTool authoring is built into `implement-cwl-tool-step`, informed by `summarize-cwl-tool`."
@@ -34,8 +34,10 @@ phases:
 
 # PAPER → CWL
 
-Direct path. Lifted from `content/meta/harness-pipelines.md` §"PAPER → CWL".
+Start with a methods or tool paper and available supplementary methods, code, tool documentation, sample data, and reported results. Record supported steps, parameters, file shapes, versions, and unknowns in `freeform-summary.md`. Leave missing commands or data locations unresolved rather than inventing them.
 
-CWL targeting has no `discover-or-author` branch — wrappers aren't a separate concern; CommandLineTool authoring is built into the per-step Mold (`implement-cwl-tool-step`) and is informed by `summarize-cwl-tool`.
+Review `freeform-cwl-design.md` and the workflow skeleton against the paper. For each placeholder step, confirm the executable or container, command, inputs, outputs, and version before implementing its `CommandLineTool`. Validate the updated CWL after each step and correct the responsible tool or connection when it fails. The CWL loop has no shared completion check, so inspect the draft for remaining placeholders.
 
-`summarize-paper` now emits the shared `freeform-summary` handoff, so the design phase is shared with future interview-sourced CWL starts.
+Resolve test inputs from the paper first, then search for fixtures or request user-supplied data. Check any fixture against the CWL input ports. Before assembling `cwl-job.yml`, supply and review a `cwl-test-plan`: no declared phase produces this required input, and `test-data-refs.json` cannot replace it.
+
+Inspect `cwl-workflow-draft.cwl` and its validation diagnostics. If a test runs, inspect `workflow-test-result.json` and use the CWL debug report to investigate a failure. Report unresolved source, test-plan, and data gaps with the workflow. A missing or unrun test provides no runtime confirmation.
