@@ -1,6 +1,6 @@
 {
   "source_pipeline": "paper-to-galaxy",
-  "source_revision": 2,
+  "source_revision": 3,
   "harness_name": "pipeline-paper-to-galaxy",
   "options": ["use-subagents", "checkpoint", "feedback"],
   "required_tools": [
