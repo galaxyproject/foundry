@@ -4,7 +4,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Pipelines
 
-- [[cwl-to-galaxy]] — Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction.
+- [[cwl-to-galaxy]] — Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test.
 - [[galaxy-workflow-maturation]] — Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result.
 - [[galaxy-workflow-review]] — Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy.
 - [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. *(reviewed)*

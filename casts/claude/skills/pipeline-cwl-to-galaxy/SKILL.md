@@ -1,15 +1,15 @@
 ---
 name: pipeline-cwl-to-galaxy
-description: "Path from a CWL Workflow to a Galaxy gxformat2 workflow — orchestrates the Foundry skills of the CWL → GALAXY pipeline in order, in a per-run working directory."
+description: "Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test — orchestrates the Foundry skills of the CWL → GALAXY pipeline in order, in a per-run working directory."
 ---
 
 # pipeline-cwl-to-galaxy
 
-Harness for the **CWL → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/cwl-to-galaxy/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline cwl-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **CWL → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/cwl-to-galaxy/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline cwl-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
-- Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction.
+- Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test.
 
 ## Bootstrap (install these CLIs first)
 
