@@ -86,7 +86,7 @@ To cast a Mold, the casting process consumes:
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
   - Other Molds (`related_molds`) — flagged as a smell; shared operational content should move to a pattern page, CLI manual page, schema, prompt, example, or research note.
-- **The cast bundle spec** — the deterministic Agent Skills assembly and reference layout declared in `casts/claude/_target.yml`. The historical target name remains for provenance compatibility; Claude Code and Codex package the resulting tree through separate thin manifests.
+- **The cast bundle spec** — the deterministic Agent Skills assembly and reference layout declared in `casts/claude/_target.yml`. The historical target name remains for provenance compatibility; Claude Code, Codex, and Antigravity package the resulting tree through separate thin manifests.
 
 Resolution policy is per-kind, not a single rule:
 - `pattern` — verbatim copy.
@@ -97,7 +97,7 @@ Resolution policy is per-kind, not a single rule:
 
 ## Output contract
 
-Per cast: `casts/claude/skills/<mold-name>/`. The directory uses the portable Agent Skills core shared by Claude Code and Codex:
+Per cast: `casts/claude/skills/<mold-name>/`. The directory uses the portable Agent Skills core shared by Claude Code, Codex, and Antigravity:
 ```
 casts/claude/skills/<mold-name>/
 ├── SKILL.md                  # deterministic render of Mold body + artifacts + refs
@@ -118,7 +118,7 @@ Per-kind subdirectories under `references/` mirror the casting dispatch and let 
 
 `SKILL.md` contains deterministic sections for when to use the skill, upstream artifact inputs, produced artifacts, upfront references, on-demand references and triggers, validation hints, the Mold procedure, optional feedback-mode behavior, and runtime notes. `_feedback.md` is rendered from the protocol note named by the registered feedback artifact rather than repeated in every Mold. Raw Foundry wiki-links are stripped or resolved to packaged reference paths so the skill is self-contained. Its frontmatter stays in the shared `name`/`description` core; runtime-specific invocation syntax belongs in manifests and usage documentation.
 
-The plugin root carries both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`, each pointing to the same `skills/` directory. Repo marketplace metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, while Codex reads `.agents/plugins/marketplace.json`. Neither duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
+The plugin root carries `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `plugin.json`, each pointing to the same `skills/` directory. Repo metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, Codex reads `.agents/plugins/marketplace.json`, and Antigravity reads `plugin.json` and workspace configurations in `.agents/`. None duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
 
 **Claude is the only target.** A target becomes real by acquiring a `casts/<target>/_target.yml` —
 that file's existence is what the caster and the site each read, so there is no list of targets
