@@ -42,6 +42,7 @@ Treat these words and phrases as banned in original prose, while preserving quot
 - Choose the page's main job: guide a task, explain a concept, or provide exact reference facts. A README can combine these when one reader journey connects them.
 - Open on the subject, decision, or task outcome. Let the title and first paragraph establish context without a stock preface such as `Use this page when...` or `This page explains...`. Put the common path first.
 - For a workflow, show prerequisites, inputs, the action or command, expected output, and the next step. Explain why a step matters when that is not obvious. Show how to recognize success and recover from likely errors.
+- In Mold and Pipeline descriptions, focus the body on what the reader should do with the inputs, decisions, outputs, and failures. Let declared references and phases carry the inventory and sequence. Put extended mechanism or rationale in the relevant research note instead of repeating the declarations in prose.
 - For reference material, state accepted values, required or optional status, defaults, validation rules, side effects, and errors. Use a table when it makes the contract easier to scan.
 - Make examples minimal and runnable when practical. Run available checks, or say what remains unverified. Distinguish released behavior from plans.
 - Give headings enough context to work when reached directly through search. Define domain terms by their effect on the reader's task or data. Link to deeper references instead of repeating large blocks.
