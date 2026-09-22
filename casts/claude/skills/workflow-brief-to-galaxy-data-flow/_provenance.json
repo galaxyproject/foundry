@@ -1,0 +1,223 @@
+{
+  "provenance_schema_version": 4,
+  "cast_target": "claude",
+  "mold": {
+    "name": "workflow-brief-to-galaxy-data-flow",
+    "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
+    "revision": 4,
+    "content_hash": "ce9672837d2b670a64e838b2dbe634b3b07aec40d172d01fb3a7504b6d7294cd",
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+  },
+  "cast_at": "2026-09-21T17:25:37.107Z",
+  "refs": [
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-collection-patterns]]",
+      "src": "content/patterns/galaxy-collection-patterns.md",
+      "dst": "references/patterns/galaxy-collection-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
+      "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
+      "src_hash": "0703d7f07898e68c1ad00ca7c6fadd41fe349a90416ee7c79840003c64b9eeb8",
+      "dst_hash": "0703d7f07898e68c1ad00ca7c6fadd41fe349a90416ee7c79840003c64b9eeb8",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-conditionals-patterns]]",
+      "src": "content/patterns/galaxy-conditionals-patterns.md",
+      "dst": "references/patterns/galaxy-conditionals-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
+      "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
+      "src_hash": "9edb312e418455ab94acf6a1a24c0ff2b3d151b8970cf00df1aeaca83d90a982",
+      "dst_hash": "9edb312e418455ab94acf6a1a24c0ff2b3d151b8970cf00df1aeaca83d90a982",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-interval-patterns]]",
+      "src": "content/patterns/galaxy-interval-patterns.md",
+      "dst": "references/patterns/galaxy-interval-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
+      "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
+      "src_hash": "ca7b0b2e1a9613a89f4f779976386890452f712320b1f6b0965a56dd8e3da247",
+      "dst_hash": "ca7b0b2e1a9613a89f4f779976386890452f712320b1f6b0965a56dd8e3da247",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-tabular-patterns]]",
+      "src": "content/patterns/galaxy-tabular-patterns.md",
+      "dst": "references/patterns/galaxy-tabular-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns.",
+      "trigger": "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges.",
+      "src_hash": "dab2839eb13ea543ceb44883e518ff077bcee5e1f3abc11a503ec39d71b0d207",
+      "dst_hash": "dab2839eb13ea543ceb44883e518ff077bcee5e1f3abc11a503ec39d71b0d207",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-data-flow-draft-contract]]",
+      "src": "content/research/galaxy-data-flow-draft-contract/index.md",
+      "dst": "references/notes/galaxy-data-flow-draft-contract.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
+      "verification": "Promote after two worked brief-to-Galaxy translations preserve this Mold boundary without moving fields.",
+      "src_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
+      "dst_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-sample-sheet-collections]]",
+      "src": "content/research/galaxy-sample-sheet-collections/index.md",
+      "dst": "references/notes/galaxy-sample-sheet-collections.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it.",
+      "trigger": "When the interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or supporting evidence describes per-sample/per-record metadata that must survive map-over steps.",
+      "src_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
+      "dst_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the narrative leaves open — a described transformation with no named tool, an implied intermediate the source never states, an ordering the prose doesn't fix.",
+      "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
+      "src_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "dst_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[workflow-brief-design]]",
+      "src": "content/research/workflow-brief-design/index.md",
+      "dst": "references/notes/workflow-brief-design.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Keep reviewed intent authoritative while using source summaries only as supporting evidence.",
+      "verification": "Confirm a worked run preserves scope and the brief's bytes while resolving Galaxy data-flow choices.",
+      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[workflow-brief-schema]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#workflowBriefSchema",
+      "dst": "references/schemas/workflow-brief-schema.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Carry the required implementation-contract shape into this design step.",
+      "src_hash": "8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0",
+      "dst_hash": "8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "workflow-brief-galaxy-data-flow",
+        "kind": "markdown",
+        "default_filename": "workflow-brief-galaxy-data-flow.md",
+        "description": "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "workflow-brief",
+        "description": "Expert-reviewed implementation contract governing scientific scope, requirements, and acceptance criteria.",
+        "inherited_schema": "[[workflow-brief-schema]]",
+        "producers": [
+          "freeform-summary-to-workflow-brief",
+          "nextflow-summary-to-workflow-brief"
+        ]
+      },
+      {
+        "id": "freeform-summary",
+        "description": "Optional narrative source evidence retained from brief production; consult it for details within the selected scope.",
+        "optional": true,
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      },
+      {
+        "id": "summary-nextflow",
+        "description": "Optional structured Nextflow source evidence; consult it without treating source implementation as Galaxy design.",
+        "optional": true,
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "workflow-brief-galaxy-interface",
+        "description": "Preceding Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] that pins inputs, outputs, and labels.",
+        "producers": [
+          "workflow-brief-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried workflow-run knowledge [[open-requirements-ledger]] initialized by the interface Mold.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
+        ]
+      }
+    ]
+  }
+}

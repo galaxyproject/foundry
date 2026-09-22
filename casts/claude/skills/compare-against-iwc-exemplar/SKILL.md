@@ -17,13 +17,13 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - Read artifact `nextflow-galaxy-data-flow`. Produced by `nextflow-summary-to-galaxy-data-flow`. Galaxy data-flow brief from nextflow-summary-to-galaxy-data-flow when running the NEXTFLOW → GALAXY pipeline.
 - Read artifact `cwl-galaxy-interface`. Produced by `cwl-summary-to-galaxy-interface`. Galaxy interface brief from cwl-summary-to-galaxy-interface when running the CWL → GALAXY pipeline.
 - Read artifact `cwl-galaxy-data-flow`. Produced by `cwl-summary-to-galaxy-data-flow`. Galaxy data-flow brief from cwl-summary-to-galaxy-data-flow when running the CWL → GALAXY pipeline.
-- Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.
-- Read artifact `freeform-galaxy-data-flow`. Produced by `freeform-summary-to-galaxy-data-flow`. Galaxy data-flow brief from freeform-summary-to-galaxy-data-flow when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.
-- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.
+- Read artifact `workflow-brief-galaxy-interface`. Produced by `workflow-brief-to-galaxy-interface`. Galaxy interface brief from workflow-brief-to-galaxy-interface when running a Workflow-Brief-driven Galaxy path.
+- Read artifact `workflow-brief-galaxy-data-flow`. Produced by `workflow-brief-to-galaxy-data-flow`. Galaxy data-flow brief from workflow-brief-to-galaxy-data-flow when running a Workflow-Brief-driven Galaxy path.
+- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-template`. Carried obligations ledger open-requirements-ledger: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.
 
 ## Outputs
 
-- Write artifact `iwc-comparison-notes` as `iwc-comparison-notes.md`. Format: `markdown`. Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file.
+- Write artifact `iwc-comparison-notes` as `iwc-comparison-notes.md`. Format: `markdown`. Structural diff against the nearest IWC exemplar(s); guidance for the downstream Galaxy template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file.
 - Write artifact `iwc-exemplar-gxformat2` as `iwc-exemplar.gxwf.yml`. Format: `yaml`. Cleaned gxformat2 conversion (via convert --to format2 --compact) of the nearest IWC exemplar's relevant subgraph — the concrete idiom the downstream template draft pattern-matches against. Bounded to the relevant subgraph, not the whole workflow. Absent when no nearest exemplar is found.
 - Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact.
 
@@ -51,7 +51,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream `*-summary-to-galaxy-template` skill before per-step authoring effort is spent.
+Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream Galaxy template skill before per-step authoring effort is spent.
 
 This skill is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs and before the gxformat2 template skill. Discovery, ranking, and comparison are one action — there is no separate retrieval skill.
 
@@ -86,10 +86,10 @@ Domain comes first so a structurally similar workflow in the wrong science area 
 
 Each finding should name the authoring surface most likely to own the fix:
 
-- Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague — surfaced for the downstream `*-summary-to-galaxy-template` skill to apply.
+- Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague — surfaced for the downstream Galaxy template skill to apply.
 - Pattern issue: recurring Galaxy idiom should become or update a pattern page.
 - Tool-step issue: exact wrapper or parameterization will be handled later in the per-step loop.
-- Test issue: defer to `*-test-to-galaxy-test-plan` or `implement-galaxy-workflow-test`.
+- Test issue: defer to the pipeline's test-plan skill or `implement-galaxy-workflow-test`.
 
 Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance for the template skill and the user.
 

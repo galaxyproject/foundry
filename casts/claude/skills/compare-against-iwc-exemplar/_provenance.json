@@ -4,11 +4,11 @@
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
-    "revision": 10,
-    "content_hash": "5b198e9b87cf554cb01aceaa14a5aaa3ab24c6a35afc35dab7d09ce154cc3a77",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "revision": 11,
+    "content_hash": "c2d41a2dfa4b9ca0bf4193b60a16a0290ad9d26ff5dfdae372ff700e84818dbe",
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-13T20:58:26.504Z",
+  "cast_at": "2026-09-21T17:25:32.792Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -56,8 +56,8 @@
       "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
       "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
       "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
-      "src_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
-      "dst_hash": "f8f75f5a4ff750bff5f682847466492dd8a9910b95b5078373567f84ce16fb54",
+      "src_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
+      "dst_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
       "source": "deterministic"
     },
     {
@@ -101,8 +101,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries a corpus exemplar answers — a collection idiom, a label convention, a structural shape the corpus already settles — and append the ones no exemplar covers, so a structural divergence with no corpus precedent reaches the template tier as a recorded obligation.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
-      "dst_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "src_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "dst_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
       "source": "deterministic"
     }
   ],
@@ -112,7 +112,7 @@
         "id": "iwc-comparison-notes",
         "kind": "markdown",
         "default_filename": "iwc-comparison-notes.md",
-        "description": "Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file."
+        "description": "Structural diff against the nearest IWC exemplar(s); guidance for the downstream Galaxy template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file."
       },
       {
         "id": "iwc-exemplar-gxformat2",
@@ -157,17 +157,17 @@
         ]
       },
       {
-        "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
+        "id": "workflow-brief-galaxy-interface",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running a Workflow-Brief-driven Galaxy path.",
         "producers": [
-          "freeform-summary-to-galaxy-interface"
+          "workflow-brief-to-galaxy-interface"
         ]
       },
       {
-        "id": "freeform-galaxy-data-flow",
-        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines.",
+        "id": "workflow-brief-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[workflow-brief-to-galaxy-data-flow]] when running a Workflow-Brief-driven Galaxy path.",
         "producers": [
-          "freeform-summary-to-galaxy-data-flow"
+          "workflow-brief-to-galaxy-data-flow"
         ]
       },
       {
@@ -180,9 +180,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
@@ -190,7 +187,10 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

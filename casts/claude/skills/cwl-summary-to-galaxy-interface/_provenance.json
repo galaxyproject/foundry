@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-interface/index.md",
     "revision": 3,
     "content_hash": "9e6b0aaea5d1662a0515cd932352e418d1539da95ed81b4e8193ce0c98d48640",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-13T20:58:26.857Z",
+  "cast_at": "2026-09-21T17:25:33.052Z",
   "refs": [
     {
       "kind": "research",
@@ -118,8 +118,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the CWL summary leaves open — an unmapped secondaryFiles bundle, an unpinned parameter default, a collection shape the source types don't determine.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
-      "dst_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "src_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "dst_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
       "source": "deterministic"
     },
     {
@@ -172,9 +172,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
@@ -182,7 +179,10 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

@@ -44,7 +44,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Produce a Galaxy workflow test plan for the update pipeline: carry the existing workflow's tests forward as a **regression baseline** and augment them for the change-set's behavioral deltas. The output is a reviewable YAML handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file — implement-galaxy-workflow-test authors the final `*-tests.yml` from it. This skill is the update pipeline's analogue of nextflow-test-to-galaxy-test-plan / freeform-summary-to-galaxy-test-plan: the dedicated test-plan producer every Galaxy-targeting pipeline places before the implement step.
+Produce a Galaxy workflow test plan for the update pipeline: carry the existing workflow's tests forward as a **regression baseline** and augment them for the change-set's behavioral deltas. The output is a reviewable YAML handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file — implement-galaxy-workflow-test authors the final `*-tests.yml` from it. This skill is the update pipeline's analogue of nextflow-test-to-galaxy-test-plan / workflow-brief-to-galaxy-test-plan: the dedicated test-plan producer every Galaxy-targeting pipeline places before the implement step.
 
 ### Translate-and-augment, not synthesize-from-scratch
 

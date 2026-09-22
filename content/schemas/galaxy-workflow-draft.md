@@ -11,8 +11,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-27
-revised: 2026-08-03
-revision: 2
+revised: 2026-09-21
+revision: 3
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
   - "[[galaxy-data-flow-draft-contract]]"
@@ -23,7 +23,7 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[freeform-summary-to-galaxy-template]]"
+  - "[[workflow-brief-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
 summary: "JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step."
 ---

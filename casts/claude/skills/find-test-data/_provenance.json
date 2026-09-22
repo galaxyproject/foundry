@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 5,
-    "content_hash": "dab7a03bc9d3382c07b335054c5e1d4b63ddc9ba50a8a703a5895573d44318be",
-    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
+    "revision": 6,
+    "content_hash": "c8679c4890f5cec760b1852f5aadcaade0912397b1f4180b912f7a3d3ff86081",
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-15T23:16:21.017Z",
+  "cast_at": "2026-09-21T17:25:33.665Z",
   "refs": [
     {
       "kind": "research",
@@ -52,8 +52,19 @@
     ],
     "consumes": [
       {
+        "id": "workflow-brief",
+        "description": "Reviewed Workflow Brief when running the brief-driven Galaxy path; mine only its selected input and fixture requirements.",
+        "optional": true,
+        "inherited_schema": "[[workflow-brief-schema]]",
+        "producers": [
+          "freeform-summary-to-workflow-brief",
+          "nextflow-summary-to-workflow-brief"
+        ]
+      },
+      {
         "id": "freeform-summary",
         "description": "Source summary from [[summarize-paper]] / [[interview-to-freeform-summary]]; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it).",
+        "optional": true,
         "producers": [
           "interview-to-freeform-summary",
           "summarize-paper"
@@ -62,6 +73,7 @@
       {
         "id": "summary-nextflow",
         "description": "Source summary from [[summarize-nextflow]]; mine its test candidate set, explicit selection, and sample-data evidence when running the NEXTFLOW → GALAXY pipeline.",
+        "optional": true,
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
@@ -70,16 +82,17 @@
       {
         "id": "summary-cwl",
         "description": "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline.",
+        "optional": true,
         "inherited_schema": "[[summary-cwl]]",
         "producers": [
           "summarize-cwl"
         ]
       },
       {
-        "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines.",
+        "id": "workflow-brief-galaxy-interface",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path.",
         "producers": [
-          "freeform-summary-to-galaxy-interface"
+          "workflow-brief-to-galaxy-interface"
         ]
       },
       {

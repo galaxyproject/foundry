@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 9,
     "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
   },
-  "cast_at": "2026-09-13T20:58:28.102Z",
+  "cast_at": "2026-09-21T17:25:33.838Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -164,8 +164,8 @@
       "evidence": "hypothesis",
       "purpose": "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs — the fall-through to topology repair, in place of fabricating the missing evidence.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
-      "dst_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "src_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "dst_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
       "source": "deterministic"
     },
     {
@@ -233,10 +233,10 @@
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-template"
         ]
       },
       {
@@ -249,9 +249,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
@@ -259,7 +256,10 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

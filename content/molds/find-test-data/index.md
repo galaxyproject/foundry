@@ -6,22 +6,29 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-15
-revision: 5
+revised: 2026-09-21
+revision: 6
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:
+  - id: workflow-brief
+    role: workflow-contract
+    optional: true
+    description: "Reviewed Workflow Brief when running the brief-driven Galaxy path; mine only its selected input and fixture requirements."
   - id: freeform-summary
     role: source-summary
+    optional: true
     description: "Source summary from [[summarize-paper]] / [[interview-to-freeform-summary]]; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it)."
   - id: summary-nextflow
     role: source-summary
+    optional: true
     description: "Source summary from [[summarize-nextflow]]; mine its test candidate set, explicit selection, and sample-data evidence when running the NEXTFLOW → GALAXY pipeline."
   - id: summary-cwl
     role: source-summary
+    optional: true
     description: "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline."
-  - id: freeform-galaxy-interface
+  - id: workflow-brief-galaxy-interface
     role: galaxy-interface
-    description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines."
+    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path."
   - id: nextflow-galaxy-interface
     role: galaxy-interface
     description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the NEXTFLOW → GALAXY pipeline."
@@ -53,14 +60,14 @@ references:
 ---
 # find-test-data
 
-Resolve concrete test data for the workflow's inputs. Read the interface brief for each input's Galaxy shape and datatype, **and the source summary for the data the source itself names** — then search IWC fixtures and public sources for data that matches. Emit `test-data-refs.json`: one entry per input, each carrying a URL or path plus the expected shape, ready for [[implement-galaxy-workflow-test]] to stage.
+Resolve concrete test data for the workflow's inputs. Read the interface brief for each input's Galaxy shape and datatype, the reviewed Workflow Brief when supplied, and any retained source summary for data the source itself names — then search IWC fixtures and public sources for data that matches. Emit `test-data-refs.json`: one entry per input, each carrying a URL or path plus the expected shape, ready for [[implement-galaxy-workflow-test]] to stage.
 
 This Mold is the first leg of the harness's `test-data-resolution` branch. It resolves what it can and reports gaps; the harness routes any unresolved input to the `user-supplied` fallthrough. Deciding to ask the user is a harness concern, not this Mold's — its job is an honest, source-backed match.
 
 ## Sequence
 
 1. **Enumerate inputs and their required shape.** From the interface brief, list each workflow input: label, Galaxy collection shape (File / list / paired / list:paired / record), and datatype. This is the *target shape* every match must satisfy.
-2. **Mine the source summary for named data.** The interface and data-flow briefs are design artifacts — they deliberately drop dataset provenance. The source summary (`freeform-summary` / `summary-nextflow` / `summary-cwl`) is where the source names its data: sample-data locations, accessions, public-data candidates, fallback bundles, and sizing guidance ("one chromosome", "precomputed count matrix", "small subset"). Pull every candidate dataset and every data-sizing instruction the source gives.
+2. **Mine the contract and available evidence for named data.** The interface and data-flow briefs are design artifacts — they deliberately drop dataset provenance. Read fixture requirements from `workflow-brief` when present, then consult any retained source summary (`freeform-summary` / `summary-nextflow` / `summary-cwl`) for sample-data locations, accessions, public-data candidates, fallback bundles, and sizing guidance. A hand-authored brief may have no summary; search from its selected input requirements rather than inventing provenance.
 3. **Match each named candidate against the required shape — and don't stop at a shape mismatch.** Check each candidate against step 1's target shape and datatype. A candidate that is the wrong *shape* (e.g. raw signal / reads named when the input is a count matrix) is **not** a resolution — but it is also **not** the end of the search. When the source's named candidates don't fit, follow the source's own guidance to the right-shape public artifact: if the source says the input is a precomputed count matrix, find the canonical public count matrix for that study/domain (GEO/ENCODE/ArrayExpress series, a published supplementary table) rather than reporting "no data." "Named candidates are the wrong shape" ≠ "no data exists."
 4. **Search IWC fixtures and public sources.** Prefer existing IWC test data for the same domain — it already conforms to [[iwc-test-data-conventions]] (remote URL, recorded hash, known collection layout); a near-neighbour IWC `-tests.yml` is the strongest source. Otherwise resolve the right-shape public dataset found in step 3, sized for a fast test run.
 5. **"Small" is a documented subset of a real source, not a fabricated stand-in.** When the source asks for a small fixture (one chromosome, selected loci, a few samples) and only a full real dataset exists, that input is **resolved**: record the real source URL plus the data-import-boundary prep needed to reach the small shape (row-subset by key, column/sample split into the collection's element identifiers). The prep is a note on the ref, not an analysis step and not an excuse to mark the input unresolved. Resolve the *data*; leave analysis parameters (factors, thresholds, reference levels, top-N) to the design Molds — they are not this Mold's to decide.

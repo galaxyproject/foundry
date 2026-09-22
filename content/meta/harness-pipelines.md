@@ -9,8 +9,8 @@ tags:
   - lifecycle/publication
 status: revised
 created: 2026-04-30
-revised: 2026-09-12
-revision: 20
+revised: 2026-09-21
+revision: 22
 summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
 
@@ -89,16 +89,18 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 ### PAPER → GALAXY
 
 1. `summarize-paper` — extract methods, named tools/algorithms, sample data, metrics, references to existing pipelines; emit `freeform-summary`.
-2. `freeform-summary-to-galaxy-interface` — Galaxy workflow interface design brief.
-3. `freeform-summary-to-galaxy-data-flow` — Galaxy abstract data-flow design brief from the summary plus interface brief.
-4. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
-5. `freeform-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from free-form source evidence, the interface and data-flow briefs, and exemplar comparison notes.
-6. `[loop]` `advance-galaxy-draft-step` — one full iteration: pick next drafty step via `gxwf draft-next-step`, route through the discover-or-author branch (try `discover-shed-tool`, fall through to `author-galaxy-tool-wrapper`), summarize the wrapper, implement the step, validate via `gxwf draft-validate --concrete`. Loop terminates on `draft: false`.
-7. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
-8. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
-9. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
-10. `run-workflow-test` — execute via Planemo.
-11. `debug-galaxy-workflow-output` — triage failures, propose fixes.
+2. `freeform-summary-to-workflow-brief` — turn the selected scientific intent into a Workflow Brief for expert review.
+3. `workflow-brief-to-galaxy-interface` — Galaxy workflow interface design brief.
+4. `workflow-brief-to-galaxy-data-flow` — Galaxy abstract data-flow design brief from the reviewed brief plus interface brief.
+5. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
+6. `workflow-brief-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from the Workflow Brief, retained source evidence, the interface and data-flow briefs, and exemplar comparison notes.
+7. `[loop]` `advance-galaxy-draft-step` — one full iteration: pick next drafty step via `gxwf draft-next-step`, route through the discover-or-author branch (try `discover-shed-tool`, fall through to `author-galaxy-tool-wrapper`), summarize the wrapper, implement the step, validate via `gxwf draft-validate --concrete`. Loop terminates on `draft: false`.
+8. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
+9. `workflow-brief-to-galaxy-test-plan` — derive the Galaxy workflow test plan from the reviewed brief and downstream design artifacts.
+10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
+11. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
+12. `run-workflow-test` — execute via Planemo.
+13. `debug-galaxy-workflow-output` — triage failures, propose fixes.
 
 ### PAPER → CWL
 
@@ -166,16 +168,18 @@ CWL is already structured; the upstream extraction work is much lighter.
 The interview path is a Galaxy-targeting pipeline, named to match the other `→ GALAXY` pipelines. Unlike them it starts from workflow intent gathered in an interview rather than an existing technical artifact, normalized into the shared `freeform-summary` handoff.
 
 1. `interview-to-freeform-summary` — normalize a user interview transcript or interactive session into the shared `freeform-summary` handoff.
-2. `freeform-summary-to-galaxy-interface`
-3. `freeform-summary-to-galaxy-data-flow`
-4. `compare-against-iwc-exemplar`
-5. `freeform-summary-to-galaxy-template`
-6. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
-7. `[branch]` test-data resolution chain: try `find-test-data` → on failure, harness gates to user-supplied data.
-8. `implement-galaxy-workflow-test`
-9. `validate-galaxy-workflow`
-10. `run-workflow-test`
-11. `debug-galaxy-workflow-output`
+2. `freeform-summary-to-workflow-brief` — turn the selected scientific intent into a Workflow Brief for expert review.
+3. `workflow-brief-to-galaxy-interface`
+4. `workflow-brief-to-galaxy-data-flow`
+5. `compare-against-iwc-exemplar`
+6. `workflow-brief-to-galaxy-template`
+7. `[loop]` `advance-galaxy-draft-step` — one full iteration (pick → discover-or-author → summarize → implement → `gxwf draft-validate --concrete`). Loop terminates on `draft: false`.
+8. `[branch]` test-data resolution chain: try `find-test-data` → on failure, harness gates to user-supplied data.
+9. `workflow-brief-to-galaxy-test-plan`
+10. `implement-galaxy-workflow-test`
+11. `validate-galaxy-workflow`
+12. `run-workflow-test`
+13. `debug-galaxy-workflow-output`
 
 ### UPDATE-INTERVIEW → GALAXY
 
@@ -223,12 +227,20 @@ Two harness-owned gates sit ahead of phase 3, and both stop the run rather than 
 
 The pipeline is read-only end to end. It cannot approve, comment, push, mark ready, or merge, and it cannot edit the workflow it reviews. An accepted edit belongs to the maturation harness proposed in galaxyproject/foundry#492, not to this journey, and is routed through `apply-galaxy-workflow-changeset` where applicable.
 
+## Workflow Brief journeys
+
+[[paper-to-workflow-brief]], [[interview-to-workflow-brief]], and [[nextflow-to-workflow-brief]] stop at an expert-editable [[workflow-brief-design]]. Paper and interview reuse their narrative summarizers and [[freeform-summary-to-workflow-brief]]; Nextflow reuses its structured summarizer and [[nextflow-summary-to-workflow-brief]]. These producers capture selected scientific intent and the agent environment without making Galaxy design choices.
+
+[[workflow-brief-to-galaxy]] is a separate journey, including for hand-authored briefs. Before phase 1, the harness checks declared blockers, records expert review, and verifies the current environment. Its Galaxy design Molds consume the reviewed brief directly and consult retained source summaries only as evidence. Paper and interview direct journeys compose summary production, brief production, an inline expert-review gate, and the same brief-driven implementation spine. The initial route uses shared brief-driven test development rather than dispatching to the specialized Nextflow reference-data and test-translation tier.
+
+Every implementation phase leaves the brief unchanged. The harness checks its hash after phases and loop iterations and on resumption. Durable workflow knowledge goes to `open-requirements.ledger.yml`: evidence as discoveries, authorized choices as decisions, unmet needs as obligations, and changes to expert intent as proposed brief-change recommendations. Ordinary phase progress remains harness state. A required brief change returns to a separate expert editing step. These review, preflight, and preservation rules are harness obligations; an assembled skill carries their instructions and is not an executable enforcement engine.
+
 ## Cross-pipeline observations
 
 - **Source-specific (one per source)**: `summarize-paper`, `interview-to-freeform-summary`, `summarize-nextflow`, `summarize-cwl`, `summarize-galaxy-workflow`. Paper and interview share the `freeform-summary` handoff; Nextflow, CWL, and Galaxy-as-source keep structured source-specific schemas (`summarize-galaxy-workflow` reads an existing Galaxy workflow for the edit pipeline).
 - **Edit-in-place (Galaxy → Galaxy)**: `interview-to-galaxy-workflow-changeset` (interview → reviewable change-set anchored to existing steps), `apply-galaxy-workflow-changeset` (change-set → `galaxy-workflow-draft`, direct edits inline, tool edits as drafty steps), and `changeset-to-galaxy-test-plan` (existing tests carried forward as a regression baseline + change-set deltas → `galaxy-test-plan`). Downstream reuses the per-step loop and test/validate/run tail unchanged.
-- **Source × target interface/data-flow**: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`. The free-form Galaxy path is split to match the Nextflow/CWL pairs; the CWL target keeps a combined `freeform-summary-to-cwl-design` Mold until free-form examples justify a split.
-- **Source × target template generation** (Galaxy): `nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`. Each consumes its source-specific or freeform design briefs.
+- **Source × target interface/data-flow**: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`. The CWL target keeps a combined `freeform-summary-to-cwl-design` Mold until free-form examples justify a split.
+- **Reviewed-contract → Galaxy design**: `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-template`, and `workflow-brief-to-galaxy-test-plan`. These target-specific Molds take the Workflow Brief as authority and optional source summaries as evidence.
 - **Target-specific (one per target)**:
   - Templates: `summary-to-cwl-template`.
   - Per-step orchestrator (Galaxy): `advance-galaxy-draft-step` — single entry in Galaxy pipelines' per-step loop; internally sequences the leaves below.
@@ -243,7 +255,7 @@ The pipeline is read-only end to end. It cannot approve, comment, push, mark rea
 
 ## Pattern pages, not Molds
 
-Per the architecture, the `design-*` knowledge skills (collection manipulation, tabular manipulation, conditional handling, …) are **Foundry pattern pages**, not Molds. They are wiki-linked from action Molds (especially `implement-galaxy-tool-step` and the source-specific Galaxy template Molds) and pulled into generated skills via casting's link resolution.
+Per the architecture, the `design-*` knowledge skills (collection manipulation, tabular manipulation, conditional handling, …) are **Foundry pattern pages**, not Molds. They are wiki-linked from action Molds (especially `implement-galaxy-tool-step` and the Galaxy template Molds) and pulled into generated skills via casting's link resolution.
 
 Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidance) plus a companion **action Mold** (`author-galaxy-tool-wrapper`) that performs the authoring. The Mold links to the pattern page; the pattern page is consumed by the generated skill via link resolution.
 

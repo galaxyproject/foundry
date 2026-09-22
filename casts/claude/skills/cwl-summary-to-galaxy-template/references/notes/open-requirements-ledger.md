@@ -5,20 +5,22 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-08-29
-revision: 3
+revised: 2026-09-21
+revision: 4
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
   - "[[implement-galaxy-tool-step]]"
-summary: "Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously."
+summary: "Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state."
 ---
 
 # Open-requirements ledger
 
-The `open-requirements-ledger` is a single artifact threaded through the source→Galaxy pipeline that records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar — and **source work it decided not to carry**. Each Mold that surfaces one **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact.
+The `open-requirements-ledger` is the carried workflow-run knowledge artifact threaded through the source→Galaxy pipeline. It records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar — and **source work it decided not to carry**. It also records evidence discovered during implementation, decisions made within the approved scope, and recommended changes to an immutable Workflow Brief. Each Mold that surfaces an obligation **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact.
+
+This ledger is about the workflow being built. It is distinct from the opt-in `foundry-feedback-ledger`, which records actionable defects or friction in the Foundry assets building it. It is also not the harness's phase-progress tracker: execution status belongs to harness state, checkpoints, and reports rather than requirement entries.
 
 ## Framing: obligations the pipeline discharges, not questions a human answers
 
@@ -86,6 +88,39 @@ Provenance (`raised_by`, `resolved_by`) is the audit trail for *when* each oblig
 
 `blocking` separates the two grades of obligation the pipeline carries. A plain entry is an unmet need the chain can keep working around — an unpinned parameter, a missing exemplar. A **blocking** entry is a computability gap: a declared step output no wired input can supply, which `gxwf` validation cannot see because the connection graph knows ports connect, not what they carry. Omit `blocking` (or set it `false`) for a plain obligation. Only blocking entries drive topology-repair escalation, and only they are counted by the decreasing-blocker invariant.
 
+## Workflow-run knowledge beside obligations
+
+Not every fact learned during a run is an unmet requirement. Keep the existing `entries` list for obligations and dropped work whose `open | resolved | surrendered` lifecycle downstream Molds can act on. Record other workflow-side knowledge in separate top-level collections so it cannot accidentally participate in the blocking count or obligation lifecycle:
+
+```yaml
+discoveries:
+  - id: source-requires-paired-reads
+    raised_by: workflow-brief-to-galaxy-interface
+    evidence: "The selected source method consumes paired reads."
+    impact: "The interface design must preserve pairing."
+
+decisions:
+  - id: expose-pairing-as-collection
+    decided_by: workflow-brief-to-galaxy-interface
+    decision: "Represent each sample as a paired collection."
+    rationale: "This implements the approved sample-attributable objective."
+    evidence:
+      - source-requires-paired-reads
+
+brief_change_recommendations:
+  - id: require-paired-inputs
+    raised_by: workflow-brief-to-galaxy-interface
+    proposed_change: "State that inputs must be paired-end reads."
+    reason: "The selected method cannot meet the accepted outcome from single-end reads."
+    evidence:
+      - source-requires-paired-reads
+    status: proposed
+```
+
+A **discovery** is source or implementation evidence a later phase needs. A **decision** is a choice the run is authorized to make within the reviewed brief; it records rationale and supporting evidence. A **brief-change recommendation** identifies a change outside that authority. The implementation run may only create it with `status: proposed`; it must never mark the recommendation accepted or edit the brief. If correctness depends on the proposed change, stop the run and return it to the separate expert editing step.
+
+Do not use these collections as an undifferentiated activity journal. Classify each durable learning by its effect: evidence about the workflow is a discovery, an authorized choice is a decision, an unmet actionable need is an obligation entry, and a required change of expert intent is a brief-change recommendation. Ordinary phase progress is not workflow knowledge. A problem in a Mold, packaged reference, harness, or related project belongs in `foundry-feedback.ledger.yml` when feedback mode is enabled.
+
 ## How to use the ledger
 
 This section is the runtime protocol for every Mold that carries the ledger. A Mold's own page states only what is local to it — what raises an entry there, and what it does when it reads one; the mechanics are here.
@@ -93,6 +128,8 @@ This section is the runtime protocol for every Mold that carries the ledger. A M
 **Read it before you decide.** Ahead of the decisions this step owns, read the `open` entries. Ones bearing on those decisions are the ones you may be able to close. Never re-derive an obligation the chain already recorded — that re-derivation is the failure this artifact exists to end.
 
 **Start one when none is supplied.** Every carrying Mold declares the ledger as an input, but the first Mold in a run receives none. Its absence is not an error: start an empty ledger at the declared filename and proceed.
+
+**Preserve every collection.** Carry obligation entries, discoveries, decisions, brief-change recommendations, and run-level headers untouched unless this Mold is explicitly adding to or updating the relevant collection. Never reinterpret one category as another merely to close it.
 
 **Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies. Set `blocking: true` only for a computability gap.
 

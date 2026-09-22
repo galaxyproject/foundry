@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-19
-revision: 10
+revised: 2026-09-21
+revision: 11
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring."
 input_artifacts:
   - id: nextflow-galaxy-interface
@@ -23,19 +23,19 @@ input_artifacts:
   - id: cwl-galaxy-data-flow
     role: galaxy-data-flow
     description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] when running the CWL → GALAXY pipeline."
-  - id: freeform-galaxy-interface
+  - id: workflow-brief-galaxy-interface
     role: galaxy-interface
-    description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
-  - id: freeform-galaxy-data-flow
+    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running a Workflow-Brief-driven Galaxy path."
+  - id: workflow-brief-galaxy-data-flow
     role: galaxy-data-flow
-    description: "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the PAPER → GALAXY or INTERVIEW → GALAXY pipelines."
+    description: "Galaxy data-flow brief from [[workflow-brief-to-galaxy-data-flow]] when running a Workflow-Brief-driven Galaxy path."
   - id: open-requirements-ledger
     description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
   - id: iwc-comparison-notes
     kind: markdown
     default_filename: iwc-comparison-notes.md
-    description: "Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file."
+    description: "Structural diff against the nearest IWC exemplar(s); guidance for the downstream Galaxy template Mold before per-step authoring. Carries an inline, bounded gxformat2 excerpt of the nearest exemplar's relevant subgraph under a labeled section, cross-referencing the iwc-exemplar-gxformat2 sibling file."
   - id: iwc-exemplar-gxformat2
     kind: yaml
     default_filename: iwc-exemplar.gxwf.yml
@@ -89,7 +89,7 @@ references:
 ---
 # compare-against-iwc-exemplar
 
-Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream `*-summary-to-galaxy-template` Mold before per-step authoring effort is spent.
+Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream Galaxy template Mold before per-step authoring effort is spent.
 
 This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs and before the gxformat2 template Mold. Discovery, ranking, and comparison are one action — there is no separate retrieval Mold.
 
@@ -124,10 +124,10 @@ Domain comes first so a structurally similar workflow in the wrong science area 
 
 Each finding should name the authoring surface most likely to own the fix:
 
-- Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague — surfaced for the downstream `*-summary-to-galaxy-template` Mold to apply.
+- Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague — surfaced for the downstream Galaxy template Mold to apply.
 - Pattern issue: recurring Galaxy idiom should become or update a pattern page.
 - Tool-step issue: exact wrapper or parameterization will be handled later in the per-step loop.
-- Test issue: defer to `*-test-to-galaxy-test-plan` or `implement-galaxy-workflow-test`.
+- Test issue: defer to the pipeline's test-plan Mold or `implement-galaxy-workflow-test`.
 
 Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance for the template Mold and the user.
 

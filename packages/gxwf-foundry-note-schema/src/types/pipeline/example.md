@@ -13,7 +13,7 @@ phases:
   - branch: Does every step map to an installed Galaxy tool?
     branches:
       - "[[cwl-summary-to-galaxy-interface]]"
-      - fallthrough: "[[freeform-summary-to-galaxy-interface]]"
+      - fallthrough: "[[workflow-brief-to-galaxy-interface]]"
   - mold: "[[validate-galaxy-workflow]]"
     loop: true
 harness_notes:

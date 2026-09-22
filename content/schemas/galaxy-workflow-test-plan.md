@@ -12,13 +12,13 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-06-16
-revision: 1
+revised: 2026-09-21
+revision: 2
 related_notes:
   - "[[tests-format]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[cwl-test-to-galaxy-test-plan]]"
-  - "[[freeform-summary-to-galaxy-test-plan]]"
+  - "[[workflow-brief-to-galaxy-test-plan]]"
   - "[[changeset-to-galaxy-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
 summary: "JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test."
@@ -42,7 +42,7 @@ foundry validate-galaxy-workflow-test-plan galaxy-test-plan.yml
 
 ## What This Models — and What It Does Not
 
-The test plan is the **intermediate handoff** between a source-specific test-plan producer ([[nextflow-test-to-galaxy-test-plan]], [[cwl-test-to-galaxy-test-plan]], [[freeform-summary-to-galaxy-test-plan]], [[changeset-to-galaxy-test-plan]]) and [[implement-galaxy-workflow-test]], which authors the final `*-tests.yml`. It preserves the *intent and provenance* of a test before any concrete `tests-format` file exists:
+The test plan is the **intermediate handoff** between a source-specific test-plan producer ([[nextflow-test-to-galaxy-test-plan]], [[cwl-test-to-galaxy-test-plan]], [[workflow-brief-to-galaxy-test-plan]], [[changeset-to-galaxy-test-plan]]) and [[implement-galaxy-workflow-test]], which authors the final `*-tests.yml`. It preserves the *intent and provenance* of a test before any concrete `tests-format` file exists:
 
 - `test_cases[]` — one entry per planned Galaxy workflow test, each with `job_inputs` and `expected_outputs`.
 - `job_inputs[]` — workflow-label binding (`workflow_label` + `label_status`), `collection_shape`, `datatype`, and a `fixture` with storage class, location, checksum, and provenance.

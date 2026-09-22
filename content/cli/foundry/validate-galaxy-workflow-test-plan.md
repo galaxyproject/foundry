@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-06-16
-revised: 2026-08-04
-revision: 2
+revised: 2026-09-21
+revision: 3
 summary: "AJV gate for Galaxy workflow test-plan YAML documents."
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
@@ -16,7 +16,7 @@ related_notes:
 
 # `foundry validate-galaxy-workflow-test-plan`
 
-Validate a Galaxy workflow test-plan document against the [[galaxy-workflow-test-plan]] schema bundled with `@galaxy-foundry/gxwf-foundry`. This is the schema gate the Galaxy test-plan producer Molds ([[nextflow-test-to-galaxy-test-plan]], [[cwl-test-to-galaxy-test-plan]], [[freeform-summary-to-galaxy-test-plan]]) emit against before [[implement-galaxy-workflow-test]] consumes the plan.
+Validate a Galaxy workflow test-plan document against the [[galaxy-workflow-test-plan]] schema bundled with `@galaxy-foundry/gxwf-foundry`. This is the schema gate the Galaxy test-plan producer Molds ([[nextflow-test-to-galaxy-test-plan]], [[cwl-test-to-galaxy-test-plan]], [[workflow-brief-to-galaxy-test-plan]]) emit against before [[implement-galaxy-workflow-test]] consumes the plan.
 
 ## Output
 
