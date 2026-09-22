@@ -12,72 +12,57 @@ revision: 3
 summary: "Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/refinement split."
 ---
 
-`content/meta/mold-spec.md` owns the eval *contract* — the file layout, the case shapes, the validator checklist. This document is the *why* behind it. When a contract rule feels arbitrary, the reasoning is here.
+An evaluation plan tells Foundry maintainers how to judge a Mold's output, regardless of the input used to produce it. Put those reusable checks in `eval.md`. Put a particular input and its expected result in `scenarios.md`. This separation also applies to Pipelines, where one scenario can exercise a whole journey.
 
-The one-line version: **`eval.md` is an oracle, not a test suite.** It says how to judge any output; it does not enumerate inputs. That single stance generates almost every rule in the contract.
+This page explains why the files have different jobs and how to decide where a check belongs. For file layout, case shape, and validator rules, see [[mold-spec]].
 
-## The eval / scenario split
+## Separate the oracle from the cases
 
-A Mold's evaluation surface is two files, and the cut between them is the most important idea here.
+`eval.md` is an abstract oracle: it states properties that should hold across inputs. `scenarios.md` binds an input or fixture to expected values. A test run pairs a scenario's output with the eval properties, then checks the scenario's own expectations.
 
-- **`eval.md` — the abstract checker.** Fixture-independent properties: *how* you judge any output.
-- **`scenarios.md` — the concrete cases.** A fixture plus its expected values: *what* you feed in and *what* you expect back.
+For a sorting function, the oracle might require the output to contain the same elements in nondecreasing order. The case `sort([3,1,2]) == [1,2,3]` belongs in the scenario file. The first statement can judge any input. The second describes one input and its expected output.
 
-The sorting analogy makes the line obvious. If you write a sort, the abstract checker says "the output holds the same elements in nondecreasing order" — a property that holds for every input, and is deliberately weaker than naming any one output. You would not bury `sort([3,1,2]) == [1,2,3]` inside that checker; that concrete pair is a test case. `eval.md` is the checker; `scenarios.md` is the table of `(input, expected)` pairs.
+The split has practical consequences:
 
-Why split them at all, when an eval case could just carry its own fixture and expected value (as the Foundry's early eval files did)?
+1. **One oracle can judge many inputs.** “Every `processes[].tool` is a foreign key into `tools[]`” applies to a summary of any pipeline. A fixture-specific count would obscure that general rule.
+2. **One input can meet many oracles.** A Pipeline scenario such as `nf-core/sarek` with five steps passes through the journey's Molds. Each Mold's `eval.md` judges its own output from that run, while the scenario names the input once.
+3. **Fixtures can change without changing the rule.** Paths move, corpora change, and pinned diffs become stale. Their expected values stay in `scenarios.md`, so the reusable property remains in `eval.md`.
+4. **Concrete regressions have a clear home.** “CalliNGS-NF has 11 processes” and “sarek yields 17 sample-sheet columns” are scenario expectations, even when they expose important failures. A named fixture or a fixed expected value is a signal to use `scenarios.md`.
 
-1. **One oracle, many inputs.** Properties are reusable. "Every `processes[].tool` is a foreign key into `tools[]`" judges a summary of *any* pipeline. Bundling it with one fixture's magic count hides that generality and tempts authors to re-state the property per fixture.
-2. **One input, many oracles.** A pipeline scenario (`nf-core/sarek`, 5 steps) flows through every Mold in the journey; each step's `eval.md` judges its own slice of that single run. The scenario is named once; the oracles compose.
-3. **Concreteness rots; properties don't.** Fixture paths move, corpora churn, pinned diffs go stale. Quarantining all of that in `scenarios.md` lets `eval.md` stay durable. When a fixture changes, you edit one file, and the oracle is untouched.
-4. **It kills the misfiling failure mode.** The recurring drift was agents writing concrete, fixture-bound cases into `eval.md` — "CalliNGS-NF has 11 processes", "sarek yields 17 sample-sheet columns". Those are scenarios. Giving them a real home (`scenarios.md`) plus a stated reason (this doc) is the fix. The contract test is mechanical: *does the entry name a specific fixture or magic value? Then it is a scenario, not eval.*
+The same distinction applies to regression checks. “Output is deterministic across re-runs” is an eval property. “bacass `summary.json` is byte-identical to the committed pin” is a scenario expectation.
 
-Regression cases show the split working cleanly. "Output is deterministic across re-runs" is a property → `eval.md`. "bacass `summary.json` is byte-identical to the committed pin" is a concrete case → `scenarios.md`. Same intent, two altitudes.
+## Write properties that detect failures without prescribing a solution
 
-## Property checks over prescriptive solutions
+An eval property should identify an observable failure while allowing valid outputs to differ. For example, “`secondaryFiles` surface as an open question or a composite-dataset note” catches silent loss. Requiring `secondaryFiles` to use Galaxy composite datatypes would prescribe one design and reject another output that handles the issue correctly.
 
-An eval property should describe a behavior the output must exhibit, not the one solution you have in mind.
+This matters for handoffs between Molds. A downstream Mold may simplify, rename, or restructure an upstream brief. The useful property is that it “must not silently contradict a high-confidence upstream decision,” rather than that every input detail appears unchanged.
 
-"`secondaryFiles` surface as an open question or a composite-dataset note" is a property — it catches silent loss without deciding the fix. "`secondaryFiles` must use Galaxy composite datatypes" is a mandate that locks in one answer and fails a different-but-correct output. Eval should catch silent loss, not pre-decide the design.
+Omissions and fabrications are especially useful failure targets. An eval can require an invented Tool Shed ID to be flagged, or require a `pickValue` marker, an `ExpressionTool` step, a step ID, or a branch-control parameter such as `skip_trim` to appear or be explicitly accounted for. The common rule is that material information must not silently vanish or be fabricated. State the rule so it can apply to any relevant input.
 
-This matters because the artifacts under test are *handoffs between Molds*, and handoffs legitimately vary. The downstream Mold can simplify, rename, or restructure and still be correct. Over-specified evals turn that honest variation into false failures, and authors learn to ignore the eval rather than trust it.
+## Give every eval property a pass/fail edge
 
-The corollary for handoff fidelity: prefer "must not silently contradict a high-confidence upstream decision" over "every input from the upstream brief appears." Drafting *should* add and drop detail; the property guards against silent contradiction, not against change.
+Before adding a property, imagine an output that would violate it. If no such output is clear, place the material elsewhere:
 
-## Eval as a guardrail at the Mold boundary
+- A description of what a run tends to look like belongs in the Mold body or `examples/`.
+- An unanswered design question, such as whether a field is useful, belongs in `refinement.md`.
+- A fixture with an expected value belongs in `scenarios.md`.
+- An instruction that merely repeats what the Mold's `index.md` already says to produce adds no evaluation value. Remove it.
 
-The highest-value properties are hallucination and omission guardrails. Casting and runtime are LLM-driven, and the characteristic failure is not a crash — it is a plausible fabrication or a silent drop. Properties that name a known fabrication source are first-class:
+These files answer different maintainer questions: what the Mold does, what can go wrong, which concrete inputs expose that behavior, and which design choices remain open. [[mold-spec]] defines their contracts.
 
-- invented Tool Shed IDs,
-- dropped `pickValue` markers,
-- evaporated `ExpressionTool` steps,
-- fabricated step IDs,
-- a branch-control parameter (`skip_trim`) silently folded away.
+## Execute deterministic checks to earn a verdict
 
-Frame each as *"X must appear, or be explicitly flagged; it must not silently vanish."* That phrasing is what makes it a property (true of any output) rather than a fixture assertion, and it targets exactly the failure mode the procedural body alone can't prevent.
+Each property in `eval.md` declares `check: deterministic` or `check: llm-judged`. A deterministic property names a mechanical oracle, such as a schema validator, structural diff, `gxwf validate` or `roundtrip`, or a `planemo test` run. Its verdict requires running that check. Predicting the result from inspection is not a pass. If the check genuinely cannot run, report the trial as blocked.
 
-## If you can't sketch the failure, it isn't eval
+Use `llm-judged` for properties assessed through reasoned inspection. This distinction keeps mechanical verdicts tied to executed checks while leaving qualitative judgments to review.
 
-Every eval property must have a pass/fail edge — an output you can imagine that violates it. This is the line between eval and the neighboring files.
+For example, `run-workflow-test` can use Planemo-managed Galaxy. `planemo test` starts its own Galaxy, so the absence of an already running Galaxy does not justify skipping that deterministic check. See `/test-drive` step 4 and [[run-workflow-test]] for the test path.
 
-- No failure edge, just "here's what running this tends to look like"? That belongs in the Mold body or in `examples/` — illustration, not evaluation.
-- An open design question with no answer yet ("is field X pulling weight?")? That's **`refinement.md`**.
-- A concrete fixture and its expected value? That's **`scenarios.md`**.
-- A re-statement of the procedural body ("produce X" when `index.md` already says to produce X)? That's nothing — delete it. Eval targets failure modes the body won't prevent.
+## Evaluate Pipelines through their Molds and a pipeline oracle
 
-The four maintainer-facing files decay differently and serve different readers; keeping them separate is what lets each stay honest. [[mold-spec]] has the per-file contract.
+A Pipeline combines its member Molds' evaluations with its own `eval.md`:
 
-## A deterministic check is run, not emulated
+- **Mold properties** judge each step's output as the journey advances. A `[loop]` phase is judged at its endstate, not on every iteration. A `[branch]` phase has no oracle of its own, so the chosen Mold's eval applies.
+- **Pipeline properties** cover end-to-end and cross-step behavior that no single Mold owns. For example, the final gxformat2 workflow validates and round-trips, and the source's scientific intent survives the source-to-target journey without silent contradiction. The Pipeline's `scenarios.md` names the journey input once.
 
-`eval.md` marks each property `check: deterministic` or `check: llm-judged`, and the two are scored differently. A deterministic check names a mechanical oracle — a schema validator, a structural diff, `gxwf validate` / `roundtrip`, a `planemo test` run — and it earns its verdict only by **executing that oracle**. Emulating it (describing what the validator would say, or marking it "not run" because the tool looks expensive) is not a weaker pass; it is no evaluation at all. A deterministic property is precisely the one an LLM cannot satisfy by inspection — that is why it was written deterministic rather than llm-judged. When a trial reaches a deterministic gate it genuinely cannot run, that is a *blocked* trial to report, not a property to wave through. (`llm-judged` properties are the ones scored by reasoned inspection; the split mirrors the eval/scenario split — mechanical where it can be, judgment only where it must be.)
-
-This is the rule a test-drive most easily violates: an executable Mold like `run-workflow-test` is self-bootstrapping (`planemo test` launches its own Galaxy), so "no running Galaxy" never justifies skipping its deterministic gate. See `/test-drive` step 4.
-
-## Pipelines evaluate by composition plus a thin oracle
-
-A Pipeline is judged two ways at once:
-
-- **Composition** — each member Mold's `eval.md` runs against that step's output as the journey advances. A `[loop]` phase is judged at its endstate, not per iteration; a `[branch]` phase carries no oracle of its own, so the chosen Mold's `eval.md` applies.
-- **A thin pipeline-level oracle** — the Pipeline's own `eval.md` states the end-to-end and cross-step properties no single Mold owns: the final gxformat2 workflow validates and round-trips; the source's scientific intent survived source → target without silent contradiction. Its `scenarios.md` names the journey input once.
-
-See `content/meta/architecture.md` for how pipeline companions are laid out and resolved.
+See [[architecture]] for the Pipeline companion layout and resolution rules.
