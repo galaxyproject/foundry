@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 7,
     "content_hash": "ae19f7e5f5ac9434e31302efd88bb5f5db484caf0145951dd27dfe19247f2ea9",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
   },
-  "cast_at": "2026-09-21T17:25:32.275Z",
+  "cast_at": "2026-09-22T18:21:55.356Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -184,6 +184,7 @@
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "nextflow-summary-to-galaxy-template",
           "repair-galaxy-draft-topology",
@@ -200,6 +201,9 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

@@ -1,24 +1,20 @@
 ---
 name: pipeline-interview-to-galaxy
-description: "Interview-driven path through a reviewed Workflow Brief to a Galaxy gxformat2 workflow — orchestrates the Foundry skills of the INTERVIEW → GALAXY pipeline in order, in a per-run working directory."
+description: "Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff — orchestrates the Foundry skills of the INTERVIEW → GALAXY pipeline in order, in a per-run working directory."
 ---
 
 # pipeline-interview-to-galaxy
 
-Harness for the **INTERVIEW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/interview-to-galaxy/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline interview-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **INTERVIEW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/interview-to-galaxy/index.md` (revision 4) — regenerate with `foundry-build assemble-pipeline interview-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
-- Interview-driven path through a reviewed Workflow Brief to a Galaxy gxformat2 workflow.
+- Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff.
 
 ## Bootstrap (install these CLIs first)
 
 Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
 
-- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
-  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
-  Check: `foundry --help`.
-  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
 - **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 galaxy-tool-cache`.
   Check: `galaxy-tool-cache --help | grep -q summarize`.
@@ -55,20 +51,19 @@ Announce the chosen directory before starting.
 Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
 
 1. **interview-to-freeform-summary** — invoke the `interview-to-freeform-summary` skill. Normalize a free-form user interview into the shared freeform-summary workflow handoff.
-2. **freeform-summary-to-workflow-brief** — invoke the `freeform-summary-to-workflow-brief` skill. Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions.
-3. **workflow-brief-to-galaxy-interface** — invoke the `workflow-brief-to-galaxy-interface` skill. Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available.
-4. **workflow-brief-to-galaxy-data-flow** — invoke the `workflow-brief-to-galaxy-data-flow` skill. Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief.
-5. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
-6. **workflow-brief-to-galaxy-template** — invoke the `workflow-brief-to-galaxy-template` skill. Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence.
-7. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
-8. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
+2. **freeform-summary-to-galaxy-interface** — invoke the `freeform-summary-to-galaxy-interface` skill. Map a free-form source summary into a Galaxy workflow interface design brief.
+3. **freeform-summary-to-galaxy-data-flow** — invoke the `freeform-summary-to-galaxy-data-flow` skill. Translate a free-form source summary into a Galaxy data-flow design brief.
+4. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
+5. **freeform-summary-to-galaxy-template** — invoke the `freeform-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
+6. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
+7. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
    - Try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
-9. **workflow-brief-to-galaxy-test-plan** — invoke the `workflow-brief-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence.
-10. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
-11. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
-12. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
-13. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
+8. **freeform-summary-to-galaxy-test-plan** — invoke the `freeform-summary-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs.
+9. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
+10. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
+11. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
+12. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
 
 ## Done
 
@@ -81,5 +76,3 @@ If the run was invoked with `--feedback`, close the ledger first: set the final 
 - Do not re-implement any skill's internal logic here; this harness only sequences and routes.
 - Carry unresolved assumptions forward as notes rather than inventing missing inputs.
 - v1 "workflow" means a Galaxy `gxformat2` workflow; the live interview mechanics are harness-owned and precede phase 1.
-- After brief production and before Galaxy design, stop for expert editing/review, run the static blocker check, and perform current environment preflight. A missing review, declared blocker, or failed preflight stops the run.
-- Retain the freeform summary as source evidence. The reviewed Workflow Brief is authoritative and remains byte-for-byte unchanged through implementation.

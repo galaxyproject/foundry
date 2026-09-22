@@ -1,6 +1,6 @@
 {
   "source_pipeline": "workflow-brief-to-galaxy",
-  "source_revision": 3,
+  "source_revision": 4,
   "harness_name": "pipeline-workflow-brief-to-galaxy",
   "options": ["use-subagents", "checkpoint", "feedback"],
   "required_tools": [

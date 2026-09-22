@@ -4,11 +4,11 @@
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
-    "revision": 11,
-    "content_hash": "c2d41a2dfa4b9ca0bf4193b60a16a0290ad9d26ff5dfdae372ff700e84818dbe",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "revision": 12,
+    "content_hash": "84abb427cbcbae5616ae22e4a7fa803f14350605c246638575b3a32c5ad9c6fb",
+    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
   },
-  "cast_at": "2026-09-21T17:25:32.792Z",
+  "cast_at": "2026-09-22T18:29:18.323Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -157,6 +157,20 @@
         ]
       },
       {
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the direct PAPER → GALAXY or INTERVIEW → GALAXY pipeline.",
+        "producers": [
+          "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the direct PAPER → GALAXY or INTERVIEW → GALAXY pipeline.",
+        "producers": [
+          "freeform-summary-to-galaxy-data-flow"
+        ]
+      },
+      {
         "id": "workflow-brief-galaxy-interface",
         "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running a Workflow-Brief-driven Galaxy path.",
         "producers": [
@@ -180,6 +194,9 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
