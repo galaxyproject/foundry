@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-to-test-data/index.md",
     "revision": 1,
     "content_hash": "a9ea8415ba92031680c1163a566b99272f50c56ffca632f87451d0f2a8a13bbd",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
   },
-  "cast_at": "2026-09-13T20:58:27.033Z",
+  "cast_at": "2026-09-23T14:46:43.467Z",
   "refs": [
     {
       "kind": "research",
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Express each ref remote-URL-first with SHA-1 integrity and per-input collection layout when recording resolved fixtures.",
       "trigger": "When writing each `test-data-refs` entry.",
-      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
-      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
     },
     {
