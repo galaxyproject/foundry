@@ -228,7 +228,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-parameter-derivation-survey]] — Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters.
 - [[iwc-runtime-parameter-shims-survey]] — Focused survey of tiny IWC runtime parameter shims for flags, enums, counts, booleans, and composed text.
 - [[iwc-sequence-operations-survey]] — IWC survey of record-level FASTA manipulation (interconversion, reformat, merge/dedup, subset, extract-at-intervals); sizes a galaxy-sequence-patterns MOC.
-- [[iwc-shortcuts-anti-patterns]] — What IWC test suites cut corners on (accepted) vs what's a code smell — existence-only probes, sim_size deltas, image dim checks, label coupling.
+- [[iwc-shortcuts-anti-patterns]] — How to judge weak IWC workflow-test assertions against the behavior they need to protect, with corpus examples and Planemo limits.
 - [[iwc-tabular-operations-survey]] — Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation.
 - [[iwc-test-data-conventions]] — IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.

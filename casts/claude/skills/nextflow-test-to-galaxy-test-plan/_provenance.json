@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
     "revision": 7,
     "content_hash": "2a8aaa5228eaa632c760ad10de9bfcdc1a7e4f034332b68cadc8a7f92cbe1e8c",
-    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
+    "commit": "25edad50e12a9a4a70399cba0affe9d94884ef23"
   },
-  "cast_at": "2026-09-23T14:46:55.881Z",
+  "cast_at": "2026-09-23T15:00:22.732Z",
   "refs": [
     {
       "kind": "research",
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests.",
       "trigger": "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
+      "dst_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
       "source": "deterministic"
     },
     {

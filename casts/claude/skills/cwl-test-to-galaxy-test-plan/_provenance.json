@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
     "revision": 3,
     "content_hash": "b55214a0b2bf18e61a75a6c7aa32cf69992aa703480b754e067707dfc262813e",
-    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
+    "commit": "25edad50e12a9a4a70399cba0affe9d94884ef23"
   },
-  "cast_at": "2026-09-23T14:46:46.906Z",
+  "cast_at": "2026-09-23T15:00:19.691Z",
   "refs": [
     {
       "kind": "research",
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests.",
       "trigger": "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
+      "dst_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
       "source": "deterministic"
     },
     {

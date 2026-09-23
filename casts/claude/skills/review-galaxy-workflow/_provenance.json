@@ -6,9 +6,9 @@
     "path": "content/molds/review-galaxy-workflow/index.md",
     "revision": 1,
     "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
-    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
+    "commit": "25edad50e12a9a4a70399cba0affe9d94884ef23"
   },
-  "cast_at": "2026-09-23T14:47:01.296Z",
+  "cast_at": "2026-09-23T15:00:30.427Z",
   "refs": [
     {
       "kind": "prompt",
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Recognize corpus-observed shortcuts so a finding cites an observed IWC anti-pattern rather than reviewer taste.",
       "trigger": "When a structural choice looks like a shortcut and the finding needs corpus grounding before it is raised as required.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
+      "dst_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
       "source": "deterministic"
     },
     {

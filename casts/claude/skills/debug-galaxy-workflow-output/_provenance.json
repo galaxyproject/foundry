@@ -6,9 +6,9 @@
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
     "revision": 5,
     "content_hash": "100b3f985f8e309092bfd05cf544a8286e0a878ee2df3a155dfebe6fcdb286f0",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "25edad50e12a9a4a70399cba0affe9d94884ef23"
   },
-  "cast_at": "2026-09-13T20:58:27.128Z",
+  "cast_at": "2026-09-23T15:00:31.872Z",
   "refs": [
     {
       "kind": "research",
@@ -88,8 +88,8 @@
       "evidence": "corpus-observed",
       "purpose": "Decide whether a proposed debug fix aligns with accepted IWC testing shortcuts or masks a real failure.",
       "trigger": "When debugging suggests weakening assertions, widening deltas, switching to existence checks, or changing output labels.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
+      "dst_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
       "source": "deterministic"
     },
     {
