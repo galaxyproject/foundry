@@ -201,6 +201,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | --- | --- | --- | --- | --- |
 | [[galaxy-workflow-testability-design]] | Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible. | draft | 2026-09-23 | 3 |
 | [[gxformat2-schema]] | Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation. | draft | 2026-09-23 | 3 |
+| [[gxformat2-workflow-inputs]] | Authoring guidance for gxformat2 workflow input types, constraints, defaults, and validation. | draft | 2026-09-23 | 3 |
 | [[iwc-shortcuts-anti-patterns]] | Judgments for when weak Galaxy workflow-test assertions are useful smoke checks and when they conceal untested results. | draft | 2026-09-23 | 3 |
 | [[iwc-test-data-conventions]] | IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values. | draft | 2026-09-23 | 4 |
 | [[planemo-asserts-idioms]] | Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints. | draft | 2026-09-23 | 7 |
@@ -239,7 +240,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-params-to-galaxy-inputs]] | Rules for translating Nextflow params, sample sheets, channels, and control flags into gxformat2 inputs. | draft | 2026-05-08 | 4 |
 | [[nextflow-workflow-io-semantics]] | Defines Nextflow workflow inputs and outputs from docs plus observed fixture pipeline structures. | draft | 2026-05-08 | 4 |
 | [[galaxy-sample-sheet-collections]] | Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist. | draft | 2026-05-06 | 2 |
-| [[gxformat2-workflow-inputs]] | Conceptual model, current aliases, and schema gaps for gxformat2 workflow inputs. | draft | 2026-05-06 | 2 |
 | [[nextflow-path-glob-to-galaxy-datatype]] | Rules for mapping Nextflow path, glob, sample-sheet, and output filename evidence to Galaxy datatype extensions. | draft | 2026-05-06 | 1 |
 | [[nextflow-to-galaxy-channel-shape-mapping]] | Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes. | draft | 2026-05-06 | 2 |
 | [[nf-schema-samplesheet-galaxy-gaps]] | nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary. | draft | 2026-05-06 | 1 |
