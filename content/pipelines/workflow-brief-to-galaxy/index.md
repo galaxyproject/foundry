@@ -3,10 +3,11 @@ type: pipeline
 title: WORKFLOW BRIEF → GALAXY
 tags:
   - target/galaxy
+  - journey/build-from-plan
 status: draft
 created: '2026-09-17'
 revised: '2026-09-22'
-revision: 4
+revision: 5
 summary: Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain.
 harness_notes:
   - The caller supplies workflow-brief.md; a hand-authored brief is a valid entry and requires no source-to-brief

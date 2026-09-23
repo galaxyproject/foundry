@@ -4,10 +4,11 @@ title: INTERVIEW → GALAXY
 tags:
   - source/interview
   - target/galaxy
+  - journey/direct-build
 status: reviewed
 created: 2026-05-22
 revised: 2026-09-22
-revision: 4
+revision: 5
 summary: "Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff."
 harness_notes:
   - 'v1 "workflow" means a Galaxy `gxformat2` workflow; the live interview mechanics are harness-owned and precede phase 1.'

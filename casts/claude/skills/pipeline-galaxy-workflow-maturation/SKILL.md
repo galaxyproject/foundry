@@ -5,7 +5,7 @@ description: "Apply the pinned IWC publication checklist to an existing Galaxy w
 
 # pipeline-galaxy-workflow-maturation
 
-Harness for the **GALAXY WORKFLOW MATURATION** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/galaxy-workflow-maturation/index.md` (revision 1) — regenerate with `foundry-build assemble-pipeline galaxy-workflow-maturation` if the pipeline changes; do not hand-edit.
+Harness for the **GALAXY WORKFLOW MATURATION** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/galaxy-workflow-maturation/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline galaxy-workflow-maturation` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 

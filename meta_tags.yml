@@ -74,6 +74,17 @@ facets:
       lifecycle/review: "Evaluate an existing workflow or submission and produce advisory review findings"
       lifecycle/publication: "Mature, package, and hand an existing workflow to a publication destination"
 
+  journey:
+    label: Journey
+    description: >-
+      The user-facing route a Pipeline occupies: direct construction, planning, implementation
+      from a reviewed plan, or work on an existing Galaxy workflow.
+    values:
+      journey/direct-build: "Run one source-to-target construction pipeline without producing a Workflow Brief"
+      journey/plan: "Produce a Workflow Brief for separate expert review and editing"
+      journey/build-from-plan: "Build a Galaxy workflow from an expert-reviewed Workflow Brief"
+      journey/existing-workflow: "Update, review, or mature an existing Galaxy workflow"
+
   tool:
     label: Tool
     description: >-

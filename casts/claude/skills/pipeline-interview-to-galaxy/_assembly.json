@@ -1,6 +1,6 @@
 {
   "source_pipeline": "interview-to-galaxy",
-  "source_revision": 4,
+  "source_revision": 5,
   "harness_name": "pipeline-interview-to-galaxy",
   "options": ["use-subagents", "checkpoint", "feedback"],
   "required_tools": [

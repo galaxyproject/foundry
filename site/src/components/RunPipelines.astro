@@ -1,11 +1,11 @@
 ---
-// Shared "Run a pipeline" surface: how-to-run steps, stop-gap framing, and the
-// runnable harness-card grid. Mounted on /usage/ (variant="full") above the
-// Mold casts, and on /pipelines/ (variant="text") below the catalog table.
-// Single source for the run story — edit here, both surfaces follow.
+// Shared pipeline-running surface. Mounted on /usage/ (full grouped commands) and
+// /pipelines/ (short pointer). Journey tags are the single source for grouping.
 import { getCollection } from 'astro:content';
+import PipelineHarnessList from './PipelineHarnessList.astro';
 import StopGapBanner from './StopGapBanner.astro';
 import { loadAssembly, assemblyStats } from '../lib/casts';
+import { pipelineJourney } from '../lib/pipeline-journeys';
 import { base } from '../lib/site-base';
 
 interface Props {
@@ -14,158 +14,209 @@ interface Props {
 const { variant = 'full' } = Astro.props;
 
 const pipelines = (await getCollection('pipelines'))
-  .filter(n => n.data.status !== 'archived')
-  .map(p => {
-    const slug = p.id.split('/').pop()!;
+  .filter((pipeline) => pipeline.data.status !== 'archived')
+  .map((pipeline) => {
+    const slug = pipeline.id.split('/').pop()!;
     const assembly = loadAssembly(slug);
     return {
       slug,
-      title: p.data.title,
-      summary: p.data.summary,
+      title: pipeline.data.title,
+      summary: pipeline.data.summary,
       assembly,
       stats: assembly ? assemblyStats(assembly) : null,
+      journey: pipelineJourney(pipeline.data.tags),
     };
   })
-  .filter(p => p.assembly)
+  .filter((pipeline) => pipeline.assembly)
   .sort((a, b) => a.title.localeCompare(b.title));
+
+const direct = pipelines.filter((pipeline) => pipeline.journey === 'direct-build');
+const planning = pipelines.filter((pipeline) => pipeline.journey === 'plan');
+const buildFromPlan = pipelines.filter((pipeline) => pipeline.journey === 'build-from-plan');
+const existing = pipelines.filter((pipeline) => pipeline.journey === 'existing-workflow');
 ---
 <div class="run-pipelines">
   <div class="section-rule">
     <h2 id="run-heading">Run a pipeline</h2>
-    <span class="section-tail">/ how to run one end-to-end today</span>
+    <span class="section-tail">/ choose the route that matches the work</span>
   </div>
   <p class="run-intro">
-    A Foundry pipeline is an ordered sequence of Molds that walks a source workflow to a target
-    workflow. You run one today via its assembled <code class="font-mono">pipeline-*</code> harness
-    skill — a stop-gap that invokes each phase's cast in order.
+    Each command invokes an assembled <code class="font-mono">pipeline-*</code> harness. Direct
+    Build keeps source-to-target work in one pipeline. Plan &amp; Build makes the Workflow Brief — and
+    its expert-review boundary — explicit. Either route can still pause for expert input or stop on
+    blockers.
   </p>
   <ol class="how-list">
     <li>
-      <strong>Install the harness skills.</strong> They install like any Foundry cast skill through
-      the Claude Code or Codex plugin metadata around the same shared bundle.
-      See <a href={`${base}/usage/#install`}>Install</a>.
+      <strong>Install the harness skills.</strong> They install through the Claude Code or Codex
+      plugin metadata around the same shared bundle. See <a href={`${base}/usage/#install`}>Install</a>.
     </li>
     <li>
-      <strong>Make the runtime available.</strong> Pipelines call out to <code class="font-mono">gxwf</code>
-      (schema/validation), Planemo (test execution), and the Foundry validators. Install these in the
-      environment before a run that reaches the validate/test phases.
+      <strong>Make the runtime available.</strong> Pipelines call out to <code class="font-mono">gxwf</code>,
+      Planemo, and the Foundry validators when their phases require them.
     </li>
     <li>
-      <strong>Invoke the harness for the pipeline you want.</strong> Each run gets its own
-      <code class="font-mono">./&lt;run-slug&gt;/</code> working directory, so artifacts stay namespaced
-      and a second run won't clobber the first — the harness creates it before phase&nbsp;1.
+      <strong>Invoke a harness below.</strong> Every run gets its own
+      <code class="font-mono">./&lt;run-slug&gt;/</code> working directory, keeping artifacts isolated.
     </li>
     <li>
-      <strong>Optional run flags.</strong> Pass <code class="font-mono">--use-subagents</code> to run each
-      cast phase in its own subagent (one per loop iteration) so the orchestrator's context stays small, and
-      <code class="font-mono">--checkpoint</code> to <code class="font-mono">git init</code> the run directory and
-      commit after every phase — a per-step history for workflow-implementation visualizations. Both default off
-      and compose.
+      <strong>Optional flags.</strong> Use <code class="font-mono">--use-subagents</code> to isolate phase
+      context and <code class="font-mono">--checkpoint</code> to commit the run directory after each phase.
     </li>
   </ol>
 
   {variant === 'full' ? (
     <>
       <StopGapBanner />
-      <div class="section-rule" style="margin-top: 1.75rem;">
-        <h3 id="runnable-heading">Runnable harnesses</h3>
-        <span class="section-tail">/ {pipelines.length} runnable</span>
-      </div>
-      <ul class="run-grid list-none p-0 m-0">
-        {pipelines.map(p => (
-          <li class="run-card">
-            <div class="run-card-head">
-              <a href={`${base}/pipelines/${p.slug}/harness/`} class="font-mono font-semibold text-(--color-link) hover:underline">
-                pipeline-{p.slug}
-              </a>
-              <a href={`${base}/pipelines/${p.slug}/`} class="text-xs text-(--color-text-secondary) hover:underline">
-                {p.title} →
-              </a>
-            </div>
-            {p.summary && <p class="run-card-summary">{p.summary}</p>}
-            <pre class="run-card-invoke"><code>Claude: /foundry-skills:pipeline-{p.slug}
-Codex:  $pipeline-{p.slug}</code></pre>
-            {p.stats && (
-              <p class="run-card-stats font-mono">
-                {p.stats.total} phases · {p.stats.cast} auto · {p.stats.manual} manual{p.stats.loops > 0 ? ` · ${p.stats.loops} loop${p.stats.loops === 1 ? '' : 's'}` : ''}
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
+
+      <section id="direct-builds" class="journey-section" aria-labelledby="direct-builds-heading">
+        <div class="journey-heading">
+          <span class="journey-number font-mono">01</span>
+          <div>
+            <h3 id="direct-builds-heading">Direct Build</h3>
+            <p>Use one pipeline when you do not need a separate, reviewable planning artifact.</p>
+          </div>
+          <span class="journey-count font-mono">{direct.length} routes</span>
+        </div>
+        <PipelineHarnessList pipelines={direct} />
+      </section>
+
+      <section id="plan-and-build" class="journey-section" aria-labelledby="plan-build-heading">
+        <div class="journey-heading">
+          <span class="journey-number font-mono">02</span>
+          <div>
+            <h3 id="plan-build-heading">Plan &amp; Build</h3>
+            <p>Split planning from implementation when the decisions deserve explicit expert review.</p>
+          </div>
+          <span class="journey-count font-mono">2 pipeline stages</span>
+        </div>
+
+        <div class="plan-stage">
+          <div class="stage-label">
+            <span class="stage-number font-mono">1</span>
+            <div><strong>Create a Workflow Brief</strong><span>Choose the source-specific planner.</span></div>
+          </div>
+          <PipelineHarnessList pipelines={planning} />
+        </div>
+        <div class="review-boundary">
+          <span class="stage-number font-mono">2</span>
+          <div>
+            <strong>Expert review &amp; edit</strong>
+            <span>Inspect the brief, resolve blockers, and revise it before implementation.</span>
+          </div>
+        </div>
+        <div class="plan-stage">
+          <div class="stage-label">
+            <span class="stage-number font-mono">3</span>
+            <div><strong>Build from the Workflow Brief</strong><span>Run the agreed plan through Galaxy implementation.</span></div>
+          </div>
+          <PipelineHarnessList pipelines={buildFromPlan} />
+        </div>
+      </section>
+
+      <section id="existing-workflows" class="journey-section" aria-labelledby="existing-heading">
+        <div class="journey-heading">
+          <span class="journey-number font-mono">03</span>
+          <div>
+            <h3 id="existing-heading">Existing Galaxy workflows</h3>
+            <p>Review, mature, or update a workflow that already exists.</p>
+          </div>
+          <span class="journey-count font-mono">{existing.length} routes</span>
+        </div>
+        <PipelineHarnessList pipelines={existing} />
+      </section>
     </>
   ) : (
     <p class="run-pointer">
-      See the <a href={`${base}/usage/#run-pipelines`}>{pipelines.length} runnable harness{pipelines.length === 1 ? '' : 'es'} on Usage →</a>
-      <span class="text-(--color-text-muted)"> — invoke command, phase counts, and install steps.</span>
+      The Usage page groups all {pipelines.length} runnable harnesses into
+      <a href={`${base}/usage/#direct-builds`}> Direct Build</a>,
+      <a href={`${base}/usage/#plan-and-build`}> Plan &amp; Build</a>, and
+      <a href={`${base}/usage/#existing-workflows`}> existing Galaxy workflow</a> routes.
     </p>
   )}
 </div>
 
 <style>
   .run-intro {
+    max-width: 52rem;
     margin: 0.4rem 0 1rem;
     color: var(--color-text-secondary);
   }
   .run-intro code,
   .how-list code,
-  .run-card code,
-  .run-pointer code {
-    font-family: var(--font-mono);
-    font-size: 0.85em;
-  }
-  .how-list {
-    margin: 0;
-    padding-left: 1.2rem;
+  .run-pointer code { font-family: var(--font-mono); font-size: 0.85em; }
+  .how-list { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.65rem; }
+  .how-list li { font-size: 0.92rem; line-height: 1.5; }
+  .run-pointer { margin: 1rem 0 0; font-size: 0.92rem; }
+  .journey-section { scroll-margin-top: 5rem; margin-top: 2.75rem; }
+  .journey-heading {
     display: grid;
-    gap: 0.7rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    align-items: start;
+    margin-bottom: 0.9rem;
   }
-  .how-list li {
-    font-size: 0.92rem;
-    line-height: 1.5;
-  }
-  .run-pointer {
-    margin: 1rem 0 0;
-    font-size: 0.92rem;
-  }
-  .run-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-    gap: 0.8rem;
-  }
-  .run-card {
-    padding: 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.7rem;
-  }
-  .run-card:hover {
-    border-color: var(--color-brand);
-  }
-  .run-card-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-  .run-card-summary {
-    margin: 0 0 0.7rem;
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-  }
-  .run-card-invoke {
-    margin: 0 0 0.6rem;
-    padding: 0.55rem 0.7rem;
-    border-radius: 0.5rem;
-    background: var(--color-surface-raised);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    overflow-x: auto;
-  }
-  .run-card-stats {
-    margin: 0;
+  .journey-number {
+    color: var(--color-accent);
     font-size: 0.72rem;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.12em;
+    padding-top: 0.3rem;
+  }
+  .journey-heading h3 { margin: 0; font-size: 1.35rem; }
+  .journey-heading p {
+    margin: 0.2rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+  }
+  .journey-count {
     color: var(--color-text-muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 0.35rem;
+  }
+  .plan-stage {
+    margin-left: 1.6rem;
+    padding-left: 1.15rem;
+    border-left: 1px solid var(--color-border);
+  }
+  .stage-label,
+  .review-boundary {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0.7rem;
+    align-items: start;
+  }
+  .stage-label { margin-bottom: 0.45rem; }
+  .stage-number {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+  }
+  .stage-label div,
+  .review-boundary div { display: grid; gap: 0.15rem; padding-top: 0.15rem; }
+  .stage-label span:last-child,
+  .review-boundary span:last-child { color: var(--color-text-secondary); font-size: 0.8rem; }
+  .review-boundary {
+    margin: 1rem 0 1rem 1.6rem;
+    padding: 0.8rem 1rem;
+    border-left: 3px solid var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-raised));
+  }
+  .review-boundary .stage-number {
+    border-color: var(--color-accent);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+  }
+  @media (max-width: 520px) {
+    .journey-heading { grid-template-columns: auto 1fr; }
+    .journey-count { grid-column: 2; padding-top: 0; }
+    .plan-stage,
+    .review-boundary { margin-left: 0; }
   }
 </style>

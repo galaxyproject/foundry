@@ -4,10 +4,11 @@ title: PAPER → GALAXY
 tags:
   - source/paper
   - target/galaxy
+  - journey/direct-build
 status: draft
 created: 2026-04-30
 revised: 2026-09-22
-revision: 4
+revision: 5
 summary: "Direct path from a paper to a Galaxy gxformat2 workflow. No Workflow Brief or CWL intermediate."
 harness_notes:
   - "The composed alternative PAPER → CWL → GALAXY is a runtime composition of `pipeline-paper-to-cwl` followed by `pipeline-cwl-to-galaxy`."

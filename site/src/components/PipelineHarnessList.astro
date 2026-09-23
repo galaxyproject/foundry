@@ -1,0 +1,82 @@
+---
+import { base } from '../lib/site-base';
+
+interface HarnessPipeline {
+  slug: string;
+  title: string;
+  summary?: string;
+  stats: { total: number; cast: number; manual: number; loops: number } | null;
+}
+
+interface Props {
+  pipelines: HarnessPipeline[];
+}
+
+const { pipelines } = Astro.props;
+---
+<ul class="harness-list list-none p-0 m-0">
+  {pipelines.map((pipeline) => (
+    <li class="harness-row">
+      <div class="harness-copy">
+        <div class="harness-title">
+          <a href={`${base}/pipelines/${pipeline.slug}/harness/`} class="font-mono">
+            pipeline-{pipeline.slug}
+          </a>
+          <a href={`${base}/pipelines/${pipeline.slug}/`} class="pipeline-link">
+            {pipeline.title} <span aria-hidden="true">→</span>
+          </a>
+        </div>
+        {pipeline.summary && <p>{pipeline.summary}</p>}
+        {pipeline.stats && (
+          <span class="harness-stats font-mono">
+            {pipeline.stats.total} phases · {pipeline.stats.cast} auto · {pipeline.stats.manual} manual
+            {pipeline.stats.loops > 0 ? ` · ${pipeline.stats.loops} loop${pipeline.stats.loops === 1 ? '' : 's'}` : ''}
+          </span>
+        )}
+      </div>
+      <pre><code>Claude: /foundry-skills:pipeline-{pipeline.slug}
+Codex:  $pipeline-{pipeline.slug}</code></pre>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .harness-list { border-top: 1px solid var(--color-border-subtle); }
+  .harness-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.7fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 0.25rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .harness-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.35rem 0.9rem; }
+  .harness-title > a:first-child {
+    color: var(--color-link);
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .harness-title > a:first-child:hover,
+  .pipeline-link:hover { text-decoration: underline; }
+  .pipeline-link { color: var(--color-text-secondary); font-size: 0.76rem; text-decoration: none; }
+  .harness-copy p {
+    margin: 0.35rem 0;
+    color: var(--color-text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+  .harness-stats { color: var(--color-text-muted); font-size: 0.68rem; letter-spacing: 0.045em; }
+  pre {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.45rem;
+    background: var(--color-surface-raised);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    overflow-x: auto;
+  }
+  @media (max-width: 760px) {
+    .harness-row { grid-template-columns: 1fr; }
+  }
+</style>

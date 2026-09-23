@@ -5,10 +5,11 @@ tags:
   - source/galaxy
   - target/galaxy
   - lifecycle/publication
+  - journey/existing-workflow
 status: draft
 created: 2026-09-12
-revised: 2026-09-12
-revision: 1
+revised: 2026-09-22
+revision: 2
 summary: "Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result."
 harness_notes:
   - "Entry is an existing workflow, not a construction run. The harness supplies a `.gxwf.yml` or `.ga` file; phase 1 normalizes `.ga` to gxformat2 and every checklist judgement downstream is stated against that normalized baseline."
