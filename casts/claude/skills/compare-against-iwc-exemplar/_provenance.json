@@ -6,9 +6,9 @@
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 10,
     "content_hash": "5b198e9b87cf554cb01aceaa14a5aaa3ab24c6a35afc35dab7d09ce154cc3a77",
-    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
+    "commit": "320a34c0e0abbb6d6af7b83673db5869617bd7d4"
   },
-  "cast_at": "2026-09-23T14:46:48.768Z",
+  "cast_at": "2026-09-23T15:11:43.224Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -71,8 +71,8 @@
       "evidence": "corpus-observed",
       "purpose": "Flag proposed shortcuts that are accepted in IWC versus shortcuts that should be treated as smells.",
       "trigger": "When the design briefs propose tests, assertions, labels, or expected-output comparisons.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
+      "dst_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
       "source": "deterministic"
     },
     {
