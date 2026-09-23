@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 3,
     "content_hash": "cafba235f3bb41612216f766eb390ee6fddcb1192ddf445b6d9eb7f2c132678c",
-    "commit": "88fdfdfd1a41f6d5ade682a238811441d1eac61b"
+    "commit": "c3dc1c5df041ea374eca87c0960c8ecab51a999d"
   },
-  "cast_at": "2026-09-23T00:57:03.125Z",
+  "cast_at": "2026-09-23T01:10:39.022Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested collection recipe when the missing producer is a collection construction, reshape, or bridge.",
       "trigger": "When the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge.",
-      "src_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
-      "dst_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
+      "src_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
+      "dst_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
       "source": "deterministic"
     },
     {

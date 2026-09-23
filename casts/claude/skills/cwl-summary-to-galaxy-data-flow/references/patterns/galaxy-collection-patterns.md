@@ -13,9 +13,9 @@ tags:
   - topic/collection-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
-summary: "Use this MOC to choose corpus-grounded Galaxy collection transformation patterns."
+revised: 2026-09-22
+revision: 2
+summary: "Choose a Galaxy collection operation or map-over recipe from the current and required data shapes."
 related_notes:
   - "[[iwc-transformations-survey]]"
   - "[[iwc-conditionals-survey]]"
@@ -25,10 +25,13 @@ related_patterns:
   - "[[reshape-relabel-remap-by-collection-axis]]"
   - "[[fan-in-bundle-consume-and-flatten]]"
   - "[[collection-cleanup-after-mapover-failure]]"
+  - "[[collection-unbox-singleton]]"
   - "[[sync-collections-by-identifier]]"
   - "[[harmonize-by-sortlist-from-identifiers]]"
   - "[[regex-relabel-via-tabular]]"
   - "[[relabel-via-rules-and-find-replace]]"
+  - "[[collection-flatten-after-fanout]]"
+  - "[[collection-build-named-bundle]]"
   - "[[collection-swap-nesting-with-apply-rules]]"
   - "[[collection-split-identifier-via-rules]]"
   - "[[collection-build-list-paired-with-apply-rules]]"
@@ -47,40 +50,40 @@ related_molds:
 
 # Galaxy: collection patterns
 
-This is the runtime-facing map for Galaxy collection transformation choices. Use it before loading raw survey notes. The survey remains evidence backing; the operation and recipe pages are the actionable references.
+Choose by the collection you have and the shape the next Galaxy step needs. The linked operation pages give tool settings and pitfalls. The recipes cover several operations around map-over, where Galaxy runs a step on each collection element. The [[iwc-transformations-survey]] records the IWC evidence behind these choices.
 
-## Cleanup
+## Enter or leave a collection
 
-- [[collection-cleanup-after-mapover-failure]] — use `__FILTER_EMPTY_DATASETS__` or `__FILTER_FAILED_DATASETS__` after map-over when empty or errored elements would break downstream steps.
-- [[collection-unbox-singleton]] — use `__EXTRACT_DATASET__` with `which: first` when a known one-element collection must become a dataset.
+- **Table to mapped elements:** [[tabular-to-collection-by-row]] splits a manifest, accession list, or result table into collection elements by row or key. Choose a stable identifier column for later alignment.
+- **Individual datasets to a named `list`:** [[collection-build-named-bundle]] assembles separate outputs for publication or a collection-aware consumer. It does not concatenate their file contents.
+- **Collection of tables to one long table:** [[tabular-concatenate-collection-to-table]] appends rows. Decide whether to carry each element identifier into every row and whether the inputs have headers.
+- **Collection of keyed value tables to one wide table:** [[tabular-pivot-collection-to-wide]] makes elements into columns. Choose the missing-value fill and header behavior for downstream use. Filter empty elements first only when they can occur.
+- **Known singleton collection to a dataset:** [[collection-unbox-singleton]] extracts its first element. Use it only when the collection has exactly one meaningful element by construction.
 
-## Map-over Lifecycle Recipes
+## Keep mapped siblings aligned
 
-- [[manifest-to-mapped-collection-lifecycle]] — build collection elements from manifest/table rows, map a tool over them, then relabel or reshape outputs.
-- [[cleanup-sync-and-publish-nonempty-results]] — clean sparse mapped outputs, sync siblings from surviving identifiers, then gate final reports.
-- [[reshape-relabel-remap-by-collection-axis]] — correct the mapped axis after domain fan-out using Apply Rules and deterministic relabeling.
-- [[fan-in-bundle-consume-and-flatten]] — bundle parallel outputs for a collection consumer, then flatten or aggregate results.
+First identify what changed. Membership, order, and labels are separate decisions.
 
-## Identifiers
+- **Empty or failed elements:** [[collection-cleanup-after-mapover-failure]] drops unusable mapped outputs with the matching built-in filter. A replacement dataset preserves the slot when a later step needs the original shape, but it changes the data supplied to that step.
+- **Membership:** [[sync-collections-by-identifier]] takes identifiers from the collection that now defines the usable set and filters a sibling to the same names. Filtering preserves the sibling's existing order.
+- **Order:** [[harmonize-by-sortlist-from-identifiers]] reorders a sibling by an identifier file when later pairing depends on order. The file must name every element, so this operation does not subset.
+- **Labels only:** [[regex-relabel-via-tabular]] derives and applies cleaner element identifiers when the collection structure is already right. [[relabel-via-rules-and-find-replace]] covers relabeling within a structural reshape.
 
-- [[sync-collections-by-identifier]] — membership sync: extract identifiers from one collection and filter or relabel a sibling collection.
-- [[harmonize-by-sortlist-from-identifiers]] — order sync: sort one sibling collection by another collection's identifier order.
-- [[regex-relabel-via-tabular]] — label rewrite: derive new element identifiers in tabular form and apply them with `__RELABEL_FROM_FILE__`.
-- [[relabel-via-rules-and-find-replace]] — relabel inside a structural reshape, currently grounded in the influenza fan-out pattern.
+After dropping elements from one mapped result, use its surviving identifiers to filter siblings before relying on per-element correspondence. Add ordering or relabeling only if the downstream step needs it.
 
-## Structural Reshape
+## Change the collection axes
 
-- [[collection-flatten-after-fanout]] — collapse nested collection output to a flat list when the outer axis no longer matters.
-- [[collection-build-named-bundle]] — assemble individual outputs into a named collection bundle for publishing or downstream fan-in.
-- [[collection-swap-nesting-with-apply-rules]] — use Apply Rules to swap `list:list` axes.
-- [[collection-split-identifier-via-rules]] — use Apply Rules regex columns to derive nested list identifiers from one identifier string.
-- [[collection-build-list-paired-with-apply-rules]] — use Apply Rules to promote identifier columns into `list:paired` structure.
+- **Nested to flat `list`:** [[collection-flatten-after-fanout]] removes a grouping level after its sample, method, or replicate identity is no longer needed.
+- **`list:list` to `list:list` with reversed axes:** [[collection-swap-nesting-with-apply-rules]] changes which level a downstream step maps over.
+- **Flat `list` identifiers to `list:list`:** [[collection-split-identifier-via-rules]] derives two list axes from a compound identifier.
+- **Identifiers to `list:paired`:** [[collection-build-list-paired-with-apply-rules]] promotes a sample identifier and a forward/reverse role. Use this when pairedness is encoded in identifiers, rather than assuming two sibling collections are aligned.
 
-## Bridges
+## Follow a map-over lifecycle
 
-- [[tabular-to-collection-by-row]] — split a tabular manifest/list into collection elements for map-over.
-- [[tabular-concatenate-collection-to-table]] — row-bind a collection of tabular outputs into one table.
-- [[tabular-pivot-collection-to-wide]] — outer-join a collection of id/value tabulars into one wide table.
+- [[manifest-to-mapped-collection-lifecycle]] — start from manifest rows, map work over collection elements, then stabilize labels and output shape.
+- [[cleanup-sync-and-publish-nonempty-results]] — clean sparse mapped results, align siblings to the survivors, and run final reports only when useful results remain.
+- [[reshape-relabel-remap-by-collection-axis]] — correct the axis a later tool should map over after domain fan-out. Its evidence is narrow, so review the identifier derivation for the specific workflow.
+- [[fan-in-bundle-consume-and-flatten]] — bundle parallel outputs for a collection-aware consumer, then flatten or aggregate its results if the next step needs a pooled shape.
 
 ## See also
 

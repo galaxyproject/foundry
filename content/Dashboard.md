@@ -6,15 +6,15 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[cwl-to-galaxy]] | Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test. | draft | 2026-09-22 | 4 |
+| [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-09-22 | 3 |
+| [[paper-to-cwl]] | Direct path from a paper to a CWL Workflow + CommandLineTool set. | draft | 2026-09-22 | 3 |
+| [[paper-to-galaxy]] | Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate. | draft | 2026-09-22 | 3 |
 | [[galaxy-workflow-maturation]] | Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result. | draft | 2026-09-12 | 1 |
 | [[galaxy-workflow-review]] | Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy. | draft | 2026-09-12 | 1 |
 | [[interview-to-galaxy]] | Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. | reviewed | 2026-07-24 | 2 |
 | [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | reviewed | 2026-07-24 | 4 |
 | [[update-interview-to-galaxy]] | Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. | reviewed | 2026-07-24 | 2 |
-| [[cwl-to-galaxy]] | Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction. | draft | 2026-04-30 | 2 |
-| [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 2 |
-| [[paper-to-cwl]] | Direct path from a paper to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 2 |
-| [[paper-to-galaxy]] | Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate. | draft | 2026-04-30 | 2 |
 
 ## Molds
 
@@ -75,6 +75,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-collection-patterns]] | Choose a Galaxy collection operation or map-over recipe from the current and required data shapes. | draft | 2026-09-22 | 2 |
+| [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-09-22 | 2 |
 | [[collection-split-identifier-via-rules]] | Use Apply Rules regex columns to split one collection identifier into nested list identifiers. | draft | 2026-09-15 | 3 |
 | [[harmonize-by-sortlist-from-identifiers]] | Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers. | draft | 2026-09-15 | 3 |
 | [[sync-collections-by-identifier]] | Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections. | draft | 2026-09-15 | 3 |
@@ -126,9 +128,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[tabular-sql-query]] | Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars. | draft | 2026-05-03 | 2 |
 | [[tabular-synthesize-bed-from-3col]] | Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants. | draft | 2026-05-03 | 2 |
 | [[tabular-to-collection-by-row]] | Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key. | draft | 2026-05-03 | 2 |
-| [[galaxy-collection-patterns]] | Use this MOC to choose corpus-grounded Galaxy collection transformation patterns. | draft | 2026-05-02 | 1 |
 | [[galaxy-conditionals-patterns]] | Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns. | draft | 2026-05-02 | 1 |
-| [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-05-02 | 1 |
 
 ## Source Patterns
 

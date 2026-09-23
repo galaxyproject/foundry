@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 7,
     "content_hash": "1f98fd5cf9a54fd81e48db957f7451760f5e97629748f3d39fd66dc59b2ac765",
-    "commit": "88fdfdfd1a41f6d5ade682a238811441d1eac61b"
+    "commit": "c3dc1c5df041ea374eca87c0960c8ecab51a999d"
   },
-  "cast_at": "2026-09-23T00:56:56.619Z",
+  "cast_at": "2026-09-23T01:10:37.466Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -40,8 +40,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
       "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
-      "src_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
-      "dst_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
+      "src_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
+      "dst_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
       "source": "deterministic"
     },
     {
