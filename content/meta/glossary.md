@@ -50,7 +50,7 @@ Alphabetical.
 
 **IWC** — Intergalactic Workflow Commission. Curates the canonical set of high-quality Galaxy workflows. The Foundry's foundational corpus.
 
-**IWC exemplar** — one workflow from the IWC corpus. The cleaned `gxformat2` versions live in `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-format2/`. Pattern pages cite exemplars; Molds reference them as ground truth; casting may inline references; evaluations exercise generated skills against them.
+**IWC exemplar** — one workflow from the IWC corpus. The cleaned `gxformat2` versions materialize in `workflow-fixtures/iwc-format2/` in the Foundry checkout. Pattern pages cite exemplars; Molds reference them as ground truth; casting may inline references; evaluations exercise generated skills against them.
 
 **Knowledge Base (KB)** — the inspectable, human-readable source of truth at the center of the instance: the standalone site where Pipelines, Molds, pattern pages, CLI manual pages, and IO schemas live and from which casting reads. Authored to be *read and learned by a human*, not merely stored for an agent to retrieve. The KB is the source; a **skill artifact** is the package. Colloquially *the Foundry* (see **Foundry**).
 
