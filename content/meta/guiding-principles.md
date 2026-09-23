@@ -87,7 +87,7 @@ Agent skills are useful. Orchestration systems are useful. The agentic-coding la
 
 The Foundry should not bind its core knowledge to one agent runtime, editor, model vendor, or orchestration framework. Its source artifacts should be abstract enough to cast into several targets and explicit enough that each target can be audited.
 
-This is why Molds are not written as runtime-specific skills. A Mold is a typed reference manifest plus a procedural skeleton. Casting turns that source artifact into a portable Agent Skill, while thin manifests and usage views adapt packaging and invocation for Claude Code and Codex. The Foundry remains the source of truth.
+This is why Molds are not written as runtime-specific skills. A Mold is a typed reference manifest plus a procedural skeleton. Casting turns that source artifact into a portable Agent Skill, while thin manifests and usage views adapt packaging and invocation for Claude Code, Codex, and Antigravity. The Foundry remains the source of truth.
 
 The boundary matters:
 
