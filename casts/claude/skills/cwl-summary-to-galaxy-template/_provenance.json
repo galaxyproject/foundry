@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
+    "commit": "70ece0120a3eca38fb5ce97c8fc5ae383556fe75"
   },
-  "cast_at": "2026-09-23T16:20:44.197Z",
+  "cast_at": "2026-09-23T16:32:11.667Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -211,8 +211,8 @@
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "4fe42382f99655115c53c1afde0da0d0556ad77984da7d0ffa8ab725ea260aa3",
-      "dst_hash": "4fe42382f99655115c53c1afde0da0d0556ad77984da7d0ffa8ab725ea260aa3",
+      "src_hash": "7d6409f71d643bff0a47b495be6f35d9544637351b420a555ef787a160210cea",
+      "dst_hash": "7d6409f71d643bff0a47b495be6f35d9544637351b420a555ef787a160210cea",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
