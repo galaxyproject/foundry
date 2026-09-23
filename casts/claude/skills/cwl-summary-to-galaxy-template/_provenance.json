@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "c3dc1c5df041ea374eca87c0960c8ecab51a999d"
+    "commit": "6f1e1941a2ba41ec1b68cefcb0ef8cf509797f34"
   },
-  "cast_at": "2026-09-23T01:10:28.330Z",
+  "cast_at": "2026-09-23T13:57:26.011Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded conditional pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "cbeeb61caaa4f9e09cc7a209f76c3d84b7a9e6934610cb7eac1c2ec4fead70a1",
-      "dst_hash": "cbeeb61caaa4f9e09cc7a209f76c3d84b7a9e6934610cb7eac1c2ec4fead70a1",
+      "src_hash": "6214c9578552f00331333e8c2b7d16dfb2707e3aa33504e342ef9e87afcfa8d5",
+      "dst_hash": "6214c9578552f00331333e8c2b7d16dfb2707e3aa33504e342ef9e87afcfa8d5",
       "source": "deterministic"
     },
     {
