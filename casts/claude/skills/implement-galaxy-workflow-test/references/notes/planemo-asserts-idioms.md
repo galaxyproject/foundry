@@ -66,16 +66,19 @@ Use `has_text` for a literal substring, `has_line` for a complete line, and thei
   outputs:
     report:
       asserts:
-        - has_text: {text: "Total Sequences"}
-        - has_text: {text: "Passed"}
-        - has_n_lines: {n: 12}
+        - has_text:
+            text: "Total Sequences"
+        - has_text:
+            text: "Passed"
+        - has_n_lines:
+            n: 12
 ```
 
-The names and count above are illustrative. Replace them with values observed from the fixture being tested. A negative content assertion such as `has_text: {text: "ERROR", negate: true}` is useful when absence of that marker is part of the output contract. A workflow-level `expect_failure:` case is useful when the workflow itself promises to reject an invalid input. Neither is an automatic requirement for every workflow.
+The names and count above are illustrative. Replace them with values observed from the fixture being tested. A `has_text` assertion with `text: "ERROR"` and `negate: true` is useful when absence of that marker is part of the output contract. A workflow-level `expect_failure:` case is useful when the workflow itself promises to reject an invalid input. Neither is an automatic requirement for every workflow.
 
 ## 5. Collection and structured-output examples
 
-For a collection output, `element_tests:` maps produced element identifiers to assertions. Use it at each level of a nested output collection too. Galaxy also accepts `elements:` as an alias at either level and some IWC tests use that spelling for nested checks, but a different key is not required for nesting. This differs from a `job:` collection input, where `elements:` lists the input fixtures. The output collection's `attributes:` or `element_count:` can check shape, while element assertions check results. See [[tests-format]] and [Galaxy's collection-test parser](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tool_util/parser/interface.py#L860-L870).
+For a collection output, `element_tests:` maps produced element identifiers to assertions. Use it at each level of a nested output collection too, as the [IWC SRA manifest test](https://github.com/galaxyproject/iwc/blob/main/workflows/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs-tests.yml#L12-L27) does for samples and their forward/reverse files. Galaxy also accepts `elements:` as an alias at either level, but a different key is not required for nesting. This differs from a `job:` collection input, where `elements:` lists the input fixtures. The output collection's `attributes:` or `element_count:` can check shape, while element assertions check results. See [[tests-format]] and [Galaxy's collection-test parser](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tool_util/parser/interface.py#L860-L870).
 
 ```yaml
 - doc: Check selected collection members
