@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 6,
-    "content_hash": "c8679c4890f5cec760b1852f5aadcaade0912397b1f4180b912f7a3d3ff86081",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "revision": 7,
+    "content_hash": "85fc9e8b90b142123652f8c8677017fae3b873dfb20cd6060db5f37e6507d7ea",
+    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
   },
-  "cast_at": "2026-09-21T17:25:33.665Z",
+  "cast_at": "2026-09-22T18:29:19.683Z",
   "refs": [
     {
       "kind": "research",
@@ -86,6 +86,13 @@
         "inherited_schema": "[[summary-cwl]]",
         "producers": [
           "summarize-cwl"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the direct PAPER / INTERVIEW → GALAXY pipelines.",
+        "producers": [
+          "freeform-summary-to-galaxy-interface"
         ]
       },
       {

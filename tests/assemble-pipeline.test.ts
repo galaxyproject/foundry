@@ -77,6 +77,35 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(loop.skill).toBe("advance-galaxy-draft-step");
   });
 
+  it("keeps Workflow Brief planning opt-in for the established direct pipelines", () => {
+    for (const slug of ["paper-to-galaxy", "interview-to-galaxy"]) {
+      const assembly = JSON.parse(
+        readFileSync(
+          path.join(repoRoot, `casts/claude/skills/pipeline-${slug}/_assembly.json`),
+          "utf8",
+        ),
+      );
+      const skills = assembly.phases
+        .filter((phase: { kind: string }) => phase.kind === "mold")
+        .map((phase: { skill: string }) => phase.skill);
+      expect(skills).toContain("freeform-summary-to-galaxy-interface");
+      expect(skills).toContain("freeform-summary-to-galaxy-test-plan");
+      expect(skills.some((skill: string) => skill.includes("workflow-brief"))).toBe(false);
+    }
+
+    const briefAssembly = JSON.parse(
+      readFileSync(
+        path.join(repoRoot, "casts/claude/skills/pipeline-workflow-brief-to-galaxy/_assembly.json"),
+        "utf8",
+      ),
+    );
+    expect(
+      briefAssembly.phases
+        .filter((phase: { kind: string }) => phase.kind === "mold")
+        .map((phase: { skill: string }) => phase.skill),
+    ).toContain("workflow-brief-to-galaxy-interface");
+  });
+
   it("documents the uniform run options and feedback lifecycle", () => {
     const skill = readFileSync(
       path.join(repoRoot, "casts/claude/skills/pipeline-nextflow-to-galaxy/SKILL.md"),

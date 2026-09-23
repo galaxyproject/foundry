@@ -1,0 +1,296 @@
+---
+import { getCollection } from 'astro:content';
+import { groupPipelinesByJourney, PIPELINE_ROUTE_LABELS } from '../lib/pipeline-journeys';
+import { base } from '../lib/site-base';
+
+const groups = groupPipelinesByJourney(await getCollection('pipelines'));
+const direct = groups['direct-build'];
+const plan = groups.plan;
+const buildFromPlan = groups['build-from-plan'][0];
+const existing = groups['existing-workflow'];
+---
+<section id="choose-route" class="route-section" aria-labelledby="route-heading">
+  <div class="section-rule">
+    <h2 id="route-heading">Choose your route</h2>
+    <span class="section-tail">/ the same building blocks, with or without a planning artifact</span>
+  </div>
+
+  <div class="route-intro">
+    <p>
+      Choose Direct Build when you want source-to-target work in one pipeline. Choose Plan &amp; Build
+      when you want a separate, durable Workflow Brief that an expert can review and edit before implementation.
+    </p>
+    <a href={`${base}/usage/#run-pipelines`}>Commands and installation →</a>
+  </div>
+
+  <div class="route-layout">
+    <article class="route-panel direct-panel" aria-labelledby="direct-heading">
+      <header class="route-panel-header">
+        <span class="route-number font-mono">01</span>
+        <div>
+          <p class="route-kicker">One assembled pipeline</p>
+          <h3 id="direct-heading">{PIPELINE_ROUTE_LABELS.direct}</h3>
+          <p>Move from source to target without creating a Workflow Brief. Review checkpoints still apply.</p>
+        </div>
+      </header>
+      <ul class="route-list list-none p-0 m-0">
+        {direct.map((pipeline) => (
+          <li>
+            <a href={`${base}/pipelines/${pipeline.slug}/`} class="route-link">
+              <span class="route-link-title font-mono">{pipeline.entry.data.title}</span>
+              <span class="route-link-meta">{pipeline.entry.data.phases.length} phases</span>
+              <span class="route-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </article>
+
+    <article class="route-panel plan-panel" aria-labelledby="plan-heading">
+      <header class="route-panel-header">
+        <span class="route-number font-mono">02</span>
+        <div>
+          <p class="route-kicker">A reviewable planning boundary</p>
+          <h3 id="plan-heading">{PIPELINE_ROUTE_LABELS.planAndBuild}</h3>
+          <p>Create a Workflow Brief, refine it with an expert, then build from the agreed plan.</p>
+        </div>
+      </header>
+      <ol class="plan-flow">
+        <li>
+          <span class="flow-step font-mono">1</span>
+          <div class="flow-content">
+            <strong>Create the brief</strong>
+            <div class="plan-links">
+              {plan.map((pipeline) => (
+                <a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.entry.data.title}</a>
+              ))}
+            </div>
+          </div>
+        </li>
+        <li class="review-step">
+          <span class="flow-step font-mono">2</span>
+          <div class="flow-content">
+            <strong>Expert review &amp; edit</strong>
+            <span>Inspect decisions, resolve blockers, and revise the Workflow Brief.</span>
+          </div>
+        </li>
+        <li>
+          <span class="flow-step font-mono">3</span>
+          <div class="flow-content">
+            <strong>Build from the brief</strong>
+            {buildFromPlan && (
+              <a class="build-link font-mono" href={`${base}/pipelines/${buildFromPlan.slug}/`}>
+                {buildFromPlan.entry.data.title} <span aria-hidden="true">→</span>
+              </a>
+            )}
+          </div>
+        </li>
+      </ol>
+    </article>
+  </div>
+
+  <aside class="existing-strip" aria-labelledby="existing-heading">
+    <div>
+      <p class="route-kicker">Already have a Galaxy workflow?</p>
+      <h3 id="existing-heading">Review, mature, or update it in place.</h3>
+    </div>
+    <ul class="existing-links list-none p-0 m-0">
+      {existing.map((pipeline) => (
+        <li><a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.entry.data.title} <span aria-hidden="true">→</span></a></li>
+      ))}
+    </ul>
+  </aside>
+</section>
+
+<style>
+  .route-section {
+    scroll-margin-top: 5rem;
+    margin-bottom: 3.5rem;
+  }
+  .route-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 2rem;
+    margin: 0.25rem 0 1.25rem;
+  }
+  .route-intro p {
+    max-width: 48rem;
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+  .route-intro a {
+    flex: none;
+    color: var(--color-link);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .route-intro a:hover { text-decoration: underline; }
+  .route-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(22rem, 1.1fr);
+    gap: 1rem;
+  }
+  .route-panel {
+    border: 1px solid var(--color-border);
+    border-radius: 0.8rem;
+    background: var(--color-surface-raised);
+    overflow: hidden;
+  }
+  .route-panel-header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.9rem;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .route-number {
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    padding-top: 0.25rem;
+  }
+  .route-kicker {
+    margin: 0 0 0.25rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .route-panel h3,
+  .existing-strip h3 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 1.35rem;
+    letter-spacing: -0.015em;
+  }
+  .route-panel-header p:last-child {
+    margin: 0.35rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .route-list li + li { border-top: 1px solid var(--color-border-subtle); }
+  .route-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.82rem 1.1rem;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.15s ease, padding-left 0.15s ease;
+  }
+  .route-link:hover,
+  .route-link:focus-visible {
+    background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+    padding-left: 1.35rem;
+  }
+  .route-link-title {
+    color: var(--color-link);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .route-link-meta {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+  }
+  .route-arrow { color: var(--color-accent); }
+  .plan-flow {
+    list-style: none;
+    margin: 0;
+    padding: 1.15rem;
+    display: grid;
+    gap: 0;
+  }
+  .plan-flow > li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0.75rem;
+    min-height: 4.5rem;
+    padding-bottom: 1rem;
+  }
+  .plan-flow > li:last-child { min-height: 0; padding-bottom: 0; }
+  .plan-flow > li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 0.95rem;
+    top: 2rem;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-border);
+  }
+  .flow-step {
+    display: grid;
+    place-items: center;
+    align-self: start;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    z-index: 1;
+  }
+  .review-step .flow-step {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+    color: var(--color-text-primary);
+  }
+  .flow-content {
+    display: grid;
+    gap: 0.35rem;
+    padding-top: 0.25rem;
+    font-size: 0.87rem;
+  }
+  .flow-content > span { color: var(--color-text-secondary); }
+  .plan-links { display: flex; flex-wrap: wrap; gap: 0.35rem 0.75rem; }
+  .plan-links a,
+  .build-link {
+    color: var(--color-link);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .plan-links a:hover,
+  .build-link:hover { text-decoration: underline; }
+  .existing-strip {
+    display: grid;
+    grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.2fr);
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 1.1rem 1.25rem;
+    border-left: 3px solid var(--color-accent);
+    background: color-mix(in srgb, var(--color-brand) 7%, var(--color-surface-raised));
+  }
+  .existing-strip h3 { font-size: 1rem; }
+  .existing-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.45rem 1.15rem;
+  }
+  .existing-links a {
+    color: var(--color-link);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .existing-links a:hover { text-decoration: underline; }
+  @media (max-width: 800px) {
+    .route-layout { grid-template-columns: 1fr; }
+    .route-intro { display: block; }
+    .route-intro a { display: inline-block; margin-top: 0.75rem; }
+    .existing-strip { grid-template-columns: 1fr; }
+    .existing-links { justify-content: flex-start; }
+  }
+  @media (max-width: 460px) {
+    .route-link { grid-template-columns: 1fr auto; }
+    .route-link-meta { display: none; }
+  }
+</style>

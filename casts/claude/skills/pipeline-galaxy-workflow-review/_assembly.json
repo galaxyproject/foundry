@@ -1,6 +1,6 @@
 {
   "source_pipeline": "galaxy-workflow-review",
-  "source_revision": 1,
+  "source_revision": 2,
   "harness_name": "pipeline-galaxy-workflow-review",
   "options": ["use-subagents", "checkpoint", "feedback"],
   "required_tools": [

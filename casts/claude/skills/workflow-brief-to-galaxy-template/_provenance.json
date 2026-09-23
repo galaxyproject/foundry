@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "e14d7fc2e0b7a49f2ea2b611adaa81f287159f34c73626b447b7413a9f61215e",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
   },
-  "cast_at": "2026-09-21T17:25:37.514Z",
+  "cast_at": "2026-09-22T18:22:03.095Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -328,6 +328,9 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

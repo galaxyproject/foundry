@@ -4,10 +4,11 @@ title: CWL → GALAXY
 tags:
   - source/cwl
   - target/galaxy
+  - journey/direct-build
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+revised: 2026-09-22
+revision: 3
 summary: "Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction."
 phases:
   - mold: "[[summarize-cwl]]"

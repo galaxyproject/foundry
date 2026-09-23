@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-09-21
-revision: 4
+revised: 2026-09-22
+revision: 5
 summary: "Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs."
 input_artifacts:
   - id: galaxy-workflow-draft
@@ -82,6 +82,7 @@ references:
     purpose: "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce."
     trigger: "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on."
 related_molds:
+  - "[[freeform-summary-to-galaxy-template]]"
   - "[[workflow-brief-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[compare-against-iwc-exemplar]]"

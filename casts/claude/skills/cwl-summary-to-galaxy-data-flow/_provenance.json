@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 3,
     "content_hash": "ed3f1d14cab3958ec321bcc108dd6274bec965cd502763ce0d5abd060a90f28b",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
   },
-  "cast_at": "2026-09-21T17:25:33.003Z",
+  "cast_at": "2026-09-22T18:21:55.875Z",
   "refs": [
     {
       "kind": "pattern",
@@ -238,6 +238,9 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

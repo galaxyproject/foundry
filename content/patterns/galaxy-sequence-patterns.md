@@ -13,8 +13,8 @@ tags:
   - topic/sequence-transform
 status: draft
 created: 2026-06-10
-revised: 2026-09-21
-revision: 3
+revised: 2026-09-23
+revision: 4
 summary: "Use this MOC to choose corpus-grounded Galaxy operations on sequence records (FASTA) — interconvert, reformat, merge, length, extract/mask by region."
 related_notes:
   - "[[iwc-sequence-operations-survey]]"
@@ -31,6 +31,7 @@ related_molds:
   - "[[cwl-summary-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
+  - "[[freeform-summary-to-galaxy-template]]"
   - "[[workflow-brief-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 ---

@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 7,
     "content_hash": "1f98fd5cf9a54fd81e48db957f7451760f5e97629748f3d39fd66dc59b2ac765",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
   },
-  "cast_at": "2026-09-21T17:25:34.456Z",
+  "cast_at": "2026-09-22T18:21:58.942Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -286,6 +286,9 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

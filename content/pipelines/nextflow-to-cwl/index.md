@@ -4,10 +4,11 @@ title: NEXTFLOW → CWL
 tags:
   - source/nextflow
   - target/cwl
+  - journey/direct-build
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+revised: 2026-09-22
+revision: 3
 summary: "Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set."
 harness_notes:
   - "NF brings real test fixtures, so `nextflow-test-to-cwl-test-plan` replaces the `test-data-resolution` chain that paper-sourced pipelines need."

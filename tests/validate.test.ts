@@ -157,7 +157,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "X",
         phases: [{ mold: "[[summarize-paper]]" }],
       }),
@@ -166,11 +166,29 @@ describe("validateData (per-file)", () => {
     expect(r.errors).toEqual([]);
   });
 
+  it("requires exactly one registered journey tag on a pipeline", () => {
+    for (const tags of [
+      ["target/galaxy"],
+      ["target/galaxy", "journey/direct-build", "journey/plan"],
+    ]) {
+      const r = validateData(
+        baseRequired({
+          type: "pipeline",
+          tags,
+          title: "X",
+          phases: [{ mold: "[[summarize-paper]]" }],
+        }),
+        schema,
+      );
+      expect(r.errors.some((error) => /exactly one journey facet tag/.test(error))).toBe(true);
+    }
+  });
+
   it("accepts pipeline harness_notes array of strings", () => {
     const r = validateData(
       baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "X",
         phases: [{ mold: "[[summarize-paper]]" }],
         harness_notes: ["Replaces the prior-art hand-authored nf-to-galaxy skill."],
@@ -184,7 +202,7 @@ describe("validateData (per-file)", () => {
     const r = validateData(
       baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "X",
         phases: [{ mold: "[[summarize-paper]]" }],
         harness_notes: [{ note: "wrong shape" }],
@@ -575,7 +593,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [{ mold: "[[some-pattern]]" }],
       }),
@@ -598,7 +616,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [{ mold: "[[mold-a]]" }],
       }),
@@ -622,7 +640,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [{ mold: "[[mold-a]]" }],
       }),
@@ -642,7 +660,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [{ mold: "[[mold-a]]" }],
       }),
@@ -659,7 +677,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [{ mold: "[[mold-a]]" }],
       }),
@@ -732,7 +750,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [{ mold: "[[mold-a]]" }],
       }),
@@ -763,7 +781,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [{ mold: "[[mold-a]]" }],
       }),
@@ -780,7 +798,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: [
           {
@@ -1363,7 +1381,7 @@ describe("validateDirectory (cross-file)", () => {
           path.join(dir, folder, "index.md"),
           baseRequired({
             type: "pipeline",
-            tags: ["target/galaxy"],
+            tags: ["target/galaxy", "journey/direct-build"],
             title: "P",
             phases: [{ mold: "[[m]]" }],
           }),
@@ -2268,7 +2286,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/bad-order/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "Bad Order",
         phases: [{ mold: "[[consumer]]" }, { mold: "[[producer]]" }],
       }),
@@ -2303,7 +2321,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/optional-input/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "Optional Input",
         phases: [{ mold: "[[optional-consumer]]" }],
       }),
@@ -2373,7 +2391,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/p/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "P",
         phases: pipelinePhases,
       }),
@@ -2448,7 +2466,7 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "pipelines/zeta/index.md"), {
       ...baseRequired({
         type: "pipeline",
-        tags: ["target/galaxy"],
+        tags: ["target/galaxy", "journey/direct-build"],
         title: "Zeta",
         phases: [{ mold: "[[consumer-x]]" }],
       }),
