@@ -6,9 +6,9 @@
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "1a5f10ecf90158c4fdaf292055ca73dcd6dd39e7253fe417b62020c3c4ec8be9",
-    "commit": "320a34c0e0abbb6d6af7b83673db5869617bd7d4"
+    "commit": "b73c533c239eff7cf6d0413f69b7bc89de9da6b6"
   },
-  "cast_at": "2026-09-23T15:11:49.942Z",
+  "cast_at": "2026-09-23T15:27:29.449Z",
   "refs": [
     {
       "kind": "research",
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the assertion family and tolerance for each change-set-driven expected output by output type.",
       "trigger": "When turning a change-set behavioral delta into assertion intent and a tolerance.",
-      "src_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
-      "dst_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
+      "src_hash": "ed9bb24e63a2e365ee37df2b9b637a022de323a485e091249bf16ef850ef3807",
+      "dst_hash": "ed9bb24e63a2e365ee37df2b9b637a022de323a485e091249bf16ef850ef3807",
       "source": "deterministic"
     },
     {
