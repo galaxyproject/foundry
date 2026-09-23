@@ -4,11 +4,11 @@
   "mold": {
     "name": "cwl-test-to-galaxy-test-plan",
     "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
-    "revision": 2,
-    "content_hash": "b708f94d8cbc0698ed076f62ff6d6194da5ae34c3cdb6443597c433eeca625e3",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "revision": 3,
+    "content_hash": "b55214a0b2bf18e61a75a6c7aa32cf69992aa703480b754e067707dfc262813e",
+    "commit": "4d28ef482bf234798207eebfb5886cbdc0bd110a"
   },
-  "cast_at": "2026-09-13T20:58:26.983Z",
+  "cast_at": "2026-09-23T14:36:05.309Z",
   "refs": [
     {
       "kind": "research",
@@ -110,7 +110,7 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "corpus-observed",
-      "purpose": "Read the CWL summary's test cases, job inputs, expected outputs, and assertion evidence.",
+      "purpose": "Read the CWL summary's test cases, job-file paths, expected-output references, and assertion evidence.",
       "license": "MIT",
       "src_hash": "6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef",
       "dst_hash": "6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef",
@@ -148,7 +148,7 @@
     "consumes": [
       {
         "id": "summary-cwl",
-        "description": "Structured CWL summary from [[summarize-cwl]]; carries test fixtures, job inputs, expected outputs.",
+        "description": "Structured CWL summary from [[summarize-cwl]]; lists discovered test cases, job-file paths, and expected-output references.",
         "inherited_schema": "[[summary-cwl]]",
         "producers": [
           "summarize-cwl"
