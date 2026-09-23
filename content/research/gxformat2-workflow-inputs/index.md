@@ -28,48 +28,24 @@ summary: "Authoring guidance for gxformat2 workflow input types, constraints, de
 
 # gxformat2 workflow inputs
 
-The top-level `inputs:` section declares the values a caller supplies when invoking a Galaxy workflow. Choose each input's type and public name from the data the workflow actually consumes. A workflow test addresses the same public names in its `job:` mapping, so verify the effective names after import or conversion. [[galaxy-workflow-testability-design]] covers that test interface.
+Top-level `inputs:` names the values a caller supplies to a Galaxy workflow. Choose the input type from the value the workflow consumes, and give it a stable name that a test can use as a `job:` key. See [[galaxy-workflow-testability-design]] for the test interface.
 
-## Choose the input type
+## Match the input's shape
 
-| Declare `type` | Galaxy input | Use when |
+| Value | gxformat2 `type` | Other fields to consider |
 |---|---|---|
-| `data` | Dataset input | The caller supplies one dataset. |
-| `collection` | Dataset collection input | The caller supplies a grouped set of datasets. Declare `collection_type` when its shape matters. |
-| `string`, `int`, `float`, `boolean` | Workflow parameter input | The caller supplies a scalar value to one or more downstream steps. |
+| One dataset | `data` or `File` | `format` for accepted Galaxy datatypes |
+| A dataset collection | `collection` | `collection_type` for its shape, `format` for member datatypes |
+| A scalar parameter | `string`, `int`, `float`, or `boolean` | `default` or choices where appropriate |
 
-These are the spellings emitted by current gxformat2 normalization. Import also accepts compatibility spellings, including `File` for `data`, `text` for `string`, and `integer` for `int`. Native Galaxy parameter state uses `text` and `integer`. The broader primitive enum in [[gxformat2-schema]] includes `long` and `double`, but that enum alone does not establish a usable native workflow parameter mapping. For new inputs, choose a type with a defined conversion and test it after import.
+Both `data` and `File` describe a single workflow dataset input. Current normalized gxformat2 export writes `data`, but `File` is accepted on import and appears in upstream examples. This export spelling is not a reason to rewrite a working hand-authored workflow. The source schema also accepts aliases such as `text` and `integer`; [[gxformat2-schema]] records the accepted vocabulary. A test fixture's `class: File` is separate from the workflow input's `type`.
 
-Use `type: File` in a workflow **test job** to stage a file. That test fixture syntax is separate from a workflow's `type: data` declaration. The gxformat2 converter also supports simple arrays of scalar input types, which become native parameter inputs with `multiple: true`. Test the actual invocation shape before using one in a new interface.
+For a collection, declare the shape the workflow needs. Galaxy defaults an omitted `collection_type` to `list`; `list:paired` means a list of paired datasets. The [IWC CellPlex workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex.ga) has two `list:paired` FASTQ inputs and a separate `list` of CSV sample mappings. See [[galaxy-collection-semantics]] for other shapes and [[galaxy-datatypes-conf]] for datatype extensions.
 
-## Constrain datasets and collections
+## Set omission and choices deliberately
 
-`format` filters the Galaxy datatype extensions accepted by a `data` or `collection` input. Declare only extensions the downstream tools can really consume. An incorrect filter can hide a valid dataset or admit data the tool cannot interpret. See [[galaxy-datatypes-conf]] for extension names.
+`optional: true` permits a missing input. `default` supplies a value when an input is missing or null; it does not itself make the input optional. The [IWC Scanpy workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.ga) combines `format: [mtx]` for its Matrix dataset with an optional text parameter whose default is `MT-`.
 
-For `type: collection`, `collection_type` describes the expected shape. If omitted, Galaxy uses `list`. Nested types use colons, such as `list:paired`. Match the grouping the workflow will process, then check that a test fixture can supply that shape. [[galaxy-collection-semantics]] explains collection structures. Current gxformat2 also declares `column_definitions` for sample-sheet collections and `fields` for record collections. Use those when the workflow requires a row or record schema, and validate the resulting workflow with Galaxy.
+For text parameters, `restrictions` defines a closed choice list, `suggestions` offers choices while allowing other text, and `restrictOnConnections` derives choices from connected select inputs. Current gxformat2 declares and converts these fields, although the older vendored JSON Schema in [[gxformat2-schema]] omits them. If a numeric bound matters, check it after import: gxformat2 declares `min` and `max`, but its current native conversion does not carry them into parameter state.
 
-The pinned [IWC CellPlex workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex.ga) declares two `list:paired` FASTQ inputs and a separate `list` of CSV sample mappings. Those are distinct structures, even though each is a collection input.
-
-## Decide whether omission is allowed
-
-`optional` and `default` answer different questions. Set `optional: true` when the caller may omit an input. Use `default` when a missing or null input should receive a specific value. A declared default does not itself make an input optional. This distinction applies to dataset, collection, and parameter inputs, although a dataset default must resolve to a usable Galaxy dataset at invocation.
-
-The pinned [IWC Scanpy workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.ga) declares `format: [tabular]` for Genes and `format: [mtx]` for Matrix. Its optional mitochondrial-gene text parameter also has a default of `MT-`. These declarations describe different interface decisions: accepted data formats, permission to omit a parameter, and the value used when it is omitted.
-
-The gxformat2 source schema also declares inclusive `min` and `max` bounds for numeric inputs. Current gxformat2 conversion does not copy them into native parameter state, so do not rely on those fields to enforce a bound after import. Check the imported form and an invocation if a bound matters to the analysis.
-
-## Present choices for text parameters
-
-Current gxformat2 declares three fields for `type: string` inputs:
-
-| Field | Runtime effect | Use when |
-|---|---|---|
-| `restrictions` | Presents a closed choice list as a select input. | Only listed values are valid. |
-| `suggestions` | Offers values while keeping the input as free text. | Listed values help users, but other values remain valid. |
-| `restrictOnConnections: true` | Tries to derive choices from connected tool or subworkflow select inputs. | The downstream selectable values should govern the workflow input. |
-
-Static list entries may be strings or `{value, label}` records. Connection-derived choices can fall back to free text when Galaxy cannot obtain the downstream options. Confirm the resulting invocation form, especially if tool options depend on another parameter. These fields are present in gxformat2's current SALAD source and conversion code. Foundry's older vendored structural JSON Schema omits them, so passing that schema cannot validate their shape. [[gxformat2-schema]] describes that validator's limits.
-
-## Check the imported interface
-
-Inspect the gxformat2 input declarations, then import or convert the workflow and confirm its effective input names, native types, collection shapes, datatype filters, and choices. Supply a representative `job:` in a workflow test and run it. This catches differences that a structural JSON Schema cannot prove, such as a usable dataset default, a valid collection type for the target Galaxy instance, or dynamic option behavior. See [[iwc-test-data-conventions]] for test input shapes.
+After import or conversion, inspect the effective input names, types, collection shapes, and choices. Run a workflow test with representative `job:` values to check the interface Galaxy actually uses. [[iwc-test-data-conventions]] covers fixture shapes.
