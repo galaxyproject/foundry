@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
     "revision": 7,
     "content_hash": "2a8aaa5228eaa632c760ad10de9bfcdc1a7e4f034332b68cadc8a7f92cbe1e8c",
-    "commit": "b73c533c239eff7cf6d0413f69b7bc89de9da6b6"
+    "commit": "64423f2dedd194e3d1f7e9106abe80d5cecfbbd9"
   },
-  "cast_at": "2026-09-23T15:27:35.917Z",
+  "cast_at": "2026-09-23T15:45:47.656Z",
   "refs": [
     {
       "kind": "research",
@@ -113,8 +113,8 @@
       "evidence": "corpus-observed",
       "purpose": "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs.",
       "trigger": "When turning Nextflow expected outputs or snapshots into Galaxy test-plan assertions.",
-      "src_hash": "ed9bb24e63a2e365ee37df2b9b637a022de323a485e091249bf16ef850ef3807",
-      "dst_hash": "ed9bb24e63a2e365ee37df2b9b637a022de323a485e091249bf16ef850ef3807",
+      "src_hash": "a96c03c872b474dac322e553505200a08d42c5964de9cfdb7d8fb085524c17b8",
+      "dst_hash": "a96c03c872b474dac322e553505200a08d42c5964de9cfdb7d8fb085524c17b8",
       "source": "deterministic"
     },
     {

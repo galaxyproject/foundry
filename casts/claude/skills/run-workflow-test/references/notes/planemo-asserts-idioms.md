@@ -75,7 +75,7 @@ The names and count above are illustrative. Replace them with values observed fr
 
 ## 5. Collection and structured-output examples
 
-For a collection output, `element_tests:` maps element identifiers to assertions. The identifier must match the produced collection. A nested collection may use `elements:` at the inner level, as in [[iwc-test-data-conventions]]. The collection's `attributes:` or `element_count:` can check shape, while element assertions check results.
+For a collection output, `element_tests:` maps produced element identifiers to assertions. Use it at each level of a nested output collection too. Galaxy also accepts `elements:` as an alias at either level and some IWC tests use that spelling for nested checks, but a different key is not required for nesting. This differs from a `job:` collection input, where `elements:` lists the input fixtures. The output collection's `attributes:` or `element_count:` can check shape, while element assertions check results. See [[tests-format]] and [Galaxy's collection-test parser](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tool_util/parser/interface.py#L860-L870).
 
 ```yaml
 - doc: Check selected collection members
