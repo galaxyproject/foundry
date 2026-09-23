@@ -34,11 +34,11 @@ Top-level `inputs:` names the values a caller supplies to a Galaxy workflow. Cho
 
 | Value | gxformat2 `type` | Other fields to consider |
 |---|---|---|
-| One dataset | `data` or `File` | `format` for accepted Galaxy datatypes |
+| One dataset | `data` | `format` for accepted Galaxy datatypes |
 | A dataset collection | `collection` | `collection_type` for its shape, `format` for member datatypes |
 | A scalar parameter | `string`, `int`, `float`, or `boolean` | `default` or choices where appropriate |
 
-Both `data` and `File` describe a single workflow dataset input. Current normalized gxformat2 export writes `data`, but `File` is accepted on import and appears in upstream examples. This export spelling is not a reason to rewrite a working hand-authored workflow. The source schema also accepts aliases such as `text` and `integer`; [[gxformat2-schema]] records the accepted vocabulary. A test fixture's `class: File` is separate from the workflow input's `type`.
+Use `data` for a single dataset input. It is the common spelling in Galaxy's gxformat2 workflow fixtures and in normalized gxformat2 exports. [[gxformat2-schema]] lists other accepted input types.
 
 For a collection, declare the shape the workflow needs. Galaxy defaults an omitted `collection_type` to `list`; `list:paired` means a list of paired datasets. The [IWC CellPlex workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex.ga) has two `list:paired` FASTQ inputs and a separate `list` of CSV sample mappings. See [[galaxy-collection-semantics]] for other shapes and [[galaxy-datatypes-conf]] for datatype extensions.
 
@@ -46,6 +46,6 @@ For a collection, declare the shape the workflow needs. Galaxy defaults an omitt
 
 `optional: true` permits a missing input. `default` supplies a value when an input is missing or null; it does not itself make the input optional. The [IWC Scanpy workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.ga) combines `format: [mtx]` for its Matrix dataset with an optional text parameter whose default is `MT-`.
 
-For text parameters, `restrictions` defines a closed choice list, `suggestions` offers choices while allowing other text, and `restrictOnConnections` derives choices from connected select inputs. Current gxformat2 declares and converts these fields, although the older vendored JSON Schema in [[gxformat2-schema]] omits them. If a numeric bound matters, check it after import: gxformat2 declares `min` and `max`, but its current native conversion does not carry them into parameter state.
+For text parameters, `restrictions` defines a closed choice list, `suggestions` offers choices while allowing other text, and `restrictOnConnections` derives choices from connected select inputs. Current gxformat2 declares and converts these fields, although the older vendored JSON Schema in [[gxformat2-schema]] omits them. Do not rely on gxformat2 `min` or `max` to constrain a numeric input: current conversion drops those bounds. Verify any required range in the imported Galaxy workflow.
 
 After import or conversion, inspect the effective input names, types, collection shapes, and choices. Run a workflow test with representative `job:` values to check the interface Galaxy actually uses. [[iwc-test-data-conventions]] covers fixture shapes.
