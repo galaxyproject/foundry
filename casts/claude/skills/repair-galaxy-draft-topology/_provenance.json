@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 3,
     "content_hash": "cafba235f3bb41612216f766eb390ee6fddcb1192ddf445b6d9eb7f2c132678c",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "88fdfdfd1a41f6d5ade682a238811441d1eac61b"
   },
-  "cast_at": "2026-09-13T20:58:29.614Z",
+  "cast_at": "2026-09-23T00:57:03.125Z",
   "refs": [
     {
       "kind": "pattern",
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce.",
       "trigger": "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on.",
-      "src_hash": "e580e71fabec9132fbdf3165cc092fcdb96a8b9bf7996b3b9b6a4b0a627065cb",
-      "dst_hash": "e580e71fabec9132fbdf3165cc092fcdb96a8b9bf7996b3b9b6a4b0a627065cb",
+      "src_hash": "5a0e96b936f4668e23804a63923e336177f4ba64dfbc7926d429f80a5b07d06f",
+      "dst_hash": "5a0e96b936f4668e23804a63923e336177f4ba64dfbc7926d429f80a5b07d06f",
       "source": "deterministic"
     },
     {

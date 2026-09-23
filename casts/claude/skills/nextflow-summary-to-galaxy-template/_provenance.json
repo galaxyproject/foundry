@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 9,
     "content_hash": "10008cbd7536688ce772c1e70a26598be7b865d97efd9f9c0c2dff2a49492f96",
-    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
+    "commit": "88fdfdfd1a41f6d5ade682a238811441d1eac61b"
   },
-  "cast_at": "2026-09-15T23:16:25.083Z",
+  "cast_at": "2026-09-23T00:56:58.316Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -101,8 +101,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
-      "src_hash": "e580e71fabec9132fbdf3165cc092fcdb96a8b9bf7996b3b9b6a4b0a627065cb",
-      "dst_hash": "e580e71fabec9132fbdf3165cc092fcdb96a8b9bf7996b3b9b6a4b0a627065cb",
+      "src_hash": "5a0e96b936f4668e23804a63923e336177f4ba64dfbc7926d429f80a5b07d06f",
+      "dst_hash": "5a0e96b936f4668e23804a63923e336177f4ba64dfbc7926d429f80a5b07d06f",
       "source": "deterministic"
     },
     {
