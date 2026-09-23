@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "9c1d56e625a5dd26cb7a82082ac8f4eeb7db287a626bf00e73457c8dd491ad6d",
-    "commit": "25edad50e12a9a4a70399cba0affe9d94884ef23"
+    "commit": "320a34c0e0abbb6d6af7b83673db5869617bd7d4"
   },
-  "cast_at": "2026-09-23T15:00:21.276Z",
+  "cast_at": "2026-09-23T15:11:46.770Z",
   "refs": [
     {
       "kind": "research",
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while synthesizing assertions from intent.",
       "trigger": "When considering existence-only, size-only, image-dimension, or tolerant output checks, or recording an omission.",
-      "src_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
-      "dst_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
+      "src_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
+      "dst_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
       "source": "deterministic"
     },
     {

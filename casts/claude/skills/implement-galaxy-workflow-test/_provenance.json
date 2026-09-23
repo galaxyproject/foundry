@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 8,
     "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "25edad50e12a9a4a70399cba0affe9d94884ef23"
+    "commit": "320a34c0e0abbb6d6af7b83673db5869617bd7d4"
   },
-  "cast_at": "2026-09-23T15:00:33.336Z",
+  "cast_at": "2026-09-23T15:11:57.777Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -74,8 +74,8 @@
       "evidence": "corpus-observed",
       "purpose": "Flag assertion shortcuts that are acceptable in IWC versus shortcuts that should be avoided.",
       "trigger": "When considering existence-only, size-only, image-only, checksum, output-label, or negative-test patterns.",
-      "src_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
-      "dst_hash": "ab03c2fdfe55508fbc11ecf2488dc2cf1c16f2c2e1b9deaf78e3157e5357a6ae",
+      "src_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
+      "dst_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
       "source": "deterministic"
     },
     {

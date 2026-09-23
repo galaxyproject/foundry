@@ -199,7 +199,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[iwc-shortcuts-anti-patterns]] | How to judge weak IWC workflow-test assertions against the behavior they need to protect, with corpus examples and Planemo limits. | draft | 2026-09-23 | 3 |
+| [[iwc-shortcuts-anti-patterns]] | Judgments for when weak Galaxy workflow-test assertions are useful smoke checks and when they conceal untested results. | draft | 2026-09-23 | 3 |
 | [[iwc-test-data-conventions]] | IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values. | draft | 2026-09-23 | 4 |
 | [[markdown-document-contract]] | Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation. | draft | 2026-09-17 | 2 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-09-17 | 4 |
