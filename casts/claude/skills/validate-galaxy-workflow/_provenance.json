@@ -6,9 +6,9 @@
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 5,
     "content_hash": "74e3743fc376f33c1eb37832ab4869c327d48f87e015c7a38597cf4c4ca939cd",
-    "commit": "79bf5c3ab98eec3a67948d8bdebb9dba7d8a2359"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-12T19:19:47.237Z",
+  "cast_at": "2026-09-23T16:20:48.818Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Classify validation or pre-test findings that indicate missing labels, omitted workflow outputs, or untestable checkpoint structure.",
       "trigger": "When terminal validation passes but workflow-level outputs, labels, or collection shapes look likely to break future workflow tests.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     }
   ],
