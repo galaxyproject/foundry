@@ -219,7 +219,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-workflow-draft-format]] — gxformat2 draft superset: wrapper-tier TODOs (tool_id, state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step.
 - [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
 - [[galaxy-workflow-testability-design]] — Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible.
-- [[gxformat2-schema]] — Vendored structural JSON Schema for gxformat2 workflows: vocabulary for inputs, outputs, steps, and step subtypes.
+- [[gxformat2-schema]] — Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation.
 - [[gxformat2-workflow-inputs]] — Conceptual model, current aliases, and schema gaps for gxformat2 workflow inputs.
 - [[iwc-comments-survey]] — How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
