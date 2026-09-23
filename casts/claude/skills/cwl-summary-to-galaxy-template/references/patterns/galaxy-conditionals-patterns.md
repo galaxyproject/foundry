@@ -12,9 +12,9 @@ tags:
   - topic/galaxy-transform
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
-summary: "Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns."
+revised: 2026-09-23
+revision: 2
+summary: "Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream."
 related_notes:
   - "[[iwc-conditionals-survey]]"
 related_patterns:
@@ -35,24 +35,27 @@ related_molds:
 
 # Galaxy: conditionals patterns
 
-This is the runtime-facing map for Galaxy conditional workflow choices. Use it before loading raw survey notes. The survey remains evidence backing; the operation and recipe pages are the actionable references.
+Choose by what should happen when the condition is false: skip a step, select one value for a continuing path, or remove unusable collection members. The linked pages give the construction details. The [[iwc-conditionals-survey]] records the IWC evidence behind them.
 
-## Direct Gates
+Galaxy steps in the observed patterns receive a boolean through an input named `when` and declare `when: $(inputs.when)`. If later steps require an output from a skipped branch, give them an explicit merge or fallback. A `when` gate alone does not provide that value.
 
-- [[conditional-run-optional-step]] — expose or derive a boolean, connect it as `inputs.when`, and use `when: $(inputs.when)` to skip optional steps.
-- [[conditional-gate-on-nonempty-result]] — compute a boolean from empty/non-empty dataset or collection state before gating downstream reporting/export. The MGnify recipe is corpus-backed but clunky pending verified-pattern workflow work.
+## Skip work without replacing its output
 
-## Routes and Fallbacks
+- **User choice or another available boolean:** [[conditional-run-optional-step]] gates an optional step or branch whose output need not feed an unconditional downstream step. Gate every step that belongs to the optional branch.
+- **Upstream result may be empty:** [[conditional-gate-on-nonempty-result]] derives a boolean from dataset content or collection emptiness, then gates reporting, visualization, or export. The MGnify collection-to-boolean chain is corpus-backed and verified against Galaxy `release_25.1`, but takes four shim steps. Use its known-good shape until a shorter one is verified.
 
-- [[conditional-route-between-alternative-outputs]] — run one of several `when`-gated alternatives, then merge possible outputs with `pick_value`.
-- [[conditional-transform-or-pass-through]] — optionally transform a value, then use `pick_value` to choose transformed output or original fallback.
+## Continue with one value
 
-## Not Conditionals
+- **Peer alternatives:** [[conditional-route-between-alternative-outputs]] gates the possible modes and merges their compatible outputs with `pick_value`. If exactly one mode must produce a value, choose merge behavior that detects zero or multiple live outputs rather than silently taking the first.
+- **Optional change to an existing value:** [[conditional-transform-or-pass-through]] gates the transform and uses `pick_value` to prefer its output when present, with the original value as the fallback. This preserves one downstream input without duplicating the rest of the workflow.
 
-- [[collection-cleanup-after-mapover-failure]] — use collection filters when empty or failed mapped elements should be dropped or replaced. This is collection-state cleanup, not a `when` gate.
-- `__FILTER_NULL__` — catalog capability for null outputs after conditional steps, but no IWC-backed pattern candidate in the conditionals survey. Zero uptake is not itself an anti-pattern call.
+## Clean a collection instead
+
+[[collection-cleanup-after-mapover-failure]] drops or replaces empty or failed elements after map-over. It changes collection membership or contents, while a `when` gate skips a whole step. If dropping elements affects alignment with a sibling collection, see [[galaxy-collection-patterns]] for the next choice.
+
+`__FILTER_NULL__` can filter null outputs after conditional steps, but the conditionals survey found no IWC use from which to establish a pattern. That absence alone does not make the capability an anti-pattern.
 
 ## See Also
 
 - [[iwc-conditionals-survey]] — conditionals survey and evidence trail.
-- [[galaxy-collection-patterns]] — companion MOC for collection transforms and cleanup.
+- [[galaxy-collection-patterns]] — collection transforms and cleanup after map-over.

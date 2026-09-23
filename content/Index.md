@@ -87,7 +87,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[conditional-transform-or-pass-through]] — Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise.
 - [[fan-in-bundle-consume-and-flatten]] — Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing.
 - [[galaxy-collection-patterns]] — Choose a Galaxy collection operation or map-over recipe from the current and required data shapes.
-- [[galaxy-conditionals-patterns]] — Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns.
+- [[galaxy-conditionals-patterns]] — Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream.
 - [[galaxy-interval-patterns]] — Use this MOC to choose corpus-grounded Galaxy genomic interval operations and recipes on coordinate features.
 - [[galaxy-sequence-patterns]] — Use this MOC to choose corpus-grounded Galaxy operations on sequence records (FASTA) — interconvert, reformat, merge, length, extract/mask by region.
 - [[galaxy-tabular-patterns]] — Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns.

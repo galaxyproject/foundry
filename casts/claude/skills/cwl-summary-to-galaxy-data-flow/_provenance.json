@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 3,
     "content_hash": "ed3f1d14cab3958ec321bcc108dd6274bec965cd502763ce0d5abd060a90f28b",
-    "commit": "c3dc1c5df041ea374eca87c0960c8ecab51a999d"
+    "commit": "6f1e1941a2ba41ec1b68cefcb0ef8cf509797f34"
   },
-  "cast_at": "2026-09-23T01:10:30.208Z",
+  "cast_at": "2026-09-23T13:57:27.623Z",
   "refs": [
     {
       "kind": "pattern",
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
       "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "cbeeb61caaa4f9e09cc7a209f76c3d84b7a9e6934610cb7eac1c2ec4fead70a1",
-      "dst_hash": "cbeeb61caaa4f9e09cc7a209f76c3d84b7a9e6934610cb7eac1c2ec4fead70a1",
+      "src_hash": "6214c9578552f00331333e8c2b7d16dfb2707e3aa33504e342ef9e87afcfa8d5",
+      "dst_hash": "6214c9578552f00331333e8c2b7d16dfb2707e3aa33504e342ef9e87afcfa8d5",
       "source": "deterministic"
     },
     {
