@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "9c1d56e625a5dd26cb7a82082ac8f4eeb7db287a626bf00e73457c8dd491ad6d",
-    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-23T16:02:44.367Z",
+  "cast_at": "2026-09-23T16:20:45.337Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose which workflow outputs and promoted checkpoints make meaningful assertions when no upstream test evidence exists.",
       "trigger": "When deciding which outputs to assert, which checkpoints to promote, and which labels the plan should assume.",
-      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
-      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {

@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 9,
     "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
-    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-23T16:02:44.652Z",
+  "cast_at": "2026-09-23T16:20:45.501Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -119,8 +119,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve testable output labels and collection element identifiers while replacing abstract steps with concrete gxformat2 steps.",
       "trigger": "When a concrete step changes output labels, emits collection outputs, creates a diagnostic checkpoint, or makes a final output too weakly assertable.",
-      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
-      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {

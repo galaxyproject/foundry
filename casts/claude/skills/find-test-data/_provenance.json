@@ -6,9 +6,9 @@
     "path": "content/molds/find-test-data/index.md",
     "revision": 5,
     "content_hash": "dab7a03bc9d3382c07b335054c5e1d4b63ddc9ba50a8a703a5895573d44318be",
-    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-23T16:02:43.869Z",
+  "cast_at": "2026-09-23T16:20:44.844Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Confirm the collection shapes and labels the resolved data must populate so downstream tests can address them.",
       "trigger": "When mapping an input label in the data-flow brief to a concrete file or collection of files.",
-      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
-      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {

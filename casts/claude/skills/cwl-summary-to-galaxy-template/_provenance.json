@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-23T16:02:43.215Z",
+  "cast_at": "2026-09-23T16:20:44.197Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -195,8 +195,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton.",
       "trigger": "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address.",
-      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
-      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {

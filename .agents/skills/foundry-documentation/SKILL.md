@@ -35,6 +35,7 @@ Treat these words and phrases as banned in original prose, while preserving quot
 - Name the actor and action. Use precise verbs for what the tool, page, or person actually does. Cut empty hedges such as `we attempt to explore`, `it might suggest`, and `could potentially indicate`. Express real uncertainty through evidence, scope, or a specific limitation. Do not strengthen a claim beyond its support.
 - Vary sentence length according to the work each sentence does. State a finding plainly, then give the mechanism or qualification it needs. Avoid repeated short openers and strings of clipped sentences.
 - Replace importance claims and decorative flourishes with the result or mechanism. Use lists for genuine sets of actions or options, and prose for reasoning.
+- Avoid saying a design choice “earns” a place, role, or right. State the criterion that justifies the choice.
 - Check names, defaults, paths, arguments, output formats, dates, numbers, and links against available sources. Mark unresolved facts instead of inventing them. Preserve important qualifications when revising.
 
 ## Documentation contracts

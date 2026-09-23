@@ -6,9 +6,9 @@
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "1a5f10ecf90158c4fdaf292055ca73dcd6dd39e7253fe417b62020c3c4ec8be9",
-    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-23T16:02:41.724Z",
+  "cast_at": "2026-09-23T16:20:43.408Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Decide which change-set-exposed outputs and promoted checkpoints make meaningful new assertions, and how much a baseline assertion must loosen when an edit intentionally changes an output.",
       "trigger": "When adding assertions for a newly exposed output or a new step, or reconciling a baseline assertion an edit invalidates.",
-      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
-      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {

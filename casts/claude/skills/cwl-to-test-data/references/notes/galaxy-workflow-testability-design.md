@@ -39,7 +39,7 @@ Start with the failure the test should detect. If a final image, report, or bina
 
 The [IWC Scanpy test](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy-tests.yml) illustrates the combination. It checks plot dimensions and sizes, but it also checks AnnData structure, a stable summary, and a ranked-gene line exposed as separate outputs. Those checks cover different failure modes. A structural HDF5 key alone does not prove the cluster calculation is right, just as an image width does not prove the plotted values are right.
 
-Promote selectively. A checkpoint earns a public output when it has a clear user or test purpose and an assertion can verify a property that matters. Exposing every intermediate dataset can obscure the workflow interface without improving confidence. If no stable content is available, record the limit in the test plan and use an honest smoke check rather than claiming it validates the scientific result.
+Promote selectively. Add a checkpoint as a public output when it serves a clear user or test purpose and an assertion can verify a property that matters. Exposing every intermediate dataset can obscure the workflow interface without improving confidence. If no stable content is available, record the limit in the test plan and use an honest smoke check rather than claiming it validates the scientific result.
 
 ## Make collection members addressable
 

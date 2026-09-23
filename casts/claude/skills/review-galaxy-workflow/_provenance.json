@@ -6,9 +6,9 @@
     "path": "content/molds/review-galaxy-workflow/index.md",
     "revision": 1,
     "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
-    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-23T16:02:46.508Z",
+  "cast_at": "2026-09-23T16:20:47.662Z",
   "refs": [
     {
       "kind": "prompt",
@@ -38,8 +38,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish a genuine workflow-interface or test-addressing defect from a stylistic preference when a label and a test key disagree.",
       "trigger": "When an input, promoted output, collection identifier, or workflow-output label does not agree with the supplied test.",
-      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
-      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {

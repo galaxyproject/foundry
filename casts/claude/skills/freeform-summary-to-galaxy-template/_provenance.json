@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "0a95f8c04465d48131ace523e0b27af53f1ade6e525a9173c5ff1e936ddc3366",
-    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
+    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
   },
-  "cast_at": "2026-09-23T16:02:44.280Z",
+  "cast_at": "2026-09-23T16:20:45.089Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -180,8 +180,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton.",
       "trigger": "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address.",
-      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
-      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {
