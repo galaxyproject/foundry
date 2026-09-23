@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-interface/index.md",
     "revision": 3,
     "content_hash": "9e6b0aaea5d1662a0515cd932352e418d1539da95ed81b4e8193ce0c98d48640",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
   },
-  "cast_at": "2026-09-13T20:58:26.857Z",
+  "cast_at": "2026-09-23T16:02:42.821Z",
   "refs": [
     {
       "kind": "research",
@@ -103,8 +103,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable Galaxy workflow input/output labels and promoted checkpoint outputs.",
       "trigger": "When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
       "source": "deterministic"
     },
     {

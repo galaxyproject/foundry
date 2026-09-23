@@ -6,9 +6,9 @@
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 1,
     "content_hash": "38d9fed5e83bcb02cdc044ac1a0858d2b3f5ce42af5905bea2b920451bacca6b",
-    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
+    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
   },
-  "cast_at": "2026-09-23T14:46:59.347Z",
+  "cast_at": "2026-09-23T16:02:45.046Z",
   "refs": [
     {
       "kind": "prompt",
@@ -38,8 +38,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep workflow interface and test addressing aligned when a safe genericity or human-readable-label correction changes the workflow interface.",
       "trigger": "When maturation changes an input, promoted output, collection identifier, or workflow-output label referenced by a supplied test.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
       "source": "deterministic"
     },
     {

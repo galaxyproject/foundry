@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-to-test-data/index.md",
     "revision": 3,
     "content_hash": "7326b3810ca2c2b6216d868e1c10c1d95b0b8ecca5a3314f1a800a1b3f67443f",
-    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
+    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
   },
-  "cast_at": "2026-09-23T14:46:50.626Z",
+  "cast_at": "2026-09-23T16:02:46.141Z",
   "refs": [
     {
       "kind": "research",
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Map each declared fixture to an addressable Galaxy input label and the collection shape it must populate.",
       "trigger": "When mapping a declared fixture (often a samplesheet-driven input) onto a Galaxy input's collection shape.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
       "source": "deterministic"
     },
     {

@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
     "revision": 3,
     "content_hash": "b55214a0b2bf18e61a75a6c7aa32cf69992aa703480b754e067707dfc262813e",
-    "commit": "586466b99aec09a13036ff891d7e187053b2cae3"
+    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
   },
-  "cast_at": "2026-09-23T15:54:11.267Z",
+  "cast_at": "2026-09-23T16:02:43.342Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose which workflow outputs and promoted checkpoints make meaningful assertions.",
       "trigger": "When deciding which outputs to assert and which labels the plan should bind to.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
       "source": "deterministic"
     },
     {

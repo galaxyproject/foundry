@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-to-test-data/index.md",
     "revision": 1,
     "content_hash": "a9ea8415ba92031680c1163a566b99272f50c56ffca632f87451d0f2a8a13bbd",
-    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
+    "commit": "a7b44fbf8a787c0ea5787d742b5d703b21ceaef7"
   },
-  "cast_at": "2026-09-23T14:46:43.467Z",
+  "cast_at": "2026-09-23T16:02:43.414Z",
   "refs": [
     {
       "kind": "research",
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Map each declared job input to an addressable Galaxy input label and the collection shape it must populate.",
       "trigger": "When mapping a CWL File-array or secondaryFiles input onto a Galaxy collection shape.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
+      "dst_hash": "437d584af9f647ad91873b29aba8155391f146ac5a4e9221d65a50d478475ce3",
       "source": "deterministic"
     },
     {
