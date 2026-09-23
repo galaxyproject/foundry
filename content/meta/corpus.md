@@ -7,69 +7,31 @@ tags:
   - meta
 status: reviewed
 created: 2026-04-30
-revised: 2026-05-10
-revision: 6
-summary: "How IWC grounding works without turning the Foundry into an upstream workflow mirror."
+revised: 2026-09-23
+revision: 7
+summary: "How IWC evidence grounds Foundry patterns and Molds without making the corpus part of the content model."
 ---
 
-The Foundry has **no IWC ingestion pipeline, no exemplar mirror, and no `workflow-fixtures` runtime dependency**. It integrates the IWC corpus through citations, survey notes, optional inline excerpts, and Molds that can fetch live corpus evidence at runtime.
+IWC workflows give the Foundry examples of Galaxy construction in use. The Foundry turns that evidence into pattern pages and Mold guidance while leaving the workflows in their upstream project. A contributor can inspect the evidence behind a pattern without maintaining a second IWC catalog of Foundry notes.
 
-`workflow-fixtures/` now lives as a top-level directory inside the Foundry checkout (Foundry support infrastructure, not a separate product). Generated corpora — `pipelines/`, `cwl/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/` — are gitignored. The validator and site-content traversal stay scoped to `content/`; `workflow-fixtures/` is invisible to them. The directory is cited by `$IWC_FORMAT2/...` and `$IWC_SKELETONS/...` from authoring/survey notes; CWL research can cite `workflow-fixtures/cwl/<repo>/...` paths in ad-hoc notes, but polished content should prefer upstream URLs or abstract workflow IDs. Nothing in `casts/` or `content/` reads from it at build time.
+## Evidence workspace
 
-## Skeleton tier
+`workflow-fixtures/` is a research workspace inside the Foundry checkout. Its tracked manifest, scripts, and Makefile materialize pinned IWC sources as cleaned `gxformat2` workflows under `iwc-format2/` and structural views under `iwc-skeletons/`. The generated trees are gitignored. The same workspace also holds pinned Nextflow and CWL sources for other research. See [[repository-layout]] for the boundary between this workspace and `content/`.
 
-Survey-time evidence has three tiers:
+Survey authors can grep `$IWC_FORMAT2` for candidate tools, scan `$IWC_SKELETONS` for connections and control flow, then read selected full workflows to confirm parameters. Skeletons omit parameter blobs, so a structural match alone does not establish an exact tool recipe. The `/iwc-survey` authoring command asks for file-and-line citations in survey notes. To rebuild the structural views after materializing IWC, run `make skeletons` from `workflow-fixtures/`.
 
-1. **Grep** over `$IWC_FORMAT2/**/*.gxwf.yml` — cheap, blind to step-pair / step-sequence patterns.
-2. **Skeleton scan** over `$IWC_SKELETONS/**/*.gxwf.yml` — cheap structural read; sees topology, control flow, and tool sequences. All 120 skeletons fit in agent context (median ~6KB, total ~1MB).
-3. **Whole-workflow reading** of selective `$IWC_FORMAT2` files — expensive; reserved for parameter-level evidence on the recipes that look promising from tier 1 or 2.
+The fixture trees support research and verification. They are not Foundry notes, site content, or inputs to the normal cast build. A generated path such as `$IWC_FORMAT2/...:42` is useful inside a survey because it points to the inspected material, but it is tied to a local materialization. Pattern metadata uses a stable workflow identity instead.
 
-A skeleton is the format2 workflow with non-structural fields stripped, leaving:
+## From survey to pattern
 
-- `tool_id`, `label`, `doc` per step
-- `in:` (with `source:`) / `out:` (ids only) / `step_inputs` topology
-- `when:` expressions and other control flow
-- `run:` subworkflow descents (recursive)
-- workflow-level `inputs:` / `outputs:` / `tags` / `release` / `license`
+[[pattern-authorship]] requires an IWC exemplar before an operation or recipe becomes a pattern page. Each pattern declares its evidence grade. Operation and recipe pages should also declare `iwc_exemplars` in frontmatter. Each entry names an abstract IWC workflow ID, explains why that workflow demonstrates the pattern, and assigns `high`, `medium`, or `low` confidence. It may name relevant steps by label or ID. A generated file path or line citation is invalid as the `workflow` value.
 
-Dropped: `tool_state` parameter blobs, step `position:` UI metadata, step-level `comments:` / `uuid` / `tool_shed_repository` / `tool_version` (redundant with `tool_id`), output post-processing fields (`add_tags`, `change_datatype`, `hide`, `rename`, …), and top-level `comments:` (Galaxy sticky-notes, not topology).
+For example, [[collection-unbox-singleton]] names VGP workflow IDs in `iwc_exemplars`, explains the singleton extraction each shows, and links the source survey through `related_notes`. Its verification path points separately to a local executable check. These are different claims: an exemplar shows that a workflow uses an idiom, while verification tests a specified behavior. Maps of content route readers among patterns and do not need to invent their own exemplar list.
 
-Regen: `cd workflow-fixtures && make skeletons` (or `tsx workflow-fixtures/scripts/build-skeletons.ts`). Idempotent — rebuilds `iwc-skeletons/` from the current `iwc-format2/`. Re-run after `make iwc` bumps the IWC pin.
+The pattern schema checks the fields and their types. Validation warns when an operation or recipe has no `iwc_exemplars` and rejects generated paths or line citations in exemplar workflow IDs. It does not fetch IWC to confirm that a workflow ID exists or that its steps support the claim. Reviewers should inspect the cited workflow when the inference matters. A pattern body can explain a small workflow excerpt or link to upstream material when that helps the reader, but neither an `## Exemplars` heading nor an inline excerpt is a required template.
 
-The pattern is **skeletons + selective full reads**, not skeletons replacing full reads. `/iwc-survey` defaults to "skeleton scan first, then drill into `$IWC_FORMAT2`" for workflow-shape topics; tool-level topics still lean grep + structured-block extraction.
+## How Molds use the corpus
 
-## What the Foundry does instead
+Molds refer to pattern pages through typed references, and casting copies those pages into the generated bundle. The cast does not regenerate them from local IWC fixtures. The [[compare-against-iwc-exemplar]] Mold is a separate runtime comparison: its procedure fetches IWC into `~/.foundry/iwc`, ranks workflows against Galaxy design briefs, and reports structural differences. When it finds a suitable match, it passes a bounded converted subgraph and excerpt to the downstream template Mold. It may also report that there is no nearest exemplar.
 
-1. **Patterns cite IWC by URL, in the page body.** A pattern's `## Exemplars` section lists IWC workflows that demonstrate it, each as a free-form Markdown link (`[bacterial-genomics/...](https://github.com/galaxyproject/iwc/blob/<sha>/workflows/...)`) with one-liner author commentary. Pin to a specific commit SHA when stability matters; pin to `main` when freshness matters. Author choice per citation; no enforced policy.
-
-2. **Inline excerpts when they earn it.** A pattern author may paste 10–30 lines of cleaned `gxformat2` directly into a pattern body to illustrate an idiom. The cleaning is done **at authoring time** by the human running `gxwf` locally (probably against `workflow-fixtures`, or against a fresh clone, or against a raw IWC URL — the Foundry doesn't care). The excerpt is committed verbatim into the pattern page; no build-time regeneration; rot is rot.
-
-3. **No IWC category aggregation layer.** Corpus grounding lives in survey notes, pattern exemplars, and body citations.
-
-4. **`compare-against-iwc-exemplar` (the Mold) operates against live IWC.** The generated skill loads with instructions to fetch IWC at runtime via `WebFetch` / `gxwf`, not against Foundry-hosted exemplar pages. The Mold's source artifact describes the *procedure*, not a corpus index.
-
-## What this gives up
-
-- **Per-workflow inverse view** ("which Foundry patterns does this specific IWC workflow demonstrate"). No structural support. To recover, an author can hand-write a `concept` note for a particularly canonical workflow and wiki-link to it. By exception, not by structural rule.
-- **Per-workflow or per-category browsing in the static site.** No structural support for now.
-- **Build-time inlining of full workflow content into casts.** Casts that need workflow detail get IWC URLs the agent fetches at runtime, or the small hand-curated excerpts on pattern pages.
-- **Auto-detection of upstream IWC structural drift.** A cited workflow can change shape without tripping any Foundry signal. Mitigation: pin citations to commit SHAs where stability matters; rely on review when authoring patterns.
-
-## Validation
-
-There is no IWC-specific validator layer. Citations in pattern bodies are not validated (URLs are URLs; the cost of brokenness is moderate, the cost of automated link-check at scale is real).
-
-## What lives where (summary)
-
-- **In the Foundry repo:** patterns with IWC citations and optional excerpts in body, plus surveys that explain the corpus evidence.
-- **NOT in the Foundry repo:** workflow-fixtures, exemplar pages, `_pin.txt`, ingest scripts, hand-curated annotation markers, frontmatter schema for `exemplar` notes.
-- **In generated fixture directories:** workflow-fixtures supports authoring and survey work only. No reference from Foundry tooling.
-
-## Minimum Exercise
-
-To exercise this lighter integration:
-
-1. Author 2–3 patterns end-to-end with `## Exemplars` sections citing IWC paths/URLs and one inline excerpt when useful.
-2. Confirm a Mold can wiki-link a pattern and that casting preserves the citations as live evidence pointers, not embedded mirrors.
-
-If the loop holds, scale to more patterns. No further integration tooling is planned.
+This division keeps authored, reviewable pattern claims separate from a run's live comparison. A new IWC revision does not automatically change a cast pattern or fail validation. Contributors refresh survey evidence and pattern claims deliberately, then regenerate affected casts through the usual [[build-and-validation]] process.
