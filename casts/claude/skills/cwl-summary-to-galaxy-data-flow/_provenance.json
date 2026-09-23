@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 3,
     "content_hash": "ed3f1d14cab3958ec321bcc108dd6274bec965cd502763ce0d5abd060a90f28b",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "c3dc1c5df041ea374eca87c0960c8ecab51a999d"
   },
-  "cast_at": "2026-09-13T20:58:26.653Z",
+  "cast_at": "2026-09-23T01:10:30.208Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection reshape, relabel, cleanup, and map-over choices in corpus-observed Galaxy recipes.",
       "trigger": "When CWL scatter, arrays, nested arrays, records, or secondary-file contracts require explicit Galaxy collection operations.",
-      "src_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
-      "dst_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
+      "src_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
+      "dst_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
       "source": "deterministic"
     },
     {

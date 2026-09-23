@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "0a95f8c04465d48131ace523e0b27af53f1ade6e525a9173c5ff1e936ddc3366",
-    "commit": "88fdfdfd1a41f6d5ade682a238811441d1eac61b"
+    "commit": "c3dc1c5df041ea374eca87c0960c8ecab51a999d"
   },
-  "cast_at": "2026-09-23T00:56:59.777Z",
+  "cast_at": "2026-09-23T01:10:31.886Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
-      "src_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
-      "dst_hash": "9840d686228a254766611196f2be03b2a66119281322c6373ce082cd08e78717",
+      "src_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
+      "dst_hash": "e3f5dddeb34dd03fb0db6fbd089bdcd7bed159c70525912121773359b474f875",
       "source": "deterministic"
     },
     {
