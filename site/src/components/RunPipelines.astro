@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 import PipelineHarnessList from './PipelineHarnessList.astro';
 import StopGapBanner from './StopGapBanner.astro';
 import { loadAssembly, assemblyStats } from '../lib/casts';
-import { pipelineJourney } from '../lib/pipeline-journeys';
+import { groupPipelinesByJourney, PIPELINE_ROUTE_LABELS } from '../lib/pipeline-journeys';
 import { base } from '../lib/site-base';
 
 interface Props {
@@ -13,27 +13,25 @@ interface Props {
 }
 const { variant = 'full' } = Astro.props;
 
-const pipelines = (await getCollection('pipelines'))
-  .filter((pipeline) => pipeline.data.status !== 'archived')
-  .map((pipeline) => {
-    const slug = pipeline.id.split('/').pop()!;
+const groups = groupPipelinesByJourney(await getCollection('pipelines'));
+const runnable = (journey: keyof typeof groups) => groups[journey]
+  .map(({ entry, slug }) => {
     const assembly = loadAssembly(slug);
     return {
       slug,
-      title: pipeline.data.title,
-      summary: pipeline.data.summary,
+      title: entry.data.title,
+      summary: entry.data.summary,
       assembly,
       stats: assembly ? assemblyStats(assembly) : null,
-      journey: pipelineJourney(pipeline.data.tags),
     };
   })
-  .filter((pipeline) => pipeline.assembly)
-  .sort((a, b) => a.title.localeCompare(b.title));
+  .filter((pipeline) => pipeline.assembly);
 
-const direct = pipelines.filter((pipeline) => pipeline.journey === 'direct-build');
-const planning = pipelines.filter((pipeline) => pipeline.journey === 'plan');
-const buildFromPlan = pipelines.filter((pipeline) => pipeline.journey === 'build-from-plan');
-const existing = pipelines.filter((pipeline) => pipeline.journey === 'existing-workflow');
+const direct = runnable('direct-build');
+const planning = runnable('plan');
+const buildFromPlan = runnable('build-from-plan');
+const existing = runnable('existing-workflow');
+const pipelineCount = direct.length + planning.length + buildFromPlan.length + existing.length;
 ---
 <div class="run-pipelines">
   <div class="section-rule">
@@ -73,7 +71,7 @@ const existing = pipelines.filter((pipeline) => pipeline.journey === 'existing-w
         <div class="journey-heading">
           <span class="journey-number font-mono">01</span>
           <div>
-            <h3 id="direct-builds-heading">Direct Build</h3>
+            <h3 id="direct-builds-heading">{PIPELINE_ROUTE_LABELS.direct}</h3>
             <p>Use one pipeline when you do not need a separate, reviewable planning artifact.</p>
           </div>
           <span class="journey-count font-mono">{direct.length} routes</span>
@@ -85,7 +83,7 @@ const existing = pipelines.filter((pipeline) => pipeline.journey === 'existing-w
         <div class="journey-heading">
           <span class="journey-number font-mono">02</span>
           <div>
-            <h3 id="plan-build-heading">Plan &amp; Build</h3>
+            <h3 id="plan-build-heading">{PIPELINE_ROUTE_LABELS.planAndBuild}</h3>
             <p>Split planning from implementation when the decisions deserve explicit expert review.</p>
           </div>
           <span class="journey-count font-mono">2 pipeline stages</span>
@@ -118,7 +116,7 @@ const existing = pipelines.filter((pipeline) => pipeline.journey === 'existing-w
         <div class="journey-heading">
           <span class="journey-number font-mono">03</span>
           <div>
-            <h3 id="existing-heading">Existing Galaxy workflows</h3>
+            <h3 id="existing-heading">{PIPELINE_ROUTE_LABELS.existing}</h3>
             <p>Review, mature, or update a workflow that already exists.</p>
           </div>
           <span class="journey-count font-mono">{existing.length} routes</span>
@@ -128,7 +126,7 @@ const existing = pipelines.filter((pipeline) => pipeline.journey === 'existing-w
     </>
   ) : (
     <p class="run-pointer">
-      The Usage page groups all {pipelines.length} runnable harnesses into
+      The Usage page groups all {pipelineCount} runnable harnesses into
       <a href={`${base}/usage/#direct-builds`}> Direct Build</a>,
       <a href={`${base}/usage/#plan-and-build`}> Plan &amp; Build</a>, and
       <a href={`${base}/usage/#existing-workflows`}> existing Galaxy workflow</a> routes.

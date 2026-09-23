@@ -91,6 +91,11 @@ export const kind = defineKind({
     z
       .object({
         ...ctx.base,
+        tags: ctx.base.tags.refine(
+          (tags) =>
+            tags.filter((tag) => ctx.registries.tags.facetOf(tag) === "journey").length === 1,
+          { message: "pipeline requires exactly one journey facet tag" },
+        ),
         type: z.literal("pipeline"),
         title: z.string(),
         phases: z.array(phase).min(1),

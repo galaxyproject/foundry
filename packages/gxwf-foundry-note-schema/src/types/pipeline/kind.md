@@ -22,6 +22,7 @@ just because the parent has it.
   A branch item may be a `[[wiki-link]]`, free text for a terminal outcome
   (`"user-supplied"`), or `{ fallthrough: "[[slug]]" }` for the default arm.
 - The **base envelope** — as on every kind.
+- **Exactly one journey tag** — every Pipeline needs one route in the site and assembled harness catalog; the tag registry defines the journey facet.
 
 ## Optional fields
 

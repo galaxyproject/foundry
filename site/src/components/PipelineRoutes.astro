@@ -1,29 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
-import { pipelineJourney } from '../lib/pipeline-journeys';
+import { groupPipelinesByJourney, PIPELINE_ROUTE_LABELS } from '../lib/pipeline-journeys';
 import { base } from '../lib/site-base';
 
-const pipelines = (await getCollection('pipelines'))
-  .filter((pipeline) => pipeline.data.status !== 'archived')
-  .map((pipeline) => ({
-    slug: pipeline.id.split('/').pop()!,
-    title: pipeline.data.title,
-    summary: pipeline.data.summary ?? '',
-    status: pipeline.data.status,
-    phaseCount: pipeline.data.phases.length,
-    journey: pipelineJourney(pipeline.data.tags),
-  }));
-
-const direct = pipelines
-  .filter((pipeline) => pipeline.journey === 'direct-build')
-  .sort((a, b) => a.title.localeCompare(b.title));
-const plan = pipelines
-  .filter((pipeline) => pipeline.journey === 'plan')
-  .sort((a, b) => a.title.localeCompare(b.title));
-const buildFromPlan = pipelines.find((pipeline) => pipeline.journey === 'build-from-plan');
-const existing = pipelines
-  .filter((pipeline) => pipeline.journey === 'existing-workflow')
-  .sort((a, b) => a.title.localeCompare(b.title));
+const groups = groupPipelinesByJourney(await getCollection('pipelines'));
+const direct = groups['direct-build'];
+const plan = groups.plan;
+const buildFromPlan = groups['build-from-plan'][0];
+const existing = groups['existing-workflow'];
 ---
 <section id="choose-route" class="route-section" aria-labelledby="route-heading">
   <div class="section-rule">
@@ -45,7 +29,7 @@ const existing = pipelines
         <span class="route-number font-mono">01</span>
         <div>
           <p class="route-kicker">One assembled pipeline</p>
-          <h3 id="direct-heading">Direct Build</h3>
+          <h3 id="direct-heading">{PIPELINE_ROUTE_LABELS.direct}</h3>
           <p>Move from source to target without creating a Workflow Brief. Review checkpoints still apply.</p>
         </div>
       </header>
@@ -53,8 +37,8 @@ const existing = pipelines
         {direct.map((pipeline) => (
           <li>
             <a href={`${base}/pipelines/${pipeline.slug}/`} class="route-link">
-              <span class="route-link-title font-mono">{pipeline.title}</span>
-              <span class="route-link-meta">{pipeline.phaseCount} phases</span>
+              <span class="route-link-title font-mono">{pipeline.entry.data.title}</span>
+              <span class="route-link-meta">{pipeline.entry.data.phases.length} phases</span>
               <span class="route-arrow" aria-hidden="true">→</span>
             </a>
           </li>
@@ -67,7 +51,7 @@ const existing = pipelines
         <span class="route-number font-mono">02</span>
         <div>
           <p class="route-kicker">A reviewable planning boundary</p>
-          <h3 id="plan-heading">Plan &amp; Build</h3>
+          <h3 id="plan-heading">{PIPELINE_ROUTE_LABELS.planAndBuild}</h3>
           <p>Create a Workflow Brief, refine it with an expert, then build from the agreed plan.</p>
         </div>
       </header>
@@ -78,7 +62,7 @@ const existing = pipelines
             <strong>Create the brief</strong>
             <div class="plan-links">
               {plan.map((pipeline) => (
-                <a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.title}</a>
+                <a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.entry.data.title}</a>
               ))}
             </div>
           </div>
@@ -96,7 +80,7 @@ const existing = pipelines
             <strong>Build from the brief</strong>
             {buildFromPlan && (
               <a class="build-link font-mono" href={`${base}/pipelines/${buildFromPlan.slug}/`}>
-                {buildFromPlan.title} <span aria-hidden="true">→</span>
+                {buildFromPlan.entry.data.title} <span aria-hidden="true">→</span>
               </a>
             )}
           </div>
@@ -112,7 +96,7 @@ const existing = pipelines
     </div>
     <ul class="existing-links list-none p-0 m-0">
       {existing.map((pipeline) => (
-        <li><a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.title} <span aria-hidden="true">→</span></a></li>
+        <li><a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.entry.data.title} <span aria-hidden="true">→</span></a></li>
       ))}
     </ul>
   </aside>

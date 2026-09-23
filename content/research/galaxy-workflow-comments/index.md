@@ -4,11 +4,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-12
-revised: 2026-09-21
-revision: 2
+revised: 2026-09-23
+revision: 3
 related_notes:
   - "[[iwc-comments-survey]]"
   - "[[gxformat2-schema]]"
+  - "[[freeform-summary-to-galaxy-template]]"
   - "[[workflow-brief-to-galaxy-template]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
