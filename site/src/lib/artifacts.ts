@@ -1,7 +1,8 @@
-import type {
-  InputArtifact,
-  OutputArtifact,
-  RuntimeArtifactRegistry,
+import {
+  runtimeProducerId,
+  type InputArtifact,
+  type OutputArtifact,
+  type RuntimeArtifactRegistry,
 } from "@galaxy-foundry/gxwf-foundry-note-schema";
 import { type NoteEntry } from "./notes";
 import { resolveWikiLinkId, type WikiLinkTarget } from "./wiki-links";
@@ -129,7 +130,7 @@ export function buildArtifactGraph(
     const node = ensure(graph, id);
     node.producers.push({
       kind: "runtime",
-      producerId: `runtime:${artifact.producer.option}`,
+      producerId: runtimeProducerId(artifact),
       artifactKind: artifact.kind,
       defaultFilename: artifact.default_filename,
       protocol: artifact.protocol,

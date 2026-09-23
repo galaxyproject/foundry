@@ -199,6 +199,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[foundry-run-manifest]] | Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard. | draft | 2026-09-18 | 1 |
 | [[markdown-document-contract]] | Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation. | draft | 2026-09-17 | 2 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-09-17 | 4 |
 | [[component-nextflow-testing]] | nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7. | draft | 2026-09-15 | 5 |

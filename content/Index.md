@@ -201,6 +201,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
 - [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
 - [[foundry-feedback-ledger]] — Runtime protocol for carrying actionable feedback about Foundry assets, and the related projects a run exercises, from cast skills back to Foundry maintainers.
+- [[foundry-run-manifest]] — Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard.
 - [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.
 - [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.

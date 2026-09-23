@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-09-16
-revision: 8
+revised: 2026-09-18
+revision: 9
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -60,6 +60,7 @@ The authoring and build application exposed as `foundry-build`. It owns reposito
 - what this Foundry contributes to a cast, and cast verification;
 - Pipeline assembly;
 - repository-wide registries and file walking, including runtime-artifact collision checks, producer validation, and inheritance.
+- reading a run directory: classification against declared cast artifacts, the run manifest, and its standalone dashboard projection.
 
 Root files under `scripts/` are thin compatibility wrappers, sync commands, or one-time maintenance utilities. New reusable authoring behavior belongs in `build-cli`, not in another root script.
 
