@@ -6,9 +6,9 @@
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "1a5f10ecf90158c4fdaf292055ca73dcd6dd39e7253fe417b62020c3c4ec8be9",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
   },
-  "cast_at": "2026-09-13T20:58:26.449Z",
+  "cast_at": "2026-09-23T14:46:57.630Z",
   "refs": [
     {
       "kind": "research",
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Record job-input fixtures for change-set-added inputs (remote-URL-first locations, hashes, collection shapes) as fixture provenance, reusing the baseline's existing fixtures unchanged.",
       "trigger": "When a change-set adds a workflow input that needs new test data, or when recording provenance for a new fixture.",
-      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
-      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
     },
     {

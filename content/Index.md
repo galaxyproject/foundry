@@ -230,7 +230,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-sequence-operations-survey]] — IWC survey of record-level FASTA manipulation (interconversion, reformat, merge/dedup, subset, extract-at-intervals); sizes a galaxy-sequence-patterns MOC.
 - [[iwc-shortcuts-anti-patterns]] — What IWC test suites cut corners on (accepted) vs what's a code smell — existence-only probes, sim_size deltas, image dim checks, label coupling.
 - [[iwc-tabular-operations-survey]] — Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation.
-- [[iwc-test-data-conventions]] — How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas.
+- [[iwc-test-data-conventions]] — IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.
 - [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
 - [[markdown-document-contract]] — Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation.

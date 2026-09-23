@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "9c1d56e625a5dd26cb7a82082ac8f4eeb7db287a626bf00e73457c8dd491ad6d",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "e76739fc09517f3777449d52f50ce0d03a462e82"
   },
-  "cast_at": "2026-09-13T20:58:27.957Z",
+  "cast_at": "2026-09-23T14:46:52.424Z",
   "refs": [
     {
       "kind": "research",
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Describe job-input fixtures, remote-URL-first locations, hashes, and collection input shapes the plan should record as fixture provenance.",
       "trigger": "When recording job inputs or fixture provenance, or deciding whether a fixture belongs in test-data, Zenodo, ENA/SRA, or CVMFS.",
-      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
-      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
     },
     {
