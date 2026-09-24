@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 8,
     "content_hash": "3cf8c148538d3dbf959589c0a2657992fb09463020403cbd7a5b51f4f56435da",
-    "commit": "da4c5e5c5933d88f7bc84598f963ed659ac5520e"
+    "commit": "c5d5d7d12c4f45cfeebc9a53e8c097b9d0a9c436"
   },
-  "cast_at": "2026-09-24T14:14:28.605Z",
+  "cast_at": "2026-09-24T15:43:45.855Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -117,8 +117,8 @@
       "purpose": "Pass an authored `GalaxyUserTool` straight to implementation, and validate a draft whose embedded user-defined tool steps crash `draft-validate --concrete` in the pinned gxwf.",
       "trigger": "When step 2 falls through to [[author-galaxy-tool-wrapper]], or when the draft already contains a step whose `run:` is a `GalaxyUserTool`.",
       "verification": "Promote after a loop run reaches `draft: false` with an authored tool embedded, and the extracted workflow imports into Galaxy with the tool resolved.",
-      "src_hash": "a201bd534aca716a362f26788e9492090a960760c89c9f87bcf96f1af9246ecd",
-      "dst_hash": "a201bd534aca716a362f26788e9492090a960760c89c9f87bcf96f1af9246ecd",
+      "src_hash": "84b2ff50c92c3715227f9ef9a60a340f61acda558724ef05ae5a2085bc9ac3fe",
+      "dst_hash": "84b2ff50c92c3715227f9ef9a60a340f61acda558724ef05ae5a2085bc9ac3fe",
       "source": "deterministic"
     },
     {

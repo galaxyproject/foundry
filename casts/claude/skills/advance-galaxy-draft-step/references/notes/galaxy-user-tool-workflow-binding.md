@@ -6,7 +6,7 @@ tags:
 status: draft
 created: 2026-09-24
 revised: 2026-09-24
-revision: 1
+revision: 2
 related_notes:
   - "[[galaxy-user-tool-authoring-help]]"
   - "[[galaxy-user-tool-authoring]]"
@@ -17,9 +17,9 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
   - "[[advance-galaxy-draft-step]]"
 sources:
-  - "https://github.com/mvdbeek/galaxy/blob/8a55bed837687e4207f20c8f15c146d621e89011/client/src/components/Tool/authoringHelp.yml"
-  - "https://github.com/mvdbeek/galaxy/blob/8a55bed837687e4207f20c8f15c146d621e89011/lib/galaxy/managers/tools.py"
-  - "https://github.com/mvdbeek/galaxy/blob/8a55bed837687e4207f20c8f15c146d621e89011/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml"
+  - "https://github.com/mvdbeek/galaxy/blob/b64d3424e52b610f0c6975b4d66a78e3a198ea83/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/mvdbeek/galaxy/blob/b64d3424e52b610f0c6975b4d66a78e3a198ea83/lib/galaxy/managers/tools.py"
+  - "https://github.com/mvdbeek/galaxy/blob/b64d3424e52b610f0c6975b4d66a78e3a198ea83/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml"
 summary: "How a Galaxy workflow step uses a GalaxyUserTool: embedded under run: in gxformat2, tool_uuid in native .ga, never the uuid as tool_id."
 ---
 
@@ -35,7 +35,7 @@ The rule is derived from the `workflows` section ("Using a tool in a workflow") 
 | A native `.ga` step that must use a tool already registered on a specific Galaxy server | `tool_uuid` set to the registered tool's `uuid`. `content_id` and `tool_id` equal the tool's own `id`, or are omitted. |
 | Any form | Never put the `uuid` in `tool_id` or `content_id`. |
 
-Galaxy rejects a step that references a tool by `tool_uuid` without embedding its definition when the step's `tool_id` names something other than that tool's `id`, including the `uuid` itself. A step that also carries `tool_representation`, as Galaxy's own export does, is exempt from this check and is not rejected, whatever its `tool_id`.
+Galaxy rejects a step that references a tool by `tool_uuid` without embedding its definition when the step's `tool_id` names something other than that tool's `id`, including the `uuid` itself. A step that also carries `tool_representation`, as older Galaxy exports do alongside `tool_uuid`, is exempt from this check and is not rejected, whatever its `tool_id`.
 
 A user-defined tool is not in a server's toolbox, so a step that names one by `tool_id` alone imports with the tool unresolved. That is true even when the `tool_id` string matches a registered tool's `id`.
 
@@ -87,9 +87,9 @@ gxformat2's converter turns that step into a native tool step whose `tool_state`
 
 A tool is registered with `POST /api/unprivileged_tools`, which returns its `uuid`. The endpoint is not admin-only. It requires the `Custom Tool Execution` role and a server with `enable_beta_tool_formats` set. The admin-only `POST /api/dynamic_tools` is a different endpoint and not the one to use. The vendored file's `api` section lists the other `/api/unprivileged_tools` endpoints and the create payload.
 
-A `uuid` pins one exact version of the tool. Saving a changed tool gives it a new `uuid`, so a workflow keeps running the old version until its step is updated. Galaxy's own `.ga` export writes `tool_uuid` and also embeds the definition as `tool_representation`, so another user or server that imports the file gets a private copy from the definition.
+A `uuid` pins one exact version of the tool. Saving a changed tool gives it a new `uuid`, so a workflow keeps running the old version until its step is updated. Galaxy's own `.ga` export embeds the definition as `tool_representation`, keeps the tool's own `id`, and writes no `tool_uuid`, because a `uuid` only resolves for the tool's owner on the server that created it. Importing the exported file creates a private copy of the tool for the importing user. Galaxy keeps `tool_uuid` only in its internal round trips, such as workflow refactoring.
 
-The Foundry has no step that needs this form. It applies when a harness edits a `.ga` that Galaxy exported, or binds a workflow to a tool someone already registered on a particular server.
+The Foundry has no step that needs this form. It applies when a harness binds a workflow to a tool someone already registered on a particular server, or edits a `.ga` from an older Galaxy export that still carries `tool_uuid`.
 
 ## gxwf limits in the pinned version
 

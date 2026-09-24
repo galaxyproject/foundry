@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 10,
     "content_hash": "a688e0e587a31c661c0d85ee5b549379443a82fecc5e9935a36cce0e1f9211cb",
-    "commit": "da4c5e5c5933d88f7bc84598f963ed659ac5520e"
+    "commit": "c5d5d7d12c4f45cfeebc9a53e8c097b9d0a9c436"
   },
-  "cast_at": "2026-09-24T14:14:29.035Z",
+  "cast_at": "2026-09-24T15:43:46.360Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -120,8 +120,8 @@
       "purpose": "Bind a step to an authored `GalaxyUserTool` by embedding the definition under `run:`, and handle the checks the pinned gxwf crashes or misreports on such a step.",
       "trigger": "When the step's tool is an authored `GalaxyUserTool` from [[author-galaxy-tool-wrapper]] rather than a Tool Shed or built-in wrapper.",
       "verification": "Promote after a worked run binds an authored tool this way and the extracted workflow imports into Galaxy with the tool resolved and runs.",
-      "src_hash": "a201bd534aca716a362f26788e9492090a960760c89c9f87bcf96f1af9246ecd",
-      "dst_hash": "a201bd534aca716a362f26788e9492090a960760c89c9f87bcf96f1af9246ecd",
+      "src_hash": "84b2ff50c92c3715227f9ef9a60a340f61acda558724ef05ae5a2085bc9ac3fe",
+      "dst_hash": "84b2ff50c92c3715227f9ef9a60a340f61acda558724ef05ae5a2085bc9ac3fe",
       "source": "deterministic"
     },
     {

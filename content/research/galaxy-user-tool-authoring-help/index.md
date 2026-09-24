@@ -6,20 +6,20 @@ tags:
 status: draft
 created: 2026-09-24
 revised: 2026-09-24
-revision: 1
+revision: 2
 license: MIT
 license_file: LICENSES/galaxy.LICENSE
 related_notes:
   - "[[galaxy-user-tool-authoring]]"
   - "[[galaxy-user-tool-workflow-binding]]"
 sources:
-  - "https://github.com/mvdbeek/galaxy/blob/8a55bed837687e4207f20c8f15c146d621e89011/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/mvdbeek/galaxy/blob/b64d3424e52b610f0c6975b4d66a78e3a198ea83/client/src/components/Tool/authoringHelp.yml"
 companions:
   - "galaxy-user-tool-authoring-help.yml"
 summary: "Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows."
 ---
 
-> **Vendored from upstream**, pinned at SHA `8a55bed`. One file lives next to this note and is declared in `companions:` so casting carries it with the note:
+> **Vendored from upstream**, pinned at SHA `b64d342`. One file lives next to this note and is declared in `companions:` so casting carries it with the note:
 >
 > - `galaxy-user-tool-authoring-help.yml` — Galaxy's single source of truth for `GalaxyUserTool` authoring guidance (`client/src/components/Tool/authoringHelp.yml`). Galaxy renders it twice: as the help panel in the tool editor and as the generated `user_defined_tools_authoring` page of the Galaxy docs. Sync is manual.
 >
@@ -39,7 +39,7 @@ The field-level rules in `tool-format`, `parameters`, `outputs`, `expressions`, 
 
 ## Pre-merge pin
 
-The pin is the head of [galaxyproject/galaxy#23694](https://github.com/galaxyproject/galaxy/pull/23694) on the `mvdbeek/galaxy` fork, before that pull request merged. It is the commit that adds the `workflows` section. Until the pull request lands, the manifest entry resolves through the temporary `$GALAXY_MVDBEEK` prefix, following the `galaxy_dannon` precedent in `common_paths.yml.sample`.
+The pin is the head of [galaxyproject/galaxy#23694](https://github.com/galaxyproject/galaxy/pull/23694) on the `mvdbeek/galaxy` fork, before that pull request merged. It includes the `workflows` section. Until the pull request lands, the manifest entry resolves through the temporary `$GALAXY_MVDBEEK` prefix, following the `galaxy_dannon` precedent in `common_paths.yml.sample`.
 
 Once #23694 merges, re-pin to the upstream merge commit:
 

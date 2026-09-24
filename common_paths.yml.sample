@@ -52,7 +52,7 @@ galaxy_dannon:
 galaxy_mvdbeek:
   path: ~/projects/repositories/mvdbeek-galaxy
   repo: mvdbeek/galaxy
-  ref: 8a55bed837687e4207f20c8f15c146d621e89011
+  ref: b64d3424e52b610f0c6975b4d66a78e3a198ea83
 
 tools_iuc:
   path: ~/projects/repositories/tools-iuc
