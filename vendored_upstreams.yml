@@ -136,6 +136,13 @@
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
 
+- local: content/research/galaxy-user-tool-authoring-help/galaxy-user-tool-authoring-help.yml
+  source: $GALAXY_MVDBEEK/client/src/components/Tool/authoringHelp.yml
+  pinned_ref: 8a55bed837687e4207f20c8f15c146d621e89011
+  framing: content/research/galaxy-user-tool-authoring-help/index.md
+  license: MIT
+  license_file: LICENSES/galaxy.LICENSE
+
 - local: content/prompts/iwc/workflow-pr-review-command/upstream.prompt
   source: https://raw.githubusercontent.com/jmchilton/iwc/d7012eb5fe40b471853acb2866a2a8af334d4c4a/.claude/commands/review.md
   pinned_ref: d7012eb5fe40b471853acb2866a2a8af334d4c4a
