@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 7,
-    "content_hash": "ae19f7e5f5ac9434e31302efd88bb5f5db484caf0145951dd27dfe19247f2ea9",
-    "commit": "215b0a4c80c752a9eef2801d46accc4acce88af2"
+    "revision": 8,
+    "content_hash": "0c0f63adbf40e1bfba2fb48bd91a08cfe8beac0c85c69134b681bf5804316d57",
+    "commit": "32db4d564c3d1431e552e521852e8ba11567f16b"
   },
-  "cast_at": "2026-09-17T11:40:06.540Z",
+  "cast_at": "2026-09-24T13:50:53.855Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -103,6 +103,22 @@
       "trigger": "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.",
       "src_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
       "dst_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-user-tool-workflow-binding]]",
+      "src": "content/research/galaxy-user-tool-workflow-binding/index.md",
+      "dst": "references/notes/galaxy-user-tool-workflow-binding.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Pass an authored `GalaxyUserTool` straight to implementation, and validate a draft whose embedded user-defined tool steps crash `draft-validate --concrete`.",
+      "trigger": "When step 2 falls through to [[author-galaxy-tool-wrapper]], or when the draft already contains a step whose `run:` is a `GalaxyUserTool`.",
+      "verification": "Promote after a loop run reaches `draft: false` with an authored tool embedded, and the extracted workflow imports into Galaxy with the tool resolved.",
+      "src_hash": "e10b53f7c64e957e7318a4854dc9bfb8c3480273207fdb35f3aa1b352eb119e0",
+      "dst_hash": "e10b53f7c64e957e7318a4854dc9bfb8c3480273207fdb35f3aa1b352eb119e0",
       "source": "deterministic"
     },
     {
