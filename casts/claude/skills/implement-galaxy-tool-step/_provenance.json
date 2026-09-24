@@ -5,10 +5,10 @@
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 10,
-    "content_hash": "42f443cb69a4759dc02b3a628fc828451fbc9baec44b6b3d26f38828764dca81",
-    "commit": "32db4d564c3d1431e552e521852e8ba11567f16b"
+    "content_hash": "4d559be2e0f9e2200459d4bfc5657e5205dd0138ef6cd997b208567ab5f66861",
+    "commit": "4447957c30e85e9a247adfd54c2f77e0783ea4da"
   },
-  "cast_at": "2026-09-24T13:50:54.233Z",
+  "cast_at": "2026-09-24T14:02:11.246Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -120,8 +120,8 @@
       "purpose": "Bind a step to an authored `GalaxyUserTool` by embedding the definition under `run:`, and handle the gxwf checks that crash or mislead on such a step.",
       "trigger": "When the step's tool is an authored `GalaxyUserTool` from [[author-galaxy-tool-wrapper]] rather than a Tool Shed or built-in wrapper.",
       "verification": "Promote after a worked run binds an authored tool this way and the extracted workflow imports into Galaxy with the tool resolved and runs.",
-      "src_hash": "e10b53f7c64e957e7318a4854dc9bfb8c3480273207fdb35f3aa1b352eb119e0",
-      "dst_hash": "e10b53f7c64e957e7318a4854dc9bfb8c3480273207fdb35f3aa1b352eb119e0",
+      "src_hash": "4f12c41cbc350286ce150adf14701be1fdf98c883b876374a0d91805c36f860c",
+      "dst_hash": "4f12c41cbc350286ce150adf14701be1fdf98c883b876374a0d91805c36f860c",
       "source": "deterministic"
     },
     {
@@ -243,7 +243,7 @@
       },
       {
         "id": "galaxy-user-tool-definition",
-        "description": "`GalaxyUserTool` YAML from [[author-galaxy-tool-wrapper]], in place of a tool summary when the discover-or-author branch fell through to authoring; embedded under the step's `run:`.",
+        "description": "`GalaxyUserTool` YAML from [[author-galaxy-tool-wrapper]], in place of a tool summary when the discover-or-author branch fell through to authoring. The step embeds it under `run:`.",
         "producers": [
           "author-galaxy-tool-wrapper"
         ]

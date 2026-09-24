@@ -9,14 +9,14 @@ status: reviewed
 created: 2026-04-30
 revised: 2026-09-24
 revision: 10
-summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
+summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool."
 input_artifacts:
   - id: galaxy-tool-summary
     role: step-tool
     description: "Galaxy tool summary manifest from [[summarize-galaxy-tool]] conforming to [[galaxy-tool-summary]]; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`."
   - id: galaxy-user-tool-definition
     role: step-tool
-    description: "`GalaxyUserTool` YAML from [[author-galaxy-tool-wrapper]], in place of a tool summary when the discover-or-author branch fell through to authoring; embedded under the step's `run:`."
+    description: "`GalaxyUserTool` YAML from [[author-galaxy-tool-wrapper]], in place of a tool summary when the discover-or-author branch fell through to authoring. The step embeds it under `run:`."
   - id: galaxy-workflow-draft
     description: "gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft."
   - id: open-requirements-ledger

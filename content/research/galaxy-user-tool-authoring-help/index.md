@@ -41,4 +41,9 @@ The field-level rules in `tool-format`, `parameters`, `outputs`, `expressions`, 
 
 The pin is the head of [galaxyproject/galaxy#23694](https://github.com/galaxyproject/galaxy/pull/23694) on the `mvdbeek/galaxy` fork, before that pull request merged. It is the commit that adds the `workflows` section. Until the pull request lands, the manifest entry resolves through the temporary `$GALAXY_MVDBEEK` prefix, following the `galaxy_dannon` precedent in `common_paths.yml.sample`.
 
-Once #23694 merges, re-pin this entry to the upstream merge commit: change its `source` in `vendored_upstreams.yml` to `$GALAXY/client/src/components/Tool/authoringHelp.yml`, check out that commit in the `$GALAXY` tree, run `pnpm sync:vendored` (it re-syncs every `$GALAXY` entry from that checkout, so review the other Galaxy files it touches), point the `sources:` URL above at `galaxyproject/galaxy`, and delete the `galaxy_mvdbeek` entry from `common_paths.yml.sample`.
+Once #23694 merges, re-pin to the upstream merge commit:
+
+1. Change this entry's `source` in `vendored_upstreams.yml` to `$GALAXY/client/src/components/Tool/authoringHelp.yml`, and check out the merge commit in the `$GALAXY` tree.
+2. Run `pnpm sync:vendored`. It re-syncs and re-pins every entry in the manifest, not only this one, and it fails if any `common_paths.yml` checkout is missing. Review the other files it touches.
+3. Point the `sources:` URLs here and in [[galaxy-user-tool-workflow-binding]] at `galaxyproject/galaxy` and the merge commit. The sync only rewrites this note's URLs, and it keeps the fork's name in them.
+4. Delete this section and the `galaxy_mvdbeek` entry in `common_paths.yml.sample`.

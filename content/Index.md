@@ -38,7 +38,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[freeform-summary-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs. *(reviewed)*
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
-- [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary. *(reviewed)*
+- [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool. *(reviewed)*
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions. *(reviewed)*
 - [[interview-to-freeform-summary]] — Normalize a free-form user interview into the shared freeform-summary workflow handoff. *(reviewed)*
 - [[interview-to-galaxy-workflow-changeset]] — Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. *(reviewed)*

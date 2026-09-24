@@ -35,13 +35,13 @@ The rule is derived from the `workflows` section ("Using a tool in a workflow") 
 | A native `.ga` step that must use a tool already registered on a specific Galaxy server | `tool_uuid` set to the registered tool's `uuid`. `content_id` and `tool_id` equal the tool's own `id`, or are omitted. |
 | Any form | Never put the `uuid` in `tool_id` or `content_id`. |
 
-Galaxy rejects a step whose `tool_id` names something other than the tool its `tool_uuid` resolves to, including the `uuid` itself.
+Galaxy rejects a step that references a tool by `tool_uuid` without embedding its definition when the step's `tool_id` names something other than that tool's `id`, including the `uuid` itself. A step that also carries `tool_representation`, as Galaxy's own export does, imports whatever its `tool_id` says.
 
 A user-defined tool is not in a server's toolbox, so a step that names one by `tool_id` alone imports with the tool unresolved. That is true even when the `tool_id` string matches a registered tool's `id`.
 
 ## Embedding the definition in a gxformat2 step
 
-The embedded form makes the workflow self-contained. When a user imports it, Galaxy registers a private copy of the tool for that user, provided the user holds the `Custom Tool Execution` role. Converting the workflow to native `.ga` with gxformat2 carries the definition as `tool_representation`, with `tool_id`, `tool_version`, and `tool_uuid` all null, and Galaxy imports that form the same way. Nothing has to be registered first, and nothing has to be injected into the converted file afterwards.
+The embedded form makes the workflow self-contained. When a user imports it, Galaxy registers a private copy of the tool for that user. That requires a server with `enable_beta_tool_formats` set and a user holding the `Custom Tool Execution` role, the same conditions as registering the tool directly. Converting the workflow to native `.ga` with gxformat2 carries the definition as `tool_representation`, with no `tool_id`, `tool_version`, or `tool_uuid`, and Galaxy imports that form the same way. Nothing has to be registered first, and nothing has to be injected into the converted file afterwards.
 
 To bind a step:
 
@@ -81,7 +81,7 @@ steps:
       n_lines: 5
 ```
 
-gxformat2's converter turns that step into a native tool step with `tool_state` `{"n_lines": 5}` and the definition in `tool_representation`. Galaxy's own test workflow `inline_user_defined_tool.gxwf.yml` exercises the same form end to end, without `out:` or `state`.
+gxformat2's converter turns that step into a native tool step whose `tool_state` contains `n_lines: 5`, with the definition in `tool_representation`. Galaxy's own test workflow `inline_user_defined_tool.gxwf.yml` exercises the same form end to end, without `out:` or `state`.
 
 ## Referencing a registered tool from a native step
 
@@ -93,15 +93,16 @@ The Foundry has no step that needs this form. It applies when a harness edits a 
 
 ## gxwf limits
 
-Both gxwf versions tested treat any object under a step's `run:` as an inlined subworkflow. For a step whose `run:` is a `GalaxyUserTool`:
+Both gxwf versions tested, 1.10.0 and 1.12.0, treat any object under a step's `run:` as an inlined subworkflow. For a step whose `run:` is a `GalaxyUserTool`:
 
 - `gxwf draft-validate --concrete` and `gxwf validate` with tool-state checks crash with `TypeError: wf.steps is not iterable` and produce no report. The crash is a tooling failure and says nothing about the step.
-- `gxwf draft-next-step` and `gxwf validate --no-tool-state` complete.
-- `gxwf draft-validate` without `--concrete` and `gxwf draft-extract` complete only when the step lists its outputs under `out:`. Without that list, `draft-validate` reports that a workflow output sourced from the step references an unknown port, and `draft-extract` drops that workflow output and still exits 0.
+- `gxwf draft-next-step` works on the draft, and `gxwf validate --no-tool-state` works on the extracted `class: GalaxyWorkflow` file. It rejects a draft for its class.
+- `gxwf draft-validate` without `--concrete` and `gxwf draft-extract` give correct results only when the step lists its outputs under `out:`. Without that list, `draft-validate` exits 1, reporting that a workflow output sourced from the step references an unknown port. `draft-extract` exits 0 but drops every workflow output and every downstream step that reads from the step.
 - `gxwf validate-tool-source <file>` validates the definition itself when it is saved as a separate file. It checks the definition, not the step that uses it.
 
 While the crash stands, a draft containing an embedded step gets no concrete tool-state validation for any of its steps. Run the checks that complete, validate the definition with `validate-tool-source`, and record in the [[open-requirements-ledger]] that concrete tool-state validation did not run.
 
 ## Open questions
 
+- `gxwf validate` with tool-state checks, which [[validate-galaxy-workflow]] runs on the extracted workflow, crashes the same way. That Mold does not yet say so.
 - Whether a Planemo-managed Galaxy runs a workflow with an embedded tool has not been tested. It would need `enable_beta_tool_formats` on that server and the `Custom Tool Execution` role for the test user.
