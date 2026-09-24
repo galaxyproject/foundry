@@ -12,7 +12,7 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 - check: llm-judged
 - assertion: records whether a later failure should be investigated as tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue.
 
-## Property: an authored user-defined tool is embedded, never referenced by uuid
+## Property: an authored user-defined tool is embedded, never referenced by id or uuid
 
 - check: deterministic
-- assertion: a step implemented from a `galaxy-user-tool-definition` carries a `run:` whose `class` is `GalaxyUserTool` and whose `id` and `version` match the authored definition, and no step in the draft puts a tool `uuid` in `tool_id` or `content_id` or names an authored tool by `tool_id` alone.
+- assertion: a step implemented from a `galaxy-user-tool-definition` carries a `run:` whose `class` is `GalaxyUserTool` and whose `id` and `version` match the authored definition, and no step in the draft names an authored tool by `tool_uuid`, `tool_id`, or `content_id` instead of embedding it.

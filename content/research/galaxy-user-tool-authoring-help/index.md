@@ -6,20 +6,20 @@ tags:
 status: draft
 created: 2026-09-24
 revised: 2026-09-24
-revision: 2
+revision: 3
 license: MIT
 license_file: LICENSES/galaxy.LICENSE
 related_notes:
   - "[[galaxy-user-tool-authoring]]"
   - "[[galaxy-user-tool-workflow-binding]]"
 sources:
-  - "https://github.com/mvdbeek/galaxy/blob/b64d3424e52b610f0c6975b4d66a78e3a198ea83/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/mvdbeek/galaxy/blob/c74e78f165e9089628ebce69c112e9d9b35e6599/client/src/components/Tool/authoringHelp.yml"
 companions:
   - "galaxy-user-tool-authoring-help.yml"
 summary: "Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows."
 ---
 
-> **Vendored from upstream**, pinned at SHA `b64d342`. One file lives next to this note and is declared in `companions:` so casting carries it with the note:
+> **Vendored from upstream**, pinned at SHA `c74e78f`. One file lives next to this note and is declared in `companions:` so casting carries it with the note:
 >
 > - `galaxy-user-tool-authoring-help.yml` — Galaxy's single source of truth for `GalaxyUserTool` authoring guidance (`client/src/components/Tool/authoringHelp.yml`). Galaxy renders it twice: as the help panel in the tool editor and as the generated `user_defined_tools_authoring` page of the Galaxy docs. Sync is manual.
 >
@@ -31,7 +31,7 @@ The file is a list of `sections`, each with an `id`, a `title`, a `kind`, and a 
 
 The sections the Foundry reads:
 
-- `workflows` ("Using a tool in a workflow") — the two ways a workflow step uses a user-defined tool. [[galaxy-user-tool-workflow-binding]] is derived from it.
+- `workflows` ("Using a tool in a workflow") — how a format2 workflow step embeds a user-defined tool under `run`. [[galaxy-user-tool-workflow-binding]] is derived from it.
 - `api` ("API endpoints") — the `/api/unprivileged_tools` endpoints, the create payload shape, and running a registered tool by `tool_uuid`.
 - `validation`, `testing` — what Galaxy checks when a tool is created, and that Galaxy stores declared tool tests but does not run them for a tool held in its database.
 

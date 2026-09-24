@@ -138,7 +138,7 @@
 
 - local: content/research/galaxy-user-tool-authoring-help/galaxy-user-tool-authoring-help.yml
   source: $GALAXY_MVDBEEK/client/src/components/Tool/authoringHelp.yml
-  pinned_ref: b64d3424e52b610f0c6975b4d66a78e3a198ea83
+  pinned_ref: c74e78f165e9089628ebce69c112e9d9b35e6599
   framing: content/research/galaxy-user-tool-authoring-help/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
