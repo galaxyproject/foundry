@@ -186,6 +186,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Research
 
 - [[gxy-sketches-alignment]] — Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not.
+- [[galaxy-user-tool-workflow-binding]] — How a Galaxy workflow step uses a GalaxyUserTool: embedded under run: in gxformat2, tool_uuid in native .ga, never the uuid as tool_id.
 - [[component-archon]] — Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap.
 - [[component-claude-dynamic-workflows]] — Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate.
 - [[component-nextflow-channel-operators]] — Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation.

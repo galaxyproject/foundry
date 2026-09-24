@@ -11,6 +11,7 @@ license: MIT
 license_file: LICENSES/galaxy.LICENSE
 related_notes:
   - "[[galaxy-user-tool-authoring]]"
+  - "[[galaxy-user-tool-workflow-binding]]"
 sources:
   - "https://github.com/mvdbeek/galaxy/blob/8a55bed837687e4207f20c8f15c146d621e89011/client/src/components/Tool/authoringHelp.yml"
 companions:
@@ -22,7 +23,7 @@ summary: "Vendored Galaxy authoring guidance for user-defined tools: tool format
 >
 > - `galaxy-user-tool-authoring-help.yml` — Galaxy's single source of truth for `GalaxyUserTool` authoring guidance (`client/src/components/Tool/authoringHelp.yml`). Galaxy renders it twice: as the help panel in the tool editor and as the generated `user_defined_tools_authoring` page of the Galaxy docs. Sync is manual.
 >
-> **When to consult:** for how a workflow step uses a user-defined tool (the `workflows` section) and for the endpoint table in its `api` section.
+> **When to consult:** as the upstream source for [[galaxy-user-tool-workflow-binding]], which derives the Foundry's step-binding rule from the file's `workflows` section, and for the endpoint table in its `api` section.
 
 ## Reading the file
 
@@ -30,7 +31,7 @@ The file is a list of `sections`, each with an `id`, a `title`, a `kind`, and a 
 
 The sections the Foundry reads:
 
-- `workflows` ("Using a tool in a workflow") — the two ways a workflow step uses a user-defined tool.
+- `workflows` ("Using a tool in a workflow") — the two ways a workflow step uses a user-defined tool. [[galaxy-user-tool-workflow-binding]] is derived from it.
 - `api` ("API endpoints") — the `/api/unprivileged_tools` endpoints, the create payload shape, and running a registered tool by `tool_uuid`.
 - `validation`, `testing` — what Galaxy checks when a tool is created, and that Galaxy stores declared tool tests but does not run them for a tool held in its database.
 
