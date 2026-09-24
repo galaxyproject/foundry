@@ -25,7 +25,7 @@ summary: "How a Galaxy workflow step uses a GalaxyUserTool: embedded under run: 
 
 A gxformat2 step that uses an authored `GalaxyUserTool` carries the whole tool definition under its `run:` key. That is the form every Foundry draft uses. A native `.ga` step may instead name an already-registered tool by `tool_uuid`. No step puts a tool's `uuid` in `tool_id` or `content_id`.
 
-The rule is derived from the `workflows` section ("Using a tool in a workflow") of Galaxy's authoring help, vendored in [[galaxy-user-tool-authoring-help]]. The Galaxy-side facts below are pinned to the same commit. The gxwf behavior was observed with `@galaxy-tool-util/cli` 1.10.0, the version the Foundry pins, and 1.12.0.
+The rule is derived from the `workflows` section ("Using a tool in a workflow") of Galaxy's authoring help, vendored in [[galaxy-user-tool-authoring-help]]. The Galaxy-side facts below are pinned to the same commit. The gxwf behavior was observed with `@galaxy-tool-util/cli` 1.10.0, the version the Foundry pins, and 1.12.0, the latest release when this was written.
 
 ## Which form to use
 
@@ -35,7 +35,7 @@ The rule is derived from the `workflows` section ("Using a tool in a workflow") 
 | A native `.ga` step that must use a tool already registered on a specific Galaxy server | `tool_uuid` set to the registered tool's `uuid`. `content_id` and `tool_id` equal the tool's own `id`, or are omitted. |
 | Any form | Never put the `uuid` in `tool_id` or `content_id`. |
 
-Galaxy rejects a step that references a tool by `tool_uuid` without embedding its definition when the step's `tool_id` names something other than that tool's `id`, including the `uuid` itself. A step that also carries `tool_representation`, as Galaxy's own export does, imports whatever its `tool_id` says.
+Galaxy rejects a step that references a tool by `tool_uuid` without embedding its definition when the step's `tool_id` names something other than that tool's `id`, including the `uuid` itself. A step that also carries `tool_representation`, as Galaxy's own export does, is exempt from this check and is not rejected, whatever its `tool_id`.
 
 A user-defined tool is not in a server's toolbox, so a step that names one by `tool_id` alone imports with the tool unresolved. That is true even when the `tool_id` string matches a registered tool's `id`.
 
@@ -48,7 +48,7 @@ To bind a step:
 - Put the complete `GalaxyUserTool` document under `run:`, unchanged. Its `id` and `version` identify the tool.
 - Leave out `tool_id`, `tool_version`, and `tool_shed_repository`. They describe toolbox tools. Remove any `TODO` sentinel the template left in those fields rather than filling it.
 - Key `in:` by the names of the definition's `data` and `collection` inputs.
-- List every output a downstream step or a workflow output uses under `out:`, by the definition's output `name`. gxwf needs this list: see "gxwf limits" below.
+- List every output a downstream step or a workflow output uses under `out:`, by the definition's output `name`. The pinned gxwf needs this list: see "gxwf limits in the pinned version" below.
 - Set values for non-data inputs in `state`, keyed by input `name`.
 
 ```yaml
@@ -91,7 +91,9 @@ A `uuid` pins one exact version of the tool. Saving a changed tool gives it a ne
 
 The Foundry has no step that needs this form. It applies when a harness edits a `.ga` that Galaxy exported, or binds a workflow to a tool someone already registered on a particular server.
 
-## gxwf limits
+## gxwf limits in the pinned version
+
+These are defects in `@galaxy-tool-util` up to the version the Foundry pins, not rules of the step format. Galaxy and gxformat2 accept an embedded step without them. They are fixed in [jmchilton/galaxy-tool-util-ts#185](https://github.com/jmchilton/galaxy-tool-util-ts/pull/185), which is not in a release yet. The guidance below applies to the pinned version. Once the Foundry pins a release containing that fix, this section goes away, along with the validation fallbacks in [[implement-galaxy-tool-step]] and [[advance-galaxy-draft-step]] that point here.
 
 Both gxwf versions tested, 1.10.0 and 1.12.0, treat any object under a step's `run:` as an inlined subworkflow. For a step whose `run:` is a `GalaxyUserTool`:
 
@@ -100,9 +102,9 @@ Both gxwf versions tested, 1.10.0 and 1.12.0, treat any object under a step's `r
 - `gxwf draft-validate` without `--concrete` and `gxwf draft-extract` give correct results only when the step lists its outputs under `out:`. Without that list, `draft-validate` exits 1, reporting that a workflow output sourced from the step references an unknown port. `draft-extract` exits 0 but drops every workflow output and every downstream step that reads from the step.
 - `gxwf validate-tool-source <file>` validates the definition itself when it is saved as a separate file. It checks the definition, not the step that uses it.
 
-While the crash stands, a draft containing an embedded step gets no concrete tool-state validation for any of its steps. Run the checks that complete, validate the definition with `validate-tool-source`, and record in the [[open-requirements-ledger]] that concrete tool-state validation did not run.
+Until a fixed gxwf is pinned, a draft containing an embedded step gets no concrete tool-state validation for any of its steps. Run the checks that complete, validate the definition with `validate-tool-source`, and record in the [[open-requirements-ledger]] that concrete tool-state validation did not run.
 
 ## Open questions
 
-- `gxwf validate` with tool-state checks, which [[validate-galaxy-workflow]] runs on the extracted workflow, crashes the same way. That Mold does not yet say so.
+- `gxwf validate` with tool-state checks, which [[validate-galaxy-workflow]] runs on the extracted workflow, crashes the same way with the pinned gxwf. That Mold does not say so, and needs no change once a fixed gxwf is pinned.
 - Whether a Planemo-managed Galaxy runs a workflow with an embedded tool has not been tested. It would need `enable_beta_tool_formats` on that server and the `Custom Tool Execution` role for the test user.
