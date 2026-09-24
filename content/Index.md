@@ -38,7 +38,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[freeform-summary-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs. *(reviewed)*
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
-- [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary. *(reviewed)*
+- [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool. *(reviewed)*
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions. *(reviewed)*
 - [[interview-to-freeform-summary]] — Normalize a free-form user interview into the shared freeform-summary workflow handoff. *(reviewed)*
 - [[interview-to-galaxy-workflow-changeset]] — Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. *(reviewed)*
@@ -186,6 +186,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Research
 
 - [[gxy-sketches-alignment]] — Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not.
+- [[galaxy-user-tool-workflow-binding]] — How a Foundry workflow step uses an authored GalaxyUserTool: the definition embedded under run:, never a tool_uuid, tool_id or content_id reference.
 - [[component-archon]] — Archon remains a heavy-harness candidate; HITL gates are stronger, but per-step sub-DAG looping is still the main gap.
 - [[component-claude-dynamic-workflows]] — Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate.
 - [[component-nextflow-channel-operators]] — Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation.
@@ -213,6 +214,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
 - [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
 - [[galaxy-xsd]] — Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax.
+- [[galaxy-user-tool-authoring-help]] — Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows.
 - [[galaxy-user-tool-authoring]] — What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — derived from Galaxy's own generator prompts.
 - [[galaxy-user-tool-critique]] — What to flag in a structurally-valid GalaxyUserTool definition, what to leave alone, and when a fix is structural.
 - [[galaxy-workflow-comments]] — How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative.

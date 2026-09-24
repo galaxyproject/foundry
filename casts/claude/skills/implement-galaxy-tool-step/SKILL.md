@@ -1,6 +1,6 @@
 ---
 name: implement-galaxy-tool-step
-description: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
+description: "Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool."
 ---
 
 # implement-galaxy-tool-step
@@ -9,11 +9,12 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## When To Use
 
-- Convert an abstract step into a concrete gxformat2 step using a tool summary.
+- Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool.
 
 ## Inputs
 
 - Read artifact `galaxy-tool-summary`. Schema: galaxy-tool-summary. Produced by `summarize-galaxy-tool`. Galaxy tool summary manifest from summarize-galaxy-tool conforming to galaxy-tool-summary; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`.
+- Read artifact `galaxy-user-tool-definition`. Produced by `author-galaxy-tool-wrapper`. `GalaxyUserTool` YAML from author-galaxy-tool-wrapper, in place of a tool summary when the discover-or-author branch fell through to authoring. The step embeds it under `run:`.
 - Read artifact `galaxy-workflow-draft`. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft.
 - Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`. Carried obligations ledger open-requirements-ledger: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.
 
@@ -43,6 +44,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/notes/galaxy-collection-semantics.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/galaxy-collection-semantics.md`; read it where that note directs.
 - `references/notes/galaxy-collection-tools.md`: Research note copied verbatim into the bundle. Insert built-in Galaxy collection-operation steps when a direct tool connection cannot express the needed shape. Use when: a step needs collection construction, filtering, extraction, zipping, unzipping, flattening, merging, or relabeling.
 - `references/notes/galaxy-tool-job-failure-reference.md`: Research note copied verbatim into the bundle. Preserve concrete tool/job failure evidence while implementing step labels, tool ids, output labels, and collection wiring. Use when: a selected wrapper has explicit failure semantics, dynamic outputs, non-default stdio rules, strict-shell behavior, or runtime-only failure risk.
+- `references/notes/galaxy-user-tool-workflow-binding.md`: Research note copied verbatim into the bundle. Bind a step to an authored `GalaxyUserTool` by embedding the definition under `run:`, and handle the checks the pinned gxwf crashes or misreports on such a step. Use when: the step's tool is an authored `GalaxyUserTool` from author-galaxy-tool-wrapper rather than a Tool Shed or built-in wrapper.
 - `references/notes/galaxy-workflow-testability-design.md`: Research note copied verbatim into the bundle. Preserve testable output labels and collection element identifiers while replacing abstract steps with concrete gxformat2 steps. Use when: a concrete step changes output labels, emits collection outputs, creates a diagnostic checkpoint, or makes a final output too weakly assertable.
 - `references/notes/nextflow-operators-to-galaxy-collection-recipes.md`: Research note copied verbatim into the bundle. Turn operator-derived abstract transforms into concrete Galaxy wiring, collection operations, or review requests. Use when: a concrete step implements behavior traced to map, join, groupTuple, branch, mix, combine, or multiMap.
 - `references/notes/nextflow-to-galaxy-channel-shape-mapping.md`: Research note copied verbatim into the bundle. Check whether a concrete tool input/output can preserve the intended source-derived Galaxy collection shape. Use when: implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs.
@@ -53,7 +55,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Replace one abstract step in the gxformat2 draft with a concrete tool step, using the upstream tool summary. One invocation resolves exactly the chosen step's `TODO_*` / `_plan_*` slots into a concrete `tool_id`, `tool_version`, `state`, and wrapper-determined port names, and returns the mutated draft. This is the "Implement" leaf of the per-step loop owned by advance-galaxy-draft-step.
+Replace one abstract step in the gxformat2 draft with a concrete tool step, using the upstream tool summary or, for a tool authored on fallthrough, its `GalaxyUserTool` definition. One invocation resolves exactly the chosen step's `TODO_*` / `_plan_*` slots into a concrete tool binding, `state`, and wrapper-determined port names, and returns the mutated draft. This is the "Implement" leaf of the per-step loop owned by advance-galaxy-draft-step.
 
 Single step in scope. This skill owns the chosen step and the wiring that connects it to ports already in the draft. It does not redesign topology and does not unwind earlier iterations — cross-step rework is the orchestrator's call.
 
@@ -61,10 +63,12 @@ Single step in scope. This skill owns the chosen step and the wiring that connec
 
 1. **Read the step's plan.** From the galaxy-workflow-draft, take the chosen step's deferred evidence: `_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`, and any `TODO_*` slots the template or data-flow brief left for this phase.
 2. **Bind to the tool summary.** Read the galaxy-tool-summary manifest: `parsed_tool` gives concrete input/output port names and datatypes; shape the step's `state` against `input_schemas.workflow_step_linked`. Set `tool_version`, and set `tool_id` — confirming or correcting an identity-pinned id rather than re-deriving a good pin from scratch. For a built-in/stock tool the `tool_id` is the bare id (`Filter1`, `Cut1`, collection ops) and `tool_version` must come from the summary's cached pin — never invent a stock version; the summary already resolved it against the shed via summarize-galaxy-tool. If `input_schemas` is `null`, consult `warnings[]` for why before binding by hand.
+
+   **Authored user-defined tool.** When the wrapper is a `galaxy-user-tool-definition` from author-galaxy-tool-wrapper, there is no tool summary and no toolbox id to bind. Follow galaxy-user-tool-workflow-binding: embed the `galaxy-user-tool.yml` document unchanged under the step's `run:`, and remove `tool_id`, `tool_version`, and `tool_shed_repository` along with any `TODO` in them. Take `in:` keys from the definition's data and collection input names, list every output a consumer uses under `out:` by its output name, and set non-data values in `state` by input name. Never name the tool by `tool_uuid`, `tool_id`, or `content_id` alone, and do not register the tool to obtain a `uuid`.
 3. **Wire ports.** Connect the step's inputs to their upstream producers and its outputs to downstream consumers per the `_plan_in` / `_plan_out` intent, using real wrapper port names. Preserve collection mapping and reduction semantics (galaxy-collection-semantics); for a source-derived shape, check the chosen input/output can actually carry the intended File / list / paired / list:paired shape (nextflow-to-galaxy-channel-shape-mapping).
 4. **Close shape gaps.** When a direct tool connection cannot express the needed shape, insert a built-in collection-operation step (galaxy-collection-tools); for identifier-derived reshaping — regex parsing, nesting swaps, paired assignment — use Apply Rules (galaxy-apply-rules-dsl); for a transform traced to a Nextflow operator (map, join, groupTuple, branch, mix, combine, multiMap), turn it into concrete wiring or a review request via nextflow-operators-to-galaxy-collection-recipes. A built-in step inserted here is itself a stock tool: resolve its concrete `tool_version` through the galaxy-tool-cache flow (summarize-galaxy-tool on the bare id) rather than guessing — or leave it draft-tier for the next loop iteration to realize.
 5. **Preserve testability.** Keep output labels and collection element identifiers stable and addressable (galaxy-workflow-testability-design). Do not rename a labeled output, drop a checkpoint, or make a final output too weakly assertable just to satisfy this step's wiring.
-6. **Validate.** Run draft-validate `--concrete` over the mutated draft: it checks draft-contract rules and gates the extracted concrete subset — including the step just implemented — against full gxformat2. On green, return the draft for the next loop iteration; on red, route the diagnostic back to whichever decision above it implicates.
+6. **Validate.** Run draft-validate `--concrete` over the mutated draft: it checks draft-contract rules and gates the extracted concrete subset — including the step just implemented — against full gxformat2. On green, return the draft for the next loop iteration; on red, route the diagnostic back to whichever decision above it implicates. With the gxwf version this skill was built against, `--concrete` crashes instead of reporting when any step in the draft embeds a `GalaxyUserTool`. Run the checks galaxy-user-tool-workflow-binding lists as working, and record the skipped concrete validation in the open-requirements-ledger rather than reading the crash as a verdict on the step.
 
 ### Failure ownership
 

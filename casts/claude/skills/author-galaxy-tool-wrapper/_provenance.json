@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 5,
-    "content_hash": "cced8f068cd1ce81fefad23a62fdb4d52b3ce805b2231f64a7fe37f258bc1e09",
-    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
+    "revision": 6,
+    "content_hash": "4965b3938a84b35f0b41d58cd6ad19902b94551b00bb04ddbe16890fde883d2d",
+    "commit": "32db4d564c3d1431e552e521852e8ba11567f16b"
   },
-  "cast_at": "2026-09-15T23:16:18.298Z",
+  "cast_at": "2026-09-24T13:50:53.889Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [

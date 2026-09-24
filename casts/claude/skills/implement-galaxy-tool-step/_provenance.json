@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 9,
-    "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
-    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
+    "revision": 10,
+    "content_hash": "889f1817fe82061204ad63687b46a71c0985e5fec07a569bca40d905cd528d97",
+    "commit": "69fb53396854bd5d1ce4b35647a8c4611f9899aa"
   },
-  "cast_at": "2026-09-23T16:20:45.501Z",
+  "cast_at": "2026-09-24T17:15:27.269Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -106,6 +106,22 @@
       "trigger": "When a selected wrapper has explicit failure semantics, dynamic outputs, non-default stdio rules, strict-shell behavior, or runtime-only failure risk.",
       "src_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
       "dst_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-user-tool-workflow-binding]]",
+      "src": "content/research/galaxy-user-tool-workflow-binding/index.md",
+      "dst": "references/notes/galaxy-user-tool-workflow-binding.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Bind a step to an authored `GalaxyUserTool` by embedding the definition under `run:`, and handle the checks the pinned gxwf crashes or misreports on such a step.",
+      "trigger": "When the step's tool is an authored `GalaxyUserTool` from [[author-galaxy-tool-wrapper]] rather than a Tool Shed or built-in wrapper.",
+      "verification": "Promote after a worked run binds an authored tool this way and the extracted workflow imports into Galaxy with the tool resolved and runs.",
+      "src_hash": "284590a21b2fdd44333df102d3867e904d3630536e74ba644f4190319f715e9e",
+      "dst_hash": "284590a21b2fdd44333df102d3867e904d3630536e74ba644f4190319f715e9e",
       "source": "deterministic"
     },
     {
@@ -223,6 +239,13 @@
         "inherited_schema": "[[galaxy-tool-summary]]",
         "producers": [
           "summarize-galaxy-tool"
+        ]
+      },
+      {
+        "id": "galaxy-user-tool-definition",
+        "description": "`GalaxyUserTool` YAML from [[author-galaxy-tool-wrapper]], in place of a tool summary when the discover-or-author branch fell through to authoring. The step embeds it under `run:`.",
+        "producers": [
+          "author-galaxy-tool-wrapper"
         ]
       },
       {

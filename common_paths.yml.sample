@@ -47,6 +47,13 @@ galaxy_dannon:
   repo: dannon/galaxy
   ref: 69d0c697b495b7f16b1475c00c8bfbd7b9bfa85e
 
+# Temporary source for the user-defined tool workflow guidance before
+# galaxyproject/galaxy#23694 merges.
+galaxy_mvdbeek:
+  path: ~/projects/repositories/mvdbeek-galaxy
+  repo: mvdbeek/galaxy
+  ref: c74e78f165e9089628ebce69c112e9d9b35e6599
+
 tools_iuc:
   path: ~/projects/repositories/tools-iuc
   repo: galaxyproject/tools-iuc
