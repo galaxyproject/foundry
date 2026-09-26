@@ -6,9 +6,9 @@
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
     "revision": 5,
     "content_hash": "100b3f985f8e309092bfd05cf544a8286e0a878ee2df3a155dfebe6fcdb286f0",
-    "commit": "586466b99aec09a13036ff891d7e187053b2cae3"
+    "commit": "6be21cadfe1dc0974fef0232bbb9eb5362980c9a"
   },
-  "cast_at": "2026-09-23T15:54:15.202Z",
+  "cast_at": "2026-09-26T16:31:48.868Z",
   "refs": [
     {
       "kind": "research",
@@ -73,8 +73,8 @@
       "evidence": "corpus-observed",
       "purpose": "Interpret Galaxy invocation-level failure evidence including invocation state, structured messages, and step job summaries.",
       "trigger": "When a failed workflow test has invocation failure, missing workflow outputs, cancelled/paused steps, subworkflow failures, or collection population errors.",
-      "src_hash": "e8115df6ddca447d47d77cb33becda847cdd19b2cbe9924782bfc180b94bb451",
-      "dst_hash": "e8115df6ddca447d47d77cb33becda847cdd19b2cbe9924782bfc180b94bb451",
+      "src_hash": "f4e613c692334c1c89b46d00d8369b3c89e2b55cad3929c8581fef3b8edfc1db",
+      "dst_hash": "f4e613c692334c1c89b46d00d8369b3c89e2b55cad3929c8581fef3b8edfc1db",
       "source": "deterministic"
     },
     {
