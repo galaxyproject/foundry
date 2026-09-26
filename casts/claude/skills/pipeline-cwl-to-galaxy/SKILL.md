@@ -27,12 +27,12 @@ Install the harness CLIs every constituent skill invokes before driving the pipe
   Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
   Check: `foundry --help`.
   Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
-- **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
-  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 galaxy-tool-cache`.
+- **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.13.1'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.13.1 galaxy-tool-cache`.
   Check: `galaxy-tool-cache --help | grep -q summarize`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
-- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
-  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
+- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.13.1'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.13.1 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 - **`planemo`** (planemo). `uv tool install planemo==0.75.47` (or `pip install planemo==0.75.47`).

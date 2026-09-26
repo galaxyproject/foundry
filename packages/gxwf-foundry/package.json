@@ -54,7 +54,7 @@
   "license": "MIT",
   "dependencies": {
     "@galaxy-foundry/summarize-nextflow": "workspace:*",
-    "@galaxy-tool-util/schema": "^1.7.2",
+    "@galaxy-tool-util/schema": "^1.13.1",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "commander": "^12.1.0",
