@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-09-23
-revision: 3
+revised: 2026-09-26
+revision: 4
 related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-collection-semantics]]"
@@ -21,6 +21,7 @@ sources:
   - "https://github.com/galaxyproject/gxformat2/blob/main/gxformat2/normalized/_format2.py"
   - "https://github.com/galaxyproject/gxformat2/blob/main/gxformat2/schema/gxformat2.py"
   - "https://github.com/galaxyproject/gxformat2/blob/main/gxformat2/lint.py"
+  - "https://github.com/jmchilton/galaxy-tool-util-ts/pull/186"
   - "https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/workflow/modules.py"
   - "https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/workflow/workflow_parameter_input_definitions.py"
 summary: "Authoring guidance for gxformat2 workflow input types, constraints, defaults, and validation."
@@ -42,10 +43,14 @@ Use `data` for a single dataset input. It is the common spelling in Galaxy's gxf
 
 For a collection, declare the shape the workflow needs. Galaxy defaults an omitted `collection_type` to `list`; `list:paired` means a list of paired datasets. The [IWC CellPlex workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex.ga) has two `list:paired` FASTQ inputs and a separate `list` of CSV sample mappings. See [[galaxy-collection-semantics]] for other shapes and [[galaxy-datatypes-conf]] for datatype extensions.
 
-## Set omission and choices deliberately
+## Set defaults and constraints deliberately
 
 `optional: true` permits a missing input. `default` supplies a value when an input is missing or null; it does not itself make the input optional. The [IWC Scanpy workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.ga) combines `format: [mtx]` for its Matrix dataset with an optional text parameter whose default is `MT-`.
 
-For text parameters, `restrictions` defines a closed choice list, `suggestions` offers choices while allowing other text, and `restrictOnConnections` derives choices from connected select inputs. Current gxformat2 declares and converts these fields, although the older vendored JSON Schema in [[gxformat2-schema]] omits them. Do not rely on gxformat2 `min` or `max` to constrain a numeric input: current conversion drops those bounds. Verify any required range in the imported Galaxy workflow.
+For text parameters, `restrictions` defines a closed choice list, `suggestions` offers choices while allowing other text, and `restrictOnConnections` derives choices from connected select inputs.
 
-After import or conversion, inspect the effective input names, types, collection shapes, and choices. Run a workflow test with representative `job:` values to check the interface Galaxy actually uses. [[iwc-test-data-conventions]] covers fixture shapes.
+For `int` and `float` parameters, set `min` and `max` to inclusive bounds. Either bound can be omitted. Foundry targets gxwf `1.13.1` or newer, which converts these bounds to Galaxy `in_range` validators and recovers them on export. See [[gxwf]] for installation.
+
+The older vendored JSON Schema in [[gxformat2-schema]] omits fields such as `restrictions`, `suggestions`, and `restrictOnConnections`. Its field list does not cover every supported input constraint.
+
+After import or conversion, inspect the effective input names, types, collection shapes, defaults, and constraints. Run a workflow test with representative `job:` values to check the interface Galaxy actually uses. [[iwc-test-data-conventions]] covers fixture shapes.
