@@ -199,6 +199,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[component-nextflow-inspect]] | Nextflow inspect and config command contracts, container-preview limits, and configuration-resolution pitfalls. | draft | 2026-09-26 | 2 |
 | [[galaxy-apply-rules-dsl]] | How Apply Rules derives columns from collection metadata, filters rows, and maps them into new collection structure. | draft | 2026-09-26 | 3 |
 | [[galaxy-collection-tools]] | Catalog of Galaxy collection-operation tools, with versioned inputs, outputs, defaults, mapping behavior, and diagnostic qualifications. | draft | 2026-09-26 | 3 |
 | [[galaxy-native-workflow-schema]] | Native Galaxy workflow step and connection vocabulary, the pinned structural schema, and the checks needed beyond that artifact. | draft | 2026-09-26 | 2 |
@@ -265,6 +266,5 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[iwc-tabular-operations-survey]] | Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation. | draft | 2026-05-02 | 2 |
 | [[iwc-transformations-survey]] | Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over. | draft | 2026-05-02 | 2 |
 | [[nextflow-operators-to-galaxy-collection-recipes]] | Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers. | draft | 2026-05-02 | 1 |
-| [[component-nextflow-inspect]] | White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-05-01 | 1 |
 | [[component-nf-core-tools]] | White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision. | draft | 2026-05-01 | 1 |
