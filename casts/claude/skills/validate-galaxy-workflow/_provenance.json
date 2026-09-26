@@ -6,9 +6,9 @@
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 5,
     "content_hash": "74e3743fc376f33c1eb37832ab4869c327d48f87e015c7a38597cf4c4ca939cd",
-    "commit": "6be21cadfe1dc0974fef0232bbb9eb5362980c9a"
+    "commit": "88eb241e0b7226af678c1a938ab2bfc89a31aa1e"
   },
-  "cast_at": "2026-09-26T16:30:30.750Z",
+  "cast_at": "2026-09-26T18:05:02.508Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep static workflow validation findings distinct from Galaxy invocation/runtime failure surfaces.",
       "trigger": "When a workflow passes gxwf validation but still has likely runtime risks around invocation scheduling, outputs, conditionals, or collection population.",
-      "src_hash": "f4e613c692334c1c89b46d00d8369b3c89e2b55cad3929c8581fef3b8edfc1db",
-      "dst_hash": "f4e613c692334c1c89b46d00d8369b3c89e2b55cad3929c8581fef3b8edfc1db",
+      "src_hash": "e86b17c0b39b88076f1a1f177cce9ef1f868de0b36437a624e4b630e2c126559",
+      "dst_hash": "e86b17c0b39b88076f1a1f177cce9ef1f868de0b36437a624e4b630e2c126559",
       "source": "deterministic"
     },
     {
