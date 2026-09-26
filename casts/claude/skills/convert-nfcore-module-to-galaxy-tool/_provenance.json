@@ -6,9 +6,9 @@
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 11,
     "content_hash": "35e945843889b66b1e87b894db30670959431d4eb871cce5e74b541b7f527098",
-    "commit": "ddf54ebebb28dad664e9e95e57f6ed4d6f157ef3"
+    "commit": "f80289eed36509c51cbe54ce6f721efb19984060"
   },
-  "cast_at": "2026-09-16T15:17:06.396Z",
+  "cast_at": "2026-09-26T20:07:26.273Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -116,8 +116,8 @@
       "purpose": "Reference for nf-core module conventions: meta.yml shape, modules.json, environment.yml posture, test layout, container directive idioms.",
       "trigger": "When parsing meta.yml, environment.yml, or main.nf and a convention is unclear; when populating _provenance.yml.",
       "verification": "Cast and verify _provenance.yml.nfcore_source.git_sha resolution and meta.yml DOI extraction work for fastp.",
-      "src_hash": "f62c4bf50c3c42dcbd4e6283dc44e21571ff91a9e219daf74330cc65174d58fd",
-      "dst_hash": "f62c4bf50c3c42dcbd4e6283dc44e21571ff91a9e219daf74330cc65174d58fd",
+      "src_hash": "c3f26f9027b0e7a59fc21cae9ae82aea0c79d5bd5a1a71854a98b28944003c63",
+      "dst_hash": "c3f26f9027b0e7a59fc21cae9ae82aea0c79d5bd5a1a71854a98b28944003c63",
       "source": "deterministic"
     },
     {

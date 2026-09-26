@@ -194,7 +194,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[component-nextflow-pipeline-anatomy]] — Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17.
 - [[component-nextflow-testing]] — nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7.
 - [[component-nf-core-module-conventions]] — RFC 2119 conventions enforced by nf-core/tools module lint, with lint-check pointers. Backs summarize-nextflow + author-galaxy-tool-wrapper.
-- [[component-nf-core-tools]] — White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision.
+- [[component-nf-core-tools]] — nf-core/tools conventions, CLI and Python surfaces, schema validation, module provenance, linting, and container-download limits.
 - [[component-tool-shed-search]] — Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload
 - [[cwl-pickvalue-to-galaxy]] — CWL `pickValue` (first_non_null / the_only_non_null / all_non_null) → Galaxy's native `pick_value` workflow step added by galaxyproject/galaxy#22222.
 - [[cwl-v1.2-schemas]] — Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization.
