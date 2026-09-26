@@ -6,7 +6,7 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-09-26
-revision: 2
+revision: 3
 related_notes:
   - "[[galaxy-workflow-invocation-failure-reference]]"
   - "[[planemo-workflow-test-architecture]]"
@@ -36,18 +36,9 @@ A failed Galaxy job preserves execution evidence separately from workflow schedu
 
 [[galaxy-workflow-invocation-failure-reference]] covers scheduling and dependency messages. [[planemo-workflow-test-architecture]] locates the structured Planemo artifacts, and [[debug-galaxy-workflow-output]] uses this evidence to classify a failure before proposing repairs.
 
-## Retrieve job evidence
+## Job evidence
 
-For an encoded job ID from an invocation or Planemo result, request `GET /api/jobs/{job_id}?full=true`. Preserve the response alongside the invocation ID, history ID, Galaxy version, and Planemo test result.
-
-```bash
-curl --fail --silent --show-error \
-  -H "x-api-key: $GALAXY_API_KEY" \
-  "$GALAXY_URL/api/jobs/$JOB_ID?full=true" \
-  > job.json
-```
-
-Set `GALAXY_URL` to the server base URL without a trailing slash. The API key must have access to the job. These requests inspect an existing run. The contracts below describe the pinned Galaxy source in this page's sources, not every deployed version.
+Full job detail includes execution identity, state, exit code, structured messages, dependencies, and separate tool and runner streams. The combined stream fields provide compatibility views of those streams.
 
 | Field | Evidence |
 |---|---|
@@ -136,15 +127,11 @@ Paths are relative to the server URL and use encoded API IDs.
 | `GET /api/jobs/{job_id}/metrics` | Job metrics subject to access policy and availability. |
 | `GET /api/jobs/{job_id}/common_problems` | Simple checks such as empty or duplicate inputs. These are clues, not a complete diagnosis. |
 
-`console_output` requires all four query parameters: `stdout_position`, `stdout_length`, `stderr_position`, and `stderr_length`. For example:
+`console_output` requires four query parameters: `stdout_position`, `stdout_length`, `stderr_position`, and `stderr_length`. They define the starting offsets and lengths of the requested stream ranges.
 
-```text
-/api/jobs/{job_id}/console_output?stdout_position=0&stdout_length=4096&stderr_position=0&stderr_length=4096
-```
+The destination must enable `live_tool_output_reporting`, including when retrieving a finished job through this endpoint. While running, Galaxy reads the requested ranges from tool stream files. Otherwise it returns stored tool streams. Full job detail exposes stored failure evidence independently of live reporting.
 
-The destination must enable `live_tool_output_reporting`, including when retrieving a finished job through this endpoint. While running, Galaxy reads the requested ranges from tool stream files. Otherwise it returns stored tool streams. Prefer full job detail for preserved failure evidence when live reporting is unavailable.
-
-Full detail does not grant administrator access. System details such as traceback, runner, destination, handler, and external job ID can require an administrator. Command-line exposure also depends on server configuration, and full-detail `job_metrics` are added for administrators. Request the missing server or runner evidence when needed instead of assuming a normal workflow-testing key can retrieve it.
+Full detail does not grant administrator access. System details such as traceback, runner, destination, handler, and external job ID can require an administrator. Command-line exposure also depends on server configuration, and full-detail `job_metrics` are added for administrators. A normal workflow-testing key may therefore lack some server or runner evidence.
 
 ## Diagnostic pitfalls and verification limits
 

@@ -201,8 +201,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | --- | --- | --- | --- | --- |
 | [[galaxy-apply-rules-dsl]] | How Apply Rules derives columns from collection metadata, filters rows, and maps them into new collection structure. | draft | 2026-09-26 | 3 |
 | [[galaxy-native-workflow-schema]] | Native Galaxy workflow step and connection vocabulary, the pinned structural schema, and the checks needed beyond that artifact. | draft | 2026-09-26 | 2 |
-| [[galaxy-tool-job-failure-reference]] | Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces. | draft | 2026-09-26 | 2 |
-| [[galaxy-workflow-invocation-failure-reference]] | Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces. | draft | 2026-09-26 | 2 |
+| [[galaxy-tool-job-failure-reference]] | Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces. | draft | 2026-09-26 | 3 |
+| [[galaxy-workflow-invocation-failure-reference]] | Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces. | draft | 2026-09-26 | 3 |
 | [[gxformat2-workflow-inputs]] | Authoring guidance for gxformat2 workflow input types, constraints, defaults, and validation. | draft | 2026-09-26 | 4 |
 | [[galaxy-workflow-testability-design]] | Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible. | draft | 2026-09-23 | 3 |
 | [[gxformat2-schema]] | Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation. | draft | 2026-09-23 | 3 |

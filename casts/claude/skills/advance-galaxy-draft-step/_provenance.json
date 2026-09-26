@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 7,
     "content_hash": "ae19f7e5f5ac9434e31302efd88bb5f5db484caf0145951dd27dfe19247f2ea9",
-    "commit": "57c66f15b6cae5e9bede21cb411073e20b94f997"
+    "commit": "88eb241e0b7226af678c1a938ab2bfc89a31aa1e"
   },
-  "cast_at": "2026-09-26T16:47:59.079Z",
+  "cast_at": "2026-09-26T18:04:56.844Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -101,8 +101,8 @@
       "evidence": "corpus-observed",
       "purpose": "Classify [[draft-validate]] diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice).",
       "trigger": "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.",
-      "src_hash": "286a2e352315abe4c49ba89e5ed31ebd492616ac2f6df6d8e7465362f3609d1d",
-      "dst_hash": "286a2e352315abe4c49ba89e5ed31ebd492616ac2f6df6d8e7465362f3609d1d",
+      "src_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
+      "dst_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
       "source": "deterministic"
     },
     {
