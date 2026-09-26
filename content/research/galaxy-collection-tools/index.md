@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 2
+revised: 2026-09-26
+revision: 3
 related_notes:
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-apply-rules-dsl]]"
@@ -14,424 +14,253 @@ related_notes:
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
   - "[[iwc-transformations-survey]]"
 sources:
-  - "https://github.com/jmchilton/galaxy-agentic-collection-transform (initial research seed)"
-  - "https://github.com/galaxyproject/galaxy/tree/main/lib/galaxy/tools (XML wrappers; source of truth)"
-summary: "Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics."
+  - "https://github.com/galaxyproject/galaxy/tree/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tools"
+  - "https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tools/__init__.py"
+  - "https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tools/model_operation_macros.xml"
+  - "https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tools/actions/model_operations.py"
+summary: "Catalog of Galaxy collection-operation tools, with versioned inputs, outputs, defaults, mapping behavior, and diagnostic qualifications."
 ---
 
-Catalog of Galaxy's built-in collection-operation tools (the `__BUILD_LIST__`, `__FILTER_FROM_FILE__`, `__APPLY_RULES__`, … family) — what each tool does, its inputs and outputs, and when to reach for it. Source of truth is the Galaxy XML wrappers under `lib/galaxy/tools/`; this is the high-level catalog. Pairs with [[galaxy-collection-semantics]], which describes the underlying mapping and reduction semantics rather than the user-facing tools.
+Galaxy's built-in collection-operation tools assemble, select, reshape, and annotate collections. Their outputs usually copy history dataset associations while sharing the underlying dataset files. They do not rerun scientific analysis or duplicate those files. Some operations read file contents, including identifier tables, tag tables, null markers, and the emptiness check. Creating a large cross product still creates many history objects.
 
-These are **model operations** — they manipulate collection structure without processing file contents, so they're fast and don't grow storage.
+The catalog describes the wrappers and implementations at Galaxy commit `a63da1dfd1960360f4aa2fddc6a75396954d750a`. Versions below are the newest wrappers present at that commit, not a promise that every Galaxy server exposes them. Older wrappers can have different inputs. A workflow's concrete `tool_version` and parameter schema must match the installed tool, not merely the newest entry in this catalog. [[galaxy-collection-semantics]] describes collection mapping and reduction, and [[galaxy-apply-rules-dsl]] gives the exact rule vocabulary.
 
-## Tool Categories
+## Collection inputs and mapped outputs
 
-### 1. Collection Creation Tools
+An input declared as `data` takes one dataset per execution. Selecting a collection for that input invokes Galaxy's normal mapping behavior. Build List and Zip therefore produce one list or pair per mapped execution, with an outer collection collecting the results. They do not accept arbitrary collections as single dataset values or concatenate them directly.
 
-#### Build List (`__BUILD_LIST__`)
-**Version:** 1.2.0
+An input declared as `data_collection` consumes a collection of a compatible type. A deeper collection may be mapped over to supply compatible inner collections. The output types in this catalog describe one execution, except where mapped behavior is stated explicitly. Collection order and identifiers both matter when synchronizing inputs. Equal element counts alone do not establish that two datasets represent the same sample.
 
-**Purpose:** Build a new list collection from individual datasets or collections.
+## Collection creation
 
-**Inputs:**
-- `datasets` (repeat): Input datasets or collections
-  - `input`: Data input (optional)
-  - `id_cond/id_select`: Label selection method
-    - `idx`: Use index (0, 1, 2...)
-    - `identifier`: Use dataset's existing identifier
-    - `manual`: Specify custom identifier
+### Build list (`__BUILD_LIST__`, 1.2.0)
 
-**Output:** `list` collection
+Builds `output`, a `list`, from a repeat named `datasets`. Each repeat has optional dataset input `input` and conditional `id_cond`:
 
-**Use Cases:**
-- A: Build collection from individual datasets
-- B: Merge collection with individual dataset(s) → nested collection
-- C: Merge collections → nested collection (requires equal element counts)
+| Parameter | Values and behavior |
+|---|---|
+| `id_cond/id_select` | `idx` by default, `identifier`, or `manual`. |
+| `idx` | Uses the repeat's zero-based position as the element identifier. Omitted optional inputs can leave gaps in the numbering. |
+| `identifier` | Uses the incoming element identifier when available, otherwise the dataset name. |
+| `id_cond/identifier` | Supplies the label for `manual`. |
 
----
+Individual datasets become elements of one list. Collection inputs to the dataset parameters are mapped, producing lists inside an outer collection. Multiple mapped inputs must be compatible for Galaxy's paired mapping. This is different from Merge Collections, which appends collection elements.
 
-#### Duplicate File to Collection (`__DUPLICATE_FILE_TO_COLLECTION__`)
-**Version:** 1.0.0
+Choose unique labels. The implementation builds an identifier-keyed dictionary, so a repeated label replaces an earlier entry. Wrapper 1.1.0 has the dataset repeat but lacks the label-selection conditional.
 
-**Purpose:** Create collection of arbitrary size by duplicating an input dataset N times.
+### Duplicate file to collection (`__DUPLICATE_FILE_TO_COLLECTION__`, 1.0.0)
 
-**Inputs:**
-- `input`: Dataset to duplicate
-- `number`: Integer - number of copies
-- `element_identifier`: Base name for identifiers (e.g., "test" → "test 1", "test 2", etc.)
+Takes dataset `input`, integer `number`, and text `element_identifier`. No numeric default is supplied for `number`. Produces `output`, a `list`, with labels formed from the base identifier, a space, and a one-based number. For base `test` and size 2, the identifiers are `test 1` and `test 2`.
 
-**Output:** `list` collection
+Each element refers to a copy of the input's history association. This can materialize repeated inputs for a test or a synchronized operation, but repeated copies remain the same scientific input.
 
-**Use Case:** Create test collections, broadcasting single dataset to match collection size.
+## Element extraction
 
----
+### Extract dataset (`__EXTRACT_DATASET__`, 1.0.2)
 
-### 2. Element Extraction Tools
+Consumes `input` with declared types `list`, `paired`, `paired_or_unpaired`, or `record`. Produces dataset `output`, named after the selected element identifier.
 
-#### Extract Dataset (`__EXTRACT_DATASET__`)
-**Version:** 1.0.2
+| Parameter | Values and behavior |
+|---|---|
+| `which/which_dataset` | `first` by default, `by_identifier`, or `by_index`. |
+| `which/identifier` | Required for `by_identifier`. The wrapper's sanitizer retains ASCII letters, digits, `_`, `-`, and `#`. |
+| `which/index` | Zero-based integer, default 0, for `by_index`. |
 
-**Purpose:** Extract a single dataset from a collection.
+An empty collection cannot supply the first dataset. Missing identifiers and invalid indices fail. For a nested input, Galaxy can map over compatible inner collections and collect the extracted datasets at the remaining outer levels. Extraction does not flatten every dataset in the hierarchy.
 
-**Inputs:**
-- `input`: Collection (`list`, `paired`, `paired_or_unpaired`, `record`)
-- `which`: Selection method
-  - `first`: First dataset
-  - `by_identifier`: Match element identifier (string)
-  - `by_index`: Select by 0-based index (integer)
+## Filtering
 
-**Output:** Single dataset
+### State, empty-content, and null filters
 
-**Note:** For nested collections, collapses inner-most collection into dataset, creating new list at that level.
+These tools take collection `input`, declared as `list` or `list:paired`, and produce collection `output` with the input type. Their predicates differ:
 
----
+| Tool and version | Criterion for retaining a dataset |
+|---|---|
+| Filter empty datasets, `__FILTER_EMPTY_DATASETS__`, 1.1.0 | Has data and yields at least one byte from Galaxy's file reader, which handles supported compression. A compressed file containing no decompressed content is empty. |
+| Filter failed datasets, `__FILTER_FAILED_DATASETS__`, 1.1.0 | `is_ok` is true. The implementation keeps successful datasets, not simply every state other than red/error. |
+| Filter null elements, `__FILTER_NULL__`, 1.1.0 | Is not the recognized `expression.json` null marker. This checks the datatype and `peek == "null"`, or the file content read by the implementation. It does not remove every empty file or arbitrary JSON containing null values. |
+| Keep success, `__KEEP_SUCCESS_DATASETS__`, 1.1.0 | `is_ok` is true. Paused datasets can reach the filter and are excluded. Other pending datasets cause an input-not-ready result. |
 
-### 3. Filter Tools
+For `list:paired`, both members must pass. If either fails the predicate, the whole pair is removed. Higher collection levels can be mapped over.
 
-#### Filter Empty Datasets (`__FILTER_EMPTY_DATASETS__`)
-**Version:** 1.1.0
+All four versions listed expose optional dataset `replacement`. For a simple list, supplying it replaces excluded elements while retaining their identifiers and copying their original tags. Replacement is rejected for `list:paired`. The 1.0.0 wrappers for Empty, Null, and Keep Success do not expose replacement. Filter Failed 1.0.0 does.
 
-**Purpose:** Remove empty elements from a collection.
+Filter Empty and Filter Null require successful inputs before applying their content predicate. They do not repair errored datasets. Filter Failed waits for ready inputs and does not accept paused inputs in the same way as Keep Success. Keep Success also waits on running or queued inputs, despite wrapper help that suggests still-running elements are removed immediately.
 
-**Inputs:**
-- `input`: Collection (`list`, `list:paired`)
-- `replacement` (optional): Dataset to replace empty elements instead of removing
+Removing elements changes the sample population and can break alignment with another collection. Preserving an identifier with a replacement preserves structural alignment, but does not establish that the replacement is a meaningful scientific result.
 
-**Output:** Filtered collection (same type)
+### Filter collection (`__FILTER_FROM_FILE__`, 1.1.0)
 
-**Use Case:** Continue multi-sample analysis when downstream tools require content.
+Takes any collection `input` and a text identifier file in conditional `how`. Matching applies to the collection's top-level element identifiers, with whitespace stripped from file lines.
 
----
+| Parameter | Contract |
+|---|---|
+| `how/how_filter` | `remove_if_absent` by default, or `remove_if_present`. |
+| `how/filter_source` | Text dataset containing one identifier per line. |
 
-#### Filter Failed Datasets (`__FILTER_FAILED_DATASETS__`)
-**Version:** 1.0.0
+`remove_if_absent` keeps elements named in the file. `remove_if_present` excludes them. File entries absent from the collection have no effect. The tool retains input order, rather than adopting file order.
 
-**Purpose:** Remove datasets in error (red) state from a collection.
+Outputs `output_filtered` and `output_discarded` partition the input and retain its collection type. Keeping the discarded output makes exclusions inspectable. The 1.0.0 wrapper exposes the same parameter names.
 
-**Inputs:**
-- `input`: Collection (`list`, `list:paired`)
-- `replacement` (optional): Dataset to replace failed elements
+## Structure transformations
 
-**Output:** Filtered collection (same type)
+### Flatten collection (`__FLATTEN__`, 1.0.0)
 
-**Use Case:** Continue analysis when some samples fail.
+Takes collection `input` and produces `output`, a flat `list` of all leaf datasets. `join_identifier` is `_` by default, with `:` and `-` also accepted. Identifiers at each nesting level are joined in traversal order.
 
----
+For `list:paired`, sample `i1` becomes `i1_forward` and `i1_reverse` with the default separator. A flat input remains a list with its existing identifiers.
 
-#### Filter Null Elements (`__FILTER_NULL__`)
-**Version:** 1.1.0
+Flattening discards the original hierarchy. Choose identifiers and separator so distinct paths produce distinct labels. The implementation stores results by joined identifier, so a collision can overwrite a preceding leaf.
 
-**Purpose:** Remove null elements (from conditional workflow execution) from a collection.
+### Nest collection (`__NEST__`, 1.0.0)
 
-**Inputs:**
-- `input`: Collection (`list`, `list:paired`)
-- `replacement` (optional): Dataset to replace null elements
+Declares collection `input` with types `list` or `paired`, and `output` with type `list:list`. Each top-level element is wrapped in a one-element inner list. The outer and inner labels are the original element identifier. Thus `[A, B]` becomes `[A → [A], B → [B]]`.
 
-**Output:** Filtered collection (same type)
+This lets a tool that consumes a whole list run once per singleton list when Galaxy maps over the outer level. It does not group multiple samples by a key. Deeper inputs involve mapping, so account for the consumed inner type and remaining outer structure instead of treating the declared output as the final workflow type. The wrapper includes a nested-pair test, whose output collection assertion does not explicitly pin the full effective type.
 
-**Use Case:** Clean up collections after conditional workflow branches.
+### Zip collections (`__ZIP_COLLECTION__`, 1.0.0)
 
----
+Takes dataset parameters `input_forward` and `input_reverse`. Produces `output`, a `paired` collection with member identifiers `forward` and `reverse`.
 
-#### Keep Success (`__KEEP_SUCCESS_DATASETS__`)
-**Version:** 1.1.0
+With individual datasets, it creates one pair. With compatible mapped collections, Galaxy creates pairs per mapped position and assembles the outer collection. It does not perform a keyed join or verify that the two files are biologically matched.
 
-**Purpose:** Keep only datasets in success (green) state.
+### Unzip collection (`__UNZIP_COLLECTION__`, 1.0.0)
 
-**Inputs:**
-- `input`: Collection (`list`, `list:paired`)
-- `replacement` (optional): Dataset to replace unsuccessful elements
+Consumes `input`, a `paired` collection, and produces datasets `forward` and `reverse`. Mapping over `list:paired` produces corresponding output lists. The tool separates associations without changing read contents.
 
-**Output:** Filtered collection (same type)
+### Split paired and unpaired (`__SPLIT_PAIRED_AND_UNPAIRED__`, 1.0.0)
 
-**Use Case:** Similar to Filter Failed but positive selection approach.
+Consumes `input` of type `list`, `list:paired`, or `list:paired_or_unpaired`. Produces:
 
----
+- `output_unpaired`, a `list` of singleton datasets.
+- `output_paired`, a `list:paired` of pairs.
 
-#### Filter Collection (`__FILTER_FROM_FILE__`)
-**Version:** 1.1.0
+A plain list sends all elements to the unpaired output. A list of pairs sends all elements to the paired output. For a mixed list, singleton subcollections are unwrapped and two-member subcollections are normalized to `paired`. Top-level identifiers are retained, and either output can be empty. This partitions an existing pairing structure. It does not infer pairs from filenames.
 
-**Purpose:** Filter elements using identifier list from a file.
+## Combining and synchronizing collections
 
-**Inputs:**
-- `input`: Any collection
-- `how/how_filter`: Filter mode
-  - `remove_if_absent`: Keep only elements in file
-  - `remove_if_present`: Remove elements in file
-- `filter_source`: Text file with identifiers (one per line)
+### Merge collections (`__MERGE_COLLECTION__`, 1.0.0)
 
-**Outputs:**
-- `output_filtered`: Elements passing filter
-- `output_discarded`: Elements removed by filter
+Takes repeat `inputs` with at least two entries, each containing collection parameter `input`. Produces `output`, deriving its collection type from the first input. Inputs need compatible structure. The tool appends their top-level elements, leaving inner collections intact.
 
-**Use Case:** Subset collections based on sample lists, exclusion lists.
+Conditional `advanced/conflict` controls overlapping identifiers:
 
----
+| `duplicate_options` | Behavior |
+|---|---|
+| `keep_first` | Default. Keeps the first element with each identifier. |
+| `keep_last` | Keeps the last value for each identifier. Its position follows the identifier's first insertion. |
+| `suffix_conflict` | Adds a suffix to every occurrence of an identifier appearing in multiple inputs. |
+| `suffix_conflict_rest` | Adds a suffix to conflicting occurrences after the first input containing that identifier. |
+| `suffix_every` | Adds a suffix to every element. |
+| `fail` | Fails if an identifier occurs more than once. |
 
-### 4. Structure Transformation Tools
+For suffix modes, `advanced/conflict/suffix_pattern` defaults to `_#`. Every `#` is replaced by the one-based **input collection number**, not the occurrence number of that identifier. Check that generated suffixes cannot collide with existing labels.
 
-#### Flatten Collection (`__FLATTEN__`)
-**Version:** 1.0.0
+The default can silently discard an overlapping sample. Use an explicit conflict policy when both occurrences matter. Merge is an append operation, not element-wise pairing. Compatible sample-sheet column definitions are retained when all inputs agree.
 
-**Purpose:** Convert nested collection to flat list by merging identifiers.
+### Harmonize two collections (`__HARMONIZELISTS__`, 1.1.0)
 
-**Inputs:**
-- `input`: Any nested collection
-- `join_identifier`: Separator for merging identifiers (`_`, `:`, `-`)
+Takes `input1`, the reference order, and optional `input2`. Both declare `list` or `list:paired`. Outputs `output1` and `output2` preserve their corresponding input types when both are supplied.
 
-**Output:** `list` collection
+With two inputs, both outputs contain only top-level identifiers present in both collections, ordered as in `input1`. No intersection produces two empty collections. This is identifier synchronization, not sorting independently or joining on file contents. Discarded elements are not separate outputs.
 
-**Example:** `list:paired` with element `i1` containing `forward`/`reverse` → flat list with `i1_forward`, `i1_reverse`
+With `input2` omitted, `output1` copies `input1` and `output2` mirrors its structure using `expression.json` null datasets. For nested pairs, both members are null markers. This mode creates placeholder files, so the general shared-file behavior has an exception here.
 
----
+Wrapper 1.0.0 requires both inputs and has no omitted-input mode.
 
-#### Nest Collection (`__NEST__`)
-**Version:** 1.0.0
+## Cross products
 
-**Purpose:** Add nesting level to a collection.
+### Flat Cross Product (`__CROSS_PRODUCT_FLAT__`, 1.0.0)
 
-**Inputs:**
-- `input`: Collection (`list`, `paired`)
+Consumes `input_a` and `input_b`, both `list`, and produces lists `output_a` and `output_b`. For input sizes n and m, each output has n × m elements. A is the outer loop, B the inner loop. Corresponding output elements refer to the A and B datasets for that combination.
 
-**Output:** `list:list` collection
+`join_identifier` accepts `_` by default, `:`, or `-`. Labels join the A and B identifiers. As with Flatten, ambiguous joined labels can collide.
 
-**Behavior:** Each element becomes a single-element inner list.
+Normal element-wise mapping over both outputs then runs the downstream tool for every combination. The cross-product tool itself performs no comparison.
 
-**Use Case:** Enable mapping over elements that are themselves lists (Galaxy maps over outer level).
+### Nested Cross Product (`__CROSS_PRODUCT_NESTED__`, 1.0.0)
 
----
+Consumes lists `input_a` and `input_b`, producing `output_a` and `output_b` as `list:list`. Both outputs use A identifiers at the outer level and B identifiers at the inner level. Within each A group, `output_a` repeats that A dataset and `output_b` contains the B datasets.
 
-#### Zip Collections (`__ZIP_COLLECTION__`)
-**Version:** 1.0.0
+Each output contains n × m leaf associations, organized in n groups of size m. Select the downstream input type and mapping depth to retain that grouping in its results. Large inputs expand job counts as well as collection metadata. [[nextflow-operators-to-galaxy-collection-recipes]] identifies unkeyed Cartesian expansion as a translation decision needing review.
 
-**Purpose:** Create paired collection from two inputs.
+## Identifier and tag operations
 
-**Inputs:**
-- `input_forward`: Dataset or collection for forward
-- `input_reverse`: Dataset or collection for reverse
+### Relabel identifiers (`__RELABEL_FROM_FILE__`, 1.1.0)
 
-**Output:** `paired` collection
+Consumes any collection `input` and produces `output` with the same type. It changes top-level identifiers, without sorting elements or changing file contents. Conditional `how` holds these parameters:
 
-**Use Case:** Combine separate forward/reverse read files/collections into paired structure.
+| Parameter | Contract |
+|---|---|
+| `how/how_select` | `txt` by default, `tabular`, or `tabular_extended`. |
+| `how/labels` | Text or tabular dataset supplying new names. |
+| `how/strict` | Boolean, off by default. Requires matching row count and, for tables, coverage of every original identifier. |
+| `how/from`, `how/to` | One-based column numbers for `tabular_extended`, defaults 1 and 2. |
 
----
+In `txt` mode, line N renames element N. Too few lines fail even with strict mode off. Extra lines are ignored unless strict mode is on.
 
-#### Unzip Collection (`__UNZIP_COLLECTION__`)
-**Version:** 1.0.0
+In `tabular` mode, each row must have exactly two tab-separated columns: old identifier and new identifier. Extended mode selects any two available columns. With strict mode off, identifiers missing from the table retain their original names. Extra source identifiers have no effect. Repeated source identifiers overwrite earlier table rows, so strict mode is not a complete duplicate-row validator.
 
-**Purpose:** Split paired collection into separate datasets.
+New labels are stripped and must match Python regex `^[\w\- \.,]+$`: Unicode word characters, hyphen, space, dot, and comma. Empty labels, unsupported characters, and duplicate resulting labels fail. This differs from Extract Dataset's narrower identifier sanitizer.
 
-**Inputs:**
-- `input`: `paired` collection
+### Sort collection (`__SORTLIST__`, 1.0.0)
 
-**Outputs:**
-- `forward`: Forward dataset
-- `reverse`: Reverse dataset
+Consumes `input`, declared as `list` or `list:paired`, and produces `output` with the same type. Parameters are in conditional `sort_type`:
 
-**Use Case:** Separate paired reads for tools requiring individual files.
+| `sort_type/sort_type` | Behavior |
+|---|---|
+| `alpha` | Default. Sorts identifiers lexicographically, with case significant. |
+| `numeric` | Removes every character except ASCII digits, converts the remaining string to an integer, and sorts by that value. |
+| `file` | Uses the line order from text dataset `sort_type/sort_file`. |
 
----
+Numeric mode does not interpret signs or decimal points. `sample-1.2` has key 12. An identifier with no digits fails integer conversion. Equal keys retain their input order.
 
-#### Split Paired and Unpaired (`__SPLIT_PAIRED_AND_UNPAIRED__`)
-**Version:** 1.0.0
+For file mode, the file's reported data-line count must equal the collection element count and each stripped line must name an existing element. The wrapper asks for every identifier exactly once, but the implementation does not explicitly reject repeated names. Supply a permutation, since repetitions can collapse entries in the output dictionary.
 
-**Purpose:** Separate mixed paired/unpaired collection into two typed collections.
+With valid inputs, sorting changes order while preserving sample membership and identity. It cannot establish correct pairing when identifiers disagree.
 
-**Inputs:**
-- `input`: Collection (`list:paired`, `list`, `list:paired_or_unpaired`)
+### Tag elements (`__TAG_FROM_FILE__`, 1.0.0)
 
-**Outputs:**
-- `output_unpaired`: `list` of unpaired datasets
-- `output_paired`: `list:paired` collection
+Consumes collection `input` and tabular dataset `tags`. Column 1 identifies the element, and later columns contain tags. Produces `output` with the same type, modifying tags on copied dataset associations.
 
-**Use Case:** Handle mixed sequencing outputs, separate for different downstream tools.
+Parameter `how` accepts `add` by default, `set`, or `remove`. They add tags while retaining existing tags, replace tags, or remove named tags, respectively. Ordinary tags are labels. Name tags use `#` or `name:` and participate in Galaxy's name-tag inheritance. `group:` tags can supply grouping metadata to tools that interpret them.
 
----
+For nested elements, the implementation looks up leaf element identifiers while traversing the copied subcollection. A row naming an outer sample does not necessarily tag all leaves under that sample. Repeated file identifiers keep the last row. Missing rows and empty tag lists should not be treated as a reliable way to clear all tags. The flat-dataset path only updates tags when a nonempty mapping is found.
 
-### 5. Collection Combination Tools
+## Apply Rules (`__APPLY_RULES__`, 1.1.0)
 
-#### Merge Collections (`__MERGE_COLLECTION__`)
-**Version:** 1.0.0
+Consumes collection `input` and rule parameter `rules`. Produces `output` with its collection type determined by the rule mapping. The interactive rule builder previews metadata transformations, and workflows can store a fixed rule set.
 
-**Purpose:** Combine two or more collections into one.
+Rules operate on rows describing leaf datasets and columns holding metadata. They can filter and sort rows, derive columns from identifiers or tags, transform strings using regular expressions, and map columns into identifier levels, paired members, or tags. They can therefore reshape a hierarchy or split identifier components without modifying dataset contents.
 
-**Inputs:**
-- `inputs` (repeat, min 2): Collections to merge
-- `advanced/conflict/duplicate_options`: Conflict handling
-  - `keep_first` (default): Keep first occurrence
-  - `keep_last`: Keep last occurrence
-  - `suffix_conflict`: Add suffix to all conflicting identifiers
-  - `suffix_conflict_rest`: Add suffix to conflicts after first
-  - `suffix_every`: Add suffix to every identifier
-  - `fail`: Error on conflict
-- `suffix_pattern`: Pattern for suffixes (default `_#`)
+This is a defined rule language, not arbitrary computation. Required mapping columns, pairing values, collisions, and resulting nesting determine whether a rule set is valid. [[galaxy-apply-rules-dsl]] documents all supported rule and mapping types, plus regex and column-index pitfalls.
 
-**Output:** Merged collection (same type as inputs)
+## Tool selection guide
 
----
+| Goal | Tool | Qualification |
+|---|---|---|
+| Assemble datasets into a list | Build list | Dataset inputs map when collections are selected. |
+| Repeat one dataset | Duplicate file to collection | Repeats associations, not independent observations. |
+| Select one dataset per collection | Extract dataset | Nested inputs may map over inner collections. |
+| Remove empty content | Filter empty datasets | Requires successful inputs. |
+| Continue after unsuccessful or paused samples | Keep success | Pending inputs still wait. |
+| Remove unsuccessful completed elements | Filter failed datasets | Uses `is_ok`, not a red-only predicate. |
+| Remove skipped/null markers | Filter null elements | Recognizes `expression.json` nulls. |
+| Subset by top-level identifiers | Filter collection | Preserves input order and exposes discarded elements. |
+| Collapse nesting | Flatten collection | Joined labels must remain unique. |
+| Wrap elements in singleton lists | Nest collection | Account for mapped outer levels. |
+| Form or separate pairs | Zip / Unzip | Does not infer biological pairing. |
+| Separate existing mixed pairs and singletons | Split paired and unpaired | Either output can be empty. |
+| Append collections | Merge collections | Default keeps only the first overlapping identifier. |
+| Synchronize identifiers and order | Harmonize two collections | Two-input mode keeps only the intersection. |
+| Materialize every A/B combination | Flat / Nested Cross Product | Expands to n × m combinations. |
+| Change identifiers | Relabel identifiers | Does not synchronize independently ordered inputs. |
+| Change order | Sort collection | Numeric mode concatenates digits. |
+| Annotate datasets | Tag elements | Nested matching uses leaf identifiers. |
+| Reshape using derived metadata | Apply Rules | Requires valid rule and output mappings. |
 
-#### Harmonize Two Collections (`__HARMONIZELISTS__`)
-**Version:** 1.0.0
+## Evidence and scope
 
-**Purpose:** Make two collections have same identifiers in same order.
+The wrapper XML supplies parameter names, declared collection types, versions, output names, and examples. `DatabaseOperationTool` and its subclasses in `lib/galaxy/tools/__init__.py` supply readiness checks and operation behavior. The shared macros supply separator choices and quota guidance. Where wrapper help simplifies or contradicts the implementation, the qualifications above follow the implementation.
 
-**Inputs:**
-- `input1`: Reference collection with desired order
-- `input2`: Collection to reorder
-
-**Outputs:**
-- `output1`: Filtered/ordered version of input1
-- `output2`: Filtered/ordered version of input2
-
-**Behavior:** Keeps only identifiers present in BOTH collections, orders by input1.
-
-**Use Case:** Prepare two collections for element-wise processing.
-
----
-
-### 6. Cross Product Tools
-
-#### Flat Cross Product (`__CROSS_PRODUCT_FLAT__`)
-**Version:** 1.0.0
-
-**Purpose:** Create flat lists enabling all-vs-all comparison between two collections.
-
-**Inputs:**
-- `input_a`: List collection A (length n)
-- `input_b`: List collection B (length m)
-- `join_identifier`: Separator for combined identifiers
-
-**Outputs:**
-- `output_a`: Flat list (n*m elements) - A elements repeated
-- `output_b`: Flat list (n*m elements) - B elements repeated
-
-**Use Case:** Run comparison tool on every combination of elements. Element-wise processing of outputs produces all pairwise comparisons.
-
----
-
-#### Nested Cross Product (`__CROSS_PRODUCT_NESTED__`)
-**Version:** 1.0.0
-
-**Purpose:** Create nested lists for all-vs-all comparison with hierarchical output.
-
-**Inputs:**
-- `input_a`: List collection A
-- `input_b`: List collection B
-
-**Outputs:**
-- `output_a`: `list:list` - nested structure of A elements
-- `output_b`: `list:list` - nested structure of B elements
-
-**Use Case:** All-vs-all comparison preserving hierarchical structure in results (outer list = A elements, inner list = B comparisons).
-
----
-
-### 7. Metadata Manipulation Tools
-
-#### Relabel Identifiers (`__RELABEL_FROM_FILE__`)
-**Version:** 1.1.0
-
-**Purpose:** Change element identifiers using mapping file.
-
-**Inputs:**
-- `input`: Any collection
-- `how/how_select`: Mapping method
-  - `txt`: Simple text file (line N = new name for element N)
-  - `tabular`: Two-column mapping (old → new)
-  - `tabular_extended`: Any two columns from tabular file
-- `labels`: Mapping file
-- `strict`: Require exact match count
-
-**Output:** Collection with new identifiers
-
-**Valid Characters:** a-z, A-Z, 0-9, dash, underscore, dot, space, comma
-
----
-
-#### Sort Collection (`__SORTLIST__`)
-**Version:** 1.0.0
-
-**Purpose:** Reorder collection elements.
-
-**Inputs:**
-- `input`: Collection (`list`, `list:paired`)
-- `sort_type`: Method
-  - `alpha`: Alphabetical
-  - `numeric`: Numeric (ignores non-numeric chars)
-  - `file`: Custom order from text file
-
-**Output:** Sorted collection (same type)
-
----
-
-#### Tag Elements (`__TAG_FROM_FILE__`)
-**Version:** 1.0.0
-
-**Purpose:** Add/modify Galaxy tags on collection elements.
-
-**Inputs:**
-- `input`: Any collection
-- `tags`: Tabular file (col1: identifier, col2+: tags)
-- `how`: Update mode
-  - `add`: Add new tags, keep existing
-  - `set`: Replace all tags
-  - `remove`: Remove specified tags
-
-**Output:** Tagged collection
-
-**Tag Types:**
-- Simple tags: Plain labels
-- Name tags: Prefix with `#` or `name:` - inherited by derived datasets
-- Group tags: Prefix with `group:` - for grouping (e.g., treatment vs control)
-
----
-
-### 8. Apply Rules Tool (`__APPLY_RULES__`)
-**Version:** 1.1.0
-
-**Purpose:** Most powerful/flexible collection manipulation tool. Process collection metadata as tabular data using rule-based transformations.
-
-**Inputs:**
-- `input`: Any collection
-- `rules`: Rule definition (JSON-based transformation rules)
-
-**Output:** Transformed collection (type determined by rules)
-
-**Capabilities:**
-- Filter elements (rows)
-- Add/remove/reorder identifier levels (columns)
-- Regular expression transformations
-- Complex nesting/flattening
-- Arbitrary reorganization
-
-**Use Cases:**
-- Restructure collections between hierarchies
-- Filter based on identifier patterns
-- Split/merge identifier components
-- Any operation not covered by simpler tools
-
-**Note:** Interactive form provides live preview. Can be used in workflows with static rules.
-
----
-
-## Tool Selection Guide
-
-| Goal | Recommended Tool |
-|------|------------------|
-| Build collection from datasets | Build List |
-| Extract single element | Extract Dataset |
-| Remove empty/failed/null elements | Filter Empty/Failed/Null |
-| Subset by identifier list | Filter Collection |
-| Convert nested → flat | Flatten Collection |
-| Add nesting level | Nest Collection |
-| Combine forward/reverse | Zip Collections |
-| Separate paired collection | Unzip Collection |
-| Concatenate collections | Merge Collections |
-| Match two collections | Harmonize Two Collections |
-| All-vs-all comparison | Cross Product (Flat or Nested) |
-| Rename elements | Relabel Identifiers |
-| Reorder elements | Sort Collection |
-| Add metadata tags | Tag Elements |
-| Complex restructuring | Apply Rules |
-| Duplicate single dataset | Duplicate File to Collection |
-
----
+The wrapper tests include concrete assertions for extraction, filtering, relabeling, sorting, nesting, merging, and cross-product output elements. This reference was checked against source and those test declarations. A live Galaxy server was not used to verify tool availability, mapped workflow output types, or deployment-specific readiness behavior.

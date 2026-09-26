@@ -200,6 +200,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
 | [[galaxy-apply-rules-dsl]] | How Apply Rules derives columns from collection metadata, filters rows, and maps them into new collection structure. | draft | 2026-09-26 | 3 |
+| [[galaxy-collection-tools]] | Catalog of Galaxy collection-operation tools, with versioned inputs, outputs, defaults, mapping behavior, and diagnostic qualifications. | draft | 2026-09-26 | 3 |
 | [[galaxy-native-workflow-schema]] | Native Galaxy workflow step and connection vocabulary, the pinned structural schema, and the checks needed beyond that artifact. | draft | 2026-09-26 | 2 |
 | [[galaxy-tool-job-failure-reference]] | Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces. | draft | 2026-09-26 | 3 |
 | [[galaxy-workflow-invocation-failure-reference]] | Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces. | draft | 2026-09-26 | 3 |
@@ -259,7 +260,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-tool-summary-input-source]] | Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source. | draft | 2026-05-03 | 2 |
 | [[iwc-map-over-lifecycle-survey]] | Survey of IWC map-over lifecycle recipes, with a Nextflow-to-Galaxy crosswalk for collection construction, cleanup, reshape, reduce, and publish phases. | draft | 2026-05-03 | 1 |
 | [[iwc-workflow-testability-survey]] | IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful. | draft | 2026-05-03 | 2 |
-| [[galaxy-collection-tools]] | Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics. | draft | 2026-05-02 | 2 |
 | [[iwc-conditionals-survey]] | Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection. | draft | 2026-05-02 | 2 |
 | [[iwc-parameter-derivation-survey]] | Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters. | draft | 2026-05-02 | 1 |
 | [[iwc-tabular-operations-survey]] | Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation. | draft | 2026-05-02 | 2 |
