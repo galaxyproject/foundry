@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-09-26
+revision: 2
 license: MIT
 license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 related_notes:
@@ -15,30 +15,62 @@ related_notes:
   - "[[galaxy-datatypes-conf]]"
 sources:
   - "https://github.com/jmchilton/galaxy-tool-util-ts/blob/7ae4ecd0ba8d492225f58a6d455c4cc5317298f0/packages/schema/src/native-galaxy-workflow.ts"
+  - "https://github.com/jmchilton/galaxy-tool-util-ts/blob/main/packages/cli/src/commands/validate-workflow.ts"
+  - "https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy_test/base/data/test_workflow_two_random_lines.ga"
 companions:
   - "native-galaxy-workflow.schema.json"
-summary: "Vendored structural JSON Schema for Galaxy native workflow (.ga) format: vocabulary for the JSON shape Galaxy emits and consumes."
+summary: "Native Galaxy workflow step and connection vocabulary, the pinned structural schema, and the checks needed beyond that artifact."
 ---
 
-> **Vendored from upstream**, pinned at SHA `7ae4ecd`. One file lives next to this note, declared in `companions:` so casting carries it into every bundle this note reaches:
->
-> - `native-galaxy-workflow.schema.json` — Draft-07 JSON Schema generated from `@galaxy-tool-util/schema`'s `NativeGalaxyWorkflowSchema` via `gxwf structural-schema --format native`. **Agents and casting should consume this** when reasoning about the JSON shape Galaxy actually exports/imports (the `.ga` format), as opposed to the human-authoring gxformat2 YAML.
->
-> **Re-sync:** `pnpm sync:vendored --update`. Sync builds galaxy-tool-util-ts and re-runs the generator before copy.
+# Galaxy native workflow structural schema
 
-## Boundary vs gxformat2
+Galaxy's native `.ga` JSON represents workflow inputs as steps and connects steps through numeric identifiers. For new workflow authoring, use the gxformat2 YAML vocabulary in [[gxformat2-schema]]. [[gxwf convert]] translates between these representations.
 
-[[gxformat2-schema]] covers the human-authoring YAML format (`*.gxwf.yml`, `class: GalaxyWorkflow`). This schema covers the JSON format Galaxy server emits/consumes (`*.ga`, `a_galaxy_workflow: "true"`). gxformat2 transpiles into native; the two are not interchangeable line-by-line.
+The companion `native-galaxy-workflow.schema.json` is a vendored Draft-07 schema generated from `@galaxy-tool-util/schema` at `7ae4ecd`. Casting carries it with this note. Foundry targets gxwf `1.13.1` or newer, but upgrading the CLI does not refresh this companion.
 
-## Top-level shape
+## Read steps and connections
 
-The schema declares required `[class, a_galaxy_workflow, format-version]` with `class: enum["NativeGalaxyWorkflow"]`. Optional: `uuid`, `name`, `annotation`, `tags`, `version`, `license`, `release`, `creator`, `report`, `readme`, `help`, `logo_url`, `doi`, `source_metadata`, `comments`, `steps`, `subworkflows`.
+The root identifies a native workflow with `a_galaxy_workflow: "true"` and `format-version: "0.1"`. Both values are strings. Its `steps` object contains step records keyed by identifiers.
 
-## Caveat: schema is stricter than reality
+The schema admits these step types:
 
-Real `.ga` files **do not carry a `class` field**. Tested against `$IWC/workflows/repeatmasking/RepeatMasking-Workflow.ga`: top keys are `a_galaxy_workflow, annotation, format-version, license, release, name, creator, steps, tags, uuid, version`. The schema's `required: ["class", ...]` rejects every real workflow Galaxy currently produces. Treat the schema as **vocabulary reference**, not a runtime validator for in-the-wild `.ga` files, until upstream relaxes the requirement or Galaxy starts emitting `class`. Worth filing on galaxy-tool-util-ts.
+| Step `type` | Role |
+|---|---|
+| `data_input` | Exposes a dataset input. |
+| `data_collection_input` | Exposes a collection input. See [[galaxy-collection-semantics]]. |
+| `parameter_input` | Exposes a scalar parameter input. |
+| `tool` | Runs the tool identified by `tool_id` and `tool_version`. |
+| `subworkflow` | Invokes a nested workflow. |
+| `pause`, `pick_value` | Represents a pause or value-selection step. |
 
-## Caveats
+A step's `input_connections` maps its receiving input names to connections. Each connection requires a numeric upstream `id` and an `output_name`. A receiving input accepts one connection or an array. Inside a receiving step:
 
-- **Doc strings dropped.** Same Effect-TS `JSONSchema.make` limitation as [[gxformat2-schema]].
-- **Repeated `$id: "/schemas/unknown"` markers** appear 4× in this schema. Strict Ajv refuses to compile; pass `{ strict: false }` or strip duplicates before compile.
+```json
+"input_connections": {
+  "input": {"id": 0, "output_name": "output"}
+}
+```
+
+This connects input `input` to step `0`'s `output` port. The schema cannot establish that this step or port exists.
+
+Step `tool_state` accepts a JSON string, an object, or `null`. Its contents need validation against the selected wrapper.
+
+Step `outputs` describes output ports. Step `workflow_outputs` exposes selected ports as public results, with `output_name` identifying the port and `label` naming the result. `post_job_actions` records output actions separately.
+
+## Validate with the current tooling
+
+Run [[gxwf validate]] on the actual workflow:
+
+```bash
+gxwf validate workflow.ga --json
+```
+
+Resolve reported errors before runtime testing. Tool-state checks need tool metadata. Validation does not establish that a representative Galaxy workflow test passes. See [[galaxy-workflow-testability-design]].
+
+The pinned companion has three limits that matter when interpreting it:
+
+- It requires `class: NativeGalaxyWorkflow` at the root and in nested workflows. Galaxy exports can omit that field. Current gxwf validation handles exports without `class`, so a failure against this artifact alone does not establish a Galaxy import failure.
+- It makes `steps` optional and requires no fields within a step. A structurally accepted record can still lack the tool identity, input configuration, or connections needed to run.
+- It omits field descriptions and repeats `$id: "/schemas/unknown"` on opaque values. Ajv rejects these duplicate identifiers even with `strict: false`, so that setting does not make the companion directly usable as an Ajv validator.
+
+Keep the companion unchanged when investigating those limits. The structural schema generated by gxwf `1.13.1` still has the `class` and duplicate-identifier limits. Maintainers refresh vendored artifacts through `pnpm sync:vendored --update`, which builds the upstream package and runs `gxwf structural-schema --format native` before copying the result.
