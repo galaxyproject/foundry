@@ -8,8 +8,8 @@ tags:
   - cli/gxwf
 status: draft
 created: 2026-05-05
-revised: 2026-05-06
-revision: 2
+revised: 2026-09-26
+revision: 3
 summary: "Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations."
 ---
 
@@ -33,4 +33,5 @@ gxwf convert workflow.gxwf.yml --to native --output workflow.ga
 
 - Default output is stdout; pipe or pass `--output` when persisting.
 - `--compact` drops node position metadata; useful for structural diffs and skeleton generation.
-- `--stateful` requires a populated tool cache (see `galaxy-tool-cache`); without it, tool-state stays as fetched.
+- With a populated tool cache, conversion re-encodes tool state using cached definitions by default. Use `--no-stateful` to copy tool state through verbatim, or `--stateful` to force re-encoding even when the cache is empty. See [[galaxy-tool-cache]].
+- Version `1.13.1` preserves numeric input `min` and `max` as native Galaxy range validators and recovers them on export.

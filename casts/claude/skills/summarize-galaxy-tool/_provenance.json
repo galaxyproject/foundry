@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 8,
     "content_hash": "a53a303bff1d7ace3b44fb12af329b12695bfcd165933634b8fb6484c0c306f7",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "6af41ff36779319b209a23a56479fda1056f495c"
   },
-  "cast_at": "2026-09-13T20:58:29.970Z",
+  "cast_at": "2026-09-26T14:09:05.039Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -68,8 +68,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Runtime that emits the tool summary; the Mold's entire job is invoking it against a populated cache. Install before driving the skill.",
-      "src_hash": "89f82f52d1a3051eb7ceca9ee87e5e925fcc5f2de9c557e336acc230edf7c2f8",
-      "dst_hash": "89f82f52d1a3051eb7ceca9ee87e5e925fcc5f2de9c557e336acc230edf7c2f8",
+      "src_hash": "d26435fa754658c21a005ac82c0a6f4d2fa4fdb6419a52d10aecf4772d9cd7ef",
+      "dst_hash": "d26435fa754658c21a005ac82c0a6f4d2fa4fdb6419a52d10aecf4772d9cd7ef",
       "source": "deterministic"
     },
     {
@@ -129,8 +129,8 @@
       "trigger": "When a downstream Mold needs a specific input/output/help/citation field from the embedded `ParsedTool`.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "0f61d64b9f05f01513d25cddafbb05d3e39ecd3f3416d77f989246d52fffa665",
-      "dst_hash": "0f61d64b9f05f01513d25cddafbb05d3e39ecd3f3416d77f989246d52fffa665",
+      "src_hash": "3966d0c425e561891113f5c71a2d36a42c00a78cb744bb8970c577b46abcff9b",
+      "dst_hash": "3966d0c425e561891113f5c71a2d36a42c00a78cb744bb8970c577b46abcff9b",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
