@@ -220,7 +220,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
 - [[galaxy-workflow-testability-design]] — Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible.
 - [[gxformat2-schema]] — Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation.
-- [[gxformat2-workflow-inputs]] — Conceptual model, current aliases, and schema gaps for gxformat2 workflow inputs.
+- [[gxformat2-workflow-inputs]] — Authoring guidance for gxformat2 workflow input types, constraints, defaults, and validation.
 - [[iwc-comments-survey]] — How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
 - [[iwc-interval-operations-survey]] — IWC corpus survey of coordinate-aware genomic interval operations; sizing and candidate boundaries for a galaxy-interval-patterns MOC, with hold-if-thin gate.
