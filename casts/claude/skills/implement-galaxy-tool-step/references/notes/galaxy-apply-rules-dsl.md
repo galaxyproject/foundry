@@ -150,13 +150,18 @@ Column 1 is `sampleA`, column 2 is `1` or `2`, and the output type is `list:pair
 
 ## Check the result
 
+Build a complex rule set incrementally. After each addition, inspect the table and retained identifiers before adding the next rule. Keep a column map in comments so later edits can update every affected index.
+
 Test identifiers, collection type, and dataset membership together. A correct element count can hide swapped samples or incorrect pairing. Check representative contents as well as structure.
 
 Watch for these failures:
 
 - **Duplicate output paths:** two rows mapping to the same full identifier path cause the later dataset to replace the earlier one in the builder. Make the final path unique for every intended dataset.
 - **Unexpected filtering:** inspect retained identifiers, especially around `invert` and count filters. Filtering is selection, not validation that every input conforms.
-- **Missing metadata or bad indices:** check the input nesting and recalculate column numbers after removal or splitting.
+- **All rows removed:** check that filters retain the expected datasets, including cases with no matches. If no row survives, there is no dataset left to map. `allow_unmatched` only affects regex extraction and cannot prevent a filter from removing rows.
+- **Regex escaping:** `.` matches any character. To match a literal filename extension, write a single-quoted YAML expression such as '\.fastq$'. To match literal parentheses, use '\(sample\)'. Avoid double-quoted YAML unless you also account for its backslash escaping.
+- **Case differences:** exact-match filters distinguish `sample1` from `Sample1`. If case should be ignored, use a regex such as '(?i)^sample1$' with `add_filter_regex`.
+- **Missing metadata or bad indices:** check the input nesting and recalculate column numbers after removal or splitting. Remove temporary columns near the end when that makes index tracking easier.
 - **Failed extraction or numeric conversion:** fix the identifier contract or select the intended rows before extraction. Use `allow_unmatched` only when an empty result has a defined role.
 
 The [collection builder](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/managers/collections.py#L823-L960) defines grouping and tag assignment. [[galaxy-collection-semantics]] covers downstream mapping and reduction. For a relabeling task, see [[relabel-via-rules-and-find-replace]].
