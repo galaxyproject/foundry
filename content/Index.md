@@ -202,7 +202,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
 - [[foundry-feedback-ledger]] — Runtime protocol for carrying actionable feedback about Foundry assets, and the related projects a run exercises, from cast skills back to Foundry maintainers.
 - [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.
-- [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.
+- [[galaxy-apply-rules-dsl]] — How Apply Rules derives columns from collection metadata, filters rows, and maps them into new collection structure.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.
 - [[galaxy-collection-tools]] — Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics.
 - [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
