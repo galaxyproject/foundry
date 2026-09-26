@@ -208,6 +208,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-workflow-invocation-failure-reference]] | Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces. | draft | 2026-09-26 | 3 |
 | [[gxformat2-workflow-inputs]] | Authoring guidance for gxformat2 workflow input types, constraints, defaults, and validation. | draft | 2026-09-26 | 4 |
 | [[iwc-conditionals-survey]] | Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection. | draft | 2026-09-26 | 3 |
+| [[iwc-parameter-derivation-survey]] | Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters. | draft | 2026-09-26 | 2 |
 | [[galaxy-workflow-testability-design]] | Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible. | draft | 2026-09-23 | 3 |
 | [[gxformat2-schema]] | Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation. | draft | 2026-09-23 | 3 |
 | [[iwc-shortcuts-anti-patterns]] | Judgments for when weak Galaxy workflow-test assertions are useful smoke checks and when they conceal untested results. | draft | 2026-09-23 | 3 |
@@ -263,7 +264,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-tool-summary-input-source]] | Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source. | draft | 2026-05-03 | 2 |
 | [[iwc-map-over-lifecycle-survey]] | Survey of IWC map-over lifecycle recipes, with a Nextflow-to-Galaxy crosswalk for collection construction, cleanup, reshape, reduce, and publish phases. | draft | 2026-05-03 | 1 |
 | [[iwc-workflow-testability-survey]] | IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful. | draft | 2026-05-03 | 2 |
-| [[iwc-parameter-derivation-survey]] | Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters. | draft | 2026-05-02 | 1 |
 | [[iwc-tabular-operations-survey]] | Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation. | draft | 2026-05-02 | 2 |
 | [[iwc-transformations-survey]] | Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over. | draft | 2026-05-02 | 2 |
 | [[nextflow-operators-to-galaxy-collection-recipes]] | Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers. | draft | 2026-05-02 | 1 |
