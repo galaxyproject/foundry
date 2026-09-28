@@ -115,7 +115,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tabular-filter-by-column-value]] — Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC.
 - [[tabular-filter-by-regex]] — Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative.
 - [[tabular-group-and-aggregate-with-datamash]] — Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions.
-- [[tabular-join-on-key]] — Use tp_easyjoin_tool for two-tabular key joins; use tp_multijoin_tool for many files and query_tabular for SQL joins.
+- [[tabular-join-on-key]] — Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies.
 - [[tabular-pivot-collection-to-wide]] — Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table.
 - [[tabular-prepend-header]] — Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row.
 - [[tabular-relabel-by-row-counter]] — Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR.

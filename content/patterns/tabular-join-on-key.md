@@ -7,9 +7,9 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
-summary: "Use tp_easyjoin_tool for two-tabular key joins; use tp_multijoin_tool for many files and query_tabular for SQL joins."
+revised: 2026-09-28
+revision: 3
+summary: "Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
@@ -21,7 +21,7 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 iwc_exemplars:
   - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
-    why: "Shows canonical and repeated tp_easyjoin_tool fan-in joins with headered inputs and zero fill."
+    why: "Shows repeated tp_easyjoin_tool inner joins with headered inputs and a zero filler."
     confidence: high
   - workflow: VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8
     why: "Shows a newer tp_easyjoin_tool pin joining key 1 to key 1 with dot fill."
@@ -42,41 +42,42 @@ iwc_exemplars:
 
 # Tabular: join on key
 
-## Tool
+A key join aligns rows from tabular datasets by matching identifier columns. `tp_easyjoin_tool` joins two files and exposes separate modes for matched and unmatched rows. `tp_multijoin_tool` aligns selected value columns from many files. [[tabular-sql-query]] covers named-table joins, compound predicates, projections, and SQL anti-joins.
 
-`toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_easyjoin_tool` is the primary corpus path for ordinary two-file key joins. Use `tp_multijoin_tool` when many files share the same key/value shape. Use [[tabular-sql-query]] when the join condition, projection, anti-join, named columns, or indexes are the point.
+Choose the output's rows before choosing a fill value. The easyjoin default, `jointype: " "`, is an **inner join**. It retains keys present in both inputs. Setting a filler to `"0"` does not make unmatched rows appear.
 
-## When to reach for it
+For a collection of per-element key/value tables becoming one wide table, see [[tabular-pivot-collection-to-wide]]. Side-by-side paste without a key, row concatenation, and grouping are different operations. [[tabular-group-and-aggregate-with-datamash]] covers aggregation before or after a join.
 
-Use this pattern when two or more tabular datasets share an identifier column and need row-wise alignment.
+## Two-file joins with easyjoin
 
-Do not use this for collection-to-wide pivots; that is [[tabular-pivot-collection-to-wide]]. Do not use it for side-by-side paste with no key, row-bind/concat, or grouping. For aggregation around a join, see [[tabular-group-and-aggregate-with-datamash]].
+The tool ID is `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_easyjoin_tool`, followed by a version pin. In the pinned IWC snapshot, it occurs 12 times across five workflows. All 12 steps select the literal-space inner mode. These observations describe the exemplars, not the full wrapper interface.
 
-## Parameters
+| Parameter | Meaning and default |
+|---|---|
+| `infile1`, `infile2` | Required connected tabular inputs |
+| `column1`, `column2` | One-based key columns in the corresponding inputs. The examples serialize them as strings such as `"1"` and `"20"` |
+| `jointype` | Output-row selection. Defaults to the literal single space `" "`, meaning matched rows only |
+| `header` | Whether the first line of each input is a header. Defaults to `false` |
+| `ignore_case` | Match keys without case distinctions. Defaults to `false` |
+| `empty_string_filler` | Replacement for missing output fields. Defaults to `"0"`. The exemplars also use `"."` |
 
-For `tp_easyjoin_tool`:
+The [`9.3+galaxy1` wrapper](https://github.com/bgruening/galaxytools/blob/288f8bef36ccf645454d44bb45a677d46d424c13/tools/text_processing/text_processing/easyjoin.xml) exposes these exact `jointype` values:
 
-- `column1`: 1-indexed key column in `infile1`, quoted as a string.
-- `column2`: 1-indexed key column in `infile2`, quoted as a string.
-- `empty_string_filler`: fill value for missing-side cells. Corpus values include `"0"` and `"."`.
-- `header`: boolean; whether inputs have headers.
-- `ignore_case`: boolean key matching option.
-- `jointype`: join mode. Corpus default outer-style shape uses a literal single-space string: `" "`.
-- `infile1`, `infile2`: connected tabular inputs.
+| Value | Rows emitted |
+|---|---|
+| `" "` | Matches between both files, an inner join |
+| `"-v 1"` | Unmatched rows from the first file only |
+| `"-v 2"` | Unmatched rows from the second file only |
+| `"-a 1"` | Matches plus unmatched rows from the first file, a left outer join |
+| `"-a 2"` | Matches plus unmatched rows from the second file, a right outer join |
+| `"-a 1 -a 2"` | Matches and unmatched rows from both files, a full outer join |
+| `"-v 1 -v 2"` | Unmatched rows from both files, excluding matches |
 
-For `tp_multijoin_tool`:
+Do not replace the literal space with an empty string or an invented `--outer` value. The selected mode determines whether unmatched rows are emitted. The filler determines their missing cells when they are emitted. The [easyjoin implementation](https://github.com/bgruening/galaxytools/blob/288f8bef36ccf645454d44bb45a677d46d424c13/tools/text_processing/text_processing/easyjoin) delegates output formatting to GNU `join`. The output places the key first, followed by non-key fields from the first and second files. The wrapper uses automatic field layout rather than a user-selected projection.
 
-- `first_file`: first connected tabular input.
-- `files`: remaining connected tabular inputs.
-- `key_column`: shared key column.
-- `value_columns`: value columns to carry through from each file.
-- `filler`: fill value for missing cells.
-- `input_header`, `output_header`: independent header toggles.
-- `ignore_dups`: duplicate-key behavior.
+### Headered inner join
 
-## Idiomatic shapes
-
-Two-file key join, fill missing with zero:
+The SARS-CoV-2 variation reporting workflow joins column 20 of its first table to column 1 of its second table. It has four easyjoin steps, each using the inner mode.
 
 ```yaml
 tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_easyjoin_tool/9.3+galaxy1
@@ -91,9 +92,24 @@ tool_state:
   jointype: " "
 ```
 
-Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
+The VGP Hi-C scaffolding exemplar uses `9.5+galaxy3`, key column 1 in both inputs, headers, and dot fill. The metagenomic genes catalogue's **Join Prodigal to AMR** step uses `9.5+galaxy2`, column 1 in both inputs, and `header: false`. Choose header handling from the actual tables, not from their workflow domain.
 
-Many two-column files joined by a shared key:
+## Many-file joins with multijoin
+
+`toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_multijoin_tool` carries selected value columns from a first file and the remaining files into a common key-aligned output. The pinned corpus has one occurrence, in PathoGFAIR sample aggregation.
+
+- `first_file` supplies the first tabular input and `files` supplies the remaining inputs.
+- `key_column` is an integer identifying the one-based shared key column. Its default is 1.
+- `value_columns` selects the one-based value columns to carry from each file. Multiple columns serialize as a comma-separated value such as `"2,3"`.
+- `filler` supplies missing cells and defaults to `"0"`.
+- `input_header` and `output_header` independently control input and output headers. Both default to `false`.
+- `ignore_dups` defaults to `false`, causing repeated keys within one file to fail. With `true`, the last row for that key replaces earlier rows from that file. It does not aggregate duplicates.
+
+The [pinned multijoin implementation](https://github.com/bgruening/galaxytools/blob/288f8bef36ccf645454d44bb45a677d46d424c13/tools/text_processing/text_processing/multijoin) retains the union of keys from all inputs and sorts them lexicographically. The output has a key column, then the selected value columns for each input in file order. Absent file/key combinations receive the filler. This differs from easyjoin's default inner mode.
+
+When `output_header: true`, the key column is named `key`. Each value column gets a sanitized input-file label plus its input header name, or `V` plus its column number when `input_header: false`. Do not assume those labels are stable biological sample names. A row with too few key or selected value columns causes an error.
+
+The PathoGFAIR step joins two-column, headerless key/value files and requests an output header:
 
 ```yaml
 tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_multijoin_tool/9.3+galaxy1
@@ -108,20 +124,22 @@ tool_state:
   ignore_dups: false
 ```
 
-Anchored by the PathoGFAIR sample aggregation IWC exemplar.
+Use this shape when the same selected key and value positions have the same meaning in every file. Heterogeneous layouts need preprocessing or an explicit SQL query.
 
-SQL join when SQL semantics matter:
+## SQL joins
+
+The clinical metaproteomics verification exemplar names its inputs `pep` and `prot`, then projects a peptide/protein inner join:
 
 ```yaml
 tool_id: toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2
 tool_state:
   query_result:
-    header: yes
+    header: "yes"
     header_prefix: ""
   sqlquery: |-
     SELECT pep.mpep, prot.prot
     FROM pep
-    INNER JOIN prot on pep.mpep=prot.pep
+    INNER JOIN prot ON pep.mpep=prot.pep
   tables:
     - table: { __class__: ConnectedValue }
       tbl_opts:
@@ -133,25 +151,37 @@ tool_state:
         col_names: pep,prot
 ```
 
-Anchored by the clinical metaproteomics verification IWC exemplar.
+Quote `"yes"` because this is a select value, not a YAML boolean. The discovery exemplar uses a `NOT IN` query to exclude peptide-spectrum-match rows associated with proteins in a reference table. Its load filters skip headers, prepend line numbers, and normalize protein lists before the query. Its indexes support those lookups. See [[tabular-sql-query]] for the broader table-loading and query contract.
 
-## Pitfalls
+All three snippets are partial step excerpts. They show tool pins and relevant state, but omit upstream `in` connections and workflow outputs. Supply those connections when constructing a workflow.
 
-- **`jointype: " "` is intentional.** The surveyed easyjoin shape uses a literal single-space string. Do not clean it up to an empty string or `--outer` without wrapper verification.
-- **Key columns are 1-indexed strings.** Use `"1"`, `"20"`, etc. Do not use `c1` here.
-- **Header flag must match input.** Wrong `header` settings shift matching and can duplicate or garble headers.
-- **Fill value is semantic.** `"0"` means absent is zero; `"."` means absent is unknown/missing. Pick based on downstream interpretation.
-- **`tp_easyjoin_tool` is not SQL.** Compound predicates, anti-joins, named-column projection, or indexed joins belong in [[tabular-sql-query]].
-- **`tp_multijoin_tool` assumes uniform shape.** It fits many same-shaped key/value files, not arbitrary heterogeneous tables.
-- **Do not substitute collection joins.** `collection_column_join` is for the collection-to-wide-table idiom, not ordinary two-file joins.
+## Correctness checks and pitfalls
 
-## Legacy alternative
+- **Check key multiplicity.** A matching key is not necessarily unique. The underlying [GNU `join` contract](https://www.gnu.org/software/coreutils/manual/html_node/join-invocation.html) emits every matching pair for repeated keys, so two rows on each side can become four output rows. Aggregate or deduplicate only if that matches the scientific result.
+- **Do not depend on input row order.** Easyjoin sorts its inputs by key internally. With headers enabled, it keeps the first line separate from that sort. Multijoin sorts its output keys lexicographically. Add a downstream sort if the result requires a particular order.
+- **Match header handling to both inputs.** Treating a data row as a header removes it from ordinary key matching. Treating a header as data can emit a spurious row or lose the intended output header.
+- **Choose missing-value semantics.** `"0"` is appropriate only when a missing measurement means zero. `"."` is a missing-value marker only if downstream tools recognize it. Neither setting changes which keys the join retains.
+- **Check key representation.** Case-sensitive matching is the default. Differences in case, whitespace, identifier prefixes, or formatting can create unexpected unmatched rows. Normalize only when the identifiers remain equivalent.
+- **Use the correct parameter vocabulary.** Easyjoin uses one-based column selectors, not expression names such as `c1`. Multijoin uses a shared `key_column` and `value_columns`. SQL uses table and column names.
+- **Check more than output size.** For stable fixtures, assert representative matched rows, required unmatched rows for the chosen mode, fill values, header content, and duplicate-key cardinality. A nonempty table alone can hide an incorrect join mode.
 
-Older core join tools may appear in inherited workflows, but the tabular survey's recommended path is `tp_easyjoin_tool` for ordinary two-file joins and `tp_multijoin_tool` for many same-shaped files. Preserve legacy steps when reading old workflows; do not introduce them in new authoring.
+## Existing workflows and alternatives
 
-## See also
+Older core join tools can be valid when their row-selection, key, and output behavior fits the workflow. Inspect those contracts before replacing an inherited step. This corpus supports easyjoin as the common two-file exemplar and multijoin as the many-file exemplar. It does not establish that another implementation is wrong.
 
-- [[iwc-tabular-operations-survey]] — corpus survey and candidate 6 evidence.
-- [[tabular-sql-query]] — SQL joins and anti-joins.
-- [[tabular-group-and-aggregate-with-datamash]] — grouped summaries before/after joins.
-- [[tabular-pivot-collection-to-wide]] — collection of two-column tables to wide table.
+Easyjoin itself supports one-sided unmatched-row modes, so an anti-join does not automatically require SQL. Choose [[tabular-sql-query]] when richer predicates, named-column projection, or a combined query make the intended operation clearer.
+
+## Evidence and related patterns
+
+The corpus observations above use IWC commit `deafc4876f2c778aaf075e48bd8e95f3604ccc92`:
+
+- [SARS-CoV-2 variation reporting](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.ga) demonstrates the headered column-20-to-column-1 excerpt.
+- [VGP Hi-C scaffolding](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.ga) uses dot fill.
+- [Metagenomic genes catalogue](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/microbiome/metagenomic-genes-catalogue/metagenomic-genes-catalogue.ga) supplies the headerless join.
+- [PathoGFAIR sample aggregation](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.ga) supplies the multijoin excerpt.
+- [Clinical metaproteomics verification](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification.ga) supplies the SQL inner join.
+- [Clinical metaproteomics discovery](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/proteomics/clinicalmp/clinicalmp-discovery/iwc-clinicalmp-discovery-workflow.ga) supplies the SQL exclusion query.
+
+Direct checks of the pinned multijoin script confirmed its full key union, lexicographic ordering, header generation, fill values, default duplicate-key failure, last-row retention with `ignore_dups`, and short-row failure. These checks ran the Perl script with local fixtures. They did not execute easyjoin or run Galaxy workflows. The wrapper contracts and inspected IWC states provide the other evidence described above.
+
+See [[iwc-tabular-operations-survey]] for counts and broader operation coverage, [[tabular-group-and-aggregate-with-datamash]] for grouped summaries, and [[tabular-pivot-collection-to-wide]] for collection-shaped wide tables.
