@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-09-26
+revision: 2
 related_notes:
   - "[[iwc-conditionals-survey]]"
   - "[[iwc-tabular-operations-survey]]"
@@ -32,41 +32,49 @@ summary: "Corpus survey of Galaxy workflow recipes that turn upstream data, meta
 
 # IWC parameter derivation survey
 
-Source corpus: 120 cleaned `gxformat2` workflows under `$IWC_FORMAT2/`, materialized in `workflow-fixtures/iwc-format2/` from pinned IWC commit `deafc4876f2c778aaf075e48bd8e95f3604ccc92`. Counts below are parsed step counts over top-level and embedded subworkflow `steps`, excluding trailing `unique_tools` summaries. Citations use `$IWC_FORMAT2/path:line`.
+The pinned IWC snapshot derives runtime parameters by reading small datasets, mapping existing parameter values, and composing text for downstream tools. The reusable mechanisms recur across domains, while the formulas and downstream syntax remain specific to each workflow.
 
-Scope: workflow steps that derive a Galaxy runtime parameter from upstream data, metadata, or a small intermediate file. This is the shim layer between ordinary data transforms and tools whose inputs are typed as `integer_param`, `float_param`, `text_param`, `boolean_param`, or connected expression strings.
+## Evidence scope
+
+Source corpus: 120 cleaned `gxformat2` workflows under `$IWC_FORMAT2/`, materialized in `workflow-fixtures/iwc-format2/` from IWC commit `deafc4876f2c778aaf075e48bd8e95f3604ccc92`, recorded in `workflow-fixtures/fixtures.yaml`. This is a pinned snapshot, not the current IWC catalog. Local citations use `$IWC_FORMAT2/path:line` from that materialization. Pinned native source links appear below.
+
+Inventory counts were recounted from the corresponding 120 native `.ga` JSON files by recursively traversing `steps` and each embedded `subworkflow`. Each embedded occurrence counts within its containing workflow, even if the same subworkflow occurs elsewhere. Tool Shed IDs are grouped by tool name across versions. Workflow-file counts count each containing file once. These counts exclude `unique_tools` summaries and count all uses of each listed tool, including uses outside parameter derivation. Full format2 reads establish the selected recipes and connections.
+
+Scope: workflow steps that derive a Galaxy runtime parameter from upstream data, metadata, or a small intermediate file. These steps connect dataset-derived values to tools that consume integer, float, text, or boolean parameters, including text expressions assembled at runtime.
 
 Out of scope:
 
-- Pure row/column transformations whose output remains a dataset; covered by [[iwc-tabular-operations-survey]].
-- Pure collection structure work; covered by [[iwc-transformations-survey]].
-- Conditional graph topology after a boolean already exists; covered by [[iwc-conditionals-survey]].
+- Pure row/column transformations whose output remains a dataset. Covered by [[iwc-tabular-operations-survey]].
+- Pure collection structure work. Covered by [[iwc-transformations-survey]].
+- Conditional graph topology after a boolean already exists. Covered by [[iwc-conditionals-survey]].
 
 ## 1. Tool inventory
 
 | Tool / family | Parsed steps | Workflow files | Main role |
 |---|---:|---:|---|
-| `compose_text_param` | 63 | 30 | Build connected text expressions, filters, labels, command fragments, and region strings |
-| `param_value_from_file` | 50 | 26 | Read a scalar from a dataset into a typed runtime parameter |
-| `map_param_value` | 26 | 14 | Map booleans/enums/text/integer values into booleans, tool flags, enum codes, or generated snippets |
-| `pick_value` | 49 | 16 | Choose first present value or provide defaults; adjacent but usually conditional/defaulting rather than derivation |
-| `column_maker` / `Add_a_column1` | 20 | 13 | Compute values in tabular-land; only a parameter-derivation shim when immediately followed by `param_value_from_file` |
-| `collection_element_identifiers` | 18 | 12 | Expose collection metadata as lines; feeds counts, relabels, filters, or other collection recipes |
-| `wc_gnu` | 8 | 5 | Count lines or characters when its output is later consumed as a parameter |
+| `compose_text_param` | 81 | 32 | Build connected text expressions, filters, labels, command fragments, and region strings |
+| `param_value_from_file` | 97 | 34 | Read a scalar from a dataset into a typed runtime parameter |
+| `map_param_value` | 56 | 17 | Map booleans/enums/text/integer values into booleans, tool flags, enum codes, or generated snippets |
+| `pick_value` | 67 | 20 | Select values or provide defaults. Adjacent conditional/defaulting operation |
+| `Add_a_column1` (`column_maker` wrapper family) | 55 | 18 | Compute a new dataset column. A scalar result contributes to derivation when later read by `param_value_from_file` |
+| `collection_element_identifiers` | 53 | 21 | Expose collection identifiers as lines for counts, relabels, filters, or other collection recipes |
+| `wc_gnu` | 35 | 13 | Count file content. Only some uses feed parameter conversion |
 
-The grep surface is larger because `unique_tools` repeats tool IDs and some surveys count those summaries. The parsed count above is better for authored step shapes.
+These are tool inventories, not counts of complete derivation recipes. For example, a `wc_gnu` step can feed another dataset tool without producing a runtime parameter. The examples below use `column_maker` as shorthand for the wrapper family, while its serialized tool ID is `Add_a_column1`. `pick_value` is the IUC Tool Shed tool, not a Galaxy built-in workflow module.
+
+The 97 `param_value_from_file` occurrences select `integer` 47 times, `text` 24 times, `boolean` 22 times, and `float` four times. Every serialized setting enables newline removal, with two native states storing `"true"` as text instead of a JSON boolean. This describes the snapshot settings, not a requirement that text parameters always discard line breaks.
 
 ## 2. Observed derivation classes
 
 ### 2a. Dataset scalar to typed parameter
 
-`param_value_from_file` is the central bridge from file-land to parameter-land. The pattern is: some upstream step writes one scalar into a tiny dataset, then `param_value_from_file` reads it as `integer`, `float`, `text`, or `boolean` with `remove_newlines: true`.
+`param_value_from_file` is the central bridge from datasets to typed parameters. The pattern is: some upstream step writes one scalar into a tiny dataset, then `param_value_from_file` reads it as `integer`, `float`, `text`, or `boolean` with `remove_newlines: true`.
 
 Examples:
 
 - VGP assembly workflows read computed genome-size and coverage files into integer/float parameters for downstream assembly tools. Examples include estimated genome size and read coverage in `$IWC_FORMAT2/VGP-assembly-v2/kmer-profiling-hifi-VGP1/kmer-profiling-hifi-VGP1.gxwf.yml` and related VGP workflows, with repeated `param_value_from_file` steps concentrated in the VGP family.
-- Consensus peak workflows compute a minimum read count table, convert it to text, replicate it into a small collection, split it, and read each scalar back as an integer parameter for `samtools_view` subsampling (`$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:372-410`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:410-499`). The same recipe appears in `consensus-peaks-chip-pe` and `consensus-peaks-chip-sr`.
-- Influenza counts forward and reverse collection elements with `wc_gnu`, then converts those counts to integer parameters before duplicating files into collections (`$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:198-287`).
+- Consensus peak workflows compute a minimum read count table, read its value as a text parameter, write that value once per replicate, split the resulting file into a collection, and read each scalar back as an integer parameter for `samtools_view` subsampling (`$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:372-410`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:410-499`). The same recipe appears in `consensus-peaks-chip-pe` and `consensus-peaks-chip-sr`.
+- Influenza counts identifier rows for forward and reverse data with `wc_gnu`, then converts those counts to integer parameters before duplicating files into collections (`$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:198-287`).
 - VGP Hi-C reads telomere BED contents as text, then maps empty text to `false` and non-empty text to `true` for gating Pretext tracks (`$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3218`).
 
 This bridge is generic. The upstream calculation is domain-specific, but the final scalar-read step is reusable and easy to get wrong because downstream tools need the typed output port, not the dataset.
@@ -79,7 +87,7 @@ Examples:
 
 - Consensus peaks count the number of replicate rows with `wc_gnu`, read the count as an integer parameter, and use it as the repeat count for generating a per-replicate scalar dataset (`$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:299-318`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:392-423`).
 - Influenza counts lines in two upstream files and reads both counts as integer parameters (`$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:198-287`).
-- HyPhy counts characters in a cleaned regular expression with `wc_gnu` (`options: [characters]`) before downstream checks (`$IWC_FORMAT2/comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:754-769`). This is a thinner signal than line-count-to-integer, but it shows the same "measure a file, then branch or parameterize" posture.
+- HyPhy counts characters in a cleaned regular expression with `wc_gnu` (`options: [characters]`) before downstream checks (`$IWC_FORMAT2/comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:754-769`). A later `tp_awk_tool` step emits `false` for a zero count and `true` for a positive count, and `param_value_from_file` reads that result as a boolean. This is a second observed boolean-producing calculation, alongside MGnify's `column_maker` recipe (`$IWC_FORMAT2/comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:797-870`).
 
 For collections, the count step often starts from `collection_element_identifiers`. The MGnify embedded subworkflow extracts element identifiers, counts lines, computes `c1 != 0` with `column_maker`, and reads the result as a boolean parameter (`$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1358-1483`). That recipe is already the strongest evidence for [[conditional-gate-on-nonempty-result]].
 
@@ -99,9 +107,9 @@ The second form is tool-parameter normalization: map one workflow-facing enum in
 
 Examples:
 
-- RNA-seq maps `Strandedness` into separate parameter dialects for `featureCounts`, Cufflinks, StringTie, replacement regexes, and STAR-count awk (`$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:270-369`; more mappings continue later in the same workflow and are mirrored in `rnaseq-sr`).
+- RNA-seq maps `Strandedness` into separate parameter dialects for `featureCounts`, Cufflinks, StringTie, replacement regexes, and STAR-count awk (`$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:270-369`. More mappings continue later in the same workflow and are mirrored in `rnaseq-sr`).
 - VGP Hi-C maps haplotype labels like `Haplotype 1`, `Haplotype 2`, `Primary`, and `Alternate` into short suffixes (`H1`, `H2`, `pri`, `alt`) before composing replacement expressions (`$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml:276-340`).
-- The taxonomic-rank summary workflow maps `Taxonomic rank` into large awk programs, then connects those generated snippets as the `code` parameter of `tp_awk_tool` (`$IWC_FORMAT2/amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table.gxwf.yml:40-140`). This is powerful but brittle; the reusable pattern is enum-to-snippet mapping, not the biological taxonomy code itself.
+- The taxonomic-rank summary workflow maps `Taxonomic rank` into large awk programs, then connects those generated snippets as the `code` parameter of `tp_awk_tool` (`$IWC_FORMAT2/amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table.gxwf.yml:40-140`). The reusable pattern is enum-to-snippet mapping. The biological taxonomy code and its maintenance requirements are specific to this workflow.
 
 The boundary is important: boolean mapping for branch topology should merge into conditionals, while enum-to-tool-dialect mapping deserves a parameter-derivation page.
 
@@ -112,12 +120,12 @@ The boundary is important: boolean mapping for branch topology should merge into
 Examples:
 
 - Consensus peaks builds a `Filter1` condition `c4 >= <minimum overlap>` from a workflow integer input, then connects it as the `cond` parameter (`$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:102-128`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:318-337`).
-- SRA manifest processing maps zero-based user input to a one-based column number, composes `c<id>,c<id>` text, and connects it to `Cut1.columnList` (`$IWC_FORMAT2/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.gxwf.yml:32-113`).
+- SRA manifest processing maps the SRA column sentinel `0` to `1` and passes other values through unchanged. It composes `c<SRA column>,c<identifier column>` text, and connects it to `Cut1.columnList` (`$IWC_FORMAT2/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.gxwf.yml:32-113`).
 - GROMACS dcTMD composes config lines such as `pull_coord1_rate = <rate>`, `dt = <step length>`, and `nsteps = <number>` (`$IWC_FORMAT2/computational-chemistry/gromacs-dctmd/gromacs-dctmd.gxwf.yml:553-654`).
 - Pox virus amplicon processing composes genomic ranges and pool suffixes from upstream text parameters (`$IWC_FORMAT2/virology/pox-virus-amplicon/pox-virus-half-genome.gxwf.yml:560-669`).
-- SARS-CoV-2 and generic variant-reporting workflows compose complex filter expressions from AF/DP thresholds; those are domain-specific but show the same connected-expression mechanism.
+- SARS-CoV-2 and generic variant-reporting workflows compose complex filter expressions from AF/DP thresholds. Those are domain-specific but show the same connected-expression mechanism.
 
-This is a strong generic shim pattern because it is the only corpus-backed way to turn typed workflow parameters into dynamic expression strings for tools that accept text parameters but need exact syntax.
+This repeatedly observed mechanism builds text parameters without a custom wrapper. It concatenates components and does not validate the downstream expression syntax.
 
 ### 2e. Compute a table value, then escape back to parameter-land
 
@@ -126,13 +134,13 @@ This is a strong generic shim pattern because it is the only corpus-backed way t
 Examples:
 
 - MGnify non-empty collection gate computes `c1 != 0` over a one-line count file, then reads the boolean with `param_value_from_file` (`$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1396-1463`).
-- VGP workflows compute formulas like `c3/<integer>` after converting coverage or genome-size estimates to parameters; these are mostly domain-specific assembly calculations rather than standalone parameter patterns.
+- VGP workflows compute formulas like `c3/<integer>` after converting coverage or genome-size estimates to parameters. These are mostly domain-specific assembly calculations rather than standalone parameter patterns.
 
 The reusable bit is not `column_maker` by itself. It is the round trip: file scalar -> tabular expression -> typed parameter. Keep this as a subsection inside scalar/boolean derivation pages rather than a standalone page.
 
-## 3. Generic shims vs tool-tied derivations
+## 3. Reusable mechanisms and domain-specific values
 
-Generic shims:
+Reusable mechanisms:
 
 - `param_value_from_file` as the file-to-typed-parameter bridge.
 - `wc_gnu -> param_value_from_file` for count-to-integer.
@@ -140,121 +148,68 @@ Generic shims:
 - `map_param_value` for enum-to-boolean and enum-to-tool-dialect mapping.
 - `compose_text_param` for dynamic text/expression construction.
 
-Tool-tied derivations:
+Domain-specific values:
 
 - RNA-seq strandedness maps are reusable across RNA-seq workflows but still tied to downstream tool dialects (`featureCounts`, Cufflinks, StringTie, STAR-count awk).
 - Taxonomic-rank-to-awk snippets are specific to the MGnify summary workflow shape.
 - GROMACS config-line composition is specific to GROMACS tools, even though the `compose_text_param` mechanism is generic.
 - VGP haplotype suffix abbreviation is a domain convention, not a Galaxy-wide parameter derivation rule.
 
-The pattern pages should lead with the generic shim, then include tool-tied examples as evidence and caveats. Do not make a page for every downstream dialect.
+The pattern pages describe the common mechanisms and use domain examples to show their boundaries. RNA-seq numeric codes are text in the observed mappings. StringTie maps `unstranded` to an empty string, which is a meaningful flag choice. Those details must survive translation even though the mapping operation is generic.
 
-## 4. Candidate pattern boundaries
+## 4. Established pattern boundaries
 
-### Candidate A: `derive-parameter-from-file`
+The survey's original candidate decisions now correspond to existing pages. The table retains the candidate letters used by neighboring notes as a record of those boundaries.
 
-Scope: read a scalar dataset into a typed Galaxy runtime parameter with `param_value_from_file`, including `integer`, `float`, `text`, and `boolean` outputs.
+| Original candidate | Need | Current coverage |
+|---|---|---|
+| A: scalar file bridge | Connect a dataset value to a typed tool parameter | [[derive-parameter-from-file]] |
+| B: count parameter | Count rows, characters, or collection identifiers before converting the result | Count recipes within [[derive-parameter-from-file]] |
+| C: non-empty boolean | Derive a boolean from data and skip downstream reporting when empty | [[conditional-gate-on-nonempty-result]] |
+| D: enum mapping | Translate workflow choices into downstream codes, flags, or snippets | [[map-workflow-enum-to-tool-parameter]] |
+| E: runtime text | Concatenate literals and connected scalar values into a text parameter | [[compose-runtime-text-parameter]] |
+| F: routing boolean | Invert a boolean or map enum choices to branch-control values | [[conditional-route-between-alternative-outputs]] and [[conditional-run-optional-step]] |
+| G: tabular scalar calculation | Calculate a dataset value, then expose it as a parameter | [[tabular-compute-new-column]] for the column calculation and [[derive-parameter-from-file]] for the bridge |
+| H: default or available value | Choose among optional parameters or nullable branch outputs | Adjacent selection operation, with routed outputs covered by [[conditional-route-between-alternative-outputs]] |
 
-Evidence:
+`pick_value` remains useful context even though selection does not calculate a new value from upstream data. Scanpy uses it both for optional numeric defaults and for selecting the available AnnData output. The consumer's behavior determines which pattern applies.
 
-- Consensus peak minimum-read and replicate-count scalar reads: `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:372-410`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:467-499`.
-- Influenza line counts converted to integer parameters: `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:198-287`.
-- VGP telomere text read for later boolean mapping: `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3092`.
+## 5. Construction checks
 
-Call: **keep**. This is the central data-to-parameter bridge, repeated across domains.
+- Connect the selected typed port from `param_value_from_file`, such as `integer_param` or `boolean_param`. A dataset connection does not substitute for a parameter connection.
+- Match the scalar producer to the intended measurement. An identifier row count measures the exposed collection identifiers, while a character count measures file content. Neither establishes scientific correctness.
+- Preserve the mapper's output type, exact mapping values, and unmapped-value policy. Numeric-looking text codes and empty string flags can be deliberate.
+- Preserve component order, connection paths, literal spaces, and punctuation in composed text. The downstream tool's syntax still needs checking.
+- Keep dataset computation separate from parameter conversion in the explanation. `column_maker` alone does not expose a typed runtime parameter.
+- For data-derived `when`, establish a boolean-producing connection before applying the conditional topology. A dataset or collection is not itself proof of a valid boolean input.
 
-### Candidate B: `derive-count-parameter-from-file-or-collection`
+## 6. Verification record and limits
 
-Scope: count lines/elements/characters with `wc_gnu` or `collection_element_identifiers`, then use the count as a runtime parameter.
+The collection non-empty recipe connects this survey to [[iwc-conditionals-survey]]:
 
-Evidence:
+```text
+collection_element_identifiers -> wc_gnu -> column_maker(c1 != 0) -> param_value_from_file -> when
+```
 
-- Replicate count in consensus peaks: `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:299-318`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:392-423`.
-- Influenza count-to-collection-size parameters: `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:198-287`.
-- MGnify collection identifier count: `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1376-1414`.
+The existing record at `verification/workflows/conditional-gate-on-nonempty-result/README.md` reports two passing cases under Planemo 0.75.41 against Galaxy `release_25.1` using the MGnify-style shim. It also records a tested direct collection-derived gate failing with `when_not_boolean`, and an embedded CWL `ExpressionTool` rejected by gxformat2 0.21.0. These are recorded outcomes for those constructions and versions, not a new execution for this revision or evidence that every shorter boolean-producing recipe is invalid.
 
-Call: **keep, likely as a subsection of Candidate A unless the page gets too large**. The recipe is smaller than the scalar bridge but common enough to name.
+The source recount establishes the inventory, and inspected workflow excerpts establish the selected settings and connections. It does not rerun all 120 workflows or prove that each domain formula produces scientifically correct results. The linked pattern pages carry their own evidence grades and verification fixtures.
 
-### Candidate C: `derive-nonempty-boolean-parameter`
+## Pinned upstream exemplars
 
-Scope: derive `true`/`false` from whether a dataset or collection has content, then use it as a `when` input or other boolean parameter.
+These native sources correspond to the local format2 examples above:
 
-Evidence:
-
-- MGnify collection non-empty subworkflow: `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1358-1483`.
-- VGP telomere text empty/non-empty mapping: `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3218`.
-- Gated downstream Pretext/Krona/BIOM outputs are already covered in [[iwc-conditionals-survey]].
-
-Call: **merge into [[conditional-gate-on-nonempty-result]]**. The boolean-derivation mechanics should be a major section of that pattern, not a separate sibling page. Verified-pattern workflow issue #84 should test this directly before recommending a shorter alternative over the MGnify four-step recipe: https://github.com/galaxyproject/foundry/issues/84.
-
-### Candidate D: `map-workflow-enum-to-tool-parameter`
-
-Scope: map a workflow-facing enum or string value to one or more downstream tool dialects: numeric codes, flags, replacement snippets, or command fragments.
-
-Evidence:
-
-- RNA-seq `Strandedness` mapped into `featureCounts`, Cufflinks, StringTie, replacement regexes, and STAR-count awk snippets: `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:270-369` and later mappings in the same file; mirrored in `rnaseq-sr`.
-- VGP haplotype labels mapped to suffix abbreviations: `$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml:276-340`.
-- Taxonomic rank mapped to generated awk programs: `$IWC_FORMAT2/amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table.gxwf.yml:40-140`.
-
-Call: **keep**. This is distinct from conditionals when the output is a tool parameter, not a branch-control boolean.
-
-### Candidate E: `compose-runtime-text-parameter`
-
-Scope: build connected text/expression parameters with `compose_text_param` from constants plus workflow or upstream scalar values.
-
-Evidence:
-
-- `Filter1.cond` expression in consensus peaks: `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:102-128`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:318-337`.
-- Dynamic `Cut1.columnList` in SRA manifest processing: `$IWC_FORMAT2/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.gxwf.yml:32-113`.
-- GROMACS config-line construction: `$IWC_FORMAT2/computational-chemistry/gromacs-dctmd/gromacs-dctmd.gxwf.yml:553-654`.
-- Pox virus range and suffix construction: `$IWC_FORMAT2/virology/pox-virus-amplicon/pox-virus-half-genome.gxwf.yml:560-669`.
-
-Call: **keep**. This is the highest-value standalone page from this survey after `param_value_from_file` because it explains how to build dynamic expressions without writing a custom wrapper.
-
-### Candidate F: `map-parameter-for-conditional-routing`
-
-Scope: invert booleans or map enum values to booleans for `when` gates.
-
-Evidence:
-
-- Scanpy 10x import branch inversion: `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:173-241`, `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:337-404`.
-- Functional annotation one-of-N eggNOG gates: `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:90-239`, `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:240-429`.
-
-Call: **merge into [[conditional-route-between-alternative-outputs]] and [[conditional-run-optional-step]]**. Do not create a parameter-derivation page just for boolean gate plumbing.
-
-### Candidate G: `compute-tabular-value-then-parameterize`
-
-Scope: use `column_maker`, `table_compute`, or a tabular tool to compute one scalar, then read it as a parameter.
-
-Evidence:
-
-- MGnify `c1 != 0` boolean in the non-empty collection gate: `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1396-1463`.
-- Consensus peaks `table_compute` minimum value used to drive subsampling: `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:263-299`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:372-499`.
-
-Call: **merge**. Cover the tabular computation in [[tabular-compute-new-column]] or a relevant tabular page, and cover the escape back to parameter-land in Candidate A. A standalone page would duplicate both.
-
-### Candidate H: `pick-default-or-first-available-parameter`
-
-Scope: use `pick_value` for defaults or to collapse nullable branch outputs.
-
-Evidence:
-
-- Scanpy defaults several optional numeric parameters with `pick_value`, then also uses it to select the available AnnData output (`$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:241-404`).
-- Conditional surveys already cover `pick_value` as the branch-output merge after gated alternatives.
-
-Call: **drop from this survey's hierarchy**. It is parameter defaulting or conditional output selection, not derivation from upstream data. Keep it inside conditionals and optional-input/default-value guidance if that page lands later.
-
-## 5. Cross-links to conditionals and verified patterns
-
-The parameter-derivation and conditional surveys overlap at exactly one high-value seam: **derive a boolean from data, then use it as `when`**. The pattern page should be [[conditional-gate-on-nonempty-result]], not a separate parameter page, because the user story is "skip downstream work when upstream data is empty" rather than "read a boolean from a file".
-
-The MGnify recipe is corpus-backed but clunky: `collection_element_identifiers -> wc_gnu -> column_maker(c1 != 0) -> param_value_from_file`. Issue #84 should verify whether a smaller Galaxy-native workflow can replace it as the recommended authoring target while preserving the MGnify shape as IWC evidence: https://github.com/galaxyproject/foundry/issues/84.
-
-## 6. Open questions
-
-- **Q1.** Candidate A and B: one page with count recipes as a section, or two pages? Lean: one page first.
-- **Q2.** Candidate D: one enum-mapping page, or one page per common dialect family such as strandedness? Lean: one generic page plus domain examples.
-- **Q3.** Candidate E: should `compose_text_param` page be operation-named (`compose-runtime-text-parameter`) or tool-named? Lean: operation-named, per prior tabular decisions.
-- **Q4.** Should `pick_value` get a separate defaulting page later, outside this derivation hierarchy? Lean: defer until optional-input/defaulting becomes a known Mold need.
-- **Q5.** Verified-pattern issue #84: can a shorter non-empty gate replace the MGnify four-step recipe as recommendation, or must the corpus recipe remain primary?
+- [VGP k-mer profiling](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/VGP-assembly-v2/kmer-profiling-hifi-VGP1/kmer-profiling-hifi-VGP1.ga)
+- [Consensus peaks ATAC/CUT&RUN](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.ga)
+- [Influenza consensus and subtyping](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.ga)
+- [VGP Hi-C manual curation](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.ga)
+- [HyPhy CAPHEINE](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/comparative_genomics/hyphy/capheine-core-and-compare.ga)
+- [MGnify rRNA prediction](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.ga)
+- [Scanpy preprocessing and clustering](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.ga)
+- [Functional annotation](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.ga)
+- [RNA-seq paired end](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/transcriptomics/rnaseq-pe/rnaseq-pe.ga)
+- [VGP Hi-C scaffolding](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.ga)
+- [Taxonomic rank abundance summary](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table.ga)
+- [SRA manifest processing](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.ga)
+- [GROMACS dcTMD](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/computational-chemistry/gromacs-dctmd/gromacs-dctmd.ga)
+- [Pox virus half-genome amplicons](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/virology/pox-virus-amplicon/pox-virus-half-genome.ga)
