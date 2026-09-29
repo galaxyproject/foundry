@@ -114,7 +114,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tabular-cut-and-reorder-columns]] — Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom.
 - [[tabular-filter-by-column-value]] — Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC.
 - [[tabular-filter-by-regex]] — Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative.
-- [[tabular-group-and-aggregate-with-datamash]] — Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions.
+- [[tabular-group-and-aggregate-with-datamash]] — Group tabular rows by one-based key columns, sort when needed, and choose Datamash operations and header settings from the intended result.
 - [[tabular-join-on-key]] — Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies.
 - [[tabular-pivot-collection-to-wide]] — Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table.
 - [[tabular-prepend-header]] — Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row.
