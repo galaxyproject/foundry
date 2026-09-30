@@ -1,0 +1,17 @@
+- doc: "Counter labels include the header unless the program preserves it explicitly"
+  job:
+    rows:
+      class: File
+      path: test-data/rows.tabular
+      filetype: tabular
+    headered_rows:
+      class: File
+      path: test-data/headered-rows.tabular
+      filetype: tabular
+  outputs:
+    zero_based:
+      file: test-data/expected-zero.tabular
+    one_based:
+      file: test-data/expected-one.tabular
+    keep_header:
+      file: test-data/expected-header.tabular

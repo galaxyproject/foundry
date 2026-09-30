@@ -78,6 +78,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[tabular-concatenate-collection-to-table]] | Stack compatible tabular collection elements into one dataset, with one header and a sample column when needed. | draft | 2026-09-30 | 3 |
 | [[tabular-pivot-collection-to-wide]] | Join a collection of keyed tabular datasets into a wide table, choosing missing-cell fill and output headers to fit the data. | draft | 2026-09-30 | 3 |
 | [[tabular-prepend-header]] | Add a fixed first line with tp_awk_tool, choosing whether to keep or replace the input's first row and whether to rewrite its fields. | draft | 2026-09-30 | 3 |
+| [[tabular-relabel-by-row-counter]] | Use tp_awk_tool and awk NR to replace each input line with a row-order label, with explicit header and numbering choices. | draft | 2026-09-30 | 3 |
 | [[tabular-group-and-aggregate-with-datamash]] | Group tabular rows by one-based key columns, sort when needed, and choose Datamash operations and header settings from the intended result. | draft | 2026-09-29 | 3 |
 | [[tabular-compute-new-column]] | Append, insert, or replace computed columns with column_maker (Add_a_column1), using a shared input-typing policy and explicit failure handling. | draft | 2026-09-28 | 5 |
 | [[tabular-join-on-key]] | Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies. | draft | 2026-09-28 | 3 |
@@ -124,7 +125,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[map-workflow-enum-to-tool-parameter]] | Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets. | draft | 2026-05-03 | 3 |
 | [[regex-relabel-via-tabular]] | Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE. | draft | 2026-05-03 | 2 |
 | [[relabel-via-rules-and-find-replace]] | Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup. | draft | 2026-05-03 | 2 |
-| [[tabular-relabel-by-row-counter]] | Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR. | draft | 2026-05-03 | 2 |
 | [[tabular-split-taxonomy-string]] | Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling. | draft | 2026-05-03 | 2 |
 | [[tabular-sql-query]] | Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars. | draft | 2026-05-03 | 2 |
 | [[tabular-synthesize-bed-from-3col]] | Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants. | draft | 2026-05-03 | 2 |

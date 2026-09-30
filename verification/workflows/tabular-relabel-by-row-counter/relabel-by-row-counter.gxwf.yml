@@ -1,0 +1,72 @@
+class: GalaxyWorkflow
+name: "Relabel tabular rows by counter"
+inputs:
+  - id: rows
+    type: data
+  - id: headered_rows
+    type: data
+outputs:
+  - id: zero_based
+    outputSource: zero_based/outfile
+  - id: one_based
+    outputSource: one_based/outfile
+  - id: keep_header
+    outputSource: keep_header/outfile
+steps:
+  - id: zero_based
+    label: zero_based
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3
+    tool_version: 9.5+galaxy3
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: rows
+    out:
+      - id: outfile
+    tool_state:
+      infile:
+        __class__: ConnectedValue
+      code: '{print "sample_" (NR-1)}'
+      variables: []
+  - id: one_based
+    label: one_based
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3
+    tool_version: 9.5+galaxy3
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: rows
+    out:
+      - id: outfile
+    tool_state:
+      infile:
+        __class__: ConnectedValue
+      code: '{print "sample_" NR}'
+      variables: []
+  - id: keep_header
+    label: keep_header
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3
+    tool_version: 9.5+galaxy3
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: headered_rows
+    out:
+      - id: outfile
+    tool_state:
+      infile:
+        __class__: ConnectedValue
+      code: 'NR==1 {print; next} {print "sample_" (NR-2)}'
+      variables: []
