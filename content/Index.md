@@ -110,7 +110,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[sequence-reformat-line-width]] — Rewrap FASTA records to a fixed sequence-line width so downstream tools and viewers get canonical 60/70/80-column output; cshl_fasta_formatter.
 - [[relabel-fasta-headers-via-tabular]] — Edit FASTA headers you cannot easily regex in place: fasta2tab, rewrite column 1 with find/replace, then tab2fasta back. The high-value sequence recipe.
 - [[tabular-compute-new-column]] — Append, insert, or replace computed columns with column_maker (Add_a_column1), using a shared input-typing policy and explicit failure handling.
-- [[tabular-concatenate-collection-to-table]] — Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe.
+- [[tabular-concatenate-collection-to-table]] — Stack compatible tabular collection elements into one dataset, with one header and a sample column when needed.
 - [[tabular-cut-and-reorder-columns]] — Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom.
 - [[tabular-filter-by-column-value]] — Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC.
 - [[tabular-filter-by-regex]] — Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative.
