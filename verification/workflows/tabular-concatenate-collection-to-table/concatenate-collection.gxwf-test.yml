@@ -1,0 +1,31 @@
+- doc: "Headered collection retains one header and repeats element IDs per row; headerless collection concatenates all rows"
+  job:
+    headered_tables:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: alpha
+          class: File
+          path: test-data/alpha-headered.tabular
+          filetype: tabular
+        - identifier: beta
+          class: File
+          path: test-data/beta-headered.tabular
+          filetype: tabular
+    headerless_tables:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: alpha
+          class: File
+          path: test-data/alpha-headerless.tabular
+          filetype: tabular
+        - identifier: beta
+          class: File
+          path: test-data/beta-headerless.tabular
+          filetype: tabular
+  outputs:
+    rows_with_sample:
+      file: test-data/expected-with-sample.tabular
+    plain_rows:
+      file: test-data/expected-plain.tabular
