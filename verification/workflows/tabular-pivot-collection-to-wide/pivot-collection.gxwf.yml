@@ -1,0 +1,59 @@
+class: GalaxyWorkflow
+name: "Pivot tabular collection to wide table"
+inputs:
+  - id: headerless_tables
+    type: collection
+    collection_type: list
+  - id: headered_tables
+    type: collection
+    collection_type: list
+outputs:
+  - id: abundance_wide
+    outputSource: headerless_zero_fill/tabular_output
+  - id: metric_wide
+    outputSource: headered_dot_fill/tabular_output
+steps:
+  - id: headerless_zero_fill
+    label: headerless_zero_fill
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3
+    tool_version: "0.0.3"
+    tool_shed_repository:
+      changeset_revision: 3ddd99c7efee
+      name: collection_column_join
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_tabular
+        source: headerless_tables
+    out:
+      - id: tabular_output
+    tool_state:
+      input_tabular:
+        __class__: ConnectedValue
+      identifier_column: "1"
+      has_header: "0"
+      old_col_in_header: true
+      fill_char: "0"
+      include_outputs: null
+  - id: headered_dot_fill
+    label: headered_dot_fill
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3
+    tool_version: "0.0.3"
+    tool_shed_repository:
+      changeset_revision: 3ddd99c7efee
+      name: collection_column_join
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_tabular
+        source: headered_tables
+    out:
+      - id: tabular_output
+    tool_state:
+      input_tabular:
+        __class__: ConnectedValue
+      identifier_column: "1"
+      has_header: "1"
+      old_col_in_header: false
+      fill_char: "."
+      include_outputs: null
