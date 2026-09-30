@@ -75,6 +75,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[tabular-group-and-aggregate-with-datamash]] | Group tabular rows by one-based key columns, sort when needed, and choose Datamash operations and header settings from the intended result. | draft | 2026-09-29 | 3 |
 | [[tabular-compute-new-column]] | Append, insert, or replace computed columns with column_maker (Add_a_column1), using a shared input-typing policy and explicit failure handling. | draft | 2026-09-28 | 5 |
 | [[tabular-join-on-key]] | Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies. | draft | 2026-09-28 | 3 |
 | [[galaxy-conditionals-patterns]] | Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream. | draft | 2026-09-23 | 2 |
@@ -121,7 +122,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[regex-relabel-via-tabular]] | Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE. | draft | 2026-05-03 | 2 |
 | [[relabel-via-rules-and-find-replace]] | Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup. | draft | 2026-05-03 | 2 |
 | [[tabular-concatenate-collection-to-table]] | Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe. | draft | 2026-05-03 | 2 |
-| [[tabular-group-and-aggregate-with-datamash]] | Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions. | draft | 2026-05-03 | 2 |
 | [[tabular-pivot-collection-to-wide]] | Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table. | draft | 2026-05-03 | 2 |
 | [[tabular-prepend-header]] | Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row. | draft | 2026-05-03 | 2 |
 | [[tabular-relabel-by-row-counter]] | Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR. | draft | 2026-05-03 | 2 |
