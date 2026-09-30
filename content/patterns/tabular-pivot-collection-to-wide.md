@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Tabular: pivot collection to wide"
 aliases:
   - "collection-to-wide-table-with-collection_column_join"
@@ -9,9 +9,9 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
-summary: "Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table."
+revised: 2026-09-30
+revision: 3
+summary: "Join a collection of keyed tabular datasets into a wide table, choosing missing-cell fill and output headers to fit the data."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
@@ -20,6 +20,8 @@ related_patterns:
   - "[[tabular-concatenate-collection-to-table]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/tabular-pivot-collection-to-wide/pivot-collection.gxwf-test.yml
 iwc_exemplars:
   - workflow: amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2
     why: "Pivots a headerless id/value collection to a wide table with zero fill and element identity in headers."
@@ -37,73 +39,61 @@ iwc_exemplars:
 
 # Tabular: pivot collection to wide
 
-## Tool
+Connect a collection of keyed tabular datasets to `collection_column_join` when each element should contribute columns to one table. For two-column `(identifier, value)` elements, the result has one key column and one value column per element. The tool aligns keys across elements and fills cells where an element has no row for a key. Make the key unique within each input if the result must have one row per identifier.
 
-`toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3`. The tabular survey identifies this as the dominant IWC wide-pivot idiom: a collection of per-element `(identifier, value)` tables becomes one wide table with one row per identifier and one column per collection element.
+## Build a wide table
 
-## When to reach for it
+The checked-in example under `verification/workflows/tabular-pivot-collection-to-wide/` has `alpha` and `beta` as elements of one dataset collection. Their tabular datasets have no header:
 
-Use this when each collection element is a two-column tabular keyed by the same identifier column, and the desired output is one wide tabular matrix.
+```text
+alpha         beta
+K1    2        K2    5
+K3    4        K3    7
+```
 
-Do not use this for ordinary two-file joins; use [[tabular-join-on-key]]. Do not frame it as a generic transpose or pivot-table operation; the survey found no broad `datamash_transpose`-style pattern in IWC.
-
-## Parameters
-
-- `input_tabular`: connected collection of tabular datasets.
-- `identifier_column`: 1-indexed key column in each per-element table. Corpus examples usually use `"1"`.
-- `fill_char`: value for missing element/key cells. Corpus examples use `"0"` and `.`.
-- `has_header`: string toggle, `"0"` / `"1"`, not a boolean.
-- `old_col_in_header`: whether collection element / original column identity appears in output headers.
-- `include_outputs`: usually `null` in corpus examples.
-
-## Idiomatic shapes
-
-Headerless abundance/count pivot:
+Connect the collection to `input_tabular` and use this `collection_column_join` state:
 
 ```yaml
 tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3
 tool_state:
-  fill_char: "0"
+  input_tabular: { __class__: ConnectedValue }
+  identifier_column: "1"
   has_header: "0"
-  identifier_column: "1"
-  include_outputs: null
-  input_tabular: { __class__: ConnectedValue }
   old_col_in_header: true
-```
-
-Anchored by the MAPseq-to-ampvis2 IWC exemplar.
-
-Headered metric-table pivot:
-
-```yaml
-tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3
-tool_state:
-  fill_char: .
-  has_header: "1"
-  identifier_column: "1"
+  fill_char: "0"
   include_outputs: null
-  input_tabular: { __class__: ConnectedValue }
-  old_col_in_header: false
 ```
 
-Anchored by the MAGs generation IWC exemplar.
+The expected `tabular_output`, shown with spacing for readability, is:
 
-## Pitfalls
+```text
+#KEY  alpha_2  beta_2
+K1    2        0
+K2    0        5
+K3    4        7
+```
 
-- **Input shape is strict.** This works because upstream emits one `(id, value)` table per collection element. It is not a generic wide/long pivot.
-- **Do not substitute ordinary joins.** `collection_column_join` is collection-shaped; use [[tabular-join-on-key]] for two-file key joins.
-- **`has_header` is a string.** Corpus YAML uses `"0"` / `"1"`, not booleans.
-- **Fill value has meaning.** `"0"` means absent is zero; `.` means missing/unknown. Match downstream semantics.
-- **Header semantics matter.** `old_col_in_header: true` preserves element identity in headers; `false` appears in MAG metric pivots.
-- **Guard empties when plausible.** The transformations survey flags upstream `__FILTER_EMPTY_DATASETS__` as a defensive guard when per-element outputs may be empty, especially small-N or filter-heavy paths. Do not apply it as universal boilerplate; several IWC pivots do not filter first.
+Here `0` means an absent key contributes a zero count. If an absent key means *unknown* rather than zero, choose a missing-value marker such as `.` instead. The file is tab-separated, and the Galaxy test compares its full contents with the committed expected file. The generated header uses `#KEY` for headerless inputs. With `old_col_in_header: true`, each value header combines the collection element identifier and the original column number, such as `alpha_2`. The [MAPseq-to-ampvis2 workflow](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.ga) uses this headerless, zero-filled configuration.
 
-## Legacy alternative
+## Match the input and output contract
 
-None. This page exists because the corpus has one dominant operation-shaped path. Awk or SQL rewrites would be custom transformations, not the IWC pattern.
+The [Column join wrapper](https://github.com/galaxyproject/tools-iuc/blob/b9b16be49cbe9777b5d1cec3d22a279cfe3e74a7/tools/collection_column_join/collection_column_join.xml) accepts multiple tabular inputs, including a dataset collection, and emits one `tabular_output`. Set its options from the actual files:
 
-## See also
+| Setting | Effect |
+|---|---|
+| `identifier_column` | One-based key column used in every element. For `(id, value)` inputs, use `"1"`. |
+| `has_header` | Number of header lines in each input, serialized as a string in these workflow states. Use `"0"` for the example above or `"1"` for a single header row. This is a count, not a true/false toggle. |
+| `old_col_in_header` | With `true`, combine each element identifier with the source non-key column header or number. With `false`, use the element identifier alone. Both settings retain element identity in output headers. |
+| `fill_char` | Text placed in cells when an element lacks a key. Choose it for the scientific meaning of absence. |
+| `include_outputs` | Leave unset or `null` unless a generated shell script is useful for inspection. |
 
-- [[iwc-tabular-operations-survey]] — candidate 8 and §7 operation-anchored naming decision.
-- [[iwc-transformations-survey]] — collection-side cross-reference and empty-element guard note.
-- [[tabular-join-on-key]] — ordinary two-file key joins.
-- [[tabular-concatenate-collection-to-table]] — row-bind a collection into one long table.
+The two-column input is the simplest case. The wrapper also carries **all** non-key columns from each element into the output. For headered `key`/`score` inputs, use `has_header: "1"` and inspect the resulting column names. With `old_col_in_header: false` and elements `alpha` and `beta`, the output header is `key`, `alpha`, `beta`. The [MAGs generation workflow](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/microbiome/mags-building/MAGs-generation.ga) repeatedly joins headered per-bin metric tables with `fill_char: "."` and `old_col_in_header: false`. Its output headers use element identifiers without the original column names.
+
+## Check the result before using it
+
+- **Check keys, values, and missing cells.** Confirm that a key present in both elements aligns on one row and that a key present in only one element receives the chosen fill in the other column. A row-count or output-exists check alone will miss swapped values or scientifically wrong fills.
+- **Check key uniqueness and consistency.** Each input should use the same key meaning and formatting. Duplicate keys within an element do not represent a single value per key and can multiply rows during a join. Normalize keys or aggregate duplicates upstream when needed.
+- **Check headers and column positions.** The tool creates an output header even for headerless inputs. Setting `has_header: "1"` on headerless data removes a real data row. Setting `"0"` on headered data treats the header as a key. With multiple non-key columns per element, `old_col_in_header: false` repeats that element's name across its output columns, so use `true` when distinct labels matter downstream.
+- **Handle empty elements by need.** When an upstream filter can produce empty per-element tables, verify what the join emits for that case and remove the empty elements first if the output must contain only populated sample columns. The [PathoGFAIR aggregation workflow](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.ga) filters empty datasets upstream. Other IWC joins do not, so that guard depends on the input and desired output.
+
+For two ordinary tables, [[tabular-join-on-key]] covers a direct key join. To stack collection rows into one long table, use [[tabular-concatenate-collection-to-table]]. The broader IWC evidence is in [[iwc-tabular-operations-survey]].

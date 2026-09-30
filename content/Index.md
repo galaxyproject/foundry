@@ -116,7 +116,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tabular-filter-by-regex]] — Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative.
 - [[tabular-group-and-aggregate-with-datamash]] — Group tabular rows by one-based key columns, sort when needed, and choose Datamash operations and header settings from the intended result.
 - [[tabular-join-on-key]] — Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies.
-- [[tabular-pivot-collection-to-wide]] — Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table.
+- [[tabular-pivot-collection-to-wide]] — Join a collection of keyed tabular datasets into a wide table, choosing missing-cell fill and output headers to fit the data.
 - [[tabular-prepend-header]] — Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row.
 - [[tabular-relabel-by-row-counter]] — Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR.
 - [[tabular-split-taxonomy-string]] — Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling.

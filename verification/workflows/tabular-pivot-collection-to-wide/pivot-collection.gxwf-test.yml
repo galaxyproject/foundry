@@ -1,0 +1,31 @@
+- doc: "Align keys across collection elements with zero or dot fill and exact generated headers"
+  job:
+    headerless_tables:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: alpha
+          class: File
+          path: test-data/alpha-headerless.tabular
+          filetype: tabular
+        - identifier: beta
+          class: File
+          path: test-data/beta-headerless.tabular
+          filetype: tabular
+    headered_tables:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: alpha
+          class: File
+          path: test-data/alpha-headered.tabular
+          filetype: tabular
+        - identifier: beta
+          class: File
+          path: test-data/beta-headered.tabular
+          filetype: tabular
+  outputs:
+    abundance_wide:
+      file: test-data/expected-abundance.tabular
+    metric_wide:
+      file: test-data/expected-metric.tabular
