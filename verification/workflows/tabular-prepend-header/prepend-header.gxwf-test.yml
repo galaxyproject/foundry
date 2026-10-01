@@ -1,0 +1,15 @@
+- doc: "Prepend a header to headerless metrics and replace an old header while normalizing genome names"
+  job:
+    headerless_rows:
+      class: File
+      path: test-data/headerless-rows.tabular
+      filetype: tabular
+    headered_rows:
+      class: File
+      path: test-data/headered-rows.tabular
+      filetype: tabular
+  outputs:
+    metric_rows:
+      file: test-data/expected-metric-rows.tabular
+    normalized_rows:
+      file: test-data/expected-normalized-rows.tabular
