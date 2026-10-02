@@ -1,0 +1,13 @@
+- doc: "Named-table join and window denominator, with both input headers skipped and one output header generated"
+  job:
+    counts:
+      class: File
+      path: test-data/counts.tabular
+      filetype: tabular
+    cohorts:
+      class: File
+      path: test-data/cohorts.tabular
+      filetype: tabular
+  outputs:
+    percentages:
+      file: test-data/expected-percentages.tabular
