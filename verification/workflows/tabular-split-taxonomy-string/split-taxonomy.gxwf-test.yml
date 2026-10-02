@@ -1,0 +1,9 @@
+- doc: "Rank prefixes determine columns even when tokens are reordered or missing"
+  job:
+    mapseq_rows:
+      class: File
+      path: test-data/mapseq-rows.tabular
+      filetype: tabular
+  outputs:
+    ranks:
+      file: test-data/expected-ranks.tabular
