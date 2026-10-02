@@ -1,0 +1,5 @@
+# MAPseq report
+id	count	taxonomy
+12	50	s__alpha;sk__Bacteria;p__Firmicutes;g__Lacto
+13	7	sk__Bacteria;k__Bacteria;p__Proteobacteria;c__Gamma;o__Entero;f__Entero;g__Escherichia;s__coli
+14	2	k__Bacteria;f__Family;s__Species

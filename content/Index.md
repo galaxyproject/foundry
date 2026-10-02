@@ -119,7 +119,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tabular-pivot-collection-to-wide]] — Join a collection of keyed tabular datasets into a wide table, choosing missing-cell fill and output headers to fit the data.
 - [[tabular-prepend-header]] — Add a fixed first line with tp_awk_tool, choosing whether to keep or replace the input's first row and whether to rewrite its fields.
 - [[tabular-relabel-by-row-counter]] — Use tp_awk_tool and awk NR to replace each input line with a row-order label, with explicit header and numbering choices.
-- [[tabular-split-taxonomy-string]] — Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling.
+- [[tabular-split-taxonomy-string]] — Expand a prefixed taxonomy lineage into fixed rank columns with tp_awk_tool, preserving row identity and handling absent ranks.
 - [[tabular-sql-query]] — Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars.
 - [[tabular-synthesize-bed-from-3col]] — Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants.
 - [[tabular-to-collection-by-row]] — Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key.
