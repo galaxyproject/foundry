@@ -35,6 +35,8 @@ Hand-authored, monolithic conversion skills are brittle, hard to test, and don't
 
 The committed `casts/claude/` plugin root is multi-runtime: `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `plugin.json` all expose the same `skills/` directory.
 
+Installed plugins are cached by `version`, so `claude plugin update` only picks up new casts after the version changes. Bump `version` in all three manifests whenever the cast skills change in a way users should receive.
+
 Claude Code:
 
 ```text
