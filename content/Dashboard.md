@@ -75,6 +75,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[tabular-sql-query]] | Load tabular datasets into Query Tabular for SQL joins, window calculations, and queries that combine several tabular operations. | draft | 2026-10-01 | 3 |
 | [[tabular-concatenate-collection-to-table]] | Stack compatible tabular collection elements into one dataset, with one header and a sample column when needed. | draft | 2026-09-30 | 3 |
 | [[tabular-pivot-collection-to-wide]] | Join a collection of keyed tabular datasets into a wide table, choosing missing-cell fill and output headers to fit the data. | draft | 2026-09-30 | 3 |
 | [[tabular-prepend-header]] | Add a fixed first line with tp_awk_tool, choosing whether to keep or replace the input's first row and whether to rewrite its fields. | draft | 2026-09-30 | 3 |
@@ -126,7 +127,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[regex-relabel-via-tabular]] | Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE. | draft | 2026-05-03 | 2 |
 | [[relabel-via-rules-and-find-replace]] | Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup. | draft | 2026-05-03 | 2 |
 | [[tabular-split-taxonomy-string]] | Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling. | draft | 2026-05-03 | 2 |
-| [[tabular-sql-query]] | Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars. | draft | 2026-05-03 | 2 |
 | [[tabular-synthesize-bed-from-3col]] | Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants. | draft | 2026-05-03 | 2 |
 | [[tabular-to-collection-by-row]] | Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key. | draft | 2026-05-03 | 2 |
 
