@@ -75,6 +75,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[tabular-synthesize-bed-from-3col]] | Convert one-based inclusive chromosome/start/end rows to six-column BED with awk, after checking the source coordinate convention. | draft | 2026-10-04 | 3 |
 | [[tabular-split-taxonomy-string]] | Expand a prefixed taxonomy lineage into fixed rank columns with tp_awk_tool, preserving row identity and handling absent ranks. | draft | 2026-10-01 | 3 |
 | [[tabular-sql-query]] | Load tabular datasets into Query Tabular for SQL joins, window calculations, and queries that combine several tabular operations. | draft | 2026-10-01 | 3 |
 | [[tabular-concatenate-collection-to-table]] | Stack compatible tabular collection elements into one dataset, with one header and a sample column when needed. | draft | 2026-09-30 | 3 |
@@ -127,7 +128,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[map-workflow-enum-to-tool-parameter]] | Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets. | draft | 2026-05-03 | 3 |
 | [[regex-relabel-via-tabular]] | Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE. | draft | 2026-05-03 | 2 |
 | [[relabel-via-rules-and-find-replace]] | Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup. | draft | 2026-05-03 | 2 |
-| [[tabular-synthesize-bed-from-3col]] | Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants. | draft | 2026-05-03 | 2 |
 | [[tabular-to-collection-by-row]] | Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key. | draft | 2026-05-03 | 2 |
 
 ## Source Patterns

@@ -121,7 +121,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tabular-relabel-by-row-counter]] — Use tp_awk_tool and awk NR to replace each input line with a row-order label, with explicit header and numbering choices.
 - [[tabular-split-taxonomy-string]] — Expand a prefixed taxonomy lineage into fixed rank columns with tp_awk_tool, preserving row identity and handling absent ranks.
 - [[tabular-sql-query]] — Load tabular datasets into Query Tabular for SQL joins, window calculations, and queries that combine several tabular operations.
-- [[tabular-synthesize-bed-from-3col]] — Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants.
+- [[tabular-synthesize-bed-from-3col]] — Convert one-based inclusive chromosome/start/end rows to six-column BED with awk, after checking the source coordinate convention.
 - [[tabular-to-collection-by-row]] — Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key.
 
 ## Source Patterns
