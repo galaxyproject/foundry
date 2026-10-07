@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Tabular: split into collection by key"
 aliases:
   - "tabular to collection by row"
@@ -15,8 +15,8 @@ tags:
   - topic/tabular-transform
 status: draft
 created: 2026-05-02
-revised: 2026-10-04
-revision: 3
+revised: 2026-10-07
+revision: 4
 summary: "Split a tabular file into a list collection by column value, grouping rows that share an identifier."
 related_notes:
   - "[[iwc-transformations-survey]]"
@@ -26,6 +26,8 @@ related_patterns:
   - "[[sync-collections-by-identifier]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/tabular-to-collection-by-row/split-by-key.gxwf-test.yml
 iwc_exemplars:
   - workflow: data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs
     why: "Splits one-column SRA accessions so fasterq_dump can run once per accession."
@@ -52,7 +54,7 @@ beta    5
 alpha   3
 ```
 
-The display uses spaces for alignment. The input file is tab-separated. With `id_col: "1"`, `top: "1"`, and the unchanged identifier regex, element `alpha` contains the header and both `alpha` rows. Element `beta` contains the header and its one row. This result was checked by running the [upstream splitter script](https://github.com/bgruening/galaxytools/blob/a8748ebc4c16adfee9f2ec18f7ab352aa238e305/tools/text_processing/split_file_to_collection/split_file_to_collection.py) on the example.
+The display uses spaces for alignment. The input file is tab-separated. With `id_col: "1"`, `top: "1"`, and the unchanged identifier regex, element `alpha` contains the header and both `alpha` rows. Element `beta` contains the header and its one row. The [verification workflow](../../verification/workflows/tabular-to-collection-by-row/split-by-key.gxwf.yml) checks the element IDs and complete files. Its Galaxy/Planemo test passed on `release_25.1`. The behavior was also checked by running the [upstream splitter script](https://github.com/bgruening/galaxytools/blob/a8748ebc4c16adfee9f2ec18f7ab352aa238e305/tools/text_processing/split_file_to_collection/split_file_to_collection.py) on the example.
 
 This is the relevant Galaxy-exported tool state from the SRA workflow, with unrelated fields omitted. The input connection targets `split_parms|input`, and the tabular collection output is `list_output_tab`.
 

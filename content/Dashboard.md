@@ -75,8 +75,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[tabular-to-collection-by-row]] | Split a tabular file into a list collection by column value, grouping rows that share an identifier. | draft | 2026-10-07 | 4 |
 | [[tabular-synthesize-bed-from-3col]] | Convert one-based inclusive chromosome/start/end rows to six-column BED with awk, after checking the source coordinate convention. | draft | 2026-10-04 | 3 |
-| [[tabular-to-collection-by-row]] | Split a tabular file into a list collection by column value, grouping rows that share an identifier. | draft | 2026-10-04 | 3 |
 | [[tabular-split-taxonomy-string]] | Expand a prefixed taxonomy lineage into fixed rank columns with tp_awk_tool, preserving row identity and handling absent ranks. | draft | 2026-10-01 | 3 |
 | [[tabular-sql-query]] | Load tabular datasets into Query Tabular for SQL joins, window calculations, and queries that combine several tabular operations. | draft | 2026-10-01 | 3 |
 | [[tabular-concatenate-collection-to-table]] | Stack compatible tabular collection elements into one dataset, with one header and a sample column when needed. | draft | 2026-09-30 | 3 |
