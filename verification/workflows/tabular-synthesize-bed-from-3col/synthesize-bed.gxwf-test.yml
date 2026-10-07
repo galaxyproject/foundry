@@ -1,0 +1,15 @@
+- doc: "One-based inclusive intervals become zero-based, half-open six-column BED on both strands"
+  job:
+    forward_intervals:
+      class: File
+      path: test-data/forward.tabular
+      filetype: tabular
+    reverse_intervals:
+      class: File
+      path: test-data/reverse.tabular
+      filetype: tabular
+  outputs:
+    forward_bed:
+      file: test-data/expected-forward.bed
+    reverse_bed:
+      file: test-data/expected-reverse.bed
