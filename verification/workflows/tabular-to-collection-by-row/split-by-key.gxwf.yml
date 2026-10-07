@@ -1,0 +1,33 @@
+class: GalaxyWorkflow
+name: "Split tabular rows into collection elements by key"
+inputs:
+  - id: rows
+    type: data
+outputs:
+  - id: grouped_rows
+    outputSource: split_by_key/list_output_tab
+steps:
+  - id: split_by_key
+    label: split_by_key
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/split_file_to_collection/split_file_to_collection/0.5.2
+    tool_version: "0.5.2"
+    tool_shed_repository:
+      changeset_revision: 2dae863c8f42
+      name: split_file_to_collection
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: split_parms|input
+        source: rows
+    out:
+      - id: list_output_tab
+    tool_state:
+      split_parms:
+        select_ftype: tabular
+        input: { __class__: ConnectedValue }
+        top: "1"
+        split_by:
+          select_split_by: col
+          id_col: "1"
+          match_regex: (.*)
+          sub_regex: \1
