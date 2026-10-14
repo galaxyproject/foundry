@@ -3,10 +3,11 @@ type: pipeline
 title: WORKFLOW BRIEF → GALAXY
 tags:
   - target/galaxy
+  - journey/build-from-plan
 status: draft
 created: '2026-09-17'
-revised: '2026-09-20'
-revision: 3
+revised: '2026-09-22'
+revision: 5
 summary: Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain.
 harness_notes:
   - The caller supplies workflow-brief.md; a hand-authored brief is a valid entry and requires no source-to-brief
@@ -52,4 +53,4 @@ A reviewed brief is the entry point, including a hand-authored brief. The harnes
 
 The input brief remains unchanged. `open-requirements.ledger.yml` records durable workflow discoveries, decisions, obligations, and proposed brief changes; ordinary phase progress remains harness state. Only a separate expert editing step can change scope or requirements. A required brief change stops implementation and returns to that editing step.
 
-Source-to-brief journeys remain independently usable so they can finish with an honest blocked draft. The paper and interview direct journeys compose brief production, an inline expert-review gate, and this same brief-driven implementation spine. This initial implementation route does not yet dispatch to the specialized Nextflow reference-data and test-translation chain.
+Source-to-brief journeys remain independently usable so they can finish with an honest blocked draft. The paper and interview direct journeys remain separate, freeform-summary-driven routes; planning is explicit composition of a source-to-brief producer with this brief-driven implementation spine. This initial implementation route does not yet dispatch to the specialized Nextflow reference-data and test-translation chain.

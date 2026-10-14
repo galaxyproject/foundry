@@ -3,10 +3,11 @@ type: pipeline
 title: PAPER → WORKFLOW BRIEF
 tags:
   - source/paper
+  - journey/plan
 status: draft
 created: '2026-09-17'
-revised: '2026-09-17'
-revision: 1
+revised: '2026-09-22'
+revision: 2
 summary: Summarize a paper source and produce a scoped Workflow Brief for expert review.
 harness_notes:
   - Brief production ends with workflow-brief.md for expert editing and review; it does not continue into

@@ -4,11 +4,11 @@
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
-    "revision": 11,
-    "content_hash": "c2d41a2dfa4b9ca0bf4193b60a16a0290ad9d26ff5dfdae372ff700e84818dbe",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "revision": 12,
+    "content_hash": "84abb427cbcbae5616ae22e4a7fa803f14350605c246638575b3a32c5ad9c6fb",
+    "commit": "f69bea36b279ed9badbc7bfca330133e8a520359"
   },
-  "cast_at": "2026-09-21T17:25:32.792Z",
+  "cast_at": "2026-10-14T14:45:21.440Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -56,8 +56,8 @@
       "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
       "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
       "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
-      "src_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
-      "dst_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
+      "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
       "source": "deterministic"
     },
     {
@@ -157,6 +157,20 @@
         ]
       },
       {
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the direct PAPER → GALAXY or INTERVIEW → GALAXY pipeline.",
+        "producers": [
+          "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-data-flow",
+        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the direct PAPER → GALAXY or INTERVIEW → GALAXY pipeline.",
+        "producers": [
+          "freeform-summary-to-galaxy-data-flow"
+        ]
+      },
+      {
         "id": "workflow-brief-galaxy-interface",
         "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running a Workflow-Brief-driven Galaxy path.",
         "producers": [
@@ -180,6 +194,9 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

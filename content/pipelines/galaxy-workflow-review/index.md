@@ -4,10 +4,11 @@ title: GALAXY WORKFLOW REVIEW
 tags:
   - source/galaxy
   - lifecycle/review
+  - journey/existing-workflow
 status: draft
 created: 2026-09-12
-revised: 2026-09-12
-revision: 1
+revised: 2026-09-22
+revision: 2
 summary: "Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy."
 harness_notes:
   - "Resolve the pull request or local worktree first and record repository, pull request number, base and head SHAs, workflow directory, primary descriptor, and the matching workflow test file."

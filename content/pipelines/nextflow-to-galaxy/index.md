@@ -4,10 +4,11 @@ title: NEXTFLOW → GALAXY
 tags:
   - source/nextflow
   - target/galaxy
+  - journey/direct-build
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 4
+revised: 2026-09-22
+revision: 5
 summary: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow."
 harness_notes:
   - "Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven."

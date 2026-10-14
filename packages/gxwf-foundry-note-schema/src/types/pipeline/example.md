@@ -3,6 +3,7 @@ type: pipeline
 title: CWL workflow to Galaxy
 tags:
   - target/galaxy
+  - journey/direct-build
 status: draft
 created: 2026-07-26
 revised: 2026-07-26

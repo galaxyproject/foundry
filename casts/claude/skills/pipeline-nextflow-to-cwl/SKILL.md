@@ -5,7 +5,7 @@ description: "Direct path from a Nextflow pipeline to a CWL Workflow + CommandLi
 
 # pipeline-nextflow-to-cwl
 
-Harness for the **NEXTFLOW → CWL** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-cwl/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline nextflow-to-cwl` if the pipeline changes; do not hand-edit.
+Harness for the **NEXTFLOW → CWL** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-cwl/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline nextflow-to-cwl` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 

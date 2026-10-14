@@ -13,13 +13,14 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-09-21
-revision: 5
+revised: 2026-09-23
+revision: 6
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[implement-galaxy-workflow-test]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[cwl-test-to-galaxy-test-plan]]"
+  - "[[freeform-summary-to-galaxy-test-plan]]"
   - "[[workflow-brief-to-galaxy-test-plan]]"
   - "[[planemo-asserts-idioms]]"
   - "[[iwc-test-data-conventions]]"

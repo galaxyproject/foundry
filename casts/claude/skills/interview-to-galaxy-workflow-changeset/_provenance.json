@@ -6,9 +6,9 @@
     "path": "content/molds/interview-to-galaxy-workflow-changeset/index.md",
     "revision": 3,
     "content_hash": "9e2b8567ee121020d44ac03ff4e119393e799c6cb35a0f21b9d2ce1d4a21dce1",
-    "commit": "ceea2e3e67063c7e932cee15ae59bc670dbbced6"
+    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
   },
-  "cast_at": "2026-09-21T17:25:34.126Z",
+  "cast_at": "2026-09-22T18:21:58.567Z",
   "refs": [
     {
       "kind": "research",
@@ -75,6 +75,9 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import PipelineMatrix from '../components/PipelineMatrix.astro';
+import PipelineRoutes from '../components/PipelineRoutes.astro';
 import FoundryStory from '../components/FoundryStory.astro';
 import PatternSpotlight from '../components/PatternSpotlight.astro';
 import { base } from '../lib/site-base';
@@ -11,8 +11,8 @@ const navCards = [
   { href: `${base}/story/`, label: 'Story', desc: 'Why Molds, casting, and the Foundry shape fit together.', kbd: 'S' },
   { href: `${base}/molds/`, label: 'Molds', desc: 'Abstract templates grouped by axis.', kbd: 'M' },
   { href: `${base}/patterns/`, label: 'Patterns', desc: 'Corpus-grounded Galaxy authoring recipes.', kbd: 'R' },
-  { href: `${base}/pipelines/`, label: 'Pipelines', desc: 'Flat list of all pipelines.', kbd: 'P' },
-  { href: `${base}/usage/`, label: 'Usage', desc: 'Install cast skills with Claude Code.', kbd: 'U' },
+  { href: `${base}/pipelines/`, label: 'Pipelines', desc: 'The complete catalog of build and maintenance routes.', kbd: 'P' },
+  { href: `${base}/usage/`, label: 'Usage', desc: 'Install and run skills with Claude Code or Codex.', kbd: 'U' },
   { href: `${base}/glossary/`, label: 'Glossary', desc: 'Pinned definitions for Foundry terminology.', kbd: 'G' },
 ];
 ---
@@ -27,24 +27,25 @@ const navCards = [
       <span class="hero-title-accent">from anything.</span>
     </h1>
     <p class="hero-lede max-w-3xl text-(--color-text-secondary) text-pretty">
-      Convert workflows authored in other systems — papers, Nextflow pipelines, CWL workflows —
-      into validated Galaxy workflows in the <code class="font-mono">gxformat2</code> format.
-      The Foundry decomposes that conversion into atomic, schema-validated steps an LLM agent
-      can execute reliably, grounded in <code class="font-mono">gxwf</code>'s static validation.
+      Build directly from a paper, interview, Nextflow pipeline, or CWL workflow. For paper,
+      interview, and Nextflow sources, you can instead create a Workflow Brief first, review it
+      with an expert, and build from the agreed plan. Every route decomposes the work into atomic,
+      schema-validated steps grounded in
+      <code class="font-mono">gxwf</code>'s static validation.
     </p>
     <div class="hero-meta">
-      <a href={`${base}/pipelines/`} class="hero-cta">
-        Browse pipelines
+      <a href="#choose-route" class="hero-cta">
+        Choose a route
         <span aria-hidden="true">→</span>
       </a>
       <span class="hero-meta-sep" aria-hidden="true">·</span>
-      <a href={`${base}/story/`} class="hero-cta-secondary">
-        Read the story
+      <a href={`${base}/usage/`} class="hero-cta-secondary">
+        Install skills
       </a>
     </div>
   </section>
 
-  <PipelineMatrix />
+  <PipelineRoutes />
   <FoundryStory />
   <PatternSpotlight />
 

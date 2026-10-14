@@ -5,7 +5,7 @@ description: "Summarize a Nextflow pipeline and produce a scoped Workflow Brief 
 
 # pipeline-nextflow-to-workflow-brief
 
-Harness for the **NEXTFLOW → WORKFLOW BRIEF** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-workflow-brief/index.md` (revision 1) — regenerate with `foundry-build assemble-pipeline nextflow-to-workflow-brief` if the pipeline changes; do not hand-edit.
+Harness for the **NEXTFLOW → WORKFLOW BRIEF** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-workflow-brief/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline nextflow-to-workflow-brief` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 

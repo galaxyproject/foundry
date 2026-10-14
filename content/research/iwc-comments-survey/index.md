@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-12
-revised: 2026-09-21
-revision: 2
+revised: 2026-09-23
+revision: 3
 related_notes:
   - "[[galaxy-workflow-comments]]"
   - "[[galaxy-native-workflow-schema]]"
@@ -189,8 +189,9 @@ note rather than a `content/patterns/` page:
 ### Disposition
 
 The actionable conventions here were distilled into [[galaxy-workflow-comments]]
-— a concrete how-to-use note. That note is what the three Galaxy-targeting
-template Molds reference ([[workflow-brief-to-galaxy-template]],
+— a concrete how-to-use note. That note is what the four Galaxy-targeting
+template Molds reference ([[freeform-summary-to-galaxy-template]],
+[[workflow-brief-to-galaxy-template]],
 [[nextflow-summary-to-galaxy-template]], [[cwl-summary-to-galaxy-template]]) so
 the template stage can optionally group the settled step set into titled stage
 frames. This survey is the corpus-evidence trail behind that guidance. No

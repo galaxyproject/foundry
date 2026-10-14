@@ -4,10 +4,11 @@ title: UPDATE-INTERVIEW → GALAXY
 tags:
   - source/interview
   - target/galaxy
+  - journey/existing-workflow
 status: reviewed
 created: 2026-07-01
-revised: 2026-07-24
-revision: 2
+revised: 2026-09-22
+revision: 3
 summary: "Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop."
 harness_notes:
   - 'The workflow is both an input and the output — the Foundry''s first GALAXY → GALAXY (edit) pipeline. Untouched regions must stay byte-stable; only change-set targets change.'

@@ -4,10 +4,11 @@ title: PAPER → CWL
 tags:
   - source/paper
   - target/cwl
+  - journey/direct-build
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+revised: 2026-09-22
+revision: 3
 summary: "Direct path from a paper to a CWL Workflow + CommandLineTool set."
 harness_notes:
   - "CWL targeting has no `discover-or-author` branch — CommandLineTool authoring is built into `implement-cwl-tool-step`, informed by `summarize-cwl-tool`."
