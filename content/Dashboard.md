@@ -24,11 +24,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[changeset-to-galaxy-test-plan]] | Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan. | reviewed | 2026-09-23 | 4 |
 | [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring. | reviewed | 2026-09-22 | 12 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-09-22 | 7 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-09-22 | 10 |
 | [[repair-galaxy-draft-topology]] | Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs. | draft | 2026-09-22 | 5 |
-| [[changeset-to-galaxy-test-plan]] | Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan. | reviewed | 2026-09-21 | 3 |
 | [[workflow-brief-to-galaxy-data-flow]] | Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief. | draft | 2026-09-20 | 4 |
 | [[workflow-brief-to-galaxy-interface]] | Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available. | draft | 2026-09-20 | 4 |
 | [[workflow-brief-to-galaxy-template]] | Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence. | draft | 2026-09-20 | 7 |
@@ -85,11 +85,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[galaxy-collection-patterns]] | Use this MOC to choose corpus-grounded Galaxy collection transformation patterns. | draft | 2026-09-21 | 2 |
-| [[galaxy-conditionals-patterns]] | Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns. | draft | 2026-09-21 | 2 |
-| [[galaxy-interval-patterns]] | Use this MOC to choose corpus-grounded Galaxy genomic interval operations and recipes on coordinate features. | draft | 2026-09-21 | 3 |
-| [[galaxy-sequence-patterns]] | Use this MOC to choose corpus-grounded Galaxy operations on sequence records (FASTA) — interconvert, reformat, merge, length, extract/mask by region. | draft | 2026-09-21 | 3 |
-| [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-09-21 | 2 |
+| [[galaxy-collection-patterns]] | Use this MOC to choose corpus-grounded Galaxy collection transformation patterns. | draft | 2026-09-23 | 3 |
+| [[galaxy-conditionals-patterns]] | Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns. | draft | 2026-09-23 | 3 |
+| [[galaxy-interval-patterns]] | Use this MOC to choose corpus-grounded Galaxy genomic interval operations and recipes on coordinate features. | draft | 2026-09-23 | 4 |
+| [[galaxy-sequence-patterns]] | Use this MOC to choose corpus-grounded Galaxy operations on sequence records (FASTA) — interconvert, reformat, merge, length, extract/mask by region. | draft | 2026-09-23 | 4 |
+| [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-09-23 | 3 |
 | [[collection-split-identifier-via-rules]] | Use Apply Rules regex columns to split one collection identifier into nested list identifiers. | draft | 2026-09-15 | 3 |
 | [[harmonize-by-sortlist-from-identifiers]] | Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers. | draft | 2026-09-15 | 3 |
 | [[sync-collections-by-identifier]] | Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections. | draft | 2026-09-15 | 3 |
@@ -156,7 +156,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-09-21 | 3 |
+| [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-09-23 | 4 |
 | [[check-workflow-brief]] | Check Workflow Brief structure and stop on explicit workflow or agent environment blockers. | draft | 2026-09-17 | 1 |
 | [[validate-markdown]] | Validate Markdown sections with the schemas shared by Foundry build and runtime consumers. | draft | 2026-09-17 | 1 |
 | [[validate-workflow-brief]] | Validate the title and required sections of a Markdown Workflow Brief. | draft | 2026-09-17 | 3 |
@@ -190,9 +190,9 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-09-21 | 3 |
-| [[galaxy-workflow-test-plan]] | JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test. | draft | 2026-09-21 | 2 |
-| [[tests-format]] | JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`. | draft | 2026-09-21 | 5 |
+| [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-09-23 | 4 |
+| [[galaxy-workflow-test-plan]] | JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test. | draft | 2026-09-23 | 3 |
+| [[tests-format]] | JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`. | draft | 2026-09-23 | 6 |
 | [[workflow-brief-schema]] | Markdown section declaration and structural validator for the workflow-brief handoff. | draft | 2026-09-21 | 1 |
 | [[summary-nextflow]] | JSON Schema for the structured summary emitted by the summarize-nextflow Mold. | draft | 2026-09-15 | 13 |
 | [[cast-provenance]] | _provenance.json contract beside every cast: Mold revision, per-ref src/dst hashes, license lineage, artifact handoff. Schema v4 — deterministic casts only. | draft | 2026-09-10 | 4 |
@@ -210,10 +210,10 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[galaxy-data-flow-draft-contract]] | Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation. | draft | 2026-09-21 | 3 |
-| [[galaxy-workflow-comments]] | How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative. | draft | 2026-09-21 | 2 |
-| [[galaxy-workflow-draft-format]] | gxformat2 draft superset: wrapper-tier TODOs (tool_id, state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step. | draft | 2026-09-21 | 3 |
-| [[iwc-comments-survey]] | How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention. | draft | 2026-09-21 | 2 |
+| [[galaxy-data-flow-draft-contract]] | Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation. | draft | 2026-09-23 | 4 |
+| [[galaxy-workflow-comments]] | How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative. | draft | 2026-09-23 | 3 |
+| [[galaxy-workflow-draft-format]] | gxformat2 draft superset: wrapper-tier TODOs (tool_id, state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step. | draft | 2026-09-23 | 4 |
+| [[iwc-comments-survey]] | How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention. | draft | 2026-09-23 | 3 |
 | [[open-requirements-ledger]] | Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state. | draft | 2026-09-21 | 4 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-09-20 | 5 |
 | [[markdown-document-contract]] | Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation. | draft | 2026-09-17 | 2 |

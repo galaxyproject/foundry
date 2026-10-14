@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 7,
     "content_hash": "1f98fd5cf9a54fd81e48db957f7451760f5e97629748f3d39fd66dc59b2ac765",
-    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
+    "commit": "f69bea36b279ed9badbc7bfca330133e8a520359"
   },
-  "cast_at": "2026-09-22T18:21:58.942Z",
+  "cast_at": "2026-10-14T14:45:25.629Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -40,8 +40,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
       "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
-      "src_hash": "0703d7f07898e68c1ad00ca7c6fadd41fe349a90416ee7c79840003c64b9eeb8",
-      "dst_hash": "0703d7f07898e68c1ad00ca7c6fadd41fe349a90416ee7c79840003c64b9eeb8",
+      "src_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
+      "dst_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
       "source": "deterministic"
     },
     {
@@ -55,8 +55,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
       "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "9edb312e418455ab94acf6a1a24c0ff2b3d151b8970cf00df1aeaca83d90a982",
-      "dst_hash": "9edb312e418455ab94acf6a1a24c0ff2b3d151b8970cf00df1aeaca83d90a982",
+      "src_hash": "67213a48c50cc4f1067621f3dc2f1b92a039570b189f8fc465edb67c7b1487a3",
+      "dst_hash": "67213a48c50cc4f1067621f3dc2f1b92a039570b189f8fc465edb67c7b1487a3",
       "source": "deterministic"
     },
     {
@@ -70,8 +70,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
       "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
-      "src_hash": "ca7b0b2e1a9613a89f4f779976386890452f712320b1f6b0965a56dd8e3da247",
-      "dst_hash": "ca7b0b2e1a9613a89f4f779976386890452f712320b1f6b0965a56dd8e3da247",
+      "src_hash": "103ad0288566f0bf721d54b8ecd49e2df0ac334b9030a754d884b2e13abdf73e",
+      "dst_hash": "103ad0288566f0bf721d54b8ecd49e2df0ac334b9030a754d884b2e13abdf73e",
       "source": "deterministic"
     },
     {
@@ -85,8 +85,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns.",
       "trigger": "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges.",
-      "src_hash": "dab2839eb13ea543ceb44883e518ff077bcee5e1f3abc11a503ec39d71b0d207",
-      "dst_hash": "dab2839eb13ea543ceb44883e518ff077bcee5e1f3abc11a503ec39d71b0d207",
+      "src_hash": "900a259c86ee342416eaf4771cfd105bfbfb4969226b748d11e8eabcfa3e8b21",
+      "dst_hash": "900a259c86ee342416eaf4771cfd105bfbfb4969226b748d11e8eabcfa3e8b21",
       "source": "deterministic"
     },
     {
@@ -100,8 +100,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
-      "dst_hash": "c578114b50766f33622744b52bc2cb98bc2df82cc0a83d9a8d5d0713b123a747",
+      "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
       "source": "deterministic"
     },
     {
