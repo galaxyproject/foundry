@@ -2,7 +2,7 @@
 //
 // A run's artifacts carry prose written by a model reading arbitrary papers and repositories, and
 // a ledger note is free text. Nothing from a run reaches the page unescaped, and the embedded JSON
-// is escaped against the one sequence that can close a script element early.
+// is escaped so nothing in it can end or re-enter a script element.
 
 const HTML_ENTITIES: Record<string, string> = {
   "&": "&amp;",
@@ -16,21 +16,18 @@ export function escapeHtml(value: unknown): string {
   return String(value ?? "").replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]!);
 }
 
-export function escapeAttr(value: unknown): string {
-  return escapeHtml(value);
-}
-
 /**
  * Serialize a value into a `<script type="application/json">` body.
  *
- * `</` is the sequence that ends the element early regardless of context, and U+2028/U+2029 are
- * literal line terminators in JavaScript source that some parsers still mishandle.
+ * Every `<`, `>` and `&` becomes a JSON unicode escape, so no value can form `</script`, `<!--` or
+ * `<script` — the sequences that end the element early or put the HTML parser into an escaped
+ * state that swallows the next script. U+2028/U+2029 are escaped for older JavaScript parsers.
  */
 export function jsonScriptBody(json: string): string {
-  return json
-    .replace(/<\//g, "<\\/")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029");
+  return json.replace(
+    /[<>&\u2028\u2029]/g,
+    (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`,
+  );
 }
 
 export function humanBytes(bytes: number | null): string {
