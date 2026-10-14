@@ -24,6 +24,7 @@ import {
   type AssemblyPhase,
   type SkillProvenance,
 } from "../lib/cast-registry.js";
+import { foundryHead } from "../lib/foundry-head.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
 import { readOption } from "../lib/cli-args.js";
@@ -105,6 +106,7 @@ export interface PipelineRunRecord {
   harness_name: string;
   assembly_path: string;
   assembly_sha256: string;
+  foundry_head: string | null;
   through_phase: number;
   scenario: ResolvedScenario;
   engine: {
@@ -454,6 +456,7 @@ export async function runLinearPipeline(
     harness_name: assembly.harness_name,
     assembly_path: path.relative(repoRoot, assemblyPath).split(path.sep).join("/"),
     assembly_sha256: sha256Path(assemblyPath),
+    foundry_head: foundryHead(repoRoot),
     through_phase: phases.at(-1)!.phase,
     scenario,
     engine: {

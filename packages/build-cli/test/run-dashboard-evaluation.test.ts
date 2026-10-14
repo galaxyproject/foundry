@@ -22,7 +22,7 @@ beforeAll(() => {
 });
 
 /** A `test-pipeline` run directory, laid out the way that command writes one. */
-function evaluationRun(): string {
+function evaluationRun(record: Record<string, unknown> = {}): string {
   const dir = mkdtempSync(path.join(tmpdir(), "foundry-pi-pipeline-run-"));
   const phaseOne = path.join(dir, "trial-001", "phase-001-summarize-nextflow", "workspace");
   mkdirSync(phaseOne, { recursive: true });
@@ -50,6 +50,7 @@ function evaluationRun(): string {
         engine: { name: "pi", provider: "anthropic", model: "a-model", thinking: "medium" },
         sandbox: { mode: "container", network_policy: "none" },
         usage: { total_tokens: 91_000, cost: 1.25, turns: 42, tool_calls: 18 },
+        ...record,
         trials: [
           {
             trial: 1,
@@ -150,6 +151,24 @@ describe("the evaluation run shape", () => {
       now: FIXED_CLOCK,
     });
     expect(model.warnings.map((warning) => warning.code)).toContain("missing-declared-input");
+  });
+
+  it("pins the run to the Foundry commit it recorded, not the one rendering it", () => {
+    const options = { repoRoot: REPO_ROOT, pipelineIndex: index, now: FIXED_CLOCK };
+    const recorded = runModelFromTestPipeline({
+      ...options,
+      runDir: evaluationRun({ foundry_head: "1".repeat(40) }),
+      foundryHead: "2".repeat(40),
+    });
+    expect(recorded.run.foundry_head).toBe("1".repeat(40));
+    expect(recorded.generator.foundry_head).toBe("2".repeat(40));
+
+    const unrecorded = runModelFromTestPipeline({
+      ...options,
+      runDir: evaluationRun(),
+      foundryHead: "2".repeat(40),
+    });
+    expect(unrecorded.run.foundry_head).toBeNull();
   });
 
   it("marks phases past the evaluated prefix as skipped, not pending", () => {

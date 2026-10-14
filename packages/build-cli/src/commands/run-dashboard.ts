@@ -11,6 +11,7 @@ import process from "node:process";
 
 import { requireRuntimeArtifactRegistry } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
+import { foundryHead } from "../lib/foundry-head.js";
 import { readOption } from "../lib/cli-args.js";
 import { errorMessage } from "../lib/errors.js";
 import { createSiteLinker, DEFAULT_SITE_BASE } from "../lib/run-links.js";
@@ -158,19 +159,6 @@ export function parseRunDashboardArgs(argv: string[]): RunDashboardArgs {
   }
   args.runDir = positional[0]!;
   return args;
-}
-
-function foundryHead(repoRoot: string): string | null {
-  const headFile = path.join(repoRoot, ".git", "HEAD");
-  if (!existsSync(headFile)) return null;
-  try {
-    const head = readFileSync(headFile, "utf8").trim();
-    if (!head.startsWith("ref:")) return head;
-    const refPath = path.join(repoRoot, ".git", head.slice(4).trim());
-    return existsSync(refPath) ? readFileSync(refPath, "utf8").trim() : null;
-  } catch {
-    return null;
-  }
 }
 
 function packageVersion(repoRoot: string): string {

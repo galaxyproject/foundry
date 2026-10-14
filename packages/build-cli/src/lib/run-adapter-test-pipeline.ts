@@ -82,6 +82,7 @@ interface PipelineRecord {
   source_revision: number;
   harness_name: string;
   assembly_sha256: string;
+  foundry_head?: string | null;
   through_phase: number;
   scenario?: { name: string };
   engine?: { name: string; provider: string; model: string; thinking?: string };
@@ -446,7 +447,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       harness_name: record.harness_name,
       assembly_sha256: record.assembly_sha256,
       assembly_matches_checkout: assemblyMatches,
-      foundry_head: null,
+      foundry_head: typeof record.foundry_head === "string" ? record.foundry_head : null,
       options_observed: [`trial-${chosen.trial}`, record.sandbox?.mode ?? "unknown"],
       status,
       started_at: record.started_at,
