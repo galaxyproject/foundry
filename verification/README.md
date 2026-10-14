@@ -35,6 +35,9 @@ outputs:
 Reach into a `list:list` by nesting `element_tests` inside an element, giving that element its own
 `class: Collection` and using `count` for its size.
 
+`gxwf validate-tests` 1.0.0 rejects nested `element_tests` although Planemo accepts them. For a nested
+collection fixture, run `gxwf validate` on the workflow and let `planemo test` check the test file.
+
 ## Local runs
 
 From a workflow directory, run Planemo directly:
