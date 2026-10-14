@@ -28,6 +28,7 @@ import {
 } from "../lib/cast-registry.js";
 import { foundryHead } from "../lib/foundry-head.js";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { sha256File } from "../lib/reconcile.js";
 import {
   PIPELINE_RUN_FILE,
   type PipelinePhaseRunRecord,
@@ -382,7 +383,7 @@ export async function runLinearPipeline(
     source_revision: assembly.source_revision,
     harness_name: assembly.harness_name,
     assembly_path: path.relative(repoRoot, assemblyFile).split(path.sep).join("/"),
-    assembly_sha256: sha256Path(assemblyFile),
+    assembly_sha256: sha256File(assemblyFile),
     foundry_head: foundryHead(repoRoot),
     through_phase: phases.at(-1)!.phase,
     scenario,

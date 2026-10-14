@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-25
-revision: 31
+revised: 2026-10-14
+revision: 32
 summary: "How typed Mold references become target-specific cast artifacts with provenance."
 ---
 
@@ -76,7 +76,7 @@ Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skil
 To cast a Mold, the casting process consumes:
 
 - **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. The cast renders the procedural body of `index.md` into `SKILL.md`. Which sibling files travel is not decided here: the `mold` kind declares a disposition per companion (`packages/gxwf-foundry-note-schema/src/types/mold/schema.ts`), and the cast verifier refuses a bundle carrying one that is not `bundled`. `eval.md` and the other Foundry-only companions never leave the Foundry; `casting.md` and `cast-skill-verification.md` are read while casting but not shipped. Author-facing meta-content (changelog entries, casting open-questions) belongs in those sibling files, not in the body of `index.md` — anything in the body is runtime instruction.
-- **Artifact IO contracts** — `input_artifacts[]` and `output_artifacts[]` define what a skill consumes and produces. `optional: true` identifies an input that may be absent or an output whose honest absence must not fail the run; omission means required. Producer-owned schemas declared on `output_artifacts[].schema` are surfaced to consumers by shared artifact `id`; cast provenance records optionality, the producer list, and inherited schema hints for harnesses. Root `runtime_artifacts.yml` contributes explicit runtime-mode producers to the same index, rendered as `runtime:<option>`, so a runtime-initialized ledger remains a normal declared input rather than a producer-validation exemption.
+- **Artifact IO contracts** — `input_artifacts[]` and `output_artifacts[]` define what a skill consumes and produces. `optional: true` identifies an input that may be absent or an output whose honest absence must not fail the run; omission means required. Producer-owned schemas declared on `output_artifacts[].schema` are surfaced to consumers by shared artifact `id`; cast provenance records optionality, the producer list, and inherited schema hints for harnesses. Root `runtime_artifacts.yml` contributes runtime producers to the same index, rendered as `runtime:<option>` for an opt-in mode and `runtime:harness` for an artifact the harness writes on every run, so a runtime-initialized ledger remains a normal declared input rather than a producer-validation exemption.
 - **All typed references declared in the manifest**, resolved by kind:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.

@@ -8,7 +8,24 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import type { SiteLinker } from "./run-manifest.js";
+export interface SiteLinker {
+  artifact(id: string): string | null;
+  mold(slug: string): string | null;
+  pipeline(slug: string): string | null;
+  harness(slug: string): string | null;
+  schema(wikiLink: string): string | null;
+  note(locator: string): string | null;
+}
+
+/** For a reader given no linker: every name renders as plain text. */
+export const NO_LINKS: SiteLinker = {
+  artifact: () => null,
+  mold: () => null,
+  pipeline: () => null,
+  harness: () => null,
+  schema: () => null,
+  note: () => null,
+};
 
 export const DEFAULT_SITE_BASE = "https://galaxyproject.github.io/foundry";
 

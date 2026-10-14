@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { scanRunDir } from "../src/lib/run-scan.js";
+import { scanFile, scanRunDir } from "../src/lib/run-scan.js";
 
 function tree(files: Record<string, string | Buffer>): string {
   const dir = mkdtempSync(path.join(tmpdir(), "foundry-run-scan-"));
@@ -120,5 +120,32 @@ describe("scanRunDir nested-file cap", () => {
     const { result } = byPath(tree(files), { deepDirs: true, maxDeepEntries: 5 });
     expect(result.entries.filter((entry) => entry.relpath.startsWith("d/"))).toHaveLength(5);
     expect(result.ignored_count).toBe(3);
+  });
+});
+
+describe("scanFile", () => {
+  it("reads one file exactly as the directory scan does", () => {
+    const dir = tree({ "sub/notes.md": "# hi\n" });
+    const scanned = byPath(dir, { deepDirs: true }).entries.get("sub/notes.md")!;
+    expect(scanFile(path.join(dir, "sub/notes.md"), "sub/notes.md")).toEqual(scanned);
+  });
+
+  it("is null for a missing path or a directory", () => {
+    const dir = tree({ "sub/a.md": "a" });
+    expect(scanFile(path.join(dir, "absent.md"), "absent.md")).toBeNull();
+    expect(scanFile(path.join(dir, "sub"), "sub")).toBeNull();
+  });
+
+  it("applies the run-wide embed budget only when given one to share", () => {
+    const dir = tree({ "a.md": "x".repeat(60), "b.md": "y".repeat(60) });
+    const options = { totalEmbedBudget: 100 };
+    expect(scanFile(path.join(dir, "b.md"), "b.md", options)!.text).not.toBeNull();
+
+    const budget = { spent: 0 };
+    expect(scanFile(path.join(dir, "a.md"), "a.md", options, budget)!.text).not.toBeNull();
+    const second = scanFile(path.join(dir, "b.md"), "b.md", options, budget)!;
+    expect(second.text).toBeNull();
+    expect(second.text_skip_reason).toBe("run-wide embed budget exhausted");
+    expect(budget.spent).toBe(60);
   });
 });

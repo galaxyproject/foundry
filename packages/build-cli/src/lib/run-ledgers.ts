@@ -19,31 +19,12 @@ import type {
   PhaseStatus,
   RunWarning,
 } from "./run-model.js";
+import { asBoolean, asNumber, asRecord, asScalarString } from "./narrow.js";
 import { asPhaseNumber, asPhaseStatus } from "./run-record.js";
 
 export const OPEN_REQUIREMENTS_FILENAME = "open-requirements.ledger.yml";
 /** The registry's `default_filename` for `foundry-feedback-ledger`, used when no registry is passed. */
 export const FEEDBACK_LEDGER_FILENAME = "foundry-feedback.ledger.yml";
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function asString(value: unknown): string | null {
-  if (typeof value === "string") return value.length > 0 ? value : null;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return null;
-}
-
-function asNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function asBoolean(value: unknown): boolean | null {
-  return typeof value === "boolean" ? value : null;
-}
 
 /** `units:` and `because:` are free-form and have arrived as both scalars and lists. */
 function asProse(value: unknown): string | null {
@@ -97,20 +78,20 @@ export function parseOpenRequirements(parsed: unknown, from: string): OpenRequir
     const row = asRecord(raw);
     if (!row) continue;
     entries.push({
-      id: asString(row.id) ?? `entry-${entries.length + 1}`,
-      status: asString(row.status) ?? "open",
-      kind: asString(row.kind),
+      id: asScalarString(row.id) ?? `entry-${entries.length + 1}`,
+      status: asScalarString(row.status) ?? "open",
+      kind: asScalarString(row.kind),
       blocking: asBoolean(row.blocking),
-      raised_by: asString(row.raised_by),
+      raised_by: asScalarString(row.raised_by),
       raised_by_phase: null,
       raised_by_href: null,
-      resolved_by: asString(row.resolved_by),
+      resolved_by: asScalarString(row.resolved_by),
       resolved_by_phase: null,
       resolved_by_href: null,
-      step: asString(row.step),
+      step: asScalarString(row.step),
       unmet: asProse(row.unmet),
       missing: asProse(row.missing),
-      supersedes: asString(row.supersedes),
+      supersedes: asScalarString(row.supersedes),
       note: asProse(row.note),
       units: asProse(row.units),
       because: asProse(row.because),
@@ -189,22 +170,22 @@ export function parseFeedbackLedger(parsed: unknown, from: string): FeedbackLedg
       const subject = asRecord(row.subject);
       const observed = asRecord(row.observed_in);
       entries.push({
-        id: asString(row.id) ?? `entry-${entries.length + 1}`,
-        raised_by: asString(row.raised_by),
+        id: asScalarString(row.id) ?? `entry-${entries.length + 1}`,
+        raised_by: asScalarString(row.raised_by),
         raised_by_phase: null,
-        kind: asString(row.kind),
-        severity: asString(row.severity),
-        status: asString(row.status),
+        kind: asScalarString(row.kind),
+        severity: asScalarString(row.severity),
+        status: asScalarString(row.status),
         what: asProse(row.what),
         expected: asProse(row.expected),
         evidence: asProse(row.evidence),
-        issue: asString(row.issue),
-        subject_kind: subject ? asString(subject.kind) : null,
-        subject_label: subject ? asString(subject.label) : null,
-        subject_locator: subject ? asString(subject.locator) : null,
+        issue: asScalarString(row.issue),
+        subject_kind: subject ? asScalarString(subject.kind) : null,
+        subject_label: subject ? asScalarString(subject.label) : null,
+        subject_locator: subject ? asScalarString(subject.locator) : null,
         subject_href: null,
         observed_revision: observed ? asNumber(observed.revision) : null,
-        observed_foundry_head: observed ? asString(observed.foundry_head) : null,
+        observed_foundry_head: observed ? asScalarString(observed.foundry_head) : null,
       });
     }
   }
@@ -213,9 +194,9 @@ export function parseFeedbackLedger(parsed: unknown, from: string): FeedbackLedg
     path: from,
     unreadable: null,
     run: {
-      pipeline: runBlock ? asString(runBlock.pipeline) : null,
-      run_slug: runBlock ? asString(runBlock.run_slug) : null,
-      status: runBlock ? asString(runBlock.status) : null,
+      pipeline: runBlock ? asScalarString(runBlock.pipeline) : null,
+      run_slug: runBlock ? asScalarString(runBlock.run_slug) : null,
+      status: runBlock ? asScalarString(runBlock.status) : null,
     },
     counts: {
       total: entries.length,
@@ -254,11 +235,11 @@ export function parseFeedbackLedgerPhases(parsed: unknown): LedgerPhaseRow[] {
     if (n === null) continue;
     rows.push({
       n,
-      kind: asString(row!.kind),
-      skill: asString(row!.skill),
+      kind: asScalarString(row!.kind),
+      skill: asScalarString(row!.skill),
       status: row!.status === undefined || row!.status === null ? null : asPhaseStatus(row!.status),
       iterations: asNumber(row!.iterations),
-      selected: asString(row!.selected),
+      selected: asScalarString(row!.selected),
       feedback_checked: asBoolean(row!.feedback_checked),
     });
   }

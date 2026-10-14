@@ -10,6 +10,9 @@ import path from "node:path";
 
 import yaml from "js-yaml";
 
+import { assemblyPath } from "./cast-registry.js";
+import { asNumber, asRecord, asString } from "./narrow.js";
+import { sha256File } from "./reconcile.js";
 import type { PhaseStatus, RunStatus, RunWarning } from "./run-model.js";
 
 export const RUN_RECORD_FILENAME = "foundry-run.yml";
@@ -61,20 +64,6 @@ const PHASE_STATUSES = new Set<PhaseStatus>([
   "unknown",
 ]);
 const RUN_STATUSES = new Set<RunStatus>(["running", "complete", "failed", "cancelled", "unknown"]);
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function asString(value: unknown): string | null {
-  return typeof value === "string" && value.length > 0 ? value : null;
-}
-
-function asNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
 
 /**
  * An identifier that YAML may have resolved to a number.
@@ -136,6 +125,17 @@ export function assemblyMatchesCheckout(
     .toLowerCase()
     .replace(/^sha256:/, "");
   return normalized === current;
+}
+
+/** `assemblyMatchesCheckout` against the pipeline's `_assembly.json` as it is on disk now. */
+export function assemblyMatchesCurrent(
+  repoRoot: string,
+  pipeline: string,
+  recorded: string | null | undefined,
+): boolean | null {
+  const file = assemblyPath(repoRoot, pipeline);
+  // Bytes, the way `test-pipeline` records the digest and the harness is told to.
+  return assemblyMatchesCheckout(recorded, existsSync(file) ? sha256File(file) : null);
 }
 
 function readArtifacts(

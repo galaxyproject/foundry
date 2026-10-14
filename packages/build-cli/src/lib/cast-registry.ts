@@ -1,44 +1,34 @@
 // Canonical readers for the committed cast tree: assembled pipeline harnesses and the per-skill
 // provenance records beside them.
 //
-// These shapes were privately redeclared in `commands/test-pipeline.ts` and again in the site's
-// `lib/casts.ts`. A third consumer arrived (the run-dashboard reader) and three partial copies of
-// one on-disk contract is how a field rename silently stops being read in two of them. The types
-// and the loaders live here now; callers narrow, they do not re-describe.
+// The assembly contract (types and the checked loader) ships in
+// @galaxy-foundry/gxwf-foundry-note-schema, shared with the writer and the site; this module adds
+// where the claude cast tree keeps it. Callers narrow, they do not re-describe.
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import type { RuntimeArtifactRegistry } from "@galaxy-foundry/gxwf-foundry-note-schema";
+import {
+  ASSEMBLY_FILE,
+  loadAssemblyManifest,
+  type AssemblyManifest,
+  type AssemblyPhase,
+  type RuntimeArtifactRegistry,
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
 
 import type { ProvenanceArtifacts } from "./artifact-contract.js";
 
+export type {
+  AssemblyBranchPhase,
+  AssemblyManifest,
+  AssemblyMoldPhase,
+  AssemblyPhase,
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
+
 export const CAST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-/** The sentinel a branch chain may end on: not a skill, a hand-off back to the user. */
+/** Sentinel names for a branch chain that does not mark its own: not skills, hand-offs to the user. */
 export const TERMINAL_SENTINELS = new Set(["user-supplied"]);
-
-/** One entry of an assembled harness's `phases` array. */
-export interface AssemblyPhase {
-  phase: number;
-  kind: string;
-  skill?: string;
-  loop?: boolean;
-  cast_present?: boolean | Array<boolean | null>;
-  pattern?: string;
-  chain?: string[];
-  branches?: unknown;
-}
-
-/** `casts/claude/skills/pipeline-<slug>/_assembly.json`. */
-export interface AssemblyManifest {
-  source_pipeline: string;
-  source_revision: number;
-  harness_name: string;
-  options?: string[];
-  required_tools?: unknown[];
-  phases: AssemblyPhase[];
-}
 
 /** The part of `casts/claude/skills/<skill>/_provenance.json` this repository reads. */
 export interface SkillProvenance {
@@ -81,7 +71,7 @@ export function skillsRoot(repoRoot: string): string {
 
 export function assemblyPath(repoRoot: string, pipeline: string): string {
   if (!CAST_SLUG.test(pipeline)) throw new Error(`invalid pipeline slug: ${pipeline}`);
-  return path.join(skillsRoot(repoRoot), `pipeline-${pipeline}`, "_assembly.json");
+  return path.join(skillsRoot(repoRoot), `pipeline-${pipeline}`, ASSEMBLY_FILE);
 }
 
 export function skillDir(repoRoot: string, skill: string): string {
@@ -90,18 +80,7 @@ export function skillDir(repoRoot: string, skill: string): string {
 }
 
 export function loadAssembly(repoRoot: string, pipeline: string): AssemblyManifest {
-  const file = assemblyPath(repoRoot, pipeline);
-  if (!existsSync(file)) throw new Error(`pipeline assembly not found: ${file}`);
-  const manifest = JSON.parse(readFileSync(file, "utf8")) as Partial<AssemblyManifest>;
-  if (
-    manifest.source_pipeline !== pipeline ||
-    typeof manifest.source_revision !== "number" ||
-    typeof manifest.harness_name !== "string" ||
-    !Array.isArray(manifest.phases)
-  ) {
-    throw new Error(`${file}: invalid pipeline assembly`);
-  }
-  return manifest as AssemblyManifest;
+  return loadAssemblyManifest(assemblyPath(repoRoot, pipeline), pipeline);
 }
 
 /** Every pipeline slug with a committed assembled harness, sorted. */
@@ -157,13 +136,21 @@ export function loadSkillProvenance(repoRoot: string, skill: string): SkillProve
   return JSON.parse(readFileSync(file, "utf8")) as SkillProvenance;
 }
 
-/** The skills a phase can invoke: its own, or every non-sentinel step of a branch chain. */
+/**
+ * The skills a phase can invoke: its own, or every non-sentinel step of a branch chain.
+ *
+ * The assembler records a sentinel step — any chain entry that is not a Mold link — as a null
+ * `cast_present`. A chain without one entry per step falls back to the known sentinel names.
+ */
 export function phaseSkills(phase: AssemblyPhase): string[] {
   if (phase.skill) return [phase.skill];
-  if (Array.isArray(phase.chain)) {
-    return phase.chain.filter((step) => typeof step === "string" && !TERMINAL_SENTINELS.has(step));
-  }
-  return [];
+  if (!Array.isArray(phase.chain)) return [];
+  const cast = phase.cast_present;
+  const marked = Array.isArray(cast) && cast.length === phase.chain.length ? cast : null;
+  return phase.chain.filter(
+    (step, i) =>
+      typeof step === "string" && (marked ? marked[i] !== null : !TERMINAL_SENTINELS.has(step)),
+  );
 }
 
 function ensure(

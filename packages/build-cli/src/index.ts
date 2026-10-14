@@ -56,8 +56,8 @@ export {
   buildRunModel,
   serializeRunManifest,
   RunRecordMissingError,
+  RunRecordUnreadableError,
   type BuildRunModelOptions,
-  type SiteLinker,
 } from "./lib/run-manifest.js";
 export {
   buildPipelineIndex,
@@ -67,7 +67,7 @@ export {
   type PipelineCandidateScore,
   type PipelineDetection,
 } from "./lib/run-reconstruct.js";
-export { createSiteLinker, DEFAULT_SITE_BASE } from "./lib/run-links.js";
+export { createSiteLinker, DEFAULT_SITE_BASE, type SiteLinker } from "./lib/run-links.js";
 export {
   isTestPipelineRunDir,
   runModelFromTestPipeline,

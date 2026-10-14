@@ -7,9 +7,11 @@
 // summarized at depth one, hashing stops above a size cap, and embedded text has both a per-file
 // and a whole-run budget. Every skip is recorded rather than silently applied.
 
-import { createHash } from "node:crypto";
 import { lstatSync, readFileSync, readdirSync, realpathSync, statSync, type Stats } from "node:fs";
 import path from "node:path";
+
+import { humanBytes } from "./html.js";
+import { sha256File } from "./reconcile.js";
 
 export interface ScanOptions {
   /** Above this, sha256 is skipped and the reason recorded. */
@@ -90,16 +92,6 @@ function isExcluded(name: string): boolean {
   return EXCLUDED_NAMES.has(name) || name.startsWith(".") || name.endsWith(".swp");
 }
 
-function humanBytes(n: number): string {
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-export function sha256File(file: string): string {
-  return createHash("sha256").update(readFileSync(file)).digest("hex");
-}
-
 function looksTextual(basename: string): boolean {
   const ext = path.extname(basename).toLowerCase();
   if (TEXT_EXTENSIONS.has(ext)) return true;
@@ -163,6 +155,89 @@ function summarizeDir(
   return { entry_count: entryCount, total_bytes: totalBytes, sample };
 }
 
+/** Embedded bytes spent so far, shared by every file read under one run-wide budget. */
+export interface EmbedBudget {
+  spent: number;
+}
+
+function entryOf(
+  full: string,
+  relpath: string,
+  stats: Stats,
+  opts: ScanOptions,
+  budget?: EmbedBudget,
+): ScannedEntry {
+  const name = path.basename(full);
+  let sha256: string | null = null;
+  let hashSkipped: string | null = null;
+  if (stats.size <= opts.maxHashBytes) {
+    try {
+      sha256 = sha256File(full);
+    } catch (error) {
+      hashSkipped = `unreadable: ${(error as Error).message}`;
+    }
+  } else {
+    hashSkipped = `over the hash cap (${humanBytes(stats.size)})`;
+  }
+
+  let text: string | null = null;
+  let textSkip: string | null = null;
+  if (!looksTextual(name)) {
+    textSkip = "not a text format";
+  } else if (stats.size > opts.maxEmbedBytes) {
+    textSkip = `over the per-file embed cap (${humanBytes(stats.size)})`;
+  } else if (budget && budget.spent + stats.size > opts.totalEmbedBudget) {
+    textSkip = "run-wide embed budget exhausted";
+  } else {
+    try {
+      const buffer = readFileSync(full);
+      if (buffer.includes(0)) {
+        textSkip = "binary content";
+      } else {
+        text = buffer.toString("utf8");
+        if (budget) budget.spent += stats.size;
+      }
+    } catch (error) {
+      textSkip = `unreadable: ${(error as Error).message}`;
+    }
+  }
+
+  return {
+    basename: name,
+    relpath,
+    type: "file",
+    size_bytes: stats.size,
+    mtime: stats.mtime.toISOString(),
+    sha256,
+    hash_skipped_reason: hashSkipped,
+    dir_summary: null,
+    text,
+    text_truncated: false,
+    text_skip_reason: textSkip,
+  };
+}
+
+/**
+ * One file, read the way `scanRunDir` reads each of its files, or null when it is not a file.
+ *
+ * Without a `budget` the run-wide embed budget does not apply; pass one to share it across calls.
+ */
+export function scanFile(
+  full: string,
+  relpath: string,
+  options: Partial<ScanOptions> = {},
+  budget?: EmbedBudget,
+): ScannedEntry | null {
+  let stats: Stats;
+  try {
+    stats = statSync(full);
+  } catch {
+    return null;
+  }
+  if (!stats.isFile()) return null;
+  return entryOf(full, relpath, stats, { ...DEFAULT_SCAN_OPTIONS, ...options }, budget);
+}
+
 /**
  * Inventory the run directory.
  *
@@ -175,7 +250,6 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
   const entries: ScannedEntry[] = [];
   let ignored = 0;
   let totalBytes = 0;
-  let embedSpent = 0;
   let deepListed = 0;
 
   let root: string;
@@ -187,56 +261,9 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
     throw new Error(`cannot read run directory ${dir}`, { cause: error });
   }
 
-  const fileEntry = (full: string, relpath: string, stats: Stats): ScannedEntry => {
-    const name = path.basename(full);
-    let sha256: string | null = null;
-    let hashSkipped: string | null = null;
-    if (stats.size <= opts.maxHashBytes) {
-      try {
-        sha256 = sha256File(full);
-      } catch (error) {
-        hashSkipped = `unreadable: ${(error as Error).message}`;
-      }
-    } else {
-      hashSkipped = `over the hash cap (${humanBytes(stats.size)})`;
-    }
-
-    let text: string | null = null;
-    let textSkip: string | null = null;
-    if (!looksTextual(name)) {
-      textSkip = "not a text format";
-    } else if (stats.size > opts.maxEmbedBytes) {
-      textSkip = `over the per-file embed cap (${humanBytes(stats.size)})`;
-    } else if (embedSpent + stats.size > opts.totalEmbedBudget) {
-      textSkip = "run-wide embed budget exhausted";
-    } else {
-      try {
-        const buffer = readFileSync(full);
-        if (buffer.includes(0)) {
-          textSkip = "binary content";
-        } else {
-          text = buffer.toString("utf8");
-          embedSpent += stats.size;
-        }
-      } catch (error) {
-        textSkip = `unreadable: ${(error as Error).message}`;
-      }
-    }
-
-    return {
-      basename: name,
-      relpath,
-      type: "file",
-      size_bytes: stats.size,
-      mtime: stats.mtime.toISOString(),
-      sha256,
-      hash_skipped_reason: hashSkipped,
-      dir_summary: null,
-      text,
-      text_truncated: false,
-      text_skip_reason: textSkip,
-    };
-  };
+  const budget: EmbedBudget = { spent: 0 };
+  const fileEntry = (full: string, relpath: string, stats: Stats): ScannedEntry =>
+    entryOf(full, relpath, stats, opts, budget);
 
   /** Lists every file under `current`; `seen` holds real directory paths, so a link cannot loop. */
   const walkNested = (current: string, seen: Set<string>): void => {

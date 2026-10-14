@@ -9,7 +9,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { escapeHtml, humanBytes, jsonScriptBody, shortInstant } from "../lib/html.js";
-import type { SiteLinker } from "../lib/run-manifest.js";
+import type { SiteLinker } from "../lib/run-links.js";
 import { DASHBOARD_CSS, DASHBOARD_JS } from "./run-dashboard-assets.js";
 import type {
   ArtifactPreview,

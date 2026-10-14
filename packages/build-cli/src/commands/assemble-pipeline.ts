@@ -28,6 +28,7 @@ import {
 import {
   requireRuntimeArtifactRegistry,
   runtimeModeOption,
+  type AssemblyPhase,
   type RuntimeArtifactDefinition,
 } from "@galaxy-foundry/gxwf-foundry-note-schema";
 import type { Frontmatter } from "../lib/types.js";
@@ -87,24 +88,6 @@ function firstSentence(s: string): string {
 }
 
 // ---- assembly model ----
-
-interface MoldPhaseEntry {
-  phase: number;
-  kind: "mold";
-  skill: string;
-  cast_present: boolean;
-  loop: boolean;
-}
-
-interface BranchPhaseEntry {
-  phase: number;
-  kind: "branch";
-  pattern: string;
-  chain: string[];
-  cast_present: (boolean | null)[];
-}
-
-type AssemblyPhase = MoldPhaseEntry | BranchPhaseEntry;
 
 const SUPPORTED_BRANCH_PATTERNS = new Set(["test-data-resolution"]);
 

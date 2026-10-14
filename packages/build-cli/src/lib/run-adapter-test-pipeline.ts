@@ -6,38 +6,37 @@
 // pretend otherwise: `evaluation` is populated only here, and `timeline` only there. What they
 // share is the spine, so one reader and one page serve both.
 
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import type { RuntimeArtifactRegistry } from "@galaxy-foundry/gxwf-foundry-note-schema";
 import type { ArtifactResult } from "@galaxy-foundry/gxwf-pi-harness";
 
-import {
-  assemblyPath,
-  declaredOutputs,
-  loadSkillProvenance,
-  phaseSkills,
-} from "./cast-registry.js";
+import { declaredOutputs } from "./cast-registry.js";
 import { PIPELINE_RUN_FILE, type PipelineRunRecord } from "./pipeline-run-record.js";
-import { buildPipelineIndex, type PipelineIndex } from "./run-reconstruct.js";
-import { derivePreview } from "./run-preview.js";
-import { assemblyMatchesCheckout, readRunRecord } from "./run-record.js";
-import { DEFAULT_SCAN_OPTIONS, sha256File, type ScannedEntry } from "./run-scan.js";
+import { NO_LINKS } from "./run-links.js";
+import { buildPipelineIndex } from "./run-reconstruct.js";
+import { assemblyMatchesCurrent, readRunRecord } from "./run-record.js";
+import { scanFile } from "./run-scan.js";
 import {
-  RUN_MANIFEST_SCHEMA_VERSION,
-  worstState,
-  type ArtifactPresence,
-  type EvaluationModel,
-  type HealthState,
-  type HealthTile,
-  type PhaseStatus,
-  type RunArtifact,
-  type RunModel,
-  type RunPhase,
-  type RunStatus,
-  type RunWarning,
+  buildPhaseRow,
+  healthRollup,
+  modelHeader,
+  phasesTile,
+  presenceCounts,
+  resolvePresence,
+  toRunArtifact,
+  type RunReaderOptions,
+} from "./run-spine.js";
+import type {
+  EvaluationModel,
+  HealthTile,
+  PhaseStatus,
+  RunArtifact,
+  RunModel,
+  RunPhase,
+  RunStatus,
+  RunWarning,
 } from "./run-model.js";
-import type { SiteLinker } from "./run-manifest.js";
 
 /**
  * Whether a directory is an evaluation run rather than a harness run.
@@ -74,72 +73,15 @@ const PHASE_STATUS: Record<string, PhaseStatus> = {
   cancelled: "skipped",
 };
 
-export interface TestPipelineAdapterOptions {
+export interface TestPipelineAdapterOptions extends RunReaderOptions {
   runDir: string;
-  repoRoot: string;
   /** Which trial to render. Defaults to the first that did not pass, else the first. */
   trial?: number;
-  runtimeArtifacts?: RuntimeArtifactRegistry;
-  pipelineIndex?: PipelineIndex;
-  linker?: SiteLinker;
-  now?: () => Date;
-  packageVersion?: string;
-  foundryHead?: string | null;
-}
-
-const NO_LINKS: SiteLinker = {
-  artifact: () => null,
-  mold: () => null,
-  pipeline: () => null,
-  harness: () => null,
-  schema: () => null,
-  note: () => null,
-};
-
-/** A workspace file read the same way the directory scanner would read one. */
-function scanOne(
-  absolute: string,
-  relpath: string,
-  maxEmbedBytes = DEFAULT_SCAN_OPTIONS.maxEmbedBytes,
-): ScannedEntry | null {
-  if (!existsSync(absolute)) return null;
-  const stats = statSync(absolute);
-  if (!stats.isFile()) return null;
-  let text: string | null = null;
-  let skip: string | null = null;
-  if (stats.size > maxEmbedBytes) {
-    skip = `over the per-file embed cap (${(stats.size / 1024).toFixed(1)} KB)`;
-  } else {
-    try {
-      const buffer = readFileSync(absolute);
-      if (buffer.includes(0)) skip = "binary content";
-      else text = buffer.toString("utf8");
-    } catch (error) {
-      skip = `unreadable: ${(error as Error).message}`;
-    }
-  }
-  return {
-    basename: path.basename(absolute),
-    relpath,
-    type: "file",
-    size_bytes: stats.size,
-    mtime: stats.mtime.toISOString(),
-    sha256: stats.size <= DEFAULT_SCAN_OPTIONS.maxHashBytes ? sha256File(absolute) : null,
-    hash_skipped_reason:
-      stats.size <= DEFAULT_SCAN_OPTIONS.maxHashBytes
-        ? null
-        : `over the hash cap (${(stats.size / (1024 * 1024)).toFixed(1)} MB)`,
-    dir_summary: null,
-    text,
-    text_truncated: false,
-    text_skip_reason: skip,
-  };
 }
 
 export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): RunModel {
   const runDir = path.resolve(options.runDir);
   const repoRoot = path.resolve(options.repoRoot);
-  const now = options.now ?? (() => new Date());
   const linker = options.linker ?? NO_LINKS;
   const warnings: RunWarning[] = [];
 
@@ -152,12 +94,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   if (!assembly) throw new Error(`no assembled harness for pipeline: ${record.pipeline}`);
   const declared = index.declared.get(record.pipeline) ?? declaredOutputs(repoRoot, assembly);
 
-  const assemblyFile = assemblyPath(repoRoot, record.pipeline);
-  const currentSha = existsSync(assemblyFile)
-    ? // The same digest `test-pipeline` recorded, so the two agree or the difference is real.
-      sha256File(assemblyFile)
-    : null;
-  const assemblyMatches = assemblyMatchesCheckout(record.assembly_sha256, currentSha);
+  const assemblyMatches = assemblyMatchesCurrent(repoRoot, record.pipeline, record.assembly_sha256);
   if (assemblyMatches === false) {
     warnings.push({
       code: "assembly-drifted",
@@ -184,20 +121,6 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
 
   const phases: RunPhase[] = assembly.phases.map((phase) => {
     const ran = phaseRecords.get(phase.phase);
-    const skills = phaseSkills(phase);
-    const produces = new Set<string>();
-    const consumes = new Set<string>();
-    for (const skill of skills) {
-      const provenance = loadSkillProvenance(repoRoot, skill);
-      for (const out of provenance?.artifacts?.produces ?? []) {
-        if (typeof out?.id === "string") produces.add(out.id);
-      }
-      for (const input of provenance?.artifacts?.consumes ?? []) {
-        if (typeof input?.id === "string") consumes.add(input.id);
-      }
-    }
-    const moldProvenance = phase.skill ? loadSkillProvenance(repoRoot, phase.skill) : null;
-    const mold = moldProvenance?.mold;
 
     // A phase beyond `--through` was never selected, which is not the same as one that was
     // selected and did not run.
@@ -207,27 +130,14 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         ? "skipped"
         : "pending";
 
-    return {
-      n: phase.phase,
-      kind: phase.kind,
-      skill: phase.skill ?? null,
-      pattern: phase.pattern ?? null,
-      chain: Array.isArray(phase.chain) ? phase.chain : [],
+    return buildPhaseRow(repoRoot, phase, linker, {
       selected: null,
-      loop: phase.loop === true,
       iterations: null,
       status,
       status_source: "run-record",
       feedback_checked: null,
-      produces: [...produces].sort(),
-      consumes: [...consumes].sort(),
-      mold:
-        mold?.path && typeof mold.revision === "number"
-          ? { path: mold.path, revision: mold.revision, content_hash: mold.content_hash ?? "" }
-          : null,
-      site_href: phase.skill ? linker.mold(phase.skill) : null,
       commits: [],
-    };
+    });
   });
 
   for (const phase of chosen.phases) {
@@ -265,18 +175,8 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     const relpath =
       hit && phaseRecord ? `${phaseRecord.run_dir}/workspace/${hit.result.path}` : null;
     const absolute = relpath ? path.join(runDir, relpath) : null;
-    const entry = absolute ? scanOne(absolute, relpath!) : null;
+    const entry = absolute ? scanFile(absolute, relpath!) : null;
     const failed = hit?.result.status === "failed" || hit?.result.status === "error";
-
-    const presence: ArtifactPresence = failed
-      ? "failed"
-      : entry
-        ? "present"
-        : output.optional
-          ? "optional-absent"
-          : output.producing_phases.length && Math.min(...output.producing_phases) <= furthest
-            ? "missing"
-            : "not-yet-due";
 
     // The worker records validator output relative to the phase's own run directory.
     const validator = hit?.result.validator;
@@ -290,28 +190,12 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         subject: output.id,
       });
     }
-    return {
-      id: output.id,
-      declared_filename: output.default_filename,
-      kind: output.kind,
-      schema: output.schema ?? null,
-      schema_href: output.schema ? linker.schema(output.schema) : null,
-      description: output.description,
-      optional: output.optional,
-      source: output.source,
-      producing_phases: [...output.producing_phases].sort((a, b) => a - b),
-      producing_skills: [...output.producing_skills].sort(),
-      consuming_phases: [...output.consuming_phases].sort((a, b) => a - b),
+    return toRunArtifact(output, linker, {
+      entry,
+      presence: failed ? "failed" : resolvePresence(output, entry, furthest),
       written_by_phase: hit?.phase ?? null,
-      presence,
-      path: relpath,
-      size_bytes: entry?.size_bytes ?? null,
-      mtime: entry?.mtime ?? null,
-      sha256: hit?.result.sha256 ?? entry?.sha256 ?? null,
-      hash_skipped_reason: entry?.hash_skipped_reason ?? null,
-      variants: [],
       writes: hit ? [{ at: null, phase: hit.phase, iteration: null }] : [],
-      preview: entry ? derivePreview(output.id, output.kind, entry) : null,
+      variants: [],
       validation:
         validator || failed
           ? {
@@ -322,8 +206,9 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
               stderr: validator ? inPhase(validator.stderr_path) : null,
             }
           : null,
-      site_href: linker.artifact(output.id),
-    };
+      path: relpath,
+      sha256: hit?.result.sha256,
+    });
   });
 
   const evaluation: EvaluationModel = {
@@ -348,12 +233,8 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     duration_ms: record.duration_ms,
   };
 
-  const present = artifacts.filter((artifact) => artifact.presence === "present").length;
-  const missing = artifacts.filter((artifact) => artifact.presence === "missing").length;
-  const failedArtifacts = artifacts.filter((artifact) => artifact.presence === "failed").length;
-  const expected = artifacts.filter((artifact) => artifact.presence !== "not-yet-due").length;
-  const done = phases.filter((phase) => phase.status === "done").length;
-  const failedPhases = phases.filter((phase) => phase.status === "failed").length;
+  const counts = presenceCounts(artifacts);
+  const { present, missing, expected, failed: failedArtifacts } = counts;
 
   // The command rewrites run.json after every trial, so a run that died mid-trial leaves a record
   // with no finish time, or fewer trials than it asked for. Older records carry neither field.
@@ -375,13 +256,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       detail: `trial ${chosen.trial} of ${requested}`,
       anchor: "#phases",
     },
-    {
-      label: "phases",
-      state: failedPhases ? "error" : done === phases.length ? "ok" : "warn",
-      value: `${done}/${phases.length}`,
-      detail: `evaluated through phase ${record.through_phase}`,
-      anchor: "#phases",
-    },
+    phasesTile(phases, `evaluated through phase ${record.through_phase}`),
     {
       label: "artifacts",
       state: missing || failedArtifacts ? "error" : "ok",
@@ -419,13 +294,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   ];
 
   return {
-    run_manifest_schema_version: RUN_MANIFEST_SCHEMA_VERSION,
-    generated_at: now().toISOString(),
-    generator: {
-      command: "run-dashboard",
-      foundry_head: options.foundryHead ?? null,
-      package_version: options.packageVersion ?? "0.0.0",
-    },
+    ...modelHeader(options),
     run: {
       shape: "test-pipeline",
       provenance: "recorded",
@@ -451,17 +320,13 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     feedback: null,
     timeline: null,
     evaluation,
-    health: {
-      overall: worstState(tiles.map((tile) => tile.state) as HealthState[]),
-      tiles,
-      furthest_phase: furthest,
-      total_phases: phases.length,
-      artifacts_present: present,
-      artifacts_expected: expected,
-      artifacts_missing: missing,
-      files_attributed: present,
-      files_seen: present,
-    },
+    health: healthRollup(tiles, {
+      phases,
+      furthest,
+      counts,
+      filesAttributed: present,
+      filesSeen: present,
+    }),
     warnings,
   };
 }

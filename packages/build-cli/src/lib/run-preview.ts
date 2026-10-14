@@ -11,18 +11,13 @@
 
 import yaml from "js-yaml";
 
+import { asRecord } from "./narrow.js";
 import type { ArtifactPreview, DerivedView } from "./run-model.js";
 import type { ScannedEntry } from "./run-scan.js";
 
 /** Head and tail of a long log, with the elision stated rather than silent. */
 const LOG_HEAD_LINES = 40;
 const LOG_TAIL_LINES = 120;
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function scalar(value: unknown): string {
   if (value === null || value === undefined) return "";
