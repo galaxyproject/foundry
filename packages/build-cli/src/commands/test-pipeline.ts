@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -9,7 +9,6 @@ import {
   PI_TEST_AUTH_PROVIDER,
   runPiSkill,
   sha256Path,
-  type ArtifactResult,
   type ContainerNetworkPolicy,
   type ExpectedArtifact,
   type PiSkillRunRecord,
@@ -19,18 +18,33 @@ import {
   type SandboxMode,
 } from "@galaxy-foundry/gxwf-pi-harness";
 import {
+  assemblyPath,
+  CAST_SLUG,
   loadAssembly,
+  loadSkillProvenance,
+  skillDir,
   type AssemblyManifest,
   type AssemblyPhase,
-  type SkillProvenance,
 } from "../lib/cast-registry.js";
 import { foundryHead } from "../lib/foundry-head.js";
 import { readMarkdown } from "../lib/frontmatter.js";
+import {
+  PIPELINE_RUN_FILE,
+  type PipelinePhaseRunRecord,
+  type PipelineRunRecord,
+  type PipelineScenario,
+  type PipelineTrialRunRecord,
+  type PromotedArtifact,
+} from "../lib/pipeline-run-record.js";
 import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
 import { readOption } from "../lib/cli-args.js";
 import { createWorkerRuntimeArgScanner, defaultWorkerRunDir } from "../lib/worker-runtime-args.js";
 
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export type {
+  PipelinePhaseRunRecord,
+  PipelineRunRecord,
+  PipelineTrialRunRecord,
+} from "../lib/pipeline-run-record.js";
 
 export interface TestPipelineOptions {
   repoRoot: string;
@@ -51,88 +65,9 @@ export interface TestPipelineOptions {
   piTestAuthDir?: string;
 }
 
-interface ResolvedScenario {
-  name: string;
-  source_path: string;
-  fixture_path: string;
-  fixture_sha256: string;
-}
-
-interface PromotedArtifact {
-  id: string;
-  path: string;
-  sha256: string;
-  producer_phase: number;
-}
-
 interface PromotedArtifactState {
   record: PromotedArtifact;
   absolutePath: string;
-}
-
-export interface PipelinePhaseRunRecord {
-  phase: number;
-  skill: string;
-  status: RunStatus;
-  failure_kind?: "worker" | "artifact_promotion";
-  error?: string;
-  run_dir: string;
-  worker_run_id?: string;
-  worker_run_path?: string;
-  trace_path?: string;
-  stderr_path?: string;
-  declared_input_ids: string[];
-  resolved_inputs: PromotedArtifact[];
-  missing_input_ids: string[];
-  artifacts: ArtifactResult[];
-  usage?: PiSkillRunRecord["usage"];
-}
-
-export interface PipelineTrialRunRecord {
-  trial: number;
-  status: RunStatus;
-  phases: PipelinePhaseRunRecord[];
-}
-
-export interface PipelineRunRecord {
-  pipeline_run_schema_version: 1;
-  run_id: string;
-  status: RunStatus;
-  started_at: string;
-  finished_at: string;
-  duration_ms: number;
-  pipeline: string;
-  source_revision: number;
-  harness_name: string;
-  assembly_path: string;
-  assembly_sha256: string;
-  foundry_head: string | null;
-  through_phase: number;
-  scenario: ResolvedScenario;
-  engine: {
-    name: "pi";
-    provider: string;
-    model: string;
-    thinking?: PiThinkingLevel;
-  };
-  sandbox: {
-    mode: SandboxMode;
-    image?: string;
-    network_policy: ContainerNetworkPolicy | "host";
-    credential_env: string[];
-    credential_auth_store: "pi-test-auth" | "none";
-  };
-  trials: PipelineTrialRunRecord[];
-  usage: {
-    input_tokens: number;
-    output_tokens: number;
-    cache_read_tokens: number;
-    cache_write_tokens: number;
-    total_tokens: number;
-    cost: number;
-    turns: number;
-    tool_calls: number;
-  };
 }
 
 export interface PipelineRunnerDependencies {
@@ -259,14 +194,14 @@ function selectLinearPhases(manifest: AssemblyManifest, through?: string): Assem
     if (phase.cast_present !== true) {
       throw new Error(`phase ${phase.phase} does not have a cast skill`);
     }
-    if (!phase.skill || !SLUG.test(phase.skill)) {
+    if (!phase.skill || !CAST_SLUG.test(phase.skill)) {
       throw new Error(`phase ${phase.phase} has an invalid skill name`);
     }
   }
   return selected;
 }
 
-function resolveScenario(repoRoot: string, pipeline: string, name: string): ResolvedScenario {
+function resolveScenario(repoRoot: string, pipeline: string, name: string): PipelineScenario {
   const scenarioPath = path.join(repoRoot, "content", "pipelines", pipeline, "scenarios.md");
   if (!existsSync(scenarioPath)) throw new Error(`pipeline scenarios not found: ${scenarioPath}`);
   const matches = parseScenarioCases(readMarkdown(scenarioPath).body).filter(
@@ -288,13 +223,11 @@ function resolveScenario(repoRoot: string, pipeline: string, name: string): Reso
   };
 }
 
-function consumedArtifactIds(skillBundleDir: string): string[] {
-  const provenancePath = path.join(skillBundleDir, "_provenance.json");
-  if (!existsSync(provenancePath)) return [];
-  const manifest = JSON.parse(readFileSync(provenancePath, "utf8")) as SkillProvenance;
-  const consumes = manifest.artifacts?.consumes ?? [];
+function consumedArtifactIds(repoRoot: string, skill: string): string[] {
+  const consumes = loadSkillProvenance(repoRoot, skill)?.artifacts?.consumes ?? [];
   return consumes.map((artifact, index) => {
-    if (typeof artifact?.id !== "string" || !SLUG.test(artifact.id)) {
+    if (typeof artifact?.id !== "string" || !CAST_SLUG.test(artifact.id)) {
+      const provenancePath = path.join(skillDir(repoRoot, skill), "_provenance.json");
       throw new Error(`${provenancePath}: artifacts.consumes[${index}] has an invalid id`);
     }
     return artifact.id;
@@ -391,7 +324,7 @@ function combinedStatus(statuses: RunStatus[]): RunStatus {
 }
 
 function writePipelineRecord(runDir: string, record: PipelineRunRecord): void {
-  writeFileSync(path.join(runDir, "run.json"), `${JSON.stringify(record, null, 2)}\n`);
+  writeFileSync(path.join(runDir, PIPELINE_RUN_FILE), `${JSON.stringify(record, null, 2)}\n`);
 }
 
 export async function runLinearPipeline(
@@ -421,25 +354,18 @@ export async function runLinearPipeline(
   }
 
   const assembly = loadAssembly(repoRoot, options.pipeline);
-  const assemblyPath = path.join(
-    repoRoot,
-    "casts",
-    "claude",
-    "skills",
-    `pipeline-${options.pipeline}`,
-    "_assembly.json",
-  );
+  const assemblyFile = assemblyPath(repoRoot, options.pipeline);
   const phases = selectLinearPhases(assembly, options.through);
   const scenario = resolveScenario(repoRoot, options.pipeline, options.scenario);
   const fixturePath = path.resolve(repoRoot, scenario.fixture_path);
   const phasePlans = phases.map((phase) => {
-    const skillDir = path.join(repoRoot, "casts", "claude", "skills", phase.skill!);
-    if (!existsSync(skillDir)) throw new Error(`cast skill not found: ${skillDir}`);
+    const bundleDir = skillDir(repoRoot, phase.skill!);
+    if (!existsSync(bundleDir)) throw new Error(`cast skill not found: ${bundleDir}`);
     return {
       phase,
-      skillDir,
-      consumes: consumedArtifactIds(skillDir),
-      produces: expectedArtifactsFromSkill(skillDir),
+      skillDir: bundleDir,
+      consumes: consumedArtifactIds(repoRoot, phase.skill!),
+      produces: expectedArtifactsFromSkill(bundleDir),
     };
   });
   preflightInputBasenames(phasePlans, fixturePath);
@@ -447,15 +373,16 @@ export async function runLinearPipeline(
   const record: PipelineRunRecord = {
     pipeline_run_schema_version: 1,
     run_id: id(),
-    status: "passed",
+    // Rewritten after every trial; a reader must not mistake a dead run for a finished one.
+    status: "running",
     started_at: started.toISOString(),
-    finished_at: started.toISOString(),
+    finished_at: null,
     duration_ms: 0,
     pipeline: options.pipeline,
     source_revision: assembly.source_revision,
     harness_name: assembly.harness_name,
-    assembly_path: path.relative(repoRoot, assemblyPath).split(path.sep).join("/"),
-    assembly_sha256: sha256Path(assemblyPath),
+    assembly_path: path.relative(repoRoot, assemblyFile).split(path.sep).join("/"),
+    assembly_sha256: sha256Path(assemblyFile),
     foundry_head: foundryHead(repoRoot),
     through_phase: phases.at(-1)!.phase,
     scenario,
@@ -472,6 +399,7 @@ export async function runLinearPipeline(
       credential_env: [...options.credentialEnv].sort(),
       credential_auth_store: options.piTestAuthDir ? "pi-test-auth" : "none",
     },
+    trials_requested: options.trials,
     trials: [],
     usage: emptyUsage(),
   };
@@ -610,7 +538,6 @@ export async function runLinearPipeline(
       if (trial.status !== "passed") break;
     }
     record.trials.push(trial);
-    record.status = combinedStatus(record.trials.map((candidate) => candidate.status));
     writePipelineRecord(runDir, record);
   }
 

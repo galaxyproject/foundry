@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import process from "node:process";
 
 import type { PiSkillRunRecord, RunPiSkillOptions } from "@galaxy-foundry/gxwf-pi-harness";
 import { expect, test } from "vitest";
@@ -219,10 +220,62 @@ test("runs a linear prefix in fresh workers with declared artifact handoffs", as
   expect(written.foundry_head).toBeNull();
 });
 
+test("run.json reads as unfinished until the last trial ends", async () => {
+  const root = fixtureRepo();
+  const runDir = path.join(root, "runs", "in-progress");
+  const midRun: Record<string, unknown>[] = [];
+
+  const record = await runLinearPipeline(
+    {
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "1",
+      trials: 2,
+      runDir,
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    },
+    {
+      runSkill: async (options) => {
+        if (options.runDir.includes("trial-002")) {
+          midRun.push(JSON.parse(readFileSync(path.join(runDir, "run.json"), "utf8")));
+        }
+        const workspace = path.join(options.runDir, "workspace");
+        mkdirSync(workspace, { recursive: true });
+        for (const artifact of options.expectedArtifacts ?? []) {
+          writeFileSync(path.join(workspace, artifact.path), artifact.id);
+        }
+        return fakeRecord(options, "summarize");
+      },
+      now: () => new Date("2026-09-09T00:00:00.000Z"),
+    },
+  );
+
+  expect(midRun).toHaveLength(1);
+  expect(midRun[0]).toEqual(
+    expect.objectContaining({ status: "running", finished_at: null, trials_requested: 2 }),
+  );
+  expect(midRun[0]!.trials).toHaveLength(1);
+
+  expect(record.status).toBe("passed");
+  expect(record.trials_requested).toBe(2);
+  const written = JSON.parse(readFileSync(path.join(runDir, "run.json"), "utf8"));
+  expect(written.status).toBe("passed");
+  expect(written.finished_at).toBe("2026-09-09T00:00:00.000Z");
+  expect(written.trials).toHaveLength(2);
+});
+
 test("records the Foundry commit the run read, including from a linked worktree", async () => {
   const root = fixtureRepo();
+  // Isolated from the developer's own git config, so their hooks and signing never run here.
+  const env = { ...process.env, GIT_CONFIG_GLOBAL: "/dev/null", GIT_CONFIG_NOSYSTEM: "1" };
   const git = (cwd: string, ...args: string[]) =>
-    execFileSync("git", ["-C", cwd, ...args], { encoding: "utf8" }).trim();
+    execFileSync("git", ["-C", cwd, ...args], { encoding: "utf8", env }).trim();
   const identity = ["-c", "user.name=t", "-c", "user.email=t@example.org"];
   git(root, "init", "-q");
   git(root, "add", "-A");

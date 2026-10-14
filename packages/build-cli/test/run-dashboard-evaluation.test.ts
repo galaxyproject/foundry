@@ -1,4 +1,5 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +21,34 @@ let index: PipelineIndex;
 beforeAll(() => {
   index = buildPipelineIndex(REPO_ROOT);
 });
+
+/** Phase 1 of a trial, having written and validated its one declared artifact. */
+function summarizePhase(artifact: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    phase: 1,
+    skill: "summarize-nextflow",
+    status: "passed",
+    run_dir: "trial-001/phase-001-summarize-nextflow",
+    declared_input_ids: [],
+    missing_input_ids: [],
+    artifacts: [
+      {
+        id: "summary-nextflow",
+        path: "summary-nextflow.json",
+        status: "passed",
+        sha256: "a".repeat(64),
+        validator: {
+          bin: "foundry",
+          args: ["validate-artifact"],
+          exit_code: 0,
+          stdout_path: "validation/summary-nextflow.stdout",
+          stderr_path: "validation/summary-nextflow.stderr",
+        },
+        ...artifact,
+      },
+    ],
+  };
+}
 
 /** A `test-pipeline` run directory, laid out the way that command writes one. */
 function evaluationRun(record: Record<string, unknown> = {}): string {
@@ -50,35 +79,12 @@ function evaluationRun(record: Record<string, unknown> = {}): string {
         engine: { name: "pi", provider: "anthropic", model: "a-model", thinking: "medium" },
         sandbox: { mode: "container", network_policy: "none" },
         usage: { total_tokens: 91_000, cost: 1.25, turns: 42, tool_calls: 18 },
-        ...record,
         trials: [
           {
             trial: 1,
             status: "failed",
             phases: [
-              {
-                phase: 1,
-                skill: "summarize-nextflow",
-                status: "passed",
-                run_dir: "trial-001/phase-001-summarize-nextflow",
-                declared_input_ids: [],
-                missing_input_ids: [],
-                artifacts: [
-                  {
-                    id: "summary-nextflow",
-                    path: "summary-nextflow.json",
-                    status: "passed",
-                    sha256: "a".repeat(64),
-                    validator: {
-                      bin: "foundry",
-                      args: ["validate-artifact"],
-                      exit_code: 0,
-                      stdout_path: "validation/summary-nextflow.stdout",
-                      stderr_path: "validation/summary-nextflow.stderr",
-                    },
-                  },
-                ],
-              },
+              summarizePhase(),
               {
                 phase: 2,
                 skill: "nextflow-summary-to-galaxy-reference-data",
@@ -93,6 +99,7 @@ function evaluationRun(record: Record<string, unknown> = {}): string {
             ],
           },
         ],
+        ...record,
       },
       null,
       2,
@@ -143,6 +150,118 @@ describe("the evaluation run shape", () => {
     expect(summary.path).toContain("trial-001/phase-001-summarize-nextflow/workspace");
   });
 
+  it("reads a record whose run has not finished as running, not complete", () => {
+    const options = { repoRoot: REPO_ROOT, pipelineIndex: index, now: FIXED_CLOCK };
+    const passedTrial = { trial: 1, status: "passed", phases: [summarizePhase()] };
+
+    // Died during trial 2 of 3: the last write was after trial 1.
+    const interrupted = runModelFromTestPipeline({
+      ...options,
+      runDir: evaluationRun({
+        status: "running",
+        finished_at: null,
+        trials_requested: 3,
+        trials: [passedTrial],
+      }),
+    });
+    expect(interrupted.run.status).toBe("running");
+    expect(interrupted.run.finished_at).toBeNull();
+    expect(interrupted.health.tiles.find((tile) => tile.label === "run")).toEqual(
+      expect.objectContaining({ state: "warn", detail: "trial 1 of 3" }),
+    );
+    expect(interrupted.warnings.map((warning) => warning.code)).toContain("run-unfinished");
+
+    // A terminal status with trials still owed is not a finished run either.
+    const shortOfTrials = runModelFromTestPipeline({
+      ...options,
+      runDir: evaluationRun({ status: "passed", trials_requested: 3, trials: [passedTrial] }),
+    });
+    expect(shortOfTrials.run.status).toBe("running");
+
+    // Records written before `trials_requested` existed read as they always did.
+    const legacy = runModelFromTestPipeline({
+      ...options,
+      runDir: evaluationRun({ status: "passed", trials: [passedTrial] }),
+    });
+    expect(legacy.run.status).toBe("complete");
+    expect(legacy.warnings.map((warning) => warning.code)).not.toContain("run-unfinished");
+  });
+
+  it("surfaces why a phase failed", () => {
+    const model = runModelFromTestPipeline({
+      runDir: evaluationRun(),
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    const failed = model.warnings.filter((warning) => warning.code === "phase-failed");
+    expect(failed).toEqual([
+      {
+        code: "phase-failed",
+        message:
+          "phase 2 (nextflow-summary-to-galaxy-reference-data) failed (worker): the worker timed out",
+        subject: "nextflow-summary-to-galaxy-reference-data",
+      },
+    ]);
+  });
+
+  it("points validator output at the phase that ran it", () => {
+    const model = runModelFromTestPipeline({
+      runDir: evaluationRun(),
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    const summary = model.artifacts.find((artifact) => artifact.id === "summary-nextflow")!;
+    expect(summary.validation).toEqual({
+      validator: "foundry",
+      status: "passed",
+      exit_code: 0,
+      stdout: "trial-001/phase-001-summarize-nextflow/validation/summary-nextflow.stdout",
+      stderr: "trial-001/phase-001-summarize-nextflow/validation/summary-nextflow.stderr",
+    });
+  });
+
+  it("does not call an artifact that failed validation present", () => {
+    const model = runModelFromTestPipeline({
+      runDir: evaluationRun({
+        trials: [
+          {
+            trial: 1,
+            status: "failed",
+            phases: [
+              summarizePhase({
+                status: "failed",
+                validator: {
+                  bin: "foundry",
+                  args: ["validate-artifact"],
+                  exit_code: 1,
+                  stdout_path: "validation/summary-nextflow.stdout",
+                  stderr_path: "validation/summary-nextflow.stderr",
+                },
+              }),
+            ],
+          },
+        ],
+      }),
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    const summary = model.artifacts.find((artifact) => artifact.id === "summary-nextflow")!;
+    expect(summary.presence).toBe("failed");
+    expect(summary.size_bytes).toBeGreaterThan(0);
+    expect(summary.validation).toEqual(expect.objectContaining({ status: "failed", exit_code: 1 }));
+    expect(model.warnings).toContainEqual({
+      code: "artifact-failed",
+      message:
+        "summary-nextflow from phase 1 failed (validator exit 1); see trial-001/phase-001-summarize-nextflow/validation/summary-nextflow.stderr",
+      subject: "summary-nextflow",
+    });
+    expect(model.health.artifacts_present).toBe(0);
+    expect(model.health.tiles.find((tile) => tile.label === "artifacts")?.state).toBe("error");
+  });
+
   it("reports a declared input no earlier phase promoted", () => {
     const model = runModelFromTestPipeline({
       runDir: evaluationRun(),
@@ -151,6 +270,31 @@ describe("the evaluation run shape", () => {
       now: FIXED_CLOCK,
     });
     expect(model.warnings.map((warning) => warning.code)).toContain("missing-declared-input");
+  });
+
+  it("judges assembly drift the way a harness run's record is judged", () => {
+    const options = { repoRoot: REPO_ROOT, pipelineIndex: index, now: FIXED_CLOCK };
+    const current = createHash("sha256")
+      .update(
+        readFileSync(
+          path.join(REPO_ROOT, "casts/claude/skills/pipeline-nextflow-to-galaxy/_assembly.json"),
+        ),
+      )
+      .digest("hex");
+    const drift = (record: Record<string, unknown>) => {
+      const model = runModelFromTestPipeline({ ...options, runDir: evaluationRun(record) });
+      return {
+        matches: model.run.assembly_matches_checkout,
+        warned: model.warnings.some((warning) => warning.code === "assembly-drifted"),
+      };
+    };
+
+    expect(drift({ assembly_sha256: `sha256:${current.toUpperCase()}` })).toEqual({
+      matches: true,
+      warned: false,
+    });
+    expect(drift({ assembly_sha256: "f".repeat(64) })).toEqual({ matches: false, warned: true });
+    expect(drift({ assembly_sha256: null })).toEqual({ matches: null, warned: false });
   });
 
   it("pins the run to the Foundry commit it recorded, not the one rendering it", () => {

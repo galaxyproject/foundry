@@ -10,6 +10,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 import type { RuntimeArtifactRegistry } from "@galaxy-foundry/gxwf-foundry-note-schema";
+import type { ArtifactResult } from "@galaxy-foundry/gxwf-pi-harness";
 
 import {
   assemblyPath,
@@ -17,10 +18,11 @@ import {
   loadSkillProvenance,
   phaseSkills,
 } from "./cast-registry.js";
+import { PIPELINE_RUN_FILE, type PipelineRunRecord } from "./pipeline-run-record.js";
 import { buildPipelineIndex, type PipelineIndex } from "./run-reconstruct.js";
 import { derivePreview } from "./run-preview.js";
-import { readRunRecord } from "./run-record.js";
-import { sha256File, type ScannedEntry } from "./run-scan.js";
+import { assemblyMatchesCheckout, readRunRecord } from "./run-record.js";
+import { DEFAULT_SCAN_OPTIONS, sha256File, type ScannedEntry } from "./run-scan.js";
 import {
   RUN_MANIFEST_SCHEMA_VERSION,
   worstState,
@@ -37,62 +39,6 @@ import {
 } from "./run-model.js";
 import type { SiteLinker } from "./run-manifest.js";
 
-/** The subset of `PipelineRunRecord` this reader needs, kept structural to avoid a cycle. */
-interface PipelineArtifactResult {
-  id: string;
-  path: string;
-  status: string;
-  sha256?: string;
-  validator?: {
-    bin: string;
-    args: string[];
-    exit_code: number | null;
-    stdout_path: string;
-    stderr_path: string;
-    error?: string;
-  };
-}
-
-interface PipelinePhaseRecord {
-  phase: number;
-  skill: string;
-  status: string;
-  failure_kind?: string;
-  error?: string;
-  run_dir: string;
-  declared_input_ids?: string[];
-  missing_input_ids?: string[];
-  artifacts?: PipelineArtifactResult[];
-}
-
-interface PipelineTrialRecord {
-  trial: number;
-  status: string;
-  phases: PipelinePhaseRecord[];
-}
-
-interface PipelineRecord {
-  pipeline_run_schema_version: number;
-  run_id: string;
-  status: string;
-  started_at: string;
-  finished_at: string;
-  duration_ms: number;
-  pipeline: string;
-  source_revision: number;
-  harness_name: string;
-  assembly_sha256: string;
-  foundry_head?: string | null;
-  through_phase: number;
-  scenario?: { name: string };
-  engine?: { name: string; provider: string; model: string; thinking?: string };
-  sandbox?: { mode: string; network_policy?: string };
-  trials: PipelineTrialRecord[];
-  usage?: Record<string, number>;
-}
-
-export const PIPELINE_RUN_FILE = "run.json";
-
 /**
  * Whether a directory is an evaluation run rather than a harness run.
  *
@@ -104,7 +50,7 @@ export function isTestPipelineRunDir(dir: string): boolean {
   if (!existsSync(file)) return false;
   if (readRunRecord(dir).record) return false;
   try {
-    const parsed = JSON.parse(readFileSync(file, "utf8")) as Partial<PipelineRecord>;
+    const parsed = JSON.parse(readFileSync(file, "utf8")) as Partial<PipelineRunRecord>;
     return typeof parsed.pipeline_run_schema_version === "number";
   } catch {
     return false;
@@ -112,6 +58,7 @@ export function isTestPipelineRunDir(dir: string): boolean {
 }
 
 const RUN_STATUS: Record<string, RunStatus> = {
+  running: "running",
   passed: "complete",
   failed: "failed",
   error: "failed",
@@ -153,7 +100,7 @@ const NO_LINKS: SiteLinker = {
 function scanOne(
   absolute: string,
   relpath: string,
-  maxEmbedBytes = 256 * 1024,
+  maxEmbedBytes = DEFAULT_SCAN_OPTIONS.maxEmbedBytes,
 ): ScannedEntry | null {
   if (!existsSync(absolute)) return null;
   const stats = statSync(absolute);
@@ -177,8 +124,11 @@ function scanOne(
     type: "file",
     size_bytes: stats.size,
     mtime: stats.mtime.toISOString(),
-    sha256: stats.size <= 8 * 1024 * 1024 ? sha256File(absolute) : null,
-    hash_skipped_reason: null,
+    sha256: stats.size <= DEFAULT_SCAN_OPTIONS.maxHashBytes ? sha256File(absolute) : null,
+    hash_skipped_reason:
+      stats.size <= DEFAULT_SCAN_OPTIONS.maxHashBytes
+        ? null
+        : `over the hash cap (${(stats.size / (1024 * 1024)).toFixed(1)} MB)`,
     dir_summary: null,
     text,
     text_truncated: false,
@@ -195,7 +145,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
 
   const record = JSON.parse(
     readFileSync(path.join(runDir, PIPELINE_RUN_FILE), "utf8"),
-  ) as PipelineRecord;
+  ) as PipelineRunRecord;
 
   const index = options.pipelineIndex ?? buildPipelineIndex(repoRoot, options.runtimeArtifacts);
   const assembly = index.assemblies.get(record.pipeline);
@@ -207,8 +157,8 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     ? // The same digest `test-pipeline` recorded, so the two agree or the difference is real.
       sha256File(assemblyFile)
     : null;
-  const assemblyMatches = record.assembly_sha256 === currentSha;
-  if (!assemblyMatches) {
+  const assemblyMatches = assemblyMatchesCheckout(record.assembly_sha256, currentSha);
+  if (assemblyMatches === false) {
     warnings.push({
       code: "assembly-drifted",
       message:
@@ -281,6 +231,14 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   });
 
   for (const phase of chosen.phases) {
+    if (phase.status !== "passed") {
+      const kind = phase.failure_kind ? ` (${phase.failure_kind})` : "";
+      warnings.push({
+        code: "phase-failed",
+        message: `phase ${phase.phase} (${phase.skill}) ${phase.status}${kind}: ${phase.error ?? "no error recorded"}`,
+        subject: phase.skill,
+      });
+    }
     for (const missing of phase.missing_input_ids ?? []) {
       warnings.push({
         code: "missing-declared-input",
@@ -292,7 +250,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
 
   // Each phase writes into its own workspace, so the same artifact id can appear more than once
   // across a run. The latest phase that produced it is the one the run carried forward.
-  const produced = new Map<string, { phase: number; result: PipelineArtifactResult }>();
+  const produced = new Map<string, { phase: number; result: ArtifactResult }>();
   for (const phase of chosen.phases) {
     for (const artifact of phase.artifacts ?? []) {
       produced.set(artifact.id, { phase: phase.phase, result: artifact });
@@ -308,16 +266,30 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       hit && phaseRecord ? `${phaseRecord.run_dir}/workspace/${hit.result.path}` : null;
     const absolute = relpath ? path.join(runDir, relpath) : null;
     const entry = absolute ? scanOne(absolute, relpath!) : null;
+    const failed = hit?.result.status === "failed" || hit?.result.status === "error";
 
-    const presence: ArtifactPresence = entry
-      ? "present"
-      : output.optional
-        ? "optional-absent"
-        : output.producing_phases.length && Math.min(...output.producing_phases) <= furthest
-          ? "missing"
-          : "not-yet-due";
+    const presence: ArtifactPresence = failed
+      ? "failed"
+      : entry
+        ? "present"
+        : output.optional
+          ? "optional-absent"
+          : output.producing_phases.length && Math.min(...output.producing_phases) <= furthest
+            ? "missing"
+            : "not-yet-due";
 
+    // The worker records validator output relative to the phase's own run directory.
     const validator = hit?.result.validator;
+    const inPhase = (file: string) => (phaseRecord ? `${phaseRecord.run_dir}/${file}` : file);
+    if (failed) {
+      const exit = validator ? `validator exit ${validator.exit_code ?? "none"}` : "no validator";
+      const evidence = validator ? `; see ${inPhase(validator.stderr_path)}` : "";
+      warnings.push({
+        code: "artifact-failed",
+        message: `${output.id} from phase ${hit!.phase} ${hit!.result.status} (${exit})${evidence}`,
+        subject: output.id,
+      });
+    }
     return {
       id: output.id,
       declared_filename: output.default_filename,
@@ -336,19 +308,20 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       size_bytes: entry?.size_bytes ?? null,
       mtime: entry?.mtime ?? null,
       sha256: hit?.result.sha256 ?? entry?.sha256 ?? null,
-      hash_skipped_reason: null,
+      hash_skipped_reason: entry?.hash_skipped_reason ?? null,
       variants: [],
       writes: hit ? [{ at: null, phase: hit.phase, iteration: null }] : [],
       preview: entry ? derivePreview(output.id, output.kind, entry) : null,
-      validation: validator
-        ? {
-            validator: validator.bin,
-            status: hit!.result.status,
-            exit_code: validator.exit_code,
-            stdout: validator.stdout_path,
-            stderr: validator.stderr_path,
-          }
-        : null,
+      validation:
+        validator || failed
+          ? {
+              validator: validator?.bin ?? null,
+              status: hit!.result.status,
+              exit_code: validator?.exit_code ?? null,
+              stdout: validator ? inPhase(validator.stdout_path) : null,
+              stderr: validator ? inPhase(validator.stderr_path) : null,
+            }
+          : null,
       site_href: linker.artifact(output.id),
     };
   });
@@ -377,33 +350,49 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
 
   const present = artifacts.filter((artifact) => artifact.presence === "present").length;
   const missing = artifacts.filter((artifact) => artifact.presence === "missing").length;
+  const failedArtifacts = artifacts.filter((artifact) => artifact.presence === "failed").length;
   const expected = artifacts.filter((artifact) => artifact.presence !== "not-yet-due").length;
   const done = phases.filter((phase) => phase.status === "done").length;
-  const failed = phases.filter((phase) => phase.status === "failed").length;
-  const status = RUN_STATUS[record.status] ?? "unknown";
+  const failedPhases = phases.filter((phase) => phase.status === "failed").length;
+
+  // The command rewrites run.json after every trial, so a run that died mid-trial leaves a record
+  // with no finish time, or fewer trials than it asked for. Older records carry neither field.
+  const requested = record.trials_requested ?? trials.length;
+  const unfinished = record.finished_at === null || trials.length < requested;
+  const status = unfinished ? "running" : (RUN_STATUS[record.status] ?? "unknown");
+  if (unfinished) {
+    warnings.push({
+      code: "run-unfinished",
+      message: `${trials.length} of ${requested} trial(s) recorded${record.finished_at === null ? " and no finish time" : ""}; the run is still going or was interrupted`,
+    });
+  }
 
   const tiles: HealthTile[] = [
     {
       label: "run",
-      state: status === "complete" ? "ok" : "error",
+      state: status === "complete" ? "ok" : status === "running" ? "warn" : "error",
       value: record.status,
-      detail: `trial ${chosen.trial} of ${trials.length}`,
+      detail: `trial ${chosen.trial} of ${requested}`,
       anchor: "#phases",
     },
     {
       label: "phases",
-      state: failed ? "error" : done === phases.length ? "ok" : "warn",
+      state: failedPhases ? "error" : done === phases.length ? "ok" : "warn",
       value: `${done}/${phases.length}`,
       detail: `evaluated through phase ${record.through_phase}`,
       anchor: "#phases",
     },
     {
       label: "artifacts",
-      state: missing ? "error" : "ok",
+      state: missing || failedArtifacts ? "error" : "ok",
       value: `${present}/${expected}`,
-      detail: missing
-        ? `${missing} declared artifact(s) not produced`
-        : "every declared artifact was produced",
+      detail:
+        [
+          missing ? `${missing} declared artifact(s) not produced` : "",
+          failedArtifacts ? `${failedArtifacts} failed their check` : "",
+        ]
+          .filter(Boolean)
+          .join("; ") || "every declared artifact was produced",
       anchor: "#artifacts",
     },
     {
