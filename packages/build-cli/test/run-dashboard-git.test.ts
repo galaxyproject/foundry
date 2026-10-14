@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseCommitSubject, parseGitLog } from "../src/lib/run-git.js";
+import { parseCommitSubject, parseGitLog, readRunTimeline } from "../src/lib/run-git.js";
 
 // These subjects are copied verbatim from a real checkpointed run. The harness documents
 // `phase <n>: <skill>` and `phase <n> step <k>: <skill>`, and none of the interesting commits in
@@ -45,6 +45,15 @@ describe("parseCommitSubject", () => {
 
   it("accepts phase zero", () => {
     expect(parseCommitSubject(REAL_SUBJECTS[4]!).phase).toBe(0);
+  });
+
+  it("flags a failure the subject announces, not one it merely mentions", () => {
+    expect(parseCommitSubject("phase 12: run-workflow-test (1 of 2 cases FAILED)").failed).toBe(
+      true,
+    );
+    expect(parseCommitSubject("phase 3: failed to resolve the wrapper").failed).toBe(true);
+    expect(parseCommitSubject("fix failed test").failed).toBe(false);
+    expect(parseCommitSubject("phase 9: rerun after the failure in phase 8").failed).toBe(false);
   });
 });
 
@@ -94,5 +103,51 @@ describe("parseGitLog", () => {
     const commits = parseGitLog(log);
     expect(commits).toHaveLength(1);
     expect(commits[0]!.phase).toBe(2);
+  });
+});
+
+describe("readRunTimeline size series", () => {
+  const FIELD = String.fromCharCode(31);
+  const RECORD = String.fromCharCode(30);
+  const LOG = [
+    `${RECORD}ccc3333${FIELD}2026-09-18T10:03:00Z${FIELD}phase 7 step 2: advance-galaxy-draft-step\n`,
+    `${RECORD}bbb2222${FIELD}2026-09-18T10:02:00Z${FIELD}phase 7 step 1: advance-galaxy-draft-step\n`,
+    `${RECORD}aaa1111${FIELD}2026-09-18T10:01:00Z${FIELD}phase 1: summarize-nextflow\n`,
+  ].join("");
+  const SIZES: Record<string, string> = { bbb2222: "120", ccc3333: "345" };
+
+  it("reads each commit's blob size from ls-tree, oldest first, skipping commits without it", () => {
+    const calls: string[][] = [];
+    const timeline = readRunTimeline("/unused", {
+      tracked: [{ artifact_id: "galaxy-workflow-draft", filename: "draft.gxwf.yml" }],
+      exec: (args) => {
+        calls.push(args);
+        if (args[0] === "log") return LOG;
+        const size = SIZES[args[2]!];
+        return size ? `100644 blob 0123abcd ${size.padStart(7)}\tdraft.gxwf.yml\n` : "";
+      },
+    })!;
+    expect(calls.filter((args) => args[0] === "ls-tree")).toHaveLength(3);
+    expect(timeline.size_series).toEqual([
+      {
+        artifact_id: "galaxy-workflow-draft",
+        filename: "draft.gxwf.yml",
+        points: [
+          { sha: "bbb2222", short: "bbb2222", date: "2026-09-18T10:02:00Z", bytes: 120 },
+          { sha: "ccc3333", short: "ccc3333", date: "2026-09-18T10:03:00Z", bytes: 345 },
+        ],
+      },
+    ]);
+  });
+
+  it("drops a series with a single point, which shows no growth", () => {
+    const timeline = readRunTimeline("/unused", {
+      tracked: [{ artifact_id: "galaxy-workflow-draft", filename: "draft.gxwf.yml" }],
+      exec: (args) => {
+        if (args[0] === "log") return LOG;
+        return args[2] === "ccc3333" ? "100644 blob 0123abcd 345\tdraft.gxwf.yml\n" : "";
+      },
+    })!;
+    expect(timeline.size_series).toEqual([]);
   });
 });

@@ -7,17 +7,17 @@
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import path from "node:path";
 
 import type { RuntimeArtifactRegistry } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
-import { declaredOutputs, type AssemblyManifest, type DeclaredOutput } from "./cast-registry.js";
+import { declaredOutputs, type DeclaredOutput } from "./cast-registry.js";
 import { assemblyPath, loadSkillProvenance, phaseSkills } from "./cast-registry.js";
 import { classifyEntries } from "./run-classify.js";
 import {
   FEEDBACK_LEDGER_FILENAME,
   readFeedbackLedger,
-  readFeedbackLedgerPhases,
   readOpenRequirements,
 } from "./run-ledgers.js";
 import { readRunTimeline, type GitExec } from "./run-git.js";
@@ -36,7 +36,13 @@ import {
   type RunWarning,
   type UnmappedFile,
 } from "./run-model.js";
-import { readRunRecord, RUN_RECORD_FILENAME, type RunRecord } from "./run-record.js";
+import {
+  asRunStatus,
+  assemblyMatchesCheckout,
+  readRunRecord,
+  RUN_RECORD_FILENAME,
+  type RunRecord,
+} from "./run-record.js";
 import { derivePreview, unmappedPreview } from "./run-preview.js";
 import { scanRunDir, type ScanOptions, type ScannedEntry } from "./run-scan.js";
 import {
@@ -72,11 +78,20 @@ export interface BuildRunModelOptions {
 }
 
 export class RunRecordMissingError extends Error {
-  constructor(runDir: string) {
+  constructor(runDir: string, filename = RUN_RECORD_FILENAME) {
     super(
-      `no ${RUN_RECORD_FILENAME} in ${runDir}. This run predates the run record, so its pipeline, phase order, loop counts and branch choices are not on disk. Pass --reconstruct to read it degraded, optionally with --pipeline <slug>.`,
+      `no ${filename} in ${runDir}. This run predates the run record, so its pipeline, phase order, loop counts and branch choices are not on disk. Pass --reconstruct to read it degraded, optionally with --pipeline <slug>.`,
     );
     this.name = "RunRecordMissingError";
+  }
+}
+
+/** A record is on disk but cannot be parsed — most often one a crashed run left half-written. */
+export class RunRecordUnreadableError extends RunRecordMissingError {
+  constructor(runDir: string, reason: string) {
+    super(runDir);
+    this.message = `${reason} (in ${runDir}). Repair it, or pass --reconstruct to read the run degraded, optionally with --pipeline <slug>.`;
+    this.name = "RunRecordUnreadableError";
   }
 }
 
@@ -116,15 +131,40 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
 
   // ---- sources ------------------------------------------------------------------------------
 
-  const recordLoad = readRunRecord(runDir);
+  const registered = (id: string): string | undefined =>
+    options.runtimeArtifacts?.artifacts.get(id)?.default_filename;
+  const recordFilename = registered("foundry-run-manifest") ?? RUN_RECORD_FILENAME;
+  const ledgerFilename = registered("foundry-feedback-ledger") ?? FEEDBACK_LEDGER_FILENAME;
+
+  const recordLoad = readRunRecord(runDir, recordFilename);
   warnings.push(...recordLoad.warnings);
   const record: RunRecord | null = recordLoad.record;
-  if (!record && !options.reconstruct) throw new RunRecordMissingError(runDir);
+  if (!record && !options.reconstruct) {
+    // A record that exists and cannot be read is not a run that predates the record; saying so
+    // would hide the one failure most worth seeing.
+    if (recordLoad.path !== null) {
+      throw new RunRecordUnreadableError(
+        runDir,
+        recordLoad.warnings[0]?.message ?? `${recordFilename} cannot be read`,
+      );
+    }
+    throw new RunRecordMissingError(runDir, recordFilename);
+  }
+  if (record && !record.pipeline) {
+    warnings.push({
+      code: "run-record-no-pipeline",
+      message: `${recordFilename} names no pipeline, so the pipeline below was worked out from the files`,
+      subject: recordFilename,
+    });
+  }
 
   const scan = scanRunDir(runDir, options.scan);
-  const ledgerPhases = readFeedbackLedgerPhases(runDir);
-  const feedback = readFeedbackLedger(runDir);
-  const openRequirements = readOpenRequirements(runDir);
+  const feedbackLoad = readFeedbackLedger(runDir, ledgerFilename);
+  const feedback = feedbackLoad.ledger;
+  const ledgerPhases = feedbackLoad.phases;
+  const openRequirementsLoad = readOpenRequirements(runDir);
+  const openRequirements = openRequirementsLoad.ledger;
+  warnings.push(...feedbackLoad.warnings, ...openRequirementsLoad.warnings);
 
   const index = options.pipelineIndex ?? buildPipelineIndex(repoRoot, options.runtimeArtifacts);
   const observed = scan.entries.filter((e) => e.type === "file").map((e) => e.basename);
@@ -133,6 +173,7 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
     ledgerPipeline: feedback?.run.pipeline,
     flagPipeline: options.pipeline,
   });
+  warnings.push(...detection.warnings);
   if (detection.conflict) {
     warnings.push({
       code: "pipeline-conflict",
@@ -151,9 +192,8 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
   const currentAssemblySha = existsSync(assemblyFile)
     ? sha256Text(readFileSync(assemblyFile, "utf8"))
     : null;
-  const recordedSha = record?.assembly_sha256 ?? null;
-  const assemblyMatches = recordedSha === null || recordedSha === currentAssemblySha;
-  if (!assemblyMatches) {
+  const assemblyMatches = assemblyMatchesCheckout(record?.assembly_sha256, currentAssemblySha);
+  if (assemblyMatches === false) {
     warnings.push({
       code: "assembly-drifted",
       message:
@@ -184,14 +224,26 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
   const recordedPhases = new Map(record?.phases.map((phase) => [phase.n, phase]) ?? []);
   const ledgerByPhase = new Map(ledgerPhases.map((row) => [row.n, row]));
 
+  const reached = (status: PhaseStatus | null): boolean =>
+    status !== null && status !== "pending" && status !== "unknown";
   const furthestRecorded = Math.max(
     0,
     ...[...recordedPhases.values()]
-      .filter((phase) => phase.status !== "pending")
+      .filter((phase) => reached(phase.status))
       .map((phase) => phase.n),
-    ...ledgerPhases.filter((row) => row.status && row.status !== "pending").map((row) => row.n),
+    ...ledgerPhases.filter((row) => reached(row.status)).map((row) => row.n),
     ...commitPhases,
   );
+
+  const roster = new Set(assembly.phases.map((phase) => phase.phase));
+  for (const phase of record?.phases ?? []) {
+    if (roster.has(phase.n)) continue;
+    warnings.push({
+      code: "run-record-phase-not-in-roster",
+      message: `${recordFilename} records phase ${phase.n}, which ${detection.pipeline} does not have`,
+      subject: String(phase.n),
+    });
+  }
 
   // Classification runs before the phase loop because a run with no record, no ledger and no
   // checkpoint history has only one source left for "did this phase run": whether its declared
@@ -240,7 +292,7 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
     const resolved: { status: PhaseStatus; source: PhaseStatusSource } = recorded
       ? { status: recorded.status, source: "run-record" }
       : ledger?.status
-        ? { status: ledger.status as PhaseStatus, source: "feedback-ledger" }
+        ? { status: ledger.status, source: "feedback-ledger" }
         : timeline
           ? {
               status: phaseStatusFromCommits(phase.phase, commitPhases, furthestRecorded),
@@ -249,12 +301,33 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
           : inferredFromArtifacts(phase.phase);
     const { status, source } = resolved;
 
-    // A record that says "running" for a phase the history shows committed is the drift the
-    // reviewer of this design predicted; report it rather than choosing a side.
-    if (recorded && timeline && recorded.status === "running" && commitPhases.has(phase.phase)) {
+    // The sources can disagree, and each disagreement is reported rather than settled silently:
+    // the record is preferred, but a reader should see that something else said otherwise.
+    if (
+      recorded &&
+      timeline &&
+      (recorded.status === "running" || recorded.status === "pending") &&
+      commitPhases.has(phase.phase)
+    ) {
       warnings.push({
         code: "phase-status-disagreement",
-        message: `phase ${phase.phase} is '${recorded.status}' in ${RUN_RECORD_FILENAME} but has a checkpoint commit`,
+        message: `phase ${phase.phase} is '${recorded.status}' in ${recordFilename} but has a checkpoint commit`,
+        subject: String(phase.phase),
+      });
+    }
+    if (recorded && ledger?.status && ledger.status !== recorded.status) {
+      warnings.push({
+        code: "phase-status-sources-disagree",
+        message: `phase ${phase.phase} is '${recorded.status}' in ${recordFilename} but '${ledger.status}' in ${ledgerFilename}`,
+        subject: String(phase.phase),
+      });
+    }
+    const assembled = phase.skill ?? phase.pattern ?? null;
+    const claimed = recorded?.skill ?? recorded?.pattern ?? null;
+    if (assembled && claimed && assembled !== claimed) {
+      warnings.push({
+        code: "run-record-skill-mismatch",
+        message: `phase ${phase.phase} is ${claimed} in ${recordFilename} but ${assembled} in today's assembly`,
         subject: String(phase.phase),
       });
     }
@@ -331,9 +404,17 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
     variantsById.set(variant.parentArtifactId, list);
   }
 
+  const declaredIds = new Set(declared.map((output) => output.id));
   const writesById = new Map<string, RunArtifact["writes"]>();
   for (const phase of record?.phases ?? []) {
     for (const written of phase.artifacts) {
+      if (!declaredIds.has(written.id) && !writesById.has(written.id)) {
+        warnings.push({
+          code: "run-record-artifact-undeclared",
+          message: `phase ${phase.n} records writing '${written.id}', which no phase of ${detection.pipeline} declares`,
+          subject: written.id,
+        });
+      }
       const list = writesById.get(written.id) ?? [];
       list.push({ at: written.at, phase: phase.n, iteration: written.iteration });
       writesById.set(written.id, list);
@@ -442,12 +523,11 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
   const filesSeen = scan.entries.filter((entry) => entry.type === "file").length;
   const filesAttributed = classification.declared.size + classification.variants.length;
 
-  const status: RunStatus =
-    record?.status ?? (feedback?.run.status as RunStatus | undefined) ?? "unknown";
+  const status: RunStatus = record?.status ?? asRunStatus(feedback?.run.status);
 
   const options_observed: string[] = [];
   if (timeline) options_observed.push("checkpoint");
-  if (existsSync(path.join(runDir, FEEDBACK_LEDGER_FILENAME))) options_observed.push("feedback");
+  if (feedback) options_observed.push("feedback");
 
   const health = buildHealth({
     status,
@@ -467,10 +547,11 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
     record?.started_at ??
     (timeline ? (timeline.commits[timeline.commits.length - 1]?.date ?? null) : null) ??
     minMtime(scan.entries);
-  const finished =
-    record?.finished_at ??
-    (timeline ? (timeline.commits[0]?.date ?? null) : null) ??
-    maxMtime(scan.entries);
+  // A record with no `finished_at` is a run that has not finished; only a run with no record at
+  // all borrows the newest commit or file time.
+  const finished = record
+    ? record.finished_at
+    : ((timeline ? (timeline.commits[0]?.date ?? null) : null) ?? maxMtime(scan.entries));
 
   return {
     run_manifest_schema_version: RUN_MANIFEST_SCHEMA_VERSION,
@@ -488,7 +569,7 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
       pipeline: detection.pipeline,
       pipeline_source_revision: record?.source_revision ?? assembly.source_revision,
       harness_name: record?.harness_name ?? assembly.harness_name,
-      assembly_sha256: recordedSha ?? currentAssemblySha,
+      assembly_sha256: record?.assembly_sha256 ?? null,
       assembly_matches_checkout: assemblyMatches,
       foundry_head: record?.foundry_head ?? null,
       options_observed,
@@ -521,6 +602,13 @@ function resolvePresence(
     ? Math.min(...output.producing_phases)
     : Number.POSITIVE_INFINITY;
   return due <= furthest ? "missing" : "not-yet-due";
+}
+
+function abbreviateHome(dir: string, home: string): string {
+  if (!home || !path.isAbsolute(dir)) return dir;
+  const relative = path.relative(home, dir);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) return dir;
+  return relative ? `~/${relative.split(path.sep).join("/")}` : "~";
 }
 
 function minMtime(entries: ScannedEntry[]): string | null {
@@ -560,15 +648,19 @@ function buildHealth(input: {
   const phaseState: HealthState =
     failedPhases > 0 ? "error" : done === input.phases.length ? "ok" : "warn";
 
-  const obligations = input.openRequirements?.counts;
-  const obligationState: HealthState = obligations
-    ? obligations.blocking_open > 0 || obligations.surrendered > 0
-      ? "warn"
-      : obligations.open > 0
+  const obligationsUnreadable = input.openRequirements?.unreadable ?? null;
+  const obligations = obligationsUnreadable ? undefined : input.openRequirements?.counts;
+  const obligationState: HealthState = obligationsUnreadable
+    ? "warn"
+    : obligations
+      ? obligations.blocking_open > 0 || obligations.surrendered > 0
         ? "warn"
-        : "ok"
-    : "ok";
+        : obligations.open > 0
+          ? "warn"
+          : "ok"
+      : "ok";
 
+  const feedbackUnreadable = input.feedback?.unreadable ?? null;
   const blockers = input.feedback?.counts.by_severity.blocker ?? 0;
   const feedbackState: HealthState = blockers > 0 ? "error" : input.feedback ? "warn" : "ok";
 
@@ -606,19 +698,31 @@ function buildHealth(input: {
     {
       label: "obligations",
       state: obligationState,
-      value: obligations ? `${obligations.open} open` : "none",
-      detail: obligations
-        ? `${obligations.resolved} resolved, ${obligations.surrendered} surrendered, ${obligations.blocking_open} blocking`
-        : "no open-requirements ledger in this run",
+      value: obligationsUnreadable
+        ? "unreadable"
+        : obligations
+          ? `${obligations.open} open`
+          : "none",
+      detail: obligationsUnreadable
+        ? `the open-requirements ledger is ${obligationsUnreadable}`
+        : obligations
+          ? `${obligations.resolved} resolved, ${obligations.surrendered} surrendered, ${obligations.blocking_open} blocking`
+          : "no open-requirements ledger in this run",
       anchor: "#obligations",
     },
     {
       label: "feedback",
       state: feedbackState,
-      value: input.feedback ? String(input.feedback.counts.total) : "off",
-      detail: input.feedback
-        ? `${blockers} blocker, ${input.feedback.counts.by_severity.major ?? 0} major, ${input.feedback.counts.by_severity.minor ?? 0} minor`
-        : "the run was not invoked with feedback mode",
+      value: feedbackUnreadable
+        ? "unreadable"
+        : input.feedback
+          ? String(input.feedback.counts.total)
+          : "off",
+      detail: feedbackUnreadable
+        ? `the feedback ledger is ${feedbackUnreadable}`
+        : input.feedback
+          ? `${blockers} blocker, ${input.feedback.counts.by_severity.major ?? 0} major, ${input.feedback.counts.by_severity.minor ?? 0} minor`
+          : "the run was not invoked with feedback mode",
       anchor: "#feedback",
     },
     {
@@ -649,10 +753,12 @@ function buildHealth(input: {
  * The page needs the bytes in order to show them. The manifest does not — every body it carried
  * would be a second copy of a file sitting in the same directory, and on a real run that doubles
  * the output for nothing. Metadata, derived views and skip reasons stay, so the manifest still
- * answers what an artifact is and why it was not shown.
+ * answers what an artifact is and why it was not shown. The run directory is abbreviated under the
+ * home directory, because the manifest is meant to be shared and a home path names its owner.
  */
-export function serializeRunManifest(model: RunModel): string {
+export function serializeRunManifest(model: RunModel, home = homedir()): string {
   const slim = JSON.parse(JSON.stringify(model)) as RunModel;
+  slim.run.dir = abbreviateHome(slim.run.dir, home);
   for (const artifact of slim.artifacts) {
     if (artifact.preview) {
       artifact.preview.body = null;
@@ -667,5 +773,3 @@ export function serializeRunManifest(model: RunModel): string {
   }
   return `${JSON.stringify(slim, null, 2)}\n`;
 }
-
-export type { AssemblyManifest };

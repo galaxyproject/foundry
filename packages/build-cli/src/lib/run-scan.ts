@@ -8,7 +8,7 @@
 // and a whole-run budget. Every skip is recorded rather than silently applied.
 
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync, statSync, type Stats } from "node:fs";
+import { lstatSync, readFileSync, readdirSync, realpathSync, statSync, type Stats } from "node:fs";
 import path from "node:path";
 
 export interface ScanOptions {
@@ -18,8 +18,10 @@ export interface ScanOptions {
   maxEmbedBytes: number;
   /** Across the whole run. Once spent, later files carry a skip reason. */
   totalEmbedBudget: number;
-  /** Recurse into directories instead of summarizing them at depth one. */
+  /** Recurse into directories, listing every nested file, instead of summarizing them. */
   deepDirs: boolean;
+  /** With `deepDirs`, nested files past this many are counted as ignored rather than listed. */
+  maxDeepEntries: number;
 }
 
 export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
@@ -27,6 +29,7 @@ export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
   maxEmbedBytes: 256 * 1024,
   totalEmbedBudget: 4 * 1024 * 1024,
   deepDirs: false,
+  maxDeepEntries: 5000,
 };
 
 /**
@@ -37,6 +40,9 @@ export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
  * artifact.
  */
 const EXCLUDED_NAMES = new Set([".git", ".omc", "node_modules", ".DS_Store"]);
+
+/** What `run-dashboard` writes beside the run; reading them back would count the reader as the run. */
+const READER_OUTPUTS = new Set(["run-manifest.json", "dashboard.html"]);
 
 const TEXT_EXTENSIONS = new Set([
   ".md",
@@ -80,7 +86,7 @@ export interface ScanResult {
   total_bytes: number;
 }
 
-export function isExcluded(name: string): boolean {
+function isExcluded(name: string): boolean {
   return EXCLUDED_NAMES.has(name) || name.startsWith(".") || name.endsWith(".swp");
 }
 
@@ -101,34 +107,56 @@ function looksTextual(basename: string): boolean {
   return /\.(ya?ml|json|md|txt|log)(\.[^.]+)*$/i.test(basename);
 }
 
-/** Depth-one summary of a directory we decline to walk. */
-function summarizeDir(dir: string): { entry_count: number; total_bytes: number; sample: string[] } {
+/**
+ * Stats for a path, following a symlink only when it resolves inside the run directory.
+ *
+ * A run directory is the user's, and a link out of it (to a home directory, a data store) must not
+ * be hashed or embedded into a page that may be shared.
+ */
+function statInside(full: string, root: string): { stats: Stats; real: string } | null {
+  try {
+    const own = lstatSync(full);
+    if (!own.isSymbolicLink()) return { stats: own, real: full };
+    const real = realpathSync(full);
+    if (real !== root && !real.startsWith(`${root}${path.sep}`)) return null;
+    return { stats: statSync(real), real };
+  } catch {
+    return null;
+  }
+}
+
+function posixRel(from: string, to: string): string {
+  return path.relative(from, to).split(path.sep).join("/");
+}
+
+/** Depth-limited summary of a directory we decline to list. */
+function summarizeDir(
+  dir: string,
+  root: string,
+): { entry_count: number; total_bytes: number; sample: string[] } {
   let entryCount = 0;
   let totalBytes = 0;
   const sample: string[] = [];
   const walk = (current: string, depth: number): void => {
     let names: string[];
     try {
-      names = readdirSync(current);
+      names = readdirSync(current).sort();
     } catch {
       return;
     }
     for (const name of names) {
-      if (EXCLUDED_NAMES.has(name)) continue;
+      if (isExcluded(name)) continue;
       const full = path.join(current, name);
-      let stats: Stats;
-      try {
-        stats = statSync(full);
-      } catch {
-        continue;
-      }
-      if (stats.isDirectory()) {
+      const found = statInside(full, root);
+      if (!found) continue;
+      if (found.stats.isDirectory()) {
         if (depth < 3) walk(full, depth + 1);
         continue;
       }
+      if (!found.stats.isFile()) continue;
       entryCount += 1;
-      totalBytes += stats.size;
-      if (sample.length < 20) sample.push(path.relative(dir, full).split(path.sep).join("/"));
+      totalBytes += found.stats.size;
+      if (sample.length < 20) sample.push(posixRel(dir, full));
     }
   };
   walk(dir, 0);
@@ -139,7 +167,8 @@ function summarizeDir(dir: string): { entry_count: number; total_bytes: number; 
  * Inventory the run directory.
  *
  * Only depth one is treated as run artifacts: every harness writes declared basenames flat into
- * the run directory, so anything nested is either tool output or input data.
+ * the run directory, so anything nested is either tool output or input data. `deepDirs` lists
+ * nested files too, under the same hash and embed budgets, without promoting them to artifacts.
  */
 export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): ScanResult {
   const opts = { ...DEFAULT_SCAN_OPTIONS, ...options };
@@ -147,79 +176,19 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
   let ignored = 0;
   let totalBytes = 0;
   let embedSpent = 0;
+  let deepListed = 0;
 
+  let root: string;
   let names: string[];
   try {
-    names = readdirSync(dir).sort();
+    root = realpathSync(dir);
+    names = readdirSync(root).sort();
   } catch (error) {
     throw new Error(`cannot read run directory ${dir}`, { cause: error });
   }
 
-  for (const name of names) {
-    if (isExcluded(name)) {
-      ignored += 1;
-      continue;
-    }
-    const full = path.join(dir, name);
-    let stats: Stats;
-    try {
-      stats = statSync(full);
-    } catch {
-      ignored += 1;
-      continue;
-    }
-    const mtime = stats.mtime.toISOString();
-
-    if (stats.isDirectory()) {
-      const summary = summarizeDir(full);
-      totalBytes += summary.total_bytes;
-      entries.push({
-        basename: name,
-        relpath: name,
-        type: "dir",
-        size_bytes: summary.total_bytes,
-        mtime,
-        sha256: null,
-        hash_skipped_reason: "directory",
-        dir_summary: summary,
-        text: null,
-        text_truncated: false,
-        text_skip_reason: null,
-      });
-      if (opts.deepDirs) {
-        for (const nested of summary.sample) {
-          const nestedFull = path.join(full, nested);
-          let nestedStats: Stats;
-          try {
-            nestedStats = statSync(nestedFull);
-          } catch {
-            continue;
-          }
-          entries.push({
-            basename: path.basename(nested),
-            relpath: `${name}/${nested}`,
-            type: "file",
-            size_bytes: nestedStats.size,
-            mtime: nestedStats.mtime.toISOString(),
-            sha256: null,
-            hash_skipped_reason: "nested under a summarized directory",
-            dir_summary: null,
-            text: null,
-            text_truncated: false,
-            text_skip_reason: "nested under a summarized directory",
-          });
-        }
-      }
-      continue;
-    }
-
-    if (!stats.isFile()) {
-      ignored += 1;
-      continue;
-    }
-
-    totalBytes += stats.size;
-
+  const fileEntry = (full: string, relpath: string, stats: Stats): ScannedEntry => {
+    const name = path.basename(full);
     let sha256: string | null = null;
     let hashSkipped: string | null = null;
     if (stats.size <= opts.maxHashBytes) {
@@ -254,19 +223,90 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
       }
     }
 
-    entries.push({
+    return {
       basename: name,
-      relpath: name,
+      relpath,
       type: "file",
       size_bytes: stats.size,
-      mtime,
+      mtime: stats.mtime.toISOString(),
       sha256,
       hash_skipped_reason: hashSkipped,
       dir_summary: null,
       text,
       text_truncated: false,
       text_skip_reason: textSkip,
-    });
+    };
+  };
+
+  /** Lists every file under `current`; `seen` holds real directory paths, so a link cannot loop. */
+  const walkNested = (current: string, seen: Set<string>): void => {
+    let nestedNames: string[];
+    try {
+      nestedNames = readdirSync(current).sort();
+    } catch {
+      return;
+    }
+    for (const name of nestedNames) {
+      if (isExcluded(name)) continue;
+      const full = path.join(current, name);
+      const found = statInside(full, root);
+      if (!found) continue;
+      if (found.stats.isDirectory()) {
+        if (seen.has(found.real)) continue;
+        seen.add(found.real);
+        walkNested(full, seen);
+        continue;
+      }
+      if (!found.stats.isFile()) continue;
+      if (deepListed >= opts.maxDeepEntries) {
+        ignored += 1;
+        continue;
+      }
+      deepListed += 1;
+      entries.push(fileEntry(full, posixRel(root, full), found.stats));
+    }
+  };
+
+  for (const name of names) {
+    if (isExcluded(name) || READER_OUTPUTS.has(name)) {
+      ignored += 1;
+      continue;
+    }
+    const full = path.join(root, name);
+    const found = statInside(full, root);
+    if (!found) {
+      ignored += 1;
+      continue;
+    }
+    const { stats } = found;
+
+    if (stats.isDirectory()) {
+      const summary = summarizeDir(full, root);
+      totalBytes += summary.total_bytes;
+      entries.push({
+        basename: name,
+        relpath: name,
+        type: "dir",
+        size_bytes: summary.total_bytes,
+        mtime: stats.mtime.toISOString(),
+        sha256: null,
+        hash_skipped_reason: "directory",
+        dir_summary: summary,
+        text: null,
+        text_truncated: false,
+        text_skip_reason: null,
+      });
+      if (opts.deepDirs) walkNested(full, new Set([found.real]));
+      continue;
+    }
+
+    if (!stats.isFile()) {
+      ignored += 1;
+      continue;
+    }
+
+    totalBytes += stats.size;
+    entries.push(fileEntry(full, name, stats));
   }
 
   return { entries, ignored_count: ignored, total_bytes: totalBytes };

@@ -15,6 +15,8 @@ import {
 } from "./cast-registry.js";
 import type { RuntimeArtifactRegistry } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
+import type { RunWarning } from "./run-model.js";
+
 export type DetectionSource = "run-record" | "feedback-ledger" | "flag" | "filename-inference";
 export type DetectionConfidence = "declared" | "flag" | "inferred";
 
@@ -35,6 +37,8 @@ export interface PipelineDetection {
   source: DetectionSource;
   candidates: PipelineCandidateScore[];
   conflict: { declared: string; best_inferred: string; note: string } | null;
+  /** Stated sources that disagree with each other, or name a pipeline this checkout lacks. */
+  warnings: RunWarning[];
 }
 
 export class PipelineUndeterminedError extends Error {
@@ -120,7 +124,7 @@ export function scorePipelines(observed: string[], index: PipelineIndex): Pipeli
 /** Below this, the evidence is too thin to name a pipeline at all. */
 const MINIMUM_SCORE = 2;
 
-export function formatCandidateTable(candidates: PipelineCandidateScore[]): string {
+function formatCandidateTable(candidates: PipelineCandidateScore[]): string {
   const rows = candidates.slice(0, 6);
   const width = Math.max(8, ...rows.map((row) => row.pipeline.length));
   const header = `  ${"pipeline".padEnd(width)}  score  matched  foreign  coverage`;
@@ -143,19 +147,52 @@ export function detectPipeline(
   hints: DetectHints = {},
 ): PipelineDetection {
   const candidates = scorePipelines(observed, index);
-  const known = (slug: string | null | undefined): slug is string =>
-    typeof slug === "string" && index.assemblies.has(slug);
+  const known = (slug: string | null): slug is string =>
+    slug !== null && index.assemblies.has(slug);
+  const flag = hints.flagPipeline || null;
+  const recorded = hints.recordPipeline || null;
+  const ledger = hints.ledgerPipeline || null;
+  const warnings: RunWarning[] = [];
+  const available = [...index.assemblies.keys()].sort().join(", ");
+
+  // A stated pipeline this checkout cannot read must not fall through to inference: the run would
+  // then be described as whichever pipeline its filenames resemble, under a claim it never made.
+  if (flag && !known(flag)) {
+    throw new PipelineUndeterminedError(
+      `--pipeline ${flag} has no assembled harness in this checkout. Available: ${available}.`,
+      candidates,
+    );
+  }
+  if (recorded && !known(recorded) && !flag) {
+    throw new PipelineUndeterminedError(
+      `the run record names pipeline ${recorded}, which has no assembled harness in this checkout, so its phases cannot be read against anything. Re-run with --pipeline <slug> to read it against one that does. Available: ${available}.`,
+      candidates,
+    );
+  }
+  if (ledger && !known(ledger)) {
+    warnings.push({
+      code: "pipeline-unknown",
+      message: `the feedback ledger names pipeline ${ledger}, which has no assembled harness in this checkout`,
+      subject: ledger,
+    });
+  }
+
+  const disagree = (a: string, aSource: string, b: string, bSource: string): void => {
+    if (a === b) return;
+    warnings.push({
+      code: "pipeline-sources-disagree",
+      message: `${aSource} says ${a} but ${bSource} says ${b}; reading it as ${a}`,
+      subject: a,
+    });
+  };
+  if (flag && recorded) disagree(flag, "--pipeline", recorded, "the run record");
+  if (recorded && ledger) disagree(recorded, "the run record", ledger, "the feedback ledger");
+  if (flag && ledger && !recorded) disagree(flag, "--pipeline", ledger, "the feedback ledger");
 
   const stated =
-    (known(hints.flagPipeline) && { slug: hints.flagPipeline, source: "flag" as const }) ||
-    (known(hints.recordPipeline) && {
-      slug: hints.recordPipeline,
-      source: "run-record" as const,
-    }) ||
-    (known(hints.ledgerPipeline) && {
-      slug: hints.ledgerPipeline,
-      source: "feedback-ledger" as const,
-    }) ||
+    (flag && { slug: flag, source: "flag" as const }) ||
+    (known(recorded) && { slug: recorded, source: "run-record" as const }) ||
+    (known(ledger) && { slug: ledger, source: "feedback-ledger" as const }) ||
     null;
 
   if (stated) {
@@ -181,6 +218,7 @@ export function detectPipeline(
       source: stated.source,
       candidates,
       conflict,
+      warnings,
     };
   }
 
@@ -208,5 +246,6 @@ export function detectPipeline(
     source: "filename-inference",
     candidates,
     conflict: null,
+    warnings,
   };
 }

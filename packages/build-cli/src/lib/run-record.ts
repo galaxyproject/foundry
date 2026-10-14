@@ -80,11 +80,23 @@ function asNumber(value: unknown): number | null {
  * An identifier that YAML may have resolved to a number.
  *
  * A sha or a commit id is hex, and an all-digit one is a legal hex string that unquoted YAML turns
- * into a number. Reading it back as a string keeps such a record usable instead of silently
- * dropping the only field that pins the run to a Foundry revision.
+ * into a number — dropping leading zeros, or reading `12e45` as an exponent. Its digits cannot be
+ * trusted to be the ones written, so it is reported and read as absent rather than compared.
  */
-function asToken(value: unknown): string | null {
-  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+function asToken(
+  value: unknown,
+  field: string,
+  from: string,
+  warnings: RunWarning[],
+): string | null {
+  if (typeof value === "number") {
+    warnings.push({
+      code: "run-record-token-not-quoted",
+      message: `${field} arrived as a YAML number, so its digits may not be the ones written; it is ignored until quoted`,
+      subject: from,
+    });
+    return null;
+  }
   return asString(value);
 }
 
@@ -94,17 +106,44 @@ function asInstant(value: unknown): string | null {
   return asString(value);
 }
 
-function asPhaseStatus(value: unknown): PhaseStatus {
+/** A phase number, which a hand-edited roster sometimes quotes. */
+export function asPhaseNumber(value: unknown): number | null {
+  if (typeof value === "string" && /^\d+$/.test(value.trim())) return Number(value);
+  return asNumber(value);
+}
+
+export function asPhaseStatus(value: unknown): PhaseStatus {
   const text = asString(value);
   return text && PHASE_STATUSES.has(text as PhaseStatus) ? (text as PhaseStatus) : "unknown";
 }
 
-function asRunStatus(value: unknown): RunStatus {
+export function asRunStatus(value: unknown): RunStatus {
   const text = asString(value);
   return text && RUN_STATUSES.has(text as RunStatus) ? (text as RunStatus) : "unknown";
 }
 
-function readArtifacts(value: unknown, warnings: RunWarning[], phase: number): RecordedArtifact[] {
+/**
+ * Whether a run read the assembly the checkout holds now. Recorded shas arrive in whatever case
+ * and prefix the writer chose; no recorded sha says nothing about drift, so it is null.
+ */
+export function assemblyMatchesCheckout(
+  recorded: string | null | undefined,
+  current: string | null,
+): boolean | null {
+  if (!recorded || current === null) return null;
+  const normalized = recorded
+    .trim()
+    .toLowerCase()
+    .replace(/^sha256:/, "");
+  return normalized === current;
+}
+
+function readArtifacts(
+  value: unknown,
+  warnings: RunWarning[],
+  phase: number,
+  from: string,
+): RecordedArtifact[] {
   if (!Array.isArray(value)) return [];
   const out: RecordedArtifact[] = [];
   for (const raw of value) {
@@ -114,7 +153,7 @@ function readArtifacts(value: unknown, warnings: RunWarning[], phase: number): R
       warnings.push({
         code: "run-record-artifact-unnamed",
         message: `phase ${phase} records an artifact with no id`,
-        subject: RUN_RECORD_FILENAME,
+        subject: from,
       });
       continue;
     }
@@ -140,7 +179,7 @@ export function parseRunRecord(text: string, from: string): RunRecordLoad {
       warnings: [
         {
           code: "run-record-unparseable",
-          message: `${RUN_RECORD_FILENAME} is not valid YAML: ${(error as Error).message}`,
+          message: `${from} is not valid YAML: ${(error as Error).message}`,
           subject: from,
         },
       ],
@@ -155,7 +194,7 @@ export function parseRunRecord(text: string, from: string): RunRecordLoad {
       warnings: [
         {
           code: "run-record-not-a-mapping",
-          message: `${RUN_RECORD_FILENAME} is not a mapping`,
+          message: `${from} is not a mapping`,
           subject: from,
         },
       ],
@@ -166,7 +205,7 @@ export function parseRunRecord(text: string, from: string): RunRecordLoad {
   if (version !== 1) {
     warnings.push({
       code: "run-record-version-unknown",
-      message: `${RUN_RECORD_FILENAME} declares run_record_version ${version}; reading it as version 1`,
+      message: `${from} declares run_record_version ${version}; reading it as version 1`,
       subject: from,
     });
   }
@@ -176,14 +215,22 @@ export function parseRunRecord(text: string, from: string): RunRecordLoad {
     for (const raw of root.phases) {
       const row = asRecord(raw);
       if (!row) continue;
-      const n = asNumber(row.n);
+      // `_assembly.json` keys its rows `phase:`, and a roster copied from it keeps that key.
+      const n = asPhaseNumber(row.n ?? row.phase);
       if (n === null) {
         warnings.push({
           code: "run-record-phase-unnumbered",
-          message: `${RUN_RECORD_FILENAME} has a phase row with no 'n'`,
+          message: `${from} has a phase row with no 'n'`,
           subject: from,
         });
         continue;
+      }
+      if (phases.some((phase) => phase.n === n)) {
+        warnings.push({
+          code: "run-record-phase-duplicate",
+          message: `${from} records phase ${n} more than once; the last row is read`,
+          subject: String(n),
+        });
       }
       phases.push({
         n,
@@ -193,13 +240,13 @@ export function parseRunRecord(text: string, from: string): RunRecordLoad {
         selected: asString(row.selected),
         status: asPhaseStatus(row.status),
         iterations: asNumber(row.iterations),
-        artifacts: readArtifacts(row.artifacts, warnings, n),
+        artifacts: readArtifacts(row.artifacts, warnings, n, from),
       });
     }
   } else {
     warnings.push({
       code: "run-record-no-phases",
-      message: `${RUN_RECORD_FILENAME} carries no phase roster`,
+      message: `${from} carries no phase roster`,
       subject: from,
     });
   }
@@ -211,8 +258,8 @@ export function parseRunRecord(text: string, from: string): RunRecordLoad {
       run_slug: asString(root.run_slug),
       source_revision: asNumber(root.source_revision),
       harness_name: asString(root.harness_name),
-      assembly_sha256: asToken(root.assembly_sha256),
-      foundry_head: asToken(root.foundry_head),
+      assembly_sha256: asToken(root.assembly_sha256, "assembly_sha256", from, warnings),
+      foundry_head: asToken(root.foundry_head, "foundry_head", from, warnings),
       started_at: asInstant(root.started_at),
       finished_at: asInstant(root.finished_at),
       status: asRunStatus(root.status),
@@ -223,8 +270,9 @@ export function parseRunRecord(text: string, from: string): RunRecordLoad {
   };
 }
 
-export function readRunRecord(runDir: string): RunRecordLoad {
-  const file = path.join(runDir, RUN_RECORD_FILENAME);
+/** `filename` is the registry's `default_filename`; the constant stands in when none is passed. */
+export function readRunRecord(runDir: string, filename = RUN_RECORD_FILENAME): RunRecordLoad {
+  const file = path.join(runDir, filename);
   if (!existsSync(file)) return { record: null, path: null, warnings: [] };
-  return parseRunRecord(readFileSync(file, "utf8"), RUN_RECORD_FILENAME);
+  return parseRunRecord(readFileSync(file, "utf8"), filename);
 }

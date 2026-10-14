@@ -16,9 +16,13 @@ import type {
   FeedbackLedgerModel,
   OpenRequirementsEntry,
   OpenRequirementsModel,
+  PhaseStatus,
+  RunWarning,
 } from "./run-model.js";
+import { asPhaseNumber, asPhaseStatus } from "./run-record.js";
 
 export const OPEN_REQUIREMENTS_FILENAME = "open-requirements.ledger.yml";
+/** The registry's `default_filename` for `foundry-feedback-ledger`, used when no registry is passed. */
 export const FEEDBACK_LEDGER_FILENAME = "foundry-feedback.ledger.yml";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -59,12 +63,18 @@ function tally(values: Array<string | null>): Record<string, number> {
   return out;
 }
 
-function loadYaml(file: string): unknown | null {
+type YamlLoad = { parsed: unknown; error: null } | { parsed: null; error: string };
+
+function loadYaml(file: string): YamlLoad {
   try {
-    return yaml.load(readFileSync(file, "utf8"));
-  } catch {
-    return null;
+    return { parsed: yaml.load(readFileSync(file, "utf8")), error: null };
+  } catch (error) {
+    return { parsed: null, error: `not valid YAML: ${(error as Error).message}` };
   }
+}
+
+function unreadableWarning(from: string, reason: string): RunWarning {
+  return { code: "ledger-unparseable", message: `${from} is ${reason}`, subject: from };
 }
 
 /**
@@ -120,6 +130,7 @@ export function parseOpenRequirements(parsed: unknown, from: string): OpenRequir
 
   return {
     path: from,
+    unreadable: null,
     entry_count: entries.length,
     topology_repair: topology,
     counts: {
@@ -133,12 +144,35 @@ export function parseOpenRequirements(parsed: unknown, from: string): OpenRequir
   };
 }
 
-export function readOpenRequirements(runDir: string): OpenRequirementsModel | null {
-  const file = path.join(runDir, OPEN_REQUIREMENTS_FILENAME);
-  if (!existsSync(file)) return null;
-  const parsed = loadYaml(file);
-  if (parsed === null) return null;
-  return parseOpenRequirements(parsed, OPEN_REQUIREMENTS_FILENAME);
+export interface OpenRequirementsLoad {
+  ledger: OpenRequirementsModel | null;
+  warnings: RunWarning[];
+}
+
+/**
+ * A ledger that exists but cannot be parsed comes back marked `unreadable` with no entries, so a
+ * reader cannot mistake it for an absent ledger or an empty one.
+ */
+export function readOpenRequirements(runDir: string): OpenRequirementsLoad {
+  const from = OPEN_REQUIREMENTS_FILENAME;
+  const file = path.join(runDir, from);
+  if (!existsSync(file)) return { ledger: null, warnings: [] };
+  const load = loadYaml(file);
+  if (load.error !== null) {
+    return {
+      ledger: {
+        path: from,
+        unreadable: load.error,
+        entry_count: 0,
+        topology_repair: null,
+        counts: { open: 0, resolved: 0, surrendered: 0, blocking_open: 0, dropped: 0 },
+        entries: [],
+      },
+      warnings: [unreadableWarning(from, load.error)],
+    };
+  }
+  if (load.parsed === null || load.parsed === undefined) return { ledger: null, warnings: [] };
+  return { ledger: parseOpenRequirements(load.parsed, from), warnings: [] };
 }
 
 /** The feedback ledger: what the run showed to be wrong with the Foundry itself. */
@@ -177,6 +211,7 @@ export function parseFeedbackLedger(parsed: unknown, from: string): FeedbackLedg
 
   return {
     path: from,
+    unreadable: null,
     run: {
       pipeline: runBlock ? asString(runBlock.pipeline) : null,
       run_slug: runBlock ? asString(runBlock.run_slug) : null,
@@ -192,51 +227,74 @@ export function parseFeedbackLedger(parsed: unknown, from: string): FeedbackLedg
   };
 }
 
-export function readFeedbackLedger(runDir: string): FeedbackLedgerModel | null {
-  const file = path.join(runDir, FEEDBACK_LEDGER_FILENAME);
-  if (!existsSync(file)) return null;
-  const parsed = loadYaml(file);
-  if (parsed === null) return null;
-  return parseFeedbackLedger(parsed, FEEDBACK_LEDGER_FILENAME);
-}
-
 /**
  * The phase roster the feedback ledger carries in its `run:` header.
  *
  * This predates the run record and remains the only phase roster a pre-record run has. It is read
- * separately from the entries because a reader may want the roster from a run that recorded no
- * feedback at all.
+ * apart from the entries because a run may carry a roster and no feedback at all.
  */
 export interface LedgerPhaseRow {
   n: number;
   kind: string | null;
   skill: string | null;
-  status: string | null;
+  status: PhaseStatus | null;
   iterations: number | null;
   selected: string | null;
   feedback_checked: boolean | null;
 }
 
-export function readFeedbackLedgerPhases(runDir: string): LedgerPhaseRow[] {
-  const file = path.join(runDir, FEEDBACK_LEDGER_FILENAME);
-  if (!existsSync(file)) return [];
-  const root = asRecord(loadYaml(file));
-  const runBlock = asRecord(root?.run);
+export function parseFeedbackLedgerPhases(parsed: unknown): LedgerPhaseRow[] {
+  const runBlock = asRecord(asRecord(parsed)?.run);
   if (!runBlock || !Array.isArray(runBlock.phases)) return [];
   const rows: LedgerPhaseRow[] = [];
   for (const raw of runBlock.phases) {
     const row = asRecord(raw);
-    const n = row ? asNumber(row.n) : null;
+    // Keyed `phase:` when the roster was copied from `_assembly.json` as is.
+    const n = row ? asPhaseNumber(row.n ?? row.phase) : null;
     if (n === null) continue;
     rows.push({
       n,
       kind: asString(row!.kind),
       skill: asString(row!.skill),
-      status: asString(row!.status),
+      status: row!.status === undefined || row!.status === null ? null : asPhaseStatus(row!.status),
       iterations: asNumber(row!.iterations),
       selected: asString(row!.selected),
       feedback_checked: asBoolean(row!.feedback_checked),
     });
   }
   return rows.sort((a, b) => a.n - b.n);
+}
+
+export interface FeedbackLedgerLoad {
+  ledger: FeedbackLedgerModel | null;
+  phases: LedgerPhaseRow[];
+  warnings: RunWarning[];
+}
+
+/** Reads the file once for both the entries and the roster. */
+export function readFeedbackLedger(
+  runDir: string,
+  filename = FEEDBACK_LEDGER_FILENAME,
+): FeedbackLedgerLoad {
+  const file = path.join(runDir, filename);
+  if (!existsSync(file)) return { ledger: null, phases: [], warnings: [] };
+  const load = loadYaml(file);
+  if (load.error !== null) {
+    return {
+      ledger: {
+        path: filename,
+        unreadable: load.error,
+        run: { pipeline: null, run_slug: null, status: null },
+        counts: { total: 0, by_kind: {}, by_severity: {}, by_status: {} },
+        entries: [],
+      },
+      phases: [],
+      warnings: [unreadableWarning(filename, load.error)],
+    };
+  }
+  return {
+    ledger: parseFeedbackLedger(load.parsed, filename),
+    phases: parseFeedbackLedgerPhases(load.parsed),
+    warnings: [],
+  };
 }

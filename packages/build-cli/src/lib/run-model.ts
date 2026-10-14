@@ -31,10 +31,11 @@ export type PhaseStatusSource =
 /**
  * Whether a declared artifact is on disk, and whether its absence is a problem.
  *
- * `missing` is the only red one: the phase that declares it has been reached and the file is not
- * there. `not-yet-due` is the run simply not having got that far.
+ * `missing` and `failed` are the red ones: the phase that declares it has been reached and the file
+ * is not there, or a run record says the file that is there failed its check. `not-yet-due` is the
+ * run simply not having got that far.
  */
-export type ArtifactPresence = "present" | "missing" | "not-yet-due" | "optional-absent";
+export type ArtifactPresence = "present" | "missing" | "failed" | "not-yet-due" | "optional-absent";
 
 export type HealthState = "ok" | "warn" | "error";
 
@@ -128,7 +129,7 @@ export interface RunArtifact {
   /** The phase the run record says actually wrote it. Null when the model was reconstructed. */
   written_by_phase: number | null;
   presence: ArtifactPresence;
-  /** Relative to wherever the dashboard is written, so a file:// link resolves. */
+  /** Relative to the run directory. */
   path: string | null;
   size_bytes: number | null;
   mtime: string | null;
@@ -195,6 +196,8 @@ export interface OpenRequirementsEntry {
 
 export interface OpenRequirementsModel {
   path: string;
+  /** Why a ledger on disk could not be parsed; its counts and entries are then empty, not zero. */
+  unreadable: string | null;
   entry_count: number;
   topology_repair: { escalations: number; cap: number; open_history: number[] } | null;
   counts: {
@@ -228,6 +231,8 @@ export interface FeedbackEntry {
 
 export interface FeedbackLedgerModel {
   path: string;
+  /** Why a ledger on disk could not be parsed; its counts and entries are then empty, not zero. */
+  unreadable: string | null;
   run: { pipeline: string | null; run_slug: string | null; status: string | null };
   counts: {
     total: number;
@@ -307,8 +312,8 @@ export interface RunIdentity {
   pipeline_source_revision: number;
   harness_name: string;
   assembly_sha256: string | null;
-  /** False when the committed assembly has changed since the run read it. */
-  assembly_matches_checkout: boolean;
+  /** False when the committed assembly has changed since the run read it; null when unknown. */
+  assembly_matches_checkout: boolean | null;
   foundry_head: string | null;
   options_observed: string[];
   status: RunStatus;
@@ -336,10 +341,6 @@ export interface RunModel {
   evaluation: EvaluationModel | null;
   health: HealthRollup;
   warnings: RunWarning[];
-}
-
-export function isMissing(artifact: RunArtifact): boolean {
-  return artifact.presence === "missing";
 }
 
 export function worstState(states: HealthState[]): HealthState {

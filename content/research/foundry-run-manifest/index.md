@@ -5,8 +5,8 @@ tags:
   - meta
 status: draft
 created: 2026-09-18
-revised: 2026-09-18
-revision: 1
+revised: 2026-10-14
+revision: 2
 summary: "Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard."
 ---
 
@@ -47,12 +47,12 @@ pipeline: paper-to-galaxy
 run_slug: auris-scf1
 source_revision: 2
 harness_name: pipeline-paper-to-galaxy
-assembly_sha256: 4f3c…            # sha256 of the harness `_assembly.json`
-foundry_head: 63a3f9cf…           # Foundry commit the run read
+assembly_sha256: "4f3c…"          # sha256 of the harness `_assembly.json`; quoted
+foundry_head: "63a3f9cf…"         # Foundry commit the run read; null outside a git checkout
 started_at: 2026-09-16T18:02:00Z
 finished_at: null
 status: running                   # running | complete | failed | cancelled
-phases:
+phases:                           # one row per `_assembly.json` phase, keyed `n`
   - n: 1
     kind: mold
     skill: summarize-paper
@@ -64,7 +64,8 @@ phases:
     skill: advance-galaxy-draft-step
     status: done
     iterations: 26
-    artifacts:
+    artifacts:                    # one row per iteration that writes; 2–25 elided here
+      - { id: galaxy-workflow-draft, file: galaxy-workflow-draft.gxwf.yml, at: 2026-09-16T18:20:00Z, iteration: 1 }
       - { id: galaxy-workflow-draft, file: galaxy-workflow-draft.gxwf.yml, at: 2026-09-16T21:36:00Z, iteration: 26 }
       - { id: galaxy-workflow, file: galaxy-workflow.gxwf.yml, at: 2026-09-16T21:40:00Z }
   - n: 7
@@ -78,25 +79,33 @@ phases:
 
 `assembly_sha256`, `source_revision`, and `foundry_head` pin the run to the Foundry it actually
 read. Without them a reader silently resolves an old run against today's Molds and reports a
-contract the run never saw. `PipelineRunRecord`, the evaluation harness's own record, carries the
+contract the run never saw. Shas are quoted: an all-digit sha left bare is a YAML number, and its
+digits are not trustworthy, so a reader ignores it. A record with no `assembly_sha256` neither
+matches nor drifts from the checkout; a reader reports the comparison as unknown. `PipelineRunRecord`, the evaluation harness's own record, carries the
 same three fields under the same names.
 
 ## Lifecycle
 
 The harness owns every field. It creates the file during working-directory setup, copying the
-complete phase roster from `_assembly.json` with `status: running` and every phase `pending`. It
+complete phase roster from `_assembly.json` with `status: running` and every phase `pending`. Each
+row is keyed `n`, the number `_assembly.json` calls `phase`; readers accept `phase` too, since a
+copied row keeps it. It
 sets a phase `running` immediately before invoking it and `done` once the phase's artifacts are
-confirmed, appending one `artifacts` row per file written. A loop phase stays one row and
-increments `iterations`, appending a row per iteration that writes. A branch phase stays one row
+confirmed, appending one `artifacts` row per file written. A loop phase stays one phase row and
+increments `iterations`, appending one `artifacts` row, with its `iteration`, for each iteration
+that writes. The last such row says which phase last wrote the file. A branch phase stays one row
 and records the chain member that satisfied it as `selected`.
 
 A phase that terminates the run and the run itself become `failed`; a graceful user stop makes the
 run `cancelled`; after every intended phase is done the run becomes `complete`. A hard interruption
 naturally leaves `running`, which is distinguishable from success without a recovery write.
 
-An absent `foundry-run.yml` means the run predates this protocol. Readers may reconstruct a
+An absent `foundry-run.yml` means the run predates this protocol. One that exists but cannot be
+parsed is a different failure, usually a run that crashed mid-write, and is reported as such. Readers may reconstruct a
 degraded view from filenames, the feedback ledger's `run:` header, and checkpoint history, but
-they must label it as reconstructed and must not claim a pipeline they cannot distinguish.
+they must label it as reconstructed and must not claim a pipeline they cannot distinguish. A
+record naming a pipeline the reader's checkout has no harness for is not read against some other
+pipeline unless the reader is told which one.
 
 ## Relationship to the other run files
 

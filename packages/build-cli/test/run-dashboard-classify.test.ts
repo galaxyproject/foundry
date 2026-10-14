@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { classifyEntries, variantParent } from "../src/lib/run-classify.js";
@@ -33,6 +35,10 @@ function file(basename: string): ScannedEntry {
     text_truncated: false,
     text_skip_reason: "not a text format",
   };
+}
+
+function nested(relpath: string): ScannedEntry {
+  return { ...file(path.posix.basename(relpath)), relpath };
 }
 
 function dir(basename: string): ScannedEntry {
@@ -145,5 +151,28 @@ describe("classifyEntries", () => {
     expect(byName.get("LICENSE")).toBe("narrative");
     expect(byName.get("test-data")).toBe("directory");
     expect(byName.get("extract.mjs")).toBe("undeclared");
+  });
+
+  it("does not take a nested file for a declared artifact, even when it wins on name", () => {
+    const result = classifyEntries(
+      [file("summary-nextflow.json"), nested("archive/summary-nextflow.json")],
+      DECLARED,
+      owners,
+      skills,
+    );
+    expect(result.declared.get("summary-nextflow")?.relpath).toBe("summary-nextflow.json");
+    const archived = result.unmapped.find((item) => item.entry.relpath.startsWith("archive/"));
+    expect(archived?.cls).toBe("undeclared");
+  });
+
+  it("does not fold a nested copy into a top-level artifact or call it cross-pipeline", () => {
+    const result = classifyEntries(
+      [nested("old/galaxy-workflow.gxwf.yml.bak"), nested("other/summary-cwl.json")],
+      DECLARED,
+      owners,
+      skills,
+    );
+    expect(result.variants).toHaveLength(0);
+    expect(result.unmapped.map((item) => item.cls)).toEqual(["undeclared", "undeclared"]);
   });
 });
