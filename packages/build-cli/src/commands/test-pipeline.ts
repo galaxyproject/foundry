@@ -18,34 +18,19 @@ import {
   type RunStatus,
   type SandboxMode,
 } from "@galaxy-foundry/gxwf-pi-harness";
-import type { ProvenanceArtifactInput } from "../lib/artifact-contract.js";
+import {
+  loadAssembly,
+  type AssemblyManifest,
+  type AssemblyPhase,
+  type SkillProvenance,
+} from "../lib/cast-registry.js";
+import { foundryHead } from "../lib/foundry-head.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
 import { readOption } from "../lib/cli-args.js";
 import { createWorkerRuntimeArgScanner, defaultWorkerRunDir } from "../lib/worker-runtime-args.js";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-interface AssemblyPhase {
-  phase: number;
-  kind: string;
-  skill?: string;
-  loop?: boolean;
-  cast_present?: boolean | Array<boolean | null>;
-}
-
-interface AssemblyManifest {
-  source_pipeline: string;
-  source_revision: number;
-  harness_name: string;
-  phases: AssemblyPhase[];
-}
-
-interface ProvenanceManifest {
-  artifacts?: {
-    consumes?: Partial<ProvenanceArtifactInput>[];
-  };
-}
 
 export interface TestPipelineOptions {
   repoRoot: string;
@@ -121,6 +106,7 @@ export interface PipelineRunRecord {
   harness_name: string;
   assembly_path: string;
   assembly_sha256: string;
+  foundry_head: string | null;
   through_phase: number;
   scenario: ResolvedScenario;
   engine: {
@@ -232,29 +218,6 @@ export function defaultTestPipelineRunDir(pipeline: string, now?: Date, id?: str
   return defaultWorkerRunDir("foundry-pi-pipeline-run", pipeline, now, id);
 }
 
-function loadAssembly(repoRoot: string, pipeline: string): AssemblyManifest {
-  if (!SLUG.test(pipeline)) throw new Error(`invalid pipeline slug: ${pipeline}`);
-  const assemblyPath = path.join(
-    repoRoot,
-    "casts",
-    "claude",
-    "skills",
-    `pipeline-${pipeline}`,
-    "_assembly.json",
-  );
-  if (!existsSync(assemblyPath)) throw new Error(`pipeline assembly not found: ${assemblyPath}`);
-  const manifest = JSON.parse(readFileSync(assemblyPath, "utf8")) as Partial<AssemblyManifest>;
-  if (
-    manifest.source_pipeline !== pipeline ||
-    typeof manifest.source_revision !== "number" ||
-    typeof manifest.harness_name !== "string" ||
-    !Array.isArray(manifest.phases)
-  ) {
-    throw new Error(`${assemblyPath}: invalid pipeline assembly`);
-  }
-  return manifest as AssemblyManifest;
-}
-
 function selectLinearPhases(manifest: AssemblyManifest, through?: string): AssemblyPhase[] {
   let throughIndex = manifest.phases.length;
   if (through !== undefined) {
@@ -325,13 +288,13 @@ function resolveScenario(repoRoot: string, pipeline: string, name: string): Reso
   };
 }
 
-function consumedArtifactIds(skillDir: string): string[] {
-  const provenancePath = path.join(skillDir, "_provenance.json");
+function consumedArtifactIds(skillBundleDir: string): string[] {
+  const provenancePath = path.join(skillBundleDir, "_provenance.json");
   if (!existsSync(provenancePath)) return [];
-  const manifest = JSON.parse(readFileSync(provenancePath, "utf8")) as ProvenanceManifest;
+  const manifest = JSON.parse(readFileSync(provenancePath, "utf8")) as SkillProvenance;
   const consumes = manifest.artifacts?.consumes ?? [];
   return consumes.map((artifact, index) => {
-    if (typeof artifact.id !== "string" || !SLUG.test(artifact.id)) {
+    if (typeof artifact?.id !== "string" || !SLUG.test(artifact.id)) {
       throw new Error(`${provenancePath}: artifacts.consumes[${index}] has an invalid id`);
     }
     return artifact.id;
@@ -493,6 +456,7 @@ export async function runLinearPipeline(
     harness_name: assembly.harness_name,
     assembly_path: path.relative(repoRoot, assemblyPath).split(path.sep).join("/"),
     assembly_sha256: sha256Path(assemblyPath),
+    foundry_head: foundryHead(repoRoot),
     through_phase: phases.at(-1)!.phase,
     scenario,
     engine: {

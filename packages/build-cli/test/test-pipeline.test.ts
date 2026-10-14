@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -7,6 +8,7 @@ import type { PiSkillRunRecord, RunPiSkillOptions } from "@galaxy-foundry/gxwf-p
 import { expect, test } from "vitest";
 
 import { defaultTestPipelineRunDir, runLinearPipeline } from "../src/commands/test-pipeline.js";
+import { foundryHead } from "../src/lib/foundry-head.js";
 
 function writeJson(filePath: string, value: unknown): void {
   mkdirSync(path.dirname(filePath), { recursive: true });
@@ -214,6 +216,52 @@ test("runs a linear prefix in fresh workers with declared artifact handoffs", as
   const written = JSON.parse(readFileSync(path.join(runDir, "run.json"), "utf8"));
   expect(written.run_id).toBe("pipeline-run-id");
   expect(written.through_phase).toBe(2);
+  expect(written.foundry_head).toBeNull();
+});
+
+test("records the Foundry commit the run read, including from a linked worktree", async () => {
+  const root = fixtureRepo();
+  const git = (cwd: string, ...args: string[]) =>
+    execFileSync("git", ["-C", cwd, ...args], { encoding: "utf8" }).trim();
+  const identity = ["-c", "user.name=t", "-c", "user.email=t@example.org"];
+  git(root, "init", "-q");
+  git(root, "add", "-A");
+  git(root, ...identity, "-c", "commit.gpgsign=false", "commit", "--no-verify", "-qm", "fixture");
+  const worktree = path.join(mkdtempSync(path.join(tmpdir(), "foundry-worktree-")), "tree");
+  git(root, "worktree", "add", "-q", "--detach", worktree);
+
+  // A root nested inside some other repository is not that repository's commit.
+  expect(foundryHead(path.join(root, "content"))).toBeNull();
+
+  for (const repoRoot of [root, worktree]) {
+    const record = await runLinearPipeline(
+      {
+        repoRoot,
+        pipeline: "demo-pipeline",
+        scenario: "tiny journey",
+        through: "1",
+        trials: 1,
+        runDir: path.join(mkdtempSync(path.join(tmpdir(), "foundry-run-")), "run"),
+        provider: "test-provider",
+        model: "test-model",
+        sandbox: "local",
+        timeoutMs: 1000,
+        credentialEnv: [],
+        sandboxNetwork: "none",
+      },
+      {
+        runSkill: async (options) => {
+          const workspace = path.join(options.runDir, "workspace");
+          mkdirSync(workspace, { recursive: true });
+          for (const artifact of options.expectedArtifacts ?? []) {
+            writeFileSync(path.join(workspace, artifact.path), artifact.id);
+          }
+          return fakeRecord(options, "summarize");
+        },
+      },
+    );
+    expect(record.foundry_head).toBe(git(root, "rev-parse", "HEAD"));
+  }
 });
 
 test("does not fail promotion when an optional output is absent", async () => {
