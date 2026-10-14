@@ -80,7 +80,7 @@ const existing = groups['existing-workflow'];
             <strong>Build from the brief</strong>
             {buildFromPlan && (
               <a class="build-link font-mono" href={`${base}/pipelines/${buildFromPlan.slug}/`}>
-                {buildFromPlan.entry.data.title} <span aria-hidden="true">→</span>
+                {buildFromPlan.entry.data.title}
               </a>
             )}
           </div>
@@ -96,7 +96,7 @@ const existing = groups['existing-workflow'];
     </div>
     <ul class="existing-links list-none p-0 m-0">
       {existing.map((pipeline) => (
-        <li><a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.entry.data.title} <span aria-hidden="true">→</span></a></li>
+        <li><a href={`${base}/pipelines/${pipeline.slug}/`}>{pipeline.entry.data.title}</a></li>
       ))}
     </ul>
   </aside>

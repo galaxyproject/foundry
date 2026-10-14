@@ -23,7 +23,7 @@ const { pipelines } = Astro.props;
             pipeline-{pipeline.slug}
           </a>
           <a href={`${base}/pipelines/${pipeline.slug}/`} class="pipeline-link">
-            {pipeline.title} <span aria-hidden="true">→</span>
+            {pipeline.title}
           </a>
         </div>
         {pipeline.summary && <p>{pipeline.summary}</p>}
