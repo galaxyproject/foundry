@@ -405,6 +405,8 @@ export async function runLinearPipeline(
     usage: emptyUsage(),
   };
   mkdirSync(runDir, { recursive: true, mode: 0o700 });
+  // On disk before any worker starts, so a run killed in its first trial still says what it was.
+  writePipelineRecord(runDir, record);
 
   for (let trialNumber = 1; trialNumber <= options.trials; trialNumber++) {
     const trialDir = path.join(runDir, `trial-${String(trialNumber).padStart(3, "0")}`);

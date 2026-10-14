@@ -185,6 +185,21 @@ describe("the evaluation run shape", () => {
     });
     expect(legacy.run.status).toBe("complete");
     expect(legacy.warnings.map((warning) => warning.code)).not.toContain("run-unfinished");
+
+    // Still in, or killed during, its first trial: nothing has been recorded yet.
+    const firstTrial = runModelFromTestPipeline({
+      ...options,
+      runDir: evaluationRun({
+        status: "running",
+        finished_at: null,
+        trials_requested: 1,
+        trials: [],
+      }),
+    });
+    expect(firstTrial.run.status).toBe("running");
+    expect(firstTrial.evaluation?.selected_trial).toBeNull();
+    expect(firstTrial.phases.every((phase) => phase.status !== "done")).toBe(true);
+    expect(firstTrial.warnings.map((warning) => warning.code)).toContain("run-unfinished");
   });
 
   it("surfaces why a phase failed", () => {

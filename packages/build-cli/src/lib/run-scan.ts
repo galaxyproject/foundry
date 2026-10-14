@@ -24,6 +24,8 @@ export interface ScanOptions {
   deepDirs: boolean;
   /** With `deepDirs`, nested files past this many are counted as ignored rather than listed. */
   maxDeepEntries: number;
+  /** Run-relative paths never read, at any depth: the files this invocation is about to write. */
+  skip: string[];
 }
 
 export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
@@ -32,6 +34,7 @@ export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
   totalEmbedBudget: 4 * 1024 * 1024,
   deepDirs: false,
   maxDeepEntries: 5000,
+  skip: [],
 };
 
 /**
@@ -125,6 +128,7 @@ function posixRel(from: string, to: string): string {
 function summarizeDir(
   dir: string,
   root: string,
+  skipped: (full: string) => boolean,
 ): { entry_count: number; total_bytes: number; sample: string[] } {
   let entryCount = 0;
   let totalBytes = 0;
@@ -145,7 +149,7 @@ function summarizeDir(
         if (depth < 3) walk(full, depth + 1);
         continue;
       }
-      if (!found.stats.isFile()) continue;
+      if (!found.stats.isFile() || skipped(full)) continue;
       entryCount += 1;
       totalBytes += found.stats.size;
       if (sample.length < 20) sample.push(posixRel(dir, full));
@@ -261,6 +265,8 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
     throw new Error(`cannot read run directory ${dir}`, { cause: error });
   }
 
+  const skip = new Set(opts.skip);
+  const skipped = (full: string): boolean => skip.has(posixRel(root, full));
   const budget: EmbedBudget = { spent: 0 };
   const fileEntry = (full: string, relpath: string, stats: Stats): ScannedEntry =>
     entryOf(full, relpath, stats, opts, budget);
@@ -284,7 +290,7 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
         walkNested(full, seen);
         continue;
       }
-      if (!found.stats.isFile()) continue;
+      if (!found.stats.isFile() || skipped(full)) continue;
       if (deepListed >= opts.maxDeepEntries) {
         ignored += 1;
         continue;
@@ -295,7 +301,7 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
   };
 
   for (const name of names) {
-    if (isExcluded(name) || READER_OUTPUTS.has(name)) {
+    if (isExcluded(name) || READER_OUTPUTS.has(name) || skip.has(name)) {
       ignored += 1;
       continue;
     }
@@ -308,7 +314,7 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
     const { stats } = found;
 
     if (stats.isDirectory()) {
-      const summary = summarizeDir(full, root);
+      const summary = summarizeDir(full, root, skipped);
       totalBytes += summary.total_bytes;
       entries.push({
         basename: name,

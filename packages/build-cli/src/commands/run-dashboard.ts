@@ -226,6 +226,14 @@ function displayPath(target: string, cwd: string): string {
  * The page is meant to be shared, so absolute paths are shown relative to the working directory or
  * under `~` rather than spelling out a home directory.
  */
+/** The run-relative paths of `files` that land inside `runDir`, so a scan does not read them back. */
+function insideRun(runDir: string, files: string[]): string[] {
+  return files
+    .map((file) => path.relative(runDir, file))
+    .filter((rel) => rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel))
+    .map((rel) => rel.split(path.sep).join("/"));
+}
+
 function footerCommandLine(argv: string[], cwd: string, home: string): string {
   const shown = (value: string): string => {
     if (!path.isAbsolute(value)) return value;
@@ -346,6 +354,7 @@ export function runDashboard(argv: string[], deps: Partial<RunDashboardDeps> = {
             ...(args.maxHashBytes !== null ? { maxHashBytes: args.maxHashBytes } : {}),
             ...(args.embedBudget !== null ? { totalEmbedBudget: args.embedBudget } : {}),
             deepDirs: args.deepDirs,
+            skip: insideRun(runDir, [manifestFile, dashboardFile]),
           },
           packageVersion: packageVersionValue,
           foundryHead: foundryHeadValue,

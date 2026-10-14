@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -133,6 +133,19 @@ describe("buildRunModel reading a run record", () => {
     const model = build(dir, { reconstruct: true, pipeline: PIPELINE });
     expect(model.run.provenance).toBe("reconstructed");
     expect(codes(model)).toContain("run-record-unparseable");
+  });
+
+  it("does not let nested files a deep scan lists pick the pipeline", () => {
+    const dir = runDir({ "notes.txt": "nothing declared at the top\n" });
+    const archived = path.join(dir, "archive");
+    mkdirSync(archived);
+    for (const name of ["summary-nextflow.json", "nextflow-galaxy-interface.md"]) {
+      writeFileSync(path.join(archived, name), "{}\n");
+    }
+    expect(() => build(dir, { reconstruct: true })).toThrow(PipelineUndeterminedError);
+    expect(() => build(dir, { reconstruct: true, scan: { deepDirs: true } })).toThrow(
+      PipelineUndeterminedError,
+    );
   });
 
   it("refuses a recorded pipeline that has no assembled harness here", () => {

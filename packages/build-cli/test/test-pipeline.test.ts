@@ -270,6 +270,47 @@ test("run.json reads as unfinished until the last trial ends", async () => {
   expect(written.trials).toHaveLength(2);
 });
 
+test("run.json is on disk, running, before the first trial ends", async () => {
+  const root = fixtureRepo();
+  const runDir = path.join(root, "runs", "first-trial");
+  const midRun: Record<string, unknown>[] = [];
+
+  await runLinearPipeline(
+    {
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "1",
+      trials: 1,
+      runDir,
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    },
+    {
+      runSkill: async (options) => {
+        const file = path.join(runDir, "run.json");
+        if (existsSync(file)) midRun.push(JSON.parse(readFileSync(file, "utf8")));
+        const workspace = path.join(options.runDir, "workspace");
+        mkdirSync(workspace, { recursive: true });
+        for (const artifact of options.expectedArtifacts ?? []) {
+          writeFileSync(path.join(workspace, artifact.path), artifact.id);
+        }
+        return fakeRecord(options, "summarize");
+      },
+      now: () => new Date("2026-09-09T00:00:00.000Z"),
+    },
+  );
+
+  expect(midRun).toHaveLength(1);
+  expect(midRun[0]).toEqual(
+    expect.objectContaining({ status: "running", finished_at: null, trials: [] }),
+  );
+});
+
 test("records the Foundry commit the run read, including from a linked worktree", async () => {
   const root = fixtureRepo();
   // Isolated from the developer's own git config, so their hooks and signing never run here.

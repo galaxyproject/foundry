@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -168,6 +168,22 @@ describe("runDashboard", () => {
     const result = run([TINY, "--root", REPO_ROOT, "--out", scratch(), "--trial", "2"]);
     expect(result.code).toBe(0);
     expect(result.stderr).toContain("--trial");
+  });
+
+  it("does not read its own earlier output back when --out sits inside the run", () => {
+    const copy = path.join(scratch(), "run");
+    cpSync(TINY, copy, { recursive: true });
+    const out = path.join(copy, "report");
+    const manifest = () => JSON.parse(readFileSync(path.join(out, "run-manifest.json"), "utf8"));
+    const argv = [copy, "--root", REPO_ROOT, "--out", out, "--offline", "--deep-dirs"];
+
+    expect(run(argv).code).toBe(0);
+    const first = manifest();
+    expect(run(argv).code).toBe(0);
+    const second = manifest();
+
+    expect(second.run.total_bytes).toBe(first.run.total_bytes);
+    expect(JSON.stringify(second.unmapped)).not.toContain("report/");
   });
 
   it("keeps the home directory out of the page footer", () => {

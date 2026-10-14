@@ -109,15 +109,19 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     trials.find((trial) => trial.trial === options.trial) ??
     trials.find((trial) => trial.status !== "passed") ??
     trials[0];
-  if (!chosen) throw new Error(`${PIPELINE_RUN_FILE} carries no trials`);
-  if (options.trial !== undefined && chosen.trial !== options.trial) {
+  // A run still in its first trial has written its record but no trial yet.
+  if (!chosen && record.finished_at !== null) {
+    throw new Error(`${PIPELINE_RUN_FILE} carries no trials`);
+  }
+  const chosenPhases = chosen?.phases ?? [];
+  if (options.trial !== undefined && chosen?.trial !== options.trial) {
     warnings.push({
       code: "trial-not-found",
-      message: `trial ${options.trial} is not in this record; showing trial ${chosen.trial}`,
+      message: `trial ${options.trial} is not in this record; ${chosen ? `showing trial ${chosen.trial}` : "no trial has finished yet"}`,
     });
   }
 
-  const phaseRecords = new Map(chosen.phases.map((phase) => [phase.phase, phase]));
+  const phaseRecords = new Map(chosenPhases.map((phase) => [phase.phase, phase]));
 
   const phases: RunPhase[] = assembly.phases.map((phase) => {
     const ran = phaseRecords.get(phase.phase);
@@ -140,7 +144,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     });
   });
 
-  for (const phase of chosen.phases) {
+  for (const phase of chosenPhases) {
     if (phase.status !== "passed") {
       const kind = phase.failure_kind ? ` (${phase.failure_kind})` : "";
       warnings.push({
@@ -161,13 +165,13 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   // Each phase writes into its own workspace, so the same artifact id can appear more than once
   // across a run. The latest phase that produced it is the one the run carried forward.
   const produced = new Map<string, { phase: number; result: ArtifactResult }>();
-  for (const phase of chosen.phases) {
+  for (const phase of chosenPhases) {
     for (const artifact of phase.artifacts ?? []) {
       produced.set(artifact.id, { phase: phase.phase, result: artifact });
     }
   }
 
-  const furthest = Math.max(0, ...chosen.phases.map((phase) => phase.phase));
+  const furthest = Math.max(0, ...chosenPhases.map((phase) => phase.phase));
 
   const artifacts: RunArtifact[] = declared.map((output) => {
     const hit = produced.get(output.id);
@@ -229,7 +233,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       phase_count: trial.phases.length,
       failed_phase: trial.phases.find((phase) => phase.status !== "passed")?.phase ?? null,
     })),
-    selected_trial: chosen.trial,
+    selected_trial: chosen?.trial ?? null,
     duration_ms: record.duration_ms,
   };
 
@@ -253,7 +257,9 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       label: "run",
       state: status === "complete" ? "ok" : status === "running" ? "warn" : "error",
       value: record.status,
-      detail: `trial ${chosen.trial} of ${requested}`,
+      detail: chosen
+        ? `trial ${chosen.trial} of ${requested}`
+        : `no trial finished of ${requested}`,
       anchor: "#phases",
     },
     phasesTile(phases, `evaluated through phase ${record.through_phase}`),
@@ -306,7 +312,10 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       assembly_sha256: record.assembly_sha256,
       assembly_matches_checkout: assemblyMatches,
       foundry_head: typeof record.foundry_head === "string" ? record.foundry_head : null,
-      options_observed: [`trial-${chosen.trial}`, record.sandbox?.mode ?? "unknown"],
+      options_observed: [
+        ...(chosen ? [`trial-${chosen.trial}`] : []),
+        record.sandbox?.mode ?? "unknown",
+      ],
       status,
       started_at: record.started_at,
       finished_at: record.finished_at,

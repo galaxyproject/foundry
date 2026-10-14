@@ -146,7 +146,10 @@ export function buildRunModel(options: BuildRunModelOptions): RunModel {
   warnings.push(...feedbackLoad.warnings, ...openRequirementsLoad.warnings);
 
   const index = options.pipelineIndex ?? buildPipelineIndex(repoRoot, options.runtimeArtifacts);
-  const observed = scan.entries.filter((e) => e.type === "file").map((e) => e.basename);
+  // Only depth one is run output; a deep scan also lists archived runs and test inputs.
+  const observed = scan.entries
+    .filter((e) => e.type === "file" && e.relpath === e.basename)
+    .map((e) => e.basename);
   const detection: PipelineDetection = detectPipeline(observed, index, {
     recordPipeline: record?.pipeline,
     ledgerPipeline: feedback?.run.pipeline,

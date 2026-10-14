@@ -73,6 +73,21 @@ describe("scanRunDir exclusions", () => {
     expect([...entries.keys()]).toEqual(["kept.md"]);
   });
 
+  it("leaves out the paths it is told to skip, at any depth, whether or not it goes deep", () => {
+    const dir = tree({
+      "summary.json": "{}",
+      "report/dashboard.html": "x".repeat(500),
+      "report/notes.md": "kept",
+    });
+    const skip = ["report/dashboard.html"];
+    for (const deepDirs of [false, true]) {
+      const { result, entries } = byPath(dir, { skip, deepDirs });
+      expect(entries.has("report/dashboard.html")).toBe(false);
+      expect(entries.get("report")!.dir_summary!.entry_count).toBe(1);
+      expect(result.total_bytes).toBe("{}".length + "kept".length);
+    }
+  });
+
   it("does not follow a symlink that leaves the run directory", () => {
     const outside = tree({ "secret.md": "outside the run", "deep/x.md": "x" });
     const dir = tree({ "kept.md": "x" });

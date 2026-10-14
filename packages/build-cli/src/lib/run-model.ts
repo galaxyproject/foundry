@@ -279,7 +279,7 @@ export interface EvaluationModel {
     phase_count: number;
     failed_phase: number | null;
   }>;
-  selected_trial: number;
+  selected_trial: number | null;
   duration_ms: number;
 }
 
