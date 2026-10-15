@@ -35,7 +35,8 @@ export interface PipelinePhaseRunRecord {
   phase: number;
   skill: string;
   status: RunStatus;
-  failure_kind?: "worker" | "artifact_promotion";
+  // The worker's own kind when it failed; a timed-out or cancelled worker's status says it alone.
+  failure_kind?: PiSkillRunRecord["failure_kind"] | "artifact_promotion";
   error?: string;
   run_dir: string;
   worker_run_id?: string;
