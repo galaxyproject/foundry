@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 9,
     "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
-    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-09-22T18:21:58.205Z",
+  "cast_at": "2026-10-15T21:04:49.224Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Implement identifier-derived collection reshaping via Apply Rules.",
       "trigger": "When collection element identifiers need regex parsing, nesting-level swaps, regrouping, or paired identifier assignment.",
-      "src_hash": "7e166c0495b4a5366f49fed4d002419a27cb33fb8eb431374878c1890a5f95a6",
-      "dst_hash": "7e166c0495b4a5366f49fed4d002419a27cb33fb8eb431374878c1890a5f95a6",
+      "src_hash": "cd61c61b4613694c685d51cc7dea9c997b3350be04135f387135eed9d9052910",
+      "dst_hash": "cd61c61b4613694c685d51cc7dea9c997b3350be04135f387135eed9d9052910",
       "source": "deterministic"
     },
     {
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Insert built-in Galaxy collection-operation steps when a direct tool connection cannot express the needed shape.",
       "trigger": "When a step needs collection construction, filtering, extraction, zipping, unzipping, flattening, merging, or relabeling.",
-      "src_hash": "457439b3c3bb23ecf9732d7c7d6e0b8fae976b6e9e26f1b6af2d818843fba601",
-      "dst_hash": "457439b3c3bb23ecf9732d7c7d6e0b8fae976b6e9e26f1b6af2d818843fba601",
+      "src_hash": "ca52bc372ad0aa6dc6f0a036a5b5ee499090a36bd3e31cd0215a393c19271531",
+      "dst_hash": "ca52bc372ad0aa6dc6f0a036a5b5ee499090a36bd3e31cd0215a393c19271531",
       "source": "deterministic"
     },
     {
@@ -104,8 +104,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve concrete tool/job failure evidence while implementing step labels, tool ids, output labels, and collection wiring.",
       "trigger": "When a selected wrapper has explicit failure semantics, dynamic outputs, non-default stdio rules, strict-shell behavior, or runtime-only failure risk.",
-      "src_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
-      "dst_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
+      "src_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
+      "dst_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
       "source": "deterministic"
     },
     {
@@ -119,8 +119,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve testable output labels and collection element identifiers while replacing abstract steps with concrete gxformat2 steps.",
       "trigger": "When a concrete step changes output labels, emits collection outputs, creates a diagnostic checkpoint, or makes a final output too weakly assertable.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {

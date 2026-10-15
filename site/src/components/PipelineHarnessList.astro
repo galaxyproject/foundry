@@ -34,8 +34,9 @@ const { pipelines } = Astro.props;
           </span>
         )}
       </div>
-      <pre><code>Claude: /foundry-skills:pipeline-{pipeline.slug}
-Codex:  $pipeline-{pipeline.slug}</code></pre>
+      <pre><code>Claude:      /foundry-skills:pipeline-{pipeline.slug}
+Codex:       $pipeline-{pipeline.slug}
+Antigravity: /pipeline-{pipeline.slug}</code></pre>
     </li>
   ))}
 </ul>
@@ -44,7 +45,7 @@ Codex:  $pipeline-{pipeline.slug}</code></pre>
   .harness-list { border-top: 1px solid var(--color-border-subtle); }
   .harness-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(29rem, 0.7fr);
+    grid-template-columns: minmax(0, 1fr) minmax(31rem, 0.7fr);
     gap: 1rem;
     align-items: center;
     padding: 1rem 0.25rem;

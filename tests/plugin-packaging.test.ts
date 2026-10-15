@@ -50,17 +50,23 @@ function skillDirectories(): string[] {
     .sort();
 }
 
-describe("dual-runtime plugin packaging", () => {
+describe("multi-runtime plugin packaging", () => {
   const claudeManifest = readJson<PluginManifest>("casts/claude/.claude-plugin/plugin.json");
   const codexManifest = readJson<PluginManifest>("casts/claude/.codex-plugin/plugin.json");
+  const antigravityManifest = readJson<PluginManifest>("casts/claude/plugin.json");
   const marketplace = readJson<Marketplace>(".agents/plugins/marketplace.json");
 
-  it("points both runtimes at one plugin identity and skill tree", () => {
+  it("points all runtimes at one plugin identity and skill tree", () => {
     expect(codexManifest.name).toBe(claudeManifest.name);
     expect(codexManifest.version).toBe(claudeManifest.version);
+    expect(antigravityManifest.name).toBe(claudeManifest.name);
+    expect(antigravityManifest.version).toBe(claudeManifest.version);
     expect(codexManifest.skills).toBe("./skills/");
+    expect(antigravityManifest.skills).toBe("./skills/");
     expect(existsSync(path.join(pluginRoot, codexManifest.skills))).toBe(true);
+    expect(existsSync(path.join(pluginRoot, antigravityManifest.skills))).toBe(true);
     expect(existsSync(path.join(repoRoot, "casts", "codex", "skills"))).toBe(false);
+    expect(existsSync(path.join(repoRoot, "casts", "antigravity", "skills"))).toBe(false);
   });
 
   it("publishes the shared plugin through the repo Codex marketplace", () => {
@@ -70,6 +76,16 @@ describe("dual-runtime plugin packaging", () => {
     expect(path.resolve(repoRoot, entry!.source.path)).toBe(pluginRoot);
     expect(entry!.policy).toEqual({ installation: "AVAILABLE", authentication: "ON_INSTALL" });
     expect(typeof entry!.category).toBe("string");
+  });
+
+  it("declares workspace customizations for Antigravity", () => {
+    interface ConfigFile {
+      entries: Array<{ path: string }>;
+    }
+    const pluginsConfig = readJson<ConfigFile>(".agents/plugins.json");
+    expect(pluginsConfig.entries.some((e) => e.path === "casts/claude")).toBe(true);
+    const skillsConfig = readJson<ConfigFile>(".agents/skills.json");
+    expect(skillsConfig.entries.some((e) => e.path === "casts/claude/skills")).toBe(true);
   });
 
   it("keeps generated skill frontmatter in the shared portable core", () => {

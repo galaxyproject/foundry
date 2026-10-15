@@ -6,9 +6,9 @@
     "path": "content/molds/review-galaxy-workflow/index.md",
     "revision": 1,
     "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
-    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-09-22T18:22:00.643Z",
+  "cast_at": "2026-10-15T21:04:51.169Z",
   "refs": [
     {
       "kind": "prompt",
@@ -38,8 +38,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish a genuine workflow-interface or test-addressing defect from a stylistic preference when a label and a test key disagree.",
       "trigger": "When an input, promoted output, collection identifier, or workflow-output label does not agree with the supplied test.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Recognize corpus-observed shortcuts so a finding cites an observed IWC anti-pattern rather than reviewer taste.",
       "trigger": "When a structural choice looks like a shortcut and the finding needs corpus grounding before it is raised as required.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
+      "dst_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
       "source": "deterministic"
     },
     {
@@ -68,8 +68,8 @@
       "evidence": "corpus-observed",
       "purpose": "Judge test labels, durable remote fixtures, creator identifiers, and companion-file naming against current IWC conventions.",
       "trigger": "When assessing the submission's test file, test-data references, creator metadata, or release entry.",
-      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
-      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
     },
     {

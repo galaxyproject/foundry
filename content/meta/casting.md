@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-25
-revision: 31
+revised: 2026-10-14
+revision: 32
 summary: "How typed Mold references become target-specific cast artifacts with provenance."
 ---
 
@@ -76,7 +76,7 @@ Drift surfaces via `foundry-build cast <mold> --check` (per-Mold) and `cast-skil
 To cast a Mold, the casting process consumes:
 
 - **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. The cast renders the procedural body of `index.md` into `SKILL.md`. Which sibling files travel is not decided here: the `mold` kind declares a disposition per companion (`packages/gxwf-foundry-note-schema/src/types/mold/schema.ts`), and the cast verifier refuses a bundle carrying one that is not `bundled`. `eval.md` and the other Foundry-only companions never leave the Foundry; `casting.md` and `cast-skill-verification.md` are read while casting but not shipped. Author-facing meta-content (changelog entries, casting open-questions) belongs in those sibling files, not in the body of `index.md` — anything in the body is runtime instruction.
-- **Artifact IO contracts** — `input_artifacts[]` and `output_artifacts[]` define what a skill consumes and produces. `optional: true` identifies an input that may be absent or an output whose honest absence must not fail the run; omission means required. Producer-owned schemas declared on `output_artifacts[].schema` are surfaced to consumers by shared artifact `id`; cast provenance records optionality, the producer list, and inherited schema hints for harnesses. Root `runtime_artifacts.yml` contributes explicit runtime-mode producers to the same index, rendered as `runtime:<option>`, so a runtime-initialized ledger remains a normal declared input rather than a producer-validation exemption.
+- **Artifact IO contracts** — `input_artifacts[]` and `output_artifacts[]` define what a skill consumes and produces. `optional: true` identifies an input that may be absent or an output whose honest absence must not fail the run; omission means required. Producer-owned schemas declared on `output_artifacts[].schema` are surfaced to consumers by shared artifact `id`; cast provenance records optionality, the producer list, and inherited schema hints for harnesses. Root `runtime_artifacts.yml` contributes runtime producers to the same index, rendered as `runtime:<option>` for an opt-in mode and `runtime:harness` for an artifact the harness writes on every run, so a runtime-initialized ledger remains a normal declared input rather than a producer-validation exemption.
 - **All typed references declared in the manifest**, resolved by kind:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
@@ -86,7 +86,7 @@ To cast a Mold, the casting process consumes:
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
   - Other Molds (`related_molds`) — flagged as a smell; shared operational content should move to a pattern page, CLI manual page, schema, prompt, example, or research note.
-- **The cast bundle spec** — the deterministic Agent Skills assembly and reference layout declared in `casts/claude/_target.yml`. The historical target name remains for provenance compatibility; Claude Code and Codex package the resulting tree through separate thin manifests.
+- **The cast bundle spec** — the deterministic Agent Skills assembly and reference layout declared in `casts/claude/_target.yml`. The historical target name remains for provenance compatibility; Claude Code, Codex, and Antigravity package the resulting tree through separate thin manifests.
 
 Resolution policy is per-kind, not a single rule:
 - `pattern` — verbatim copy.
@@ -97,7 +97,7 @@ Resolution policy is per-kind, not a single rule:
 
 ## Output contract
 
-Per cast: `casts/claude/skills/<mold-name>/`. The directory uses the portable Agent Skills core shared by Claude Code and Codex:
+Per cast: `casts/claude/skills/<mold-name>/`. The directory uses the portable Agent Skills core shared by Claude Code, Codex, and Antigravity:
 ```
 casts/claude/skills/<mold-name>/
 ├── SKILL.md                  # deterministic render of Mold body + artifacts + refs
@@ -118,7 +118,7 @@ Per-kind subdirectories under `references/` mirror the casting dispatch and let 
 
 `SKILL.md` contains deterministic sections for when to use the skill, upstream artifact inputs, produced artifacts, upfront references, on-demand references and triggers, validation hints, the Mold procedure, optional feedback-mode behavior, and runtime notes. `_feedback.md` is rendered from the protocol note named by the registered feedback artifact rather than repeated in every Mold. Raw Foundry wiki-links are stripped or resolved to packaged reference paths so the skill is self-contained. Its frontmatter stays in the shared `name`/`description` core; runtime-specific invocation syntax belongs in manifests and usage documentation.
 
-The plugin root carries both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`, each pointing to the same `skills/` directory. Repo marketplace metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, while Codex reads `.agents/plugins/marketplace.json`. Neither duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
+The plugin root carries `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `plugin.json`, each pointing to the same `skills/` directory. Repo metadata is likewise thin: Claude reads `.claude-plugin/marketplace.json`, Codex reads `.agents/plugins/marketplace.json`, and Antigravity reads `plugin.json` and workspace configurations in `.agents/`. None duplicates skill bodies, references, schemas, provenance, or Pipeline assemblies.
 
 **Claude is the only target.** A target becomes real by acquiring a `casts/<target>/_target.yml` —
 that file's existence is what the caster and the site each read, so there is no list of targets

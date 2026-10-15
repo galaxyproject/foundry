@@ -77,10 +77,22 @@ export {
 export {
   loadRuntimeArtifactRegistry,
   requireRuntimeArtifactRegistry,
+  runtimeModeOption,
+  runtimeProducerId,
   type RuntimeArtifactDefinition,
   type RuntimeArtifactLoad,
+  type RuntimeArtifactProducer,
   type RuntimeArtifactRegistry,
 } from "./runtime-artifacts.js";
+
+export {
+  ASSEMBLY_FILE,
+  loadAssemblyManifest,
+  type AssemblyBranchPhase,
+  type AssemblyManifest,
+  type AssemblyMoldPhase,
+  type AssemblyPhase,
+} from "./assembly.js";
 
 // The license table is not ours: it ships in @galaxy-foundry/license-policy, shared
 // across Foundry instances. Only `LicensePolicy` is re-exported, because a caller

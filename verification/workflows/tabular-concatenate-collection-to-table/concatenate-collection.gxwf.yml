@@ -1,0 +1,56 @@
+class: GalaxyWorkflow
+name: "Concatenate tabular collection elements"
+inputs:
+  - id: headered_tables
+    type: collection
+    collection_type: list
+  - id: headerless_tables
+    type: collection
+    collection_type: list
+outputs:
+  - id: rows_with_sample
+    outputSource: with_names/output
+  - id: plain_rows
+    outputSource: without_names/output
+steps:
+  - id: with_names
+    label: with_names
+    tool_id: toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0
+    tool_version: "5.1.0"
+    tool_shed_repository:
+      changeset_revision: 90981f86000f
+      name: collapse_collections
+      owner: nml
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_list
+        source: headered_tables
+    out:
+      - id: output
+    tool_state:
+      input_list:
+        __class__: ConnectedValue
+      filename:
+        add_name: true
+        place_name: same_multiple
+      one_header: true
+  - id: without_names
+    label: without_names
+    tool_id: toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0
+    tool_version: "5.1.0"
+    tool_shed_repository:
+      changeset_revision: 90981f86000f
+      name: collapse_collections
+      owner: nml
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_list
+        source: headerless_tables
+    out:
+      - id: output
+    tool_state:
+      input_list:
+        __class__: ConnectedValue
+      filename:
+        add_name: false
+      one_header: false

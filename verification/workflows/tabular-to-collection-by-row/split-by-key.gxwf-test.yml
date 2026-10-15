@@ -1,0 +1,16 @@
+- doc: "Repeated keys group complete rows under one identifier while preserving the header"
+  job:
+    rows:
+      class: File
+      path: test-data/rows.tabular
+      filetype: tabular
+  outputs:
+    grouped_rows:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        alpha:
+          file: test-data/expected-alpha.tabular
+        beta:
+          file: test-data/expected-beta.tabular

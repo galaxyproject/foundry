@@ -1,0 +1,48 @@
+class: GalaxyWorkflow
+name: "Split prefixed taxonomy string into rank columns"
+inputs:
+  - id: mapseq_rows
+    type: data
+outputs:
+  - id: ranks
+    outputSource: split_taxonomy/outfile
+steps:
+  - id: split_taxonomy
+    label: split_taxonomy
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy0
+    tool_version: "9.5+galaxy0"
+    tool_shed_repository:
+      changeset_revision: 3dc70b59608c
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: mapseq_rows
+    out:
+      - id: outfile
+    tool_state:
+      infile: { __class__: ConnectedValue }
+      variables: []
+      code: |-
+        BEGIN {
+          FS = OFS = "\t"
+          print "OTU", "Superkingdom", "Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"
+        }
+        NR > 2 {
+          otu_id = "OTU_" $1
+          superkingdom = kingdom = phylum = tax_class = order = family = genus = species = ""
+          n = split($3, taxonomy, ";")
+          for (i = 1; i <= n; i++) {
+            token = taxonomy[i]
+            if (token ~ /^sk__/) superkingdom = token
+            else if (token ~ /^k__/) kingdom = token
+            else if (token ~ /^p__/) phylum = token
+            else if (token ~ /^c__/) tax_class = token
+            else if (token ~ /^o__/) order = token
+            else if (token ~ /^f__/) family = token
+            else if (token ~ /^g__/) genus = token
+            else if (token ~ /^s__/) species = token
+          }
+          print otu_id, superkingdom, kingdom, phylum, tax_class, order, family, genus, species
+        }

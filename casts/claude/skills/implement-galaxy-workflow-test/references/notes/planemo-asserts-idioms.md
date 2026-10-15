@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-11
-revision: 6
+revised: 2026-09-23
+revision: 7
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
@@ -16,231 +16,109 @@ related_notes:
   - "[[validate-tests]]"
   - "[[iwc-tabular-operations-survey]]"
   - "[[galaxy-discover-datasets]]"
-summary: "Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate."
+summary: "Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints."
 ---
 
-# Planemo asserts: idiom and decision guide
+# Choosing Planemo workflow-test assertions
 
-Companion to [[iwc-test-data-conventions]] (input shapes), [[galaxy-workflow-testability-design]] (workflow structure before test YAML exists), and [[iwc-shortcuts-anti-patterns]] (what's accepted vs smell). This note is forward-looking: when authoring a new `<workflow>-tests.yml`, which assertion family fits which output, and what the recommended tolerances and operators are.
+Name the wrong result a test must catch before choosing YAML syntax. For a fixed input and byte-stable output, compare the result with an expected file or checksum. For a variable result, assert the stable properties that would fail if the analysis were wrong. A size, shape, or existence check is a useful smoke test when content is genuinely variable, ideally alongside a stable checkpoint. It is an anti-pattern when it replaces a more meaningful check that is available. [[iwc-shortcuts-anti-patterns]] develops that judgment, while [[iwc-test-data-conventions]] covers input fixtures and [[tests-format]] supplies the exact assertion vocabulary.
 
-The **vocabulary itself is not restated here** — every assertion's parameter list, types, defaults, required fields, and Python docstring is rendered from the test-format JSON Schema at [[tests-format]]. Assertion names below deep-link into that page (e.g. [[tests-format#has_text_model|has_text]] jumps straight to that `$def`).
+## 1. Choose by the property, then the output type
 
-## 1. Choose by output type
+| Output | Meaningful check to try | If the result varies |
+| --- | --- | --- |
+| Text report or HTML | [[tests-format#has_text_model|has_text]] for a stable result, section, or value. Use [[tests-format#has_line_model|has_line]] for a complete stable line. | Use [[tests-format#has_text_matching_model|has_text_matching]] or [[tests-format#has_line_matching_model|has_line_matching]] for a bounded variable field. Line count or size can supplement the content check. |
+| TSV, CSV, BED, GFF, or GTF | Compare a small deterministic file, or check a stable header and representative data row. [[tests-format#has_n_columns_model|has_n_columns]] checks shape. | Check a stable row or field, with a justified [[tests-format#has_n_lines_model|has_n_lines]] range if row count varies. Do not infer correct rows from column count alone. |
+| VCF | Compare expected calls exactly when reproducible. Otherwise assert a known variant record or a bounded record pattern. | Header changes may justify a measured `lines_diff:`, but the allowance applies to the whole file. Pair it with a record-level check. |
+| FASTA or FASTQ | Compare exact sequence output when reproducible, or assert a known sequence or read identifier. | Line or size checks only establish rough shape. Check a stable sequence statistic or expose one as another output when content varies. |
+| JSON | [[tests-format#has_json_property_with_value_model|has_json_property_with_value]] for a stable JSON value, or [[tests-format#has_json_property_with_text_model|has_json_property_with_text]] for a stable string. | Choose a stable property or companion summary. Searching for `{` proves little beyond text presence. |
+| HDF5 or AnnData | [[tests-format#has_h5_keys_model|has_h5_keys]] for required groups or datasets, and [[tests-format#has_h5_attribute_model|has_h5_attribute]] where an attribute value matters. | Keys prove structure, not cell counts or biological results. Assert a stable table or report checkpoint too. |
+| XML | [[tests-format#is_valid_xml_model|is_valid_xml]] plus [[tests-format#has_element_with_path_model|has_element_with_path]], element text, or element count for the property at issue. | Ignore irrelevant formatting while keeping a stable semantic assertion. |
+| Images and plots | Image dimensions or channel/frame checks confirm rendering and shape. | Check the table, matrix, or summary behind the plot if available. Size and dimensions alone do not verify plotted values. |
+| ZIP, tar, or tar.gz archives | [[tests-format#has_archive_member_model|has_archive_member]] for required members, optionally with nested assertions on member content. | Compare stable members or a companion report when the archive bytes vary. This assertion is for archive formats, not BAM or HDF5. |
+| BAM or other opaque binary | Exact file or checksum comparison if byte-stable. | A measured size band can be a smoke check. Expose a flagstat, coverage table, or other stable summary to check the analysis. |
+| Output collection | Assert collection type or count and address significant members by identifier with `element_tests:`. | Member existence alone cannot verify member content. Give representative members meaningful assertions. |
 
-The single most useful decision table. Pick the row that matches the file format the workflow emits; default to the recommended assertion family.
+If only a weak final artifact is exposed, consider adding a workflow output that carries a stable result before settling on the smoke check. The [IWC Scanpy workflow test](https://github.com/galaxyproject/iwc/blob/main/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy-tests.yml) checks image properties and also asserts on AnnData and text or table outputs. [[galaxy-workflow-testability-design]] explains how to choose those checkpoints. An assertion on a checkpoint should test the relevant result, not merely that its file exists.
 
-| Output type | Default assertion family | Why | Fallback |
-|---|---|---|---|
-| **Plain text reports / logs** (FastQC summary, MultiQC text section) | [[tests-format#has_text_model|has_text]] (substring on a known stable token) + [[tests-format#has_n_lines_model|has_n_lines]] with `delta:` | Substring is robust across versions; line count catches truncation | [[tests-format#has_text_matching_model|has_text_matching]] (regex) when token text changes per run |
-| **HTML reports** (MultiQC HTML, custom dashboards) | [[tests-format#has_text_model|has_text]] against stable section names | HTML embeds timestamps and asset hashes; byte-diff is hopeless | [[tests-format#has_size_model|has_size]] + large `delta` as last resort |
-| **Tabular** (TSV, CSV, BED-like) | [[tests-format#has_n_columns_model|has_n_columns]] + [[tests-format#has_text_model|has_text]] for headers + [[tests-format#has_n_lines_model|has_n_lines]] with `delta:` | Schema-shape + content probes; tolerant to row reordering | [[tests-format#has_line_matching_model|has_line_matching]] for a known canonical row |
-| **VCF** | `compare: diff` with `lines_diff: 6` | The `lines_diff: 6` constant matches the typical VCF header preamble that embeds `##fileDate=` and `##source=` | [[tests-format#has_text_matching_model|has_text_matching]] for known variants |
-| **BAM** | [[tests-format#has_size_model|has_size]] + [[tests-format#has_archive_member_model|has_archive_member]] (BAM is a gzipped block format) | Headers contain `@PG` lines with command lines and Galaxy job IDs; never byte-diff | Convert to SAM in a downstream step and assert on text |
-| **FASTA** (deterministic — assemblies, consensus) | `file:` exact comparison or [[tests-format#has_text_model|has_text]] for known sequence | Output is byte-stable when the upstream tool is deterministic | [[tests-format#has_n_lines_model|has_n_lines]] if line wrapping varies |
-| **FASTA** (non-deterministic — RepeatModeler libraries) | `compare: sim_size` with large `delta:` | Family content varies run-to-run | [[tests-format#has_n_lines_model|has_n_lines]] with `delta:` |
-| **FASTQ** (rare as workflow output) | [[tests-format#has_n_lines_model|has_n_lines]] (must be multiple of 4) | Quality scores are read-id-dependent | `compare: sim_size` |
-| **JSON** (deterministic — config dumps, params) | [[tests-format#has_json_property_with_value_model|has_json_property_with_value]] / [[tests-format#has_json_property_with_text_model|has_json_property_with_text]] | Surgical: assert on the property you care about, ignore the rest | `compare: diff` if the JSON is fully canonical |
-| **JSON** (stochastic — HyPhy stats, MCMC results) | `has_text: text: "{"` (existence-only) | Embedded floats break any structural assertion; see [[iwc-shortcuts-anti-patterns]] §1 | [[tests-format#has_h5_keys_model|has_h5_keys]]-equivalent for top-level structural keys |
-| **HDF5 / AnnData** | [[tests-format#has_h5_keys_model|has_h5_keys]] + [[tests-format#has_h5_attribute_model|has_h5_attribute]] for known structure | Asserts shape, not values — values are float-noisy | [[tests-format#has_size_model|has_size]] with `delta:` |
-| **XML** | [[tests-format#is_valid_xml_model|is_valid_xml]] + [[tests-format#has_element_with_path_model|has_element_with_path]] + `element_text_is`/`element_text_matches` | Surgical structural probes; byte-diff fails on whitespace/attribute-order | [[tests-format#has_n_elements_with_path_model|has_n_elements_with_path]] for cardinality |
-| **PNG / image plots** | [[tests-format#has_image_width_model|has_image_width]] + [[tests-format#has_image_height_model|has_image_height]] + [[tests-format#has_size_model|has_size]] with `delta:` (5–10%) | Catches "rendered something with the right dimensions"; corpus norm | [[tests-format#has_image_center_of_mass_model|has_image_center_of_mass]] if mask/segmentation outputs are deterministic |
-| **TIFF / multipage images** | [[tests-format#has_image_frames_model|has_image_frames]] + [[tests-format#has_image_channels_model|has_image_channels]] + [[tests-format#has_size_model|has_size]] with `delta:` | Same logic, channel/frame structure matters | — |
-| **Archives** (zip, tar.gz) | `has_archive_member: path: "regex"` with nested `asserts:` | Asserts on a specific member; archive timestamps never byte-stable | [[tests-format#has_size_model|has_size]] with `delta:` |
-| **GFF / GTF** | [[tests-format#has_n_lines_model|has_n_lines]] with `delta:` + [[tests-format#has_text_model|has_text]] for known feature | Tools reorder freely; hard to byte-diff | `has_n_columns: 9` (GFF spec) |
-| **Cool / HiC matrices** | `compare: sim_size` with multi-MB `delta:` | Binary, run-to-run variance | [[tests-format#has_archive_member_model|has_archive_member]] for HDF5 component |
+## 2. Compare operators and expected artifacts
 
-When in doubt: start with [[tests-format#has_size_model|has_size]] + `delta_frac: 0.1`. It catches the catastrophic failure mode (empty / 10x bigger output). Then add a content probe.
+`file:` or `location:` supplies an expected artifact for a comparison. `compare: diff` is the default and is appropriate for byte-stable results. An output `checksum:` can cover a large byte-stable result without storing the whole expected file. Use `compare: re_match` or `re_match_multiline` when the expected artifact expresses bounded regex variation, `contains` when an expected block must occur in the output, and `sim_size` when only approximate byte size is dependable. [Planemo's output-format guide](https://planemo.readthedocs.io/en/latest/test_format.html#outputs) documents these forms. Exact comparison gives a useful diff on failure, so keep it when the output really is stable.
 
-### 1a. If the assertion is too weak, revisit the workflow output
+`lines_diff:` on `diff` is a count of allowed differing lines, not an instruction to ignore a header. A changed line counts as a removal and an addition under the [[tests-format|vendored schema]]. For a VCF with mutable provenance, inspect actual comparisons to set any allowance, then ensure the allowed count cannot let a changed call pass unnoticed. A fixed `lines_diff: 6` is not a VCF default. If a record is stable, assert that record separately or compare a normalized output.
 
-Assertion choice sometimes reveals a workflow-design problem. If the only available output can support only a size check or image-dimension smoke test, check whether the workflow should expose a stronger checkpoint before settling for the weak assertion.
+## 3. Set tolerances from the failure boundary
 
-- Scanpy's plot outputs use size and image-dimension assertions, but the same workflow also exposes AnnData HDF5 checkpoints and a cluster-count table (`$IWC/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy-tests.yml:33-205`).
-- RNA-seq paired-end uses coarse size bands for coverage/mapped-read outputs, but expression/count tables get stronger regex and exact-line checks (`$IWC/workflows/transcriptomics/rnaseq-pe/rnaseq-pe-tests.yml:48-97`).
+For `compare: sim_size`, `delta:` is an absolute byte allowance and `delta_frac:` a fractional allowance relative to the expected artifact. For [[tests-format#has_size_model|has_size]], `delta:` is an absolute byte allowance around `size:`. In count and image assertions, `delta:` uses that assertion's unit, such as lines or pixels. Do not transfer a number between assertion families without checking its unit in [[tests-format]].
 
-Rule: if a translated workflow exposes only weakly assertable final reports, consult [[galaxy-workflow-testability-design]] and consider promoting a table/text/HDF5 checkpoint before writing the final assertions.
+Run representative inputs across the environments the test must support. Record the observed range and choose the smallest allowance that includes expected variation while rejecting the wrong result named at the start. In particular, check whether the lower bound admits an empty output. If it does, add a positive minimum or a stronger assertion. The [IWC RepeatMasking test](https://github.com/galaxyproject/iwc/blob/main/workflows/repeatmasking/RepeatMasking-Workflow-tests.yml) uses broad size comparisons for variable outputs, but its byte allowances are measurements for that case, not reusable defaults. There is no general 10% tolerance for new outputs.
 
-## 2. The `compare:` operators
+## 4. Text assertions and repeated checks
 
-Top-level on a `file:` output assertion. Vocabulary, in decreasing strictness:
-
-- **`diff`** (default). Byte-for-byte equality with optional `lines_diff:` tolerance for a fixed number of header lines. Use only when the upstream tool is deterministic on fixed inputs *and* the output has no embedded timestamps, command lines, version banners, or hash-ordered Python-dict-style keys.
-- **`re_match` / `re_match_multiline`**. Each line of the expected fixture is a regex that must match the corresponding output line. Useful when a few fields per row are timestamped but the rest is canonical. Rare in the corpus.
-- **`contains`**. The expected fixture is a substring of the output. Cheap; weak. Prefer `asserts: has_text` for new code unless you genuinely have a multi-line block to assert as a whole.
-- **`sim_size`**. Output file size matches the fixture's size within `delta:` (bytes) or `delta_frac:` (fraction). Use when the output is necessarily non-deterministic but its rough size is reproducible (RepeatModeler libraries, HiC matrices, Bayesian sampler outputs).
-
-Picking `lines_diff:`: count the mutable header lines in the output format. VCF: ~6 (`##fileformat`, `##fileDate`, `##source`, `##reference`, contig/info lines vary). SAM/text headers: count `@HD`/`@PG`/`@CO` lines. Set `lines_diff:` to the count exactly — looser values mask real diffs.
-
-## 3. Tolerance picking
-
-**`delta:`** is bytes (for [[tests-format#has_size_model|has_size]] and `compare: sim_size`) or absolute count (for [[tests-format#has_n_lines_model|has_n_lines]], [[tests-format#has_n_columns_model|has_n_columns]], [[tests-format#has_image_width_model|has_image_width]], etc.). Suffix multipliers documented in the schema — `1K`, `1M`, `1G` work.
-
-**`delta_frac:`** is a fraction (0.1 = 10%). Use when expected size scales with input volume. Three IWC tests use it (`scRNAseq/baredsc/*`, `genome-assembly/polish-with-long-reads/*`); the rest use absolute `delta:`.
-
-**Picking magnitudes** (from corpus survey in [[iwc-shortcuts-anti-patterns]] §2):
-
-- Image dimensions: `delta: 25–30` pixels (5% of typical matplotlib defaults).
-- Image file size: `delta: 5K–60K` (5–10% of file size).
-- Small text reports: `delta: 1K–10K`.
-- HTML reports: `delta: 25K–100K`.
-- BAM files: `delta: 1M–10M`.
-- RepeatModeler / Bayesian sampler outputs: `delta: 30K–90M` (extreme, but justified by the underlying nondeterminism).
-
-**Heuristic for new outputs:** `delta_frac: 0.1` is a defensible default. Tighten if the output proves more deterministic than expected.
-
-## 4. Text family — [[tests-format#has_text_model|has_text]] vs [[tests-format#has_text_matching_model|has_text_matching]] vs [[tests-format#has_line_model|has_line]] vs [[tests-format#has_line_matching_model|has_line_matching]] vs [[tests-format#has_n_lines_model|has_n_lines]]
-
-All five are common; choose by what you're verifying.
-
-- **[[tests-format#has_text_model|has_text]]** — output contains the substring `text:`. Anywhere in the output, any number of times. Add `n:` / `min:` / `max:` to constrain occurrence count. Add `delta:` to allow slack on the count.
-- **[[tests-format#has_text_matching_model|has_text_matching]]** — output matches the regex `expression:`. Use sparingly; prefer literal [[tests-format#has_text_model|has_text]] when you can.
-- **[[tests-format#has_line_model|has_line]]** — output has at least one *line* matching `line:` exactly. Use when line boundaries matter (e.g. asserting on a specific row in a table).
-- **[[tests-format#has_line_matching_model|has_line_matching]]** — same but with regex.
-- **[[tests-format#has_n_lines_model|has_n_lines]]** — assert the line count is `n:` ± `delta:`.
-
-A common combination in IWC: `has_n_lines: n: 100, delta: 5` + `has_text: text: "expected_token"` — line-count sanity-check plus a content marker. This catches both truncation and content drift in one assertion pair.
-
-`negate: true` is supported on every assertion. Used for the "this output should NOT contain X" case.
-
-## 5. Collection output assertions (`element_tests:`)
-
-For Galaxy collection outputs, the test format keys element assertions by element identifier:
+Use `has_text` for a literal substring, `has_line` for a complete line, and their `*_matching` forms when a regex is needed. `has_n_lines` checks count and can detect truncation, but a plausible count does not establish correct content. A test can combine count with a stable token or row. The [[tests-format|schema]] accepts `asserts:` as a mapping for one assertion of each kind or as a list. Use the list form to repeat a kind: repeated YAML mapping keys can silently overwrite earlier checks.
 
 ```yaml
-my_collection_output:
-  element_tests:
-    sample_1:
+- doc: Stable report fields
+  job:
+    input:
+      class: File
+      path: test-data/input.txt
+  outputs:
+    report:
       asserts:
-        has_text:
-          text: "expected"
-    sample_2:
-      file: test-data/expected_sample_2.txt
+        - has_text:
+            text: "Total Sequences"
+        - has_text:
+            text: "Passed"
+        - has_n_lines:
+            n: 12
 ```
 
-Optional `attributes:` at the collection level can assert on the produced collection shape:
+The names and count above are illustrative. Replace them with values observed from the fixture being tested. A `has_text` assertion with `text: "ERROR"` and `negate: true` is useful when absence of that marker is part of the output contract. A workflow-level `expect_failure:` case is useful when the workflow itself promises to reject an invalid input. Neither is an automatic requirement for every workflow.
+
+## 5. Collection and structured-output examples
+
+For a collection output, `element_tests:` maps produced element identifiers to assertions. Use it at each level of a nested output collection too, as the [IWC SRA manifest test](https://github.com/galaxyproject/iwc/blob/main/workflows/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs-tests.yml#L12-L27) does for samples and their forward/reverse files. Galaxy also accepts `elements:` as an alias at either level, but a different key is not required for nesting. This differs from a `job:` collection input, where `elements:` lists the input fixtures. The output collection's `attributes:` or `element_count:` can check shape, while element assertions check results. See [[tests-format]] and [Galaxy's collection-test parser](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tool_util/parser/interface.py#L860-L870).
 
 ```yaml
-my_collection_output:
-  attributes: {collection_type: list:list}
-  element_tests:
-    ...
+- doc: Check selected collection members
+  job:
+    input:
+      class: File
+      path: test-data/input.txt
+  outputs:
+    results:
+      class: Collection
+      collection_type: list
+      element_tests:
+        sample_a:
+          asserts:
+            has_json_property_with_text:
+              property: status
+              text: complete
+        sample_b:
+          asserts:
+            has_json_property_with_value:
+              property: count
+              value: "3"
 ```
 
-Nested collections: outer `element_tests:` keyed by outer identifier; inner uses `elements:` (note plural, no `_tests` suffix on the inner). See [[iwc-test-data-conventions]] §2f for the live example.
+For `has_json_property_with_value`, `value:` is a **JSON-encoded string**, so a numeric three is written `"3"` in YAML. For HDF5, `has_h5_keys` takes one comma-separated `keys:` string, for example `keys: "obs/louvain,var/highly_variable"`. Use an additional result assertion if these structural keys could survive a scientifically wrong computation. Check the syntax against the vendored schema rather than copying YAML with repeated keys from an existing test.
 
-For a list-of-files where every element should pass the same minimal check, the existence-probe pattern (`has_text: "{"` for JSON; `has_size: min: 100` for any non-empty binary) is widely used and accepted in IWC.
+## 6. Validate labels and schema before execution
 
-## 6. The validate-against-workflow inner loop
+A schema-valid test can still name an output or input label that the workflow does not expose. Run [[validate-tests]] with the workflow to check both the test format and the label/type match before a Galaxy run:
 
-A `-tests.yml` file can be **structurally invalid** in two distinct ways:
-
-1. **Schema-invalid** — wrong field names, wrong nesting, wrong types. Caught by the test-format JSON Schema.
-2. **Workflow-incoherent** — schema-valid YAML, but the input/output labels don't match the actual workflow. Renaming an output in the `.ga` and forgetting to update its sibling `-tests.yml` produces this case. Planemo will surface it as an "output not found" error at test-runtime, but only after a full workflow run.
-
-The `@galaxy-tool-util/schema` npm package ships **two** validators that catch both cases statically — no Galaxy or Planemo invocation needed:
-
-- **`validateTestsFile(yaml)`** — runs the file against `tests.schema.json` (AJV). Reports schema violations with paths.
-- **`checkTestsAgainstWorkflow(workflow, tests)`** — cross-checks a `.ga` / format2 workflow against a tests file: missing input labels, missing output labels, type incompatibilities (e.g. test supplies a `File` for a parameter typed `int`).
-
-Both are pure-JS, take milliseconds, and have no Galaxy dependency. Wire them into the inner authoring loop:
-
-```
-edit -tests.yml
-  → validateTestsFile()                    # schema gate
-  → checkTestsAgainstWorkflow(.ga, tests)  # coherence gate
-  → planemo workflow_test_on_invocation    # assertion gate (no full re-run)
-  → planemo test                           # full integration (slow)
+```sh
+gxwf validate-tests workflow-tests.yml --workflow workflow.ga
 ```
 
-The first two gates short-circuit cheap mistakes before a slow planemo run. They are the static-validation equivalent of `gxwf` for tests, and the `implement-galaxy-workflow-test` mold should reference them as its primary inner-loop tooling. Source: galaxy-tool-util-ts package, `src/test-format/index.ts` exports.
+That static check cannot prove an assertion passes or that a chosen property is scientifically meaningful. Follow it with `planemo workflow_test_on_invocation` against a saved successful invocation when available, then run the full [[planemo-test|Planemo test]] for integration. If an assertion fails, inspect the actual output and the named failure before widening a tolerance. See [[planemo-workflow-test-architecture]] for execution and failure evidence.
 
-## 7. Authoring loop — generation, then refinement
+## 7. Create and refine the test
 
-Reviewer convention is to **generate** the initial `-tests.yml` rather than hand-write it. Two planemo subcommands cover this:
+The [IWC contribution guide](https://github.com/galaxyproject/iwc/blob/main/workflows/README.md#generate-tests) permits writing a test by hand or generating a starting file. `planemo workflow_test_init` can create a template, and `--from_invocation` can use an existing successful invocation. Inspect generated input references, labels, expected files, and comparisons. Keep exact comparisons that are stable. Replace those made brittle by known variation with targeted assertions that still catch wrong results. [[planemo-workflow_test_on_invocation]] can rerun assertion checks against that invocation without executing the workflow again.
 
-- **`planemo workflow_test_init --from_invocation <invocation_id>`** ([[planemo-workflow_test_init]]) — given a successful Galaxy invocation ID, emit a `-tests.yml` with a `job:` block that captures all inputs (with SHA-1 hashes) and an `outputs:` block with `file:` references to the actual outputs (downloaded into `test-data/`). Hand-tighten the assertions afterward.
-- **`planemo workflow_test_on_invocation <tests.yml> <invocation_id>`** ([[planemo-workflow_test_on_invocation]]) — re-evaluate an edited `-tests.yml` against a saved invocation without re-running the workflow. The fast inner loop for assertion iteration; complements the static gates in §6.
+## 8. Source of the exact syntax
 
-Together these cut the assertion-iteration cost dramatically. An agent should:
-
-1. Run the workflow once on usegalaxy.* (or local) to get a known-good invocation.
-2. `--from_invocation` to bootstrap the test file.
-3. Replace the autogenerated `file:` exact-comparison assertions with assertion-family-appropriate alternatives per §1.
-4. [[planemo-workflow_test_on_invocation]] after each edit; full [[planemo-test]] at the end.
-
-## 8. What the schema gives you for free
-
-When the test-format schema lands as a Foundry-rendered note, the agent can consult any assertion's `$def` directly for: parameter types, defaults, required fields, the `that` discriminator constant, and the original Python docstring (carried through as `description`). This note does **not** restate that vocabulary — it complements it with the corpus-grounded *which-and-when*.
-
-What's still missing from the schema and worth keeping in research notes:
-
-- This decision table (§1) — output-type → assertion family.
-- Tolerance magnitudes (§3) — corpus-derived defaults.
-- The `validateTestsFile` / `checkTestsAgainstWorkflow` integration story (§6).
-- Anti-pattern flags — see [[iwc-shortcuts-anti-patterns]].
-
-## 9. Common combinations (recipes)
-
-Six recipes worth memorizing.
-
-**Stable text report (FastQC summary, simple stats).**
-```yaml
-my_report:
-  asserts:
-    has_n_lines: { n: 12, delta: 2 }
-    has_text: { text: "Total Sequences" }
-```
-
-**MultiQC HTML report.**
-```yaml
-multiqc_report:
-  asserts:
-    has_text: { text: "Filtered Reads" }
-    has_text: { text: "FastQC" }
-```
-
-**VCF (pinned tool, fixed reference).**
-```yaml
-called_variants:
-  file: test-data/expected.vcf
-  compare: diff
-  lines_diff: 6
-```
-
-**Stochastic JSON (HyPhy-style).**
-```yaml
-hyphy_meme:
-  element_tests:
-    geneA: { asserts: { has_text: { text: "{" } } }
-    geneB: { asserts: { has_text: { text: "{" } } }
-```
-
-**Matplotlib plot.**
-```yaml
-umap_plot:
-  asserts:
-    has_size: { size: 68416, delta: 6000 }
-    has_image_width: { width: 601, delta: 30 }
-    has_image_height: { height: 429, delta: 25 }
-```
-
-**AnnData (HDF5).**
-```yaml
-clustered_anndata:
-  asserts:
-    has_h5_keys: { keys: "obs/louvain" }
-    has_h5_keys: { keys: "var/highly_variable" }
-    has_h5_keys: { keys: "uns/rank_genes_groups" }
-    has_size: { size: 12000000, delta: 1500000 }
-```
-
-## 10. Cross-references
-
-- [[galaxy-workflow-testability-design]] — decide which workflow outputs and checkpoints to expose before choosing assertions.
-- [[iwc-test-data-conventions]] — input-side conventions (job inputs, collection shapes, `hashes:`, CVMFS).
-- [[iwc-shortcuts-anti-patterns]] — accepted-vs-smell catalog and corpus prevalence; this note's mirror image.
-- Test-format schema (`@galaxy-tool-util/schema` npm package) — authoritative vocabulary; will be vendored into a Foundry-rendered schema note. See `content/meta/casting.md` for the casting story.
-- Planemo test-format spec: [planemo.readthedocs.io/en/latest/test_format.html](https://planemo.readthedocs.io/en/latest/test_format.html).
-- [[galaxy-xsd]] — Galaxy XSD assertion source of truth, vendored from upstream.
-- Tightening of the schema and Pydantic source: [galaxyproject/galaxy#22566](https://github.com/galaxyproject/galaxy/pull/22566).
-- TS schema sync into npm: [jmchilton/galaxy-tool-util-ts#75](https://github.com/jmchilton/galaxy-tool-util-ts/pull/75).
+[[tests-format]] points to the vendored JSON Schema for accepted fields, types, defaults, and assertion arguments. This note supplies the choice and its limits, not a second schema. Consult the [Planemo test-format documentation](https://planemo.readthedocs.io/en/latest/test_format.html) for the upstream test-file structure and [[iwc-shortcuts-anti-patterns]] for when a smoke check conceals an available stronger test.

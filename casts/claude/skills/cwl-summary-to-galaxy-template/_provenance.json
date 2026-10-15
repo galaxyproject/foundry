@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "f69bea36b279ed9badbc7bfca330133e8a520359"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-10-14T14:45:22.448Z",
+  "cast_at": "2026-10-15T21:04:47.871Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
-      "src_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
-      "dst_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
+      "src_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
+      "dst_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded conditional pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "67213a48c50cc4f1067621f3dc2f1b92a039570b189f8fc465edb67c7b1487a3",
-      "dst_hash": "67213a48c50cc4f1067621f3dc2f1b92a039570b189f8fc465edb67c7b1487a3",
+      "src_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
+      "dst_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
       "source": "deterministic"
     },
     {
@@ -82,8 +82,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
-      "src_hash": "900a259c86ee342416eaf4771cfd105bfbfb4969226b748d11e8eabcfa3e8b21",
-      "dst_hash": "900a259c86ee342416eaf4771cfd105bfbfb4969226b748d11e8eabcfa3e8b21",
+      "src_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
+      "dst_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
       "source": "deterministic"
     },
     {
@@ -195,8 +195,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton.",
       "trigger": "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {
@@ -211,8 +211,8 @@
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "4fe42382f99655115c53c1afde0da0d0556ad77984da7d0ffa8ab725ea260aa3",
-      "dst_hash": "4fe42382f99655115c53c1afde0da0d0556ad77984da7d0ffa8ab725ea260aa3",
+      "src_hash": "187a01f8cddc186df2e3c4c3b2d57e887a59b81a8199f83ffa195c07760596d3",
+      "dst_hash": "187a01f8cddc186df2e3c4c3b2d57e887a59b81a8199f83ffa195c07760596d3",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },

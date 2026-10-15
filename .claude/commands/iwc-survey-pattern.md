@@ -14,7 +14,7 @@ Write or refine exactly one pattern page under `content/patterns/` from a survey
 3. **`content/meta/pattern-authorship.md`** — operation-anchored naming, corpus-first rule, legacy-tool posture.
 4. **`content/meta/architecture.md`** §3, §5, §6 — note types, frontmatter, validation.
 5. **`packages/gxwf-foundry-note-schema/src/types/<kind>/`** (one directory per note kind — `schema.ts`, `kind.md`, `example.md`) + **`meta_tags.yml`** — frontmatter contract and tags.
-6. **`common_paths.yml.sample`** — citation prefix vocabulary; use `$IWC_FORMAT2/path:line` citations.
+6. **`common_paths.yml.sample`** — resolve `$IWC_FORMAT2/path:line` survey evidence while reviewing it. In pattern `iwc_exemplars`, use abstract IWC workflow IDs rather than generated paths or line citations.
 7. **The survey at `$1`** — especially the candidate boundary, decisions, and open-question resolution relevant to `$2`.
 
 ## Find style comparators without loading everything
@@ -47,7 +47,7 @@ Use these sections as a flexible house style, not a hard template:
 - `## Parameters` — authoring-relevant fields and sharp YAML shape facts, not full tool documentation.
 - `## Idiomatic shapes` — corpus-shaped YAML or compact snippets.
 - `## Pitfalls` — concrete silent failures and correctness traps.
-- `## Exemplars (IWC)` — `$IWC_FORMAT2/path:line` citations with why each exemplar matters.
+- Add a short body exemplar or source excerpt only when it helps explain the operation; the structured exemplar list belongs in `iwc_exemplars` frontmatter.
 - `## Legacy alternative` — optional. Include only when there is a real legacy/read-support/migration point.
 - `## See also` — related survey, close sibling pages, and decision-boundary pages.
 
@@ -58,6 +58,7 @@ Drop sections that do not earn their space. A thin “None surfaced” legacy se
 - Required fields must conform to the `@galaxy-foundry/gxwf-foundry-note-schema` contract; do not add ad-hoc fields.
 - Set `pattern_kind: operation` for concrete operation pages, `pattern_kind: recipe` for multi-step lifecycle pages, and `pattern_kind: moc` for map-of-content pages that route readers to operations and recipes.
 - `summary` is a compressed “what to do and when” line, not a mini abstract.
+- For an operation or recipe, set `iwc_exemplars` to abstract IWC workflow IDs with `why` and `confidence`, and optional step labels or IDs. Do not use generated fixture paths or line citations as `workflow` values. Declare `evidence` at the grade the sources support.
 - `related_notes` should name primary source notes only, usually the survey. Put secondary context notes in body or `See also` unless they are essential source material.
 - `related_patterns` should be focused: pages that decide against this one, close siblings, or immediate follow-ups. Do not list the whole neighborhood.
 - `related_molds` usually includes `[[implement-galaxy-tool-step]]` when the page guides Galaxy step authoring.
@@ -66,8 +67,8 @@ Drop sections that do not earn their space. A thin “None surfaced” legacy se
 
 - The survey is the audit trail; the pattern page is the actionable reference.
 - Preserve pinned decisions from the survey. If a decision looks wrong, surface it as a question; do not silently override it.
-- Cite corpus examples tightly. Prefer 2-4 exemplars that teach distinct shapes over citation density.
-- Prefer workflow-path citations plus step label/tool name when line numbers are brittle because cleaning/conversion output changes. Use exact line ranges only when they clarify a stable snippet.
+- Record corpus examples tightly in `iwc_exemplars`. Prefer 2-4 workflows that teach distinct shapes over citation density.
+- Keep file-and-line citations in the survey audit trail. In a pattern body, cite a source or show a compact excerpt only when it clarifies a specific mechanism; use the stable workflow ID in `iwc_exemplars` for the structured citation.
 - Prefer concrete prescriptive language where the corpus justifies it: “set `one_header: true` when...” not “consider headers.”
 - Avoid speculative capabilities. No IWC exemplar means no pattern page.
 

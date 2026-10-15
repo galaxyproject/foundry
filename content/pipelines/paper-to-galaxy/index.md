@@ -7,8 +7,8 @@ tags:
   - journey/direct-build
 status: draft
 created: 2026-04-30
-revised: 2026-09-22
-revision: 5
+revised: 2026-10-15
+revision: 6
 summary: "Direct path from a paper to a Galaxy gxformat2 workflow. No Workflow Brief or CWL intermediate."
 harness_notes:
   - "The composed alternative PAPER → CWL → GALAXY is a runtime composition of `pipeline-paper-to-cwl` followed by `pipeline-cwl-to-galaxy`."
@@ -43,5 +43,3 @@ Review the Galaxy interface and data-flow briefs against the paper before accept
 For workflow tests, use paper-derived data and expected outputs where they are resolvable. If they are not, check suitable IWC or public fixtures, then supply the missing data yourself. Review `galaxy-test-plan.yml` for assumed labels, fixture provenance, assertions, and omissions before inspecting the assembled `galaxy-workflow.gxwf-tests.yml`.
 
 Inspect `galaxy-workflow.gxwf.yml`, `galaxy-workflow-validation-result.json`, and `workflow-test-result.json`. Use the debug report to investigate a failing run. Treat `test-definition-missing` or `not-run` as missing runtime evidence, and report unresolved source or test gaps with the workflow.
-
-The composed alternative `PAPER → CWL → GALAXY` is a runtime composition of `paper-to-cwl` followed by `cwl-to-galaxy` — open question whether to surface as a distinct pipeline note.

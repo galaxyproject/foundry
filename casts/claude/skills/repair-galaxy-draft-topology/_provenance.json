@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 5,
     "content_hash": "99b1b5f90fa3860ae60a02c9182ac74b18b96ad8ee455bdf9692e962417c2785",
-    "commit": "f69bea36b279ed9badbc7bfca330133e8a520359"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-10-14T14:45:27.341Z",
+  "cast_at": "2026-10-15T21:04:51.076Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested collection recipe when the missing producer is a collection construction, reshape, or bridge.",
       "trigger": "When the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge.",
-      "src_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
-      "dst_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
+      "src_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
+      "dst_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce.",
       "trigger": "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on.",
-      "src_hash": "900a259c86ee342416eaf4771cfd105bfbfb4969226b748d11e8eabcfa3e8b21",
-      "dst_hash": "900a259c86ee342416eaf4771cfd105bfbfb4969226b748d11e8eabcfa3e8b21",
+      "src_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
+      "dst_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
       "source": "deterministic"
     },
     {

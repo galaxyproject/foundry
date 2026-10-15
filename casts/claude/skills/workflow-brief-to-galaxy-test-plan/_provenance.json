@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-test-plan/index.md",
     "revision": 3,
     "content_hash": "f1a59e333a99f6aefffe21fd33e3c965c31f72cf2359d4d322d90ecbae4689ec",
-    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-09-20T17:29:36.177Z",
+  "cast_at": "2026-10-15T21:04:53.126Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose which workflow outputs and promoted checkpoints make meaningful assertions when no upstream test evidence exists.",
       "trigger": "When deciding which outputs to assert, which checkpoints to promote, and which labels the plan should assume.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Distinguish accepted IWC-style test shortcuts from assertion smells while synthesizing assertions from intent.",
       "trigger": "When considering existence-only, size-only, image-dimension, or tolerant output checks, or recording an omission.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
+      "dst_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Describe job-input fixtures, remote-URL-first locations, hashes, and collection input shapes the plan should record as fixture provenance.",
       "trigger": "When recording job inputs or fixture provenance, or deciding whether a fixture belongs in test-data, Zenodo, ENA/SRA, or CVMFS.",
-      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
-      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the assertion family and tolerance that fit each synthesized expected output by output type.",
       "trigger": "When turning an expected output into assertion intent and a tolerance.",
-      "src_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
-      "dst_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
+      "src_hash": "4da914a226c93cca8a1cc2823043429c05da712e3ef051724d15959a7aef5b09",
+      "dst_hash": "4da914a226c93cca8a1cc2823043429c05da712e3ef051724d15959a7aef5b09",
       "source": "deterministic"
     },
     {

@@ -1,3 +1,5 @@
+import { isRecord } from "./narrow.js";
+
 const ROADMAP_LABELS = ["roadmap/main", "roadmap/substep", "roadmap/off"] as const;
 
 export const DEFAULT_ROADMAP_REPO = "galaxyproject/foundry";
@@ -540,8 +542,4 @@ function repoFromApiIssue(raw: unknown): string {
   const match = /\/repos\/([^/]+\/[^/]+)$/.exec(raw.repository_url);
   if (!match?.[1]) throw new Error(`invalid GitHub repository_url: ${raw.repository_url}`);
   return match[1];
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

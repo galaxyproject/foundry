@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 2,
     "content_hash": "23b770bbbd5409a37a7a0ea457a10b2cfba21f36a6e7e892125735035ac36078",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "commit": "6af41ff36779319b209a23a56479fda1056f495c"
   },
-  "cast_at": "2026-09-13T20:58:30.021Z",
+  "cast_at": "2026-09-26T14:10:15.560Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Convert a legacy `.ga` workflow to gxformat2 before summarizing, and record the conversion under documents.converted_path.",
       "trigger": "When the supplied workflow is native `.ga` rather than gxformat2.",
       "verification": "Cast the skill, run on one `.ga` and one gxformat2 fixture; confirm the `.ga` case populates documents.converted_path and both summaries validate.",
-      "src_hash": "1bb19d20b4a39b1708d8f5346a0294616cdb9df83ba5255c4a90d97030d13b83",
-      "dst_hash": "1cdf49f10f77039af6efc5b82fe79720bb18e50d1f57d653670697f7262c7640",
+      "src_hash": "bfbf46667e803c9ef8b176e2f01a2dbf5b0cd013bfdbf5182280803e736b3fc7",
+      "dst_hash": "ff19b97f01a45938a25ac68c6865903c313c94d939a5d5084250cb2191f9355c",
       "source": "deterministic"
     },
     {

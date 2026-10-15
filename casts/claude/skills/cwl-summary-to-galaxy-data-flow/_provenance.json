@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 3,
     "content_hash": "ed3f1d14cab3958ec321bcc108dd6274bec965cd502763ce0d5abd060a90f28b",
-    "commit": "f69bea36b279ed9badbc7bfca330133e8a520359"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-10-14T14:45:22.036Z",
+  "cast_at": "2026-10-15T21:04:47.411Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection reshape, relabel, cleanup, and map-over choices in corpus-observed Galaxy recipes.",
       "trigger": "When CWL scatter, arrays, nested arrays, records, or secondary-file contracts require explicit Galaxy collection operations.",
-      "src_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
-      "dst_hash": "e04d3c6a289e6ca5412ca12dedb0f324ecd8f70aaa45ae2db73a4729a648a4d9",
+      "src_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
+      "dst_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
       "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "67213a48c50cc4f1067621f3dc2f1b92a039570b189f8fc465edb67c7b1487a3",
-      "dst_hash": "67213a48c50cc4f1067621f3dc2f1b92a039570b189f8fc465edb67c7b1487a3",
+      "src_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
+      "dst_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
       "source": "deterministic"
     },
     {

@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 10,
     "content_hash": "f9da7475cf7e165452d520af3244b1c620d104ee7937a97b3919b92ff329b9e6",
-    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-09-22T18:29:20.419Z",
+  "cast_at": "2026-10-15T21:04:49.467Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -59,8 +59,8 @@
       "evidence": "corpus-observed",
       "purpose": "Revise workflow inputs, outputs, labels, checkpoints, and collection identifiers so meaningful tests can be authored.",
       "trigger": "When test authoring reveals missing labels, omitted workflow-level outputs, unstable collection identifiers, weakly assertable final outputs, or fixture-shape pressure on workflow inputs.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {
@@ -74,8 +74,8 @@
       "evidence": "corpus-observed",
       "purpose": "Flag assertion shortcuts that are acceptable in IWC versus shortcuts that should be avoided.",
       "trigger": "When considering existence-only, size-only, image-only, checksum, output-label, or negative-test patterns.",
-      "src_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
-      "dst_hash": "14cc27c6a3e01588b06151535afdcb671cadd8e10dc960a248934e9133ebc8ab",
+      "src_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
+      "dst_hash": "b3f691a59751114ab67588832ba978052ab2be2ab5ef775737177ad45d7bdc45",
       "source": "deterministic"
     },
     {
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style.",
       "trigger": "When writing or revising the job/input side of a Galaxy workflow test file.",
-      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
-      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
     },
     {
@@ -104,8 +104,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose assertion families, tolerance magnitudes, and the static/Planemo validation loop.",
       "trigger": "When writing or revising output assertions for a Galaxy workflow test file.",
-      "src_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
-      "dst_hash": "81b8feeccd891642572e587a494d1e4d3a1b369a19d92947626230494fd92beb",
+      "src_hash": "4da914a226c93cca8a1cc2823043429c05da712e3ef051724d15959a7aef5b09",
+      "dst_hash": "4da914a226c93cca8a1cc2823043429c05da712e3ef051724d15959a7aef5b09",
       "source": "deterministic"
     },
     {

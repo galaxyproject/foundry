@@ -6,9 +6,9 @@
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 1,
     "content_hash": "38d9fed5e83bcb02cdc044ac1a0858d2b3f5ce42af5905bea2b920451bacca6b",
-    "commit": "7439a9659c15fef8b65953e7ba3bb087d0b589b3"
+    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
   },
-  "cast_at": "2026-09-22T18:21:58.635Z",
+  "cast_at": "2026-10-15T21:04:49.791Z",
   "refs": [
     {
       "kind": "prompt",
@@ -38,8 +38,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep workflow interface and test addressing aligned when a safe genericity or human-readable-label correction changes the workflow interface.",
       "trigger": "When maturation changes an input, promoted output, collection identifier, or workflow-output label referenced by a supplied test.",
-      "src_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
-      "dst_hash": "81b01801ec3d14810d570dd2d7815da2bb11e41a562af9182c29fd2974f4b855",
+      "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
+      "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
     },
     {
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Apply current IWC conventions for test labels, durable remote fixtures, creator identifiers, release changes, and companion-file naming.",
       "trigger": "When a supplied test, test-data reference, creator record, or release decision must be checked or updated.",
-      "src_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
-      "dst_hash": "1921e939703444604440e0768caca6e6b834a73dcfa964f450fa081143e008d3",
+      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
     },
     {

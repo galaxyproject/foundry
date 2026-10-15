@@ -280,8 +280,7 @@
               "name",
               "label",
               "hidden",
-              "type",
-              "structure"
+              "type"
             ],
             "properties": {
               "name": {
@@ -304,6 +303,192 @@
                 "type": "string",
                 "enum": [
                   "collection"
+                ]
+              },
+              "collection_type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "collection_type_source": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "collection_type_from_rules": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "structured_like": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "discover_datasets": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "discover_via",
+                            "format",
+                            "visible",
+                            "assign_primary_output",
+                            "directory",
+                            "recurse",
+                            "match_relative_path",
+                            "sort_key",
+                            "sort_comp",
+                            "sort_reverse",
+                            "pattern"
+                          ],
+                          "properties": {
+                            "discover_via": {
+                              "type": "string",
+                              "enum": [
+                                "pattern"
+                              ]
+                            },
+                            "format": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "visible": {
+                              "type": "boolean"
+                            },
+                            "assign_primary_output": {
+                              "type": "boolean"
+                            },
+                            "directory": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "recurse": {
+                              "type": "boolean"
+                            },
+                            "match_relative_path": {
+                              "type": "boolean"
+                            },
+                            "sort_key": {
+                              "type": "string",
+                              "enum": [
+                                "filename",
+                                "name",
+                                "designation",
+                                "dbkey"
+                              ]
+                            },
+                            "sort_comp": {
+                              "type": "string",
+                              "enum": [
+                                "lexical",
+                                "numeric"
+                              ]
+                            },
+                            "sort_reverse": {
+                              "type": "boolean"
+                            },
+                            "pattern": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "discover_via",
+                            "format",
+                            "visible",
+                            "assign_primary_output",
+                            "directory",
+                            "recurse",
+                            "match_relative_path"
+                          ],
+                          "properties": {
+                            "discover_via": {
+                              "type": "string",
+                              "enum": [
+                                "tool_provided_metadata"
+                              ]
+                            },
+                            "format": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "visible": {
+                              "type": "boolean"
+                            },
+                            "assign_primary_output": {
+                              "type": "boolean"
+                            },
+                            "directory": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "recurse": {
+                              "type": "boolean"
+                            },
+                            "match_relative_path": {
+                              "type": "boolean"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               },
               "structure": {

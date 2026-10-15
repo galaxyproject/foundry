@@ -1,0 +1,79 @@
+run:
+  pipeline: nextflow-to-galaxy
+  run_slug: tiny-nextflow-run
+  status: failed
+  phases:
+    - { n: 1, kind: mold, skill: summarize-nextflow, status: done, feedback_checked: true }
+    - { n: 2, kind: mold, skill: nextflow-summary-to-galaxy-reference-data, status: done, feedback_checked: true }
+    - { n: 3, kind: mold, skill: nextflow-summary-to-galaxy-interface, status: done, feedback_checked: true }
+    - { n: 4, kind: mold, skill: nextflow-summary-to-galaxy-data-flow, status: done, feedback_checked: true }
+    - { n: 5, kind: mold, skill: compare-against-iwc-exemplar, status: done, feedback_checked: false }
+    - { n: 6, kind: mold, skill: nextflow-summary-to-galaxy-template, status: done, feedback_checked: true }
+    - { n: 7, kind: mold, skill: advance-galaxy-draft-step, status: done, feedback_checked: true, iterations: 4 }
+    - { n: 8, kind: branch, pattern: test-data-resolution, status: done, feedback_checked: true, selected: nextflow-to-test-data }
+    - { n: 9, kind: mold, skill: nextflow-test-to-galaxy-test-plan, status: done, feedback_checked: true }
+    - { n: 10, kind: mold, skill: implement-galaxy-workflow-test, status: done, feedback_checked: true }
+    - { n: 11, kind: mold, skill: validate-galaxy-workflow, status: done, feedback_checked: true }
+    - { n: 12, kind: mold, skill: run-workflow-test, status: failed, feedback_checked: true }
+    - { n: 13, kind: mold, skill: debug-galaxy-workflow-output, status: pending }
+entries:
+  - id: template-silent-on-optional-outputs
+    raised_by: nextflow-summary-to-galaxy-template
+    observed_in:
+      mold: nextflow-summary-to-galaxy-template
+      path: content/molds/nextflow-summary-to-galaxy-template/index.md
+      revision: 7
+      content_hash: aaaa1111
+      foundry_head: beef0001
+    subject:
+      kind: mold
+      label: nextflow-summary-to-galaxy-template
+      locator: content/molds/nextflow-summary-to-galaxy-template/index.md
+      content_hash: aaaa1111
+    kind: gap
+    severity: blocker
+    what: "The Mold does not say how an absent optional output reaches the draft."
+    expected: "State the draft encoding for an optional output."
+    evidence: "The template stopped at the optional output decision."
+    status: open
+    issue: null
+  - id: draft-step-rereads-resolved-wrapper
+    raised_by: advance-galaxy-draft-step
+    observed_in:
+      mold: advance-galaxy-draft-step
+      path: content/molds/advance-galaxy-draft-step/index.md
+      revision: 12
+      content_hash: bbbb2222
+      foundry_head: beef0001
+    subject:
+      kind: mold
+      label: advance-galaxy-draft-step
+      locator: content/molds/advance-galaxy-draft-step/index.md
+      content_hash: bbbb2222
+    kind: friction
+    severity: minor
+    what: "An already-resolved wrapper is looked up again on each iteration."
+    expected: "Reuse the pin recorded earlier in the run."
+    evidence: "Four iterations, two identical tool-search calls."
+    status: open
+    issue: null
+  - id: planemo-page-missing-exit-codes
+    raised_by: run-workflow-test
+    observed_in:
+      mold: run-workflow-test
+      path: content/molds/run-workflow-test/index.md
+      revision: 5
+      content_hash: cccc3333
+      foundry_head: beef0001
+    subject:
+      kind: cli-command
+      label: planemo-test
+      locator: content/cli/planemo/test.md
+      content_hash: dddd4444
+    kind: defect
+    severity: major
+    what: "The manual page omits the exit code for a partial failure."
+    expected: "List every exit code the command can return."
+    evidence: "Planemo exited 1 with one case green and one red."
+    status: open
+    issue: null
