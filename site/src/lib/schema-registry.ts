@@ -8,6 +8,7 @@ import galaxyToolDiscoverySchema from '../../../packages/gxwf-foundry/src/schema
 import galaxyToolSummarySchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
 import galaxyWorkflowTestPlanSchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json';
 import summaryCwlSchema from '../../../packages/gxwf-foundry/src/schemas/summary-cwl/summary-cwl.schema.json';
+import testDataRefsSchema from '../../../packages/gxwf-foundry/src/schemas/test-data-refs/test-data-refs.schema.json';
 import testsFormatSchema from '../../../packages/gxwf-foundry/src/schemas/tests-format/tests.schema.json';
 import castProvenanceSchema from '../../../scripts/lib/schemas/cast-provenance.schema.json';
 import foundryPkg from '../../../packages/gxwf-foundry/package.json';
@@ -51,6 +52,10 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   },
   'galaxy-workflow-test-plan': {
     schema: galaxyWorkflowTestPlanSchema as unknown as Record<string, unknown>,
+    version: foundryVersion,
+  },
+  'test-data-refs': {
+    schema: testDataRefsSchema as unknown as Record<string, unknown>,
     version: foundryVersion,
   },
   'cast-provenance': {

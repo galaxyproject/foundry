@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-22
-revision: 7
+revised: 2026-10-16
+revision: 8
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:
   - id: workflow-brief
@@ -38,12 +38,24 @@ input_artifacts:
   - id: cwl-galaxy-interface
     role: galaxy-interface
     description: "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the CWL → GALAXY pipeline."
+  - id: test-data-refs
+    optional: true
+    description: "Refs from the chain's source-specific leg ([[nextflow-to-test-data]], [[cwl-to-test-data]], [[paper-to-test-data]]) when the pipeline has one. Keep its resolved entries unchanged and search only for its unresolved inputs. Absent when this Mold is the chain's first leg."
 output_artifacts:
   - id: test-data-refs
     kind: json
     default_filename: test-data-refs.json
-    description: "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring."
+    schema: "[[test-data-refs]]"
+    description: "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring. Carries forward, unchanged, every entry an earlier leg resolved."
 references:
+  - kind: schema
+    ref: "[[test-data-refs]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning."
+    verification: "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
@@ -65,16 +77,16 @@ references:
 
 Resolve concrete test data for the workflow's inputs. Read the interface brief for each input's Galaxy shape and datatype, the reviewed Workflow Brief when supplied, and any retained source summary for data the source itself names — then search IWC fixtures and public sources for data that matches. Emit `test-data-refs.json`: one entry per input, each carrying a URL or path plus the expected shape, ready for [[implement-galaxy-workflow-test]] to stage.
 
-This Mold is the first leg of the harness's `test-data-resolution` branch. It resolves what it can and reports gaps; the harness routes any unresolved input to the `user-supplied` fallthrough. Deciding to ask the user is a harness concern, not this Mold's — its job is an honest, source-backed match.
+This Mold is the search leg of the harness's `test-data-resolution` branch: it runs after the source-specific leg when the pipeline has one, and first otherwise. It resolves what it can and reports gaps; the harness routes any unresolved input to the `user-supplied` fallthrough. Deciding to ask the user is a harness concern, not this Mold's — its job is an honest, source-backed match.
 
 ## Sequence
 
-1. **Enumerate inputs and their required shape.** From the interface brief, list each workflow input: label, Galaxy collection shape (File / list / paired / list:paired / record), and datatype. This is the *target shape* every match must satisfy.
+1. **Enumerate inputs and their required shape.** From the interface brief, list each workflow input: label, Galaxy collection shape (File / list / paired / list:paired / record), and datatype. This is the *target shape* every match must satisfy. If an earlier leg's `test-data-refs` is present, keep each `resolved: true` entry exactly as written, `resolved_by` included, and work only the unresolved labels through steps 2–5.
 2. **Mine the contract and available evidence for named data.** The interface and data-flow briefs are design artifacts — they deliberately drop dataset provenance. Read fixture requirements from `workflow-brief` when present, then consult any retained source summary (`freeform-summary` / `summary-nextflow` / `summary-cwl`) for sample-data locations, accessions, public-data candidates, fallback bundles, and sizing guidance. A hand-authored brief may have no summary; search from its selected input requirements rather than inventing provenance.
 3. **Match each named candidate against the required shape — and don't stop at a shape mismatch.** Check each candidate against step 1's target shape and datatype. A candidate that is the wrong *shape* (e.g. raw signal / reads named when the input is a count matrix) is **not** a resolution — but it is also **not** the end of the search. When the source's named candidates don't fit, follow the source's own guidance to the right-shape public artifact: if the source says the input is a precomputed count matrix, find the canonical public count matrix for that study/domain (GEO/ENCODE/ArrayExpress series, a published supplementary table) rather than reporting "no data." "Named candidates are the wrong shape" ≠ "no data exists."
 4. **Search IWC fixtures and public sources.** Prefer existing IWC test data for the same domain — it already conforms to [[iwc-test-data-conventions]] (remote URL, recorded hash, known collection layout); a near-neighbour IWC `-tests.yml` is the strongest source. Otherwise resolve the right-shape public dataset found in step 3, sized for a fast test run.
 5. **"Small" is a documented subset of a real source, not a fabricated stand-in.** When the source asks for a small fixture (one chromosome, selected loci, a few samples) and only a full real dataset exists, that input is **resolved**: record the real source URL plus the data-import-boundary prep needed to reach the small shape (row-subset by key, column/sample split into the collection's element identifiers). The prep is a note on the ref, not an analysis step and not an excuse to mark the input unresolved. Resolve the *data*; leave analysis parameters (factors, thresholds, reference levels, top-N) to the design Molds — they are not this Mold's to decide.
-6. **Emit refs.** Write one `test-data-refs.json` entry per input: the URL/path, the expected Galaxy shape, datatype, element identifiers when it is a collection, integrity hash when known, and any subset/split prep. Per [[galaxy-workflow-testability-design]], make sure each entry maps to an addressable input label.
+6. **Emit refs.** Write one `test-data-refs.json` entry per input: the URL/path, the expected Galaxy shape, datatype, element identifiers when it is a collection, integrity hash when known, and any subset/split prep. Per [[galaxy-workflow-testability-design]], make sure each entry maps to an addressable input label. Shape each entry per [[test-data-refs]], set `resolved_by: find-test-data` on the entries you resolve, and validate the file with `foundry validate-test-data-refs` before returning.
 7. **Report genuine gaps only.** Mark `resolved: false` with a reason **only** when steps 2–5 turn up no real source of the right shape — not merely because the source's first-named candidate was the wrong shape or because a real source needs a documented subset. These honest gaps are what the harness hands to `user-supplied`.
 
 ## No fabrication

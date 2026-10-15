@@ -70,7 +70,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 5. **freeform-summary-to-galaxy-template** — invoke the `freeform-summary-to-galaxy-template` skill. gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief.
 6. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
 7. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
-   - Try `paper-to-test-data` — Derive workflow test inputs and expected outputs from a paper.
+   - Try `paper-to-test-data` — Resolve the test data a paper names into refs for each workflow input.
    - Otherwise try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
 8. **freeform-summary-to-galaxy-test-plan** — invoke the `freeform-summary-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs.

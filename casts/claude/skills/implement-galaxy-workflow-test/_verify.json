@@ -12,6 +12,18 @@
         "validate-galaxy-workflow-test-plan",
         "{artifact_path}"
       ]
+    },
+    {
+      "artifact_id": "test-data-refs",
+      "direction": "input",
+      "kind": "json",
+      "default_filename": "test-data-refs.json",
+      "schema": "[[test-data-refs]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-test-data-refs",
+        "{artifact_path}"
+      ]
     }
   ]
 }

@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 7,
-    "content_hash": "85fc9e8b90b142123652f8c8677017fae3b873dfb20cd6060db5f37e6507d7ea",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "revision": 8,
+    "content_hash": "854238aee01711044de686f74e789e843f19613e6740722b7d95e68d7ad89e03",
+    "commit": "b9c16baddd12482c739bb00a2aa7689260ddcd86"
   },
-  "cast_at": "2026-10-15T21:04:48.334Z",
+  "cast_at": "2026-10-16T22:26:06.626Z",
   "refs": [
     {
       "kind": "research",
@@ -39,6 +39,22 @@
       "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
       "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[test-data-refs]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testDataRefsSchema",
+      "dst": "references/schemas/test-data-refs.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.",
+      "verification": "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it.",
+      "license": "MIT",
+      "src_hash": "55d9059369ad8fb8b8602732d4e1ec97638b3af57144e8218fa846b6047e02cb",
+      "dst_hash": "55d9059369ad8fb8b8602732d4e1ec97638b3af57144e8218fa846b6047e02cb",
+      "source": "deterministic"
     }
   ],
   "artifacts": {
@@ -47,7 +63,8 @@
         "id": "test-data-refs",
         "kind": "json",
         "default_filename": "test-data-refs.json",
-        "description": "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring."
+        "schema": "[[test-data-refs]]",
+        "description": "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring. Carries forward, unchanged, every entry an earlier leg resolved."
       }
     ],
     "consumes": [
@@ -114,6 +131,18 @@
         "description": "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the CWL → GALAXY pipeline.",
         "producers": [
           "cwl-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "test-data-refs",
+        "description": "Refs from the chain's source-specific leg ([[nextflow-to-test-data]], [[cwl-to-test-data]], [[paper-to-test-data]]) when the pipeline has one. Keep its resolved entries unchanged and search only for its unresolved inputs. Absent when this Mold is the chain's first leg.",
+        "optional": true,
+        "inherited_schema": "[[test-data-refs]]",
+        "producers": [
+          "cwl-to-test-data",
+          "find-test-data",
+          "nextflow-to-test-data",
+          "paper-to-test-data"
         ]
       }
     ]

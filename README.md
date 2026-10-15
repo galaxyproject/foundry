@@ -139,8 +139,8 @@ Forward work is quality and reach rather than existence. Review is underway rath
 | Pattern pages | 54 |
 | Source-pattern pages | 7 |
 | CLI tools | 6 |
-| CLI command pages | 29 |
-| Schema notes | 15 |
+| CLI command pages | 30 |
+| Schema notes | 16 |
 | Research notes | 70 |
 <!-- /generated:corpus -->
 

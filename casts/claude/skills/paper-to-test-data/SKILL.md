@@ -1,6 +1,6 @@
 ---
 name: paper-to-test-data
-description: "Derive workflow test inputs and expected outputs from a paper."
+description: "Resolve the test data a paper names into refs for each workflow input."
 ---
 
 # paper-to-test-data
@@ -9,15 +9,16 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## When To Use
 
-- Derive workflow test inputs and expected outputs from a paper.
+- Resolve the test data a paper names into refs for each workflow input.
 
 ## Inputs
 
 - Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`. Free-form summary from summarize-paper; sample data and reference evidence the test fixtures derive from.
+- Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface pinning the workflow input labels, collection shapes, and datatypes each ref must map onto.
 
 ## Outputs
 
-- Write artifact `test-data-refs` as `test-data-refs.json`. Format: `json`. Resolved workflow test inputs and expected outputs derived from paper evidence (URLs, file shapes, expected hashes).
+- Write artifact `test-data-refs` as `test-data-refs.json`. Format: `json`. Schema: test-data-refs. Test data the paper names, one ref per workflow input (URLs, shapes, hashes). Shared id with find-test-data, which fills only the inputs this Mold leaves unresolved.
 
 ## Required Tools
 
@@ -25,7 +26,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
-- None declared.
+- `references/schemas/test-data-refs.schema.json`: Schema file copied verbatim into the bundle. Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.
 
 ## Load On Demand
 
@@ -33,11 +34,11 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- None declared.
+- Validate `test-data-refs.json` before returning it: run `foundry validate-test-data-refs test-data-refs.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-test-data-refs test-data-refs.json`. This checks artifact `test-data-refs` against the test-data-refs schema.
 
 ## Procedure
 
-Read the paper free-form summary from summarize-paper and derive concrete workflow test inputs and expected outputs — resolvable URLs, file shapes, and expected hashes — emitted as `test-data-refs`.
+Read the paper free-form summary from summarize-paper and resolve the data the paper names (resolvable URLs, file shapes, expected hashes) onto the workflow inputs the interface brief declares, as `test-data-refs` with `resolved_by: paper-to-test-data`. An input the paper names no data for stays `resolved: false` with a reason, for find-test-data to search. Expected outputs are the test plan's to derive, not this skill's. Validate the file with `foundry validate-test-data-refs` before returning.
 
 ## Feedback Mode
 
