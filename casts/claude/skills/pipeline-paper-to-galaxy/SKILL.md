@@ -5,11 +5,11 @@ description: "Direct path from a paper to a Galaxy gxformat2 workflow — orches
 
 # pipeline-paper-to-galaxy
 
-Harness for the **PAPER → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-galaxy/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline paper-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **PAPER → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-galaxy/index.md` (revision 6) — regenerate with `foundry-build assemble-pipeline paper-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
-- Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate.
+- Direct path from a paper to a Galaxy gxformat2 workflow. No Workflow Brief or CWL intermediate.
 
 ## Bootstrap (install these CLIs first)
 

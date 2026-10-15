@@ -13,6 +13,8 @@ import castProvenanceSchema from '../../../scripts/lib/schemas/cast-provenance.s
 import foundryPkg from '../../../packages/gxwf-foundry/package.json';
 import summaryNextflowSchema from '../../../packages/summarize-nextflow/src/schema/summary-nextflow.schema.json';
 import summarizeNextflowPkg from '../../../packages/summarize-nextflow/package.json';
+import { workflowBriefSchema } from '../../../packages/gxwf-foundry/src/workflow-brief';
+import type { MarkdownDocumentSchema } from '../../../packages/gxwf-foundry/src/markdown-document';
 
 export interface SchemaEntry {
   schema: Record<string, unknown>;
@@ -21,6 +23,10 @@ export interface SchemaEntry {
 
 const foundryVersion = (foundryPkg as { version?: string }).version ?? '';
 const summarizeNextflowVersion = (summarizeNextflowPkg as { version?: string }).version ?? '';
+
+export const markdownSchemaRegistry: Record<string, { schema: MarkdownDocumentSchema; version: string }> = {
+  'workflow-brief': { schema: workflowBriefSchema, version: foundryVersion },
+};
 
 export const schemaRegistry: Record<string, SchemaEntry> = {
   'tests-format': {

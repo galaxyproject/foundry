@@ -5,7 +5,7 @@ description: "Post-construction review journey: summarize, validate, and test an
 
 # pipeline-galaxy-workflow-review
 
-Harness for the **GALAXY WORKFLOW REVIEW** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/galaxy-workflow-review/index.md` (revision 1) — regenerate with `foundry-build assemble-pipeline galaxy-workflow-review` if the pipeline changes; do not hand-edit.
+Harness for the **GALAXY WORKFLOW REVIEW** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/galaxy-workflow-review/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline galaxy-workflow-review` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 

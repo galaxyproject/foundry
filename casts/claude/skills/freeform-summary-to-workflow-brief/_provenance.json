@@ -1,0 +1,96 @@
+{
+  "provenance_schema_version": 4,
+  "cast_target": "claude",
+  "mold": {
+    "name": "freeform-summary-to-workflow-brief",
+    "path": "content/molds/freeform-summary-to-workflow-brief/index.md",
+    "revision": 1,
+    "content_hash": "e353ee588f69cd37c8f3a2c19c6d672d29c096684b885f9d62d1f8f35d9397ff",
+    "commit": "21765674b50fa1552557043bbd4709ae15ab4c3f"
+  },
+  "cast_at": "2026-09-20T17:29:30.750Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[check-workflow-brief]]",
+      "src": "content/cli/foundry/check-workflow-brief.md",
+      "dst": "references/cli/check-workflow-brief.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Report declared blockers separately from structural validity.",
+      "trigger": "After structural validation and before reporting whether the brief is clear of declared blockers.",
+      "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
+      "src_hash": "7fd8bccdd0f5a2a62cc51e00589e9e263ce633a4c9a75ba3753d4d01ae822895",
+      "dst_hash": "a5ad5bcca89d0e0db6f2e4503bf48cfec962c5282e89d2d9a3b3738eda11e8b3",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[validate-workflow-brief]]",
+      "src": "content/cli/foundry/validate-workflow-brief.md",
+      "dst": "references/cli/validate-workflow-brief.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Validate the emitted brief before returning it.",
+      "trigger": "After writing workflow-brief.md.",
+      "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
+      "src_hash": "3ddc9b59fb25189ac6d6c3cf9fb389c5292664e1effd13879a518af6f80d3e9c",
+      "dst_hash": "f50a470d61ea5bc3863325cded80e7d008e200f7972a9e9e26fd9cbd082d01e4",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[workflow-brief-design]]",
+      "src": "content/research/workflow-brief-design/index.md",
+      "dst": "references/notes/workflow-brief-design.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Apply the brief boundaries: evidence and expert intent, no inferred Galaxy design, and separate workflow/environment blockers.",
+      "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
+      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[workflow-brief-schema]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#workflowBriefSchema",
+      "dst": "references/schemas/workflow-brief-schema.schema.json",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Carry the Markdown section declaration and its structural validator.",
+      "src_hash": "8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0",
+      "dst_hash": "8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "workflow-brief",
+        "kind": "markdown",
+        "default_filename": "workflow-brief.md",
+        "schema": "[[workflow-brief-schema]]",
+        "description": "Expert-editable workflow intent and agent environment, with optional details and explicit workflow or environment blockers."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "freeform-summary",
+        "description": "Source evidence supplied by the preceding summarizer; preserve uncertainty and the caller’s selected scope.",
+        "producers": [
+          "interview-to-freeform-summary",
+          "summarize-paper"
+        ]
+      }
+    ]
+  }
+}

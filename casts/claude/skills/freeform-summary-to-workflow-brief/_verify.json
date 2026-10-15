@@ -1,0 +1,17 @@
+{
+  "verify_schema_version": 1,
+  "entries": [
+    {
+      "artifact_id": "workflow-brief",
+      "direction": "output",
+      "kind": "markdown",
+      "default_filename": "workflow-brief.md",
+      "schema": "[[workflow-brief-schema]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-workflow-brief",
+        "{artifact_path}"
+      ]
+    }
+  ]
+}

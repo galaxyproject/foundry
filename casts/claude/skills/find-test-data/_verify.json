@@ -24,6 +24,18 @@
         "validate-summary-nextflow",
         "{artifact_path}"
       ]
+    },
+    {
+      "artifact_id": "workflow-brief",
+      "direction": "input",
+      "kind": "markdown",
+      "default_filename": "workflow-brief.md",
+      "schema": "[[workflow-brief-schema]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-workflow-brief",
+        "{artifact_path}"
+      ]
     }
   ]
 }

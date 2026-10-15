@@ -204,6 +204,32 @@ describe("the document skeleton", () => {
   });
 });
 
+describe("the public pipeline routes", () => {
+  it("presents direct and planned builds separately on the landing page", () => {
+    const base = baseFrom(home);
+    expect(home).toContain('id="choose-route"');
+    expect(home).toContain("Direct Build");
+    expect(home).toContain("Plan &amp; Build");
+    expect(home).toContain("Expert review &amp; edit");
+    expect(home).toContain("PAPER → GALAXY");
+    expect(home).toContain("PAPER → WORKFLOW BRIEF");
+    expect(home).toContain(`href="${base}/pipelines/paper-to-workflow-brief/"`);
+    expect(home).toContain(`href="${base}/pipelines/workflow-brief-to-galaxy/"`);
+  });
+
+  it("groups runnable commands by journey on Usage", () => {
+    const base = baseFrom(home);
+    const usage = read(path.join(DIST, "usage/index.html"));
+    expect(usage).toContain('id="direct-builds"');
+    expect(usage).toContain('id="plan-and-build"');
+    expect(usage).toContain('id="existing-workflows"');
+    expect(usage).toContain("Expert review &amp; edit");
+    expect(usage).toContain("pipeline-paper-to-galaxy");
+    expect(usage).toContain("pipeline-paper-to-workflow-brief");
+    expect(usage).toContain(`href="${base}/pipelines/workflow-brief-to-galaxy/harness/"`);
+  });
+});
+
 /** Every stylesheet the build emitted, concatenated. The shell's styles are split across several. */
 const emittedCss = (): string =>
   readdirSync(path.join(DIST, "_astro"))

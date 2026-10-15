@@ -4,10 +4,11 @@ title: CWL → GALAXY
 tags:
   - source/cwl
   - target/galaxy
+  - journey/direct-build
 status: draft
 created: 2026-04-30
-revised: 2026-09-22
-revision: 4
+revised: 2026-10-15
+revision: 5
 summary: "Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test."
 phases:
   - mold: "[[summarize-cwl]]"
