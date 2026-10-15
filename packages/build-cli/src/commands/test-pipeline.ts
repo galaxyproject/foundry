@@ -316,6 +316,22 @@ function addUsage(total: PipelineRunRecord["usage"], usage: PiSkillRunRecord["us
   total.tool_calls += usage.tool_calls;
 }
 
+/** Why a worker that reported no error failed, when the artifacts it was judged on say. */
+function failedArtifactsError(
+  artifacts: PiSkillRunRecord["artifacts"],
+  expected: ExpectedArtifact[],
+): string | undefined {
+  const optional = new Set(expected.filter((item) => item.optional).map((item) => item.id));
+  const failed = artifacts.filter(
+    (artifact) =>
+      artifact.status === "failed" ||
+      artifact.status === "error" ||
+      (artifact.status === "missing" && !optional.has(artifact.id)),
+  );
+  if (!failed.length) return undefined;
+  return `declared artifact did not pass: ${failed.map((artifact) => `${artifact.id} (${artifact.status})`).join(", ")}`;
+}
+
 function combinedStatus(statuses: RunStatus[]): RunStatus {
   if (statuses.every((status) => status === "passed")) return "passed";
   for (const status of ["error", "timed_out", "cancelled", "failed"] as const) {
@@ -482,8 +498,8 @@ export async function runLinearPipeline(
         phase: phase.phase,
         skill: phase.skill!,
         status: worker.status,
-        failure_kind: worker.status === "passed" ? undefined : "worker",
-        error: worker.error,
+        failure_kind: worker.failure_kind,
+        error: worker.error ?? failedArtifactsError(worker.artifacts, plan.produces),
         run_dir: path.relative(runDir, phaseRunDir).split(path.sep).join("/"),
         worker_run_id: worker.run_id,
         worker_run_path: path

@@ -539,6 +539,46 @@ test("rejects a hash-mismatched promoted artifact distinctly from worker failure
   );
 });
 
+test("keeps the worker's own failure kind, and names the artifact when the worker gives no error", async () => {
+  const root = fixtureRepo();
+  const record = await runLinearPipeline(
+    {
+      repoRoot: root,
+      pipeline: "demo-pipeline",
+      scenario: "tiny journey",
+      through: "1",
+      trials: 1,
+      runDir: path.join(root, "runs", "skill-failure"),
+      provider: "test-provider",
+      model: "test-model",
+      sandbox: "local",
+      timeoutMs: 1000,
+      credentialEnv: [],
+      sandboxNetwork: "none",
+    },
+    {
+      runSkill: async (options) => {
+        const passed = fakeRecord(options, "summarize");
+        return {
+          ...passed,
+          status: "failed",
+          failure_kind: "skill",
+          artifacts: passed.artifacts.map((artifact) =>
+            artifact.id === "summary" ? { ...artifact, status: "failed" } : artifact,
+          ),
+        };
+      },
+    },
+  );
+  expect(record.trials[0]?.phases[0]).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "skill",
+      error: "declared artifact did not pass: summary (failed)",
+    }),
+  );
+});
+
 test("preflights missing pi-test-auth and staged basename collisions before creating a run", async () => {
   const root = fixtureRepo();
   const missingAuthRun = path.join(root, "runs", "missing-auth");
