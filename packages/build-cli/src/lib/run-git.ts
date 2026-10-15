@@ -27,7 +27,7 @@ export type GitExec = (args: string[]) => string;
 const FIELD = String.fromCharCode(31);
 const RECORD = String.fromCharCode(30);
 
-export const GIT_LOG_ARGS = [
+const GIT_LOG_ARGS = [
   "log",
   `--format=${RECORD}%H${FIELD}%aI${FIELD}%s`,
   "--numstat",
@@ -44,10 +44,19 @@ export const GIT_LOG_ARGS = [
  */
 const SUBJECT = /^phase\s+(\d+)(?:\s+step\s+(\d+))?(?:\s+attempt\s+(\d+))?\s*:\s*(.*)$/i;
 
+/**
+ * Whether a subject announces a failure, rather than merely mentioning one.
+ *
+ * Real failure commits shout (`FAILED - no shed tools installed`, `(1 of 2 cases FAILED)`) or lead
+ * with it; `fix failed test` and `rerun after the failure` are ordinary work.
+ */
+function announcesFailure(label: string): boolean {
+  return /\bFAIL(?:ED|URE|S)?\b/.test(label) || /^fail(?:ed|ure|s)?\b/i.test(label.trim());
+}
+
 export function parseCommitSubject(
   subject: string,
 ): Pick<RunCommit, "phase" | "step" | "attempt" | "label" | "kind" | "failed"> {
-  const failed = /\bfail(ed|ure|s)?\b/i.test(subject);
   const match = SUBJECT.exec(subject.trim());
   if (!match) {
     return {
@@ -56,17 +65,18 @@ export function parseCommitSubject(
       attempt: null,
       label: subject.trim(),
       kind: "ad-hoc",
-      failed,
+      failed: announcesFailure(subject),
     };
   }
   const step = match[2] ? Number(match[2]) : null;
+  const label = (match[4] ?? "").trim();
   return {
     phase: Number(match[1]),
     step,
     attempt: match[3] ? Number(match[3]) : null,
-    label: (match[4] ?? "").trim() || subject.trim(),
+    label: label || subject.trim(),
     kind: step === null ? "phase" : "step",
-    failed,
+    failed: announcesFailure(label),
   };
 }
 

@@ -12,6 +12,12 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 import {
+  ASSEMBLY_FILE,
+  loadAssemblyManifest,
+  type AssemblyManifest,
+  type AssemblyPhase,
+} from '@galaxy-foundry/gxwf-foundry-note-schema';
+import {
   bundlePathTemplate,
   resolveBundlePath,
 } from '../../../packages/build-cli/src/lib/target-layout.js';
@@ -269,30 +275,9 @@ export function listAllCasts(repoRoot: string = defaultRepoRoot()): CastArtifact
 
 // ── Pipeline harness assemblies (`_assembly.json`) ──────────────────────────
 // Produced by `/assemble-pipeline`; the stop-gap harness manifest. One per
-// `pipeline-<slug>` cast. Shape mirrors scripts/assemble-pipeline output.
+// `pipeline-<slug>` cast. The shape and its loader ship in the note-schema package.
 
-export interface AssemblyPhase {
-  phase: number;
-  kind: 'mold' | 'branch' | string;
-  /** Present for `kind: mold`. */
-  skill?: string;
-  /** Boolean for mold phases; per-leg array for branch phases. */
-  cast_present: boolean | (boolean | null)[];
-  loop?: boolean;
-  /** Branch phases. */
-  pattern?: string;
-  chain?: string[];
-  branches?: unknown[];
-}
-
-export interface AssemblyManifest {
-  source_pipeline: string;
-  source_revision: number;
-  harness_name: string;
-  /** Runtime invocation flags the harness honors (e.g. `use-subagents`, `checkpoint`). */
-  options?: string[];
-  phases: AssemblyPhase[];
-}
+export type { AssemblyManifest, AssemblyPhase };
 
 export interface AssemblyStats {
   total: number;
@@ -308,13 +293,10 @@ export function loadAssembly(
   pipelineSlug: string,
   repoRoot: string = defaultRepoRoot(),
 ): AssemblyManifest | null {
-  const file = path.join(
-    castDirFor('claude', `pipeline-${pipelineSlug}`, repoRoot),
-    '_assembly.json',
-  );
+  const file = path.join(castDirFor('claude', `pipeline-${pipelineSlug}`, repoRoot), ASSEMBLY_FILE);
   if (!existsSync(file)) return null;
   try {
-    return JSON.parse(readFileSync(file, 'utf8')) as AssemblyManifest;
+    return loadAssemblyManifest(file, pipelineSlug);
   } catch {
     return null;
   }

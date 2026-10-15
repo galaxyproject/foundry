@@ -7,9 +7,11 @@
 // summarized at depth one, hashing stops above a size cap, and embedded text has both a per-file
 // and a whole-run budget. Every skip is recorded rather than silently applied.
 
-import { createHash } from "node:crypto";
-import { readFileSync, readdirSync, statSync, type Stats } from "node:fs";
+import { lstatSync, readFileSync, readdirSync, realpathSync, statSync, type Stats } from "node:fs";
 import path from "node:path";
+
+import { humanBytes } from "./html.js";
+import { sha256File } from "./reconcile.js";
 
 export interface ScanOptions {
   /** Above this, sha256 is skipped and the reason recorded. */
@@ -18,8 +20,12 @@ export interface ScanOptions {
   maxEmbedBytes: number;
   /** Across the whole run. Once spent, later files carry a skip reason. */
   totalEmbedBudget: number;
-  /** Recurse into directories instead of summarizing them at depth one. */
+  /** Recurse into directories, listing every nested file, instead of summarizing them. */
   deepDirs: boolean;
+  /** With `deepDirs`, nested files past this many are counted as ignored rather than listed. */
+  maxDeepEntries: number;
+  /** Run-relative paths never read, at any depth: the files this invocation is about to write. */
+  skip: string[];
 }
 
 export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
@@ -27,6 +33,8 @@ export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
   maxEmbedBytes: 256 * 1024,
   totalEmbedBudget: 4 * 1024 * 1024,
   deepDirs: false,
+  maxDeepEntries: 5000,
+  skip: [],
 };
 
 /**
@@ -37,6 +45,9 @@ export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
  * artifact.
  */
 const EXCLUDED_NAMES = new Set([".git", ".omc", "node_modules", ".DS_Store"]);
+
+/** What `run-dashboard` writes beside the run; reading them back would count the reader as the run. */
+const READER_OUTPUTS = new Set(["run-manifest.json", "dashboard.html"]);
 
 const TEXT_EXTENSIONS = new Set([
   ".md",
@@ -80,18 +91,8 @@ export interface ScanResult {
   total_bytes: number;
 }
 
-export function isExcluded(name: string): boolean {
+function isExcluded(name: string): boolean {
   return EXCLUDED_NAMES.has(name) || name.startsWith(".") || name.endsWith(".swp");
-}
-
-function humanBytes(n: number): string {
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-export function sha256File(file: string): string {
-  return createHash("sha256").update(readFileSync(file)).digest("hex");
 }
 
 function looksTextual(basename: string): boolean {
@@ -101,84 +102,226 @@ function looksTextual(basename: string): boolean {
   return /\.(ya?ml|json|md|txt|log)(\.[^.]+)*$/i.test(basename);
 }
 
-/** Depth-one summary of a directory we decline to walk. */
-function summarizeDir(dir: string): { entry_count: number; total_bytes: number; sample: string[] } {
+/**
+ * Stats for a path, following a symlink only when it resolves inside the run directory.
+ *
+ * A run directory is the user's, and a link out of it (to a home directory, a data store) must not
+ * be hashed or embedded into a page that may be shared.
+ */
+function statInside(full: string, root: string): { stats: Stats; real: string } | null {
+  try {
+    const own = lstatSync(full);
+    if (!own.isSymbolicLink()) return { stats: own, real: full };
+    const real = realpathSync(full);
+    if (real !== root && !real.startsWith(`${root}${path.sep}`)) return null;
+    return { stats: statSync(real), real };
+  } catch {
+    return null;
+  }
+}
+
+function posixRel(from: string, to: string): string {
+  return path.relative(from, to).split(path.sep).join("/");
+}
+
+/** Depth-limited summary of a directory we decline to list. */
+function summarizeDir(
+  dir: string,
+  root: string,
+  skipped: (full: string) => boolean,
+): { entry_count: number; total_bytes: number; sample: string[] } {
   let entryCount = 0;
   let totalBytes = 0;
   const sample: string[] = [];
   const walk = (current: string, depth: number): void => {
     let names: string[];
     try {
-      names = readdirSync(current);
+      names = readdirSync(current).sort();
     } catch {
       return;
     }
     for (const name of names) {
-      if (EXCLUDED_NAMES.has(name)) continue;
+      if (isExcluded(name)) continue;
       const full = path.join(current, name);
-      let stats: Stats;
-      try {
-        stats = statSync(full);
-      } catch {
-        continue;
-      }
-      if (stats.isDirectory()) {
+      const found = statInside(full, root);
+      if (!found) continue;
+      if (found.stats.isDirectory()) {
         if (depth < 3) walk(full, depth + 1);
         continue;
       }
+      if (!found.stats.isFile() || skipped(full)) continue;
       entryCount += 1;
-      totalBytes += stats.size;
-      if (sample.length < 20) sample.push(path.relative(dir, full).split(path.sep).join("/"));
+      totalBytes += found.stats.size;
+      if (sample.length < 20) sample.push(posixRel(dir, full));
     }
   };
   walk(dir, 0);
   return { entry_count: entryCount, total_bytes: totalBytes, sample };
 }
 
+/** Embedded bytes spent so far, shared by every file read under one run-wide budget. */
+export interface EmbedBudget {
+  spent: number;
+}
+
+function entryOf(
+  full: string,
+  relpath: string,
+  stats: Stats,
+  opts: ScanOptions,
+  budget?: EmbedBudget,
+): ScannedEntry {
+  const name = path.basename(full);
+  let sha256: string | null = null;
+  let hashSkipped: string | null = null;
+  if (stats.size <= opts.maxHashBytes) {
+    try {
+      sha256 = sha256File(full);
+    } catch (error) {
+      hashSkipped = `unreadable: ${(error as Error).message}`;
+    }
+  } else {
+    hashSkipped = `over the hash cap (${humanBytes(stats.size)})`;
+  }
+
+  let text: string | null = null;
+  let textSkip: string | null = null;
+  if (!looksTextual(name)) {
+    textSkip = "not a text format";
+  } else if (stats.size > opts.maxEmbedBytes) {
+    textSkip = `over the per-file embed cap (${humanBytes(stats.size)})`;
+  } else if (budget && budget.spent + stats.size > opts.totalEmbedBudget) {
+    textSkip = "run-wide embed budget exhausted";
+  } else {
+    try {
+      const buffer = readFileSync(full);
+      if (buffer.includes(0)) {
+        textSkip = "binary content";
+      } else {
+        text = buffer.toString("utf8");
+        if (budget) budget.spent += stats.size;
+      }
+    } catch (error) {
+      textSkip = `unreadable: ${(error as Error).message}`;
+    }
+  }
+
+  return {
+    basename: name,
+    relpath,
+    type: "file",
+    size_bytes: stats.size,
+    mtime: stats.mtime.toISOString(),
+    sha256,
+    hash_skipped_reason: hashSkipped,
+    dir_summary: null,
+    text,
+    text_truncated: false,
+    text_skip_reason: textSkip,
+  };
+}
+
+/**
+ * One file, read the way `scanRunDir` reads each of its files, or null when it is not a file.
+ *
+ * Without a `budget` the run-wide embed budget does not apply; pass one to share it across calls.
+ */
+export function scanFile(
+  full: string,
+  relpath: string,
+  options: Partial<ScanOptions> = {},
+  budget?: EmbedBudget,
+): ScannedEntry | null {
+  let stats: Stats;
+  try {
+    stats = statSync(full);
+  } catch {
+    return null;
+  }
+  if (!stats.isFile()) return null;
+  return entryOf(full, relpath, stats, { ...DEFAULT_SCAN_OPTIONS, ...options }, budget);
+}
+
 /**
  * Inventory the run directory.
  *
  * Only depth one is treated as run artifacts: every harness writes declared basenames flat into
- * the run directory, so anything nested is either tool output or input data.
+ * the run directory, so anything nested is either tool output or input data. `deepDirs` lists
+ * nested files too, under the same hash and embed budgets, without promoting them to artifacts.
  */
 export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): ScanResult {
   const opts = { ...DEFAULT_SCAN_OPTIONS, ...options };
   const entries: ScannedEntry[] = [];
   let ignored = 0;
   let totalBytes = 0;
-  let embedSpent = 0;
+  let deepListed = 0;
 
+  let root: string;
   let names: string[];
   try {
-    names = readdirSync(dir).sort();
+    root = realpathSync(dir);
+    names = readdirSync(root).sort();
   } catch (error) {
     throw new Error(`cannot read run directory ${dir}`, { cause: error });
   }
 
-  for (const name of names) {
-    if (isExcluded(name)) {
-      ignored += 1;
-      continue;
-    }
-    const full = path.join(dir, name);
-    let stats: Stats;
+  const skip = new Set(opts.skip);
+  const skipped = (full: string): boolean => skip.has(posixRel(root, full));
+  const budget: EmbedBudget = { spent: 0 };
+  const fileEntry = (full: string, relpath: string, stats: Stats): ScannedEntry =>
+    entryOf(full, relpath, stats, opts, budget);
+
+  /** Lists every file under `current`; `seen` holds real directory paths, so a link cannot loop. */
+  const walkNested = (current: string, seen: Set<string>): void => {
+    let nestedNames: string[];
     try {
-      stats = statSync(full);
+      nestedNames = readdirSync(current).sort();
     } catch {
+      return;
+    }
+    for (const name of nestedNames) {
+      if (isExcluded(name)) continue;
+      const full = path.join(current, name);
+      const found = statInside(full, root);
+      if (!found) continue;
+      if (found.stats.isDirectory()) {
+        if (seen.has(found.real)) continue;
+        seen.add(found.real);
+        walkNested(full, seen);
+        continue;
+      }
+      if (!found.stats.isFile() || skipped(full)) continue;
+      if (deepListed >= opts.maxDeepEntries) {
+        ignored += 1;
+        continue;
+      }
+      deepListed += 1;
+      entries.push(fileEntry(full, posixRel(root, full), found.stats));
+    }
+  };
+
+  for (const name of names) {
+    if (isExcluded(name) || READER_OUTPUTS.has(name) || skip.has(name)) {
       ignored += 1;
       continue;
     }
-    const mtime = stats.mtime.toISOString();
+    const full = path.join(root, name);
+    const found = statInside(full, root);
+    if (!found) {
+      ignored += 1;
+      continue;
+    }
+    const { stats } = found;
 
     if (stats.isDirectory()) {
-      const summary = summarizeDir(full);
+      const summary = summarizeDir(full, root, skipped);
       totalBytes += summary.total_bytes;
       entries.push({
         basename: name,
         relpath: name,
         type: "dir",
         size_bytes: summary.total_bytes,
-        mtime,
+        mtime: stats.mtime.toISOString(),
         sha256: null,
         hash_skipped_reason: "directory",
         dir_summary: summary,
@@ -186,30 +329,7 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
         text_truncated: false,
         text_skip_reason: null,
       });
-      if (opts.deepDirs) {
-        for (const nested of summary.sample) {
-          const nestedFull = path.join(full, nested);
-          let nestedStats: Stats;
-          try {
-            nestedStats = statSync(nestedFull);
-          } catch {
-            continue;
-          }
-          entries.push({
-            basename: path.basename(nested),
-            relpath: `${name}/${nested}`,
-            type: "file",
-            size_bytes: nestedStats.size,
-            mtime: nestedStats.mtime.toISOString(),
-            sha256: null,
-            hash_skipped_reason: "nested under a summarized directory",
-            dir_summary: null,
-            text: null,
-            text_truncated: false,
-            text_skip_reason: "nested under a summarized directory",
-          });
-        }
-      }
+      if (opts.deepDirs) walkNested(full, new Set([found.real]));
       continue;
     }
 
@@ -219,54 +339,7 @@ export function scanRunDir(dir: string, options: Partial<ScanOptions> = {}): Sca
     }
 
     totalBytes += stats.size;
-
-    let sha256: string | null = null;
-    let hashSkipped: string | null = null;
-    if (stats.size <= opts.maxHashBytes) {
-      try {
-        sha256 = sha256File(full);
-      } catch (error) {
-        hashSkipped = `unreadable: ${(error as Error).message}`;
-      }
-    } else {
-      hashSkipped = `over the hash cap (${humanBytes(stats.size)})`;
-    }
-
-    let text: string | null = null;
-    let textSkip: string | null = null;
-    if (!looksTextual(name)) {
-      textSkip = "not a text format";
-    } else if (stats.size > opts.maxEmbedBytes) {
-      textSkip = `over the per-file embed cap (${humanBytes(stats.size)})`;
-    } else if (embedSpent + stats.size > opts.totalEmbedBudget) {
-      textSkip = "run-wide embed budget exhausted";
-    } else {
-      try {
-        const buffer = readFileSync(full);
-        if (buffer.includes(0)) {
-          textSkip = "binary content";
-        } else {
-          text = buffer.toString("utf8");
-          embedSpent += stats.size;
-        }
-      } catch (error) {
-        textSkip = `unreadable: ${(error as Error).message}`;
-      }
-    }
-
-    entries.push({
-      basename: name,
-      relpath: name,
-      type: "file",
-      size_bytes: stats.size,
-      mtime,
-      sha256,
-      hash_skipped_reason: hashSkipped,
-      dir_summary: null,
-      text,
-      text_truncated: false,
-      text_skip_reason: textSkip,
-    });
+    entries.push(fileEntry(full, name, stats));
   }
 
   return { entries, ignored_count: ignored, total_bytes: totalBytes };

@@ -5,7 +5,11 @@
 // blank on a double click, which is the main way this gets opened. The manifest is still inlined
 // so the page carries its own data, but nothing rendered depends on reading it back.
 
-import { escapeAttr, escapeHtml, humanBytes, jsonScriptBody, shortInstant } from "../lib/html.js";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+
+import { escapeHtml, humanBytes, jsonScriptBody, shortInstant } from "../lib/html.js";
+import type { SiteLinker } from "../lib/run-links.js";
 import { DASHBOARD_CSS, DASHBOARD_JS } from "./run-dashboard-assets.js";
 import type {
   ArtifactPreview,
@@ -20,9 +24,13 @@ import type {
 export const GENERATOR_MARKER = "generated-by: foundry-build run-dashboard v1";
 
 export interface RenderOptions {
-  siteBase: string;
   manifestJson: string;
   commandLine: string;
+  /** Resolves the pipeline's page; without one the pipeline name is plain text. */
+  linker?: SiteLinker;
+  /** File links are relative from `outDir` to `runDir`; both default to the page's own directory. */
+  runDir?: string;
+  outDir?: string;
 }
 
 // ---- small builders --------------------------------------------------------------------------
@@ -30,18 +38,41 @@ export interface RenderOptions {
 function link(href: string | null, label: string, extraClass = ""): string {
   const text = escapeHtml(label);
   if (!href) return text;
-  const cls = extraClass ? ` class="${escapeAttr(extraClass)}"` : "";
-  return `<a href="${escapeAttr(href)}"${cls}>${text}</a>`;
+  const cls = extraClass ? ` class="${escapeHtml(extraClass)}"` : "";
+  return `<a href="${escapeHtml(href)}"${cls}>${text}</a>`;
+}
+
+/** A link to a file in the run, valid from wherever the page was written. */
+function fileHref(relpath: string, options: RenderOptions): string {
+  const up = options.runDir && options.outDir ? path.relative(options.outDir, options.runDir) : "";
+  // Different drives have no relative path between them.
+  if (path.isAbsolute(up)) return pathToFileURL(path.join(options.runDir!, relpath)).href;
+  const segments = [...up.split(path.sep), ...relpath.split("/")]
+    .filter(Boolean)
+    .map(encodeURIComponent)
+    .join("/");
+  return up ? segments : `./${segments}`;
+}
+
+/** Every table scrolls inside its own box so a wide one never widens the page. */
+function table(
+  head: string,
+  rows: string,
+  options: { sortable?: boolean; bodyId?: string } = {},
+): string {
+  const sortable = options.sortable ? " data-sortable" : "";
+  const bodyId = options.bodyId ? ` id="${escapeHtml(options.bodyId)}"` : "";
+  return `<div class="table-scroll"><table class="data-table"${sortable}><thead><tr>${head}</tr></thead><tbody${bodyId}>${rows}</tbody></table></div>`;
 }
 
 function badge(value: string, state?: string): string {
-  const stateAttr = state ? ` data-state="${escapeAttr(state)}"` : "";
-  return `<span class="badge" data-v="${escapeAttr(value)}"${stateAttr}>${escapeHtml(value)}</span>`;
+  const stateAttr = state ? ` data-state="${escapeHtml(state)}"` : "";
+  return `<span class="badge" data-v="${escapeHtml(value)}"${stateAttr}>${escapeHtml(value)}</span>`;
 }
 
 function section(id: string, title: string, tail: string, body: string): string {
   return [
-    `<section id="${escapeAttr(id)}">`,
+    `<section id="${escapeHtml(id)}">`,
     `<div class="section-rule"><h2>${escapeHtml(title)}</h2><span class="section-tail">${escapeHtml(tail)}</span></div>`,
     body,
     "</section>",
@@ -68,7 +99,7 @@ function renderHeader(model: RunModel, options: RenderOptions): string {
     ...run.options_observed.map((option) => `<span class="chip">--${escapeHtml(option)}</span>`),
   ].join("");
 
-  const pipelineHref = options.siteBase ? `${options.siteBase}/pipelines/${run.pipeline}/` : null;
+  const pipelineHref = options.linker?.pipeline(run.pipeline) ?? null;
 
   const banners: string[] = [];
   if (run.provenance === "reconstructed") {
@@ -76,21 +107,33 @@ function renderHeader(model: RunModel, options: RenderOptions): string {
     // ledger has a real phase roster, and a checkpointed one has a real timeline; claiming those
     // are lost would understate the page the reader is looking at.
     const recovered: string[] = [];
-    if (model.feedback) recovered.push("the feedback ledger supplied the phase roster");
+    if (model.feedback && !model.feedback.unreadable) {
+      recovered.push("the feedback ledger supplied the phase roster");
+    }
     if (model.timeline) recovered.push("the checkpoint history supplied the timeline");
     const stillMissing = model.artifacts.every((artifact) => artifact.written_by_phase === null)
       ? " Which phase wrote each file is not recorded anywhere, so the artifact table attributes by declaration rather than by fact."
       : "";
+    const recordUnreadable = model.warnings.some(
+      (warning) => warning.code === "run-record-unparseable",
+    );
+    const why = recordUnreadable
+      ? "This run's <code>foundry-run.yml</code> could not be read"
+      : "This run carries no <code>foundry-run.yml</code>";
     banners.push(
-      `<div class="banner"><p><strong>Reconstructed, not recorded.</strong> This run carries no <code>foundry-run.yml</code>, so its pipeline was inferred from the files on disk and the phase order comes from today's assembled harness${recovered.length ? `, though ${escapeHtml(recovered.join(" and "))}` : ""}.${stillMissing} ${escapeHtml(String(model.health.files_attributed))} of ${escapeHtml(String(model.health.files_seen))} files map to a declared artifact.</p></div>`,
+      `<div class="banner"><p><strong>Reconstructed, not recorded.</strong> ${why}, so its pipeline was inferred from the files on disk and the phase order comes from today's assembled harness${recovered.length ? `, though ${escapeHtml(recovered.join(" and "))}` : ""}.${stillMissing} ${escapeHtml(String(model.health.files_attributed))} of ${escapeHtml(String(model.health.files_seen))} files map to a declared artifact.</p></div>`,
     );
   }
-  if (!run.assembly_matches_checkout) {
+  // Null means no sha was recorded, which says nothing about drift.
+  if (run.assembly_matches_checkout === false) {
     banners.push(
       `<div class="banner"><p><strong>The harness changed since this run.</strong> Phase numbers and declared artifacts below describe the committed pipeline as it stands now, not the one this run read.</p></div>`,
     );
   }
-  const errors = model.warnings.filter((warning) => warning.code === "pipeline-conflict");
+  const errors = model.warnings.filter(
+    (warning) =>
+      warning.code === "pipeline-conflict" || warning.code === "pipeline-sources-disagree",
+  );
   for (const warning of errors) {
     banners.push(
       `<div class="banner banner-error"><p><strong>Sources disagree.</strong> ${escapeHtml(warning.message)}</p></div>`,
@@ -112,7 +155,7 @@ function renderHealth(model: RunModel): string {
   const tiles = model.health.tiles
     .map((tile) =>
       [
-        `<a class="tile" data-state="${escapeAttr(tile.state)}" href="${escapeAttr(tile.anchor)}">`,
+        `<a class="tile" data-state="${escapeHtml(tile.state)}" href="${escapeHtml(tile.anchor)}">`,
         `<div class="tile-label">${escapeHtml(tile.label)}</div>`,
         `<div class="tile-value">${escapeHtml(tile.value)}</div>`,
         `<div class="tile-detail">${escapeHtml(tile.detail)}</div>`,
@@ -152,9 +195,9 @@ function renderPhases(model: RunModel): string {
       const note =
         phase.status_source === "unknown"
           ? "no source recorded this phase"
-          : `${phase.status} · from ${phase.status_source.replace("-", " ")}`;
+          : `${phase.status} · from ${phase.status_source.replaceAll("-", " ")}`;
       return [
-        `<li class="${classes}" data-status="${escapeAttr(phase.status)}" data-phase-filter="${escapeAttr(String(phase.n))}">`,
+        `<li class="${classes}" data-status="${escapeHtml(phase.status)}" data-phase-filter="${escapeHtml(String(phase.n))}">`,
         `<span class="stop-marker" aria-hidden="true"></span>`,
         `<span class="stop-num">${String(phase.n).padStart(2, "0")}</span>`,
         `<span class="stop-name">${name}</span>`,
@@ -172,23 +215,24 @@ function renderPhases(model: RunModel): string {
 const PRESENCE_STATE: Record<string, string> = {
   present: "ok",
   missing: "error",
+  failed: "error",
   "not-yet-due": "warn",
   "optional-absent": "warn",
 };
 
-function renderArtifactRow(artifact: RunArtifact): string {
+function renderArtifactRow(artifact: RunArtifact, options: RenderOptions): string {
   const phase = artifact.written_by_phase ?? artifact.producing_phases[0] ?? null;
   const fileCell = artifact.path
-    ? `<a href="${escapeAttr(`./${artifact.path}`)}">${escapeHtml(artifact.declared_filename)}</a>`
+    ? `<a href="${escapeHtml(fileHref(artifact.path, options))}">${escapeHtml(artifact.declared_filename)}</a>`
     : escapeHtml(artifact.declared_filename);
   return [
-    `<tr data-row data-presence="${escapeAttr(artifact.presence)}" data-kind="${escapeAttr(artifact.kind)}">`,
-    `<td class="num" data-value="${escapeAttr(String(phase ?? 999))}">phase ${escapeHtml(String(phase ?? "—"))}</td>`,
+    `<tr data-row data-phase="${escapeHtml(String(phase ?? "none"))}" data-presence="${escapeHtml(artifact.presence)}" data-kind="${escapeHtml(artifact.kind)}">`,
+    `<td class="num" data-value="${escapeHtml(String(phase ?? 999))}">phase ${escapeHtml(String(phase ?? "—"))}</td>`,
     `<td class="mono">${link(artifact.site_href, artifact.id)}</td>`,
     `<td class="mono">${fileCell}</td>`,
     `<td class="mono">${escapeHtml(artifact.kind)}</td>`,
     `<td>${badge(artifact.presence, PRESENCE_STATE[artifact.presence])}</td>`,
-    `<td class="num" data-value="${escapeAttr(String(artifact.size_bytes ?? 0))}">${escapeHtml(humanBytes(artifact.size_bytes))}</td>`,
+    `<td class="num" data-value="${escapeHtml(String(artifact.size_bytes ?? 0))}">${escapeHtml(humanBytes(artifact.size_bytes))}</td>`,
     `<td class="num">${escapeHtml(shortInstant(artifact.mtime))}</td>`,
     `<td class="num">${artifact.variants.length ? escapeHtml(String(artifact.variants.length)) : "—"}</td>`,
     "</tr>",
@@ -213,7 +257,7 @@ function renderDerived(view: DerivedView): string {
       .join("");
     return [
       `<p class="panel-sub">${escapeHtml(view.class ?? "workflow")} — ${view.steps.length} step(s), ${drafty} still drafty, ${view.inputs.length} input(s), ${view.outputs.length} output(s).</p>`,
-      `<table class="data-table"><thead><tr><th>step</th><th>label</th><th>tool</th><th>state</th><th>plan keys</th></tr></thead><tbody>${rows}</tbody></table>`,
+      table("<th>step</th><th>label</th><th>tool</th><th>state</th><th>plan keys</th>", rows),
     ].join("\n");
   }
 
@@ -236,9 +280,7 @@ function renderDerived(view: DerivedView): string {
       .join("");
     return [
       `<dl class="kv">${counts}</dl>`,
-      cases
-        ? `<table class="data-table"><thead><tr><th>case</th><th>status</th></tr></thead><tbody>${cases}</tbody></table>`
-        : "",
+      cases ? table("<th>case</th><th>status</th>", cases) : "",
     ].join("\n");
   }
 
@@ -250,7 +292,7 @@ function renderDerived(view: DerivedView): string {
         `<tr>${columns.map((column) => `<td class="mono">${escapeHtml(pin[column] ?? "—")}</td>`).join("")}</tr>`,
     )
     .join("");
-  return `<table class="data-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  return table(head, body);
 }
 
 function renderPreview(preview: ArtifactPreview | null, idBase: string): string {
@@ -267,7 +309,7 @@ function renderPreview(preview: ArtifactPreview | null, idBase: string): string 
     const items = preview.outline
       .map(
         (entry) =>
-          `<li data-depth="${escapeAttr(String(entry.depth))}">${escapeHtml(entry.text)}</li>`,
+          `<li data-depth="${escapeHtml(String(entry.depth))}">${escapeHtml(entry.text)}</li>`,
       )
       .join("");
     tabs.push({
@@ -288,22 +330,24 @@ function renderPreview(preview: ArtifactPreview | null, idBase: string): string 
   }
   if (!tabs.length) return empty("nothing to show.");
 
+  // Every panel is rendered visible, each with its own label, so the page reads top to bottom
+  // without a script; the script hides the label and all but the selected panel.
   const buttons = tabs
     .map(
       (tab, index) =>
-        `<button class="tab" type="button" data-tab="${escapeAttr(tab.id)}" aria-selected="${index === 0}">${escapeHtml(tab.label)}</button>`,
+        `<button class="tab" type="button" role="tab" id="${escapeHtml(tab.id)}-tab" aria-controls="${escapeHtml(tab.id)}" aria-selected="${index === 0}" data-tab="${escapeHtml(tab.id)}">${escapeHtml(tab.label)}</button>`,
     )
     .join("");
   const panels = tabs
     .map(
-      (tab, index) =>
-        `<div class="tabpanel" id="${escapeAttr(tab.id)}"${index === 0 ? "" : " hidden"}>${tab.body}</div>`,
+      (tab) =>
+        `<div class="tabpanel" id="${escapeHtml(tab.id)}" role="tabpanel" aria-labelledby="${escapeHtml(tab.id)}-tab"><p class="panel-sub tabpanel-label">${escapeHtml(tab.label)}</p>${tab.body}</div>`,
     )
     .join("\n");
-  return `<div data-tabs><div class="tabs">${buttons}</div>${panels}</div>`;
+  return `<div data-tabs><div class="tabs js-only" role="tablist">${buttons}</div>${panels}</div>`;
 }
 
-function renderArtifactPanel(artifact: RunArtifact): string {
+function renderArtifactPanel(artifact: RunArtifact, options: RenderOptions): string {
   const meta: string[] = [
     `<dt>declared by</dt><dd>${escapeHtml(artifact.producing_skills.join(", ") || "—")} (phase ${escapeHtml(artifact.producing_phases.join(", ") || "—")})</dd>`,
     `<dt>consumed at</dt><dd>${escapeHtml(artifact.consuming_phases.join(", ") || "nothing downstream reads it")}</dd>`,
@@ -319,21 +363,40 @@ function renderArtifactPanel(artifact: RunArtifact): string {
       .join("; ");
     meta.push(`<dt>written</dt><dd>${escapeHtml(writes)}</dd>`);
   }
+  const validation = artifact.validation;
+  if (validation) {
+    const output = (["stdout", "stderr"] as const)
+      .map((stream) => {
+        const file = validation[stream];
+        return file ? `<a href="${escapeHtml(fileHref(file, options))}">${stream}</a>` : "";
+      })
+      .filter(Boolean)
+      .join(" ");
+    const facts = [
+      validation.validator ? escapeHtml(validation.validator) : "",
+      validation.exit_code === null ? "" : `exit ${escapeHtml(String(validation.exit_code))}`,
+      output,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    meta.push(`<dt>validation</dt><dd>${badge(validation.status)} ${facts}</dd>`);
+  }
 
   const variants = artifact.variants.length
-    ? [
-        `<p class="panel-sub">Kept-aside copies — each one marks a hand edit.</p>`,
-        `<table class="data-table"><thead><tr><th>file</th><th>size</th><th>vs current</th><th>modified</th></tr></thead><tbody>`,
-        ...artifact.variants.map(
-          (variant) =>
-            `<tr><td class="mono">${escapeHtml(variant.basename)}</td><td class="num">${escapeHtml(humanBytes(variant.size_bytes))}</td><td class="num">${variant.bytes_delta === null ? "—" : escapeHtml(`${variant.bytes_delta > 0 ? "+" : ""}${variant.bytes_delta} B`)}</td><td class="num">${escapeHtml(shortInstant(variant.mtime))}</td></tr>`,
-        ),
-        "</tbody></table>",
-      ].join("")
+    ? `<p class="panel-sub">Kept-aside copies — each one marks a hand edit.</p>` +
+      table(
+        "<th>file</th><th>size</th><th>vs current</th><th>modified</th>",
+        artifact.variants
+          .map(
+            (variant) =>
+              `<tr><td class="mono">${escapeHtml(variant.basename)}</td><td class="num">${escapeHtml(humanBytes(variant.size_bytes))}</td><td class="num">${variant.bytes_delta === null ? "—" : escapeHtml(`${variant.bytes_delta > 0 ? "+" : ""}${variant.bytes_delta} B`)}</td><td class="num">${escapeHtml(shortInstant(variant.mtime))}</td></tr>`,
+          )
+          .join(""),
+      )
     : "";
 
   return [
-    `<details class="panel" id="artifact-${escapeAttr(artifact.id)}">`,
+    `<details class="panel" id="artifact-${escapeHtml(artifact.id)}">`,
     `<summary><span class="panel-title">${escapeHtml(artifact.id)}</span>${badge(artifact.presence, PRESENCE_STATE[artifact.presence])}<span class="panel-sub">${escapeHtml(artifact.declared_filename)}</span></summary>`,
     `<div class="panel-body">`,
     `<p class="lede">${escapeHtml(artifact.description)}</p>`,
@@ -344,7 +407,7 @@ function renderArtifactPanel(artifact: RunArtifact): string {
   ].join("\n");
 }
 
-function renderArtifacts(model: RunModel): string {
+function renderArtifacts(model: RunModel, options: RenderOptions): string {
   if (!model.artifacts.length) return empty("this pipeline declares no artifacts.");
   const rows = model.artifacts
     .slice()
@@ -353,29 +416,38 @@ function renderArtifacts(model: RunModel): string {
         (a.written_by_phase ?? a.producing_phases[0] ?? 99) -
           (b.written_by_phase ?? b.producing_phases[0] ?? 99) || a.id.localeCompare(b.id),
     )
-    .map(renderArtifactRow)
+    .map((artifact) => renderArtifactRow(artifact, options))
     .join("\n");
 
-  const filters = ["present", "missing", "not-yet-due", "optional-absent"]
+  // A presence value this renderer does not know still gets a filter.
+  const presences = new Set(["present", "missing", "failed", "not-yet-due", "optional-absent"]);
+  for (const artifact of model.artifacts) presences.add(artifact.presence);
+  const filters = [...presences]
     .map(
       (value) =>
-        `<button class="filter" type="button" data-filter="presence" data-value="${escapeAttr(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
+        `<button class="filter" type="button" data-filter="presence" data-value="${escapeHtml(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
     )
     .join("");
 
-  const panels = model.artifacts.map(renderArtifactPanel).join("\n");
+  const panels = model.artifacts
+    .map((artifact) => renderArtifactPanel(artifact, options))
+    .join("\n");
 
   return [
-    `<div class="controls" data-controls="artifact-rows">`,
+    `<div class="controls js-only" data-controls="artifact-rows">`,
     filters,
+    // Set by clicking a phase stop; hidden until then.
+    `<button class="filter" type="button" data-filter="phase" data-value="" aria-pressed="false" hidden>phase</button>`,
     `<input class="search" type="search" data-search placeholder="search artifacts" aria-label="search artifacts">`,
     `<button class="filter" type="button" data-reset>reset</button>`,
     `<span class="section-tail" data-count></span>`,
     "</div>",
-    `<table class="data-table" data-sortable><thead><tr>`,
-    `<th data-sort="number">phase</th><th data-sort="text">artifact</th><th data-sort="text">file</th><th data-sort="text">kind</th><th data-sort="text">presence</th><th data-sort="number">size</th><th data-sort="text">modified</th><th data-sort="number">copies</th>`,
-    `</tr></thead><tbody id="artifact-rows">${rows}</tbody></table>`,
-    `<div class="controls"><button class="filter" type="button" data-toggle-all="artifact-panels">expand all</button></div>`,
+    table(
+      `<th data-sort="number">phase</th><th data-sort="text">artifact</th><th data-sort="text">file</th><th data-sort="text">kind</th><th data-sort="text">presence</th><th data-sort="number">size</th><th data-sort="text">modified</th><th data-sort="number">copies</th>`,
+      rows,
+      { sortable: true, bodyId: "artifact-rows" },
+    ),
+    `<div class="controls js-only"><button class="filter" type="button" data-toggle-all="artifact-panels">expand all</button></div>`,
     `<div id="artifact-panels">${panels}</div>`,
   ].join("\n");
 }
@@ -391,7 +463,7 @@ function renderObligation(entry: OpenRequirementsEntry): string {
     entry.resolved_by ? link(entry.resolved_by_href, entry.resolved_by) : "still open",
   ].join(" ");
   return [
-    `<details class="panel" data-row data-status="${escapeAttr(entry.status)}" data-kind="${escapeAttr(entry.kind ?? "gap")}">`,
+    `<details class="panel" data-row data-status="${escapeHtml(entry.status)}" data-kind="${escapeHtml(entry.kind ?? "gap")}">`,
     `<summary><span class="panel-title">${escapeHtml(entry.id)}</span>${badge(entry.status)}${entry.blocking ? badge("blocking", "error") : ""}${entry.kind ? badge(entry.kind) : ""}<span class="panel-sub">${chain}</span></summary>`,
     `<div class="panel-body">`,
     entry.unmet ? `<dl class="kv"><dt>unmet</dt><dd>${escapeHtml(entry.unmet)}</dd></dl>` : "",
@@ -405,9 +477,14 @@ function renderObligation(entry: OpenRequirementsEntry): string {
   ].join("\n");
 }
 
+function unreadableLedger(ledgerPath: string, reason: string): string {
+  return `<div class="banner banner-error"><p><strong>Unreadable.</strong> <code>${escapeHtml(ledgerPath)}</code> is on disk but could not be parsed, so nothing below comes from it: ${escapeHtml(reason)}</p></div>`;
+}
+
 function renderObligations(model: RunModel): string {
   const ledger = model.open_requirements;
   if (!ledger) return empty("this run carries no open-requirements ledger.");
+  if (ledger.unreadable) return unreadableLedger(ledger.path, ledger.unreadable);
 
   const counts = ledger.counts;
   const repair = ledger.topology_repair;
@@ -421,7 +498,7 @@ function renderObligations(model: RunModel): string {
   const filters = ["surrendered", "open", "resolved"]
     .map(
       (value) =>
-        `<button class="filter" type="button" data-filter="status" data-value="${escapeAttr(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
+        `<button class="filter" type="button" data-filter="status" data-value="${escapeHtml(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
     )
     .join("");
 
@@ -438,7 +515,7 @@ function renderObligations(model: RunModel): string {
   return [
     `<p class="lede">${counts.open} open, ${counts.resolved} resolved, ${counts.surrendered} surrendered, ${counts.dropped} deliberately dropped. ${counts.blocking_open} open entr${counts.blocking_open === 1 ? "y is" : "ies are"} blocking.</p>`,
     repairBlock,
-    `<div class="controls" data-controls="obligation-rows">${filters}<input class="search" type="search" data-search placeholder="search obligations" aria-label="search obligations"><button class="filter" type="button" data-reset>reset</button><span class="section-tail" data-count></span></div>`,
+    `<div class="controls js-only" data-controls="obligation-rows">${filters}<input class="search" type="search" data-search placeholder="search obligations" aria-label="search obligations"><button class="filter" type="button" data-reset>reset</button><span class="section-tail" data-count></span></div>`,
     `<div id="obligation-rows">${entries || empty("the ledger is empty.")}</div>`,
   ].join("\n");
 }
@@ -450,7 +527,7 @@ function renderFeedbackEntry(entry: FeedbackEntry): string {
     ? link(entry.subject_href, entry.subject_label)
     : escapeHtml(entry.subject_locator ?? "unattributed");
   return [
-    `<details class="panel" data-row data-severity="${escapeAttr(entry.severity ?? "unspecified")}" data-kind="${escapeAttr(entry.kind ?? "unspecified")}" data-status="${escapeAttr(entry.status ?? "open")}">`,
+    `<details class="panel" data-row data-severity="${escapeHtml(entry.severity ?? "unspecified")}" data-kind="${escapeHtml(entry.kind ?? "unspecified")}" data-status="${escapeHtml(entry.status ?? "open")}">`,
     `<summary><span class="panel-title">${escapeHtml(entry.id)}</span>${entry.severity ? badge(entry.severity) : ""}${entry.kind ? badge(entry.kind) : ""}<span class="panel-sub">${subject}</span></summary>`,
     `<div class="panel-body">`,
     prose(entry.what),
@@ -472,6 +549,7 @@ function renderFeedback(model: RunModel): string {
       "the run was not invoked with feedback mode, so nothing was recorded about the Foundry itself.",
     );
   }
+  if (ledger.unreadable) return unreadableLedger(ledger.path, ledger.unreadable);
   if (!ledger.entries.length) {
     return empty("feedback mode was on and no entries were appended.");
   }
@@ -480,13 +558,13 @@ function renderFeedback(model: RunModel): string {
   const filters = severities
     .map(
       (value) =>
-        `<button class="filter" type="button" data-filter="severity" data-value="${escapeAttr(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
+        `<button class="filter" type="button" data-filter="severity" data-value="${escapeHtml(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
     )
     .join("");
   const kindFilters = Object.keys(ledger.counts.by_kind)
     .map(
       (value) =>
-        `<button class="filter" type="button" data-filter="kind" data-value="${escapeAttr(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
+        `<button class="filter" type="button" data-filter="kind" data-value="${escapeHtml(value)}" aria-pressed="false">${escapeHtml(value)}</button>`,
     )
     .join("");
 
@@ -499,7 +577,7 @@ function renderFeedback(model: RunModel): string {
 
   return [
     `<p class="lede">${ledger.counts.total} entr${ledger.counts.total === 1 ? "y" : "ies"} about the Foundry's own assets. Triage them with the <code>report-foundry-run-feedback</code> skill rather than filing from here.</p>`,
-    `<div class="controls" data-controls="feedback-rows">${filters}${kindFilters}<input class="search" type="search" data-search placeholder="search feedback" aria-label="search feedback"><button class="filter" type="button" data-reset>reset</button><span class="section-tail" data-count></span></div>`,
+    `<div class="controls js-only" data-controls="feedback-rows">${filters}${kindFilters}<input class="search" type="search" data-search placeholder="search feedback" aria-label="search feedback"><button class="filter" type="button" data-reset>reset</button><span class="section-tail" data-count></span></div>`,
     `<div id="feedback-rows">${entries}</div>`,
   ].join("\n");
 }
@@ -524,7 +602,7 @@ function renderGrowth(model: RunModel): string {
       return [
         `<div class="growth">`,
         `<p class="panel-sub">${escapeHtml(entry.filename)} — ${entry.points.length} commits, ending at ${escapeHtml(humanBytes(entry.points[entry.points.length - 1]!.bytes))}.</p>`,
-        `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="size of ${escapeAttr(entry.filename)} across commits" preserveAspectRatio="none">`,
+        `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="size of ${escapeHtml(entry.filename)} across commits" preserveAspectRatio="none">`,
         `<polyline fill="none" stroke="var(--brand)" stroke-width="2" points="${points}" />`,
         "</svg>",
         "</div>",
@@ -547,7 +625,7 @@ function renderTimeline(model: RunModel): string {
         ? `${commit.files.length} file(s), +${commit.files.reduce((sum, file) => sum + file.added, 0)}/-${commit.files.reduce((sum, file) => sum + file.deleted, 0)}`
         : "no file changes";
       return [
-        `<div class="commit" data-kind="${escapeAttr(commit.kind)}" data-failed="${commit.failed}">`,
+        `<div class="commit" data-kind="${escapeHtml(commit.kind)}" data-failed="${commit.failed}">`,
         `<span class="commit-sha">${escapeHtml(commit.short)}</span>`,
         `<span class="commit-date">${escapeHtml(shortInstant(commit.date))}</span>`,
         `<span class="commit-subject">${escapeHtml(commit.subject)}</span>`,
@@ -586,7 +664,7 @@ function renderEvaluation(model: RunModel): string {
     `<dt>sandbox</dt><dd>${escapeHtml(evaluation.sandbox.mode)}, network ${escapeHtml(evaluation.sandbox.network_policy)}</dd>`,
     `<dt>duration</dt><dd>${escapeHtml((evaluation.duration_ms / 1000).toFixed(1))} s</dd></dl>`,
     usage ? `<p class="panel-sub">Usage</p><dl class="kv">${usage}</dl>` : "",
-    `<table class="data-table"><thead><tr><th>trial</th><th>status</th><th>phases</th><th>failed at</th></tr></thead><tbody>${trials}</tbody></table>`,
+    table("<th>trial</th><th>status</th><th>phases</th><th>failed at</th>", trials),
   ].join("\n");
 
   return section("evaluation", "Evaluation", "what it cost and how it was run", body);
@@ -605,7 +683,7 @@ const UNMAPPED_EXPLANATION: Record<string, string> = {
   derivative: "a copy kept aside before a change",
 };
 
-function renderUnmappedGroup(cls: string, files: UnmappedFile[]): string {
+function renderUnmappedGroup(cls: string, files: UnmappedFile[], options: RenderOptions): string {
   const rows = files
     .map((file) => {
       const summary = file.dir_summary
@@ -615,18 +693,33 @@ function renderUnmappedGroup(cls: string, files: UnmappedFile[]): string {
         ? file.declared_by_pipelines
         : file.declared_by_skills;
       const extra = owners.length ? escapeHtml(owners.join(", ")) : "—";
-      return `<tr><td class="mono"><a href="${escapeAttr(`./${file.relpath}`)}">${escapeHtml(file.relpath)}</a></td><td class="num">${summary}</td><td class="num">${escapeHtml(shortInstant(file.mtime))}</td><td class="mono">${extra}</td></tr>`;
+      return `<tr><td class="mono"><a href="${escapeHtml(fileHref(file.relpath, options))}">${escapeHtml(file.relpath)}</a></td><td class="num">${summary}</td><td class="num">${escapeHtml(shortInstant(file.mtime))}</td><td class="mono">${extra}</td></tr>`;
     })
     .join("");
+  const previews = files
+    .map((file, index) =>
+      file.preview
+        ? [
+            `<details class="panel">`,
+            `<summary><span class="panel-title">${escapeHtml(file.relpath)}</span></summary>`,
+            `<div class="panel-body">${renderPreview(file.preview, `unmapped-${cls}-${index}`)}</div>`,
+            "</details>",
+          ].join("")
+        : "",
+    )
+    .join("\n");
   return [
     `<details class="panel"${cls === "cross-pipeline" ? " open" : ""}>`,
     `<summary><span class="panel-title">${escapeHtml(cls)}</span><span class="panel-sub">${files.length} — ${escapeHtml(UNMAPPED_EXPLANATION[cls] ?? "")}</span></summary>`,
-    `<div class="panel-body"><table class="data-table"><thead><tr><th>path</th><th>size</th><th>modified</th><th>declared by</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+    `<div class="panel-body">`,
+    table("<th>path</th><th>size</th><th>modified</th><th>declared by</th>", rows),
+    previews,
+    "</div>",
     "</details>",
   ].join("\n");
 }
 
-function renderUnmapped(model: RunModel): string {
+function renderUnmapped(model: RunModel, options: RenderOptions): string {
   if (!model.unmapped.length) {
     return empty(
       `every file in this run is a declared artifact. ${model.ignored_count} path(s) ignored.`,
@@ -646,9 +739,11 @@ function renderUnmapped(model: RunModel): string {
     "directory",
     "undeclared",
   ];
-  const blocks = order
+  // A class outside the usual order still renders, after the rest.
+  const rest = [...groups.keys()].filter((cls) => !order.includes(cls)).sort();
+  const blocks = [...order, ...rest]
     .filter((cls) => groups.has(cls))
-    .map((cls) => renderUnmappedGroup(cls, groups.get(cls)!))
+    .map((cls) => renderUnmappedGroup(cls, groups.get(cls)!, options))
     .join("\n");
   return [
     `<p class="lede">${model.health.files_attributed} of ${model.health.files_seen} files map to a declared artifact. The rest are below. ${model.ignored_count} path(s) were ignored entirely.</p>`,
@@ -693,7 +788,7 @@ export function renderRunDashboard(model: RunModel, options: RenderOptions): str
       "artifacts",
       "Artifacts",
       "what it declared and what is on disk",
-      renderArtifacts(model),
+      renderArtifacts(model, options),
     ),
     section("obligations", "Obligations", "what the workflow still owes", renderObligations(model)),
     section(
@@ -705,7 +800,12 @@ export function renderRunDashboard(model: RunModel, options: RenderOptions): str
     model.evaluation
       ? renderEvaluation(model)
       : section("timeline", "Timeline", "how the draft grew", renderTimeline(model)),
-    section("unmapped", "Everything else", "files no Mold declares", renderUnmapped(model)),
+    section(
+      "unmapped",
+      "Everything else",
+      "files no Mold declares",
+      renderUnmapped(model, options),
+    ),
     `<footer class="page-foot">`,
     warnings,
     `<p class="mono">${escapeHtml(options.commandLine)}</p>`,

@@ -8,7 +8,24 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import type { SiteLinker } from "./run-manifest.js";
+export interface SiteLinker {
+  artifact(id: string): string | null;
+  mold(slug: string): string | null;
+  pipeline(slug: string): string | null;
+  harness(slug: string): string | null;
+  schema(wikiLink: string): string | null;
+  note(locator: string): string | null;
+}
+
+/** For a reader given no linker: every name renders as plain text. */
+export const NO_LINKS: SiteLinker = {
+  artifact: () => null,
+  mold: () => null,
+  pipeline: () => null,
+  harness: () => null,
+  schema: () => null,
+  note: () => null,
+};
 
 export const DEFAULT_SITE_BASE = "https://galaxyproject.github.io/foundry";
 
@@ -41,15 +58,28 @@ export function createSiteLinker(options: SiteLinkerOptions): SiteLinker {
   return {
     // The artifact catalogue is generated from the whole corpus rather than from one file, so an
     // id that reached this model came from a committed provenance record and the page exists.
-    artifact: (id) => (base ? `${base}/artifacts/${id}/` : null),
-    mold: (slug) => link(`mold:${slug}`, `content/molds/${slug}/index.md`, `/molds/${slug}/`),
+    artifact: (id) => (base ? `${base}/artifacts/${encodeURIComponent(id)}/` : null),
+    mold: (slug) =>
+      link(`mold:${slug}`, `content/molds/${slug}/index.md`, `/molds/${encodeURIComponent(slug)}/`),
     pipeline: (slug) =>
-      link(`pipeline:${slug}`, `content/pipelines/${slug}/index.md`, `/pipelines/${slug}/`),
+      link(
+        `pipeline:${slug}`,
+        `content/pipelines/${slug}/index.md`,
+        `/pipelines/${encodeURIComponent(slug)}/`,
+      ),
     harness: (slug) =>
-      link(`harness:${slug}`, `content/pipelines/${slug}/index.md`, `/pipelines/${slug}/harness/`),
+      link(
+        `harness:${slug}`,
+        `content/pipelines/${slug}/index.md`,
+        `/pipelines/${encodeURIComponent(slug)}/harness/`,
+      ),
     schema: (wikiLink) => {
       const name = stripWikiLink(wikiLink);
-      return link(`schema:${name}`, `content/schemas/${name}.md`, `/schemas/${name}/`);
+      return link(
+        `schema:${name}`,
+        `content/schemas/${name}.md`,
+        `/schemas/${encodeURIComponent(name)}/`,
+      );
     },
     // A feedback entry's `subject.locator` is a repository path such as
     // `content/research/<slug>/index.md`; the site routes that note at its slugged id.
@@ -60,7 +90,7 @@ export function createSiteLinker(options: SiteLinkerOptions): SiteLinker {
         .slice("content/".length)
         .replace(/\/index\.md$/, "")
         .replace(/\.md$/, "");
-      return link(`note:${id}`, normalized, `/${id}/`);
+      return link(`note:${id}`, normalized, `/${id.split("/").map(encodeURIComponent).join("/")}/`);
     },
   };
 }

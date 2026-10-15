@@ -55,9 +55,10 @@ Announce the chosen directory before starting.
 
 Maintain `./<run-slug>/foundry-run.yml` for the whole run. It is not optional and has no flag: it is how anything reading this run afterwards knows what it was.
 
-- **Create it during working-directory setup**, before phase 1. Set `run_record_version: 1`, `pipeline: nextflow-to-galaxy`, `run_slug` to the chosen slug, `harness_name` and `source_revision` from `_assembly.json`, `assembly_sha256` to the sha256 of that file, `foundry_head` to the Foundry commit you are reading, `started_at` to now, `status: running`, and `phases` to the complete roster from `_assembly.json` with every phase `pending`.
+- **Create it during working-directory setup**, before phase 1. Set `run_record_version: 1`, `pipeline: nextflow-to-galaxy`, `run_slug` to the chosen slug, `harness_name` and `source_revision` from `_assembly.json`, `assembly_sha256` to the sha256 hex digest of that file, `foundry_head` to the Foundry commit you are reading (`null` when the Foundry is not a git checkout), `started_at` to now, `finished_at: null`, and `status: running`. Quote both shas: an unquoted all-digit sha reads back as a number and is discarded.
+- **Copy the phase roster** into `phases`: one row per entry of `_assembly.json`'s top-level `phases`, keyed `n:` (that entry's `phase` number), with `kind`, then `skill` for a mold or `pattern` for a branch, `status: pending`, and `artifacts: []`. A loop row later gains `iterations`, a branch row `selected`. Phase 1 reads `{ n: 1, kind: mold, skill: summarize-nextflow, status: pending, artifacts: [] }`.
 - **Set a phase `running`** immediately before invoking it, and `done` once you have confirmed its artifacts exist.
-- **Append one `artifacts` row per file a phase writes**: `{ id, file, at }` using the artifact id and basename the skill declares. A loop phase stays one row, increments `iterations`, and adds a row per iteration that writes, carrying `iteration: <k>`.
+- **Append one `artifacts` row per file a phase writes**: `{ id, file, at }` using the artifact id and basename the skill declares. A loop phase stays one row, increments `iterations`, and appends a row for each iteration that writes, carrying `iteration: <k>`.
 - **Record a branch's outcome** as `selected: <chain member>` on that phase's row.
 - **Close it in `## Done`**: set `finished_at` and the final `status` — `complete` when every intended phase is done, `failed` when a phase terminated the run, `cancelled` on a graceful stop. Leave it `running` on a hard interruption rather than inventing a recovery write.
 - Under `--use-subagents` the subagent does the work and reports; **you** write the record. Do the same pass yourself for a MANUAL phase.
@@ -87,9 +88,9 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 
 Report the final artifacts in `./<run-slug>/` and any phases handled manually (marked MANUAL above).
 
-Close `./<run-slug>/foundry-run.yml` first: set `finished_at` and the final `status`, and make sure every phase row carries the artifacts it wrote. A run whose record still says `running` is one nothing downstream can read honestly.
+Close `./<run-slug>/foundry-run.yml` before anything else: set `finished_at` and the final `status`, and make sure every phase row carries the artifacts it wrote. A run whose record still says `running` is one nothing downstream can read honestly.
 
-If the run was invoked with `--feedback`, close the ledger first: set the final `run.status`, then tell the user the ledger path `./<run-slug>/foundry-feedback.ledger.yml` and how many entries it holds. If it holds any, offer to run the `report-foundry-run-feedback` skill on it, which triages them into local drafts and files nothing without explicit confirmation. Report an empty ledger as "no feedback recorded", never as evidence the Foundry worked well.
+If the run was invoked with `--feedback`, close the ledger next, after the run record: set the final `run.status`, then tell the user the ledger path `./<run-slug>/foundry-feedback.ledger.yml` and how many entries it holds. If it holds any, offer to run the `report-foundry-run-feedback` skill on it, which triages them into local drafts and files nothing without explicit confirmation. Report an empty ledger as "no feedback recorded", never as evidence the Foundry worked well.
 
 ## Notes
 

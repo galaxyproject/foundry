@@ -8,6 +8,7 @@
 
 export const DASHBOARD_CSS = `
 :root {
+  color-scheme: light dark;
   --brand: #25537b;
   --chrome: #2c3143;
   --accent: #e8c547;
@@ -22,7 +23,7 @@ export const DASHBOARD_CSS = `
   --link: #25537b;
   --rail: #b7c3d2;
   --ok: #18794e;
-  --warn: #b7791f;
+  --warn: #975a16;
   --error: #c53030;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -60,6 +61,10 @@ body {
 }
 
 .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 16px 96px; }
+
+/* Controls that do nothing without the script, which marks the root on load. */
+html:not(.js) .js-only { display: none !important; }
+html.js .tabpanel-label { display: none; }
 
 a { color: var(--link); }
 a:hover { text-decoration: underline; }
@@ -161,7 +166,9 @@ section { margin: 40px 0 0; scroll-margin-top: 16px; }
   width: 2px;
   background: var(--rail);
 }
-.stop { position: relative; padding: 7px 0 7px 6px; display: flex; gap: 10px; align-items: baseline; }
+.stop { position: relative; padding: 7px 0 7px 6px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.stop[data-phase-filter][role="button"] { cursor: pointer; }
+.stop[data-phase-filter][role="button"]:hover .stop-num { color: var(--link); }
 .stop-marker {
   position: absolute;
   left: -24px;
@@ -191,6 +198,7 @@ section { margin: 40px 0 0; scroll-margin-top: 16px; }
 
 /* ---- tables ---- */
 
+.table-scroll { overflow-x: auto; max-width: 100%; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .data-table th {
   text-align: left;
@@ -249,7 +257,9 @@ section { margin: 40px 0 0; scroll-margin-top: 16px; }
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  min-width: 200px;
+  min-width: 0;
+  width: 200px;
+  max-width: 100%;
 }
 .hidden-row { display: none; }
 
@@ -274,7 +284,8 @@ details.panel > summary::before { content: "▸"; color: var(--text-muted); marg
 details.panel[open] > summary::before { content: "▾"; }
 .panel-body { padding: 0 12px 12px; }
 .panel-title { font-family: var(--mono); font-weight: 600; }
-.panel-sub { font-size: 12px; color: var(--text-muted); }
+.panel-sub { font-size: 12px; color: var(--text-muted); overflow-wrap: anywhere; }
+.panel-title { overflow-wrap: anywhere; }
 
 .tabs { display: flex; gap: 4px; margin: 10px 0 8px; flex-wrap: wrap; }
 .tab {
@@ -306,7 +317,7 @@ pre.source {
 
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; font-size: 13px; margin: 0; }
 .kv dt { font-family: var(--mono); font-size: 11.5px; color: var(--text-muted); }
-.kv dd { margin: 0; }
+.kv dd { margin: 0; overflow-wrap: anywhere; min-width: 0; }
 
 .outline { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-secondary); }
 .outline li[data-depth="1"] { font-weight: 600; color: var(--text); }
@@ -316,7 +327,8 @@ pre.source {
 
 /* ---- timeline ---- */
 
-.commit { display: flex; gap: 10px; align-items: baseline; padding: 3px 0; font-size: 13px; }
+.commit { display: flex; flex-wrap: wrap; gap: 0 10px; align-items: baseline; padding: 3px 0; font-size: 13px; }
+.commit-subject { overflow-wrap: anywhere; min-width: 0; }
 .commit-sha { font-family: var(--mono); font-size: 11.5px; color: var(--text-muted); }
 .commit-date { font-family: var(--mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
 .commit[data-kind="ad-hoc"] .commit-subject { color: var(--text-muted); font-style: italic; }
@@ -343,18 +355,29 @@ footer.page-foot {
 `;
 
 /**
- * Filtering, sorting, tabs and copy buttons.
+ * Filtering, sorting and tabs.
  *
- * Every one of these is an enhancement: filters start in the show-everything state, expandables
- * are native `details`, and every anchor is a real fragment link — so with scripting off the page
- * is fully readable, just unfiltered. Nothing here renders content or assigns markup from data.
+ * Every one of these is an enhancement. Without a script every tab panel is shown, each with its
+ * own label, expandables are native `details`, every anchor is a real fragment link, and the
+ * controls that would do nothing are hidden — so the page is fully readable, just unfiltered.
+ * Nothing here renders content or assigns markup from data.
  */
 export const DASHBOARD_JS = `
 (function () {
   "use strict";
 
+  document.documentElement.classList.add("js");
+
   function rows(scope) {
     return Array.prototype.slice.call(scope.querySelectorAll("[data-row]"));
+  }
+
+  function activate(element, action) {
+    element.addEventListener("click", action);
+    element.addEventListener("keydown", function (event) {
+      if (event.target !== element) return;
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); action(event); }
+    });
   }
 
   function applyFilters(group) {
@@ -407,12 +430,16 @@ export const DASHBOARD_JS = `
   document.querySelectorAll("table[data-sortable]").forEach(function (table) {
     var body = table.tBodies[0];
     if (!body) return;
-    table.querySelectorAll("th[data-sort]").forEach(function (header, column) {
+    var headers = Array.prototype.slice.call(table.querySelectorAll("th[data-sort]"));
+    headers.forEach(function (header, column) {
       header.classList.add("sortable");
       header.setAttribute("tabindex", "0");
+      header.setAttribute("aria-sort", "none");
       var descending = false;
-      function sort() {
+      activate(header, function () {
         descending = !descending;
+        headers.forEach(function (other) { other.setAttribute("aria-sort", "none"); });
+        header.setAttribute("aria-sort", descending ? "descending" : "ascending");
         var numeric = header.getAttribute("data-sort") === "number";
         var ordered = Array.prototype.slice.call(body.rows).sort(function (a, b) {
           var left = a.cells[column] ? a.cells[column].getAttribute("data-value") || a.cells[column].textContent : "";
@@ -423,26 +450,24 @@ export const DASHBOARD_JS = `
           return descending ? -result : result;
         });
         ordered.forEach(function (row) { body.appendChild(row); });
-      }
-      header.addEventListener("click", sort);
-      header.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); sort(); }
       });
     });
   });
 
   document.querySelectorAll("[data-tabs]").forEach(function (group) {
     var tabs = Array.prototype.slice.call(group.querySelectorAll("[data-tab]"));
-    tabs.forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        tabs.forEach(function (other) {
-          var selected = other === tab;
-          other.setAttribute("aria-selected", selected ? "true" : "false");
-          var panel = document.getElementById(other.getAttribute("data-tab"));
-          if (panel) panel.hidden = !selected;
-        });
+    function select(tab) {
+      tabs.forEach(function (other) {
+        var selected = other === tab;
+        other.setAttribute("aria-selected", selected ? "true" : "false");
+        var panel = document.getElementById(other.getAttribute("data-tab"));
+        if (panel) panel.hidden = !selected;
       });
+    }
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () { select(tab); });
     });
+    if (tabs.length) select(tabs[0]);
   });
 
   document.querySelectorAll("[data-toggle-all]").forEach(function (button) {
@@ -456,28 +481,25 @@ export const DASHBOARD_JS = `
     });
   });
 
-  document.querySelectorAll("[data-copy]").forEach(function (button) {
-    button.addEventListener("click", function () {
-      var text = button.getAttribute("data-copy");
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function () {
-        var original = button.textContent;
-        button.textContent = "copied";
-        setTimeout(function () { button.textContent = original; }, 1200);
+  // A phase stop filters the artifact table to that phase through the table's own phase filter.
+  var group = document.querySelector('[data-controls="artifact-rows"]');
+  var phaseFilter = group && group.querySelector('[data-filter="phase"]');
+  if (phaseFilter) {
+    document.querySelectorAll("[data-phase-filter]").forEach(function (stop) {
+      stop.setAttribute("tabindex", "0");
+      stop.setAttribute("role", "button");
+      activate(stop, function (event) {
+        if (event.target.closest && event.target.closest("a")) return;
+        var phase = stop.getAttribute("data-phase-filter");
+        phaseFilter.setAttribute("data-value", phase);
+        phaseFilter.setAttribute("aria-pressed", "true");
+        phaseFilter.textContent = "phase " + phase;
+        phaseFilter.hidden = false;
+        applyFilters(group);
+        var section = document.getElementById("artifacts");
+        if (section) section.scrollIntoView({ behavior: "smooth" });
       });
     });
-  });
-
-  document.querySelectorAll("[data-phase-filter]").forEach(function (stop) {
-    stop.addEventListener("click", function () {
-      var phase = stop.getAttribute("data-phase-filter");
-      var group = document.querySelector('[data-controls="artifact-rows"]');
-      if (!group) return;
-      var search = group.querySelector("[data-search]");
-      if (search) { search.value = "phase " + phase; search.dispatchEvent(new Event("input")); }
-      var section = document.getElementById("artifacts");
-      if (section) section.scrollIntoView({ behavior: "smooth" });
-    });
-  });
+  }
 })();
 `;

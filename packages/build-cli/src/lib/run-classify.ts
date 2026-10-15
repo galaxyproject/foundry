@@ -146,6 +146,19 @@ export function classifyEntries(
       continue;
     }
 
+    // Declared names are only meaningful at the top: every harness writes its artifacts flat, so
+    // a nested file of the same name (an archived copy, test input) is not that artifact, a
+    // variant of it, or another pipeline's.
+    if (entry.relpath !== entry.basename) {
+      const nested = isToolOutput(entry.basename)
+        ? "tool-output"
+        : isNarrative(entry.basename)
+          ? "narrative"
+          : "undeclared";
+      push(entry, nested);
+      continue;
+    }
+
     const declaredMatch = byFilename.get(entry.basename);
     if (declaredMatch) {
       declaredHits.set(declaredMatch.id, entry);

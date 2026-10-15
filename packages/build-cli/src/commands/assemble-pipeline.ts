@@ -28,6 +28,7 @@ import {
 import {
   requireRuntimeArtifactRegistry,
   runtimeModeOption,
+  type AssemblyPhase,
   type RuntimeArtifactDefinition,
 } from "@galaxy-foundry/gxwf-foundry-note-schema";
 import type { Frontmatter } from "../lib/types.js";
@@ -88,24 +89,6 @@ function firstSentence(s: string): string {
 
 // ---- assembly model ----
 
-interface MoldPhaseEntry {
-  phase: number;
-  kind: "mold";
-  skill: string;
-  cast_present: boolean;
-  loop: boolean;
-}
-
-interface BranchPhaseEntry {
-  phase: number;
-  kind: "branch";
-  pattern: string;
-  chain: string[];
-  cast_present: (boolean | null)[];
-}
-
-type AssemblyPhase = MoldPhaseEntry | BranchPhaseEntry;
-
 const SUPPORTED_BRANCH_PATTERNS = new Set(["test-data-resolution"]);
 
 // Runtime invocation options every assembled harness honors. Uniform across
@@ -113,12 +96,22 @@ const SUPPORTED_BRANCH_PATTERNS = new Set(["test-data-resolution"]);
 // `_assembly.json` for the site / future visualization tooling.
 const BASE_HARNESS_OPTIONS = ["use-subagents", "checkpoint"] as const;
 
-function harnessOptions(feedback?: RuntimeArtifactDefinition): string[] {
-  const option = feedback ? runtimeModeOption(feedback) : null;
-  return [...BASE_HARNESS_OPTIONS, ...(option ? [option] : [])];
+/** The feedback ledger together with the flag that turns it on, narrowed once. */
+interface FeedbackMode {
+  artifact: RuntimeArtifactDefinition;
+  option: string;
 }
 
-function runOptionsSection(feedback?: RuntimeArtifactDefinition): string[] {
+function feedbackMode(artifact?: RuntimeArtifactDefinition): FeedbackMode | undefined {
+  const option = artifact ? runtimeModeOption(artifact) : null;
+  return artifact && option ? { artifact, option } : undefined;
+}
+
+function harnessOptions(feedback?: FeedbackMode): string[] {
+  return [...BASE_HARNESS_OPTIONS, ...(feedback ? [feedback.option] : [])];
+}
+
+function runOptionsSection(feedback?: FeedbackMode): string[] {
   return [
     "## Run options",
     "",
@@ -128,7 +121,7 @@ function runOptionsSection(feedback?: RuntimeArtifactDefinition): string[] {
     "- `--checkpoint` — commit after every phase so the run directory's git history is a per-step record (a data source for workflow-implementation visualizations). When set, `git init ./<run-slug>/` during working-directory setup — this is a standalone per-run repo; do not add it to any surrounding repo you are working inside. Write `./<run-slug>/.gitignore` in the same step holding `dashboard.html`, `run-manifest.json`, and `.omc/`, so a later reading tool cannot land in the history it reads. Then after each phase's artifact is confirmed run `git -C ./<run-slug>/ add -A && git -C ./<run-slug>/ commit -m \"phase <n>: <skill>\"`. Loop phases commit **once per iteration** (`phase <n> step <k>: <skill>`); for a MANUAL loop, commit once per by-hand step. Keep the subject grammar exactly — `phase <n>: <skill>` and `phase <n> step <k>: <skill>`, with any note in parentheses after it — because it is parsed. With `--use-subagents`, the subagent does the work and returns; you make the commit.",
     ...(feedback
       ? [
-          `- \`--${runtimeModeOption(feedback)}\` — create \`./<run-slug>/${feedback.default_filename}\` before phase 1. Set \`run.pipeline\` to this pipeline's slug and \`run.run_slug\` to the chosen run slug. Copy the complete top-level roster from \`_assembly.json\` with \`run.status: running\` and every phase \`pending\`; set a phase \`running\` immediately before it starts and \`done\` after success. Keep one row per loop and increment \`iterations\`; record a branch's chosen path as \`selected\`. Pass the same ledger path to every skill and subagent. Before marking a phase \`done\`, require its feedback outcome — appended entry ids or an explicit \`no feedback\` — and record \`feedback_checked: true\` on that row; under \`--use-subagents\` the subagent's short report carries that line. Do the same pass yourself for a MANUAL phase, naming the pipeline source as the subject when the harness is what needs to change. On a terminating error mark the phase and run \`failed\`; on a graceful stop mark the run \`cancelled\`; after every intended phase is done mark the run \`complete\`. Never describe an empty incomplete ledger as a clean run.`,
+          `- \`--${feedback.option}\` — create \`./<run-slug>/${feedback.artifact.default_filename}\` before phase 1. Set \`run.pipeline\` to this pipeline's slug and \`run.run_slug\` to the chosen run slug. Copy the complete top-level roster from \`_assembly.json\` with \`run.status: running\` and every phase \`pending\`; set a phase \`running\` immediately before it starts and \`done\` after success. Keep one row per loop and increment \`iterations\`; record a branch's chosen path as \`selected\`. Pass the same ledger path to every skill and subagent. Before marking a phase \`done\`, require its feedback outcome — appended entry ids or an explicit \`no feedback\` — and record \`feedback_checked: true\` on that row; under \`--use-subagents\` the subagent's short report carries that line. Do the same pass yourself for a MANUAL phase, naming the pipeline source as the subject when the harness is what needs to change. On a terminating error mark the phase and run \`failed\`; on a graceful stop mark the run \`cancelled\`; after every intended phase is done mark the run \`complete\`. Never describe an empty incomplete ledger as a clean run.`,
         ]
       : []),
     "",
@@ -143,15 +136,25 @@ function runOptionsSection(feedback?: RuntimeArtifactDefinition): string[] {
  * counts, and a branch's selection are not recoverable from the files afterwards — this section is
  * what puts them on disk while they are still known.
  */
-function runRecordSection(record: RuntimeArtifactDefinition, slug: string): string[] {
+function runRecordSection(
+  record: RuntimeArtifactDefinition,
+  slug: string,
+  example: AssemblyPhase | undefined,
+): string[] {
+  const exampleRow = example
+    ? example.kind === "mold"
+      ? `{ n: ${example.phase}, kind: mold, skill: ${example.skill}, status: pending, artifacts: [] }`
+      : `{ n: ${example.phase}, kind: branch, pattern: ${example.pattern}, status: pending, artifacts: [] }`
+    : "{ n: 1, kind: mold, skill: <skill>, status: pending, artifacts: [] }";
   return [
     "## Run record (keep this current)",
     "",
     `Maintain \`./<run-slug>/${record.default_filename}\` for the whole run. It is not optional and has no flag: it is how anything reading this run afterwards knows what it was.`,
     "",
-    `- **Create it during working-directory setup**, before phase 1. Set \`run_record_version: 1\`, \`pipeline: ${slug}\`, \`run_slug\` to the chosen slug, \`harness_name\` and \`source_revision\` from \`_assembly.json\`, \`assembly_sha256\` to the sha256 of that file, \`foundry_head\` to the Foundry commit you are reading, \`started_at\` to now, \`status: running\`, and \`phases\` to the complete roster from \`_assembly.json\` with every phase \`pending\`.`,
+    `- **Create it during working-directory setup**, before phase 1. Set \`run_record_version: 1\`, \`pipeline: ${slug}\`, \`run_slug\` to the chosen slug, \`harness_name\` and \`source_revision\` from \`_assembly.json\`, \`assembly_sha256\` to the sha256 hex digest of that file, \`foundry_head\` to the Foundry commit you are reading (\`null\` when the Foundry is not a git checkout), \`started_at\` to now, \`finished_at: null\`, and \`status: running\`. Quote both shas: an unquoted all-digit sha reads back as a number and is discarded.`,
+    `- **Copy the phase roster** into \`phases\`: one row per entry of \`_assembly.json\`'s top-level \`phases\`, keyed \`n:\` (that entry's \`phase\` number), with \`kind\`, then \`skill\` for a mold or \`pattern\` for a branch, \`status: pending\`, and \`artifacts: []\`. A loop row later gains \`iterations\`, a branch row \`selected\`. Phase ${example?.phase ?? 1} reads \`${exampleRow}\`.`,
     "- **Set a phase `running`** immediately before invoking it, and `done` once you have confirmed its artifacts exist.",
-    "- **Append one `artifacts` row per file a phase writes**: `{ id, file, at }` using the artifact id and basename the skill declares. A loop phase stays one row, increments `iterations`, and adds a row per iteration that writes, carrying `iteration: <k>`.",
+    "- **Append one `artifacts` row per file a phase writes**: `{ id, file, at }` using the artifact id and basename the skill declares. A loop phase stays one row, increments `iterations`, and appends a row for each iteration that writes, carrying `iteration: <k>`.",
     "- **Record a branch's outcome** as `selected: <chain member>` on that phase's row.",
     "- **Close it in `## Done`**: set `finished_at` and the final `status` — `complete` when every intended phase is done, `failed` when a phase terminated the run, `cancelled` on a graceful stop. Leave it `running` on a hard interruption rather than inventing a recovery write.",
     "- Under `--use-subagents` the subagent does the work and reports; **you** write the record. Do the same pass yourself for a MANUAL phase.",
@@ -174,7 +177,7 @@ function assemble(
   metaByPath: ReadonlyMap<string, Frontmatter>,
   slugMap: ReadonlyMap<string, string>,
   repoRoot: string,
-  feedback?: RuntimeArtifactDefinition,
+  feedback?: FeedbackMode,
   runRecord?: RuntimeArtifactDefinition,
 ): Assembled {
   const errors: string[] = [];
@@ -262,6 +265,7 @@ function assemble(
     requiredTools,
     feedback,
     runRecord,
+    examplePhase: assemblyPhases[0],
   });
 
   return { skill, assemblyPhases, requiredTools, errors };
@@ -333,8 +337,9 @@ function renderSkill(args: {
   hasManual: boolean;
   harnessNotes: string[];
   requiredTools: RequiredTool[];
-  feedback?: RuntimeArtifactDefinition;
+  feedback?: FeedbackMode;
   runRecord?: RuntimeArtifactDefinition;
+  examplePhase?: AssemblyPhase;
 }): string {
   const description = `${firstSentence(args.summary)} — orchestrates the Foundry skills of the ${args.title} pipeline in order, in a per-run working directory.`;
   const doneTail = args.hasManual ? " and any phases handled manually (marked MANUAL above)" : "";
@@ -389,7 +394,7 @@ function renderSkill(args: {
     "",
     "Announce the chosen directory before starting.",
     "",
-    ...(args.runRecord ? runRecordSection(args.runRecord, args.slug) : []),
+    ...(args.runRecord ? runRecordSection(args.runRecord, args.slug, args.examplePhase) : []),
     "## Pipeline",
     "",
     "Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.",
@@ -402,13 +407,13 @@ function renderSkill(args: {
     ...(args.runRecord
       ? [
           "",
-          `Close \`./<run-slug>/${args.runRecord.default_filename}\` first: set \`finished_at\` and the final \`status\`, and make sure every phase row carries the artifacts it wrote. A run whose record still says \`running\` is one nothing downstream can read honestly.`,
+          `Close \`./<run-slug>/${args.runRecord.default_filename}\` before anything else: set \`finished_at\` and the final \`status\`, and make sure every phase row carries the artifacts it wrote. A run whose record still says \`running\` is one nothing downstream can read honestly.`,
         ]
       : []),
     ...(args.feedback
       ? [
           "",
-          `If the run was invoked with \`--${runtimeModeOption(args.feedback)}\`, close the ledger first: set the final \`run.status\`, then tell the user the ledger path \`./<run-slug>/${args.feedback.default_filename}\` and how many entries it holds. If it holds any, offer to run the \`report-foundry-run-feedback\` skill on it, which triages them into local drafts and files nothing without explicit confirmation. Report an empty ledger as "no feedback recorded", never as evidence the Foundry worked well.`,
+          `If the run was invoked with \`--${args.feedback.option}\`, ${args.runRecord ? "close the ledger next, after the run record" : "close the ledger first"}: set the final \`run.status\`, then tell the user the ledger path \`./<run-slug>/${args.feedback.artifact.default_filename}\` and how many entries it holds. If it holds any, offer to run the \`report-foundry-run-feedback\` skill on it, which triages them into local drafts and files nothing without explicit confirmation. Report an empty ledger as "no feedback recorded", never as evidence the Foundry worked well.`,
         ]
       : []),
     "",
@@ -438,7 +443,7 @@ function renderAssembly(
   revision: number,
   phases: AssemblyPhase[],
   requiredTools: RequiredTool[],
-  feedback?: RuntimeArtifactDefinition,
+  feedback?: FeedbackMode,
 ): string {
   // JSON round-trip drops undefined-valued keys before the compact serializer.
   const tools = JSON.parse(JSON.stringify(requiredTools)) as unknown[];
@@ -492,7 +497,7 @@ export async function runAssemblePipelineCommand(argv = process.argv.slice(2)): 
   const runtimeArtifacts = requireRuntimeArtifactRegistry(
     path.join(repoRoot, "runtime_artifacts.yml"),
   );
-  const feedback = runtimeArtifacts.artifacts.get("foundry-feedback-ledger");
+  const feedback = feedbackMode(runtimeArtifacts.artifacts.get("foundry-feedback-ledger"));
   const runRecord = runtimeArtifacts.artifacts.get("foundry-run-manifest");
   const parsedPhases = parsePhases(phases, slugMap, metaByPath, pipelineRel);
 

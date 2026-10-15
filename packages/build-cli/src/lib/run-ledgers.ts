@@ -16,30 +16,15 @@ import type {
   FeedbackLedgerModel,
   OpenRequirementsEntry,
   OpenRequirementsModel,
+  PhaseStatus,
+  RunWarning,
 } from "./run-model.js";
+import { asBoolean, asNumber, asRecord, asScalarString } from "./narrow.js";
+import { asPhaseNumber, asPhaseStatus } from "./run-record.js";
 
 export const OPEN_REQUIREMENTS_FILENAME = "open-requirements.ledger.yml";
+/** The registry's `default_filename` for `foundry-feedback-ledger`, used when no registry is passed. */
 export const FEEDBACK_LEDGER_FILENAME = "foundry-feedback.ledger.yml";
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function asString(value: unknown): string | null {
-  if (typeof value === "string") return value.length > 0 ? value : null;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return null;
-}
-
-function asNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function asBoolean(value: unknown): boolean | null {
-  return typeof value === "boolean" ? value : null;
-}
 
 /** `units:` and `because:` are free-form and have arrived as both scalars and lists. */
 function asProse(value: unknown): string | null {
@@ -59,12 +44,18 @@ function tally(values: Array<string | null>): Record<string, number> {
   return out;
 }
 
-function loadYaml(file: string): unknown | null {
+type YamlLoad = { parsed: unknown; error: null } | { parsed: null; error: string };
+
+function loadYaml(file: string): YamlLoad {
   try {
-    return yaml.load(readFileSync(file, "utf8"));
-  } catch {
-    return null;
+    return { parsed: yaml.load(readFileSync(file, "utf8")), error: null };
+  } catch (error) {
+    return { parsed: null, error: `not valid YAML: ${(error as Error).message}` };
   }
+}
+
+function unreadableWarning(from: string, reason: string): RunWarning {
+  return { code: "ledger-unparseable", message: `${from} is ${reason}`, subject: from };
 }
 
 /**
@@ -87,20 +78,20 @@ export function parseOpenRequirements(parsed: unknown, from: string): OpenRequir
     const row = asRecord(raw);
     if (!row) continue;
     entries.push({
-      id: asString(row.id) ?? `entry-${entries.length + 1}`,
-      status: asString(row.status) ?? "open",
-      kind: asString(row.kind),
+      id: asScalarString(row.id) ?? `entry-${entries.length + 1}`,
+      status: asScalarString(row.status) ?? "open",
+      kind: asScalarString(row.kind),
       blocking: asBoolean(row.blocking),
-      raised_by: asString(row.raised_by),
+      raised_by: asScalarString(row.raised_by),
       raised_by_phase: null,
       raised_by_href: null,
-      resolved_by: asString(row.resolved_by),
+      resolved_by: asScalarString(row.resolved_by),
       resolved_by_phase: null,
       resolved_by_href: null,
-      step: asString(row.step),
+      step: asScalarString(row.step),
       unmet: asProse(row.unmet),
       missing: asProse(row.missing),
-      supersedes: asString(row.supersedes),
+      supersedes: asScalarString(row.supersedes),
       note: asProse(row.note),
       units: asProse(row.units),
       because: asProse(row.because),
@@ -120,6 +111,7 @@ export function parseOpenRequirements(parsed: unknown, from: string): OpenRequir
 
   return {
     path: from,
+    unreadable: null,
     entry_count: entries.length,
     topology_repair: topology,
     counts: {
@@ -133,12 +125,35 @@ export function parseOpenRequirements(parsed: unknown, from: string): OpenRequir
   };
 }
 
-export function readOpenRequirements(runDir: string): OpenRequirementsModel | null {
-  const file = path.join(runDir, OPEN_REQUIREMENTS_FILENAME);
-  if (!existsSync(file)) return null;
-  const parsed = loadYaml(file);
-  if (parsed === null) return null;
-  return parseOpenRequirements(parsed, OPEN_REQUIREMENTS_FILENAME);
+export interface OpenRequirementsLoad {
+  ledger: OpenRequirementsModel | null;
+  warnings: RunWarning[];
+}
+
+/**
+ * A ledger that exists but cannot be parsed comes back marked `unreadable` with no entries, so a
+ * reader cannot mistake it for an absent ledger or an empty one.
+ */
+export function readOpenRequirements(runDir: string): OpenRequirementsLoad {
+  const from = OPEN_REQUIREMENTS_FILENAME;
+  const file = path.join(runDir, from);
+  if (!existsSync(file)) return { ledger: null, warnings: [] };
+  const load = loadYaml(file);
+  if (load.error !== null) {
+    return {
+      ledger: {
+        path: from,
+        unreadable: load.error,
+        entry_count: 0,
+        topology_repair: null,
+        counts: { open: 0, resolved: 0, surrendered: 0, blocking_open: 0, dropped: 0 },
+        entries: [],
+      },
+      warnings: [unreadableWarning(from, load.error)],
+    };
+  }
+  if (load.parsed === null || load.parsed === undefined) return { ledger: null, warnings: [] };
+  return { ledger: parseOpenRequirements(load.parsed, from), warnings: [] };
 }
 
 /** The feedback ledger: what the run showed to be wrong with the Foundry itself. */
@@ -155,32 +170,33 @@ export function parseFeedbackLedger(parsed: unknown, from: string): FeedbackLedg
       const subject = asRecord(row.subject);
       const observed = asRecord(row.observed_in);
       entries.push({
-        id: asString(row.id) ?? `entry-${entries.length + 1}`,
-        raised_by: asString(row.raised_by),
+        id: asScalarString(row.id) ?? `entry-${entries.length + 1}`,
+        raised_by: asScalarString(row.raised_by),
         raised_by_phase: null,
-        kind: asString(row.kind),
-        severity: asString(row.severity),
-        status: asString(row.status),
+        kind: asScalarString(row.kind),
+        severity: asScalarString(row.severity),
+        status: asScalarString(row.status),
         what: asProse(row.what),
         expected: asProse(row.expected),
         evidence: asProse(row.evidence),
-        issue: asString(row.issue),
-        subject_kind: subject ? asString(subject.kind) : null,
-        subject_label: subject ? asString(subject.label) : null,
-        subject_locator: subject ? asString(subject.locator) : null,
+        issue: asScalarString(row.issue),
+        subject_kind: subject ? asScalarString(subject.kind) : null,
+        subject_label: subject ? asScalarString(subject.label) : null,
+        subject_locator: subject ? asScalarString(subject.locator) : null,
         subject_href: null,
         observed_revision: observed ? asNumber(observed.revision) : null,
-        observed_foundry_head: observed ? asString(observed.foundry_head) : null,
+        observed_foundry_head: observed ? asScalarString(observed.foundry_head) : null,
       });
     }
   }
 
   return {
     path: from,
+    unreadable: null,
     run: {
-      pipeline: runBlock ? asString(runBlock.pipeline) : null,
-      run_slug: runBlock ? asString(runBlock.run_slug) : null,
-      status: runBlock ? asString(runBlock.status) : null,
+      pipeline: runBlock ? asScalarString(runBlock.pipeline) : null,
+      run_slug: runBlock ? asScalarString(runBlock.run_slug) : null,
+      status: runBlock ? asScalarString(runBlock.status) : null,
     },
     counts: {
       total: entries.length,
@@ -192,51 +208,74 @@ export function parseFeedbackLedger(parsed: unknown, from: string): FeedbackLedg
   };
 }
 
-export function readFeedbackLedger(runDir: string): FeedbackLedgerModel | null {
-  const file = path.join(runDir, FEEDBACK_LEDGER_FILENAME);
-  if (!existsSync(file)) return null;
-  const parsed = loadYaml(file);
-  if (parsed === null) return null;
-  return parseFeedbackLedger(parsed, FEEDBACK_LEDGER_FILENAME);
-}
-
 /**
  * The phase roster the feedback ledger carries in its `run:` header.
  *
  * This predates the run record and remains the only phase roster a pre-record run has. It is read
- * separately from the entries because a reader may want the roster from a run that recorded no
- * feedback at all.
+ * apart from the entries because a run may carry a roster and no feedback at all.
  */
 export interface LedgerPhaseRow {
   n: number;
   kind: string | null;
   skill: string | null;
-  status: string | null;
+  status: PhaseStatus | null;
   iterations: number | null;
   selected: string | null;
   feedback_checked: boolean | null;
 }
 
-export function readFeedbackLedgerPhases(runDir: string): LedgerPhaseRow[] {
-  const file = path.join(runDir, FEEDBACK_LEDGER_FILENAME);
-  if (!existsSync(file)) return [];
-  const root = asRecord(loadYaml(file));
-  const runBlock = asRecord(root?.run);
+export function parseFeedbackLedgerPhases(parsed: unknown): LedgerPhaseRow[] {
+  const runBlock = asRecord(asRecord(parsed)?.run);
   if (!runBlock || !Array.isArray(runBlock.phases)) return [];
   const rows: LedgerPhaseRow[] = [];
   for (const raw of runBlock.phases) {
     const row = asRecord(raw);
-    const n = row ? asNumber(row.n) : null;
+    // Keyed `phase:` when the roster was copied from `_assembly.json` as is.
+    const n = row ? asPhaseNumber(row.n ?? row.phase) : null;
     if (n === null) continue;
     rows.push({
       n,
-      kind: asString(row!.kind),
-      skill: asString(row!.skill),
-      status: asString(row!.status),
+      kind: asScalarString(row!.kind),
+      skill: asScalarString(row!.skill),
+      status: row!.status === undefined || row!.status === null ? null : asPhaseStatus(row!.status),
       iterations: asNumber(row!.iterations),
-      selected: asString(row!.selected),
+      selected: asScalarString(row!.selected),
       feedback_checked: asBoolean(row!.feedback_checked),
     });
   }
   return rows.sort((a, b) => a.n - b.n);
+}
+
+export interface FeedbackLedgerLoad {
+  ledger: FeedbackLedgerModel | null;
+  phases: LedgerPhaseRow[];
+  warnings: RunWarning[];
+}
+
+/** Reads the file once for both the entries and the roster. */
+export function readFeedbackLedger(
+  runDir: string,
+  filename = FEEDBACK_LEDGER_FILENAME,
+): FeedbackLedgerLoad {
+  const file = path.join(runDir, filename);
+  if (!existsSync(file)) return { ledger: null, phases: [], warnings: [] };
+  const load = loadYaml(file);
+  if (load.error !== null) {
+    return {
+      ledger: {
+        path: filename,
+        unreadable: load.error,
+        run: { pipeline: null, run_slug: null, status: null },
+        counts: { total: 0, by_kind: {}, by_severity: {}, by_status: {} },
+        entries: [],
+      },
+      phases: [],
+      warnings: [unreadableWarning(filename, load.error)],
+    };
+  }
+  return {
+    ledger: parseFeedbackLedger(load.parsed, filename),
+    phases: parseFeedbackLedgerPhases(load.parsed),
+    warnings: [],
+  };
 }

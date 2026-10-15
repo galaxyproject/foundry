@@ -1,10 +1,16 @@
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
+import {
+  requireRuntimeArtifactRegistry,
+  type RuntimeArtifactRegistry,
+} from "@galaxy-foundry/gxwf-foundry-note-schema";
+
+import type { AssemblyManifest } from "../src/lib/cast-registry.js";
 import {
   buildRunModel,
   RunRecordMissingError,
@@ -18,15 +24,75 @@ import type { RunModel } from "../src/lib/run-model.js";
 const REPO_ROOT = path.resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const FIXTURES = path.join(REPO_ROOT, "packages/build-cli/test/fixtures/runs");
 const TINY = path.join(FIXTURES, "tiny-nextflow-run");
-const GIT_LOG = readFileSync(path.join(FIXTURES, "tiny-nextflow-run.git-log.txt"), "utf8");
+
+/**
+ * The fixture's checkpoint history, newest first, as `git log` would print it.
+ *
+ * Built here from readable rows rather than committed as a transcript, because the transcript's
+ * record and field separators are control characters no editor shows.
+ */
+const GIT_ROWS: Array<{ sha: string; date: string; subject: string; files: string[][] }> = [
+  {
+    sha: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345671",
+    date: "2026-09-18T10:07:32Z",
+    subject: "phase 12: run-workflow-test (1 of 2 cases FAILED)",
+    files: [
+      ["1", "0", "workflow-test-result.json"],
+      ["118", "0", "planemo-run.log"],
+    ],
+  },
+  {
+    sha: "b2c3d4e5f60718293a4b5c6d7e8f90123456712a",
+    date: "2026-09-18T10:03:10Z",
+    subject: "phase 7 step 4: advance-galaxy-draft-step (featureCounts endpoint)",
+    files: [
+      ["12", "3", "galaxy-workflow-draft.gxwf.yml"],
+      ["20", "0", "galaxy-workflow.gxwf.yml"],
+    ],
+  },
+  {
+    sha: "c3d4e5f60718293a4b5c6d7e8f90123456712ab3",
+    date: "2026-09-18T10:02:40Z",
+    subject: "drop a stray editor swap file",
+    files: [["0", "4", ".trim.swp"]],
+  },
+  {
+    sha: "d4e5f60718293a4b5c6d7e8f90123456712ab3c4",
+    date: "2026-09-18T10:02:00Z",
+    subject: "phase 6: nextflow-summary-to-galaxy-template",
+    files: [["18", "0", "galaxy-workflow-draft.gxwf.yml"]],
+  },
+  {
+    sha: "e5f60718293a4b5c6d7e8f90123456712ab3c4d5",
+    date: "2026-09-18T10:00:30Z",
+    subject: "phase 1: summarize-nextflow",
+    files: [["5", "0", "summary-nextflow.json"]],
+  },
+];
+const GIT_LOG = GIT_ROWS.map(
+  (row) =>
+    `${String.fromCharCode(30)}${row.sha}${String.fromCharCode(31)}${row.date}${String.fromCharCode(31)}${row.subject}\n${row.files.map((f) => f.join("\t")).join("\n")}\n`,
+).join("");
 
 const FIXED_CLOCK = () => new Date("2026-09-18T12:00:00.000Z");
 const SITE_BASE = "https://galaxyproject.github.io/foundry";
 
+let registry: RuntimeArtifactRegistry;
 let index: PipelineIndex;
+let assembly: AssemblyManifest;
 beforeAll(() => {
-  index = buildPipelineIndex(REPO_ROOT);
+  // The same registry the CLI passes, so runtime artifacts are declared exactly as they are there.
+  registry = requireRuntimeArtifactRegistry(path.join(REPO_ROOT, "runtime_artifacts.yml"));
+  index = buildPipelineIndex(REPO_ROOT, registry);
+  assembly = index.assemblies.get("nextflow-to-galaxy")!;
 });
+
+/** The phase number today's assembly gives a skill, so these tests follow a renumbering. */
+function phaseOf(skill: string): number {
+  const phase = assembly.phases.find((candidate) => candidate.skill === skill);
+  if (!phase) throw new Error(`no phase runs ${skill}`);
+  return phase.phase;
+}
 
 /** The fixture is read with the captured log rather than a committed nested `.git`. */
 function tinyModel(overrides: Partial<Parameters<typeof buildRunModel>[0]> = {}): RunModel {
@@ -34,6 +100,7 @@ function tinyModel(overrides: Partial<Parameters<typeof buildRunModel>[0]> = {})
     runDir: TINY,
     repoRoot: REPO_ROOT,
     pipelineIndex: index,
+    runtimeArtifacts: registry,
     now: FIXED_CLOCK,
     gitExec: (args) => {
       if (args[0] === "log") return GIT_LOG;
@@ -52,8 +119,24 @@ describe("buildRunModel on a recorded run", () => {
     expect(model.run.slug).toBe("tiny-nextflow-run");
     expect(model.run.status).toBe("failed");
     expect(model.run.foundry_head).toBe("beef0001beef0001beef0001beef0001beef0001");
-    expect(model.phases).toHaveLength(13);
+    expect(model.phases).toHaveLength(assembly.phases.length);
     expect(model.phases.every((phase) => phase.status_source === "run-record")).toBe(true);
+  });
+
+  it("agrees with today's assembly, so the fixture cannot silently go stale", () => {
+    const model = tinyModel();
+    expect(model.warnings.filter((warning) => warning.code.startsWith("run-record-"))).toEqual([]);
+    // The fixture pins no sha, so whether it matches the checkout is unknown, not assumed.
+    expect(model.run.assembly_matches_checkout).toBeNull();
+    expect(model.run.assembly_sha256).toBeNull();
+  });
+
+  it("declares the run record itself as a runtime artifact, not a stray", () => {
+    const model = tinyModel();
+    const record = model.artifacts.find((artifact) => artifact.id === "foundry-run-manifest");
+    expect(record?.presence).toBe("present");
+    expect(record?.source).toBe("runtime");
+    expect(model.unmapped.map((file) => file.relpath)).not.toContain("foundry-run.yml");
   });
 
   it("carries loop iterations and the branch decision, which no file records", () => {
@@ -69,18 +152,24 @@ describe("buildRunModel on a recorded run", () => {
     const model = tinyModel();
     const draft = model.artifacts.find((artifact) => artifact.id === "galaxy-workflow-draft")!;
     expect(draft.presence).toBe("present");
-    expect(draft.written_by_phase).toBe(7);
-    expect(draft.writes.map((write) => write.phase)).toEqual([6, 7]);
+    const template = phaseOf("nextflow-summary-to-galaxy-template");
+    const loop = phaseOf("advance-galaxy-draft-step");
+    expect(draft.written_by_phase).toBe(loop);
+    expect(draft.writes.map((write) => write.phase)).toEqual([template, loop]);
     expect(draft.writes[1]!.iteration).toBe(4);
   });
 
   it("separates an artifact that is due and absent from one that is not due yet", () => {
     const model = tinyModel();
     const byId = new Map(model.artifacts.map((artifact) => [artifact.id, artifact]));
-    // Phase 11 ran, so its validation result should exist.
-    expect(byId.get("galaxy-workflow-validation-result")!.presence).toBe("missing");
-    // Phase 13 never started, so its debug report is not a defect.
-    expect(byId.get("workflow-debug-report")!.presence).toBe("not-yet-due");
+    // The validation phase ran, so its result should exist.
+    const validation = byId.get("galaxy-workflow-validation-result")!;
+    expect(Math.min(...validation.producing_phases)).toBe(phaseOf("validate-galaxy-workflow"));
+    expect(validation.presence).toBe("missing");
+    // The debug phase never started, so its report is not a defect.
+    const debug = byId.get("workflow-debug-report")!;
+    expect(Math.min(...debug.producing_phases)).toBe(phaseOf("debug-galaxy-workflow-output"));
+    expect(debug.presence).toBe("not-yet-due");
   });
 
   it("reads the obligations ledger with its statuses and repair budget", () => {
@@ -94,8 +183,8 @@ describe("buildRunModel on a recorded run", () => {
     });
     expect(ledger.topology_repair).toEqual({ escalations: 1, cap: 5, open_history: [3, 2] });
     const resolved = ledger.entries.find((entry) => entry.status === "resolved")!;
-    expect(resolved.raised_by_phase).toBe(3);
-    expect(resolved.resolved_by_phase).toBe(2);
+    expect(resolved.raised_by_phase).toBe(phaseOf("nextflow-summary-to-galaxy-interface"));
+    expect(resolved.resolved_by_phase).toBe(phaseOf("nextflow-summary-to-galaxy-reference-data"));
   });
 
   it("reads the feedback ledger and links entries back to the notes they blame", () => {
@@ -110,7 +199,9 @@ describe("buildRunModel on a recorded run", () => {
     const timeline = tinyModel().timeline!;
     expect(timeline.commit_count).toBe(5);
     expect(timeline.commits.some((commit) => commit.kind === "ad-hoc")).toBe(true);
-    expect(timeline.commits.find((commit) => commit.phase === 12)!.failed).toBe(true);
+    expect(
+      timeline.commits.find((commit) => commit.phase === phaseOf("run-workflow-test"))!.failed,
+    ).toBe(true);
   });
 
   it("derives a step table from the draft, marking what is still unresolved", () => {
@@ -142,7 +233,7 @@ describe("buildRunModel on a recorded run", () => {
   it("rolls the run up to an error when a phase failed", () => {
     const model = tinyModel();
     expect(model.health.overall).toBe("error");
-    expect(model.health.total_phases).toBe(13);
+    expect(model.health.total_phases).toBe(assembly.phases.length);
   });
 
   it("never writes an absolute path into the manifest's relative fields", () => {
@@ -164,6 +255,21 @@ describe("buildRunModel on a recorded run", () => {
     }
     // The in-memory model still carries them, which is what the page renders from.
     expect(model.artifacts.find((a) => a.id === "summary-nextflow")!.preview!.body).toBeTruthy();
+  });
+});
+
+describe("serializeRunManifest", () => {
+  it("abbreviates a run directory under home, keeping the model's own path absolute", () => {
+    const model = tinyModel();
+    const manifest = JSON.parse(serializeRunManifest(model, path.dirname(TINY))) as RunModel;
+    expect(manifest.run.dir).toBe("~/tiny-nextflow-run");
+    expect(model.run.dir).toBe(TINY);
+  });
+
+  it("leaves a run directory outside home as it is", () => {
+    const model = tinyModel();
+    const manifest = JSON.parse(serializeRunManifest(model, "/nowhere/else")) as RunModel;
+    expect(manifest.run.dir).toBe(TINY);
   });
 });
 
@@ -239,13 +345,7 @@ describe("renderRunDashboard", () => {
   });
 
   it("emits no external link at all when told to stay offline", () => {
-    const offline = buildRunModel({
-      runDir: TINY,
-      repoRoot: REPO_ROOT,
-      pipelineIndex: index,
-      now: FIXED_CLOCK,
-      linker: createSiteLinker({ repoRoot: REPO_ROOT, base: "" }),
-    });
+    const offline = tinyModel({ linker: createSiteLinker({ repoRoot: REPO_ROOT, base: "" }) });
     const html = render(offline, "");
     expect(html).not.toContain('href="http');
     expect(html).not.toContain('src="http');
@@ -262,8 +362,11 @@ describe("renderRunDashboard", () => {
 
   it("shows every artifact the run declared", () => {
     const model = tinyModel();
+    // Only the rendered page counts: the inlined manifest below it names every id regardless.
     const html = render(model);
-    for (const artifact of model.artifacts) expect(html).toContain(artifact.id);
+    const page = html.slice(0, html.indexOf('id="run-manifest"'));
+    expect(page.length).toBeGreaterThan(0);
+    for (const artifact of model.artifacts) expect(page).toContain(artifact.id);
   });
 
   it("escapes content that would otherwise break the page", () => {
@@ -275,7 +378,7 @@ describe("renderRunDashboard", () => {
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     // The inlined manifest must survive it too.
     const body = html.slice(html.indexOf('id="run-manifest"'));
-    expect(body).toContain("<\\/script>");
+    expect(body).toContain("\\u003c/script\\u003e");
   });
 
   it("is byte-identical across renders of the same model", () => {
