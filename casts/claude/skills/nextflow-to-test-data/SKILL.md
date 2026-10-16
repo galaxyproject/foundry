@@ -18,7 +18,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- Write artifact `test-data-refs` as `test-data-refs.json`. Format: `json`. Test data resolved from the pipeline's declared fixtures, expressed as URLs/paths plus expected shapes for downstream test authoring. Shared id with find-test-data — the branch's search fallback fills only the inputs this Mold leaves unresolved.
+- Write artifact `test-data-refs` as `test-data-refs.json`. Format: `json`. Schema: test-data-refs. Test data resolved from the pipeline's declared fixtures, expressed as URLs/paths plus expected shapes for downstream test authoring. Shared id with find-test-data — the branch's search fallback fills only the inputs this Mold leaves unresolved.
 
 ## Required Tools
 
@@ -27,6 +27,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/schemas/summary-nextflow.schema.json`: Schema file copied verbatim into the bundle. Input contract: read `test_selection` and the chosen `test_candidates[].inputs[]` — role, url/path, sha1, filetype — as the declared source of test data.
+- `references/schemas/test-data-refs.schema.json`: Schema file copied verbatim into the bundle. Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.
 
 ## Load On Demand
 
@@ -37,7 +38,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- None declared.
+- Validate `test-data-refs.json` before returning it: run `foundry validate-test-data-refs test-data-refs.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-test-data-refs test-data-refs.json`. This checks artifact `test-data-refs` against the test-data-refs schema.
 
 ## Procedure
 
@@ -50,8 +51,8 @@ This skill is the source-specific first leg of the harness's `test-data-resoluti
 1. **Enumerate Galaxy inputs and their required shape.** From the interface brief, list each workflow input: label, Galaxy collection shape (File / list / paired / list:paired / record), and datatype. This is the *target shape* every ref must satisfy.
 2. **Resolve the candidate.** Read `test_selection`. If it names a candidate, collect that candidate's declared inputs: `role`, `url`/`path`, `sha1`, `filetype`, and description. If it reports `needs-scope-choice`, compare the candidates' scope, execution mode, and input coverage and record the caller's choice; do not infer scale or representativeness from a profile name alone.
 3. **Map each declared fixture onto a Galaxy input.** Match by role and shape onto the interface's input labels. A samplesheet-driven Nextflow input often expands into a Galaxy collection — record the element identifiers and any split/concatenation prep needed to reach the Galaxy collection shape (galaxy-workflow-testability-design).
-4. **Emit refs.** Write one `test-data-refs.json` entry per resolved input: prefer the declared remote `url` + `sha1` (remote-URL-first, iwc-test-data-conventions); fall back to the in-tree `path` plus provenance only when no URL is published. Carry datatype, collection element identifiers, and any subset/split prep. Each entry maps to an addressable workflow input label.
-5. **Report genuine gaps.** An input with no declared fixture of the right shape stays `resolved: false` with a reason — this is what the harness hands to find-test-data. Do not search public sources here; searching is find-test-data's job, not this skill's.
+4. **Emit refs.** Write one `test-data-refs.json` entry per resolved input: prefer the declared remote `url` + `sha1` (remote-URL-first, iwc-test-data-conventions); fall back to the in-tree `path` plus provenance only when no URL is published. Carry datatype, collection element identifiers, and any subset/split prep. Each entry maps to an addressable workflow input label. Shape each entry per test-data-refs with `resolved_by: nextflow-to-test-data`, and validate the file with `foundry validate-test-data-refs` before returning.
+5. **Report genuine gaps.** An input with no declared fixture of the right shape stays `resolved: false` with a reason and `storage: unresolved` — this is what the harness hands to find-test-data. Do not search public sources here; searching is find-test-data's job, not this skill's.
 
 ### No fabrication
 

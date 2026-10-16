@@ -54,6 +54,7 @@ regenerateFromJson("summary-galaxy-workflow", "summaryGalaxyWorkflowSchema");
 regenerateFromJson("galaxy-tool-discovery", "galaxyToolDiscoverySchema");
 regenerateFromJson("galaxy-tool-summary", "galaxyToolSummarySchema");
 regenerateFromJson("galaxy-workflow-test-plan", "galaxyWorkflowTestPlanSchema");
+regenerateFromJson("test-data-refs", "testDataRefsSchema");
 regenerateFromUpstream(
   "tests-format",
   "tests.schema",

@@ -213,6 +213,22 @@ export const foundryCliMeta: CliProgramSpec = {
       commands: [],
     },
     {
+      name: "validate-test-data-refs",
+      fullName: "foundry validate-test-data-refs",
+      description: "Validate a test-data-refs JSON document.",
+      synopsis: "foundry validate-test-data-refs <test-data-refs.json>",
+      args: [
+        {
+          raw: "test-data-refs.json",
+          name: "test-data-refs.json",
+          required: true,
+          variadic: false,
+        },
+      ],
+      options: [],
+      commands: [],
+    },
+    {
       name: "validate-markdown",
       fullName: "foundry validate-markdown",
       description: "Validate Markdown sections against a named document schema.",

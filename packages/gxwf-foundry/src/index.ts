@@ -7,6 +7,7 @@ export { summaryGalaxyWorkflowSchema } from "./schemas/summary-galaxy-workflow/s
 export { galaxyToolDiscoverySchema } from "./schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.generated.js";
 export { galaxyToolSummarySchema } from "./schemas/galaxy-tool-summary/galaxy-tool-summary.schema.generated.js";
 export { galaxyWorkflowTestPlanSchema } from "./schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.generated.js";
+export { testDataRefsSchema } from "./schemas/test-data-refs/test-data-refs.schema.generated.js";
 export {
   workflowBriefSchema,
   parseWorkflowBrief,
@@ -33,6 +34,7 @@ export { galaxyToolDiscoveryValidator } from "./commands/validate-galaxy-tool-di
 export { galaxyToolSummaryValidator } from "./commands/validate-galaxy-tool-summary.js";
 export { summaryNextflowValidator } from "./commands/validate-summary-nextflow.js";
 export { galaxyWorkflowTestPlanValidator } from "./commands/validate-galaxy-workflow-test-plan.js";
+export { testDataRefsValidator } from "./commands/validate-test-data-refs.js";
 export { validateTestsFormat } from "./commands/validate-tests-format.js";
 
 export {

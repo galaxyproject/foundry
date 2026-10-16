@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-to-test-data",
     "path": "content/molds/nextflow-to-test-data/index.md",
-    "revision": 3,
-    "content_hash": "7326b3810ca2c2b6216d868e1c10c1d95b0b8ecca5a3314f1a800a1b3f67443f",
-    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
+    "revision": 4,
+    "content_hash": "842e097edfb5bfbc37b62a35d5870ee2087df33919212a7965fd70dae799b189",
+    "commit": "2bdd9b9b68a71fd161362922e9d1ae797d10a8ce"
   },
-  "cast_at": "2026-09-23T16:20:46.891Z",
+  "cast_at": "2026-10-16T22:32:04.267Z",
   "refs": [
     {
       "kind": "research",
@@ -86,6 +86,22 @@
       "src_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
       "dst_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
       "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[test-data-refs]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testDataRefsSchema",
+      "dst": "references/schemas/test-data-refs.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.",
+      "verification": "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it.",
+      "license": "MIT",
+      "src_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "dst_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "source": "deterministic"
     }
   ],
   "artifacts": {
@@ -94,6 +110,7 @@
         "id": "test-data-refs",
         "kind": "json",
         "default_filename": "test-data-refs.json",
+        "schema": "[[test-data-refs]]",
         "description": "Test data resolved from the pipeline's declared fixtures, expressed as URLs/paths plus expected shapes for downstream test authoring. Shared id with [[find-test-data]] — the branch's search fallback fills only the inputs this Mold leaves unresolved."
       }
     ],

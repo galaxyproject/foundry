@@ -58,7 +58,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan. *(reviewed)*
 - [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. *(reviewed)*
-- [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
+- [[paper-to-test-data]] — Resolve the test data a paper names into refs for each workflow input.
 - [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
 - [[report-foundry-run-feedback]] — Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts.
 - [[review-galaxy-workflow]] — Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review.
@@ -172,6 +172,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[validate-summary-cwl]] — AJV gate for summarize-cwl JSON documents.
 - [[validate-summary-galaxy-workflow]] — AJV gate for summarize-galaxy-workflow JSON documents.
 - [[validate-summary-nextflow]] — AJV gate for summarize-nextflow JSON documents.
+- [[validate-test-data-refs]] — AJV gate for the test-data-refs document the test-data-resolution chain writes.
 - [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
 - [[validate-tests-format]] — AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check.
 - [[validate-workflow-brief]] — Validate the title and required sections of a Markdown Workflow Brief.
@@ -187,6 +188,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summary-galaxy-workflow]] — JSON Schema for the structured summary emitted by the summarize-galaxy-workflow Mold.
 - [[tests-format]] — JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`.
 - [[galaxy-workflow-test-plan]] — JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test.
+- [[test-data-refs]] — JSON Schema for the test data each Galaxy workflow input gets, written by the test-data-resolution chain and read by implement-galaxy-workflow-test.
 - [[nextflow-parameters-meta]] — JSON Schema (Draft 2020-12) meta-schema validating per-pipeline nextflow_schema.json files. Upstream from nextflow-io/nf-schema.
 - [[summary-nextflow]] — JSON Schema for the structured summary emitted by the summarize-nextflow Mold.
 - [[nf-core-module-meta]] — JSON Schema (Draft-07) validating nf-core module meta.yml — channel IO, tools, containers, conda lockfiles. Upstream from nf-core/modules.

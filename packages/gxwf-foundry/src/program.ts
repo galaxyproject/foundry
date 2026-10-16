@@ -12,6 +12,7 @@ import { runValidateSummaryGalaxyWorkflow } from "./commands/validate-summary-ga
 import { runValidateGalaxyToolDiscovery } from "./commands/validate-galaxy-tool-discovery.js";
 import { runValidateGalaxyToolSummary } from "./commands/validate-galaxy-tool-summary.js";
 import { runValidateGalaxyWorkflowTestPlan } from "./commands/validate-galaxy-workflow-test-plan.js";
+import { runValidateTestDataRefs } from "./commands/validate-test-data-refs.js";
 import {
   runValidateTestsFormat,
   type ValidateTestsOptions,
@@ -63,6 +64,12 @@ export function buildProgram(): Command {
     .description("Validate a Galaxy workflow test-plan YAML document.")
     .argument("<test-plan.yml>")
     .action((path: string) => runValidateGalaxyWorkflowTestPlan(path));
+
+  program
+    .command("validate-test-data-refs")
+    .description("Validate a test-data-refs JSON document.")
+    .argument("<test-data-refs.json>")
+    .action((path: string) => runValidateTestDataRefs(path));
 
   program
     .command("validate-markdown")

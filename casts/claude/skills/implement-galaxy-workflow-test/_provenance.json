@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 10,
     "content_hash": "f9da7475cf7e165452d520af3244b1c620d104ee7937a97b3919b92ff329b9e6",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "commit": "b9c16baddd12482c739bb00a2aa7689260ddcd86"
   },
-  "cast_at": "2026-10-15T21:04:49.467Z",
+  "cast_at": "2026-10-16T22:26:07.564Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -190,6 +190,7 @@
       {
         "id": "test-data-refs",
         "description": "Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.",
+        "inherited_schema": "[[test-data-refs]]",
         "producers": [
           "cwl-to-test-data",
           "find-test-data",

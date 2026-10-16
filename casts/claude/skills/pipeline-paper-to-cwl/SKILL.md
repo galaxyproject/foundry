@@ -66,7 +66,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 5. **implement-cwl-tool-step** (loop) — invoke the `implement-cwl-tool-step` skill, once per step. No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand.
 6. **validate-cwl** (loop) — invoke the `validate-cwl` skill, once per step. No shared endstate oracle yet; iterate over the tools enumerated in the CWL template, doing each by hand.
 7. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
-   - Try `paper-to-test-data` — Derive workflow test inputs and expected outputs from a paper.
+   - Try `paper-to-test-data` — Resolve the test data a paper names into refs for each workflow input.
    - Otherwise try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
 8. **implement-cwl-workflow-test** — invoke the `implement-cwl-workflow-test` skill. Assemble CWL job file(s) and expected-output assertions.

@@ -7,8 +7,8 @@ tags:
   - source/cwl
 status: draft
 created: 2026-07-17
-revised: 2026-07-17
-revision: 1
+revised: 2026-10-15
+revision: 2
 summary: "Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs."
 input_artifacts:
   - id: summary-cwl
@@ -19,8 +19,17 @@ output_artifacts:
   - id: test-data-refs
     kind: json
     default_filename: test-data-refs.json
+    schema: "[[test-data-refs]]"
     description: "Test data resolved from the CWL source's declared test cases, expressed as URLs/paths plus expected shapes for downstream test authoring. Shared id with [[find-test-data]] — the branch's search fallback fills only the inputs this Mold leaves unresolved."
 references:
+  - kind: schema
+    ref: "[[test-data-refs]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: cast-validated
+    purpose: "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning."
+    verification: "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it."
   - kind: schema
     ref: "[[summary-cwl]]"
     used_at: runtime
@@ -64,8 +73,8 @@ This Mold is the source-specific first leg of the harness's `test-data-resolutio
 1. **Enumerate Galaxy inputs and their required shape.** From the interface brief, list each workflow input: label, Galaxy collection shape (File / list / paired / list:paired / record), and datatype. This is the *target shape* every ref must satisfy.
 2. **Read the declared test cases.** From the summary's `tests[]`, read each case's `job_path` inputs — File/Directory objects with their `location`/`path`, `secondaryFiles`, arrays, and inline literals — plus `expected_outputs`. Prefer the case whose inputs best cover the workflow's inputs.
 3. **Map each declared input onto a Galaxy input.** Match by id and shape onto the interface's input labels. A CWL File array maps to a Galaxy list; a File carrying `secondaryFiles` may map to a record or composite datatype — record element identifiers and any prep needed to reach the Galaxy collection shape ([[galaxy-workflow-testability-design]]).
-4. **Emit refs.** Write one `test-data-refs.json` entry per resolved input: prefer a remote `location` URL when the job references one (remote-URL-first, [[iwc-test-data-conventions]]); fall back to the in-tree `path` plus provenance only when no URL is published. Carry datatype, collection element identifiers, and any subset/split prep. Each entry maps to an addressable workflow input label.
-5. **Report genuine gaps.** An input with no declared test-case input of the right shape stays `resolved: false` with a reason — this is what the harness hands to [[find-test-data]]. Do not search public sources here; searching is find-test-data's job, not this Mold's.
+4. **Emit refs.** Write one `test-data-refs.json` entry per resolved input: prefer a remote `location` URL when the job references one (remote-URL-first, [[iwc-test-data-conventions]]); fall back to the in-tree `path` plus provenance only when no URL is published. Carry datatype, collection element identifiers, and any subset/split prep. Each entry maps to an addressable workflow input label. Shape each entry per [[test-data-refs]] with `resolved_by: cwl-to-test-data`, and validate the file with `foundry validate-test-data-refs` before returning.
+5. **Report genuine gaps.** An input with no declared test-case input of the right shape stays `resolved: false` with a reason and `storage: unresolved` — this is what the harness hands to [[find-test-data]]. Do not search public sources here; searching is find-test-data's job, not this Mold's.
 
 ## No fabrication
 

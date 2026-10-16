@@ -24,10 +24,13 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-10-16 | 8 |
+| [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-10-15 | 2 |
+| [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-10-15 | 4 |
+| [[paper-to-test-data]] | Resolve the test data a paper names into refs for each workflow input. | draft | 2026-10-15 | 3 |
 | [[changeset-to-galaxy-test-plan]] | Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan. | reviewed | 2026-09-23 | 4 |
 | [[cwl-test-to-galaxy-test-plan]] | Translate CWL test fixtures into a Galaxy workflow test plan. | draft | 2026-09-23 | 3 |
 | [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring. | reviewed | 2026-09-22 | 12 |
-| [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-09-22 | 7 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-09-22 | 10 |
 | [[repair-galaxy-draft-topology]] | Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs. | draft | 2026-09-22 | 5 |
 | [[workflow-brief-to-galaxy-data-flow]] | Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief. | draft | 2026-09-20 | 4 |
@@ -40,7 +43,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests. | draft | 2026-09-16 | 11 |
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-09-15 | 3 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | reviewed | 2026-09-15 | 7 |
-| [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-09-15 | 3 |
 | [[summarize-nextflow]] | Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds. | reviewed | 2026-09-15 | 18 |
 | [[review-galaxy-workflow]] | Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review. | draft | 2026-09-12 | 1 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-09-12 | 7 |
@@ -68,13 +70,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[implement-cwl-tool-step]] | Convert an abstract step into a concrete CWL CommandLineTool + step. | draft | 2026-07-24 | 2 |
 | [[implement-cwl-workflow-test]] | Assemble CWL job file(s) and expected-output assertions. | draft | 2026-07-24 | 2 |
 | [[interview-to-freeform-summary]] | Normalize a free-form user interview into the shared freeform-summary workflow handoff. | reviewed | 2026-07-24 | 3 |
-| [[paper-to-test-data]] | Derive workflow test inputs and expected outputs from a paper. | draft | 2026-07-24 | 2 |
 | [[summarize-cwl-tool]] | Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target. | draft | 2026-07-24 | 2 |
 | [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | reviewed | 2026-07-24 | 8 |
 | [[summarize-galaxy-workflow]] | Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps. | reviewed | 2026-07-24 | 2 |
 | [[summarize-paper]] | Extract methods, tools, sample data, and references from a paper. | draft | 2026-07-24 | 2 |
 | [[validate-cwl]] | Run cwltool --validate / schema lint, classify failures, recommend fixes. | draft | 2026-07-24 | 3 |
-| [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-07-17 | 1 |
 | [[summarize-cwl]] | Validate and normalize a CWL Workflow tree, then emit a lightweight structured summary for downstream Galaxy translation. | draft | 2026-05-10 | 2 |
 | [[freeform-summary-to-cwl-design]] | Translate a free-form source summary into a CWL workflow design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-cwl-data-flow]] | Translate a Nextflow summary into a CWL data-flow design brief. | draft | 2026-05-05 | 1 |
@@ -156,6 +156,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[validate-test-data-refs]] | AJV gate for the test-data-refs document the test-data-resolution chain writes. | draft | 2026-10-15 | 1 |
 | [[convert]] | Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations. | draft | 2026-09-26 | 3 |
 | [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-09-23 | 4 |
 | [[check-workflow-brief]] | Check Workflow Brief structure and stop on explicit workflow or agent environment blockers. | draft | 2026-09-17 | 1 |
@@ -190,6 +191,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[test-data-refs]] | JSON Schema for the test data each Galaxy workflow input gets, written by the test-data-resolution chain and read by implement-galaxy-workflow-test. | draft | 2026-10-15 | 1 |
 | [[galaxy-workflow-draft]] | JSON Schema for `class: GalaxyWorkflowDraft` — gxformat2 with `TODO_*` sentinels and `_plan_*` planning fields per draft step. | draft | 2026-09-23 | 4 |
 | [[galaxy-workflow-test-plan]] | JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test. | draft | 2026-09-23 | 3 |
 | [[tests-format]] | JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`. | draft | 2026-09-23 | 6 |
