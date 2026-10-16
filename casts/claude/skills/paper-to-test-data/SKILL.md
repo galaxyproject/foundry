@@ -14,7 +14,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`. Free-form summary from summarize-paper; sample data and reference evidence the test fixtures derive from.
-- Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface pinning the workflow input labels, collection shapes, and datatypes each ref must map onto.
+- Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY.
+- Read artifact `freeform-cwl-design`. Produced by `freeform-summary-to-cwl-design`. CWL design from freeform-summary-to-cwl-design naming the workflow input ports each ref must map onto, in PAPER → CWL.
 
 ## Outputs
 
@@ -38,7 +39,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Read the paper free-form summary from summarize-paper and resolve the data the paper names (resolvable URLs, file shapes, expected hashes) onto the workflow inputs the interface brief declares, as `test-data-refs` with `resolved_by: paper-to-test-data`. An input the paper names no data for stays `resolved: false` with a reason, for find-test-data to search. Expected outputs are the test plan's to derive, not this skill's. Validate the file with `foundry validate-test-data-refs` before returning.
+Read the paper free-form summary from summarize-paper and resolve the data the paper names (resolvable URLs, file shapes, expected hashes) onto the workflow inputs the target declares — the Galaxy interface brief's input labels, or the CWL design's input ports — as `test-data-refs` with `resolved_by: paper-to-test-data`. An input the paper names no data for stays `resolved: false` with a reason, for find-test-data to search. Expected outputs are the test plan's to derive, not this skill's. Validate the file with `foundry validate-test-data-refs` before returning.
 
 ## Feedback Mode
 

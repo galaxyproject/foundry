@@ -5,10 +5,10 @@
     "name": "paper-to-test-data",
     "path": "content/molds/paper-to-test-data/index.md",
     "revision": 3,
-    "content_hash": "60b30f927d43b98ff9332f92111c615bcf162e88ce245033b4c69c5a83ac5019",
-    "commit": "b9c16baddd12482c739bb00a2aa7689260ddcd86"
+    "content_hash": "cdb6a8d7ca4c84f6dddd457ceb9f48a1286d92a865f3577c8d647d0d0a9765e5",
+    "commit": "2bdd9b9b68a71fd161362922e9d1ae797d10a8ce"
   },
-  "cast_at": "2026-10-16T22:26:09.180Z",
+  "cast_at": "2026-10-16T22:32:04.310Z",
   "refs": [
     {
       "kind": "schema",
@@ -22,8 +22,8 @@
       "purpose": "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.",
       "verification": "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it.",
       "license": "MIT",
-      "src_hash": "55d9059369ad8fb8b8602732d4e1ec97638b3af57144e8218fa846b6047e02cb",
-      "dst_hash": "55d9059369ad8fb8b8602732d4e1ec97638b3af57144e8218fa846b6047e02cb",
+      "src_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "dst_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
       "source": "deterministic"
     }
   ],
@@ -48,9 +48,16 @@
       },
       {
         "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto.",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY.",
         "producers": [
           "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "freeform-cwl-design",
+        "description": "CWL design from [[freeform-summary-to-cwl-design]] naming the workflow input ports each ref must map onto, in PAPER → CWL.",
+        "producers": [
+          "freeform-summary-to-cwl-design"
         ]
       }
     ]

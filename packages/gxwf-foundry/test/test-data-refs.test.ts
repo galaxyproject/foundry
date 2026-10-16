@@ -122,6 +122,27 @@ describe("testDataRefsValidator", () => {
     expect(validate({ refs: [{ ...RESOLVED_COLLECTION, elements: [] }] }).valid).toBe(false);
   });
 
+  it("requires every element of a resolved collection to reach data", () => {
+    const withElements = (elements: unknown[]) => ({
+      refs: [{ ...RESOLVED_COLLECTION, elements }],
+    });
+    const [sample] = RESOLVED_COLLECTION.elements;
+    const [forward, reverse] = sample.elements;
+    expect(validate(withElements([{ identifier: "sample1" }])).valid).toBe(false);
+    expect(validate(withElements([{ identifier: "sample1", elements: [] }])).valid).toBe(false);
+    const noLocation = {
+      ...forward,
+      fixture: { ...forward.fixture, storage: null, location: null },
+    };
+    expect(
+      validate(withElements([{ identifier: "sample1", elements: [noLocation, reverse] }])).valid,
+    ).toBe(false);
+    const noStorage = { ...forward, fixture: { ...forward.fixture, storage: null } };
+    expect(
+      validate(withElements([{ identifier: "sample1", elements: [noStorage, reverse] }])).valid,
+    ).toBe(false);
+  });
+
   it("requires a storage class alongside a location", () => {
     const noStorage = { ...RESOLVED_FILE, fixture: { ...RESOLVED_FILE.fixture, storage: null } };
     expect(validate({ refs: [noStorage] }).valid).toBe(false);

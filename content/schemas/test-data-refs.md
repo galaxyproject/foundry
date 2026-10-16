@@ -47,7 +47,7 @@ The pipelines' `test-data-resolution` branch is a chain that fills gaps, not a c
 - `resolved` — `true` when the ref points at real data of the required shape, `false` for an honest gap with a `reason`. Whether the chain is done is a deterministic question: does any ref have `resolved: false`?
 - `resolved_by` — the Mold that resolved the input. A later leg keeps an earlier leg's resolved entries, this field included, and replaces only the unresolved ones.
 - `fixture` — the same shape as [[galaxy-workflow-test-plan#Fixture]] (storage class, location, checksum, provenance), so a ref's fixture drops into a test plan unchanged. An unresolved ref has `storage: unresolved` and no location.
-- `elements[]` — collection elements, nested for nested shapes (`list:paired` → sample → `forward`/`reverse`), each with its own fixture. A resolved collection has either a location or at least one element.
+- `elements[]` — collection elements, nested for nested shapes (`list:paired` → sample → `forward`/`reverse`), each with its own fixture. A resolved collection has either a location or at least one element, and each of its elements reaches a located fixture, directly or through nested elements.
 - `prep` — the import-boundary prep (subset, split, concatenation) needed to reach the Galaxy shape from the source data.
 
 ## Not Enforced Here

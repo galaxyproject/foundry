@@ -40,7 +40,7 @@ export const testDataRefsSchema = {
         "workflow_label": {
           "type": "string",
           "minLength": 1,
-          "description": "Workflow input label, from the interface brief, that this ref feeds."
+          "description": "Workflow input this ref feeds: its label in the Galaxy interface brief, or its input port in the CWL design."
         },
         "collection_shape": {
           "type": [
@@ -151,7 +151,10 @@ export const testDataRefsSchema = {
                 ],
                 "properties": {
                   "elements": {
-                    "minItems": 1
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/$defs/DataElement"
+                    }
                   }
                 }
               }
@@ -205,6 +208,41 @@ export const testDataRefsSchema = {
           }
         }
       }
+    },
+    "DataElement": {
+      "description": "An element of a resolved collection: it carries a located fixture, or nested elements that each do.",
+      "anyOf": [
+        {
+          "required": [
+            "fixture"
+          ],
+          "properties": {
+            "fixture": {
+              "properties": {
+                "storage": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "elements"
+          ],
+          "properties": {
+            "elements": {
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/DataElement"
+              }
+            }
+          }
+        }
+      ]
     },
     "Fixture": {
       "type": "object",

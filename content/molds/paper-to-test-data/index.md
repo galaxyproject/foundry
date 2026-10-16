@@ -14,7 +14,11 @@ input_artifacts:
   - id: freeform-summary
     description: "Free-form summary from [[summarize-paper]]; sample data and reference evidence the test fixtures derive from."
   - id: freeform-galaxy-interface
-    description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto."
+    role: workflow-interface
+    description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY."
+  - id: freeform-cwl-design
+    role: workflow-interface
+    description: "CWL design from [[freeform-summary-to-cwl-design]] naming the workflow input ports each ref must map onto, in PAPER → CWL."
 output_artifacts:
   - id: test-data-refs
     kind: json
@@ -33,4 +37,4 @@ references:
 ---
 # paper-to-test-data
 
-Read the paper free-form summary from [[summarize-paper]] and resolve the data the paper names (resolvable URLs, file shapes, expected hashes) onto the workflow inputs the interface brief declares, as `test-data-refs` with `resolved_by: paper-to-test-data`. An input the paper names no data for stays `resolved: false` with a reason, for [[find-test-data]] to search. Expected outputs are the test plan's to derive, not this Mold's. Validate the file with `foundry validate-test-data-refs` before returning.
+Read the paper free-form summary from [[summarize-paper]] and resolve the data the paper names (resolvable URLs, file shapes, expected hashes) onto the workflow inputs the target declares — the Galaxy interface brief's input labels, or the CWL design's input ports — as `test-data-refs` with `resolved_by: paper-to-test-data`. An input the paper names no data for stays `resolved: false` with a reason, for [[find-test-data]] to search. Expected outputs are the test plan's to derive, not this Mold's. Validate the file with `foundry validate-test-data-refs` before returning.
