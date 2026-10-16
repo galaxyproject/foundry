@@ -1,5 +1,16 @@
 # @galaxy-foundry/gxwf-foundry
 
+## 0.3.0
+
+### Minor Changes
+
+- [#684](https://github.com/galaxyproject/foundry/pull/684) [`2bdd9b9`](https://github.com/galaxyproject/foundry/commit/2bdd9b9b68a71fd161362922e9d1ae797d10a8ce) Thanks [@jmchilton](https://github.com/jmchilton)! - Add the `test-data-refs` schema and `foundry validate-test-data-refs`. The
+  test-data-resolution chain (a source-specific Mold, then `find-test-data`)
+  writes one ref per workflow input, each either resolved, naming the Mold that
+  resolved it, or an honest gap with a reason, so whether the chain is done can
+  be read from the file. A ref's `fixture` is the test plan's `Fixture` shape.
+  Exports `testDataRefsSchema` and `testDataRefsValidator`.
+
 ## 0.2.0
 
 ### Minor Changes
