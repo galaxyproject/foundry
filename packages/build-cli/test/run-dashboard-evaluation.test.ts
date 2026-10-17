@@ -323,6 +323,89 @@ describe("the evaluation run shape", () => {
     expect(model.warnings.map((warning) => warning.code)).not.toContain("missing-declared-input");
   });
 
+  it("keeps a loop phase to one row and finds each artifact in the iteration that wrote it", () => {
+    const loopDir = "trial-001/phase-007-advance-galaxy-draft-step";
+    const draft = {
+      id: "galaxy-workflow-draft",
+      path: "galaxy-workflow-draft.gxwf.yml",
+      status: "passed",
+      sha256: "d".repeat(64),
+    };
+    const workflow = {
+      id: "galaxy-workflow",
+      path: "galaxy-workflow.gxwf.yml",
+      status: "present",
+      sha256: "e".repeat(64),
+    };
+    const iteration = (n: number, artifacts: Record<string, unknown>[]) => ({
+      iteration: n,
+      next_step: n === 1 ? ["trim reads"] : null,
+      status: "passed",
+      run_dir: `${loopDir}/iteration-00${n}`,
+      resolved_inputs: [],
+      missing_input_ids: [],
+      artifacts,
+    });
+    const runDir = evaluationRun({
+      status: "passed",
+      through_phase: 7,
+      trials: [
+        {
+          trial: 1,
+          status: "passed",
+          phases: [
+            summarizePhase(),
+            {
+              phase: 7,
+              skill: "advance-galaxy-draft-step",
+              status: "passed",
+              run_dir: loopDir,
+              declared_input_ids: ["galaxy-workflow-draft", "open-requirements-ledger"],
+              missing_input_ids: [],
+              artifacts: [draft, workflow],
+              iterations: [
+                iteration(1, [draft, { ...workflow, status: "missing", sha256: undefined }]),
+                iteration(2, [{ ...draft, status: "missing", sha256: undefined }, workflow]),
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    for (const [n, file] of [
+      [1, "galaxy-workflow-draft.gxwf.yml"],
+      [2, "galaxy-workflow.gxwf.yml"],
+    ] as const) {
+      const workspace = path.join(runDir, loopDir, `iteration-00${n}`, "workspace");
+      mkdirSync(workspace, { recursive: true });
+      writeFileSync(path.join(workspace, file), "class: GalaxyWorkflow\n");
+    }
+
+    const model = runModelFromTestPipeline({
+      runDir,
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    const loop = model.phases.find((phase) => phase.n === 7)!;
+    expect(loop).toEqual(expect.objectContaining({ loop: true, iterations: 2, status: "done" }));
+    const byId = (id: string) => model.artifacts.find((artifact) => artifact.id === id)!;
+    expect(byId("galaxy-workflow")).toEqual(
+      expect.objectContaining({
+        path: `${loopDir}/iteration-002/workspace/galaxy-workflow.gxwf.yml`,
+        written_by_phase: 7,
+        writes: [{ at: null, phase: 7, iteration: 2 }],
+      }),
+    );
+    expect(byId("galaxy-workflow").size_bytes).toBeGreaterThan(0);
+    expect(byId("galaxy-workflow-draft")).toEqual(
+      expect.objectContaining({
+        path: `${loopDir}/iteration-001/workspace/galaxy-workflow-draft.gxwf.yml`,
+        writes: [{ at: null, phase: 7, iteration: 1 }],
+      }),
+    );
+  });
+
   it("judges assembly drift the way a harness run's record is judged", () => {
     const options = { repoRoot: REPO_ROOT, pipelineIndex: index, now: FIXED_CLOCK };
     const current = createHash("sha256")

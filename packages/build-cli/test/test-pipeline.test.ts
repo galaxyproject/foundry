@@ -6,9 +6,15 @@ import path from "node:path";
 import process from "node:process";
 
 import type { PiSkillRunRecord, RunPiSkillOptions } from "@galaxy-foundry/gxwf-pi-harness";
+import { nextDraftStep } from "@galaxy-tool-util/schema";
+import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 import { expect, test } from "vitest";
 
-import { defaultTestPipelineRunDir, runLinearPipeline } from "../src/commands/test-pipeline.js";
+import {
+  defaultTestPipelineRunDir,
+  parseTestPipelineArgs,
+  runLinearPipeline,
+} from "../src/commands/test-pipeline.js";
 import { foundryHead } from "../src/lib/foundry-head.js";
 
 function writeJson(filePath: string, value: unknown): void {
@@ -634,4 +640,361 @@ test("preflights missing pi-test-auth and staged basename collisions before crea
     }),
   ).rejects.toThrow("phase 2 declared inputs share staged basename 'shared.json'");
   expect(existsSync(collisionRun)).toBe(false);
+});
+
+const DRAFT_FILE = "galaxy-workflow-draft.gxwf.yml";
+
+function draftFixtureRepo(): string {
+  const root = fixtureRepo();
+  writeJson(
+    path.join(root, "casts", "claude", "skills", "pipeline-demo-pipeline", "_assembly.json"),
+    {
+      source_pipeline: "demo-pipeline",
+      source_revision: 1,
+      harness_name: "pipeline-demo-pipeline",
+      phases: [
+        { phase: 1, kind: "mold", skill: "template", cast_present: true, loop: false },
+        {
+          phase: 2,
+          kind: "mold",
+          skill: "advance-galaxy-draft-step",
+          cast_present: true,
+          loop: true,
+        },
+        { phase: 3, kind: "mold", skill: "check", cast_present: true, loop: false },
+      ],
+    },
+  );
+  writeSkill(root, "template", [], [{ id: "galaxy-workflow-draft", default_filename: DRAFT_FILE }]);
+  writeSkill(
+    root,
+    "advance-galaxy-draft-step",
+    ["galaxy-workflow-draft", "open-requirements-ledger"],
+    [
+      { id: "galaxy-workflow-draft", default_filename: DRAFT_FILE },
+      { id: "galaxy-workflow", default_filename: "galaxy-workflow.gxwf.yml" },
+      { id: "open-requirements-ledger", default_filename: "open-requirements.ledger.yml" },
+    ],
+  );
+  writeSkill(root, "check", ["galaxy-workflow"], [{ id: "report", default_filename: "report.md" }]);
+  return root;
+}
+
+function todoStep(source: string) {
+  return { tool_id: "TODO", tool_version: "TODO", in: { input: source } };
+}
+
+/** A worker record judged on what the fake worker actually wrote. */
+function workspaceRecord(options: RunPiSkillOptions, skill: string): PiSkillRunRecord {
+  const workspace = path.join(options.runDir, "workspace");
+  const record = fakeRecord(options, skill);
+  const artifacts = (options.expectedArtifacts ?? []).map((artifact) => {
+    const file = path.join(workspace, artifact.path);
+    return existsSync(file)
+      ? {
+          id: artifact.id,
+          path: artifact.path,
+          status: "present" as const,
+          sha256: createHash("sha256").update(readFileSync(file)).digest("hex"),
+        }
+      : { id: artifact.id, path: artifact.path, status: "missing" as const };
+  });
+  const failed = artifacts.some(
+    (artifact, index) =>
+      artifact.status === "missing" && !options.expectedArtifacts?.[index]?.optional,
+  );
+  return {
+    ...record,
+    status: failed ? "failed" : "passed",
+    failure_kind: failed ? "skill" : undefined,
+    artifacts,
+    usage: {
+      input_tokens: 10,
+      output_tokens: 10,
+      cache_read_tokens: 0,
+      cache_write_tokens: 0,
+      total_tokens: 20,
+      cost: 0.01,
+      turns: 1,
+      tool_calls: 1,
+    },
+  };
+}
+
+type Draft = { steps: Record<string, Record<string, unknown>> };
+
+/** Concretizes the step the oracle picks, as advance-galaxy-draft-step does, or extracts at the end. */
+function draftWorker(
+  calls: RunPiSkillOptions[],
+  advance: (draft: Draft, step: string) => void = (draft, step) => {
+    draft.steps[step].tool_id = "cat1";
+    draft.steps[step].tool_version = "1.0";
+  },
+) {
+  return async (options: RunPiSkillOptions) => {
+    calls.push(options);
+    const skill = path.basename(options.skillDir);
+    const workspace = path.join(options.runDir, "workspace");
+    mkdirSync(workspace, { recursive: true });
+    const write = (file: string, value: unknown) =>
+      writeFileSync(path.join(workspace, file), dumpYaml(value));
+    if (skill === "template") {
+      write(DRAFT_FILE, {
+        class: "GalaxyWorkflowDraft",
+        inputs: { reads: "data" },
+        outputs: {},
+        steps: { a: todoStep("reads"), b: todoStep("a/out") },
+      });
+    } else if (skill === "advance-galaxy-draft-step") {
+      const staged = options.inputPaths!.find((input) => path.basename(input) === DRAFT_FILE)!;
+      const draft = loadYaml(readFileSync(staged, "utf8")) as Draft;
+      const next = nextDraftStep(draft);
+      if (next.draft) {
+        advance(draft, next.step.at(-1)!);
+        write(DRAFT_FILE, draft);
+        write("open-requirements.ledger.yml", { entries: [] });
+      } else {
+        write("galaxy-workflow.gxwf.yml", { ...draft, class: "GalaxyWorkflow" });
+      }
+    } else {
+      writeFileSync(path.join(workspace, "report.md"), "ok\n");
+    }
+    return workspaceRecord(options, skill);
+  };
+}
+
+function draftRunOptions(root: string, name: string) {
+  return {
+    repoRoot: root,
+    pipeline: "demo-pipeline",
+    scenario: "tiny journey",
+    trials: 1,
+    runDir: path.join(root, "runs", name),
+    provider: "test-provider",
+    model: "test-model",
+    sandbox: "local" as const,
+    timeoutMs: 1000,
+    credentialEnv: [],
+    sandboxNetwork: "none" as const,
+  };
+}
+
+test("drives the draft loop with one worker per drafty step, then the terminal call", async () => {
+  const root = draftFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "draft-loop"), {
+    runSkill: draftWorker(calls),
+  });
+
+  expect(record.status).toBe("passed");
+  expect(calls.map((call) => path.basename(call.skillDir))).toEqual([
+    "template",
+    "advance-galaxy-draft-step",
+    "advance-galaxy-draft-step",
+    "advance-galaxy-draft-step",
+    "check",
+  ]);
+  const loop = record.trials[0]!.phases[1]!;
+  expect(loop).toEqual(
+    expect.objectContaining({ phase: 2, skill: "advance-galaxy-draft-step", status: "passed" }),
+  );
+  expect(loop.iterations?.map((iteration) => [iteration.iteration, iteration.next_step])).toEqual([
+    [1, ["a"]],
+    [2, ["b"]],
+    [3, null],
+  ]);
+  expect(loop.iterations?.[0]?.run_dir).toBe(
+    "trial-001/phase-002-advance-galaxy-draft-step/iteration-001",
+  );
+  expect(loop.usage?.turns).toBe(3);
+  expect(record.usage.turns).toBe(5);
+
+  // Each iteration reads the draft the one before it wrote.
+  const [first, second, terminal] = calls.slice(1, 4);
+  expect(first!.inputPaths).toContain(
+    path.join(root, "runs", "draft-loop", "trial-001/phase-001-template/workspace", DRAFT_FILE),
+  );
+  expect(second!.inputPaths).toContain(
+    path.join(root, "runs", "draft-loop", loop.iterations![0]!.run_dir, "workspace", DRAFT_FILE),
+  );
+  expect(loop.iterations?.[0]?.missing_input_ids).toEqual(["open-requirements-ledger"]);
+  expect(loop.iterations?.[1]?.missing_input_ids).toEqual([]);
+
+  // The extracted workflow is written only on the terminal call; the draft only before it.
+  const optional = (call: RunPiSkillOptions) =>
+    Object.fromEntries((call.expectedArtifacts ?? []).map((a) => [a.id, a.optional === true]));
+  expect(optional(first!)).toEqual({
+    "galaxy-workflow-draft": false,
+    "galaxy-workflow": true,
+    "open-requirements-ledger": false,
+  });
+  expect(optional(terminal!)).toEqual({
+    "galaxy-workflow-draft": true,
+    "galaxy-workflow": false,
+    "open-requirements-ledger": true,
+  });
+
+  // Every iteration shares one run-scoped tool cache.
+  const cacheDirs = new Set(calls.slice(1, 4).map((call) => call.cacheDir));
+  expect(cacheDirs.size).toBe(1);
+  expect(existsSync([...cacheDirs][0]!)).toBe(true);
+  expect(calls[0]!.cacheDir).toBeUndefined();
+
+  expect(record.trials[0]!.phases[2]!.resolved_inputs).toEqual([
+    expect.objectContaining({
+      id: "galaxy-workflow",
+      path: `${loop.iterations![2]!.run_dir}/workspace/galaxy-workflow.gxwf.yml`,
+      producer_phase: 2,
+    }),
+  ]);
+});
+
+test("fails a draft-loop iteration that leaves the draft unchanged", async () => {
+  const root = draftFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "no-progress"), {
+    runSkill: draftWorker(calls, () => undefined),
+  });
+
+  expect(record.status).toBe("failed");
+  const loop = record.trials[0]!.phases[1]!;
+  expect(loop).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "loop_no_progress",
+      error: "iteration 1 left galaxy-workflow-draft unchanged; step a is still drafty",
+    }),
+  );
+  expect(loop.iterations).toHaveLength(1);
+  expect(calls).toHaveLength(2);
+});
+
+test("caps draft-loop iterations, by default at twice the drafty steps plus the terminal call", async () => {
+  const root = draftFixtureRepo();
+  let added = 0;
+  const calls: RunPiSkillOptions[] = [];
+  // Each iteration concretizes its step but inserts another drafty one, so the draft never ends.
+  const record = await runLinearPipeline(draftRunOptions(root, "default-cap"), {
+    runSkill: draftWorker(calls, (draft, step) => {
+      draft.steps[step].tool_id = "cat1";
+      draft.steps[step].tool_version = "1.0";
+      draft.steps[`z${added++}`] = todoStep("reads");
+    }),
+  });
+  const loop = record.trials[0]!.phases[1]!;
+  expect(loop).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "loop_cap",
+      error: "draft loop reached 5 iterations without finishing",
+    }),
+  );
+  expect(loop.iterations).toHaveLength(5);
+
+  const capped = await runLinearPipeline(
+    { ...draftRunOptions(root, "explicit-cap"), maxIterations: 1 },
+    { runSkill: draftWorker([]) },
+  );
+  expect(capped.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_cap",
+      error: "draft loop reached 1 iteration without finishing",
+    }),
+  );
+});
+
+test("stops before the next worker once the run budget is spent", async () => {
+  const root = draftFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "budget"), trials: 2, maxCost: 0.015 },
+    { runSkill: draftWorker(calls) },
+  );
+
+  expect(calls).toHaveLength(2);
+  expect(record.status).toBe("cancelled");
+  expect(record.trials).toHaveLength(1);
+  const loop = record.trials[0]!.phases[1]!;
+  expect(loop).toEqual(
+    expect.objectContaining({
+      status: "cancelled",
+      failure_kind: "budget",
+      error: "run budget spent before iteration 2: cost 0.02 of --max-cost 0.015",
+    }),
+  );
+  expect(loop.iterations).toHaveLength(1);
+
+  const tokenCalls: RunPiSkillOptions[] = [];
+  const tokens = await runLinearPipeline(
+    { ...draftRunOptions(root, "token-budget"), maxTokens: 20 },
+    { runSkill: draftWorker(tokenCalls) },
+  );
+  expect(tokenCalls).toHaveLength(1);
+  expect(tokens.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "cancelled",
+      failure_kind: "budget",
+      error: "run budget spent before phase 2: 20 tokens of --max-tokens 20",
+      artifacts: [],
+    }),
+  );
+});
+
+test("still rejects a loop phase with no controller oracle", async () => {
+  const root = draftFixtureRepo();
+  const assemblyPath = path.join(root, "casts/claude/skills/pipeline-demo-pipeline/_assembly.json");
+  const assembly = JSON.parse(readFileSync(assemblyPath, "utf8"));
+  assembly.phases[1].skill = "implement-cwl-tool-step";
+  writeJson(assemblyPath, assembly);
+  writeSkill(root, "implement-cwl-tool-step", [], []);
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "no-oracle"), { runSkill: draftWorker([]) }),
+  ).rejects.toThrow(
+    "phase 2 loops over implement-cwl-tool-step, which has no controller loop oracle; select an earlier --through phase",
+  );
+});
+
+test("parses the loop cap and run budget", () => {
+  const base = ["nextflow-to-galaxy", "--scenario", "demo", "--provider", "p", "--model", "m"];
+  expect(
+    parseTestPipelineArgs([
+      ...base,
+      "--max-iterations",
+      "4",
+      "--max-cost=2.5",
+      "--max-tokens",
+      "1000000",
+    ]),
+  ).toEqual(expect.objectContaining({ maxIterations: 4, maxCost: 2.5, maxTokens: 1_000_000 }));
+  expect(() => parseTestPipelineArgs([...base, "--max-iterations", "0"])).toThrow(
+    "--max-iterations must be a positive integer",
+  );
+  expect(() => parseTestPipelineArgs([...base, "--max-cost", "free"])).toThrow(
+    "--max-cost must be a positive number",
+  );
+});
+
+test("records a draft the loop oracle cannot read as the loop's error, not a crashed run", async () => {
+  const root = draftFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const worker = draftWorker(calls);
+  const record = await runLinearPipeline(draftRunOptions(root, "unreadable-draft"), {
+    runSkill: async (options) => {
+      if (path.basename(options.skillDir) !== "template") return worker(options);
+      calls.push(options);
+      const workspace = path.join(options.runDir, "workspace");
+      mkdirSync(workspace, { recursive: true });
+      writeFileSync(path.join(workspace, DRAFT_FILE), "steps: [unclosed\n");
+      return workspaceRecord(options, "template");
+    },
+  });
+  expect(calls).toHaveLength(1);
+  expect(record.status).toBe("error");
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "error",
+      error: expect.stringMatching(/^loop oracle could not read galaxy-workflow-draft: /),
+      iterations: [],
+    }),
+  );
 });

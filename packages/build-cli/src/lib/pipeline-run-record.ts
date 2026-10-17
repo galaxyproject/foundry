@@ -31,23 +31,45 @@ export interface PromotedArtifact {
   producer_phase: number;
 }
 
-export interface PipelinePhaseRunRecord {
-  phase: number;
-  skill: string;
+/** One Pi worker's part in a run: a phase, or one iteration of a loop phase. */
+export interface PipelineWorkerRunRecord {
   status: RunStatus;
   // The worker's own kind when it failed; a timed-out or cancelled worker's status says it alone.
-  failure_kind?: PiSkillRunRecord["failure_kind"] | "artifact_promotion";
+  // The controller adds its own: a promotion it refused, a loop that stalled or hit its cap, or
+  // a run budget spent before the worker could start.
+  failure_kind?:
+    | PiSkillRunRecord["failure_kind"]
+    | "artifact_promotion"
+    | "loop_no_progress"
+    | "loop_cap"
+    | "budget";
   error?: string;
   run_dir: string;
   worker_run_id?: string;
   worker_run_path?: string;
   trace_path?: string;
   stderr_path?: string;
-  declared_input_ids: string[];
   resolved_inputs: PromotedArtifact[];
   missing_input_ids: string[];
   artifacts: ArtifactResult[];
   usage?: PiSkillRunRecord["usage"];
+}
+
+export interface PipelineLoopIterationRecord extends PipelineWorkerRunRecord {
+  iteration: number;
+  /** The work the loop oracle picked for this call; null for the terminal call. */
+  next_step: string[] | null;
+}
+
+export interface PipelinePhaseRunRecord extends PipelineWorkerRunRecord {
+  phase: number;
+  skill: string;
+  declared_input_ids: string[];
+  /**
+   * A loop phase's calls, in order. Its own `run_dir` then holds one directory per iteration,
+   * its `artifacts` are the latest each id was written, and its `usage` sums the iterations.
+   */
+  iterations?: PipelineLoopIterationRecord[];
 }
 
 export interface PipelineTrialRunRecord {
