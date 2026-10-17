@@ -11,6 +11,9 @@ export const CONTAINER_PLANEMO_VERSION_LABEL = "org.galaxyproject.foundry.planem
 export const CONTAINER_RPC_VERSION_LABEL = "org.galaxyproject.foundry.pi-rpc-version";
 export const CONTAINER_RPC_VERSION = "1";
 
+// @galaxy-tool-util's CLIs read it when a command is given no --cache-dir.
+export const TOOL_CACHE_ENV = "GALAXY_TOOL_CACHE_DIR";
+
 export type ContainerNetworkPolicy = "bridge" | "none";
 
 export interface ContainerMount {
@@ -147,6 +150,8 @@ export function buildDockerRunArgs(config: ContainerLaunchConfig, piArgs: string
     "--env=PI_CODING_AGENT_DIR=/pi-agent",
     "--env=PI_SKIP_VERSION_CHECK=1",
   );
+  const toolCache = config.mounts.find((mount) => mount.purpose === "tool-cache");
+  if (toolCache) args.push(`--env=${TOOL_CACHE_ENV}=${toolCache.target}`);
   for (const name of config.credential_env) args.push("--env", name);
   args.push(config.image_id, ...piArgs);
   return args;

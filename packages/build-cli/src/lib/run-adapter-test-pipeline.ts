@@ -70,7 +70,8 @@ const PHASE_STATUS: Record<string, PhaseStatus> = {
   failed: "failed",
   error: "failed",
   timed_out: "failed",
-  cancelled: "skipped",
+  // Selected and started, or stopped by the budget before it could: either way it did not finish.
+  cancelled: "failed",
 };
 
 export interface TestPipelineAdapterOptions extends RunReaderOptions {
@@ -209,7 +210,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       const evidence = validator ? `; see ${inPhase(validator.stderr_path)}` : "";
       warnings.push({
         code: "artifact-failed",
-        message: `${output.id} from phase ${hit!.phase} ${hit!.result.status} (${exit})${evidence}`,
+        message: `${output.id} from phase ${hit!.phase}${hit!.iteration === null ? "" : ` iteration ${hit!.iteration}`} ${hit!.result.status} (${exit})${evidence}`,
         subject: output.id,
       });
     }
@@ -266,7 +267,15 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   // The command rewrites run.json after every trial, so a run that died mid-trial leaves a record
   // with no finish time, or fewer trials than it asked for. Older records carry neither field.
   const requested = record.trials_requested ?? trials.length;
-  const unfinished = record.finished_at === null || trials.length < requested;
+  // A spent budget ends the run with trials still owed; that run did finish.
+  const stoppedEarly = record.finished_at !== null && record.status === "cancelled";
+  const unfinished = record.finished_at === null || (trials.length < requested && !stoppedEarly);
+  if (stoppedEarly && trials.length < requested) {
+    warnings.push({
+      code: "trials-skipped",
+      message: `stopped after ${trials.length} of ${requested} trial(s)`,
+    });
+  }
   const status = unfinished ? "running" : (RUN_STATUS[record.status] ?? "unknown");
   if (unfinished) {
     warnings.push({

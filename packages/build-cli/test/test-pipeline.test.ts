@@ -998,3 +998,38 @@ test("records a draft the loop oracle cannot read as the loop's error, not a cra
     }),
   );
 });
+
+test("preflights a loop oracle whose artifacts the loop Mold does not declare", async () => {
+  const root = draftFixtureRepo();
+  writeSkill(
+    root,
+    "advance-galaxy-draft-step",
+    ["galaxy-workflow-draft"],
+    [{ id: "galaxy-workflow-draft", default_filename: DRAFT_FILE }],
+  );
+  let launched = false;
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "oracle-contract"), {
+      runSkill: async () => {
+        launched = true;
+        throw new Error("must not launch");
+      },
+    }),
+  ).rejects.toThrow(
+    "phase 2 (advance-galaxy-draft-step) does not produce galaxy-workflow, which its loop oracle expects",
+  );
+  expect(launched).toBe(false);
+});
+
+test("preflights the draft loop out of the container sandbox, whose image has no gxwf", async () => {
+  const root = draftFixtureRepo();
+  await expect(
+    runLinearPipeline(
+      { ...draftRunOptions(root, "container-loop"), sandbox: "container" },
+      { runSkill: draftWorker([]) },
+    ),
+  ).rejects.toThrow(
+    "phase 2 (advance-galaxy-draft-step) needs gxwf, which the container image does not ship; use --sandbox local",
+  );
+  expect(existsSync(path.join(root, "runs", "container-loop"))).toBe(false);
+});

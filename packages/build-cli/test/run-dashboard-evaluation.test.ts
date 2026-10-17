@@ -406,6 +406,108 @@ describe("the evaluation run shape", () => {
     );
   });
 
+  it("reads a run the budget stopped as cancelled, not running, and names the phase it stopped", () => {
+    const runDir = evaluationRun({
+      status: "cancelled",
+      trials_requested: 2,
+      trials: [
+        {
+          trial: 1,
+          status: "cancelled",
+          phases: [
+            summarizePhase(),
+            {
+              phase: 2,
+              skill: "nextflow-summary-to-galaxy-reference-data",
+              status: "cancelled",
+              failure_kind: "budget",
+              error: "run budget spent before phase 2: cost 1.25 of --max-cost 1",
+              run_dir: "trial-001/phase-002-nextflow-summary-to-galaxy-reference-data",
+              declared_input_ids: ["summary-nextflow"],
+              missing_input_ids: [],
+              artifacts: [],
+            },
+          ],
+        },
+      ],
+    });
+    const model = runModelFromTestPipeline({
+      runDir,
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    expect(model.run.status).toBe("cancelled");
+    const codes = model.warnings.map((warning) => warning.code);
+    expect(codes).not.toContain("run-unfinished");
+    expect(model.warnings).toContainEqual(
+      expect.objectContaining({
+        code: "trials-skipped",
+        message: "stopped after 1 of 2 trial(s)",
+      }),
+    );
+    expect(model.phases.find((phase) => phase.n === 2)?.status).toBe("failed");
+  });
+
+  it("names the loop iteration whose artifact failed validation", () => {
+    const loopDir = "trial-001/phase-007-advance-galaxy-draft-step";
+    const failedWorkflow = {
+      id: "galaxy-workflow",
+      path: "galaxy-workflow.gxwf.yml",
+      status: "failed",
+      sha256: "e".repeat(64),
+      validator: {
+        bin: "gxwf",
+        args: ["validate"],
+        exit_code: 1,
+        stdout_path: "validation/galaxy-workflow.stdout",
+        stderr_path: "validation/galaxy-workflow.stderr",
+      },
+    };
+    const model = runModelFromTestPipeline({
+      runDir: evaluationRun({
+        through_phase: 7,
+        trials: [
+          {
+            trial: 1,
+            status: "failed",
+            phases: [
+              summarizePhase(),
+              {
+                phase: 7,
+                skill: "advance-galaxy-draft-step",
+                status: "failed",
+                run_dir: loopDir,
+                declared_input_ids: [],
+                missing_input_ids: [],
+                artifacts: [failedWorkflow],
+                iterations: [
+                  {
+                    iteration: 3,
+                    next_step: null,
+                    status: "failed",
+                    run_dir: `${loopDir}/iteration-003`,
+                    resolved_inputs: [],
+                    missing_input_ids: [],
+                    artifacts: [failedWorkflow],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    expect(model.warnings).toContainEqual({
+      code: "artifact-failed",
+      message: `galaxy-workflow from phase 7 iteration 3 failed (validator exit 1); see ${loopDir}/iteration-003/validation/galaxy-workflow.stderr`,
+      subject: "galaxy-workflow",
+    });
+  });
+
   it("judges assembly drift the way a harness run's record is judged", () => {
     const options = { repoRoot: REPO_ROOT, pipelineIndex: index, now: FIXED_CLOCK };
     const current = createHash("sha256")
