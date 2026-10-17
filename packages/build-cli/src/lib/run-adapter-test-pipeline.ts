@@ -70,7 +70,8 @@ const PHASE_STATUS: Record<string, PhaseStatus> = {
   failed: "failed",
   error: "failed",
   timed_out: "failed",
-  cancelled: "skipped",
+  // Selected and started, or stopped by the budget before it could: either way it did not finish.
+  cancelled: "failed",
 };
 
 export interface TestPipelineAdapterOptions extends RunReaderOptions {
@@ -136,7 +137,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
 
     return buildPhaseRow(repoRoot, phase, linker, {
       selected: null,
-      iterations: null,
+      iterations: ran?.iterations?.length ?? null,
       status,
       status_source: "run-record",
       feedback_checked: null,
@@ -166,35 +167,50 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     }
   }
 
-  // Each phase writes into its own workspace, so the same artifact id can appear more than once
-  // across a run. The latest phase that produced it is the one the run carried forward.
-  const produced = new Map<string, { phase: number; result: ArtifactResult }>();
+  // Each phase, and each iteration of a loop phase, writes into its own workspace, so the same
+  // artifact id can appear more than once across a run. The latest write is the one the run
+  // carried forward.
+  interface Write {
+    phase: number;
+    iteration: number | null;
+    runDir: string;
+    result: ArtifactResult;
+  }
+  const writes = new Map<string, Write[]>();
   for (const phase of chosenPhases) {
-    for (const artifact of phase.artifacts ?? []) {
-      produced.set(artifact.id, { phase: phase.phase, result: artifact });
+    const workers = phase.iterations?.length
+      ? phase.iterations.map((iteration) => ({ ...iteration, n: iteration.iteration }))
+      : [{ ...phase, n: null }];
+    for (const worker of workers) {
+      for (const artifact of worker.artifacts ?? []) {
+        if (artifact.status === "missing" && phase.iterations?.length) continue;
+        writes.set(artifact.id, [
+          ...(writes.get(artifact.id) ?? []),
+          { phase: phase.phase, iteration: worker.n, runDir: worker.run_dir, result: artifact },
+        ]);
+      }
     }
   }
 
   const furthest = Math.max(0, ...chosenPhases.map((phase) => phase.phase));
 
   const artifacts: RunArtifact[] = declared.map((output) => {
-    const hit = produced.get(output.id);
-    const phaseRecord = hit ? phaseRecords.get(hit.phase) : undefined;
-    const relpath =
-      hit && phaseRecord ? `${phaseRecord.run_dir}/workspace/${hit.result.path}` : null;
+    const history = writes.get(output.id) ?? [];
+    const hit = history.at(-1);
+    const relpath = hit ? `${hit.runDir}/workspace/${hit.result.path}` : null;
     const absolute = relpath ? path.join(runDir, relpath) : null;
     const entry = absolute ? scanFile(absolute, relpath!) : null;
     const failed = hit?.result.status === "failed" || hit?.result.status === "error";
 
-    // The worker records validator output relative to the phase's own run directory.
+    // The worker records validator output relative to its own run directory.
     const validator = hit?.result.validator;
-    const inPhase = (file: string) => (phaseRecord ? `${phaseRecord.run_dir}/${file}` : file);
+    const inPhase = (file: string) => (hit ? `${hit.runDir}/${file}` : file);
     if (failed) {
       const exit = validator ? `validator exit ${validator.exit_code ?? "none"}` : "no validator";
       const evidence = validator ? `; see ${inPhase(validator.stderr_path)}` : "";
       warnings.push({
         code: "artifact-failed",
-        message: `${output.id} from phase ${hit!.phase} ${hit!.result.status} (${exit})${evidence}`,
+        message: `${output.id} from phase ${hit!.phase}${hit!.iteration === null ? "" : ` iteration ${hit!.iteration}`} ${hit!.result.status} (${exit})${evidence}`,
         subject: output.id,
       });
     }
@@ -202,7 +218,11 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       entry,
       presence: failed ? "failed" : resolvePresence(output, entry, furthest),
       written_by_phase: hit?.phase ?? null,
-      writes: hit ? [{ at: null, phase: hit.phase, iteration: null }] : [],
+      writes: history.map((write) => ({
+        at: null,
+        phase: write.phase,
+        iteration: write.iteration,
+      })),
       variants: [],
       validation:
         validator || failed
@@ -247,7 +267,15 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   // The command rewrites run.json after every trial, so a run that died mid-trial leaves a record
   // with no finish time, or fewer trials than it asked for. Older records carry neither field.
   const requested = record.trials_requested ?? trials.length;
-  const unfinished = record.finished_at === null || trials.length < requested;
+  // A spent budget ends the run with trials still owed; that run did finish.
+  const stoppedEarly = record.finished_at !== null && record.status === "cancelled";
+  const unfinished = record.finished_at === null || (trials.length < requested && !stoppedEarly);
+  if (stoppedEarly && trials.length < requested) {
+    warnings.push({
+      code: "trials-skipped",
+      message: `stopped after ${trials.length} of ${requested} trial(s)`,
+    });
+  }
   const status = unfinished ? "running" : (RUN_STATUS[record.status] ?? "unknown");
   if (unfinished) {
     warnings.push({

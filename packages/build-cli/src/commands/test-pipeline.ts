@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, realpathSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -17,6 +17,8 @@ import {
   type RunStatus,
   type SandboxMode,
 } from "@galaxy-foundry/gxwf-pi-harness";
+import { detectDraft, nextDraftStep } from "@galaxy-tool-util/schema";
+import { load as loadYaml } from "js-yaml";
 import {
   assemblyPath,
   CAST_SLUG,
@@ -31,10 +33,12 @@ import { readMarkdown } from "../lib/frontmatter.js";
 import { sha256File } from "../lib/reconcile.js";
 import {
   PIPELINE_RUN_FILE,
+  type PipelineLoopIterationRecord,
   type PipelinePhaseRunRecord,
   type PipelineRunRecord,
   type PipelineScenario,
   type PipelineTrialRunRecord,
+  type PipelineWorkerRunRecord,
   type PromotedArtifact,
 } from "../lib/pipeline-run-record.js";
 import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
@@ -64,6 +68,11 @@ export interface TestPipelineOptions {
   sandboxNetwork: ContainerNetworkPolicy;
   credentialEnv: string[];
   piTestAuthDir?: string;
+  /** Overrides each loop phase's default iteration cap. */
+  maxIterations?: number;
+  /** Run budget, checked before each worker starts; a running worker is bounded by its timeout. */
+  maxCost?: number;
+  maxTokens?: number;
 }
 
 interface PromotedArtifactState {
@@ -96,6 +105,9 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
   let scenario: string | null = null;
   let through: string | undefined;
   let trials = 1;
+  let maxIterations: number | undefined;
+  let maxCost: number | undefined;
+  let maxTokens: number | undefined;
 
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i]!;
@@ -114,6 +126,27 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     option = readOption(argv, i, "--trials");
     if (option) {
       trials = parsePositiveInteger(option.value, "--trials");
+      i = option.lastIndex;
+      continue;
+    }
+    option = readOption(argv, i, "--max-iterations");
+    if (option) {
+      maxIterations = parsePositiveInteger(option.value, "--max-iterations");
+      i = option.lastIndex;
+      continue;
+    }
+    option = readOption(argv, i, "--max-tokens");
+    if (option) {
+      maxTokens = parsePositiveInteger(option.value, "--max-tokens");
+      i = option.lastIndex;
+      continue;
+    }
+    option = readOption(argv, i, "--max-cost");
+    if (option) {
+      maxCost = Number(option.value);
+      if (!Number.isFinite(maxCost) || maxCost <= 0) {
+        throw new Error("--max-cost must be a positive number");
+      }
       i = option.lastIndex;
       continue;
     }
@@ -146,6 +179,9 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     scenario,
     through,
     trials,
+    maxIterations,
+    maxCost,
+    maxTokens,
     piTestAuthDir: piTestAuth ? (piTestAuthDir ?? undefined) : undefined,
   };
 }
@@ -154,7 +190,52 @@ export function defaultTestPipelineRunDir(pipeline: string, now?: Date, id?: str
   return defaultWorkerRunDir("foundry-pi-pipeline-run", pipeline, now, id);
 }
 
-function selectLinearPhases(manifest: AssemblyManifest, through?: string): AssemblyPhase[] {
+/** How the controller drives a loop phase: one fresh worker per call until the oracle says stop. */
+interface LoopOracle {
+  label: string;
+  /** The artifact every call reads and rewrites, which the oracle reads before each call. */
+  carried: string;
+  /** Outputs only the terminal call writes. */
+  terminal: string[];
+  /** The work the next call should do, or null when the next call is the terminal one. */
+  next(carriedPath: string): string[] | null;
+  /** The cap when the run sets none, from the carried artifact at loop entry. */
+  defaultCap(carriedPath: string): number;
+  prompt(iteration: number, next: string[] | null): string;
+}
+
+function readYamlFile(file: string): unknown {
+  return loadYaml(readFileSync(file, "utf8"));
+}
+
+const LOOP_ORACLES: Record<string, LoopOracle> = {
+  // The Mold runs `gxwf draft-next-step` itself; the controller asks the same library function.
+  "advance-galaxy-draft-step": {
+    label: "draft loop",
+    carried: "galaxy-workflow-draft",
+    terminal: ["galaxy-workflow"],
+    next(carriedPath) {
+      const pick = nextDraftStep(readYamlFile(carriedPath));
+      return pick.draft ? pick.step : null;
+    },
+    defaultCap(carriedPath) {
+      const survey = detectDraft(readYamlFile(carriedPath));
+      const steps = new Set(
+        [...survey.todos, ...survey.planFields].map((hit) => JSON.stringify(hit.path)),
+      );
+      // A call per drafty step, as many again for steps a topology repair inserts, then the
+      // terminal call.
+      return 2 * steps.size + 1;
+    },
+    prompt(iteration, next) {
+      return next
+        ? `Loop iteration ${iteration}: \`gxwf draft-next-step\` picks step ${JSON.stringify(next)}. Advance that one step.`
+        : `Loop iteration ${iteration}: \`gxwf draft-next-step\` reports \`draft: false\`. This is the terminal call: extract the concrete workflow.`;
+    },
+  },
+};
+
+function selectPhases(manifest: AssemblyManifest, through?: string): AssemblyPhase[] {
   let throughIndex = manifest.phases.length;
   if (through !== undefined) {
     if (/^[1-9][0-9]*$/.test(through)) {
@@ -187,16 +268,16 @@ function selectLinearPhases(manifest: AssemblyManifest, through?: string): Assem
         `phase ${phase.phase} uses unsupported ${phase.kind} control flow; select an earlier --through phase`,
       );
     }
-    if (phase.loop) {
-      throw new Error(
-        `phase ${phase.phase} uses unsupported loop control flow; select an earlier --through phase`,
-      );
-    }
     if (phase.cast_present !== true) {
       throw new Error(`phase ${phase.phase} does not have a cast skill`);
     }
     if (!phase.skill || !CAST_SLUG.test(phase.skill)) {
       throw new Error(`phase ${phase.phase} has an invalid skill name`);
+    }
+    if (phase.loop && !Object.hasOwn(LOOP_ORACLES, phase.skill)) {
+      throw new Error(
+        `phase ${phase.phase} loops over ${phase.skill}, which has no controller loop oracle; select an earlier --through phase`,
+      );
     }
   }
   return selected;
@@ -340,6 +421,23 @@ function combinedStatus(statuses: RunStatus[]): RunStatus {
   return "failed";
 }
 
+function spentBudget(
+  usage: PipelineRunRecord["usage"],
+  options: TestPipelineOptions,
+): string | null {
+  if (options.maxCost !== undefined && usage.cost >= options.maxCost) {
+    return `cost ${Number(usage.cost.toFixed(6))} of --max-cost ${options.maxCost}`;
+  }
+  if (options.maxTokens !== undefined && usage.total_tokens >= options.maxTokens) {
+    return `${usage.total_tokens} tokens of --max-tokens ${options.maxTokens}`;
+  }
+  return null;
+}
+
+function padded(n: number): string {
+  return String(n).padStart(3, "0");
+}
+
 function writePipelineRecord(runDir: string, record: PipelineRunRecord): void {
   writeFileSync(path.join(runDir, PIPELINE_RUN_FILE), `${JSON.stringify(record, null, 2)}\n`);
 }
@@ -372,7 +470,7 @@ export async function runLinearPipeline(
 
   const assembly = loadAssembly(repoRoot, options.pipeline);
   const assemblyFile = assemblyPath(repoRoot, options.pipeline);
-  const phases = selectLinearPhases(assembly, options.through);
+  const phases = selectPhases(assembly, options.through);
   const scenario = resolveScenario(repoRoot, options.pipeline, options.scenario);
   const fixturePath = path.resolve(repoRoot, scenario.fixture_path);
   const phasePlans = phases.map((phase) => {
@@ -383,8 +481,30 @@ export async function runLinearPipeline(
       skillDir: bundleDir,
       consumes: consumedArtifactIds(repoRoot, phase.skill!),
       produces: expectedArtifactsFromSkill(bundleDir),
+      loop: phase.loop ? LOOP_ORACLES[phase.skill!] : undefined,
     };
   });
+  type PhasePlan = (typeof phasePlans)[number];
+  for (const plan of phasePlans) {
+    if (!plan.loop) continue;
+    const label = `phase ${plan.phase.phase} (${plan.phase.skill})`;
+    const produced = new Set(plan.produces.map((artifact) => artifact.id));
+    for (const id of [plan.loop.carried, ...plan.loop.terminal]) {
+      if (!produced.has(id)) {
+        throw new Error(`${label} does not produce ${id}, which its loop oracle expects`);
+      }
+    }
+    if (!plan.consumes.includes(plan.loop.carried)) {
+      throw new Error(
+        `${label} does not consume ${plan.loop.carried}, which its loop oracle expects`,
+      );
+    }
+    if (options.sandbox === "container") {
+      throw new Error(
+        `${label} needs gxwf, which the container image does not ship; use --sandbox local`,
+      );
+    }
+  }
   preflightInputBasenames(phasePlans, fixturePath);
   const started = now();
   const record: PipelineRunRecord = {
@@ -424,137 +544,290 @@ export async function runLinearPipeline(
   // On disk before any worker starts, so a run killed in its first trial still says what it was.
   writePipelineRecord(runDir, record);
 
-  for (let trialNumber = 1; trialNumber <= options.trials; trialNumber++) {
-    const trialDir = path.join(runDir, `trial-${String(trialNumber).padStart(3, "0")}`);
+  const relative = (target: string) => path.relative(runDir, target).split(path.sep).join("/");
+  type Promoted = Map<string, PromotedArtifactState>;
+
+  const staged = (plan: PhasePlan, promoted: Promoted, scenarioInput: string | null) => ({
+    scenarioInput,
+    resolved: plan.consumes.flatMap((id) => {
+      const artifact = promoted.get(id);
+      return artifact ? [artifact.record] : [];
+    }),
+    missing: plan.consumes.filter((id) => !promoted.has(id)),
+    paths: [
+      ...(scenarioInput ? [scenarioInput] : []),
+      ...plan.consumes.flatMap((id) => {
+        const artifact = promoted.get(id);
+        return artifact ? [artifact.absolutePath] : [];
+      }),
+    ],
+  });
+
+  /** Runs one worker; a launch that throws is the worker's error. */
+  const launch = async (
+    plan: PhasePlan,
+    workerRunDir: string,
+    inputs: ReturnType<typeof staged>,
+    expected: ExpectedArtifact[],
+    extraPrompt?: string,
+    cacheDir?: string,
+  ): Promise<PipelineWorkerRunRecord> => {
+    const base = {
+      run_dir: relative(workerRunDir),
+      resolved_inputs: inputs.resolved,
+      missing_input_ids: inputs.missing,
+    };
+    let worker: PiSkillRunRecord;
+    try {
+      const prompt = phasePrompt(
+        options.pipeline,
+        options.scenario,
+        plan.phase,
+        inputs.scenarioInput !== null,
+        inputs.resolved,
+        inputs.missing,
+      );
+      worker = await runner({
+        skillDir: plan.skillDir,
+        prompt: extraPrompt ? `${prompt}\n${extraPrompt}` : prompt,
+        inputPaths: inputs.paths,
+        expectedArtifacts: expected,
+        runDir: workerRunDir,
+        provider: options.provider,
+        model: options.model,
+        thinking: options.thinking,
+        timeoutMs: options.timeoutMs,
+        tools: options.tools,
+        sandbox: options.sandbox,
+        sandboxImage: options.sandboxImage,
+        sandboxNetwork: options.sandboxNetwork,
+        credentialEnv: options.credentialEnv,
+        piTestAuthDir: options.piTestAuthDir,
+        cacheDir,
+      });
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : String(caught);
+      return { ...base, status: "error", error: message, artifacts: [] };
+    }
+    addUsage(record.usage, worker.usage);
+    return {
+      ...base,
+      status: worker.status,
+      failure_kind: worker.failure_kind,
+      error: worker.error ?? failedArtifactsError(worker.artifacts, expected),
+      worker_run_id: worker.run_id,
+      worker_run_path: relative(path.join(workerRunDir, "run.json")),
+      trace_path: relative(path.join(workerRunDir, worker.trace_path)),
+      stderr_path: relative(path.join(workerRunDir, worker.stderr_path)),
+      artifacts: worker.artifacts,
+      usage: worker.usage,
+    };
+  };
+
+  /** Carries a passed worker's outputs forward, or marks why one could not be. */
+  const promote = (
+    result: PipelineWorkerRunRecord,
+    expected: ExpectedArtifact[],
+    workerRunDir: string,
+    producerPhase: number,
+    promoted: Promoted,
+  ): void => {
+    for (const declared of expected) {
+      const artifact = result.artifacts.find((candidate) => candidate.id === declared.id);
+      if (declared.optional && artifact?.status === "missing") continue;
+      const artifactPath = path.join(workerRunDir, "workspace", declared.path);
+      const actualSha256 = existsSync(artifactPath) ? sha256Path(artifactPath) : undefined;
+      if (
+        !artifact ||
+        (artifact.status !== "passed" && artifact.status !== "present") ||
+        !artifact.sha256 ||
+        !actualSha256 ||
+        artifact.sha256 !== actualSha256
+      ) {
+        result.status = "failed";
+        result.failure_kind = "artifact_promotion";
+        result.error = `declared artifact was not promotable: ${declared.id}`;
+        return;
+      }
+      promoted.set(declared.id, {
+        absolutePath: artifactPath,
+        record: {
+          id: declared.id,
+          path: relative(artifactPath),
+          sha256: actualSha256,
+          producer_phase: producerPhase,
+        },
+      });
+    }
+  };
+
+  const runLoop = async (
+    plan: PhasePlan,
+    oracle: LoopOracle,
+    phaseRunDir: string,
+    promoted: Promoted,
+    cacheDir: string,
+  ): Promise<PipelinePhaseRunRecord> => {
+    const entry = staged(plan, promoted, null);
+    const iterations: PipelineLoopIterationRecord[] = [];
+    const latest = new Map<string, PipelineWorkerRunRecord["artifacts"][number]>();
+    const phaseRecord: PipelinePhaseRunRecord = {
+      phase: plan.phase.phase,
+      skill: plan.phase.skill!,
+      status: "passed",
+      run_dir: relative(phaseRunDir),
+      declared_input_ids: plan.consumes,
+      resolved_inputs: entry.resolved,
+      missing_input_ids: entry.missing,
+      artifacts: [],
+      usage: emptyUsage(),
+      iterations,
+    };
+    const stop = (
+      status: PipelinePhaseRunRecord["status"],
+      failureKind: PipelinePhaseRunRecord["failure_kind"],
+      error: string,
+    ) => Object.assign(phaseRecord, { status, failure_kind: failureKind, error });
+
+    const carriedAtEntry = promoted.get(oracle.carried);
+    if (!carriedAtEntry) {
+      return stop("error", undefined, `no earlier phase promoted ${oracle.carried}`);
+    }
+    // The carried artifact passed its validator to be promoted, but the oracle still parses it.
+    const ask = <T>(question: () => T): T | Error => {
+      try {
+        return question();
+      } catch (caught) {
+        return caught instanceof Error ? caught : new Error(String(caught));
+      }
+    };
+    const cap = options.maxIterations ?? ask(() => oracle.defaultCap(carriedAtEntry.absolutePath));
+    if (cap instanceof Error) {
+      return stop(
+        "error",
+        undefined,
+        `loop oracle could not read ${oracle.carried}: ${cap.message}`,
+      );
+    }
+    for (let n = 1; ; n++) {
+      if (n > cap) {
+        return stop(
+          "failed",
+          "loop_cap",
+          `${oracle.label} reached ${cap} iteration${cap === 1 ? "" : "s"} without finishing`,
+        );
+      }
+      const spent = spentBudget(record.usage, options);
+      if (spent) {
+        return stop("cancelled", "budget", `run budget spent before iteration ${n}: ${spent}`);
+      }
+
+      const before = promoted.get(oracle.carried)!;
+      const next = ask(() => oracle.next(before.absolutePath));
+      if (next instanceof Error) {
+        return stop(
+          "error",
+          undefined,
+          `loop oracle could not read ${oracle.carried}: ${next.message}`,
+        );
+      }
+      const terminal = next === null;
+      // Calls before the terminal one are not asked for the terminal outputs, so a partial one a
+      // stalled call writes is never promoted. The terminal call need not rewrite the rest.
+      const expected = plan.produces.flatMap((artifact) => {
+        const terminalOutput = oracle.terminal.includes(artifact.id);
+        if (!terminal) return terminalOutput ? [] : [artifact];
+        return [{ ...artifact, optional: artifact.optional === true || !terminalOutput }];
+      });
+      const iterationDir = path.join(phaseRunDir, `iteration-${padded(n)}`);
+      const result = await launch(
+        plan,
+        iterationDir,
+        staged(plan, promoted, null),
+        expected,
+        oracle.prompt(n, next),
+        cacheDir,
+      );
+      if (result.status === "passed") {
+        promote(result, expected, iterationDir, plan.phase.phase, promoted);
+      }
+      iterations.push({ iteration: n, next_step: next, ...result });
+      addUsage(phaseRecord.usage!, result.usage);
+      for (const artifact of result.artifacts) {
+        if (artifact.status !== "missing") latest.set(artifact.id, artifact);
+      }
+      phaseRecord.artifacts = [...latest.values()];
+
+      if (result.status !== "passed") {
+        return stop(
+          result.status,
+          result.failure_kind,
+          `iteration ${n}: ${result.error ?? "no error recorded"}`,
+        );
+      }
+      if (terminal) return phaseRecord;
+      if (promoted.get(oracle.carried)!.record.sha256 === before.record.sha256) {
+        return stop(
+          "failed",
+          "loop_no_progress",
+          `iteration ${n} left ${oracle.carried} unchanged; step ${next.join(" > ")} is still drafty`,
+        );
+      }
+    }
+  };
+
+  let budgetSpent = false;
+  for (let trialNumber = 1; trialNumber <= options.trials && !budgetSpent; trialNumber++) {
+    const trialDir = path.join(runDir, `trial-${padded(trialNumber)}`);
     mkdirSync(trialDir);
-    const promoted = new Map<string, PromotedArtifactState>();
+    const promoted: Promoted = new Map();
     const trial: PipelineTrialRunRecord = { trial: trialNumber, status: "passed", phases: [] };
+    // Shared by the trial's loop iterations, so a wrapper one call fetched is there for the next.
+    let cacheDir: string | undefined;
 
     for (const plan of phasePlans) {
       const phase = plan.phase;
-      const phaseRunDir = path.join(
-        trialDir,
-        `phase-${String(phase.phase).padStart(3, "0")}-${phase.skill}`,
-      );
-      const resolvedInputs = plan.consumes.flatMap((artifactId) => {
-        const artifact = promoted.get(artifactId);
-        return artifact ? [artifact.record] : [];
-      });
-      const missingInputIds = plan.consumes.filter((artifactId) => !promoted.has(artifactId));
-      const scenarioInput = plan === phasePlans[0] ? fixturePath : null;
-      const inputPaths = [
-        ...(scenarioInput ? [scenarioInput] : []),
-        ...plan.consumes.flatMap((artifactId) => {
-          const artifact = promoted.get(artifactId);
-          return artifact ? [artifact.absolutePath] : [];
-        }),
-      ];
-
-      let worker: PiSkillRunRecord;
-      try {
-        worker = await runner({
-          skillDir: plan.skillDir,
-          prompt: phasePrompt(
-            options.pipeline,
-            options.scenario,
-            phase,
-            scenarioInput !== null,
-            resolvedInputs,
-            missingInputIds,
-          ),
-          inputPaths,
-          expectedArtifacts: plan.produces,
-          runDir: phaseRunDir,
-          provider: options.provider,
-          model: options.model,
-          thinking: options.thinking,
-          timeoutMs: options.timeoutMs,
-          tools: options.tools,
-          sandbox: options.sandbox,
-          sandboxImage: options.sandboxImage,
-          sandboxNetwork: options.sandboxNetwork,
-          credentialEnv: options.credentialEnv,
-          piTestAuthDir: options.piTestAuthDir,
-        });
-      } catch (caught) {
-        const message = caught instanceof Error ? caught.message : String(caught);
-        trial.phases.push({
+      const phaseRunDir = path.join(trialDir, `phase-${padded(phase.phase)}-${phase.skill}`);
+      const inputs = staged(plan, promoted, plan === phasePlans[0] ? fixturePath : null);
+      let phaseRecord: PipelinePhaseRunRecord;
+      const spent = spentBudget(record.usage, options);
+      if (spent) {
+        phaseRecord = {
           phase: phase.phase,
           skill: phase.skill!,
-          status: "error",
-          error: message,
-          run_dir: path.relative(runDir, phaseRunDir).split(path.sep).join("/"),
+          status: "cancelled",
+          failure_kind: "budget",
+          error: `run budget spent before phase ${phase.phase}: ${spent}`,
+          run_dir: relative(phaseRunDir),
           declared_input_ids: plan.consumes,
-          resolved_inputs: resolvedInputs,
-          missing_input_ids: missingInputIds,
+          resolved_inputs: inputs.resolved,
+          missing_input_ids: inputs.missing,
           artifacts: [],
-        });
-        trial.status = "error";
-        break;
-      }
-
-      addUsage(record.usage, worker.usage);
-      const phaseRecord: PipelinePhaseRunRecord = {
-        phase: phase.phase,
-        skill: phase.skill!,
-        status: worker.status,
-        failure_kind: worker.failure_kind,
-        error: worker.error ?? failedArtifactsError(worker.artifacts, plan.produces),
-        run_dir: path.relative(runDir, phaseRunDir).split(path.sep).join("/"),
-        worker_run_id: worker.run_id,
-        worker_run_path: path
-          .relative(runDir, path.join(phaseRunDir, "run.json"))
-          .split(path.sep)
-          .join("/"),
-        trace_path: path
-          .relative(runDir, path.join(phaseRunDir, worker.trace_path))
-          .split(path.sep)
-          .join("/"),
-        stderr_path: path
-          .relative(runDir, path.join(phaseRunDir, worker.stderr_path))
-          .split(path.sep)
-          .join("/"),
-        declared_input_ids: plan.consumes,
-        resolved_inputs: resolvedInputs,
-        missing_input_ids: missingInputIds,
-        artifacts: worker.artifacts,
-        usage: worker.usage,
-      };
-      trial.phases.push(phaseRecord);
-      if (worker.status !== "passed") {
-        trial.status = worker.status;
-        break;
-      }
-
-      for (const expected of plan.produces) {
-        const artifact = worker.artifacts.find((candidate) => candidate.id === expected.id);
-        if (expected.optional && artifact?.status === "missing") continue;
-        const artifactPath = path.join(phaseRunDir, "workspace", expected.path);
-        const actualSha256 = existsSync(artifactPath) ? sha256Path(artifactPath) : undefined;
-        if (
-          !artifact ||
-          (artifact.status !== "passed" && artifact.status !== "present") ||
-          !artifact.sha256 ||
-          !actualSha256 ||
-          artifact.sha256 !== actualSha256
-        ) {
-          phaseRecord.status = "failed";
-          phaseRecord.failure_kind = "artifact_promotion";
-          phaseRecord.error = `declared artifact was not promotable: ${expected.id}`;
-          trial.status = "failed";
-          break;
+        };
+      } else if (plan.loop) {
+        if (!cacheDir) {
+          cacheDir = path.join(trialDir, "tool-cache");
+          mkdirSync(cacheDir);
         }
-        promoted.set(expected.id, {
-          absolutePath: artifactPath,
-          record: {
-            id: expected.id,
-            path: path.relative(runDir, artifactPath).split(path.sep).join("/"),
-            sha256: actualSha256,
-            producer_phase: phase.phase,
-          },
-        });
+        phaseRecord = await runLoop(plan, plan.loop, phaseRunDir, promoted, cacheDir);
+      } else {
+        const result = await launch(plan, phaseRunDir, inputs, plan.produces);
+        phaseRecord = {
+          phase: phase.phase,
+          skill: phase.skill!,
+          declared_input_ids: plan.consumes,
+          ...result,
+        };
+        if (result.status === "passed") {
+          promote(phaseRecord, plan.produces, phaseRunDir, phase.phase, promoted);
+        }
       }
-      if (trial.status !== "passed") break;
+      trial.phases.push(phaseRecord);
+      if (phaseRecord.status !== "passed") {
+        trial.status = phaseRecord.status;
+        budgetSpent = phaseRecord.failure_kind === "budget";
+        break;
+      }
     }
     record.trials.push(trial);
     writePipelineRecord(runDir, record);

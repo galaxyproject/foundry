@@ -9,6 +9,7 @@ import {
   readFileSync,
   readdirSync,
   realpathSync,
+  statSync,
   symlinkSync,
   unlinkSync,
   writeFileSync,
@@ -29,6 +30,7 @@ import { parse as parseYaml } from "yaml";
 import {
   DEFAULT_CONTAINER_IMAGE,
   inspectContainerImage,
+  TOOL_CACHE_ENV,
   type ContainerImageResolution,
   type ContainerLaunchConfig,
   type ContainerMount,
@@ -101,6 +103,8 @@ export interface PiSkillRunRecord {
     provenance_sha256?: string;
     prompt_sha256: string;
     explicit_activation: string;
+    /** The writable tool cache the caller shared with this worker, as the worker sees it. */
+    cache_dir?: string;
     tools: string[];
     timeout_ms: number;
     ambient_discovery_disabled: true;
@@ -160,6 +164,8 @@ export interface RunPiSkillOptions {
   sandboxNetwork?: ContainerNetworkPolicy;
   credentialEnv?: string[];
   piTestAuthDir?: string;
+  /** A writable tool cache that outlives this worker, so later workers reuse what it fetched. */
+  cacheDir?: string;
   dockerBin?: string;
   signal?: AbortSignal;
   onEvent?: (event: JsonAgentSessionEvent) => void;
@@ -407,12 +413,16 @@ function invocationPrompt(
   prompt: string,
   inputs: StagedInput[],
   castBundleSha256: string,
+  cacheDir: string | undefined,
 ): string {
   const inputNote = inputs.length
     ? `\n\nDeclared inputs staged in this worker:\n${inputs.map((input) => `- ${input.staged_path}`).join("\n")}`
     : "";
+  const cacheNote = cacheDir
+    ? `\n\nUse \`${cacheDir}\` as the tool cache directory (\`--cache-dir\`). It is shared with this run's other workers, so reuse what is already there.`
+    : "";
   const metadata = JSON.stringify({ cast_bundle_sha256: castBundleSha256 });
-  return `/skill:${skill}\n\n${prompt}${inputNote}\n\nHarness runtime metadata (outside the cast bundle):\n${metadata}`;
+  return `/skill:${skill}\n\n${prompt}${inputNote}${cacheNote}\n\nHarness runtime metadata (outside the cast bundle):\n${metadata}`;
 }
 
 function prepareRunDirectory(
@@ -460,11 +470,14 @@ function resolveCredentialEnv(names: string[]): string[] {
   return unique.sort();
 }
 
+const CONTAINER_CACHE_DIR = "/tool-cache";
+
 function containerMounts(
   skillDir: string,
   inputsDir: string,
   workspace: string,
   hasInputs: boolean,
+  cacheDir: string | undefined,
 ): ContainerMount[] {
   return [
     {
@@ -492,6 +505,17 @@ function containerMounts(
       read_only: false,
       purpose: "output",
     },
+    ...(cacheDir
+      ? [
+          {
+            type: "bind" as const,
+            source: cacheDir,
+            target: CONTAINER_CACHE_DIR,
+            read_only: false,
+            purpose: "tool-cache" as const,
+          },
+        ]
+      : []),
     {
       type: "tmpfs",
       target: "/pi-agent",
@@ -577,6 +601,13 @@ export async function runPiSkill(
           dockerBin,
         )
       : undefined;
+  if (options.cacheDir && !existsSync(options.cacheDir)) {
+    throw new Error(`tool cache directory not found: ${options.cacheDir}`);
+  }
+  const cacheDir = options.cacheDir && realpathSync(options.cacheDir);
+  if (cacheDir && !statSync(cacheDir).isDirectory()) {
+    throw new Error(`tool cache is not a directory: ${cacheDir}`);
+  }
   const skill = readSkillName(skillDir);
   const expectedArtifacts = options.expectedArtifacts ?? expectedArtifactsFromSkill(skillDir);
   loadVerifyEntries(skillDir);
@@ -597,7 +628,8 @@ export async function runPiSkill(
   }
   const inputPaths = options.inputPaths ?? [];
   const inputs = stageInputs(inputPaths, inputsDir, sandbox === "container" ? "/inputs" : "inputs");
-  const prompt = invocationPrompt(skill, options.prompt, inputs, castBundleSha256);
+  const workerCacheDir = cacheDir && (sandbox === "container" ? CONTAINER_CACHE_DIR : cacheDir);
+  const prompt = invocationPrompt(skill, options.prompt, inputs, castBundleSha256, workerCacheDir);
   const tracePath = path.join(runDir, "trace.jsonl");
   const stderrPath = path.join(runDir, "stderr.log");
   writeFileSync(tracePath, "");
@@ -606,7 +638,7 @@ export async function runPiSkill(
   const provenancePath = path.join(workerSkillDir, "_provenance.json");
   const mounts =
     sandbox === "container"
-      ? containerMounts(workerSkillDir, inputsDir, workspace, inputPaths.length > 0)
+      ? containerMounts(workerSkillDir, inputsDir, workspace, inputPaths.length > 0, cacheDir)
       : undefined;
   const containerName = `foundry-pi-${runId.toLowerCase()}`;
   const baseRecord = {
@@ -627,6 +659,7 @@ export async function runPiSkill(
       provenance_sha256: existsSync(provenancePath) ? sha256Path(provenancePath) : undefined,
       prompt_sha256: sha256Text(prompt),
       explicit_activation: `/skill:${skill}`,
+      cache_dir: workerCacheDir,
       tools,
       timeout_ms: timeoutMs,
       ambient_discovery_disabled: true as const,
@@ -688,7 +721,10 @@ export async function runPiSkill(
     env:
       sandbox === "container"
         ? { FOUNDRY_CONTAINER_LAUNCH_CONFIG: JSON.stringify(launchConfig) }
-        : { PI_CODING_AGENT_DIR: agentDir! },
+        : {
+            PI_CODING_AGENT_DIR: agentDir!,
+            ...(cacheDir ? { [TOOL_CACHE_ENV]: cacheDir } : {}),
+          },
     provider: options.provider,
     model: options.model,
     args: [

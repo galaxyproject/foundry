@@ -138,6 +138,9 @@ importers:
       '@galaxy-foundry/wiki-links':
         specifier: ^0.4.0
         version: 0.4.0
+      '@galaxy-tool-util/schema':
+        specifier: ^1.13.1
+        version: 1.13.1
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
@@ -4791,7 +4794,7 @@ snapshots:
 
   '@astrojs/yaml2ts@0.2.4':
     dependencies:
-      yaml: 2.8.3
+      yaml: 2.9.0
 
   '@aws-crypto/sha256-browser@5.2.0':
     dependencies:
@@ -5663,7 +5666,7 @@ snapshots:
     dependencies:
       '@galaxy-tool-util/schema': 1.10.0
       effect: 3.21.2
-      yaml: 2.8.3
+      yaml: 2.9.0
 
   '@galaxy-tool-util/core@1.13.1':
     dependencies:

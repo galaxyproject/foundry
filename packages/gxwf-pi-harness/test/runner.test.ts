@@ -5,6 +5,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   statSync,
   unlinkSync,
   writeFileSync,
@@ -16,6 +17,7 @@ import type { RpcClientOptions } from "@earendil-works/pi-coding-agent";
 import { describe, expect, test } from "vitest";
 
 import {
+  buildDockerRunArgs,
   expectedArtifactsFromSkill,
   runPiSkill,
   sha256Path,
@@ -581,6 +583,89 @@ describe("runPiSkill", () => {
     } finally {
       delete process.env[secretName];
     }
+  });
+
+  test("hands a worker the caller's tool cache, writable and outside its run directory", async () => {
+    const root = fixtureRoot();
+    const skillDir = makeSkill(root);
+    mkdirSync(path.join(root, "tool-cache"));
+    const cacheDir = realpathSync(path.join(root, "tool-cache"));
+    const writeOutput = (_prompt: string, options: RpcClientOptions) => {
+      writeFileSync(path.join(options.cwd!, "output.json"), '{"ok":true}\n');
+    };
+
+    const local: { prompt?: string; options?: RpcClientOptions } = {};
+    const localRecord = await runPiSkill(
+      {
+        skillDir,
+        prompt: "Advance the draft.",
+        runDir: path.join(root, "runs", "local"),
+        provider: "test-provider",
+        model: "requested-model",
+        cacheDir,
+      },
+      fakeDependencies(writeOutput, local),
+    );
+    expect(localRecord.invocation.cache_dir).toBe(cacheDir);
+    expect(local.prompt).toContain(`\`${cacheDir}\``);
+    // The tool CLIs read it too, so a command that forgets --cache-dir still shares the cache.
+    expect(local.options?.env?.GALAXY_TOOL_CACHE_DIR).toBe(cacheDir);
+
+    const contained: { prompt?: string; options?: RpcClientOptions } = {};
+    const containerRecord = await runPiSkill(
+      {
+        skillDir,
+        prompt: "Advance the draft.",
+        runDir: path.join(root, "runs", "container"),
+        provider: "test-provider",
+        model: "requested-model",
+        sandbox: "container",
+        cacheDir,
+      },
+      {
+        ...fakeDependencies(writeOutput, contained),
+        inspectContainerImage: (requested) => ({
+          requested,
+          resolved_id: "sha256:resolved",
+          repo_digests: [],
+          pi_version: "0.84.4",
+          foundry_cli_version: "0.1.0",
+          planemo_version: "0.75.47",
+        }),
+      },
+    );
+    if (containerRecord.sandbox.mode !== "container") throw new Error("expected container record");
+    expect(containerRecord.invocation.cache_dir).toBe("/tool-cache");
+    expect(containerRecord.sandbox.mounts).toContainEqual(
+      expect.objectContaining({
+        type: "bind",
+        source: cacheDir,
+        target: "/tool-cache",
+        read_only: false,
+        purpose: "tool-cache",
+      }),
+    );
+    expect(contained.prompt).toContain("`/tool-cache`");
+    const launch = JSON.parse(contained.options!.env!.FOUNDRY_CONTAINER_LAUNCH_CONFIG!);
+    expect(buildDockerRunArgs(launch, [])).toContain("--env=GALAXY_TOOL_CACHE_DIR=/tool-cache");
+    expect(contained.prompt).not.toContain(cacheDir);
+  });
+
+  test("rejects a tool cache that is not a directory", async () => {
+    const root = fixtureRoot();
+    await expect(
+      runPiSkill(
+        {
+          skillDir: makeSkill(root),
+          prompt: "Advance the draft.",
+          runDir: path.join(root, "runs", "missing-cache"),
+          provider: "test-provider",
+          model: "requested-model",
+          cacheDir: path.join(root, "no-such-cache"),
+        },
+        fakeDependencies(() => undefined),
+      ),
+    ).rejects.toThrow(/cache/);
   });
 
   test("enforces a wall timeout and aborts the worker", async () => {
