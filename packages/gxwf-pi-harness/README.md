@@ -15,7 +15,7 @@ The runner hashes that frozen copy once and supplies `cast_bundle_sha256` as run
 
 OpenAI subscription-backed diagnostics can opt into the Foundry-specific `pi-test-auth` store. Login, refresh, and logout use Pi's public authentication API; Foundry does not interpret or copy tokens. For each local run, the fresh Pi configuration temporarily links to the store's `auth.json`, then removes that link before retaining the run directory. Run records contain only the label `pi-test-auth`, never the store path or credential values.
 
-Container mode runs the whole Pi RPC worker inside a disposable Docker container. It mounts the staged skill bundle and copied declared inputs read-only, mounts only the run's output directory read-write, and uses tmpfs for Pi configuration and temporary files. The checkout itself is never mounted.
+Container mode runs the whole Pi RPC worker inside a disposable Docker container. It mounts the staged skill bundle and copied declared inputs read-only, mounts the run's output directory read-write (plus the caller's `cacheDir` at `/tool-cache`, when given), and uses tmpfs for Pi configuration and temporary files. The checkout itself is never mounted.
 
 Build the default image from the repository root:
 

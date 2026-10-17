@@ -17,6 +17,7 @@ import type { RpcClientOptions } from "@earendil-works/pi-coding-agent";
 import { describe, expect, test } from "vitest";
 
 import {
+  buildDockerRunArgs,
   expectedArtifactsFromSkill,
   runPiSkill,
   sha256Path,
@@ -593,7 +594,7 @@ describe("runPiSkill", () => {
       writeFileSync(path.join(options.cwd!, "output.json"), '{"ok":true}\n');
     };
 
-    const local: { prompt?: string } = {};
+    const local: { prompt?: string; options?: RpcClientOptions } = {};
     const localRecord = await runPiSkill(
       {
         skillDir,
@@ -607,8 +608,10 @@ describe("runPiSkill", () => {
     );
     expect(localRecord.invocation.cache_dir).toBe(cacheDir);
     expect(local.prompt).toContain(`\`${cacheDir}\``);
+    // The tool CLIs read it too, so a command that forgets --cache-dir still shares the cache.
+    expect(local.options?.env?.GALAXY_TOOL_CACHE_DIR).toBe(cacheDir);
 
-    const contained: { prompt?: string } = {};
+    const contained: { prompt?: string; options?: RpcClientOptions } = {};
     const containerRecord = await runPiSkill(
       {
         skillDir,
@@ -643,6 +646,8 @@ describe("runPiSkill", () => {
       }),
     );
     expect(contained.prompt).toContain("`/tool-cache`");
+    const launch = JSON.parse(contained.options!.env!.FOUNDRY_CONTAINER_LAUNCH_CONFIG!);
+    expect(buildDockerRunArgs(launch, [])).toContain("--env=GALAXY_TOOL_CACHE_DIR=/tool-cache");
     expect(contained.prompt).not.toContain(cacheDir);
   });
 

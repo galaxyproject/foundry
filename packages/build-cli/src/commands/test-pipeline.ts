@@ -485,6 +485,26 @@ export async function runLinearPipeline(
     };
   });
   type PhasePlan = (typeof phasePlans)[number];
+  for (const plan of phasePlans) {
+    if (!plan.loop) continue;
+    const label = `phase ${plan.phase.phase} (${plan.phase.skill})`;
+    const produced = new Set(plan.produces.map((artifact) => artifact.id));
+    for (const id of [plan.loop.carried, ...plan.loop.terminal]) {
+      if (!produced.has(id)) {
+        throw new Error(`${label} does not produce ${id}, which its loop oracle expects`);
+      }
+    }
+    if (!plan.consumes.includes(plan.loop.carried)) {
+      throw new Error(
+        `${label} does not consume ${plan.loop.carried}, which its loop oracle expects`,
+      );
+    }
+    if (options.sandbox === "container") {
+      throw new Error(
+        `${label} needs gxwf, which the container image does not ship; use --sandbox local`,
+      );
+    }
+  }
   preflightInputBasenames(phasePlans, fixturePath);
   const started = now();
   const record: PipelineRunRecord = {
