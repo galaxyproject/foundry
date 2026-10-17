@@ -820,12 +820,13 @@ test("drives the draft loop with one worker per drafty step, then the terminal c
   expect(loop.iterations?.[0]?.missing_input_ids).toEqual(["open-requirements-ledger"]);
   expect(loop.iterations?.[1]?.missing_input_ids).toEqual([]);
 
-  // The extracted workflow is written only on the terminal call; the draft only before it.
+  // The terminal call need not rewrite the draft or the ledger.
   const optional = (call: RunPiSkillOptions) =>
     Object.fromEntries((call.expectedArtifacts ?? []).map((a) => [a.id, a.optional === true]));
+  // A call before the terminal one is not asked for the extracted workflow, so a partial one it
+  // writes anyway is never promoted.
   expect(optional(first!)).toEqual({
     "galaxy-workflow-draft": false,
-    "galaxy-workflow": true,
     "open-requirements-ledger": false,
   });
   expect(optional(terminal!)).toEqual({

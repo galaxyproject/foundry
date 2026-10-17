@@ -732,10 +732,12 @@ export async function runLinearPipeline(
         );
       }
       const terminal = next === null;
-      // The terminal call writes only the terminal outputs; every call before it, everything else.
-      const expected = plan.produces.map((artifact) => {
-        const writtenNow = oracle.terminal.includes(artifact.id) === terminal;
-        return { ...artifact, optional: artifact.optional === true || !writtenNow };
+      // Calls before the terminal one are not asked for the terminal outputs, so a partial one a
+      // stalled call writes is never promoted. The terminal call need not rewrite the rest.
+      const expected = plan.produces.flatMap((artifact) => {
+        const terminalOutput = oracle.terminal.includes(artifact.id);
+        if (!terminal) return terminalOutput ? [] : [artifact];
+        return [{ ...artifact, optional: artifact.optional === true || !terminalOutput }];
       });
       const iterationDir = path.join(phaseRunDir, `iteration-${padded(n)}`);
       const result = await launch(
