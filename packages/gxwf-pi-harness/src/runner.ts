@@ -30,6 +30,7 @@ import { parse as parseYaml } from "yaml";
 import {
   DEFAULT_CONTAINER_IMAGE,
   inspectContainerImage,
+  TOOL_CACHE_ENV,
   type ContainerImageResolution,
   type ContainerLaunchConfig,
   type ContainerMount,
@@ -720,7 +721,10 @@ export async function runPiSkill(
     env:
       sandbox === "container"
         ? { FOUNDRY_CONTAINER_LAUNCH_CONFIG: JSON.stringify(launchConfig) }
-        : { PI_CODING_AGENT_DIR: agentDir! },
+        : {
+            PI_CODING_AGENT_DIR: agentDir!,
+            ...(cacheDir ? { [TOOL_CACHE_ENV]: cacheDir } : {}),
+          },
     provider: options.provider,
     model: options.model,
     args: [
