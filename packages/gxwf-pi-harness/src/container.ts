@@ -18,7 +18,7 @@ export interface ContainerMount {
   source?: string;
   target: string;
   read_only: boolean;
-  purpose: "skill" | "inputs" | "output" | "agent-config" | "temporary-files";
+  purpose: "skill" | "inputs" | "output" | "tool-cache" | "agent-config" | "temporary-files";
 }
 
 export interface ContainerImageResolution {
