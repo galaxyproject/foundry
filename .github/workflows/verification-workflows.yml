@@ -61,7 +61,7 @@ jobs:
             name="${name//\//-}"
             name="${name%.gxwf.yml}"
             planemo test "$workflow" \
-              --galaxy_branch release_25.1 \
+              --galaxy_branch release_26.1 \
               --test_output_json "upload/${name}.json" \
               --test_output "upload/${name}.html" \
               --summary minimal

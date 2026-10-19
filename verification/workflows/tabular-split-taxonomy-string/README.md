@@ -9,7 +9,7 @@ Run from this directory:
 ```sh
 gxwf validate split-taxonomy.gxwf.yml
 gxwf validate-tests split-taxonomy.gxwf-test.yml
-planemo test split-taxonomy.gxwf.yml --galaxy_branch release_25.1
+planemo test split-taxonomy.gxwf.yml --galaxy_branch release_26.1
 ```
 
 On 2026-10-01, Planemo ran this fixture against Galaxy `release_25.1`. Its one workflow test passed the exact-output comparison.
