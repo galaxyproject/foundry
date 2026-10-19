@@ -202,6 +202,8 @@ interface LoopOracle {
   /** The cap when the run sets none, from the carried artifact at loop entry. */
   defaultCap(carriedPath: string): number;
   prompt(iteration: number, next: string[] | null): string;
+  /** Where a call that could not do its work records why, and the ids of what blocks that work. */
+  blockers?: { artifact: string; read(file: string, next: string[]): string[] };
 }
 
 function readYamlFile(file: string): unknown {
@@ -231,6 +233,23 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
       return next
         ? `Loop iteration ${iteration}: \`gxwf draft-next-step\` picks step ${JSON.stringify(next)}. Advance that one step.`
         : `Loop iteration ${iteration}: \`gxwf draft-next-step\` reports \`draft: false\`. This is the terminal call: extract the concrete workflow.`;
+    },
+    blockers: {
+      artifact: "open-requirements-ledger",
+      // A blocking entry stays open until a repair closes it, and is surrendered at the cap.
+      read(file, next) {
+        const ledger = readYamlFile(file) as { entries?: unknown } | null;
+        const entries: unknown[] = Array.isArray(ledger?.entries) ? ledger.entries : [];
+        return entries.flatMap((entry) => {
+          const { id, status, blocking, step } = (entry ?? {}) as Record<string, unknown>;
+          const blocks =
+            blocking === true &&
+            (status === "open" || status === "surrendered") &&
+            typeof step === "string" &&
+            next.includes(step);
+          return blocks && typeof id === "string" ? [id] : [];
+        });
+      },
     },
   },
 };
@@ -489,7 +508,9 @@ export async function runLinearPipeline(
     if (!plan.loop) continue;
     const label = `phase ${plan.phase.phase} (${plan.phase.skill})`;
     const produced = new Set(plan.produces.map((artifact) => artifact.id));
-    for (const id of [plan.loop.carried, ...plan.loop.terminal]) {
+    const expects = [plan.loop.carried, ...plan.loop.terminal];
+    if (plan.loop.blockers) expects.push(plan.loop.blockers.artifact);
+    for (const id of expects) {
       if (!produced.has(id)) {
         throw new Error(`${label} does not produce ${id}, which its loop oracle expects`);
       }
@@ -767,11 +788,24 @@ export async function runLinearPipeline(
       }
       if (terminal) return phaseRecord;
       if (promoted.get(oracle.carried)!.record.sha256 === before.record.sha256) {
-        return stop(
-          "failed",
-          "loop_no_progress",
-          `iteration ${n} left ${oracle.carried} unchanged; step ${next.join(" > ")} is still drafty`,
-        );
+        const stalled = `iteration ${n} left ${oracle.carried} unchanged; step ${next.join(" > ")}`;
+        const ledger = oracle.blockers && promoted.get(oracle.blockers.artifact);
+        const blockers = ledger ? ask(() => oracle.blockers!.read(ledger.absolutePath, next)) : [];
+        if (blockers instanceof Error) {
+          return stop(
+            "failed",
+            "loop_no_progress",
+            `${stalled} is still drafty, and ${oracle.blockers!.artifact} could not be read: ${blockers.message}`,
+          );
+        }
+        if (blockers.length) {
+          return stop(
+            "failed",
+            "loop_blocked",
+            `${stalled} is blocked by ${oracle.blockers!.artifact} entries ${blockers.join(", ")}`,
+          );
+        }
+        return stop("failed", "loop_no_progress", `${stalled} is still drafty`);
       }
     }
   };

@@ -104,6 +104,18 @@ Properties are tagged by bucket:
   skill falls through to [[author-galaxy-tool-wrapper]] rather than guessing a
   wrapper.
 
+## Property: a step nothing can implement ends the call blocked
+
+- bucket: routing
+- check: deterministic + llm-judged
+- assertion: when no stock, Tool Shed, or authored wrapper can produce the
+  chosen step's declared output from its wired inputs, the call either changes
+  the draft through [[repair-galaxy-draft-topology]] or leaves a blocking ledger
+  entry naming the step, open or surrendered. Mechanically: a call that leaves
+  the draft byte-identical must carry such an entry. Returning with the draft
+  and ledger both unchanged fails, as does writing `galaxy-workflow.gxwf.yml`
+  before the terminal call.
+
 ## Property: reuse a wrapper already pinned in the draft
 
 - bucket: routing

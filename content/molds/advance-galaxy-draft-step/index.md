@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-06-02
-revised: 2026-09-17
-revision: 7
+revised: 2026-10-19
+revision: 8
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
@@ -141,12 +141,23 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
      - **Deferred** — `tool_id` is `TODO`. Search fresh: run [[discover-shed-tool]] against the step's `_plan_*` context.
 
      Either way, if no acceptable shed candidate emerges, fall through to [[author-galaxy-tool-wrapper]].
+   - **Nothing fits** — a step whose `tool_id` is `TODO` and that no stock tool satisfies is searched as a deferred Tool Shed step, then authored. If authoring can't meet the declared output either, because the output needs something no tool can compute from the step's wired inputs, that is a computability gap. Append a blocking ledger entry for this step, citing the searches you ran and any related entry's id, and go to step 5.
 
    If the resolved pin is absent from the cache, run [[add]] `<tool_id> --tool-version <v> --cache-dir <dir>` before summarization. In `@galaxy-tool-util/cli` 1.10.0, validation also fetches and caches missing metadata unless `--offline` is set; offline validation requires a populated cache.
 3. **Summarize the wrapper.** If step 2 reused a sibling's pin, reuse the cached [[galaxy-tool-summary]] for that `tool_id`/`tool_version` pair. Otherwise, invoke [[summarize-galaxy-tool]] to produce the summary.
 4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `state`, and wrapper-determined port names.
-5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry [[implement-galaxy-tool-step]] appended against this step. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
+5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry that step 2 or [[implement-galaxy-tool-step]] appended against this step. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
 6. **Validate.** Run [[draft-validate]] `<draft> --concrete --strict-state --json --cache-dir <dir>`. `--strict-state` makes skipped tool-state checks fail validation; draft structure and topology checks still run. If metadata is unavailable, resolve the cache or fetch error and retry. Return on exit 0; route other failures using the JSON diagnostics and the rules below.
+
+## How a call ends
+
+A call before the terminal one ends in one of three ways:
+
+- the picked step is concrete and validates;
+- [[repair-galaxy-draft-topology]] changed the draft around it;
+- the step is blocked: an open blocking ledger entry names it, surrendered once the escalation cap is reached.
+
+Never return with the draft and ledger both unchanged: that reports no work as success. Only the terminal call runs [[draft-extract]]; an earlier extract is a partial workflow.
 
 ## Failure routing
 

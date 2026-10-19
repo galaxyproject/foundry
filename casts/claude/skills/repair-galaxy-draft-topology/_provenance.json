@@ -4,11 +4,11 @@
   "mold": {
     "name": "repair-galaxy-draft-topology",
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
-    "revision": 5,
-    "content_hash": "99b1b5f90fa3860ae60a02c9182ac74b18b96ad8ee455bdf9692e962417c2785",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "revision": 6,
+    "content_hash": "47f60607da7bfebe8505112865ede352ca980372e7adfa93275667904be10bc4",
+    "commit": "c8ef149b9818ce3c899c34cce6f9cc07daaaed98"
   },
-  "cast_at": "2026-10-15T21:04:51.076Z",
+  "cast_at": "2026-10-19T18:12:28.045Z",
   "refs": [
     {
       "kind": "pattern",

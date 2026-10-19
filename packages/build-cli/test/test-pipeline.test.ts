@@ -723,10 +723,13 @@ function workspaceRecord(options: RunPiSkillOptions, skill: string): PiSkillRunR
 
 type Draft = { steps: Record<string, Record<string, unknown>> };
 
-/** Concretizes the step the oracle picks, as advance-galaxy-draft-step does, or extracts at the end. */
+/**
+ * Concretizes the step the oracle picks, as advance-galaxy-draft-step does, or extracts at the end.
+ * `advance` may return the ledger entries the call writes.
+ */
 function draftWorker(
   calls: RunPiSkillOptions[],
-  advance: (draft: Draft, step: string) => void = (draft, step) => {
+  advance: (draft: Draft, step: string) => unknown[] | void = (draft, step) => {
     draft.steps[step].tool_id = "cat1";
     draft.steps[step].tool_version = "1.0";
   },
@@ -750,9 +753,9 @@ function draftWorker(
       const draft = loadYaml(readFileSync(staged, "utf8")) as Draft;
       const next = nextDraftStep(draft);
       if (next.draft) {
-        advance(draft, next.step.at(-1)!);
+        const entries = advance(draft, next.step.at(-1)!) ?? [];
         write(DRAFT_FILE, draft);
-        write("open-requirements.ledger.yml", { entries: [] });
+        write("open-requirements.ledger.yml", { entries });
       } else {
         write("galaxy-workflow.gxwf.yml", { ...draft, class: "GalaxyWorkflow" });
       }
@@ -868,6 +871,56 @@ test("fails a draft-loop iteration that leaves the draft unchanged", async () =>
   );
   expect(loop.iterations).toHaveLength(1);
   expect(calls).toHaveLength(2);
+});
+
+function ledgerEntry(id: string, step: string, status: string, blocking: boolean) {
+  return { id, status, blocking, raised_by: "advance-galaxy-draft-step", step };
+}
+
+test.each(["open", "surrendered"])(
+  "reports a draft-loop iteration as blocked when a blocking entry for its unchanged step is %s",
+  async (status) => {
+    const root = draftFixtureRepo();
+    const calls: RunPiSkillOptions[] = [];
+    const record = await runLinearPipeline(draftRunOptions(root, `blocked-${status}`), {
+      runSkill: draftWorker(calls, () => [
+        ledgerEntry("a-uncomputable", "a", status, true),
+        ledgerEntry("a-also-uncomputable", "a", status, true),
+      ]),
+    });
+
+    expect(record.status).toBe("failed");
+    const loop = record.trials[0]!.phases[1]!;
+    expect(loop).toEqual(
+      expect.objectContaining({
+        status: "failed",
+        failure_kind: "loop_blocked",
+        error:
+          "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by " +
+          "open-requirements-ledger entries a-uncomputable, a-also-uncomputable",
+      }),
+    );
+    expect(calls).toHaveLength(2);
+  },
+);
+
+test("reports a stalled draft-loop iteration as no progress when no blocking entry names its step", async () => {
+  const root = draftFixtureRepo();
+  const record = await runLinearPipeline(draftRunOptions(root, "not-blocked"), {
+    runSkill: draftWorker([], () => [
+      ledgerEntry("a-gap", "a", "open", false),
+      ledgerEntry("a-repaired", "a", "resolved", true),
+      ledgerEntry("b-uncomputable", "b", "open", true),
+    ]),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "loop_no_progress",
+      error: "iteration 1 left galaxy-workflow-draft unchanged; step a is still drafty",
+    }),
+  );
 });
 
 test("caps draft-loop iterations, by default at twice the drafty steps plus the terminal call", async () => {

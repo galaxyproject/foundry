@@ -35,12 +35,13 @@ export interface PromotedArtifact {
 export interface PipelineWorkerRunRecord {
   status: RunStatus;
   // The worker's own kind when it failed; a timed-out or cancelled worker's status says it alone.
-  // The controller adds its own: a promotion it refused, a loop that stalled or hit its cap, or
-  // a run budget spent before the worker could start.
+  // The controller adds its own: a promotion it refused, a loop that stalled, was blocked or hit
+  // its cap, or a run budget spent before the worker could start.
   failure_kind?:
     | PiSkillRunRecord["failure_kind"]
     | "artifact_promotion"
     | "loop_no_progress"
+    | "loop_blocked"
     | "loop_cap"
     | "budget";
   error?: string;
