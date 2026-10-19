@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-09
-revised: 2026-09-20
-revision: 4
+revised: 2026-10-19
+revision: 5
 summary: "Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available."
 input_artifacts:
   - id: workflow-brief
@@ -92,5 +92,7 @@ Read the reviewed, unchanged Workflow Brief and emit a reviewable Markdown inter
 The Workflow Brief is authoritative for objective, included and excluded scope, expert requirements, and acceptance criteria. Consult a retained `freeform-summary` or `summary-nextflow` only as supporting evidence for the selected work. Evidence may supply methods, formats, parameters, datasets, or uncertainty that the concise brief omits, but it cannot silently add analyses or override an expert decision. A hand-authored brief with no source summary is valid.
 
 Translate what the reviewed contract and available evidence support into Galaxy interface decisions. Record evidence as discoveries, authorized mappings as decisions, missing actionable detail as obligations, and any needed change to expert intent as a proposed brief-change recommendation in the ledger. Never edit the brief or apply a proposed change here.
+
+Before the interface decisions, record each of the brief's open questions as a ledger decision, following the Workflow Brief open questions protocol in [[open-requirements-ledger]]. Record every question, including ones about data flow or tests rather than the interface, so none is lost before a later Mold reads the ledger. A brief with no open questions adds nothing.
 
 The output is not a gxformat2 skeleton and not a workflow schema. It is a design handoff consumed by [[workflow-brief-to-galaxy-data-flow]], [[workflow-brief-to-galaxy-template]], and later test-plan work.

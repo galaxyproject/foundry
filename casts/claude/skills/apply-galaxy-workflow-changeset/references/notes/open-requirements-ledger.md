@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-09-21
-revision: 4
+revised: 2026-10-19
+revision: 5
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
@@ -120,6 +120,25 @@ brief_change_recommendations:
 A **discovery** is source or implementation evidence a later phase needs. A **decision** is a choice the run is authorized to make within the reviewed brief; it records rationale and supporting evidence. A **brief-change recommendation** identifies a change outside that authority. The implementation run may only create it with `status: proposed`; it must never mark the recommendation accepted or edit the brief. If correctness depends on the proposed change, stop the run and return it to the separate expert editing step.
 
 Do not use these collections as an undifferentiated activity journal. Classify each durable learning by its effect: evidence about the workflow is a discovery, an authorized choice is a decision, an unmet actionable need is an obligation entry, and a required change of expert intent is a brief-change recommendation. Ordinary phase progress is not workflow knowledge. A problem in a Mold, packaged reference, harness, or related project belongs in `foundry-feedback.ledger.yml` when feedback mode is enabled.
+
+### Workflow Brief open questions
+
+A reviewed Workflow Brief can leave choices in `### Open questions`, each with a proposed answer and its evidence ([[workflow-brief-design]]). The expert accepted each proposal by leaving it unedited, so it is reviewed intent rather than an agent guess. The first design Mold records every open question as a decision, so later Molds and the person reading the run can see what was assumed and why:
+
+```yaml
+decisions:
+  - id: keep-html-reports-only
+    decided_by: workflow-brief-to-galaxy-interface
+    open_question: "Should the FastQC zip archives be kept alongside the HTML reports?"
+    basis: brief-proposal     # brief-proposal | agent
+    decision: "Expose the HTML reports only."
+    rationale: "The brief's proposal, unedited at review."
+```
+
+- `open_question` quotes the brief's question, so each question traces to exactly one decision.
+- `basis: brief-proposal` adopts the brief's proposal. `basis: agent` records the Mold's own answer to a question with no proposal, as in a hand-authored brief.
+- `confidence: low` copies a proposal the brief marked low confidence, or marks an `agent` answer resting on thin evidence. Omit it otherwise. Never drop a low mark.
+- A later Mold that finds a `brief-proposal` decision wrong records a brief-change recommendation, because the expert accepted that answer. One that finds an `agent` decision wrong records its own decision with `supersedes` set to the earlier decision's `id`.
 
 ## How to use the ledger
 

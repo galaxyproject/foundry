@@ -26,6 +26,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | --- | --- | --- | --- | --- |
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
+| [[workflow-brief-to-galaxy-interface]] | Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available. | draft | 2026-10-19 | 5 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-10-16 | 8 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-10-15 | 2 |
 | [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-10-15 | 4 |
@@ -36,7 +37,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-09-22 | 10 |
 | [[repair-galaxy-draft-topology]] | Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs. | draft | 2026-09-22 | 5 |
 | [[workflow-brief-to-galaxy-data-flow]] | Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief. | draft | 2026-09-20 | 4 |
-| [[workflow-brief-to-galaxy-interface]] | Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available. | draft | 2026-09-20 | 4 |
 | [[workflow-brief-to-galaxy-template]] | Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence. | draft | 2026-09-20 | 7 |
 | [[workflow-brief-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence. | draft | 2026-09-20 | 3 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-09-17 | 7 |
@@ -212,6 +212,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[open-requirements-ledger]] | Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state. | draft | 2026-10-19 | 5 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-10-19 | 6 |
 | [[foundry-run-manifest]] | Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard. | draft | 2026-10-14 | 2 |
 | [[iwc-tabular-operations-survey]] | Corpus survey of tabular tools and operations across IWC workflows. Evidence for the operation pattern hierarchy on row/column data manipulation. | draft | 2026-09-28 | 3 |
@@ -234,7 +235,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[iwc-shortcuts-anti-patterns]] | Judgments for when weak Galaxy workflow-test assertions are useful smoke checks and when they conceal untested results. | draft | 2026-09-23 | 3 |
 | [[iwc-test-data-conventions]] | IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values. | draft | 2026-09-23 | 4 |
 | [[planemo-asserts-idioms]] | Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints. | draft | 2026-09-23 | 7 |
-| [[open-requirements-ledger]] | Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state. | draft | 2026-09-21 | 4 |
 | [[markdown-document-contract]] | Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation. | draft | 2026-09-17 | 2 |
 | [[component-nextflow-testing]] | nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7. | draft | 2026-09-15 | 5 |
 | [[galaxy-datatypes-conf]] | Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications. | draft | 2026-09-15 | 3 |
