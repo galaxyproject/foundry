@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-09-20
-revision: 3
+revised: 2026-10-19
+revision: 4
 summary: "Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence."
 input_artifacts:
   - id: workflow-brief
@@ -29,6 +29,9 @@ input_artifacts:
     description: "Structural diff guidance from [[compare-against-iwc-exemplar]]; steers the plan toward IWC-aligned testable checkpoints and fixture shapes."
   - id: iwc-exemplar-gxformat2
     description: "Cleaned gxformat2 view of the nearest IWC exemplar from [[compare-against-iwc-exemplar]]; pattern-match its labels, collection identifiers, and tested checkpoints. Absent when no nearest exemplar was found."
+  - id: open-requirements-ledger
+    optional: true
+    description: "Carried workflow-run knowledge [[open-requirements-ledger]] when the run supplied one; read-only here, used to follow the current answers to the Workflow Brief's open questions."
 output_artifacts:
   - id: galaxy-test-plan
     kind: yaml
@@ -107,6 +110,15 @@ references:
     evidence: corpus-observed
     purpose: "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs."
     trigger: "When recording the labels and checkpoints the downstream test must address."
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Follow the current open-question decisions, including answers the interface Mold made for questions the brief left without a proposal, instead of answering them again."
+    trigger: "When the run supplied an open-requirements ledger whose decisions carry `open_question`."
+    verification: "Run a brief whose open question about test data has no proposal; confirm the test plan follows the interface Mold's recorded answer."
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[tests-format]]"
@@ -115,6 +127,8 @@ related_notes:
 # workflow-brief-to-galaxy-test-plan
 
 Synthesize a Galaxy workflow test plan from the reviewed Workflow Brief and the Galaxy interface and data-flow briefs. Consult retained source evidence when available. The output is a reviewable handoff conforming to [[galaxy-workflow-test-plan]], not a concrete `tests-format` file: it records test cases, job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and intentional omissions so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact.
+
+When the run supplies an open-requirements ledger, follow its current open-question decisions, such as a chosen test dataset, rather than answering those questions again. The ledger is read-only here. A decision that looks wrong for testing goes into the plan's `warnings[]` for the expert, not into a new answer.
 
 ## Synthesized, not translated
 

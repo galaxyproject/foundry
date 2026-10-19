@@ -6,18 +6,18 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[interview-to-workflow-brief]] | Summarize an interview source and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
+| [[nextflow-to-workflow-brief]] | Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
+| [[paper-to-workflow-brief]] | Summarize a paper source and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
 | [[workflow-brief-to-galaxy]] | Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain. | draft | 2026-10-19 | 6 |
 | [[cwl-to-galaxy]] | Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test. | draft | 2026-10-15 | 5 |
 | [[paper-to-galaxy]] | Direct path from a paper to a Galaxy gxformat2 workflow. No Workflow Brief or CWL intermediate. | draft | 2026-10-15 | 6 |
 | [[galaxy-workflow-maturation]] | Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result. | draft | 2026-09-22 | 2 |
 | [[galaxy-workflow-review]] | Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy. | draft | 2026-09-22 | 2 |
 | [[interview-to-galaxy]] | Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. | reviewed | 2026-09-22 | 5 |
-| [[interview-to-workflow-brief]] | Summarize an interview source and produce a scoped Workflow Brief for expert review. | draft | 2026-09-22 | 2 |
 | [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-09-22 | 3 |
 | [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | reviewed | 2026-09-22 | 5 |
-| [[nextflow-to-workflow-brief]] | Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review. | draft | 2026-09-22 | 2 |
 | [[paper-to-cwl]] | Direct path from a paper to a CWL Workflow + CommandLineTool set. | draft | 2026-09-22 | 3 |
-| [[paper-to-workflow-brief]] | Summarize a paper source and produce a scoped Workflow Brief for expert review. | draft | 2026-09-22 | 2 |
 | [[update-interview-to-galaxy]] | Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. | reviewed | 2026-09-22 | 3 |
 
 ## Molds
@@ -27,6 +27,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[workflow-brief-to-galaxy-interface]] | Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available. | draft | 2026-10-19 | 5 |
+| [[workflow-brief-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence. | draft | 2026-10-19 | 4 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-10-16 | 8 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-10-15 | 2 |
 | [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-10-15 | 4 |
@@ -38,7 +39,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[repair-galaxy-draft-topology]] | Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs. | draft | 2026-09-22 | 5 |
 | [[workflow-brief-to-galaxy-data-flow]] | Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief. | draft | 2026-09-20 | 4 |
 | [[workflow-brief-to-galaxy-template]] | Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence. | draft | 2026-09-20 | 7 |
-| [[workflow-brief-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence. | draft | 2026-09-20 | 3 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-09-17 | 7 |
 | [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests. | draft | 2026-09-16 | 11 |
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-09-15 | 3 |

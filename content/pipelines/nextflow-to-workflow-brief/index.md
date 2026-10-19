@@ -6,8 +6,8 @@ tags:
   - journey/plan
 status: draft
 created: '2026-09-17'
-revised: '2026-09-22'
-revision: 2
+revised: '2026-10-19'
+revision: 3
 summary: Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review.
 harness_notes:
   - Brief production ends with workflow-brief.md for expert editing and review; it does not continue into
@@ -16,6 +16,9 @@ harness_notes:
     blocker rather than an agent choice.
   - Retain source evidence and run both structural validation and the static blocker check on the emitted
     brief. A valid blocked brief is an honest production result, not permission to implement.
+  - When reporting at Done, list the brief's open questions with their proposed answers, low-confidence
+    proposals first. Tell the expert that leaving a proposal unedited accepts it and editing the answer
+    overrides it.
 phases:
   - mold: '[[summarize-nextflow]]'
   - mold: '[[nextflow-summary-to-workflow-brief]]'
