@@ -112,7 +112,7 @@ Properties are tagged by bucket:
   chosen step's declared output from its wired inputs, the call either changes
   the draft through [[repair-galaxy-draft-topology]] or leaves a blocking ledger
   entry naming the step, open or surrendered. Mechanically: a call that leaves
-  the draft byte-identical must carry such an entry. Returning with the draft
+  the draft byte-identical must have appended or updated such an entry. Returning with the draft
   and ledger both unchanged fails, as does writing `galaxy-workflow.gxwf.yml`
   before the terminal call.
 

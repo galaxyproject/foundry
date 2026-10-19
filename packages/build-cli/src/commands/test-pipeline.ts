@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { isDeepStrictEqual } from "node:util";
 
 import {
   expectedArtifactsFromSkill,
@@ -30,6 +31,7 @@ import {
 } from "../lib/cast-registry.js";
 import { foundryHead } from "../lib/foundry-head.js";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { parseOpenRequirements } from "../lib/run-ledgers.js";
 import { sha256File } from "../lib/reconcile.js";
 import {
   PIPELINE_RUN_FILE,
@@ -202,8 +204,14 @@ interface LoopOracle {
   /** The cap when the run sets none, from the carried artifact at loop entry. */
   defaultCap(carriedPath: string): number;
   prompt(iteration: number, next: string[] | null): string;
-  /** Where a call that could not do its work records why, and the ids of what blocks that work. */
-  blockers?: { artifact: string; read(file: string, next: string[]): string[] };
+  /**
+   * Where a call that could not do its work records why: the ids of what blocks `next` that the
+   * call itself wrote or changed, from the artifact as the call left it and as it found it.
+   */
+  blockers?: {
+    artifact: string;
+    read(file: string, earlier: string | null, next: string[]): string[];
+  };
 }
 
 function readYamlFile(file: string): unknown {
@@ -236,19 +244,23 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
     },
     blockers: {
       artifact: "open-requirements-ledger",
-      // A blocking entry stays open until a repair closes it, and is surrendered at the cap.
-      read(file, next) {
-        const ledger = readYamlFile(file) as { entries?: unknown } | null;
-        const entries: unknown[] = Array.isArray(ledger?.entries) ? ledger.entries : [];
-        return entries.flatMap((entry) => {
-          const { id, status, blocking, step } = (entry ?? {}) as Record<string, unknown>;
-          const blocks =
-            blocking === true &&
-            (status === "open" || status === "surrendered") &&
-            typeof step === "string" &&
-            next.includes(step);
-          return blocks && typeof id === "string" ? [id] : [];
-        });
+      read(file, earlier, next) {
+        const entries = (ledger: string) => {
+          const parsed = parseOpenRequirements(readYamlFile(ledger), ledger);
+          if (!parsed) throw new Error("it has no list of entries");
+          return parsed.entries;
+        };
+        const before = new Map(earlier ? entries(earlier).map((entry) => [entry.id, entry]) : []);
+        // A blocking entry stays open until a repair closes it, and is surrendered at the cap.
+        return entries(file)
+          .filter(
+            (entry) =>
+              entry.blocking === true &&
+              (entry.status === "open" || entry.status === "surrendered") &&
+              entry.step === next.at(-1) &&
+              !isDeepStrictEqual(before.get(entry.id), entry),
+          )
+          .map((entry) => entry.id);
       },
     },
   },
@@ -744,6 +756,7 @@ export async function runLinearPipeline(
       }
 
       const before = promoted.get(oracle.carried)!;
+      const ledgerBefore = oracle.blockers && promoted.get(oracle.blockers.artifact);
       const next = ask(() => oracle.next(before.absolutePath));
       if (next instanceof Error) {
         return stop(
@@ -790,7 +803,11 @@ export async function runLinearPipeline(
       if (promoted.get(oracle.carried)!.record.sha256 === before.record.sha256) {
         const stalled = `iteration ${n} left ${oracle.carried} unchanged; step ${next.join(" > ")}`;
         const ledger = oracle.blockers && promoted.get(oracle.blockers.artifact);
-        const blockers = ledger ? ask(() => oracle.blockers!.read(ledger.absolutePath, next)) : [];
+        const blockers = ledger
+          ? ask(() =>
+              oracle.blockers!.read(ledger.absolutePath, ledgerBefore?.absolutePath ?? null, next),
+            )
+          : [];
         if (blockers instanceof Error) {
           return stop(
             "failed",
