@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-09-22
-revision: 5
+revised: 2026-10-19
+revision: 6
 summary: "Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs."
 input_artifacts:
   - id: galaxy-workflow-draft
@@ -89,10 +89,10 @@ related_molds:
 ---
 # repair-galaxy-draft-topology
 
-Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop is wrapper-tier — it does not edit topology. This Mold is the **escalation target** the loop reaches when implementation proves the settled topology cannot support a declared step: a step output that needs evidence no wired input carries (the connection graph validates fine, but nothing produces what the output requires). Wrapper-tier gaps — no Tool Shed wrapper picked yet — are not this case; those route through the discover-or-author branch.
+Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop is wrapper-tier — it does not edit topology. This Mold is the **escalation target** the loop reaches when implementation proves the settled topology cannot support a declared step: a step output that needs evidence no wired input carries (the connection graph validates fine, but nothing produces what the output requires). Wrapper-tier gaps — no Tool Shed wrapper picked yet — are not this case; those route through the discover-or-author branch first. When that branch is exhausted — no stock, shed, or authored wrapper can produce the step's declared output from its wired inputs — the loop records a blocking entry, and it is this case.
 
 You are invoked with the partially-realized draft and the [[open-requirements-ledger]]. Read the open blocking entries: each names a step, the uncomputable output, and the missing evidence. Your job is **bounded topology repair** — not re-settling the workflow. Repair the named region and nothing else; the surrounding topology, already-realized steps, and workflow interface stay put.
 
 Decide the *shape* of the fix from the missing evidence, the surrounding data-flow design ([[galaxy-data-flow-draft-contract]]), IWC structure, and the pattern pages. It may be one producer step, or a small sub-path of a few tools, or — when the declared output is genuinely uncomputable and no producer exists — narrowing the step to what its inputs can support. Insert the new step(s) in the draft superset ([[galaxy-workflow-draft-format]]): concrete topology and edges, wrapper-tier `TODO` for `tool_id` and ports, `_plan_*` fields carrying intent. The existing discover-or-author → `summarize-galaxy-tool` → `implement-galaxy-tool-step` machinery realizes them on later loop iterations; do not resolve wrappers here.
 
-Then update the ledger. For each blocking entry your repair addresses, mark it `resolved` with a note on how (producer added, sub-path added, output narrowed). The loop's convergence gate counts open blocking entries and requires each escalation to strictly reduce that count, under a hard cap on escalations. If you cannot close an entry — no producer is discoverable and the output cannot be honestly narrowed — **surrender it**: leave it open with a note, so the terminal path writes it into the final draft as a labelled gap rather than spinning or fabricating. Never insert a producer whose own output is uncomputable from what feeds it; that grows the DAG without reducing the open count and the loop will not converge.
+Then update the ledger. For each blocking entry your repair addresses, mark it `resolved` with a note on how (producer added, sub-path added, output narrowed). A narrowing drops source work, so also record it as a `kind: dropped` entry with its `units` and a cited `because`. The loop's convergence gate counts open blocking entries and requires each escalation to strictly reduce that count, under a hard cap on escalations. If you cannot close an entry — no producer is discoverable and the output cannot be honestly narrowed — **surrender it**: leave it open with a note, so the terminal path writes it into the final draft as a labelled gap rather than spinning or fabricating. Never insert a producer whose own output is uncomputable from what feeds it; that grows the DAG without reducing the open count and the loop will not converge.
