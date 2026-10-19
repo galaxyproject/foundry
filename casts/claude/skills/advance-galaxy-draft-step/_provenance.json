@@ -5,10 +5,10 @@
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 8,
-    "content_hash": "1afa52c18062ae54fb34faea0b6a5890c79db0500d012bb3b0a0489dc47b8d4a",
-    "commit": "c8ef149b9818ce3c899c34cce6f9cc07daaaed98"
+    "content_hash": "d6ef5a3f25fd0a47babff4e814c4b6cc665b7f1213db92bf8498c0449a95a83b",
+    "commit": "327616a11c3f4b24f17515a683f785fd2915f343"
   },
-  "cast_at": "2026-10-19T18:12:22.265Z",
+  "cast_at": "2026-10-19T18:59:18.048Z",
   "refs": [
     {
       "kind": "cli-command",

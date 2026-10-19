@@ -725,7 +725,7 @@ type Draft = { steps: Record<string, Record<string, unknown>> };
 
 /**
  * Concretizes the step the oracle picks, as advance-galaxy-draft-step does, or extracts at the end.
- * `advance` may return the ledger entries the call writes.
+ * `advance` may return the ledger entries the call writes; `ledger` lays them out.
  */
 function draftWorker(
   calls: RunPiSkillOptions[],
@@ -733,6 +733,7 @@ function draftWorker(
     draft.steps[step].tool_id = "cat1";
     draft.steps[step].tool_version = "1.0";
   },
+  ledger: (entries: unknown[]) => unknown = (entries) => ({ entries }),
 ) {
   return async (options: RunPiSkillOptions) => {
     calls.push(options);
@@ -755,7 +756,7 @@ function draftWorker(
       if (next.draft) {
         const entries = advance(draft, next.step.at(-1)!) ?? [];
         write(DRAFT_FILE, draft);
-        write("open-requirements.ledger.yml", { entries });
+        write("open-requirements.ledger.yml", ledger(entries));
       } else {
         write("galaxy-workflow.gxwf.yml", { ...draft, class: "GalaxyWorkflow" });
       }
@@ -904,6 +905,63 @@ test.each(["open", "surrendered"])(
   },
 );
 
+test("reads a blocking entry from a ledger written as a bare list", async () => {
+  const root = draftFixtureRepo();
+  const record = await runLinearPipeline(draftRunOptions(root, "blocked-bare-list"), {
+    runSkill: draftWorker(
+      [],
+      () => [ledgerEntry("a-uncomputable", "a", "open", true)],
+      (entries) => entries,
+    ),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({ failure_kind: "loop_blocked" }),
+  );
+});
+
+test("does not read a blocking entry the stalled call left untouched as its exit", async () => {
+  const root = draftFixtureRepo();
+  // The first call concretizes a and records a blocker for b; the second leaves both alone.
+  const blocker = ledgerEntry("b-uncomputable", "b", "open", true);
+  const record = await runLinearPipeline(draftRunOptions(root, "blocked-earlier"), {
+    runSkill: draftWorker([], (draft, step) => {
+      if (step === "a") {
+        draft.steps.a.tool_id = "cat1";
+        draft.steps.a.tool_version = "1.0";
+      }
+      return [blocker];
+    }),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_no_progress",
+      error: "iteration 2 left galaxy-workflow-draft unchanged; step b is still drafty",
+    }),
+  );
+});
+
+test("reports a stalled draft-loop iteration as no progress when its ledger cannot be read", async () => {
+  const root = draftFixtureRepo();
+  const record = await runLinearPipeline(draftRunOptions(root, "blocked-unreadable"), {
+    runSkill: draftWorker(
+      [],
+      () => undefined,
+      () => "not a ledger",
+    ),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_no_progress",
+      error: expect.stringMatching(
+        /^iteration 1 left galaxy-workflow-draft unchanged; step a is still drafty, and open-requirements-ledger could not be read: /,
+      ),
+    }),
+  );
+});
+
 test("reports a stalled draft-loop iteration as no progress when no blocking entry names its step", async () => {
   const root = draftFixtureRepo();
   const record = await runLinearPipeline(draftRunOptions(root, "not-blocked"), {
@@ -1050,6 +1108,24 @@ test("records a draft the loop oracle cannot read as the loop's error, not a cra
       error: expect.stringMatching(/^loop oracle could not read galaxy-workflow-draft: /),
       iterations: [],
     }),
+  );
+});
+
+test("preflights a loop Mold that does not write the ledger its oracle reads blockers from", async () => {
+  const root = draftFixtureRepo();
+  writeSkill(
+    root,
+    "advance-galaxy-draft-step",
+    ["galaxy-workflow-draft"],
+    [
+      { id: "galaxy-workflow-draft", default_filename: DRAFT_FILE },
+      { id: "galaxy-workflow", default_filename: "galaxy-workflow.gxwf.yml" },
+    ],
+  );
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "oracle-ledger"), { runSkill: draftWorker([]) }),
+  ).rejects.toThrow(
+    "phase 2 (advance-galaxy-draft-step) does not produce open-requirements-ledger, which its loop oracle expects",
   );
 });
 

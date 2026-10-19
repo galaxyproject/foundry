@@ -18,12 +18,12 @@ The Mold gave it no way out. The stock branch of step 2 never searches the
 Tool Shed or authors a wrapper, and step 5 only escalated on a blocking entry
 appended by [[implement-galaxy-tool-step]].
 
-Step 2 now ends: search the Tool Shed, then author. If neither can meet the
+Step 2 now ends: a `TODO` step no stock tool fits is searched on the Tool Shed, then authored. If neither can meet the
 declared output, the call appends a blocking entry for the step and goes to
 step 5. A new "How a call ends" section names the three ways a non-terminal call
 ends and keeps `draft-extract` to the terminal call. A routing eval checks it.
 `repair-galaxy-draft-topology` now accepts the case.
 
-`test-pipeline` reads that entry: a call that leaves the draft unchanged with an
-open or surrendered blocking entry for its step fails as `loop_blocked`, naming
-the entry, rather than `loop_no_progress`.
+`test-pipeline` reads that entry: a call that leaves the draft unchanged but
+appends or updates an open or surrendered blocking entry for its step fails as
+`loop_blocked`, naming the entry, rather than `loop_no_progress`.
