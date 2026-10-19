@@ -16,6 +16,7 @@ import {
   parseTestPipelineArgs,
   runLinearPipeline,
   selectPhases,
+  testPipelineExitCode,
 } from "../src/commands/test-pipeline.js";
 import { loadAssembly } from "../src/lib/cast-registry.js";
 import { foundryHead } from "../src/lib/foundry-head.js";
@@ -1576,4 +1577,12 @@ test("still stops paper-to-cwl at its CWL loop, ahead of the test-data branch", 
   expect(() =>
     selectPhases(loadAssembly(REPO_ROOT, "paper-to-cwl"), "test-data-resolution"),
   ).toThrow("loops over summarize-cwl-tool, which has no controller loop oracle");
+});
+
+test("exits 2 for a blocked run, apart from other runs that did not pass", () => {
+  expect(
+    ["passed", "blocked", "failed", "cancelled"].map((status) =>
+      testPipelineExitCode(status as "passed"),
+    ),
+  ).toEqual([0, 2, 1, 1]);
 });

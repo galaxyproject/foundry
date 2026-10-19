@@ -1114,11 +1114,16 @@ export async function runLinearPipeline(
   return record;
 }
 
+/** 0 for a passed run, 2 for one that needs a person, 1 otherwise. */
+export function testPipelineExitCode(status: PipelineRunRecord["status"]): number {
+  return status === "passed" ? 0 : status === "blocked" ? 2 : 1;
+}
+
 export async function runTestPipelineCommand(argv = process.argv.slice(2)): Promise<void> {
   const args = parseTestPipelineArgs(argv);
   const repoRoot = path.resolve(args.root ?? process.cwd());
   const runDir = path.resolve(args.runDir ?? defaultTestPipelineRunDir(args.pipeline));
   const record = await runLinearPipeline({ ...args, repoRoot, runDir });
   process.stdout.write(`${JSON.stringify(record, null, 2)}\n`);
-  if (record.status !== "passed") process.exitCode = 1;
+  process.exitCode = testPipelineExitCode(record.status);
 }
