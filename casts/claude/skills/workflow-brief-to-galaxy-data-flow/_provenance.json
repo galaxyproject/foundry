@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
     "revision": 4,
     "content_hash": "ce9672837d2b670a64e838b2dbe634b3b07aec40d172d01fb3a7504b6d7294cd",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "commit": "9f40f0e65bf1f465b59332c48af64fc1a1a80cd3"
   },
-  "cast_at": "2026-10-15T21:04:52.505Z",
+  "cast_at": "2026-10-19T18:07:58.203Z",
   "refs": [
     {
       "kind": "pattern",
@@ -126,8 +126,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep reviewed intent authoritative while using source summaries only as supporting evidence.",
       "verification": "Confirm a worked run preserves scope and the brief's bytes while resolving Galaxy data-flow choices.",
-      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
-      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "src_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
+      "dst_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
       "source": "deterministic"
     },
     {

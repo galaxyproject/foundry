@@ -31,6 +31,13 @@ are sample-attributable quality reports. Galaxy representations are left to desi
 
 Preserve sample identity. Do not add analyses outside the selected scope.
 
+### Open questions
+
+- Should the FastQC zip archives be kept alongside the HTML reports?
+  - Proposed: keep the HTML reports only.
+  - Evidence: the source publishes `*.{html,json}` from FASTQC (`conf/modules.config`) and passes the
+    zip archives only to MULTIQC (`workflows/demo.nf`), which the expert excluded.
+
 ## Agent Environment
 
 ### Tooling

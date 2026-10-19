@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "e14d7fc2e0b7a49f2ea2b611adaa81f287159f34c73626b447b7413a9f61215e",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "commit": "9f40f0e65bf1f465b59332c48af64fc1a1a80cd3"
   },
-  "cast_at": "2026-10-15T21:04:53.026Z",
+  "cast_at": "2026-10-19T18:07:58.317Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -210,8 +210,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the reviewed brief authoritative while using retained summaries as evidence rather than replacement intent.",
       "verification": "Confirm a worked run preserves brief scope and bytes through topology construction.",
-      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
-      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "src_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
+      "dst_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
       "source": "deterministic"
     },
     {

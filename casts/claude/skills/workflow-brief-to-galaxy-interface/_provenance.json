@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-interface/index.md",
     "revision": 4,
     "content_hash": "cceda6df2258243be7d60070d11ff2fd0d50b61ee395edaef83902ee060bf0db",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "commit": "9f40f0e65bf1f465b59332c48af64fc1a1a80cd3"
   },
-  "cast_at": "2026-10-15T21:04:52.749Z",
+  "cast_at": "2026-10-19T18:07:58.258Z",
   "refs": [
     {
       "kind": "research",
@@ -103,8 +103,8 @@
       "evidence": "hypothesis",
       "purpose": "Preserve the authority boundary between reviewed intent, optional source evidence, and downstream Galaxy design decisions.",
       "verification": "Confirm a worked run does not broaden brief scope from richer source evidence and leaves the brief unchanged.",
-      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
-      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "src_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
+      "dst_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
       "source": "deterministic"
     },
     {

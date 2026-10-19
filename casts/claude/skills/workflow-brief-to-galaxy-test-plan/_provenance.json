@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-test-plan/index.md",
     "revision": 3,
     "content_hash": "f1a59e333a99f6aefffe21fd33e3c965c31f72cf2359d4d322d90ecbae4689ec",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "commit": "9f40f0e65bf1f465b59332c48af64fc1a1a80cd3"
   },
-  "cast_at": "2026-10-15T21:04:53.126Z",
+  "cast_at": "2026-10-19T18:07:58.381Z",
   "refs": [
     {
       "kind": "research",
@@ -96,8 +96,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep reviewed acceptance criteria authoritative while treating source summaries as supporting evidence.",
       "verification": "Confirm synthesized tests do not assert excluded analyses or silently alter expert acceptance criteria.",
-      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
-      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "src_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
+      "dst_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
       "source": "deterministic"
     },
     {
