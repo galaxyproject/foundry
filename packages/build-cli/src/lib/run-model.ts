@@ -19,8 +19,16 @@ export type RunShape = "harness" | "test-pipeline";
  */
 export type RunProvenance = "recorded" | "reconstructed";
 
-export type RunStatus = "running" | "complete" | "failed" | "cancelled" | "unknown";
-export type PhaseStatus = "pending" | "running" | "done" | "failed" | "skipped" | "unknown";
+export type RunStatus = "running" | "complete" | "failed" | "cancelled" | "blocked" | "unknown";
+/** `blocked`: stopped on something only a person can supply, such as test data. */
+export type PhaseStatus =
+  | "pending"
+  | "running"
+  | "done"
+  | "failed"
+  | "blocked"
+  | "skipped"
+  | "unknown";
 export type PhaseStatusSource =
   | "run-record"
   | "feedback-ledger"

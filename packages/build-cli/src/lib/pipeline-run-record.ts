@@ -14,8 +14,14 @@ import type {
 
 export const PIPELINE_RUN_FILE = "run.json";
 
-/** A trial's or phase's outcome, or `running` while the run has not finished. */
-export type PipelineRunStatus = RunStatus | "running";
+/**
+ * A phase's or trial's outcome. `blocked` is a phase only the controller can end in: it needs
+ * something no worker can supply, such as test data only a person can provide.
+ */
+export type PipelineOutcome = RunStatus | "blocked";
+
+/** A run's outcome, or `running` while the run has not finished. */
+export type PipelineRunStatus = PipelineOutcome | "running";
 
 export interface PipelineScenario {
   name: string;
@@ -36,13 +42,15 @@ export interface PipelineWorkerRunRecord {
   status: RunStatus;
   // The worker's own kind when it failed; a timed-out or cancelled worker's status says it alone.
   // The controller adds its own: a promotion it refused, a loop that stalled, was blocked or hit
-  // its cap, or a run budget spent before the worker could start.
+  // its cap, a branch leg that broke the chain's contract, or a run budget spent before the worker
+  // could start.
   failure_kind?:
     | PiSkillRunRecord["failure_kind"]
     | "artifact_promotion"
     | "loop_no_progress"
     | "loop_blocked"
     | "loop_cap"
+    | "branch_contract"
     | "budget";
   error?: string;
   run_dir: string;
@@ -62,20 +70,33 @@ export interface PipelineLoopIterationRecord extends PipelineWorkerRunRecord {
   next_step: string[] | null;
 }
 
-export interface PipelinePhaseRunRecord extends PipelineWorkerRunRecord {
-  phase: number;
+export interface PipelineBranchLegRecord extends PipelineWorkerRunRecord {
+  /** Position in the branch's chain, from 1. */
+  leg: number;
   skill: string;
+  /** What the leg's output still left unresolved; null when the leg did not pass. */
+  unresolved: string[] | null;
+}
+
+export interface PipelinePhaseRunRecord extends Omit<PipelineWorkerRunRecord, "status"> {
+  status: PipelineOutcome;
+  phase: number;
+  /** The phase's skill; a branch phase's pattern name. */
+  skill: string;
+  /** A branch phase's: those of the leg it entered with. */
   declared_input_ids: string[];
   /**
    * A loop phase's calls, in order. Its own `run_dir` then holds one directory per iteration,
    * its `artifacts` are the latest each id was written, and its `usage` sums the iterations.
    */
   iterations?: PipelineLoopIterationRecord[];
+  /** A branch phase's legs that ran, in chain order, laid out and summed like `iterations`. */
+  legs?: PipelineBranchLegRecord[];
 }
 
 export interface PipelineTrialRunRecord {
   trial: number;
-  status: RunStatus;
+  status: PipelineOutcome;
   phases: PipelinePhaseRunRecord[];
 }
 

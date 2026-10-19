@@ -1163,3 +1163,303 @@ test("preflights the draft loop out of the container sandbox, whose image has no
   );
   expect(existsSync(path.join(root, "runs", "container-loop"))).toBe(false);
 });
+
+const REFS_FILE = "test-data-refs.json";
+
+function branchFixtureRepo(legs = { second: ["galaxy-interface", "test-data-refs"] }): string {
+  const root = fixtureRepo();
+  writeJson(
+    path.join(root, "casts", "claude", "skills", "pipeline-demo-pipeline", "_assembly.json"),
+    {
+      source_pipeline: "demo-pipeline",
+      source_revision: 1,
+      harness_name: "pipeline-demo-pipeline",
+      phases: [
+        { phase: 1, kind: "mold", skill: "interface", cast_present: true, loop: false },
+        {
+          phase: 2,
+          kind: "branch",
+          pattern: "test-data-resolution",
+          chain: ["source-to-test-data", "find-test-data", "user-supplied"],
+          cast_present: [true, true, null],
+        },
+        { phase: 3, kind: "mold", skill: "test-plan", cast_present: true, loop: false },
+      ],
+    },
+  );
+  const refs = { id: "test-data-refs", default_filename: REFS_FILE };
+  writeSkill(root, "interface", [], [{ id: "galaxy-interface", default_filename: "iface.json" }]);
+  writeSkill(root, "source-to-test-data", ["galaxy-interface"], [refs]);
+  writeSkill(root, "find-test-data", legs.second, [refs]);
+  writeSkill(root, "test-plan", ["test-data-refs"], [{ id: "plan", default_filename: "plan.md" }]);
+  return root;
+}
+
+function testDataRef(label: string, resolved: boolean, by = "source-to-test-data") {
+  return {
+    workflow_label: label,
+    collection_shape: null,
+    datatype: "fasta",
+    resolved,
+    resolved_by: resolved ? by : null,
+    reason: resolved ? null : "no data found",
+    fixture: resolved
+      ? { storage: "url", location: `https://example.org/${label}.fa` }
+      : { storage: "unresolved", location: null },
+  };
+}
+
+type Refs = { refs: ReturnType<typeof testDataRef>[] };
+
+/** Runs each branch leg as the given function of the refs staged for it; other skills write stubs. */
+function branchWorker(
+  calls: RunPiSkillOptions[],
+  legs: Record<string, ((earlier: Refs | null) => unknown) | undefined>,
+) {
+  return async (options: RunPiSkillOptions) => {
+    calls.push(options);
+    const skill = path.basename(options.skillDir);
+    const workspace = path.join(options.runDir, "workspace");
+    mkdirSync(workspace, { recursive: true });
+    if (skill in legs) {
+      const staged = options.inputPaths?.find((input) => path.basename(input) === REFS_FILE);
+      const earlier = staged ? (JSON.parse(readFileSync(staged, "utf8")) as Refs) : null;
+      const refs = legs[skill]?.(earlier);
+      if (refs !== undefined) writeJson(path.join(workspace, REFS_FILE), refs);
+    } else {
+      for (const artifact of options.expectedArtifacts ?? []) {
+        writeFileSync(path.join(workspace, artifact.path), `${artifact.id}\n`);
+      }
+    }
+    return workspaceRecord(options, skill);
+  };
+}
+
+/** A later leg as find-test-data runs it: every earlier ref kept, the unresolved ones filled. */
+function fillGaps(earlier: Refs | null): Refs {
+  return {
+    refs: earlier!.refs.map((ref) =>
+      ref.resolved ? ref : testDataRef(ref.workflow_label, true, "find-test-data"),
+    ),
+  };
+}
+
+const halfResolved = () => ({ refs: [testDataRef("a", true), testDataRef("b", false)] });
+
+test("ends the test-data branch at the first leg that resolves every input", async () => {
+  const root = branchFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "branch-first-leg"), {
+    runSkill: branchWorker(calls, {
+      "source-to-test-data": () => ({ refs: [testDataRef("a", true), testDataRef("b", true)] }),
+      "find-test-data": fillGaps,
+    }),
+  });
+
+  expect(record.status).toBe("passed");
+  expect(calls.map((call) => path.basename(call.skillDir))).toEqual([
+    "interface",
+    "source-to-test-data",
+    "test-plan",
+  ]);
+  const branch = record.trials[0]!.phases[1]!;
+  expect(branch).toEqual(
+    expect.objectContaining({
+      phase: 2,
+      skill: "test-data-resolution",
+      status: "passed",
+      run_dir: "trial-001/phase-002-test-data-resolution",
+      declared_input_ids: ["galaxy-interface"],
+    }),
+  );
+  expect(branch.legs?.map((leg) => [leg.leg, leg.skill, leg.run_dir, leg.unresolved])).toEqual([
+    [
+      1,
+      "source-to-test-data",
+      "trial-001/phase-002-test-data-resolution/leg-1-source-to-test-data",
+      [],
+    ],
+  ]);
+  expect(branch.usage?.turns).toBe(1);
+  expect(record.trials[0]!.phases[2]!.resolved_inputs).toEqual([
+    expect.objectContaining({
+      id: "test-data-refs",
+      path: `${branch.legs![0]!.run_dir}/workspace/${REFS_FILE}`,
+      producer_phase: 2,
+    }),
+  ]);
+});
+
+test("runs the next test-data leg on what the earlier one left unresolved", async () => {
+  const root = branchFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "branch-fill"), {
+    runSkill: branchWorker(calls, {
+      "source-to-test-data": halfResolved,
+      "find-test-data": fillGaps,
+    }),
+  });
+
+  expect(record.status).toBe("passed");
+  const branch = record.trials[0]!.phases[1]!;
+  expect(branch.legs?.map((leg) => [leg.skill, leg.unresolved])).toEqual([
+    ["source-to-test-data", ["b"]],
+    ["find-test-data", []],
+  ]);
+  expect(branch.usage?.turns).toBe(2);
+  const find = calls[2]!;
+  expect(find.inputPaths).toContain(
+    path.join(root, "runs", "branch-fill", branch.legs![0]!.run_dir, "workspace", REFS_FILE),
+  );
+  expect(find.prompt).toContain("leaves these inputs unresolved: b");
+  expect(record.trials[0]!.phases[2]!.resolved_inputs[0]!.path).toBe(
+    `${branch.legs![1]!.run_dir}/workspace/${REFS_FILE}`,
+  );
+});
+
+test("blocks the test-data branch when inputs are still unresolved at user-supplied", async () => {
+  const root = branchFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "branch-blocked"), {
+    runSkill: branchWorker(calls, {
+      "source-to-test-data": halfResolved,
+      "find-test-data": (earlier) => earlier,
+    }),
+  });
+
+  expect(record.status).toBe("blocked");
+  expect(record.trials[0]!.status).toBe("blocked");
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "blocked",
+      error:
+        "test-data-resolution left 1 input unresolved after find-test-data: b; the next step, user-supplied, needs a person",
+    }),
+  );
+  expect(record.trials[0]!.phases).toHaveLength(2);
+  expect(calls).toHaveLength(3);
+});
+
+test.each([
+  ["writes no refs", () => ({ refs: [] }), fillGaps, "leg 1 (source-to-test-data) wrote no refs"],
+  [
+    "drops an earlier ref",
+    halfResolved,
+    () => ({ refs: [testDataRef("b", true, "find-test-data")] }),
+    "leg 2 (find-test-data) dropped ref a, which an earlier leg wrote",
+  ],
+  [
+    "changes a resolved ref",
+    halfResolved,
+    () => ({ refs: [testDataRef("a", true, "find-test-data"), testDataRef("b", true)] }),
+    "leg 2 (find-test-data) changed ref a, which an earlier leg resolved",
+  ],
+])("fails a test-data leg that %s", async (_name, first, second, error) => {
+  const root = branchFixtureRepo();
+  const record = await runLinearPipeline(draftRunOptions(root, "branch-contract"), {
+    runSkill: branchWorker([], { "source-to-test-data": first, "find-test-data": second }),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({ status: "failed", failure_kind: "branch_contract", error }),
+  );
+  expect(record.trials[0]!.phases).toHaveLength(2);
+});
+
+test("fails the test-data branch when a leg's worker fails, without trying the next leg", async () => {
+  const root = branchFixtureRepo();
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "branch-leg-failed"), through: "test-data-resolution" },
+    {
+      runSkill: branchWorker(calls, {
+        "source-to-test-data": () => undefined,
+        "find-test-data": fillGaps,
+      }),
+    },
+  );
+
+  expect(record.through_phase).toBe(2);
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "skill",
+      error:
+        "leg 1 (source-to-test-data): declared artifact did not pass: test-data-refs (missing)",
+    }),
+  );
+  expect(calls).toHaveLength(2);
+});
+
+test("stops the test-data branch before a leg once the run budget is spent", async () => {
+  const root = branchFixtureRepo();
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "branch-budget"), maxTokens: 30 },
+    {
+      runSkill: branchWorker([], {
+        "source-to-test-data": halfResolved,
+        "find-test-data": fillGaps,
+      }),
+    },
+  );
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "cancelled",
+      failure_kind: "budget",
+      error: "run budget spent before leg 2: 40 tokens of --max-tokens 30",
+    }),
+  );
+  expect(record.trials[0]!.phases[1]!.legs).toHaveLength(1);
+});
+
+test.each([
+  [
+    "a leg that does not produce the refs",
+    { second: ["galaxy-interface", "test-data-refs"] },
+    (root: string) =>
+      writeSkill(
+        root,
+        "find-test-data",
+        ["test-data-refs"],
+        [{ id: "other", default_filename: "o" }],
+      ),
+    "phase 2 (test-data-resolution) leg find-test-data does not produce test-data-refs, which the branch carries",
+  ],
+  [
+    "a later leg that does not read the refs",
+    { second: ["galaxy-interface"] },
+    () => undefined,
+    "phase 2 (test-data-resolution) leg find-test-data does not consume test-data-refs, which the branch carries",
+  ],
+])("preflights a test-data branch with %s", async (_name, legs, change, error) => {
+  const root = branchFixtureRepo(legs);
+  change(root);
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "branch-preflight"), {
+      runSkill: branchWorker([], {}),
+    }),
+  ).rejects.toThrow(error);
+  expect(existsSync(path.join(root, "runs", "branch-preflight"))).toBe(false);
+});
+
+test.each([
+  [[true, false, null], "phase 2 leg find-test-data does not have a cast skill"],
+  [[null, true, null], "phase 2 chain has a sentinel before its last skill"],
+])("preflights a test-data branch chain marked %j", async (castPresent, error) => {
+  const root = branchFixtureRepo();
+  const assemblyFile = path.join(
+    root,
+    "casts",
+    "claude",
+    "skills",
+    "pipeline-demo-pipeline",
+    "_assembly.json",
+  );
+  const assembly = JSON.parse(readFileSync(assemblyFile, "utf8"));
+  assembly.phases[1].cast_present = castPresent;
+  writeJson(assemblyFile, assembly);
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "branch-chain"), { runSkill: branchWorker([], {}) }),
+  ).rejects.toThrow(error);
+});
