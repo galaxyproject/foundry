@@ -287,6 +287,42 @@ describe("the evaluation run shape", () => {
     expect(model.warnings.map((warning) => warning.code)).toContain("missing-declared-input");
   });
 
+  it("does not report a carried input the phase starts and writes itself", () => {
+    const ledger = {
+      id: "open-requirements-ledger",
+      path: "open-requirements.ledger.yml",
+      status: "present",
+      sha256: "b".repeat(64),
+    };
+    const model = runModelFromTestPipeline({
+      runDir: evaluationRun({
+        status: "passed",
+        trials: [
+          {
+            trial: 1,
+            status: "passed",
+            phases: [
+              summarizePhase(),
+              {
+                phase: 2,
+                skill: "nextflow-summary-to-galaxy-reference-data",
+                status: "passed",
+                run_dir: "trial-001/phase-002-nextflow-summary-to-galaxy-reference-data",
+                declared_input_ids: ["summary-nextflow", "open-requirements-ledger"],
+                missing_input_ids: ["open-requirements-ledger"],
+                artifacts: [ledger],
+              },
+            ],
+          },
+        ],
+      }),
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    expect(model.warnings.map((warning) => warning.code)).not.toContain("missing-declared-input");
+  });
+
   it("judges assembly drift the way a harness run's record is judged", () => {
     const options = { repoRoot: REPO_ROOT, pipelineIndex: index, now: FIXED_CLOCK };
     const current = createHash("sha256")

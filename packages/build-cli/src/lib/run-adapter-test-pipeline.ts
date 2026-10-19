@@ -153,7 +153,11 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         subject: phase.skill,
       });
     }
+    // A carried artifact such as a ledger is read and written back by the same phase, so its
+    // first producer starts without one.
+    const writes = new Set((phase.artifacts ?? []).map((artifact) => artifact.id));
     for (const missing of phase.missing_input_ids ?? []) {
+      if (writes.has(missing)) continue;
       warnings.push({
         code: "missing-declared-input",
         message: `phase ${phase.phase} (${phase.skill}) declared input '${missing}' that no earlier phase promoted`,
