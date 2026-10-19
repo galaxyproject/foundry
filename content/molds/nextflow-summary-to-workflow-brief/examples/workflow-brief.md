@@ -31,6 +31,14 @@ are sample-attributable quality reports. Galaxy representations are left to desi
 
 Preserve sample identity. Do not add analyses outside the selected scope.
 
+### Open questions
+
+- Should the FastQC zip archives be kept alongside the HTML reports?
+  - Proposed: keep the HTML reports only.
+  - Evidence: FASTQC emits HTML reports and zip archives (summary `processes`, FASTQC `outputs`).
+    The zip archives feed only `ch_multiqc_files` and so MULTIQC (summary `workflow.channels`),
+    which the expert excluded.
+
 ## Agent Environment
 
 ### Tooling

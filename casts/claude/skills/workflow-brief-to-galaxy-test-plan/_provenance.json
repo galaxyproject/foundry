@@ -4,11 +4,11 @@
   "mold": {
     "name": "workflow-brief-to-galaxy-test-plan",
     "path": "content/molds/workflow-brief-to-galaxy-test-plan/index.md",
-    "revision": 3,
-    "content_hash": "f1a59e333a99f6aefffe21fd33e3c965c31f72cf2359d4d322d90ecbae4689ec",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "revision": 4,
+    "content_hash": "df02aa501cbc18fdf5c36ddc3f2ca87e17f4db51c054a52cbbef6eb0a66bd4e3",
+    "commit": "e77fd771b6e3c2bd78cea4d7a267164c72df6e73"
   },
-  "cast_at": "2026-10-15T21:04:53.126Z",
+  "cast_at": "2026-10-19T19:10:46.247Z",
   "refs": [
     {
       "kind": "research",
@@ -58,6 +58,22 @@
     {
       "kind": "research",
       "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Follow the current open-question decisions, including answers the interface Mold made for questions the brief left without a proposal, instead of answering them again.",
+      "trigger": "When the run supplied an open-requirements ledger whose decisions carry `open_question`.",
+      "verification": "Run a brief whose open question about test data has no proposal; confirm the test plan follows the interface Mold's recorded answer.",
+      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
       "ref": "[[planemo-asserts-idioms]]",
       "src": "content/research/planemo-asserts-idioms/index.md",
       "dst": "references/notes/planemo-asserts-idioms.md",
@@ -96,8 +112,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep reviewed acceptance criteria authoritative while treating source summaries as supporting evidence.",
       "verification": "Confirm synthesized tests do not assert excluded analyses or silently alter expert acceptance criteria.",
-      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
-      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
       "source": "deterministic"
     },
     {
@@ -213,6 +229,33 @@
         "description": "Cleaned gxformat2 view of the nearest IWC exemplar from [[compare-against-iwc-exemplar]]; pattern-match its labels, collection identifiers, and tested checkpoints. Absent when no nearest exemplar was found.",
         "producers": [
           "compare-against-iwc-exemplar"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried workflow-run knowledge [[open-requirements-ledger]] when the run supplied one; read-only here, used to follow the current answers to the Workflow Brief's open questions.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

@@ -5,7 +5,7 @@ description: "Summarize a paper source and produce a scoped Workflow Brief for e
 
 # pipeline-paper-to-workflow-brief
 
-Harness for the **PAPER → WORKFLOW BRIEF** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-workflow-brief/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline paper-to-workflow-brief` if the pipeline changes; do not hand-edit.
+Harness for the **PAPER → WORKFLOW BRIEF** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/paper-to-workflow-brief/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline paper-to-workflow-brief` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -73,3 +73,4 @@ If the run was invoked with `--feedback`, close the ledger next, after the run r
 - Brief production ends with workflow-brief.md for expert editing and review; it does not continue into Galaxy design or implementation.
 - The caller supplies the desired objective and selected scope. Ambiguous selection becomes a Workflow blocker rather than an agent choice.
 - Retain source evidence and run both structural validation and the static blocker check on the emitted brief. A valid blocked brief is an honest production result, not permission to implement.
+- When reporting at Done, list the brief's open questions with their proposed answers, low-confidence proposals first. Tell the expert that leaving a proposal unedited accepts it and editing the answer overrides it.

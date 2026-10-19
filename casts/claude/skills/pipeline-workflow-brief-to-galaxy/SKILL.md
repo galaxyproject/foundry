@@ -5,7 +5,7 @@ description: "Consume an expert-reviewed, unchanged Workflow Brief directly thro
 
 # pipeline-workflow-brief-to-galaxy
 
-Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 5) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 6) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -96,3 +96,4 @@ If the run was invoked with `--feedback`, close the ledger next, after the run r
 - Record durable workflow knowledge in open-requirements.ledger.yml: evidence as discoveries, authorized choices as decisions, unmet needs as obligations, and changes to expert intent as proposed brief-change recommendations. Harness progress remains harness state. Do not apply a recommendation to the brief; return a required change to the separate expert editing step.
 - The selected brief governs scientific scope. Design Molds consume it directly and may consult retained freeform or Nextflow summaries only as source evidence; linked evidence does not broaden scope.
 - Phase 6 resolves test data with find-test-data then caller-supplied fixtures. Phase 7 develops the test plan; the brief itself never contains final fixture/assertion declarations.
+- When reporting at Done, list the Workflow Brief open questions recorded in open-requirements.ledger.yml with the current answer the run used and its basis, low-confidence answers first, followed by every proposed brief-change recommendation. These are the assumptions the expert should check. Changing one means editing the brief and rerunning.

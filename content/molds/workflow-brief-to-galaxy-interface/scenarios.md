@@ -43,6 +43,16 @@ evidence rather than the authoritative input.
   confidence-tagged assumptions, not silently resolved into precise facts the
   source does not support.
 
+## Case: brief open questions with proposed answers
+
+- fixture: a Workflow Brief with three open questions: one with a supported
+  proposed answer, one whose proposal is marked low confidence, and one with
+  no proposal.
+- expect: the ledger gains one decision per question, each quoting it in
+  `open_question`. The first two carry `basis: brief-proposal` and the low
+  mark survives as `confidence: low`. The third carries `basis: agent` with
+  the Mold's own answer and rationale. The brief is unchanged.
+
 ## Case: brief consumed by the data-flow Mold
 
 - fixture: Workflow Brief, interface brief, and optional source evidence.

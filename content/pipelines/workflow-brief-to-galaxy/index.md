@@ -6,8 +6,8 @@ tags:
   - journey/build-from-plan
 status: draft
 created: '2026-09-17'
-revised: '2026-09-22'
-revision: 5
+revised: '2026-10-19'
+revision: 6
 summary: Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain.
 harness_notes:
   - The caller supplies workflow-brief.md; a hand-authored brief is a valid entry and requires no source-to-brief
@@ -29,6 +29,10 @@ harness_notes:
     freeform or Nextflow summaries only as source evidence; linked evidence does not broaden scope.
   - Phase 6 resolves test data with find-test-data then caller-supplied fixtures. Phase 7 develops the
     test plan; the brief itself never contains final fixture/assertion declarations.
+  - When reporting at Done, list the Workflow Brief open questions recorded in open-requirements.ledger.yml
+    with the current answer the run used and its basis, low-confidence answers first, followed by every proposed
+    brief-change recommendation. These are the assumptions the expert should check. Changing one means
+    editing the brief and rerunning.
 phases:
   - mold: '[[workflow-brief-to-galaxy-interface]]'
   - mold: '[[workflow-brief-to-galaxy-data-flow]]'

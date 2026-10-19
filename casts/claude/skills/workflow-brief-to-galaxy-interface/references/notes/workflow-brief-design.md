@@ -5,8 +5,8 @@ tags:
   - meta
 status: draft
 created: 2026-09-17
-revised: 2026-09-20
-revision: 5
+revised: 2026-10-19
+revision: 6
 summary: "Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers."
 ---
 
@@ -29,7 +29,7 @@ The `workflowBriefSchema` declaration uses the shared engine described in [[mark
 | `### Inputs and outputs` | No | Scientific roles and source-supported formats or organization. |
 | `### Requirements and preferences` | No | Expert or source requirements, their strength, rationale, and evidence. |
 | `### Acceptance criteria` | No | High-level behaviors that establish success. |
-| `### Open questions` | No | Questions that do not prevent work from proceeding. |
+| `### Open questions` | No | Unresolved choices that do not prevent work, each with a proposed answer and its evidence. |
 | `### Decisions` | No | Expert decisions and rationale. |
 | `### Related artifacts` | No | Links to source evidence and other relevant inputs. |
 | `### Blockers` | No, under Workflow | Unresolved issues that prevent design or implementation. Any content blocks work. |
@@ -47,7 +47,17 @@ The writing agent must record evidence and expert intent without making Galaxy d
 
 The agent must not write a step graph, concrete tool state, or final test declarations into the brief. Interface design, data-flow design, tool discovery, and test development belong to the downstream design and implementation Molds. Inputs and outputs stay at scientific roles and source-supported descriptions. Acceptance criteria stay high-level; detailed fixtures and assertions belong to test development.
 
-Requirements and preferences describe what the expert or source asks for. Agent Environment Constraints describe restrictions on the agent's work. Uncertainty that prevents proceeding belongs in Blockers; other questions can remain in Open questions.
+Requirements and preferences describe what the expert or source asks for. Agent Environment Constraints describe restrictions on the agent's work. Uncertainty that prevents proceeding belongs in Blockers. Record every other unresolved choice in Open questions with a proposed answer and the evidence for it, such as source behavior, the expert's wording, or the available test data. Propose the answer the evidence best supports. Where expert intent and source behavior conflict, propose the expert's intent and cite the conflict. When the evidence is thin, still propose an answer, mark it low confidence, and say what evidence is missing. The expert accepts a proposal by leaving it unedited and overrides it by editing the answer.
+
+Write each open question as a bullet with `Proposed:` and `Evidence:` sub-bullets. Add `Confidence: low` and `Missing:` when the evidence is thin:
+
+```md
+- Should runs of one sample be merged before trimming?
+  - Proposed: yes, merge them as the source does.
+  - Evidence: the source merges sample-sheet rows sharing a sample ID. The selection does not mention merging.
+  - Confidence: low
+  - Missing: whether the expert's samples ever span several runs.
+```
 
 ## Agent environment
 

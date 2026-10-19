@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
     "revision": 4,
     "content_hash": "ce9672837d2b670a64e838b2dbe634b3b07aec40d172d01fb3a7504b6d7294cd",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
   },
-  "cast_at": "2026-10-15T21:04:52.505Z",
+  "cast_at": "2026-10-19T19:01:30.456Z",
   "refs": [
     {
       "kind": "pattern",
@@ -111,8 +111,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the narrative leaves open — a described transformation with no named tool, an implied intermediate the source never states, an ordering the prose doesn't fix.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
-      "dst_hash": "4f1a9fb3991030992ad19f3ebd536d0a2f3a6c047f3b873a702e2d82523ac2b8",
+      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
       "source": "deterministic"
     },
     {
@@ -126,8 +126,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep reviewed intent authoritative while using source summaries only as supporting evidence.",
       "verification": "Confirm a worked run preserves scope and the brief's bytes while resolving Galaxy data-flow choices.",
-      "src_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
-      "dst_hash": "d4c328a79ec2a15fe60dee4fe07684a4bbca1d2d20626ba57e2623fe85a18aae",
+      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
       "source": "deterministic"
     },
     {

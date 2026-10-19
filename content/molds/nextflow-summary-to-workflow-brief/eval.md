@@ -19,3 +19,8 @@
 
 - check: llm-judged
 - assertion: Requested tooling and container preferences are distinguished from observed versions/usability and from unknown availability.
+
+## Property: every open question carries a proposed answer
+
+- check: llm-judged
+- assertion: Each Open questions item has a proposed answer and the evidence for it. Where expert intent and source behavior conflict, the proposal follows the expert and cites the conflict. A proposal resting on thin evidence is marked low confidence and names the missing evidence rather than presenting a guess as settled.

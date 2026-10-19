@@ -7,8 +7,8 @@ tags:
   - source/freeform
 status: draft
 created: '2026-09-17'
-revised: '2026-09-17'
-revision: 1
+revised: '2026-10-19'
+revision: 2
 summary: Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design
   assumptions.
 input_artifacts:
@@ -78,7 +78,7 @@ The writing agent must not infer Galaxy datatypes, collections, interface labels
 
 Use supplied environment evidence or harmless availability/version probes to describe expected `gxwf`, `foundry`, and `planemo` tooling, agent constraints, container preferences, and Docker/Singularity/Apptainer usability. Distinguish requested requirements, observed facts, and unknowns. Do not claim a container engine works based only on an executable being on PATH. Do not install tools or change the environment as part of brief production.
 
-Place known issues preventing work in `### Blockers` under the appropriate parent. Put nonblocking questions in Workflow/Open questions. Omit or leave Blockers empty when there are none; any text there, including “none”, is blocking.
+Place known issues preventing work in `### Blockers` under the appropriate parent. Put other unresolved choices in Workflow/Open questions, each with a proposed answer and its evidence. Omit or leave Blockers empty when there are none. Any text there, including “none”, is blocking.
 
 ## Validate and hand off
 

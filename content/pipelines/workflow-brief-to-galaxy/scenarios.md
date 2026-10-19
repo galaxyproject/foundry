@@ -14,3 +14,8 @@
 
 - fixture: `content/molds/nextflow-summary-to-workflow-brief/examples/workflow-brief.md`
 - expect: Direct design keeps read quality reporting and excludes trimming and aggregate reporting. Links to the source summary retain evidence; the agent never treats that evidence as authority or widens or edits the brief.
+
+## Case: open-question answers are reported at the end of the run
+
+- fixture: `content/molds/nextflow-summary-to-workflow-brief/examples/workflow-brief.md`
+- expect: The ledger records the brief's FastQC zip-archive question as a decision with `basis: brief-proposal`. The final report lists that question with the answer used, lists low-confidence answers first when there are any, and lists any proposed brief-change recommendations. The brief is unchanged.
