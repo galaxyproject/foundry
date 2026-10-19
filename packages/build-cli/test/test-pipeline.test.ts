@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 import type { PiSkillRunRecord, RunPiSkillOptions } from "@galaxy-foundry/gxwf-pi-harness";
 import { nextDraftStep } from "@galaxy-tool-util/schema";
@@ -14,7 +15,9 @@ import {
   defaultTestPipelineRunDir,
   parseTestPipelineArgs,
   runLinearPipeline,
+  selectPhases,
 } from "../src/commands/test-pipeline.js";
+import { loadAssembly } from "../src/lib/cast-registry.js";
 import { foundryHead } from "../src/lib/foundry-head.js";
 
 function writeJson(filePath: string, value: unknown): void {
@@ -1225,7 +1228,8 @@ function branchWorker(
       const staged = options.inputPaths?.find((input) => path.basename(input) === REFS_FILE);
       const earlier = staged ? (JSON.parse(readFileSync(staged, "utf8")) as Refs) : null;
       const refs = legs[skill]?.(earlier);
-      if (refs !== undefined) writeJson(path.join(workspace, REFS_FILE), refs);
+      if (typeof refs === "string") writeFileSync(path.join(workspace, REFS_FILE), refs);
+      else if (refs !== undefined) writeJson(path.join(workspace, REFS_FILE), refs);
     } else {
       for (const artifact of options.expectedArtifacts ?? []) {
         writeFileSync(path.join(workspace, artifact.path), `${artifact.id}\n`);
@@ -1462,4 +1466,114 @@ test.each([
   await expect(
     runLinearPipeline(draftRunOptions(root, "branch-chain"), { runSkill: branchWorker([], {}) }),
   ).rejects.toThrow(error);
+});
+
+test("reports refs the branch oracle cannot read as a controller error, not the leg's", async () => {
+  const root = branchFixtureRepo();
+  const record = await runLinearPipeline(draftRunOptions(root, "branch-unreadable"), {
+    runSkill: branchWorker([], { "source-to-test-data": () => "not json" }),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "error",
+      error: expect.stringMatching(
+        /^branch oracle could not read test-data-refs from leg 1 \(source-to-test-data\): /,
+      ),
+    }),
+  );
+});
+
+test("runs a test-data chain whose first leg is find-test-data, with no refs staged", async () => {
+  const root = branchFixtureRepo();
+  const assemblyFile = path.join(
+    root,
+    "casts",
+    "claude",
+    "skills",
+    "pipeline-demo-pipeline",
+    "_assembly.json",
+  );
+  const assembly = JSON.parse(readFileSync(assemblyFile, "utf8"));
+  assembly.phases[1].chain = ["find-test-data", "user-supplied"];
+  assembly.phases[1].cast_present = [true, null];
+  writeJson(assemblyFile, assembly);
+  const record = await runLinearPipeline(draftRunOptions(root, "branch-find-only"), {
+    runSkill: branchWorker([], {
+      "find-test-data": (earlier) => {
+        expect(earlier).toBeNull();
+        return { refs: [testDataRef("a", true, "find-test-data")] };
+      },
+    }),
+  });
+
+  expect(record.status).toBe("passed");
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      declared_input_ids: ["galaxy-interface", "test-data-refs"],
+      missing_input_ids: ["test-data-refs"],
+    }),
+  );
+});
+
+test("preflights a test-data chain that ends on more than one sentinel", async () => {
+  const root = branchFixtureRepo();
+  const assemblyFile = path.join(
+    root,
+    "casts",
+    "claude",
+    "skills",
+    "pipeline-demo-pipeline",
+    "_assembly.json",
+  );
+  const assembly = JSON.parse(readFileSync(assemblyFile, "utf8"));
+  assembly.phases[1].chain.push("ask-again");
+  assembly.phases[1].cast_present.push(null);
+  writeJson(assemblyFile, assembly);
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "branch-sentinels"), {
+      runSkill: branchWorker([], {}),
+    }),
+  ).rejects.toThrow("phase 2 chain ends on more than one sentinel");
+});
+
+test("reads a run as blocked when one trial blocks and another passes", async () => {
+  const root = branchFixtureRepo();
+  let trial = 0;
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "branch-trials"), trials: 2 },
+    {
+      runSkill: branchWorker([], {
+        "source-to-test-data": () => {
+          trial++;
+          return trial === 1 ? halfResolved() : { refs: [testDataRef("a", true)] };
+        },
+        "find-test-data": (earlier) => earlier,
+      }),
+    },
+  );
+
+  expect(record.trials.map((t) => t.status)).toEqual(["blocked", "passed"]);
+  expect(record.status).toBe("blocked");
+});
+
+const REPO_ROOT = path.resolve(fileURLToPath(new URL("../../..", import.meta.url)));
+
+test.each([
+  "cwl-to-galaxy",
+  "interview-to-galaxy",
+  "nextflow-to-galaxy",
+  "paper-to-galaxy",
+  "workflow-brief-to-galaxy",
+])("accepts the committed %s assembly through its test-data branch", (pipeline) => {
+  const assembly = loadAssembly(REPO_ROOT, pipeline);
+  expect(selectPhases(assembly, "test-data-resolution").at(-1)).toEqual(
+    expect.objectContaining({ kind: "branch", pattern: "test-data-resolution" }),
+  );
+});
+
+test("still stops paper-to-cwl at its CWL loop, ahead of the test-data branch", () => {
+  expect(() =>
+    selectPhases(loadAssembly(REPO_ROOT, "paper-to-cwl"), "test-data-resolution"),
+  ).toThrow("loops over summarize-cwl-tool, which has no controller loop oracle");
 });

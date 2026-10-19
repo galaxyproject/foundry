@@ -232,7 +232,7 @@ section { margin: 40px 0 0; scroll-margin-top: 16px; }
 .badge[data-state="error"], .badge[data-v="missing"], .badge[data-v="failed"], .badge[data-v="blocker"] {
   border-color: var(--error); color: var(--error);
 }
-.badge[data-state="warn"], .badge[data-v="running"], .badge[data-v="open"], .badge[data-v="surrendered"], .badge[data-v="major"] {
+.badge[data-state="warn"], .badge[data-v="running"], .badge[data-v="blocked"], .badge[data-v="open"], .badge[data-v="surrendered"], .badge[data-v="major"] {
   border-color: var(--warn); color: var(--warn);
 }
 

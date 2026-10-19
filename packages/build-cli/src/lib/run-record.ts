@@ -60,18 +60,10 @@ const PHASE_STATUSES = new Set<PhaseStatus>([
   "running",
   "done",
   "failed",
-  "blocked",
   "skipped",
   "unknown",
 ]);
-const RUN_STATUSES = new Set<RunStatus>([
-  "running",
-  "complete",
-  "failed",
-  "cancelled",
-  "blocked",
-  "unknown",
-]);
+const RUN_STATUSES = new Set<RunStatus>(["running", "complete", "failed", "cancelled", "unknown"]);
 
 /**
  * An identifier that YAML may have resolved to a number.

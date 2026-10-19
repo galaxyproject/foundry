@@ -176,6 +176,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   interface Write {
     phase: number;
     iteration: number | null;
+    leg: number | null;
     /** The worker within the phase, for messages: ` iteration 2`, ` leg 1 (find-test-data)`. */
     within: string;
     runDir: string;
@@ -187,11 +188,17 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       ? phase.iterations.map((iteration) => ({
           ...iteration,
           n: iteration.iteration,
+          legN: null,
           within: ` iteration ${iteration.iteration}`,
         }))
       : phase.legs?.length
-        ? phase.legs.map((leg) => ({ ...leg, n: null, within: ` leg ${leg.leg} (${leg.skill})` }))
-        : [{ ...phase, n: null, within: "" }];
+        ? phase.legs.map((leg) => ({
+            ...leg,
+            n: null,
+            legN: leg.leg,
+            within: ` leg ${leg.leg} (${leg.skill})`,
+          }))
+        : [{ ...phase, n: null, legN: null, within: "" }];
     const several = Boolean(phase.iterations?.length || phase.legs?.length);
     for (const worker of workers) {
       for (const artifact of worker.artifacts ?? []) {
@@ -201,6 +208,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
           {
             phase: phase.phase,
             iteration: worker.n,
+            leg: worker.legN,
             within: worker.within,
             runDir: worker.run_dir,
             result: artifact,
@@ -240,6 +248,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         at: null,
         phase: write.phase,
         iteration: write.iteration,
+        ...(write.leg === null ? {} : { leg: write.leg }),
       })),
       variants: [],
       validation:
@@ -273,7 +282,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       trial: trial.trial,
       status: trial.status,
       phase_count: trial.phases.length,
-      failed_phase: trial.phases.find((phase) => phase.status !== "passed")?.phase ?? null,
+      stopped_phase: trial.phases.find((phase) => phase.status !== "passed")?.phase ?? null,
     })),
     selected_trial: chosen?.trial ?? null,
     duration_ms: record.duration_ms,

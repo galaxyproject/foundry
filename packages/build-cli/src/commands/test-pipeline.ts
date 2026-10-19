@@ -320,7 +320,7 @@ const BRANCH_ORACLES: Record<string, BranchOracle> = {
   },
 };
 
-function selectPhases(manifest: AssemblyManifest, through?: string): AssemblyPhase[] {
+export function selectPhases(manifest: AssemblyManifest, through?: string): AssemblyPhase[] {
   let throughIndex = manifest.phases.length;
   if (through !== undefined) {
     if (/^[1-9][0-9]*$/.test(through)) {
@@ -554,6 +554,15 @@ function spentBudget(
     return `${usage.total_tokens} tokens of --max-tokens ${options.maxTokens}`;
   }
   return null;
+}
+
+/** An oracle's answer, or the error it threw reading an artifact a validator already passed. */
+function attempt<T>(question: () => T): T | Error {
+  try {
+    return question();
+  } catch (caught) {
+    return caught instanceof Error ? caught : new Error(String(caught));
+  }
 }
 
 function padded(n: number): string {
@@ -817,47 +826,81 @@ export async function runLinearPipeline(
     }
   };
 
-  const runLoop = async (
-    plan: WorkerPlan,
-    oracle: LoopOracle,
+  /**
+   * A phase run as several workers in turn — a loop's calls or a branch's legs — kept as one
+   * record. Its `run_dir` holds one directory per worker, its `artifacts` are the latest each id
+   * was written, and its `usage` sums the workers'.
+   */
+  const multiWorkerPhase = (
+    plan: PhasePlan,
+    entryPlan: WorkerPlan,
     phaseRunDir: string,
     promoted: Promoted,
-    cacheDir: string,
-  ): Promise<PipelinePhaseRunRecord> => {
-    const entry = staged(plan, promoted, null);
-    const iterations: PipelineLoopIterationRecord[] = [];
+  ) => {
+    const entry = staged(entryPlan, promoted, null);
     const latest = new Map<string, PipelineWorkerRunRecord["artifacts"][number]>();
     const phaseRecord: PipelinePhaseRunRecord = {
       phase: plan.phase.phase,
       skill: plan.skill,
       status: "passed",
       run_dir: relative(phaseRunDir),
-      declared_input_ids: plan.consumes,
+      declared_input_ids: entryPlan.consumes,
       resolved_inputs: entry.resolved,
       missing_input_ids: entry.missing,
       artifacts: [],
       usage: emptyUsage(),
-      iterations,
     };
     const stop = (
       status: PipelinePhaseRunRecord["status"],
       failureKind: PipelinePhaseRunRecord["failure_kind"],
       error: string,
     ) => Object.assign(phaseRecord, { status, failure_kind: failureKind, error });
+    /** Runs one worker, carries forward what it passed, and adds it to the phase. */
+    const step = async (
+      worker: WorkerPlan,
+      workerDir: string,
+      expected: ExpectedArtifact[],
+      prompt: string,
+      cacheDir?: string,
+    ): Promise<PipelineWorkerRunRecord> => {
+      const result = await launch(
+        worker,
+        workerDir,
+        staged(worker, promoted, null),
+        expected,
+        prompt,
+        cacheDir,
+      );
+      if (result.status === "passed") {
+        promote(result, expected, workerDir, plan.phase.phase, promoted);
+      }
+      addUsage(phaseRecord.usage!, result.usage);
+      for (const artifact of result.artifacts) {
+        if (artifact.status !== "missing") latest.set(artifact.id, artifact);
+      }
+      phaseRecord.artifacts = [...latest.values()];
+      return result;
+    };
+    return { phaseRecord, stop, step };
+  };
+
+  const runLoop = async (
+    plan: MoldPhasePlan,
+    oracle: LoopOracle,
+    phaseRunDir: string,
+    promoted: Promoted,
+    cacheDir: string,
+  ): Promise<PipelinePhaseRunRecord> => {
+    const { phaseRecord, stop, step } = multiWorkerPhase(plan, plan, phaseRunDir, promoted);
+    const iterations: PipelineLoopIterationRecord[] = [];
+    phaseRecord.iterations = iterations;
 
     const carriedAtEntry = promoted.get(oracle.carried);
     if (!carriedAtEntry) {
       return stop("error", undefined, `no earlier phase promoted ${oracle.carried}`);
     }
-    // The carried artifact passed its validator to be promoted, but the oracle still parses it.
-    const ask = <T>(question: () => T): T | Error => {
-      try {
-        return question();
-      } catch (caught) {
-        return caught instanceof Error ? caught : new Error(String(caught));
-      }
-    };
-    const cap = options.maxIterations ?? ask(() => oracle.defaultCap(carriedAtEntry.absolutePath));
+    const cap =
+      options.maxIterations ?? attempt(() => oracle.defaultCap(carriedAtEntry.absolutePath));
     if (cap instanceof Error) {
       return stop(
         "error",
@@ -880,7 +923,7 @@ export async function runLinearPipeline(
 
       const before = promoted.get(oracle.carried)!;
       const ledgerBefore = oracle.blockers && promoted.get(oracle.blockers.artifact);
-      const next = ask(() => oracle.next(before.absolutePath));
+      const next = attempt(() => oracle.next(before.absolutePath));
       if (next instanceof Error) {
         return stop(
           "error",
@@ -897,23 +940,8 @@ export async function runLinearPipeline(
         return [{ ...artifact, optional: artifact.optional === true || !terminalOutput }];
       });
       const iterationDir = path.join(phaseRunDir, `iteration-${padded(n)}`);
-      const result = await launch(
-        plan,
-        iterationDir,
-        staged(plan, promoted, null),
-        expected,
-        oracle.prompt(n, next),
-        cacheDir,
-      );
-      if (result.status === "passed") {
-        promote(result, expected, iterationDir, plan.phase.phase, promoted);
-      }
+      const result = await step(plan, iterationDir, expected, oracle.prompt(n, next), cacheDir);
       iterations.push({ iteration: n, next_step: next, ...result });
-      addUsage(phaseRecord.usage!, result.usage);
-      for (const artifact of result.artifacts) {
-        if (artifact.status !== "missing") latest.set(artifact.id, artifact);
-      }
-      phaseRecord.artifacts = [...latest.values()];
 
       if (result.status !== "passed") {
         return stop(
@@ -927,7 +955,7 @@ export async function runLinearPipeline(
         const stalled = `iteration ${n} left ${oracle.carried} unchanged; step ${next.join(" > ")}`;
         const ledger = oracle.blockers && promoted.get(oracle.blockers.artifact);
         const blockers = ledger
-          ? ask(() =>
+          ? attempt(() =>
               oracle.blockers!.read(ledger.absolutePath, ledgerBefore?.absolutePath ?? null, next),
             )
           : [];
@@ -956,26 +984,14 @@ export async function runLinearPipeline(
     promoted: Promoted,
   ): Promise<PipelinePhaseRunRecord> => {
     const oracle = plan.branch;
-    const entry = staged(plan.legs[0]!, promoted, null);
+    const { phaseRecord, stop, step } = multiWorkerPhase(
+      plan,
+      plan.legs[0]!,
+      phaseRunDir,
+      promoted,
+    );
     const legs: PipelineBranchLegRecord[] = [];
-    const latest = new Map<string, PipelineWorkerRunRecord["artifacts"][number]>();
-    const phaseRecord: PipelinePhaseRunRecord = {
-      phase: plan.phase.phase,
-      skill: plan.skill,
-      status: "passed",
-      run_dir: relative(phaseRunDir),
-      declared_input_ids: plan.legs[0]!.consumes,
-      resolved_inputs: entry.resolved,
-      missing_input_ids: entry.missing,
-      artifacts: [],
-      usage: emptyUsage(),
-      legs,
-    };
-    const stop = (
-      status: PipelinePhaseRunRecord["status"],
-      failureKind: PipelinePhaseRunRecord["failure_kind"],
-      error: string,
-    ) => Object.assign(phaseRecord, { status, failure_kind: failureKind, error });
+    phaseRecord.legs = legs;
 
     let unresolved: string[] | null = null;
     for (const [index, leg] of plan.legs.entries()) {
@@ -985,16 +1001,7 @@ export async function runLinearPipeline(
 
       const earlier = promoted.get(oracle.carried);
       const legDir = path.join(phaseRunDir, `leg-${n}-${leg.skill}`);
-      const result = await launch(
-        leg,
-        legDir,
-        staged(leg, promoted, null),
-        leg.produces,
-        oracle.prompt(n, unresolved),
-      );
-      if (result.status === "passed") {
-        promote(result, leg.produces, legDir, plan.phase.phase, promoted);
-      }
+      const result = await step(leg, legDir, leg.produces, oracle.prompt(n, unresolved));
       const legRecord: PipelineBranchLegRecord = {
         leg: n,
         skill: leg.skill,
@@ -1002,11 +1009,6 @@ export async function runLinearPipeline(
         ...result,
       };
       legs.push(legRecord);
-      addUsage(phaseRecord.usage!, result.usage);
-      for (const artifact of result.artifacts) {
-        if (artifact.status !== "missing") latest.set(artifact.id, artifact);
-      }
-      phaseRecord.artifacts = [...latest.values()];
 
       const label = `leg ${n} (${leg.skill})`;
       if (result.status !== "passed") {
@@ -1017,16 +1019,20 @@ export async function runLinearPipeline(
         );
       }
       const carried = promoted.get(oracle.carried)!.absolutePath;
-      let broken: string | null;
-      try {
-        broken = oracle.broken(carried, earlier?.absolutePath ?? null);
-        unresolved = oracle.unresolved(carried);
-      } catch (caught) {
-        broken = `could not be read: ${caught instanceof Error ? caught.message : String(caught)}`;
+      const answer = attempt(() => ({
+        broken: oracle.broken(carried, earlier?.absolutePath ?? null),
+        unresolved: oracle.unresolved(carried),
+      }));
+      if (answer instanceof Error) {
+        return stop(
+          "error",
+          undefined,
+          `branch oracle could not read ${oracle.carried} from ${label}: ${answer.message}`,
+        );
       }
-      if (broken) return stop("failed", "branch_contract", `${label} ${broken}`);
-      legRecord.unresolved = unresolved;
-      if (!unresolved!.length) return phaseRecord;
+      if (answer.broken) return stop("failed", "branch_contract", `${label} ${answer.broken}`);
+      unresolved = legRecord.unresolved = answer.unresolved;
+      if (!unresolved.length) return phaseRecord;
     }
 
     const count = `${unresolved!.length} input${unresolved!.length === 1 ? "" : "s"}`;

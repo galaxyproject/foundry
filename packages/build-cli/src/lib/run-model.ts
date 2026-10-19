@@ -76,6 +76,8 @@ export interface ArtifactWrite {
   at: string | null;
   phase: number | null;
   iteration: number | null;
+  /** The branch leg that wrote it, from 1; set only on a write by a branch leg. */
+  leg?: number;
 }
 
 export type DerivedView =
@@ -285,7 +287,8 @@ export interface EvaluationModel {
     trial: number;
     status: string;
     phase_count: number;
-    failed_phase: number | null;
+    /** The phase the trial stopped at: one that failed, or a blocked one. */
+    stopped_phase: number | null;
   }>;
   selected_trial: number | null;
   duration_ms: number;
