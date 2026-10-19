@@ -35,8 +35,9 @@ Preserve sample identity. Do not add analyses outside the selected scope.
 
 - Should the FastQC zip archives be kept alongside the HTML reports?
   - Proposed: keep the HTML reports only.
-  - Evidence: the source publishes `*.{html,json}` from FASTQC (`conf/modules.config`) and passes the
-    zip archives only to MULTIQC (`workflows/demo.nf`), which the expert excluded.
+  - Evidence: FASTQC emits HTML reports and zip archives (summary `processes`, FASTQC `outputs`).
+    The zip archives feed only `ch_multiqc_files` and so MULTIQC (summary `workflow.channels`),
+    which the expert excluded.
 
 ## Agent Environment
 

@@ -5,10 +5,10 @@
     "name": "freeform-summary-to-workflow-brief",
     "path": "content/molds/freeform-summary-to-workflow-brief/index.md",
     "revision": 2,
-    "content_hash": "224c43766341f0264127b60c967373e27dcbccec4f640ccf3d15f0127acf7fa3",
-    "commit": "9f40f0e65bf1f465b59332c48af64fc1a1a80cd3"
+    "content_hash": "c4ed7645e511fb513295d1c5a031a3ad9dee4210522ac4880dd577bbe5931f24",
+    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
   },
-  "cast_at": "2026-10-19T18:07:54.576Z",
+  "cast_at": "2026-10-19T19:01:25.861Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -53,8 +53,8 @@
       "evidence": "hypothesis",
       "purpose": "Apply the brief boundaries: evidence and expert intent, no inferred Galaxy design, and separate workflow/environment blockers.",
       "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
-      "src_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
-      "dst_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
+      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
       "source": "deterministic"
     },
     {

@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-interface/index.md",
     "revision": 5,
     "content_hash": "c84d428e03ab42e7b33335c72de6728d5bf26726e4a9986bf49343e6461a2fcd",
-    "commit": "6cbd879b25fd2ccd02140288cb515e654c881fe6"
+    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
   },
-  "cast_at": "2026-10-19T18:26:57.316Z",
+  "cast_at": "2026-10-19T19:01:30.682Z",
   "refs": [
     {
       "kind": "research",
@@ -88,8 +88,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the narrative never settles — an output the source names but never specifies, a parameter stated only qualitatively, a collection shape the prose doesn't determine.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "79d5bab36f8a54fa27d13f5f28f45b8cf56e92cc29b7522b5500465c2678a94e",
-      "dst_hash": "79d5bab36f8a54fa27d13f5f28f45b8cf56e92cc29b7522b5500465c2678a94e",
+      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
       "source": "deterministic"
     },
     {
@@ -103,8 +103,8 @@
       "evidence": "hypothesis",
       "purpose": "Preserve the authority boundary between reviewed intent, optional source evidence, and downstream Galaxy design decisions.",
       "verification": "Confirm a worked run does not broaden brief scope from richer source evidence and leaves the brief unchanged.",
-      "src_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
-      "dst_hash": "1f9ed280e7095839d3ca11a17bc32b7f02ff7c32942817be219968d1cdabec0c",
+      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
       "source": "deterministic"
     },
     {

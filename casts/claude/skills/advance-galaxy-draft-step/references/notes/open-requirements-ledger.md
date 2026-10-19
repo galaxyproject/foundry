@@ -132,19 +132,20 @@ decisions:
     open_question: "Should the FastQC zip archives be kept alongside the HTML reports?"
     basis: brief-proposal     # brief-proposal | agent
     decision: "Expose the HTML reports only."
-    rationale: "The brief's proposal, unedited at review."
+    rationale: "The brief's answer, accepted at review."
 ```
 
-- `open_question` quotes the brief's question, so each question traces to exactly one decision.
+- `open_question` quotes the brief's question, so each question traces to exactly one current decision.
 - `basis: brief-proposal` adopts the brief's proposal. `basis: agent` records the Mold's own answer to a question with no proposal, as in a hand-authored brief.
 - `confidence: low` copies a proposal the brief marked low confidence, or marks an `agent` answer resting on thin evidence. Omit it otherwise. Never drop a low mark.
-- A later Mold that finds a `brief-proposal` decision wrong records a brief-change recommendation, because the expert accepted that answer. One that finds an `agent` decision wrong records its own decision with `supersedes` set to the earlier decision's `id`.
+- A Mold that finds an accepted proposal wrong, including the first design Mold while recording it, records a brief-change recommendation, because the expert accepted that answer. It keeps using the accepted answer. If correctness depends on the change, stop as described above.
+- A later Mold that finds an `agent` decision wrong records its own decision. That decision repeats `open_question` and sets `supersedes` to the earlier decision's `id`. The earlier decision stays as history, unlike a superseded obligation entry, which reopens. The current answer to a question is the decision that no other decision supersedes.
 
 ## How to use the ledger
 
 This section is the runtime protocol for every Mold that carries the ledger. A Mold's own page states only what is local to it — what raises an entry there, and what it does when it reads one; the mechanics are here.
 
-**Read it before you decide.** Ahead of the decisions this step owns, read the `open` entries. Ones bearing on those decisions are the ones you may be able to close. Never re-derive an obligation the chain already recorded — that re-derivation is the failure this artifact exists to end.
+**Read it before you decide.** Ahead of the decisions this step owns, read the `open` entries and the decisions that carry `open_question`. Open entries bearing on those decisions are the ones you may be able to close. A current open-question decision is the answer to follow. Never re-derive an obligation the chain already recorded — that re-derivation is the failure this artifact exists to end.
 
 **Start one when none is supplied.** Every carrying Mold declares the ledger as an input, but the first Mold in a run receives none. Its absence is not an error: start an empty ledger at the declared filename and proceed.
 
@@ -223,7 +224,7 @@ The template Mold's computability review pass is the notable appender ahead of t
 - Decide whether the drops should be **counted**, not just labelled. `kind: dropped` and `units` make each cut legible one entry at a time; nothing totals them, so a run that drops a plane four times over still reports four reasonable-looking entries. A conservation rule — every source unit ends the run carried, subsumed, or surrendered, and the buckets sum to the source total — would make the aggregate visible the way `open_history` makes escalation visible. Deliberately not attempted here: labelling is cheap and may prove sufficient, counting needs a definition of "source unit" per source kind.
 - Decide whether entry structure should harden further (typed `unmet` / `missing`, links back to source-summary evidence, machine-checkable `status` transitions) once two or three worked runs exercise it. Hardening it would also give the producing Molds an `output_artifacts[].schema` to cite, which none carry today.
 - Assign terminal surrender of *non-blocking* entries. [[advance-galaxy-draft-step]] surrenders open blocking entries at the escalation cap, but an unpinned-parameter entry the design tier appended and nobody closed currently rides out the run without ever being marked `surrendered`. Nothing owns that pass today.
-- Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. Every design Mold still emits both, with no rule for which destination an unresolved choice belongs in.
+- Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. A Workflow Brief's open questions now become ledger decisions (see **Workflow Brief open questions**), but every design Mold still emits its own open questions and ledger entries, with no rule for which destination an unresolved choice belongs in.
 - Decide whether the source-summary Molds should also emit structured entries, or keep their free-text open-questions until the design tier formalizes them.
 - Specify how surrendered entries surface in the runnable gxformat2 (a workflow-level annotation, a report output, or a sidecar) when the draft is stripped of `_plan_*` and TODO sentinels.
 - Move the `topology_repair` escalation budget out of the ledger and into the draft (a workflow-level annotation) so it travels with the artifact it bounds; the ledger home is a v1 expedient.

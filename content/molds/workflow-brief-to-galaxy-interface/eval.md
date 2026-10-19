@@ -53,7 +53,7 @@ authoring, not whether it follows one exact prose template.
 
 - bucket: handoff
 - check: llm-judged
-- assertion: every open question in the Workflow Brief has exactly one ledger
+- assertion: every open question in the Workflow Brief has exactly one current ledger
   decision quoting it in `open_question`. A proposed answer is adopted with
   `basis: brief-proposal`, a question without one is answered with
   `basis: agent`, and a low-confidence mark is kept rather than dropped.

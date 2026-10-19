@@ -30,7 +30,7 @@ harness_notes:
   - Phase 6 resolves test data with find-test-data then caller-supplied fixtures. Phase 7 develops the
     test plan; the brief itself never contains final fixture/assertion declarations.
   - When reporting at Done, list the Workflow Brief open questions recorded in open-requirements.ledger.yml
-    with the answer the run used and its basis, low-confidence answers first, followed by every proposed
+    with the current answer the run used and its basis, low-confidence answers first, followed by every proposed
     brief-change recommendation. These are the assumptions the expert should check. Changing one means
     editing the brief and rerunning.
 phases:

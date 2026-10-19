@@ -49,6 +49,16 @@ The agent must not write a step graph, concrete tool state, or final test declar
 
 Requirements and preferences describe what the expert or source asks for. Agent Environment Constraints describe restrictions on the agent's work. Uncertainty that prevents proceeding belongs in Blockers. Record every other unresolved choice in Open questions with a proposed answer and the evidence for it, such as source behavior, the expert's wording, or the available test data. Propose the answer the evidence best supports. Where expert intent and source behavior conflict, propose the expert's intent and cite the conflict. When the evidence is thin, still propose an answer, mark it low confidence, and say what evidence is missing. The expert accepts a proposal by leaving it unedited and overrides it by editing the answer.
 
+Write each open question as a bullet with `Proposed:` and `Evidence:` sub-bullets. Add `Confidence: low` and `Missing:` when the evidence is thin:
+
+```md
+- Should runs of one sample be merged before trimming?
+  - Proposed: yes, merge them as the source does.
+  - Evidence: the source merges sample-sheet rows sharing a sample ID. The selection does not mention merging.
+  - Confidence: low
+  - Missing: whether the expert's samples ever span several runs.
+```
+
 ## Agent environment
 
 Tooling records whether expected tools such as `gxwf`, `foundry`, and `planemo` are available at the required versions. Distinguish intended requirements from observed availability. Containerization records the preference and whether Docker, Singularity, or Apptainer is actually usable, rather than assuming that an executable name proves a working engine.
