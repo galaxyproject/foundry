@@ -406,6 +406,170 @@ describe("the evaluation run shape", () => {
     );
   });
 
+  it("keeps a branch phase to one row, reads it as blocked, and finds artifacts in their leg", () => {
+    const branchDir = "trial-001/phase-008-test-data-resolution";
+    const refs = (sha: string) => ({
+      id: "test-data-refs",
+      path: "test-data-refs.json",
+      status: "passed",
+      sha256: sha.repeat(64),
+    });
+    const leg = (n: number, skill: string, unresolved: string[]) => ({
+      leg: n,
+      skill,
+      unresolved,
+      status: "passed",
+      run_dir: `${branchDir}/leg-${n}-${skill}`,
+      resolved_inputs: [],
+      missing_input_ids: [],
+      artifacts: [refs(String(n))],
+    });
+    const runDir = evaluationRun({
+      status: "blocked",
+      through_phase: 8,
+      trials: [
+        {
+          trial: 1,
+          status: "blocked",
+          phases: [
+            summarizePhase(),
+            {
+              phase: 8,
+              skill: "test-data-resolution",
+              status: "blocked",
+              error:
+                "test-data-resolution left 1 input unresolved after find-test-data: reads; the next step, user-supplied, needs a person",
+              run_dir: branchDir,
+              declared_input_ids: ["summary-nextflow", "nextflow-galaxy-interface"],
+              missing_input_ids: [],
+              artifacts: [refs("2")],
+              legs: [
+                leg(1, "nextflow-to-test-data", ["reads"]),
+                leg(2, "find-test-data", ["reads"]),
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    for (const [n, skill] of [
+      [1, "nextflow-to-test-data"],
+      [2, "find-test-data"],
+    ] as const) {
+      const workspace = path.join(runDir, branchDir, `leg-${n}-${skill}`, "workspace");
+      mkdirSync(workspace, { recursive: true });
+      writeFileSync(path.join(workspace, "test-data-refs.json"), '{"refs": []}\n');
+    }
+
+    const model = runModelFromTestPipeline({
+      runDir,
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    expect(model.run.status).toBe("blocked");
+    const branch = model.phases.find((phase) => phase.n === 8)!;
+    expect(branch).toEqual(
+      expect.objectContaining({
+        kind: "branch",
+        status: "blocked",
+        selected: "find-test-data",
+        iterations: null,
+      }),
+    );
+    expect(model.artifacts.find((artifact) => artifact.id === "test-data-refs")).toEqual(
+      expect.objectContaining({
+        path: `${branchDir}/leg-2-find-test-data/workspace/test-data-refs.json`,
+        written_by_phase: 8,
+        writes: [
+          { at: null, phase: 8, iteration: null, leg: 1 },
+          { at: null, phase: 8, iteration: null, leg: 2 },
+        ],
+      }),
+    );
+    expect(model.warnings).toContainEqual(
+      expect.objectContaining({
+        code: "phase-blocked",
+        message:
+          "phase 8 (test-data-resolution) blocked: test-data-resolution left 1 input unresolved after find-test-data: reads; the next step, user-supplied, needs a person",
+      }),
+    );
+    expect(model.health.tiles.find((tile) => tile.label === "run")?.state).toBe("warn");
+    const html = renderRunDashboard(model, {
+      siteBase: "",
+      manifestJson: serializeRunManifest(model),
+      commandLine: "foundry-build run-dashboard run-abc",
+    });
+    expect(html).toContain('data-status="blocked"');
+  });
+
+  it("names the branch leg whose artifact failed validation", () => {
+    const branchDir = "trial-001/phase-008-test-data-resolution";
+    const runDir = evaluationRun({
+      status: "failed",
+      through_phase: 8,
+      trials: [
+        {
+          trial: 1,
+          status: "failed",
+          phases: [
+            summarizePhase(),
+            {
+              phase: 8,
+              skill: "test-data-resolution",
+              status: "failed",
+              failure_kind: "skill",
+              error:
+                "leg 1 (nextflow-to-test-data): declared artifact did not pass: test-data-refs (failed)",
+              run_dir: branchDir,
+              declared_input_ids: ["summary-nextflow", "nextflow-galaxy-interface"],
+              missing_input_ids: [],
+              artifacts: [],
+              legs: [
+                {
+                  leg: 1,
+                  skill: "nextflow-to-test-data",
+                  unresolved: null,
+                  status: "failed",
+                  failure_kind: "skill",
+                  run_dir: `${branchDir}/leg-1-nextflow-to-test-data`,
+                  resolved_inputs: [],
+                  missing_input_ids: [],
+                  artifacts: [
+                    {
+                      id: "test-data-refs",
+                      path: "test-data-refs.json",
+                      status: "failed",
+                      sha256: "1".repeat(64),
+                      validator: {
+                        bin: "foundry",
+                        exit_code: 1,
+                        stdout_path: "validation/test-data-refs.stdout",
+                        stderr_path: "validation/test-data-refs.stderr",
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    const model = runModelFromTestPipeline({
+      runDir,
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    expect(model.warnings).toContainEqual(
+      expect.objectContaining({
+        code: "artifact-failed",
+        message: `test-data-refs from phase 8 leg 1 (nextflow-to-test-data) failed (validator exit 1); see ${branchDir}/leg-1-nextflow-to-test-data/validation/test-data-refs.stderr`,
+      }),
+    );
+  });
+
   it("reads a run the budget stopped as cancelled, not running, and names the phase it stopped", () => {
     const runDir = evaluationRun({
       status: "cancelled",

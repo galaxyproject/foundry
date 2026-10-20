@@ -358,7 +358,7 @@ function renderArtifactPanel(artifact: RunArtifact, options: RenderOptions): str
     const writes = artifact.writes
       .map(
         (write) =>
-          `phase ${write.phase ?? "—"}${write.iteration ? ` step ${write.iteration}` : ""} at ${shortInstant(write.at)}`,
+          `phase ${write.phase ?? "—"}${write.iteration ? ` step ${write.iteration}` : ""}${write.leg ? ` leg ${write.leg}` : ""} at ${shortInstant(write.at)}`,
       )
       .join("; ");
     meta.push(`<dt>written</dt><dd>${escapeHtml(writes)}</dd>`);
@@ -655,7 +655,7 @@ function renderEvaluation(model: RunModel): string {
   const trials = evaluation.trials
     .map(
       (trial) =>
-        `<tr${trial.trial === evaluation.selected_trial ? ' class="stop-furthest"' : ""}><td class="num">${trial.trial}</td><td>${badge(trial.status)}</td><td class="num">${trial.phase_count}</td><td class="num">${escapeHtml(String(trial.failed_phase ?? "—"))}</td></tr>`,
+        `<tr${trial.trial === evaluation.selected_trial ? ' class="stop-furthest"' : ""}><td class="num">${trial.trial}</td><td>${badge(trial.status)}</td><td class="num">${trial.phase_count}</td><td class="num">${escapeHtml(String(trial.stopped_phase ?? "—"))}</td></tr>`,
     )
     .join("");
 
@@ -664,7 +664,7 @@ function renderEvaluation(model: RunModel): string {
     `<dt>sandbox</dt><dd>${escapeHtml(evaluation.sandbox.mode)}, network ${escapeHtml(evaluation.sandbox.network_policy)}</dd>`,
     `<dt>duration</dt><dd>${escapeHtml((evaluation.duration_ms / 1000).toFixed(1))} s</dd></dl>`,
     usage ? `<p class="panel-sub">Usage</p><dl class="kv">${usage}</dl>` : "",
-    table("<th>trial</th><th>status</th><th>phases</th><th>failed at</th>", trials),
+    table("<th>trial</th><th>status</th><th>phases</th><th>stopped at</th>", trials),
   ].join("\n");
 
   return section("evaluation", "Evaluation", "what it cost and how it was run", body);

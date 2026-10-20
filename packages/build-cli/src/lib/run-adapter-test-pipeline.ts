@@ -63,6 +63,7 @@ const RUN_STATUS: Record<string, RunStatus> = {
   error: "failed",
   timed_out: "failed",
   cancelled: "cancelled",
+  blocked: "blocked",
 };
 
 const PHASE_STATUS: Record<string, PhaseStatus> = {
@@ -72,6 +73,7 @@ const PHASE_STATUS: Record<string, PhaseStatus> = {
   timed_out: "failed",
   // Selected and started, or stopped by the budget before it could: either way it did not finish.
   cancelled: "failed",
+  blocked: "blocked",
 };
 
 export interface TestPipelineAdapterOptions extends RunReaderOptions {
@@ -136,7 +138,8 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         : "pending";
 
     return buildPhaseRow(repoRoot, phase, linker, {
-      selected: null,
+      // A branch runs its legs in order until one leaves nothing unresolved; the last one ran.
+      selected: ran?.legs?.at(-1)?.skill ?? null,
       iterations: ran?.iterations?.length ?? null,
       status,
       status_source: "run-record",
@@ -149,7 +152,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     if (phase.status !== "passed") {
       const kind = phase.failure_kind ? ` (${phase.failure_kind})` : "";
       warnings.push({
-        code: "phase-failed",
+        code: phase.status === "blocked" ? "phase-blocked" : "phase-failed",
         message: `phase ${phase.phase} (${phase.skill}) ${phase.status}${kind}: ${phase.error ?? "no error recorded"}`,
         subject: phase.skill,
       });
@@ -167,26 +170,49 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     }
   }
 
-  // Each phase, and each iteration of a loop phase, writes into its own workspace, so the same
-  // artifact id can appear more than once across a run. The latest write is the one the run
-  // carried forward.
+  // Each phase, each iteration of a loop phase, and each leg of a branch writes into its own
+  // workspace, so the same artifact id can appear more than once across a run. The latest write is
+  // the one the run carried forward.
   interface Write {
     phase: number;
     iteration: number | null;
+    leg: number | null;
+    /** The worker within the phase, for messages: ` iteration 2`, ` leg 1 (find-test-data)`. */
+    within: string;
     runDir: string;
     result: ArtifactResult;
   }
   const writes = new Map<string, Write[]>();
   for (const phase of chosenPhases) {
     const workers = phase.iterations?.length
-      ? phase.iterations.map((iteration) => ({ ...iteration, n: iteration.iteration }))
-      : [{ ...phase, n: null }];
+      ? phase.iterations.map((iteration) => ({
+          ...iteration,
+          n: iteration.iteration,
+          legN: null,
+          within: ` iteration ${iteration.iteration}`,
+        }))
+      : phase.legs?.length
+        ? phase.legs.map((leg) => ({
+            ...leg,
+            n: null,
+            legN: leg.leg,
+            within: ` leg ${leg.leg} (${leg.skill})`,
+          }))
+        : [{ ...phase, n: null, legN: null, within: "" }];
+    const several = Boolean(phase.iterations?.length || phase.legs?.length);
     for (const worker of workers) {
       for (const artifact of worker.artifacts ?? []) {
-        if (artifact.status === "missing" && phase.iterations?.length) continue;
+        if (artifact.status === "missing" && several) continue;
         writes.set(artifact.id, [
           ...(writes.get(artifact.id) ?? []),
-          { phase: phase.phase, iteration: worker.n, runDir: worker.run_dir, result: artifact },
+          {
+            phase: phase.phase,
+            iteration: worker.n,
+            leg: worker.legN,
+            within: worker.within,
+            runDir: worker.run_dir,
+            result: artifact,
+          },
         ]);
       }
     }
@@ -210,7 +236,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       const evidence = validator ? `; see ${inPhase(validator.stderr_path)}` : "";
       warnings.push({
         code: "artifact-failed",
-        message: `${output.id} from phase ${hit!.phase}${hit!.iteration === null ? "" : ` iteration ${hit!.iteration}`} ${hit!.result.status} (${exit})${evidence}`,
+        message: `${output.id} from phase ${hit!.phase}${hit!.within} ${hit!.result.status} (${exit})${evidence}`,
         subject: output.id,
       });
     }
@@ -222,6 +248,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         at: null,
         phase: write.phase,
         iteration: write.iteration,
+        ...(write.leg === null ? {} : { leg: write.leg }),
       })),
       variants: [],
       validation:
@@ -255,7 +282,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       trial: trial.trial,
       status: trial.status,
       phase_count: trial.phases.length,
-      failed_phase: trial.phases.find((phase) => phase.status !== "passed")?.phase ?? null,
+      stopped_phase: trial.phases.find((phase) => phase.status !== "passed")?.phase ?? null,
     })),
     selected_trial: chosen?.trial ?? null,
     duration_ms: record.duration_ms,
@@ -287,7 +314,12 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   const tiles: HealthTile[] = [
     {
       label: "run",
-      state: status === "complete" ? "ok" : status === "running" ? "warn" : "error",
+      state:
+        status === "complete"
+          ? "ok"
+          : status === "running" || status === "blocked"
+            ? "warn"
+            : "error",
       value: record.status,
       detail: chosen
         ? `trial ${chosen.trial} of ${requested}`

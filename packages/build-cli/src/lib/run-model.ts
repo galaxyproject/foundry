@@ -19,8 +19,16 @@ export type RunShape = "harness" | "test-pipeline";
  */
 export type RunProvenance = "recorded" | "reconstructed";
 
-export type RunStatus = "running" | "complete" | "failed" | "cancelled" | "unknown";
-export type PhaseStatus = "pending" | "running" | "done" | "failed" | "skipped" | "unknown";
+export type RunStatus = "running" | "complete" | "failed" | "cancelled" | "blocked" | "unknown";
+/** `blocked`: stopped on something only a person can supply, such as test data. */
+export type PhaseStatus =
+  | "pending"
+  | "running"
+  | "done"
+  | "failed"
+  | "blocked"
+  | "skipped"
+  | "unknown";
 export type PhaseStatusSource =
   | "run-record"
   | "feedback-ledger"
@@ -68,6 +76,8 @@ export interface ArtifactWrite {
   at: string | null;
   phase: number | null;
   iteration: number | null;
+  /** The branch leg that wrote it, from 1; set only on a write by a branch leg. */
+  leg?: number;
 }
 
 export type DerivedView =
@@ -277,7 +287,8 @@ export interface EvaluationModel {
     trial: number;
     status: string;
     phase_count: number;
-    failed_phase: number | null;
+    /** The phase the trial stopped at: one that failed, or a blocked one. */
+    stopped_phase: number | null;
   }>;
   selected_trial: number | null;
   duration_ms: number;

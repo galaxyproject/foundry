@@ -183,6 +183,7 @@ section { margin: 40px 0 0; scroll-margin-top: 16px; }
 .stop[data-status="done"] .stop-marker { background: var(--ok); border-color: var(--ok); }
 .stop[data-status="failed"] .stop-marker { background: var(--error); border-color: var(--error); }
 .stop[data-status="running"] .stop-marker { background: var(--warn); border-color: var(--warn); }
+.stop[data-status="blocked"] .stop-marker { border-color: var(--warn); }
 .stop.stop-furthest .stop-marker { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent); }
 .stop-num { font-family: var(--mono); font-size: 12px; color: var(--text-muted); min-width: 22px; }
 .stop-name { font-weight: 560; }
@@ -231,7 +232,7 @@ section { margin: 40px 0 0; scroll-margin-top: 16px; }
 .badge[data-state="error"], .badge[data-v="missing"], .badge[data-v="failed"], .badge[data-v="blocker"] {
   border-color: var(--error); color: var(--error);
 }
-.badge[data-state="warn"], .badge[data-v="running"], .badge[data-v="open"], .badge[data-v="surrendered"], .badge[data-v="major"] {
+.badge[data-state="warn"], .badge[data-v="running"], .badge[data-v="blocked"], .badge[data-v="open"], .badge[data-v="surrendered"], .badge[data-v="major"] {
   border-color: var(--warn); color: var(--warn);
 }
 
