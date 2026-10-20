@@ -94,6 +94,22 @@ export interface PipelinePhaseRunRecord extends Omit<PipelineWorkerRunRecord, "s
   legs?: PipelineBranchLegRecord[];
 }
 
+/** Where a run started past phase 1 got the artifacts of the phases before its first. */
+export interface PipelineSeedRecord {
+  /** The earlier run's directory, absolute. */
+  run_dir: string;
+  run_id: string;
+  trial: number;
+  /** The earlier run's, which may differ from this run's own. */
+  assembly_sha256: string;
+  /** The first phase this run ran. */
+  from_phase: number;
+  /** The earlier trial's phases before `from_phase`, as they ended there. */
+  phases: { phase: number; skill: string; status: PipelineOutcome }[];
+  /** What those phases that passed carried forward, copied under this run's `seed/`. */
+  artifacts: PromotedArtifact[];
+}
+
 export interface PipelineTrialRunRecord {
   trial: number;
   status: PipelineOutcome;
@@ -115,6 +131,8 @@ export interface PipelineRunRecord {
   assembly_sha256: string;
   foundry_head: string | null;
   through_phase: number;
+  /** Set on a run started past phase 1 from an earlier run's artifacts. */
+  seed?: PipelineSeedRecord;
   scenario: PipelineScenario;
   engine: {
     name: "pi";

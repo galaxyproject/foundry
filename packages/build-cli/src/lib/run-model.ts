@@ -34,6 +34,8 @@ export type PhaseStatusSource =
   | "feedback-ledger"
   | "git"
   | "artifact-presence"
+  // An evaluation run started past phase 1: the phase ran, if at all, in the run it was seeded from.
+  | "seed-run"
   | "unknown";
 
 /**
@@ -78,6 +80,8 @@ export interface ArtifactWrite {
   iteration: number | null;
   /** The branch leg that wrote it, from 1; set only on a write by a branch leg. */
   leg?: number;
+  /** Set only on a write made in the run this one was seeded from, and copied in. */
+  seeded?: true;
 }
 
 export type DerivedView =

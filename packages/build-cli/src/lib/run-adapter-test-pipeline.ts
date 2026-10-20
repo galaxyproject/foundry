@@ -125,24 +125,40 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   }
 
   const phaseRecords = new Map(chosenPhases.map((phase) => [phase.phase, phase]));
+  const seed = record.seed;
+  const seededPhases = new Map(seed?.phases.map((phase) => [phase.phase, phase]));
+  if (seed) {
+    const drifted = seed.assembly_sha256 !== record.assembly_sha256;
+    warnings.push({
+      code: "seeded",
+      message: `phases before ${seed.from_phase} did not run here; their artifacts were copied from trial ${seed.trial} of run ${seed.run_id} (${seed.run_dir})${drifted ? ", which used a different harness assembly" : ""}`,
+      subject: seed.run_id,
+    });
+  }
 
   const phases: RunPhase[] = assembly.phases.map((phase) => {
     const ran = phaseRecords.get(phase.phase);
+    const seededFrom = seed && phase.phase < seed.from_phase;
 
     // A phase beyond `--through` was never selected, which is not the same as one that was
-    // selected and did not run.
+    // selected and did not run. One before `--from` ran in the seed run, and only one that passed
+    // there carried anything into this one.
     const status: PhaseStatus = ran
       ? (PHASE_STATUS[ran.status] ?? "unknown")
-      : phase.phase > record.through_phase
-        ? "skipped"
-        : "pending";
+      : seededFrom
+        ? seededPhases.get(phase.phase)?.status === "passed"
+          ? "done"
+          : "skipped"
+        : phase.phase > record.through_phase
+          ? "skipped"
+          : "pending";
 
     return buildPhaseRow(repoRoot, phase, linker, {
       // A branch runs its legs in order until one leaves nothing unresolved; the last one ran.
       selected: ran?.legs?.at(-1)?.skill ?? null,
       iterations: ran?.iterations?.length ?? null,
       status,
-      status_source: "run-record",
+      status_source: seededFrom ? "seed-run" : "run-record",
       feedback_checked: null,
       commits: [],
     });
@@ -179,10 +195,33 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     leg: number | null;
     /** The worker within the phase, for messages: ` iteration 2`, ` leg 1 (find-test-data)`. */
     within: string;
-    runDir: string;
+    /** The worker's run directory, which its validator output is relative to; null for a seed. */
+    runDir: string | null;
+    file: string;
+    seeded: boolean;
     result: ArtifactResult;
   }
   const writes = new Map<string, Write[]>();
+  // A seed is carried in ahead of every phase this run ran.
+  for (const artifact of seed?.artifacts ?? []) {
+    writes.set(artifact.id, [
+      {
+        phase: artifact.producer_phase,
+        iteration: null,
+        leg: null,
+        within: " (seeded)",
+        runDir: null,
+        file: artifact.path,
+        seeded: true,
+        result: {
+          id: artifact.id,
+          path: artifact.path,
+          status: "present",
+          sha256: artifact.sha256,
+        },
+      },
+    ]);
+  }
   for (const phase of chosenPhases) {
     const workers = phase.iterations?.length
       ? phase.iterations.map((iteration) => ({
@@ -211,6 +250,8 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
             leg: worker.legN,
             within: worker.within,
             runDir: worker.run_dir,
+            file: `${worker.run_dir}/workspace/${artifact.path}`,
+            seeded: false,
             result: artifact,
           },
         ]);
@@ -223,14 +264,14 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
   const artifacts: RunArtifact[] = declared.map((output) => {
     const history = writes.get(output.id) ?? [];
     const hit = history.at(-1);
-    const relpath = hit ? `${hit.runDir}/workspace/${hit.result.path}` : null;
+    const relpath = hit?.file ?? null;
     const absolute = relpath ? path.join(runDir, relpath) : null;
     const entry = absolute ? scanFile(absolute, relpath!) : null;
     const failed = hit?.result.status === "failed" || hit?.result.status === "error";
 
     // The worker records validator output relative to its own run directory.
     const validator = hit?.result.validator;
-    const inPhase = (file: string) => (hit ? `${hit.runDir}/${file}` : file);
+    const inPhase = (file: string) => (hit?.runDir ? `${hit.runDir}/${file}` : file);
     if (failed) {
       const exit = validator ? `validator exit ${validator.exit_code ?? "none"}` : "no validator";
       const evidence = validator ? `; see ${inPhase(validator.stderr_path)}` : "";
@@ -249,6 +290,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         phase: write.phase,
         iteration: write.iteration,
         ...(write.leg === null ? {} : { leg: write.leg }),
+        ...(write.seeded ? { seeded: true as const } : {}),
       })),
       variants: [],
       validation:
@@ -326,7 +368,12 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         : `no trial finished of ${requested}`,
       anchor: "#phases",
     },
-    phasesTile(phases, `evaluated through phase ${record.through_phase}`),
+    phasesTile(
+      phases,
+      seed
+        ? `evaluated phases ${seed.from_phase} to ${record.through_phase}`
+        : `evaluated through phase ${record.through_phase}`,
+    ),
     {
       label: "artifacts",
       state: missing || failedArtifacts ? "error" : "ok",

@@ -715,6 +715,75 @@ describe("the evaluation run shape", () => {
     expect(unrecorded.run.foundry_head).toBeNull();
   });
 
+  it("reads phases a seed run carried as seeded, not as run here or pending", () => {
+    const seedArtifact = "seed/phase-001-summarize-nextflow/summary-nextflow.json";
+    const runDir = evaluationRun({
+      status: "passed",
+      through_phase: 8,
+      seed: {
+        run_dir: "/runs/earlier",
+        run_id: "earlier-run",
+        trial: 1,
+        assembly_sha256: "e".repeat(64),
+        from_phase: 8,
+        phases: [
+          { phase: 1, skill: "summarize-nextflow", status: "passed" },
+          { phase: 7, skill: "advance-galaxy-draft-step", status: "failed" },
+        ],
+        artifacts: [
+          {
+            id: "summary-nextflow",
+            path: seedArtifact,
+            sha256: "a".repeat(64),
+            producer_phase: 1,
+          },
+        ],
+      },
+      trials: [{ trial: 1, status: "passed", phases: [] }],
+    });
+    mkdirSync(path.dirname(path.join(runDir, seedArtifact)), { recursive: true });
+    writeFileSync(path.join(runDir, seedArtifact), '{"pipeline": "demo"}\n');
+
+    const model = runModelFromTestPipeline({
+      runDir,
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    const byNumber = new Map(model.phases.map((phase) => [phase.n, phase]));
+    expect(byNumber.get(1)).toEqual(
+      expect.objectContaining({ status: "done", status_source: "seed-run" }),
+    );
+    // Its outputs were not carried, so the seed run's failure is not this run's.
+    expect(byNumber.get(7)).toEqual(
+      expect.objectContaining({ status: "skipped", status_source: "seed-run" }),
+    );
+    expect(model.artifacts.find((artifact) => artifact.id === "summary-nextflow")).toEqual(
+      expect.objectContaining({
+        path: seedArtifact,
+        written_by_phase: 1,
+        writes: [{ at: null, phase: 1, iteration: null, seeded: true }],
+      }),
+    );
+    expect(model.warnings).toContainEqual(
+      expect.objectContaining({
+        code: "seeded",
+        message:
+          "phases before 8 did not run here; their artifacts were copied from trial 1 of run earlier-run (/runs/earlier), which used a different harness assembly",
+      }),
+    );
+    expect(model.health.tiles.find((tile) => tile.label === "phases")?.detail).toBe(
+      "evaluated phases 8 to 8",
+    );
+    const html = renderRunDashboard(model, {
+      siteBase: "",
+      manifestJson: serializeRunManifest(model),
+      commandLine: "foundry-build run-dashboard run-abc",
+    });
+    expect(html).toContain("done · from seed run");
+    expect(html).toContain("phase 1 seeded");
+  });
+
   it("marks phases past the evaluated prefix as skipped, not pending", () => {
     const model = runModelFromTestPipeline({
       runDir: evaluationRun(),

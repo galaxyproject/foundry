@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { isDeepStrictEqual } from "node:util";
@@ -41,6 +41,7 @@ import {
   type PipelinePhaseRunRecord,
   type PipelineRunRecord,
   type PipelineScenario,
+  type PipelineSeedRecord,
   type PipelineTrialRunRecord,
   type PipelineWorkerRunRecord,
   type PromotedArtifact,
@@ -60,6 +61,12 @@ export interface TestPipelineOptions {
   pipeline: string;
   scenario: string;
   through?: string;
+  /** The first phase to run; the artifacts of those before it come from `seedRun`. */
+  from?: string;
+  /** An earlier `test-pipeline` run directory of the same pipeline and scenario. */
+  seedRun?: string;
+  /** The seed run's trial to carry artifacts from; defaults to 1. */
+  seedTrial?: number;
   trials: number;
   runDir: string;
   provider: string;
@@ -108,6 +115,9 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
   const positional: string[] = [];
   let scenario: string | null = null;
   let through: string | undefined;
+  let from: string | undefined;
+  let seedRun: string | undefined;
+  let seedTrial: number | undefined;
   let trials = 1;
   let maxIterations: number | undefined;
   let maxCost: number | undefined;
@@ -124,6 +134,24 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     option = readOption(argv, i, "--through");
     if (option) {
       through = option.value;
+      i = option.lastIndex;
+      continue;
+    }
+    option = readOption(argv, i, "--from");
+    if (option) {
+      from = option.value;
+      i = option.lastIndex;
+      continue;
+    }
+    option = readOption(argv, i, "--seed-run");
+    if (option) {
+      seedRun = option.value;
+      i = option.lastIndex;
+      continue;
+    }
+    option = readOption(argv, i, "--seed-trial");
+    if (option) {
+      seedTrial = parsePositiveInteger(option.value, "--seed-trial");
       i = option.lastIndex;
       continue;
     }
@@ -182,6 +210,9 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     pipeline: positional[0]!,
     scenario,
     through,
+    from,
+    seedRun,
+    seedTrial,
     trials,
     maxIterations,
     maxCost,
@@ -320,25 +351,36 @@ const BRANCH_ORACLES: Record<string, BranchOracle> = {
   },
 };
 
-export function selectPhases(manifest: AssemblyManifest, through?: string): AssemblyPhase[] {
-  let throughIndex = manifest.phases.length;
-  if (through !== undefined) {
-    if (/^[1-9][0-9]*$/.test(through)) {
-      const phaseNumber = Number(through);
-      const index = manifest.phases.findIndex((phase) => phase.phase === phaseNumber);
-      if (index < 0) throw new Error(`--through phase not found: ${through}`);
-      throughIndex = index + 1;
-    } else {
-      const matches = manifest.phases
-        .map((phase, index) => ({ phase, index }))
-        .filter(({ phase }) => (phase.skill ?? phase.pattern) === through);
-      if (matches.length !== 1) throw new Error(`--through skill must match one phase: ${through}`);
-      throughIndex = matches[0]!.index + 1;
-    }
+function phaseIndex(manifest: AssemblyManifest, value: string, flag: string): number {
+  if (/^[1-9][0-9]*$/.test(value)) {
+    const index = manifest.phases.findIndex((phase) => phase.phase === Number(value));
+    if (index < 0) throw new Error(`${flag} phase not found: ${value}`);
+    return index;
+  }
+  const matches = manifest.phases
+    .map((phase, index) => ({ phase, index }))
+    .filter(({ phase }) => (phase.skill ?? phase.pattern) === value);
+  if (matches.length !== 1) throw new Error(`${flag} skill must match one phase: ${value}`);
+  return matches[0]!.index;
+}
+
+/** The phases from `from` through `through`; only those are checked as runnable. */
+export function selectPhases(
+  manifest: AssemblyManifest,
+  through?: string,
+  from?: string,
+): AssemblyPhase[] {
+  if (!manifest.phases.length) throw new Error("pipeline assembly has no phases");
+  const throughIndex =
+    through === undefined ? manifest.phases.length - 1 : phaseIndex(manifest, through, "--through");
+  const fromIndex = from === undefined ? 0 : phaseIndex(manifest, from, "--from");
+  if (fromIndex > throughIndex) {
+    throw new Error(
+      `--from phase ${manifest.phases[fromIndex]!.phase} comes after --through phase ${manifest.phases[throughIndex]!.phase}`,
+    );
   }
 
-  const selected = manifest.phases.slice(0, throughIndex);
-  if (!selected.length) throw new Error("pipeline assembly has no phases");
+  const selected = manifest.phases.slice(fromIndex, throughIndex + 1);
   const phaseNumbers = new Set<number>();
   for (const phase of selected) {
     if (!Number.isSafeInteger(phase.phase) || phase.phase < 1) {
@@ -408,6 +450,133 @@ function resolveScenario(repoRoot: string, pipeline: string, name: string): Pipe
   };
 }
 
+/** An artifact an earlier run carried forward, checked against that run's record. */
+interface SeedSource {
+  id: string;
+  sha256: string;
+  producerPhase: number;
+  producerSkill: string;
+  /** Its path in the producing worker's workspace, which its copy keeps. */
+  workspacePath: string;
+  absolutePath: string;
+}
+
+interface SeedPlan {
+  record: Omit<PipelineSeedRecord, "artifacts">;
+  sources: SeedSource[];
+}
+
+/**
+ * What an earlier run of the same scenario carried forward from the phases before `fromPhase`:
+ * the latest write of each artifact by a phase that passed, as the run itself promoted them.
+ */
+function planSeed(
+  seedRun: string,
+  trialNumber: number,
+  pipeline: string,
+  scenario: PipelineScenario,
+  fromPhase: number,
+): SeedPlan {
+  const dir = path.resolve(seedRun);
+  const file = path.join(dir, PIPELINE_RUN_FILE);
+  if (!existsSync(file)) throw new Error(`seed run has no ${PIPELINE_RUN_FILE}: ${dir}`);
+  const earlier = JSON.parse(readFileSync(file, "utf8")) as PipelineRunRecord;
+  if (earlier.pipeline !== pipeline) {
+    throw new Error(`seed run is of pipeline '${earlier.pipeline}', not '${pipeline}'`);
+  }
+  if (earlier.scenario?.name !== scenario.name) {
+    throw new Error(`seed run is of scenario '${earlier.scenario?.name}', not '${scenario.name}'`);
+  }
+  if (earlier.scenario.fixture_sha256 !== scenario.fixture_sha256) {
+    throw new Error("seed run's scenario fixture has changed since it ran");
+  }
+  const trial = earlier.trials?.find((candidate) => candidate.trial === trialNumber);
+  if (!trial) throw new Error(`seed run has no trial ${trialNumber}`);
+
+  const phases = trial.phases.filter((phase) => phase.phase < fromPhase);
+  const latest = new Map<string, SeedSource>();
+  for (const phase of phases) {
+    // A phase that did not pass may have written outputs the run refused to carry forward.
+    if (phase.status !== "passed") continue;
+    const workers = phase.iterations?.length
+      ? phase.iterations
+      : phase.legs?.length
+        ? phase.legs
+        : [phase];
+    for (const worker of workers) {
+      for (const artifact of worker.artifacts) {
+        if (artifact.status !== "passed" && artifact.status !== "present") continue;
+        latest.set(artifact.id, {
+          id: artifact.id,
+          sha256: artifact.sha256 ?? "",
+          producerPhase: phase.phase,
+          producerSkill: phase.skill,
+          workspacePath: artifact.path,
+          absolutePath: path.join(dir, worker.run_dir, "workspace", artifact.path),
+        });
+      }
+    }
+  }
+  for (const source of latest.values()) {
+    if (!existsSync(source.absolutePath) || sha256Path(source.absolutePath) !== source.sha256) {
+      throw new Error(
+        `seed run's ${source.id} from phase ${source.producerPhase} no longer matches its recorded sha256: ${source.absolutePath}`,
+      );
+    }
+  }
+  return {
+    record: {
+      run_dir: dir,
+      run_id: earlier.run_id,
+      trial: trialNumber,
+      assembly_sha256: earlier.assembly_sha256,
+      from_phase: fromPhase,
+      phases: phases.map((phase) => ({
+        phase: phase.phase,
+        skill: phase.skill,
+        status: phase.status,
+      })),
+    },
+    sources: [...latest.values()],
+  };
+}
+
+/**
+ * Refuses a run whose phases read an artifact last produced, before `--from`, by a phase that did
+ * not pass in the seed run: any copy carried from an earlier phase would be stale. An artifact a
+ * passed phase chose not to write stays absent, as it would in a run from phase 1.
+ */
+function preflightSeededInputs(
+  repoRoot: string,
+  earlierPhases: AssemblyPhase[],
+  workerPlans: WorkerPlan[],
+  seed: SeedPlan | null,
+): void {
+  const producers = new Map<string, AssemblyPhase>();
+  for (const phase of earlierPhases) {
+    for (const skill of phaseSkills(phase)) {
+      const bundleDir = skillDir(repoRoot, skill);
+      if (!existsSync(bundleDir)) continue;
+      for (const artifact of expectedArtifactsFromSkill(bundleDir)) {
+        producers.set(artifact.id, phase);
+      }
+    }
+  }
+  const producedHere = new Set<string>();
+  for (const plan of workerPlans) {
+    for (const id of plan.consumes) {
+      const producer = producers.get(id);
+      if (producedHere.has(id) || !producer) continue;
+      const ended = seed?.record.phases.find((phase) => phase.phase === producer.phase);
+      if (ended?.status === "passed") continue;
+      throw new Error(
+        `phase ${plan.phase.phase} (${plan.skill}) consumes ${id}, which phase ${producer.phase} (${producer.skill ?? producer.pattern}) produces, but the seed run's phase ${producer.phase} ${ended ? "did not pass" : "never ran"}`,
+      );
+    }
+    for (const artifact of plan.produces) producedHere.add(artifact.id);
+  }
+}
+
 function consumedArtifactIds(repoRoot: string, skill: string): string[] {
   const consumes = loadSkillProvenance(repoRoot, skill)?.artifacts?.consumes ?? [];
   return consumes.map((artifact, index) => {
@@ -471,11 +640,15 @@ interface BranchPhasePlan {
 
 type PhasePlan = MoldPhasePlan | BranchPhasePlan;
 
-function preflightInputBasenames(workerPlans: WorkerPlan[], fixturePath: string): void {
-  const available = new Map<string, string>();
+function preflightInputBasenames(
+  workerPlans: WorkerPlan[],
+  fixtureInput: string | null,
+  seeded: SeedSource[],
+): void {
+  const available = new Map(seeded.map((source) => [source.id, source.workspacePath]));
   workerPlans.forEach((plan, index) => {
     const basenames = [
-      ...(index === 0 ? [path.basename(realpathSync(fixturePath))] : []),
+      ...(index === 0 && fixtureInput ? [path.basename(realpathSync(fixtureInput))] : []),
       ...plan.consumes.flatMap((id) => {
         const producedPath = available.get(id);
         return producedPath ? [path.basename(producedPath)] : [];
@@ -586,6 +759,12 @@ export async function runLinearPipeline(
   if (!Number.isSafeInteger(options.trials) || options.trials < 1) {
     throw new Error("trials must be a positive integer");
   }
+  if (options.seedRun !== undefined && options.from === undefined) {
+    throw new Error("--seed-run needs --from");
+  }
+  if (options.seedTrial !== undefined && options.seedRun === undefined) {
+    throw new Error("--seed-trial needs --seed-run");
+  }
   if (options.sandbox === "local" && (options.sandboxImage || options.credentialEnv.length)) {
     throw new Error("container image and credential options require sandbox=container");
   }
@@ -601,9 +780,20 @@ export async function runLinearPipeline(
 
   const assembly = loadAssembly(repoRoot, options.pipeline);
   const assemblyFile = assemblyPath(repoRoot, options.pipeline);
-  const phases = selectPhases(assembly, options.through);
+  const phases = selectPhases(assembly, options.through, options.from);
+  // The scenario fixture is the first phase's input, so a run started later is not given it.
+  const firstPhase = assembly.phases[0]!.phase;
+  const fromPhase = phases[0]!.phase;
+  if (fromPhase !== firstPhase && options.seedRun === undefined) {
+    throw new Error(
+      `--from phase ${fromPhase} needs --seed-run for the artifacts of phases before it`,
+    );
+  }
   const scenario = resolveScenario(repoRoot, options.pipeline, options.scenario);
   const fixturePath = path.resolve(repoRoot, scenario.fixture_path);
+  const seed = options.seedRun
+    ? planSeed(options.seedRun, options.seedTrial ?? 1, options.pipeline, scenario, fromPhase)
+    : null;
   const workerPlan = (phase: AssemblyPhase, skill: string): WorkerPlan => {
     const bundleDir = skillDir(repoRoot, skill);
     if (!existsSync(bundleDir)) throw new Error(`cast skill not found: ${bundleDir}`);
@@ -669,7 +859,17 @@ export async function runLinearPipeline(
       );
     }
   }
-  preflightInputBasenames(workerPlans, fixturePath);
+  preflightSeededInputs(
+    repoRoot,
+    assembly.phases.slice(0, assembly.phases.indexOf(phases[0]!)),
+    workerPlans,
+    seed,
+  );
+  preflightInputBasenames(
+    workerPlans,
+    fromPhase === firstPhase ? fixturePath : null,
+    seed?.sources ?? [],
+  );
   const started = now();
   const record: PipelineRunRecord = {
     pipeline_run_schema_version: 1,
@@ -705,11 +905,32 @@ export async function runLinearPipeline(
     usage: emptyUsage(),
   };
   mkdirSync(runDir, { recursive: true, mode: 0o700 });
-  // On disk before any worker starts, so a run killed in its first trial still says what it was.
-  writePipelineRecord(runDir, record);
-
   const relative = (target: string) => path.relative(runDir, target).split(path.sep).join("/");
   type Promoted = Map<string, PromotedArtifactState>;
+
+  // Copied, so the run stands on its own once the seed run is gone.
+  const seeded: PromotedArtifactState[] = (seed?.sources ?? []).map((source) => {
+    const target = path.join(
+      runDir,
+      "seed",
+      `phase-${padded(source.producerPhase)}-${source.producerSkill}`,
+      source.workspacePath,
+    );
+    mkdirSync(path.dirname(target), { recursive: true });
+    cpSync(source.absolutePath, target, { recursive: true });
+    return {
+      absolutePath: target,
+      record: {
+        id: source.id,
+        path: relative(target),
+        sha256: source.sha256,
+        producer_phase: source.producerPhase,
+      },
+    };
+  });
+  if (seed) record.seed = { ...seed.record, artifacts: seeded.map((artifact) => artifact.record) };
+  // On disk before any worker starts, so a run killed in its first trial still says what it was.
+  writePipelineRecord(runDir, record);
 
   const staged = (plan: WorkerPlan, promoted: Promoted, scenarioInput: string | null) => ({
     scenarioInput,
@@ -1050,7 +1271,7 @@ export async function runLinearPipeline(
   for (let trialNumber = 1; trialNumber <= options.trials && !budgetSpent; trialNumber++) {
     const trialDir = path.join(runDir, `trial-${padded(trialNumber)}`);
     mkdirSync(trialDir);
-    const promoted: Promoted = new Map();
+    const promoted: Promoted = new Map(seeded.map((artifact) => [artifact.record.id, artifact]));
     const trial: PipelineTrialRunRecord = { trial: trialNumber, status: "passed", phases: [] };
     // Shared by the trial's loop iterations, so a wrapper one call fetched is there for the next.
     let cacheDir: string | undefined;
@@ -1059,7 +1280,9 @@ export async function runLinearPipeline(
       const phase = plan.phase;
       const phaseRunDir = path.join(trialDir, `phase-${padded(phase.phase)}-${plan.skill}`);
       const entryPlan = "legs" in plan ? plan.legs[0]! : plan;
-      const inputs = staged(entryPlan, promoted, entryPlan === workerPlans[0] ? fixturePath : null);
+      const scenarioInput =
+        entryPlan === workerPlans[0] && phase.phase === firstPhase ? fixturePath : null;
+      const inputs = staged(entryPlan, promoted, scenarioInput);
       let phaseRecord: PipelinePhaseRunRecord;
       const spent = spentBudget(record.usage, options);
       if (spent) {

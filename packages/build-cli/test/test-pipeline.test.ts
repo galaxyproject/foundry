@@ -17,6 +17,7 @@ import {
   runLinearPipeline,
   selectPhases,
   testPipelineExitCode,
+  type PipelineRunRecord,
 } from "../src/commands/test-pipeline.js";
 import { loadAssembly } from "../src/lib/cast-registry.js";
 import { foundryHead } from "../src/lib/foundry-head.js";
@@ -1585,4 +1586,185 @@ test("exits 2 for a blocked run, apart from other runs that did not pass", () =>
       testPipelineExitCode(status as "passed"),
     ),
   ).toEqual([0, 2, 1, 1]);
+});
+
+/** A finished run of the branch fixture's first phase, to seed later runs from. */
+async function seedRun(root: string, name = "earlier") {
+  const options = { ...draftRunOptions(root, name), through: "1" };
+  const record = await runLinearPipeline(options, {
+    runSkill: branchWorker([], {}),
+    id: () => `${name}-run`,
+  });
+  return { dir: options.runDir, record };
+}
+
+test("starts at --from on a seed run's artifacts, copied into the new run", async () => {
+  const root = branchFixtureRepo();
+  const earlier = await seedRun(root);
+  const calls: RunPiSkillOptions[] = [];
+  const runDir = path.join(root, "runs", "seeded");
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "seeded"), from: "test-data-resolution", seedRun: earlier.dir },
+    {
+      runSkill: branchWorker(calls, {
+        "source-to-test-data": () => ({ refs: [testDataRef("a", true)] }),
+        "find-test-data": fillGaps,
+      }),
+    },
+  );
+
+  expect(record.status).toBe("passed");
+  expect(calls.map((call) => path.basename(call.skillDir))).toEqual([
+    "source-to-test-data",
+    "test-plan",
+  ]);
+  const seeded = path.join(runDir, "seed", "phase-001-interface", "iface.json");
+  // The scenario fixture is phase 1's input, not the input of whichever phase runs first.
+  expect(calls[0]!.inputPaths).toEqual([seeded]);
+  expect(calls[0]!.prompt).not.toContain("scenario fixture");
+  expect(readFileSync(seeded, "utf8")).toBe("galaxy-interface\n");
+  const seededArtifact = {
+    id: "galaxy-interface",
+    path: "seed/phase-001-interface/iface.json",
+    sha256: earlier.record.trials[0]!.phases[0]!.artifacts[0]!.sha256,
+    producer_phase: 1,
+  };
+  expect(record.seed).toEqual({
+    run_dir: earlier.dir,
+    run_id: "earlier-run",
+    trial: 1,
+    assembly_sha256: earlier.record.assembly_sha256,
+    from_phase: 2,
+    phases: [{ phase: 1, skill: "interface", status: "passed" }],
+    artifacts: [seededArtifact],
+  });
+  expect(record.trials[0]!.phases.map((phase) => phase.phase)).toEqual([2, 3]);
+  expect(record.trials[0]!.phases[0]!.resolved_inputs).toEqual([seededArtifact]);
+});
+
+test("does not seed from a phase that did not pass in the seed run", async () => {
+  const root = branchFixtureRepo();
+  const earlier = path.join(root, "runs", "earlier");
+  const failed = await runLinearPipeline(draftRunOptions(root, "earlier"), {
+    runSkill: branchWorker([], { "source-to-test-data": () => ({ refs: [] }) }),
+  });
+  expect(failed.trials[0]!.phases[1]!.failure_kind).toBe("branch_contract");
+
+  const runDir = path.join(root, "runs", "seeded");
+  await expect(
+    runLinearPipeline(
+      { ...draftRunOptions(root, "seeded"), from: "test-plan", seedRun: earlier },
+      { runSkill: branchWorker([], {}) },
+    ),
+  ).rejects.toThrow(
+    "phase 3 (test-plan) consumes test-data-refs, which phase 2 (test-data-resolution) produces, but the seed run's phase 2 did not pass",
+  );
+  expect(existsSync(runDir)).toBe(false);
+});
+
+test("refuses a seed artifact that no longer matches the seed run's record", async () => {
+  const root = branchFixtureRepo();
+  const earlier = await seedRun(root);
+  writeFileSync(
+    path.join(earlier.dir, "trial-001", "phase-001-interface", "workspace", "iface.json"),
+    "edited\n",
+  );
+  await expect(
+    runLinearPipeline(
+      { ...draftRunOptions(root, "seeded"), from: "2", seedRun: earlier.dir },
+      { runSkill: branchWorker([], {}) },
+    ),
+  ).rejects.toThrow(
+    "seed run's galaxy-interface from phase 1 no longer matches its recorded sha256",
+  );
+});
+
+test("refuses a seed run of another scenario, fixture or trial", async () => {
+  const root = branchFixtureRepo();
+  const earlier = await seedRun(root);
+  const recordFile = path.join(earlier.dir, "run.json");
+  const original = readFileSync(recordFile, "utf8");
+  const seeded = (name: string, extra = {}) =>
+    runLinearPipeline(
+      { ...draftRunOptions(root, name), from: "2", seedRun: earlier.dir, ...extra },
+      { runSkill: branchWorker([], {}) },
+    );
+  const rewrite = (edit: (record: PipelineRunRecord) => void) => {
+    const record = JSON.parse(original);
+    edit(record);
+    writeJson(recordFile, record);
+  };
+
+  rewrite((record) => (record.scenario.name = "another journey"));
+  await expect(seeded("scenario")).rejects.toThrow(
+    "seed run is of scenario 'another journey', not 'tiny journey'",
+  );
+  rewrite((record) => (record.scenario.fixture_sha256 = "0".repeat(64)));
+  await expect(seeded("fixture")).rejects.toThrow(
+    "seed run's scenario fixture has changed since it ran",
+  );
+  rewrite(() => {});
+  await expect(seeded("trial", { seedTrial: 2 })).rejects.toThrow("seed run has no trial 2");
+});
+
+test("needs --seed-run to start past phase 1, and --from to use one", async () => {
+  const root = branchFixtureRepo();
+  await expect(
+    runLinearPipeline(
+      { ...draftRunOptions(root, "unseeded"), from: "2" },
+      { runSkill: branchWorker([], {}) },
+    ),
+  ).rejects.toThrow("--from phase 2 needs --seed-run for the artifacts of phases before it");
+  await expect(
+    runLinearPipeline(
+      { ...draftRunOptions(root, "unstarted"), seedRun: root },
+      { runSkill: branchWorker([], {}) },
+    ),
+  ).rejects.toThrow("--seed-run needs --from");
+});
+
+test("selects phases from --from through --through, checking only those", () => {
+  const root = branchFixtureRepo();
+  const assembly = loadAssembly(root, "demo-pipeline");
+  expect(selectPhases(assembly, "3", "test-data-resolution").map((phase) => phase.phase)).toEqual([
+    2, 3,
+  ]);
+  expect(() => selectPhases(assembly, "1", "2")).toThrow(
+    "--from phase 2 comes after --through phase 1",
+  );
+  expect(
+    selectPhases(
+      loadAssembly(REPO_ROOT, "paper-to-cwl"),
+      "test-data-resolution",
+      "test-data-resolution",
+    ),
+  ).toEqual([expect.objectContaining({ kind: "branch", pattern: "test-data-resolution" })]);
+});
+
+test("parses --from, --seed-run and --seed-trial", () => {
+  const args = parseTestPipelineArgs([
+    "nextflow-to-galaxy",
+    "--scenario",
+    "demo",
+    "--provider",
+    "p",
+    "--model",
+    "m",
+    "--from",
+    "test-data-resolution",
+    "--seed-run",
+    "/runs/earlier",
+    "--seed-trial",
+    "2",
+  ]);
+  expect(args).toEqual(
+    expect.objectContaining({
+      from: "test-data-resolution",
+      seedRun: "/runs/earlier",
+      seedTrial: 2,
+    }),
+  );
+  expect(() => parseTestPipelineArgs(["p", "--scenario", "s", "--seed-trial", "0"])).toThrow(
+    "--seed-trial must be a positive integer",
+  );
 });
