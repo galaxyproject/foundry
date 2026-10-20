@@ -468,7 +468,8 @@ interface SeedPlan {
 
 /**
  * What an earlier run of the same scenario carried forward from the phases before `fromPhase`:
- * the latest write of each artifact by a phase that passed, as the run itself promoted them.
+ * the latest write of each artifact by a phase that passed, as the run itself promoted them. A
+ * seed run that was itself seeded passes its own seed on.
  */
 function planSeed(
   seedRun: string,
@@ -476,6 +477,8 @@ function planSeed(
   pipeline: string,
   scenario: PipelineScenario,
   fromPhase: number,
+  /** This pipeline's phases before `fromPhase`, which the seed run's must have run. */
+  earlierPhases: AssemblyPhase[],
 ): SeedPlan {
   const dir = path.resolve(seedRun);
   const file = path.join(dir, PIPELINE_RUN_FILE);
@@ -493,9 +496,33 @@ function planSeed(
   const trial = earlier.trials?.find((candidate) => candidate.trial === trialNumber);
   if (!trial) throw new Error(`seed run has no trial ${trialNumber}`);
 
-  const phases = trial.phases.filter((phase) => phase.phase < fromPhase);
-  const latest = new Map<string, SeedSource>();
+  const inherited = earlier.seed;
+  const phases = [...(inherited?.phases ?? []), ...trial.phases].filter(
+    (phase) => phase.phase < fromPhase,
+  );
   for (const phase of phases) {
+    const current = earlierPhases.find((candidate) => candidate.phase === phase.phase);
+    const currentSkill = current?.skill ?? current?.pattern;
+    if (currentSkill !== phase.skill) {
+      throw new Error(
+        `seed run's phase ${phase.phase} ran ${phase.skill}, but this pipeline's phase ${phase.phase} is ${currentSkill ?? "absent"}`,
+      );
+    }
+  }
+  const latest = new Map<string, SeedSource>();
+  for (const artifact of inherited?.artifacts ?? []) {
+    if (artifact.producer_phase >= fromPhase) continue;
+    latest.set(artifact.id, {
+      id: artifact.id,
+      sha256: artifact.sha256,
+      producerPhase: artifact.producer_phase,
+      producerSkill: phases.find((phase) => phase.phase === artifact.producer_phase)!.skill,
+      // Under `seed/phase-NNN-<skill>/`, the copy keeps the producing workspace's own path.
+      workspacePath: artifact.path.split("/").slice(2).join("/"),
+      absolutePath: path.join(dir, artifact.path),
+    });
+  }
+  for (const phase of trial.phases.filter((candidate) => candidate.phase < fromPhase)) {
     // A phase that did not pass may have written outputs the run refused to carry forward.
     if (phase.status !== "passed") continue;
     const workers = phase.iterations?.length
@@ -791,8 +818,16 @@ export async function runLinearPipeline(
   }
   const scenario = resolveScenario(repoRoot, options.pipeline, options.scenario);
   const fixturePath = path.resolve(repoRoot, scenario.fixture_path);
+  const earlierPhases = assembly.phases.slice(0, assembly.phases.indexOf(phases[0]!));
   const seed = options.seedRun
-    ? planSeed(options.seedRun, options.seedTrial ?? 1, options.pipeline, scenario, fromPhase)
+    ? planSeed(
+        options.seedRun,
+        options.seedTrial ?? 1,
+        options.pipeline,
+        scenario,
+        fromPhase,
+        earlierPhases,
+      )
     : null;
   const workerPlan = (phase: AssemblyPhase, skill: string): WorkerPlan => {
     const bundleDir = skillDir(repoRoot, skill);
@@ -859,12 +894,7 @@ export async function runLinearPipeline(
       );
     }
   }
-  preflightSeededInputs(
-    repoRoot,
-    assembly.phases.slice(0, assembly.phases.indexOf(phases[0]!)),
-    workerPlans,
-    seed,
-  );
+  preflightSeededInputs(repoRoot, earlierPhases, workerPlans, seed);
   preflightInputBasenames(
     workerPlans,
     fromPhase === firstPhase ? fixturePath : null,

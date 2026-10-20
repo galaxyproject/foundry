@@ -1768,3 +1768,79 @@ test("parses --from, --seed-run and --seed-trial", () => {
     "--seed-trial must be a positive integer",
   );
 });
+
+test("seeds from a run that was itself seeded, carrying its seed forward", async () => {
+  const root = branchFixtureRepo();
+  writeSkill(
+    root,
+    "test-plan",
+    ["galaxy-interface", "test-data-refs"],
+    [{ id: "plan", default_filename: "plan.md" }],
+  );
+  const first = await seedRun(root);
+  const middle = path.join(root, "runs", "middle");
+  await runLinearPipeline(
+    {
+      ...draftRunOptions(root, "middle"),
+      from: "2",
+      through: "2",
+      seedRun: first.dir,
+    },
+    {
+      runSkill: branchWorker([], {
+        "source-to-test-data": () => ({ refs: [testDataRef("a", true)] }),
+      }),
+    },
+  );
+
+  const calls: RunPiSkillOptions[] = [];
+  const runDir = path.join(root, "runs", "last");
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "last"), from: "3", seedRun: middle },
+    { runSkill: branchWorker(calls, {}) },
+  );
+
+  expect(record.status).toBe("passed");
+  expect(record.seed?.phases).toEqual([
+    { phase: 1, skill: "interface", status: "passed" },
+    { phase: 2, skill: "test-data-resolution", status: "passed" },
+  ]);
+  expect(record.seed?.artifacts.map((artifact) => [artifact.id, artifact.path])).toEqual([
+    ["galaxy-interface", "seed/phase-001-interface/iface.json"],
+    ["test-data-refs", `seed/phase-002-test-data-resolution/${REFS_FILE}`],
+  ]);
+  expect(calls[0]!.inputPaths).toEqual([
+    path.join(runDir, "seed", "phase-001-interface", "iface.json"),
+    path.join(runDir, "seed", "phase-002-test-data-resolution", REFS_FILE),
+  ]);
+});
+
+test("refuses a seed run whose phase ran a different skill than this pipeline's phase", async () => {
+  const root = branchFixtureRepo();
+  const earlier = await seedRun(root);
+  const assemblyFile = path.join(
+    root,
+    "casts",
+    "claude",
+    "skills",
+    "pipeline-demo-pipeline",
+    "_assembly.json",
+  );
+  const assembly = JSON.parse(readFileSync(assemblyFile, "utf8"));
+  assembly.phases[0].skill = "renamed-interface";
+  writeJson(assemblyFile, assembly);
+  writeSkill(
+    root,
+    "renamed-interface",
+    [],
+    [{ id: "galaxy-interface", default_filename: "iface.json" }],
+  );
+  await expect(
+    runLinearPipeline(
+      { ...draftRunOptions(root, "renumbered"), from: "2", seedRun: earlier.dir },
+      { runSkill: branchWorker([], {}) },
+    ),
+  ).rejects.toThrow(
+    "seed run's phase 1 ran interface, but this pipeline's phase 1 is renamed-interface",
+  );
+});
