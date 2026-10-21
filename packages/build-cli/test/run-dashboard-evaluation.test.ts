@@ -739,7 +739,23 @@ describe("the evaluation run shape", () => {
           },
         ],
       },
-      trials: [{ trial: 1, status: "passed", phases: [] }],
+      trials: [
+        {
+          trial: 1,
+          status: "passed",
+          phases: [
+            {
+              phase: 8,
+              skill: "test-data-resolution",
+              status: "passed",
+              run_dir: "trial-001/phase-008-test-data-resolution",
+              declared_input_ids: ["summary-nextflow"],
+              missing_input_ids: [],
+              artifacts: [],
+            },
+          ],
+        },
+      ],
     });
     mkdirSync(path.dirname(path.join(runDir, seedArtifact)), { recursive: true });
     writeFileSync(path.join(runDir, seedArtifact), '{"pipeline": "demo"}\n');
@@ -764,6 +780,10 @@ describe("the evaluation run shape", () => {
         written_by_phase: 1,
         writes: [{ at: null, phase: 1, iteration: null, seeded: true }],
       }),
+    );
+    // Only the skipped phase 7 produces it, so it is not this run's to have written.
+    expect(model.artifacts.find((artifact) => artifact.id === "galaxy-workflow")?.presence).toBe(
+      "not-yet-due",
     );
     expect(model.warnings).toContainEqual(
       expect.objectContaining({

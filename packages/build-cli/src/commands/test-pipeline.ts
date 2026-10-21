@@ -22,12 +22,14 @@ import { load as loadYaml } from "js-yaml";
 import {
   assemblyPath,
   CAST_SLUG,
+  declaredOutputs,
   loadAssembly,
   loadSkillProvenance,
   phaseSkills,
   skillDir,
   type AssemblyManifest,
   type AssemblyPhase,
+  type DeclaredOutput,
 } from "../lib/cast-registry.js";
 import { foundryHead } from "../lib/foundry-head.js";
 import { readMarkdown } from "../lib/frontmatter.js";
@@ -35,6 +37,7 @@ import { parseOpenRequirements } from "../lib/run-ledgers.js";
 import { sha256File } from "../lib/reconcile.js";
 import {
   PIPELINE_RUN_FILE,
+  phaseWorkers,
   type PipelineBranchLegRecord,
   type PipelineLoopIterationRecord,
   type PipelineOutcome,
@@ -525,12 +528,7 @@ function planSeed(
   for (const phase of trial.phases.filter((candidate) => candidate.phase < fromPhase)) {
     // A phase that did not pass may have written outputs the run refused to carry forward.
     if (phase.status !== "passed") continue;
-    const workers = phase.iterations?.length
-      ? phase.iterations
-      : phase.legs?.length
-        ? phase.legs
-        : [phase];
-    for (const worker of workers) {
+    for (const worker of phaseWorkers(phase)) {
       for (const artifact of worker.artifacts) {
         if (artifact.status !== "passed" && artifact.status !== "present") continue;
         latest.set(artifact.id, {
@@ -569,36 +567,39 @@ function planSeed(
 }
 
 /**
- * Refuses a run whose phases read an artifact last produced, before `--from`, by a phase that did
- * not pass in the seed run: any copy carried from an earlier phase would be stale. An artifact a
- * passed phase chose not to write stays absent, as it would in a run from phase 1.
+ * Refuses a run whose phases read an artifact the seed run did not carry in good order: one last
+ * produced, before `--from`, by a phase that did not pass there, since any older copy would be
+ * stale; or one that phase must write but the seed has no copy of. An optional artifact a passed
+ * phase did not write stays absent, as it would in a run from phase 1.
  */
 function preflightSeededInputs(
-  repoRoot: string,
+  outputs: DeclaredOutput[],
   earlierPhases: AssemblyPhase[],
   workerPlans: WorkerPlan[],
   seed: SeedPlan | null,
 ): void {
-  const producers = new Map<string, AssemblyPhase>();
-  for (const phase of earlierPhases) {
-    for (const skill of phaseSkills(phase)) {
-      const bundleDir = skillDir(repoRoot, skill);
-      if (!existsSync(bundleDir)) continue;
-      for (const artifact of expectedArtifactsFromSkill(bundleDir)) {
-        producers.set(artifact.id, phase);
-      }
-    }
-  }
+  const declared = new Map(outputs.map((output) => [output.id, output]));
+  const carried = new Set(seed?.sources.map((source) => source.id));
   const producedHere = new Set<string>();
   for (const plan of workerPlans) {
     for (const id of plan.consumes) {
-      const producer = producers.get(id);
-      if (producedHere.has(id) || !producer) continue;
+      const output = declared.get(id);
+      const producer = [...earlierPhases]
+        .reverse()
+        .find((phase) => output?.producing_phases.includes(phase.phase));
+      if (producedHere.has(id) || !output || !producer) continue;
+      const consumer = `phase ${plan.phase.phase} (${plan.skill}) consumes ${id}, which phase ${producer.phase} (${producer.skill ?? producer.pattern}) produces`;
       const ended = seed?.record.phases.find((phase) => phase.phase === producer.phase);
-      if (ended?.status === "passed") continue;
-      throw new Error(
-        `phase ${plan.phase.phase} (${plan.skill}) consumes ${id}, which phase ${producer.phase} (${producer.skill ?? producer.pattern}) produces, but the seed run's phase ${producer.phase} ${ended ? "did not pass" : "never ran"}`,
-      );
+      if (ended?.status !== "passed") {
+        throw new Error(
+          `${consumer}, but the seed run's phase ${producer.phase} ${ended ? "did not pass" : "never ran"}`,
+        );
+      }
+      if (!carried.has(id) && !output.optional) {
+        throw new Error(
+          `${consumer}; it passed in the seed run, but the seed run carried no copy of it`,
+        );
+      }
     }
     for (const artifact of plan.produces) producedHere.add(artifact.id);
   }
@@ -816,6 +817,9 @@ export async function runLinearPipeline(
       `--from phase ${fromPhase} needs --seed-run for the artifacts of phases before it`,
     );
   }
+  if (fromPhase === firstPhase && options.seedRun !== undefined) {
+    throw new Error(`--seed-run needs --from to name a phase after phase ${firstPhase}`);
+  }
   const scenario = resolveScenario(repoRoot, options.pipeline, options.scenario);
   const fixturePath = path.resolve(repoRoot, scenario.fixture_path);
   const earlierPhases = assembly.phases.slice(0, assembly.phases.indexOf(phases[0]!));
@@ -894,7 +898,7 @@ export async function runLinearPipeline(
       );
     }
   }
-  preflightSeededInputs(repoRoot, earlierPhases, workerPlans, seed);
+  preflightSeededInputs(declaredOutputs(repoRoot, assembly), earlierPhases, workerPlans, seed);
   preflightInputBasenames(
     workerPlans,
     fromPhase === firstPhase ? fixturePath : null,
@@ -947,7 +951,7 @@ export async function runLinearPipeline(
       source.workspacePath,
     );
     mkdirSync(path.dirname(target), { recursive: true });
-    cpSync(source.absolutePath, target, { recursive: true });
+    cpSync(source.absolutePath, target, { recursive: true, dereference: true });
     return {
       absolutePath: target,
       record: {

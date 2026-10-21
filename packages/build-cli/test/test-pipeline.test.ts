@@ -1844,3 +1844,86 @@ test("refuses a seed run whose phase ran a different skill than this pipeline's 
     "seed run's phase 1 ran interface, but this pipeline's phase 1 is renamed-interface",
   );
 });
+
+test("refuses a seed that carried no copy of an input its producing phase passed with", async () => {
+  // pb rewrites what pa wrote, so a run seeded at pc keeps only pb's copy.
+  const root = fixtureRepo();
+  writeJson(
+    path.join(root, "casts", "claude", "skills", "pipeline-demo-pipeline", "_assembly.json"),
+    {
+      source_pipeline: "demo-pipeline",
+      source_revision: 1,
+      harness_name: "pipeline-demo-pipeline",
+      phases: ["pa", "pb", "pc"].map((skill, i) => ({
+        phase: i + 1,
+        kind: "mold",
+        skill,
+        cast_present: true,
+        loop: false,
+      })),
+    },
+  );
+  const x = { id: "x", default_filename: "x.txt" };
+  writeSkill(root, "pa", [], [x]);
+  writeSkill(root, "pb", ["x"], [x]);
+  writeSkill(root, "pc", ["x"], [{ id: "y", default_filename: "y.txt" }]);
+  const run = (name: string, extra = {}) =>
+    runLinearPipeline(
+      { ...draftRunOptions(root, name), ...extra },
+      { runSkill: branchWorker([], {}) },
+    );
+
+  await run("s0", { through: "2" });
+  await run("s1", { from: "3", seedRun: path.join(root, "runs", "s0") });
+  await expect(run("s2", { from: "2", seedRun: path.join(root, "runs", "s1") })).rejects.toThrow(
+    "phase 2 (pb) consumes x, which phase 1 (pa) produces; it passed in the seed run, but the seed run carried no copy of it",
+  );
+});
+
+test("refuses --seed-run when --from is the first phase, which needs no seed", async () => {
+  const root = branchFixtureRepo();
+  const earlier = await seedRun(root);
+  await expect(
+    runLinearPipeline(
+      { ...draftRunOptions(root, "first"), from: "1", seedRun: earlier.dir },
+      { runSkill: branchWorker([], {}) },
+    ),
+  ).rejects.toThrow("--seed-run needs --from to name a phase after phase 1");
+});
+
+test("seeds from a loop phase the latest write of each artifact, in every trial", async () => {
+  const root = draftFixtureRepo();
+  const loopRun = path.join(root, "runs", "loop");
+  const loop = await runLinearPipeline(
+    { ...draftRunOptions(root, "loop"), through: "2" },
+    { runSkill: draftWorker([]) },
+  );
+  const iterations = loop.trials[0]!.phases[1]!.iterations!;
+  expect(iterations).toHaveLength(3);
+
+  const calls: RunPiSkillOptions[] = [];
+  const runDir = path.join(root, "runs", "after-loop");
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "after-loop"), from: "3", seedRun: loopRun, trials: 2 },
+    { runSkill: draftWorker(calls) },
+  );
+
+  expect(record.status).toBe("passed");
+  const shaOf = (iteration: number, id: string) =>
+    iterations[iteration]!.artifacts.find((artifact) => artifact.id === id)!.sha256;
+  expect(
+    Object.fromEntries(record.seed!.artifacts.map((artifact) => [artifact.id, artifact.sha256])),
+  ).toEqual({
+    // The terminal call wrote only the workflow; the draft and ledger are the last call's before it.
+    "galaxy-workflow-draft": shaOf(1, "galaxy-workflow-draft"),
+    "open-requirements-ledger": shaOf(1, "open-requirements-ledger"),
+    "galaxy-workflow": shaOf(2, "galaxy-workflow"),
+  });
+  const workflow = path.join(
+    runDir,
+    "seed",
+    "phase-002-advance-galaxy-draft-step",
+    "galaxy-workflow.gxwf.yml",
+  );
+  expect(calls.map((call) => call.inputPaths)).toEqual([[workflow], [workflow]]);
+});

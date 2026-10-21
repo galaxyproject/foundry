@@ -1,7 +1,7 @@
 // The `run.json` a `foundry-build test-pipeline` run writes at the top of its run directory.
 //
-// Types only, shared by the command that writes the record and the dashboard reader that reads it
-// back, so the two cannot drift apart.
+// Types, and the one helper for walking them, shared by the command that writes the record and the
+// dashboard reader that reads it back, so the two cannot drift apart.
 
 import type {
   ArtifactResult,
@@ -108,6 +108,15 @@ export interface PipelineSeedRecord {
   phases: { phase: number; skill: string; status: PipelineOutcome }[];
   /** What those phases that passed carried forward, copied under this run's `seed/`. */
   artifacts: PromotedArtifact[];
+}
+
+/** The workers a phase ran, in order: its loop iterations, its branch legs, or the phase itself. */
+export function phaseWorkers(
+  phase: PipelinePhaseRunRecord,
+): (PipelinePhaseRunRecord | PipelineLoopIterationRecord | PipelineBranchLegRecord)[] {
+  if (phase.iterations?.length) return phase.iterations;
+  if (phase.legs?.length) return phase.legs;
+  return [phase];
 }
 
 export interface PipelineTrialRunRecord {

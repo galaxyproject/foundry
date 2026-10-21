@@ -12,7 +12,7 @@ import path from "node:path";
 import type { ArtifactResult } from "@galaxy-foundry/gxwf-pi-harness";
 
 import { declaredOutputs } from "./cast-registry.js";
-import { PIPELINE_RUN_FILE, type PipelineRunRecord } from "./pipeline-run-record.js";
+import { PIPELINE_RUN_FILE, phaseWorkers, type PipelineRunRecord } from "./pipeline-run-record.js";
 import { NO_LINKS } from "./run-links.js";
 import { buildPipelineIndex } from "./run-reconstruct.js";
 import { assemblyMatchesCurrent, readRunRecord } from "./run-record.js";
@@ -223,22 +223,18 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     ]);
   }
   for (const phase of chosenPhases) {
-    const workers = phase.iterations?.length
-      ? phase.iterations.map((iteration) => ({
-          ...iteration,
-          n: iteration.iteration,
-          legN: null,
-          within: ` iteration ${iteration.iteration}`,
-        }))
-      : phase.legs?.length
-        ? phase.legs.map((leg) => ({
-            ...leg,
-            n: null,
-            legN: leg.leg,
-            within: ` leg ${leg.leg} (${leg.skill})`,
-          }))
-        : [{ ...phase, n: null, legN: null, within: "" }];
-    const several = Boolean(phase.iterations?.length || phase.legs?.length);
+    const workers = phaseWorkers(phase).map((worker) => ({
+      ...worker,
+      n: "iteration" in worker ? worker.iteration : null,
+      legN: "leg" in worker ? worker.leg : null,
+      within:
+        "iteration" in worker
+          ? ` iteration ${worker.iteration}`
+          : "leg" in worker
+            ? ` leg ${worker.leg} (${worker.skill})`
+            : "",
+    }));
+    const several = workers[0]?.run_dir !== phase.run_dir;
     for (const worker of workers) {
       for (const artifact of worker.artifacts ?? []) {
         if (artifact.status === "missing" && several) continue;
@@ -281,9 +277,16 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         subject: output.id,
       });
     }
+    // A phase before `--from` that carried nothing here did not owe this run its outputs.
+    const owed = seed
+      ? {
+          ...output,
+          producing_phases: output.producing_phases.filter((n) => n >= seed.from_phase),
+        }
+      : output;
     return toRunArtifact(output, linker, {
       entry,
-      presence: failed ? "failed" : resolvePresence(output, entry, furthest),
+      presence: failed ? "failed" : resolvePresence(owed, entry, furthest),
       written_by_phase: hit?.phase ?? null,
       writes: history.map((write) => ({
         at: null,
