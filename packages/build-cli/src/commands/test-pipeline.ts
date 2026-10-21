@@ -261,8 +261,11 @@ interface LoopOracle {
   /** The worker a blocked call is escalated to, and how the controller judges what it did. */
   repair?: {
     skill: string;
-    /** Open blocking entries in the blockers artifact; each repair must lower the count. */
-    open(file: string): number;
+    /**
+     * Open blocking entries in the blockers artifact, or only those of `among`; each repair must
+     * lower the count.
+     */
+    open(file: string, among?: string[]): number;
     /** The escalation cap the blockers artifact itself sets, if it sets one. */
     cap(file: string): number | null;
     prompt(iteration: number, next: string[], blockers: string[]): string;
@@ -272,10 +275,14 @@ interface LoopOracle {
 /** Repairs a loop escalates to when neither the run nor the ledger caps them. */
 const DEFAULT_REPAIR_CAP = 3;
 
-function ledgerEntries(ledger: string) {
+function readLedger(ledger: string) {
   const parsed = parseOpenRequirements(readYamlFile(ledger), ledger);
   if (!parsed) throw new Error("it has no list of entries");
-  return parsed.entries;
+  return parsed;
+}
+
+function ledgerEntries(ledger: string) {
+  return readLedger(ledger).entries;
 }
 
 function readYamlFile(file: string): unknown {
@@ -328,17 +335,16 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
     // `topology_repair` header is left as the calls wrote it; the run record counts escalations.
     repair: {
       skill: "repair-galaxy-draft-topology",
-      open(file) {
-        return ledgerEntries(file).filter(
-          (entry) => entry.blocking === true && entry.status === "open",
+      open(file, among) {
+        const ledger = readLedger(file);
+        if (!among) return ledger.counts.blocking_open;
+        return ledger.entries.filter(
+          (entry) => entry.blocking === true && entry.status === "open" && among.includes(entry.id),
         ).length;
       },
       cap(file) {
-        const header = (readYamlFile(file) as { topology_repair?: { cap?: unknown } } | null)
-          ?.topology_repair;
-        return Number.isSafeInteger(header?.cap) && (header!.cap as number) > 0
-          ? (header!.cap as number)
-          : null;
+        const cap = readLedger(file).topology_repair?.cap;
+        return Number.isSafeInteger(cap) && cap! > 0 ? cap! : null;
       },
       prompt(iteration, next, blockers) {
         return `Loop iteration ${iteration}: the draft loop escalates to you. The call before could not advance step ${JSON.stringify(next)}; open-requirements-ledger entries ${blockers.join(", ")} block it. Repair that region of the draft, or narrow the step, and mark each entry you close resolved.`;
@@ -1303,7 +1309,18 @@ export async function runLinearPipeline(
           return stop("failed", "loop_no_progress", `${stalled} is still drafty`);
         const blocked = `${stalled} is blocked by ${oracle.blockers!.artifact} entries ${blockers.join(", ")}`;
         if (!repairOracle) return stop("failed", "loop_blocked", blocked);
-
+        // A surrendered blocker was given up on; a repair could not lower the open count.
+        const repairable = attempt(() => repairOracle.open(ledger!.absolutePath, blockers));
+        if (repairable instanceof Error || repairable === 0) {
+          return stop("failed", "loop_blocked", blocked);
+        }
+        if (n >= cap) {
+          return stop(
+            "failed",
+            "loop_blocked",
+            `${blocked}, and the loop has reached its cap of ${cap} iteration${cap === 1 ? "" : "s"}`,
+          );
+        }
         if (repairs >= repairCap) {
           return stop(
             "failed",

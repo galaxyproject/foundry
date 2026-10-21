@@ -1934,6 +1934,7 @@ const LEDGER_FILE = "open-requirements.ledger.yml";
 function withRepairCast(
   root: string,
   produces = ["galaxy-workflow-draft", "open-requirements-ledger"],
+  consumes = ["galaxy-workflow-draft", "open-requirements-ledger"],
 ) {
   const files: Record<string, string> = {
     "galaxy-workflow-draft": DRAFT_FILE,
@@ -1942,7 +1943,7 @@ function withRepairCast(
   writeSkill(
     root,
     REPAIR,
-    ["galaxy-workflow-draft", "open-requirements-ledger"],
+    consumes,
     produces.map((id) => ({ id, default_filename: files[id]! })),
   );
   return root;
@@ -2020,6 +2021,54 @@ test("escalates a blocked draft-loop call to a repair worker, then resumes the l
   const repairCall = calls.find((call) => path.basename(call.skillDir) === REPAIR)!;
   expect(repairCall.prompt).toContain("a-uncomputable-0");
   expect(repairCall.cacheDir).toBe(calls[1]!.cacheDir);
+});
+
+test("counts only advance calls against the draft loop's iteration cap", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "repair-iteration-cap"), maxIterations: 4 },
+    { runSkill: repairingWorker([], rewire) },
+  );
+
+  expect(record.status).toBe("passed");
+  expect(record.trials[0]!.phases[1]!.iterations).toHaveLength(5);
+});
+
+test("does not repair a step whose only blocker is surrendered", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "repair-surrendered"), {
+    runSkill: draftWorker(calls, () => [ledgerEntry("a-surrendered", "a", "surrendered", true)]),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-surrendered",
+    }),
+  );
+  expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(0);
+});
+
+test("does not repair after the draft loop's last allowed call", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "repair-last-call"), maxIterations: 1 },
+    { runSkill: repairingWorker(calls, rewire) },
+  );
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-uncomputable-0, and the loop has reached its cap of 1 iteration",
+    }),
+  );
+  expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(0);
 });
 
 test("stops the draft loop when a repair does not lower the open blocking count", async () => {
@@ -2171,6 +2220,14 @@ test("preflights a repair cast that does not carry the draft and the ledger", as
     runLinearPipeline(draftRunOptions(root, "repair-preflight"), { runSkill: draftWorker([]) }),
   ).rejects.toThrow(
     "phase 2 (advance-galaxy-draft-step) escalates to repair-galaxy-draft-topology, which does not produce open-requirements-ledger",
+  );
+  const unread = withRepairCast(draftFixtureRepo(), undefined, ["galaxy-workflow-draft"]);
+  await expect(
+    runLinearPipeline(draftRunOptions(unread, "repair-preflight-consumes"), {
+      runSkill: draftWorker([]),
+    }),
+  ).rejects.toThrow(
+    "phase 2 (advance-galaxy-draft-step) escalates to repair-galaxy-draft-topology, which does not consume open-requirements-ledger",
   );
 });
 
