@@ -5,10 +5,10 @@
     "name": "workflow-brief-to-galaxy-data-flow",
     "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
     "revision": 5,
-    "content_hash": "eb1baabd420ebb9c97e2ddcb72b36b69d17b2c929e7247093642f3da3d54756e",
-    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
+    "content_hash": "0740b31928c22e7c8b85f4f0e81898164e3ed06e158dca005dcfe71b05827eac",
+    "commit": "5ff0c3700db55d9b0c67997b630be2046e98f868"
   },
-  "cast_at": "2026-10-21T22:37:54.198Z",
+  "cast_at": "2026-10-21T22:49:52.745Z",
   "refs": [
     {
       "kind": "pattern",

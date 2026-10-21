@@ -88,10 +88,12 @@ describe("assemble-pipeline (committed harnesses)", () => {
         .phases.filter((phase: { kind: string }) => phase.kind === "mold")
         .map((phase: { skill: string }) => phase.skill);
     const briefSpine = moldSkills("workflow-brief-to-galaxy");
+    expect(briefSpine).toContain("workflow-brief-to-galaxy-interface");
+    expect(briefSpine).toContain("workflow-brief-to-galaxy-test-plan");
     for (const [slug, summarizer] of [
       ["paper-to-galaxy", "summarize-paper"],
       ["interview-to-galaxy", "interview-to-freeform-summary"],
-    ]) {
+    ] as const) {
       expect(moldSkills(slug)).toEqual([
         summarizer,
         "freeform-summary-to-workflow-brief",
