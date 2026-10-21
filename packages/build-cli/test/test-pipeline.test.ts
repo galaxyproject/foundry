@@ -1927,3 +1927,197 @@ test("seeds from a loop phase the latest write of each artifact, in every trial"
   );
   expect(calls.map((call) => call.inputPaths)).toEqual([[workflow], [workflow]]);
 });
+
+const REPAIR = "repair-galaxy-draft-topology";
+const LEDGER_FILE = "open-requirements.ledger.yml";
+
+function withRepairCast(
+  root: string,
+  produces = ["galaxy-workflow-draft", "open-requirements-ledger"],
+) {
+  const files: Record<string, string> = {
+    "galaxy-workflow-draft": DRAFT_FILE,
+    "open-requirements-ledger": LEDGER_FILE,
+  };
+  writeSkill(
+    root,
+    REPAIR,
+    ["galaxy-workflow-draft", "open-requirements-ledger"],
+    produces.map((id) => ({ id, default_filename: files[id]! })),
+  );
+  return root;
+}
+
+type Ledger = { entries: Record<string, unknown>[] };
+
+/**
+ * The draft loop of `draftWorker`, in which step a blocks until a repair has run, and a repair
+ * worker that applies `repair` to the staged draft and ledger.
+ */
+function repairingWorker(
+  calls: RunPiSkillOptions[],
+  repair: (draft: Draft, ledger: Ledger, n: number) => void,
+  blocksAfterRepair = false,
+) {
+  let repairs = 0;
+  const advance = draftWorker(calls, (draft, step) => {
+    if (step === "a" && (repairs === 0 || blocksAfterRepair)) {
+      return [ledgerEntry(`a-uncomputable-${repairs}`, "a", "open", true)];
+    }
+    draft.steps[step]!.tool_id = "cat1";
+    draft.steps[step]!.tool_version = "1.0";
+  });
+  return async (options: RunPiSkillOptions) => {
+    if (path.basename(options.skillDir) !== REPAIR) return advance(options);
+    calls.push(options);
+    repairs++;
+    const staged = (name: string) => options.inputPaths!.find((p) => path.basename(p) === name)!;
+    const draft = loadYaml(readFileSync(staged(DRAFT_FILE), "utf8")) as Draft;
+    const ledger = loadYaml(readFileSync(staged(LEDGER_FILE), "utf8")) as Ledger;
+    repair(draft, ledger, repairs);
+    const workspace = path.join(options.runDir, "workspace");
+    mkdirSync(workspace, { recursive: true });
+    writeFileSync(path.join(workspace, DRAFT_FILE), dumpYaml(draft));
+    writeFileSync(path.join(workspace, LEDGER_FILE), dumpYaml(ledger));
+    return workspaceRecord(options, REPAIR);
+  };
+}
+
+/** Re-wires step a and resolves every open blocking entry, as a successful repair would. */
+function rewire(draft: Draft, ledger: Ledger, n: number) {
+  draft.steps.a!.in = { input: "reads", repaired: `pass-${n}` };
+  for (const entry of ledger.entries) if (entry.blocking) entry.status = "resolved";
+}
+
+test("escalates a blocked draft-loop call to a repair worker, then resumes the loop", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "repaired"), {
+    runSkill: repairingWorker(calls, rewire),
+  });
+
+  expect(record.status).toBe("passed");
+  const loop = record.trials[0]!.phases[1]!;
+  expect(
+    loop.iterations?.map((iteration) => [
+      iteration.iteration,
+      iteration.skill ?? null,
+      iteration.next_step,
+    ]),
+  ).toEqual([
+    [1, null, ["a"]],
+    [2, REPAIR, ["a"]],
+    [3, null, ["a"]],
+    [4, null, ["b"]],
+    [5, null, null],
+  ]);
+  expect(loop.iterations?.[1]).toEqual(
+    expect.objectContaining({
+      run_dir: "trial-001/phase-002-advance-galaxy-draft-step/iteration-002",
+      open_blocking: { before: 1, after: 0 },
+    }),
+  );
+  const repairCall = calls.find((call) => path.basename(call.skillDir) === REPAIR)!;
+  expect(repairCall.prompt).toContain("a-uncomputable-0");
+  expect(repairCall.cacheDir).toBe(calls[1]!.cacheDir);
+});
+
+test("stops the draft loop when a repair does not lower the open blocking count", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const record = await runLinearPipeline(draftRunOptions(root, "repair-stuck"), {
+    runSkill: repairingWorker([], (draft) => {
+      draft.steps.a!.in = { input: "reads", repaired: "but-still-blocked" };
+    }),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-uncomputable-0, and the repair at iteration 2 left 1 open blocking entry, no fewer than before",
+    }),
+  );
+});
+
+test("stops the draft loop once its repairs reach the cap", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "repair-cap"), maxRepairs: 1 },
+    { runSkill: repairingWorker(calls, rewire, true) },
+  );
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 3 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-uncomputable-1, and the loop has reached its cap of 1 repair",
+    }),
+  );
+  expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(1);
+});
+
+test("fails the draft loop when its repair worker fails", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const advance = repairingWorker([], rewire);
+  const record = await runLinearPipeline(draftRunOptions(root, "repair-failed"), {
+    runSkill: async (options) => {
+      if (path.basename(options.skillDir) !== REPAIR) return advance(options);
+      return workspaceRecord(options, REPAIR); // wrote nothing
+    },
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "skill",
+      error: expect.stringMatching(/^iteration 2 \(repair-galaxy-draft-topology\): /),
+    }),
+  );
+});
+
+test("stops before a repair worker once the run budget is spent", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "repair-budget"), maxCost: 0.02 },
+    { runSkill: repairingWorker([], rewire) },
+  );
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "cancelled",
+      failure_kind: "budget",
+      error: "run budget spent before the repair at iteration 2: cost 0.02 of --max-cost 0.02",
+    }),
+  );
+});
+
+test("preflights a repair cast that does not carry the draft and the ledger", async () => {
+  const root = withRepairCast(draftFixtureRepo(), ["galaxy-workflow-draft"]);
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "repair-preflight"), { runSkill: draftWorker([]) }),
+  ).rejects.toThrow(
+    "phase 2 (advance-galaxy-draft-step) escalates to repair-galaxy-draft-topology, which does not produce open-requirements-ledger",
+  );
+});
+
+test("parses the repair cap", () => {
+  const args = parseTestPipelineArgs([
+    "p",
+    "--scenario",
+    "s",
+    "--provider",
+    "p",
+    "--model",
+    "m",
+    "--max-repairs",
+    "2",
+  ]);
+  expect(args.maxRepairs).toBe(2);
+  expect(() => parseTestPipelineArgs(["p", "--scenario", "s", "--max-repairs", "0"])).toThrow(
+    "--max-repairs must be a positive integer",
+  );
+});

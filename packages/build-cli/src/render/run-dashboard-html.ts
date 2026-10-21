@@ -358,7 +358,7 @@ function renderArtifactPanel(artifact: RunArtifact, options: RenderOptions): str
     const writes = artifact.writes
       .map(
         (write) =>
-          `phase ${write.phase ?? "—"}${write.iteration ? ` step ${write.iteration}` : ""}${write.leg ? ` leg ${write.leg}` : ""}${write.seeded ? " seeded" : ""} at ${shortInstant(write.at)}`,
+          `phase ${write.phase ?? "—"}${write.iteration ? ` step ${write.iteration}` : ""}${write.skill ? ` (${write.skill})` : ""}${write.leg ? ` leg ${write.leg}` : ""}${write.seeded ? " seeded" : ""} at ${shortInstant(write.at)}`,
       )
       .join("; ");
     meta.push(`<dt>written</dt><dd>${escapeHtml(writes)}</dd>`);

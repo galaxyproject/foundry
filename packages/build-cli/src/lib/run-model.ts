@@ -82,6 +82,8 @@ export interface ArtifactWrite {
   leg?: number;
   /** Set only on a write made in the run this one was seeded from, and copied in. */
   seeded?: true;
+  /** Set only on a loop write by a skill other than the phase's, such as a repair. */
+  skill?: string;
 }
 
 export type DerivedView =

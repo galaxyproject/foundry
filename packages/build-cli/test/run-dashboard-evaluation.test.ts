@@ -613,6 +613,76 @@ describe("the evaluation run shape", () => {
     expect(model.phases.find((phase) => phase.n === 2)?.status).toBe("failed");
   });
 
+  it("labels a loop iteration that ran a repair, in its writes and its warnings", () => {
+    const loopDir = "trial-001/phase-007-advance-galaxy-draft-step";
+    const draft = (sha: string, status = "passed") => ({
+      id: "galaxy-workflow-draft",
+      path: "galaxy-workflow-draft.gxwf.yml",
+      status,
+      sha256: sha.repeat(64),
+    });
+    const iteration = (n: number, artifact: ReturnType<typeof draft>, skill?: string) => ({
+      iteration: n,
+      next_step: ["restore"],
+      ...(skill ? { skill } : {}),
+      status: artifact.status === "passed" ? "passed" : "failed",
+      run_dir: `${loopDir}/iteration-00${n}`,
+      resolved_inputs: [],
+      missing_input_ids: [],
+      artifacts: [artifact],
+    });
+    const model = runModelFromTestPipeline({
+      runDir: evaluationRun({
+        through_phase: 7,
+        trials: [
+          {
+            trial: 1,
+            status: "failed",
+            phases: [
+              summarizePhase(),
+              {
+                phase: 7,
+                skill: "advance-galaxy-draft-step",
+                status: "failed",
+                run_dir: loopDir,
+                declared_input_ids: [],
+                missing_input_ids: [],
+                artifacts: [draft("2", "failed")],
+                iterations: [
+                  iteration(1, draft("1")),
+                  iteration(2, draft("2", "failed"), "repair-galaxy-draft-topology"),
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+      repoRoot: REPO_ROOT,
+      pipelineIndex: index,
+      now: FIXED_CLOCK,
+    });
+    expect(
+      model.artifacts.find((artifact) => artifact.id === "galaxy-workflow-draft")?.writes,
+    ).toEqual([
+      { at: null, phase: 7, iteration: 1 },
+      { at: null, phase: 7, iteration: 2, skill: "repair-galaxy-draft-topology" },
+    ]);
+    expect(model.warnings).toContainEqual(
+      expect.objectContaining({
+        code: "artifact-failed",
+        message: expect.stringContaining(
+          "galaxy-workflow-draft from phase 7 iteration 2 (repair-galaxy-draft-topology) failed",
+        ),
+      }),
+    );
+    const html = renderRunDashboard(model, {
+      siteBase: "",
+      manifestJson: serializeRunManifest(model),
+      commandLine: "foundry-build run-dashboard run-abc",
+    });
+    expect(html).toContain("phase 7 step 2 (repair-galaxy-draft-topology)");
+  });
+
   it("names the loop iteration whose artifact failed validation", () => {
     const loopDir = "trial-001/phase-007-advance-galaxy-draft-step";
     const failedWorkflow = {

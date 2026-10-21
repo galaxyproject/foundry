@@ -68,6 +68,10 @@ export interface PipelineLoopIterationRecord extends PipelineWorkerRunRecord {
   iteration: number;
   /** The work the loop oracle picked for this call; null for the terminal call. */
   next_step: string[] | null;
+  /** Set on a call to a skill other than the phase's, such as a repair the loop escalated to. */
+  skill?: string;
+  /** A repair's open blocking-entry count as it found and left the ledger. */
+  open_blocking?: { before: number; after: number };
 }
 
 export interface PipelineBranchLegRecord extends PipelineWorkerRunRecord {

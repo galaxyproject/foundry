@@ -199,6 +199,8 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
     runDir: string | null;
     file: string;
     seeded: boolean;
+    /** A loop iteration's own skill, when it is not the phase's. */
+    skill: string | null;
     result: ArtifactResult;
   }
   const writes = new Map<string, Write[]>();
@@ -213,6 +215,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         runDir: null,
         file: artifact.path,
         seeded: true,
+        skill: null,
         result: {
           id: artifact.id,
           path: artifact.path,
@@ -229,7 +232,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
       legN: "leg" in worker ? worker.leg : null,
       within:
         "iteration" in worker
-          ? ` iteration ${worker.iteration}`
+          ? ` iteration ${worker.iteration}${worker.skill ? ` (${worker.skill})` : ""}`
           : "leg" in worker
             ? ` leg ${worker.leg} (${worker.skill})`
             : "",
@@ -248,6 +251,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
             runDir: worker.run_dir,
             file: `${worker.run_dir}/workspace/${artifact.path}`,
             seeded: false,
+            skill: "iteration" in worker ? (worker.skill ?? null) : null,
             result: artifact,
           },
         ]);
@@ -294,6 +298,7 @@ export function runModelFromTestPipeline(options: TestPipelineAdapterOptions): R
         iteration: write.iteration,
         ...(write.leg === null ? {} : { leg: write.leg }),
         ...(write.seeded ? { seeded: true as const } : {}),
+        ...(write.skill ? { skill: write.skill } : {}),
       })),
       variants: [],
       validation:

@@ -84,6 +84,8 @@ export interface TestPipelineOptions {
   piTestAuthDir?: string;
   /** Overrides each loop phase's default iteration cap. */
   maxIterations?: number;
+  /** Overrides each loop phase's cap on repair escalations. */
+  maxRepairs?: number;
   /** Run budget, checked before each worker starts; a running worker is bounded by its timeout. */
   maxCost?: number;
   maxTokens?: number;
@@ -123,6 +125,7 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
   let seedTrial: number | undefined;
   let trials = 1;
   let maxIterations: number | undefined;
+  let maxRepairs: number | undefined;
   let maxCost: number | undefined;
   let maxTokens: number | undefined;
 
@@ -167,6 +170,12 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     option = readOption(argv, i, "--max-iterations");
     if (option) {
       maxIterations = parsePositiveInteger(option.value, "--max-iterations");
+      i = option.lastIndex;
+      continue;
+    }
+    option = readOption(argv, i, "--max-repairs");
+    if (option) {
+      maxRepairs = parsePositiveInteger(option.value, "--max-repairs");
       i = option.lastIndex;
       continue;
     }
@@ -218,6 +227,7 @@ export function parseTestPipelineArgs(argv: string[]): TestPipelineCliArgs {
     seedTrial,
     trials,
     maxIterations,
+    maxRepairs,
     maxCost,
     maxTokens,
     piTestAuthDir: piTestAuth ? (piTestAuthDir ?? undefined) : undefined,
@@ -248,6 +258,24 @@ interface LoopOracle {
     artifact: string;
     read(file: string, earlier: string | null, next: string[]): string[];
   };
+  /** The worker a blocked call is escalated to, and how the controller judges what it did. */
+  repair?: {
+    skill: string;
+    /** Open blocking entries in the blockers artifact; each repair must lower the count. */
+    open(file: string): number;
+    /** The escalation cap the blockers artifact itself sets, if it sets one. */
+    cap(file: string): number | null;
+    prompt(iteration: number, next: string[], blockers: string[]): string;
+  };
+}
+
+/** Repairs a loop escalates to when neither the run nor the ledger caps them. */
+const DEFAULT_REPAIR_CAP = 3;
+
+function ledgerEntries(ledger: string) {
+  const parsed = parseOpenRequirements(readYamlFile(ledger), ledger);
+  if (!parsed) throw new Error("it has no list of entries");
+  return parsed.entries;
 }
 
 function readYamlFile(file: string): unknown {
@@ -281,14 +309,11 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
     blockers: {
       artifact: "open-requirements-ledger",
       read(file, earlier, next) {
-        const entries = (ledger: string) => {
-          const parsed = parseOpenRequirements(readYamlFile(ledger), ledger);
-          if (!parsed) throw new Error("it has no list of entries");
-          return parsed.entries;
-        };
-        const before = new Map(earlier ? entries(earlier).map((entry) => [entry.id, entry]) : []);
+        const before = new Map(
+          earlier ? ledgerEntries(earlier).map((entry) => [entry.id, entry]) : [],
+        );
         // A blocking entry stays open until a repair closes it, and is surrendered at the cap.
-        return entries(file)
+        return ledgerEntries(file)
           .filter(
             (entry) =>
               entry.blocking === true &&
@@ -297,6 +322,26 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
               !isDeepStrictEqual(before.get(entry.id), entry),
           )
           .map((entry) => entry.id);
+      },
+    },
+    // The Mold's step 5 escalation, which a single-skill worker cannot make itself. The ledger's
+    // `topology_repair` header is left as the calls wrote it; the run record counts escalations.
+    repair: {
+      skill: "repair-galaxy-draft-topology",
+      open(file) {
+        return ledgerEntries(file).filter(
+          (entry) => entry.blocking === true && entry.status === "open",
+        ).length;
+      },
+      cap(file) {
+        const header = (readYamlFile(file) as { topology_repair?: { cap?: unknown } } | null)
+          ?.topology_repair;
+        return Number.isSafeInteger(header?.cap) && (header!.cap as number) > 0
+          ? (header!.cap as number)
+          : null;
+      },
+      prompt(iteration, next, blockers) {
+        return `Loop iteration ${iteration}: the draft loop escalates to you. The call before could not advance step ${JSON.stringify(next)}; open-requirements-ledger entries ${blockers.join(", ")} block it. Repair that region of the draft, or narrow the step, and mark each entry you close resolved.`;
       },
     },
   },
@@ -653,6 +698,8 @@ interface WorkerPlan {
 }
 
 interface MoldPhasePlan extends WorkerPlan {
+  /** The worker a blocked loop call is escalated to, when the harness casts it. */
+  repair?: WorkerPlan;
   loop?: LoopOracle;
 }
 
@@ -844,6 +891,11 @@ export async function runLinearPipeline(
       produces: expectedArtifactsFromSkill(bundleDir),
     };
   };
+  // A harness without the repair cast ends a blocked loop call as loop_blocked, as before.
+  const repairPlan = (phase: AssemblyPhase): WorkerPlan | undefined => {
+    const skill = phase.loop && phase.skill ? LOOP_ORACLES[phase.skill]?.repair?.skill : undefined;
+    return skill && existsSync(skillDir(repoRoot, skill)) ? workerPlan(phase, skill) : undefined;
+  };
   const phasePlans: PhasePlan[] = phases.map((phase) =>
     phase.kind === "branch"
       ? {
@@ -856,9 +908,12 @@ export async function runLinearPipeline(
       : {
           ...workerPlan(phase, phase.skill),
           loop: phase.loop ? LOOP_ORACLES[phase.skill] : undefined,
+          repair: repairPlan(phase),
         },
   );
-  const workerPlans = phasePlans.flatMap((plan) => ("legs" in plan ? plan.legs : [plan]));
+  const workerPlans = phasePlans.flatMap((plan) =>
+    "legs" in plan ? plan.legs : plan.repair ? [plan, plan.repair] : [plan],
+  );
   for (const plan of phasePlans) {
     if (!("legs" in plan)) continue;
     const label = `phase ${plan.phase.phase} (${plan.skill})`;
@@ -891,6 +946,16 @@ export async function runLinearPipeline(
       throw new Error(
         `${label} does not consume ${plan.loop.carried}, which its loop oracle expects`,
       );
+    }
+    if (plan.repair) {
+      const carries = [plan.loop.carried, plan.loop.blockers!.artifact];
+      const repairs = `${label} escalates to ${plan.repair.skill}, which does not`;
+      for (const id of carries) {
+        if (!plan.repair.produces.some((artifact) => artifact.id === id)) {
+          throw new Error(`${repairs} produce ${id}`);
+        }
+        if (!plan.repair.consumes.includes(id)) throw new Error(`${repairs} consume ${id}`);
+      }
     }
     if (options.sandbox === "container") {
       throw new Error(
@@ -1163,6 +1228,9 @@ export async function runLinearPipeline(
         `loop oracle could not read ${oracle.carried}: ${cap.message}`,
       );
     }
+    const repairOracle = plan.repair && oracle.repair;
+    let repairs = 0;
+    // `n` counts the oracle's calls, which `cap` bounds; repairs have their own cap.
     for (let n = 1; ; n++) {
       if (n > cap) {
         return stop(
@@ -1171,9 +1239,10 @@ export async function runLinearPipeline(
           `${oracle.label} reached ${cap} iteration${cap === 1 ? "" : "s"} without finishing`,
         );
       }
+      const at = iterations.length + 1;
       const spent = spentBudget(record.usage, options);
       if (spent) {
-        return stop("cancelled", "budget", `run budget spent before iteration ${n}: ${spent}`);
+        return stop("cancelled", "budget", `run budget spent before iteration ${at}: ${spent}`);
       }
 
       const before = promoted.get(oracle.carried)!;
@@ -1194,20 +1263,20 @@ export async function runLinearPipeline(
         if (!terminal) return terminalOutput ? [] : [artifact];
         return [{ ...artifact, optional: artifact.optional === true || !terminalOutput }];
       });
-      const iterationDir = path.join(phaseRunDir, `iteration-${padded(n)}`);
-      const result = await step(plan, iterationDir, expected, oracle.prompt(n, next), cacheDir);
-      iterations.push({ iteration: n, next_step: next, ...result });
+      const iterationDir = path.join(phaseRunDir, `iteration-${padded(at)}`);
+      const result = await step(plan, iterationDir, expected, oracle.prompt(at, next), cacheDir);
+      iterations.push({ iteration: at, next_step: next, ...result });
 
       if (result.status !== "passed") {
         return stop(
           result.status,
           result.failure_kind,
-          `iteration ${n}: ${result.error ?? "no error recorded"}`,
+          `iteration ${at}: ${result.error ?? "no error recorded"}`,
         );
       }
       if (terminal) return phaseRecord;
       if (promoted.get(oracle.carried)!.record.sha256 === before.record.sha256) {
-        const stalled = `iteration ${n} left ${oracle.carried} unchanged; step ${next.join(" > ")}`;
+        const stalled = `iteration ${at} left ${oracle.carried} unchanged; step ${next.join(" > ")}`;
         const ledger = oracle.blockers && promoted.get(oracle.blockers.artifact);
         const blockers = ledger
           ? attempt(() =>
@@ -1221,14 +1290,73 @@ export async function runLinearPipeline(
             `${stalled} is still drafty, and ${oracle.blockers!.artifact} could not be read: ${blockers.message}`,
           );
         }
-        if (blockers.length) {
+        if (!blockers.length)
+          return stop("failed", "loop_no_progress", `${stalled} is still drafty`);
+        const blocked = `${stalled} is blocked by ${oracle.blockers!.artifact} entries ${blockers.join(", ")}`;
+        if (!repairOracle) return stop("failed", "loop_blocked", blocked);
+
+        const repairCap =
+          options.maxRepairs ?? attempt(() => repairOracle.cap(ledger!.absolutePath));
+        const limit =
+          repairCap instanceof Error || repairCap === null ? DEFAULT_REPAIR_CAP : repairCap;
+        if (repairs >= limit) {
           return stop(
             "failed",
             "loop_blocked",
-            `${stalled} is blocked by ${oracle.blockers!.artifact} entries ${blockers.join(", ")}`,
+            `${blocked}, and the loop has reached its cap of ${limit} repair${limit === 1 ? "" : "s"}`,
           );
         }
-        return stop("failed", "loop_no_progress", `${stalled} is still drafty`);
+        const repairAt = iterations.length + 1;
+        const repairSpent = spentBudget(record.usage, options);
+        if (repairSpent) {
+          return stop(
+            "cancelled",
+            "budget",
+            `run budget spent before the repair at iteration ${repairAt}: ${repairSpent}`,
+          );
+        }
+        const openBefore = attempt(() => repairOracle.open(ledger!.absolutePath));
+        repairs++;
+        const repaired = await step(
+          plan.repair!,
+          path.join(phaseRunDir, `iteration-${padded(repairAt)}`),
+          plan.repair!.produces,
+          repairOracle.prompt(repairAt, next, blockers),
+          cacheDir,
+        );
+        const repairRecord: PipelineLoopIterationRecord = {
+          iteration: repairAt,
+          next_step: next,
+          skill: plan.repair!.skill,
+          ...repaired,
+        };
+        iterations.push(repairRecord);
+        if (repaired.status !== "passed") {
+          return stop(
+            repaired.status,
+            repaired.failure_kind,
+            `iteration ${repairAt} (${plan.repair!.skill}): ${repaired.error ?? "no error recorded"}`,
+          );
+        }
+        const openAfter = attempt(() =>
+          repairOracle.open(promoted.get(oracle.blockers!.artifact)!.absolutePath),
+        );
+        if (openBefore instanceof Error || openAfter instanceof Error) {
+          const failure = openBefore instanceof Error ? openBefore : (openAfter as Error);
+          return stop(
+            "error",
+            undefined,
+            `loop oracle could not read ${oracle.blockers!.artifact} around the repair at iteration ${repairAt}: ${failure.message}`,
+          );
+        }
+        repairRecord.open_blocking = { before: openBefore, after: openAfter };
+        if (openAfter >= openBefore) {
+          return stop(
+            "failed",
+            "loop_blocked",
+            `${blocked}, and the repair at iteration ${repairAt} left ${openAfter} open blocking entr${openAfter === 1 ? "y" : "ies"}, no fewer than before`,
+          );
+        }
       }
     }
   };
