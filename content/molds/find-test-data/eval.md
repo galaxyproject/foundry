@@ -21,4 +21,10 @@ applied to whatever a scenario produces.
 
 - bucket: utility
 - check: deterministic
-- assertion: every workflow input label has exactly one entry; each entry is either resolved (URL/path + shape + datatype) or marked `resolved: false` with a reason. No input is uncovered and none is silently absent, so [[implement-galaxy-workflow-test]] can stage from the refs without re-deriving input shapes.
+- assertion: every workflow input label has exactly one entry; each entry is either resolved (URL/path + shape + datatype), omitted, or marked `resolved: false` with a reason. No input is uncovered and none is silently absent, so [[implement-galaxy-workflow-test]] can stage from the refs without re-deriving input shapes.
+
+## Property: only a searched optional input is omitted
+
+- bucket: fidelity
+- check: llm-judged
+- assertion: every ref marked `omitted: true` is an input the interface brief marks optional, and its reason records the search that found nothing. No required input is omitted, and no input with a real source of the right shape is omitted instead of resolved.

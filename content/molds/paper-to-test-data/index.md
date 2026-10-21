@@ -7,8 +7,8 @@ tags:
   - source/paper
 status: draft
 created: 2026-04-30
-revised: 2026-10-15
-revision: 3
+revised: 2026-10-20
+revision: 4
 summary: "Resolve the test data a paper names into refs for each workflow input."
 input_artifacts:
   - id: freeform-summary
@@ -37,4 +37,4 @@ references:
 ---
 # paper-to-test-data
 
-Read the paper free-form summary from [[summarize-paper]] and resolve the data the paper names (resolvable URLs, file shapes, expected hashes) onto the workflow inputs the target declares — the Galaxy interface brief's input labels, or the CWL design's input ports — as `test-data-refs` with `resolved_by: paper-to-test-data`. An input the paper names no data for stays `resolved: false` with a reason, for [[find-test-data]] to search. Expected outputs are the test plan's to derive, not this Mold's. Validate the file with `foundry validate-test-data-refs` before returning.
+Read the paper free-form summary from [[summarize-paper]] and resolve the data the paper names (resolvable URLs, file shapes, expected hashes) onto the workflow inputs the target declares — the Galaxy interface brief's input labels, or the CWL design's input ports — as `test-data-refs` with `resolved_by: paper-to-test-data`. An input the paper names no data for stays `resolved: false` with a reason, for [[find-test-data]] to search; that includes an optional one, which this Mold never marks `omitted`. Expected outputs are the test plan's to derive, not this Mold's. Validate the file with `foundry validate-test-data-refs` before returning.

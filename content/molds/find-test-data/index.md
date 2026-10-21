@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-16
-revision: 8
+revised: 2026-10-20
+revision: 9
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:
   - id: workflow-brief
@@ -88,6 +88,7 @@ This Mold is the search leg of the harness's `test-data-resolution` branch: it r
 5. **"Small" is a documented subset of a real source, not a fabricated stand-in.** When the source asks for a small fixture (one chromosome, selected loci, a few samples) and only a full real dataset exists, that input is **resolved**: record the real source URL plus the data-import-boundary prep needed to reach the small shape (row-subset by key, column/sample split into the collection's element identifiers). The prep is a note on the ref, not an analysis step and not an excuse to mark the input unresolved. Resolve the *data*; leave analysis parameters (factors, thresholds, reference levels, top-N) to the design Molds — they are not this Mold's to decide.
 6. **Emit refs.** Write one `test-data-refs.json` entry per input: the URL/path, the expected Galaxy shape, datatype, element identifiers when it is a collection, integrity hash when known, and any subset/split prep. Per [[galaxy-workflow-testability-design]], make sure each entry maps to an addressable input label. Shape each entry per [[test-data-refs]], set `resolved_by: find-test-data` on the entries you resolve, and validate the file with `foundry validate-test-data-refs` before returning.
 7. **Report genuine gaps only.** Mark `resolved: false` with a reason **only** when steps 2–5 turn up no real source of the right shape — not merely because the source's first-named candidate was the wrong shape or because a real source needs a documented subset. These honest gaps are what the harness hands to `user-supplied`.
+8. **Omit an optional input nothing supplies.** When the interface marks an input optional, the workflow runs without it, and steps 2–5 found no data for it, it is not a gap for a person to fill. Write it `omitted: true`, still `resolved: false`, with `resolved_by: find-test-data`, a reason naming what you searched, and a fixture with null storage and location. Omission comes after the search, never instead of it, and a required input is never omitted. The harness counts an omitted input as settled, and [[implement-galaxy-workflow-test]] leaves it unset.
 
 ## No fabrication
 

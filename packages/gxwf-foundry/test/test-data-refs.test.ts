@@ -73,6 +73,17 @@ const UNRESOLVED = {
   },
 };
 
+const OMITTED = {
+  workflow_label: "MultiQC logo",
+  collection_shape: null,
+  datatype: "png",
+  resolved: false,
+  omitted: true,
+  resolved_by: "find-test-data",
+  reason: "optional, and no source case or public search supplies a logo; the test leaves it unset",
+  fixture: { storage: null, location: null, checksum: null, provenance: "omitted optional input" },
+};
+
 describe("testDataRefsSchema", () => {
   it("is a JSON Schema with $schema", () => {
     expect((testDataRefsSchema as { $schema?: string }).$schema).toMatch(/json-schema\.org/);
@@ -141,6 +152,30 @@ describe("testDataRefsValidator", () => {
     expect(
       validate(withElements([{ identifier: "sample1", elements: [noStorage, reverse] }])).valid,
     ).toBe(false);
+  });
+
+  it("accepts an optional input the test omits, naming who omitted it and why", () => {
+    expect(validate({ refs: [RESOLVED_FILE, OMITTED, UNRESOLVED] })).toEqual({
+      valid: true,
+      errors: [],
+    });
+    expect(validate({ refs: [{ ...UNRESOLVED, omitted: false }] }).valid).toBe(true);
+  });
+
+  it("keeps an omitted input apart from both data and a gap", () => {
+    const refs = (ref: unknown) => ({ refs: [ref] });
+    expect(validate(refs({ ...OMITTED, resolved: true })).valid).toBe(false);
+    expect(validate(refs({ ...OMITTED, reason: null })).valid).toBe(false);
+    expect(validate(refs({ ...OMITTED, resolved_by: null })).valid).toBe(false);
+    const located = {
+      ...OMITTED,
+      fixture: { ...OMITTED.fixture, storage: "remote-url", location: "https://example.org/l.png" },
+    };
+    expect(validate(refs(located)).valid).toBe(false);
+    expect(
+      validate(refs({ ...OMITTED, fixture: { ...OMITTED.fixture, storage: "unresolved" } })).valid,
+    ).toBe(false);
+    expect(validate(refs({ ...OMITTED, elements: [{ identifier: "a" }] })).valid).toBe(false);
   });
 
   it("requires a storage class alongside a location", () => {

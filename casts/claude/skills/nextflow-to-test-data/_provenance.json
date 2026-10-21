@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-to-test-data",
     "path": "content/molds/nextflow-to-test-data/index.md",
-    "revision": 4,
-    "content_hash": "842e097edfb5bfbc37b62a35d5870ee2087df33919212a7965fd70dae799b189",
-    "commit": "2bdd9b9b68a71fd161362922e9d1ae797d10a8ce"
+    "revision": 5,
+    "content_hash": "91e146098cb66fb738b794ecbaeaaf7671b3155c5f126124a214981d5dbc91bf",
+    "commit": "d4a0c56ce1b50069c458a891065ff4ee0232abb1"
   },
-  "cast_at": "2026-10-16T22:32:04.267Z",
+  "cast_at": "2026-10-21T00:33:50.198Z",
   "refs": [
     {
       "kind": "research",
@@ -99,8 +99,8 @@
       "purpose": "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.",
       "verification": "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it.",
       "license": "MIT",
-      "src_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
-      "dst_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "src_hash": "93413d37103c31dc4e36f79410c42a629c837d76c103f383ae8d6f1c9d0e82b8",
+      "dst_hash": "93413d37103c31dc4e36f79410c42a629c837d76c103f383ae8d6f1c9d0e82b8",
       "source": "deterministic"
     }
   ],

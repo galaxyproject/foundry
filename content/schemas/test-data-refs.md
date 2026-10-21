@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-10-15
-revised: 2026-10-15
-revision: 1
+revised: 2026-10-20
+revision: 2
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[iwc-test-data-conventions]]"
@@ -44,7 +44,8 @@ foundry validate-test-data-refs test-data-refs.json
 The pipelines' `test-data-resolution` branch is a chain that fills gaps, not a choice between alternatives. A source-specific Mold ([[nextflow-to-test-data]], [[cwl-to-test-data]], [[paper-to-test-data]]) maps the data the source declares. [[find-test-data]] then searches for whatever the first leg left unresolved. Anything still unresolved goes to the user. Every leg writes the same `test-data-refs.json`.
 
 - `refs[]` — one entry per workflow input label.
-- `resolved` — `true` when the ref points at real data of the required shape, `false` for an honest gap with a `reason`. Whether the chain is done is a deterministic question: does any ref have `resolved: false`?
+- `resolved` — `true` when the ref points at real data of the required shape, `false` for an honest gap with a `reason`, or for an omitted input.
+- `omitted` — `true` for an optional input the test leaves unset after every leg came up empty. It names the Mold that omitted it and why, and carries no data. Only [[find-test-data]] omits, after searching; a later leg may still give it data, but not reopen it as a gap. Whether the chain is done is a deterministic question: is any ref `resolved: false` and not omitted?
 - `resolved_by` — the Mold that resolved the input. A later leg keeps an earlier leg's resolved entries, this field included, and replaces only the unresolved ones.
 - `fixture` — the same shape as [[galaxy-workflow-test-plan#Fixture]] (storage class, location, checksum, provenance), so a ref's fixture drops into a test plan unchanged. An unresolved ref has `storage: unresolved` and no location.
 - `elements[]` — collection elements, nested for nested shapes (`list:paired` → sample → `forward`/`reverse`), each with its own fixture. A resolved collection has either a location or at least one element, and each of its elements reaches a located fixture, directly or through nested elements.
@@ -52,5 +53,6 @@ The pipelines' `test-data-resolution` branch is a chain that fills gaps, not a c
 
 ## Not Enforced Here
 
+- **Only optional inputs are omitted.** The refs don't record whether an input is optional; [[find-test-data]]'s eval checks it against the interface brief.
 - **One entry per label.** JSON Schema can't express uniqueness by key; [[find-test-data]]'s eval checks full input coverage.
 - **The data exists.** The schema checks shape, not that a URL resolves or a checksum matches.

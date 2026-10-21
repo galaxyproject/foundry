@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
-    "revision": 10,
-    "content_hash": "f9da7475cf7e165452d520af3244b1c620d104ee7937a97b3919b92ff329b9e6",
-    "commit": "b9c16baddd12482c739bb00a2aa7689260ddcd86"
+    "revision": 11,
+    "content_hash": "6cb4f93b73dd9638a9f74673d215b54bc6e4c55736108411f08a43400581571d",
+    "commit": "d4a0c56ce1b50069c458a891065ff4ee0232abb1"
   },
-  "cast_at": "2026-10-16T22:26:07.564Z",
+  "cast_at": "2026-10-21T00:33:48.323Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [

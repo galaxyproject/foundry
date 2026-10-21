@@ -4,11 +4,11 @@
   "mold": {
     "name": "paper-to-test-data",
     "path": "content/molds/paper-to-test-data/index.md",
-    "revision": 3,
-    "content_hash": "cdb6a8d7ca4c84f6dddd457ceb9f48a1286d92a865f3577c8d647d0d0a9765e5",
-    "commit": "2bdd9b9b68a71fd161362922e9d1ae797d10a8ce"
+    "revision": 4,
+    "content_hash": "0d875f20b98a8941d66a4ebe1f605fb4b7172671b241d71da6d238f83272ae32",
+    "commit": "d4a0c56ce1b50069c458a891065ff4ee0232abb1"
   },
-  "cast_at": "2026-10-16T22:32:04.310Z",
+  "cast_at": "2026-10-21T00:33:50.293Z",
   "refs": [
     {
       "kind": "schema",
@@ -22,8 +22,8 @@
       "purpose": "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.",
       "verification": "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it.",
       "license": "MIT",
-      "src_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
-      "dst_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "src_hash": "93413d37103c31dc4e36f79410c42a629c837d76c103f383ae8d6f1c9d0e82b8",
+      "dst_hash": "93413d37103c31dc4e36f79410c42a629c837d76c103f383ae8d6f1c9d0e82b8",
       "source": "deterministic"
     }
   ],

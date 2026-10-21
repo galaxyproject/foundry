@@ -1927,3 +1927,66 @@ test("seeds from a loop phase the latest write of each artifact, in every trial"
   );
   expect(calls.map((call) => call.inputPaths)).toEqual([[workflow], [workflow]]);
 });
+
+function omittedRef(label: string, by = "find-test-data") {
+  return {
+    ...testDataRef(label, false),
+    omitted: true,
+    resolved_by: by,
+    reason: "optional, and nothing supplies it; the test leaves it unset",
+    fixture: { storage: null, location: null, checksum: null, provenance: "omitted" },
+  };
+}
+
+test("settles the test-data branch on an optional input a leg omits", async () => {
+  const root = branchFixtureRepo();
+  const record = await runLinearPipeline(draftRunOptions(root, "branch-omitted"), {
+    runSkill: branchWorker([], {
+      "source-to-test-data": halfResolved,
+      "find-test-data": (earlier) => ({
+        refs: earlier!.refs.map((ref) => (ref.resolved ? ref : omittedRef(ref.workflow_label))),
+      }),
+    }),
+  });
+
+  expect(record.status).toBe("passed");
+  expect(record.trials[0]!.phases[1]!.legs?.map((leg) => leg.unresolved)).toEqual([["b"], []]);
+});
+
+test("lets a later leg give an omitted input data, but not reopen it as a gap", async () => {
+  const root = branchFixtureRepo();
+  const sourceOmits = () => ({
+    refs: [testDataRef("a", true), omittedRef("b", "source-to-test-data"), testDataRef("c", false)],
+  });
+  const filled = await runLinearPipeline(draftRunOptions(root, "omitted-filled"), {
+    runSkill: branchWorker([], {
+      "source-to-test-data": sourceOmits,
+      "find-test-data": (earlier) => ({
+        refs: earlier!.refs.map((ref) =>
+          ref.resolved ? ref : testDataRef(ref.workflow_label, true, "find-test-data"),
+        ),
+      }),
+    }),
+  });
+  expect(filled.status).toBe("passed");
+
+  const reopened = await runLinearPipeline(draftRunOptions(root, "omitted-reopened"), {
+    runSkill: branchWorker([], {
+      "source-to-test-data": sourceOmits,
+      "find-test-data": () => ({
+        refs: [
+          testDataRef("a", true),
+          testDataRef("b", false),
+          testDataRef("c", true, "find-test-data"),
+        ],
+      }),
+    }),
+  });
+  expect(reopened.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      status: "failed",
+      failure_kind: "branch_contract",
+      error: "leg 2 (find-test-data) reopened ref b, which an earlier leg omitted",
+    }),
+  );
+});

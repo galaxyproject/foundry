@@ -3,7 +3,7 @@
   "$id": "https://galaxyproject.org/foundry/schemas/test-data-refs.schema.json",
   "$comment": "Canonical source: packages/gxwf-foundry/src/schemas/test-data-refs/test-data-refs.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[test-data-refs]] wiki-links; the cast pipeline imports the `testDataRefsSchema` runtime export and serializes it into cast bundles. $defs.Fixture is a verbatim copy of the galaxy-workflow-test-plan Fixture; a test keeps them equal.",
   "title": "Galaxy workflow test-data refs",
-  "description": "Test data for each Galaxy workflow input, written by the test-data-resolution chain (a source-specific Mold, then find-test-data) and read by implement-galaxy-workflow-test. One ref per workflow input; an input no leg could resolve stays in the list as an honest gap.",
+  "description": "Test data for each Galaxy workflow input, written by the test-data-resolution chain (a source-specific Mold, then find-test-data) and read by implement-galaxy-workflow-test. One ref per workflow input; an input no leg could resolve stays in the list as an honest gap, and an optional one the test leaves unset as an omitted ref.",
   "$ref": "#/$defs/TestDataRefs",
   "$defs": {
     "TestDataRefs": {
@@ -56,21 +56,25 @@
         },
         "resolved": {
           "type": "boolean",
-          "description": "true when the ref points at real data of the required shape; false for an honest gap."
+          "description": "true when the ref points at real data of the required shape; false for an honest gap, or for an omitted input."
+        },
+        "omitted": {
+          "type": "boolean",
+          "description": "true for an optional input the test leaves unset after every leg came up empty. It is settled, not a gap, but carries no data, so resolved stays false. Only for an input the interface marks optional; the refs cannot check that themselves."
         },
         "resolved_by": {
           "type": [
             "string",
             "null"
           ],
-          "description": "Name of the Mold that resolved this input, e.g. nextflow-to-test-data or find-test-data; null while unresolved."
+          "description": "Name of the Mold that resolved, or omitted, this input, e.g. nextflow-to-test-data or find-test-data; null for a gap."
         },
         "reason": {
           "type": [
             "string",
             "null"
           ],
-          "description": "Why the input is unresolved; null when resolved."
+          "description": "Why the input is unresolved or omitted; null when resolved."
         },
         "fixture": {
           "$ref": "#/$defs/Fixture",
@@ -94,16 +98,28 @@
       "allOf": [
         {
           "if": {
+            "required": [
+              "omitted"
+            ],
             "properties": {
-              "resolved": {
-                "const": false
+              "omitted": {
+                "const": true
               }
             }
           },
           "then": {
+            "not": {
+              "required": [
+                "elements"
+              ]
+            },
             "properties": {
+              "resolved": {
+                "const": false
+              },
               "resolved_by": {
-                "type": "null"
+                "type": "string",
+                "minLength": 1
               },
               "reason": {
                 "type": "string",
@@ -112,7 +128,7 @@
               "fixture": {
                 "properties": {
                   "storage": {
-                    "const": "unresolved"
+                    "type": "null"
                   },
                   "location": {
                     "type": "null"
@@ -122,41 +138,71 @@
             }
           },
           "else": {
-            "properties": {
-              "resolved_by": {
-                "type": "string",
-                "minLength": 1
-              },
-              "reason": {
-                "type": "null"
+            "if": {
+              "properties": {
+                "resolved": {
+                  "const": false
+                }
               }
             },
-            "anyOf": [
-              {
-                "properties": {
-                  "fixture": {
-                    "properties": {
-                      "location": {
-                        "type": "string"
+            "then": {
+              "properties": {
+                "resolved_by": {
+                  "type": "null"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "fixture": {
+                  "properties": {
+                    "storage": {
+                      "const": "unresolved"
+                    },
+                    "location": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "resolved_by": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": "null"
+                }
+              },
+              "anyOf": [
+                {
+                  "properties": {
+                    "fixture": {
+                      "properties": {
+                        "location": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "required": [
+                    "elements"
+                  ],
+                  "properties": {
+                    "elements": {
+                      "minItems": 1,
+                      "items": {
+                        "$ref": "#/$defs/DataElement"
                       }
                     }
                   }
                 }
-              },
-              {
-                "required": [
-                  "elements"
-                ],
-                "properties": {
-                  "elements": {
-                    "minItems": 1,
-                    "items": {
-                      "$ref": "#/$defs/DataElement"
-                    }
-                  }
-                }
-              }
-            ]
+              ]
+            }
           }
         },
         {

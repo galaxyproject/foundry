@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: reviewed
 created: 2026-07-17
-revised: 2026-10-15
-revision: 4
+revised: 2026-10-20
+revision: 5
 summary: "Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs."
 input_artifacts:
   - id: summary-nextflow
@@ -75,7 +75,7 @@ This Mold is the source-specific first leg of the harness's `test-data-resolutio
 2. **Resolve the candidate.** Read `test_selection`. If it names a candidate, collect that candidate's declared inputs: `role`, `url`/`path`, `sha1`, `filetype`, and description. If it reports `needs-scope-choice`, compare the candidates' scope, execution mode, and input coverage and record the caller's choice; do not infer scale or representativeness from a profile name alone.
 3. **Map each declared fixture onto a Galaxy input.** Match by role and shape onto the interface's input labels. A samplesheet-driven Nextflow input often expands into a Galaxy collection — record the element identifiers and any split/concatenation prep needed to reach the Galaxy collection shape ([[galaxy-workflow-testability-design]]).
 4. **Emit refs.** Write one `test-data-refs.json` entry per resolved input: prefer the declared remote `url` + `sha1` (remote-URL-first, [[iwc-test-data-conventions]]); fall back to the in-tree `path` plus provenance only when no URL is published. Carry datatype, collection element identifiers, and any subset/split prep. Each entry maps to an addressable workflow input label. Shape each entry per [[test-data-refs]] with `resolved_by: nextflow-to-test-data`, and validate the file with `foundry validate-test-data-refs` before returning.
-5. **Report genuine gaps.** An input with no declared fixture of the right shape stays `resolved: false` with a reason and `storage: unresolved` — this is what the harness hands to [[find-test-data]]. Do not search public sources here; searching is find-test-data's job, not this Mold's.
+5. **Report genuine gaps.** An input with no declared fixture of the right shape stays `resolved: false` with a reason and `storage: unresolved` — this is what the harness hands to [[find-test-data]]. Do not search public sources here; searching is find-test-data's job, not this Mold's. Leave an optional input with no fixture as a gap too; never mark it `omitted`, because [[find-test-data]] may find data for it, and omitting is its call after it has searched.
 
 ## No fabrication
 

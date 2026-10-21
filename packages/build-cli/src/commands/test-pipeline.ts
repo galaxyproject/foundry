@@ -316,6 +316,8 @@ interface BranchOracle {
 interface TestDataRef {
   workflow_label: string;
   resolved: boolean;
+  /** An optional input the test leaves unset: settled, though it carries no data. */
+  omitted?: boolean;
 }
 
 function readTestDataRefs(file: string): TestDataRef[] {
@@ -328,7 +330,7 @@ const BRANCH_ORACLES: Record<string, BranchOracle> = {
     carried: "test-data-refs",
     unresolved(carriedPath) {
       return readTestDataRefs(carriedPath)
-        .filter((ref) => !ref.resolved)
+        .filter((ref) => !ref.resolved && !ref.omitted)
         .map((ref) => ref.workflow_label);
     },
     broken(carriedPath, earlierPath) {
@@ -336,12 +338,16 @@ const BRANCH_ORACLES: Record<string, BranchOracle> = {
       if (!refs.length) return "wrote no refs";
       if (!earlierPath) return null;
       const byLabel = new Map(refs.map((ref) => [ref.workflow_label, ref]));
-      // A later leg keeps every ref an earlier one wrote, and every resolved one unchanged.
+      // A later leg keeps every ref an earlier one wrote, and every resolved one unchanged. It
+      // may give an omitted input data, but not reopen it as a gap.
       for (const earlier of readTestDataRefs(earlierPath)) {
         const ref = byLabel.get(earlier.workflow_label);
         if (!ref) return `dropped ref ${earlier.workflow_label}, which an earlier leg wrote`;
         if (earlier.resolved && !isDeepStrictEqual(ref, earlier)) {
           return `changed ref ${earlier.workflow_label}, which an earlier leg resolved`;
+        }
+        if (earlier.omitted && !ref.resolved && !ref.omitted) {
+          return `reopened ref ${earlier.workflow_label}, which an earlier leg omitted`;
         }
       }
       return null;
