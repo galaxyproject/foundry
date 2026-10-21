@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 7,
-    "content_hash": "ae19f7e5f5ac9434e31302efd88bb5f5db484caf0145951dd27dfe19247f2ea9",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 8,
+    "content_hash": "d6ef5a3f25fd0a47babff4e814c4b6cc665b7f1213db92bf8498c0449a95a83b",
+    "commit": "2e488b9b732975ac03fad8dce958532fa1a695de"
   },
-  "cast_at": "2026-10-19T19:01:23.142Z",
+  "cast_at": "2026-10-20T22:46:36.763Z",
   "refs": [
     {
       "kind": "cli-command",

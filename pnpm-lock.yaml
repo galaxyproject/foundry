@@ -138,6 +138,9 @@ importers:
       '@galaxy-foundry/wiki-links':
         specifier: ^0.4.0
         version: 0.4.0
+      '@galaxy-tool-util/schema':
+        specifier: ^1.13.1
+        version: 1.13.1
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
