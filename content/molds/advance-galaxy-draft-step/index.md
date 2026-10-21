@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-06-02
-revised: 2026-10-19
-revision: 8
+revised: 2026-10-21
+revision: 9
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
@@ -71,7 +71,7 @@ references:
     load: on-demand
     mode: sidecar
     evidence: corpus-observed
-    purpose: "Cache the resolved wrapper for summarization and validation, using its confirmed tool version."
+    purpose: "Cache the resolved wrapper for summarization and validation, using its confirmed tool version. For a stock tool, a successful add is what confirms the version."
     trigger: "After resolving the wrapper and version, if the shared cache lacks that pin."
     verification: "Confirm add caches the resolved pin and draft-validate --concrete --strict-state --json validates its state using the same --cache-dir."
   - kind: cli-command
@@ -99,6 +99,14 @@ references:
     evidence: corpus-observed
     purpose: "Classify [[draft-validate]] diagnostics against wrapper-defined runtime failure semantics so the iteration routes back to the right authoring surface (implementation vs. wrapper choice)."
     trigger: "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime."
+  - kind: research
+    ref: "[[galaxy-collection-tools]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Find a built-in collection operation that meets a step's plan, and the version Galaxy ships for it."
+    trigger: "In step 2, when the chosen step's `tool_id` is `TODO`, or its tool is a stock collection operation whose version the step plan and the cache don't give."
   - kind: research
     ref: "[[open-requirements-ledger]]"
     used_at: runtime
@@ -135,7 +143,14 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
    - **Already resolved in this draft** — find a concrete step with the `tool_id` named by the chosen step's `_plan_*` context or identity pin. Reuse its `tool_id` and `tool_version`, skipping [[discover-shed-tool]] for Tool Shed wrappers or cache/version lookup for stock tools. Continue to step 3.
 
    Otherwise, split on whether the step's tool is a **built-in / stock** Galaxy tool — a bare id with no `owner/repo` path (`Filter1`, `sort1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`):
-   - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through [[discover-shed-tool]] (Tool Shed search) or [[author-galaxy-tool-wrapper]]. Only its concrete version needs resolving: the shed serves stock tools by bare id, but its TRS version-list endpoint can't auto-resolve the version, so read it from a populated cache via `galaxy-tool-cache list` or take a known pin from the step plan — never hand-guess a stock version. [[summarize-galaxy-tool]] then performs the bare-id `add`/`summarize` with that explicit `--tool-version`. When the step's `tool_id` is `TODO` and no stock tool meets its plan, treat it as a deferred Tool Shed step instead.
+   - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through [[discover-shed-tool]] (Tool Shed search) or [[author-galaxy-tool-wrapper]]. Only its concrete version needs resolving. The shed serves stock tools by bare id, but its TRS version-list endpoint can't list their versions, so take the version from the first of these that names one:
+     - a pin in the step plan;
+     - the run's cache, via `galaxy-tool-cache list`;
+     - the version a reference page documents for that tool, such as [[galaxy-collection-tools]] for collection operations.
+
+     Never hand-guess a version none of these names. [[add]] `<id> --tool-version <v>` then confirms it: when the shed serves that version, the pin is checked, not guessed. [[summarize-galaxy-tool]] then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
+
+     When the step's `tool_id` is `TODO`, check the built-in collection operations in [[galaxy-collection-tools]] against its plan first, because [[discover-shed-tool]]'s Tool Shed search doesn't index built-ins and can't find one. Only when no built-in meets the plan, treat it as a deferred Tool Shed step.
    - **Tool Shed wrapper** — branch on whether the template already pinned wrapper identity (see the tiers in [[galaxy-workflow-draft-format]]):
      - **Identity-pinned** — `tool_id` is concrete and `tool_version` is `TODO`. Treat the pin as a strong seed: confirm it via [[discover-shed-tool]] and resolve the changeset, correcting the `tool_id` only if discovery contradicts the pin (a pinned id is high-confidence template evidence, not a guess to re-derive from scratch).
      - **Deferred** — `tool_id` is `TODO`. Search fresh: run [[discover-shed-tool]] against the step's `_plan_*` context.
