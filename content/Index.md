@@ -80,7 +80,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Patterns
 
 - [[cleanup-sync-and-publish-nonempty-results]] — Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results.
-- [[collection-build-list-paired-with-apply-rules]] — Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first.
+- [[collection-build-list-paired-with-apply-rules]] — Use Apply Rules to map a sample column and a read-direction column into a list:paired collection, from flat identifiers or an existing paired level.
 - [[collection-build-named-bundle]] — Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in.
 - [[collection-cleanup-after-mapover-failure]] — Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps.
 - [[collection-flatten-after-fanout]] — Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters.
