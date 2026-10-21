@@ -211,7 +211,7 @@
       "properties": {
         "family": {
           "type": "string",
-          "description": "tests-format assertion family or compare operator this intent maps to, by name, e.g. has_text, has_n_lines, has_n_columns, has_size, has_image_width, has_h5_keys, file, compare:diff, compare:sim_size. Names reference the tests-format schema vocabulary; this plan does not restate parameter shapes."
+          "description": "tests-format assertion family, compare operator, or output-attribute field this intent maps to, by name. Assertion families go inside the output's `asserts:`, e.g. has_text, has_n_lines, has_n_columns, has_size, has_image_width, has_h5_keys. Compare operators and output-attribute fields sit beside `asserts:`: file, compare:diff, compare:sim_size, element_count (collection outputs), count (nested sub-collections), ftype, checksum, metadata. Do not use collection_type (state it in ExpectedOutput.collection_shape) or element_tests (a non-null element_identifier implies it). Names reference the tests-format schema vocabulary; this plan does not restate parameter shapes."
         },
         "intent": {
           "type": "string",
@@ -227,12 +227,12 @@
         },
         "element_identifier": {
           "type": ["string", "null"],
-          "description": "Collection element identifier this assertion targets, for element-level (element_tests) assertions; null for top-level dataset assertions."
+          "description": "Collection element identifier this assertion targets, for element-level (element_tests) assertions; null for top-level dataset assertions. Address an element of a nested collection by joining identifiers outermost first with `/`, e.g. WT_REP1/forward in a list:paired."
         },
         "evidence": {
           "type": "string",
-          "enum": ["test-evidence", "intent"],
-          "description": "Whether this assertion was translated from upstream test evidence or synthesized from intent."
+          "enum": ["test-evidence", "fixture-derived", "intent"],
+          "description": "Basis of the expected value: test-evidence means translated from an upstream assertion, checksum, or expected file; fixture-derived means measured from upstream test fixture bytes where no upstream assertion exists (e.g. snapshot-only nf-tests); intent means synthesized from workflow intent, wrapper XML, or step state with no upstream anchor."
         },
         "confidence": {
           "type": "string",

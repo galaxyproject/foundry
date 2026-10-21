@@ -79,6 +79,25 @@ describe("galaxyWorkflowTestPlanValidator", () => {
     expect(result.errors.some((e) => e.keyword === "enum")).toBe(true);
   });
 
+  it("accepts evidence fixture-derived on an assertion (measured from upstream fixture bytes)", () => {
+    const plan = loadPlan("nextflow-translated") as {
+      test_cases: { expected_outputs: { assertion_intent: { evidence: string }[] }[] }[];
+    };
+    plan.test_cases[0].expected_outputs[0].assertion_intent[0].evidence = "fixture-derived";
+    const result = galaxyWorkflowTestPlanValidator.validate(plan);
+    if (!result.valid) console.error("fixture-derived errors:", result.errors);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("rejects source.derived_from fixture-derived (assertion-level only)", () => {
+    const plan = loadPlan("nextflow-translated") as { source: { derived_from: string } };
+    plan.source.derived_from = "fixture-derived";
+    const result = galaxyWorkflowTestPlanValidator.validate(plan);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.keyword === "enum")).toBe(true);
+  });
+
   it("rejects an invalid label_status enum value", () => {
     const plan = loadPlan("nextflow-translated") as {
       test_cases: { job_inputs: { label_status: string }[] }[];
