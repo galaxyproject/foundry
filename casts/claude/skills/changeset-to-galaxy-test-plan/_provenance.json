@@ -6,9 +6,9 @@
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 4,
     "content_hash": "1b8362487f534389c4e581cc2cb54e21fc004bb1a06d818b4dff1ba34bdc2423",
-    "commit": "8a9f41876902fe05e402d8d60e9697c890202c77"
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-21T01:29:32.715Z",
+  "cast_at": "2026-10-21T22:15:14.507Z",
   "refs": [
     {
       "kind": "research",
@@ -97,8 +97,8 @@
       "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema so the skill carries its output shape; validate with `foundry validate-galaxy-workflow-test-plan`.",
       "verification": "Cast the skill, run on a summary with existing tests plus a change-set, confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it without re-reading the change-set.",
       "license": "MIT",
-      "src_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
-      "dst_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
+      "src_hash": "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
+      "dst_hash": "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
       "source": "deterministic"
     },
     {

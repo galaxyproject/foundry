@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-22
-revision: 10
+revised: 2026-10-21
+revision: 11
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[freeform-summary-to-galaxy-test-plan]]"
@@ -122,7 +122,7 @@ The workflow is the contract: input and output labels in the test file must addr
    - Never emit a `path:` (or `location:`) the test references but no source produces — an un-materialized path passes the static cross-check and fails only at upload, far from here. If a ref is `resolved: false`, surface the gap rather than authoring a path to a file that does not exist.
 
    Inputs must match the workflow's collection shapes and datatypes.
-3. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions. Choose assertion families and tolerances per [[planemo-asserts-idioms]]; check each shortcut against [[iwc-shortcuts-anti-patterns]] so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation.
+3. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions. Choose assertion families and tolerances per [[planemo-asserts-idioms]]; check each shortcut against [[iwc-shortcuts-anti-patterns]] so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation. A `family` naming an output-attribute field (`element_count`, `count`, `ftype`, `checksum`, `metadata`) or a compare operator goes beside `asserts:`, not inside it; a non-null `element_identifier` goes under `element_tests`, with `/` separating nested ranks.
 4. **Validate static.** Run [[validate-tests]] for the schema gate, then the workflow-label cross-check (`checkTestsAgainstWorkflow`): zero missing input labels, zero missing output labels, no collection/datatype mismatches. Fix before spending a Planemo run.
 5. **Run green.** Drive [[planemo]] `test` with the staged data. "Managed Galaxy" here means **Planemo-managed**: `planemo test` bootstraps its own Galaxy and installs the workflow's tools from the Tool Shed/conda — it does **not** require a pre-provisioned external server, so absence of a running Galaxy is not a reason to skip this gate (cost/runtime of heavy tool or reference-DB installs may be, but that is a deliberate deferral, not an impossibility). On green, hand off the test file plus enough invocation/job/assertion context for [[run-workflow-test]] and [[debug-galaxy-workflow-output]] to use if a later run fails.
 

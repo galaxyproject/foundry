@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-09-23
-revision: 3
+revised: 2026-10-21
+revision: 4
 related_notes:
   - "[[tests-format]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"
@@ -48,14 +48,14 @@ The test plan is the **intermediate handoff** between a source-specific test-pla
 - `test_cases[]` — one entry per planned Galaxy workflow test, each with `job_inputs` and `expected_outputs`.
 - `job_inputs[]` — workflow-label binding (`workflow_label` + `label_status`), `collection_shape`, `datatype`, and a `fixture` with storage class, location, checksum, and provenance.
 - `expected_outputs[]` — output-label binding, `output_kind`, `collection_shape`, and `assertion_intent[]`.
-- `assertion_intent[]` — a tests-format assertion **family by name** (`has_text`, `has_n_lines`, `has_size`, `compare:diff`, …), a plain-language `intent`, an optional `expected_value`, an optional `tolerance`, an optional collection `element_identifier`, plus `evidence` and `confidence`.
+- `assertion_intent[]` — a tests-format assertion **family by name** (`has_text`, `has_n_lines`, `has_size`, `compare:diff`, …) or output-attribute field (`element_count`, `ftype`, `checksum`, …), a plain-language `intent`, an optional `expected_value`, an optional `tolerance`, an optional collection `element_identifier` (`/`-joined for nested collections), plus `evidence` and `confidence`. A collection's type is stated once, in `collection_shape`, never as a `family`.
 - `unresolved[]` / `omissions[]` / `warnings[]` — mappings left open, outputs deliberately unasserted (with rationale), and plan-construction warnings.
 
 ## Intentional Non-Goals
 
 - **No duplication of [[tests-format]].** Assertion families are referenced by name; their parameter shapes, defaults, and discriminators live in the tests-format schema. The plan records *which* family and *why*, not the final YAML.
 - **Not the final artifact.** [[implement-galaxy-workflow-test]] converts a schema-valid plan into a `tests-format` `*-tests.yml` and runs the static + workflow-label gates; the plan never substitutes for that file.
-- **Source-agnostic structure.** The schema does not encode nf-test, CWL, paper-, or Galaxy-specific *structure*; `source.kind` (`nextflow` / `cwl` / `freeform` / `galaxy`) is a provenance label only — `galaxy` marks a Galaxy→Galaxy update plan carried forward from an existing workflow's own tests. The `derived_from` / `evidence` axis (`test-evidence` vs `intent`) distinguishes a plan **translated** from upstream test fixtures from one **synthesized** from workflow intent — the only difference a freeform source needs. That axis appears at three nested levels by design: `source.derived_from` is the plan's **dominant** basis (binary `test-evidence` / `intent` — an update plan is `test-evidence` because the carried-forward baseline dominates, even though it also carries synthesized change-set cases), `test_cases[].derived_from` lets a mostly-synthesized plan still carry an individual translated case (or `mixed`), and each `assertion_intent[].evidence` records the basis of one assertion — they layer, they are not interchangeable. `mixed` lives only at the case level; the plan-level field always picks the dominant basis.
+- **Source-agnostic structure.** The schema does not encode nf-test, CWL, paper-, or Galaxy-specific *structure*; `source.kind` (`nextflow` / `cwl` / `freeform` / `galaxy`) is a provenance label only — `galaxy` marks a Galaxy→Galaxy update plan carried forward from an existing workflow's own tests. The `derived_from` / `evidence` axis (`test-evidence` vs `intent`) distinguishes a plan **translated** from upstream test fixtures from one **synthesized** from workflow intent — the only difference a freeform source needs. That axis appears at three nested levels by design: `source.derived_from` is the plan's **dominant** basis (binary `test-evidence` / `intent` — an update plan is `test-evidence` because the carried-forward baseline dominates, even though it also carries synthesized change-set cases), `test_cases[].derived_from` lets a mostly-synthesized plan still carry an individual translated case (or `mixed`), and each `assertion_intent[].evidence` records the basis of one assertion — they layer, they are not interchangeable. `mixed` lives only at the case level; the plan-level field always picks the dominant basis. `fixture-derived` lives only at the assertion level: an expected value measured from upstream fixture bytes when the source has no assertion to translate (snapshot-only nf-tests), kept apart from `test-evidence` so a reviewer can tell measured values from translated ones.
 
 ## Expressing Unknowns
 

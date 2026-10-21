@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-test-to-galaxy-test-plan",
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
-    "revision": 7,
-    "content_hash": "2a8aaa5228eaa632c760ad10de9bfcdc1a7e4f034332b68cadc8a7f92cbe1e8c",
-    "commit": "8a9f41876902fe05e402d8d60e9697c890202c77"
+    "revision": 8,
+    "content_hash": "fa769216f621ef25470c9fb907df1278635c0a1e022b647b9462ff7b92469291",
+    "commit": "0bc7a9fb9345c236d1c1e622e4674d8440f7a320"
   },
-  "cast_at": "2026-10-21T01:29:35.427Z",
+  "cast_at": "2026-10-21T22:30:35.620Z",
   "refs": [
     {
       "kind": "research",
@@ -129,8 +129,8 @@
       "purpose": "Output contract: the emitted plan conforms to [[galaxy-workflow-test-plan]]. Cast bundles the JSON Schema; validate with `foundry validate-galaxy-workflow-test-plan`.",
       "verification": "Cast the skill on an nf-core/bacass summary and confirm the emitted YAML validates and downstream [[implement-galaxy-workflow-test]] consumes it.",
       "license": "MIT",
-      "src_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
-      "dst_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
+      "src_hash": "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
+      "dst_hash": "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
       "source": "deterministic"
     },
     {
