@@ -85,6 +85,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[collection-cleanup-after-mapover-failure]] | Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step. | draft | 2026-10-21 | 3 |
 | [[galaxy-collection-patterns]] | Choose a Galaxy collection operation or map-over recipe from the current and required data shapes. | draft | 2026-10-15 | 4 |
 | [[galaxy-conditionals-patterns]] | Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream. | draft | 2026-10-15 | 4 |
 | [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-10-15 | 4 |
@@ -130,7 +131,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[fan-in-bundle-consume-and-flatten]] | Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing. | draft | 2026-05-04 | 1 |
 | [[manifest-to-mapped-collection-lifecycle]] | Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs. | draft | 2026-05-04 | 1 |
 | [[reshape-relabel-remap-by-collection-axis]] | Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis. | draft | 2026-05-04 | 1 |
-| [[collection-cleanup-after-mapover-failure]] | Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps. | draft | 2026-05-03 | 2 |
 | [[compose-runtime-text-parameter]] | Use compose_text_param to build connected text expressions from constants plus runtime scalar values. | draft | 2026-05-03 | 3 |
 | [[conditional-gate-on-nonempty-result]] | Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps. | draft | 2026-05-03 | 3 |
 | [[conditional-run-optional-step]] | Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch. | draft | 2026-05-03 | 4 |

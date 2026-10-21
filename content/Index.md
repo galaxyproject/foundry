@@ -82,7 +82,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cleanup-sync-and-publish-nonempty-results]] — Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results.
 - [[collection-build-list-paired-with-apply-rules]] — Use Apply Rules to map a sample column and a read-direction column into a list:paired collection, from flat identifiers or an existing paired level.
 - [[collection-build-named-bundle]] — Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in.
-- [[collection-cleanup-after-mapover-failure]] — Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps.
+- [[collection-cleanup-after-mapover-failure]] — Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step.
 - [[collection-flatten-after-fanout]] — Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters.
 - [[harmonize-by-sortlist-from-identifiers]] — Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers.
 - [[regex-relabel-via-tabular]] — Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE.

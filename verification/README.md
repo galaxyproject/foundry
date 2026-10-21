@@ -52,4 +52,6 @@ A verified workflow should be committed only when it is deterministic, small, an
 
 Prefer in-tree test data for tiny fixtures. Do not use Zenodo or remote fixtures for byte-scale inputs.
 
+A Planemo workflow test fails whenever its history holds an errored dataset, so behavior that depends on a failed job, such as `__FILTER_FAILED_DATASETS__` or failure routing, cannot be verified here. Cite Galaxy's own API test for that behavior instead.
+
 This v1 surface deliberately avoids generators, RO-Crate metadata, Dockstore wiring, scheduled Galaxy-version matrices, and IWC-style sharding.
