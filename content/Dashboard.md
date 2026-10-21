@@ -88,6 +88,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-collection-patterns]] | Choose a Galaxy collection operation or map-over recipe from the current and required data shapes. | draft | 2026-10-15 | 4 |
 | [[galaxy-conditionals-patterns]] | Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream. | draft | 2026-10-15 | 4 |
 | [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-10-15 | 4 |
+| [[collection-build-list-paired-with-apply-rules]] | Use Apply Rules to map a sample column and a read-direction column into a list:paired collection, from flat identifiers or an existing paired level. | draft | 2026-10-14 | 3 |
 | [[tabular-to-collection-by-row]] | Split a tabular file into a list collection by column value, grouping rows that share an identifier. | draft | 2026-10-07 | 4 |
 | [[tabular-synthesize-bed-from-3col]] | Convert one-based inclusive chromosome/start/end rows to six-column BED with awk, after checking the source coordinate convention. | draft | 2026-10-04 | 3 |
 | [[tabular-split-taxonomy-string]] | Expand a prefixed taxonomy lineage into fixed rank columns with tp_awk_tool, preserving row identity and handling absent ranks. | draft | 2026-10-01 | 3 |
@@ -129,7 +130,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[fan-in-bundle-consume-and-flatten]] | Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing. | draft | 2026-05-04 | 1 |
 | [[manifest-to-mapped-collection-lifecycle]] | Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs. | draft | 2026-05-04 | 1 |
 | [[reshape-relabel-remap-by-collection-axis]] | Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis. | draft | 2026-05-04 | 1 |
-| [[collection-build-list-paired-with-apply-rules]] | Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first. | draft | 2026-05-03 | 2 |
 | [[collection-cleanup-after-mapover-failure]] | Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps. | draft | 2026-05-03 | 2 |
 | [[compose-runtime-text-parameter]] | Use compose_text_param to build connected text expressions from constants plus runtime scalar values. | draft | 2026-05-03 | 3 |
 | [[conditional-gate-on-nonempty-result]] | Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps. | draft | 2026-05-03 | 3 |

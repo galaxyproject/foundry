@@ -1,0 +1,44 @@
+- doc: "Interleaved sampleX_R1/R2 identifiers become list:paired; R1 lands in forward and R2 in reverse for each sample"
+  job:
+    reads:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sampleB_R2
+          class: File
+          path: test-data/sampleB_R2.txt
+          filetype: txt
+        - identifier: sampleA_R1
+          class: File
+          path: test-data/sampleA_R1.txt
+          filetype: txt
+        - identifier: sampleB_R1
+          class: File
+          path: test-data/sampleB_R1.txt
+          filetype: txt
+        - identifier: sampleA_R2
+          class: File
+          path: test-data/sampleA_R2.txt
+          filetype: txt
+  outputs:
+    pairs:
+      class: Collection
+      collection_type: "list:paired"
+      element_count: 2
+      element_tests:
+        sampleA:
+          class: Collection
+          count: 2
+          element_tests:
+            forward:
+              file: test-data/sampleA_R1.txt
+            reverse:
+              file: test-data/sampleA_R2.txt
+        sampleB:
+          class: Collection
+          count: 2
+          element_tests:
+            forward:
+              file: test-data/sampleB_R1.txt
+            reverse:
+              file: test-data/sampleB_R2.txt
