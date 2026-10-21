@@ -41,7 +41,7 @@ From a workflow directory, run Planemo directly:
 
 ```sh
 planemo lint *.gxwf.yml
-planemo test *.gxwf.yml --galaxy_branch release_25.1
+planemo test *.gxwf.yml --galaxy_branch release_26.1
 ```
 
 Use the exact workflow filename once a directory has more than one experimental file. Planemo 0.75.41 recognizes `.gxwf.yml` plus `.gxwf-test.yml` for these fixtures.

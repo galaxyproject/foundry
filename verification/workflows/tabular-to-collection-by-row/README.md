@@ -9,7 +9,7 @@ Run from this directory:
 ```sh
 gxwf validate split-by-key.gxwf.yml
 gxwf validate-tests split-by-key.gxwf-test.yml
-planemo test split-by-key.gxwf.yml --galaxy_branch release_25.1 --no_dependency_resolution --no_install_resolver_dependencies
+planemo test split-by-key.gxwf.yml --galaxy_branch release_26.1 --no_dependency_resolution --no_install_resolver_dependencies
 ```
 
 The pinned wrapper declares a Python 3.5 dependency that current Conda could not install in the test environment. The Planemo command uses the host Python runtime instead. The workflow ran and all collection element assertions passed on Galaxy `release_25.1`.

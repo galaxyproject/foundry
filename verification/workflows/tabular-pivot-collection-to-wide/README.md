@@ -9,5 +9,5 @@ Run from this directory with:
 ```sh
 gxwf validate pivot-collection.gxwf.yml
 gxwf validate-tests pivot-collection.gxwf-test.yml
-planemo test pivot-collection.gxwf.yml --galaxy_branch release_25.1
+planemo test pivot-collection.gxwf.yml --galaxy_branch release_26.1
 ```

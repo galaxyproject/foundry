@@ -9,7 +9,7 @@ Run from this directory:
 ```sh
 gxwf validate prepend-header.gxwf.yml
 gxwf validate-tests prepend-header.gxwf-test.yml
-planemo test prepend-header.gxwf.yml --galaxy_branch release_25.1
+planemo test prepend-header.gxwf.yml --galaxy_branch release_26.1
 ```
 
 On 2026-09-30, Planemo tested this fixture against Galaxy `release_25.1`. The one workflow test passed both full-output comparisons.

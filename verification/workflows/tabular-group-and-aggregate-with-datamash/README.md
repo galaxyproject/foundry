@@ -9,5 +9,5 @@ Run from this directory with:
 ```sh
 gxwf validate group-and-aggregate.gxwf.yml
 gxwf validate-tests group-and-aggregate.gxwf-test.yml
-planemo test group-and-aggregate.gxwf.yml --galaxy_branch release_25.1
+planemo test group-and-aggregate.gxwf.yml --galaxy_branch release_26.1
 ```

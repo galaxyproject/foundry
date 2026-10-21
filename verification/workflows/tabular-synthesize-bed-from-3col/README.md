@@ -9,7 +9,7 @@ Run from this directory:
 ```sh
 gxwf validate synthesize-bed.gxwf.yml
 gxwf validate-tests synthesize-bed.gxwf-test.yml
-planemo test synthesize-bed.gxwf.yml --galaxy_branch release_25.1
+planemo test synthesize-bed.gxwf.yml --galaxy_branch release_26.1
 ```
 
 The two `gxwf` commands check the workflow and test declarations. Planemo runs the workflow and checks the complete output files. This fixture assumes the input coordinate convention described above. It does not prove that an arbitrary upstream table follows that convention.

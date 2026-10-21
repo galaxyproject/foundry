@@ -9,5 +9,5 @@ Run from this directory with:
 ```sh
 gxwf validate concatenate-collection.gxwf.yml
 gxwf validate-tests concatenate-collection.gxwf-test.yml
-planemo test concatenate-collection.gxwf.yml --galaxy_branch release_25.1
+planemo test concatenate-collection.gxwf.yml --galaxy_branch release_26.1
 ```
