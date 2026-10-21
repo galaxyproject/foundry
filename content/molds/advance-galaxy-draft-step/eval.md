@@ -104,17 +104,18 @@ Properties are tagged by bucket:
   skill falls through to [[author-galaxy-tool-wrapper]] rather than guessing a
   wrapper.
 
-## Property: a built-in step resolves its version from a named source
+## Property: a TODO step a built-in meets uses it, at a named version
 
 - bucket: routing
 - check: llm-judged
 - assertion: when the chosen step's `tool_id` is `TODO` and a built-in
   collection operation meets its `_plan_*` contract, the skill picks that
-  built-in, not a Tool Shed wrapper. It takes the version from the step plan,
-  the run's cache, or [[galaxy-collection-tools]], and confirms it with
-  `galaxy-tool-cache add <id> --tool-version <v>` before summarizing. Fails if
-  the skill blocks the step because only a Tool Shed search came up empty, or
-  if it uses a version none of those sources names.
+  built-in, not a Tool Shed wrapper. Its version comes from the step plan, the
+  run's cache, or [[galaxy-collection-tools]], and the step's `tool_version` is
+  the version of the cache entry its summary was built from. Fails if the skill
+  blocks the step because only a Tool Shed search came up empty, if it uses a
+  version none of those sources names, or if the step's version differs from
+  the cached one.
 
 ## Property: a step nothing can implement ends the call blocked
 

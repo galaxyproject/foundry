@@ -25,6 +25,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-10-21 | 9 |
+| [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | reviewed | 2026-10-21 | 9 |
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[repair-galaxy-draft-topology]] | Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs. | draft | 2026-10-19 | 6 |
@@ -71,7 +72,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[implement-cwl-workflow-test]] | Assemble CWL job file(s) and expected-output assertions. | draft | 2026-07-24 | 2 |
 | [[interview-to-freeform-summary]] | Normalize a free-form user interview into the shared freeform-summary workflow handoff. | reviewed | 2026-07-24 | 3 |
 | [[summarize-cwl-tool]] | Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target. | draft | 2026-07-24 | 2 |
-| [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | reviewed | 2026-07-24 | 8 |
 | [[summarize-galaxy-workflow]] | Read an existing Galaxy gxformat2 (or .ga) workflow and emit a structured summary for interview and change-set steps. | reviewed | 2026-07-24 | 2 |
 | [[summarize-paper]] | Extract methods, tools, sample data, and references from a paper. | draft | 2026-07-24 | 2 |
 | [[validate-cwl]] | Run cwltool --validate / schema lint, classify failures, recommend fixes. | draft | 2026-07-24 | 3 |
@@ -156,6 +156,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[add]] | Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema. | draft | 2026-10-21 | 3 |
+| [[list]] | Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached. | draft | 2026-10-21 | 2 |
 | [[validate-test-data-refs]] | AJV gate for the test-data-refs document the test-data-resolution chain writes. | draft | 2026-10-15 | 1 |
 | [[convert]] | Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations. | draft | 2026-09-26 | 3 |
 | [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-09-23 | 4 |
@@ -167,8 +169,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[validate-summary-cwl]] | AJV gate for summarize-cwl JSON documents. | draft | 2026-08-04 | 2 |
 | [[validate-summary-galaxy-workflow]] | AJV gate for summarize-galaxy-workflow JSON documents. | draft | 2026-08-04 | 2 |
 | [[validate-summary-nextflow]] | AJV gate for summarize-nextflow JSON documents. | draft | 2026-08-04 | 2 |
-| [[add]] | Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema. | draft | 2026-06-18 | 2 |
-| [[list]] | Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached. | draft | 2026-06-18 | 1 |
 | [[summarize]] | Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool. | draft | 2026-06-18 | 2 |
 | [[draft-extract]] | Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved. | draft | 2026-05-27 | 1 |
 | [[draft-next-step]] | Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak. | draft | 2026-05-27 | 1 |

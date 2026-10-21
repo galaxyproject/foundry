@@ -8,8 +8,8 @@ tags:
   - cli/galaxy-tool-cache
 status: draft
 created: 2026-06-18
-revised: 2026-06-18
-revision: 1
+revised: 2026-10-21
+revision: 2
 summary: "Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached."
 ---
 
@@ -17,7 +17,7 @@ summary: "Enumerate the tools in a cache directory with their resolved versions;
 
 Enumerate the entries in a `--cache-dir` with their resolved versions, ids, and provenance. Read-only — `list` never fetches; it reports what `add` / `populate-workflow` already cached.
 
-This is the version-confirmation surface for the cache: after `add` resolves a pin, `list` shows the concrete `tool_version` it stored — including for **stock/built-in** ids, whose version is otherwise hard to confirm while the shed's TRS version-list endpoint is down (see [[add]]). Discovery of a not-yet-cached stock version still depends on a populated cache or a known pin; `list` reports an empty array for an empty cache, it does not synthesize the shed's catalogue.
+This is the version-confirmation surface for the cache: after `add` resolves a pin, `list` shows the concrete `tool_version` it stored — including for **stock/built-in** ids, whose version is otherwise hard to confirm while the shed's TRS version-list endpoint is down (see [[add]]). `list` reports an empty array for an empty cache; it does not synthesize the shed's catalogue, so a not-yet-cached stock version comes from the other sources [[add]] names.
 
 ## Output
 
