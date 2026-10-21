@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-test-plan/index.md",
     "revision": 2,
     "content_hash": "9c1d56e625a5dd26cb7a82082ac8f4eeb7db287a626bf00e73457c8dd491ad6d",
-    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
+    "commit": "8a9f41876902fe05e402d8d60e9697c890202c77"
   },
-  "cast_at": "2026-09-23T16:20:45.337Z",
+  "cast_at": "2026-10-21T01:29:33.904Z",
   "refs": [
     {
       "kind": "research",
@@ -114,8 +114,8 @@
       "trigger": "When naming an assertion family or compare operator for a synthesized expected output.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "src_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
+      "dst_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }

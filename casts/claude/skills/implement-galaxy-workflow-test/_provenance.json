@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 10,
     "content_hash": "f9da7475cf7e165452d520af3244b1c620d104ee7937a97b3919b92ff329b9e6",
-    "commit": "b9c16baddd12482c739bb00a2aa7689260ddcd86"
+    "commit": "8a9f41876902fe05e402d8d60e9697c890202c77"
   },
-  "cast_at": "2026-10-16T22:26:07.564Z",
+  "cast_at": "2026-10-21T01:29:34.319Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -151,8 +151,8 @@
       "purpose": "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "src_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
+      "dst_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
