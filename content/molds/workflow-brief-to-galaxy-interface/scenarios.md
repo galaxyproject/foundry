@@ -53,6 +53,15 @@ evidence rather than the authoritative input.
   mark survives as `confidence: low`. The third carries `basis: agent` with
   the Mold's own answer and rationale. The brief is unchanged.
 
+## Case: unreviewed brief in a direct build
+
+- fixture: the same brief, with the run stating that no expert reviewed it
+  (a [[paper-to-galaxy]] direct build).
+- expect: the first two decisions carry `basis: unreviewed-proposal`, never
+  `brief-proposal`, and the low mark survives as `confidence: low`. The third
+  still carries `basis: agent`. The Mold records no brief-change
+  recommendation for a proposal it merely doubts, and the brief is unchanged.
+
 ## Case: brief consumed by the data-flow Mold
 
 - fixture: Workflow Brief, interface brief, and optional source evidence.

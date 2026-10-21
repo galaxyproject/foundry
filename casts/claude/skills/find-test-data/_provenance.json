@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 8,
-    "content_hash": "854238aee01711044de686f74e789e843f19613e6740722b7d95e68d7ad89e03",
-    "commit": "2bdd9b9b68a71fd161362922e9d1ae797d10a8ce"
+    "revision": 9,
+    "content_hash": "82e774ca6a49c3bcca2e78c89a6abf4c423f39ef2826ce965da535aedb99694f",
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-16T22:32:02.369Z",
+  "cast_at": "2026-10-21T22:37:49.169Z",
   "refs": [
     {
       "kind": "research",
@@ -106,15 +106,8 @@
         ]
       },
       {
-        "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the direct PAPER / INTERVIEW → GALAXY pipelines.",
-        "producers": [
-          "freeform-summary-to-galaxy-interface"
-        ]
-      },
-      {
         "id": "workflow-brief-galaxy-interface",
-        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path.",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path, including the direct PAPER / INTERVIEW → GALAXY pipelines.",
         "producers": [
           "workflow-brief-to-galaxy-interface"
         ]

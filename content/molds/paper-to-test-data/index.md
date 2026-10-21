@@ -7,15 +7,15 @@ tags:
   - source/paper
 status: draft
 created: 2026-04-30
-revised: 2026-10-15
-revision: 3
+revised: 2026-10-21
+revision: 4
 summary: "Resolve the test data a paper names into refs for each workflow input."
 input_artifacts:
   - id: freeform-summary
     description: "Free-form summary from [[summarize-paper]]; sample data and reference evidence the test fixtures derive from."
-  - id: freeform-galaxy-interface
+  - id: workflow-brief-galaxy-interface
     role: workflow-interface
-    description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY."
+    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY."
   - id: freeform-cwl-design
     role: workflow-interface
     description: "CWL design from [[freeform-summary-to-cwl-design]] naming the workflow input ports each ref must map onto, in PAPER → CWL."

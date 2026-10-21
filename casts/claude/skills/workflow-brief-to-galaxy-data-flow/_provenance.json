@@ -4,11 +4,11 @@
   "mold": {
     "name": "workflow-brief-to-galaxy-data-flow",
     "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
-    "revision": 4,
-    "content_hash": "ce9672837d2b670a64e838b2dbe634b3b07aec40d172d01fb3a7504b6d7294cd",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 5,
+    "content_hash": "eb1baabd420ebb9c97e2ddcb72b36b69d17b2c929e7247093642f3da3d54756e",
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-19T19:01:30.456Z",
+  "cast_at": "2026-10-21T22:37:54.198Z",
   "refs": [
     {
       "kind": "pattern",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns.",
       "trigger": "When selecting collection cleanup, reshape, identifier, or collection-tabular bridge patterns.",
-      "src_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
-      "dst_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
+      "src_hash": "980c73874be9adbd9a4118a0d677e6a1ce15c210313148b4b5fca29767804606",
+      "dst_hash": "980c73874be9adbd9a4118a0d677e6a1ce15c210313148b4b5fca29767804606",
       "source": "deterministic"
     },
     {
@@ -36,8 +36,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground conditional-branch and optional-step choices in curated, corpus-observed Galaxy when/pick_value patterns.",
       "trigger": "When data-flow translation needs optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
-      "dst_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
+      "src_hash": "14035e3077d8c7d7c69db527af4b1640c17d55e96148dc4f46fbfe160ef919e9",
+      "dst_hash": "14035e3077d8c7d7c69db527af4b1640c17d55e96148dc4f46fbfe160ef919e9",
       "source": "deterministic"
     },
     {
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground genomic-interval operation choices in curated, corpus-observed Galaxy interval recipes.",
       "trigger": "When the workflow operates on genomic intervals (BED/GFF/VCF coordinate features) and data-flow translation needs overlap, merge, coverage, windowing, masking, or set-algebra steps.",
-      "src_hash": "103ad0288566f0bf721d54b8ecd49e2df0ac334b9030a754d884b2e13abdf73e",
-      "dst_hash": "103ad0288566f0bf721d54b8ecd49e2df0ac334b9030a754d884b2e13abdf73e",
+      "src_hash": "70255fe496797ddf86f165039a9ee1847799771914dd6b26639d9e938225f115",
+      "dst_hash": "70255fe496797ddf86f165039a9ee1847799771914dd6b26639d9e938225f115",
       "source": "deterministic"
     },
     {
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns.",
       "trigger": "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges.",
-      "src_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
-      "dst_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
+      "src_hash": "5681bf97046cdc9c3f1336e3e11a127d7cbee11cecd33554387672321a855799",
+      "dst_hash": "5681bf97046cdc9c3f1336e3e11a127d7cbee11cecd33554387672321a855799",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "hypothesis",
       "purpose": "Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.",
       "verification": "Promote after two worked brief-to-Galaxy translations preserve this Mold boundary without moving fields.",
-      "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
-      "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "src_hash": "87dc42828854d1e9f9086c7d673fb1fcecc47309a88c3aa56c6b48fdde680104",
+      "dst_hash": "87dc42828854d1e9f9086c7d673fb1fcecc47309a88c3aa56c6b48fdde680104",
       "source": "deterministic"
     },
     {
@@ -111,8 +111,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the narrative leaves open — a described transformation with no named tool, an implied intermediate the source never states, an ordering the prose doesn't fix.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
+      "dst_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
       "source": "deterministic"
     },
     {
@@ -124,10 +124,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Keep reviewed intent authoritative while using source summaries only as supporting evidence.",
+      "purpose": "Keep brief intent authoritative while using source summaries only as supporting evidence.",
       "verification": "Confirm a worked run preserves scope and the brief's bytes while resolving Galaxy data-flow choices.",
-      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
-      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "src_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
+      "dst_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
       "source": "deterministic"
     },
     {
@@ -163,7 +163,7 @@
     "consumes": [
       {
         "id": "workflow-brief",
-        "description": "Expert-reviewed implementation contract governing scientific scope, requirements, and acceptance criteria.",
+        "description": "Implementation contract, expert-reviewed or accepted unreviewed by a direct build, governing scientific scope, requirements, and acceptance criteria.",
         "inherited_schema": "[[workflow-brief-schema]]",
         "producers": [
           "freeform-summary-to-workflow-brief",
@@ -205,9 +205,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

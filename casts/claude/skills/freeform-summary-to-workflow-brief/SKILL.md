@@ -42,7 +42,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Read the narrative or interview-derived `freeform-summary` and emit a Workflow Brief for expert review.
+Read the narrative or interview-derived `freeform-summary` and emit a Workflow Brief for expert review, or for a direct build that continues without review.
 
 ### Evidence and scope
 
@@ -62,7 +62,7 @@ Place known issues preventing work in `### Blockers` under the appropriate paren
 
 Run `foundry validate-workflow-brief workflow-brief.md`. Fix structural failures without inventing scientific intent. Run `foundry check-workflow-brief workflow-brief.md --json` and retain its result in the run report. Exit `4` means a valid but blocked brief: return that brief and its blockers for expert/environment resolution. Do not suppress the blockers to obtain a clear check.
 
-Return the brief for expert editing and review. Producing a brief does not authorize Galaxy design or implementation, and a clear static check does not replace review or environment preflight. Keep source evidence available to the later consumer.
+Return the brief to the pipeline. Producing a brief does not by itself authorize Galaxy design or implementation. The pipeline decides that, after expert review or, in a direct build, by accepting the proposals unreviewed. A clear static check does not replace environment preflight, or review where the pipeline requires it. Keep source evidence available to the later consumer.
 
 ## Feedback Mode
 

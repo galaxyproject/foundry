@@ -1,6 +1,6 @@
 ---
 name: workflow-brief-to-galaxy-test-plan
-description: "Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence."
+description: "Synthesize a Galaxy workflow test plan from a Workflow Brief, its Galaxy design briefs, and available source evidence."
 ---
 
 # workflow-brief-to-galaxy-test-plan
@@ -9,18 +9,18 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## When To Use
 
-- Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence.
+- Synthesize a Galaxy workflow test plan from a Workflow Brief, its Galaxy design briefs, and available source evidence.
 
 ## Inputs
 
-- Read artifact `workflow-brief`. Schema: workflow-brief-schema. Produced by `freeform-summary-to-workflow-brief`, `nextflow-summary-to-workflow-brief`. Expert-reviewed implementation contract whose acceptance criteria and scope govern test intent.
+- Read artifact `workflow-brief`. Schema: workflow-brief-schema. Produced by `freeform-summary-to-workflow-brief`, `nextflow-summary-to-workflow-brief`. Implementation contract, expert-reviewed or accepted unreviewed by a direct build, whose acceptance criteria and scope govern test intent.
 - Read artifact `freeform-summary`. Optional; absence is allowed and must be reported honestly. Produced by `interview-to-freeform-summary`, `summarize-paper`. Optional narrative source evidence carrying methods, sample data, parameters, and expected outputs within the brief's selected scope.
 - Read artifact `summary-nextflow`. Optional; absence is allowed and must be reported honestly. Schema: summary-nextflow. Produced by `summarize-nextflow`. Optional structured Nextflow source evidence carrying parameters, tests, fixtures, and expected outputs within the brief's selected scope.
 - Read artifact `workflow-brief-galaxy-interface`. Produced by `workflow-brief-to-galaxy-interface`. Galaxy interface brief from workflow-brief-to-galaxy-interface that pins workflow inputs, outputs, and labels the plan binds assertions to.
 - Read artifact `workflow-brief-galaxy-data-flow`. Produced by `workflow-brief-to-galaxy-data-flow`. Galaxy data-flow brief from workflow-brief-to-galaxy-data-flow that pins abstract operations and collection choices the plan must respect.
 - Read artifact `iwc-comparison-notes`. Produced by `compare-against-iwc-exemplar`. Structural diff guidance from compare-against-iwc-exemplar; steers the plan toward IWC-aligned testable checkpoints and fixture shapes.
 - Read artifact `iwc-exemplar-gxformat2`. Produced by `compare-against-iwc-exemplar`. Cleaned gxformat2 view of the nearest IWC exemplar from compare-against-iwc-exemplar; pattern-match its labels, collection identifiers, and tested checkpoints. Absent when no nearest exemplar was found.
-- Read artifact `open-requirements-ledger`. Optional; absence is allowed and must be reported honestly. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-template`. Carried workflow-run knowledge open-requirements-ledger when the run supplied one; read-only here, used to follow the current answers to the Workflow Brief's open questions.
+- Read artifact `open-requirements-ledger`. Optional; absence is allowed and must be reported honestly. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-template`. Carried workflow-run knowledge open-requirements-ledger when the run supplied one; read-only here, used to follow the current answers to the Workflow Brief's open questions.
 
 ## Outputs
 
@@ -32,7 +32,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
-- `references/notes/workflow-brief-design.md`: Research note copied verbatim into the bundle. Keep reviewed acceptance criteria authoritative while treating source summaries as supporting evidence.
+- `references/notes/workflow-brief-design.md`: Research note copied verbatim into the bundle. Keep the brief's acceptance criteria authoritative while treating source summaries as supporting evidence.
 - `references/schemas/galaxy-workflow-test-plan.schema.json`: Schema file copied verbatim into the bundle. Output contract: the emitted plan conforms to galaxy-workflow-test-plan. Cast bundles the JSON Schema so the skill carries its output shape; validate with `foundry validate-galaxy-workflow-test-plan`.
 - `references/schemas/workflow-brief-schema.schema.json`: Schema file copied verbatim into the bundle. Carry the required implementation contract and its acceptance criteria into test planning.
 
@@ -52,13 +52,13 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Synthesize a Galaxy workflow test plan from the reviewed Workflow Brief and the Galaxy interface and data-flow briefs. Consult retained source evidence when available. The output is a reviewable handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file: it records test cases, job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and intentional omissions so implement-galaxy-workflow-test can author the final Galaxy test artifact.
+Synthesize a Galaxy workflow test plan from the Workflow Brief and the Galaxy interface and data-flow briefs. Consult retained source evidence when available. The output is a reviewable handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file: it records test cases, job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and intentional omissions so implement-galaxy-workflow-test can author the final Galaxy test artifact.
 
 When the run supplies an open-requirements ledger, follow its current open-question decisions, such as a chosen test dataset, rather than answering those questions again. The ledger is read-only here. A decision that looks wrong for testing goes into the plan's `warnings[]` for the expert, not into a new answer.
 
 ### Synthesized, not translated
 
-This is the structural difference from nextflow-test-to-galaxy-test-plan and cwl-test-to-galaxy-test-plan. Those skills **translate** existing upstream test evidence into a Galaxy plan. This skill **synthesizes** the common brief-driven plan from reviewed acceptance criteria and the testable structure the interface/data-flow briefs and nearest IWC exemplar imply. When retained evidence contains concrete fixtures, snapshots, parameters, or expected results, cite and use them within the selected scope; their presence does not let evidence override the brief.
+This is the structural difference from nextflow-test-to-galaxy-test-plan and cwl-test-to-galaxy-test-plan. Those skills **translate** existing upstream test evidence into a Galaxy plan. This skill **synthesizes** the common brief-driven plan from the brief's acceptance criteria and the testable structure the interface/data-flow briefs and nearest IWC exemplar imply. When retained evidence contains concrete fixtures, snapshots, parameters, or expected results, cite and use them within the selected scope; their presence does not let evidence override the brief.
 
 Set the plan's `source.derived_from` to `intent` (not `test-evidence`) and each synthesized assertion's `evidence` to `intent`; most synthesized assertions are `confidence: medium` or `low`. Where the brief or retained evidence carries a concrete expected value (a known count, a named output token, a published figure), record it as `expected_value` and raise the confidence.
 

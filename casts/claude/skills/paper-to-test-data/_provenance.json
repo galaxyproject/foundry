@@ -4,11 +4,11 @@
   "mold": {
     "name": "paper-to-test-data",
     "path": "content/molds/paper-to-test-data/index.md",
-    "revision": 3,
-    "content_hash": "cdb6a8d7ca4c84f6dddd457ceb9f48a1286d92a865f3577c8d647d0d0a9765e5",
-    "commit": "2bdd9b9b68a71fd161362922e9d1ae797d10a8ce"
+    "revision": 4,
+    "content_hash": "48a7c7ecc0e0bdfa915d19597ef34c269c29ac76269d9f1ee6b62f8b9b5a23e3",
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-16T22:32:04.310Z",
+  "cast_at": "2026-10-21T22:37:51.605Z",
   "refs": [
     {
       "kind": "schema",
@@ -47,10 +47,10 @@
         ]
       },
       {
-        "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY.",
+        "id": "workflow-brief-galaxy-interface",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY.",
         "producers": [
-          "freeform-summary-to-galaxy-interface"
+          "workflow-brief-to-galaxy-interface"
         ]
       },
       {

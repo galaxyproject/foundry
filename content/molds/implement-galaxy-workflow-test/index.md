@@ -7,11 +7,10 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-22
-revision: 10
+revised: 2026-10-21
+revision: 11
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
-  - "[[freeform-summary-to-galaxy-test-plan]]"
   - "[[workflow-brief-to-galaxy-test-plan]]"
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"

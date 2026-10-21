@@ -4,11 +4,11 @@
   "mold": {
     "name": "compare-against-iwc-exemplar",
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
-    "revision": 12,
-    "content_hash": "84abb427cbcbae5616ae22e4a7fa803f14350605c246638575b3a32c5ad9c6fb",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 13,
+    "content_hash": "9bbfb5b7ac47a7b2e88a429305b4b91238bc87196b62e0dab20ebe2f2b7fba40",
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-19T19:01:23.641Z",
+  "cast_at": "2026-10-21T22:37:47.640Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -56,8 +56,8 @@
       "purpose": "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution.",
       "trigger": "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details.",
       "verification": "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata.",
-      "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
-      "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "src_hash": "87dc42828854d1e9f9086c7d673fb1fcecc47309a88c3aa56c6b48fdde680104",
+      "dst_hash": "87dc42828854d1e9f9086c7d673fb1fcecc47309a88c3aa56c6b48fdde680104",
       "source": "deterministic"
     },
     {
@@ -101,8 +101,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries a corpus exemplar answers — a collection idiom, a label convention, a structural shape the corpus already settles — and append the ones no exemplar covers, so a structural divergence with no corpus precedent reaches the template tier as a recorded obligation.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
+      "dst_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
       "source": "deterministic"
     }
   ],
@@ -157,22 +157,8 @@
         ]
       },
       {
-        "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] when running the direct PAPER → GALAXY or INTERVIEW → GALAXY pipeline.",
-        "producers": [
-          "freeform-summary-to-galaxy-interface"
-        ]
-      },
-      {
-        "id": "freeform-galaxy-data-flow",
-        "description": "Galaxy data-flow brief from [[freeform-summary-to-galaxy-data-flow]] when running the direct PAPER → GALAXY or INTERVIEW → GALAXY pipeline.",
-        "producers": [
-          "freeform-summary-to-galaxy-data-flow"
-        ]
-      },
-      {
         "id": "workflow-brief-galaxy-interface",
-        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running a Workflow-Brief-driven Galaxy path.",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] when running a Workflow-Brief-driven Galaxy path, including the direct PAPER → GALAXY and INTERVIEW → GALAXY pipelines.",
         "producers": [
           "workflow-brief-to-galaxy-interface"
         ]
@@ -194,9 +180,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

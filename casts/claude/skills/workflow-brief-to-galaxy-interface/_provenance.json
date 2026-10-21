@@ -4,11 +4,11 @@
   "mold": {
     "name": "workflow-brief-to-galaxy-interface",
     "path": "content/molds/workflow-brief-to-galaxy-interface/index.md",
-    "revision": 5,
-    "content_hash": "c84d428e03ab42e7b33335c72de6728d5bf26726e4a9986bf49343e6461a2fcd",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 6,
+    "content_hash": "910b13a3339776dd7c974630d158a000984969acf44ec4c62c85248d0b14a600",
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-19T19:01:30.682Z",
+  "cast_at": "2026-10-21T22:37:54.539Z",
   "refs": [
     {
       "kind": "research",
@@ -88,8 +88,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the narrative never settles — an output the source names but never specifies, a parameter stated only qualitatively, a collection shape the prose doesn't determine.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
+      "dst_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
       "source": "deterministic"
     },
     {
@@ -101,10 +101,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Preserve the authority boundary between reviewed intent, optional source evidence, and downstream Galaxy design decisions.",
+      "purpose": "Preserve the authority boundary between brief intent, optional source evidence, and downstream Galaxy design decisions.",
       "verification": "Confirm a worked run does not broaden brief scope from richer source evidence and leaves the brief unchanged.",
-      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
-      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "src_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
+      "dst_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
       "source": "deterministic"
     },
     {
@@ -140,7 +140,7 @@
     "consumes": [
       {
         "id": "workflow-brief",
-        "description": "Expert-reviewed implementation contract. Its objective, scope, requirements, acceptance criteria, and exclusions govern every interface decision.",
+        "description": "Implementation contract, expert-reviewed or accepted unreviewed by a direct build. Its objective, scope, requirements, acceptance criteria, and exclusions govern every interface decision.",
         "inherited_schema": "[[workflow-brief-schema]]",
         "producers": [
           "freeform-summary-to-workflow-brief",
@@ -176,9 +176,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

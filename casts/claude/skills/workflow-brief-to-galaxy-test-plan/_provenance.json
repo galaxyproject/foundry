@@ -4,11 +4,11 @@
   "mold": {
     "name": "workflow-brief-to-galaxy-test-plan",
     "path": "content/molds/workflow-brief-to-galaxy-test-plan/index.md",
-    "revision": 4,
-    "content_hash": "df02aa501cbc18fdf5c36ddc3f2ca87e17f4db51c054a52cbbef6eb0a66bd4e3",
-    "commit": "8a9f41876902fe05e402d8d60e9697c890202c77"
+    "revision": 5,
+    "content_hash": "9f66d06d295a2be50453916962e88a0ea728936b484e1f074e1ad2046660c84d",
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-21T01:29:37.380Z",
+  "cast_at": "2026-10-21T22:37:54.911Z",
   "refs": [
     {
       "kind": "research",
@@ -67,8 +67,8 @@
       "purpose": "Follow the current open-question decisions, including answers the interface Mold made for questions the brief left without a proposal, instead of answering them again.",
       "trigger": "When the run supplied an open-requirements ledger whose decisions carry `open_question`.",
       "verification": "Run a brief whose open question about test data has no proposal; confirm the test plan follows the interface Mold's recorded answer.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
+      "dst_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
       "source": "deterministic"
     },
     {
@@ -110,10 +110,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Keep reviewed acceptance criteria authoritative while treating source summaries as supporting evidence.",
+      "purpose": "Keep the brief's acceptance criteria authoritative while treating source summaries as supporting evidence.",
       "verification": "Confirm synthesized tests do not assert excluded analyses or silently alter expert acceptance criteria.",
-      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
-      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "src_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
+      "dst_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
       "source": "deterministic"
     },
     {
@@ -178,7 +178,7 @@
     "consumes": [
       {
         "id": "workflow-brief",
-        "description": "Expert-reviewed implementation contract whose acceptance criteria and scope govern test intent.",
+        "description": "Implementation contract, expert-reviewed or accepted unreviewed by a direct build, whose acceptance criteria and scope govern test intent.",
         "inherited_schema": "[[workflow-brief-schema]]",
         "producers": [
           "freeform-summary-to-workflow-brief",
@@ -242,9 +242,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",

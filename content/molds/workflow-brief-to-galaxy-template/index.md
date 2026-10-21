@@ -7,12 +7,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-09-20
-revision: 7
-summary: "Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence."
+revised: 2026-10-21
+revision: 8
+summary: "Build a gxformat2 skeleton from a Workflow Brief and its Galaxy design briefs, consulting retained source evidence."
 input_artifacts:
   - id: workflow-brief
-    description: "Expert-reviewed implementation contract governing scope and requirements."
+    description: "Implementation contract, expert-reviewed or accepted unreviewed by a direct build, governing scope and requirements."
   - id: freeform-summary
     role: source-evidence
     optional: true
@@ -55,7 +55,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Keep the reviewed brief authoritative while using retained summaries as evidence rather than replacement intent."
+    purpose: "Keep the brief authoritative while using retained summaries as evidence rather than replacement intent."
     verification: "Confirm a worked run preserves brief scope and bytes through topology construction."
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -164,7 +164,7 @@ Read the unchanged Workflow Brief and its Galaxy interface and data-flow briefs.
 
 The Workflow Brief is the implementation contract. Source artifacts are an evidence dossier: use them to substantiate methods, formats, parameters, and named tools within the selected scope, never to reintroduce excluded work or override expert requirements. A hand-authored brief without a source summary remains a valid input; record consequential missing evidence in the ledger instead of inventing it.
 
-Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream Workflow-Brief-to-Galaxy interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from reviewed intent, source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. Wrapper resolution, by contrast, is **evidence-gated, not source-gated**: resolve each tool step to the tier its evidence supports — **Resolved** (fully concrete, no `_plan_*`), **Identity-pinned** (concrete `tool_id`, parameters and changeset left to the per-step Mold), or **Deferred** (`tool_id: TODO`) — as defined in [[galaxy-workflow-draft-format]]. Capture whatever you defer in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
+Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream Workflow-Brief-to-Galaxy interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from brief intent, source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. Wrapper resolution, by contrast, is **evidence-gated, not source-gated**: resolve each tool step to the tier its evidence supports — **Resolved** (fully concrete, no `_plan_*`), **Identity-pinned** (concrete `tool_id`, parameters and changeset left to the per-step Mold), or **Deferred** (`tool_id: TODO`) — as defined in [[galaxy-workflow-draft-format]]. Capture whatever you defer in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
 
 Evidence tendency: narrative sources name tools less often than structured pipeline summaries, so their steps land in **Deferred** more often — but source evidence that names a specific tool/version can harden to the matching tier, and a corpus-confirmed utility wrapper is not deferred merely because the source is informal. When deferring a domain tool, cite the originating paper section, interview answer, pipeline location, figure, or supplementary table in `_plan_context`, and record vague intent in `_plan_state` so the per-step Mold knows the evidence ceiling.
 

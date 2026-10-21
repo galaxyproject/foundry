@@ -5,7 +5,7 @@ description: "Consume an expert-reviewed, unchanged Workflow Brief directly thro
 
 # pipeline-workflow-brief-to-galaxy
 
-Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 6) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **WORKFLOW BRIEF → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/workflow-brief-to-galaxy/index.md` (revision 7) — regenerate with `foundry-build assemble-pipeline workflow-brief-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -63,15 +63,15 @@ Maintain `./<run-slug>/foundry-run.yml` for the whole run. It is not optional an
 
 Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
 
-1. **workflow-brief-to-galaxy-interface** — invoke the `workflow-brief-to-galaxy-interface` skill. Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available.
-2. **workflow-brief-to-galaxy-data-flow** — invoke the `workflow-brief-to-galaxy-data-flow` skill. Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief.
+1. **workflow-brief-to-galaxy-interface** — invoke the `workflow-brief-to-galaxy-interface` skill. Map a Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available.
+2. **workflow-brief-to-galaxy-data-flow** — invoke the `workflow-brief-to-galaxy-data-flow` skill. Translate a Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief.
 3. **compare-against-iwc-exemplar** — invoke the `compare-against-iwc-exemplar` skill. Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring.
-4. **workflow-brief-to-galaxy-template** — invoke the `workflow-brief-to-galaxy-template` skill. Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence.
+4. **workflow-brief-to-galaxy-template** — invoke the `workflow-brief-to-galaxy-template` skill. Build a gxformat2 skeleton from a Workflow Brief and its Galaxy design briefs, consulting retained source evidence.
 5. **advance-galaxy-draft-step** (loop) — invoke the `advance-galaxy-draft-step` skill, once per step. It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues.
 6. **test-data-resolution** (branch) — resolve in order; stop at the first that yields acceptable output:
    - Try `find-test-data` — Search IWC fixtures and public sources for test data matching a data-flow shape.
    - **user-supplied** — if nothing above yields acceptable output, ask the user to supply it directly.
-7. **workflow-brief-to-galaxy-test-plan** — invoke the `workflow-brief-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence.
+7. **workflow-brief-to-galaxy-test-plan** — invoke the `workflow-brief-to-galaxy-test-plan` skill. Synthesize a Galaxy workflow test plan from a Workflow Brief, its Galaxy design briefs, and available source evidence.
 8. **implement-galaxy-workflow-test** — invoke the `implement-galaxy-workflow-test` skill. Assemble Galaxy workflow test fixtures and assertions.
 9. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 10. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.

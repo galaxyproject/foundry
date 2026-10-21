@@ -12,8 +12,8 @@ tags:
   - topic/galaxy-transform
 status: draft
 created: 2026-05-02
-revised: 2026-10-15
-revision: 4
+revised: 2026-10-21
+revision: 5
 summary: "Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream."
 related_notes:
   - "[[iwc-conditionals-survey]]"
@@ -29,7 +29,6 @@ related_molds:
   - "[[cwl-summary-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[freeform-summary-to-galaxy-template]]"
   - "[[workflow-brief-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 ---

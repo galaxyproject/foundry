@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-16
-revision: 8
+revised: 2026-10-21
+revision: 9
 summary: "Search IWC fixtures and public sources for test data matching a data-flow shape."
 input_artifacts:
   - id: workflow-brief
@@ -26,12 +26,9 @@ input_artifacts:
     role: source-summary
     optional: true
     description: "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline."
-  - id: freeform-galaxy-interface
-    role: galaxy-interface
-    description: "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the direct PAPER / INTERVIEW → GALAXY pipelines."
   - id: workflow-brief-galaxy-interface
     role: galaxy-interface
-    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path."
+    description: "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path, including the direct PAPER / INTERVIEW → GALAXY pipelines."
   - id: nextflow-galaxy-interface
     role: galaxy-interface
     description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the NEXTFLOW → GALAXY pipeline."
@@ -75,7 +72,7 @@ references:
 ---
 # find-test-data
 
-Resolve concrete test data for the workflow's inputs. Read the interface brief for each input's Galaxy shape and datatype, the reviewed Workflow Brief when supplied, and any retained source summary for data the source itself names — then search IWC fixtures and public sources for data that matches. Emit `test-data-refs.json`: one entry per input, each carrying a URL or path plus the expected shape, ready for [[implement-galaxy-workflow-test]] to stage.
+Resolve concrete test data for the workflow's inputs. Read the interface brief for each input's Galaxy shape and datatype, the Workflow Brief when supplied, and any retained source summary for data the source itself names — then search IWC fixtures and public sources for data that matches. Emit `test-data-refs.json`: one entry per input, each carrying a URL or path plus the expected shape, ready for [[implement-galaxy-workflow-test]] to stage.
 
 This Mold is the search leg of the harness's `test-data-resolution` branch: it runs after the source-specific leg when the pipeline has one, and first otherwise. It resolves what it can and reports gaps; the harness routes any unresolved input to the `user-supplied` fallthrough. Deciding to ask the user is a harness concern, not this Mold's — its job is an honest, source-backed match.
 

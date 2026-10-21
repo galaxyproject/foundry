@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-workflow-brief/index.md",
     "revision": 2,
     "content_hash": "c2761e698f7913963c3324379d597b72cd6af456baf08742507ebf31b1b7d599",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-19T19:01:27.674Z",
+  "cast_at": "2026-10-21T22:37:51.161Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -53,8 +53,8 @@
       "evidence": "hypothesis",
       "purpose": "Apply the brief boundaries: evidence and expert intent, no inferred Galaxy design, and separate workflow/environment blockers.",
       "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
-      "src_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
-      "dst_hash": "88237d668f962ca4d81a802ab4e975034eb40442a87f1fc77a27bd5688878b35",
+      "src_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
+      "dst_hash": "386911b9e2e5a74243b834d98f7255246dff8ae66aa41a03e0be5c7360d9c766",
       "source": "deterministic"
     },
     {

@@ -5,8 +5,8 @@ tags:
   - meta
 status: draft
 created: 2026-09-17
-revised: 2026-10-19
-revision: 6
+revised: 2026-10-21
+revision: 7
 summary: "Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers."
 ---
 
@@ -86,6 +86,8 @@ The exported `WorkflowBrief` and `WorkflowBriefSection` types describe the parse
 2. The expert edits the brief and settles blockers needed before the next stage.
 3. The harness checks structure, declared blockers, review, and environment readiness.
 4. Brief-to-Galaxy consumes the brief and referenced evidence, then runs design, draft, implementation, and test development.
+
+A direct build ([[paper-to-galaxy]], [[interview-to-galaxy]]) skips step 2. It writes the brief, runs the same structure and blocker checks, records that no expert reviewed it, and continues into the same design Molds. Declared blockers still stop it. Its open-question proposals are recorded with `basis: unreviewed-proposal` ([[open-requirements-ledger]]), so a later Mold can supersede one instead of stopping, and the run reports them all at the end for the user to check.
 
 Brief-to-Galaxy and every design or implementation step must leave the brief unchanged. Record durable workflow knowledge in `open-requirements.ledger.yml`: evidence as discoveries, authorized choices as decisions, unmet needs as obligations, and changes to expert intent as proposed brief-change recommendations. Ordinary phase progress remains harness state. Updating the brief belongs to a separate expert editing step; an implementation agent must not resolve a blocker by rewriting its input.
 

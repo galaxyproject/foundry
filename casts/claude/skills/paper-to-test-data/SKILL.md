@@ -14,7 +14,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `freeform-summary`. Produced by `interview-to-freeform-summary`, `summarize-paper`. Free-form summary from summarize-paper; sample data and reference evidence the test fixtures derive from.
-- Read artifact `freeform-galaxy-interface`. Produced by `freeform-summary-to-galaxy-interface`. Galaxy interface brief from freeform-summary-to-galaxy-interface pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY.
+- Read artifact `workflow-brief-galaxy-interface`. Produced by `workflow-brief-to-galaxy-interface`. Galaxy interface brief from workflow-brief-to-galaxy-interface pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY.
 - Read artifact `freeform-cwl-design`. Produced by `freeform-summary-to-cwl-design`. CWL design from freeform-summary-to-cwl-design naming the workflow input ports each ref must map onto, in PAPER → CWL.
 
 ## Outputs

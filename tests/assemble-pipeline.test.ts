@@ -77,33 +77,41 @@ describe("assemble-pipeline (committed harnesses)", () => {
     expect(loop.skill).toBe("advance-galaxy-draft-step");
   });
 
-  it("keeps Workflow Brief planning opt-in for the established direct pipelines", () => {
-    for (const slug of ["paper-to-galaxy", "interview-to-galaxy"]) {
-      const assembly = JSON.parse(
+  it("builds the direct pipelines on the Workflow Brief Molds without a review stop", () => {
+    const moldSkills = (slug: string): string[] =>
+      JSON.parse(
         readFileSync(
           path.join(repoRoot, `casts/claude/skills/pipeline-${slug}/_assembly.json`),
           "utf8",
         ),
-      );
-      const skills = assembly.phases
-        .filter((phase: { kind: string }) => phase.kind === "mold")
+      )
+        .phases.filter((phase: { kind: string }) => phase.kind === "mold")
         .map((phase: { skill: string }) => phase.skill);
-      expect(skills).toContain("freeform-summary-to-galaxy-interface");
-      expect(skills).toContain("freeform-summary-to-galaxy-test-plan");
-      expect(skills.some((skill: string) => skill.includes("workflow-brief"))).toBe(false);
-    }
-
-    const briefAssembly = JSON.parse(
-      readFileSync(
-        path.join(repoRoot, "casts/claude/skills/pipeline-workflow-brief-to-galaxy/_assembly.json"),
+    const briefSpine = moldSkills("workflow-brief-to-galaxy");
+    for (const [slug, summarizer] of [
+      ["paper-to-galaxy", "summarize-paper"],
+      ["interview-to-galaxy", "interview-to-freeform-summary"],
+    ]) {
+      expect(moldSkills(slug)).toEqual([
+        summarizer,
+        "freeform-summary-to-workflow-brief",
+        ...briefSpine,
+      ]);
+      const skill = readFileSync(
+        path.join(repoRoot, `casts/claude/skills/pipeline-${slug}/SKILL.md`),
         "utf8",
-      ),
+      );
+      expect(skill).toContain("no expert review");
+      expect(skill).toContain("basis: unreviewed-proposal");
+    }
+    const briefSkill = readFileSync(
+      path.join(repoRoot, "casts/claude/skills/pipeline-workflow-brief-to-galaxy/SKILL.md"),
+      "utf8",
     );
+    expect(briefSkill).toContain("Missing review or");
     expect(
-      briefAssembly.phases
-        .filter((phase: { kind: string }) => phase.kind === "mold")
-        .map((phase: { skill: string }) => phase.skill),
-    ).toContain("workflow-brief-to-galaxy-interface");
+      existsSync(path.join(repoRoot, "casts/claude/skills/freeform-summary-to-galaxy-interface")),
+    ).toBe(false);
   });
 
   it("documents the uniform run options and feedback lifecycle", () => {

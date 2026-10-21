@@ -1,6 +1,6 @@
 ---
 name: workflow-brief-to-galaxy-data-flow
-description: "Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief."
+description: "Translate a Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief."
 ---
 
 # workflow-brief-to-galaxy-data-flow
@@ -9,15 +9,15 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## When To Use
 
-- Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief.
+- Translate a Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief.
 
 ## Inputs
 
-- Read artifact `workflow-brief`. Schema: workflow-brief-schema. Produced by `freeform-summary-to-workflow-brief`, `nextflow-summary-to-workflow-brief`. Expert-reviewed implementation contract governing scientific scope, requirements, and acceptance criteria.
+- Read artifact `workflow-brief`. Schema: workflow-brief-schema. Produced by `freeform-summary-to-workflow-brief`, `nextflow-summary-to-workflow-brief`. Implementation contract, expert-reviewed or accepted unreviewed by a direct build, governing scientific scope, requirements, and acceptance criteria.
 - Read artifact `freeform-summary`. Optional; absence is allowed and must be reported honestly. Produced by `interview-to-freeform-summary`, `summarize-paper`. Optional narrative source evidence retained from brief production; consult it for details within the selected scope.
 - Read artifact `summary-nextflow`. Optional; absence is allowed and must be reported honestly. Schema: summary-nextflow. Produced by `summarize-nextflow`. Optional structured Nextflow source evidence; consult it without treating source implementation as Galaxy design.
 - Read artifact `workflow-brief-galaxy-interface`. Produced by `workflow-brief-to-galaxy-interface`. Preceding Galaxy interface brief from workflow-brief-to-galaxy-interface that pins inputs, outputs, and labels.
-- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-template`. Carried workflow-run knowledge open-requirements-ledger initialized by the interface Mold.
+- Read artifact `open-requirements-ledger`. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-template`. Carried workflow-run knowledge open-requirements-ledger initialized by the interface Mold.
 
 ## Outputs
 
@@ -32,7 +32,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 - `references/notes/galaxy-data-flow-draft-contract.md`: Research note copied verbatim into the bundle. Keep the data-flow brief separate from gxformat2 templating and concrete step implementation.
 - `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the narrative leaves open — a described transformation with no named tool, an implied intermediate the source never states, an ordering the prose doesn't fix.
-- `references/notes/workflow-brief-design.md`: Research note copied verbatim into the bundle. Keep reviewed intent authoritative while using source summaries only as supporting evidence.
+- `references/notes/workflow-brief-design.md`: Research note copied verbatim into the bundle. Keep brief intent authoritative while using source summaries only as supporting evidence.
 - `references/schemas/workflow-brief-schema.schema.json`: Schema file copied verbatim into the bundle. Carry the required implementation-contract shape into this design step.
 
 ## Load On Demand
@@ -49,9 +49,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Read the reviewed Workflow Brief plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Consult retained source evidence when available. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
+Read the Workflow Brief plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Consult retained source evidence when available. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
 
-The Workflow Brief governs scope and requirements. A `freeform-summary` or `summary-nextflow` can substantiate details within that scope but cannot broaden it or turn source implementation into assumed Galaxy wiring. Translate what the brief, interface, and evidence support; classify the rest as unresolved tool needs or ledger obligations. If correct implementation requires changing reviewed intent, propose a brief change and stop rather than silently applying it.
+The Workflow Brief governs scope and requirements. A `freeform-summary` or `summary-nextflow` can substantiate details within that scope but cannot broaden it or turn source implementation into assumed Galaxy wiring. Translate what the brief, interface, and evidence support; classify the rest as unresolved tool needs or ledger obligations. If correct implementation requires changing the brief's intent, propose a brief change and stop rather than silently applying it.
 
 The output is not gxformat2 and should not resolve exact Tool Shed tools. workflow-brief-to-galaxy-template turns this handoff and the interface brief into a skeleton.
 

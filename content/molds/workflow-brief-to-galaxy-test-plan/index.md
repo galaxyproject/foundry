@@ -7,12 +7,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-10-19
-revision: 4
-summary: "Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence."
+revised: 2026-10-21
+revision: 5
+summary: "Synthesize a Galaxy workflow test plan from a Workflow Brief, its Galaxy design briefs, and available source evidence."
 input_artifacts:
   - id: workflow-brief
-    description: "Expert-reviewed implementation contract whose acceptance criteria and scope govern test intent."
+    description: "Implementation contract, expert-reviewed or accepted unreviewed by a direct build, whose acceptance criteria and scope govern test intent."
   - id: freeform-summary
     role: source-evidence
     optional: true
@@ -52,7 +52,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Keep reviewed acceptance criteria authoritative while treating source summaries as supporting evidence."
+    purpose: "Keep the brief's acceptance criteria authoritative while treating source summaries as supporting evidence."
     verification: "Confirm synthesized tests do not assert excluded analyses or silently alter expert acceptance criteria."
   - kind: schema
     ref: "[[galaxy-workflow-test-plan]]"
@@ -126,13 +126,13 @@ related_notes:
 ---
 # workflow-brief-to-galaxy-test-plan
 
-Synthesize a Galaxy workflow test plan from the reviewed Workflow Brief and the Galaxy interface and data-flow briefs. Consult retained source evidence when available. The output is a reviewable handoff conforming to [[galaxy-workflow-test-plan]], not a concrete `tests-format` file: it records test cases, job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and intentional omissions so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact.
+Synthesize a Galaxy workflow test plan from the Workflow Brief and the Galaxy interface and data-flow briefs. Consult retained source evidence when available. The output is a reviewable handoff conforming to [[galaxy-workflow-test-plan]], not a concrete `tests-format` file: it records test cases, job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and intentional omissions so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact.
 
 When the run supplies an open-requirements ledger, follow its current open-question decisions, such as a chosen test dataset, rather than answering those questions again. The ledger is read-only here. A decision that looks wrong for testing goes into the plan's `warnings[]` for the expert, not into a new answer.
 
 ## Synthesized, not translated
 
-This is the structural difference from [[nextflow-test-to-galaxy-test-plan]] and [[cwl-test-to-galaxy-test-plan]]. Those Molds **translate** existing upstream test evidence into a Galaxy plan. This Mold **synthesizes** the common brief-driven plan from reviewed acceptance criteria and the testable structure the interface/data-flow briefs and nearest IWC exemplar imply. When retained evidence contains concrete fixtures, snapshots, parameters, or expected results, cite and use them within the selected scope; their presence does not let evidence override the brief.
+This is the structural difference from [[nextflow-test-to-galaxy-test-plan]] and [[cwl-test-to-galaxy-test-plan]]. Those Molds **translate** existing upstream test evidence into a Galaxy plan. This Mold **synthesizes** the common brief-driven plan from the brief's acceptance criteria and the testable structure the interface/data-flow briefs and nearest IWC exemplar imply. When retained evidence contains concrete fixtures, snapshots, parameters, or expected results, cite and use them within the selected scope; their presence does not let evidence override the brief.
 
 Set the plan's `source.derived_from` to `intent` (not `test-evidence`) and each synthesized assertion's `evidence` to `intent`; most synthesized assertions are `confidence: medium` or `low`. Where the brief or retained evidence carries a concrete expected value (a known count, a named output token, a published figure), record it as `expected_value` and raise the confidence.
 

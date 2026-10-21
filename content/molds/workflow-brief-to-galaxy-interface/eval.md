@@ -7,7 +7,7 @@ content live in `scenarios.md`; the oracle here is applied to whatever a scenari
 produces. These properties judge whether the brief is useful to downstream Galaxy
 authoring, not whether it follows one exact prose template.
 
-## Property: reviewed scope is authoritative
+## Property: the brief's scope is authoritative
 
 - bucket: fidelity
 - check: llm-judged
@@ -55,7 +55,8 @@ authoring, not whether it follows one exact prose template.
 - check: llm-judged
 - assertion: every open question in the Workflow Brief has exactly one current ledger
   decision quoting it in `open_question`. A proposed answer is adopted with
-  `basis: brief-proposal`, a question without one is answered with
+  `basis: brief-proposal`, or with `basis: unreviewed-proposal` when the run
+  says no expert reviewed the brief. A question without one is answered with
   `basis: agent`, and a low-confidence mark is kept rather than dropped.
 
 ## Property: downstream data-flow Mold can consume the brief

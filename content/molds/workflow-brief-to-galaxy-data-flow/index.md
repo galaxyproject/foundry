@@ -7,12 +7,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-09
-revised: 2026-09-20
-revision: 4
-summary: "Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief."
+revised: 2026-10-21
+revision: 5
+summary: "Translate a Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief."
 input_artifacts:
   - id: workflow-brief
-    description: "Expert-reviewed implementation contract governing scientific scope, requirements, and acceptance criteria."
+    description: "Implementation contract, expert-reviewed or accepted unreviewed by a direct build, governing scientific scope, requirements, and acceptance criteria."
   - id: freeform-summary
     role: source-evidence
     optional: true
@@ -48,7 +48,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Keep reviewed intent authoritative while using source summaries only as supporting evidence."
+    purpose: "Keep brief intent authoritative while using source summaries only as supporting evidence."
     verification: "Confirm a worked run preserves scope and the brief's bytes while resolving Galaxy data-flow choices."
   - kind: research
     ref: "[[open-requirements-ledger]]"
@@ -112,8 +112,8 @@ related_notes:
 ---
 # workflow-brief-to-galaxy-data-flow
 
-Read the reviewed Workflow Brief plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Consult retained source evidence when available. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
+Read the Workflow Brief plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Consult retained source evidence when available. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
 
-The Workflow Brief governs scope and requirements. A `freeform-summary` or `summary-nextflow` can substantiate details within that scope but cannot broaden it or turn source implementation into assumed Galaxy wiring. Translate what the brief, interface, and evidence support; classify the rest as unresolved tool needs or ledger obligations. If correct implementation requires changing reviewed intent, propose a brief change and stop rather than silently applying it.
+The Workflow Brief governs scope and requirements. A `freeform-summary` or `summary-nextflow` can substantiate details within that scope but cannot broaden it or turn source implementation into assumed Galaxy wiring. Translate what the brief, interface, and evidence support; classify the rest as unresolved tool needs or ledger obligations. If correct implementation requires changing the brief's intent, propose a brief change and stop rather than silently applying it.
 
 The output is not gxformat2 and should not resolve exact Tool Shed tools. [[workflow-brief-to-galaxy-template]] turns this handoff and the interface brief into a skeleton.

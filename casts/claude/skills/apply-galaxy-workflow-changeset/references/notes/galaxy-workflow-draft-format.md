@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-06
-revised: 2026-09-23
-revision: 4
+revised: 2026-10-21
+revision: 5
 related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-data-flow-draft-contract]]"
@@ -16,7 +16,6 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
-  - "[[freeform-summary-to-galaxy-template]]"
   - "[[workflow-brief-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
   - "[[implement-galaxy-tool-step]]"

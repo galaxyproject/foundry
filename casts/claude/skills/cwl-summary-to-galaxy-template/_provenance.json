@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 5,
     "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "f264e5886afef3f6decec636f40afa4f2fe926bd"
   },
-  "cast_at": "2026-10-19T19:01:24.243Z",
+  "cast_at": "2026-10-21T22:37:48.584Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded collection pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.",
-      "src_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
-      "dst_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
+      "src_hash": "980c73874be9adbd9a4118a0d677e6a1ce15c210313148b4b5fca29767804606",
+      "dst_hash": "980c73874be9adbd9a4118a0d677e6a1ce15c210313148b4b5fca29767804606",
       "source": "deterministic"
     },
     {
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded conditional pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
-      "dst_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
+      "src_hash": "14035e3077d8c7d7c69db527af4b1640c17d55e96148dc4f46fbfe160ef919e9",
+      "dst_hash": "14035e3077d8c7d7c69db527af4b1640c17d55e96148dc4f46fbfe160ef919e9",
       "source": "deterministic"
     },
     {
@@ -67,8 +67,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded genomic-interval pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for interval overlap, merge, coverage, windowing, masking, or set-algebra on coordinate features.",
-      "src_hash": "103ad0288566f0bf721d54b8ecd49e2df0ac334b9030a754d884b2e13abdf73e",
-      "dst_hash": "103ad0288566f0bf721d54b8ecd49e2df0ac334b9030a754d884b2e13abdf73e",
+      "src_hash": "70255fe496797ddf86f165039a9ee1847799771914dd6b26639d9e938225f115",
+      "dst_hash": "70255fe496797ddf86f165039a9ee1847799771914dd6b26639d9e938225f115",
       "source": "deterministic"
     },
     {
@@ -82,8 +82,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges.",
-      "src_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
-      "dst_hash": "54219d2387f3831ebf5a5a918d7f588f75baa120768ed627ec6c9c4b0f309539",
+      "src_hash": "5681bf97046cdc9c3f1336e3e11a127d7cbee11cecd33554387672321a855799",
+      "dst_hash": "5681bf97046cdc9c3f1336e3e11a127d7cbee11cecd33554387672321a855799",
       "source": "deterministic"
     },
     {
@@ -150,8 +150,8 @@
       "purpose": "Respect the handoff from abstract data-flow draft to gxformat2 skeleton.",
       "trigger": "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs.",
       "verification": "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes.",
-      "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
-      "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "src_hash": "87dc42828854d1e9f9086c7d673fb1fcecc47309a88c3aa56c6b48fdde680104",
+      "dst_hash": "87dc42828854d1e9f9086c7d673fb1fcecc47309a88c3aa56c6b48fdde680104",
       "source": "deterministic"
     },
     {
@@ -165,8 +165,8 @@
       "evidence": "corpus-observed",
       "purpose": "Group the settled step set into titled stage frames (the gxformat2 `comments:` array) so the skeleton carries the analysis-stage narrative IWC authors annotate by hand. Schema-legal and optional.",
       "trigger": "After topology is settled and the skeleton can be partitioned into named analysis stages (inputs, per-stage step clusters, parameter-derivation knots, visualization/outputs).",
-      "src_hash": "ac413a82024728288ec4389331688eaa0dfcf0341f0432be4ea36524ff00ab9b",
-      "dst_hash": "ac413a82024728288ec4389331688eaa0dfcf0341f0432be4ea36524ff00ab9b",
+      "src_hash": "a651f11544083d28176d66ff9d730f88dc25cfe74ab80530cf7768c9f3376006",
+      "dst_hash": "a651f11544083d28176d66ff9d730f88dc25cfe74ab80530cf7768c9f3376006",
       "source": "deterministic"
     },
     {
@@ -180,8 +180,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "6e4e89785e1607af7debb8444ff05fc2a0a6128223627df326af5fdb2134e78a",
-      "dst_hash": "6e4e89785e1607af7debb8444ff05fc2a0a6128223627df326af5fdb2134e78a",
+      "src_hash": "f58020b7fcdba24aa213145aa9757d8b15a166c078351ca09f0e1ff28ce6969d",
+      "dst_hash": "f58020b7fcdba24aa213145aa9757d8b15a166c078351ca09f0e1ff28ce6969d",
       "source": "deterministic"
     },
     {
@@ -245,8 +245,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
+      "dst_hash": "326722c19b44c9c62318d96bd814b0a8f2f5d061dd0925826720d0e3196b2629",
       "source": "deterministic"
     },
     {
@@ -345,9 +345,6 @@
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",
           "cwl-summary-to-galaxy-template",
-          "freeform-summary-to-galaxy-data-flow",
-          "freeform-summary-to-galaxy-interface",
-          "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
