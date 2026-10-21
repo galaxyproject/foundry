@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@galaxy-tool-util/cli':
-        specifier: ^1.13.1
-        version: 1.13.1
+        specifier: ^1.14.0
+        version: 1.14.0
       '@galaxy-tool-util/schema':
-        specifier: ^1.13.1
-        version: 1.13.1
+        specifier: ^1.14.0
+        version: 1.14.0
     devDependencies:
       '@arethetypeswrong/cli':
         specifier: ^0.18.2
@@ -170,8 +170,8 @@ importers:
         specifier: workspace:*
         version: link:../summarize-nextflow
       '@galaxy-tool-util/schema':
-        specifier: ^1.13.1
-        version: 1.13.1
+        specifier: ^1.14.0
+        version: 1.14.0
       ajv:
         specifier: ^8.17.1
         version: 8.20.0
@@ -1296,36 +1296,36 @@ packages:
     resolution: {integrity: sha512-K4KDHl/AsBudimBpmIjT6u85qFExY+XKKehiWeaEJcB8CPkvZULkf5JjwW2gLvB3HVxo2bnD7bWeZmVNFMNWdQ==}
     hasBin: true
 
-  '@galaxy-tool-util/cli@1.13.1':
-    resolution: {integrity: sha512-lhG1GERXjNi05/opzolad0NNgj23KHlLw+p6RsT/nG3vLDm2Opp+CmAqe6YrEcXnQTG9Rb7zIwnXQwydoZCIhA==}
+  '@galaxy-tool-util/cli@1.14.0':
+    resolution: {integrity: sha512-AMuPTOM6q94r2KoRxVwO6TwTSqjvyVBW1Z9CWBGkLDwFBuj8OPB6p0THipkru886LOaI/AF5s+ehA5k+lVIKpQ==}
     hasBin: true
 
   '@galaxy-tool-util/connection-validation@1.10.0':
     resolution: {integrity: sha512-Nz9CdwdnQ1+3figfAS5YW9ELOXaZk4TeGSS8XyV7+XPOfWuPBt7vhxmQZ8baf7NBUTQCCGFSB4LEX/YeJHAS+w==}
 
-  '@galaxy-tool-util/connection-validation@1.13.1':
-    resolution: {integrity: sha512-xYKOsNBtxbqVc4BzM9e7A4hd5LzjxhypRJwBK583XALZ2gQG+JTxgrsj9Hph/WYh00L/gxtMCx/hGxOxqmPuJw==}
+  '@galaxy-tool-util/connection-validation@1.14.0':
+    resolution: {integrity: sha512-kwSpL0esFuYbyTokFhzq/jnE7uPlj9otJQn9YwdEjxVg1OXPWXbdQ+2a/SgIJpaNR4DD9/9qUUXH6e9jqBFJzw==}
 
   '@galaxy-tool-util/core@1.10.0':
     resolution: {integrity: sha512-PtFbuKXmzuJJQKcoS0YbisR1+nEy2eyxvxSOaoXWF+EcwSzjBlGWGj6XmGjGP1Vbvc2dJau+XMdHSdyr5WeU9w==}
 
-  '@galaxy-tool-util/core@1.13.1':
-    resolution: {integrity: sha512-+DqcTSMApgXqHsfh2cqkgIy3in4U/kAO+o2QS4HHqiClfhPPOJmmcFlEgtrrudwzvrHk5i06UQN+x7XT4JeXZA==}
+  '@galaxy-tool-util/core@1.14.0':
+    resolution: {integrity: sha512-RqmsY8kQr//0rqLaVm1z1WmlRdFB9xvpWiWjlH/xUxvXTiq5dlbmkuIT9xPhe7A2ni7jL8Zm/fN6jgiK1A6JXQ==}
 
   '@galaxy-tool-util/schema@1.10.0':
     resolution: {integrity: sha512-X0+79uHY5Lu8mGehbhZIgDpiUONmtM6p1Tn0QWu+yFF7NNDdkxK951G9Q9QAIuNdYkobI03T8VWgz+17zvJF8g==}
 
-  '@galaxy-tool-util/schema@1.13.1':
-    resolution: {integrity: sha512-UP9bZ7dbpvKlCoCSelBpNGIi2N8pWCc/rKHQJeVBxUOelYzzz5Og3R5bXQT6+irgWhnQQtTi61LGa5oTn668Gg==}
+  '@galaxy-tool-util/schema@1.14.0':
+    resolution: {integrity: sha512-puhect6vIncZHBZV8gVA/D1Wtba1RzDw/KSFDNRTCVtYqZPHnNGaITKVnMP/L3sEPzIomz0LcSqYnlXMdADeeA==}
 
   '@galaxy-tool-util/search@1.10.0':
     resolution: {integrity: sha512-zMPHrrUpRRaVldKjZwYEmV9dzoM8nN2BDasQvjTutLl7vK6fomuWaFem6HqLiou43qe9Y7+X0LBQElKGhEQMfA==}
 
-  '@galaxy-tool-util/search@1.13.1':
-    resolution: {integrity: sha512-TsCUIco6JJr31ZbnkMGGO7iKIDeM5YeebjA5T87Av8taOwJ5Im/jiNL73CijprUBmBrkxrPTO4G+dDFF1/mdOQ==}
+  '@galaxy-tool-util/search@1.14.0':
+    resolution: {integrity: sha512-eVCLHECsejlcZ+FDW1Lx5M26OX56iPptJyJylcu+Qo9SHjneuKYzivjie2j/JXG+9VwEIdcl0pWeyFIc9gPu8w==}
 
-  '@galaxy-tool-util/tool-xml@1.13.1':
-    resolution: {integrity: sha512-QlnAEAatbLIEbalvpi/ZJZnTmqLmxxIxxuLid9eF70Af7EQJuiykf/JWj6ggqJDoDjZnCg3uiIPU6CgMJqPSfQ==}
+  '@galaxy-tool-util/tool-xml@1.14.0':
+    resolution: {integrity: sha512-q4LMuL3bTGPcoww6tjjMn5xdyGUB4szAwOQfZGazXsuWp5E4aSuMe+iQdXaVKY1XVEGnq0cfhqTkUF0iBVryLA==}
 
   '@galaxy-tool-util/workflow-graph@1.2.0':
     resolution: {integrity: sha512-S3a/2lHaNcKoE9pYWSZXPL6DPFh+DXU5JhMdVMMzYRx4BHDbpK0aqVPcwyq+uAlNP+PqwmhD6WLgdsVwBSDotQ==}
@@ -4791,7 +4791,7 @@ snapshots:
 
   '@astrojs/yaml2ts@0.2.4':
     dependencies:
-      yaml: 2.8.3
+      yaml: 2.9.0
 
   '@aws-crypto/sha256-browser@5.2.0':
     dependencies:
@@ -5634,13 +5634,13 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@galaxy-tool-util/cli@1.13.1':
+  '@galaxy-tool-util/cli@1.14.0':
     dependencies:
-      '@galaxy-tool-util/connection-validation': 1.13.1
-      '@galaxy-tool-util/core': 1.13.1
-      '@galaxy-tool-util/schema': 1.13.1
-      '@galaxy-tool-util/search': 1.13.1
-      '@galaxy-tool-util/tool-xml': 1.13.1
+      '@galaxy-tool-util/connection-validation': 1.14.0
+      '@galaxy-tool-util/core': 1.14.0
+      '@galaxy-tool-util/schema': 1.14.0
+      '@galaxy-tool-util/search': 1.14.0
+      '@galaxy-tool-util/tool-xml': 1.14.0
       ajv: 8.20.0
       commander: 14.0.3
       effect: 3.21.2
@@ -5654,20 +5654,20 @@ snapshots:
       '@galaxy-tool-util/schema': 1.10.0
       '@galaxy-tool-util/workflow-graph': 1.2.0
 
-  '@galaxy-tool-util/connection-validation@1.13.1':
+  '@galaxy-tool-util/connection-validation@1.14.0':
     dependencies:
-      '@galaxy-tool-util/schema': 1.13.1
+      '@galaxy-tool-util/schema': 1.14.0
       '@galaxy-tool-util/workflow-graph': 1.2.0
 
   '@galaxy-tool-util/core@1.10.0':
     dependencies:
       '@galaxy-tool-util/schema': 1.10.0
       effect: 3.21.2
-      yaml: 2.8.3
+      yaml: 2.9.0
 
-  '@galaxy-tool-util/core@1.13.1':
+  '@galaxy-tool-util/core@1.14.0':
     dependencies:
-      '@galaxy-tool-util/schema': 1.13.1
+      '@galaxy-tool-util/schema': 1.14.0
       effect: 3.21.2
       yaml: 2.9.0
 
@@ -5678,7 +5678,7 @@ snapshots:
       effect: 3.21.2
       yaml: 2.8.3
 
-  '@galaxy-tool-util/schema@1.13.1':
+  '@galaxy-tool-util/schema@1.14.0':
     dependencies:
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
@@ -5690,14 +5690,14 @@ snapshots:
       '@galaxy-tool-util/core': 1.10.0
       '@galaxy-tool-util/schema': 1.10.0
 
-  '@galaxy-tool-util/search@1.13.1':
+  '@galaxy-tool-util/search@1.14.0':
     dependencies:
-      '@galaxy-tool-util/core': 1.13.1
-      '@galaxy-tool-util/schema': 1.13.1
+      '@galaxy-tool-util/core': 1.14.0
+      '@galaxy-tool-util/schema': 1.14.0
 
-  '@galaxy-tool-util/tool-xml@1.13.1':
+  '@galaxy-tool-util/tool-xml@1.14.0':
     dependencies:
-      '@galaxy-tool-util/schema': 1.13.1
+      '@galaxy-tool-util/schema': 1.14.0
       fast-xml-parser: 5.11.1
       yaml: 2.9.0
 

@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
     "revision": 3,
     "content_hash": "b55214a0b2bf18e61a75a6c7aa32cf69992aa703480b754e067707dfc262813e",
-    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
+    "commit": "8a9f41876902fe05e402d8d60e9697c890202c77"
   },
-  "cast_at": "2026-09-23T16:20:44.285Z",
+  "cast_at": "2026-10-21T01:29:33.289Z",
   "refs": [
     {
       "kind": "research",
@@ -129,8 +129,8 @@
       "trigger": "When mapping expected outputs, tolerances, or fixture assertions into Galaxy workflow-test assertion intent.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "src_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
+      "dst_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }

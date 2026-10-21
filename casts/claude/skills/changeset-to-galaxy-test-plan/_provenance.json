@@ -6,9 +6,9 @@
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 4,
     "content_hash": "1b8362487f534389c4e581cc2cb54e21fc004bb1a06d818b4dff1ba34bdc2423",
-    "commit": "7883ef99b75391d816e7c2023afc2af04ade0fbb"
+    "commit": "8a9f41876902fe05e402d8d60e9697c890202c77"
   },
-  "cast_at": "2026-10-15T21:04:45.892Z",
+  "cast_at": "2026-10-21T01:29:32.715Z",
   "refs": [
     {
       "kind": "research",
@@ -129,8 +129,8 @@
       "trigger": "When naming an assertion family or compare operator for a carried-forward or change-set-driven expected output.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "src_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
+      "dst_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }

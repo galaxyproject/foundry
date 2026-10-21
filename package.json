@@ -83,7 +83,7 @@
     "zod": "^4.4.3"
   },
   "dependencies": {
-    "@galaxy-tool-util/cli": "^1.13.1",
-    "@galaxy-tool-util/schema": "^1.13.1"
+    "@galaxy-tool-util/cli": "^1.14.0",
+    "@galaxy-tool-util/schema": "^1.14.0"
   }
 }
