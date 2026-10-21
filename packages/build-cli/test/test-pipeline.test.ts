@@ -2060,6 +2060,76 @@ test("stops the draft loop once its repairs reach the cap", async () => {
   expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(1);
 });
 
+test("takes the repair cap from the ledger the draft loop is handed", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  writeSkill(
+    root,
+    "template",
+    [],
+    [
+      { id: "galaxy-workflow-draft", default_filename: DRAFT_FILE },
+      { id: "open-requirements-ledger", default_filename: LEDGER_FILE },
+    ],
+  );
+  const calls: RunPiSkillOptions[] = [];
+  const loop = repairingWorker(calls, rewire, true);
+  const record = await runLinearPipeline(draftRunOptions(root, "repair-ledger-cap"), {
+    runSkill: async (options) => {
+      const result = await loop(options);
+      if (path.basename(options.skillDir) === "template") {
+        const ledger = {
+          topology_repair: { escalations: 0, cap: 1, open_history: [] },
+          entries: [],
+        };
+        writeFileSync(path.join(options.runDir, "workspace", LEDGER_FILE), dumpYaml(ledger));
+        return workspaceRecord(options, "template");
+      }
+      return result;
+    },
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error: expect.stringMatching(/the loop has reached its cap of 1 repair$/),
+    }),
+  );
+  expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(1);
+});
+
+test("does not let a draft-loop call raise the repair cap", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const calls: RunPiSkillOptions[] = [];
+  let repairs = 0;
+  const advance = draftWorker(
+    calls,
+    (_draft, step) =>
+      step === "a" ? [ledgerEntry(`a-uncomputable-${repairs}`, "a", "open", true)] : [],
+    (entries) => ({
+      topology_repair: { escalations: repairs, cap: 10, open_history: [] },
+      entries,
+    }),
+  );
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "repair-cap-raised"), maxIterations: 20 },
+    {
+      runSkill: async (options) => {
+        if (path.basename(options.skillDir) !== REPAIR) return advance(options);
+        repairs++;
+        return repairingWorker(calls, rewire)(options);
+      },
+    },
+  );
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error: expect.stringMatching(/the loop has reached its cap of 3 repairs$/),
+    }),
+  );
+  expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(3);
+});
+
 test("fails the draft loop when its repair worker fails", async () => {
   const root = withRepairCast(draftFixtureRepo());
   const advance = repairingWorker([], rewire);

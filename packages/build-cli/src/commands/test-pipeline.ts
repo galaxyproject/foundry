@@ -1229,6 +1229,15 @@ export async function runLinearPipeline(
       );
     }
     const repairOracle = plan.repair && oracle.repair;
+    // The cap is read once, from the ledger the loop is handed, so no call can raise its own.
+    const ledgerAtEntry = oracle.blockers && promoted.get(oracle.blockers.artifact);
+    const ledgerCap =
+      repairOracle && ledgerAtEntry
+        ? attempt(() => repairOracle.cap(ledgerAtEntry.absolutePath))
+        : null;
+    const repairCap =
+      options.maxRepairs ??
+      (ledgerCap instanceof Error || ledgerCap === null ? DEFAULT_REPAIR_CAP : ledgerCap);
     let repairs = 0;
     // `n` counts the oracle's calls, which `cap` bounds; repairs have their own cap.
     for (let n = 1; ; n++) {
@@ -1295,15 +1304,11 @@ export async function runLinearPipeline(
         const blocked = `${stalled} is blocked by ${oracle.blockers!.artifact} entries ${blockers.join(", ")}`;
         if (!repairOracle) return stop("failed", "loop_blocked", blocked);
 
-        const repairCap =
-          options.maxRepairs ?? attempt(() => repairOracle.cap(ledger!.absolutePath));
-        const limit =
-          repairCap instanceof Error || repairCap === null ? DEFAULT_REPAIR_CAP : repairCap;
-        if (repairs >= limit) {
+        if (repairs >= repairCap) {
           return stop(
             "failed",
             "loop_blocked",
-            `${blocked}, and the loop has reached its cap of ${limit} repair${limit === 1 ? "" : "s"}`,
+            `${blocked}, and the loop has reached its cap of ${repairCap} repair${repairCap === 1 ? "" : "s"}`,
           );
         }
         const repairAt = iterations.length + 1;
