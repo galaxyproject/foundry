@@ -34,6 +34,7 @@ import {
 import { foundryHead } from "../lib/foundry-head.js";
 import { readMarkdown } from "../lib/frontmatter.js";
 import { parseOpenRequirements } from "../lib/run-ledgers.js";
+import type { OpenRequirementsEntry } from "../lib/run-model.js";
 import { sha256File } from "../lib/reconcile.js";
 import {
   PIPELINE_RUN_FILE,
@@ -251,27 +252,42 @@ interface LoopOracle {
   defaultCap(carriedPath: string): number;
   prompt(iteration: number, next: string[] | null): string;
   /**
-   * Where a call that could not do its work records why: the ids of what blocks `next` that the
-   * call itself wrote or changed, from the artifact as the call left it and as it found it.
+   * Where a call that could not do its work records why: the entries for the last step of `next`
+   * that the call itself wrote or changed, from the artifact as the call left it and as it found it.
    */
   blockers?: {
     artifact: string;
-    read(file: string, earlier: string | null, next: string[]): string[];
-  };
-  /** The worker a blocked call is escalated to, and how the controller judges what it did. */
-  repair?: {
-    skill: string;
-    /** Open blocking entries in the blockers artifact, or only those of `among`. */
-    open(file: string, among?: string[]): number;
-    /** Which of `named` the artifact marks resolved, and which it no longer has. */
-    settled(file: string, named: string[]): { resolved: string[]; missing: string[] };
-    /** The escalation cap the blockers artifact itself sets, if it sets one. */
+    read(file: string, earlier: string | null, next: string[]): OpenRequirementsEntry[];
+    /** Open blocking entries in the artifact. */
+    openBlocking(file: string): number;
+    /** Which of `named` the artifact marks open or resolved, and which it no longer has. */
+    settled(
+      file: string,
+      named: string[],
+    ): { open: string[]; resolved: string[]; missing: string[] };
+    /** The escalation cap the artifact itself sets, if it sets one. */
     cap(file: string): number | null;
-    prompt(iteration: number, next: string[], blockers: string[]): string;
   };
+  /**
+   * The workers a stalled call is escalated to, in order: the first that takes one of the call's
+   * entries runs. They share one cap.
+   */
+  escalations?: LoopEscalation[];
 }
 
-/** Repairs a loop escalates to when neither the run nor the ledger caps them. */
+/** A worker a stalled loop call is escalated to, and how the controller judges what it did. */
+interface LoopEscalation {
+  skill: string;
+  /** What one run of this worker is called in the controller's messages. */
+  noun: string;
+  /** Whether an entry the stalled call wrote is this worker's to act on. */
+  takes(entry: OpenRequirementsEntry): boolean;
+  /** Why the carried artifact as the worker left it falls short, beyond the entries it settled. */
+  check?(carriedPath: string, next: string[]): string | null;
+  prompt(iteration: number, next: string[], entries: string[]): string;
+}
+
+/** Escalations a loop makes when neither the run nor the ledger caps them. */
 const DEFAULT_REPAIR_CAP = 3;
 
 function readLedger(ledger: string) {
@@ -318,32 +334,17 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
         const before = new Map(
           earlier ? ledgerEntries(earlier).map((entry) => [entry.id, entry]) : [],
         );
-        // A blocking entry stays open until a repair closes it, and is surrendered at the cap.
-        return ledgerEntries(file)
-          .filter(
-            (entry) =>
-              entry.blocking === true &&
-              (entry.status === "open" || entry.status === "surrendered") &&
-              entry.step === next.at(-1) &&
-              !isDeepStrictEqual(before.get(entry.id), entry),
-          )
-          .map((entry) => entry.id);
+        return ledgerEntries(file).filter(
+          (entry) => entry.step === next.at(-1) && !isDeepStrictEqual(before.get(entry.id), entry),
+        );
       },
-    },
-    // The Mold's step 5 escalation, which a single-skill worker cannot make itself. The ledger's
-    // `topology_repair` header is left as the calls wrote it; the run record counts escalations.
-    repair: {
-      skill: "repair-galaxy-draft-topology",
-      open(file, among) {
-        const ledger = readLedger(file);
-        if (!among) return ledger.counts.blocking_open;
-        return ledger.entries.filter(
-          (entry) => entry.blocking === true && entry.status === "open" && among.includes(entry.id),
-        ).length;
+      openBlocking(file) {
+        return readLedger(file).counts.blocking_open;
       },
       settled(file, named) {
         const entries = new Map(ledgerEntries(file).map((entry) => [entry.id, entry]));
         return {
+          open: named.filter((id) => entries.get(id)?.status === "open"),
           resolved: named.filter((id) => entries.get(id)?.status === "resolved"),
           missing: named.filter((id) => !entries.has(id)),
         };
@@ -352,10 +353,21 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
         const cap = readLedger(file).topology_repair?.cap;
         return Number.isSafeInteger(cap) && cap! > 0 ? cap! : null;
       },
-      prompt(iteration, next, blockers) {
-        return `Loop iteration ${iteration}: the draft loop escalates to you. The call before could not advance step ${JSON.stringify(next)}; open-requirements-ledger entries ${blockers.join(", ")} block it. Repair that region of the draft, or narrow the step, and mark each entry you close resolved.`;
-      },
     },
+    // Escalations the Mold makes, which a single-skill worker cannot make itself. The ledger's
+    // `topology_repair` header is left as the calls wrote it; the run record counts escalations.
+    escalations: [
+      {
+        skill: "repair-galaxy-draft-topology",
+        noun: "repair",
+        // A blocking entry stays open until a repair closes it, and is surrendered at the cap.
+        takes: (entry) =>
+          entry.blocking === true && (entry.status === "open" || entry.status === "surrendered"),
+        prompt(iteration, next, entries) {
+          return `Loop iteration ${iteration}: the draft loop escalates to you. The call before could not advance step ${JSON.stringify(next)}; open-requirements-ledger entries ${entries.join(", ")} block it. Repair that region of the draft, or narrow the step, and mark each entry you close resolved.`;
+        },
+      },
+    ],
   },
 };
 
@@ -710,9 +722,13 @@ interface WorkerPlan {
 }
 
 interface MoldPhasePlan extends WorkerPlan {
-  /** The worker a blocked loop call is escalated to, when the harness casts it. */
-  repair?: WorkerPlan;
+  /** The loop's escalations whose skills the harness casts, in the oracle's order. */
+  escalations?: EscalationPlan[];
   loop?: LoopOracle;
+}
+
+interface EscalationPlan extends WorkerPlan {
+  escalation: LoopEscalation;
 }
 
 interface BranchPhasePlan {
@@ -903,10 +919,12 @@ export async function runLinearPipeline(
       produces: expectedArtifactsFromSkill(bundleDir),
     };
   };
-  // A harness without the repair cast ends a blocked loop call as loop_blocked, as before.
-  const repairPlan = (phase: AssemblyPhase): WorkerPlan | undefined => {
-    const skill = phase.loop && phase.skill ? LOOP_ORACLES[phase.skill]?.repair?.skill : undefined;
-    return skill && existsSync(skillDir(repoRoot, skill)) ? workerPlan(phase, skill) : undefined;
+  // A harness without an escalation's cast ends a call that needs it as loop_blocked, as before.
+  const escalationPlans = (phase: AssemblyPhase): EscalationPlan[] | undefined => {
+    const escalations = phase.loop ? LOOP_ORACLES[phase.skill]?.escalations : undefined;
+    return escalations
+      ?.filter((escalation) => existsSync(skillDir(repoRoot, escalation.skill)))
+      .map((escalation) => ({ ...workerPlan(phase, escalation.skill), escalation }));
   };
   const phasePlans: PhasePlan[] = phases.map((phase) =>
     phase.kind === "branch"
@@ -920,11 +938,11 @@ export async function runLinearPipeline(
       : {
           ...workerPlan(phase, phase.skill),
           loop: phase.loop ? LOOP_ORACLES[phase.skill] : undefined,
-          repair: repairPlan(phase),
+          escalations: escalationPlans(phase),
         },
   );
   const workerPlans = phasePlans.flatMap((plan) =>
-    "legs" in plan ? plan.legs : plan.repair ? [plan, plan.repair] : [plan],
+    "legs" in plan ? plan.legs : [plan, ...(plan.escalations ?? [])],
   );
   for (const plan of phasePlans) {
     if (!("legs" in plan)) continue;
@@ -959,14 +977,14 @@ export async function runLinearPipeline(
         `${label} does not consume ${plan.loop.carried}, which its loop oracle expects`,
       );
     }
-    if (plan.repair) {
+    for (const escalation of plan.escalations ?? []) {
       const carries = [plan.loop.carried, plan.loop.blockers!.artifact];
-      const repairs = `${label} escalates to ${plan.repair.skill}, which does not`;
+      const escalates = `${label} escalates to ${escalation.skill}, which does not`;
       for (const id of carries) {
-        if (!plan.repair.produces.some((artifact) => artifact.id === id)) {
-          throw new Error(`${repairs} produce ${id}`);
+        if (!escalation.produces.some((artifact) => artifact.id === id)) {
+          throw new Error(`${escalates} produce ${id}`);
         }
-        if (!plan.repair.consumes.includes(id)) throw new Error(`${repairs} consume ${id}`);
+        if (!escalation.consumes.includes(id)) throw new Error(`${escalates} consume ${id}`);
       }
     }
     if (options.sandbox === "container") {
@@ -1231,21 +1249,23 @@ export async function runLinearPipeline(
     if (!carriedAtEntry) {
       return stop("error", undefined, `no earlier phase promoted ${oracle.carried}`);
     }
-    const repairOracle = plan.repair && oracle.repair;
+    const escalationPlans = plan.escalations ?? [];
     // The cap is read once, from the ledger the loop is handed, so no call can raise its own.
     const ledgerAtEntry = oracle.blockers && promoted.get(oracle.blockers.artifact);
     const ledgerCap =
-      repairOracle && ledgerAtEntry
-        ? attempt(() => repairOracle.cap(ledgerAtEntry.absolutePath))
+      escalationPlans.length && ledgerAtEntry
+        ? attempt(() => oracle.blockers!.cap(ledgerAtEntry.absolutePath))
         : null;
     const repairCap =
       options.maxRepairs ??
       (ledgerCap instanceof Error || ledgerCap === null ? DEFAULT_REPAIR_CAP : ledgerCap);
     const defaultCap = attempt(() => oracle.defaultCap(carriedAtEntry.absolutePath));
-    // Each repair is followed by another call at the step it repaired.
+    // Each escalation is followed by another call at the step it was escalated for.
     const cap =
       options.maxIterations ??
-      (defaultCap instanceof Error ? defaultCap : defaultCap + (repairOracle ? repairCap : 0));
+      (defaultCap instanceof Error
+        ? defaultCap
+        : defaultCap + (escalationPlans.length ? repairCap : 0));
     if (cap instanceof Error) {
       return stop(
         "error",
@@ -1253,8 +1273,9 @@ export async function runLinearPipeline(
         `loop oracle could not read ${oracle.carried}: ${cap.message}`,
       );
     }
-    let repairs = 0;
-    // `n` counts the oracle's calls, which `cap` bounds; repairs have their own cap.
+    // Repairs and authorings share `repairCap`.
+    let escalations = 0;
+    // `n` counts the oracle's calls, which `cap` bounds; escalations have their own cap.
     for (let n = 1; ; n++) {
       if (n > cap) {
         return stop(
@@ -1302,25 +1323,34 @@ export async function runLinearPipeline(
       if (promoted.get(oracle.carried)!.record.sha256 === before.record.sha256) {
         const stalled = `iteration ${at} left ${oracle.carried} unchanged; step ${next.join(" > ")}`;
         const ledger = oracle.blockers && promoted.get(oracle.blockers.artifact);
-        const blockers = ledger
+        const written = ledger
           ? attempt(() =>
               oracle.blockers!.read(ledger.absolutePath, ledgerBefore?.absolutePath ?? null, next),
             )
           : [];
-        if (blockers instanceof Error) {
+        if (written instanceof Error) {
           return stop(
             "failed",
             "loop_no_progress",
-            `${stalled} is still drafty, and ${oracle.blockers!.artifact} could not be read: ${blockers.message}`,
+            `${stalled} is still drafty, and ${oracle.blockers!.artifact} could not be read: ${written.message}`,
           );
         }
+        // The first escalation that takes one of the call's entries is the one it needs.
+        const escalation = oracle.escalations?.find((candidate) => written.some(candidate.takes));
+        const blockers = escalation
+          ? written.filter(escalation.takes).map((entry) => entry.id)
+          : [];
         if (!blockers.length)
           return stop("failed", "loop_no_progress", `${stalled} is still drafty`);
         const blocked = `${stalled} is blocked by ${oracle.blockers!.artifact} entries ${blockers.join(", ")}`;
-        if (!repairOracle) return stop("failed", "loop_blocked", blocked);
-        // A surrendered blocker was given up on; a repair could not resolve it.
-        const repairable = attempt(() => repairOracle.open(ledger!.absolutePath, blockers));
-        if (repairable instanceof Error || repairable === 0) {
+        const escalated = escalationPlans.find((candidate) => candidate.escalation === escalation);
+        if (!escalated) return stop("failed", "loop_blocked", blocked);
+        const { noun } = escalated.escalation;
+        // A surrendered entry was given up on; an escalation could not settle it.
+        const actionable = attempt(
+          () => oracle.blockers!.settled(ledger!.absolutePath, blockers).open.length,
+        );
+        if (actionable instanceof Error || actionable === 0) {
           return stop("failed", "loop_blocked", blocked);
         }
         if (n >= cap) {
@@ -1330,72 +1360,75 @@ export async function runLinearPipeline(
             `${blocked}, and the loop has reached its cap of ${cap} iteration${cap === 1 ? "" : "s"}`,
           );
         }
-        if (repairs >= repairCap) {
+        if (escalations >= repairCap) {
           return stop(
             "failed",
             "loop_blocked",
             `${blocked}, and the loop has reached its cap of ${repairCap} repair${repairCap === 1 ? "" : "s"}`,
           );
         }
-        const repairAt = iterations.length + 1;
-        const repairSpent = spentBudget(record.usage, options);
-        if (repairSpent) {
+        const escalationAt = iterations.length + 1;
+        const escalationSpent = spentBudget(record.usage, options);
+        if (escalationSpent) {
           return stop(
             "cancelled",
             "budget",
-            `run budget spent before the repair at iteration ${repairAt}: ${repairSpent}`,
+            `run budget spent before the ${noun} at iteration ${escalationAt}: ${escalationSpent}`,
           );
         }
-        const openBefore = attempt(() => repairOracle.open(ledger!.absolutePath));
-        repairs++;
-        const repaired = await step(
-          plan.repair!,
-          path.join(phaseRunDir, `iteration-${padded(repairAt)}`),
-          plan.repair!.produces,
-          repairOracle.prompt(repairAt, next, blockers),
+        const openBefore = attempt(() => oracle.blockers!.openBlocking(ledger!.absolutePath));
+        escalations++;
+        const result = await step(
+          escalated,
+          path.join(phaseRunDir, `iteration-${padded(escalationAt)}`),
+          escalated.produces,
+          escalated.escalation.prompt(escalationAt, next, blockers),
           cacheDir,
         );
-        const repairRecord: PipelineLoopIterationRecord = {
-          iteration: repairAt,
+        const escalationRecord: PipelineLoopIterationRecord = {
+          iteration: escalationAt,
           next_step: next,
-          skill: plan.repair!.skill,
-          ...repaired,
+          skill: escalated.skill,
+          ...result,
         };
-        iterations.push(repairRecord);
-        if (repaired.status !== "passed") {
+        iterations.push(escalationRecord);
+        if (result.status !== "passed") {
           return stop(
-            repaired.status,
-            repaired.failure_kind,
-            `iteration ${repairAt} (${plan.repair!.skill}): ${repaired.error ?? "no error recorded"}`,
+            result.status,
+            result.failure_kind,
+            `iteration ${escalationAt} (${escalated.skill}): ${result.error ?? "no error recorded"}`,
           );
         }
         const ledgerAfter = promoted.get(oracle.blockers!.artifact)!.absolutePath;
         const after = attempt(() => ({
-          open: repairOracle.open(ledgerAfter),
-          ...repairOracle.settled(ledgerAfter, blockers),
+          openBlocking: oracle.blockers!.openBlocking(ledgerAfter),
+          ...oracle.blockers!.settled(ledgerAfter, blockers),
+          shortfall:
+            escalated.escalation.check?.(promoted.get(oracle.carried)!.absolutePath, next) ?? null,
         }));
         if (openBefore instanceof Error || after instanceof Error) {
           const failure = openBefore instanceof Error ? openBefore : (after as Error);
           return stop(
             "error",
             undefined,
-            `loop oracle could not read ${oracle.blockers!.artifact} around the repair at iteration ${repairAt}: ${failure.message}`,
+            `loop oracle could not read ${oracle.blockers!.artifact} around the ${noun} at iteration ${escalationAt}: ${failure.message}`,
           );
         }
-        const { resolved, missing } = after;
-        repairRecord.open_blocking = { before: openBefore, after: after.open };
-        // Progress is judged on the blockers the repair was given, not the ledger as a whole.
-        const repairedAt = `${blocked}, and the repair at iteration ${repairAt}`;
+        const { resolved, missing, shortfall } = after;
+        escalationRecord.open_blocking = { before: openBefore, after: after.openBlocking };
+        // Progress is judged on the entries the worker was given, not the ledger as a whole.
+        const escalatedAt = `${blocked}, and the ${noun} at iteration ${escalationAt}`;
         if (missing.length) {
           return stop(
             "failed",
             "loop_blocked",
-            `${repairedAt} removed ${missing.join(", ")} from the ledger`,
+            `${escalatedAt} removed ${missing.join(", ")} from the ledger`,
           );
         }
         if (!resolved.length) {
-          return stop("failed", "loop_blocked", `${repairedAt} resolved none of them`);
+          return stop("failed", "loop_blocked", `${escalatedAt} resolved none of them`);
         }
+        if (shortfall) return stop("failed", "loop_blocked", `${escalatedAt} left ${shortfall}`);
       }
     }
   };
