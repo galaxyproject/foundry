@@ -5,10 +5,10 @@
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 9,
-    "content_hash": "bad656e8aa3526b17519cdc408a234b4167b3f5588bdc689b46274d59fb3a949",
-    "commit": "358ac95968170dbaf07403ed3619d869f5567b1a"
+    "content_hash": "4ef20523509c868242430c8f71b5d4ea0e72b1ce67060d7fd7f0a3761986b996",
+    "commit": "5d6d612394eddc39ed37826ef4ac009ac7edc89f"
   },
-  "cast_at": "2026-10-21T22:22:45.576Z",
+  "cast_at": "2026-10-22T01:48:52.888Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Cache the resolved wrapper for summarization and validation, using its confirmed tool version. For a stock tool, add confirms the version: the shed serves it, or Galaxy's declared equivalent, which then becomes the pin.",
       "trigger": "After resolving the wrapper and version, if the shared cache lacks that pin.",
       "verification": "Confirm add caches the resolved pin and draft-validate --concrete --strict-state --json validates its state using the same --cache-dir.",
-      "src_hash": "ee1189499108bebaf58dae63064c6e782e7bcd813afd4c3dbd924b4008e50558",
-      "dst_hash": "7c70e4746d4650e87b34bebe57d5900c2ad2baff82ed88b6dc50eca56d606688",
+      "src_hash": "8cc3c297d7b12dd91647904b256d8d718002b633c89bd1595ca8943fc178a85a",
+      "dst_hash": "3f547c3ef7b114401374b1406e19b1095ec66d9cdca53a75102d2310796af5e6",
       "source": "deterministic"
     },
     {

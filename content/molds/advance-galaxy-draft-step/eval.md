@@ -115,7 +115,9 @@ Properties are tagged by bucket:
   the version of the cache entry its summary was built from. Fails if the skill
   blocks the step because only a Tool Shed search came up empty, if it uses a
   version none of those sources names, or if the step's version differs from
-  the cached one.
+  the cached one. When no source names a version, the call instead leaves the
+  draft unchanged and appends a non-blocking `gap` entry naming the step and
+  the sources checked; a blocking entry for a missing version fails.
 
 ## Property: a step nothing can implement ends the call blocked
 
@@ -125,7 +127,9 @@ Properties are tagged by bucket:
   chosen step's declared output from its wired inputs, the call either changes
   the draft through [[repair-galaxy-draft-topology]] or leaves a blocking ledger
   entry naming the step, open or surrendered. Mechanically: a call that leaves
-  the draft byte-identical must have appended or updated such an entry. Returning with the draft
+  the draft byte-identical must have appended or updated such an entry, or,
+  for a built-in tool no source gives a version for, a non-blocking `gap`
+  entry naming the step. Returning with the draft
   and ledger both unchanged fails, as does writing `galaxy-workflow.gxwf.yml`
   before the terminal call.
 

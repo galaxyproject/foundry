@@ -73,7 +73,7 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
      - the run's cache, via `galaxy-tool-cache list`;
      - for a collection operation, the version galaxy-collection-tools lists.
 
-     Never hand-guess a version none of these names; a built-in that isn't a collection operation still needs a plan pin or a cached version. add `<id> --tool-version <v>` then confirms it. The shed may serve Galaxy's declared equivalent instead (see add); re-run `add` with the version it reported and pin that. summarize-galaxy-tool then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
+     Never hand-guess a version none of these names; a built-in that isn't a collection operation still needs a plan pin or a cached version. When none names one, append a non-blocking `gap` entry for the step naming the sources you checked, leave the draft unchanged, and return. A missing version is not a computability gap, so it never goes to repair-galaxy-draft-topology. add `<id> --tool-version <v>` then confirms it. The shed may serve Galaxy's declared equivalent instead (see add); re-run `add` with the version it reported and pin that. summarize-galaxy-tool then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
 
      When the step's `tool_id` is `TODO`, check the built-in collection operations in galaxy-collection-tools against its plan first, because discover-shed-tool's Tool Shed search doesn't index built-ins and can't find one. Only when no built-in meets the plan, treat it as a deferred Tool Shed step.
    - **Tool Shed wrapper** — branch on whether the template already pinned wrapper identity (see the tiers in galaxy-workflow-draft-format):
@@ -90,13 +90,14 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
 
 ### How a call ends
 
-A call before the terminal one ends in one of three ways:
+A call before the terminal one ends in one of four ways:
 
 - the picked step is concrete and validates;
 - repair-galaxy-draft-topology changed the draft around it;
-- the step is blocked: a blocking ledger entry this call appended or updated names it, left open when no repair closed it, and surrendered once the escalation cap is reached.
+- the step is blocked: a blocking ledger entry this call appended or updated names it, left open when no repair closed it, and surrendered once the escalation cap is reached;
+- the step's built-in tool has no version any source names: a non-blocking `gap` entry this call appended names the step and the sources checked.
 
-Never return with the draft unchanged and no such entry: that reports no work as success. Only the terminal call runs draft-extract; an earlier extract is a partial workflow.
+Never return with the draft unchanged and neither entry: that reports no work as success. Only the terminal call runs draft-extract; an earlier extract is a partial workflow.
 
 ### Failure routing
 

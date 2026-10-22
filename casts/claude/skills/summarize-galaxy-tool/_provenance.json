@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-tool/index.md",
     "revision": 9,
     "content_hash": "75470ebcbc5e3336fb61f72920064a7c019fec6d2e871896aed36cc6456a434c",
-    "commit": "358ac95968170dbaf07403ed3619d869f5567b1a"
+    "commit": "5d6d612394eddc39ed37826ef4ac009ac7edc89f"
   },
-  "cast_at": "2026-10-21T22:22:51.786Z",
+  "cast_at": "2026-10-22T01:49:00.409Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Cache-population precondition: `summarize` reads an already-cached pin and fails if missing, so `add` fetches the pin into the cache first. Stock/built-in bare ids resolve against the shed but need an explicit `--tool-version`.",
       "trigger": "When the requested pin is not yet present in the configured cache directory.",
       "verification": "Cast the skill, `add` a fresh pin then `summarize` it, confirm the cache miss is resolved before the manifest is emitted.",
-      "src_hash": "ee1189499108bebaf58dae63064c6e782e7bcd813afd4c3dbd924b4008e50558",
-      "dst_hash": "7c70e4746d4650e87b34bebe57d5900c2ad2baff82ed88b6dc50eca56d606688",
+      "src_hash": "8cc3c297d7b12dd91647904b256d8d718002b633c89bd1595ca8943fc178a85a",
+      "dst_hash": "3f547c3ef7b114401374b1406e19b1095ec66d9cdca53a75102d2310796af5e6",
       "source": "deterministic"
     },
     {
