@@ -85,9 +85,11 @@ Properties are tagged by bucket:
   `paired` level gives `forward`/`reverse`, and each `paired_or_unpaired` level
   gives either those or `unpaired`, covering both variants. Running the step's
   `rules` over those paths with Galaxy's `galaxy.util.rules_dsl` raises no
-  error, and the mapped identifiers are unique. Fails if a regex expects
-  sample-sheet column or source field names (`1`/`2`, `fastq_1`) at a paired
-  level, or if one variant of a `paired_or_unpaired` input fails.
+  error, and the mapped identifiers are unique. For a sample-sheet input, the
+  paths include two rows that share every column value, as one sample with two
+  runs does. Fails if a regex expects sample-sheet column or source field names
+  (`1`/`2`, `fastq_1`) at a paired level, if one variant of a
+  `paired_or_unpaired` input fails, or if those two rows map to one identifier.
 
 ## Property: the implemented loop round-trips to the oracle
 

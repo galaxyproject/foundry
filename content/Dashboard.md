@@ -24,7 +24,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-10-21 | 10 |
+| [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-10-22 | 11 |
 | [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | reviewed | 2026-10-21 | 9 |
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
@@ -212,7 +212,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[galaxy-apply-rules-dsl]] | How Apply Rules derives columns from collection metadata, filters rows, and maps them into new collection structure. | draft | 2026-10-21 | 4 |
+| [[galaxy-apply-rules-dsl]] | How Apply Rules derives columns from collection metadata, filters rows, and maps them into new collection structure. | draft | 2026-10-22 | 5 |
 | [[open-requirements-ledger]] | Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state. | draft | 2026-10-19 | 5 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-10-19 | 6 |
 | [[foundry-run-manifest]] | Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard. | draft | 2026-10-14 | 2 |

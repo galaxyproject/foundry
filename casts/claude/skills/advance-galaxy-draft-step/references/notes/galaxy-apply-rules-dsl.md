@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-10-21
-revision: 4
+revised: 2026-10-22
+revision: 5
 related_notes:
   - "[[galaxy-collection-tools]]"
   - "[[galaxy-collection-semantics]]"
@@ -159,7 +159,7 @@ Test identifiers, collection type, and dataset membership together. A correct el
 
 Watch for these failures:
 
-- **Duplicate output paths:** two rows mapping to the same full identifier path cause the later dataset to replace the earlier one in the builder. Make the final path unique for every intended dataset.
+- **Duplicate output paths:** two rows mapping to the same full identifier path cause the later dataset to replace the earlier one in the builder. Make the final path unique for every intended dataset. A sample-sheet column (`add_column_from_sample_sheet_index`) can repeat across rows, as when one sample has several runs, so a path built from it alone can collide. Build the path from the row's own identifier (`identifier0`), which is unique, or add it where the column repeats.
 - **Unexpected filtering:** inspect retained identifiers, especially around `invert` and count filters. Filtering is selection, not validation that every input conforms.
 - **All rows removed:** check that filters retain the expected datasets, including cases with no matches. If no row survives, there is no dataset left to map. `allow_unmatched` only affects regex extraction and cannot prevent a filter from removing rows.
 - **Regex escaping:** `.` matches any character. To match a literal filename extension, write a single-quoted YAML expression such as '\.fastq$'. To match literal parentheses, use '\(sample\)'. Avoid double-quoted YAML unless you also account for its backslash escaping.

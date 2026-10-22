@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 9,
     "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
-    "commit": "d25aaa75baf0dd31b1dfa91cd07392024dc248b3"
+    "commit": "3c8adb329a662d5ffb1e01f421ca27fb3c57aef0"
   },
-  "cast_at": "2026-10-22T03:21:04.491Z",
+  "cast_at": "2026-10-22T15:15:13.671Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Implement identifier-derived collection reshaping via Apply Rules.",
       "trigger": "When collection element identifiers need regex parsing, nesting-level swaps, regrouping, or paired identifier assignment.",
-      "src_hash": "446b7ef1cc29f8816ff05b0a59f0b30b33e5cffaf274a8a993ae231fc842056f",
-      "dst_hash": "446b7ef1cc29f8816ff05b0a59f0b30b33e5cffaf274a8a993ae231fc842056f",
+      "src_hash": "64a9cd81c92cc8e70ddc9aea8bf5b28494e8ef975b137213df8bc12410c71875",
+      "dst_hash": "64a9cd81c92cc8e70ddc9aea8bf5b28494e8ef975b137213df8bc12410c71875",
       "source": "deterministic"
     },
     {
