@@ -261,11 +261,10 @@ interface LoopOracle {
   /** The worker a blocked call is escalated to, and how the controller judges what it did. */
   repair?: {
     skill: string;
-    /**
-     * Open blocking entries in the blockers artifact, or only those of `among`; each repair must
-     * lower the count.
-     */
+    /** Open blocking entries in the blockers artifact, or only those of `among`. */
     open(file: string, among?: string[]): number;
+    /** Which of `named` the artifact marks resolved, and which it no longer has. */
+    settled(file: string, named: string[]): { resolved: string[]; missing: string[] };
     /** The escalation cap the blockers artifact itself sets, if it sets one. */
     cap(file: string): number | null;
     prompt(iteration: number, next: string[], blockers: string[]): string;
@@ -341,6 +340,13 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
         return ledger.entries.filter(
           (entry) => entry.blocking === true && entry.status === "open" && among.includes(entry.id),
         ).length;
+      },
+      settled(file, named) {
+        const entries = new Map(ledgerEntries(file).map((entry) => [entry.id, entry]));
+        return {
+          resolved: named.filter((id) => entries.get(id)?.status === "resolved"),
+          missing: named.filter((id) => !entries.has(id)),
+        };
       },
       cap(file) {
         const cap = readLedger(file).topology_repair?.cap;
@@ -1225,15 +1231,6 @@ export async function runLinearPipeline(
     if (!carriedAtEntry) {
       return stop("error", undefined, `no earlier phase promoted ${oracle.carried}`);
     }
-    const cap =
-      options.maxIterations ?? attempt(() => oracle.defaultCap(carriedAtEntry.absolutePath));
-    if (cap instanceof Error) {
-      return stop(
-        "error",
-        undefined,
-        `loop oracle could not read ${oracle.carried}: ${cap.message}`,
-      );
-    }
     const repairOracle = plan.repair && oracle.repair;
     // The cap is read once, from the ledger the loop is handed, so no call can raise its own.
     const ledgerAtEntry = oracle.blockers && promoted.get(oracle.blockers.artifact);
@@ -1244,6 +1241,18 @@ export async function runLinearPipeline(
     const repairCap =
       options.maxRepairs ??
       (ledgerCap instanceof Error || ledgerCap === null ? DEFAULT_REPAIR_CAP : ledgerCap);
+    const defaultCap = attempt(() => oracle.defaultCap(carriedAtEntry.absolutePath));
+    // Each repair is followed by another call at the step it repaired.
+    const cap =
+      options.maxIterations ??
+      (defaultCap instanceof Error ? defaultCap : defaultCap + (repairOracle ? repairCap : 0));
+    if (cap instanceof Error) {
+      return stop(
+        "error",
+        undefined,
+        `loop oracle could not read ${oracle.carried}: ${cap.message}`,
+      );
+    }
     let repairs = 0;
     // `n` counts the oracle's calls, which `cap` bounds; repairs have their own cap.
     for (let n = 1; ; n++) {
@@ -1309,7 +1318,7 @@ export async function runLinearPipeline(
           return stop("failed", "loop_no_progress", `${stalled} is still drafty`);
         const blocked = `${stalled} is blocked by ${oracle.blockers!.artifact} entries ${blockers.join(", ")}`;
         if (!repairOracle) return stop("failed", "loop_blocked", blocked);
-        // A surrendered blocker was given up on; a repair could not lower the open count.
+        // A surrendered blocker was given up on; a repair could not resolve it.
         const repairable = attempt(() => repairOracle.open(ledger!.absolutePath, blockers));
         if (repairable instanceof Error || repairable === 0) {
           return stop("failed", "loop_blocked", blocked);
@@ -1360,24 +1369,32 @@ export async function runLinearPipeline(
             `iteration ${repairAt} (${plan.repair!.skill}): ${repaired.error ?? "no error recorded"}`,
           );
         }
-        const openAfter = attempt(() =>
-          repairOracle.open(promoted.get(oracle.blockers!.artifact)!.absolutePath),
-        );
-        if (openBefore instanceof Error || openAfter instanceof Error) {
-          const failure = openBefore instanceof Error ? openBefore : (openAfter as Error);
+        const ledgerAfter = promoted.get(oracle.blockers!.artifact)!.absolutePath;
+        const after = attempt(() => ({
+          open: repairOracle.open(ledgerAfter),
+          ...repairOracle.settled(ledgerAfter, blockers),
+        }));
+        if (openBefore instanceof Error || after instanceof Error) {
+          const failure = openBefore instanceof Error ? openBefore : (after as Error);
           return stop(
             "error",
             undefined,
             `loop oracle could not read ${oracle.blockers!.artifact} around the repair at iteration ${repairAt}: ${failure.message}`,
           );
         }
-        repairRecord.open_blocking = { before: openBefore, after: openAfter };
-        if (openAfter >= openBefore) {
+        const { resolved, missing } = after;
+        repairRecord.open_blocking = { before: openBefore, after: after.open };
+        // Progress is judged on the blockers the repair was given, not the ledger as a whole.
+        const repairedAt = `${blocked}, and the repair at iteration ${repairAt}`;
+        if (missing.length) {
           return stop(
             "failed",
             "loop_blocked",
-            `${blocked}, and the repair at iteration ${repairAt} left ${openAfter} open blocking entr${openAfter === 1 ? "y" : "ies"}, no fewer than before`,
+            `${repairedAt} removed ${missing.join(", ")} from the ledger`,
           );
+        }
+        if (!resolved.length) {
+          return stop("failed", "loop_blocked", `${repairedAt} resolved none of them`);
         }
       }
     }

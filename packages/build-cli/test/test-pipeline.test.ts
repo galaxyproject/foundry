@@ -2071,7 +2071,7 @@ test("does not repair after the draft loop's last allowed call", async () => {
   expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(0);
 });
 
-test("stops the draft loop when a repair does not lower the open blocking count", async () => {
+test("stops the draft loop when a repair resolves none of the blockers it was given", async () => {
   const root = withRepairCast(draftFixtureRepo());
   const record = await runLinearPipeline(draftRunOptions(root, "repair-stuck"), {
     runSkill: repairingWorker([], (draft) => {
@@ -2085,9 +2085,83 @@ test("stops the draft loop when a repair does not lower the open blocking count"
       failure_kind: "loop_blocked",
       error:
         "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
-        "entries a-uncomputable-0, and the repair at iteration 2 left 1 open blocking entry, no fewer than before",
+        "entries a-uncomputable-0, and the repair at iteration 2 resolved none of them",
     }),
   );
+  expect(record.trials[0]!.phases[1]!.iterations?.[1]?.open_blocking).toEqual({
+    before: 1,
+    after: 1,
+  });
+});
+
+test("does not count a repair that resolves only another step's blocker as progress", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  let repairs = 0;
+  const advance = draftWorker([], (_draft, step) =>
+    step === "a" && repairs === 0
+      ? [
+          ledgerEntry("a-uncomputable", "a", "open", true),
+          ledgerEntry("b-uncomputable", "b", "open", true),
+        ]
+      : [],
+  );
+  const repair = repairingWorker([], (draft, ledger) => {
+    draft.steps.a!.in = { input: "reads", repaired: "elsewhere" };
+    for (const entry of ledger.entries)
+      if (entry.id === "b-uncomputable") entry.status = "resolved";
+  });
+  const record = await runLinearPipeline(draftRunOptions(root, "repair-elsewhere"), {
+    runSkill: async (options) => {
+      if (path.basename(options.skillDir) !== REPAIR) return advance(options);
+      repairs++;
+      return repair(options);
+    },
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-uncomputable, and the repair at iteration 2 resolved none of them",
+    }),
+  );
+});
+
+test("stops the draft loop when a repair removes a blocker instead of resolving it", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const record = await runLinearPipeline(draftRunOptions(root, "repair-removed"), {
+    runSkill: repairingWorker([], (draft, ledger) => {
+      draft.steps.a!.in = { input: "reads", repaired: "by-deletion" };
+      ledger.entries = ledger.entries.filter((entry) => entry.id !== "a-uncomputable-0");
+    }),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-uncomputable-0, and the repair at iteration 2 removed a-uncomputable-0 from the ledger",
+    }),
+  );
+});
+
+test("leaves the default iteration cap room for every repair", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "repair-default-cap"), maxRepairs: 5 },
+    { runSkill: repairingWorker(calls, rewire, true) },
+  );
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error: expect.stringMatching(/the loop has reached its cap of 5 repairs$/),
+    }),
+  );
+  expect(calls.filter((call) => path.basename(call.skillDir) === REPAIR)).toHaveLength(5);
 });
 
 test("stops the draft loop once its repairs reach the cap", async () => {
