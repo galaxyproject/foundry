@@ -15,4 +15,4 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 ## Property: rename values use post-job action syntax
 
 - check: llm-judged
-- assertion: every `rename:` on a step output uses `#{input}` for an input's dataset name and `${label}` only for a declared workflow parameter input; a tool-XML label variable such as `${on_string}` or `${tool.name}` in a rename is a failure, because Galaxy leaves it literal in the dataset name.
+- assertion: every `rename:` on a step output uses `#{input}` for an input's dataset name and `${label}` only for a declared workflow parameter input; a tool-XML label variable such as `${on_string}` or `${tool.name}` in a rename is a failure, because Galaxy treats it as an untyped run-time parameter, not the input's name.

@@ -18,6 +18,7 @@ related_notes:
 sources:
   - "https://github.com/jmchilton/galaxy-tool-util-ts/blob/7ae4ecd0ba8d492225f58a6d455c4cc5317298f0/packages/schema/src/galaxy-workflow.ts"
   - "https://github.com/galaxyproject/galaxy/blob/v26.1.1/lib/galaxy/job_execution/actions/post.py"
+  - "https://github.com/galaxyproject/galaxy/blob/v26.1.1/lib/galaxy/workflow/modules.py"
 companions:
   - "gxformat2.schema.json"
 summary: "Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation."
@@ -54,7 +55,7 @@ The schema makes `outputSource` optional, even though a usable produced output n
 
 Step `out:` entries serve a different purpose. They can be output names or records with `id` and actions such as `rename`, `change_datatype`, `add_tags`, `remove_tags`, `hide`, `delete_intermediate_datasets`, and `set_columns`. These actions affect produced datasets or history presentation. They do not supply a top-level output's public name.
 
-A `rename` value is not a tool-XML label template. Galaxy's [`RenameDatasetAction`](https://github.com/galaxyproject/galaxy/blob/v26.1.1/lib/galaxy/job_execution/actions/post.py#L152-L256) fills in two forms. `#{input}` becomes the name of the dataset bound to that tool input. Use the tool's input name, with `.` for a nested one (e.g. `queries_0.input2`), and optional `| basename`, `| upper` or `| lower`. `${label}` becomes the value of the workflow parameter input with that label. Write `#{gtf_to_extend} BREW3R extended` to name an output after its input. Any other `${...}` stays literal in the dataset name, including the tool-XML variables `${on_string}` and `${tool.name}`, which work only in a wrapper's `<data label=...>`. A `${...}` that names no parameter input is what the workflow linters report as an "untyped parameter".
+A `rename` value is not a tool-XML label template. Galaxy's [`RenameDatasetAction`](https://github.com/galaxyproject/galaxy/blob/v26.1.1/lib/galaxy/job_execution/actions/post.py#L152-L256) fills in two forms. `#{input}` becomes the name of the dataset bound to that tool input. Use the tool's input name, with `.` for a nested one (e.g. `queries_0.input2`), and optional `| basename`, `| upper` or `| lower`. `${label}` becomes the value of the workflow parameter input with that label. Write `#{gtf_to_extend} BREW3R extended` to name an output after its input. A `${name}` with no matching parameter input is an informal, untyped parameter ([`get_informal_replacement_parameters`](https://github.com/galaxyproject/galaxy/blob/v26.1.1/lib/galaxy/workflow/modules.py#L3094-L3103)). The run form asks for a free-text value, and an API or Planemo run that supplies no `replacement_params` leaves `${name}` literal in the dataset name. The tool-XML variables `${on_string}` and `${tool.name}` work only in a wrapper's `<data label=...>`; in a rename they fall into this case. This is what the workflow linters report as an "untyped parameter"; declare a parameter input instead.
 
 ## Step fields and state
 
