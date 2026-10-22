@@ -24,6 +24,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | reviewed | 2026-10-22 | 10 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-10-21 | 11 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | reviewed | 2026-10-21 | 8 |
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
@@ -62,7 +63,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[interview-to-galaxy-workflow-changeset]] | Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. | reviewed | 2026-08-19 | 3 |
 | [[nextflow-summary-to-galaxy-interface]] | Map a Nextflow summary into a Galaxy workflow interface design brief. | reviewed | 2026-08-19 | 6 |
 | [[nextflow-summary-to-galaxy-reference-data]] | Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline. | reviewed | 2026-08-19 | 5 |
-| [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | reviewed | 2026-08-19 | 9 |
 | [[debug-cwl-workflow-output]] | Triage failing CWL run outputs; classify failure modes; propose fixes. | draft | 2026-07-24 | 3 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. | reviewed | 2026-07-24 | 5 |
 | [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | reviewed | 2026-07-24 | 5 |

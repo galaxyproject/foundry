@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-08-19
-revision: 9
+revised: 2026-10-22
+revision: 10
 summary: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs."
 input_artifacts:
   - id: summary-nextflow
@@ -101,6 +101,14 @@ references:
     purpose: "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton."
     trigger: "When creating workflow inputs, outputs, and placeholder connections involving collections."
   - kind: research
+    ref: "[[galaxy-paired-or-unpaired-collections]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Name a paired or mixed collection input's members as Galaxy does: `forward`/`reverse`, and `unpaired` for a single read."
+    trigger: "When emitting a workflow input whose `collection_type` has a `paired` or `paired_or_unpaired` level, including a `sample_sheet:*` input."
+  - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"
     used_at: runtime
     load: upfront
@@ -188,6 +196,8 @@ Read the original Nextflow source artifact, the `summary-nextflow.json` summary,
 The reference-data, interface, and data-flow briefs guide the skeleton, but they do not replace source evidence. Treat the prior-step index as the working context: Nextflow source, source summary, reference-data brief, interface brief, data-flow brief, and any open questions carried forward.
 
 Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. Wrapper resolution, by contrast, is **evidence-gated, not source-gated**: resolve each tool step to the tier its evidence supports — **Resolved** (fully concrete, no `_plan_*`), **Identity-pinned** (concrete `tool_id`, parameters and changeset left to the per-step Mold), or **Deferred** (`tool_id: TODO`) — as defined in [[galaxy-workflow-draft-format]]. Capture whatever you defer in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
+
+A collection input's members are named by its `collection_type`, not by the source: a `paired` level holds `forward` and `reverse`, and `paired_or_unpaired` adds `unpaired` for a single read ([[galaxy-paired-or-unpaired-collections]]). An nf-core sample sheet's path columns, such as `fastq_1`/`fastq_2`, become those members, and their source names don't survive. Give a `sample_sheet*` input `column_definitions` for its other columns only. Never give it `fields`: Galaxy reads `fields` only on a `record` collection, and later steps take the names as member names. Its `doc` names the members as Galaxy does.
 
 Source tendency: nf-core modules name their tool, pin a version, and carry the `command:` block, conda packages, and container tags — so steps reach **Resolved** when a pattern page or IWC exemplar covers the operation (fill `tool_id`, parameters, and port names from the worked example), and **Identity-pinned** when the module names the tool but its settings for this context stay open. **Deferred** is for domain-specific scientific tools with no covering pattern (alignment, variant calling, expression quantification, etc.) — pack `_plan_context` with the source command, conda specs, container tags, and pre/post conditions the per-step Mold needs to pick a wrapper. Emitting `TODO` over a pattern-covered recipe discards real evidence the per-step Mold cannot recover.
 

@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
-    "revision": 9,
-    "content_hash": "10008cbd7536688ce772c1e70a26598be7b865d97efd9f9c0c2dff2a49492f96",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 10,
+    "content_hash": "a11783894ffc4d71505232913378f677714609831145b07bdf7db6eaa3de6c56",
+    "commit": "c2406d44954aebf094e8590e2edd7fc8bd5d0f6a"
   },
-  "cast_at": "2026-10-19T19:01:27.606Z",
+  "cast_at": "2026-10-22T16:40:11.618Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -156,6 +156,21 @@
       "verification": "Promote after two worked Nextflow-to-Galaxy templates preserve the data-flow/template split without schema changes.",
       "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
       "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-paired-or-unpaired-collections]]",
+      "src": "content/research/galaxy-paired-or-unpaired-collections/index.md",
+      "dst": "references/notes/galaxy-paired-or-unpaired-collections.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Name a paired or mixed collection input's members as Galaxy does: `forward`/`reverse`, and `unpaired` for a single read.",
+      "trigger": "When emitting a workflow input whose `collection_type` has a `paired` or `paired_or_unpaired` level, including a `sample_sheet:*` input.",
+      "src_hash": "f4f25820425ec5fbe4efa50b3e350981e055e959fc362510ae60837773f3d83a",
+      "dst_hash": "f4f25820425ec5fbe4efa50b3e350981e055e959fc362510ae60837773f3d83a",
       "source": "deterministic"
     },
     {

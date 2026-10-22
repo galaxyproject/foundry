@@ -48,3 +48,13 @@ the oracle here is applied to whatever a scenario produces.
 - assertion: high-confidence structural IWC findings may alter the skeleton;
   low-confidence findings are carried as TODO/review notes. The emitted workflow
   should make applied IWC guidance traceable.
+
+## Property: a paired collection input is named as Galaxy names it
+
+- bucket: schema
+- check: deterministic + llm-judged
+- assertion: no workflow input carries `fields` unless its `collection_type` is
+  a `record`. A `sample_sheet*` input's `column_definitions` list only its
+  non-path columns. Its `doc` and any `_plan_*` field naming its members use
+  `forward`, `reverse` and `unpaired`, not source column names such as
+  `fastq_1`. Fails on `fields` on a `sample_sheet:paired_or_unpaired` input.
