@@ -1,0 +1,162 @@
+class: GalaxyWorkflow
+name: "Relabel the inner level of a list:list by swapping it to the top"
+inputs:
+  - id: sample_by_segment
+    type: collection
+    collection_type: "list:list"
+outputs:
+  - id: mapping
+    outputSource: build_mapping/outfile
+  - id: segment_by_sample
+    outputSource: relabel_segments/output
+  - id: relabeled
+    outputSource: swap_back/output
+  - id: relabeled_one_step
+    outputSource: relabel_in_place/output
+steps:
+  - id: swap_to_segment
+    label: swap_to_segment
+    tool_id: __APPLY_RULES__
+    in:
+      - id: input
+        source: sample_by_segment
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      rules:
+        rules:
+          - type: add_column_metadata
+            value: identifier0
+          - type: add_column_metadata
+            value: identifier1
+        mapping:
+          - type: list_identifiers
+            columns: [1, 0]
+  # maps over the outer level: one file of sample identifiers per segment
+  - id: identifiers_per_segment
+    label: identifiers_per_segment
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_element_identifiers/collection_element_identifiers/0.0.3
+    tool_version: 0.0.3
+    tool_shed_repository:
+      changeset_revision: 3e27acfa4830
+      name: collection_element_identifiers
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_collection
+        source: swap_to_segment/output
+    out:
+      - id: output
+    tool_state:
+      input_collection:
+        __class__: ConnectedValue
+  - id: segment_identifiers
+    label: segment_identifiers
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_element_identifiers/collection_element_identifiers/0.0.3
+    tool_version: 0.0.3
+    tool_shed_repository:
+      changeset_revision: 3e27acfa4830
+      name: collection_element_identifiers
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_collection
+        source: identifiers_per_segment/output
+    out:
+      - id: output
+        change_datatype: tabular
+    tool_state:
+      input_collection:
+        __class__: ConnectedValue
+  - id: build_mapping
+    label: build_mapping
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_find_and_replace/9.5+galaxy3
+    tool_version: 9.5+galaxy3
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: segment_identifiers/output
+    out:
+      - id: outfile
+    tool_state:
+      infile:
+        __class__: ConnectedValue
+      find_and_replace:
+        - find_pattern: '^(mapped: (.+))$'
+          replace_pattern: '$1\t$2'
+          is_regex: true
+          global: false
+          caseinsensitive: false
+          wholewords: false
+          skip_first_line: false
+          searchwhere:
+            searchwhere_select: line
+  - id: relabel_segments
+    label: relabel_segments
+    tool_id: __RELABEL_FROM_FILE__
+    in:
+      - id: input
+        source: swap_to_segment/output
+      - id: how|labels
+        source: build_mapping/outfile
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      how:
+        how_select: tabular
+        labels:
+          __class__: ConnectedValue
+        strict: false
+  - id: swap_back
+    label: swap_back
+    tool_id: __APPLY_RULES__
+    in:
+      - id: input
+        source: relabel_segments/output
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      rules:
+        rules:
+          - type: add_column_metadata
+            value: identifier0
+          - type: add_column_metadata
+            value: identifier1
+        mapping:
+          - type: list_identifiers
+            columns: [1, 0]
+  # one-step alternative: rewrite identifier1 into a new column and map it in its place
+  - id: relabel_in_place
+    label: relabel_in_place
+    tool_id: __APPLY_RULES__
+    in:
+      - id: input
+        source: sample_by_segment
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      rules:
+        rules:
+          - type: add_column_metadata
+            value: identifier0
+          - type: add_column_metadata
+            value: identifier1
+          - type: add_column_regex
+            target_column: 1
+            expression: '^mapped: (.+)$'
+            replacement: '\1'
+        mapping:
+          - type: list_identifiers
+            columns: [0, 2]

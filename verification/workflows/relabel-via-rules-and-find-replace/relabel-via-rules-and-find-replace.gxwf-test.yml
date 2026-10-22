@@ -1,0 +1,94 @@
+- doc: "Swapping the noisy inner level to the top lets a tabular relabel clean it; swapping back restores sample -> segment with every leaf in place"
+  job:
+    sample_by_segment:
+      class: Collection
+      collection_type: "list:list"
+      elements:
+        - identifier: sampleA
+          class: Collection
+          elements:
+            - identifier: "mapped: HA"
+              class: File
+              path: test-data/a-ha.txt
+              filetype: txt
+            - identifier: "mapped: NA"
+              class: File
+              path: test-data/a-na.txt
+              filetype: txt
+        - identifier: sampleB
+          class: Collection
+          elements:
+            - identifier: "mapped: HA"
+              class: File
+              path: test-data/b-ha.txt
+              filetype: txt
+            - identifier: "mapped: NA"
+              class: File
+              path: test-data/b-na.txt
+              filetype: txt
+  outputs:
+    mapping:
+      file: test-data/expected_mapping.tabular
+    segment_by_sample:
+      class: Collection
+      collection_type: "list:list"
+      element_count: 2
+      element_tests:
+        HA:
+          class: Collection
+          count: 2
+          element_tests:
+            sampleA:
+              file: test-data/a-ha.txt
+            sampleB:
+              file: test-data/b-ha.txt
+        NA:
+          class: Collection
+          count: 2
+          element_tests:
+            sampleA:
+              file: test-data/a-na.txt
+            sampleB:
+              file: test-data/b-na.txt
+    relabeled:
+      class: Collection
+      collection_type: "list:list"
+      element_count: 2
+      element_tests:
+        sampleA:
+          class: Collection
+          count: 2
+          element_tests:
+            HA:
+              file: test-data/a-ha.txt
+            NA:
+              file: test-data/a-na.txt
+        sampleB:
+          class: Collection
+          count: 2
+          element_tests:
+            HA:
+              file: test-data/b-ha.txt
+            NA:
+              file: test-data/b-na.txt
+    relabeled_one_step:
+      class: Collection
+      collection_type: "list:list"
+      element_count: 2
+      element_tests:
+        sampleA:
+          class: Collection
+          count: 2
+          element_tests:
+            HA:
+              file: test-data/a-ha.txt
+            NA:
+              file: test-data/a-na.txt
+        sampleB:
+          class: Collection
+          count: 2
+          element_tests:
+            HA:
+              file: test-data/b-ha.txt
+            NA:
+              file: test-data/b-na.txt

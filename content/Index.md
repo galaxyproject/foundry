@@ -86,7 +86,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[collection-flatten-after-fanout]] — Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters.
 - [[harmonize-by-sortlist-from-identifiers]] — Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers.
 - [[regex-relabel-via-tabular]] — Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE.
-- [[relabel-via-rules-and-find-replace]] — Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup.
+- [[relabel-via-rules-and-find-replace]] — Relabel the inner level of a list:list by swapping it to the top with Apply Rules, relabeling from a find/replace-built table, and swapping back.
 - [[collection-split-identifier-via-rules]] — Use Apply Rules regex columns to split one collection identifier into nested list identifiers.
 - [[collection-swap-nesting-with-apply-rules]] — Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns.
 - [[sync-collections-by-identifier]] — Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections.
