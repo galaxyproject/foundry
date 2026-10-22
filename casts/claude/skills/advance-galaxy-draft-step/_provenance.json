@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 7,
-    "content_hash": "ae19f7e5f5ac9434e31302efd88bb5f5db484caf0145951dd27dfe19247f2ea9",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 8,
+    "content_hash": "f6c5de61e4bbbad161fd279790b9d69d439ccebb3f7f6c51d62dcc8510de2fa8",
+    "commit": "06bd4a0a4e747687fe58e9d0215e1b6454c3868e"
   },
-  "cast_at": "2026-10-19T19:01:23.142Z",
+  "cast_at": "2026-10-22T16:45:37.731Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -91,6 +91,22 @@
       "source": "deterministic"
     },
     {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[summarize]]",
+      "src": "content/cli/galaxy-tool-cache/summarize.md",
+      "dst": "references/cli/summarize.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Regenerate the [[galaxy-tool-summary]] for a pin reused from a sibling step, from the populated cache, without re-running discovery.",
+      "trigger": "In step 3, when step 2 reused a sibling's `tool_id`/`tool_version` and no summary file for that pin is at hand.",
+      "verification": "Cast the skill, reuse a sibling pin on an IWC-derived draft, confirm summarize --output writes a manifest that validates against galaxy-tool-summary.",
+      "src_hash": "96099b98e52244ac882066511a8ffa87c1fbbd6fb1c7acc98de3cca822f98277",
+      "dst_hash": "b51364ad4d415f6047e3cf3d3052dea1598cd2197595be66697c9777918b2de7",
+      "source": "deterministic"
+    },
+    {
       "kind": "research",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-job-failure-reference]]",
@@ -149,6 +165,24 @@
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
       "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[parsed-tool]]",
+      "src": "package://@galaxy-tool-util/schema#parsedToolSchema",
+      "dst": "references/schemas/parsed-tool.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Field-level shape of the `ParsedTool` payload under the summary's `parsed_tool`, which [[galaxy-tool-summary]] leaves as a placeholder: port names, datatypes, and a conditional's `whens[]` (`discriminator`, `is_default_when`) in declaration order.",
+      "trigger": "When reading a field of `parsed_tool`, including a conditional's case index or default case.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "3966d0c425e561891113f5c71a2d36a42c00a78cb744bb8970c577b46abcff9b",
+      "dst_hash": "3966d0c425e561891113f5c71a2d36a42c00a78cb744bb8970c577b46abcff9b",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }

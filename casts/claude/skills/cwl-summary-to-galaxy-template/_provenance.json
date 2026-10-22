@@ -4,12 +4,28 @@
   "mold": {
     "name": "cwl-summary-to-galaxy-template",
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
-    "revision": 5,
-    "content_hash": "a3dabae5502a3ebe29c6de4f0a07d1359c9c3166b96e7ea2d02cc8c042bb7892",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 6,
+    "content_hash": "b14eef623c16859a525a138e7fd4beddbb5cf8568ab9f4c1cdb9b12fc7803a44",
+    "commit": "c2406d44954aebf094e8590e2edd7fc8bd5d0f6a"
   },
-  "cast_at": "2026-10-19T19:01:24.243Z",
+  "cast_at": "2026-10-22T16:42:51.542Z",
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[draft-next-step]]",
+      "src": "content/cli/gxwf/draft-next-step.md",
+      "dst": "references/cli/draft-next-step.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Confirm the per-step loop can walk the emitted draft: it descends into draft subworkflows and reports the picked step's full path, so nesting steps in a subworkflow does not hide them from the loop.",
+      "trigger": "When deciding whether to group steps into a subworkflow, or after writing the draft to confirm the loop picks a step.",
+      "verification": "Cast the skill, emit a draft with a drafty step inside a subworkflow, confirm draft-next-step returns that step's full path.",
+      "src_hash": "d4fe7945945a57846fe8b168e7bacba04f739de1d86bc613ae6f0e5879ac2f55",
+      "dst_hash": "8638645f5974d8072dc3c63e522b7ab25d562f8d6217ea93b61f0a29f371d6f7",
+      "source": "deterministic"
+    },
     {
       "kind": "cli-command",
       "mode": "sidecar",
