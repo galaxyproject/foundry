@@ -2554,3 +2554,40 @@ test("preflights an author cast that does not carry the draft and the ledger", a
     "phase 2 (advance-galaxy-draft-step) escalates to author-galaxy-tool-wrapper, which does not produce open-requirements-ledger",
   );
 });
+
+test("matches a ledger entry naming its step by id when the draft lists steps by label", async () => {
+  const root = draftFixtureRepo();
+  const record = await runLinearPipeline(draftRunOptions(root, "listed-steps"), {
+    runSkill: async (options) => {
+      const skill = path.basename(options.skillDir);
+      const workspace = path.join(options.runDir, "workspace");
+      mkdirSync(workspace, { recursive: true });
+      const write = (file: string, value: unknown) =>
+        writeFileSync(path.join(workspace, file), dumpYaml(value));
+      if (skill === "template") {
+        write(DRAFT_FILE, {
+          class: "GalaxyWorkflowDraft",
+          inputs: { reads: "data" },
+          outputs: {},
+          steps: [{ id: "a", label: "Step A", ...todoStep("reads") }],
+        });
+      } else {
+        const staged = options.inputPaths!.find((input) => path.basename(input) === DRAFT_FILE)!;
+        write(DRAFT_FILE, loadYaml(readFileSync(staged, "utf8")));
+        write(LEDGER_FILE, { entries: [ledgerEntry("a-uncomputable", "a", "open", true)] });
+      }
+      return workspaceRecord(options, skill);
+    },
+  });
+
+  const loop = record.trials[0]!.phases[1]!;
+  expect(loop.iterations?.[0]?.next_step).toEqual(["Step A"]);
+  expect(loop).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step Step A is blocked by " +
+        "open-requirements-ledger entries a-uncomputable",
+    }),
+  );
+});

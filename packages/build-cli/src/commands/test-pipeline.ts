@@ -254,10 +254,16 @@ interface LoopOracle {
   /**
    * Where a call that could not do its work records why: the entries for the last step of `next`
    * that the call itself wrote or changed, from the artifact as the call left it and as it found it.
+   * `carriedPath` resolves the step, which an entry may name by a different handle than `next`.
    */
   blockers?: {
     artifact: string;
-    read(file: string, earlier: string | null, next: string[]): OpenRequirementsEntry[];
+    read(
+      file: string,
+      earlier: string | null,
+      next: string[],
+      carriedPath: string,
+    ): OpenRequirementsEntry[];
     /** Open blocking entries in the artifact. */
     openBlocking(file: string): number;
     /** Which of `named` the artifact marks open or resolved, and which it no longer has. */
@@ -353,12 +359,18 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
     },
     blockers: {
       artifact: "open-requirements-ledger",
-      read(file, earlier, next) {
+      read(file, earlier, next, carriedPath) {
         const before = new Map(
           earlier ? ledgerEntries(earlier).map((entry) => [entry.id, entry]) : [],
         );
+        // `draft-next-step` names a listed step by its label; an entry may name it by its id.
+        const step = draftStep(readYamlFile(carriedPath), next);
+        const names = new Set([next.at(-1), step?.id, step?.label]);
         return ledgerEntries(file).filter(
-          (entry) => entry.step === next.at(-1) && !isDeepStrictEqual(before.get(entry.id), entry),
+          (entry) =>
+            entry.step !== null &&
+            names.has(entry.step) &&
+            !isDeepStrictEqual(before.get(entry.id), entry),
         );
       },
       openBlocking(file) {
@@ -1371,7 +1383,12 @@ export async function runLinearPipeline(
         const ledger = oracle.blockers && promoted.get(oracle.blockers.artifact);
         const written = ledger
           ? attempt(() =>
-              oracle.blockers!.read(ledger.absolutePath, ledgerBefore?.absolutePath ?? null, next),
+              oracle.blockers!.read(
+                ledger.absolutePath,
+                ledgerBefore?.absolutePath ?? null,
+                next,
+                before.absolutePath,
+              ),
             )
           : [];
         if (written instanceof Error) {
