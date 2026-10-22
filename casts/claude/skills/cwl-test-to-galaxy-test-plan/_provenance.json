@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-test-to-galaxy-test-plan/index.md",
     "revision": 3,
     "content_hash": "b55214a0b2bf18e61a75a6c7aa32cf69992aa703480b754e067707dfc262813e",
-    "commit": "89c7b9ef4c3c3edac038c41ba5f12bb88a2737ec"
+    "commit": "e7e35239bd403eae34443058cfd1e9c975001947"
   },
-  "cast_at": "2026-10-21T23:22:09.229Z",
+  "cast_at": "2026-10-22T03:03:54.692Z",
   "refs": [
     {
       "kind": "research",
@@ -66,8 +66,8 @@
       "evidence": "corpus-observed",
       "purpose": "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs.",
       "trigger": "When turning CWL expected outputs into Galaxy test-plan assertions.",
-      "src_hash": "901764ed3bbfb3930ae24d7274055f0c9ce8faebfbd5bfc537ba33bc735b4ecd",
-      "dst_hash": "901764ed3bbfb3930ae24d7274055f0c9ce8faebfbd5bfc537ba33bc735b4ecd",
+      "src_hash": "64c477c4f54beebfa461e9c58d5443d099f02501c4725eddee1f51c7ae124712",
+      "dst_hash": "64c477c4f54beebfa461e9c58d5443d099f02501c4725eddee1f51c7ae124712",
       "source": "deterministic"
     },
     {
