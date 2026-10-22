@@ -69,7 +69,7 @@ In IWC the two uses are cleaning generated names and relabeling several sibling 
 
 Choose a neighbor when the job is different:
 
-- [[relabel-via-rules-and-find-replace]] when relabeling is part of an Apply Rules reshape of nested collections.
+- [[relabel-via-rules-and-find-replace]] when the identifiers to change are on an inner level of a nested collection.
 - [[sync-collections-by-identifier]] when the new labels are a plain list in collection order, or when a sibling must keep or drop elements to match.
 - [[harmonize-by-sortlist-from-identifiers]] when element order must match.
 - [[relabel-fasta-headers-via-tabular]] when the labels to change are FASTA headers inside each dataset, not collection identifiers.
@@ -180,5 +180,5 @@ The job fails, rather than producing a partial collection, when a new label brea
 
 - [[galaxy-collection-tools]] — `__RELABEL_FROM_FILE__` parameter contract and validation rules.
 - [[iwc-transformations-survey]] — Recipe G and its boundary with Recipe B.
-- [[relabel-via-rules-and-find-replace]] — relabeling inside an Apply Rules reshape.
+- [[relabel-via-rules-and-find-replace]] — relabeling an inner level of a nested collection.
 - [[sync-collections-by-identifier]] — positional `txt` relabeling and membership filtering.
