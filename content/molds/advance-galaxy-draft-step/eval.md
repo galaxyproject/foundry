@@ -131,6 +131,20 @@ Properties are tagged by bucket:
   `source: local` entry under a Tool Shed id, or if a wrapper file is written
   anywhere outside the run's outputs.
 
+## Property: an existing tool that serves the consumers beats authoring
+
+- bucket: routing
+- check: llm-judged
+- assertion: when a built-in or Tool Shed candidate's outputs can feed every
+  consumer of the chosen step, possibly by changing the plan, the call uses it,
+  records each source output or port given up as a `kind: dropped` entry with
+  a cited `because`, and appends no `needs_tool` entry. A `needs_tool` entry's
+  `missing` names, for each candidate, the consumer it can't serve. Fails if a
+  candidate is rejected only for differing from the source in an output or port
+  no consumer needs, for a property the step's own configuration provides
+  (such as unique identifiers), or if a tool is requested for a step whose plan
+  a built-in meets.
+
 ## Property: an inline tool step is bound from its own declaration
 
 - bucket: implementation
