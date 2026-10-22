@@ -78,7 +78,7 @@ Link the upstream issue or pull request in a comment so the next reader can chec
 - is `roadmap/substep` without a `roadmap/main` parent, or
 - is `roadmap/main` or `roadmap/off` with a parent.
 
-The workflow runs whenever an issue is opened, reopened, labeled or unlabeled, and daily, because GitHub sends no event when a parent link changes. Its run summary names each flagged issue and the rule it breaks.
+The workflow runs on the `opened`, `reopened`, `labeled` and `unlabeled` issue events, and daily, because GitHub sends no event when a parent link changes. Its run summary names each flagged issue and the rule it breaks.
 
 ## GitHub defaults
 
