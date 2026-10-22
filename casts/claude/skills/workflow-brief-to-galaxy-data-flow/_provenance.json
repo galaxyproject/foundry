@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
     "revision": 4,
     "content_hash": "ce9672837d2b670a64e838b2dbe634b3b07aec40d172d01fb3a7504b6d7294cd",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "ec1ba0b075fbb6d80c641a555a48c75faa94e095"
   },
-  "cast_at": "2026-10-19T19:01:30.456Z",
+  "cast_at": "2026-10-22T03:39:27.780Z",
   "refs": [
     {
       "kind": "pattern",
@@ -96,8 +96,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it.",
       "trigger": "When the interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or supporting evidence describes per-sample/per-record metadata that must survive map-over steps.",
-      "src_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
-      "dst_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
+      "src_hash": "90265cc5f381e78f6a54efeffced41d7db01a1c482d27ec81b842df8f541bdd0",
+      "dst_hash": "90265cc5f381e78f6a54efeffced41d7db01a1c482d27ec81b842df8f541bdd0",
       "source": "deterministic"
     },
     {

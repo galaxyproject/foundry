@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-06
-revision: 2
+revised: 2026-10-21
+revision: 3
 related_notes:
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-collection-tools]]"
@@ -28,6 +28,9 @@ sources:
   - "lib/galaxy/tools/sample_sheet_to_tabular.xml"
   - "lib/galaxy/webapps/galaxy/api/dataset_collections.py (sample_sheet_workbook endpoints)"
   - "lib/galaxy/model/migrations/alembic/versions_gxy/3af58c192752_implement_sample_sheets.py"
+  - "lib/galaxy/tool_util/client/staging.py (create_collection_func)"
+  - "lib/galaxy_test/workflow/collection_semantics_list_paired_or_unpaired.gxwf-tests.yml"
+  - "lib/galaxy_test/workflow/split_paired_and_unpaired.gxwf-tests.yml"
 summary: "Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist."
 ---
 
@@ -98,6 +101,17 @@ Tools read columns at runtime through `DatasetCollectionWrapper.sample_sheet_row
 - `POST /api/dataset_collections` accepts `column_definitions` and `rows` (a `{element_identifier: [values]}` dict).
 - `POST /api/tools/fetch` carries `column_definitions` at target level and per-element `row` for remote-URI sample-sheet creation.
 - Workbook endpoints (`/api/sample_sheet_workbook[/parse]`, `/api/dataset_collections/{id}/sample_sheet_workbook[/parse]`) generate and parse XLSX/CSV/TSV using openpyxl, with header rows, dropdowns for `restrictions`, type validation, and an instructions sheet.
+
+## In a workflow test job
+
+A test job writes a sample sheet as a `Collection` with a `rows:` map beside `elements`. `rows` has one key per row's element identifier, and each value lists that row's column values in the input's `column_definitions` order. Galaxy's own sample-sheet tests always give `rows`, even with no columns (`el1: []`, `lib/galaxy_test/workflow/collection_semantics_list_paired_or_unpaired.gxwf-tests.yml`).
+
+For an inner `paired_or_unpaired` level, each row is a `Collection`:
+
+- a paired row has `forward` and `reverse` `File` elements;
+- a single-read row has one `File` element named `unpaired` (`lib/galaxy_test/workflow/split_paired_and_unpaired.gxwf-tests.yml`).
+
+Test staging sends `rows` but not `column_definitions` (`lib/galaxy/tool_util/client/staging.py`, `create_collection_func`), so a staged sheet carries no column definitions. Whether a workflow input that declares columns accepts it at invocation is unverified.
 
 ## Workflow integration
 

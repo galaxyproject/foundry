@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-20
-revision: 11
+revised: 2026-10-21
+revision: 12
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[freeform-summary-to-galaxy-test-plan]]"
@@ -79,6 +79,14 @@ references:
     purpose: "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style."
     trigger: "When writing or revising the job/input side of a Galaxy workflow test file."
   - kind: research
+    ref: "[[galaxy-sample-sheet-collections]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Write a sample-sheet job input as Galaxy's own tests do: its `rows`, and the shape of each paired or single-read row."
+    trigger: "In step 2, when a workflow input's `collection_type` starts with `sample_sheet`."
+  - kind: research
     ref: "[[planemo-asserts-idioms]]"
     used_at: runtime
     load: on-demand
@@ -122,7 +130,11 @@ The workflow is the contract: input and output labels in the test file must addr
    - Never emit a `path:` (or `location:`) the test references but no source produces — an un-materialized path passes the static cross-check and fails only at upload, far from here. If a ref is `resolved: false`, surface the gap rather than authoring a path to a file that does not exist.
    - A ref marked `omitted: true` is an optional input the test leaves unset: write no job input for it and stage nothing. It is not a gap to surface.
 
-   Inputs must match the workflow's collection shapes and datatypes.
+   Inputs must match the workflow's collection shapes and datatypes. For a `sample_sheet*` input, write the job as [[galaxy-sample-sheet-collections]] describes:
+   - give `rows:`, one entry per row identifier, with its values in the input's `column_definitions` order;
+   - under `paired_or_unpaired`, write a single-read row as a `Collection` holding one `unpaired` `File`, not as a bare `File`.
+
+   [[validate-tests]] checks neither.
 3. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions. Choose assertion families and tolerances per [[planemo-asserts-idioms]]; check each shortcut against [[iwc-shortcuts-anti-patterns]] so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation.
 4. **Validate static.** Run [[validate-tests]] for the schema gate, then the workflow-label cross-check (`checkTestsAgainstWorkflow`): zero missing input labels, zero missing output labels, no collection/datatype mismatches. Fix before spending a Planemo run.
 5. **Run green.** Drive [[planemo]] `test` with the staged data. "Managed Galaxy" here means **Planemo-managed**: `planemo test` bootstraps its own Galaxy and installs the workflow's tools from the Tool Shed/conda — it does **not** require a pre-provisioned external server, so absence of a running Galaxy is not a reason to skip this gate (cost/runtime of heavy tool or reference-DB installs may be, but that is a deliberate deferral, not an impossibility). On green, hand off the test file plus enough invocation/job/assertion context for [[run-workflow-test]] and [[debug-galaxy-workflow-output]] to use if a later run fails.

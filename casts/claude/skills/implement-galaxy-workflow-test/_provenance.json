@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
-    "revision": 11,
-    "content_hash": "6cb4f93b73dd9638a9f74673d215b54bc6e4c55736108411f08a43400581571d",
-    "commit": "d4a0c56ce1b50069c458a891065ff4ee0232abb1"
+    "revision": 12,
+    "content_hash": "8ed8be31e33d858eb6b3efc2095a47217bad8c82a9e72eb8fe90c6f8df1cd2ec",
+    "commit": "ec1ba0b075fbb6d80c641a555a48c75faa94e095"
   },
-  "cast_at": "2026-10-21T00:33:48.323Z",
+  "cast_at": "2026-10-22T03:39:21.724Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -46,6 +46,21 @@
       "purpose": "Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation.",
       "src_hash": "12e8cac3ffb4ab7f007ced7a8d4f01e6b3785d06a55926496bbacc0a8f3fc5c5",
       "dst_hash": "12e8cac3ffb4ab7f007ced7a8d4f01e6b3785d06a55926496bbacc0a8f3fc5c5",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-sample-sheet-collections]]",
+      "src": "content/research/galaxy-sample-sheet-collections/index.md",
+      "dst": "references/notes/galaxy-sample-sheet-collections.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Write a sample-sheet job input as Galaxy's own tests do: its `rows`, and the shape of each paired or single-read row.",
+      "trigger": "In step 2, when a workflow input's `collection_type` starts with `sample_sheet`.",
+      "src_hash": "90265cc5f381e78f6a54efeffced41d7db01a1c482d27ec81b842df8f541bdd0",
+      "dst_hash": "90265cc5f381e78f6a54efeffced41d7db01a1c482d27ec81b842df8f541bdd0",
       "source": "deterministic"
     },
     {

@@ -20,6 +20,16 @@ mechanically checkable.
   gxformat2 or native Galaxy workflow format) reports zero missing input labels,
   zero missing output labels, and no collection/datatype mismatches.
 
+## Property: a sample-sheet job input is written as Galaxy stages one
+
+- check: deterministic
+- assertion: for each job input bound to a `sample_sheet*` workflow input,
+  `rows` has exactly one key per row identifier in `elements`. Each value has
+  one entry per `column_definitions` column, in order, and no required column
+  is empty. Under `paired_or_unpaired`, every row is a `Collection`, whose
+  elements are `forward` and `reverse`, or a single `unpaired`. Fails on a
+  missing `rows`, a bare `File` row, or any other inner identifier.
+
 ## Property: static CLI validation
 
 - check: deterministic

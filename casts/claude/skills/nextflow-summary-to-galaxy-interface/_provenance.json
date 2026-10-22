@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 6,
     "content_hash": "43966773391578490688098c9333f6eb2eaa94574755f5b6554e7f9b72a605c0",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "ec1ba0b075fbb6d80c641a555a48c75faa94e095"
   },
-  "cast_at": "2026-10-19T19:01:27.218Z",
+  "cast_at": "2026-10-22T03:39:22.827Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -40,8 +40,8 @@
       "evidence": "corpus-observed",
       "purpose": "Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs.",
       "trigger": "When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.",
-      "src_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
-      "dst_hash": "98736fdcd0c4f4698af4e0cd4c539b33e3d0db872de1e10487556b21033030ec",
+      "src_hash": "90265cc5f381e78f6a54efeffced41d7db01a1c482d27ec81b842df8f541bdd0",
+      "dst_hash": "90265cc5f381e78f6a54efeffced41d7db01a1c482d27ec81b842df8f541bdd0",
       "source": "deterministic"
     },
     {

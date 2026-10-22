@@ -24,9 +24,9 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-10-21 | 12 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-10-20 | 3 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-10-20 | 9 |
-| [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-10-20 | 11 |
 | [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-10-20 | 5 |
 | [[paper-to-test-data]] | Resolve the test data a paper names into refs for each workflow input. | draft | 2026-10-20 | 4 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-10-19 | 8 |
@@ -212,6 +212,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-sample-sheet-collections]] | Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist. | draft | 2026-10-21 | 3 |
 | [[open-requirements-ledger]] | Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state. | draft | 2026-10-19 | 5 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-10-19 | 6 |
 | [[foundry-run-manifest]] | Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard. | draft | 2026-10-14 | 2 |
@@ -264,7 +265,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-conditional-to-galaxy-subworkflow-when]] | Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule. | draft | 2026-05-08 | 1 |
 | [[nextflow-params-to-galaxy-inputs]] | Rules for translating Nextflow params, sample sheets, channels, and control flags into gxformat2 inputs. | draft | 2026-05-08 | 4 |
 | [[nextflow-workflow-io-semantics]] | Defines Nextflow workflow inputs and outputs from docs plus observed fixture pipeline structures. | draft | 2026-05-08 | 4 |
-| [[galaxy-sample-sheet-collections]] | Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist. | draft | 2026-05-06 | 2 |
 | [[nextflow-path-glob-to-galaxy-datatype]] | Rules for mapping Nextflow path, glob, sample-sheet, and output filename evidence to Galaxy datatype extensions. | draft | 2026-05-06 | 1 |
 | [[nextflow-to-galaxy-channel-shape-mapping]] | Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes. | draft | 2026-05-06 | 2 |
 | [[nf-schema-samplesheet-galaxy-gaps]] | nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary. | draft | 2026-05-06 | 1 |
