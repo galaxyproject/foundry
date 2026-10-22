@@ -5,10 +5,10 @@
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 10,
-    "content_hash": "491fca62d0185b2ba74a3e517405101ffceb905b5a0eb452872aa826301d55cd",
-    "commit": "c2406d44954aebf094e8590e2edd7fc8bd5d0f6a"
+    "content_hash": "3d8f702f6712105152487cd0400dbc15dcb61b1d21a8cb1633c72dbbbaa655b0",
+    "commit": "35f525ac6afd41a0e964d635e09661cc17317b13"
   },
-  "cast_at": "2026-10-22T16:40:50.297Z",
+  "cast_at": "2026-10-22T20:31:44.056Z",
   "refs": [
     {
       "kind": "cli-command",
