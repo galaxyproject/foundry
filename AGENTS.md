@@ -17,6 +17,7 @@
 - `content/meta/harness-pipelines.md` — pipeline narrative behind `content/pipelines/`.
 - `content/meta/casting.md` — casting design.
 - `content/meta/corpus.md` — IWC grounding; URL-not-mirror principle.
+- `content/meta/issue-labels.md` — GitHub issue labels and triage rules. Load before labelling or picking up an issue.
 
 ## Authoring rules
 
