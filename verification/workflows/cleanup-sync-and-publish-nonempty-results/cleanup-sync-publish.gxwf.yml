@@ -1,0 +1,222 @@
+class: GalaxyWorkflow
+name: "Clean mapped results, sync a sibling, publish only non-empty results"
+inputs:
+  - id: samples
+    type: collection
+    collection_type: list
+  - id: sequences
+    type: collection
+    collection_type: list
+outputs:
+  - id: kept_ids
+    outputSource: kept_identifiers/output
+  - id: synced
+    outputSource: sync_sequences/output_filtered
+  - id: paired
+    outputSource: pair_hits_with_sequences/out_file1
+  - id: report_ids
+    outputSource: report_identifiers/output
+  - id: has_results
+    outputSource: has_results/boolean_param
+  - id: report
+    outputSource: report/output
+  - id: no_results_note
+    outputSource: no_results_note/out_file1
+steps:
+  # mapped search; a sample with no matching rows yields a zero-byte element
+  - id: search_hits
+    label: search_hits
+    tool_id: Grep1
+    tool_version: 1.0.4
+    in:
+      - id: input
+        source: samples
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      pattern: "hit$"
+      invert: ""
+      keep_header: false
+  - id: drop_empty
+    label: drop_empty
+    tool_id: __FILTER_EMPTY_DATASETS__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: search_hits/out_file1
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+  - id: kept_identifiers
+    label: kept_identifiers
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_element_identifiers/collection_element_identifiers/0.0.3
+    tool_version: 0.0.3
+    tool_shed_repository:
+      changeset_revision: 3e27acfa4830
+      name: collection_element_identifiers
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_collection
+        source: drop_empty/output
+    out:
+      - id: output
+    tool_state:
+      input_collection:
+        __class__: ConnectedValue
+  - id: sync_sequences
+    label: sync_sequences
+    tool_id: __FILTER_FROM_FILE__
+    in:
+      - id: input
+        source: sequences
+      - id: how|filter_source
+        source: kept_identifiers/output
+    out:
+      - id: output_filtered
+      - id: output_discarded
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      how:
+        how_filter: remove_if_absent
+        filter_source:
+          __class__: ConnectedValue
+  # linked map-over: Galaxy pairs the two collections element by element
+  - id: pair_hits_with_sequences
+    label: pair_hits_with_sequences
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: drop_empty/output
+      - id: queries_0|input2
+        source: sync_sequences/output_filtered
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      queries:
+        - input2:
+            __class__: ConnectedValue
+  - id: report_identifiers
+    label: report_identifiers
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_element_identifiers/collection_element_identifiers/0.0.3
+    tool_version: 0.0.3
+    tool_shed_repository:
+      changeset_revision: 3e27acfa4830
+      name: collection_element_identifiers
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_collection
+        source: pair_hits_with_sequences/out_file1
+    out:
+      - id: output
+    tool_state:
+      input_collection:
+        __class__: ConnectedValue
+  - id: count_results
+    label: count_results
+    tool_id: wc_gnu
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: report_identifiers/output
+    out:
+      - id: out_file1
+    tool_state:
+      include_header: false
+      input1:
+        __class__: ConnectedValue
+      options:
+        - lines
+  - id: count_to_boolean_table
+    label: count_to_boolean_table
+    tool_id: toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1
+    tool_version: "2.1"
+    tool_shed_repository:
+      changeset_revision: aff5135563c6
+      name: column_maker
+      owner: devteam
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input
+        source: count_results/out_file1
+    out:
+      - id: out_file1
+    tool_state:
+      avoid_scientific_notation: false
+      error_handling:
+        auto_col_types: true
+        fail_on_non_existent_columns: true
+        non_computable:
+          action: --fail-on-non-computable
+      input:
+        __class__: ConnectedValue
+      ops:
+        header_lines_select: "no"
+        expressions:
+          - cond: c1 != 0
+            add_column:
+              mode: R
+              pos: "1"
+  - id: has_results
+    label: has_results
+    tool_id: param_value_from_file
+    tool_version: 0.1.0
+    in:
+      - id: input1
+        source: count_to_boolean_table/out_file1
+    out:
+      - id: boolean_param
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      param_type: boolean
+      remove_newlines: true
+  # reduction: one job over the whole collection, so it is gated
+  - id: report
+    label: report
+    tool_id: toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0
+    tool_version: "5.1.0"
+    tool_shed_repository:
+      changeset_revision: 90981f86000f
+      name: collapse_collections
+      owner: nml
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_list
+        source: pair_hits_with_sequences/out_file1
+      - id: when
+        source: has_results/boolean_param
+    out:
+      - id: output
+    tool_state:
+      input_list:
+        __class__: ConnectedValue
+      filename:
+        add_name: true
+        place_name: same_multiple
+      one_header: false
+    when: $(inputs.when)
+  - id: no_results_note
+    label: no_results_note
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: count_to_boolean_table/out_file1
+      - id: when
+        source: has_results/boolean_param
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(!inputs.when)
