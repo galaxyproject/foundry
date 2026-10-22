@@ -7,20 +7,39 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-24
-revision: 5
+revised: 2026-10-22
+revision: 6
 related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
+  - "[[open-requirements-ledger]]"
 summary: "Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable."
 input_artifacts:
   - id: summary-nextflow
+    optional: true
     description: "Source pipeline summary from [[summarize-nextflow]]; provides process command, inputs, outputs, and container or conda evidence for UDT authoring."
+  - id: galaxy-workflow-draft
+    optional: true
+    description: "The draft loop's gxformat2 draft (see [[galaxy-workflow-draft-format]]), when [[advance-galaxy-draft-step]] escalates a step that needs a tool. The step's `_plan_*` fields and wiring say what the tool must do."
+  - id: open-requirements-ledger
+    optional: true
+    description: "Carried obligations ledger [[open-requirements-ledger]], when escalated from the draft loop. Its open `kind: needs_tool` entry names the step and why discovery found nothing."
 output_artifacts:
   - id: galaxy-user-tool-definition
     kind: yaml
     default_filename: galaxy-user-tool.yml
     description: "Galaxy `GalaxyUserTool` YAML definition for a tool not present on the Tool Shed."
+  - id: galaxy-workflow-draft
+    kind: yaml
+    default_filename: galaxy-workflow-draft.gxwf.yml
+    schema: "[[galaxy-workflow-draft]]"
+    optional: true
+    description: "When escalated from the draft loop: the same draft with the authored tool inline as the step's `run:`, its `tool_id` and `tool_version` removed and its port wiring left for the next loop call."
+  - id: open-requirements-ledger
+    kind: yaml
+    default_filename: open-requirements.ledger.yml
+    optional: true
+    description: "When escalated from the draft loop: the ledger with the step's `needs_tool` entry resolved, every other entry passed through unchanged."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"
@@ -115,9 +134,15 @@ Write `galaxy-user-tool.yml` with the validated and critic-reviewed `GalaxyUserT
 
 The artifact should be ready for the downstream harness or Galaxy runtime to load as a user-defined tool. Include unresolved assumptions only when they are truthful and actionable; otherwise fail instead of emitting a misleading tool.
 
+### 7. Place it in the draft, when escalated from the draft loop
+
+When given a draft and a ledger with an open `kind: needs_tool` entry, author the tool for the step that entry names. Read what it must do from the entry, the step's `_plan_*` fields and its wiring, and from the source summary when there is one.
+
+Then write the same `GalaxyUserTool` into the draft as that step's `run:`, and remove the step's `tool_id` and `tool_version`. A step with an inline tool needs no Tool Shed id, so never give it one. Leave the step's port names and `state` to the next loop call. Mark the `needs_tool` entry `resolved`, with `resolved_by: author-galaxy-tool-wrapper`. If the tool can't be authored truthfully, leave the draft unchanged and mark the entry `surrendered`, saying why.
+
 ## Non-goals
 
 - **Tool Shed discovery.** Use [[discover-shed-tool]] before this Mold.
 - **Existing wrapper summarization.** Use [[summarize-galaxy-tool]] for Tool Shed or installed Galaxy wrappers.
 - **Galaxy XML authoring.** This Mold emits UDT YAML only.
-- **Workflow step binding.** [[implement-galaxy-tool-step]] decides how the authored tool is used in a workflow step.
+- **Workflow step binding.** Beyond placing the tool as a step's `run:`, [[implement-galaxy-tool-step]] decides how the authored tool is used: its port names and `state`.

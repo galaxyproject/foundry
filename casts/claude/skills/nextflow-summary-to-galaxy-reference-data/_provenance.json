@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
     "revision": 5,
     "content_hash": "b49bae31e3b8918b45f852b8f50e1101e71837380b97f8e8ec237a5dd2955f7f",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "62766fff2e73d489442a2a7d7d238fe94581d5fb"
   },
-  "cast_at": "2026-10-19T19:01:27.484Z",
+  "cast_at": "2026-10-22T13:05:23.410Z",
   "refs": [
     {
       "kind": "research",
@@ -114,6 +114,7 @@
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",

@@ -304,6 +304,29 @@ function readYamlFile(file: string): unknown {
   return loadYaml(readFileSync(file, "utf8"));
 }
 
+/** The draft step at `stepPath`, walking into subworkflow `run:` steps. */
+function draftStep(draft: unknown, stepPath: string[]): Record<string, unknown> | null {
+  let container = draft;
+  let found: Record<string, unknown> | null = null;
+  for (const id of stepPath) {
+    const steps = (container as { steps?: unknown } | null)?.steps;
+    const candidates = Array.isArray(steps)
+      ? steps
+      : steps && typeof steps === "object"
+        ? Object.entries(steps).map(([key, value]) => ({ id: key, ...(value as object) }))
+        : [];
+    found =
+      (candidates.find(
+        (candidate) =>
+          (candidate as { id?: unknown }).id === id ||
+          (candidate as { label?: unknown }).label === id,
+      ) as Record<string, unknown> | undefined) ?? null;
+    if (!found) return null;
+    container = found.run;
+  }
+  return found;
+}
+
 const LOOP_ORACLES: Record<string, LoopOracle> = {
   // The Mold runs `gxwf draft-next-step` itself; the controller asks the same library function.
   "advance-galaxy-draft-step": {
@@ -365,6 +388,28 @@ const LOOP_ORACLES: Record<string, LoopOracle> = {
           entry.blocking === true && (entry.status === "open" || entry.status === "surrendered"),
         prompt(iteration, next, entries) {
           return `Loop iteration ${iteration}: the draft loop escalates to you. The call before could not advance step ${JSON.stringify(next)}; open-requirements-ledger entries ${entries.join(", ")} block it. Repair that region of the draft, or narrow the step, and mark each entry you close resolved.`;
+        },
+      },
+      {
+        skill: "author-galaxy-tool-wrapper",
+        noun: "authoring",
+        takes: (entry) =>
+          entry.kind === "needs_tool" &&
+          (entry.status === "open" || entry.status === "surrendered"),
+        check(carriedPath, next) {
+          const step = draftStep(readYamlFile(carriedPath), next);
+          const run = step?.run as { class?: unknown } | undefined;
+          if (run?.class !== "GalaxyUserTool") {
+            return `step ${next.join(" > ")} without an inline GalaxyUserTool \`run:\``;
+          }
+          const toolId = step!.tool_id;
+          if (toolId !== undefined && toolId !== null && toolId !== "TODO") {
+            return `step ${next.join(" > ")} with tool_id ${JSON.stringify(toolId)} beside its inline tool`;
+          }
+          return null;
+        },
+        prompt(iteration, next, entries) {
+          return `Loop iteration ${iteration}: the draft loop escalates to you. The call before found no Tool Shed wrapper for step ${JSON.stringify(next)}; open-requirements-ledger entries ${entries.join(", ")} say what it needs. Author a GalaxyUserTool for it, write it into the draft as that step's \`run:\` with no \`tool_id\`, leave its port wiring for the next call, and mark each entry you settle resolved.`;
         },
       },
     ],
@@ -1275,6 +1320,7 @@ export async function runLinearPipeline(
     }
     // Repairs and authorings share `repairCap`.
     let escalations = 0;
+    const authored = new Map<string, number>();
     // `n` counts the oracle's calls, which `cap` bounds; escalations have their own cap.
     for (let n = 1; ; n++) {
       if (n > cap) {
@@ -1367,6 +1413,15 @@ export async function runLinearPipeline(
             `${blocked}, and the loop has reached its cap of ${repairCap} repair${repairCap === 1 ? "" : "s"}`,
           );
         }
+        const stepKey = JSON.stringify(next);
+        const authoredAt = noun === "authoring" ? authored.get(stepKey) : undefined;
+        if (authoredAt !== undefined) {
+          return stop(
+            "failed",
+            "loop_blocked",
+            `${blocked}, and the step was already authored at iteration ${authoredAt}`,
+          );
+        }
         const escalationAt = iterations.length + 1;
         const escalationSpent = spentBudget(record.usage, options);
         if (escalationSpent) {
@@ -1378,6 +1433,7 @@ export async function runLinearPipeline(
         }
         const openBefore = attempt(() => oracle.blockers!.openBlocking(ledger!.absolutePath));
         escalations++;
+        if (noun === "authoring") authored.set(stepKey, escalationAt);
         const result = await step(
           escalated,
           path.join(phaseRunDir, `iteration-${padded(escalationAt)}`),

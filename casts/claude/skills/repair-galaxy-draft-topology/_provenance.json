@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 6,
     "content_hash": "47f60607da7bfebe8505112865ede352ca980372e7adfa93275667904be10bc4",
-    "commit": "781785c178b8ca5126124a1c56adbc51879078c5"
+    "commit": "62766fff2e73d489442a2a7d7d238fe94581d5fb"
   },
-  "cast_at": "2026-10-20T22:46:07.425Z",
+  "cast_at": "2026-10-22T13:05:24.702Z",
   "refs": [
     {
       "kind": "pattern",
@@ -164,6 +164,7 @@
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
           "cwl-summary-to-galaxy-template",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
@@ -178,6 +179,7 @@
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",

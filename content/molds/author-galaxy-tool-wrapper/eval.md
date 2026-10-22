@@ -33,3 +33,15 @@ the oracle here is applied to whatever a scenario produces.
   discovery evidence is unacceptable; when it does fall through, it explains why
   the fallthrough was justified and compares the authored UDT shape against the
   existing wrapper's behavior.
+
+## Property: an escalated tool lands inline in its step
+
+- bucket: draft-placement
+- check: deterministic
+- assertion: when escalated from the draft loop with an open `kind: needs_tool`
+  entry, the step it names carries the authored `GalaxyUserTool` as its `run:`,
+  identical to `galaxy-user-tool.yml`. The step has no `tool_id` or
+  `tool_version`, and the entry is `resolved`, or `surrendered` with the draft
+  unchanged. `gxwf draft-validate --concrete --strict-state` passes. Fails if
+  the step gets a Tool Shed `tool_id`, if the tool is written anywhere but the
+  run's outputs, or if any other step or entry changes.

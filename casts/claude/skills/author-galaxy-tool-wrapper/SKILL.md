@@ -13,11 +13,15 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `summary-nextflow`. Schema: summary-nextflow. Produced by `summarize-nextflow`. Source pipeline summary from summarize-nextflow; provides process command, inputs, outputs, and container or conda evidence for UDT authoring.
+- Read artifact `summary-nextflow`. Optional; absence is allowed and must be reported honestly. Schema: summary-nextflow. Produced by `summarize-nextflow`. Source pipeline summary from summarize-nextflow; provides process command, inputs, outputs, and container or conda evidence for UDT authoring.
+- Read artifact `galaxy-workflow-draft`. Optional; absence is allowed and must be reported honestly. Schema: galaxy-workflow-draft. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `author-galaxy-tool-wrapper`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-template`. The draft loop's gxformat2 draft (see galaxy-workflow-draft-format), when advance-galaxy-draft-step escalates a step that needs a tool. The step's `_plan_*` fields and wiring say what the tool must do.
+- Read artifact `open-requirements-ledger`. Optional; absence is allowed and must be reported honestly. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `author-galaxy-tool-wrapper`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-template`. Carried obligations ledger open-requirements-ledger, when escalated from the draft loop. Its open `kind: needs_tool` entry names the step and why discovery found nothing.
 
 ## Outputs
 
 - Write artifact `galaxy-user-tool-definition` as `galaxy-user-tool.yml`. Format: `yaml`. Galaxy `GalaxyUserTool` YAML definition for a tool not present on the Tool Shed.
+- Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Optional; absence is allowed and must be reported honestly. Format: `yaml`. Schema: galaxy-workflow-draft. When escalated from the draft loop: the same draft with the authored tool inline as the step's `run:`, its `tool_id` and `tool_version` removed and its port wiring left for the next loop call.
+- Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Optional; absence is allowed and must be reported honestly. Format: `yaml`. When escalated from the draft loop: the ledger with the step's `needs_tool` entry resolved, every other entry passed through unchanged.
 
 ## Required Tools
 
@@ -36,7 +40,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- None declared.
+- Validate `galaxy-workflow-draft.gxwf.yml` for artifact `galaxy-workflow-draft` against the galaxy-workflow-draft schema when a validator is available.
 
 ## Procedure
 
@@ -99,12 +103,18 @@ Write `galaxy-user-tool.yml` with the validated and critic-reviewed `GalaxyUserT
 
 The artifact should be ready for the downstream harness or Galaxy runtime to load as a user-defined tool. Include unresolved assumptions only when they are truthful and actionable; otherwise fail instead of emitting a misleading tool.
 
+#### 7. Place it in the draft, when escalated from the draft loop
+
+When given a draft and a ledger with an open `kind: needs_tool` entry, author the tool for the step that entry names. Read what it must do from the entry, the step's `_plan_*` fields and its wiring, and from the source summary when there is one.
+
+Then write the same `GalaxyUserTool` into the draft as that step's `run:`, and remove the step's `tool_id` and `tool_version`. A step with an inline tool needs no Tool Shed id, so never give it one. Leave the step's port names and `state` to the next loop call. Mark the `needs_tool` entry `resolved`, with `resolved_by: author-galaxy-tool-wrapper`. If the tool can't be authored truthfully, leave the draft unchanged and mark the entry `surrendered`, saying why.
+
 ### Non-goals
 
 - **Tool Shed discovery.** Use discover-shed-tool before this skill.
 - **Existing wrapper summarization.** Use summarize-galaxy-tool for Tool Shed or installed Galaxy wrappers.
 - **Galaxy XML authoring.** This skill emits UDT YAML only.
-- **Workflow step binding.** implement-galaxy-tool-step decides how the authored tool is used in a workflow step.
+- **Workflow step binding.** Beyond placing the tool as a step's `run:`, implement-galaxy-tool-step decides how the authored tool is used: its port names and `state`.
 
 ## Feedback Mode
 

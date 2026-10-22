@@ -6,9 +6,9 @@
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 1,
     "content_hash": "38d9fed5e83bcb02cdc044ac1a0858d2b3f5ce42af5905bea2b920451bacca6b",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "62766fff2e73d489442a2a7d7d238fe94581d5fb"
   },
-  "cast_at": "2026-10-19T19:01:26.768Z",
+  "cast_at": "2026-10-22T13:05:22.782Z",
   "refs": [
     {
       "kind": "prompt",
@@ -167,6 +167,7 @@
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",

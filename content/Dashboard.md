@@ -24,6 +24,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[author-galaxy-tool-wrapper]] | Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable. | reviewed | 2026-10-22 | 6 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-10-19 | 8 |
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
@@ -50,7 +51,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[mature-galaxy-workflow-for-iwc]] | Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set. | draft | 2026-09-10 | 1 |
 | [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-08-29 | 7 |
 | [[report-foundry-run-feedback]] | Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts. | draft | 2026-08-25 | 1 |
-| [[author-galaxy-tool-wrapper]] | Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable. | reviewed | 2026-08-24 | 5 |
 | [[apply-galaxy-workflow-changeset]] | Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps. | reviewed | 2026-08-19 | 3 |
 | [[cwl-summary-to-galaxy-data-flow]] | Translate a CWL summary into a Galaxy data-flow design brief. | draft | 2026-08-19 | 3 |
 | [[cwl-summary-to-galaxy-interface]] | Map a CWL summary into a Galaxy workflow interface design brief. | draft | 2026-08-19 | 3 |

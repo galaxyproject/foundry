@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-interface/index.md",
     "revision": 3,
     "content_hash": "de0cb02532205ad18f4aa1ab2881cac725a3191b448468a8a11d0663ff1ec97d",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "62766fff2e73d489442a2a7d7d238fe94581d5fb"
   },
-  "cast_at": "2026-10-19T19:01:25.425Z",
+  "cast_at": "2026-10-22T13:05:21.741Z",
   "refs": [
     {
       "kind": "research",
@@ -123,6 +123,7 @@
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",

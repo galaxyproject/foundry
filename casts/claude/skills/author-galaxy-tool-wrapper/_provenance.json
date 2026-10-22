@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 5,
-    "content_hash": "cced8f068cd1ce81fefad23a62fdb4d52b3ce805b2231f64a7fe37f258bc1e09",
-    "commit": "d1b4cabede5bc91a5ab8603d5c2d589ad7f0d100"
+    "revision": 6,
+    "content_hash": "9d26e5b7e3f77b27ce4a8dc61b76dda5c18f8947513a3a6495f88d91cc5adceb",
+    "commit": "62766fff2e73d489442a2a7d7d238fe94581d5fb"
   },
-  "cast_at": "2026-09-15T23:16:18.298Z",
+  "cast_at": "2026-10-22T13:05:20.166Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -103,15 +103,76 @@
         "kind": "yaml",
         "default_filename": "galaxy-user-tool.yml",
         "description": "Galaxy `GalaxyUserTool` YAML definition for a tool not present on the Tool Shed."
+      },
+      {
+        "id": "galaxy-workflow-draft",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-draft.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
+        "optional": true,
+        "description": "When escalated from the draft loop: the same draft with the authored tool inline as the step's `run:`, its `tool_id` and `tool_version` removed and its port wiring left for the next loop call."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "optional": true,
+        "description": "When escalated from the draft loop: the ledger with the step's `needs_tool` entry resolved, every other entry passed through unchanged."
       }
     ],
     "consumes": [
       {
         "id": "summary-nextflow",
         "description": "Source pipeline summary from [[summarize-nextflow]]; provides process command, inputs, outputs, and container or conda evidence for UDT authoring.",
+        "optional": true,
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-draft",
+        "description": "The draft loop's gxformat2 draft (see [[galaxy-workflow-draft-format]]), when [[advance-galaxy-draft-step]] escalates a step that needs a tool. The step's `_plan_*` fields and wiring say what the tool must do.",
+        "optional": true,
+        "inherited_schema": "[[galaxy-workflow-draft]]",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-template"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]], when escalated from the draft loop. Its open `kind: needs_tool` entry names the step and why discovery found nothing.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

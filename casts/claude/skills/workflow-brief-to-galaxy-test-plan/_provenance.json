@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-test-plan/index.md",
     "revision": 4,
     "content_hash": "df02aa501cbc18fdf5c36ddc3f2ca87e17f4db51c054a52cbbef6eb0a66bd4e3",
-    "commit": "e77fd771b6e3c2bd78cea4d7a267164c72df6e73"
+    "commit": "62766fff2e73d489442a2a7d7d238fe94581d5fb"
   },
-  "cast_at": "2026-10-19T19:10:46.247Z",
+  "cast_at": "2026-10-22T13:05:26.244Z",
   "refs": [
     {
       "kind": "research",
@@ -238,6 +238,7 @@
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",

@@ -6,9 +6,9 @@
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 12,
     "content_hash": "84abb427cbcbae5616ae22e4a7fa803f14350605c246638575b3a32c5ad9c6fb",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "62766fff2e73d489442a2a7d7d238fe94581d5fb"
   },
-  "cast_at": "2026-10-19T19:01:23.641Z",
+  "cast_at": "2026-10-22T13:05:20.324Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -190,6 +190,7 @@
         "producers": [
           "advance-galaxy-draft-step",
           "apply-galaxy-workflow-changeset",
+          "author-galaxy-tool-wrapper",
           "compare-against-iwc-exemplar",
           "cwl-summary-to-galaxy-data-flow",
           "cwl-summary-to-galaxy-interface",

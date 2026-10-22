@@ -2322,3 +2322,235 @@ test("parses the repair cap", () => {
     "--max-repairs must be a positive integer",
   );
 });
+
+const AUTHOR = "author-galaxy-tool-wrapper";
+
+function withAuthorCast(
+  root: string,
+  produces = ["galaxy-workflow-draft", "open-requirements-ledger"],
+  consumes = ["galaxy-workflow-draft", "open-requirements-ledger"],
+) {
+  const files: Record<string, string> = {
+    "galaxy-workflow-draft": DRAFT_FILE,
+    "open-requirements-ledger": LEDGER_FILE,
+  };
+  writeSkill(
+    root,
+    AUTHOR,
+    consumes,
+    produces.map((id) => ({ id, default_filename: files[id]! })),
+  );
+  return root;
+}
+
+function needsTool(id: string, step: string) {
+  return { ...ledgerEntry(id, step, "open", false), kind: "needs_tool" };
+}
+
+const USER_TOOL = {
+  class: "GalaxyUserTool",
+  id: "cat_user_defined",
+  version: "0.1",
+  name: "cat_user_defined",
+  container: "busybox",
+  shell_command: "cat '$(inputs.input1.path)' > output.txt",
+  inputs: [{ name: "input1", type: "data", format: ["txt"] }],
+  outputs: [{ name: "output1", type: "data", format: "txt", from_work_dir: "output.txt" }],
+};
+
+/** Writes the tool inline as step a's `run:`, leaving its port for the next call, and settles the entries. */
+function inlineTool(draft: Draft, ledger: Ledger) {
+  const step = draft.steps.a!;
+  delete step.tool_id;
+  delete step.tool_version;
+  step.run = USER_TOOL;
+  step.in = { TODO_input: "reads" };
+  for (const entry of ledger.entries) if (entry.kind === "needs_tool") entry.status = "resolved";
+}
+
+/**
+ * The draft loop of `draftWorker`, in which step a needs a tool authored until it carries one, and
+ * an author worker that applies `author` to the staged draft and ledger.
+ */
+function authoringWorker(
+  calls: RunPiSkillOptions[],
+  author: (draft: Draft, ledger: Ledger) => void = inlineTool,
+  needsAgain = false,
+) {
+  const advance = draftWorker(calls, (draft, step) => {
+    const current = draft.steps[step]!;
+    if (step === "a" && (!current.run || needsAgain)) return [needsTool("a-needs-tool", "a")];
+    if (current.run) current.in = { input1: "reads" };
+    else {
+      current.tool_id = "cat1";
+      current.tool_version = "1.0";
+    }
+  });
+  return async (options: RunPiSkillOptions) => {
+    if (path.basename(options.skillDir) !== AUTHOR) return advance(options);
+    calls.push(options);
+    const staged = (name: string) => options.inputPaths!.find((p) => path.basename(p) === name)!;
+    const draft = loadYaml(readFileSync(staged(DRAFT_FILE), "utf8")) as Draft;
+    const ledger = loadYaml(readFileSync(staged(LEDGER_FILE), "utf8")) as Ledger;
+    author(draft, ledger);
+    const workspace = path.join(options.runDir, "workspace");
+    mkdirSync(workspace, { recursive: true });
+    writeFileSync(path.join(workspace, DRAFT_FILE), dumpYaml(draft));
+    writeFileSync(path.join(workspace, LEDGER_FILE), dumpYaml(ledger));
+    return workspaceRecord(options, AUTHOR);
+  };
+}
+
+test("escalates a draft-loop call that needs a tool to an author worker, then resumes the loop", async () => {
+  const root = withAuthorCast(withRepairCast(draftFixtureRepo()));
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "authored"), {
+    runSkill: authoringWorker(calls),
+  });
+
+  expect(record.status).toBe("passed");
+  const loop = record.trials[0]!.phases[1]!;
+  expect(
+    loop.iterations?.map((iteration) => [
+      iteration.iteration,
+      iteration.skill ?? null,
+      iteration.next_step,
+    ]),
+  ).toEqual([
+    [1, null, ["a"]],
+    [2, AUTHOR, ["a"]],
+    [3, null, ["a"]],
+    [4, null, ["b"]],
+    [5, null, null],
+  ]);
+  const authorCall = calls.find((call) => path.basename(call.skillDir) === AUTHOR)!;
+  expect(authorCall.prompt).toContain("a-needs-tool");
+  expect(authorCall.prompt).toContain("`run:`");
+  expect(calls.some((call) => path.basename(call.skillDir) === REPAIR)).toBe(false);
+});
+
+test("does not escalate a non-blocking entry that is not a tool request", async () => {
+  const root = withAuthorCast(withRepairCast(draftFixtureRepo()));
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "version-gap"), {
+    runSkill: draftWorker(calls, () => [
+      { ...ledgerEntry("a-no-version", "a", "open", false), kind: "gap" },
+    ]),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_no_progress",
+      error: "iteration 1 left galaxy-workflow-draft unchanged; step a is still drafty",
+    }),
+  );
+  expect(calls).toHaveLength(2);
+});
+
+test("stops the draft loop when a step needs a tool and the harness casts no author", async () => {
+  const root = withRepairCast(draftFixtureRepo());
+  const record = await runLinearPipeline(draftRunOptions(root, "no-author"), {
+    runSkill: authoringWorker([]),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-needs-tool",
+    }),
+  );
+});
+
+test.each([
+  [
+    "writes no inline tool",
+    (draft: Draft, ledger: Ledger) => {
+      draft.steps.a!.in = { input: "reads", touched: true };
+      for (const entry of ledger.entries) entry.status = "resolved";
+    },
+    "step a without an inline GalaxyUserTool `run:`",
+  ],
+  [
+    "keeps a Tool Shed id beside the inline tool",
+    (draft: Draft, ledger: Ledger) => {
+      inlineTool(draft, ledger);
+      draft.steps.a!.tool_id = "toolshed.g2.bx.psu.edu/repos/foundry/cat/cat";
+    },
+    'step a with tool_id "toolshed.g2.bx.psu.edu/repos/foundry/cat/cat" beside its inline tool',
+  ],
+])("stops the draft loop when an authoring %s", async (_, author, shortfall) => {
+  const root = withAuthorCast(draftFixtureRepo());
+  const record = await runLinearPipeline(draftRunOptions(root, "author-shortfall"), {
+    runSkill: authoringWorker([], author),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 1 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        `entries a-needs-tool, and the authoring at iteration 2 left ${shortfall}`,
+    }),
+  );
+});
+
+test("does not author the same step twice", async () => {
+  const root = withAuthorCast(draftFixtureRepo());
+  const calls: RunPiSkillOptions[] = [];
+  const record = await runLinearPipeline(draftRunOptions(root, "author-twice"), {
+    runSkill: authoringWorker(calls, inlineTool, true),
+  });
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error:
+        "iteration 3 left galaxy-workflow-draft unchanged; step a is blocked by open-requirements-ledger " +
+        "entries a-needs-tool, and the step was already authored at iteration 2",
+    }),
+  );
+  expect(calls.filter((call) => path.basename(call.skillDir) === AUTHOR)).toHaveLength(1);
+});
+
+test("counts authorings and repairs against one cap", async () => {
+  const root = withAuthorCast(withRepairCast(draftFixtureRepo()));
+  let repaired = false;
+  const advance = authoringWorker([]);
+  const blocked = draftWorker([], (draft, step) => {
+    if (step === "b" && !repaired) return [ledgerEntry("b-uncomputable", "b", "open", true)];
+    draft.steps[step]!.tool_id = "cat1";
+    draft.steps[step]!.tool_version = "1.0";
+  });
+  const record = await runLinearPipeline(
+    { ...draftRunOptions(root, "shared-cap"), maxRepairs: 1 },
+    {
+      runSkill: async (options) => {
+        const draft = options.inputPaths?.find((p) => path.basename(p) === DRAFT_FILE);
+        const picksB =
+          draft && nextDraftStep(loadYaml(readFileSync(draft, "utf8"))).step?.at(-1) === "b";
+        if (path.basename(options.skillDir) === REPAIR) repaired = true;
+        return picksB ? blocked(options) : advance(options);
+      },
+    },
+  );
+
+  expect(record.trials[0]!.phases[1]).toEqual(
+    expect.objectContaining({
+      failure_kind: "loop_blocked",
+      error: expect.stringMatching(
+        /step b is blocked by open-requirements-ledger entries b-uncomputable, and the loop has reached its cap of 1 repair$/,
+      ),
+    }),
+  );
+});
+
+test("preflights an author cast that does not carry the draft and the ledger", async () => {
+  const root = withAuthorCast(draftFixtureRepo(), ["galaxy-workflow-draft"]);
+  await expect(
+    runLinearPipeline(draftRunOptions(root, "author-preflight"), { runSkill: draftWorker([]) }),
+  ).rejects.toThrow(
+    "phase 2 (advance-galaxy-draft-step) escalates to author-galaxy-tool-wrapper, which does not produce open-requirements-ledger",
+  );
+});
