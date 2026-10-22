@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 11,
     "content_hash": "34855691581889d36265e00178088b8a52a51ee72119329261bca186f7cb480e",
-    "commit": "89c7b9ef4c3c3edac038c41ba5f12bb88a2737ec"
+    "commit": "e7e35239bd403eae34443058cfd1e9c975001947"
   },
-  "cast_at": "2026-10-21T23:22:11.062Z",
+  "cast_at": "2026-10-22T03:03:56.307Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -104,8 +104,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose assertion families, tolerance magnitudes, and the static/Planemo validation loop.",
       "trigger": "When writing or revising output assertions for a Galaxy workflow test file.",
-      "src_hash": "901764ed3bbfb3930ae24d7274055f0c9ce8faebfbd5bfc537ba33bc735b4ecd",
-      "dst_hash": "901764ed3bbfb3930ae24d7274055f0c9ce8faebfbd5bfc537ba33bc735b4ecd",
+      "src_hash": "64c477c4f54beebfa461e9c58d5443d099f02501c4725eddee1f51c7ae124712",
+      "dst_hash": "64c477c4f54beebfa461e9c58d5443d099f02501c4725eddee1f51c7ae124712",
       "source": "deterministic"
     },
     {
