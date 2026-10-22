@@ -1,0 +1,89 @@
+class: GalaxyWorkflow
+name: "Transform or pass through"
+inputs:
+  - id: original
+    type: data
+  - id: add_suffix
+    type: boolean
+outputs:
+  - id: selected
+    outputSource: transformed_or_original/data_param
+  - id: original_first
+    outputSource: original_first/data_param
+steps:
+  - id: add_suffix_step
+    label: add_suffix_step
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_replace_in_line/9.5+galaxy3
+    tool_version: 9.5+galaxy3
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: original
+      - id: when
+        source: add_suffix
+    out:
+      - id: outfile
+    tool_state:
+      infile:
+        __class__: ConnectedValue
+      replacements:
+        - find_pattern: ">.+$"
+          replace_pattern: "&.H1"
+          sed_options: ""
+    when: $(inputs.when)
+  - id: transformed_or_original
+    label: transformed_or_original
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: b19e21af9c52
+      name: pick_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: style_cond|type_cond|pick_from_0|value
+        source: add_suffix_step/outfile
+      - id: style_cond|type_cond|pick_from_1|value
+        source: original
+    out:
+      - id: data_param
+    tool_state:
+      style_cond:
+        pick_style: first
+        type_cond:
+          param_type: data
+          pick_from:
+            - value:
+                __class__: ConnectedValue
+            - value:
+                __class__: ConnectedValue
+  - id: original_first
+    label: original_first
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: b19e21af9c52
+      name: pick_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: style_cond|type_cond|pick_from_0|value
+        source: original
+      - id: style_cond|type_cond|pick_from_1|value
+        source: add_suffix_step/outfile
+    out:
+      - id: data_param
+    tool_state:
+      style_cond:
+        pick_style: first
+        type_cond:
+          param_type: data
+          pick_from:
+            - value:
+                __class__: ConnectedValue
+            - value:
+                __class__: ConnectedValue

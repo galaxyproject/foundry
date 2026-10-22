@@ -1,0 +1,23 @@
+- doc: "Transform gated on: pick_value returns the transformed output, while the original-first merge returns the original"
+  job:
+    original:
+      class: File
+      path: test-data/original.fasta
+      filetype: fasta
+    add_suffix: true
+  outputs:
+    selected:
+      file: test-data/suffixed.fasta
+    original_first:
+      file: test-data/original.fasta
+
+- doc: "Transform gated off: pick_value passes the original input through unchanged"
+  job:
+    original:
+      class: File
+      path: test-data/original.fasta
+      filetype: fasta
+    add_suffix: false
+  outputs:
+    selected:
+      file: test-data/original.fasta
