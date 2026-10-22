@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-data-flow",
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
-    "revision": 7,
-    "content_hash": "1f98fd5cf9a54fd81e48db957f7451760f5e97629748f3d39fd66dc59b2ac765",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "revision": 8,
+    "content_hash": "f71cc2b4ceb115d7d93c3dd2e622cbfafb8b9f338f1dd450ee5773f3c0a0e247",
+    "commit": "c2406d44954aebf094e8590e2edd7fc8bd5d0f6a"
   },
-  "cast_at": "2026-10-19T19:01:26.960Z",
+  "cast_at": "2026-10-22T20:21:10.378Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
