@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-06-02
 revised: 2026-10-21
-revision: 9
+revision: 10
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
@@ -108,6 +108,14 @@ references:
     purpose: "Find a built-in collection operation that meets a step's plan, and its newest version at the page's Galaxy commit."
     trigger: "In step 2, when the chosen step's `tool_id` is `TODO`, or its tool is a stock collection operation whose version the step plan and the cache don't give."
   - kind: research
+    ref: "[[galaxy-apply-rules-dsl]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Write an Apply Rules step's `rules` against the identifiers each level of its input carries, which for a paired level are `forward`, `reverse` and `unpaired`."
+    trigger: "In step 4, when the chosen step's tool is `__APPLY_RULES__`."
+  - kind: research
     ref: "[[open-requirements-ledger]]"
     used_at: runtime
     load: upfront
@@ -160,6 +168,8 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
    If the resolved pin is absent from the cache, run [[add]] `<tool_id> --tool-version <v> --cache-dir <dir>` before summarization. In `@galaxy-tool-util/cli` 1.10.0, validation also fetches and caches missing metadata unless `--offline` is set; offline validation requires a populated cache.
 3. **Summarize the wrapper.** If step 2 reused a sibling's pin, reuse the cached [[galaxy-tool-summary]] for that `tool_id`/`tool_version` pair. Otherwise, invoke [[summarize-galaxy-tool]] to produce the summary.
 4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary and the draft; it resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `state`, and wrapper-determined port names.
+
+   For `__APPLY_RULES__`, write each rule against the identifiers Galaxy gives the input's levels ([[galaxy-apply-rules-dsl]]). A paired level is `forward`/`reverse`, or `unpaired` for a single read, whatever the input's `fields` or sample-sheet columns are named. [[draft-validate]] doesn't run the rules, so a regex that misses those names validates green and fails every job.
 5. **Check computability.** Inspect the [[open-requirements-ledger]] for an `open` blocking entry against this step: one that step 2 or [[implement-galaxy-tool-step]] appended, or one an earlier Mold raised. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no such entry, continue to validation.
 6. **Validate.** Run [[draft-validate]] `<draft> --concrete --strict-state --json --cache-dir <dir>`. `--strict-state` makes skipped tool-state checks fail validation; draft structure and topology checks still run. If metadata is unavailable, resolve the cache or fetch error and retry. Return on exit 0; route other failures using the JSON diagnostics and the rules below.
 

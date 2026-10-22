@@ -77,6 +77,18 @@ Properties are tagged by bucket:
   Hallucination guardrail: a fabricated `tool_id` or an invented output port
   that doesn't match the resolved wrapper's summary is a failure, not a pass.
 
+## Property: an Apply Rules step's rules run on the identifiers its input has
+
+- bucket: implementation
+- check: deterministic
+- assertion: build the identifier paths the step's input would produce: each
+  `paired` level gives `forward`/`reverse`, and each `paired_or_unpaired` level
+  gives either those or `unpaired`, covering both variants. Running the step's
+  `rules` over those paths with Galaxy's `galaxy.util.rules_dsl` raises no
+  error, and the mapped identifiers are unique. Fails if a regex expects
+  sample-sheet column or source field names (`1`/`2`, `fastq_1`) at a paired
+  level, or if one variant of a `paired_or_unpaired` input fails.
+
 ## Property: the implemented loop round-trips to the oracle
 
 - bucket: implementation

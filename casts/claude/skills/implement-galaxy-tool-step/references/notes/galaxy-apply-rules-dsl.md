@@ -5,11 +5,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-09-26
-revision: 3
+revised: 2026-10-21
+revision: 4
 related_notes:
   - "[[galaxy-collection-tools]]"
   - "[[galaxy-collection-semantics]]"
+  - "[[galaxy-paired-or-unpaired-collections]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
   - "[[collection-build-list-paired-with-apply-rules]]"
@@ -63,6 +64,8 @@ The first rule creates column 0 from the outer identifier. The second creates co
 ## Rows, columns, and sources
 
 For collection input, Galaxy starts with one **empty row per leaf dataset**. Source metadata accompanies each row: its identifier path, index path, dataset reference, dataset tags, and any inherited sample-sheet columns. `identifier0` means the outermost identifier. `index0` is its zero-based position.
+
+A `paired` level's identifiers are `forward` and `reverse`; a `paired_or_unpaired` level adds `unpaired` for a single read ([[galaxy-paired-or-unpaired-collections]]). This holds whatever the workflow input's sample-sheet columns or source fields are called, such as `fastq_1`/`fastq_2`. A regex written for those names misses every row, and a missed regex fails the job unless it sets `allow_unmatched`.
 
 Column indices are zero-based and refer to the table at that point in execution. Addition rules append columns. Removing columns shifts subsequent indices. Filters and sorting carry source metadata along with the rows, so a renamed row still points to its original dataset.
 

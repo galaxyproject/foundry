@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 9,
-    "content_hash": "4ef20523509c868242430c8f71b5d4ea0e72b1ce67060d7fd7f0a3761986b996",
-    "commit": "5d6d612394eddc39ed37826ef4ac009ac7edc89f"
+    "revision": 10,
+    "content_hash": "28f5b55a75134a38cbec719f235fa6c4d6c345267f8f2cc1b58de81047ff4eea",
+    "commit": "d25aaa75baf0dd31b1dfa91cd07392024dc248b3"
   },
-  "cast_at": "2026-10-22T01:48:52.888Z",
+  "cast_at": "2026-10-22T03:21:00.725Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -88,6 +88,21 @@
       "verification": "Cast the skill, populate a cache with a stock tool, run list --json, confirm the reported version is what add's --tool-version uses for that bare id.",
       "src_hash": "4ed4547735a635d40a52136cf86b8e2a32925e6532ead858c37d20117ce8d9c1",
       "dst_hash": "4b9842e4d4de2b99d9af0668b96d5a73c7eb8f6098ed91802b6005d5286d1d4f",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-apply-rules-dsl]]",
+      "src": "content/research/galaxy-apply-rules-dsl/index.md",
+      "dst": "references/notes/galaxy-apply-rules-dsl.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Write an Apply Rules step's `rules` against the identifiers each level of its input carries, which for a paired level are `forward`, `reverse` and `unpaired`.",
+      "trigger": "In step 4, when the chosen step's tool is `__APPLY_RULES__`.",
+      "src_hash": "446b7ef1cc29f8816ff05b0a59f0b30b33e5cffaf274a8a993ae231fc842056f",
+      "dst_hash": "446b7ef1cc29f8816ff05b0a59f0b30b33e5cffaf274a8a993ae231fc842056f",
       "source": "deterministic"
     },
     {
