@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 11,
-    "content_hash": "b83d37fb3e7e728533a1a448d73da69101dc515c3c8f5d7d98d57f03a5bec474",
-    "commit": "3c8adb329a662d5ffb1e01f421ca27fb3c57aef0"
+    "revision": 12,
+    "content_hash": "d9f9efb6d09809d684a8c4c39ecc7653425d6d0d2725cba68c3edec608e3206e",
+    "commit": "8b37372f687ecaed0d382a5643edcc4196f454fe"
   },
-  "cast_at": "2026-10-22T13:12:04.142Z",
+  "cast_at": "2026-10-22T15:20:20.175Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -101,8 +101,8 @@
       "evidence": "corpus-observed",
       "purpose": "Write an Apply Rules step's `rules` against the identifiers each level of its input carries, which for a paired level are `forward`, `reverse` and `unpaired`.",
       "trigger": "In step 4, when the chosen step's tool is `__APPLY_RULES__`.",
-      "src_hash": "446b7ef1cc29f8816ff05b0a59f0b30b33e5cffaf274a8a993ae231fc842056f",
-      "dst_hash": "446b7ef1cc29f8816ff05b0a59f0b30b33e5cffaf274a8a993ae231fc842056f",
+      "src_hash": "64a9cd81c92cc8e70ddc9aea8bf5b28494e8ef975b137213df8bc12410c71875",
+      "dst_hash": "64a9cd81c92cc8e70ddc9aea8bf5b28494e8ef975b137213df8bc12410c71875",
       "source": "deterministic"
     },
     {
