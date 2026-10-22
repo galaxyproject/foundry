@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 7,
     "content_hash": "259675e41c65f7622049cc9ef5f64b7d9f7ac5edb005555a09045e747708218c",
-    "commit": "89c7b9ef4c3c3edac038c41ba5f12bb88a2737ec"
+    "commit": "275cc43f2464c8ed2965793d6a22f099c0ede142"
   },
-  "cast_at": "2026-10-21T23:22:12.961Z",
+  "cast_at": "2026-10-22T02:58:48.342Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -74,8 +74,8 @@
       "evidence": "corpus-observed",
       "purpose": "Interpret assertion failures and choose the right fast inner-loop command before full reruns.",
       "trigger": "When a workflow test file exists and the task is to run, iterate, or classify its test assertions.",
-      "src_hash": "901764ed3bbfb3930ae24d7274055f0c9ce8faebfbd5bfc537ba33bc735b4ecd",
-      "dst_hash": "901764ed3bbfb3930ae24d7274055f0c9ce8faebfbd5bfc537ba33bc735b4ecd",
+      "src_hash": "8d4188a930103e7d7a555300e7592668915c3e96f001f6929cf4c20fb55e0e38",
+      "dst_hash": "8d4188a930103e7d7a555300e7592668915c3e96f001f6929cf4c20fb55e0e38",
       "source": "deterministic"
     },
     {
