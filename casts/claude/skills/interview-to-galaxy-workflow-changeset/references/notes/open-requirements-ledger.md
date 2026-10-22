@@ -5,14 +5,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-10-19
-revision: 5
+revised: 2026-10-22
+revision: 6
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
   - "[[implement-galaxy-tool-step]]"
+  - "[[author-galaxy-tool-wrapper]]"
 summary: "Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state."
 ---
 
@@ -35,7 +36,7 @@ Like the `_plan_*` family in [[galaxy-workflow-draft-format]], ledger entries ar
 ```yaml
 - id: sccmec-evidence-missing
   status: open                # open | resolved | surrendered
-  kind: gap                   # gap | dropped — see below; omit for gap
+  kind: gap                   # gap | dropped | needs_tool — see below; omit for gap
   blocking: true              # true only for a computability gap; the convergence gate counts these
   raised_by: implement-galaxy-tool-step   # Mold that appended it
   step: classify_context       # draft step the obligation attaches to (if any)
@@ -83,6 +84,8 @@ entry showed that it had not been.
 A reason you can cite, cite. A reason you cannot cite is still recorded — write it plainly
 and leave it uncited rather than dressing it as evidence — but an uncited drop is not a
 finding the run may reason from afterwards. It is a debt, and it should read as one.
+
+A **`needs_tool`** entry asks for a tool to be written. [[advance-galaxy-draft-step]] appends one, non-blocking, when Tool Shed discovery finds no acceptable wrapper for a step. `unmet` says what the tool must do, and `missing` gives the searches run and why each candidate failed. [[author-galaxy-tool-wrapper]] resolves it by writing the tool inline as the step's `run:`. It is not a `gap`: the step can be computed, it just has no wrapper yet.
 
 Provenance (`raised_by`, `resolved_by`) is the audit trail for *when* each obligation entered and left — the traceability #281 asked for, and the evidence the convergence gate reads.
 

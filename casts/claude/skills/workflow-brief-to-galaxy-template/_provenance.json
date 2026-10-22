@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "e14d7fc2e0b7a49f2ea2b611adaa81f287159f34c73626b447b7413a9f61215e",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "3c8adb329a662d5ffb1e01f421ca27fb3c57aef0"
   },
-  "cast_at": "2026-10-19T19:01:30.947Z",
+  "cast_at": "2026-10-22T13:12:12.377Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -195,8 +195,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "f7d016eaca504612b3944698b3c2f6ec5397ede2e8777b1af57bc87655616b3b",
+      "dst_hash": "f7d016eaca504612b3944698b3c2f6ec5397ede2e8777b1af57bc87655616b3b",
       "source": "deterministic"
     },
     {

@@ -67,6 +67,7 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
 1. **Pick.** Run draft-next-step. If `draft: false`, the loop is done: run draft-extract to emit the concrete `galaxy-workflow.gxwf.yml` (drafty steps dropped, `_plan_*` stripped, `class` promoted to `GalaxyWorkflow`), then return. Otherwise carry the chosen step id forward.
 2. **Resolve a wrapper.** First check for an existing pin:
    - **Already resolved in this draft** — find a concrete step with the `tool_id` named by the chosen step's `_plan_*` context or identity pin. Reuse its `tool_id` and `tool_version`, skipping discover-shed-tool for Tool Shed wrappers or cache/version lookup for stock tools. Continue to step 3.
+   - **Inline tool** — the step carries `run:` with `class: GalaxyUserTool`, which author-galaxy-tool-wrapper wrote. That is its wrapper: skip discovery, the cache and summarize-galaxy-tool, and go to step 4, binding ports from the tool's own `inputs` and `outputs`. The step has no `tool_id` or `tool_version`; never add one.
 
    Otherwise, split on whether the step's tool is a **built-in / stock** Galaxy tool — a bare id with no `owner/repo` path (`Filter1`, `sort1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`):
    - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through discover-shed-tool (Tool Shed search) or author-galaxy-tool-wrapper. Only its concrete version needs resolving. The shed serves stock tools by bare id, but its TRS version-list endpoint can't list their versions, so take the version from the first of these that names one:
@@ -81,7 +82,9 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
      - **Identity-pinned** — `tool_id` is concrete and `tool_version` is `TODO`. Treat the pin as a strong seed: confirm it via discover-shed-tool and resolve the changeset, correcting the `tool_id` only if discovery contradicts the pin (a pinned id is high-confidence template evidence, not a guess to re-derive from scratch).
      - **Deferred** — `tool_id` is `TODO` and no built-in meets the plan. Search fresh: run discover-shed-tool against the step's `_plan_*` context.
 
-     Either way, if no acceptable shed candidate emerges, fall through to author-galaxy-tool-wrapper. If authoring can't meet the declared output either, because the output needs something no tool can compute from the step's wired inputs, that is a computability gap: append a blocking ledger entry for this step, citing the searches you ran and any related entry's id, and go to step 5.
+     Either way, if no acceptable shed candidate emerges, the step needs a tool written. Append an open, non-blocking `kind: needs_tool` entry for the step (open-requirements-ledger): `unmet` says what the tool must do, and `missing` gives the searches you ran and why each candidate failed. Leave the draft unchanged and invoke author-galaxy-tool-wrapper on it, which writes the tool inline as the step's `run:` and resolves the entry. When this call can't invoke it, return with the entry open, and the harness escalates it. Never write a wrapper yourself, run add on a local file, or pin a Tool Shed id that discovery didn't return.
+
+     If authoring can't meet the declared output either, because the output needs something no tool can compute from the step's wired inputs, that is a computability gap: append a blocking ledger entry for this step, citing the searches you ran and any related entry's id, and go to step 5.
 
    If the resolved pin is absent from the cache, run add `<tool_id> --tool-version <v> --cache-dir <dir>` before summarization. In `@galaxy-tool-util/cli` 1.10.0, validation also fetches and caches missing metadata unless `--offline` is set; offline validation requires a populated cache.
 3. **Summarize the wrapper.** If step 2 reused a sibling's pin, reuse the cached galaxy-tool-summary for that `tool_id`/`tool_version` pair. Otherwise, invoke summarize-galaxy-tool to produce the summary.
@@ -93,14 +96,15 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
 
 ### How a call ends
 
-A call before the terminal one ends in one of four ways:
+A call before the terminal one ends in one of five ways:
 
 - the picked step is concrete and validates;
 - repair-galaxy-draft-topology changed the draft around it;
 - the step is blocked: a blocking ledger entry this call appended or updated names it, left open when no repair closed it, and surrendered once the escalation cap is reached;
-- the step's built-in tool has no version any source names: a non-blocking `gap` entry this call appended names the step and the sources checked.
+- the step's built-in tool has no version any source names: a non-blocking `gap` entry this call appended names the step and the sources checked;
+- the step needs a tool written: an open `kind: needs_tool` entry this call appended names it, and author-galaxy-tool-wrapper hasn't run yet.
 
-Never return with the draft unchanged and neither entry: that reports no work as success. Only the terminal call runs draft-extract; an earlier extract is a partial workflow.
+Never return with the draft unchanged and none of these entries: that reports no work as success. Only the terminal call runs draft-extract; an earlier extract is a partial workflow.
 
 ### Failure routing
 

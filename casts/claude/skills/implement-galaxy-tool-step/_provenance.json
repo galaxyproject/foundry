@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 9,
     "content_hash": "197be2d9b27741c3f258092f8392654369d1ca234d7fad492387ff69d656292b",
-    "commit": "d25aaa75baf0dd31b1dfa91cd07392024dc248b3"
+    "commit": "3c8adb329a662d5ffb1e01f421ca27fb3c57aef0"
   },
-  "cast_at": "2026-10-22T03:21:04.491Z",
+  "cast_at": "2026-10-22T13:12:07.848Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -164,8 +164,8 @@
       "evidence": "hypothesis",
       "purpose": "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs — the fall-through to topology repair, in place of fabricating the missing evidence.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "f7d016eaca504612b3944698b3c2f6ec5397ede2e8777b1af57bc87655616b3b",
+      "dst_hash": "f7d016eaca504612b3944698b3c2f6ec5397ede2e8777b1af57bc87655616b3b",
       "source": "deterministic"
     },
     {

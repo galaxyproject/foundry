@@ -116,6 +116,29 @@ Properties are tagged by bucket:
   skill falls through to [[author-galaxy-tool-wrapper]] rather than guessing a
   wrapper.
 
+## Property: a step that needs a tool is recorded, not improvised
+
+- bucket: routing
+- check: deterministic + llm-judged
+- assertion: when no acceptable Tool Shed candidate meets the chosen step, the
+  call appends an open, non-blocking `kind: needs_tool` ledger entry for that
+  step, with `unmet` and `missing` citing the searches run. The draft is
+  unchanged unless [[author-galaxy-tool-wrapper]] ran in the same call and
+  wrote the tool inline as the step's `run:`. Fails if a step gets a Tool Shed
+  `tool_id` that discovery didn't return, if the run's tool cache holds a
+  `source: local` entry under a Tool Shed id, or if a wrapper file is written
+  anywhere outside the run's outputs.
+
+## Property: an inline tool step is bound from its own declaration
+
+- bucket: implementation
+- check: deterministic
+- assertion: on a step whose `run:` is a `GalaxyUserTool`, the call renames
+  each `TODO_*` port to one of the tool's declared `inputs` or `outputs` names,
+  and leaves the step with no `tool_id` or `tool_version`. It runs no Tool Shed
+  search, cache `add` or summary for the step. `gxwf draft-validate --concrete
+  --strict-state` passes.
+
 ## Property: a TODO step a built-in meets uses it, at a named version
 
 - bucket: routing
