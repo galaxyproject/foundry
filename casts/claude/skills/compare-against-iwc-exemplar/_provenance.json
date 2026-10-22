@@ -6,9 +6,9 @@
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 12,
     "content_hash": "84abb427cbcbae5616ae22e4a7fa803f14350605c246638575b3a32c5ad9c6fb",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "2f8792a62ca53f074605ddbcfb25e75871f52b24"
   },
-  "cast_at": "2026-10-19T19:01:23.641Z",
+  "cast_at": "2026-10-22T03:17:12.356Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -86,8 +86,8 @@
       "evidence": "corpus-observed",
       "purpose": "Compare proposed test-data placement and fixture shapes against IWC conventions.",
       "trigger": "When the design briefs hint at workflow tests or input fixture organization.",
-      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
-      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
       "source": "deterministic"
     },
     {

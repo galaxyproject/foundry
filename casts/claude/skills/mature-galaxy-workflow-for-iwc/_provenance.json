@@ -6,9 +6,9 @@
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 1,
     "content_hash": "38d9fed5e83bcb02cdc044ac1a0858d2b3f5ce42af5905bea2b920451bacca6b",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "2f8792a62ca53f074605ddbcfb25e75871f52b24"
   },
-  "cast_at": "2026-10-19T19:01:26.768Z",
+  "cast_at": "2026-10-22T03:17:25.422Z",
   "refs": [
     {
       "kind": "prompt",
@@ -53,8 +53,8 @@
       "evidence": "corpus-observed",
       "purpose": "Apply current IWC conventions for test labels, durable remote fixtures, creator identifiers, release changes, and companion-file naming.",
       "trigger": "When a supplied test, test-data reference, creator record, or release decision must be checked or updated.",
-      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
-      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
       "source": "deterministic"
     },
     {

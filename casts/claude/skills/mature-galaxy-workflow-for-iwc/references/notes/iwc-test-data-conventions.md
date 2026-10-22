@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-09-23
-revision: 4
+revised: 2026-10-21
+revision: 5
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-shortcuts-anti-patterns]]"
@@ -75,7 +75,7 @@ job:
         filetype: fastqsanger.gz
 ```
 
-The [IWC short-read QC test](https://github.com/galaxyproject/iwc/blob/main/workflows/read-preprocessing/short-read-qc-trimming/short-read-quality-control-and-trimming-tests.yml) uses the nested form. The outer collection is `list:paired`, each outer element has `type: paired`, and the two files are identified as `forward` and `reverse`:
+The [IWC short-read QC test](https://github.com/galaxyproject/iwc/blob/main/workflows/read-preprocessing/short-read-qc-trimming/short-read-quality-control-and-trimming-tests.yml) uses the nested form. The outer collection is `list:paired`, each outer element is a `Collection` with a sample `identifier:`, and the two files are identified as `forward` and `reverse`:
 
 ```yaml
 job:
@@ -84,7 +84,6 @@ job:
     collection_type: list:paired
     elements:
       - class: Collection
-        type: paired
         identifier: pair
         elements:
           - class: File
@@ -97,7 +96,7 @@ job:
             filetype: fastqsanger.gz
 ```
 
-A bare `paired` collection uses the inner shape without the outer list. For deeper collections, keep each level's type and identifiers aligned with the workflow input. Check the resulting YAML against [[tests-format]] and the concrete workflow. The sampled IWC tests also contain nested output assertions: an output collection's `element_tests:` selects an outer identifier, then `elements:` selects nested identifiers. See the sampled `scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex-tests.yml` and [[planemo-asserts-idioms]].
+Only the outer collection declares `collection_type:`. Galaxy derives each inner element's type by splitting it on the first `:`, so an inner `collection_type:` (the IWC file carries a redundant `collection_type: paired`) is ignored, and `type:` is rejected by [[tests-format]]. A bare `paired` collection uses the inner shape without the outer list. For deeper collections, keep each level's identifiers aligned with the workflow input. Check the resulting YAML against [[tests-format]] and the concrete workflow. The sampled IWC tests also contain nested output assertions: an output collection's `element_tests:` selects an outer identifier, then a nested `element_tests:` selects inner identifiers. See the sampled `scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex-tests.yml` and [[planemo-asserts-idioms]].
 
 Planemo also [accepts a plain YAML list of File objects](https://planemo.readthedocs.io/en/latest/test_format.html#galaxy-collection-inputs) as a simple Galaxy `list`. That shorthand gives no control over element identifiers. Use the explicit collection form when names or a non-list shape matter. Do not treat an absence from a sample of IWC tests as a parser restriction.
 

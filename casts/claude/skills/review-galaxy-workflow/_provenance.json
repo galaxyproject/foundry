@@ -6,9 +6,9 @@
     "path": "content/molds/review-galaxy-workflow/index.md",
     "revision": 1,
     "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "2f8792a62ca53f074605ddbcfb25e75871f52b24"
   },
-  "cast_at": "2026-10-19T19:01:28.752Z",
+  "cast_at": "2026-10-22T03:17:31.729Z",
   "refs": [
     {
       "kind": "prompt",
@@ -68,8 +68,8 @@
       "evidence": "corpus-observed",
       "purpose": "Judge test labels, durable remote fixtures, creator identifiers, and companion-file naming against current IWC conventions.",
       "trigger": "When assessing the submission's test file, test-data references, creator metadata, or release entry.",
-      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
-      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
       "source": "deterministic"
     },
     {
