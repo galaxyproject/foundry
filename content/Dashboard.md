@@ -213,7 +213,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
 | [[iwc-test-data-conventions]] | IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values. | draft | 2026-10-21 | 5 |
-| [[planemo-asserts-idioms]] | Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints. | draft | 2026-10-21 | 9 |
+| [[planemo-asserts-idioms]] | Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints. | draft | 2026-10-21 | 10 |
 | [[open-requirements-ledger]] | Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state. | draft | 2026-10-19 | 5 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-10-19 | 6 |
 | [[foundry-run-manifest]] | Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard. | draft | 2026-10-14 | 2 |

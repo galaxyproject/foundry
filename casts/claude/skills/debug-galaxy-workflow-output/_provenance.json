@@ -6,9 +6,9 @@
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
     "revision": 5,
     "content_hash": "100b3f985f8e309092bfd05cf544a8286e0a878ee2df3a155dfebe6fcdb286f0",
-    "commit": "e7e35239bd403eae34443058cfd1e9c975001947"
+    "commit": "47aa5c1cf419386ea72929c8ee34aec0db65588f"
   },
-  "cast_at": "2026-10-22T03:03:54.868Z",
+  "cast_at": "2026-10-22T03:42:26.275Z",
   "refs": [
     {
       "kind": "research",
@@ -118,8 +118,8 @@
       "evidence": "corpus-observed",
       "purpose": "Classify whether a failure is an assertion-choice problem, tolerance problem, or real workflow-output regression.",
       "trigger": "When Planemo reports output assertion failures or generated tests are too strict/too weak.",
-      "src_hash": "64c477c4f54beebfa461e9c58d5443d099f02501c4725eddee1f51c7ae124712",
-      "dst_hash": "64c477c4f54beebfa461e9c58d5443d099f02501c4725eddee1f51c7ae124712",
+      "src_hash": "9a6363854dcbeb01e1e590dc5bc0f5d7d0ec9675c4828ad2a8be8fa8022a61df",
+      "dst_hash": "9a6363854dcbeb01e1e590dc5bc0f5d7d0ec9675c4828ad2a8be8fa8022a61df",
       "source": "deterministic"
     },
     {
