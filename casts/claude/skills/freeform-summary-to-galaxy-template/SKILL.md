@@ -41,6 +41,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
+- `references/cli/draft-next-step.json`: CLI command reference packaged as a sidecar. Confirm the per-step loop can walk the emitted draft: it descends into draft subworkflows and reports the picked step's full path, so nesting steps in a subworkflow does not hide them from the loop. Use when: deciding whether to group steps into a subworkflow, or after writing the draft to confirm the loop picks a step.
 - `references/cli/draft-validate.json`: CLI command reference packaged as a sidecar. Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off. Use when: after writing or modifying the draft workflow file.
 - `references/patterns/galaxy-collection-patterns.md`: Pattern note copied verbatim into the bundle. Use corpus-grounded collection pattern guidance for unresolved skeleton steps. Use when: adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges.
 - `references/patterns/galaxy-conditionals-patterns.md`: Pattern note copied verbatim into the bundle. Use corpus-grounded conditional pattern guidance for unresolved skeleton steps. Use when: adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.
