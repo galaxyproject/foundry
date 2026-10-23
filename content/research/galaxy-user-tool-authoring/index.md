@@ -66,6 +66,12 @@ Expressions are JavaScript, spliced into the command verbatim.
 - **`$(outputs.param_name.path)` is not valid at all.** Outputs are captured by `from_work_dir` or `discover_datasets`, never referenced in the command.
 - Escape shell variables that are not Galaxy expressions: `\$(date)`.
 
+**What `inputs.x` is for a `data` input.** A CWL-style file object with `class` (`File`, or `Directory` for a directory dataset), `path`, `location`, `basename`, `nameroot`, `nameext`, `format` (the Galaxy datatype extension) and `size`.
+
+- **`element_identifier` is not usable in the command.** The field exists, but `$(inputs.x.element_identifier)` renders `null`, even when the tool is mapped over a collection. This was tested against Galaxy dev at `51e0a80a`, through both `/api/tools` and `/api/jobs`.
+- **`basename` and `nameroot` are not the element identifier either.** They come from the dataset's original upload filename or, failing that, its history name. They happen to match the identifier only when the element was created with the same name.
+- **Consequence: a user-defined tool cannot name its own collection element.** A per-sample label that the tool writes into a file has to come from a `text` parameter. Mapped over a collection, every element gets the same value, so a downstream aggregator such as MultiQC can collapse the rows into one. Say so in `help` rather than guessing an accessor; a wrong one validates clean and fails at runtime.
+
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
 
 ## 4. Input parameter types
