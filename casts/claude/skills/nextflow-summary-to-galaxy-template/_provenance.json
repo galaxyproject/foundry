@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 10,
     "content_hash": "77f885d640900cca7dac4a3bbb33308d4d8065e871c919c672487db61caf93ab",
-    "commit": "c2406d44954aebf094e8590e2edd7fc8bd5d0f6a"
+    "commit": "3753147150645d71b6817ccfa928b619805825ec"
   },
-  "cast_at": "2026-10-22T16:42:53.482Z",
+  "cast_at": "2026-10-22T20:32:33.715Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -231,8 +231,8 @@
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and producer-side output actions while emitting the skeleton.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "187a01f8cddc186df2e3c4c3b2d57e887a59b81a8199f83ffa195c07760596d3",
-      "dst_hash": "187a01f8cddc186df2e3c4c3b2d57e887a59b81a8199f83ffa195c07760596d3",
+      "src_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
+      "dst_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
