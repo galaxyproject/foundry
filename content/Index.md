@@ -291,6 +291,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[eval-philosophy]] — Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/refinement split. *(reviewed)*
 - [[guiding-principles]] — The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding. *(reviewed)*
 - [[harness-pipelines]] — The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior. *(revised)*
+- [[issue-labels]] — What each label on galaxyproject/foundry issues means, which labels a triaged issue carries, and what reads them.
 - [[mold-spec]] — The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it. *(reviewed)*
 - [[molds]] — The axes a Mold buckets on, the boundary against reference content, and where the Mold set is still uneven. *(reviewed)*
 - [[pattern-authorship]] — Developer-facing authorship rules for operation-named, corpus-grounded pattern pages. *(reviewed)*
