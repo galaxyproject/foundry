@@ -12,6 +12,7 @@
  */
 
 import type { CliProgramSpec } from "./types.js";
+import { SCHEMA_PIN_OPTION } from "./schema-pin.js";
 import { FOUNDRY_VERSION } from "./version.generated.js";
 
 export type {
@@ -120,112 +121,112 @@ export const foundryCliMeta: CliProgramSpec = {
       name: "validate-summary-nextflow",
       fullName: "foundry validate-summary-nextflow",
       description: "Validate a summarize-nextflow JSON document.",
-      synopsis: "foundry validate-summary-nextflow <summary.json>",
+      synopsis: "foundry validate-summary-nextflow [options] [summary.json]",
       args: [
         {
           raw: "summary.json",
           name: "summary.json",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
-      options: [],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
       name: "validate-summary-cwl",
       fullName: "foundry validate-summary-cwl",
       description: "Validate a summarize-cwl JSON document.",
-      synopsis: "foundry validate-summary-cwl <summary.json>",
+      synopsis: "foundry validate-summary-cwl [options] [summary.json]",
       args: [
         {
           raw: "summary.json",
           name: "summary.json",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
-      options: [],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
       name: "validate-summary-galaxy-workflow",
       fullName: "foundry validate-summary-galaxy-workflow",
       description: "Validate a summarize-galaxy-workflow JSON document.",
-      synopsis: "foundry validate-summary-galaxy-workflow <summary.json>",
+      synopsis: "foundry validate-summary-galaxy-workflow [options] [summary.json]",
       args: [
         {
           raw: "summary.json",
           name: "summary.json",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
-      options: [],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
       name: "validate-galaxy-tool-discovery",
       fullName: "foundry validate-galaxy-tool-discovery",
       description: "Validate a discover-shed-tool recommendation document.",
-      synopsis: "foundry validate-galaxy-tool-discovery <recommendation.json>",
+      synopsis: "foundry validate-galaxy-tool-discovery [options] [recommendation.json]",
       args: [
         {
           raw: "recommendation.json",
           name: "recommendation.json",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
-      options: [],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
       name: "validate-galaxy-tool-summary",
       fullName: "foundry validate-galaxy-tool-summary",
       description: "Validate a galaxy-tool-cache summarize manifest.",
-      synopsis: "foundry validate-galaxy-tool-summary <manifest.json>",
+      synopsis: "foundry validate-galaxy-tool-summary [options] [manifest.json]",
       args: [
         {
           raw: "manifest.json",
           name: "manifest.json",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
-      options: [],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
       name: "validate-galaxy-workflow-test-plan",
       fullName: "foundry validate-galaxy-workflow-test-plan",
       description: "Validate a Galaxy workflow test-plan YAML document.",
-      synopsis: "foundry validate-galaxy-workflow-test-plan <test-plan.yml>",
+      synopsis: "foundry validate-galaxy-workflow-test-plan [options] [test-plan.yml]",
       args: [
         {
           raw: "test-plan.yml",
           name: "test-plan.yml",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
-      options: [],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
       name: "validate-test-data-refs",
       fullName: "foundry validate-test-data-refs",
       description: "Validate a test-data-refs JSON document.",
-      synopsis: "foundry validate-test-data-refs <test-data-refs.json>",
+      synopsis: "foundry validate-test-data-refs [options] [test-data-refs.json]",
       args: [
         {
           raw: "test-data-refs.json",
           name: "test-data-refs.json",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
-      options: [],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
@@ -244,9 +245,9 @@ export const foundryCliMeta: CliProgramSpec = {
       name: "validate-workflow-brief",
       fullName: "foundry validate-workflow-brief",
       description: "Validate a Workflow Brief Markdown document (experimental RFC).",
-      synopsis: "foundry validate-workflow-brief <brief.md>",
-      args: [{ raw: "brief.md", name: "brief.md", required: true, variadic: false }],
-      options: [],
+      synopsis: "foundry validate-workflow-brief [options] [brief.md]",
+      args: [{ raw: "brief.md", name: "brief.md", required: false, variadic: false }],
+      options: [SCHEMA_PIN_OPTION],
       commands: [],
     },
     {
@@ -273,16 +274,17 @@ export const foundryCliMeta: CliProgramSpec = {
       fullName: "foundry validate-tests-format",
       description:
         "Validate a Galaxy workflow tests YAML file; optionally cross-check against a workflow.",
-      synopsis: "foundry validate-tests-format [options] <tests.yml>",
+      synopsis: "foundry validate-tests-format [options] [tests.yml]",
       args: [
         {
           raw: "tests.yml",
           name: "tests.yml",
-          required: true,
+          required: false,
           variadic: false,
         },
       ],
       options: [
+        SCHEMA_PIN_OPTION,
         {
           flags: "--workflow <path>",
           name: "workflow",

@@ -10,6 +10,8 @@
       "validator_bin": "foundry",
       "args": [
         "validate-workflow-brief",
+        "--schema-sha256",
+        "8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0",
         "{artifact_path}"
       ]
     }

@@ -10,6 +10,8 @@
       "validator_bin": "foundry",
       "args": [
         "validate-summary-nextflow",
+        "--schema-sha256",
+        "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
         "{artifact_path}"
       ]
     },
@@ -22,6 +24,8 @@
       "validator_bin": "foundry",
       "args": [
         "validate-workflow-brief",
+        "--schema-sha256",
+        "8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0",
         "{artifact_path}"
       ]
     }

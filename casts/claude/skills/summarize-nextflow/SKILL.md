@@ -46,7 +46,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-nextflow.json` before returning it: run `foundry validate-summary-nextflow summary-nextflow.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-nextflow summary-nextflow.json`. This checks artifact `summary-nextflow` against the summary-nextflow schema.
+- Before starting, check that the installed validator carries the summary-nextflow schema this bundle was cast with: run `foundry validate-summary-nextflow --schema-sha256 839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `summary-nextflow.json` before returning it: run `foundry validate-summary-nextflow --schema-sha256 839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54 summary-nextflow.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-nextflow --schema-sha256 839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54 summary-nextflow.json`. This checks artifact `summary-nextflow` against the summary-nextflow schema.
 
 ## Procedure
 

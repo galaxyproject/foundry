@@ -37,7 +37,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `test-data-refs.json` before returning it: run `foundry validate-test-data-refs test-data-refs.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-test-data-refs test-data-refs.json`. This checks artifact `test-data-refs` against the test-data-refs schema.
+- Before starting, check that the installed validator carries the test-data-refs schema this bundle was cast with: run `foundry validate-test-data-refs --schema-sha256 534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `test-data-refs.json` before returning it: run `foundry validate-test-data-refs --schema-sha256 534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8 test-data-refs.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-test-data-refs --schema-sha256 534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8 test-data-refs.json`. This checks artifact `test-data-refs` against the test-data-refs schema.
 
 ## Procedure
 

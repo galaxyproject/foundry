@@ -156,17 +156,18 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[validate-test-data-refs]] | AJV gate for the test-data-refs document the test-data-resolution chain writes. | draft | 2026-10-15 | 1 |
+| [[validate-galaxy-tool-discovery]] | AJV gate for discover-shed-tool recommendation documents. | draft | 2026-10-23 | 3 |
+| [[validate-galaxy-tool-summary]] | AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree. | draft | 2026-10-23 | 3 |
+| [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-10-23 | 5 |
+| [[validate-summary-cwl]] | AJV gate for summarize-cwl JSON documents. | draft | 2026-10-23 | 3 |
+| [[validate-summary-galaxy-workflow]] | AJV gate for summarize-galaxy-workflow JSON documents. | draft | 2026-10-23 | 3 |
+| [[validate-summary-nextflow]] | AJV gate for summarize-nextflow JSON documents. | draft | 2026-10-23 | 3 |
+| [[validate-test-data-refs]] | AJV gate for the test-data-refs document the test-data-resolution chain writes. | draft | 2026-10-23 | 2 |
+| [[validate-tests-format]] | AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check. | draft | 2026-10-23 | 2 |
+| [[validate-workflow-brief]] | Validate the title and required sections of a Markdown Workflow Brief. | draft | 2026-10-23 | 4 |
 | [[convert]] | Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations. | draft | 2026-09-26 | 3 |
-| [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-09-23 | 4 |
 | [[check-workflow-brief]] | Check Workflow Brief structure and stop on explicit workflow or agent environment blockers. | draft | 2026-09-17 | 1 |
 | [[validate-markdown]] | Validate Markdown sections with the schemas shared by Foundry build and runtime consumers. | draft | 2026-09-17 | 1 |
-| [[validate-workflow-brief]] | Validate the title and required sections of a Markdown Workflow Brief. | draft | 2026-09-17 | 3 |
-| [[validate-galaxy-tool-discovery]] | AJV gate for discover-shed-tool recommendation documents. | draft | 2026-08-04 | 2 |
-| [[validate-galaxy-tool-summary]] | AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree. | draft | 2026-08-04 | 2 |
-| [[validate-summary-cwl]] | AJV gate for summarize-cwl JSON documents. | draft | 2026-08-04 | 2 |
-| [[validate-summary-galaxy-workflow]] | AJV gate for summarize-galaxy-workflow JSON documents. | draft | 2026-08-04 | 2 |
-| [[validate-summary-nextflow]] | AJV gate for summarize-nextflow JSON documents. | draft | 2026-08-04 | 2 |
 | [[add]] | Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema. | draft | 2026-06-18 | 2 |
 | [[list]] | Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached. | draft | 2026-06-18 | 1 |
 | [[summarize]] | Emit a deterministic galaxy-tool-summary manifest (cache provenance + embedded ParsedTool + generated input JSON Schemas) for a cached tool. | draft | 2026-06-18 | 2 |
@@ -180,7 +181,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[planemo-workflow_test_init]] | Initialize a Galaxy workflow test description for supplied workflow. | draft | 2026-05-11 | 1 |
 | [[planemo-workflow_test_on_invocation]] | Run defined tests against existing workflow invocation. | draft | 2026-05-11 | 1 |
 | [[summarize-nextflow]] | Statically introspect a Nextflow / nf-core pipeline tree and emit a validated JSON summary. | draft | 2026-05-11 | 1 |
-| [[validate-tests-format]] | AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check. | draft | 2026-05-11 | 1 |
 | [[tool-revisions]] | Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin. | draft | 2026-05-06 | 2 |
 | [[tool-search]] | Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence. | draft | 2026-05-06 | 2 |
 | [[tool-versions]] | List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence. | draft | 2026-05-06 | 2 |

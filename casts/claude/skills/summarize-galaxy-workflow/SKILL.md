@@ -44,7 +44,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-galaxy-workflow.json` before returning it: run `foundry validate-summary-galaxy-workflow summary-galaxy-workflow.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-galaxy-workflow summary-galaxy-workflow.json`. This checks artifact `summary-galaxy-workflow` against the summary-galaxy-workflow schema.
+- Before starting, check that the installed validator carries the summary-galaxy-workflow schema this bundle was cast with: run `foundry validate-summary-galaxy-workflow --schema-sha256 55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `summary-galaxy-workflow.json` before returning it: run `foundry validate-summary-galaxy-workflow --schema-sha256 55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3 summary-galaxy-workflow.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-galaxy-workflow --schema-sha256 55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3 summary-galaxy-workflow.json`. This checks artifact `summary-galaxy-workflow` against the summary-galaxy-workflow schema.
 
 ## Procedure
 

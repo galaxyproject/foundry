@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-07-01
-revised: 2026-08-04
-revision: 2
+revised: 2026-10-23
+revision: 3
 summary: "AJV gate for summarize-galaxy-workflow JSON documents."
 related_notes:
   - "[[summary-galaxy-workflow]]"
@@ -20,7 +20,7 @@ Validate a JSON document against the [[summary-galaxy-workflow]] schema bundled 
 
 ## Output
 
-Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors exit `1`. With `--schema-sha256 <hex>` it first compares the hash of the schema it carries against `<hex>`, the pin a cast bundle records in `_verify.json`: a mismatch exits `4` without validating, because the validator and the bundle disagree about the contract (see [[schema-packages]]). Given the pin and no artifact, it checks only the pin.
 
 ## Examples
 

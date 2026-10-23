@@ -58,7 +58,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `summary-cwl.json` before returning it: run `foundry validate-summary-cwl summary-cwl.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-cwl summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
+- Before starting, check that the installed validator carries the summary-cwl schema this bundle was cast with: run `foundry validate-summary-cwl --schema-sha256 6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `summary-cwl.json` before returning it: run `foundry validate-summary-cwl --schema-sha256 6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef summary-cwl.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-cwl --schema-sha256 6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef summary-cwl.json`. This checks artifact `summary-cwl` against the summary-cwl schema.
 
 ## Procedure
 
