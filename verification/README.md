@@ -35,6 +35,8 @@ outputs:
 Reach into a `list:list` by nesting `element_tests` inside an element, giving that element its own
 `class: Collection` and using `count` for its size.
 
+Galaxy never checks a count, `min`, or `max` of 0, so `element_count: 0` passes on any collection. Prove emptiness with a derived dataset instead, such as an identifier file asserted with `has_size: 0`.
+
 ## Local runs
 
 From a workflow directory, run Planemo directly:
