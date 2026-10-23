@@ -5,21 +5,21 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-09-24
-revised: 2026-09-24
-revision: 3
+revised: 2026-10-23
+revision: 4
 license: MIT
 license_file: LICENSES/galaxy.LICENSE
 related_notes:
   - "[[galaxy-user-tool-authoring]]"
   - "[[galaxy-user-tool-workflow-binding]]"
 sources:
-  - "https://github.com/mvdbeek/galaxy/blob/c74e78f165e9089628ebce69c112e9d9b35e6599/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/client/src/components/Tool/authoringHelp.yml"
 companions:
   - "galaxy-user-tool-authoring-help.yml"
 summary: "Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows."
 ---
 
-> **Vendored from upstream**, pinned at SHA `c74e78f`. One file lives next to this note and is declared in `companions:` so casting carries it with the note:
+> **Vendored from upstream**, pinned at SHA `5af1d03` on `release_26.1`, after [galaxyproject/galaxy#23694](https://github.com/galaxyproject/galaxy/pull/23694) merged. One file lives next to this note and is declared in `companions:` so casting carries it with the note:
 >
 > - `galaxy-user-tool-authoring-help.yml` — Galaxy's single source of truth for `GalaxyUserTool` authoring guidance (`client/src/components/Tool/authoringHelp.yml`). Galaxy renders it twice: as the help panel in the tool editor and as the generated `user_defined_tools_authoring` page of the Galaxy docs. Sync is manual.
 >
@@ -36,14 +36,3 @@ The sections the Foundry reads:
 - `validation`, `testing` — what Galaxy checks when a tool is created, and that Galaxy stores declared tool tests but does not run them for a tool held in its database.
 
 The field-level rules in `tool-format`, `parameters`, `outputs`, `expressions`, and `containers` overlap [[galaxy-user-tool-authoring]], which was derived earlier from Galaxy's generator prompts. That note remains what [[author-galaxy-tool-wrapper]] loads.
-
-## Pre-merge pin
-
-The pin is the head of [galaxyproject/galaxy#23694](https://github.com/galaxyproject/galaxy/pull/23694) on the `mvdbeek/galaxy` fork, before that pull request merged. It includes the `workflows` section. Until the pull request lands, the manifest entry resolves through the temporary `$GALAXY_MVDBEEK` prefix, following the `galaxy_dannon` precedent in `common_paths.yml.sample`.
-
-Once #23694 merges, re-pin to the upstream merge commit:
-
-1. Change this entry's `source` in `vendored_upstreams.yml` to `$GALAXY/client/src/components/Tool/authoringHelp.yml`, and check out the merge commit in the `$GALAXY` tree.
-2. Run `pnpm sync:vendored`. It re-syncs and re-pins every entry in the manifest, not only this one, and it fails if any `common_paths.yml` checkout is missing. Review the other files it touches.
-3. Point the `sources:` URLs here and in [[galaxy-user-tool-workflow-binding]] at `galaxyproject/galaxy` and the merge commit. The sync only rewrites this note's URLs, and it keeps the fork's name in them.
-4. Delete this section and the `galaxy_mvdbeek` entry in `common_paths.yml.sample`.

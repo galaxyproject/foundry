@@ -17,9 +17,9 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
   - "[[advance-galaxy-draft-step]]"
 sources:
-  - "https://github.com/mvdbeek/galaxy/blob/c74e78f165e9089628ebce69c112e9d9b35e6599/client/src/components/Tool/authoringHelp.yml"
-  - "https://github.com/mvdbeek/galaxy/blob/c74e78f165e9089628ebce69c112e9d9b35e6599/lib/galaxy/managers/tools.py"
-  - "https://github.com/mvdbeek/galaxy/blob/c74e78f165e9089628ebce69c112e9d9b35e6599/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy/managers/tools.py"
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml"
 summary: "How a Foundry workflow step uses an authored GalaxyUserTool: the definition embedded under run:, never a tool_uuid, tool_id or content_id reference."
 ---
 
