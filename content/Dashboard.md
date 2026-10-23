@@ -85,6 +85,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[conditional-gate-on-nonempty-result]] | Derive a boolean from a collection's element count or a dataset's text, then use when to skip report or export steps on empty results. | draft | 2026-10-23 | 4 |
 | [[relabel-via-rules-and-find-replace]] | Relabel the inner level of a list:list by swapping it to the top with Apply Rules, relabeling from a find/replace-built table, and swapping back. | draft | 2026-10-22 | 3 |
 | [[collection-cleanup-after-mapover-failure]] | Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step. | draft | 2026-10-21 | 3 |
 | [[conditional-transform-or-pass-through]] | Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise. | draft | 2026-10-21 | 3 |
@@ -134,7 +135,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[manifest-to-mapped-collection-lifecycle]] | Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs. | draft | 2026-05-04 | 1 |
 | [[reshape-relabel-remap-by-collection-axis]] | Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis. | draft | 2026-05-04 | 1 |
 | [[compose-runtime-text-parameter]] | Use compose_text_param to build connected text expressions from constants plus runtime scalar values. | draft | 2026-05-03 | 3 |
-| [[conditional-gate-on-nonempty-result]] | Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps. | draft | 2026-05-03 | 3 |
 | [[conditional-run-optional-step]] | Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch. | draft | 2026-05-03 | 4 |
 | [[derive-parameter-from-file]] | Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters. | draft | 2026-05-03 | 3 |
 | [[map-workflow-enum-to-tool-parameter]] | Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets. | draft | 2026-05-03 | 3 |
