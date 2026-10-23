@@ -20,6 +20,7 @@ exclude: |
     content/research/[^/]+/(?!index\.md$)|
     packages/.*/test/fixtures/|
     workflow-fixtures/|
+    verification/workflows/[^/]+/test-data/|
     casts/|
     site/\.astro/|
     site/dist/|
