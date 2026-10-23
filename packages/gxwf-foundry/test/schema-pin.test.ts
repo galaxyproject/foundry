@@ -4,16 +4,23 @@
 import { createHash } from "node:crypto";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { buildProgram } from "../src/program.js";
 import { summaryNextflowSchema } from "@galaxy-foundry/summarize-nextflow";
-import { galaxyToolSummarySchema } from "../src/index.js";
+import { testsSchema } from "@galaxy-tool-util/schema";
+import { galaxyToolSummarySchema, testsFormatSchema } from "../src/index.js";
 import { SCHEMA_SKEW_EXIT, schemaSha256 } from "../src/lib/schema-pin.js";
 
 const MINIMAL = fileURLToPath(
   new URL("./fixtures/galaxy-tool-summary/minimal.json", import.meta.url),
 );
 const WRONG = "0".repeat(64);
+
+// An installed upstream whose tests schema moved past Foundry's snapshot.
+vi.mock("@galaxy-tool-util/schema", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@galaxy-tool-util/schema")>();
+  return { ...actual, testsSchema: { ...actual.testsSchema, $comment: "upstream drift" } };
+});
 
 class Exited extends Error {
   constructor(readonly code: number) {
@@ -102,5 +109,20 @@ describe("--schema-sha256", () => {
       .filter((c) => !c.options.some((o) => o.long === "--schema-sha256"))
       .map((c) => c.name());
     expect(missing).toEqual([]);
+  });
+
+  it("pins validate-tests-format to the upstream schema it validates against", async () => {
+    const snapshot = await run(
+      "validate-tests-format",
+      "--schema-sha256",
+      schemaSha256(testsFormatSchema),
+    );
+    expect(snapshot.code).toBe(SCHEMA_SKEW_EXIT);
+    const upstream = await run(
+      "validate-tests-format",
+      "--schema-sha256",
+      schemaSha256(testsSchema),
+    );
+    expect(upstream.code).toBe(0);
   });
 });

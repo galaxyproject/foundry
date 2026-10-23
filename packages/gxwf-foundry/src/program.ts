@@ -6,6 +6,7 @@ import { runValidateMarkdown } from "./commands/validate-markdown.js";
 import { runValidateWorkflowBrief } from "./commands/validate-workflow-brief.js";
 import { Command } from "commander";
 import { summaryNextflowSchema } from "@galaxy-foundry/summarize-nextflow";
+import { testsSchema } from "@galaxy-tool-util/schema";
 import {
   galaxyToolDiscoverySchema,
   galaxyToolSummarySchema,
@@ -13,7 +14,6 @@ import {
   summaryCwlSchema,
   summaryGalaxyWorkflowSchema,
   testDataRefsSchema,
-  testsFormatSchema,
   workflowBriefSchema,
 } from "./index.js";
 import { attachSchemaPin } from "./lib/schema-pin.js";
@@ -137,7 +137,8 @@ export function buildProgram(): Command {
       )
       .argument("[tests.yml]"),
     "tests-format",
-    testsFormatSchema,
+    // validateTestsFile compiles upstream's schema, not Foundry's snapshot.
+    testsSchema,
   )
     .option("--workflow <path>", "Workflow file to cross-check inputs/outputs against")
     .option("--json", "Emit machine-readable JSON report", false)
