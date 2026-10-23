@@ -33,6 +33,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Map Nextflow container/conda evidence to Galaxy UDT container and package provenance. Use when: a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.
 - `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
 - `references/notes/galaxy-user-tool-critique.md`: Research note copied verbatim into the bundle. Clarity and idiomaticity criteria, and the text-versus-structural test for each proposed fix. Use when: after the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.
+- `references/notes/galaxy-user-tool-workflow-binding.md`: Research note copied verbatim into the bundle. Register an authored tool through `/api/unprivileged_tools`, not the admin-only `/api/dynamic_tools`, when it must run on a server outside a workflow step. Use when: the caller asks to register, upload, or run the authored tool on a Galaxy server instead of embedding it in a workflow step.
 
 ## Validation
 
@@ -99,7 +100,7 @@ Write `galaxy-user-tool.yml` with the validated and critic-reviewed `GalaxyUserT
 
 The artifact should be ready for the downstream harness or Galaxy runtime to load as a user-defined tool. Include unresolved assumptions only when they are truthful and actionable. Otherwise fail instead of emitting a misleading tool.
 
-The file is handed on as written. implement-galaxy-tool-step embeds it under the workflow step's `run:`, so it does not need registering with a Galaxy server first, and its `id` and `version` are what identify the tool in the workflow.
+The file is handed on as written. implement-galaxy-tool-step embeds it under the workflow step's `run:`, so it does not need registering with a Galaxy server first, and its `id` and `version` are what identify the tool in the workflow. To register or run it on a server by itself, follow galaxy-user-tool-workflow-binding.
 
 ### Non-goals
 

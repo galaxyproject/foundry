@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 6,
-    "content_hash": "4965b3938a84b35f0b41d58cd6ad19902b94551b00bb04ddbe16890fde883d2d",
-    "commit": "32db4d564c3d1431e552e521852e8ba11567f16b"
+    "revision": 7,
+    "content_hash": "9902b753cdc5228221107dd8c26785173985734aab8775380ab8a3529e93d7c7",
+    "commit": "7cbb53a2107d14c2458218eb9799c9f34949ef7d"
   },
-  "cast_at": "2026-09-24T13:50:53.889Z",
+  "cast_at": "2026-10-23T22:57:05.239Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -78,6 +78,21 @@
       "trigger": "After the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.",
       "src_hash": "94b047cc268b0f788e8d596b9e809b4764c68b94e8bd4f819c2f9af59d559a11",
       "dst_hash": "94b047cc268b0f788e8d596b9e809b4764c68b94e8bd4f819c2f9af59d559a11",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-user-tool-workflow-binding]]",
+      "src": "content/research/galaxy-user-tool-workflow-binding/index.md",
+      "dst": "references/notes/galaxy-user-tool-workflow-binding.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Register an authored tool through `/api/unprivileged_tools`, not the admin-only `/api/dynamic_tools`, when it must run on a server outside a workflow step.",
+      "trigger": "When the caller asks to register, upload, or run the authored tool on a Galaxy server instead of embedding it in a workflow step.",
+      "src_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
+      "dst_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
       "source": "deterministic"
     },
     {
