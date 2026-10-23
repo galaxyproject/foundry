@@ -15,7 +15,7 @@ Verifies `[[cleanup-sync-and-publish-nonempty-results]]` as one chain: Filter Em
 ## Case 2: no sample has hits
 
 - `kept_ids` and `report_ids` are zero bytes, which proves the cleaned and paired collections are empty. The test does not assert `element_count: 0`, because Galaxy's collection check skips a count of zero.
-- `no_results_note` is gated on `$(!inputs.when)` and must contain `False`, as in the gate fixture. Planemo does not expose a `false` boolean output, and the skipped `report` output is not asserted.
+- `no_results_note` is gated on `$(!inputs.when)` and must contain `False`. Planemo does not expose a `false` boolean output, and the skipped `report` output is not asserted.
 
 Filter Failed is not exercised, because an errored dataset fails a Planemo test.
 

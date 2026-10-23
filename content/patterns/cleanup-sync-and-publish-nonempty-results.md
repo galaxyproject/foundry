@@ -38,9 +38,12 @@ iwc_exemplars:
       - id: 17
       - id: 19
       - id: 36
-      - label: "Krona SSU SILVA"
-      - label: "HDF5 SSU SILVA"
-    why: "Step 12 drops empty SSU BED results, step 15 lists the survivors, and step 17 filters the 'Processed sequences' input to them so bedtools getfasta (step 19) pairs each BED with its own sample's sequences. Steps 13, 16, 18, and 20 repeat this for LSU. Later, subworkflow 36 derives a boolean from the cleaned Krona-format MAPseq output, and the Krona and BIOM export steps each carry their own when."
+      - id: 41
+      - id: 42
+        label: "Krona SSU SILVA"
+      - id: 45
+        label: "HDF5 SSU SILVA"
+    why: "Step 12 drops empty SSU BED results, step 15 lists the survivors, and step 17 filters the 'Processed sequences' input to them so bedtools getfasta (step 19) pairs each BED with its own sample's sequences. Steps 13, 16, 18, and 20 repeat this for LSU. Later, subworkflow 36 counts the cleaned Krona-format MAPseq output (step 28) to gate Krona SSU SILVA, and subworkflow 41 counts a separately cleaned table (step 35) to gate the HDF5 and JSON BIOM conversions."
     confidence: high
 ---
 
@@ -167,7 +170,7 @@ Derive the boolean from the collection the report step reads. In the verified wo
   when: $(inputs.when)
 ```
 
-Each step needs its own `when:`. A skipped step produces a `null` placeholder, and a step that reads it runs anyway, as [[conditional-transform-or-pass-through]] describes. MGnify puts the same boolean on each of its BIOM conversion steps as well as on Krona.
+Each step needs its own `when:`. A skipped step produces a `null` placeholder, and a step that reads it runs anyway, as [[conditional-transform-or-pass-through]] describes. MGnify gives each Krona and BIOM step its own `when`, fed by the subworkflow that counts the collection that step reads.
 
 ## Pitfalls
 
