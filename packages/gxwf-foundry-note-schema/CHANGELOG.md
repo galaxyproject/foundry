@@ -1,5 +1,28 @@
 # @galaxy-foundry/gxwf-foundry-note-schema
 
+## 0.4.0
+
+### Minor Changes
+
+- [#681](https://github.com/galaxyproject/foundry/pull/681) [`87da8f9`](https://github.com/galaxyproject/foundry/commit/87da8f91ad1e0bb73f7ccd98c754aff6d1ca4f90) Thanks [@jmchilton](https://github.com/jmchilton)! - Export the pipeline harness assembly contract: `AssemblyManifest`, the
+  `AssemblyPhase` union of `AssemblyMoldPhase` and `AssemblyBranchPhase`, the
+  `ASSEMBLY_FILE` name, and `loadAssemblyManifest(file, pipeline)`, which reads an
+  `_assembly.json` and throws when it is missing or is not that pipeline's
+  assembly. The assembler, the build CLI's readers and the site now share these
+  instead of each declaring the shape.
+
+- [#605](https://github.com/galaxyproject/foundry/pull/605) [`f69bea3`](https://github.com/galaxyproject/foundry/commit/f69bea36b279ed9badbc7bfca330133e8a520359) Thanks [@jmchilton](https://github.com/jmchilton)! - Require each pipeline note to carry exactly one `journey/*` tag (`direct-build`, `plan`, `build-from-plan`, or `existing-workflow`). Pipeline notes without a journey tag, or with more than one, now fail validation. Accompanies the restored direct Galaxy pipeline routes and the optional Workflow Brief planning journey.
+
+- [#569](https://github.com/galaxyproject/foundry/pull/569) [`4a7a486`](https://github.com/galaxyproject/foundry/commit/4a7a486b95c29860e7796c54c2fd587ae6af3dfa) Thanks [@mvdbeek](https://github.com/mvdbeek)! - Allow a runtime artifact to declare an always-on `harness` producer alongside the
+  existing opt-in `runtime-mode` one. A `runtime-mode` artifact names the flag that
+  turns it on; a `harness` artifact is written on every run and must not name one.
+  Adds `runtimeProducerId` and `runtimeModeOption` so consumers read the producer
+  token and the flag name without narrowing the union themselves.
+
+  `RuntimeArtifactDefinition.producer` is now a union, so `producer.option` no
+  longer typechecks without narrowing on `producer.kind`. Read the flag with
+  `runtimeModeOption(artifact)`, which returns null for a `harness` artifact.
+
 ## 0.3.0
 
 ### Minor Changes

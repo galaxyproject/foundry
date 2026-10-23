@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-08-19
-revision: 6
+revised: 2026-10-22
+revision: 7
 summary: "gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief."
 input_artifacts:
   - id: freeform-summary
@@ -52,6 +52,15 @@ references:
     purpose: "Validate the emitted draft against draft-contract rules (sentinel form, topology, _plan_* placement) before handing off."
     trigger: "After writing or modifying the draft workflow file."
     verification: "Cast the skill, run on a representative paper-derived summary, confirm draft-validate diagnostics route back."
+  - kind: cli-command
+    ref: "[[draft-next-step]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Confirm the per-step loop can walk the emitted draft: it descends into draft subworkflows and reports the picked step's full path, so nesting steps in a subworkflow does not hide them from the loop."
+    trigger: "When deciding whether to group steps into a subworkflow, or after writing the draft to confirm the loop picks a step."
+    verification: "Cast the skill, emit a draft with a drafty step inside a subworkflow, confirm draft-next-step returns that step's full path."
   - kind: research
     ref: "[[open-requirements-ledger]]"
     used_at: runtime

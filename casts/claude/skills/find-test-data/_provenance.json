@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 5,
-    "content_hash": "dab7a03bc9d3382c07b335054c5e1d4b63ddc9ba50a8a703a5895573d44318be",
-    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
+    "revision": 8,
+    "content_hash": "854238aee01711044de686f74e789e843f19613e6740722b7d95e68d7ad89e03",
+    "commit": "2f8792a62ca53f074605ddbcfb25e75871f52b24"
   },
-  "cast_at": "2026-09-23T16:20:44.844Z",
+  "cast_at": "2026-10-22T03:17:18.861Z",
   "refs": [
     {
       "kind": "research",
@@ -36,8 +36,24 @@
       "evidence": "corpus-observed",
       "purpose": "Match IWC test-data conventions — Zenodo/remote-URL first, SHA-1 integrity, per-input collection layout — when selecting or describing candidate fixtures.",
       "trigger": "When choosing where test data should come from or describing the shape a candidate file must have.",
-      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
-      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[test-data-refs]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testDataRefsSchema",
+      "dst": "references/schemas/test-data-refs.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.",
+      "verification": "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it.",
+      "license": "MIT",
+      "src_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "dst_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
       "source": "deterministic"
     }
   ],
@@ -47,13 +63,25 @@
         "id": "test-data-refs",
         "kind": "json",
         "default_filename": "test-data-refs.json",
-        "description": "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring."
+        "schema": "[[test-data-refs]]",
+        "description": "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring. Carries forward, unchanged, every entry an earlier leg resolved."
       }
     ],
     "consumes": [
       {
+        "id": "workflow-brief",
+        "description": "Reviewed Workflow Brief when running the brief-driven Galaxy path; mine only its selected input and fixture requirements.",
+        "optional": true,
+        "inherited_schema": "[[workflow-brief-schema]]",
+        "producers": [
+          "freeform-summary-to-workflow-brief",
+          "nextflow-summary-to-workflow-brief"
+        ]
+      },
+      {
         "id": "freeform-summary",
         "description": "Source summary from [[summarize-paper]] / [[interview-to-freeform-summary]]; mine its sample-data, public-data-candidate, accession, and data-sizing guidance — this is where the source's dataset evidence lives (the design briefs strip it).",
+        "optional": true,
         "producers": [
           "interview-to-freeform-summary",
           "summarize-paper"
@@ -62,6 +90,7 @@
       {
         "id": "summary-nextflow",
         "description": "Source summary from [[summarize-nextflow]]; mine its test candidate set, explicit selection, and sample-data evidence when running the NEXTFLOW → GALAXY pipeline.",
+        "optional": true,
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
@@ -70,6 +99,7 @@
       {
         "id": "summary-cwl",
         "description": "Source summary from [[summarize-cwl]]; mine its test-data / sample-data evidence when running the CWL → GALAXY pipeline.",
+        "optional": true,
         "inherited_schema": "[[summary-cwl]]",
         "producers": [
           "summarize-cwl"
@@ -77,9 +107,16 @@
       },
       {
         "id": "freeform-galaxy-interface",
-        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the PAPER / INTERVIEW → GALAXY pipelines.",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the direct PAPER / INTERVIEW → GALAXY pipelines.",
         "producers": [
           "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "workflow-brief-galaxy-interface",
+        "description": "Galaxy interface brief from [[workflow-brief-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for a Workflow-Brief-driven Galaxy path.",
+        "producers": [
+          "workflow-brief-to-galaxy-interface"
         ]
       },
       {
@@ -94,6 +131,18 @@
         "description": "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] pinning input labels, collection shapes, and datatypes for the CWL → GALAXY pipeline.",
         "producers": [
           "cwl-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "test-data-refs",
+        "description": "Refs from the chain's source-specific leg ([[nextflow-to-test-data]], [[cwl-to-test-data]], [[paper-to-test-data]]) when the pipeline has one. Keep its resolved entries unchanged and search only for its unresolved inputs. Absent when this Mold is the chain's first leg.",
+        "optional": true,
+        "inherited_schema": "[[test-data-refs]]",
+        "producers": [
+          "cwl-to-test-data",
+          "find-test-data",
+          "nextflow-to-test-data",
+          "paper-to-test-data"
         ]
       }
     ]

@@ -1,0 +1,4 @@
+OTU	Superkingdom	Kingdom	Phylum	Class	Order	Family	Genus	Species
+OTU_12	sk__Bacteria		p__Firmicutes				g__Lacto	s__alpha
+OTU_13	sk__Bacteria	k__Bacteria	p__Proteobacteria	c__Gamma	o__Entero	f__Entero	g__Escherichia	s__coli
+OTU_14		k__Bacteria				f__Family		s__Species

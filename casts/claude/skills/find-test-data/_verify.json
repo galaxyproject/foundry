@@ -24,6 +24,46 @@
         "validate-summary-nextflow",
         "{artifact_path}"
       ]
+    },
+    {
+      "artifact_id": "test-data-refs",
+      "direction": "input",
+      "kind": "json",
+      "default_filename": "test-data-refs.json",
+      "schema": "[[test-data-refs]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-test-data-refs",
+        "--schema-sha256",
+        "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+        "{artifact_path}"
+      ]
+    },
+    {
+      "artifact_id": "workflow-brief",
+      "direction": "input",
+      "kind": "markdown",
+      "default_filename": "workflow-brief.md",
+      "schema": "[[workflow-brief-schema]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-workflow-brief",
+        "{artifact_path}"
+      ]
+    },
+    {
+      "artifact_id": "test-data-refs",
+      "direction": "output",
+      "kind": "json",
+      "default_filename": "test-data-refs.json",
+      "schema": "[[test-data-refs]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-test-data-refs",
+        "--schema-sha256",
+        "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+        "{artifact_path}"
+      ]
     }
   ]
 }

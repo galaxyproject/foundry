@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
-    "revision": 8,
-    "content_hash": "966c486ccda2eb1e0f06afa674c5d6b85a7e7bfcc9b1545309e3ef8b1016f931",
-    "commit": "dd3d8eaf62dd85bf4eb631b956e7c6bf2f994dd4"
+    "revision": 11,
+    "content_hash": "34855691581889d36265e00178088b8a52a51ee72119329261bca186f7cb480e",
+    "commit": "47aa5c1cf419386ea72929c8ee34aec0db65588f"
   },
-  "cast_at": "2026-09-23T16:20:45.773Z",
+  "cast_at": "2026-10-22T03:42:28.350Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style.",
       "trigger": "When writing or revising the job/input side of a Galaxy workflow test file.",
-      "src_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
-      "dst_hash": "d2a3f38968204ea6344a6948e6e834c717867c6ba0c5140b2650fd4731bece5f",
+      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
       "source": "deterministic"
     },
     {
@@ -104,8 +104,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose assertion families, tolerance magnitudes, and the static/Planemo validation loop.",
       "trigger": "When writing or revising output assertions for a Galaxy workflow test file.",
-      "src_hash": "4da914a226c93cca8a1cc2823043429c05da712e3ef051724d15959a7aef5b09",
-      "dst_hash": "4da914a226c93cca8a1cc2823043429c05da712e3ef051724d15959a7aef5b09",
+      "src_hash": "9a6363854dcbeb01e1e590dc5bc0f5d7d0ec9675c4828ad2a8be8fa8022a61df",
+      "dst_hash": "9a6363854dcbeb01e1e590dc5bc0f5d7d0ec9675c4828ad2a8be8fa8022a61df",
       "source": "deterministic"
     },
     {
@@ -135,8 +135,8 @@
       "purpose": "Input contract: read the schema-valid Galaxy test plan (job inputs, expected outputs, assertion intent, tolerances, label assumptions, unresolved mappings, omissions) and convert it into tests-format output, reconciling assumed labels and fixtures against the real draft.",
       "verification": "Consume a cast test plan from a *-test-to-galaxy-test-plan Mold and confirm tests-format output can be authored from it without re-reading the source summary.",
       "license": "MIT",
-      "src_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
-      "dst_hash": "325e9cf1bb5e075fa818dc68868647de95389ca8df8581ee8cf1e2be61196e37",
+      "src_hash": "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
+      "dst_hash": "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
       "source": "deterministic"
     },
     {
@@ -151,8 +151,8 @@
       "purpose": "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
-      "dst_hash": "ff0de5041f4c3de0ab7abe9e7555c5a7120665b077f42661461301b0fb26f372",
+      "src_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
+      "dst_hash": "f86dd6a8111919264030609bab6ab970b015f6f66d324b5e2f721d4f62ab3cbc",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
@@ -175,7 +175,8 @@
           "changeset-to-galaxy-test-plan",
           "cwl-test-to-galaxy-test-plan",
           "freeform-summary-to-galaxy-test-plan",
-          "nextflow-test-to-galaxy-test-plan"
+          "nextflow-test-to-galaxy-test-plan",
+          "workflow-brief-to-galaxy-test-plan"
         ]
       },
       {
@@ -189,6 +190,7 @@
       {
         "id": "test-data-refs",
         "description": "Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.",
+        "inherited_schema": "[[test-data-refs]]",
         "producers": [
           "cwl-to-test-data",
           "find-test-data",

@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-08-19
-revision: 3
+revised: 2026-09-22
+revision: 5
 summary: "Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs."
 input_artifacts:
   - id: galaxy-workflow-draft
@@ -83,6 +83,7 @@ references:
     trigger: "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on."
 related_molds:
   - "[[freeform-summary-to-galaxy-template]]"
+  - "[[workflow-brief-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[compare-against-iwc-exemplar]]"
 ---

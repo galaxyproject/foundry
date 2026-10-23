@@ -10,6 +10,20 @@
       "validator_bin": "foundry",
       "args": [
         "validate-galaxy-workflow-test-plan",
+        "--schema-sha256",
+        "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
+        "{artifact_path}"
+      ]
+    },
+    {
+      "artifact_id": "test-data-refs",
+      "direction": "input",
+      "kind": "json",
+      "default_filename": "test-data-refs.json",
+      "schema": "[[test-data-refs]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-test-data-refs",
         "{artifact_path}"
       ]
     }

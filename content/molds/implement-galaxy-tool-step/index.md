@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-24
-revision: 10
+revised: 2026-10-23
+revision: 11
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool."
 input_artifacts:
   - id: galaxy-tool-summary
@@ -54,6 +54,14 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `state` shape."
+  - kind: schema
+    ref: "[[parsed-tool]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Field-level shape of the `ParsedTool` payload under the summary's `parsed_tool`, which [[galaxy-tool-summary]] leaves as a placeholder: port names, datatypes, and a conditional's `whens[]` (`discriminator`, `is_default_when`) in declaration order."
+    trigger: "When reading a field of `parsed_tool`, including a conditional's case index or default case."
   - kind: cli-command
     ref: "[[draft-validate]]"
     used_at: runtime
@@ -138,12 +146,12 @@ Single step in scope. This Mold owns the chosen step and the wiring that connect
 ## Sequence
 
 1. **Read the step's plan.** From the [[galaxy-workflow-draft]], take the chosen step's deferred evidence: `_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`, and any `TODO_*` slots the template or data-flow brief left for this phase.
-2. **Bind to the tool summary.** Read the [[galaxy-tool-summary]] manifest: `parsed_tool` gives concrete input/output port names and datatypes; shape the step's `state` against `input_schemas.workflow_step_linked`. Set `tool_version`, and set `tool_id` — confirming or correcting an identity-pinned id rather than re-deriving a good pin from scratch. For a built-in/stock tool the `tool_id` is the bare id (`Filter1`, `Cut1`, collection ops) and `tool_version` must come from the summary's cached pin — never invent a stock version; the summary already resolved it against the shed via [[summarize-galaxy-tool]]. If `input_schemas` is `null`, consult `warnings[]` for why before binding by hand.
+2. **Bind to the tool summary.** Read the [[galaxy-tool-summary]] manifest: `parsed_tool` gives concrete input/output port names and datatypes; shape the step's `state` against `input_schemas.workflow_step_linked`. Set `tool_version`, and set `tool_id` — confirming or correcting an identity-pinned id rather than re-deriving a good pin from scratch. For a built-in/stock tool the `tool_id` is the bare id (`Filter1`, `Cut1`, collection ops) and `tool_version` must come from the summary's cached pin — never invent a stock version; the summary already resolved it against the shed via [[summarize-galaxy-tool]]. If `input_schemas` is `null`, consult `warnings[]` for why before binding by hand. Read a conditional's cases from `parsed_tool`, not the wrapper XML ([[parsed-tool]]): its index in `whens[]` is the case index, and `is_default_when` marks the default, which need not be case 0.
 
    **Authored user-defined tool.** When the wrapper is a `galaxy-user-tool-definition` from [[author-galaxy-tool-wrapper]], there is no tool summary and no toolbox id to bind. Follow [[galaxy-user-tool-workflow-binding]]: embed the `galaxy-user-tool.yml` document unchanged under the step's `run:`, and remove `tool_id`, `tool_version`, and `tool_shed_repository` along with any `TODO` in them. Take `in:` keys from the definition's data and collection input names, list every output a consumer uses under `out:` by its output name, and set non-data values in `state` by input name. Never name the tool by `tool_uuid`, `tool_id`, or `content_id` alone, and do not register the tool to obtain a `uuid`.
 3. **Wire ports.** Connect the step's inputs to their upstream producers and its outputs to downstream consumers per the `_plan_in` / `_plan_out` intent, using real wrapper port names. Preserve collection mapping and reduction semantics ([[galaxy-collection-semantics]]); for a source-derived shape, check the chosen input/output can actually carry the intended File / list / paired / list:paired shape ([[nextflow-to-galaxy-channel-shape-mapping]]).
 4. **Close shape gaps.** When a direct tool connection cannot express the needed shape, insert a built-in collection-operation step ([[galaxy-collection-tools]]); for identifier-derived reshaping — regex parsing, nesting swaps, paired assignment — use Apply Rules ([[galaxy-apply-rules-dsl]]); for a transform traced to a Nextflow operator (map, join, groupTuple, branch, mix, combine, multiMap), turn it into concrete wiring or a review request via [[nextflow-operators-to-galaxy-collection-recipes]]. A built-in step inserted here is itself a stock tool: resolve its concrete `tool_version` through the galaxy-tool-cache flow ([[summarize-galaxy-tool]] on the bare id) rather than guessing — or leave it draft-tier for the next loop iteration to realize.
-5. **Preserve testability.** Keep output labels and collection element identifiers stable and addressable ([[galaxy-workflow-testability-design]]). Do not rename a labeled output, drop a checkpoint, or make a final output too weakly assertable just to satisfy this step's wiring.
+5. **Preserve testability.** Keep output labels and collection element identifiers stable and addressable ([[galaxy-workflow-testability-design]]). Do not rename a labeled output, drop a checkpoint, or make a final output too weakly assertable just to satisfy this step's wiring. A dataset `rename:` names the output after an input with `#{input}`, or uses a workflow parameter with `${label}`. Tool-XML label variables such as `${on_string}` are not rename variables; Galaxy treats them as untyped run-time parameters ([[gxformat2-schema]]).
 6. **Validate.** Run [[draft-validate]] `--concrete` over the mutated draft: it checks draft-contract rules and gates the extracted concrete subset — including the step just implemented — against full gxformat2. On green, return the draft for the next loop iteration; on red, route the diagnostic back to whichever decision above it implicates. With the gxwf version this skill was built against, `--concrete` crashes instead of reporting when any step in the draft embeds a `GalaxyUserTool`. Run the checks [[galaxy-user-tool-workflow-binding]] lists as working, and record the skipped concrete validation in the [[open-requirements-ledger]] rather than reading the crash as a verdict on the step.
 
 ## Failure ownership

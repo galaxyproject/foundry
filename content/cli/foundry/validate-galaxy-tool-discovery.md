@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-05-11
-revised: 2026-08-04
-revision: 2
+revised: 2026-10-23
+revision: 3
 summary: "AJV gate for discover-shed-tool recommendation documents."
 related_notes:
   - "[[galaxy-tool-discovery]]"
@@ -20,7 +20,7 @@ Validate a tool-discovery recommendation against the [[galaxy-tool-discovery]] s
 
 ## Output
 
-Prints `<path>: valid` to stdout on success (exit `0`). Schema failure: stderr diagnostics, exit `3`. Input errors exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). Schema failure: stderr diagnostics, exit `3`. Input errors exit `1`. With `--schema-sha256 <hex>` it first compares the hash of the schema it carries against `<hex>`, the pin a cast bundle records in `_verify.json`: a mismatch exits `4` without validating, because the validator and the bundle disagree about the contract (see [[schema-packages]]). Given the pin and no artifact, it checks only the pin.
 
 ## Examples
 

@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 10,
-    "content_hash": "889f1817fe82061204ad63687b46a71c0985e5fec07a569bca40d905cd528d97",
-    "commit": "69fb53396854bd5d1ce4b35647a8c4611f9899aa"
+    "revision": 11,
+    "content_hash": "f83e464f6580751f5cdc718f74df6dae1f61f5cb831011d0a7b55c72eecd8a36",
+    "commit": "26b7c6cb5e6473adfc546f51df7b0c2a279e278d"
   },
-  "cast_at": "2026-09-24T17:15:27.269Z",
+  "cast_at": "2026-10-23T22:52:17.145Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -37,8 +37,8 @@
       "evidence": "corpus-observed",
       "purpose": "Implement identifier-derived collection reshaping via Apply Rules.",
       "trigger": "When collection element identifiers need regex parsing, nesting-level swaps, regrouping, or paired identifier assignment.",
-      "src_hash": "7e166c0495b4a5366f49fed4d002419a27cb33fb8eb431374878c1890a5f95a6",
-      "dst_hash": "7e166c0495b4a5366f49fed4d002419a27cb33fb8eb431374878c1890a5f95a6",
+      "src_hash": "cd61c61b4613694c685d51cc7dea9c997b3350be04135f387135eed9d9052910",
+      "dst_hash": "cd61c61b4613694c685d51cc7dea9c997b3350be04135f387135eed9d9052910",
       "source": "deterministic"
     },
     {
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Insert built-in Galaxy collection-operation steps when a direct tool connection cannot express the needed shape.",
       "trigger": "When a step needs collection construction, filtering, extraction, zipping, unzipping, flattening, merging, or relabeling.",
-      "src_hash": "457439b3c3bb23ecf9732d7c7d6e0b8fae976b6e9e26f1b6af2d818843fba601",
-      "dst_hash": "457439b3c3bb23ecf9732d7c7d6e0b8fae976b6e9e26f1b6af2d818843fba601",
+      "src_hash": "ca52bc372ad0aa6dc6f0a036a5b5ee499090a36bd3e31cd0215a393c19271531",
+      "dst_hash": "ca52bc372ad0aa6dc6f0a036a5b5ee499090a36bd3e31cd0215a393c19271531",
       "source": "deterministic"
     },
     {
@@ -104,8 +104,8 @@
       "evidence": "corpus-observed",
       "purpose": "Preserve concrete tool/job failure evidence while implementing step labels, tool ids, output labels, and collection wiring.",
       "trigger": "When a selected wrapper has explicit failure semantics, dynamic outputs, non-default stdio rules, strict-shell behavior, or runtime-only failure risk.",
-      "src_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
-      "dst_hash": "bf6530fca24f40780836e92d8d263f789038a6e0a722351ab8e8c9aa42646e2c",
+      "src_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
+      "dst_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
       "source": "deterministic"
     },
     {
@@ -180,8 +180,8 @@
       "evidence": "hypothesis",
       "purpose": "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs — the fall-through to topology repair, in place of fabricating the missing evidence.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
-      "dst_hash": "e1d5e3a4d6d650af5b2efc4703fe6f79bb4d0cc12e6cd14e841c5b91df122ea0",
+      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
       "source": "deterministic"
     },
     {
@@ -212,6 +212,24 @@
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
       "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
       "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[parsed-tool]]",
+      "src": "package://@galaxy-tool-util/schema#parsedToolSchema",
+      "dst": "references/schemas/parsed-tool.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Field-level shape of the `ParsedTool` payload under the summary's `parsed_tool`, which [[galaxy-tool-summary]] leaves as a placeholder: port names, datatypes, and a conditional's `whens[]` (`discriminator`, `is_default_when`) in declaration order.",
+      "trigger": "When reading a field of `parsed_tool`, including a conditional's case index or default case.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "3966d0c425e561891113f5c71a2d36a42c00a78cb744bb8970c577b46abcff9b",
+      "dst_hash": "3966d0c425e561891113f5c71a2d36a42c00a78cb744bb8970c577b46abcff9b",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }
@@ -259,7 +277,8 @@
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-template"
         ]
       },
       {
@@ -282,7 +301,10 @@
           "nextflow-summary-to-galaxy-interface",
           "nextflow-summary-to-galaxy-reference-data",
           "nextflow-summary-to-galaxy-template",
-          "repair-galaxy-draft-topology"
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
         ]
       }
     ]

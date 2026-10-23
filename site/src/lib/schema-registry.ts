@@ -8,11 +8,14 @@ import galaxyToolDiscoverySchema from '../../../packages/gxwf-foundry/src/schema
 import galaxyToolSummarySchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json';
 import galaxyWorkflowTestPlanSchema from '../../../packages/gxwf-foundry/src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json';
 import summaryCwlSchema from '../../../packages/gxwf-foundry/src/schemas/summary-cwl/summary-cwl.schema.json';
+import testDataRefsSchema from '../../../packages/gxwf-foundry/src/schemas/test-data-refs/test-data-refs.schema.json';
 import testsFormatSchema from '../../../packages/gxwf-foundry/src/schemas/tests-format/tests.schema.json';
 import castProvenanceSchema from '../../../scripts/lib/schemas/cast-provenance.schema.json';
 import foundryPkg from '../../../packages/gxwf-foundry/package.json';
 import summaryNextflowSchema from '../../../packages/summarize-nextflow/src/schema/summary-nextflow.schema.json';
 import summarizeNextflowPkg from '../../../packages/summarize-nextflow/package.json';
+import { workflowBriefSchema } from '../../../packages/gxwf-foundry/src/workflow-brief';
+import type { MarkdownDocumentSchema } from '../../../packages/gxwf-foundry/src/markdown-document';
 
 export interface SchemaEntry {
   schema: Record<string, unknown>;
@@ -21,6 +24,10 @@ export interface SchemaEntry {
 
 const foundryVersion = (foundryPkg as { version?: string }).version ?? '';
 const summarizeNextflowVersion = (summarizeNextflowPkg as { version?: string }).version ?? '';
+
+export const markdownSchemaRegistry: Record<string, { schema: MarkdownDocumentSchema; version: string }> = {
+  'workflow-brief': { schema: workflowBriefSchema, version: foundryVersion },
+};
 
 export const schemaRegistry: Record<string, SchemaEntry> = {
   'tests-format': {
@@ -45,6 +52,10 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   },
   'galaxy-workflow-test-plan': {
     schema: galaxyWorkflowTestPlanSchema as unknown as Record<string, unknown>,
+    version: foundryVersion,
+  },
+  'test-data-refs': {
+    schema: testDataRefsSchema as unknown as Record<string, unknown>,
     version: foundryVersion,
   },
   'cast-provenance': {

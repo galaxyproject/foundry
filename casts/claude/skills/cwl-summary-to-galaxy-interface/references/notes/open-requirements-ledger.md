@@ -5,20 +5,22 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-08-29
-revision: 3
+revised: 2026-10-19
+revision: 5
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
   - "[[implement-galaxy-tool-step]]"
-summary: "Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously."
+summary: "Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state."
 ---
 
 # Open-requirements ledger
 
-The `open-requirements-ledger` is a single artifact threaded through the source→Galaxy pipeline that records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar — and **source work it decided not to carry**. Each Mold that surfaces one **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact.
+The `open-requirements-ledger` is the carried workflow-run knowledge artifact threaded through the source→Galaxy pipeline. It records **obligations the pipeline has taken on but not yet met** — a declared output with no producer, a parameter whose value the source never pinned, a tool with no corpus exemplar — and **source work it decided not to carry**. It also records evidence discovered during implementation, decisions made within the approved scope, and recommended changes to an immutable Workflow Brief. Each Mold that surfaces an obligation **appends** it; each Mold whose decision closes one **marks it resolved**; the terminal path **surrenders** whatever remains open, explicitly, into the final artifact.
+
+This ledger is about the workflow being built. It is distinct from the opt-in `foundry-feedback-ledger`, which records actionable defects or friction in the Foundry assets building it. It is also not the harness's phase-progress tracker: execution status belongs to harness state, checkpoints, and reports rather than requirement entries.
 
 ## Framing: obligations the pipeline discharges, not questions a human answers
 
@@ -86,13 +88,68 @@ Provenance (`raised_by`, `resolved_by`) is the audit trail for *when* each oblig
 
 `blocking` separates the two grades of obligation the pipeline carries. A plain entry is an unmet need the chain can keep working around — an unpinned parameter, a missing exemplar. A **blocking** entry is a computability gap: a declared step output no wired input can supply, which `gxwf` validation cannot see because the connection graph knows ports connect, not what they carry. Omit `blocking` (or set it `false`) for a plain obligation. Only blocking entries drive topology-repair escalation, and only they are counted by the decreasing-blocker invariant.
 
+## Workflow-run knowledge beside obligations
+
+Not every fact learned during a run is an unmet requirement. Keep the existing `entries` list for obligations and dropped work whose `open | resolved | surrendered` lifecycle downstream Molds can act on. Record other workflow-side knowledge in separate top-level collections so it cannot accidentally participate in the blocking count or obligation lifecycle:
+
+```yaml
+discoveries:
+  - id: source-requires-paired-reads
+    raised_by: workflow-brief-to-galaxy-interface
+    evidence: "The selected source method consumes paired reads."
+    impact: "The interface design must preserve pairing."
+
+decisions:
+  - id: expose-pairing-as-collection
+    decided_by: workflow-brief-to-galaxy-interface
+    decision: "Represent each sample as a paired collection."
+    rationale: "This implements the approved sample-attributable objective."
+    evidence:
+      - source-requires-paired-reads
+
+brief_change_recommendations:
+  - id: require-paired-inputs
+    raised_by: workflow-brief-to-galaxy-interface
+    proposed_change: "State that inputs must be paired-end reads."
+    reason: "The selected method cannot meet the accepted outcome from single-end reads."
+    evidence:
+      - source-requires-paired-reads
+    status: proposed
+```
+
+A **discovery** is source or implementation evidence a later phase needs. A **decision** is a choice the run is authorized to make within the reviewed brief; it records rationale and supporting evidence. A **brief-change recommendation** identifies a change outside that authority. The implementation run may only create it with `status: proposed`; it must never mark the recommendation accepted or edit the brief. If correctness depends on the proposed change, stop the run and return it to the separate expert editing step.
+
+Do not use these collections as an undifferentiated activity journal. Classify each durable learning by its effect: evidence about the workflow is a discovery, an authorized choice is a decision, an unmet actionable need is an obligation entry, and a required change of expert intent is a brief-change recommendation. Ordinary phase progress is not workflow knowledge. A problem in a Mold, packaged reference, harness, or related project belongs in `foundry-feedback.ledger.yml` when feedback mode is enabled.
+
+### Workflow Brief open questions
+
+A reviewed Workflow Brief can leave choices in `### Open questions`, each with a proposed answer and its evidence ([[workflow-brief-design]]). The expert accepted each proposal by leaving it unedited, so it is reviewed intent rather than an agent guess. The first design Mold records every open question as a decision, so later Molds and the person reading the run can see what was assumed and why:
+
+```yaml
+decisions:
+  - id: keep-html-reports-only
+    decided_by: workflow-brief-to-galaxy-interface
+    open_question: "Should the FastQC zip archives be kept alongside the HTML reports?"
+    basis: brief-proposal     # brief-proposal | agent
+    decision: "Expose the HTML reports only."
+    rationale: "The brief's answer, accepted at review."
+```
+
+- `open_question` quotes the brief's question, so each question traces to exactly one current decision.
+- `basis: brief-proposal` adopts the brief's proposal. `basis: agent` records the Mold's own answer to a question with no proposal, as in a hand-authored brief.
+- `confidence: low` copies a proposal the brief marked low confidence, or marks an `agent` answer resting on thin evidence. Omit it otherwise. Never drop a low mark.
+- A Mold that finds an accepted proposal wrong, including the first design Mold while recording it, records a brief-change recommendation, because the expert accepted that answer. It keeps using the accepted answer. If correctness depends on the change, stop as described above.
+- A later Mold that finds an `agent` decision wrong records its own decision. That decision repeats `open_question` and sets `supersedes` to the earlier decision's `id`. The earlier decision stays as history, unlike a superseded obligation entry, which reopens. The current answer to a question is the decision that no other decision supersedes.
+
 ## How to use the ledger
 
 This section is the runtime protocol for every Mold that carries the ledger. A Mold's own page states only what is local to it — what raises an entry there, and what it does when it reads one; the mechanics are here.
 
-**Read it before you decide.** Ahead of the decisions this step owns, read the `open` entries. Ones bearing on those decisions are the ones you may be able to close. Never re-derive an obligation the chain already recorded — that re-derivation is the failure this artifact exists to end.
+**Read it before you decide.** Ahead of the decisions this step owns, read the `open` entries and the decisions that carry `open_question`. Open entries bearing on those decisions are the ones you may be able to close. A current open-question decision is the answer to follow. Never re-derive an obligation the chain already recorded — that re-derivation is the failure this artifact exists to end.
 
 **Start one when none is supplied.** Every carrying Mold declares the ledger as an input, but the first Mold in a run receives none. Its absence is not an error: start an empty ledger at the declared filename and proceed.
+
+**Preserve every collection.** Carry obligation entries, discoveries, decisions, brief-change recommendations, and run-level headers untouched unless this Mold is explicitly adding to or updating the relevant collection. Never reinterpret one category as another merely to close it.
 
 **Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies. Set `blocking: true` only for a computability gap.
 
@@ -167,7 +224,7 @@ The template Mold's computability review pass is the notable appender ahead of t
 - Decide whether the drops should be **counted**, not just labelled. `kind: dropped` and `units` make each cut legible one entry at a time; nothing totals them, so a run that drops a plane four times over still reports four reasonable-looking entries. A conservation rule — every source unit ends the run carried, subsumed, or surrendered, and the buckets sum to the source total — would make the aggregate visible the way `open_history` makes escalation visible. Deliberately not attempted here: labelling is cheap and may prove sufficient, counting needs a definition of "source unit" per source kind.
 - Decide whether entry structure should harden further (typed `unmet` / `missing`, links back to source-summary evidence, machine-checkable `status` transitions) once two or three worked runs exercise it. Hardening it would also give the producing Molds an `output_artifacts[].schema` to cite, which none carry today.
 - Assign terminal surrender of *non-blocking* entries. [[advance-galaxy-draft-step]] surrenders open blocking entries at the escalation cap, but an unpinned-parameter entry the design tier appended and nobody closed currently rides out the run without ever being marked `surrendered`. Nothing owns that pass today.
-- Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. Every design Mold still emits both, with no rule for which destination an unresolved choice belongs in.
+- Reconcile the design-tier briefs' free-text "open questions" sections with the ledger. A Workflow Brief's open questions now become ledger decisions (see **Workflow Brief open questions**), but every design Mold still emits its own open questions and ledger entries, with no rule for which destination an unresolved choice belongs in.
 - Decide whether the source-summary Molds should also emit structured entries, or keep their free-text open-questions until the design tier formalizes them.
 - Specify how surrendered entries surface in the runnable gxformat2 (a workflow-level annotation, a report output, or a sidecar) when the draft is stripped of `_plan_*` and TODO sentinels.
 - Move the `topology_repair` escalation budget out of the ledger and into the draft (a workflow-level annotation) so it travels with the artifact it bounds; the ledger home is a v1 expedient.

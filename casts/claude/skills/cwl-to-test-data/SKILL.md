@@ -18,7 +18,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Outputs
 
-- Write artifact `test-data-refs` as `test-data-refs.json`. Format: `json`. Test data resolved from the CWL source's declared test cases, expressed as URLs/paths plus expected shapes for downstream test authoring. Shared id with find-test-data — the branch's search fallback fills only the inputs this Mold leaves unresolved.
+- Write artifact `test-data-refs` as `test-data-refs.json`. Format: `json`. Schema: test-data-refs. Test data resolved from the CWL source's declared test cases, expressed as URLs/paths plus expected shapes for downstream test authoring. Shared id with find-test-data — the branch's search fallback fills only the inputs this Mold leaves unresolved.
 
 ## Required Tools
 
@@ -27,6 +27,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/schemas/summary-cwl.schema.json`: Schema file copied verbatim into the bundle. Input contract: read `tests[]` — each case's `job_path` inputs and `expected_outputs` — as the declared source of test data.
+- `references/schemas/test-data-refs.schema.json`: Schema file copied verbatim into the bundle. Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.
 
 ## Load On Demand
 
@@ -36,7 +37,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- None declared.
+- Before starting, check that the installed validator carries the test-data-refs schema this bundle was cast with: run `foundry validate-test-data-refs --schema-sha256 534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `test-data-refs.json` before returning it: run `foundry validate-test-data-refs --schema-sha256 534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8 test-data-refs.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-test-data-refs --schema-sha256 534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8 test-data-refs.json`. This checks artifact `test-data-refs` against the test-data-refs schema.
 
 ## Procedure
 
@@ -49,8 +51,8 @@ This skill is the source-specific first leg of the harness's `test-data-resoluti
 1. **Enumerate Galaxy inputs and their required shape.** From the interface brief, list each workflow input: label, Galaxy collection shape (File / list / paired / list:paired / record), and datatype. This is the *target shape* every ref must satisfy.
 2. **Read the declared test cases.** From the summary's `tests[]`, read each case's `job_path` inputs — File/Directory objects with their `location`/`path`, `secondaryFiles`, arrays, and inline literals — plus `expected_outputs`. Prefer the case whose inputs best cover the workflow's inputs.
 3. **Map each declared input onto a Galaxy input.** Match by id and shape onto the interface's input labels. A CWL File array maps to a Galaxy list; a File carrying `secondaryFiles` may map to a record or composite datatype — record element identifiers and any prep needed to reach the Galaxy collection shape (galaxy-workflow-testability-design).
-4. **Emit refs.** Write one `test-data-refs.json` entry per resolved input: prefer a remote `location` URL when the job references one (remote-URL-first, iwc-test-data-conventions); fall back to the in-tree `path` plus provenance only when no URL is published. Carry datatype, collection element identifiers, and any subset/split prep. Each entry maps to an addressable workflow input label.
-5. **Report genuine gaps.** An input with no declared test-case input of the right shape stays `resolved: false` with a reason — this is what the harness hands to find-test-data. Do not search public sources here; searching is find-test-data's job, not this skill's.
+4. **Emit refs.** Write one `test-data-refs.json` entry per resolved input: prefer a remote `location` URL when the job references one (remote-URL-first, iwc-test-data-conventions); fall back to the in-tree `path` plus provenance only when no URL is published. Carry datatype, collection element identifiers, and any subset/split prep. Each entry maps to an addressable workflow input label. Shape each entry per test-data-refs with `resolved_by: cwl-to-test-data`, and validate the file with `foundry validate-test-data-refs` before returning.
+5. **Report genuine gaps.** An input with no declared test-case input of the right shape stays `resolved: false` with a reason and `storage: unresolved` — this is what the harness hands to find-test-data. Do not search public sources here; searching is find-test-data's job, not this skill's.
 
 ### No fabrication
 

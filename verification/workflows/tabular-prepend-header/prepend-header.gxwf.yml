@@ -1,0 +1,55 @@
+class: GalaxyWorkflow
+name: "Prepend or replace tabular header with awk"
+inputs:
+  - id: headerless_rows
+    type: data
+  - id: headered_rows
+    type: data
+outputs:
+  - id: metric_rows
+    outputSource: prepend_metric_header/outfile
+  - id: normalized_rows
+    outputSource: replace_and_normalize_header/outfile
+steps:
+  - id: prepend_metric_header
+    label: prepend_metric_header
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3
+    tool_version: "9.5+galaxy3"
+    tool_shed_repository:
+      changeset_revision: ab83aa685821
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: headerless_rows
+    out:
+      - id: outfile
+    tool_state:
+      code: 'BEGIN {print "Metric\tAlternate"} {print}'
+      infile: { __class__: ConnectedValue }
+      variables: []
+  - id: replace_and_normalize_header
+    label: replace_and_normalize_header
+    tool_id: toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy2
+    tool_version: "9.5+galaxy2"
+    tool_shed_repository:
+      changeset_revision: c41d78ae5fee
+      name: text_processing
+      owner: bgruening
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: infile
+        source: headered_rows
+    out:
+      - id: outfile
+    tool_state:
+      code: |-
+        BEGIN {OFS="\t"; print "genome\tcompleteness\tcontamination"}
+        NR > 1 {
+            if ($1 !~ /\.fasta$/)
+                $1 = $1 ".fasta"
+            print $1, $2, $3
+        }
+      infile: { __class__: ConnectedValue }
+      variables: []

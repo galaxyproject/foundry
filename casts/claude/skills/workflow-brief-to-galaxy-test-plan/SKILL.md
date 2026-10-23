@@ -1,0 +1,94 @@
+---
+name: workflow-brief-to-galaxy-test-plan
+description: "Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence."
+---
+
+# workflow-brief-to-galaxy-test-plan
+
+Follow the procedure below and use the artifact/reference sections as the runtime contract.
+
+## When To Use
+
+- Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence.
+
+## Inputs
+
+- Read artifact `workflow-brief`. Schema: workflow-brief-schema. Produced by `freeform-summary-to-workflow-brief`, `nextflow-summary-to-workflow-brief`. Expert-reviewed implementation contract whose acceptance criteria and scope govern test intent.
+- Read artifact `freeform-summary`. Optional; absence is allowed and must be reported honestly. Produced by `interview-to-freeform-summary`, `summarize-paper`. Optional narrative source evidence carrying methods, sample data, parameters, and expected outputs within the brief's selected scope.
+- Read artifact `summary-nextflow`. Optional; absence is allowed and must be reported honestly. Schema: summary-nextflow. Produced by `summarize-nextflow`. Optional structured Nextflow source evidence carrying parameters, tests, fixtures, and expected outputs within the brief's selected scope.
+- Read artifact `workflow-brief-galaxy-interface`. Produced by `workflow-brief-to-galaxy-interface`. Galaxy interface brief from workflow-brief-to-galaxy-interface that pins workflow inputs, outputs, and labels the plan binds assertions to.
+- Read artifact `workflow-brief-galaxy-data-flow`. Produced by `workflow-brief-to-galaxy-data-flow`. Galaxy data-flow brief from workflow-brief-to-galaxy-data-flow that pins abstract operations and collection choices the plan must respect.
+- Read artifact `iwc-comparison-notes`. Produced by `compare-against-iwc-exemplar`. Structural diff guidance from compare-against-iwc-exemplar; steers the plan toward IWC-aligned testable checkpoints and fixture shapes.
+- Read artifact `iwc-exemplar-gxformat2`. Produced by `compare-against-iwc-exemplar`. Cleaned gxformat2 view of the nearest IWC exemplar from compare-against-iwc-exemplar; pattern-match its labels, collection identifiers, and tested checkpoints. Absent when no nearest exemplar was found.
+- Read artifact `open-requirements-ledger`. Optional; absence is allowed and must be reported honestly. Produced by `advance-galaxy-draft-step`, `apply-galaxy-workflow-changeset`, `compare-against-iwc-exemplar`, `cwl-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-template`, `freeform-summary-to-galaxy-data-flow`, `freeform-summary-to-galaxy-interface`, `freeform-summary-to-galaxy-template`, `implement-galaxy-tool-step`, `interview-to-galaxy-workflow-changeset`, `mature-galaxy-workflow-for-iwc`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-reference-data`, `nextflow-summary-to-galaxy-template`, `repair-galaxy-draft-topology`, `workflow-brief-to-galaxy-data-flow`, `workflow-brief-to-galaxy-interface`, `workflow-brief-to-galaxy-template`. Carried workflow-run knowledge open-requirements-ledger when the run supplied one; read-only here, used to follow the current answers to the Workflow Brief's open questions.
+
+## Outputs
+
+- Write artifact `galaxy-test-plan` as `galaxy-test-plan.yml`. Format: `yaml`. Schema: galaxy-workflow-test-plan. Reviewable Galaxy workflow test plan (see galaxy-workflow-test-plan): synthesized test cases with job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.
+
+## Required Tools
+
+- None declared. Procedure should not assume external CLIs are present.
+
+## Load Upfront
+
+- `references/notes/workflow-brief-design.md`: Research note copied verbatim into the bundle. Keep reviewed acceptance criteria authoritative while treating source summaries as supporting evidence.
+- `references/schemas/galaxy-workflow-test-plan.schema.json`: Schema file copied verbatim into the bundle. Output contract: the emitted plan conforms to galaxy-workflow-test-plan. Cast bundles the JSON Schema so the skill carries its output shape; validate with `foundry validate-galaxy-workflow-test-plan`.
+- `references/schemas/workflow-brief-schema.schema.json`: Schema file copied verbatim into the bundle. Carry the required implementation contract and its acceptance criteria into test planning.
+
+## Load On Demand
+
+- `references/notes/galaxy-workflow-testability-design.md`: Research note copied verbatim into the bundle. Choose which workflow outputs and promoted checkpoints make meaningful assertions when no upstream test evidence exists. Use when: deciding which outputs to assert, which checkpoints to promote, and which labels the plan should assume.
+- `references/notes/iwc-shortcuts-anti-patterns.md`: Research note copied verbatim into the bundle. Distinguish accepted IWC-style test shortcuts from assertion smells while synthesizing assertions from intent. Use when: considering existence-only, size-only, image-dimension, or tolerant output checks, or recording an omission.
+- `references/notes/iwc-test-data-conventions.md`: Research note copied verbatim into the bundle. Describe job-input fixtures, remote-URL-first locations, hashes, and collection input shapes the plan should record as fixture provenance. Use when: recording job inputs or fixture provenance, or deciding whether a fixture belongs in test-data, Zenodo, ENA/SRA, or CVMFS.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Follow the current open-question decisions, including answers the interface Mold made for questions the brief left without a proposal, instead of answering them again. Use when: the run supplied an open-requirements ledger whose decisions carry `open_question`.
+- `references/notes/planemo-asserts-idioms.md`: Research note copied verbatim into the bundle. Pick the assertion family and tolerance that fit each synthesized expected output by output type. Use when: turning an expected output into assertion intent and a tolerance.
+- `references/notes/planemo-workflow-test-architecture.md`: Research note copied verbatim into the bundle. Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs. Use when: recording the labels and checkpoints the downstream test must address.
+- `references/schemas/tests-format.schema.json`: Schema file copied verbatim into the bundle. Use the Galaxy workflow tests schema as the assertion-family vocabulary referenced by the plan's assertion intent. Use when: naming an assertion family or compare operator for a synthesized expected output.
+
+## Validation
+
+- Before starting, check that the installed validator carries the galaxy-workflow-test-plan schema this bundle was cast with: run `foundry validate-galaxy-workflow-test-plan --schema-sha256 03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `galaxy-test-plan.yml` before returning it: run `foundry validate-galaxy-workflow-test-plan --schema-sha256 03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95 galaxy-test-plan.yml` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-workflow-test-plan --schema-sha256 03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95 galaxy-test-plan.yml`. This checks artifact `galaxy-test-plan` against the galaxy-workflow-test-plan schema.
+
+## Procedure
+
+Synthesize a Galaxy workflow test plan from the reviewed Workflow Brief and the Galaxy interface and data-flow briefs. Consult retained source evidence when available. The output is a reviewable handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file: it records test cases, job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and intentional omissions so implement-galaxy-workflow-test can author the final Galaxy test artifact.
+
+When the run supplies an open-requirements ledger, follow its current open-question decisions, such as a chosen test dataset, rather than answering those questions again. The ledger is read-only here. A decision that looks wrong for testing goes into the plan's `warnings[]` for the expert, not into a new answer.
+
+### Synthesized, not translated
+
+This is the structural difference from nextflow-test-to-galaxy-test-plan and cwl-test-to-galaxy-test-plan. Those skills **translate** existing upstream test evidence into a Galaxy plan. This skill **synthesizes** the common brief-driven plan from reviewed acceptance criteria and the testable structure the interface/data-flow briefs and nearest IWC exemplar imply. When retained evidence contains concrete fixtures, snapshots, parameters, or expected results, cite and use them within the selected scope; their presence does not let evidence override the brief.
+
+Set the plan's `source.derived_from` to `intent` (not `test-evidence`) and each synthesized assertion's `evidence` to `intent`; most synthesized assertions are `confidence: medium` or `low`. Where the brief or retained evidence carries a concrete expected value (a known count, a named output token, a published figure), record it as `expected_value` and raise the confidence.
+
+### Labels and fixtures are assumed, not bound
+
+This skill consumes the template-era briefs, not the concrete workflow draft or the resolved test-data refs — those exist in the harness run-state by the time the plan is authored, but they are reconciled downstream rather than here. So:
+
+- Bind assertions to the labels the interface brief pins, and set `label_status` to `assumed` (or `unresolved` when even the brief is silent) and the plan's `workflow.label_source` to `interface-brief`. implement-galaxy-workflow-test reconciles these against the real draft labels and the workflow-label cross-check.
+- Record fixtures with `storage: unresolved` and `location: null` when the brief or evidence names test data only by description; capture what is known (a dataset name, an accession, a Zenodo DOI, a rough size) in `fixture.provenance` so test-data resolution and the implement skill can act on it. Use iwc-test-data-conventions for the storage classes and the remote-URL-first convention.
+
+When a binding or fixture cannot be settled from the briefs, add an `unresolved[]` entry (with `blocking: true` when the final test cannot be authored without it) rather than inventing a label or a URL.
+
+### Choosing assertions from intent
+
+For each expected output the briefs expose, pick the assertion family by output type per planemo-asserts-idioms and a defensible tolerance. When the only exposed output is weakly assertable (a stochastic plot, an opaque binary), consult galaxy-workflow-testability-design: prefer recording assertion intent against a stronger promoted checkpoint, and when you settle for a weak check, record the weaker outputs in `omissions[]` with a rationale rather than asserting around them. Check each shortcut against iwc-shortcuts-anti-patterns so an existence-only or size-only intent is a deliberate choice.
+
+Keep the plan addressable by stable labels and artifacts (planemo-workflow-test-architecture) so the downstream test, run, and debug skills can connect assertions back to invocations and outputs.
+
+## Feedback Mode
+
+- Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
+- When enabled, read `_feedback.md` before doing the work and use its registered `foundry-feedback.ledger.yml` protocol.
+- Preserve harness-owned run and phase state. Append only concrete observations about a canonical Foundry source asset or a related project that this run showed to be at fault; do not put ordinary workflow requirements in this ledger.
+- Before reporting completion, make one explicit pass over the work you just did. Do not ask yourself whether anything was unclear — recall what happened: where you guessed at something the instructions should have settled, needed information this bundle does not carry, hit an instruction that contradicted another or contradicted the artifacts in front of you, used a packaged reference that did not cover your case, or did something the procedure never describes.
+- Append an entry for each such event that clears the protocol's bar. If none do, append nothing and report `no feedback` explicitly. Silence and a clean pass are not the same thing, and nothing downstream can tell them apart unless you say which one it was.
+- Pass the same ledger path to any subagent used for this work, and merge updates serially so one writer cannot overwrite another.
+
+## Runtime Notes
+
+- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.
+- Preserve declared artifact filenames unless the user or harness supplies explicit paths.
+- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.

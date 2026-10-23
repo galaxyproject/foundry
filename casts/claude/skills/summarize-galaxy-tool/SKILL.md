@@ -21,8 +21,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
-  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 galaxy-tool-cache`.
+- **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.14.0'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.14.0 galaxy-tool-cache`.
   Check: `galaxy-tool-cache --help | grep -q summarize`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
   Bundled reference: `references/cli/galaxy-tool-cache.md`.
@@ -43,7 +43,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `galaxy-tool-summary.json` before returning it: run `foundry validate-galaxy-tool-summary galaxy-tool-summary.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-summary galaxy-tool-summary.json`. This checks artifact `galaxy-tool-summary` against the galaxy-tool-summary schema.
+- Before starting, check that the installed validator carries the galaxy-tool-summary schema this bundle was cast with: run `foundry validate-galaxy-tool-summary --schema-sha256 bf77d0735410fa0028bc9bea08edaff3016580508bf27851fdcae65d038f2d94` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `galaxy-tool-summary.json` before returning it: run `foundry validate-galaxy-tool-summary --schema-sha256 bf77d0735410fa0028bc9bea08edaff3016580508bf27851fdcae65d038f2d94 galaxy-tool-summary.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-summary --schema-sha256 bf77d0735410fa0028bc9bea08edaff3016580508bf27851fdcae65d038f2d94 galaxy-tool-summary.json`. This checks artifact `galaxy-tool-summary` against the galaxy-tool-summary schema.
 
 ## Procedure
 

@@ -1,0 +1,76 @@
+---
+name: pipeline-nextflow-to-workflow-brief
+description: "Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review — orchestrates the Foundry skills of the NEXTFLOW → WORKFLOW BRIEF pipeline in order, in a per-run working directory."
+---
+
+# pipeline-nextflow-to-workflow-brief
+
+Harness for the **NEXTFLOW → WORKFLOW BRIEF** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-workflow-brief/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline nextflow-to-workflow-brief` if the pipeline changes; do not hand-edit.
+
+## When To Use
+
+- Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review.
+
+## Bootstrap (install these CLIs first)
+
+Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
+
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
+  Check: `foundry --help`.
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
+
+## Run options
+
+Optional flags, given as leading arguments. Strip any you recognize; treat the remaining positional argument as the run slug. All default off and compose.
+
+- `--use-subagents` — run each cast phase in its own subagent to keep this orchestrator's context small. For each phase whose skill is cast, spawn a subagent, tell it the run directory and to invoke the named skill with every default filename prefixed by `./<run-slug>/`, and have it return a short report (artifacts written, assumptions, status) rather than its full transcript; carry only that report forward. A cast loop phase runs **one subagent per iteration** — each advances a single step and returns its done-signal, and you inspect that signal to decide whether to spawn the next iteration. Branch phases run their whole fallback chain in one subagent. MANUAL (un-cast) phases are never delegated — including MANUAL loop phases — so handle those yourself regardless of the per-iteration rule above.
+- `--checkpoint` — commit after every phase so the run directory's git history is a per-step record (a data source for workflow-implementation visualizations). When set, `git init ./<run-slug>/` during working-directory setup — this is a standalone per-run repo; do not add it to any surrounding repo you are working inside. Write `./<run-slug>/.gitignore` in the same step holding `dashboard.html`, `run-manifest.json`, and `.omc/`, so a later reading tool cannot land in the history it reads. Then after each phase's artifact is confirmed run `git -C ./<run-slug>/ add -A && git -C ./<run-slug>/ commit -m "phase <n>: <skill>"`. Loop phases commit **once per iteration** (`phase <n> step <k>: <skill>`); for a MANUAL loop, commit once per by-hand step. Keep the subject grammar exactly — `phase <n>: <skill>` and `phase <n> step <k>: <skill>`, with any note in parentheses after it — because it is parsed. With `--use-subagents`, the subagent does the work and returns; you make the commit.
+- `--feedback` — create `./<run-slug>/foundry-feedback.ledger.yml` before phase 1. Set `run.pipeline` to this pipeline's slug and `run.run_slug` to the chosen run slug. Copy the complete top-level roster from `_assembly.json` with `run.status: running` and every phase `pending`; set a phase `running` immediately before it starts and `done` after success. Keep one row per loop and increment `iterations`; record a branch's chosen path as `selected`. Pass the same ledger path to every skill and subagent. Before marking a phase `done`, require its feedback outcome — appended entry ids or an explicit `no feedback` — and record `feedback_checked: true` on that row; under `--use-subagents` the subagent's short report carries that line. Do the same pass yourself for a MANUAL phase, naming the pipeline source as the subject when the harness is what needs to change. On a terminating error mark the phase and run `failed`; on a graceful stop mark the run `cancelled`; after every intended phase is done mark the run `complete`. Never describe an empty incomplete ledger as a clean run.
+
+## Working directory (do this first)
+
+Every constituent skill writes fixed filenames to its working directory. To keep one run's artifacts namespaced and avoid clobbering a prior run (foundry#282):
+
+1. Pick a run slug — use the harness argument if given; else ask the user for a short project name up front (the directory must exist before phase 1 writes its first artifact, so don't wait for a source title); else default `nextflow-to-workflow-brief-run`.
+2. Create `./<run-slug>/` in the current directory. If it exists, suffix `-2`, `-3`, … . If invoked with `--checkpoint`, run `git init ./<run-slug>/` now and write its `.gitignore` (see Run options).
+3. Run **every** skill invocation below with `./<run-slug>/` as its working directory: **prefix every default input and output filename with `./<run-slug>/`** when you invoke the skill. The skills preserve their declared basenames and honor a harness-supplied directory; you supply the prefix on **both reads and writes**, so each phase finds the prior phase's output and nothing lands in the repo root.
+4. Create `./<run-slug>/foundry-run.yml` now, before phase 1 writes anything (see Run record below).
+
+Announce the chosen directory before starting.
+
+## Run record (keep this current)
+
+Maintain `./<run-slug>/foundry-run.yml` for the whole run. It is not optional and has no flag: it is how anything reading this run afterwards knows what it was.
+
+- **Create it during working-directory setup**, before phase 1. Set `run_record_version: 1`, `pipeline: nextflow-to-workflow-brief`, `run_slug` to the chosen slug, `harness_name` and `source_revision` from `_assembly.json`, `assembly_sha256` to the sha256 hex digest of that file, `foundry_head` to the Foundry commit you are reading (`null` when the Foundry is not a git checkout), `started_at` to now, `finished_at: null`, and `status: running`. Quote both shas: an unquoted all-digit sha reads back as a number and is discarded.
+- **Copy the phase roster** into `phases`: one row per entry of `_assembly.json`'s top-level `phases`, keyed `n:` (that entry's `phase` number), with `kind`, then `skill` for a mold or `pattern` for a branch, `status: pending`, and `artifacts: []`. A loop row later gains `iterations`, a branch row `selected`. Phase 1 reads `{ n: 1, kind: mold, skill: summarize-nextflow, status: pending, artifacts: [] }`.
+- **Set a phase `running`** immediately before invoking it, and `done` once you have confirmed its artifacts exist.
+- **Append one `artifacts` row per file a phase writes**: `{ id, file, at }` using the artifact id and basename the skill declares. A loop phase stays one row, increments `iterations`, and appends a row for each iteration that writes, carrying `iteration: <k>`.
+- **Record a branch's outcome** as `selected: <chain member>` on that phase's row.
+- **Close it in `## Done`**: set `finished_at` and the final `status` — `complete` when every intended phase is done, `failed` when a phase terminated the run, `cancelled` on a graceful stop. Leave it `running` on a hard interruption rather than inventing a recovery write.
+- Under `--use-subagents` the subagent does the work and reports; **you** write the record. Do the same pass yourself for a MANUAL phase.
+
+## Pipeline
+
+Run these phases in order. After each, confirm the expected artifact exists in the run directory before advancing.
+
+1. **summarize-nextflow** — invoke the `summarize-nextflow` skill. Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds.
+2. **nextflow-summary-to-workflow-brief** — invoke the `nextflow-summary-to-workflow-brief` skill. Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions.
+
+## Done
+
+Report the final artifacts in `./<run-slug>/`.
+
+Close `./<run-slug>/foundry-run.yml` before anything else: set `finished_at` and the final `status`, and make sure every phase row carries the artifacts it wrote. A run whose record still says `running` is one nothing downstream can read honestly.
+
+If the run was invoked with `--feedback`, close the ledger next, after the run record: set the final `run.status`, then tell the user the ledger path `./<run-slug>/foundry-feedback.ledger.yml` and how many entries it holds. If it holds any, offer to run the `report-foundry-run-feedback` skill on it, which triages them into local drafts and files nothing without explicit confirmation. Report an empty ledger as "no feedback recorded", never as evidence the Foundry worked well.
+
+## Notes
+
+- Do not re-implement any skill's internal logic here; this harness only sequences and routes.
+- Carry unresolved assumptions forward as notes rather than inventing missing inputs.
+- Brief production ends with workflow-brief.md for expert editing and review; it does not continue into Galaxy design or implementation.
+- The caller supplies the desired objective and selected scope. Ambiguous selection becomes a Workflow blocker rather than an agent choice.
+- Retain source evidence and run both structural validation and the static blocker check on the emitted brief. A valid blocked brief is an honest production result, not permission to implement.
+- When reporting at Done, list the brief's open questions with their proposed answers, low-confidence proposals first. Tell the expert that leaving a proposal unedited accepts it and editing the answer overrides it.

@@ -1,0 +1,11 @@
+- doc: "Unsorted headered rows are grouped by key and reduced; empty grouping reduces the whole file"
+  job:
+    rows:
+      class: File
+      path: test-data/rows.tabular
+      filetype: tabular
+  outputs:
+    grouped:
+      file: test-data/expected_grouped.tabular
+    whole_file_absmax:
+      file: test-data/expected_absmax.tabular

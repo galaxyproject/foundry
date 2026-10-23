@@ -3,6 +3,7 @@ type: pipeline
 title: CWL workflow to Galaxy
 tags:
   - target/galaxy
+  - journey/direct-build
 status: draft
 created: 2026-07-26
 revised: 2026-07-26
@@ -13,7 +14,7 @@ phases:
   - branch: Does every step map to an installed Galaxy tool?
     branches:
       - "[[cwl-summary-to-galaxy-interface]]"
-      - fallthrough: "[[freeform-summary-to-galaxy-interface]]"
+      - fallthrough: "[[workflow-brief-to-galaxy-interface]]"
   - mold: "[[validate-galaxy-workflow]]"
     loop: true
 harness_notes:

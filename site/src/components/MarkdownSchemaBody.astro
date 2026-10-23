@@ -1,0 +1,38 @@
+---
+import type { MarkdownDocumentSchema, MarkdownSectionSchema } from '../../../packages/gxwf-foundry/src/markdown-document';
+
+interface Props { schema: MarkdownDocumentSchema }
+const { schema } = Astro.props;
+
+function rows(rules: readonly MarkdownSectionSchema[], parent = '', depth = 2): { heading: string; parent: string; min: number; max: string; content: boolean }[] {
+  return rules.flatMap(rule => [
+    { heading: `${'#'.repeat(depth)} ${rule.heading}`, parent, min: rule.min ?? 0, max: rule.max === undefined ? 'Unbounded' : String(rule.max), content: rule.content ?? false },
+    ...rows(rule.sections ?? [], parent ? `${parent} / ${rule.heading}` : rule.heading, depth + 1),
+  ]);
+}
+---
+
+<section class="mb-8 prose prose-slate max-w-none dark:prose-invert">
+  <h2>Markdown sections</h2>
+  <p>
+    {schema.title === 'required' ? 'One nonempty document title is required.' : 'Titles are unconstrained.'}
+    Headings are {schema.caseSensitive ? 'case-sensitive' : 'case-insensitive'}.
+    Counts apply within each parent; additional headings and arbitrary order are allowed.
+  </p>
+  <div class="overflow-x-auto">
+    <table>
+      <thead><tr><th>Heading</th><th>Parent</th><th>Minimum</th><th>Maximum</th><th>Content</th></tr></thead>
+      <tbody>
+        {rows(schema.sections).map(row => (
+          <tr>
+            <td><code>{row.heading}</code></td>
+            <td>{row.parent || 'Document'}</td>
+            <td>{row.min}</td>
+            <td>{row.max}</td>
+            <td>{row.content ? 'Required when present' : 'May be empty'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>

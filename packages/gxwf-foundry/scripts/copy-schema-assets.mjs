@@ -27,6 +27,10 @@ const ASSETS = [
     "src/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json",
     "dist/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json",
   ],
+  [
+    "src/schemas/test-data-refs/test-data-refs.schema.json",
+    "dist/schemas/test-data-refs/test-data-refs.schema.json",
+  ],
   ["src/schemas/tests-format/tests.schema.json", "dist/schemas/tests-format/tests.schema.json"],
 ];
 

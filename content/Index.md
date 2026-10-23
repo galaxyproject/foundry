@@ -8,11 +8,15 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-workflow-maturation]] — Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result.
 - [[galaxy-workflow-review]] — Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy.
 - [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. *(reviewed)*
+- [[interview-to-workflow-brief]] — Summarize an interview source and produce a scoped Workflow Brief for expert review.
 - [[nextflow-to-cwl]] — Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set.
 - [[nextflow-to-galaxy]] — Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. *(reviewed)*
+- [[nextflow-to-workflow-brief]] — Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review.
 - [[paper-to-cwl]] — Direct path from a paper to a CWL Workflow + CommandLineTool set.
-- [[paper-to-galaxy]] — Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate.
+- [[paper-to-galaxy]] — Direct path from a paper to a Galaxy gxformat2 workflow. No Workflow Brief or CWL intermediate.
+- [[paper-to-workflow-brief]] — Summarize a paper source and produce a scoped Workflow Brief for expert review.
 - [[update-interview-to-galaxy]] — Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. *(reviewed)*
+- [[workflow-brief-to-galaxy]] — Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain.
 
 ## Molds
 
@@ -36,6 +40,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[freeform-summary-to-galaxy-interface]] — Map a free-form source summary into a Galaxy workflow interface design brief. *(reviewed)*
 - [[freeform-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. *(reviewed)*
 - [[freeform-summary-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a free-form summary and the Galaxy design briefs. *(reviewed)*
+- [[freeform-summary-to-workflow-brief]] — Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions.
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool. *(reviewed)*
@@ -49,10 +54,11 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief. *(reviewed)*
 - [[nextflow-summary-to-galaxy-reference-data]] — Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline. *(reviewed)*
 - [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. *(reviewed)*
+- [[nextflow-summary-to-workflow-brief]] — Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan. *(reviewed)*
 - [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. *(reviewed)*
-- [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
+- [[paper-to-test-data]] — Resolve the test data a paper names into refs for each workflow input.
 - [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
 - [[report-foundry-run-feedback]] — Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts.
 - [[review-galaxy-workflow]] — Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review.
@@ -66,17 +72,21 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from source and design handoffs.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
 - [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. *(reviewed)*
+- [[workflow-brief-to-galaxy-data-flow]] — Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief.
+- [[workflow-brief-to-galaxy-interface]] — Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available.
+- [[workflow-brief-to-galaxy-template]] — Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence.
+- [[workflow-brief-to-galaxy-test-plan]] — Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence.
 
 ## Patterns
 
 - [[cleanup-sync-and-publish-nonempty-results]] — Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results.
-- [[collection-build-list-paired-with-apply-rules]] — Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first.
+- [[collection-build-list-paired-with-apply-rules]] — Use Apply Rules to map a sample column and a read-direction column into a list:paired collection, from flat identifiers or an existing paired level.
 - [[collection-build-named-bundle]] — Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in.
-- [[collection-cleanup-after-mapover-failure]] — Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps.
+- [[collection-cleanup-after-mapover-failure]] — Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step.
 - [[collection-flatten-after-fanout]] — Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters.
 - [[harmonize-by-sortlist-from-identifiers]] — Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers.
 - [[regex-relabel-via-tabular]] — Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE.
-- [[relabel-via-rules-and-find-replace]] — Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup.
+- [[relabel-via-rules-and-find-replace]] — Relabel the inner level of a list:list by swapping it to the top with Apply Rules, relabeling from a find/replace-built table, and swapping back.
 - [[collection-split-identifier-via-rules]] — Use Apply Rules regex columns to split one collection identifier into nested list identifiers.
 - [[collection-swap-nesting-with-apply-rules]] — Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns.
 - [[sync-collections-by-identifier]] — Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections.
@@ -109,20 +119,20 @@ Generated from content frontmatter. Do not edit by hand.
 - [[sequence-merge-and-dedup]] — Concatenate several FASTA files into one and drop duplicate records by sequence identity in a single step; fasta_merge_files_and_filter_unique_sequences.
 - [[sequence-reformat-line-width]] — Rewrap FASTA records to a fixed sequence-line width so downstream tools and viewers get canonical 60/70/80-column output; cshl_fasta_formatter.
 - [[relabel-fasta-headers-via-tabular]] — Edit FASTA headers you cannot easily regex in place: fasta2tab, rewrite column 1 with find/replace, then tab2fasta back. The high-value sequence recipe.
-- [[tabular-compute-new-column]] — Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule.
-- [[tabular-concatenate-collection-to-table]] — Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe.
+- [[tabular-compute-new-column]] — Append, insert, or replace computed columns with column_maker (Add_a_column1), using a shared input-typing policy and explicit failure handling.
+- [[tabular-concatenate-collection-to-table]] — Stack compatible tabular collection elements into one dataset, with one header and a sample column when needed.
 - [[tabular-cut-and-reorder-columns]] — Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom.
 - [[tabular-filter-by-column-value]] — Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC.
 - [[tabular-filter-by-regex]] — Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative.
-- [[tabular-group-and-aggregate-with-datamash]] — Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions.
-- [[tabular-join-on-key]] — Use tp_easyjoin_tool for two-tabular key joins; use tp_multijoin_tool for many files and query_tabular for SQL joins.
-- [[tabular-pivot-collection-to-wide]] — Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table.
-- [[tabular-prepend-header]] — Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row.
-- [[tabular-relabel-by-row-counter]] — Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR.
-- [[tabular-split-taxonomy-string]] — Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling.
-- [[tabular-sql-query]] — Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars.
-- [[tabular-synthesize-bed-from-3col]] — Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants.
-- [[tabular-to-collection-by-row]] — Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key.
+- [[tabular-group-and-aggregate-with-datamash]] — Group tabular rows by one-based key columns, sort when needed, and choose Datamash operations and header settings from the intended result.
+- [[tabular-join-on-key]] — Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies.
+- [[tabular-pivot-collection-to-wide]] — Join a collection of keyed tabular datasets into a wide table, choosing missing-cell fill and output headers to fit the data.
+- [[tabular-prepend-header]] — Add a fixed first line with tp_awk_tool, choosing whether to keep or replace the input's first row and whether to rewrite its fields.
+- [[tabular-relabel-by-row-counter]] — Use tp_awk_tool and awk NR to replace each input line with a row-order label, with explicit header and numbering choices.
+- [[tabular-to-collection-by-row]] — Split a tabular file into a list collection by column value, grouping rows that share an identifier.
+- [[tabular-split-taxonomy-string]] — Expand a prefixed taxonomy lineage into fixed rank columns with tp_awk_tool, preserving row identity and handling absent ranks.
+- [[tabular-sql-query]] — Load tabular datasets into Query Tabular for SQL joins, window calculations, and queries that combine several tabular operations.
+- [[tabular-synthesize-bed-from-3col]] — Convert one-based inclusive chromosome/start/end rows to six-column BED with awk, after checking the source coordinate convention.
 
 ## Source Patterns
 
@@ -162,6 +172,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[validate-summary-cwl]] — AJV gate for summarize-cwl JSON documents.
 - [[validate-summary-galaxy-workflow]] — AJV gate for summarize-galaxy-workflow JSON documents.
 - [[validate-summary-nextflow]] — AJV gate for summarize-nextflow JSON documents.
+- [[validate-test-data-refs]] — AJV gate for the test-data-refs document the test-data-resolution chain writes.
 - [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
 - [[validate-tests-format]] — AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check.
 - [[validate-workflow-brief]] — Validate the title and required sections of a Markdown Workflow Brief.
@@ -177,11 +188,13 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summary-galaxy-workflow]] — JSON Schema for the structured summary emitted by the summarize-galaxy-workflow Mold.
 - [[tests-format]] — JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`.
 - [[galaxy-workflow-test-plan]] — JSON Schema for the intermediate Galaxy workflow test-plan handoff produced by the test-plan Molds and consumed by implement-galaxy-workflow-test.
+- [[test-data-refs]] — JSON Schema for the test data each Galaxy workflow input gets, written by the test-data-resolution chain and read by implement-galaxy-workflow-test.
 - [[nextflow-parameters-meta]] — JSON Schema (Draft 2020-12) meta-schema validating per-pipeline nextflow_schema.json files. Upstream from nextflow-io/nf-schema.
 - [[summary-nextflow]] — JSON Schema for the structured summary emitted by the summarize-nextflow Mold.
 - [[nf-core-module-meta]] — JSON Schema (Draft-07) validating nf-core module meta.yml — channel IO, tools, containers, conda lockfiles. Upstream from nf-core/modules.
 - [[nf-core-subworkflow-meta]] — JSON Schema (Draft-07) validating nf-core subworkflow meta.yml — channel IO, components dependencies, authors. Upstream from nf-core/modules.
 - [[planemo-test-report]] — JSON Schema for the report emitted by `planemo test --test_output_json` (and friends), vendored from upstream planemo.
+- [[workflow-brief-schema]] — Markdown section declaration and structural validator for the workflow-brief handoff.
 
 ## Research
 
@@ -191,24 +204,25 @@ Generated from content frontmatter. Do not edit by hand.
 - [[component-claude-dynamic-workflows]] — Dynamic workflows natively solve the per-step sub-DAG loop Archon couldn't, with schema-typed step handoffs; cost is in-session-only resume and no mid-run gate.
 - [[component-nextflow-channel-operators]] — Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation.
 - [[component-nextflow-containers-and-envs]] — Container URL grammar (depot, BioContainers, mulled-v2, Wave, ORAS) and conda directive resolution rules backing summarize-nextflow §5.
-- [[component-nextflow-inspect]] — White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision.
+- [[component-nextflow-inspect]] — Nextflow inspect and config command contracts, container-preview limits, and configuration-resolution pitfalls.
 - [[component-nextflow-pipeline-anatomy]] — Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17.
 - [[component-nextflow-testing]] — nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs the nextflow test-plan Molds and summarize-nextflow §7.
 - [[component-nf-core-module-conventions]] — RFC 2119 conventions enforced by nf-core/tools module lint, with lint-check pointers. Backs summarize-nextflow + author-galaxy-tool-wrapper.
-- [[component-nf-core-tools]] — White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision.
+- [[component-nf-core-tools]] — nf-core/tools conventions, CLI and Python surfaces, schema validation, module provenance, linting, and container-download limits.
 - [[component-tool-shed-search]] — Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload
 - [[cwl-pickvalue-to-galaxy]] — CWL `pickValue` (first_non_null / the_only_non_null / all_non_null) → Galaxy's native `pick_value` workflow step added by galaxyproject/galaxy#22222.
 - [[cwl-v1.2-schemas]] — Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization.
 - [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
 - [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
 - [[foundry-feedback-ledger]] — Runtime protocol for carrying actionable feedback about Foundry assets, and the related projects a run exercises, from cast skills back to Foundry maintainers.
+- [[foundry-run-manifest]] — Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard.
 - [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.
-- [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.
+- [[galaxy-apply-rules-dsl]] — How Apply Rules derives columns from collection metadata, filters rows, and maps them into new collection structure.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.
-- [[galaxy-collection-tools]] — Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics.
+- [[galaxy-collection-tools]] — Catalog of Galaxy collection-operation tools, with versioned inputs, outputs, defaults, mapping behavior, and diagnostic qualifications.
 - [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
 - [[galaxy-datatypes-conf]] — Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications.
-- [[galaxy-native-workflow-schema]] — Vendored structural JSON Schema for Galaxy native workflow (.ga) format: vocabulary for the JSON shape Galaxy emits and consumes.
+- [[galaxy-native-workflow-schema]] — Native Galaxy workflow step and connection vocabulary, the pinned structural schema, and the checks needed beyond that artifact.
 - [[galaxy-paired-or-unpaired-collections]] — Galaxy's `paired_or_unpaired` collection type: discriminated-union shape for paired-or-single reads, no workflow-level mode switch needed. Galaxy PR #19377.
 - [[galaxy-sample-sheet-collections]] — Galaxy's sample_sheet collection family: typed column metadata, four variants, mapping rules, validator allowlist.
 - [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
@@ -222,7 +236,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
 - [[galaxy-workflow-testability-design]] — Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible.
 - [[gxformat2-schema]] — Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation.
-- [[gxformat2-workflow-inputs]] — Conceptual model, current aliases, and schema gaps for gxformat2 workflow inputs.
+- [[gxformat2-workflow-inputs]] — Authoring guidance for gxformat2 workflow input types, constraints, defaults, and validation.
 - [[iwc-comments-survey]] — How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
 - [[iwc-interval-operations-survey]] — IWC corpus survey of coordinate-aware genomic interval operations; sizing and candidate boundaries for a galaxy-interval-patterns MOC, with hold-if-thin gate.
@@ -231,7 +245,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-runtime-parameter-shims-survey]] — Focused survey of tiny IWC runtime parameter shims for flags, enums, counts, booleans, and composed text.
 - [[iwc-sequence-operations-survey]] — IWC survey of record-level FASTA manipulation (interconversion, reformat, merge/dedup, subset, extract-at-intervals); sizes a galaxy-sequence-patterns MOC.
 - [[iwc-shortcuts-anti-patterns]] — Judgments for when weak Galaxy workflow-test assertions are useful smoke checks and when they conceal untested results.
-- [[iwc-tabular-operations-survey]] — Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation.
+- [[iwc-tabular-operations-survey]] — Corpus survey of tabular tools and operations across IWC workflows. Evidence for the operation pattern hierarchy on row/column data manipulation.
 - [[iwc-test-data-conventions]] — IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.
 - [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
@@ -251,7 +265,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nfcore-task-ext-args-to-galaxy-additional-options]] — Map nf-core's task.ext.args escape hatch to a single Galaxy text param surfacing extra command-line arguments.
 - [[nfcore-versions-emit-to-galaxy-version-command]] — Translate nf-core's versions emit (heredoc or topic: versions) into Galaxy's <version_command>, dropping the versions output channel.
 - [[nf-schema-samplesheet-galaxy-gaps]] — nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary.
-- [[open-requirements-ledger]] — Carried unresolved-requirements artifact the source→Galaxy pipeline discharges or explicitly surrenders, autonomously.
+- [[open-requirements-ledger]] — Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state.
 - [[planemo-asserts-idioms]] — Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints.
 - [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 - [[nextflow-test-case-selection]] — A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage.
@@ -279,6 +293,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[eval-philosophy]] — Why eval.md is an abstract oracle and scenarios.md holds the concrete cases, and the eval/scenario/refinement split. *(reviewed)*
 - [[guiding-principles]] — The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding. *(reviewed)*
 - [[harness-pipelines]] — The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior. *(revised)*
+- [[issue-labels]] — What each label on galaxyproject/foundry issues means, which labels a triaged issue carries, and what reads them.
 - [[mold-spec]] — The Mold authoring contract: source layout, which files may sit beside index.md, and who enforces it. *(reviewed)*
 - [[molds]] — The axes a Mold buckets on, the boundary against reference content, and where the Mold set is still uneven. *(reviewed)*
 - [[pattern-authorship]] — Developer-facing authorship rules for operation-named, corpus-grounded pattern pages. *(reviewed)*

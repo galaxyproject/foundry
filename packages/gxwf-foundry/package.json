@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-foundry/gxwf-foundry",
-  "version": "0.1.2",
+  "version": "0.3.0",
   "description": "Galaxy Workflow Foundry CLI — produce and validate Mold IO artifacts.",
   "type": "module",
   "bin": {
@@ -20,6 +20,7 @@
     "./schemas/galaxy-tool-discovery.json": "./dist/schemas/galaxy-tool-discovery/galaxy-tool-discovery.schema.json",
     "./schemas/galaxy-tool-summary.json": "./dist/schemas/galaxy-tool-summary/galaxy-tool-summary.schema.json",
     "./schemas/galaxy-workflow-test-plan.json": "./dist/schemas/galaxy-workflow-test-plan/galaxy-workflow-test-plan.schema.json",
+    "./schemas/test-data-refs.json": "./dist/schemas/test-data-refs/test-data-refs.schema.json",
     "./schemas/tests-format.json": "./dist/schemas/tests-format/tests.schema.json"
   },
   "files": [
@@ -54,7 +55,7 @@
   "license": "MIT",
   "dependencies": {
     "@galaxy-foundry/summarize-nextflow": "workspace:*",
-    "@galaxy-tool-util/schema": "^1.7.2",
+    "@galaxy-tool-util/schema": "^1.14.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "commander": "^12.1.0",

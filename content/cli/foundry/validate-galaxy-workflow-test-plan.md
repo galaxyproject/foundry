@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-06-16
-revised: 2026-08-04
-revision: 2
+revised: 2026-10-23
+revision: 5
 summary: "AJV gate for Galaxy workflow test-plan YAML documents."
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
@@ -16,11 +16,11 @@ related_notes:
 
 # `foundry validate-galaxy-workflow-test-plan`
 
-Validate a Galaxy workflow test-plan document against the [[galaxy-workflow-test-plan]] schema bundled with `@galaxy-foundry/gxwf-foundry`. This is the schema gate the Galaxy test-plan producer Molds ([[nextflow-test-to-galaxy-test-plan]], [[cwl-test-to-galaxy-test-plan]], [[freeform-summary-to-galaxy-test-plan]]) emit against before [[implement-galaxy-workflow-test]] consumes the plan.
+Validate a Galaxy workflow test-plan document against the [[galaxy-workflow-test-plan]] schema bundled with `@galaxy-foundry/gxwf-foundry`. This is the schema gate the Galaxy test-plan producer Molds ([[nextflow-test-to-galaxy-test-plan]], [[cwl-test-to-galaxy-test-plan]], [[freeform-summary-to-galaxy-test-plan]], [[workflow-brief-to-galaxy-test-plan]]) emit against before [[implement-galaxy-workflow-test]] consumes the plan.
 
 ## Output
 
-Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors (missing file, malformed YAML) exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors (missing file, malformed YAML) exit `1`. With `--schema-sha256 <hex>` it first compares the hash of the schema it carries against `<hex>`, the pin a cast bundle records in `_verify.json`: a mismatch exits `4` without validating, because the validator and the bundle disagree about the contract (see [[schema-packages]]). Given the pin and no artifact, it checks only the pin.
 
 ## Examples
 

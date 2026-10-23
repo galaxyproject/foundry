@@ -40,11 +40,12 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `galaxy-test-plan.yml` before returning it: run `foundry validate-galaxy-workflow-test-plan galaxy-test-plan.yml` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-workflow-test-plan galaxy-test-plan.yml`. This checks artifact `galaxy-test-plan` against the galaxy-workflow-test-plan schema.
+- Before starting, check that the installed validator carries the galaxy-workflow-test-plan schema this bundle was cast with: run `foundry validate-galaxy-workflow-test-plan --schema-sha256 03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `galaxy-test-plan.yml` before returning it: run `foundry validate-galaxy-workflow-test-plan --schema-sha256 03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95 galaxy-test-plan.yml` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-workflow-test-plan --schema-sha256 03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95 galaxy-test-plan.yml`. This checks artifact `galaxy-test-plan` against the galaxy-workflow-test-plan schema.
 
 ## Procedure
 
-Produce a Galaxy workflow test plan for the update pipeline: carry the existing workflow's tests forward as a **regression baseline** and augment them for the change-set's behavioral deltas. The output is a reviewable YAML handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file — implement-galaxy-workflow-test authors the final `*-tests.yml` from it. This skill is the update pipeline's analogue of nextflow-test-to-galaxy-test-plan / freeform-summary-to-galaxy-test-plan: the dedicated test-plan producer every Galaxy-targeting pipeline places before the implement step.
+Produce a Galaxy workflow test plan for the update pipeline: carry the existing workflow's tests forward as a **regression baseline** and augment them for the change-set's behavioral deltas. The output is a reviewable YAML handoff conforming to galaxy-workflow-test-plan, not a concrete `tests-format` file — implement-galaxy-workflow-test authors the final `*-tests.yml` from it. This skill is the update pipeline's analogue of nextflow-test-to-galaxy-test-plan / freeform-summary-to-galaxy-test-plan / workflow-brief-to-galaxy-test-plan: the dedicated test-plan producer every Galaxy-targeting pipeline places before the implement step.
 
 ### Translate-and-augment, not synthesize-from-scratch
 

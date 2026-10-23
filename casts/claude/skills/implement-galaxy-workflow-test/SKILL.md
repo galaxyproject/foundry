@@ -13,9 +13,9 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Inputs
 
-- Read artifact `galaxy-test-plan`. Schema: galaxy-workflow-test-plan. Produced by `changeset-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `freeform-summary-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`. Schema-valid Galaxy test plan (galaxy-workflow-test-plan) from a *-test-to-galaxy-test-plan Mold; carries job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.
+- Read artifact `galaxy-test-plan`. Schema: galaxy-workflow-test-plan. Produced by `changeset-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `freeform-summary-to-galaxy-test-plan`, `nextflow-test-to-galaxy-test-plan`, `workflow-brief-to-galaxy-test-plan`. Schema-valid Galaxy test plan (galaxy-workflow-test-plan) from a *-test-to-galaxy-test-plan Mold; carries job inputs, expected outputs, assertion intent, fixture provenance, label assumptions, unresolved mappings, and omissions.
 - Read artifact `galaxy-workflow`. Produced by `advance-galaxy-draft-step`, `mature-galaxy-workflow-for-iwc`. Concrete gxformat2 workflow being tested — the loop-endstate `galaxy-workflow.gxwf.yml` from advance-galaxy-draft-step (`class: GalaxyWorkflow`); provides the real input/output labels, outputs, and collection shapes the test must assert against.
-- Read artifact `test-data-refs`. Produced by `cwl-to-test-data`, `find-test-data`, `nextflow-to-test-data`, `paper-to-test-data`. Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.
+- Read artifact `test-data-refs`. Schema: test-data-refs. Produced by `cwl-to-test-data`, `find-test-data`, `nextflow-to-test-data`, `paper-to-test-data`. Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data.
 
 ## Outputs
 
@@ -23,8 +23,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
-  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
+- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.14.0'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.14.0 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 - **`planemo`** (planemo). `uv tool install planemo==0.75.47` (or `pip install planemo==0.75.47`).
@@ -71,7 +71,7 @@ The workflow is the contract: input and output labels in the test file must addr
    - Never emit a `path:` (or `location:`) the test references but no source produces — an un-materialized path passes the static cross-check and fails only at upload, far from here. If a ref is `resolved: false`, surface the gap rather than authoring a path to a file that does not exist.
 
    Inputs must match the workflow's collection shapes and datatypes.
-3. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions. Choose assertion families and tolerances per planemo-asserts-idioms; check each shortcut against iwc-shortcuts-anti-patterns so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation.
+3. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions. Choose assertion families and tolerances per planemo-asserts-idioms; check each shortcut against iwc-shortcuts-anti-patterns so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation. A `family` naming an output-attribute field (`element_count`, `count`, `ftype`, `checksum`, `metadata`) or a compare operator goes beside `asserts:`, not inside it; a non-null `element_identifier` goes under `element_tests`, with `/` separating nested ranks.
 4. **Validate static.** Run validate-tests for the schema gate, then the workflow-label cross-check (`checkTestsAgainstWorkflow`): zero missing input labels, zero missing output labels, no collection/datatype mismatches. Fix before spending a Planemo run.
 5. **Run green.** Drive planemo `test` with the staged data. "Managed Galaxy" here means **Planemo-managed**: `planemo test` bootstraps its own Galaxy and installs the workflow's tools from the Tool Shed/conda — it does **not** require a pre-provisioned external server, so absence of a running Galaxy is not a reason to skip this gate (cost/runtime of heavy tool or reference-DB installs may be, but that is a deliberate deferral, not an impossibility). On green, hand off the test file plus enough invocation/job/assertion context for run-workflow-test and debug-galaxy-workflow-output to use if a later run fails.
 

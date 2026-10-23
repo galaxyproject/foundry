@@ -1,0 +1,16 @@
+[
+  {
+    "tool": "foundry",
+    "origin": "npm",
+    "package": "@galaxy-foundry/gxwf-foundry",
+    "invoke": "foundry",
+    "invoke_fallback": "npx --package @galaxy-foundry/gxwf-foundry foundry",
+    "availability_check": "foundry --help",
+    "docs_url": "https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md",
+    "source": "implied",
+    "implied_by": [
+      "foundry check-workflow-brief",
+      "foundry validate-workflow-brief"
+    ]
+  }
+]

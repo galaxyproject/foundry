@@ -4,19 +4,37 @@
   "mold": {
     "name": "paper-to-test-data",
     "path": "content/molds/paper-to-test-data/index.md",
-    "revision": 2,
-    "content_hash": "863d7b503a77fa63449899f124d1669e181fdfd9a72f81f516a219cdc89cb6bb",
-    "commit": "63a3f9cf9c97a637fe1628d298e524f35709e289"
+    "revision": 3,
+    "content_hash": "cdb6a8d7ca4c84f6dddd457ceb9f48a1286d92a865f3577c8d647d0d0a9765e5",
+    "commit": "2bdd9b9b68a71fd161362922e9d1ae797d10a8ce"
   },
-  "cast_at": "2026-09-13T20:58:29.564Z",
-  "refs": [],
+  "cast_at": "2026-10-16T22:32:04.310Z",
+  "refs": [
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[test-data-refs]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#testDataRefsSchema",
+      "dst": "references/schemas/test-data-refs.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Output contract: one ref per workflow input, resolved or an honest gap with a reason. Cast bundles the JSON Schema; validate with `foundry validate-test-data-refs` before returning.",
+      "verification": "Run the test-data-resolution chain on a pinned scenario and confirm each leg's test-data-refs.json validates and implement-galaxy-workflow-test stages from it.",
+      "license": "MIT",
+      "src_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "dst_hash": "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
+      "source": "deterministic"
+    }
+  ],
   "artifacts": {
     "produces": [
       {
         "id": "test-data-refs",
         "kind": "json",
         "default_filename": "test-data-refs.json",
-        "description": "Resolved workflow test inputs and expected outputs derived from paper evidence (URLs, file shapes, expected hashes)."
+        "schema": "[[test-data-refs]]",
+        "description": "Test data the paper names, one ref per workflow input (URLs, shapes, hashes). Shared id with [[find-test-data]], which fills only the inputs this Mold leaves unresolved."
       }
     ],
     "consumes": [
@@ -26,6 +44,20 @@
         "producers": [
           "interview-to-freeform-summary",
           "summarize-paper"
+        ]
+      },
+      {
+        "id": "freeform-galaxy-interface",
+        "description": "Galaxy interface brief from [[freeform-summary-to-galaxy-interface]] pinning the workflow input labels, collection shapes, and datatypes each ref must map onto, in PAPER → GALAXY.",
+        "producers": [
+          "freeform-summary-to-galaxy-interface"
+        ]
+      },
+      {
+        "id": "freeform-cwl-design",
+        "description": "CWL design from [[freeform-summary-to-cwl-design]] naming the workflow input ports each ref must map onto, in PAPER → CWL.",
+        "producers": [
+          "freeform-summary-to-cwl-design"
         ]
       }
     ]

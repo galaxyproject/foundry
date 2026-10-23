@@ -1,0 +1,31 @@
+{
+  "verify_schema_version": 1,
+  "entries": [
+    {
+      "artifact_id": "summary-nextflow",
+      "direction": "input",
+      "kind": "json",
+      "default_filename": "summary-nextflow.json",
+      "schema": "[[summary-nextflow]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-summary-nextflow",
+        "{artifact_path}"
+      ]
+    },
+    {
+      "artifact_id": "workflow-brief",
+      "direction": "input",
+      "kind": "markdown",
+      "default_filename": "workflow-brief.md",
+      "schema": "[[workflow-brief-schema]]",
+      "validator_bin": "foundry",
+      "args": [
+        "validate-workflow-brief",
+        "--schema-sha256",
+        "8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0",
+        "{artifact_path}"
+      ]
+    }
+  ]
+}

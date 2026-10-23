@@ -1,5 +1,19 @@
 # @galaxy-foundry/gxwf-pi-harness
 
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [[`dd2fd85`](https://github.com/galaxyproject/foundry/commit/dd2fd85735f006674e55c0cadd1a89d68d2bcf28), [`2bdd9b9`](https://github.com/galaxyproject/foundry/commit/2bdd9b9b68a71fd161362922e9d1ae797d10a8ce), [`5692fa8`](https://github.com/galaxyproject/foundry/commit/5692fa8776278fb06ba1468d8170797a70475bc8)]:
+  - @galaxy-foundry/gxwf-foundry@0.3.0
+
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [[`c048a0c`](https://github.com/galaxyproject/foundry/commit/c048a0c65fb672d32b6d69bb7bfb810d71b9850b), [`6365a99`](https://github.com/galaxyproject/foundry/commit/6365a99ed1e18e0526cb0d0d4b3b4ba4c527cca8)]:
+  - @galaxy-foundry/gxwf-foundry@0.2.0
+
 ## 0.4.1
 
 ### Patch Changes

@@ -4,6 +4,7 @@ title: NEXTFLOW → CWL
 tags:
   - source/nextflow
   - target/cwl
+  - journey/direct-build
 status: draft
 created: 2026-04-30
 revised: 2026-09-22

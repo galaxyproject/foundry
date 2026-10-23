@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 2
+revised: 2026-09-28
+revision: 3
 related_notes:
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
@@ -30,334 +30,352 @@ related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"
   - "[[iwc-parameter-derivation-survey]]"
   - "[[iwc-transformations-survey]]"
-summary: "Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation."
+summary: "Corpus survey of tabular tools and operations across IWC workflows. Evidence for the operation pattern hierarchy on row/column data manipulation."
 ---
 
 # IWC tabular operations survey
 
-Source corpus: `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-format2/`, 120 `.gxwf.yml` files across 20 domain directories. Counts below are step-occurrence counts produced by `grep -rh "^[[:space:]]*- tool_id:" --include="*.yml" | sort | uniq -c` (i.e. one count per workflow step that uses the tool, including subworkflow steps and the trailing `unique_tools` block — so the magnitudes are roughly 2x the count of *distinct* invocations a user authored, but the *ranking* is faithful). All file:line citations are into `iwc-format2/`.
+The pinned IWC corpus uses a mix of Galaxy-bundled row/column tools, Tool Shed text-processing wrappers, and collection-to-table bridges. The operation inventory below records those choices and the recipes behind [[galaxy-tabular-patterns]]. Tool frequency describes this snapshot. It does not establish that an alternative is unsuitable for a particular workflow.
 
-The corpus is heavily skewed toward sars-cov-2 reporting, microbiome amplicon, VGP assembly QC, and scRNA-seq metadata wrangling — those four pull the tabular tooling. Pure read/align/call workflows (`read-preprocessing/`, most of `variant-calling/`) barely touch tabular operations directly; their tabular work happens inside `multiqc` rollups, which are out of scope.
+## Evidence and counting method
+
+The snapshot is IWC commit `deafc4876f2c778aaf075e48bd8e95f3604ccc92`, recorded in `workflow-fixtures/fixtures.yaml`. It contains 120 native `.ga` workflows across 20 domain directories. Counts were refreshed on 2026-09-28 by parsing native JSON, visiting every `steps` entry, and recursively visiting embedded `subworkflow.steps`. Each actual tool step contributes once. Embedded copies of a subworkflow count in each containing workflow, so these are occurrences, not unique authored definitions or runtime jobs.
+
+The original survey counted generated `unique_tools` summaries as steps. The counts here exclude those summaries and combine version pins only where the table explicitly says so. A tool can implement several operations, so the tool counts are not a count of distinct tabular tasks.
+
+Local citations use `$IWC_FORMAT2`, the cleaned gxformat2 materialization of that snapshot. These paths and line numbers support inspection of parameters. Pinned native sources are linked in §8. Collection operations and reporting tools are listed separately because their presence around a table transformation does not make them row/column operations.
 
 ## 1. Tool inventory
 
-Ranked by step occurrences. "DT" = devteam, "BG" = bgruening, "IUC" = iuc, "NML" = nml. Display names and short forms shown after first introduction.
+### 1a. Galaxy-bundled tools
 
-### 1a. Galaxy "core" tabular tools (no toolshed owner; bundled with Galaxy)
+These IDs are unqualified in the native workflows. `addValue` is a Tool Shed tool and belongs in §1c.
 
-| Steps | tool_id | Short name | Operation |
-|---|---|---|---|
-| 127 | `Cut1` | Cut1 (Cut columns from a table) | Column projection |
-| 33 | `Filter1` | Filter1 (Filter data on any column using simple expressions) | Row filter |
-| 47 | `Grep1` | Grep1 (Select lines that match an expression) | Row filter (regex) |
-| 25 | `sort1` | sort1 (Sort) | Sort |
-| 21 | `Remove beginning1` | Remove beginning | Header strip |
-| 19 | `Grouping1` | Grouping1 (Group data by a column) | Group/aggregate |
-| 7 | `Paste1` | Paste1 (Paste two files side by side) | Column-bind |
-| 5 | `addValue/1.0.1` (DT) | Add a column | Constant column add |
-| 4 | `cat1` | Concatenate | Row-bind |
-
-First citations:
-- `Cut1` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782` (`columnList: c4,c6,c7,c13,c14,c15,c16,c17,c18,c19,c21,c22,c23,c26,c24,c25,c20`, `delimiter: T`).
-- `Filter1` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545` (`cond: c4=='PASS' or c4=='.'`, `header_lines: "1"`).
-- `Grep1` — `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:687` (`pattern: ^>`, `invert: ""`, `keep_header: false`).
-- `sort1` — `VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:559`.
-- `Grouping1` — `microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:324` (`groupcol: "6"`, `operations: [{optype: length, opcol: "6"}]`).
-- `Remove beginning1` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:186`.
-- `Paste1` — `genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:733` (two inputs, `delimiter: T`).
-
-### 1b. bgruening text_processing suite ("tp_*")
-
-By far the largest single family. Same upstream tool collection (`text_processing` repo, owner `bgruening`), individual tools bucketed by operation. Multiple version pins coexist in the corpus (`9.3+galaxy1`, `9.5+galaxy0`, `9.5+galaxy2`, `9.5+galaxy3`) — totals below sum across versions.
-
-| Steps (all versions) | tool stem | Operation |
+| Steps | Tool ID | Operation |
 |---|---|---|
-| 195 | `tp_awk_tool` | Free-form awk |
-| 66 | `tp_find_and_replace` | Regex/string replace (whole-line) |
-| 39 | `tp_replace_in_line` | Regex replace in line |
-| 43 | `tp_grep_tool` | Row filter (regex; vs core `Grep1`) |
-| 16 | `tp_sed_tool` | Free-form sed |
-| 15 | `tp_cat` | Row-bind |
-| 12 | `tp_text_file_with_recurring_lines` | Header/template lines (constant prefix) |
-| 11 | `tp_replace_in_column` | Per-column substitution |
-| ~8 | `tp_sort_header_tool` | Sort while preserving header |
-| ~6 | `tp_sorted_uniq` | Dedupe (sort+uniq combined) |
-| ~5 | `tp_easyjoin_tool` | Join on key |
-| ~4 | `tp_head_tool` | First-N row truncate |
-| ~3 | `tp_uniq_tool` | Dedupe |
-| ~2 | `tp_multijoin_tool` | Multi-file outer join |
+| 91 | `Cut1` | Select and reorder columns |
+| 27 | `Filter1` | Filter rows with a column expression |
+| 21 | `Grep1` | Filter lines by regex |
+| 19 | `Remove beginning1` | Remove initial lines |
+| 15 | `Grouping1` | Group and aggregate |
+| 13 | `sort1` | Sort rows |
+| 6 | `cat1` | Concatenate files |
+| 4 | `Paste1` | Paste files side by side |
 
-Representative full IDs (first occurrence in corpus):
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3` — `comparative_genomics/hyphy/hyphy-core.gxwf.yml:169`. 82 steps at `9.3+galaxy1`, 60 at `9.5+galaxy3`, 30 at `9.5+galaxy0`, 27 at `9.5+galaxy3` (sars-cov-2 cluster), 13 at `9.5+galaxy2` — that's the version-pin spread.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_find_and_replace/9.5+galaxy3` — `read-preprocessing/short-read-quality-control-and-trimming.gxwf.yml` and elsewhere; 38 steps total at this version, plus 16 at `9.5+galaxy0` and 12 at `9.3+galaxy1`. Example regex spec: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:390-407` (compound `find_pattern` reflowing seven `,`-collapsed datamash columns into seven plain columns; `is_regex: true`, `skip_first_line: true`).
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_replace_in_line/9.5+galaxy0` — `sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-variant-calling/pe-artic-variation.gxwf.yml:973`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_easyjoin_tool/9.3+galaxy1` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:601` (5 invocations in this single file alone — see §3).
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_text_file_with_recurring_lines/9.5+galaxy3` — `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:663`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sed_tool/9.5+galaxy3` — `sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-ivar-analysis/pe-wgs-ivar-analysis.gxwf.yml:155` (5 sed invocations in this one file).
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_replace_in_column/9.5+galaxy3` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:942`. Older `1.1.3` pin survives at `sars-cov-2-variant-calling/sars-cov-2-ont-artic-variant-calling/ont-artic-variation.gxwf.yml:192`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_cat/9.5+galaxy3` — `sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-ivar-analysis/pe-wgs-ivar-analysis.gxwf.yml:627`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sorted_uniq/9.5+galaxy3` — `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:773`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_uniq_tool/9.5+galaxy3` — `VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:2476` (inside a subworkflow).
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_head_tool/9.5+galaxy0` — `microbiome/pathogen-identification/allele-based-pathogen-identification/Allele-based-Pathogen-Identification.gxwf.yml:495`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3` — used 43x across four pins (`1.1.1`, `9.3+galaxy1`, `9.5+galaxy2`, `9.5+galaxy3` — last dominates); coexists with core `Grep1` (47x). See §3.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_multijoin_tool/9.3+galaxy1` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:796`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sort_header_tool/9.3+galaxy1` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:923`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/split_file_on_column/tp_split_on_column/0.6` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:369` (split a tabular into a collection by a key column).
+Representative states:
+
+- `Cut1`: `columnList: c4,c6,c7,c13,c14,c15,c16,c17,c18,c19,c21,c22,c23,c26,c24,c25,c20`, `delimiter: T` in `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782`.
+- `Filter1`: `cond: c4=='PASS' or c4=='.'`, `header_lines: "1"` in the same workflow at line 545.
+- `Grep1`: `pattern: ^>`, `invert: ""`, `keep_header: false` in `$IWC_FORMAT2/comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:687`.
+- `Grouping1`: `groupcol: "6"`, `operations: [{optype: length, opcol: "6"}]` in `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:324`.
+- `Remove beginning1`: two successive steps in that PathoGFAIR workflow at lines 186 and 200.
+- `Paste1`: two inputs with `delimiter: T` in `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:733`.
+
+### 1b. bgruening text-processing tools
+
+The table combines versions of each tool stem. Except for `tp_split_on_column`, these are from `bgruening/text_processing`.
+
+| Steps | Tool stem | Operation |
+|---|---|---|
+| 127 | `tp_awk_tool` | Awk recipes |
+| 54 | `tp_find_and_replace` | Sequenced find/replace patterns |
+| 25 | `tp_replace_in_line` | Replace text within lines |
+| 18 | `tp_grep_tool` | Regex line filter |
+| 16 | `tp_cat` | Concatenate files |
+| 15 | `tp_replace_in_column` | Replace values in a selected column |
+| 13 | `tp_text_file_with_recurring_lines` | Generate constant/template lines |
+| 12 | `tp_easyjoin_tool` | Two-file key join |
+| 11 | `tp_sed_tool` | Sed recipes |
+| 8 | `tp_cut_tool` | Cut fields or characters |
+| 6 | `tp_sort_header_tool` | Sort with header handling |
+| 6 | `tp_sorted_uniq` | Sort and deduplicate lines |
+| 3 | `tp_tail_tool` | Take final lines |
+| 2 | `tp_head_tool` | Take initial lines |
+| 2 | `tp_uniq_tool` | Deduplicate adjacent lines |
+| 1 | `tp_multijoin_tool` | Join many files |
+| 1 | `tp_split_on_column` | Split a table into a collection by column |
+
+An example full ID is `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_awk_tool/9.5+galaxy3`. Awk pins account for 45 steps at `9.3+galaxy1`, 43 at `9.5+galaxy3`, 30 at `9.5+galaxy0`, and 9 at `9.5+galaxy2`. The separate split wrapper is `toolshed.g2.bx.psu.edu/repos/bgruening/split_file_on_column/tp_split_on_column/0.6`.
+
+Useful inspection points:
+
+- `tp_find_and_replace`: `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:389-407`, with multiple regex patterns and different `skip_first_line` settings.
+- `tp_replace_in_line`: `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-variant-calling/pe-artic-variation.gxwf.yml:973`.
+- `tp_text_file_with_recurring_lines`: `$IWC_FORMAT2/comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:663`.
+- `tp_sed_tool`: `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-ivar-analysis/pe-wgs-ivar-analysis.gxwf.yml:155`.
+- `tp_replace_in_column`: the variation-reporting workflow at lines 281–289, with `column_replace: "16"`, `delimiter: tab`, `pass_comments: "#"`, `skip_lines: "1"`, and `unknowns_strategy: skip`.
+- `tp_sorted_uniq`: the capheine workflow at line 773. Its trailing tool summary is not another invocation.
+- `tp_uniq_tool`: `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:2476`, inside an embedded subworkflow.
+- `tp_head_tool`: `$IWC_FORMAT2/microbiome/pathogen-identification/allele-based-pathogen-identification/Allele-based-Pathogen-Identification.gxwf.yml:495` and `:633`.
+- `tp_multijoin_tool`: the PathoGFAIR workflow at line 796.
+- `tp_split_on_column`: the same workflow at line 369.
 
 ### 1c. devteam column tools
 
-| Steps | tool_id | Operation |
+| Steps, all versions | Tool stem | Operation |
 |---|---|---|
-| 93 | `toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1` | Computed column (Python expressions over `cN`) |
-| 56 | `toolshed.g2.bx.psu.edu/repos/devteam/add_value/addValue/1.0.1` | Constant column add (older idiom; survives heavily in VGP) |
+| 55 | `column_maker/Add_a_column1` | Compute columns with Python expressions |
+| 31 | `add_value/addValue` | Add a constant column |
 
-`column_maker/Add_a_column1/2.1` first occurrence: `sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:344`. Representative state at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:294-328` — two `expressions:` entries in one step, one inserting `c7` as `AFcaller` at position `I` (insert), one replacing position `7` with `round((c18 + c19) / c6, 6)` named `AF`. The `error_handling: { auto_col_types: true, fail_on_non_existent_columns: true, non_computable: { action: --fail-on-non-computable } }` block is a stable boilerplate across the corpus — pattern page should call it out as the recommended-default tuple.
+`Add_a_column1` has 49 steps at `2.1`, 2 at `2.0`, and 4 at `1.6`. The 51 steps at versions 2.0/2.1 carry structured `error_handling`. The four 1.6 steps do not use that shape. `addValue` occurs at version `1.0.1` under `toolshed.g2.bx.psu.edu/repos/devteam/add_value/addValue/1.0.1`.
+
+The variation-reporting workflow at lines 294–328 has two expressions in one step: insert `c7` at position 8 as `AFcaller`, then replace position 7 with `round((c18 + c19) / c6, 6)` as `AF`. It sets `auto_col_types: true`, `fail_on_non_existent_columns: true`, and `non_computable.action: --fail-on-non-computable`. Those flags apply to the whole step, not separately to each expression.
 
 ### 1d. iuc / nml tabular tools
 
-| Steps | tool_id | Operation |
+| Steps, all versions | Tool stem | Observed role |
 |---|---|---|
-| 73 | `toolshed.g2.bx.psu.edu/repos/iuc/datamash_ops/datamash_ops/{1.1.0,1.8+galaxy0,1.9+galaxy0}` | Group/aggregate; collapse |
-| 44 | `toolshed.g2.bx.psu.edu/repos/nml/collapse_collections/collapse_dataset/5.1.0` | Concatenate a collection into a single tabular (with `add_name`/`one_header`) |
-| 32 | `toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3` | Wide pivot: outer-join a collection of 2-col tables on identifier → one row-per-id, one col-per-element |
-| 16 | `toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2` | Arbitrary SQL (SQLite) over one or more tabulars |
-| 11 | `toolshed.g2.bx.psu.edu/repos/iuc/filter_tabular/filter_tabular/3.3.1` | SQL-or-line-filter pre-processor |
-| ~6 | `toolshed.g2.bx.psu.edu/repos/iuc/table_compute/table_compute/1.2.4+galaxy{1,2}` | Pandas-style row/col reductions and matrix ops |
-| ~3 | `toolshed.g2.bx.psu.edu/repos/iuc/biom_convert/biom_convert/...` | Format conversion (BIOM↔tabular, tangentially) |
+| 41 | `nml/collapse_collections/collapse_dataset` | Stack a collection's files into one dataset |
+| 30 | `iuc/datamash_ops/datamash_ops` | Grouped and whole-file aggregation |
+| 22 | `iuc/collection_column_join/collection_column_join` | Align a collection's tables by identifier |
+| 16 | `iuc/biom_convert/biom_convert` | BIOM/tabular conversion |
+| 12 | `iuc/query_tabular/query_tabular` | SQL over loaded tables |
+| 8 | `iuc/filter_tabular/filter_tabular` | Line filters and table projection |
+| 4 | `iuc/table_compute/table_compute` | Matrix/vector computation |
 
-First citations:
-- `datamash_ops/1.8+galaxy0` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:333`. Representative state (collapse a per-effect duplication): `grouping: 1,2,3,4,5,6,7,8,9,10`, `operations: [{op_name: collapse, op_column: "11"}, ..., {op_name: collapse, op_column: "17"}]` — 7 collapses across columns 11-17 in one step. Lines 333-373.
-- `datamash_ops/1.9+galaxy0` (newer pin) — `VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:746`.
-- `collapse_collections/collapse_dataset/5.1.0` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:414` (`filename: { add_name: true, place_name: same_multiple }`, `one_header: true`). This is the Galaxy idiom for "flatten a collection back to a single tabular while injecting the element identifier as a leading column" — one_header strips per-file headers but keeps the first.
-- `collection_column_join/0.0.3` — `amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:202` (`identifier_column: "1"`, `fill_char: "0"`, `has_header: "0"`, `old_col_in_header: true`).
-- `query_tabular/3.3.2` — `amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:33`. SQL example at lines 57-64: `SELECT c1, c2, c3, c3 * 100 / SUM(c3) OVER() AS relative_abundance FROM t1;` — window-function relative abundance, in one tool. The `tables_0|table` input shape and `input_opts: { linefilters: [{filter: {filter_type: comment, comment_char: "35"}}, ...] }` for skipping `#`-prefixed lines is the recurring boilerplate.
-- `filter_tabular/3.3.1` — `genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:657`. Used as a lightweight column-projection / regex-line-filter alternative to `query_tabular` when no SQL is needed.
-- `table_compute/1.2.4+galaxy2` — `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:265` (`mode: matrixapply`, `matrixapply_func: { vector_op: min }`, `dimension: "0"` — column-wise min reduction). This is the only tool in the corpus that surfaces pandas-style reductions explicitly.
+The `collapse_dataset` count includes 40 steps at 5.1.0 and one at 4.2. Datamash pins are 1.1.0, 1.8+galaxy0, and 1.9+galaxy0. `query_tabular` has 11 steps at 3.3.2 and one at 3.3.0. `filter_tabular` has seven at 3.3.1 and one at 3.3.0. `table_compute` uses 1.2.4+galaxy1/2.
 
-### 1e. Tabular-adjacent / built-ins worth flagging
+Representative states appear in the operation inventory below. `filter_tabular` is not the SQL tool: its projection and line filters can prepare a table without a SQL query.
 
-- `wc_gnu` (72 steps) — line-count, frequently downstream of a Filter/awk to feed `param_value_from_file` (e.g. `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:301`).
-- `__APPLY_RULES__` (22), `__FLATTEN__` (11), `__RELABEL_FROM_FILE__` (39), `__FILTER_FROM_FILE__` (20), `__FILTER_EMPTY_DATASETS__` (64), `__EXTRACT_DATASET__` (46), `__MERGE_COLLECTION__` (12) — Galaxy collection ops; out of scope per task ("not row/column ops") but they bracket the tabular sections heavily.
-- `compose_text_param/0.1.1` (99), `pick_value/0.2.0` (85), `param_value_from_file` (154), `map_param_value/0.2.0` (92), `collection_element_identifiers/0.0.2` (99) — the metadata-wrangling cluster around tabular steps; not tabular themselves.
-- `multiqc/1.33+galaxy0` (31) and `tooldistillator_summarize/1.0.4+galaxy0` (11) — produce tabular outputs but are reporting tools; out of scope.
+### 1e. Adjacent operations
 
-### 1f. Notable absences
+- `wc_gnu`: 35 steps, including the line-count-to-parameter example in §2n.
+- Collection modules: `__APPLY_RULES__` 17, `__FLATTEN__` 10, `__RELABEL_FROM_FILE__` 22, `__FILTER_FROM_FILE__` 13, `__FILTER_EMPTY_DATASETS__` 44, `__EXTRACT_DATASET__` 44, and `__MERGE_COLLECTION__` 6. See [[galaxy-collection-patterns]] for their collection contracts.
+- Parameter and metadata tools: `compose_text_param` 81, `pick_value` 67, `param_value_from_file` 97, `map_param_value` 56, and `collection_element_identifiers` 53. See [[iwc-parameter-derivation-survey]] for their boundaries.
+- Reporting tools such as `multiqc` and `tooldistillator_summarize` can produce tables, but this inventory does not classify their report generation as a table transformation.
 
-Searched `--include="*.yml"` for these; **zero hits in the corpus**:
+### 1f. Absence in this snapshot
 
-- `csvtk/*` — none. Rich CSV/TSV swiss-army wrapper exists in toolshed but no IWC workflow uses it.
-- `datamash_transpose/*`, `datamash_reverse/*` — none. Datamash's transpose/reverse subcommands are not surfaced through any IWC workflow; transpose is done either via `table_compute` (rare) or implicit in the wide-pivot `collection_column_join` idiom (§5).
-- No dedicated CSV format converter (no `tab_to_csv` / `csv_to_tab`); when conversion is needed it goes through awk.
-- No bedtools-as-tabular intersect/sort outside of genuine BED contexts (excluded by scope anyway).
+No actual tool IDs in the snapshot identify csvtk, `datamash_transpose`, `datamash_reverse`, `tab_to_csv`, or `csv_to_tab`. This does not establish that these tools are unavailable or unsuitable. It limits the exemplars this survey can provide. Collection-column joins are not general transposes, and the taxonomy expansion in §2g is not a wide-to-long pivot.
 
 ## 2. Operation inventory
 
-Each operation, ranked by visible IWC frequency, with 2-3 file:line examples each.
+The sixteen categories describe operations seen or sought in the corpus. Tool totals are exact occurrence counts. Operation totals are not supplied because an awk or SQL step can perform several operations at once.
 
-### 2a. Filter rows (very common; ~80+ instances)
+### 2a. Filter rows
 
-- Core `Filter1` with Python-expression over `cN` columns: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545` (`cond: c4=='PASS' or c4=='.'`, `header_lines: "1"`).
-- `Filter1` driven by a runtime-generated rule string fed from another step: `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336` (`cond: { __class__: ConnectedValue }` from `generate filter rule/out1`).
-- Regex/grep — split between core `Grep1` and `tp_grep_tool` (see §3 for the redundancy). Core: `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:687` (`pattern: ^>`).
-- SQL filter with side-effect of column projection: `query_tabular` at `amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:33`.
-- Filter via awk pattern: pervasive — see §2g and the `code:` greps in §5.
+- `Filter1` (27 steps) evaluates column expressions. Variation reporting uses `c4=='PASS' or c4=='.'` with one header line at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545`.
+- A runtime-generated predicate connects to `cond` in `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336`.
+- `Grep1` (21) and `tp_grep_tool` (18) filter whole lines. They have different parameter contracts and header capabilities. See §7 for the consistency preference and its qualification.
+- Awk patterns and SQL `WHERE` clauses can filter while performing other operations. A `SELECT` projection alone is not evidence of row filtering.
 
-### 2b. Column projection / cut (very common; ~127 `Cut1` + N `query_tabular`)
+### 2b. Column projection / cut
 
-- `Cut1` with comma-separated `cN` list: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782` (`columnList: c4,c6,c7,c13,...,c20`, `delimiter: T`). `Cut1` is *also* used to **reorder** columns by listing them out of order (note `c20` last after `c26,c24,c25` in that example).
-- `query_tabular` for column projection + computed columns in one shot: `amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:57-64`.
-- `filter_tabular` for projection without SQL: `amplicon/amplicon-mgnify/mgnify-amplicon-taxonomic-summary-tables/mgnify-amplicon-summary-tables.gxwf.yml:203`.
+`Cut1` (91 steps) selects columns in the supplied order. The variation-reporting example at line 782 places `c20` after `c26,c24,c25`, so selection also reorders columns. `query_tabular` can project and compute together. `filter_tabular` performs projection without SQL in `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-taxonomic-summary-tables/mgnify-amplicon-summary-tables.gxwf.yml:203`.
 
-### 2c. Computed column / per-row arithmetic (~93 `column_maker` + many awk)
+The MAPseq-to-ampvis2 SQL step computes relative abundance alongside projection (`$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:57-64`):
 
-- `Add_a_column1/2.1` with multiple expressions in one step (insert *and* replace): `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:316-329` (`AFcaller` at insert pos 8, `AF = round((c18 + c19) / c6, 6)` at replace pos 7).
-- String-concatenation new column: same file lines 462-472 (`c5 + '>' + c6` named `change`, `c3 + ':' + c19` named `change_with_pos`).
-- Per-row arithmetic via awk: see §2g.
+```sql
+SELECT c1, c2, c3, c3 * 100 / SUM(c3) OVER() AS relative_abundance FROM t1;
+```
 
-### 2d. Sort (~25 core `sort1`, ~8 `tp_sort_header_tool`)
+Its input-load filters skip `#`-prefixed lines before table import. This combines a computed column with a whole-table window aggregate, which gives SQL a specific role beyond a column cut.
 
-- Core `sort1` first occurrence: `VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:559` (inside subworkflow).
-- Header-preserving sort: `tp_sort_header_tool/9.3+galaxy1` at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:923` and `:950` — used immediately before downstream joins.
+### 2c. Computed column / per-row arithmetic
 
-### 2e. Group / aggregate (~73 `datamash_ops`, ~19 `Grouping1`)
+`Add_a_column1` (55 steps across versions) supports successive insert, replace, and append expressions. Variation reporting inserts `AFcaller` and replaces `AF` at lines 316–329. The same workflow appends `change` from `c5 + '>' + c6` and `change_with_pos` from `c3 + ':' + c19` at lines 462–472. The former step enables numeric typing, while the latter keeps strings. Awk also computes row values when a recipe needs branching or string splitting.
 
-- Datamash with multi-column `grouping:` plus several `op_name`s in one step: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:333-370` (10-col grouping, 7 collapse columns) and `:562-596` (single-col group, 5 ops: `countunique × 3`, `min`, `max`, `collapse`).
-- `Grouping1` (older Galaxy tool): `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:324` (`groupcol: "6"`, `operations: [{optype: length, opcol: "6"}]`) and `:1087` (`optype: cat`, i.e. concatenate group members).
+### 2d. Sort
 
-### 2f. Join (~5 `tp_easyjoin_tool` instances visible at top-level, ~2 `tp_multijoin_tool`)
+`sort1` occurs 13 times and `tp_sort_header_tool` six times. Header-aware sorts precede joins at variation-reporting lines 923 and 950. A `sort1` example is `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:559`. Match numeric/text comparison and header handling to the input instead of inferring them from the tool name.
 
-- Two-file join on key columns: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:601-627` (`column1: "20"`, `column2: "1"`, `empty_string_filler: "0"`, `header: true`, `jointype: " "` — note the *single space* string for default outer join, not `--outer`). Five easyjoin steps in this one workflow alone (lines 601, 722, 752, 799, 1059).
-- Multi-file join: `microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:796` (`tp_multijoin_tool/9.3+galaxy1`).
+### 2e. Group / aggregate
 
-### 2g. awk (free-form) (~195 step instances)
+`datamash_ops` occurs 30 times and `Grouping1` 15 times.
 
-Effectively the swiss-army knife. Several recurring sub-shapes:
+- Variation reporting groups by columns 1–10 and collapses columns 11–17 at lines 333–373.
+- Its step at lines 562–596 groups by column 3 and performs five operations: three `countunique` operations, `min`, and `max`.
+- `Grouping1` uses `optype: length` at PathoGFAIR line 324 and `optype: cat` at line 1087.
 
-- **Header injection** (constant prefix): `microbiome/mags-building/MAGs-generation.gxwf.yml:1090-1096` —
-  ```
-  BEGIN {OFS="\t"; print "genome\tcompleteness\tcontamination"}
-  NR > 1 {
-      if ($1 !~ /\.fasta$/)
-          $1 = $1 ".fasta"
-      print $1, $2, $3
-  }
-  ```
-  Same one-liner shape at `VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:855` (`'BEGIN{print "Metric\tAlternate"}; {print}; '`) and `:1631` (`Metric\tPrimary`).
-- **BED triple synthesis from a 3-column input**: `amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:222` and `:268` —
-  `'BEGIN {OFS="\t"} {print $1, $2 - 1, $3, "forward", "1", "+"}'`
-  vs `:245`/`:291` `"reverse", "1", "-"`. Replicated verbatim inside the `mgnify-amplicon-pipeline-v5-complete.gxwf.yml:2101,2124,2147,2170` subworkflow embeddings.
-- **Long-format taxonomy splitter**: `amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:101-135` — `split($3, taxonomy, ";")` then dispatch by `^sk__`/`^k__`/`^p__`/`^c__`/`^o__`/`^f__`/`^g__`/`^s__` prefix into the 8 taxonomic-rank columns. Re-implemented (similar but not identical) at `amplicon/amplicon-mgnify/mgnify-amplicon-taxonomic-summary-tables/mgnify-amplicon-summary-tables.gxwf.yml:241,281,336` and `mgnify-amplicon-pipeline-v5-complete.gxwf.yml:5697,5737,5792,6130,6170`.
-- **FASTQ id sanitization** (technically in scope as a row-text op): `amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-complete/mgnify-amplicon-pipeline-v5-complete.gxwf.yml:407` — `NR % 4 == 1 { gsub(/[ \/]/, "-", $0) } { print }`.
-- **Inline relabel** (replace whole record with a counter): `microbiome/binning-evaluation/MAGs-binning-evaluation.gxwf.yml:433` — `'{gsub( $0 ,"sample_" (NR-1)); print}'`.
+Datamash's `grouping` is a comma-separated string and `operations` is a list of `{op_name, op_column}` entries. `header_in` and `header_out` are independent. `need_sort` controls sorting before grouped aggregation, so disabling it requires an upstream guarantee that equal keys are grouped. Whole-file reductions use empty grouping.
 
-### 2h. String/regex replace at the line/column level (~66 `tp_find_and_replace`, ~39 `tp_replace_in_line`, ~11 `tp_replace_in_column`)
+### 2f. Join on key
 
-- `tp_find_and_replace` with **multiple sequenced patterns in one step**: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:389-407` (compound regex reflow + a `(GroupBy|collapse)\(([^)]+)\)` → `$2` strip). Demonstrates the convention `skip_first_line: true` for the first pass and `false` for the second.
-- `tp_replace_in_column` with `column_replace: "16"`, `delimiter: tab`, `pass_comments: "#"`, `skip_lines: "1"`, `unknowns_strategy: skip`: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:281-289`.
+`tp_easyjoin_tool` occurs 12 times across five workflows. Four of those steps are in variation reporting, at lines 601, 722, 752, and 799. The first connects key column 20 to column 1 and sets `header: true`, `empty_string_filler: "0"`, and `jointype: " "`.
 
-### 2i. Concatenate / row-bind (~15 `tp_cat`, ~4 `cat1`, ~44 `collapse_dataset`)
+The literal space selects the matched-both-files mode, an inner join. It does not select an outer join. The wrapper exposes different options for unpaired rows. Preserve the literal enum value when copying this exemplar and choose the join mode deliberately. See the pinned wrapper in §8.
 
-- `tp_cat` for two-file concat: `sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-ivar-analysis/pe-wgs-ivar-analysis.gxwf.yml:627`.
-- `collapse_dataset` for collection→tabular concat with header dedup: `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:414` (`one_header: true`, `add_name: true`, `place_name: same_multiple`). This is the dominant idiom — 44 steps; cf. only 15 `tp_cat` and 4 `cat1`.
+`tp_multijoin_tool` occurs once, in PathoGFAIR at line 796. It aligns many same-shaped key/value inputs. SQL joins are another option when named tables, compound conditions, or anti-joins are needed.
 
-### 2j. Dedupe (~6 `tp_sorted_uniq`, ~3 `tp_uniq_tool`)
+### 2g. Awk recipes
 
-- `tp_sorted_uniq` first hit: `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:773` and `:1293` (in the workflow's `unique_tools` block).
-- `tp_uniq_tool`: `VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:2476`.
+`tp_awk_tool` occurs 127 times. Four reusable recipes have operation-named pages, while other uses remain workflow-specific.
 
-### 2k. Header strip / take first N (~21 `Remove beginning1`, ~4 `tp_head_tool`)
+**Header injection and row cleanup**, from `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:1090-1096`:
 
-- `Remove beginning1`: `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:186` and `:200` (used twice in succession).
-- `tp_head_tool`: `microbiome/pathogen-identification/allele-based-pathogen-identification/Allele-based-Pathogen-Identification.gxwf.yml:495,633`.
+```awk
+BEGIN {OFS="\t"; print "genome\tcompleteness\tcontamination"}
+NR > 1 {
+    if ($1 !~ /\.fasta$/)
+        $1 = $1 ".fasta"
+    print $1, $2, $3
+}
+```
 
-### 2l. Pivot / transpose
+The `NR > 1` guard replaces an existing header instead of retaining it. VGP QC prepends fixed metric headers at `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:855` and `:1631`.
 
-**Sparse — and the corpus shape is itself a finding.** No `datamash_transpose` invocations anywhere. `table_compute` does column reductions but is not used as a transpose. The dominant **wide-pivot** idiom is `collection_column_join`: take a *collection* of two-column (id, value) tables and outer-join them on the id column to produce one row-per-id, one-column-per-element. Examples at `amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:202`, `microbiome/pathogen-identification/nanopore-pre-processing/Nanopore-Pre-Processing.gxwf.yml:823`, `microbiome/mags-building/MAGs-generation.gxwf.yml:1483,1544,1656`, `microbiome/mag-genome-annotation-parallel/MAG-Genome-Annotation-Parallel.gxwf.yml:811`. The collection element identifier is the new column header (`old_col_in_header: true`).
+**BED synthesis**, from `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:222`:
 
-**Long-pivot** (wide → long) is done with awk; e.g. `amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:101-135` reshapes a `;`-delimited taxonomy column to 8 parallel columns — itself wide-from-long via awk dispatch, reverse direction.
+```awk
+'BEGIN {OFS="\t"} {print $1, $2 - 1, $3, "forward", "1", "+"}'
+```
 
-### 2m. Format conversion (tabular flavors)
+The reverse-strand version uses `"reverse", "1", "-"`. These steps also appear in the complete MGnify workflow's embedded subworkflow at lines 2101, 2124, 2147, and 2170. The subtraction assumes the input start needs conversion to zero-based BED coordinates.
 
-Almost none seen. `biom_convert` (24 step occurrences across some amplicon workflows) is the only dedicated converter, and it converts between BIOM and TSV — adjacent to scope. Otherwise, conversions between TSV/CSV/BED-like flavors are done with awk + `Cut1` ad hoc; **no pure converter pattern exists**.
+**Taxonomy-string expansion**, from `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:101-135`: `split($3, taxonomy, ";")` dispatches `sk__`, `k__`, `p__`, `c__`, `o__`, `f__`, `g__`, and `s__` tokens into eight rank columns. It expands one field into columns without creating extra rows. Related, non-identical programs occur in the taxonomic summary workflow at lines 241, 281, and 336.
 
-### 2n. Count / summarize (~72 `wc_gnu`)
+**Row-counter labels**, from `$IWC_FORMAT2/microbiome/binning-evaluation/MAGs-binning-evaluation.gxwf.yml:433`:
 
-`wc_gnu` is overwhelmingly used to feed `param_value_from_file` (line-count → integer parameter). E.g. `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:301-313` (`include_header: false`, `options: [lines]`).
+```awk
+'{gsub( $0 ,"sample_" (NR-1)); print}'
+```
+
+This is the observed regex-based whole-record replacement. A fresh counter recipe can assign `$0` directly so arbitrary input text is not interpreted as a regex. Row order is the identity source in either case.
+
+The complete MGnify workflow also sanitizes FASTQ IDs at line 407 with `NR % 4 == 1 { gsub(/[ \/]/, "-", $0) } { print }`. That is adjacent text processing, not a tabular row recipe. Awk `code` values appear both as single-quoted command fragments and multiline programs. Check the wrapper's quoting contract before translating between them.
+
+### 2h. String / regex replacement
+
+`tp_find_and_replace` occurs 54 times, `tp_replace_in_line` 25 times, and `tp_replace_in_column` 15 times. Their overlap does not make their contracts interchangeable.
+
+Variation reporting runs sequenced patterns at lines 389–407, including cleanup of collapsed values and `(GroupBy|collapse)\(([^)]+)\)` → `$2` header cleanup. The first pattern skips the header, while the second includes it. Its column-specific replacement at lines 281–289 selects column 16 and separately handles comments, skipped lines, and unknown values. Choose by the intended replacement scope.
+
+### 2i. Concatenate / row-bind
+
+`collapse_dataset` has 41 steps, `tp_cat` 16, and `cat1` six. `tp_cat` concatenates ordinary files at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-ivar-analysis/pe-wgs-ivar-analysis.gxwf.yml:627`.
+
+Variation reporting stacks a collection at line 414 with `filename: {add_name: true, place_name: same_multiple}` and `one_header: true`. The element name is repeated on data rows as provenance. In this headered mode the first header is prefixed with `Sample`. MAPseq-to-ampvis2 at line 178 instead disables both names and header handling. These settings follow input shape and downstream needs, not a universal boilerplate tuple.
+
+### 2j. Deduplicate
+
+`tp_sorted_uniq` occurs six times and `tp_uniq_tool` twice. The capheine workflow uses the former at line 773. VGP Hi-C uses the latter inside an embedded subworkflow at line 2476. Sorting plus uniqueness and adjacent-line uniqueness are different operations. Aggregating by a key with datamash is different again from removing identical whole lines.
+
+### 2k. Remove initial lines / take first N
+
+`Remove beginning1` occurs 19 times and `tp_head_tool` twice. PathoGFAIR removes initial lines at lines 186 and 200. Allele-based pathogen identification takes initial rows at lines 495 and 633. Removing a known header and limiting a file's row count need different choices.
+
+### 2l. Collection-to-wide alignment / transpose
+
+`collection_column_join` occurs 22 times across 12 workflows. It aligns identifiers from a collection's tables into a wider output. The two-column `(id, value)` input is the reusable wide-table idiom, but the wrapper can carry multiple non-key columns from each file. It is not a generic transpose or wide-to-long pivot.
+
+MAPseq-to-ampvis2 at line 202 sets `identifier_column: "1"`, `fill_char: "0"`, `has_header: "0"`, and `old_col_in_header: true`. MAGs generation at lines 1483, 1544, and 1656 uses `fill_char: .`, `has_header: "1"`, and `old_col_in_header: false`. With `old_col_in_header: true`, output headers include the element name plus the original column header or column number. With false, they use the element name. Zero fill and original-header suffixes are not common to every exemplar.
+
+No `datamash_transpose` step was found. The four `table_compute` steps do not establish a generic transpose pattern. Taxonomy expansion is a separate field-to-columns operation (§2g).
+
+### 2m. Format conversion
+
+`biom_convert` occurs 16 times across three workflows and converts between BIOM and tabular representations, adjacent to this survey's row/column scope. Awk and column cuts also assemble particular tabular layouts. No dedicated TSV↔CSV converter exemplar was found in this snapshot, so this survey does not derive a general converter pattern from it.
+
+### 2n. Count / summarize
+
+`wc_gnu` occurs 35 times. One use counts filtered rows for a typed downstream parameter: `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:301-313` sets `include_header: false` and `options: [lines]`. The corpus also uses counts for reports and other intermediate results. A `wc_gnu` occurrence alone does not establish a count-to-parameter chain.
 
 ### 2o. Sample / random subset
 
-Not visible at the tabular layer in any sampled file; sampling happens upstream at FASTQ level (`seqtk_sample`), not on tabular outputs.
+No tabular random-subset exemplar was identified by this survey. Sequence-level sampling is outside the row/column scope. This leaves the category without a recipe here, rather than making tabular sampling an invalid choice.
 
-### 2p. Side-by-side bind / paste
+### 2p. Side-by-side paste
 
-`Paste1` (7 instances): `genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:733` and `microbiome/pathogen-identification/allele-based-pathogen-identification/Allele-based-Pathogen-Identification.gxwf.yml:611`.
+`Paste1` occurs four times. Functional annotation at line 733 and allele-based pathogen identification at line 611 paste files side by side. This aligns rows by position, not by an identifier key. Upstream row order and row counts therefore need to match the intended pairing.
 
-## 3. Cross-tab (tool × operation; redundancy hotspots)
+## 3. Tool choice by operation
 
-| Operation | Tools that cover it (corpus-observed) | Recommendation lean |
+| Operation | Corpus paths | Choice or qualification |
 |---|---|---|
-| Filter rows (column expression) | `Filter1`, `query_tabular`, `filter_tabular`, awk | `Filter1` for one-shot; `query_tabular` only when SQL semantics needed |
-| Filter rows (regex) | `Grep1` (47), `tp_grep_tool` (43), awk | **Real redundancy** — 47 vs 43 split with no semantic distinction visible |
-| Cut/project columns | `Cut1` (127), `query_tabular`, `filter_tabular`, `Paste1`+`Cut1` chains | `Cut1` dominates; use `query_tabular` for project+compute fused |
-| Computed column | `Add_a_column1` (93), awk, `query_tabular` | `Add_a_column1` if the expression is short; awk if the row needs a multi-line decision tree (see §2g taxonomy splitter) |
-| Sort | `sort1`, `tp_sort_header_tool` | `tp_sort_header_tool` whenever the input has a header — `sort1`'s header handling is implicit |
-| Group/aggregate | `datamash_ops` (73), `Grouping1` (19), `query_tabular` | `datamash_ops` is the canonical choice; `Grouping1` survives in older microbiome workflows |
-| Join on key | `tp_easyjoin_tool`, `tp_multijoin_tool`, `query_tabular` (SQL `JOIN`), `collection_column_join` (collection-shape) | `tp_easyjoin_tool` for two-file 1:1; `collection_column_join` for the collection→wide-table case |
-| Header injection | awk `BEGIN`-block, `tp_text_file_with_recurring_lines`+`tp_cat` | awk is far more frequent (see §5 idiom #1) |
-| Header strip | `Remove beginning1`, awk `NR > 1`, `tp_head_tool` | `Remove beginning1` is purpose-built and dominant |
-| Concatenate (row-bind) | `tp_cat`, `cat1`, `collapse_dataset` (collection→single) | `collapse_dataset` for collections; `tp_cat` for plain two-file |
-| Dedupe | `tp_sorted_uniq`, `tp_uniq_tool`, `datamash_ops` collapse + count | `tp_sorted_uniq` for line-level; `datamash_ops` for key-aware dedupe |
-| Replace text | `tp_find_and_replace` (66), `tp_replace_in_line` (39), `tp_replace_in_column` (11), `tp_sed_tool` (16), awk | `tp_replace_in_column` when the substitution is per-column (preserves other columns); `tp_find_and_replace` for whole-line; the rest are all redundant flavors of "regex replace" |
-| Wide pivot | `collection_column_join`, awk | `collection_column_join` for the collection-to-table case (only viable use); no tool for wide↔long generic |
-| Transpose | `table_compute` (rare) | No good IWC-attested option; gap |
+| Column predicate | `Filter1`, awk, SQL `WHERE` | `Filter1` for a short column expression, SQL when the query also needs SQL operations |
+| Whole-line regex | `Grep1`, `tp_grep_tool`, awk | Prefer `tp_grep_tool` for family consistency, retain `Grep1` when its independent header handling fits |
+| Select/reorder columns | `Cut1`, `filter_tabular`, `query_tabular` | `Cut1` for projection alone, SQL for projection combined with computation/query semantics |
+| Compute column | `Add_a_column1`, awk, `query_tabular` | Match expression complexity and typing to the tool |
+| Sort | `sort1`, `tp_sort_header_tool` | Verify comparison mode and header handling |
+| Group/aggregate | `datamash_ops`, `Grouping1`, `query_tabular` | Datamash is the hierarchy's primary aggregate tool, SQL remains valid when the query fits |
+| Join by key | `tp_easyjoin_tool`, `tp_multijoin_tool`, SQL | Choose the required match/unpaired-row behavior, uniform-file shape, or SQL predicate |
+| Prepend header | Awk, generated text plus concatenation | Account for an existing header and datatype |
+| Remove header | `Remove beginning1`, awk `NR > 1` | Remove only the known header lines |
+| Stack rows | `tp_cat`, `cat1`, `collapse_dataset` | Collection bridge when inputs are a collection, ordinary concatenation otherwise |
+| Deduplicate | `tp_sorted_uniq`, `tp_uniq_tool` | Distinguish whole-line, adjacent-line, and key-group semantics |
+| Replace text | Column/line replace wrappers, sed, awk | Choose replacement scope and regex flavor explicitly |
+| Collection to wide table | `collection_column_join` | Check keys, non-key columns, missing cells, and header naming |
+| Transpose / wide-to-long | No general exemplar identified | No pattern derived from this snapshot |
 
-**Tool-anchored deep-dive candidates** (one tool covers many operations, complex parameterization):
+## 4. Established pattern coverage
 
-- **awk** (`tp_awk_tool`, 195 steps across all versions) — by far the highest-leverage page. Header injection, BED synthesis, column reshape, regex filter, taxonomy splitting all condense to awk one-liners or short blocks. The `code: |-` field carries a Bash-like single-quoted string OR a multiline awk program; both shapes are present (compare `mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:222` quoted-string form vs `mapseq-to-ampvis2.gxwf.yml:101` multiline `|-` form).
-- **datamash_ops** (73 steps) — the only group/aggregate path that scales beyond toy `Grouping1`. The `grouping:` field is a comma-separated string, `operations:` is a list of `{op_name, op_column}` pairs, both `header_in`/`header_out` are independent toggles, and `need_sort:` matters for correctness. Worth a dedicated page.
-- **column_maker / Add_a_column1** (93 steps) — Python expressions over `cN`, plus the `error_handling` boilerplate, plus the `add_column.mode: I/R/""` (insert/replace/append) mini-DSL. Worth a page; reviewers will reach for it constantly.
-- **query_tabular** (16 steps) — niche but powerful (SQL window functions, multi-table JOINs). Worth a page so users don't reach for awk when SQL is genuinely cleaner.
-- **collection_column_join** (32 steps) — *the* wide-pivot idiom, and unobvious unless you already know about it. Worth a page.
+The operation hierarchy now exists under [[galaxy-tabular-patterns]]. The earlier candidate list is resolved into these pages:
 
-## 4. Candidate operation-pattern boundaries
+- [[tabular-filter-by-column-value]], [[tabular-filter-by-regex]], and [[tabular-cut-and-reorder-columns]] cover single-table filtering and projection.
+- [[tabular-compute-new-column]] covers expression nesting, append/insert/replace, strict failure handling, and typing. The correction in §7 applies to its mixed-expression guidance.
+- [[tabular-group-and-aggregate-with-datamash]] covers key grouping, sorting requirements, headers, and aggregate sequences.
+- [[tabular-join-on-key]] covers ordinary key joins and SQL alternatives. The literal-space easyjoin mode is inner, as described in §2f.
+- [[tabular-sql-query]] is the SQL leaf for windows, joins, anti-joins, and combined query operations.
+- [[tabular-pivot-collection-to-wide]] and [[tabular-concatenate-collection-to-table]] distinguish collection elements becoming columns from their rows being stacked.
+- [[tabular-prepend-header]], [[tabular-synthesize-bed-from-3col]], [[tabular-split-taxonomy-string]], and [[tabular-relabel-by-row-counter]] split awk recipes by operation.
+- [[tabular-to-collection-by-row]] covers the reverse bridge from table rows or keys into collection elements.
 
-Proposed operation pages, each scoped tightly. Where a candidate is weak, I say so.
+Sort, line deduplication, initial-line removal, and ordinary file concatenation remain supporting operations here. The current hierarchy has no general transpose, wide-to-long, or TSV↔CSV page derived from this survey. A suitable exemplar can justify adding one later. Sed is recorded as an option where its transformations fit, without a dedicated page in this hierarchy.
 
-1. **`tabular-filter-by-column-value`** — `Filter1` with `cond: cN == 'X' or cN > Y`. Cite `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545`, `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320`, `sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:276`. Tools: `Filter1`. *Why:* highest-frequency single operation; the `header_lines:` parameter is an easy-to-miss correctness lever; the `cond:` mini-language is non-obvious (Python with `cN` columns). **Keep.**
+## 5. Recurring recipes and failure modes
 
-2. **`tabular-filter-by-regex` (or `tabular-grep`)** — Cover both `Grep1` and `tp_grep_tool` and resolve the redundancy. Cite `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:687`. **Keep, but the page must take a position** on which to recommend (see open question Q1).
+1. **Header generation with awk.** `BEGIN {OFS="\t"; print "header\there\there"}` creates a fixed first row. The MAGs example also skips the old header and cleans filenames. VGP uses fixed `Metric\tPrimary` and `Metric\tAlternate` headers for separate haplotypes. Generating a header file and concatenating is another observed path, but the corpus-wide awk count does not measure how often this specific recipe is chosen.
 
-3. **`tabular-cut-and-reorder-columns`** — `Cut1` with `columnList: cN,cM,...`, including the use of out-of-order lists for column reordering. Cite `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782` (reorder), `:830`, `:878`. Note `delimiter: T` constant. **Keep.**
+2. **Datamash collapse followed by regex cleanup.** Variation reporting collapses seven columns at lines 333–373, then uses a seven-group regex at lines 375–407 to retain the first comma-delimited member of each collapsed cell. This is first-member extraction after aggregation, not intrinsically an argmax. Its meaning depends on upstream order. The regex group count and comma handling must match the data.
 
-4. **`tabular-compute-new-column`** — `column_maker/Add_a_column1` with the `error_handling` boilerplate and `add_column.mode: I/R/""` DSL. Cite `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:316-329`, `:462-472`, `consensus-from-variation.gxwf.yml:344`. **Keep — this is one of the most foot-gun-prone tools in IWC due to silent column-type coercion when `auto_col_types: false`.**
+3. **Simple row predicates and richer transformations coexist.** Variation reporting uses `Filter1` for status rows, then other tools for aggregation, replacement, and joins. Tool choice follows the operation. A SQL workflow need not route every simple filter through SQL.
 
-5. **`tabular-group-and-aggregate-with-datamash`** — `datamash_ops` with multi-column `grouping:`, sequenced `operations:`. Cite `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:333-373` (collapse-by-many), `:562-596` (count/min/max in one step), `:632-657` (single-op countunique). **Keep — high-density idiom page.**
+4. **Collection alignment depends on table shape.** The three MAG metric joins use headered inputs and dot fill. MAPseq abundance uses headerless inputs and zero fill. These are different missing-value and header contracts. Empty-file filtering is useful when upstream can produce empties, but not every join needs it.
 
-6. **`tabular-join-on-key`** — `tp_easyjoin_tool` with `column1`/`column2`, `empty_string_filler`, `jointype` (note the leading-space convention for outer). Cite `variation-reporting.gxwf.yml:601`, `:722`, `:1059`. Mention `tp_multijoin_tool` for >2 inputs and `query_tabular` for SQL JOIN. **Keep.**
+5. **Collection stacking can preserve sample identity.** `add_name: true` with `place_name: same_multiple` records the element name on each row. `one_header: true` copies the first file's initial line, then removes the initial line from every file before stacking the remaining rows. It does not compare header text or validate matching headers. All inputs need headers for this mode. On headerless inputs it drops data rows. Turning names off is valid when downstream does not need row provenance.
 
-7. **`awk-in-galaxy`** (deep tool-anchored page) — `tp_awk_tool` quoted vs multiline `code:` shapes, `BEGIN {OFS="\t"}` rituals, `NR > 1` header skip, `gsub`, `split`. Cite §2g and §5 examples. **Keep — must be a deep page; see open question Q2 about depth.**
+6. **Version pins are part of the recipe.** The four awk pins account for 127 actual steps. A newer pin is not proof of interchangeable parameters or behavior. Preserve a working pin when reviewing an inherited workflow and verify the target wrapper before changing it. The constant-column `addValue` tool is separate from `Add_a_column1`, despite overlapping display names.
 
-8. **`collection-to-wide-table-with-collection_column_join`** — the wide-pivot idiom. Cite `mapseq-to-ampvis2.gxwf.yml:202`, `mags-building/MAGs-generation.gxwf.yml:1483,1544,1656`, `mag-genome-annotation-parallel/MAG-Genome-Annotation-Parallel.gxwf.yml:811`. **Keep — non-obvious without a worked example.**
+## 6. Scope boundaries
 
-9. **`collection-to-single-tabular-with-collapse_dataset`** — sibling to the above for the row-bind direction. Cite `variation-reporting.gxwf.yml:414`, `mapseq-to-ampvis2.gxwf.yml:178`. The `add_name`/`one_header`/`place_name` triad is the foot-gun. **Keep.**
+Coordinate-aware BED operations belong in [[galaxy-interval-patterns]], and sequence-record operations in [[galaxy-sequence-patterns]]. The BED-synthesis recipe remains here because it constructs columns and performs an explicit coordinate conversion. The FASTQ-ID sanitization example records an adjacent awk use without redefining FASTQ as a table.
 
-10. **`tabular-sql-with-query_tabular`** — Cite `mapseq-to-ampvis2.gxwf.yml:33` (window function), `mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:137`. The `tables[].input_opts.linefilters` and `tbl_opts.column_names_from_first_line` boilerplate is non-trivial. **Keep — this page exists to *narrow* when query_tabular is the right reach (SQL windows, JOINs), not to evangelize it.**
+Reporting tools are potential table sources. This survey does not establish a separate tabular-source pattern for them. Likewise, absence of a tool family in this pinned corpus is an evidence boundary, not a recommendation against the tool.
 
-**Drop / merge candidates** (don't deserve their own page):
+## 7. Decision record and corrected constraints
 
-- `tabular-sort` — `sort1` and `tp_sort_header_tool` are simple enough to roll into a one-line note inside other pages. Possible exception: a one-paragraph stub disambiguating the two.
-- `tabular-dedupe` — same; `tp_sorted_uniq` and `tp_uniq_tool` are thin wrappers, low pitfall density.
-- `tabular-row-bind` — collapse into the `collapse_dataset` page; standalone `tp_cat` doesn't merit a page.
-- `tabular-format-convert` — corpus is too sparse. Document as a gap, not a page (see §6 Q5).
-- `tabular-pivot-wide-to-long` — no concrete IWC pattern; corpus does this case-by-case in awk. Don't write a page until there's signal.
-- `sed-in-galaxy` — `tp_sed_tool` (16) is dwarfed by `tp_find_and_replace` (66) and awk (195). Cover sed as a one-section note inside the awk page rather than a sibling page.
-- `tabular-header-strip` — `Remove beginning1` is one-parameter (`num_lines`); too thin for a standalone.
+The original 2026-04-30 review settled the hierarchy's naming and scope. Those decisions remain:
 
-## 5. Surprising or recurring idioms
+- **Operation names.** Name pages after the operation, even when the implementation is tool-specific. The four awk recipes remain separate operation pages rather than one large awk manual.
+- **Regex-filter preference.** Prefer `tp_grep_tool` for consistency with the text-processing family. `Grep1` remains a valid inherited tool and a fit for its independent header-preservation option. They are not duplicate parameter contracts: `Grep1` uses `pattern` and may expose `keep_header`, while `tp_grep_tool` uses `url_paste`, regex-flavor/context options, and no independent header toggle in the surveyed shapes.
+- **SQL scope.** Keep [[tabular-sql-query]] in the tabular hierarchy for SQL-shaped operations. Windows, joins, anti-joins, and combined projection/computation justify it. Simpler wrappers remain easier to inspect for isolated operations.
+- **Format-conversion scope.** Do not create a generic converter pattern without an exemplar. The absence finding stays here and is scoped to this snapshot.
+- **Inherited tools.** Keep recognizable older IDs such as `Grouping1`, `cat1`, `addValue`, `Remove beginning1`, `Paste1`, and `sort1` in the evidence trail. A family-consistency preference does not establish that these tools are scientifically wrong.
 
-1. **The `BEGIN {OFS="\t"; print "header\there\there"} { print rows }` ritual.** Constant across families: `microbiome/mags-building/MAGs-generation.gxwf.yml:1090`, `VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:855`, `:1631` (`Metric\tPrimary` vs `Metric\tAlternate` — same workflow, two haplotypes, identical rite). Authors reach for awk to attach a header rather than concatenating a constant header file with `tp_cat` — `tp_text_file_with_recurring_lines` exists for the latter but is rarely used (12 step instances corpus-wide vs awk's 195).
+### Strict failure handling and expression typing
 
-2. **Datamash → Find&Replace round-trip to emulate "collapse with delimiter X".** `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:333-373` collapses 7 columns; `:375-407` then runs `tp_find_and_replace` with a 7-group regex `\t([^\t,]+),[^\t]+\t...` to keep only the first comma-delimited member of each collapsed cell. This is "argmax in datamash" implemented as "collapse-then-regex-trim-to-first" because datamash doesn't have a "first" op accessible through this UI. Pattern page should warn this is the pattern, and that getting the regex group count right is the primary failure mode.
+All 51 `Add_a_column1` steps with structured `error_handling` set `fail_on_non_existent_columns: true`. Forty-nine use `--fail-on-non-computable`, and two use `--skip-non-computable` in consensus-from-variation's coordinate arithmetic. The same 51 steps split into 48 `auto_col_types: true` and three false. These are counts for the structured 2.0/2.1 states, not all 55 occurrences across versions.
 
-3. **The same workflow uses `Filter1` AND `query_tabular` for distinct cases.** `sars-cov-2-variation-reporting/variation-reporting.gxwf.yml` uses `Filter1` (line 545) for the simple `c4=='PASS'` case but reaches for datamash, easyjoin, find&replace chains for the fan-out/fan-in. There is a real implicit decision boundary: `Filter1` for one-shot row filters; switch tools when the operation needs sort-aware or join-aware semantics.
+The authoring rule keeps missing-column failure enabled and uses failure on non-computable values unless skipping rows is part of the intended behavior. Choose typing by the expressions in the step:
 
-4. **`collection_column_join` as the only attested wide-pivot.** Six workflows use it, all with the same shape: a collection of `(id, value)` tabulars (one per sample/element) joined on column 1 with `fill_char: "0"`. `microbiome/mags-building/MAGs-generation.gxwf.yml:1483,1544,1656` does this *three times* in one workflow for three different metric families. There's no `pivot_table`-style tool in the corpus; this collection-shape join is the workflow author's substitute, and only works because the upstream produces one (id, value) file per element.
+| Expression kind | Typing choice |
+|---|---|
+| Arithmetic on numeric bare `cN`, such as `(c18+c19)/c6` | `auto_col_types: true`, with appropriate input metadata |
+| String concatenation, such as `c5 + '>' + c6` | `auto_col_types: false` |
+| Explicit-cast arithmetic, such as `int(c2) - 1` | `auto_col_types: false`, with the expression supplying conversion |
+| Expressions requiring different typing policies | Separate tool steps, or one consistent string policy with explicit numeric casts |
 
-5. **`collapse_dataset` with `add_name: true, place_name: same_multiple, one_header: true` is the canonical "merge a per-sample collection into a single annotated tabular".** `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:414`, `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:553` (with `collection_column_join`), `microbiome/host-contamination-removal/...`. Without the `one_header: true` you get duplicated header rows; without `add_name: true` you lose the per-row sample identity. Both bugs are silent.
+`auto_col_types` is a step-level setting under `tool_state.error_handling`. With true, the wrapper supplies Galaxy's input column-type metadata for conversion. It does not infer types from what an expression demands. With false, input column values are strings until the expression explicitly converts them. Splitting a mixed calculation into multiple `ops.expressions` entries does **not** give the entries separate settings. All expressions share the chosen input-column typing policy. Columns calculated by an earlier expression retain their result types for later expressions. The older mixed-expression decision is corrected on this point because the wrapper emits one `--column-types` policy for the step.
 
-6. **Version pin sprawl in the awk tool is the leading cause of "same idiom shows up four times".** `tp_awk_tool` exists in the corpus at `9.3+galaxy1` (82 steps), `9.5+galaxy0` (30), `9.5+galaxy2` (13), `9.5+galaxy3` (60+27 in two clusters). Same parameter shape across all of them. Reviewer-facing pattern: pick the highest pin currently in any live workflow and discourage downgrading; do not block PRs for older pins on cleanup-pass grounds.
+Keep `expressions` under `tool_state.ops`, next to `header_lines_select`. `error_handling` is a top-level sibling of `ops`. Expressions execute in order, so inserted or replaced columns change the positions referenced by later expressions. The canonical arithmetic, string-concatenation, and explicit-cast examples remain variation-reporting lines 307–329, lines 438–475, and consensus-from-variation lines 343–378 respectively.
 
-## 6. Open questions
+## 8. Pinned sources
 
-- **Q1.** `Grep1` (47) vs `tp_grep_tool` (43) — semantic difference real? Both take `pattern`, `invert`, `keep_header`. Suggest the regex page recommend one and demote the other; need your call which.
-- **Q2.** `awk-in-galaxy` page depth: one page covering all 195 invocations, or split into 4 sub-pages (`awk-header-injection`, `awk-bed-synthesis`, `awk-taxonomy-split`, `awk-relabel`)? Lean: one page with idiom sections; split only if frontmatter cross-linking gets noisy.
-- **Q3.** Should `Add_a_column1` page warn against `auto_col_types: false`? Many corpus uses set it true, some false (`variation-reporting.gxwf.yml:454`); silent string-vs-numeric coercion is a real bug source. Need your call on prescriptiveness.
-- **Q4.** Is `query_tabular` deep-dive in scope for this hierarchy or its own thing? It overlaps Galaxy's broader "compute over tabular" story (R, Python, csvtk-shaped). Lean: keep it in this hierarchy as the SQL operation.
-- **Q5.** Tabular format conversion is genuinely sparse (no `tab_to_csv`, no `csv_to_tab` ops; `biom_convert` is the only thing close). Write a one-paragraph "gap note" page or skip entirely?
-- **Q6.** Older tool IDs (`Grouping1`, `cat1`, `addValue/1.0.1`, `Remove beginning1`, `Paste1`, `sort1`) — do pages mention them as legacy or only the modern equivalent? Lean: mention with a "newer alternative" pointer; corpus still uses them so doc-blindness is wrong.
-- **Q7.** Out-of-scope in this survey but adjacent: `multiqc` and `tooldistillator_summarize` produce tabular outputs that downstream tabular tools then chew on. Worth a "tabular sources" cross-reference page or skip?
-- **Q8.** Should the wide-pivot page be `collection-to-wide-table-with-collection_column_join` (tool-anchored) or `tabular-pivot-collection-to-wide` (operation-anchored with the tool as recommendation)? Lean: operation-anchored title, tool-anchored content.
+Native IWC sources for the main recipes, all at the surveyed commit:
 
-## 7. Decisions (2026-04-30)
+- [SARS-CoV-2 variation reporting](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.ga): computation, grouping, regex cleanup, joins, and collection stacking.
+- [Consensus from variation](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.ga): explicit numeric casts and skip-on-non-computable arithmetic.
+- [MAPseq to ampvis2](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.ga): SQL relative abundance, taxonomy expansion, collection stacking, and collection alignment.
+- [MGnify rRNA prediction](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.ga): BED synthesis and computation before parameter extraction.
+- [MAGs generation](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/microbiome/mags-building/MAGs-generation.ga): header cleanup and three headered metric joins with dot fill.
+- [PathoGFAIR sample aggregation](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.ga): grouping, multi-file joins, column splitting, and collection stacking.
 
-Resolved via `AskUserQuestion` after this survey landed. Pinned here so the next subagent inherits them without re-litigation.
+Wrapper sources are pinned separately from the IWC snapshot. They establish the contracts used for the corrections below, without implying that every version in the inventory is interchangeable.
 
-- **Naming axis (Q8 + general).** Operation-anchored page names. Tool-anchored content is fine inside an operation-named page. Even the awk-split sub-pages get operation names (`tabular-prepend-header`, `tabular-synthesize-bed-from-3col`, `tabular-split-taxonomy-string`, `tabular-relabel-by-row-counter`); awk is the implementation, not the title.
-- **awk page depth (Q2).** Split into 4-5 operation-named sub-pages per the bullet above. No single `awk-in-galaxy` umbrella page; cross-link the awk-as-recipe sub-pages from a §Recipes line in any operation page that uses awk.
-- **Grep1 vs tp_grep_tool (Q1).** Recommend `tp_grep_tool`. Demote `Grep1` to a "legacy alternative" footnote. Consistency with the rest of the `tp_*` family wins over slight corpus-frequency edge of `Grep1`.
-- **Format-conversion gap (Q5).** Skip. Corpus-first principle: no exemplar = no page. The §2m gap note in this survey stands as the only record.
-- **`auto_col_types` (Q3).** The `tabular-compute-new-column` page prescribes a **strict structured rule**:
-  - **Always** set `fail_on_non_existent_columns: true` (51/51 corpus instances).
-  - `non_computable.action: --fail-on-non-computable` is the dominant choice (49/51); the two `--skip-non-computable` exceptions (`consensus-from-variation.gxwf.yml:364`, `:402`) are intentional, for BED-coordinate arithmetic where some rows are legitimately non-numeric.
-  - **`auto_col_types`** is per-expression-kind:
-    | Expression kind | `auto_col_types` |
-    |---|---|
-    | Arithmetic on raw `cN` (`(c18+c19)/c6`, `round(...)`) | `true` |
-    | Pure string concat (`c5 + '>' + c6`) | `false` |
-    | Arithmetic with explicit casts (`int(cN)`, `float(cN)`) | `false` |
-    | Mixed | split into two `expressions:` entries with different settings |
-  - Corpus distribution: 48 `true` / 3 `false`. Cite `variation-reporting.gxwf.yml:307-329` (true, raw-`cN` arithmetic), `:438-475` (false, string concat), and `consensus-from-variation.gxwf.yml:343-378` (false, explicit-cast arithmetic) as the canonical triple.
-  - Note on YAML shape: `expressions:` is nested under `tool_state.ops.expressions` (with `header_lines_select: yes|no` as sibling). `error_handling` is a top-level sibling of `ops`, not nested inside it. The pattern page must show this shape; flat `expressions:` does not roundtrip.
-- **Legacy tool IDs (Q6).** Pages name the modern tool primarily; include a short "Legacy alternative" footnote pointing to the old ID (`Grouping1`, `cat1`, `addValue/1.0.1`, `Remove beginning1`, `Paste1`, `sort1`). Reading old IWC workflows must remain possible.
-- **`query_tabular` (Q4).** Leaf in this tabular hierarchy as `tabular-sql-query`. Scope narrowly to "when SQL is the right reach" — window functions, multi-table JOINs, project+compute fused. Cross-link from filter / join / compute leaves; do not evangelize.
-- **Tabular-source cross-ref (Q7).** Deferred. If a Mold (e.g. `summarize-galaxy-tool`) later needs to point to multiqc/tooldistillator-as-tabular-source context, write the page then.
+- [Galaxy sort wrapper](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/tools/filters/sorter.xml): explicit `header_lines` handling for `sort1`.
+- [Easyjoin wrapper](https://github.com/bgruening/galaxytools/blob/a8748ebc4c16adfee9f2ec18f7ab352aa238e305/tools/text_processing/text_processing/easyjoin.xml): literal-space matched-both mode and options for unpaired rows.
+- [Column maker wrapper](https://github.com/galaxyproject/tools-iuc/blob/b9b16be49cbe9777b5d1cec3d22a279cfe3e74a7/tools/column_maker/column_maker.xml): shared typing policy, nested expressions, and error handling.
+- [Collection stacking wrapper](https://github.com/phac-nml/galaxy_tools/blob/b9a9397b9aa3c5b3ff8325386c5920da964abdbd/tools/collapse_collection/merge.xml): first-line removal and row provenance at version 5.1.0.
+- [Collection column join wrapper](https://github.com/galaxyproject/tools-iuc/blob/b9b16be49cbe9777b5d1cec3d22a279cfe3e74a7/tools/collection_column_join/collection_column_join.xml): non-key columns, full alignment, header suffixes, and missing-cell fill.
+
+This refresh verifies source structure, counts, and selected wrapper contracts. It does not rerun these workflows or replace the behavior checks linked from individual pattern pages.

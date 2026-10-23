@@ -1,0 +1,63 @@
+- doc: "A mapped search leaves sampleB zero bytes. Filter Empty drops it, the replacement form keeps its identifier with sentinel contents, and a header-only result is not empty"
+  job:
+    samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sampleA
+          class: File
+          path: test-data/sampleA.tabular
+          filetype: tabular
+        - identifier: sampleB
+          class: File
+          path: test-data/sampleB.tabular
+          filetype: tabular
+        - identifier: sampleC
+          class: File
+          path: test-data/sampleC.tabular
+          filetype: tabular
+    sentinel:
+      class: File
+      path: test-data/sentinel.txt
+      filetype: txt
+  outputs:
+    hits:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        sampleA:
+          file: test-data/expected_sampleA_hits.tabular
+        sampleB:
+          asserts:
+            has_size:
+              size: 0
+        sampleC:
+          file: test-data/expected_sampleC_hits.tabular
+    hits_nonempty:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        sampleA:
+          file: test-data/expected_sampleA_hits.tabular
+        sampleC:
+          file: test-data/expected_sampleC_hits.tabular
+    hits_replaced:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        sampleA:
+          file: test-data/expected_sampleA_hits.tabular
+        sampleB:
+          file: test-data/sentinel.txt
+        sampleC:
+          file: test-data/expected_sampleC_hits.tabular
+    hits_with_header_filtered:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        sampleB:
+          file: test-data/expected_header_only.tabular

@@ -40,6 +40,17 @@ Properties are tagged by bucket:
   identifier/metadata story visible from input through mapped steps and any
   gather/reduce step.
 
+## Property: element identifiers are unique across the source test's rows
+
+- bucket: fidelity
+- check: llm-judged
+- assertion: when the draft names collection element identifiers, applying its
+  rule to every row of the source test's sample sheet gives each dataset its own
+  identifier. A source test with two rows sharing a `sample` value fails a rule
+  keyed on `sample` plus mate (`sample__R1`), and a draft that reads a sample's
+  per-run suffixes (`SAMPLE3_SE_1`, `SAMPLE3_SE_2` for two single-end rows) as
+  mates fails.
+
 ## Property: unresolved tool needs are bounded
 
 - bucket: handoff

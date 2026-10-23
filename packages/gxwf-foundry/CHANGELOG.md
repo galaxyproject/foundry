@@ -1,5 +1,44 @@
 # @galaxy-foundry/gxwf-foundry
 
+## 0.3.0
+
+### Minor Changes
+
+- [#684](https://github.com/galaxyproject/foundry/pull/684) [`2bdd9b9`](https://github.com/galaxyproject/foundry/commit/2bdd9b9b68a71fd161362922e9d1ae797d10a8ce) Thanks [@jmchilton](https://github.com/jmchilton)! - Add the `test-data-refs` schema and `foundry validate-test-data-refs`. The
+  test-data-resolution chain (a source-specific Mold, then `find-test-data`)
+  writes one ref per workflow input, each either resolved, naming the Mold that
+  resolved it, or an honest gap with a reason, so whether the chain is done can
+  be read from the file. A ref's `fixture` is the test plan's `Fixture` shape.
+  Exports `testDataRefsSchema` and `testDataRefsValidator`.
+
+- [#695](https://github.com/galaxyproject/foundry/pull/695) [`5692fa8`](https://github.com/galaxyproject/foundry/commit/5692fa8776278fb06ba1468d8170797a70475bc8) Thanks [@jmchilton](https://github.com/jmchilton)! - The Galaxy workflow test-plan schema accepts `evidence: fixture-derived` on an
+  assertion intent, for an expected value measured from upstream fixture bytes
+  when the source has no assertion to translate. `family` now documents the
+  output-attribute fields that sit beside `asserts:` (`element_count`, `count`,
+  `ftype`, `checksum`, `metadata`), and `element_identifier` documents
+  `/`-joined addresses for nested collections.
+
+### Patch Changes
+
+- [#692](https://github.com/galaxyproject/foundry/pull/692) [`dd2fd85`](https://github.com/galaxyproject/foundry/commit/dd2fd85735f006674e55c0cadd1a89d68d2bcf28) Thanks [@jmchilton](https://github.com/jmchilton)! - Require `@galaxy-tool-util/schema` 1.14.0. The vendored tests-format schema now
+  accepts `count`, `min`, and `max` on nested collection elements, matching Galaxy
+  release_26.1 (galaxy#23554).
+
+## 0.2.0
+
+### Minor Changes
+
+- [#565](https://github.com/galaxyproject/foundry/pull/565) [`6365a99`](https://github.com/galaxyproject/foundry/commit/6365a99ed1e18e0526cb0d0d4b3b4ba4c527cca8) Thanks [@jmchilton](https://github.com/jmchilton)! - Add shared declarative Markdown document schemas and structural validation for build and runtime consumers. Migrate CLI pages, evals, and scenarios to the shared parser, and introduce an experimental Workflow Brief schema and validation commands.
+
+  Workflow Briefs separate workflow intent from the agent environment, keep most details optional, and expose a static blocker check through `foundry check-workflow-brief`.
+
+### Patch Changes
+
+- [#618](https://github.com/galaxyproject/foundry/pull/618) [`c048a0c`](https://github.com/galaxyproject/foundry/commit/c048a0c65fb672d32b6d69bb7bfb810d71b9850b) Thanks [@jmchilton](https://github.com/jmchilton)! - Upgrade the Galaxy schema dependency to 1.13.1 to preserve numeric workflow input bounds during conversion.
+
+- Updated dependencies [[`9814cec`](https://github.com/galaxyproject/foundry/commit/9814ceca9fa98d1c26e74f6c46c0f66bff538dc2)]:
+  - @galaxy-foundry/summarize-nextflow@0.4.0
+
 ## 0.1.2
 
 ### Patch Changes

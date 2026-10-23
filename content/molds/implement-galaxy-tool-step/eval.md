@@ -16,3 +16,8 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 
 - check: deterministic
 - assertion: a step implemented from a `galaxy-user-tool-definition` carries a `run:` whose `class` is `GalaxyUserTool` and whose `id` and `version` match the authored definition, and no step in the draft names an authored tool by `tool_uuid`, `tool_id`, or `content_id` instead of embedding it.
+
+## Property: rename values use post-job action syntax
+
+- check: llm-judged
+- assertion: every `rename:` on a step output uses `#{input}` for an input's dataset name and `${label}` only for a declared workflow parameter input; a tool-XML label variable such as `${on_string}` or `${tool.name}` in a rename is a failure, because Galaxy treats it as an untyped run-time parameter, not the input's name.

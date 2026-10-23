@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-09-15
-revision: 9
+revised: 2026-09-18
+revision: 10
 summary: "How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current."
 ---
 
@@ -86,6 +86,20 @@ Casting treats source and output as separate lifecycles:
 `foundry-build test-skill` is the opt-in first layer of the external Pipeline evaluation harness. It invokes one committed cast skill through the pinned Pi RPC runtime with an explicit `/skill:<name>` activation. Every run uses a fresh process, worker directory, and Pi configuration directory; disables session, context-file, extension, prompt-template, and ambient skill discovery; stages a dereferenced copy of the selected skill plus only the declared inputs; and retains raw JSONL, stderr, usage, runtime identity, input and artifact hashes, and a versioned `run.json`. The CLI's default run directory is unique and rooted in the operating system's temporary directory rather than the checkout; `--run-dir` remains an explicit override. The `foundry_subagent` extension always derives expected artifacts from the selected cast's `_provenance.json`, so the parent agent cannot replace or suppress the contract being evaluated. The runner applies the cast's `_verify.json` process checks after execution when it contains a validator for an expected artifact.
 
 Local mode provides process and context isolation but is not a security boundary. Container mode runs the whole Pi RPC worker in a disposable Docker container resolved to an immutable image ID. A dereferenced copy of the selected cast and copied declared inputs are the only read-only host mounts; the run output directory is the only read-write host mount; Pi configuration and temporary storage are ephemeral tmpfs mounts; and no checkout path is mounted. The normalized record captures the effective image, complete mount manifest, network policy, and credential environment-variable allowlist. The image pins both Pi and the Foundry runtime CLI required by the pilot skill, and the runner rejects images whose compatibility labels do not match those pins. Deterministic Pipeline sequencing and independent qualitative grading remain staged follow-up in [issue #476](https://github.com/galaxyproject/foundry/issues/476). Pi is exactly pinned by the optional `@galaxy-foundry/gxwf-pi-harness` tooling; ordinary validation, casting, assembly, and site builds do not start it or require provider credentials.
+
+## Reading a conversion run
+
+`foundry-build run-dashboard <run-dir>` reads a per-run working directory left by an assembled
+harness and emits two uncommitted files beside it: `run-manifest.json`, the normalized run model,
+and `dashboard.html`, one self-contained page over it. It resolves the run against committed cast
+metadata — the harness `_assembly.json` for the phase spine and each skill's `_provenance.json` for
+declared artifacts — and against the run's own [[foundry-run-manifest]], which the harness writes as
+it goes. A run predating that record is read only under `--reconstruct`, degraded and labelled, and
+the command refuses to name a pipeline whose filenames it cannot distinguish rather than guessing.
+
+Unlike every other generator here it has no `--check` mode, deliberately: its output lands in a
+user's ignored run directory and is never committed, so there is nothing for it to drift against.
+The page loads nothing over a network and is opened from the filesystem.
 
 ## Site build
 

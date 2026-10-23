@@ -23,8 +23,11 @@ import {
   type Frontmatter,
   type RefResolution,
   type ResolvedRef,
+  type ProvenanceRefEntry,
   type TargetConfig,
 } from "@galaxy-foundry/cast";
+import { schemaSha256 } from "@galaxy-foundry/gxwf-foundry";
+import { summaryNextflowSchema } from "@galaxy-foundry/summarize-nextflow";
 import { fileSlug } from "../packages/build-cli/src/lib/walk.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -536,6 +539,57 @@ describe("artifact-contract inheritance", () => {
         },
       ],
     });
+  });
+
+  it("pins a subcommand validator to the bundled schema's hash", async () => {
+    const { buildProducerIndex, buildVerifyManifest } =
+      await import("../packages/build-cli/src/commands/cast-mold.js");
+    const meta = new Map<string, Frontmatter>([
+      [
+        "content/molds/producer/index.md",
+        {
+          type: "mold",
+          output_artifacts: [{ id: "summary-x", schema: "[[schema-x]]" }],
+        },
+      ],
+      [
+        "content/schemas/schema-x.md",
+        {
+          type: "schema",
+          name: "schema-x",
+          validator_bin: "foundry",
+          validator_subcommand: "validate-schema-x",
+        },
+      ],
+    ]);
+    const slugMap = new Map([["schema-x", "content/schemas/schema-x.md"]]);
+    const refs = [
+      { kind: "schema", ref: "[[schema-x]]", dst_hash: "ab".repeat(32) },
+    ] as unknown as ProvenanceRefEntry[];
+    const manifest = buildVerifyManifest(
+      meta.get("content/molds/producer/index.md")!,
+      buildProducerIndex(meta),
+      slugMap,
+      meta,
+      refs,
+    );
+    expect(manifest.entries[0]!.args).toEqual([
+      "validate-schema-x",
+      "--schema-sha256",
+      "ab".repeat(32),
+      "{artifact_path}",
+    ]);
+  });
+
+  it("pins the committed summarize-nextflow bundle to the schema the CLI carries", () => {
+    const verify = JSON.parse(
+      readFileSync(
+        path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "_verify.json"),
+        "utf8",
+      ),
+    ) as { entries: { artifact_id: string; args: string[] }[] };
+    const args = verify.entries.find((e) => e.artifact_id === "summary-nextflow")!.args;
+    expect(args[args.indexOf("--schema-sha256") + 1]).toBe(schemaSha256(summaryNextflowSchema));
   });
 
   it("drops inherited_schema when producers disagree on the schema", async () => {

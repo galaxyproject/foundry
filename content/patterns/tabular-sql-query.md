@@ -1,15 +1,17 @@
 ---
 type: pattern
 pattern_kind: operation
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Tabular: SQL query"
 tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 2
-summary: "Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars."
+revised: 2026-10-01
+revision: 3
+summary: "Load tabular datasets into Query Tabular for SQL joins, window calculations, and queries that combine several tabular operations."
+verification_paths:
+  - verification/workflows/tabular-sql-query/sql-query.gxwf-test.yml
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
@@ -23,128 +25,71 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 iwc_exemplars:
   - workflow: amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2
-    why: "Uses a single-table query with SUM window function for relative abundance."
+    why: "Uses a single-table SUM window function for relative abundance after input line filtering."
     confidence: high
   - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
-    why: "Shows one input with main query plus multiple addqueries outputs."
+    why: "Shows one input with a main query and additional query outputs."
     confidence: high
   - workflow: proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification
-    why: "Shows a two-table INNER JOIN with named tables."
+    why: "Joins two named input tables and selects columns from each."
     confidence: high
   - workflow: proteomics/clinicalmp/clinicalmp-discovery/iwc-clinicalmp-discovery-workflow
-    why: "Shows a three-table anti-join with load filters and indexes."
+    why: "Excludes rows using a three-table query after skipping headers, numbering lines, and normalizing a list column."
     confidence: high
 ---
 
 # Tabular: SQL query
 
-## Tool
+`query_tabular` loads one or more tabular datasets into SQLite, runs a `SELECT` query, and writes tabular results. Choose it when the result needs SQL operations such as a window calculation, a join with additional predicates, or a query that combines filtering, grouping, and projection. For a single row predicate, cut, or computed column, the corresponding [[tabular-filter-by-column-value|filter]], [[tabular-cut-and-reorder-columns|cut]], or [[tabular-compute-new-column|compute]] pattern is usually easier to inspect. [[tabular-join-on-key]] covers joins that do not need a SQL query.
 
-`toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2` ("Query Tabular"). 16 step occurrences in the surveyed IWC corpus. This is the SQL operation in the tabular hierarchy: powerful, but deliberately narrow.
+The example workflow uses `toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2` and pins its Tool Shed changeset. Keep the version and changeset together when adapting the example.
 
-## When to reach for it
+## Load tables, then query them
 
-Use `query_tabular` when the operation is genuinely SQL-shaped: window functions, multi-table joins, anti-joins, or fused project + compute + filter over one or more tabular inputs.
+Each `tables` entry connects a tabular dataset. The first unnamed table becomes `t1`, the second `t2`, and so on. Set `tbl_opts.table_name` when names make a multi-table query easier to read. Columns default to `c1`, `c2`, and so on. `tbl_opts.col_names` assigns names by position. For example, `sample,amount` gives those names to the first two columns. A blank position retains its `cN` name. With `load_named_columns: false`, all columns load under those names. Set it to `true` only when the query should load the columns explicitly named in `col_names`.
 
-For a one-table Python predicate, use [[tabular-filter-by-column-value]]. For whole-line regex filtering, use [[tabular-filter-by-regex]]. For pure projection, use [[tabular-cut-and-reorder-columns]]. For a simple computed column, use [[tabular-compute-new-column]].
+Input headers and output headers are independent:
 
-## Parameters
+| Setting | Effect |
+| --- | --- |
+| `tables[].input_opts.linefilters` with `skip` | Removes leading input lines before loading. Use `skip_lines: "1"` for a conventional header that should not become a data row. |
+| `tables[].tbl_opts.column_names_from_first_line` | Takes column names from the input's first line. Use this **instead of** skipping that line when its names are suitable for SQLite. |
+| `tables[].tbl_opts.col_names` | Supplies column names by position, whether or not the input has a header. It does not remove the input header row. |
+| `query_result.header` | `"yes"` writes a header for the **main result** from selected column names or aliases. `"no"` omits it. `header_prefix`, when set, prefixes that output header with the selected character. |
 
-- `sqlquery`: main SQL query. Tables are named `t1`, `t2`, ... unless `tables[].tbl_opts.table_name` sets explicit names.
-- `query_result.header`: `yes` / `no`; controls whether the main output has a header.
-- `tables`: repeat list of inputs to load into SQLite.
-- `tables[].table`: connected tabular input.
-- `tables[].input_opts.linefilters`: load-time preprocessing before SQLite import. Corpus filters include `comment`, `skip`, `prepend_dataset_name`, `prepend_line_num`, and `normalize`.
-- `tables[].tbl_opts.table_name`: optional SQL table name. Blank means default `t1`, `t2`, ...
-- `tables[].tbl_opts.column_names_from_first_line`: whether the first row supplies column names.
-- `tables[].tbl_opts.col_names`: comma-separated named columns for SQL.
-- `tables[].tbl_opts.load_named_columns`: whether to load named columns rather than positional `cN` columns.
-- `tables[].tbl_opts.indexes`: optional SQLite indexes for join-heavy queries.
-- `addqueries.queries`: optional extra SQL outputs. Check this before assuming `sqlquery` is the only result.
-- `workdb`: usually `workdb.sqlite`.
+The `header` select values are strings. Quote `"yes"` and `"no"` in YAML so they do not become booleans. Set `ORDER BY` when output order matters. An unordered SQL result has no promised row order, even if the input files are ordered.
 
-## Idiomatic shapes
+## Example: join and calculate within groups
 
-Single-table project + compute with a window function:
+The complete workflow under `verification/workflows/tabular-sql-query/` accepts a `counts` table (`sample`, `amount`) and a `cohorts` table (`sample`, `cohort`). It skips both input header rows, names the loaded tables and columns, and joins by sample. The `SUM(...) OVER (PARTITION BY ...)` denominator is computed per cohort, so samples A and B share a denominator while C gets its own. The `100.0` keeps the division fractional.
 
-```yaml
-tool_id: toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2
-tool_state:
-  query_result:
-    header: no
-  sqlquery: |-
-    SELECT c1, c2, c3, c3 * 100 / SUM(c3) OVER() AS relative_abundance
-    FROM t1;
-  tables:
-    - table: { __class__: ConnectedValue }
-      input_opts:
-        linefilters:
-          - filter:
-              filter_type: comment
-              comment_char: "35"
-          - filter:
-              filter_type: prepend_dataset_name
-      tbl_opts:
-        table_name: ""
-        column_names_from_first_line: false
-        col_names: ""
-        load_named_columns: false
-        indexes: []
-  workdb: workdb.sqlite
+```sql
+SELECT counts.sample, cohorts.cohort, counts.amount,
+       ROUND(100.0 * counts.amount /
+             SUM(counts.amount) OVER (PARTITION BY cohorts.cohort), 1) AS percent
+FROM counts JOIN cohorts ON counts.sample = cohorts.sample
+ORDER BY counts.sample
 ```
 
-Anchored by the MAPseq-to-ampvis2 IWC exemplar.
+With amounts A=2, B=3, C=5 and cohorts A=x, B=x, C=y, the output is:
 
-Multi-table SQL join with named tables:
-
-```yaml
-tool_id: toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2
-tool_state:
-  query_result:
-    header: yes
-    header_prefix: ""
-  sqlquery: |-
-    SELECT pep.mpep, prot.prot
-    FROM pep
-    INNER JOIN prot on pep.mpep=prot.pep
-  tables:
-    - table: { __class__: ConnectedValue }
-      input_opts:
-        linefilters: []
-      tbl_opts:
-        table_name: pep
-        column_names_from_first_line: false
-        col_names: mpep
-        load_named_columns: false
-        indexes: []
-    - table: { __class__: ConnectedValue }
-      input_opts:
-        linefilters: []
-      tbl_opts:
-        table_name: prot
-        column_names_from_first_line: false
-        col_names: pep,prot
-        load_named_columns: false
-        indexes: []
-  workdb: workdb.sqlite
+```text
+sample  cohort  amount  percent
+A       x       2       40.0
+B       x       3       60.0
+C       y       5       100.0
 ```
 
-Anchored by the clinical metaproteomics verification IWC exemplar.
+The Planemo test in `verification_paths` checks this output byte for byte, including its header and order. Its README gives the command used for the local run. A failed comparison can reveal an imported header row, the wrong join multiplicity, an incorrect window partition, or an unexpected output header.
 
-## Pitfalls
+## Input filters and additional results
 
-- **Do not use SQL for simple filters or cuts.** The survey decision keeps this page narrow; simple row predicates and projections have clearer operation pages.
-- **Header handling is split across fields.** `query_result.header`, `tables[].tbl_opts.column_names_from_first_line`, and load filters like `skip` are independent.
-- **Line filters run before SQL.** `prepend_dataset_name`, `prepend_line_num`, and `normalize` change column positions before the query sees the table.
-- **Blank `table_name` is meaningful.** Blank means default `t1`; named joins need explicit table names.
-- **`comment_char: "35"` means `#`.** The corpus YAML uses the ASCII code string, not the literal `#`.
-- **Extra outputs can hide in `addqueries`.** Some workflows emit multiple query results from one step.
-- **Version pins vary.** `3.3.0` and `3.3.2` appear in corpus. Prefer the newest available pin unless preserving an existing workflow.
+Line filters run in the listed order **before** SQLite receives rows. A `comment` filter with `comment_char: "35"` excludes lines beginning with `#`. `prepend_dataset_name` and `prepend_line_num` add columns, so later `cN` positions shift. `normalize` expands a delimited list into rows, which can also change join multiplicity. Check the post-filter table shape before writing the query. The [MAPseq workflow](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.ga) filters comment lines and prepends the dataset name before its relative-abundance window query. The [clinical discovery workflow](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/proteomics/clinicalmp/clinicalmp-discovery/iwc-clinicalmp-discovery-workflow.ga) skips a header, prepends line numbers, normalizes protein lists, and uses indexes for its exclusion query.
 
-## See also
+`sqlquery` produces the main `output`. Up to three `addqueries.queries` can produce `output1`, `output2`, and `output3`, each with its own `query_result` header setting. `save_db` can also expose the SQLite database as `sqlitedb`. Check all declared workflow outputs before treating a step as a single-result query. The [MGnify rRNA workflow](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.ga) demonstrates additional queries.
 
-- [[iwc-tabular-operations-survey]] — corpus survey and §7 decision record for SQL as a narrow tabular operation.
-- [[tabular-filter-by-column-value]] — one-table row predicates.
-- [[tabular-cut-and-reorder-columns]] — pure projection.
-- [[tabular-compute-new-column]] — simple computed columns.
-- [[tabular-join-on-key]] — ordinary key joins without SQL-specific semantics.
+## Check the result
+
+A successful tool job does not establish that a join or window calculation is correct. In a small fixture, assert the header, selected columns, row count, representative values, and duplicate-key behavior. If a query divides by an aggregate, include a group with a different denominator, as the fixture above does. A `NULL` denominator or a missing join key needs an explicit policy in the SQL and expected output.
+
+The [Query Tabular wrapper](https://github.com/galaxyproject/tools-iuc/blob/master/tools/query_tabular/query_tabular.xml) defines the inputs and output names. Its [macros](https://github.com/galaxyproject/tools-iuc/blob/master/tools/query_tabular/macros.xml) define line filters and header settings. See [[iwc-tabular-operations-survey]] for the pinned corpus inventory and [[tabular-join-on-key]] for a comparison with dedicated join tools.

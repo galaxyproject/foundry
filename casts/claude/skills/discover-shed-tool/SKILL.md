@@ -21,8 +21,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.8.1'`.
-  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.8.1 gxwf`.
+- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.14.0'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.14.0 gxwf`.
   Check: `gxwf --help | grep -q draft-validate`.
   Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
@@ -39,7 +39,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `galaxy-tool-pin.json` before returning it: run `foundry validate-galaxy-tool-discovery galaxy-tool-pin.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-discovery galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
+- Before starting, check that the installed validator carries the galaxy-tool-discovery schema this bundle was cast with: run `foundry validate-galaxy-tool-discovery --schema-sha256 c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `galaxy-tool-pin.json` before returning it: run `foundry validate-galaxy-tool-discovery --schema-sha256 c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c galaxy-tool-pin.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-discovery --schema-sha256 c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
 
 ## Procedure
 

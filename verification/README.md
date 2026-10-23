@@ -41,7 +41,7 @@ From a workflow directory, run Planemo directly:
 
 ```sh
 planemo lint *.gxwf.yml
-planemo test *.gxwf.yml --galaxy_branch release_25.1
+planemo test *.gxwf.yml --galaxy_branch release_26.1
 ```
 
 Use the exact workflow filename once a directory has more than one experimental file. Planemo 0.75.41 recognizes `.gxwf.yml` plus `.gxwf-test.yml` for these fixtures.
@@ -51,5 +51,7 @@ Use the exact workflow filename once a directory has more than one experimental 
 A verified workflow should be committed only when it is deterministic, small, and explains what claim it verifies.
 
 Prefer in-tree test data for tiny fixtures. Do not use Zenodo or remote fixtures for byte-scale inputs.
+
+A Planemo workflow test fails whenever its history holds an errored dataset, so behavior that depends on a failed job, such as `__FILTER_FAILED_DATASETS__` or failure routing, cannot be verified here. Cite Galaxy's own API test for that behavior instead.
 
 This v1 surface deliberately avoids generators, RO-Crate metadata, Dockstore wiring, scheduled Galaxy-version matrices, and IWC-style sharding.

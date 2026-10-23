@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-09-23
-revision: 7
+revised: 2026-10-21
+revision: 10
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
@@ -28,7 +28,7 @@ Name the wrong result a test must catch before choosing YAML syntax. For a fixed
 | Output | Meaningful check to try | If the result varies |
 | --- | --- | --- |
 | Text report or HTML | [[tests-format#has_text_model|has_text]] for a stable result, section, or value. Use [[tests-format#has_line_model|has_line]] for a complete stable line. | Use [[tests-format#has_text_matching_model|has_text_matching]] or [[tests-format#has_line_matching_model|has_line_matching]] for a bounded variable field. Line count or size can supplement the content check. |
-| TSV, CSV, BED, GFF, or GTF | Compare a small deterministic file, or check a stable header and representative data row. [[tests-format#has_n_columns_model|has_n_columns]] checks shape. | Check a stable row or field, with a justified [[tests-format#has_n_lines_model|has_n_lines]] range if row count varies. Do not infer correct rows from column count alone. |
+| TSV, CSV, BED, GFF, or GTF | Compare a small deterministic file, or check a stable header and representative data row. [[tests-format#has_n_columns_model|has_n_columns]] checks the first line's width (see section 4). | Check a stable row or field, with a justified [[tests-format#has_n_lines_model|has_n_lines]] range if row count varies. Do not infer correct rows from column count alone. |
 | VCF | Compare expected calls exactly when reproducible. Otherwise assert a known variant record or a bounded record pattern. | Header changes may justify a measured `lines_diff:`, but the allowance applies to the whole file. Pair it with a record-level check. |
 | FASTA or FASTQ | Compare exact sequence output when reproducible, or assert a known sequence or read identifier. | Line or size checks only establish rough shape. Check a stable sequence statistic or expose one as another output when content varies. |
 | JSON | [[tests-format#has_json_property_with_value_model|has_json_property_with_value]] for a stable JSON value, or [[tests-format#has_json_property_with_text_model|has_json_property_with_text]] for a stable string. | Choose a stable property or companion summary. Searching for `{` proves little beyond text presence. |
@@ -55,7 +55,7 @@ Run representative inputs across the environments the test must support. Record 
 
 ## 4. Text assertions and repeated checks
 
-Use `has_text` for a literal substring, `has_line` for a complete line, and their `*_matching` forms when a regex is needed. `has_n_lines` checks count and can detect truncation, but a plausible count does not establish correct content. A test can combine count with a stable token or row. The [[tests-format|schema]] accepts `asserts:` as a mapping for one assertion of each kind or as a list. Use the list form to repeat a kind: repeated YAML mapping keys can silently overwrite earlier checks.
+Use `has_text` for a literal substring, `has_line` for a complete line, and their `*_matching` forms when a regex is needed. `has_text_matching` is an unanchored search, but `has_line_matching` is not: Galaxy wraps the expression as `^<expression>$` in multiline mode, so it must match a whole line. `^I\t` matches only a line that is exactly `I` and a tab; write `I\t.*` for lines that start with `I` and a tab. A leading `^` or trailing `$` is redundant but harmless. `has_n_lines` checks count and can detect truncation, but a plausible count does not establish correct content. A test can combine count with a stable token or row. `has_n_columns` counts the `sep:`-delimited fields of the first non-comment line only, and `comment:` is the only control over which line that is. When header and data rows differ in width, it measures the header. R's `write.table(x, row.names = TRUE, col.names = TRUE)` writes N header fields above N+1-field data rows, so a five-sample matrix has `has_n_columns` 5. Check data-row width with a `has_line_matching` that fixes the field count, e.g. `([^\t]*\t){5}[^\t]*` for six fields. The [[tests-format|schema]] accepts `asserts:` as a mapping for one assertion of each kind or as a list. Use the list form to repeat a kind: repeated YAML mapping keys can silently overwrite earlier checks.
 
 ```yaml
 - doc: Stable report fields
@@ -78,7 +78,7 @@ The names and count above are illustrative. Replace them with values observed fr
 
 ## 5. Collection and structured-output examples
 
-For a collection output, `element_tests:` maps produced element identifiers to assertions. Use it at each level of a nested output collection too, as the [IWC SRA manifest test](https://github.com/galaxyproject/iwc/blob/main/workflows/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs-tests.yml#L12-L27) does for samples and their forward/reverse files. Galaxy also accepts `elements:` as an alias at either level, but a different key is not required for nesting. This differs from a `job:` collection input, where `elements:` lists the input fixtures. The output collection's `attributes:` or `element_count:` can check shape, while element assertions check results. See [[tests-format]] and [Galaxy's collection-test parser](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tool_util/parser/interface.py#L860-L870).
+For a collection output, `element_tests:` maps produced element identifiers to assertions, at each level of a nested output collection, as the [IWC SRA manifest test](https://github.com/galaxyproject/iwc/blob/main/workflows/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs-tests.yml#L12-L27) does for samples and their forward/reverse files. The output's `collection_type:` and `element_count:` check shape, while element assertions check results. A nested sub-collection under `element_tests:` takes `count:` (or `min:`/`max:`) instead of `element_count:`, and no `collection_type:`, since the output's `collection_type:` already fixes every rank. Naming members only proves they exist, so add `count:` when exact membership matters, e.g. `count: 1` under an unpaired sample in a `list:paired_or_unpaired` output so a spurious second member fails. See [[tests-format]] and [Galaxy's collection-test parser](https://github.com/galaxyproject/galaxy/blob/a63da1dfd1960360f4aa2fddc6a75396954d750a/lib/galaxy/tool_util/parser/interface.py#L860-L870).
 
 ```yaml
 - doc: Check selected collection members

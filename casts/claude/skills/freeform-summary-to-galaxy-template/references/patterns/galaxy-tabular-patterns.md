@@ -13,8 +13,8 @@ tags:
   - topic/tabular-transform
 status: draft
 created: 2026-05-02
-revised: 2026-09-22
-revision: 2
+revised: 2026-10-15
+revision: 4
 summary: "Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
@@ -40,6 +40,7 @@ related_molds:
   - "[[nextflow-summary-to-galaxy-template]]"
   - "[[cwl-summary-to-galaxy-template]]"
   - "[[freeform-summary-to-galaxy-template]]"
+  - "[[workflow-brief-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 ---
 

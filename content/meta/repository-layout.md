@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-29
-revision: 4
+revised: 2026-09-18
+revision: 5
 summary: "Where authored source, implementation code, generated artifacts, fixtures, and site files belong."
 ---
 
@@ -80,6 +80,7 @@ The generated `site/dist/` output is deployment material and is not committed so
 - `verification/` contains small committed fixtures and expected reports used to prove runtime behavior.
 - `workflow-fixtures/` materializes external Nextflow, CWL, and IWC corpora for research. Generated clones and conversions are gitignored; fixture declarations and materialization scripts are authored.
 - `LICENSES/` contains license texts required by vendored or redistributed material.
+- `.foundry-runs/` is an ignored local workspace for conversion runs. A run directory is a consumer's working material, not repository content; `foundry-build run-dashboard` reads one and writes its manifest and page back into it.
 
 Generated output never moves under `content/` merely to make it render. The site can read a generated tree through a dedicated registry or route without turning that artifact into a note.
 

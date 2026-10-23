@@ -24,7 +24,7 @@ The fixture trees support research and verification. They are not Foundry notes,
 
 ## From survey to pattern
 
-[[pattern-authorship]] requires an IWC exemplar before an operation or recipe becomes a pattern page. Each pattern declares its evidence grade. Operation and recipe pages should also declare `iwc_exemplars` in frontmatter. Each entry names an abstract IWC workflow ID, explains why that workflow demonstrates the pattern, and assigns `high`, `medium`, or `low` confidence. It may name relevant steps by label or ID. A generated file path or line citation is invalid as the `workflow` value.
+[[pattern-authorship]] requires an IWC exemplar before an operation or recipe becomes a pattern page. Each pattern declares its evidence grade. Operation and recipe pages should also declare `iwc_exemplars` in frontmatter. Each entry names an abstract IWC workflow ID, explains why that workflow demonstrates the pattern, and assigns `high`, `medium`, or `low` confidence. It may name relevant steps by label or ID. A label must be the step's actual IWC label; name an unlabeled step by its `.ga` step ID. A generated file path or line citation is invalid as the `workflow` value.
 
 For example, [[collection-unbox-singleton]] names VGP workflow IDs in `iwc_exemplars`, explains the singleton extraction each shows, and links the source survey through `related_notes`. Its verification path points separately to a local executable check. These are different claims: an exemplar shows that a workflow uses an idiom, while verification tests a specified behavior. Maps of content route readers among patterns and do not need to invent their own exemplar list.
 

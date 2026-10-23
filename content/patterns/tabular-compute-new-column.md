@@ -7,9 +7,9 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-09-14
-revision: 4
-summary: "Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule."
+revised: 2026-09-28
+revision: 5
+summary: "Append, insert, or replace computed columns with column_maker (Add_a_column1), using a shared input-typing policy and explicit failure handling."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
   - "[[iwc-parameter-derivation-survey]]"
@@ -39,64 +39,76 @@ iwc_exemplars:
 
 # Tabular: compute a new column
 
-## Tool
+`column_maker/Add_a_column1` evaluates expressions over a tabular dataset's `c1`, `c2`, … fields and appends, inserts, or replaces columns. Expressions run in order within one tool step, so later expressions see the columns produced by earlier ones. Choose one input-typing policy for the whole step and keep failure handling explicit.
 
-`toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1` ("Compute on rows", historically "Add a column"). 93 step occurrences in the surveyed IWC corpus — the canonical computed-column tool. Source: `$TOOLS_IUC/tools/column_maker/column_maker.xml` (the toolshed owner is `devteam` for historical reasons; modern source lives in `tools-iuc`).
+## Tool and scope
 
-## When to reach for it
+The examples use `toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1`, displayed as “Compute on rows”. The pinned IWC snapshot in [[iwc-tabular-operations-survey]] contains 55 occurrences across 18 workflows: 49 at version 2.1, two at 2.0, and four at 1.6. The structured error-handling counts below cover the 51 version 2.0/2.1 states, not the four older states.
 
-Insert, replace, or append a column whose value is a Python expression over the existing `cN` columns. Multiple expressions can be sequenced inside a single tool step (each one operates on the running output of the previous). Use this for arithmetic, simple type coercion, and string concatenation.
+The tool accepts a `tabular` dataset through `input` and produces `out_file1`, with the input's datatype as its output format. Retained original fields keep their text formatting. Computed values are serialized as strings, with optional decimal formatting for floats. Blank lines and lines starting with `#` are skipped among data rows.
 
-If the row decision needs a multi-line conditional or `split`/`gsub`, prefer awk (see the awk recipe sub-pages cross-referenced from [[iwc-tabular-operations-survey]]). If columns and a row predicate are computed together, prefer [[tabular-sql-query]].
+Use it for arithmetic, explicit type conversions, and string expressions supported by the wrapper's expression whitelist. It does not execute arbitrary Python programs. Awk can fit more involved row transformations, as illustrated by the operation pages under [[galaxy-tabular-patterns]]. Use [[tabular-sql-query]] when projection, computation, and row filtering belong in one query.
 
-If the computed table value is only an intermediate scalar or boolean that will be read back with `param_value_from_file`, keep the `column_maker` mechanics here but follow [[derive-parameter-from-file]] or [[conditional-gate-on-nonempty-result]] downstream. MGnify uses this shape for `c1 != 0` before reading the result as a boolean.
+For a computed value that must become a runtime scalar or boolean, continue with [[derive-parameter-from-file]] or [[conditional-gate-on-nonempty-result]]. MGnify's rRNA prediction workflow computes `c1 != 0` before reading the result as a boolean parameter.
 
-## Parameters
+## Parameters and defaults
 
-`tool_state` has three top-level fields that matter for authoring: `error_handling` (a `<section>` in the wrapper), `ops` (a conditional keyed on `header_lines_select`, holding `expressions`), and the optional `avoid_scientific_notation` boolean. `expressions` is a `<repeat>` nested under `ops` — flattening it to the top level produces YAML that won't roundtrip.
+`tool_state.ops` is a conditional selected by `header_lines_select`. Its `expressions` repeat must remain inside `ops`. The `error_handling` section and `avoid_scientific_notation` boolean are top-level siblings of `ops`.
 
-- `error_handling` — **set as below**:
-
-  ```yaml
-  error_handling:
-    auto_col_types: <see table>
-    fail_on_non_existent_columns: true
-    non_computable:
-      action: --fail-on-non-computable   # see enum below
-  ```
-
-  `fail_on_non_existent_columns: true` is uniform across all 51 corpus instances. `non_computable.action` accepts five values per the wrapper: `--fail-on-non-computable` (default; 49/51 in corpus), `--skip-non-computable` (2/51, both in `consensus-from-variation.gxwf.yml` where BED-coordinate arithmetic can legitimately yield non-numerics), `--keep-non-computable`, `--non-computable-blank`, and `--non-computable-default` (which requires a `non_computable.default_value` sub-field, e.g. `nan`, `NA`, `.`).
-
-- `ops.header_lines_select`: select with values `yes` / `no`. With `yes`, the first input line is passed through unchanged and each expression must include a `new_column_name` (used as the header label). With `no`, expressions must *omit* `new_column_name` and the first line is computed like any other.
-
-- `ops.expressions`: repeat list of `{ cond, add_column: { mode, pos }, new_column_name? }` entries, evaluated left-to-right. Expressions can reference columns added by earlier expressions in the same step.
-
-- `add_column.mode`: select with values `""` (Append), `I` (Insert), `R` (Replace).
-- `add_column.pos`: 1-indexed integer (`min: 1` per wrapper) for `I` and `R`; the empty string `""` for Append (the wrapper renders `pos` as a hidden empty param when `mode: ""`).
-- `avoid_scientific_notation`: optional top-level boolean (default `false`). Set `true` to force decimal output for floats; otherwise small floats render as `1e-13`.
-
-## The strict `auto_col_types` rule
-
-`auto_col_types` controls whether bare `cN` references are coerced to numeric when the expression demands it. Corpus distribution is 48 `true` / 3 `false`. Pick by what the expression does to its `cN` references:
-
-| Expression kind | `auto_col_types` |
+| Field | Accepted values and effect |
 |---|---|
-| Arithmetic on raw `cN` (`(c18 + c19) / c6`, `round(...)`) | `true` |
-| Pure string concatenation (`c5 + '>' + c6`) | `false` |
-| Arithmetic with explicit casts (`int(c2) - …`, `float(cN)`) — the expression handles its own type coercion | `false` |
-| Mixed | split into two `expressions:` entries with different settings |
+| `ops.header_lines_select` | `"no"` (default) or `"yes"`. With yes, the first physical line supplies the header and its fields are updated by the column operations. With no, it is handled as a data row, or skipped if blank or starting with `#`. |
+| `ops.expressions` | One or more entries containing `cond` and `add_column`, plus `new_column_name` in the headered branch. Entries execute in order. |
+| `expressions[].cond` | Expression over the current `cN` fields, using the supported functions and operators. |
+| `expressions[].new_column_name` | Available in the `"yes"` branch, with default `New Column`. Names an appended/inserted field or replaces a field's header. Set it explicitly for meaningful headers and omit it in the `"no"` branch. |
+| `expressions[].add_column.mode` | `""` to append, `I` to insert before the selected field, or `R` to replace it. |
+| `expressions[].add_column.pos` | A one-based integer with minimum 1 for insert/replace. Append uses the hidden empty value `""`. |
+| `error_handling.auto_col_types` | Boolean, default true. Use Galaxy's input column-type metadata when true, or treat all original fields as strings when false. |
+| `error_handling.fail_on_non_existent_columns` | Boolean, default true. Fail on an expression referencing a missing `cN`. Disabling this routes that failure through the selected non-computable-row policy. |
+| `error_handling.non_computable.action` | Row-expression failure policy, described below. Default `--fail-on-non-computable`. |
+| `avoid_scientific_notation` | Boolean, default false. With true, computed floats use expanded decimal output. Otherwise a float may render as `1e-13`. |
 
-Rationale: with `true`, `c5 + c6` performs numeric addition (silently turning a string concat into `0+0` if columns are non-numeric); with `false` and *no* explicit cast, `c18 + c19` is string concat, which silently produces `"3.13.4"` instead of `6.4`. Both bugs are silent. Explicit `int()` / `float()` is the third escape hatch.
+The five non-computable policies are:
 
-Canonical exemplars to memorize:
+| Action | Result when a row expression fails |
+|---|---|
+| `--fail-on-non-computable` | Fail the tool run. |
+| `--skip-non-computable` | Omit the row. |
+| `--keep-non-computable` | Write the original row unchanged, without any changes from earlier expressions. |
+| `--non-computable-blank` | Substitute an empty field value for the failed expression and continue. |
+| `--non-computable-default` | Substitute `non_computable.default_value` and continue. Suggestions include `nan`, `NA`, and `.`, or a custom string. |
 
-- Arithmetic on raw `cN`, `auto_col_types: true` — the SARS-CoV-2 variation reporting workflow computes `AF = round((c18 + c19) / c6, 6)` and inserts `AFcaller`.
-- String concat, `auto_col_types: false` — the same workflow appends `change` and `change_with_pos` from string concatenation expressions.
-- Explicit-cast arithmetic, `auto_col_types: false` — the SARS-CoV-2 consensus-from-variation workflow uses `int(...)` expressions with `--skip-non-computable`.
+Keep missing-column failure enabled and select failure on non-computable values unless a different result is part of the intended operation. These strict settings are already the wrapper defaults. All 51 structured corpus states enable missing-column failure. Forty-nine fail on non-computable rows, and two skip them in consensus-from-variation's coordinate arithmetic. Skipping is valid when dropping those rows is intended, but check what was dropped. Syntax errors and input type-conversion failures are not repaired by a row-skipping policy.
 
-## Idiomatic shapes
+## Choose one input-typing policy per step
 
-Insert + replace in one step, arithmetic on raw `cN`:
+`auto_col_types` does not infer types from an expression. With true, the wrapper passes Galaxy's recorded input column types to the script. The script converts the original row fields once, before evaluating the expressions. With false, original fields enter as strings. Values produced by earlier expressions retain their result types for subsequent expressions in that step.
+
+| Expression kind | Typing choice |
+|---|---|
+| Arithmetic on bare numeric `cN`, such as `(c18 + c19) / c6` | True, with appropriate input column-type metadata. |
+| String concatenation, such as `c5 + '>' + c6` | False, to keep original fields as strings. |
+| Arithmetic with explicit casts, such as `int(c2) - 1` | False, with the expression supplying conversion. |
+| Calculations requiring different input-typing policies | Separate tool steps, or one consistent string policy with explicit numeric casts. |
+
+Multiple `expressions` entries cannot have separate `auto_col_types` settings. An expression may use `str()`, `int()`, or `float()` explicitly when its desired type differs from the step's input policy.
+
+A wrong policy can produce a valid but wrong result. With string inputs, `c1 + c2` concatenates `"3"` and `"4"` into `"34"`, while integer inputs produce `7`. True does not guarantee numeric inputs if Galaxy recorded string types. Conversely, a non-numeric value in a column recorded as numeric causes a conversion failure, not silent replacement with zero. Check metadata and assert meaningful output values, not just successful execution.
+
+The three false settings among the 51 structured states illustrate two uses:
+
+- Variation reporting appends `change` and `change_with_pos` with two string expressions in one step.
+- Two consensus-from-variation steps use explicit `int()` arithmetic with skip-on-non-computable handling.
+
+The other 48 use true, including variation reporting's raw-column arithmetic.
+
+## Idiomatic step fragments
+
+These are partial gxformat2 tool-step fragments. Supply the workflow's connection to the required `input` dataset and connect or publish `out_file1` as appropriate. They preserve the version 2.1 pin used by variation reporting.
+
+### Insert, then replace with arithmetic
+
+The first expression inserts `AFcaller` before column 8. The second expression sees that expanded row, then replaces column 7 with the calculated `AF`.
 
 ```yaml
 tool_id: toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1
@@ -107,7 +119,7 @@ tool_state:
     non_computable:
       action: --fail-on-non-computable
   ops:
-    header_lines_select: yes
+    header_lines_select: "yes"
     expressions:
       - cond: c7
         add_column:
@@ -121,9 +133,11 @@ tool_state:
         new_column_name: AF
 ```
 
-Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
+This is the arithmetic step in `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting`. Column references in the second expression are positions after the insertion, not positions in the original input.
 
-String-concat new columns (append), `auto_col_types: false`:
+### Append string-derived columns
+
+The same workflow appends `change` and `change_with_pos` in one step with two expressions sharing the string policy.
 
 ```yaml
 tool_id: toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1
@@ -134,7 +148,7 @@ tool_state:
     non_computable:
       action: --fail-on-non-computable
   ops:
-    header_lines_select: yes
+    header_lines_select: "yes"
     expressions:
       - cond: c5 + '>' + c6
         add_column:
@@ -148,26 +162,32 @@ tool_state:
         new_column_name: change_with_pos
 ```
 
-Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
+Appending the first result leaves the original column positions intact, so the second expression still reads original `c3` and `c19`.
 
-## Pitfalls
+## Pitfalls and recovery
 
-- **Wrong `auto_col_types`.** See the table above — the failure mode is silent and downstream-only.
-- **Flattening `expressions:` to `tool_state` top level.** The actual nesting is `tool_state.ops.expressions` with `tool_state.ops.header_lines_select` as a sibling. `error_handling` and `avoid_scientific_notation` are siblings of `ops`, not nested inside it. Flat shapes don't roundtrip.
-- **`new_column_name` paired with `header_lines_select: no`.** The wrapper only exposes `new_column_name` inside the `header_lines_select: yes` branch. Authoring a step with `header_lines_select: no` AND `new_column_name` produces YAML the tool form won't accept.
-- **Mixing arithmetic and string concat in one entry.** Split into two `expressions:` entries with different `auto_col_types` rather than reaching for `str(...)` inside the expression.
-- **Skipping `error_handling`.** Wrapper defaults differ from corpus defaults; without explicit `fail_on_non_existent_columns: true`, non-existent column refs may pass through depending on `non_computable.action`.
-- **`add_column.mode` / `pos`.** `I` (insert) and `R` (replace) take a 1-indexed integer `pos`; append uses `mode: ""` and `pos: ""`. Off-by-one in `pos` shifts every downstream `cN` reference in subsequent expressions in the same step.
-- **`Add a column` (`addValue/1.0.1`)** — a different, legacy tool that adds a *constant* column only. Do not confuse with `column_maker/Add_a_column1`.
+- **Wrong typing or stale metadata.** A successful `+` expression can concatenate instead of adding. Inspect Galaxy's recorded column types. Correct metadata or choose false with explicit casts when strings and missing-value handling require it.
+- **Conversion errors before evaluation.** A numeric metadata type applied to a non-numeric field can fail even if the expression never uses that field. The script converts all original fields. Fix the data or use the string policy and explicit conversions. Row-skipping does not catch this initial conversion failure.
+- **Flattened expression state.** Keep `expressions` under `tool_state.ops`, alongside `header_lines_select`. Keep `error_handling` alongside `ops`. A flat repeat is not the wrapper's parameter structure.
+- **Header mismatch.** Headered mode consumes the first physical line and changes its fields to match append/insert/replace. A leading comment or blank line is therefore not an interchangeable header. Headerless mode skips blank/comment lines and computes the first ordinary row. Select the branch matching the input, and include `new_column_name` only in the headered branch.
+- **Changing column positions.** Inserts shift later `cN` references. Replacements change values at existing positions. Write each expression against the row at that point. Replacement positions must exist in the planned column layout.
+- **Permissive error handling hiding lost results.** Inspect skipped-row diagnostics and test expected output values or retained rows. Keep-unchanged can leave rows with fewer columns than successfully computed rows. Blank/default substitution preserves the operation's column change but introduces missing or fallback values that downstream tools must accept.
+- **Similar tool names.** `add_value/addValue` adds a constant column. `column_maker/Add_a_column1` computes expressions. Match the tool ID to the required operation.
 
-## Legacy alternative
+## Constant-column alternative
 
-`toolshed.g2.bx.psu.edu/repos/devteam/add_value/addValue/1.0.1` ("Add a column", 56 step occurrences) is the legacy constant-column-only tool — heavily used in older VGP workflows. For new work, prefer `column_maker/Add_a_column1` even for constant columns; it carries the same `error_handling` story and unifies one tool.
+`toolshed.g2.bx.psu.edu/repos/devteam/add_value/addValue/1.0.1` is a separate constant-column tool, with 31 occurrences in the pinned survey. It remains a valid choice for that operation. Use `column_maker` when the value depends on existing columns or its insert/replace and error-handling controls fit the task. A shared display name does not make their parameter contracts interchangeable.
+
+## Evidence and verification
+
+The existing behavior fixture is recorded in `verification_paths` above. It compares numeric and concatenated outputs for `c1 + c2` under different typing settings. The version 2.1 script was also exercised directly with supplied numeric and string types, reproducing both committed expected outputs and checking expression order, header replacement, and strict failures. The record at `verification/workflows/tabular-compute-new-column/README.md` describes these checks. This revision does not rerun Galaxy. Header handling alone does not determine input column types, so the fixture's result must be interpreted with the actual Galaxy metadata passed to each step.
+
+The source review covers the version 2.1 [wrapper](https://github.com/galaxyproject/tools-iuc/blob/802d7fe606623d900fd0d5de157e87166c0b7e84/tools/column_maker/column_maker.xml) and [script](https://github.com/galaxyproject/tools-iuc/blob/802d7fe606623d900fd0d5de157e87166c0b7e84/tools/column_maker/column_maker.py). The current 2.1+galaxy0 [wrapper](https://github.com/galaxyproject/tools-iuc/blob/b9b16be49cbe9777b5d1cec3d22a279cfe3e74a7/tools/column_maker/column_maker.xml) retains the typing, expression-order, header, and failure contracts described here. Older 1.6 states are outside this parameter recipe.
 
 ## See also
 
-- [[iwc-tabular-operations-survey]] — corpus survey, §7 decision record for the `auto_col_types` rule.
-- [[iwc-parameter-derivation-survey]] — compute-then-parameterize seam.
-- [[tabular-cut-and-reorder-columns]] — pure column projection without computation.
-- [[tabular-sql-query]] — when project + compute + filter need to fuse.
-- [[derive-parameter-from-file]] — when a one-value dataset must become a typed runtime parameter.
+- [[iwc-tabular-operations-survey]] — pinned counts and corrected typing constraints in §7.
+- [[iwc-parameter-derivation-survey]] — computation followed by parameter extraction.
+- [[tabular-cut-and-reorder-columns]] — column projection without computation.
+- [[tabular-sql-query]] — combined projection, computation, and filtering.
+- [[derive-parameter-from-file]] — one-value dataset to typed runtime parameter.

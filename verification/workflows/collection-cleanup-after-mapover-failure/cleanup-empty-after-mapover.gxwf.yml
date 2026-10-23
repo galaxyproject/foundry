@@ -1,0 +1,90 @@
+class: GalaxyWorkflow
+name: "Clean up empty elements after map-over"
+inputs:
+  - id: samples
+    type: collection
+    collection_type: list
+  - id: sentinel
+    type: data
+outputs:
+  - id: hits
+    outputSource: search_hits/out_file1
+  - id: hits_nonempty
+    outputSource: drop_empty/output
+  - id: hits_replaced
+    outputSource: replace_empty/output
+  - id: hits_with_header_filtered
+    outputSource: drop_empty_with_header/output
+steps:
+  # sampleB has no matching rows, so its mapped output is zero bytes
+  - id: search_hits
+    label: search_hits
+    tool_id: Grep1
+    tool_version: 1.0.4
+    in:
+      - id: input
+        source: samples
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      pattern: "hit$"
+      invert: ""
+      keep_header: false
+  - id: drop_empty
+    label: drop_empty
+    tool_id: __FILTER_EMPTY_DATASETS__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: search_hits/out_file1
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+  - id: replace_empty
+    label: replace_empty
+    tool_id: __FILTER_EMPTY_DATASETS__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: search_hits/out_file1
+      - id: replacement
+        source: sentinel
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      replacement:
+        __class__: ConnectedValue
+  # same search keeping the header, so sampleB holds one header line and no rows
+  - id: search_hits_with_header
+    label: search_hits_with_header
+    tool_id: Grep1
+    tool_version: 1.0.4
+    in:
+      - id: input
+        source: samples
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      pattern: "hit$"
+      invert: ""
+      keep_header: true
+  - id: drop_empty_with_header
+    label: drop_empty_with_header
+    tool_id: __FILTER_EMPTY_DATASETS__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: search_hits_with_header/out_file1
+    out:
+      - id: output
+    tool_state:
+      input:
+        __class__: ConnectedValue

@@ -29,6 +29,8 @@ import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command"
 import {
   DEFINITIONS,
   requireRuntimeArtifactRegistry,
+  runtimeModeOption,
+  runtimeProducerId,
   type RuntimeArtifactRegistry,
 } from "@galaxy-foundry/gxwf-foundry-note-schema";
 
@@ -172,12 +174,12 @@ const GALAXY_HOOKS: CastHooks = {
       ];
     },
     // How to check an artifact this skill produced — which validator, invoked how.
-    ({ meta, metaByPath, slugMap }) => [
+    ({ meta, refs, metaByPath, slugMap }) => [
       {
         path: "_verify.json",
         content:
           JSON.stringify(
-            buildVerifyManifest(meta, producerIndexFor(metaByPath), slugMap, metaByPath),
+            buildVerifyManifest(meta, producerIndexFor(metaByPath), slugMap, metaByPath, refs),
             null,
             2,
           ) + "\n",
@@ -231,14 +233,14 @@ const GALAXY_HOOKS: CastHooks = {
           describe,
         ),
       ),
-      bulletSection("Validation", schemaValidationRows(produces, slugMap, metaByPath)),
+      bulletSection("Validation", schemaValidationRows(produces, slugMap, metaByPath, refs)),
       { title: "Procedure", body: procedure || "No Mold body supplied." },
       ...(feedback
         ? [
             bulletSection("Feedback Mode", [
               requiresFeedback
-                ? `- This skill requires \`${feedback.default_filename}\`; read \`_feedback.md\` before doing the work even when the caller did not invoke a pipeline with \`--${feedback.producer.option}\`.`
-                : `- Feedback mode is off unless the caller explicitly enables \`--${feedback.producer.option}\` or supplies a feedback-ledger path.`,
+                ? `- This skill requires \`${feedback.default_filename}\`; read \`_feedback.md\` before doing the work even when the caller did not invoke a pipeline with \`--${runtimeModeOption(feedback)}\`.`
+                : `- Feedback mode is off unless the caller explicitly enables \`--${runtimeModeOption(feedback)}\` or supplies a feedback-ledger path.`,
               ...(requiresFeedback
                 ? []
                 : [
@@ -382,7 +384,7 @@ export function buildProducerIndex(
       throw new Error(`runtime artifact '${id}' collides with a Mold output producer`);
     }
     idx.set(id, {
-      producers: [`runtime:${artifact.producer.option}`],
+      producers: [runtimeProducerId(artifact)],
       kind: artifact.kind,
       default_filename: artifact.default_filename,
     });
@@ -395,10 +397,32 @@ interface ValidatorInvocation {
   args: string[];
 }
 
+// Hash of the schema this bundle copied, when it copied one.
+function bundledSchemaHash(
+  schemaRef: string,
+  refs: readonly ProvenanceRefEntry[],
+): string | undefined {
+  const ref = refs.find((r) => r.kind === "schema" && r.ref === schemaRef);
+  return ref?.dst_hash ?? undefined;
+}
+
+// Subcommand validators are `foundry validate-*`, which all take `--schema-sha256`.
+function schemaPinArgs(
+  schemaRef: string,
+  validatorMeta: Frontmatter | undefined,
+  refs: readonly ProvenanceRefEntry[],
+): string[] {
+  const hash = bundledSchemaHash(schemaRef, refs);
+  return hash && typeof validatorMeta?.validator_subcommand === "string"
+    ? ["--schema-sha256", hash]
+    : [];
+}
+
 function schemaValidatorInvocation(
   schemaRef: string,
   slugMap: ReadonlyMap<string, string>,
   metaByPath: ReadonlyMap<string, Frontmatter>,
+  refs: readonly ProvenanceRefEntry[],
 ): ValidatorInvocation | undefined {
   const target = resolveWikiLink(schemaRef, slugMap);
   if (!target) return undefined;
@@ -407,7 +431,10 @@ function schemaValidatorInvocation(
   if (!bin) return undefined;
   const sub =
     typeof meta?.validator_subcommand === "string" ? meta.validator_subcommand : undefined;
-  return { bin, args: sub ? [sub, "{artifact_path}"] : ["{artifact_path}"] };
+  return {
+    bin,
+    args: [...(sub ? [sub] : []), ...schemaPinArgs(schemaRef, meta, refs), "{artifact_path}"],
+  };
 }
 
 export function buildVerifyManifest(
@@ -415,6 +442,7 @@ export function buildVerifyManifest(
   producerIndex: Map<string, ProducerInfo>,
   slugMap: ReadonlyMap<string, string>,
   metaByPath: ReadonlyMap<string, Frontmatter>,
+  refs: readonly ProvenanceRefEntry[] = [],
 ): VerifyManifest {
   const entries: VerifyManifestEntry[] = [];
   const rawOut = meta.output_artifacts;
@@ -423,7 +451,7 @@ export function buildVerifyManifest(
       if (!a || typeof a !== "object") continue;
       const o = a as Record<string, unknown>;
       if (typeof o.id !== "string" || typeof o.schema !== "string") continue;
-      const inv = schemaValidatorInvocation(o.schema, slugMap, metaByPath);
+      const inv = schemaValidatorInvocation(o.schema, slugMap, metaByPath, refs);
       if (!inv) continue;
       entries.push({
         artifact_id: o.id,
@@ -444,7 +472,7 @@ export function buildVerifyManifest(
       if (typeof o.id !== "string") continue;
       const producer = producerIndex.get(o.id);
       if (!producer?.schema) continue;
-      const inv = schemaValidatorInvocation(producer.schema, slugMap, metaByPath);
+      const inv = schemaValidatorInvocation(producer.schema, slugMap, metaByPath, refs);
       if (!inv) continue;
       entries.push({
         artifact_id: o.id,
@@ -568,6 +596,7 @@ function schemaValidationRows(
   outputs: ProvenanceArtifactOutput[],
   slugMap: ReadonlyMap<string, string>,
   metaByPath: ReadonlyMap<string, Frontmatter>,
+  refs: readonly ProvenanceRefEntry[],
 ): string[] {
   const rows: string[] = [];
   for (const output of outputs) {
@@ -576,7 +605,9 @@ function schemaValidationRows(
     const meta = target ? metaByPath.get(target) : undefined;
     const validator = scalar(meta?.validator_bin);
     const subcommand = scalar(meta?.validator_subcommand);
-    const command = validator && subcommand ? `${validator} ${subcommand}` : validator;
+    const pin = schemaPinArgs(output.schema, meta, refs).join(" ");
+    const command =
+      validator && subcommand ? [validator, subcommand, pin].filter(Boolean).join(" ") : validator;
     // The package that ships the bin, which the note declares when it differs from the
     // package the export comes from. Inferring it from "has a subcommand" hardcoded one
     // instance's CLI package name in the caster, and was wrong in principle for any Foundry
@@ -586,6 +617,11 @@ function schemaValidationRows(
     const file = output.default_filename
       ? `\`${output.default_filename}\``
       : "the emitted artifact";
+    if (validator && pin) {
+      rows.push(
+        `- Before starting, check that the installed validator carries the ${schemaName} schema this bundle was cast with: run \`${command}\` with no artifact. Exit 4, or an \`unknown option '--schema-sha256'\` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.`,
+      );
+    }
     rows.push(
       validator
         ? `- Validate ${file} before returning it: run \`${command} ${output.default_filename ?? "<artifact-path>"}\`${validatorPackage ? ` from \`${validatorPackage}\`` : ""}. ${validatorPackage ? `If the command is not on PATH, run \`npx --package ${validatorPackage} ${command} ${output.default_filename ?? "<artifact-path>"}\`. ` : ""}This checks artifact \`${output.id}\` against the ${schemaName} schema.`

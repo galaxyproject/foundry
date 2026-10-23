@@ -44,6 +44,12 @@ export function castVerifyManifests(repoRoot: string): string[] {
   return out.sort();
 }
 
+// A bundle pins the schema it copied; bundles that did not copy it carry no pin.
+function withoutSchemaPin(args: string[]): string[] {
+  const at = args.indexOf("--schema-sha256");
+  return at === -1 ? args : [...args.slice(0, at), ...args.slice(at + 2)];
+}
+
 // One filename maps to one command. Two Molds declaring the same artifact must
 // agree on how it is validated; disagreement is a corpus bug, not something to
 // resolve by picking a winner here.
@@ -57,7 +63,7 @@ export function buildValidatorRegistry(repoRoot: string): Map<string, ValidatorS
       const spec: ValidatorSpec = {
         artifactId: entry.artifact_id ?? entry.default_filename,
         bin: entry.validator_bin,
-        args: entry.args ?? [],
+        args: withoutSchemaPin(entry.args ?? []),
         declaredBy: [rel],
       };
       const existing = registry.get(entry.default_filename);

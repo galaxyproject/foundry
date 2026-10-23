@@ -1,0 +1,291 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://galaxyproject.org/foundry/schemas/test-data-refs.schema.json",
+  "$comment": "Canonical source: packages/gxwf-foundry/src/schemas/test-data-refs/test-data-refs.schema.json in galaxyproject/foundry. Mold frontmatter cites this schema via [[test-data-refs]] wiki-links; the cast pipeline imports the `testDataRefsSchema` runtime export and serializes it into cast bundles. $defs.Fixture is a verbatim copy of the galaxy-workflow-test-plan Fixture; a test keeps them equal.",
+  "title": "Galaxy workflow test-data refs",
+  "description": "Test data for each Galaxy workflow input, written by the test-data-resolution chain (a source-specific Mold, then find-test-data) and read by implement-galaxy-workflow-test. One ref per workflow input; an input no leg could resolve stays in the list as an honest gap.",
+  "$ref": "#/$defs/TestDataRefs",
+  "$defs": {
+    "TestDataRefs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "refs"
+      ],
+      "properties": {
+        "refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "description": "One entry per workflow input label. A later leg of the chain keeps every entry an earlier leg resolved, unchanged, and replaces only unresolved ones."
+        }
+      }
+    },
+    "Ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow_label",
+        "collection_shape",
+        "datatype",
+        "resolved",
+        "resolved_by",
+        "reason",
+        "fixture"
+      ],
+      "properties": {
+        "workflow_label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Workflow input this ref feeds: its label in the Galaxy interface brief, or its input port in the CWL design."
+        },
+        "collection_shape": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Galaxy collection shape when the input is a collection, e.g. list, paired, list:paired, record; null for a single dataset."
+        },
+        "datatype": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Galaxy datatype/extension, e.g. fastqsanger.gz, fasta, tabular; null when undecided."
+        },
+        "resolved": {
+          "type": "boolean",
+          "description": "true when the ref points at real data of the required shape; false for an honest gap."
+        },
+        "resolved_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Name of the Mold that resolved this input, e.g. nextflow-to-test-data or find-test-data; null while unresolved."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Why the input is unresolved; null when resolved."
+        },
+        "fixture": {
+          "$ref": "#/$defs/Fixture",
+          "description": "Where the data lives. For a collection whose elements carry their own fixtures, storage and location may be null."
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Element"
+          },
+          "description": "Collection elements, nested for nested shapes (list:paired → sample → forward/reverse). Identifiers must match the staged test file."
+        },
+        "prep": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Data-import-boundary prep needed to reach the Galaxy shape from the source data: a subset, split, or concatenation. A note on the ref, not an analysis step."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "resolved": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "resolved_by": {
+                "type": "null"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fixture": {
+                "properties": {
+                  "storage": {
+                    "const": "unresolved"
+                  },
+                  "location": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "resolved_by": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "null"
+              }
+            },
+            "anyOf": [
+              {
+                "properties": {
+                  "fixture": {
+                    "properties": {
+                      "location": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "required": [
+                  "elements"
+                ],
+                "properties": {
+                  "elements": {
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/$defs/DataElement"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "fixture": {
+                "properties": {
+                  "location": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fixture": {
+                "properties": {
+                  "storage": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixture": {
+          "$ref": "#/$defs/Fixture"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Element"
+          }
+        }
+      }
+    },
+    "DataElement": {
+      "description": "An element of a resolved collection: it carries a located fixture, or nested elements that each do.",
+      "anyOf": [
+        {
+          "required": [
+            "fixture"
+          ],
+          "properties": {
+            "fixture": {
+              "properties": {
+                "storage": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "elements"
+          ],
+          "properties": {
+            "elements": {
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/DataElement"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storage",
+        "location",
+        "checksum",
+        "provenance"
+      ],
+      "properties": {
+        "storage": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "remote-url",
+            "in-repo",
+            "cvmfs-string",
+            "generated-toy",
+            "unresolved",
+            null
+          ],
+          "description": "Where the fixture data lives or should live: remote-url (Zenodo/EBI/SRA location), in-repo (committed test-data path), cvmfs-string (data-table/built-in-index bare string), generated-toy (to be synthesized), or unresolved (not yet sourced)."
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Concrete URL, repo-relative path, or data-table string when known; null when the fixture still needs resolution."
+        },
+        "checksum": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Integrity hash when available, e.g. SHA-1:<hex>; null when unknown."
+        },
+        "provenance": {
+          "type": "string",
+          "description": "Where this fixture comes from or how it was chosen, e.g. a translated source test-data reference, a Zenodo record, or a note that test-data-resolution must supply it."
+        }
+      }
+    }
+  }
+}
