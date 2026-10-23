@@ -10,6 +10,8 @@
       "validator_bin": "foundry",
       "args": [
         "validate-summary-galaxy-workflow",
+        "--schema-sha256",
+        "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
         "{artifact_path}"
       ]
     },
@@ -22,6 +24,8 @@
       "validator_bin": "foundry",
       "args": [
         "validate-galaxy-workflow-test-plan",
+        "--schema-sha256",
+        "03fc1d58499c4bd5f3fa9556d771a8f24bcc8a387f120bd6eb28fe5f103ffc95",
         "{artifact_path}"
       ]
     }

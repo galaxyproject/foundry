@@ -62,6 +62,27 @@ describe("validator registry", () => {
     expect(buildValidatorRegistry(root).get("summary-thing.json")?.declaredBy).toHaveLength(2);
   });
 
+  it("treats a schema pin as the bundle's, not part of the validator", () => {
+    const root = scratchRepo();
+    const entry = {
+      artifact_id: "summary-thing",
+      default_filename: "summary-thing.json",
+      validator_bin: "foundry",
+      args: ["validate-summary-thing", "{artifact_path}"],
+    };
+    writeVerify(root, "producer", [
+      { ...entry, args: ["validate-summary-thing", "--schema-sha256", "ab", "{artifact_path}"] },
+    ]);
+    writeVerify(root, "consumer", [{ ...entry, direction: "input" }]);
+    expect(buildValidatorRegistry(root).get("summary-thing.json")).toMatchObject({
+      args: ["validate-summary-thing", "{artifact_path}"],
+      declaredBy: [
+        "casts/claude/skills/consumer/_verify.json",
+        "casts/claude/skills/producer/_verify.json",
+      ],
+    });
+  });
+
   // Picking a winner would make the gate's verdict depend on readdir order.
   it("refuses to guess when two casts disagree about how to validate one artifact", () => {
     const root = scratchRepo();

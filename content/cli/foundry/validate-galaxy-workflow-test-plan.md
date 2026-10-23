@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-06-16
-revised: 2026-09-23
-revision: 4
+revised: 2026-10-23
+revision: 5
 summary: "AJV gate for Galaxy workflow test-plan YAML documents."
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
@@ -20,7 +20,7 @@ Validate a Galaxy workflow test-plan document against the [[galaxy-workflow-test
 
 ## Output
 
-Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors (missing file, malformed YAML) exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). On schema failure, prints AJV diagnostics to stderr and exits `3`. Input errors (missing file, malformed YAML) exit `1`. With `--schema-sha256 <hex>` it first compares the hash of the schema it carries against `<hex>`, the pin a cast bundle records in `_verify.json`: a mismatch exits `4` without validating, because the validator and the bundle disagree about the contract (see [[schema-packages]]). Given the pin and no artifact, it checks only the pin.
 
 ## Examples
 

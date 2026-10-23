@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-09-17
-revised: 2026-09-17
-revision: 3
+revised: 2026-10-23
+revision: 4
 summary: "Validate the title and required sections of a Markdown Workflow Brief."
 ---
 
@@ -18,7 +18,7 @@ Validate a Markdown document against the section contract described in [[workflo
 
 ## Output
 
-Prints `<path>: valid` to stdout on success (exit `0`). Missing, duplicate, or empty required sections produce diagnostics on stderr and exit `3`. Input read failures exit `1`.
+Prints `<path>: valid` to stdout on success (exit `0`). Missing, duplicate, or empty required sections produce diagnostics on stderr and exit `3`. Input read failures exit `1`. With `--schema-sha256 <hex>` it first compares the hash of the schema it carries against `<hex>`, the pin a cast bundle records in `_verify.json`: a mismatch exits `4` without validating, because the validator and the bundle disagree about the contract (see [[schema-packages]]). Given the pin and no artifact, it checks only the pin.
 
 ## Examples
 

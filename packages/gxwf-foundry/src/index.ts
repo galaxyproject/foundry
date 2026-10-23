@@ -27,6 +27,7 @@ export {
   type SchemaValidationResult,
   type SchemaValidator,
 } from "./lib/validator.js";
+export { SCHEMA_SKEW_EXIT, schemaSha256 } from "./lib/schema-pin.js";
 
 export { summaryCwlValidator } from "./commands/validate-summary-cwl.js";
 export { summaryGalaxyWorkflowValidator } from "./commands/validate-summary-galaxy-workflow.js";

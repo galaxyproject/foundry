@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-05-04
-revised: 2026-05-11
-revision: 5
+revised: 2026-10-23
+revision: 6
 summary: "Where a Mold IO schema lives, how cast resolves one through a schema note, and why there is no separate schema package."
 ---
 
@@ -34,7 +34,9 @@ There is no separate `*-schema` package. Validators all funnel through one CLI: 
 
 ## Validator invocation
 
-Generated skills validate through the CLI: `foundry validate-<name> <artifact-path>`. Cast bundles `validator_bin` + `args` (`[validator_subcommand, "{artifact_path}"]`) into `_verify.json` so `validate-artifact` can spawn the right command.
+Generated skills validate through the CLI: `foundry validate-<name> <artifact-path>`. Cast bundles `validator_bin` + `args` (`[validator_subcommand, "--schema-sha256", <hash>, "{artifact_path}"]`) into `_verify.json` so `validate-artifact` can spawn the right command.
+
+The bundle copies the schema at cast time; the validator carries whatever schema its installed package release shipped. When the two differ, the gate inverts: conformant output fails and stale output passes ([foundry#643](https://github.com/galaxyproject/foundry/issues/643)). So the bundle pins the copy it made. The hash is the schema ref's `dst_hash` in `_provenance.json`, the sha256 of `JSON.stringify(schema, null, 2) + "\n"`, and every `foundry validate-*` that checks against one schema computes the same hash from its own copy. A mismatch exits `4` before any validation. Given the pin and no artifact, the command checks only the pin, which is how the skill's Validation section checks for skew before the work starts. The pin is added only for a subcommand validator whose schema the bundle copied.
 
 Library validators are also exported from `@galaxy-foundry/gxwf-foundry` and `@galaxy-foundry/summarize-nextflow` for TS consumers (the site uses these). Skills should still prefer the CLI so failures reproduce on a developer machine without needing a TS toolchain.
 

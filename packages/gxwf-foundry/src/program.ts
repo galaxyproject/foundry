@@ -5,6 +5,18 @@ import {
 import { runValidateMarkdown } from "./commands/validate-markdown.js";
 import { runValidateWorkflowBrief } from "./commands/validate-workflow-brief.js";
 import { Command } from "commander";
+import { summaryNextflowSchema } from "@galaxy-foundry/summarize-nextflow";
+import {
+  galaxyToolDiscoverySchema,
+  galaxyToolSummarySchema,
+  galaxyWorkflowTestPlanSchema,
+  summaryCwlSchema,
+  summaryGalaxyWorkflowSchema,
+  testDataRefsSchema,
+  testsFormatSchema,
+  workflowBriefSchema,
+} from "./index.js";
+import { attachSchemaPin } from "./lib/schema-pin.js";
 import { attachSummarizeNextflow } from "./commands/summarize-nextflow.js";
 import { runValidateSummaryNextflow } from "./commands/validate-summary-nextflow.js";
 import { runValidateSummaryCwl } from "./commands/validate-summary-cwl.js";
@@ -29,47 +41,68 @@ export function buildProgram(): Command {
 
   attachSummarizeNextflow(program);
 
-  program
-    .command("validate-summary-nextflow")
-    .description("Validate a summarize-nextflow JSON document.")
-    .argument("<summary.json>")
-    .action((path: string) => runValidateSummaryNextflow(path));
+  attachSchemaPin(
+    program
+      .command("validate-summary-nextflow")
+      .description("Validate a summarize-nextflow JSON document.")
+      .argument("[summary.json]"),
+    "summary-nextflow",
+    summaryNextflowSchema,
+  ).action((path: string) => runValidateSummaryNextflow(path));
 
-  program
-    .command("validate-summary-cwl")
-    .description("Validate a summarize-cwl JSON document.")
-    .argument("<summary.json>")
-    .action((path: string) => runValidateSummaryCwl(path));
+  attachSchemaPin(
+    program
+      .command("validate-summary-cwl")
+      .description("Validate a summarize-cwl JSON document.")
+      .argument("[summary.json]"),
+    "summary-cwl",
+    summaryCwlSchema,
+  ).action((path: string) => runValidateSummaryCwl(path));
 
-  program
-    .command("validate-summary-galaxy-workflow")
-    .description("Validate a summarize-galaxy-workflow JSON document.")
-    .argument("<summary.json>")
-    .action((path: string) => runValidateSummaryGalaxyWorkflow(path));
+  attachSchemaPin(
+    program
+      .command("validate-summary-galaxy-workflow")
+      .description("Validate a summarize-galaxy-workflow JSON document.")
+      .argument("[summary.json]"),
+    "summary-galaxy-workflow",
+    summaryGalaxyWorkflowSchema,
+  ).action((path: string) => runValidateSummaryGalaxyWorkflow(path));
 
-  program
-    .command("validate-galaxy-tool-discovery")
-    .description("Validate a discover-shed-tool recommendation document.")
-    .argument("<recommendation.json>")
-    .action((path: string) => runValidateGalaxyToolDiscovery(path));
+  attachSchemaPin(
+    program
+      .command("validate-galaxy-tool-discovery")
+      .description("Validate a discover-shed-tool recommendation document.")
+      .argument("[recommendation.json]"),
+    "galaxy-tool-discovery",
+    galaxyToolDiscoverySchema,
+  ).action((path: string) => runValidateGalaxyToolDiscovery(path));
 
-  program
-    .command("validate-galaxy-tool-summary")
-    .description("Validate a galaxy-tool-cache summarize manifest.")
-    .argument("<manifest.json>")
-    .action((path: string) => runValidateGalaxyToolSummary(path));
+  attachSchemaPin(
+    program
+      .command("validate-galaxy-tool-summary")
+      .description("Validate a galaxy-tool-cache summarize manifest.")
+      .argument("[manifest.json]"),
+    "galaxy-tool-summary",
+    galaxyToolSummarySchema,
+  ).action((path: string) => runValidateGalaxyToolSummary(path));
 
-  program
-    .command("validate-galaxy-workflow-test-plan")
-    .description("Validate a Galaxy workflow test-plan YAML document.")
-    .argument("<test-plan.yml>")
-    .action((path: string) => runValidateGalaxyWorkflowTestPlan(path));
+  attachSchemaPin(
+    program
+      .command("validate-galaxy-workflow-test-plan")
+      .description("Validate a Galaxy workflow test-plan YAML document.")
+      .argument("[test-plan.yml]"),
+    "galaxy-workflow-test-plan",
+    galaxyWorkflowTestPlanSchema,
+  ).action((path: string) => runValidateGalaxyWorkflowTestPlan(path));
 
-  program
-    .command("validate-test-data-refs")
-    .description("Validate a test-data-refs JSON document.")
-    .argument("<test-data-refs.json>")
-    .action((path: string) => runValidateTestDataRefs(path));
+  attachSchemaPin(
+    program
+      .command("validate-test-data-refs")
+      .description("Validate a test-data-refs JSON document.")
+      .argument("[test-data-refs.json]"),
+    "test-data-refs",
+    testDataRefsSchema,
+  ).action((path: string) => runValidateTestDataRefs(path));
 
   program
     .command("validate-markdown")
@@ -78,11 +111,14 @@ export function buildProgram(): Command {
     .argument("<document.md>")
     .action((schema: string, path: string) => runValidateMarkdown(schema, path));
 
-  program
-    .command("validate-workflow-brief")
-    .description("Validate a Workflow Brief Markdown document (experimental RFC).")
-    .argument("<brief.md>")
-    .action((path: string) => runValidateWorkflowBrief(path));
+  attachSchemaPin(
+    program
+      .command("validate-workflow-brief")
+      .description("Validate a Workflow Brief Markdown document (experimental RFC).")
+      .argument("[brief.md]"),
+    "workflow-brief",
+    workflowBriefSchema,
+  ).action((path: string) => runValidateWorkflowBrief(path));
 
   program
     .command("check-workflow-brief")
@@ -93,12 +129,16 @@ export function buildProgram(): Command {
       runCheckWorkflowBrief(path, options),
     );
 
-  program
-    .command("validate-tests-format")
-    .description(
-      "Validate a Galaxy workflow tests YAML file; optionally cross-check against a workflow.",
-    )
-    .argument("<tests.yml>")
+  attachSchemaPin(
+    program
+      .command("validate-tests-format")
+      .description(
+        "Validate a Galaxy workflow tests YAML file; optionally cross-check against a workflow.",
+      )
+      .argument("[tests.yml]"),
+    "tests-format",
+    testsFormatSchema,
+  )
     .option("--workflow <path>", "Workflow file to cross-check inputs/outputs against")
     .option("--json", "Emit machine-readable JSON report", false)
     .action((path: string, opts: ValidateTestsOptions) => runValidateTestsFormat(path, opts));

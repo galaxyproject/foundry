@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-workflow-brief/index.md",
     "revision": 2,
     "content_hash": "c2761e698f7913963c3324379d597b72cd6af456baf08742507ebf31b1b7d599",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "35f525ac6afd41a0e964d635e09661cc17317b13"
   },
-  "cast_at": "2026-10-19T19:01:27.674Z",
+  "cast_at": "2026-10-23T14:41:05.658Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -38,8 +38,8 @@
       "purpose": "Validate the emitted brief before returning it.",
       "trigger": "After writing workflow-brief.md.",
       "verification": "Check the committed fixtures and review a worked run for faithful evidence and unchanged brief input.",
-      "src_hash": "3ddc9b59fb25189ac6d6c3cf9fb389c5292664e1effd13879a518af6f80d3e9c",
-      "dst_hash": "f50a470d61ea5bc3863325cded80e7d008e200f7972a9e9e26fd9cbd082d01e4",
+      "src_hash": "85992477f91f2131695e7d9ec5d798f99e4800b276aaefd1d763aeb2b10ea105",
+      "dst_hash": "4e4a4cb44d6d34f90080ecc6f9cdaff68abce96babfdcf289acfa7337cf8b737",
       "source": "deterministic"
     },
     {

@@ -7,8 +7,8 @@ tags:
   - cli/foundry
 status: draft
 created: 2026-05-11
-revised: 2026-05-11
-revision: 1
+revised: 2026-10-23
+revision: 2
 summary: "AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check."
 related_notes:
   - "[[tests-format]]"
@@ -20,7 +20,7 @@ Validate a Galaxy workflow tests YAML file (`*-tests.yml`, `*.gxwf-tests.yml`) a
 
 ## Output
 
-Default output is human-readable diagnostics. `--json` emits a structured report. Schema failure exits `3`; input errors exit `1`.
+Default output is human-readable diagnostics. `--json` emits a structured report. Schema failure exits `3`; input errors exit `1`. With `--schema-sha256 <hex>` it first compares the hash of the schema it carries against `<hex>`, the pin a cast bundle records in `_verify.json`: a mismatch exits `4` without validating, because the validator and the bundle disagree about the contract (see [[schema-packages]]). Given the pin and no artifact, it checks only the pin.
 
 ## Examples
 

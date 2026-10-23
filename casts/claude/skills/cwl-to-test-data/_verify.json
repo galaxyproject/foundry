@@ -10,6 +10,8 @@
       "validator_bin": "foundry",
       "args": [
         "validate-summary-cwl",
+        "--schema-sha256",
+        "6ba695858bcc32ef1bb1b0c9f61d8a3c1074848819b6077c50bec3c7b5f6c6ef",
         "{artifact_path}"
       ]
     },
@@ -22,6 +24,8 @@
       "validator_bin": "foundry",
       "args": [
         "validate-test-data-refs",
+        "--schema-sha256",
+        "534dcb2f44e24a33bd59de2bca8d882af97321c602cf1b66776c22c38b0207a8",
         "{artifact_path}"
       ]
     }

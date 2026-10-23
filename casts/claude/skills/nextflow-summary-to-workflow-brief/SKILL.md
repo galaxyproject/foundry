@@ -39,7 +39,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Validate `workflow-brief.md` before returning it: run `foundry validate-workflow-brief workflow-brief.md` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-workflow-brief workflow-brief.md`. This checks artifact `workflow-brief` against the workflow-brief-schema schema.
+- Before starting, check that the installed validator carries the workflow-brief-schema schema this bundle was cast with: run `foundry validate-workflow-brief --schema-sha256 8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `workflow-brief.md` before returning it: run `foundry validate-workflow-brief --schema-sha256 8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0 workflow-brief.md` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-workflow-brief --schema-sha256 8e65acb789057c59f2fe3a2e7920682ad272a82e0caa92de69b62cc56d5036e0 workflow-brief.md`. This checks artifact `workflow-brief` against the workflow-brief-schema schema.
 
 ## Procedure
 
