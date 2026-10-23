@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-08-24
-revised: 2026-08-24
-revision: 1
+revised: 2026-10-22
+revision: 2
 component: tool_util_models
 related_notes:
   - "[[component-nextflow-containers-and-envs]]"
@@ -14,6 +14,10 @@ related_notes:
 sources:
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_structured.md"
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_container_critic.md"
+  - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tool_util_models/tool_outputs.py"
+  - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tool_util_models/parameters.py"
+  - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tools/runtime.py"
+  - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/test/unit/tool_util/user_tool_source_validation_cases.yml"
 summary: "What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — derived from Galaxy's own generator prompts."
 ---
 
@@ -62,6 +66,12 @@ Expressions are JavaScript, spliced into the command verbatim.
 - **`$(outputs.param_name.path)` is not valid at all.** Outputs are captured by `from_work_dir` or `discover_datasets`, never referenced in the command.
 - Escape shell variables that are not Galaxy expressions: `\$(date)`.
 
+**What `inputs.x` is for a `data` input.** A CWL-style file object with `class` (`File`, or `Directory` for a directory dataset), `path`, `location`, `basename`, `nameroot`, `nameext`, `format` (the Galaxy datatype extension) and `size`.
+
+- **`element_identifier` is not usable in the command.** The field exists, but `$(inputs.x.element_identifier)` renders `null`, even when the tool is mapped over a collection. This was tested against Galaxy dev at `51e0a80a`, through both `/api/tools` and `/api/jobs`.
+- **`basename` and `nameroot` are not the element identifier either.** They come from the dataset's original upload filename or, failing that, its history name. They happen to match the identifier only when the element was created with the same name.
+- **Consequence: a user-defined tool cannot name its own collection element.** A per-sample label that the tool writes into a file has to come from a `text` parameter. Mapped over a collection, every element gets the same value, so a downstream aggregator such as MultiQC can collapse the rows into one. Say so in `help` rather than guessing an accessor; a wrong one validates clean and fails at runtime.
+
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
 
 ## 4. Input parameter types
@@ -78,6 +88,8 @@ Each input needs a `type`: `data`, `text`, `integer`, `float`, `boolean`, `selec
 
 - **`data`** — a single file, captured with `from_work_dir`.
 - **`collection`** — requires `discover_datasets`. A collection with only `from_work_dir` is rejected: nothing would claim its elements from the working directory.
+- **Collection fields sit on the output itself.** `collection_type` and `discover_datasets` are siblings of `name` and `type`, as below. Galaxy before 26.1 nested them under `structure:`; 26.1 lifts that legacy form, but don't write it.
+- **A `discover_datasets` entry needs only `pattern`.** `directory`, `format`, `visible`, `recurse`, `sort_key` and the rest are optional. A misspelled key is rejected, not ignored.
 - **`format` on an output is a single string**, unlike a data input's `format`, which is a list. The asymmetry is real and easy to get backwards.
 
 ```yaml
@@ -96,11 +108,13 @@ outputs:
             directory: splits
 ```
 
+**Validator defect, temporary.** `gxwf validate-tool-source` up to 1.14.0 rejects this collection output. Its bundled schema predates Galaxy's 26.1 change and demands the `structure:` form plus all ten discovery fields. Galaxy accepts the example as written. Until the fixed release is pinned, treat those errors on a collection output as a validator defect: keep the flat form, and don't add `structure:` or a duplicate `discover_datasets` to satisfy it. Remove this warning once the Foundry pins a gxwf release with the resynced schema.
+
 ## 6. Script placement — inline or configfile
 
 *Target-neutral.*
 
-There are exactly two ways to run a script. Pick one and complete it.
+There are exactly two ways to run a script. Pick one and complete it. Whether you write the script or vendor one the source ships, the same choice applies; vendoring adds the obligations below.
 
 **Short script (a few lines): inline it.** `python -c` / `Rscript -e`, referencing inputs directly. Self-contained; nothing else to declare.
 
@@ -117,6 +131,35 @@ shell_command: python script.py
 ```
 
 **The failure mode to check for:** a command that runs a script by name (`python script.py`) with no `configfiles` entry whose `filename` is exactly that name. The file will not exist at runtime. Either add the configfile or inline the script — a half-completed choice is broken, not partial.
+
+**`configfiles[].content` is evaluated like `shell_command`.** The same `$(…)` / `${…}` expression evaluation runs over it, and the same check rejects an `inputs.NAME` that no input declares. Anything true of the command in §3 is true of a configfile.
+
+### Vendoring a script the source ships
+
+A workflow engine can run a script that is not in the container: the source bundles it and puts it on `PATH` (a Nextflow pipeline's `bin/`, for example). A user-defined tool has no way to stage a file onto `PATH`, so the script has to travel inside the tool, as a `configfiles` entry run by name.
+
+- **Copy it verbatim**, then audit the copy. Every `$(` and `${` in it is evaluated as an expression, not passed to the interpreter. Rewrite each one, or escape it as `\$(` / `\${`. Unbraced `$NAME` passes through untouched. Search for the two delimiters rather than assuming a script has none; R and Python scripts often don't, shell scripts often do.
+- **Keep its attribution and license header.** The tool's top-level `license` covers the wrapper, not the embedded code.
+- **Name the source and version** in `description` or `help`, so a re-vendor is a diff against a known upstream.
+
+### Rendering a Nextflow template
+
+*Nextflow-specific.*
+
+A Nextflow `template 'x.r'` is not a script: Nextflow interpolates `$name`, `${expr}`, `$a.b` and `$task.*` into it before it runs. Vendoring the shipped file verbatim hands the interpreter literal `$bam` and `$task.cpus`. Validation does not catch this, because the undeclared-input check only reads `inputs.NAME` references, so an unresolved token surfaces as a runtime error or a silently wrong literal.
+
+Vendor the rendered form. Before embedding:
+
+1. List every interpolation site in the template, and count them.
+2. Resolve each one, then check the count matches:
+   - A staged `path` input becomes a `data` input, written as `$(inputs.x.path)`.
+   - `$task.cpus` becomes `$GALAXY_SLOTS` (§8), read from the environment, unbraced. `${GALAXY_SLOTS}` would be evaluated as an expression.
+   - A `$meta.*` field becomes a tool parameter. `$meta.id`, the sample name, has no parameter equivalent; see §3 for what the input object offers.
+   - `$task.ext.args` is resolved against the pipeline's `conf/modules*.config` (and the module's test config). Promote each key it actually sets to a real parameter rather than carrying a free-text args string.
+   - Anything else becomes a literal or a documented drop.
+3. Record the resolutions in `help`, so the next re-vendor can diff against them.
+
+The vendoring obligations above apply to the rendered file too.
 
 ## 7. Container, and inferring packages when no image is evidenced
 
