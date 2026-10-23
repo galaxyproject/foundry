@@ -88,6 +88,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[relabel-via-rules-and-find-replace]] | Relabel the inner level of a list:list by swapping it to the top with Apply Rules, relabeling from a find/replace-built table, and swapping back. | draft | 2026-10-22 | 3 |
 | [[collection-cleanup-after-mapover-failure]] | Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step. | draft | 2026-10-21 | 3 |
 | [[conditional-transform-or-pass-through]] | Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise. | draft | 2026-10-21 | 3 |
+| [[regex-relabel-via-tabular]] | Build an old-to-new identifier table with a tp_find_and_replace regex, then apply it by name with RELABEL_FROM_FILE in tabular mode. | draft | 2026-10-21 | 3 |
 | [[galaxy-collection-patterns]] | Choose a Galaxy collection operation or map-over recipe from the current and required data shapes. | draft | 2026-10-15 | 4 |
 | [[galaxy-conditionals-patterns]] | Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream. | draft | 2026-10-15 | 4 |
 | [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-10-15 | 4 |
@@ -138,7 +139,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[conditional-run-optional-step]] | Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch. | draft | 2026-05-03 | 4 |
 | [[derive-parameter-from-file]] | Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters. | draft | 2026-05-03 | 3 |
 | [[map-workflow-enum-to-tool-parameter]] | Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets. | draft | 2026-05-03 | 3 |
-| [[regex-relabel-via-tabular]] | Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE. | draft | 2026-05-03 | 2 |
 
 ## Source Patterns
 

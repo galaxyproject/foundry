@@ -1,0 +1,50 @@
+- doc: "A regex turns identifiers into old-to-new rows; tabular relabeling matches by name, keeps unmatched names, and keeps input order"
+  job:
+    reads:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: alpha.fastq
+          class: File
+          path: test-data/reads.txt
+          filetype: txt
+        - identifier: beta.fastq
+          class: File
+          path: test-data/reads.txt
+          filetype: txt
+        - identifier: gamma.fastq
+          class: File
+          path: test-data/reads.txt
+          filetype: txt
+    reports:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: gamma.fastq
+          class: File
+          path: test-data/b-gamma.txt
+          filetype: txt
+        - identifier: delta.fastq
+          class: File
+          path: test-data/b-delta.txt
+          filetype: txt
+        - identifier: alpha.fastq
+          class: File
+          path: test-data/b-alpha.txt
+          filetype: txt
+  outputs:
+    mapping:
+      file: test-data/expected_mapping.tabular
+    relabeled:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        gamma:
+          file: test-data/b-gamma.txt
+        delta.fastq:
+          file: test-data/b-delta.txt
+        alpha:
+          file: test-data/b-alpha.txt
+    relabeled_first:
+      file: test-data/b-gamma.txt
