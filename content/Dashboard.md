@@ -28,6 +28,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[cwl-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs. | draft | 2026-10-22 | 6 |
 | [[freeform-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. | reviewed | 2026-10-22 | 7 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary. | reviewed | 2026-10-22 | 10 |
+| [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-10-22 | 8 |
 | [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | reviewed | 2026-10-22 | 10 |
 | [[workflow-brief-to-galaxy-template]] | Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence. | draft | 2026-10-22 | 8 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-10-21 | 11 |
@@ -52,7 +53,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-09-12 | 7 |
 | [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | reviewed | 2026-09-12 | 5 |
 | [[mature-galaxy-workflow-for-iwc]] | Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set. | draft | 2026-09-10 | 1 |
-| [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-08-29 | 7 |
 | [[report-foundry-run-feedback]] | Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts. | draft | 2026-08-25 | 1 |
 | [[author-galaxy-tool-wrapper]] | Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable. | reviewed | 2026-08-24 | 5 |
 | [[apply-galaxy-workflow-changeset]] | Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps. | reviewed | 2026-08-19 | 3 |

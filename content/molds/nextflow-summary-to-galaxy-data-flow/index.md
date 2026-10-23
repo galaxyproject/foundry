@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-08-29
-revision: 7
+revised: 2026-10-22
+revision: 8
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
 input_artifacts:
   - id: summary-nextflow
@@ -153,3 +153,5 @@ related_notes:
 Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, Galaxy tool needs, confidence, and open questions.
 
 The output is not gxformat2 and should not resolve exact Tool Shed tools. Nor does it rule them out. Recording that a step's tool does not exist, will not be found, or must be authored is the same adjudication made negative, and it belongs to [[advance-galaxy-draft-step]], which owns routing. Say what each step needs a tool to *do*; let discovery report what exists. Justify step granularity from the source's own structure — subworkflow boundaries, the ratio of plumbing to scientific work. A guess about tool availability is not a justification.
+
+When the brief names collection element identifiers, take them from the source's own output names and check them against the source test's rows. A per-row column such as `sample` can repeat, as when one sample has several runs, so key each element on something unique per dataset and say what makes it unique. A positional suffix (`_1`, `_2`) is a mate only when every row it numbers is paired.

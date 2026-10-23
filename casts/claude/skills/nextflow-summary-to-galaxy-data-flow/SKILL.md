@@ -57,6 +57,8 @@ Read a Nextflow summary plus the preceding Galaxy interface brief and emit a rev
 
 The output is not gxformat2 and should not resolve exact Tool Shed tools. Nor does it rule them out. Recording that a step's tool does not exist, will not be found, or must be authored is the same adjudication made negative, and it belongs to advance-galaxy-draft-step, which owns routing. Say what each step needs a tool to *do*; let discovery report what exists. Justify step granularity from the source's own structure — subworkflow boundaries, the ratio of plumbing to scientific work. A guess about tool availability is not a justification.
 
+When the brief names collection element identifiers, take them from the source's own output names and check them against the source test's rows. A per-row column such as `sample` can repeat, as when one sample has several runs, so key each element on something unique per dataset and say what makes it unique. A positional suffix (`_1`, `_2`) is a mate only when every row it numbers is paired.
+
 ## Feedback Mode
 
 - Feedback mode is off unless the caller explicitly enables `--feedback` or supplies a feedback-ledger path.
