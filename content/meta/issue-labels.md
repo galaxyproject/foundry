@@ -7,8 +7,8 @@ tags:
   - meta
 status: draft
 created: 2026-10-21
-revised: 2026-10-21
-revision: 1
+revised: 2026-10-24
+revision: 2
 summary: "What each label on galaxyproject/foundry issues means, which labels a triaged issue carries, and what reads them."
 ---
 
@@ -66,6 +66,9 @@ A blocker label means the issue cannot move until the named outside change lands
 | `upstream/galaxy` | A change lands in Galaxy. |
 | `upstream/planemo` | A change lands in Planemo. |
 | `upstream/gxwf` | A change lands in gxwf. |
+| `upstream/gxformat2` | A change lands in gxformat2. |
+| `upstream/tools` | A change lands in a Galaxy tool wrapper repository, such as tools-iuc. |
+| `upstream/tool-shed` | A change lands in the Tool Shed. |
 | `requires-iwc-inputs` | An IWC workflow uses the operation. Patterns are written from the corpus, not ahead of it ([[pattern-authorship]]). |
 
 Link the upstream issue or pull request in a comment so the next reader can check whether it has landed.
