@@ -1,5 +1,11 @@
 # @galaxy-foundry/gxwf-foundry
 
+## 0.4.0
+
+### Minor Changes
+
+- [#707](https://github.com/galaxyproject/foundry/pull/707) [`e104dfd`](https://github.com/galaxyproject/foundry/commit/e104dfdebb235e379091ccc8d5a894b27e52cb37) Thanks [@jmchilton](https://github.com/jmchilton)! - Every single-schema `foundry validate-*` subcommand accepts `--schema-sha256 <hex>`. When the hash of the schema it carries differs, it exits `4` without validating. Given the pin and no artifact, it checks only the pin. Cast bundles record the pin in `_verify.json` and in their Validation section, so a validator release that lags a bundle's schema fails loudly instead of inverting the gate ([#643](https://github.com/galaxyproject/foundry/issues/643), [#706](https://github.com/galaxyproject/foundry/issues/706)).
+
 ## 0.3.0
 
 ### Minor Changes
