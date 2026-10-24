@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 8,
-    "content_hash": "f6c5de61e4bbbad161fd279790b9d69d439ccebb3f7f6c51d62dcc8510de2fa8",
-    "commit": "06bd4a0a4e747687fe58e9d0215e1b6454c3868e"
+    "revision": 9,
+    "content_hash": "31eae5497a80bd7e6da259750227a7daa55563b976f0cb2ca525e2b7b270ad4f",
+    "commit": "7cbb53a2107d14c2458218eb9799c9f34949ef7d"
   },
-  "cast_at": "2026-10-22T16:45:37.731Z",
+  "cast_at": "2026-10-23T22:57:04.925Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -119,6 +119,22 @@
       "trigger": "When draft-validate fails after a step has been implemented, or when a selected wrapper has explicit failure semantics that may surface at runtime.",
       "src_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
       "dst_hash": "188511486605e05d6d6ffb555b9c31287a1b6bd94c1f67dd8e483ce258415bfa",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-user-tool-workflow-binding]]",
+      "src": "content/research/galaxy-user-tool-workflow-binding/index.md",
+      "dst": "references/notes/galaxy-user-tool-workflow-binding.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Pass an authored `GalaxyUserTool` straight to implementation.",
+      "trigger": "When step 2 falls through to [[author-galaxy-tool-wrapper]], or when the draft already contains a step whose `run:` is a `GalaxyUserTool`.",
+      "verification": "Promote after a loop run reaches `draft: false` with an authored tool embedded, and the extracted workflow imports into Galaxy with the tool resolved.",
+      "src_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
+      "dst_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
       "source": "deterministic"
     },
     {

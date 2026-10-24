@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-08-24
-revision: 5
+revised: 2026-10-23
+revision: 7
 related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
@@ -44,6 +44,14 @@ references:
     evidence: corpus-observed
     purpose: "Clarity and idiomaticity criteria, and the text-versus-structural test for each proposed fix."
     trigger: "After the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`."
+  - kind: research
+    ref: "[[galaxy-user-tool-workflow-binding]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Register an authored tool through `/api/unprivileged_tools`, not the admin-only `/api/dynamic_tools`, when it must run on a server outside a workflow step."
+    trigger: "When the caller asks to register, upload, or run the authored tool on a Galaxy server instead of embedding it in a workflow step."
   - kind: research
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
@@ -113,7 +121,9 @@ Apply every concrete clarity or idiomaticity issue. Sort each fix into text-leve
 
 Write `galaxy-user-tool.yml` with the validated and critic-reviewed `GalaxyUserTool` definition.
 
-The artifact should be ready for the downstream harness or Galaxy runtime to load as a user-defined tool. Include unresolved assumptions only when they are truthful and actionable; otherwise fail instead of emitting a misleading tool.
+The artifact should be ready for the downstream harness or Galaxy runtime to load as a user-defined tool. Include unresolved assumptions only when they are truthful and actionable. Otherwise fail instead of emitting a misleading tool.
+
+The file is handed on as written. [[implement-galaxy-tool-step]] embeds it under the workflow step's `run:`, so it does not need registering with a Galaxy server first, and its `id` and `version` are what identify the tool in the workflow. To register or run it on a server by itself, follow [[galaxy-user-tool-workflow-binding]].
 
 ## Non-goals
 
