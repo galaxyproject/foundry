@@ -44,6 +44,34 @@ Materialize Nextflow fixtures with `make fixtures-nextflow`.
 - expect: the journey produces a gxformat2 workflow that validates and whose
   workflow test runs.
 
+## Case: nf-core/atacseq end to end
+
+- fixture: `workflow-fixtures/pipelines/nf-core__atacseq` (medium; `--genome`
+  key resolves a reference bundle).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
+## Case: nf-core/smrnaseq end to end
+
+- fixture: `workflow-fixtures/pipelines/nf-core__smrnaseq` (medium; genome,
+  miRBase and GTF references together).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
+## Case: nf-core/funcscan end to end
+
+- fixture: `workflow-fixtures/pipelines/nf-core__funcscan` (medium; several
+  user-supplied databases).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
+## Case: nf-core/rnaseq end to end
+
+- fixture: `workflow-fixtures/pipelines/nf-core__rnaseq` (large; several
+  aligners, heavy config).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
 ## Case: nf-core/sarek capped at 5 steps
 
 - fixture: `workflow-fixtures/pipelines/nf-core__sarek`, scope-narrowed to the
