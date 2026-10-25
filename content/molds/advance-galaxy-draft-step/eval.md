@@ -95,6 +95,15 @@ Properties are tagged by bucket:
 - assertion: when `draft-next-step` reports `draft: false`, the cast skill
   returns without invoking discover-or-author, summarize, or implement.
 
+## Property: the last concretizing call emits the concrete workflow
+
+- bucket: picker
+- check: deterministic
+- assertion: when an invocation concretizes the last drafty step, it leaves
+  `gxwf draft-next-step` reporting `draft: false` and writes
+  `galaxy-workflow.gxwf.yml` (`class: GalaxyWorkflow`, no `_plan_*`) before
+  returning, without a further invocation.
+
 ## Property: no acceptable shed candidate falls through to authoring
 
 - bucket: routing

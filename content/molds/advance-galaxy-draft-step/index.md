@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-06-02
-revised: 2026-10-23
-revision: 9
+revised: 2026-10-25
+revision: 10
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
@@ -150,7 +150,7 @@ related_notes:
 
 Orchestrator Mold for the per-step Galaxy authoring loop. One invocation advances the gxformat2 draft by **one** step: pick → resolve a wrapper → summarize the wrapper → implement the step → validate. The harness loop reduces to `while (gxwf draft-next-step <wf>).draft: invoke skill`.
 
-This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-next-step]]) and the per-step validator ([[draft-validate]] `--concrete`). Iterations terminate when the draft has no remaining drafty steps; on that terminal call the Mold extracts the concrete `galaxy-workflow.gxwf.yml` (via [[draft-extract]]) — that promoted-class workflow, not the `-draft` file, is what downstream Molds test and run — and the harness then drops out of the loop and proceeds to terminal validation via [[validate-galaxy-workflow]].
+This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-next-step]]) and the per-step validator ([[draft-validate]] `--concrete`). Iterations terminate when the draft has no remaining drafty steps; the call that concretizes the last drafty step (or a call that finds none) extracts the concrete `galaxy-workflow.gxwf.yml` (via [[draft-extract]]) — that promoted-class workflow, not the `-draft` file, is what downstream Molds test and run — and the harness then drops out of the loop and proceeds to terminal validation via [[validate-galaxy-workflow]].
 
 ## Sequence
 
@@ -172,7 +172,7 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
 3. **Summarize the wrapper.** If step 2 reused a sibling's pin, reuse that pin's [[galaxy-tool-summary]]: use the file an earlier iteration wrote, or regenerate it from the cache with `galaxy-tool-cache` [[summarize]] `<tool_id> --tool-version <v> --cache-dir <dir> --output <file>`. If step 2 fell through to [[author-galaxy-tool-wrapper]] or reused an embedded definition, skip summarization: the authored `galaxy-user-tool.yml` is not in any toolbox or cache, and its own `inputs` and `outputs` are the port contract. Otherwise, invoke [[summarize-galaxy-tool]] to produce the summary.
 4. **Implement.** Invoke [[implement-galaxy-tool-step]] with the summary, or the authored `galaxy-user-tool.yml`, and the draft. It resolves the chosen step's remaining `TODO_*` / `_plan_*` slots into a concrete `tool_id` (confirming or correcting any pinned identity), `tool_version`, `state`, and wrapper-determined port names. For an authored tool it embeds the definition under the step's `run:` instead, as [[galaxy-user-tool-workflow-binding]] describes.
 5. **Check computability.** Inspect the [[open-requirements-ledger]] for a new `open` blocking entry [[implement-galaxy-tool-step]] appended against this step. [[draft-validate]] cannot catch this: the connection graph knows ports connect, not what they carry, so the draft validates green even though the step can't run. If such an entry is present, escalate to [[repair-galaxy-draft-topology]] for a bounded repair (insert a producer/sub-path or honestly narrow the output), then update the ledger's `topology_repair` budget as the ledger note directs — each escalation must strictly reduce the open blocking-entry count, under a hard cap, and surrender rather than retry once the cap is reached. Then return — the next iteration resumes the loop, realizing any draft-tier steps the repair inserted. With no new blocking entry, continue to validation.
-6. **Validate.** Run [[draft-validate]] `<draft> --concrete --strict-state --json --cache-dir <dir>`. `--strict-state` makes skipped tool-state checks fail validation; draft structure and topology checks still run. If metadata is unavailable, resolve the cache or fetch error and retry. Return on exit 0; route other failures using the JSON diagnostics and the rules below.
+6. **Validate.** Run [[draft-validate]] `<draft> --concrete --strict-state --json --cache-dir <dir>`. `--strict-state` makes skipped tool-state checks fail validation; draft structure and topology checks still run. If metadata is unavailable, resolve the cache or fetch error and retry. On exit 0, run [[draft-next-step]] again: if it now reports `draft: false`, this invocation concretized the last drafty step, so run [[draft-extract]] to emit `galaxy-workflow.gxwf.yml` before returning, because a `while draft` harness never invokes the skill again. Route other failures using the JSON diagnostics and the rules below.
 
 ## Failure routing
 
