@@ -87,7 +87,8 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - expect: every `processes[]` row with `module_path` under `modules/nf-core/`
   has `meta != null`; `meta.tools[]`, `meta.input[]`, and `meta.output[]` are
   normalized from the vendored `meta.yml`; and `module_tests[].length` equals
-  the count of `*.nf.test` files under that module's `tests/` directory. Every
+  the count of `test("…")` blocks across the `*.nf.test` files under that
+  module's `tests/` directory. Every
   `processes[]` row under `modules/local/` has `meta == null` and
   `module_tests == []`.
 
@@ -95,9 +96,10 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 
 - fixture: `workflow-fixtures/pipelines/nf-core__bacass`.
 - expect: every `subworkflows[]` row whose `path` lives under
-  `subworkflows/nf-core/` has `tests[].length` matching on-disk `*.nf.test`
-  files under that subworkflow directory; local or untested subworkflows emit
-  `tests == []`. No snapshot contents are inlined.
+  `subworkflows/nf-core/` has `tests[].length` matching the `test("…")` blocks
+  in on-disk `*.nf.test` files under that subworkflow directory; local or
+  untested subworkflows emit `tests == []`. Raw `.snap` JSON is never inlined,
+  only the compact `snapshot.parsed_content`.
 
 ## Case: container directive coverage
 
