@@ -65,16 +65,19 @@ whatever a scenario produces. Properties are tagged by bucket:
 - check: deterministic
 - assertion: every `processes[]` row under `modules/nf-core/` has `meta != null`
   normalized from the vendored `meta.yml` (`meta.tools[]`/`input[]`/`output[]`),
-  and `module_tests[].length` equals the on-disk `*.nf.test` count for that
-  module; every `modules/local/` row has `meta == null` and `module_tests == []`.
+  and `module_tests[].length` equals the number of `test("…")` blocks across
+  that module's on-disk `*.nf.test` files (one row per test case, not per
+  file); every `modules/local/` row has `meta == null` and `module_tests == []`.
 
 ## Property: subworkflow tests are enumerated structurally
 
 - bucket: fidelity
 - check: deterministic
 - assertion: every `subworkflows[]` row under `subworkflows/nf-core/` has
-  `tests[].length` matching its on-disk `*.nf.test` count; local or untested
-  subworkflows emit `tests == []`; no snapshot contents are inlined.
+  `tests[].length` matching the number of `test("…")` blocks across its
+  on-disk `*.nf.test` files; local or untested subworkflows emit
+  `tests == []`; raw `.snap` JSON is never inlined, only the schema's compact
+  `snapshot.parsed_content`.
 
 ## Property: subworkflow topology is source-faithful
 
