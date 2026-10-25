@@ -11,6 +11,39 @@ Materialize Nextflow fixtures with `make fixtures-nextflow`.
   input; FastQC/MultiQC-style reports surface as workflow outputs; no
   promoted-workflow TODO sentinels remain.
 
+## Case: nextflow-io/rnaseq-nf end to end
+
+- fixture: `workflow-fixtures/pipelines/nextflow-io__rnaseq-nf` (tiny; not
+  nf-core, ships its own test data).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
+## Case: nf-core/bamtofastq end to end
+
+- fixture: `workflow-fixtures/pipelines/nf-core__bamtofastq` (tiny).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
+## Case: nf-core/hlatyping end to end
+
+- fixture: `workflow-fixtures/pipelines/nf-core__hlatyping` (small; single
+  purpose).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
+## Case: CRG-CNAG/CalliNGS-NF end to end
+
+- fixture: `workflow-fixtures/pipelines/CRG-CNAG__CalliNGS-NF` (tiny; not
+  nf-core, no schema or nf-test).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
+## Case: nf-core/bacass end to end
+
+- fixture: `workflow-fixtures/pipelines/nf-core__bacass` (small).
+- expect: the journey produces a gxformat2 workflow that validates and whose
+  workflow test runs.
+
 ## Case: nf-core/sarek capped at 5 steps
 
 - fixture: `workflow-fixtures/pipelines/nf-core__sarek`, scope-narrowed to the
