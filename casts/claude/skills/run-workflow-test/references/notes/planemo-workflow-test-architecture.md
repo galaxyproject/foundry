@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-11
-revision: 3
+revised: 2026-10-26
+revision: 4
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[galaxy-tool-job-failure-reference]]"
@@ -23,6 +23,8 @@ sources:
   - "~/projects/repositories/planemo/planemo/galaxy/activity.py"
   - "~/projects/repositories/planemo/planemo/galaxy/invocations"
   - "~/projects/repositories/planemo/planemo/galaxy/config.py"
+  - "~/projects/repositories/planemo/planemo/galaxy/serve.py"
+  - "~/projects/repositories/planemo/planemo/engine/galaxy.py"
 summary: "Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries."
 ---
 
@@ -94,6 +96,20 @@ Important operations:
 
 For workflows, Planemo invokes Galaxy using input labels/names. Stable generated labels are therefore important for both test execution and debugging.
 
+### Workflow Import Failures
+
+Planemo imports the workflow while it brings Galaxy up for the run (`install_workflows()` in `planemo/galaxy/serve.py` for managed Galaxy and in `ExternalGalaxyEngine.ensure_runnables_served` in `planemo/engine/galaxy.py` for external Galaxy, as of planemo 0.75.47). That is outside the per-test `execute()` wrapper that turns exceptions into an `ErrorRunResponse`. When Galaxy rejects `POST /api/workflows/upload`, BioBlend raises `ConnectionError`, the test command exits non-zero, and Planemo writes neither the `--test_output_json` report nor the HTML report. No workflow, history, or invocation id exists.
+
+The evidence then lives in three places:
+
+| Evidence | What it holds |
+|---|---|
+| Upload response | HTTP status and body. A 400 usually names the failing field or validation rule. A 500 body rarely explains the cause. |
+| Galaxy server log | The traceback for the failing request — the managed Galaxy's log or the `planemo serve` log. The only place a 500's cause appears. |
+| Planemo terminal log | The BioBlend exception and the point in the run where it was raised. |
+
+Re-POSTing the same workflow to `/api/workflows/upload` as the same user on the same server reproduces the failure without the rest of the Planemo run, which makes it the cheap loop for isolating a trigger.
+
 Workflow testability design guidance lives in [[galaxy-workflow-testability-design]]. This architecture note only records why Planemo makes labels and workflow-level outputs operationally important.
 
 ## Structured Artifacts
@@ -121,6 +137,7 @@ Planemo transforms and summarizes Galaxy failure information. These are likely i
 - Polling may summarize “at least one job is in error” while detailed job evidence is printed elsewhere or stored separately.
 - Missing outputs become assertion/output problems, which can conflate label mismatch, workflow output omission, optional output absence, failed invocation, or output download issue.
 - Output download failures may be logged but not always propagated as the most specific failure.
+- A rejected workflow import aborts the run before any structured report is written, so terminal and server logs are the only record.
 - External Galaxy without an admin key may defer missing-tool problems until runtime.
 - `allow_tool_state_corrections=True` can let Galaxy adjust tool state during invocation, which is useful but can mask definition drift.
 - `--no_wait` is not suitable for debug conclusions because invocation creation can succeed before jobs fail.
@@ -135,7 +152,7 @@ For [[run-workflow-test]]:
 
 For [[debug-galaxy-workflow-output]]:
 
-- Start from structured Planemo output.
+- Start from structured Planemo output. When there is none because the workflow import failed, start from the upload response and the Galaxy server log.
 - For missing-output failures, check label drift and omitted workflow-level outputs before assuming tool failure.
 - If the failure is job-level, inspect Galaxy job APIs described in [[galaxy-tool-job-failure-reference]].
 - If the failure is invocation-level, inspect Galaxy invocation APIs described in [[galaxy-workflow-invocation-failure-reference]].

@@ -50,3 +50,10 @@ No committed fixture exercises `status: "not-run"`, or a run against an existing
 rather than a Planemo-managed Galaxy (`galaxy_mode: "existing"`) — every fixture
 that ran records `galaxy_mode: "managed"`, and `missing-test` records none at all
 because nothing ran. No case asserts either until a fixture binds them.
+
+No fixture exercises `failure_modality: "workflow-import-rejected"` either. The
+observed case is the ncbi/egapx run in issue #726: `POST /api/workflows/upload`
+returned 500, Planemo wrote no structured output, and the handoff had to carry
+the terminal log, server log and upload response in place of ids. Binding it
+needs a workflow whose rejection was observed on a recorded Galaxy, together
+with the result that run produced.

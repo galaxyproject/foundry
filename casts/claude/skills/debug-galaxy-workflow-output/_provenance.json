@@ -4,11 +4,11 @@
   "mold": {
     "name": "debug-galaxy-workflow-output",
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
-    "revision": 5,
-    "content_hash": "100b3f985f8e309092bfd05cf544a8286e0a878ee2df3a155dfebe6fcdb286f0",
-    "commit": "47aa5c1cf419386ea72929c8ee34aec0db65588f"
+    "revision": 6,
+    "content_hash": "39a985e8e71e51606509f7f2f79a5cac274d4bdbb53782fa941696d38ac2e270",
+    "commit": "f48c01b6cae92f90980c5fe3d42597bfcbab07e0"
   },
-  "cast_at": "2026-10-22T03:42:26.275Z",
+  "cast_at": "2026-10-26T16:00:38.048Z",
   "refs": [
     {
       "kind": "research",
@@ -132,9 +132,9 @@
       "load": "on-demand",
       "evidence": "corpus-observed",
       "purpose": "Locate which Planemo artifact or Galaxy API surface preserves the failure evidence.",
-      "trigger": "When Planemo output is ambiguous, structured test JSON is available, or rerunning can be avoided by inspecting an existing invocation.",
-      "src_hash": "d6ac347c8361d6c312c64c1197426673e53aa1c5577e1c72f1c80a20ccd1cce3",
-      "dst_hash": "d6ac347c8361d6c312c64c1197426673e53aa1c5577e1c72f1c80a20ccd1cce3",
+      "trigger": "When Planemo output is ambiguous, structured test JSON is available or missing because Galaxy rejected the workflow import, or rerunning can be avoided by inspecting an existing invocation.",
+      "src_hash": "8c6bfed27d10fc1bd36341cc7b184e8a55165e6755bf5c0d9461147748ef4a9e",
+      "dst_hash": "8c6bfed27d10fc1bd36341cc7b184e8a55165e6755bf5c0d9461147748ef4a9e",
       "source": "deterministic"
     }
   ],
@@ -144,7 +144,7 @@
         "id": "workflow-debug-report",
         "kind": "markdown",
         "default_filename": "workflow-debug-report.md",
-        "description": "Failure-surface classification with captured job/invocation/collection/assertion evidence and a recommended next step or reference-gap follow-up."
+        "description": "Failure-surface classification with captured import/job/invocation/collection/assertion evidence and a recommended next step or reference-gap follow-up."
       }
     ],
     "consumes": [
