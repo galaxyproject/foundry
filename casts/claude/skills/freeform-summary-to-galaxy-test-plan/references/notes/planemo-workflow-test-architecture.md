@@ -98,17 +98,17 @@ For workflows, Planemo invokes Galaxy using input labels/names. Stable generated
 
 ### Workflow Import Failures
 
-Planemo imports the workflow while it brings Galaxy up for the run (`install_workflows()` in `planemo/galaxy/serve.py` for managed Galaxy and in `ExternalGalaxyEngine.ensure_runnables_served` in `planemo/engine/galaxy.py` for external Galaxy, as of planemo 0.75.47). That is outside the per-test `execute()` wrapper that turns exceptions into an `ErrorRunResponse`. When Galaxy rejects `POST /api/workflows/upload`, BioBlend raises `ConnectionError`, the test command exits non-zero, and Planemo writes neither the `--test_output_json` report nor the HTML report. No workflow, history, or invocation id exists.
+Planemo imports the workflow while it brings Galaxy up for the run (`config.install_workflows()`, called from `_serve()` in `planemo/galaxy/serve.py` for managed Galaxy and from `ExternalGalaxyEngine.ensure_runnables_served` in `planemo/engine/galaxy.py` for external Galaxy, as of planemo 0.75.47). For gxformat2 it converts the workflow to a native dict client-side first, so Galaxy's own gxformat2 conversion never runs. That is outside the per-test `execute()` wrapper that turns exceptions into an `ErrorRunResponse`. When Galaxy rejects the import request, BioBlend raises `ConnectionError`, the test command exits non-zero, and Planemo writes neither the `--test_output_json` report nor the HTML report. No workflow, history, or invocation id exists.
 
 The evidence then lives in three places:
 
 | Evidence | What it holds |
 |---|---|
 | Upload response | HTTP status and body. A 400 usually names the failing field or validation rule. A 500 body rarely explains the cause. |
-| Galaxy server log | The traceback for the failing request — the managed Galaxy's log or the `planemo serve` log. The only place a 500's cause appears. |
+| Galaxy server log | The traceback for the failing request, the only place a 500's cause appears. Managed Galaxy streams its log into the Planemo terminal output and keeps it on disk. External Galaxy keeps it on the server. |
 | Planemo terminal log | The BioBlend exception and the point in the run where it was raised. |
 
-Re-POSTing the same workflow to `/api/workflows/upload` as the same user on the same server reproduces the failure without the rest of the Planemo run, which makes it the cheap loop for isolating a trigger.
+Re-importing the same converted dict as the same user on the same server reproduces the failure without the rest of the Planemo run, which makes it the cheap loop for isolating a trigger.
 
 Workflow testability design guidance lives in [[galaxy-workflow-testability-design]]. This architecture note only records why Planemo makes labels and workflow-level outputs operationally important.
 

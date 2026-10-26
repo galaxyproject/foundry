@@ -12,7 +12,7 @@ scenario produces.
   preserves the invocation id, history id, workflow id, the Planemo structured
   result, and any test-output artifact paths needed by debug molds. When Galaxy
   rejected the workflow import, the ids and structured result are recorded as
-  absent, and the Planemo terminal log, Galaxy server log, and upload response
+  absent, and the Planemo terminal log, Galaxy server log, and import response
   are preserved in their place.
 
 ## Property: existing versus managed Galaxy mode
