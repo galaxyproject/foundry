@@ -27,9 +27,9 @@ With `--connections`, `connection_report.step_results[]` has one entry per top-l
 
 Find the step and output that produce a workflow output. In gxformat2, split `outputSource` into `<step_label>/<output_name>`; with no `/` the source is a workflow input, whose single output is `output`. In a native `.ga`, take the step and `output_name` carrying that `workflow_outputs[].label`. Read that step's `resolved_outputs[name].collection_type`.
 
-- A non-null value is the resolved collection type, including map-over: a dataset output of a step mapped over a `list` resolves to `list`.
-- Null means dataset only when the tool declares a dataset output (not a collection) and every connection on the path to the step is `ok`. A collection output whose type could not be resolved also reports null, with `ok` connections, so a null on a declared collection output is unknown.
-- A `skip` connection propagates as null downstream, with `ok` connections after it. Treat any null downstream of a `skip` as unknown.
+- With every connection on the path to the step `ok`, a non-null value is the resolved collection type, including map-over: a dataset output of a step mapped over a `list` resolves to `list`.
+- Null means dataset only when the tool declares a dataset output (not a collection) and the path is clean. A collection output whose type could not be resolved also reports null, with `ok` connections, so a null on a declared collection output is unknown.
+- A `skip` connection contributes no map-over rank, and its effect propagates downstream behind `ok` connections. Any value, null or not, at or downstream of a `skip` is unknown: a non-null type there can be missing a rank.
 - Subworkflow steps report resolved outputs, but the subworkflow's inner steps and their skips are not in `step_results`. A null from a subworkflow output is unknown unless you trace the inner chain by hand.
 
 ## Examples

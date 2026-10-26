@@ -27,25 +27,26 @@ agreement and handoff reporting are judged.
 - check: deterministic
 - assertion: every asserted output whose producing step's `resolved_outputs`
   entry in `gxwf validate --connections --json` has a non-null
-  `collection_type` takes collection form (`class: Collection` and that
-  `collection_type`). Every job input bound to a `data_collection` workflow
+  `collection_type`, with no `skip` connection on the path to that step, takes
+  collection form (`class: Collection` and that `collection_type`). Every job input bound to a `data_collection` workflow
   input is `class: Collection` with the declared `collection_type`, and every
   input bound to a `data` input is not.
 
 ## Property: datatypes agree with the workflow
 
 - check: llm-judged
-- assertion: each output `ftype` names the producing tool output's format (or
-  its `format_source` input's datatype), and each job input `filetype` is the
+- assertion: each output `ftype` names the producing output's datatype (the
+  step's `change_datatype` when set, otherwise the tool output's format or its
+  `format_source` input's datatype), and each job input `filetype` is the
   workflow input's declared `format` or a subtype of it.
 
 ## Property: unresolved kinds and plan disagreements surface
 
 - check: llm-judged
-- assertion: an output whose kind `--connections` cannot settle (null on a
-  declared collection output, downstream of a `skip`, or from inside a
-  subworkflow) is named in the handoff as hand-checked, not silently asserted
-  in dataset form. When the test plan's `output_kind` or `collection_shape`
+- assertion: an output whose kind `--connections` cannot settle (any value
+  at or behind a `skip`, a null on a declared collection output, or a null
+  from a subworkflow) is named in the handoff as hand-checked, not silently
+  asserted in either form. When the test plan's `output_kind` or `collection_shape`
   disagrees with the workflow's resolved kind, the handoff reports it as a
   test-plan defect naming the output, the plan value, and the resolved value;
   it must not vanish into an assertion that silently follows either side.

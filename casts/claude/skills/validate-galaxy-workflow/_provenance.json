@@ -6,9 +6,9 @@
     "path": "content/molds/validate-galaxy-workflow/index.md",
     "revision": 5,
     "content_hash": "74e3743fc376f33c1eb37832ab4869c327d48f87e015c7a38597cf4c4ca939cd",
-    "commit": "cc3df02b4e119417d2845a5269f7a4207bc36f70"
+    "commit": "88e38f053b8cfbdefb3ce03bafeca16d71e98461"
   },
-  "cast_at": "2026-10-26T16:15:57.917Z",
+  "cast_at": "2026-10-26T16:24:31.965Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -22,8 +22,8 @@
       "purpose": "Validate the assembled gxformat2 workflow before runtime testing.",
       "trigger": "After all Galaxy steps and workflow tests have been assembled.",
       "verification": "Run the cast skill on a complete IWC-derived workflow and confirm terminal validation findings are separated from runtime test failures.",
-      "src_hash": "ac89ce20b76a2e8e00ef87d13baf9501bef6f26ef4be3fb612807b04089f02d8",
-      "dst_hash": "ab191135626e7925a2951be64381bd0294fcc83e20062d836b19d61932a5a9ef",
+      "src_hash": "8ddaf8cabaf79180d2d070381281c1a10fbe0ff0d6ce76638869fe84800e8c2d",
+      "dst_hash": "cdd3c19cc4f7097c0d2ca96438f6f24a406e9d1a4b1310a0924bd2a02f67560c",
       "source": "deterministic"
     },
     {
