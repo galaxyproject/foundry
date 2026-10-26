@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 11,
     "content_hash": "34855691581889d36265e00178088b8a52a51ee72119329261bca186f7cb480e",
-    "commit": "044a8d12714aece3be9c1f422af92d6c93028292"
+    "commit": "0c5869722a559e46ed0dd3a72ec8f849eecf900b"
   },
-  "cast_at": "2026-10-26T16:21:13.565Z",
+  "cast_at": "2026-10-26T16:29:36.678Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -119,8 +119,8 @@
       "evidence": "corpus-observed",
       "purpose": "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs.",
       "trigger": "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations.",
-      "src_hash": "f89385a49685c7cf0029e6d29db65a3a14e960032d8b43b4e14a89ded849121e",
-      "dst_hash": "f89385a49685c7cf0029e6d29db65a3a14e960032d8b43b4e14a89ded849121e",
+      "src_hash": "702604a92ed28b09c48280ef4ca993e2f96edcf306da42de41842dae513c5ba8",
+      "dst_hash": "702604a92ed28b09c48280ef4ca993e2f96edcf306da42de41842dae513c5ba8",
       "source": "deterministic"
     },
     {

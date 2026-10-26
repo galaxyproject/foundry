@@ -97,6 +97,8 @@ Run these workflows against a Galaxy that Planemo serves, as an external Galaxy.
      planemo serve --docker --port 9123 empty
    ```
 
+   Planemo adds Galaxy's built-in tools to the served toolbox only for tool ids it reads from the served target, so an empty directory gets `upload1` alone. A workflow that also uses a built-in collection tool (a `tool_id` such as `__BUILD_LIST__`, `__APPLY_RULES__` or `__FILTER_NULL__`) fails import with that tool missing, and `shed-tools` cannot install it. Passing each tool's XML with `--extra_tools` should add it but has not been tested. Until it is, record `not-run` and name the missing built-in tools.
+
 2. With the served Galaxy's admin key (`test_key` by default), provision a user that can run embedded tools. Galaxy checks the role, not admin status, so the admin user needs the role as much as any other user. Do not store the user key in run artifacts.
 
    | Request | Body |
@@ -126,7 +128,7 @@ Detect the dependency before running:
 
 1. **Find the table.** The parsed tool model hides it: a data-table select has `options: null`. Read the tool source instead. The Tool Shed serves it with macros expanded at `GET /api/tools/<owner>~<repo>~<tool_id>/versions/<version>/tool_source`, with `+` in the version URL-encoded as `%2B`. The full Tool Shed GUID does not work as the id there. Collect every `from_data_table` attribute. One tool can read several tables, and a later table can filter on an earlier select's value.
 2. **Keep the selects the step depends on.** Count every non-optional data-table select on the conditional branch the step takes, and every optional one its state sets. A select on a branch the step does not take is not a dependency.
-3. **Query the table.** On an external Galaxy, after the workflow's tools are installed, call `GET /api/tool_data/<table>`. Any user key works because the endpoint is public. A 404 after the tools are installed means the repository registers no such table. An empty table returns `fields: []`. Otherwise check that some row carries the value the step selects.
+3. **Query the table.** On an external Galaxy, after the workflow's tools are installed, call `GET /api/tool_data/<table>`. Any user key works because the endpoint is public. A 404 after the tools are installed means the repository registers no such table. An empty table returns `fields: []`. Otherwise check that some row carries the value the step selects, or that the select's `add_value` filter supplies it. Only a value neither provides is unmet.
 
 A Planemo-managed Galaxy exists only while `planemo test` runs, so its tables cannot be queried before the invocation. Treat a data-table select as unmet there unless the repository's `.loc.sample` already carries the value, or the caller supplied data-table configuration that contains it, for example through Planemo's `--tool_data_table` and `--tool_data_path` options.
 
