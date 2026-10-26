@@ -5,10 +5,10 @@
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 8,
-    "content_hash": "95e4f6601086b32d5a0b0ba2e1bfdc5362dc990b2d6b3d9400519a133c3de45b",
-    "commit": "a59d6025d612ce7013b09fa1ccb58f60507ccc6a"
+    "content_hash": "6e312c6ee27ef6e45a6ace74087cd28a6509ade11f788a51ee478efce58971b6",
+    "commit": "0b06389d693ff56e7892349d90052de33156734c"
   },
-  "cast_at": "2026-10-26T16:21:34.222Z",
+  "cast_at": "2026-10-26T16:33:05.181Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
