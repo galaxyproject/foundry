@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-08-24
-revised: 2026-10-22
-revision: 2
+revised: 2026-10-26
+revision: 3
 component: tool_util_models
 related_notes:
   - "[[component-nextflow-containers-and-envs]]"
@@ -16,7 +16,10 @@ sources:
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_container_critic.md"
   - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tool_util_models/tool_outputs.py"
   - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tool_util_models/parameters.py"
-  - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tools/runtime.py"
+  - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/lib/galaxy/tools/runtime.py"
+  - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/lib/galaxy/tool_util_models/yaml_parameters.py"
+  - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/lib/galaxy/workflow/modules.py"
+  - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/test/functional/tools/collection_paired_test_y.yml"
   - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/test/unit/tool_util/user_tool_source_validation_cases.yml"
 summary: "What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — derived from Galaxy's own generator prompts."
 ---
@@ -68,17 +71,29 @@ Expressions are JavaScript, spliced into the command verbatim.
 
 **What `inputs.x` is for a `data` input.** A CWL-style file object with `class` (`File`, or `Directory` for a directory dataset), `path`, `location`, `basename`, `nameroot`, `nameext`, `format` (the Galaxy datatype extension) and `size`.
 
-- **`element_identifier` is not usable in the command.** The field exists, but `$(inputs.x.element_identifier)` renders `null`, even when the tool is mapped over a collection. This was tested against Galaxy dev at `51e0a80a`, through both `/api/tools` and `/api/jobs`.
+- **`element_identifier` is `null` on a mapped-over `data` input.** The field exists, but map-over hands each job a plain dataset, so `$(inputs.x.element_identifier)` renders `null`. On a plain dataset it is `null` too. This was API-tested against Galaxy dev at `51e0a80a`, through both `/api/tools` and `/api/jobs`. Fixes are open, not merged: galaxyproject/galaxy#24434 and galaxyproject/galaxy#24422.
 - **`basename` and `nameroot` are not the element identifier either.** They come from the dataset's original upload filename or, failing that, its history name. They happen to match the identifier only when the element was created with the same name.
-- **Consequence: a user-defined tool cannot name its own collection element.** A per-sample label that the tool writes into a file has to come from a `text` parameter. Mapped over a collection, every element gets the same value, so a downstream aggregator such as MultiQC can collapse the rows into one. Say so in `help` rather than guessing an accessor; a wrong one validates clean and fails at runtime.
+- **Consequence: a tool mapped over a collection cannot name its own element.** A per-sample label that the tool writes into a file has to come from a `text` parameter. Mapped over a collection, every element gets the same value, so a downstream aggregator such as MultiQC can collapse the rows into one. To get identifiers today, take the whole collection as a `data_collection` input (below). Otherwise say so in `help` rather than guessing an accessor; a wrong one validates clean and fails at runtime.
+
+**What `inputs.x` is for a `data_collection` input.** An object with `class: Collection`, `name` (the collection's name), `collection_type`, `tags` and `elements`. Each leaf is a file object as above, plus a non-null `element_identifier`. The shape of `elements` depends on the collection type:
+
+- **`list`, `sample_sheet`, and `list:*`** — `elements` is an **array**, in collection order. Iterate it: ``$(inputs.x.elements.map((e) => `'${e.path}'`).join(" "))``, or read `e.element_identifier` for the sample name.
+- **`paired`, `record`** — `elements` is an **object keyed by identifier**: `$(inputs.x.elements.forward.path)`, `$(inputs.x.elements.reverse.path)`.
+- **`paired_or_unpaired`** — keyed like `paired`, plus a boolean `has_single_item`. A single dataset sits under `unpaired`; a pair sits under `forward` and `reverse`:
+
+  ``$(inputs.x.has_single_item ? `'${inputs.x.elements.unpaired.path}'` : `'${inputs.x.elements.forward.path}' '${inputs.x.elements.reverse.path}'`)``
+- **Nested types** (`list:paired`) — each inner collection has the same shape, with its identifier in `name`, not `element_identifier`.
+
+**`inputs.x.forward` is the wrong path; `inputs.x.elements.forward` is right.** Validation does not catch the difference: it checks that `inputs.x` is declared, not the fields after it. Galaxy's own test tool `collection_paired_test_y.yml` uses the `elements` form. A deprecated builder, used for `/api/tools` submissions and for workflow steps whose state fails request validation, drops the `elements` wrapper and `has_single_item`. A run that passes there proves nothing about the form above. These collection shapes come from reading `lib/galaxy/tools/runtime.py` and `lib/galaxy/workflow/modules.py` (`to_cwl`) on Galaxy dev at `87d295c9`. No Galaxy test reads leaf `element_identifier` or `has_single_item` from a user-defined tool yet.
 
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
 
 ## 4. Input parameter types
 
-Each input needs a `type`: `data`, `text`, `integer`, `float`, `boolean`, `select`.
+Each input needs a `type`: `data`, `data_collection`, `text`, `integer`, `float`, `boolean`, `select`, `color`. `conditional`, `repeat` and `section` group nested inputs.
 
 - **`data`** — `format` is a **list** of allowed types, always, even for one: `[fastq]`, `[fasta, fasta.gz]`.
+- **`data_collection`** — `collection_type` restricts which collections can be picked (`list`, `paired`, `paired_or_unpaired`, `list:paired`, …). Omit it to accept any. `format` is a list, as for `data`, and applies to every element. §3 gives the runtime shape.
 - **`value`** sets the default for `text`, `integer`, `float`, `boolean` **only**.
 - A **`select`** takes no `value` — mark its default with `selected: true` on one of its `options`.
 - A **`data`** input takes no `value` either.
@@ -106,6 +121,7 @@ outputs:
           - discover_via: pattern
             pattern: __name__
             directory: splits
+            format: fastqsanger
 ```
 
 **Validator defect, temporary.** `gxwf validate-tool-source` up to 1.14.0 rejects this collection output. Its bundled schema predates Galaxy's 26.1 change and demands the `structure:` form plus all ten discovery fields. Galaxy accepts the example as written. Until the fixed release is pinned, treat those errors on a collection output as a validator defect: keep the flat form, and don't add `structure:` or a duplicate `discover_datasets` to satisfy it. Remove this warning once the Foundry pins a gxwf release with the resynced schema.
