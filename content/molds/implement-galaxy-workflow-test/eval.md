@@ -28,7 +28,9 @@ agreement and handoff reporting are judged.
 - assertion: every asserted output whose producing step's `resolved_outputs`
   entry in `gxwf validate --connections --json` has a non-null
   `collection_type`, with no `skip` connection on the path to that step, takes
-  collection form (`class: Collection` and that `collection_type`). Every job input bound to a `data_collection` workflow
+  collection form (`class: Collection` and that `collection_type`). For a
+  subworkflow output only the collection form is checked; its depth is
+  confirmed by hand. Every job input bound to a `data_collection` workflow
   input is `class: Collection` with the declared `collection_type`, and every
   input bound to a `data` input is not.
 

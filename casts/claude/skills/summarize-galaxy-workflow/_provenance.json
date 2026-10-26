@@ -6,9 +6,9 @@
     "path": "content/molds/summarize-galaxy-workflow/index.md",
     "revision": 2,
     "content_hash": "23b770bbbd5409a37a7a0ea457a10b2cfba21f36a6e7e892125735035ac36078",
-    "commit": "88e38f053b8cfbdefb3ce03bafeca16d71e98461"
+    "commit": "064ff5a5b4073f6a985f42856da586032cbd329f"
   },
-  "cast_at": "2026-10-26T16:24:31.440Z",
+  "cast_at": "2026-10-26T16:31:18.228Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -38,8 +38,8 @@
       "purpose": "Validate the gxformat2 workflow before extraction and record diagnostics under documents.validation.",
       "trigger": "Before extracting structure from the workflow document.",
       "verification": "Cast the skill, run on one valid and one malformed workflow; the malformed one surfaces gxwf validate diagnostics in the summary.",
-      "src_hash": "8ddaf8cabaf79180d2d070381281c1a10fbe0ff0d6ce76638869fe84800e8c2d",
-      "dst_hash": "cdd3c19cc4f7097c0d2ca96438f6f24a406e9d1a4b1310a0924bd2a02f67560c",
+      "src_hash": "f0fd59d4360570248796e9d7dedc9be502e8c69dd061e9f32f238197f5a6f047",
+      "dst_hash": "0fb6c573ca650bad2b3be1dfe8a6c5be32dc26f2b1750403f0ff0b76252b4e83",
       "source": "deterministic"
     },
     {

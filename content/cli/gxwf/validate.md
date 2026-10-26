@@ -30,7 +30,7 @@ Find the step and output that produce a workflow output. In gxformat2, split `ou
 - With every connection on the path to the step `ok`, a non-null value is the resolved collection type, including map-over: a dataset output of a step mapped over a `list` resolves to `list`.
 - Null means dataset only when the tool declares a dataset output (not a collection) and the path is clean. A collection output whose type could not be resolved also reports null, with `ok` connections, so a null on a declared collection output is unknown.
 - A `skip` connection contributes no map-over rank, and its effect propagates downstream behind `ok` connections. Any value, null or not, at or downstream of a `skip` is unknown: a non-null type there can be missing a rank.
-- Subworkflow steps report resolved outputs, but the subworkflow's inner steps and their skips are not in `step_results`. A null from a subworkflow output is unknown unless you trace the inner chain by hand.
+- Subworkflow steps report resolved outputs, but the subworkflow's inner steps and their skips are not in `step_results`. A null from a subworkflow output is unknown; a non-null one still means a collection, but its depth is unconfirmed until you trace the inner chain by hand.
 
 ## Examples
 
