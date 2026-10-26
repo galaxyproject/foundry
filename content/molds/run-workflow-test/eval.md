@@ -30,9 +30,10 @@ scenario produces.
   hands off a structured summary that identifies the observed failure modality
   and the next reference surface to inspect: Planemo result, Galaxy job API,
   Galaxy invocation API, history contents, test assertion report, workflow
-  import response, or Galaxy server log. A rejected workflow import is a
-  `fail` with modality `workflow-import-rejected`, never a `not-run` and never
-  an assertion or invocation failure.
+  import response, or Galaxy server log. A workflow import Galaxy rejected for
+  the workflow's content or through a server defect is a `fail` with modality
+  `workflow-import-rejected`, never a `not-run` and never an assertion or
+  invocation failure.
 
 ## Property: honest non-execution
 
