@@ -5,10 +5,10 @@
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 12,
-    "content_hash": "19a696a9f3eca0894a57f1938dff6bdb6e00c9ffba0e2c31ffb79a88b0b05cd2",
-    "commit": "f48c01b6cae92f90980c5fe3d42597bfcbab07e0"
+    "content_hash": "5cbeecfbba20f430315cd0696be74fea30d3bf111962f61496593844c315dffd",
+    "commit": "cc3df02b4e119417d2845a5269f7a4207bc36f70"
   },
-  "cast_at": "2026-10-26T16:05:25.491Z",
+  "cast_at": "2026-10-26T16:15:51.512Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -45,8 +45,8 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve each asserted output's collection type from the `--connections` report's `resolved_outputs`, so output assertions take dataset or collection form from the workflow, not the plan.",
       "trigger": "Before authoring output assertions, and again after any workflow edit that touches an asserted output's producing step.",
-      "src_hash": "1bf4b4c50e9987f63e65ad36f6deefe6e399fe009280d4bee8533d6c451acf1e",
-      "dst_hash": "ff10c49819b0f7af13f247ea03e4dd24ba2e5144da3beaa6b1ab96698c7e03b7",
+      "src_hash": "ac89ce20b76a2e8e00ef87d13baf9501bef6f26ef4be3fb612807b04089f02d8",
+      "dst_hash": "ab191135626e7925a2951be64381bd0294fcc83e20062d836b19d61932a5a9ef",
       "source": "deterministic"
     },
     {

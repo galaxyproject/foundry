@@ -5,7 +5,7 @@ Evaluation plan for the `implement-galaxy-workflow-test` Mold. This file is the
 independent of which workflow fixture it was authored against. Concrete fixtures
 and their expected values live in `scenarios.md`; the oracle here is applied to
 whatever a scenario produces. Most properties are deterministic gates; datatype
-agreement and plan-defect reporting are judged until a static gate covers them.
+agreement and handoff reporting are judged.
 
 ## Property: tests-format schema gate
 
@@ -25,15 +25,12 @@ agreement and plan-defect reporting are judged until a static gate covers them.
 ## Property: output and input kind match the workflow
 
 - check: deterministic
-- assertion: every asserted output whose producing step resolved cleanly in
-  `gxwf validate --connections --json` takes collection form (`class:
-  Collection` and the same `collection_type`) exactly when that step's
-  `resolved_outputs` entry has a non-null `collection_type`, and dataset form
-  when it is null. Every job input bound to a `data_collection` workflow input
-  is `class: Collection` with the declared `collection_type`, and every input
-  bound to a `data` input is not. An output whose kind could not be resolved
-  (a `skip` or non-`ok` connection upstream) is named in the handoff as
-  hand-checked, not silently asserted in dataset form.
+- assertion: every asserted output whose producing step's `resolved_outputs`
+  entry in `gxwf validate --connections --json` has a non-null
+  `collection_type` takes collection form (`class: Collection` and that
+  `collection_type`). Every job input bound to a `data_collection` workflow
+  input is `class: Collection` with the declared `collection_type`, and every
+  input bound to a `data` input is not.
 
 ## Property: datatypes agree with the workflow
 
@@ -42,14 +39,16 @@ agreement and plan-defect reporting are judged until a static gate covers them.
   its `format_source` input's datatype), and each job input `filetype` is the
   workflow input's declared `format` or a subtype of it.
 
-## Property: plan/workflow disagreement surfaces
+## Property: unresolved kinds and plan disagreements surface
 
 - check: llm-judged
-- assertion: when the test plan's `output_kind` or `collection_shape` for an
-  output disagrees with the workflow's resolved kind, the handoff reports it as
-  a test-plan defect naming the output, the plan value, and the resolved value.
-  The disagreement must not vanish into an assertion that silently follows
-  either side.
+- assertion: an output whose kind `--connections` cannot settle (null on a
+  declared collection output, downstream of a `skip`, or from inside a
+  subworkflow) is named in the handoff as hand-checked, not silently asserted
+  in dataset form. When the test plan's `output_kind` or `collection_shape`
+  disagrees with the workflow's resolved kind, the handoff reports it as a
+  test-plan defect naming the output, the plan value, and the resolved value;
+  it must not vanish into an assertion that silently follows either side.
 
 ## Property: static CLI validation
 

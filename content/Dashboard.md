@@ -156,6 +156,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[validate]] | Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution. | draft | 2026-10-26 | 4 |
 | [[validate-tests]] | Validate Galaxy workflow test files and optionally cross-check labels against their workflow. | draft | 2026-10-26 | 4 |
 | [[validate-galaxy-tool-discovery]] | AJV gate for discover-shed-tool recommendation documents. | draft | 2026-10-23 | 3 |
 | [[validate-galaxy-tool-summary]] | AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree. | draft | 2026-10-23 | 3 |
@@ -185,7 +186,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[tool-revisions]] | Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin. | draft | 2026-05-06 | 2 |
 | [[tool-search]] | Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence. | draft | 2026-05-06 | 2 |
 | [[tool-versions]] | List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence. | draft | 2026-05-06 | 2 |
-| [[validate]] | Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution. | draft | 2026-05-06 | 3 |
 
 ## Schemas
 

@@ -8,8 +8,8 @@ tags:
   - cli/gxwf
 status: draft
 created: 2026-05-02
-revised: 2026-05-06
-revision: 3
+revised: 2026-10-26
+revision: 4
 summary: "Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution."
 ---
 
@@ -20,6 +20,17 @@ Validate a Galaxy workflow source file before attempting runtime execution. Use 
 ## Output
 
 Default output is human-readable diagnostics. JSON output should be treated as the preferred cast-skill interface; free-text diagnostics are a fallback for humans.
+
+With `--connections`, `connection_report.step_results[]` has one entry per top-level step (`label`, or `step` id when unlabelled). Each entry carries its `connections[]` (`status` `ok`, `skip` or invalid) and `resolved_outputs[]` (`name`, `collection_type`).
+
+## Resolving an output's kind
+
+Find the step and output that produce a workflow output. In gxformat2, split `outputSource` into `<step_label>/<output_name>`; with no `/` the source is a workflow input, whose single output is `output`. In a native `.ga`, take the step and `output_name` carrying that `workflow_outputs[].label`. Read that step's `resolved_outputs[name].collection_type`.
+
+- A non-null value is the resolved collection type, including map-over: a dataset output of a step mapped over a `list` resolves to `list`.
+- Null means dataset only when the tool declares a dataset output (not a collection) and every connection on the path to the step is `ok`. A collection output whose type could not be resolved also reports null, with `ok` connections, so a null on a declared collection output is unknown.
+- A `skip` connection propagates as null downstream, with `ok` connections after it. Treat any null downstream of a `skip` as unknown.
+- Subworkflow steps report resolved outputs, but the subworkflow's inner steps and their skips are not in `step_results`. A null from a subworkflow output is unknown unless you trace the inner chain by hand.
 
 ## Examples
 

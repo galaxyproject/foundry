@@ -13,7 +13,7 @@
 ## Case: mapped-over output the plan calls a dataset
 
 - fixture: `ncbi/egapx` through `nextflow-to-galaxy`. Output `star_bam` has `outputSource: rnaseq_short/star_bam`. Inside the subworkflow, `star_wnode.reads` (`paired_or_unpaired`) is fed `short_reads` (`list:paired_or_unpaired`), so the step maps over the list. The test plan says `output_kind: dataset`, `collection_shape: null`.
-- expect: `gxwf validate --connections` resolves `rnaseq_short`'s `star_bam` to `collection_type: list`. The test asserts `star_bam` as `class: Collection`, `collection_type: list`, not a bare `ftype: bam`. The handoff reports the plan's `output_kind: dataset` as a test-plan defect. `checkTestsAgainstWorkflow` passes both forms, so it cannot settle this case.
+- expect: `gxwf validate --connections` (`@galaxy-tool-util/cli` 1.14.0) resolves `rnaseq_short`'s `star_bam` to `collection_type: list`. The test asserts `star_bam` as `class: Collection`, `collection_type: list`, not a bare `ftype: bam`. The handoff reports the plan's `output_kind: dataset` as a test-plan defect. `checkTestsAgainstWorkflow` passes both forms, so it cannot settle this case.
 
 ## Case: static CLI validation
 
