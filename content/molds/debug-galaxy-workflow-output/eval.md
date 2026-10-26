@@ -18,13 +18,14 @@ whatever a scenario produces.
 
 - check: llm-judged
 - assertion: when Galaxy rejected the workflow import, the report records the
-  import request's HTTP status and response body, the server-log traceback, and the
-  Planemo terminal log, and does not claim job, invocation, or assertion
-  evidence that cannot exist before an invocation. Any bisection uses
-  self-contained synthetic workflows against a passing control, not truncations
-  of the real workflow. A defect reproduced by a statically valid minimal workflow is
-  recorded as an upstream repro, never dodged by reshaping the workflow. A
-  content rejection is routed back to the phase that emitted the construct.
+  import request's HTTP status and response body, the Planemo terminal log, and
+  the server-log traceback when the server logged one (always for a 500), and
+  does not claim job, invocation, or assertion evidence that cannot exist before
+  an invocation. Any bisection uses self-contained synthetic workflows against a
+  passing control, not truncations of the real workflow. A defect reproduced by
+  a statically valid minimal workflow is recorded as an upstream repro, never
+  dodged by reshaping the workflow. A content rejection is routed back to the
+  phase that emitted the construct.
 
 ## Property: captures job-failure evidence
 
