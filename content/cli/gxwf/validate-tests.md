@@ -8,8 +8,8 @@ tags:
   - cli/gxwf
 status: draft
 created: 2026-05-03
-revised: 2026-05-06
-revision: 3
+revised: 2026-10-26
+revision: 4
 summary: "Validate Galaxy workflow test files and optionally cross-check labels against their workflow."
 related_notes:
   - "[[tests-format]]"
@@ -40,5 +40,6 @@ gxwf validate-tests workflow-tests.yml --workflow workflow.gxwf.yml --json
 
 - This is the cheap static gate before Planemo. It does not execute the workflow and does not prove assertions pass on real outputs.
 - Use `--workflow` whenever the workflow file is available. Schema-valid tests can still reference stale input/output labels after workflow edits.
+- The `--workflow` cross-check covers labels, required inputs, and job-value JSON types only. It does not compare collection shape or datatype: a dataset assertion on a collection output, or `ftype: bam` on a fasta output, still reports valid. Resolve output kinds with [[gxwf validate]] `--connections`.
 - Run this before `planemo workflow_test_on_invocation` or full `planemo test`; it catches authoring mistakes without starting Galaxy.
 - The assertion vocabulary itself comes from [[tests-format]]; strategy for choosing assertions lives in [[planemo-asserts-idioms]].
