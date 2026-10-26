@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "a9a4393c49eec26be0c7c67925e04960a04ea07d5d7ee6ecd415c2491bcac467",
-    "commit": "f0515353aec7d57e89f60cac678c80907cf91e4c"
+    "commit": "9678dfba7293f01d34bb755adbb6dbfa7913dea0"
   },
-  "cast_at": "2026-10-27T20:17:18.950Z",
+  "cast_at": "2026-10-28T17:07:15.673Z",
   "refs": [
     {
       "kind": "cli-command",
