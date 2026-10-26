@@ -46,7 +46,8 @@ checked against a real artifact rather than a description of one.
 
 ## Coverage gaps
 
-No committed fixture exercises `status: "not-run"`, or a run against an existing
+No committed fixture exercises `status: "not-run"` (including a data-table
+deferral), a workflow that embeds a `GalaxyUserTool`, or a run against an existing
 rather than a Planemo-managed Galaxy (`galaxy_mode: "existing"`) — every fixture
 that ran records `galaxy_mode: "managed"`, and `missing-test` records none at all
 because nothing ran. No case asserts either until a fixture binds them.

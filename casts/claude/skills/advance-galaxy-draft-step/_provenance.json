@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 10,
     "content_hash": "cd510f127a0f2a88980737c5e3bf04b860c6591ae70500c1cae078104c9e8eef",
-    "commit": "f0515353aec7d57e89f60cac678c80907cf91e4c"
+    "commit": "73e2413185fbb76ce7fb323b791625711b1cd8c0"
   },
-  "cast_at": "2026-10-27T20:17:16.100Z",
+  "cast_at": "2026-10-28T17:05:31.355Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -133,8 +133,8 @@
       "purpose": "Pass an authored `GalaxyUserTool` straight to implementation.",
       "trigger": "When step 2 falls through to [[author-galaxy-tool-wrapper]], or when the draft already contains a step whose `run:` is a `GalaxyUserTool`.",
       "verification": "Promote after a loop run reaches `draft: false` with an authored tool embedded, and the extracted workflow imports into Galaxy with the tool resolved.",
-      "src_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
-      "dst_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
+      "src_hash": "ff8cc62ebd679f8eb51c06c214a80dc66bdd6189e436b7844c78dbacdce33ef8",
+      "dst_hash": "ff8cc62ebd679f8eb51c06c214a80dc66bdd6189e436b7844c78dbacdce33ef8",
       "source": "deterministic"
     },
     {

@@ -6,13 +6,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-11
-revision: 3
+revised: 2026-10-26
+revision: 4
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[galaxy-tool-job-failure-reference]]"
   - "[[galaxy-workflow-invocation-failure-reference]]"
   - "[[planemo-asserts-idioms]]"
+  - "[[galaxy-user-tool-workflow-binding]]"
+  - "[[iwc-test-data-conventions]]"
 related_molds:
   - "[[run-workflow-test]]"
   - "[[debug-galaxy-workflow-output]]"
@@ -23,7 +25,10 @@ sources:
   - "~/projects/repositories/planemo/planemo/galaxy/activity.py"
   - "~/projects/repositories/planemo/planemo/galaxy/invocations"
   - "~/projects/repositories/planemo/planemo/galaxy/config.py"
-summary: "Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries."
+  - "~/projects/repositories/planemo/planemo/galaxy/workflows.py"
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy/webapps/galaxy/api/tool_data.py"
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy/managers/tool_data.py"
+summary: "Reference for Planemo workflow test/run architecture, Galaxy modes, user-defined-tool and data-table runs, API polling, and noisy failure boundaries."
 ---
 
 # Planemo Workflow-Test Architecture
@@ -49,7 +54,7 @@ Planemo chooses between engines early:
 
 - CWL runnables can use CWL-specific engines.
 - Supplying `--galaxy_url` implies an external running Galaxy unless an engine is explicitly selected.
-- Default Galaxy workflow testing uses a managed local Galaxy engine.
+- Default Galaxy workflow testing uses a managed local Galaxy engine, except for workflows that embed user-defined tools (see [Workflows that embed user-defined tools](#workflows-that-embed-user-defined-tools)).
 - `--engine docker_galaxy` uses a managed Dockerized Galaxy.
 - `--engine external_galaxy` uses an existing running Galaxy.
 
@@ -77,6 +82,48 @@ Important managed-mode behavior:
 For external Galaxy, Planemo uses supplied Galaxy URL and API keys. A user key runs workflows; an admin key may be needed for installing missing repositories or creating a user key.
 
 External Galaxy mode is useful when the target environment matters, but failure surfaces can include server configuration, installed tools, permissions, and existing history state. Eval logs should preserve URL/key mode without storing secrets.
+
+## Workflows That Embed User-Defined Tools
+
+A workflow with a `GalaxyUserTool` under any step's `run:` cannot be tested on a Planemo-managed Galaxy. Planemo collects every tool step's `tool_id` while it builds the managed Galaxy's configuration, and an embedded step has none, so `planemo test` and `planemo serve <workflow>` fail with `KeyError: 'tool_id'` before Galaxy starts ([galaxyproject/planemo#1757](https://github.com/galaxyproject/planemo/issues/1757)). With a `tool_id` added by hand, the import then fails with HTTP 403 "User is not allowed to run unprivileged tools", because the managed test user has no role that allows running user-defined tools.
+
+Run these workflows against a Galaxy that Planemo serves, as an external Galaxy. [[galaxy-user-tool-workflow-binding]] defines the server setting and user role this provisions.
+
+1. Serve an empty directory with beta tool formats enabled. Serving the workflow itself hits the same `KeyError`. `--docker` lets the embedded tools' `container:` images run.
+
+   ```sh
+   mkdir -p empty
+   GALAXY_CONFIG_OVERRIDE_ENABLE_BETA_TOOL_FORMATS=true \
+     planemo serve --docker --port 9123 empty
+   ```
+
+2. With the served Galaxy's admin key (`test_key` by default), create a user (`POST /api/users`), then a role holding that user with `role_type: user_tool_execute` (`POST /api/roles` with `user_ids`), then the user's API key (`POST /api/users/{id}/api_key`). Galaxy checks the role, not admin status, so the admin user needs the role as much as any other user. Do not store the user key in run artifacts.
+3. Preinstall Tool Shed repositories that appear only inside subworkflows. The pinned [[planemo]] release installs repositories from top-level format2 steps only. Planemo `master` walks embedded subworkflows ([galaxyproject/planemo#1742](https://github.com/galaxyproject/planemo/pull/1742)), so this step is unnecessary once a release includes that change. Until then, list every repository at any depth in an ephemeris tool list and install it with `shed-tools install -g http://localhost:9123 -a test_key -t tools.yml`.
+4. Run the test against the served Galaxy:
+
+   ```sh
+   planemo test --engine external_galaxy \
+     --galaxy_url http://localhost:9123 \
+     --galaxy_admin_key test_key --galaxy_user_key "$USER_KEY" \
+     --test_output_json tool_test_output.json \
+     workflow.gxwf.yml
+   ```
+
+This route passed a small workflow with embedded tools 1/1, using planemo 0.75.47 serving Galaxy `master`. Record the mode as external Galaxy, the reason (embedded tools), how repositories were installed, and the Galaxy URL. Stop the served Galaxy after the run.
+
+## Data-Table Inputs
+
+A tool select backed by a Galaxy data table (`<options from_data_table="...">`) accepts only values that the target Galaxy's table contains. Admins populate tables with data managers or `.loc` files. A fresh Galaxy that installs the tool from the Tool Shed registers the table from the repository's `.loc.sample` file, which usually holds no rows. The Foundry discourages data tables in translated workflows ([[nextflow-to-galaxy-reference-data-mapping]]), so a workflow test that needs one is usually a design gap to report, not a server to fix.
+
+Detect the dependency before running:
+
+1. **Find the table.** The parsed tool model hides it: a data-table select has `options: null`. Read the tool source instead. The Tool Shed serves it with macros expanded at `GET /api/tools/<owner>~<repo>~<tool_id>/versions/<version>/tool_source`, with `+` in the version URL-encoded as `%2B`. The full Tool Shed GUID does not work as the id there. Collect every `from_data_table` attribute. One tool can read several tables, and a later table can filter on an earlier select's value.
+2. **Keep the selects the step actually sets.** A select on a conditional branch the step's state does not take is not a dependency.
+3. **Query the table.** On an external Galaxy, after the workflow's tools are installed, call `GET /api/tool_data/<table>`. Any user key works because the endpoint is public. A missing table returns 404 and means the tool is not installed. An empty table returns `fields: []`. Otherwise check that some row carries the value the step selects.
+
+A Planemo-managed Galaxy exists only while `planemo test` runs, so its tables cannot be queried before the invocation. Treat a data-table select as unmet there unless the caller supplied data-table configuration that contains the value, for example through Planemo's `--tool_data_table` and `--tool_data_path` options.
+
+When the table or the row is missing, the test cannot pass. [[run-workflow-test]] records `not-run` and names the table, the value, and the step. Provisioning the table is optional and is the caller's decision. [[iwc-test-data-conventions]] covers how the test file writes a data-table value.
 
 ## API Interaction
 

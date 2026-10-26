@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-template/index.md",
     "revision": 8,
     "content_hash": "ff684b1c73690303127c8465ccdcdf9ffbfe1c95d72a6ed224ca33f153c5ea1d",
-    "commit": "f0515353aec7d57e89f60cac678c80907cf91e4c"
+    "commit": "73e2413185fbb76ce7fb323b791625711b1cd8c0"
   },
-  "cast_at": "2026-10-27T20:17:24.144Z",
+  "cast_at": "2026-10-28T17:05:35.034Z",
   "refs": [
     {
       "kind": "cli-command",

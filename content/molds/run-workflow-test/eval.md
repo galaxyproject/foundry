@@ -18,6 +18,9 @@ scenario produces.
 - assertion: the output records which Galaxy mode was used (existing/external
   Galaxy or Planemo-managed Galaxy), how tools/workflows/test data were staged,
   and which API credentials or URLs are needed for follow-up failure inspection.
+  A workflow with a `GalaxyUserTool` under any step's `run:` is run against an
+  external Galaxy, never attempted on the managed path, and the output says the
+  embedded tools are why.
 
 ## Property: failure modality handoff
 
@@ -31,4 +34,4 @@ scenario produces.
 ## Property: honest non-execution
 
 - check: deterministic
-- assertion: when no test definition exists, or a test exists but cannot be executed, the run still emits the structured result with `status: test-definition-missing` or `status: not-run` and its reason. It claims no pass, and it attributes no failure modality or next reference surface to a run that did not happen. Aborting without a handoff fails this property, and so does presenting an unrun test as a green one.
+- assertion: when no test definition exists, or a test exists but cannot be executed, the run still emits the structured result with `status: test-definition-missing` or `status: not-run` and its reason. It claims no pass, and it attributes no failure modality or next reference surface to a run that did not happen. Aborting without a handoff fails this property, and so does presenting an unrun test as a green one. A run deferred because a step needs a data-table value the target Galaxy lacks names the table, the value, and the step in its reason.
