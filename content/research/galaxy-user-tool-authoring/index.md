@@ -77,12 +77,12 @@ Expressions are JavaScript, spliced into the command verbatim.
 
 **What `inputs.x` is for a `data_collection` input.** An object with `class: Collection`, `name` (the collection's name), `collection_type`, `tags` and `elements`. Each leaf is a file object as above, plus a non-null `element_identifier`. The shape of `elements` depends on the collection type:
 
-- **`list`, `sample_sheet`, `list:*` and `sample_sheet:*`** — `elements` is an **array**, in collection order. Iterate it: ``$(inputs.x.elements.map((e) => `'${e.path}'`).join(" "))``, or read `e.element_identifier` for the sample name.
+- **`list`, `sample_sheet`** — `elements` is an **array** of file objects, in collection order. Iterate it: ``$(inputs.x.elements.map((e) => `'${e.path}'`).join(" "))``, or read `e.element_identifier` for the sample name.
 - **`paired`, `record`** — `elements` is an **object keyed by identifier**: `$(inputs.x.elements.forward.path)`, `$(inputs.x.elements.reverse.path)`.
 - **`paired_or_unpaired`** — keyed like `paired`, plus a boolean `has_single_item`. A single dataset sits under `unpaired`. A pair sits under `forward` and `reverse`:
 
   ``$(inputs.x.has_single_item ? `'${inputs.x.elements.unpaired.path}'` : `'${inputs.x.elements.forward.path}' '${inputs.x.elements.reverse.path}'`)``
-- **Nested types** (`list:paired`) — each inner collection has the same shape, with its identifier in `name`, not `element_identifier`.
+- **Nested types** — `list:*` and `sample_sheet:*` give an array of inner collections, other outer types an object of them. Each inner collection has the shape above, with its identifier in `name`, not `element_identifier`, so `e.path` on one is `undefined`. For `list:paired`: ``$(inputs.x.elements.map((e) => `'${e.elements.forward.path}'`).join(" "))``.
 - **Mapped over a nested collection** — a `paired` input mapped over a `list:paired` gets one inner pair per job, and `inputs.x.name` is that pair's outer identifier. This is how a per-sample tool gets its sample name today.
 
 **Write `inputs.x.elements.forward`, not `inputs.x.forward`.** Validation does not catch the difference: it checks that `inputs.x` is declared, not the fields after it. Galaxy's own test tool `collection_paired_test_y.yml` uses the `elements` form. A deprecated builder, used for `/api/tools` submissions and for workflow steps whose request state Galaxy fails to capture, returns a bare array for `list` and a bare identifier-keyed object for every other type, with none of the collection fields. A run that passes there proves nothing about the form above. No Galaxy test yet reads leaf `element_identifier`, `has_single_item` or a mapped pair's `name` from a user-defined tool.
