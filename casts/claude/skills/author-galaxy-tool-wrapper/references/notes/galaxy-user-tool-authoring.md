@@ -73,18 +73,19 @@ Expressions are JavaScript, spliced into the command verbatim.
 
 - **`element_identifier` is `null` on a mapped-over `data` input.** The field exists, but map-over hands each job a plain dataset, so `$(inputs.x.element_identifier)` renders `null`. On a plain dataset it is `null` too. This was API-tested against Galaxy dev at `51e0a80a`, through both `/api/tools` and `/api/jobs`. Fixes are open, not merged: galaxyproject/galaxy#24434 and galaxyproject/galaxy#24422.
 - **`basename` and `nameroot` are not the element identifier either.** They come from the dataset's original upload filename or, failing that, its history name. They happen to match the identifier only when the element was created with the same name.
-- **Consequence: a tool mapped over a collection cannot name its own element.** A per-sample label that the tool writes into a file has to come from a `text` parameter. Mapped over a collection, every element gets the same value, so a downstream aggregator such as MultiQC can collapse the rows into one. To get identifiers today, take the whole collection as a `data_collection` input (below). Otherwise say so in `help` rather than guessing an accessor; a wrong one validates clean and fails at runtime.
+- **Consequence: a tool mapped over a collection cannot name its own element.** A per-sample label that the tool writes into a file has to come from a `text` parameter. Mapped over a collection, every element gets the same value, so a downstream aggregator such as MultiQC can collapse the rows into one. To get identifiers today, take the whole collection as a `data_collection` input (below). Otherwise say so in `help` rather than guessing an accessor. A wrong one validates clean and fails at runtime.
 
 **What `inputs.x` is for a `data_collection` input.** An object with `class: Collection`, `name` (the collection's name), `collection_type`, `tags` and `elements`. Each leaf is a file object as above, plus a non-null `element_identifier`. The shape of `elements` depends on the collection type:
 
-- **`list`, `sample_sheet`, and `list:*`** — `elements` is an **array**, in collection order. Iterate it: ``$(inputs.x.elements.map((e) => `'${e.path}'`).join(" "))``, or read `e.element_identifier` for the sample name.
+- **`list`, `sample_sheet`, `list:*` and `sample_sheet:*`** — `elements` is an **array**, in collection order. Iterate it: ``$(inputs.x.elements.map((e) => `'${e.path}'`).join(" "))``, or read `e.element_identifier` for the sample name.
 - **`paired`, `record`** — `elements` is an **object keyed by identifier**: `$(inputs.x.elements.forward.path)`, `$(inputs.x.elements.reverse.path)`.
-- **`paired_or_unpaired`** — keyed like `paired`, plus a boolean `has_single_item`. A single dataset sits under `unpaired`; a pair sits under `forward` and `reverse`:
+- **`paired_or_unpaired`** — keyed like `paired`, plus a boolean `has_single_item`. A single dataset sits under `unpaired`. A pair sits under `forward` and `reverse`:
 
   ``$(inputs.x.has_single_item ? `'${inputs.x.elements.unpaired.path}'` : `'${inputs.x.elements.forward.path}' '${inputs.x.elements.reverse.path}'`)``
 - **Nested types** (`list:paired`) — each inner collection has the same shape, with its identifier in `name`, not `element_identifier`.
+- **Mapped over a nested collection** — a `paired` input mapped over a `list:paired` gets one inner pair per job, and `inputs.x.name` is that pair's outer identifier. This is how a per-sample tool gets its sample name today.
 
-**`inputs.x.forward` is the wrong path; `inputs.x.elements.forward` is right.** Validation does not catch the difference: it checks that `inputs.x` is declared, not the fields after it. Galaxy's own test tool `collection_paired_test_y.yml` uses the `elements` form. A deprecated builder, used for `/api/tools` submissions and for workflow steps whose state fails request validation, drops the `elements` wrapper and `has_single_item`. A run that passes there proves nothing about the form above. These collection shapes come from reading `lib/galaxy/tools/runtime.py` and `lib/galaxy/workflow/modules.py` (`to_cwl`) on Galaxy dev at `87d295c9`. No Galaxy test reads leaf `element_identifier` or `has_single_item` from a user-defined tool yet.
+**Write `inputs.x.elements.forward`, not `inputs.x.forward`.** Validation does not catch the difference: it checks that `inputs.x` is declared, not the fields after it. Galaxy's own test tool `collection_paired_test_y.yml` uses the `elements` form. A deprecated builder, used for `/api/tools` submissions and for workflow steps whose request state Galaxy fails to capture, returns a bare array for `list` and a bare identifier-keyed object for every other type, with none of the collection fields. A run that passes there proves nothing about the form above. No Galaxy test yet reads leaf `element_identifier`, `has_single_item` or a mapped pair's `name` from a user-defined tool.
 
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
 
@@ -94,7 +95,7 @@ Each input needs a `type`: `data`, `data_collection`, `text`, `integer`, `float`
 
 - **`data`** — `format` is a **list** of allowed types, always, even for one: `[fastq]`, `[fasta, fasta.gz]`.
 - **`data_collection`** — `collection_type` restricts which collections can be picked (`list`, `paired`, `paired_or_unpaired`, `list:paired`, …). Omit it to accept any. `format` is a list, as for `data`, and applies to every element. §3 gives the runtime shape.
-- **`value`** sets the default for `text`, `integer`, `float`, `boolean` **only**.
+- **`value`** sets the default for `text`, `integer`, `float`, `boolean`, `color` **only**.
 - A **`select`** takes no `value` — mark its default with `selected: true` on one of its `options`.
 - A **`data`** input takes no `value` either.
 - **The field is `value`, never `default`.** `default` is rejected as an unknown field, as is any other unrecognized key.
@@ -103,7 +104,7 @@ Each input needs a `type`: `data`, `data_collection`, `text`, `integer`, `float`
 
 - **`data`** — a single file, captured with `from_work_dir`.
 - **`collection`** — requires `discover_datasets`. A collection with only `from_work_dir` is rejected: nothing would claim its elements from the working directory.
-- **Collection fields sit on the output itself.** `collection_type` and `discover_datasets` are siblings of `name` and `type`, as below. Galaxy before 26.1 nested them under `structure:`; 26.1 lifts that legacy form, but don't write it.
+- **Collection fields sit on the output itself.** `collection_type` and `discover_datasets` are siblings of `name` and `type`, as below. Galaxy before 26.1 nested them under `structure:`. 26.1 lifts that legacy form, but don't write it.
 - **A `discover_datasets` entry needs only `pattern`.** `directory`, `format`, `visible`, `recurse`, `sort_key` and the rest are optional. A misspelled key is rejected, not ignored.
 - **`format` on an output is a single string**, unlike a data input's `format`, which is a list. The asymmetry is real and easy to get backwards.
 
@@ -130,7 +131,7 @@ outputs:
 
 *Target-neutral.*
 
-There are exactly two ways to run a script. Pick one and complete it. Whether you write the script or vendor one the source ships, the same choice applies; vendoring adds the obligations below.
+There are exactly two ways to run a script. Pick one and complete it. Whether you write the script or vendor one the source ships, the same choice applies. Vendoring adds the obligations below.
 
 **Short script (a few lines): inline it.** `python -c` / `Rscript -e`, referencing inputs directly. Self-contained; nothing else to declare.
 
@@ -154,7 +155,7 @@ shell_command: python script.py
 
 A workflow engine can run a script that is not in the container: the source bundles it and puts it on `PATH` (a Nextflow pipeline's `bin/`, for example). A user-defined tool has no way to stage a file onto `PATH`, so the script has to travel inside the tool, as a `configfiles` entry run by name.
 
-- **Copy it verbatim**, then audit the copy. Every `$(` and `${` in it is evaluated as an expression, not passed to the interpreter. Rewrite each one, or escape it as `\$(` / `\${`. Unbraced `$NAME` passes through untouched. Search for the two delimiters rather than assuming a script has none; R and Python scripts often don't, shell scripts often do.
+- **Copy it verbatim**, then audit the copy. Every `$(` and `${` in it is evaluated as an expression, not passed to the interpreter. Rewrite each one, or escape it as `\$(` / `\${`. Unbraced `$NAME` passes through untouched. Search for the two delimiters rather than assuming a script has none. R and Python scripts often have neither, and shell scripts often have both.
 - **Keep its attribution and license header.** The tool's top-level `license` covers the wrapper, not the embedded code.
 - **Name the source and version** in `description` or `help`, so a re-vendor is a diff against a known upstream.
 
@@ -170,7 +171,7 @@ Vendor the rendered form. Before embedding:
 2. Resolve each one, then check the count matches:
    - A staged `path` input becomes a `data` input, written as `$(inputs.x.path)`.
    - `$task.cpus` becomes `$GALAXY_SLOTS` (§8), read from the environment, unbraced. `${GALAXY_SLOTS}` would be evaluated as an expression.
-   - A `$meta.*` field becomes a tool parameter. `$meta.id`, the sample name, has no parameter equivalent; see §3 for what the input object offers.
+   - A `$meta.*` field becomes a tool parameter. `$meta.id`, the sample name, has no parameter equivalent. §3 says what the input object offers.
    - `$task.ext.args` is resolved against the pipeline's `conf/modules*.config` (and the module's test config). Promote each key it actually sets to a real parameter rather than carrying a free-text args string.
    - Anything else becomes a literal or a documented drop.
 3. Record the resolutions in `help`, so the next re-vendor can diff against them.
