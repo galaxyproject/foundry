@@ -19,8 +19,8 @@ scenario produces.
   Galaxy or Planemo-managed Galaxy), how tools/workflows/test data were staged,
   and which API credentials or URLs are needed for follow-up failure inspection.
   A workflow with a `GalaxyUserTool` under any step's `run:` is run against an
-  external Galaxy, never attempted on the managed path, and the output says the
-  embedded tools are why.
+  external Galaxy or recorded `not-run`, never attempted on the managed path, and
+  the output says the embedded tools are why.
 
 ## Property: failure modality handoff
 

@@ -89,7 +89,7 @@ A workflow with a `GalaxyUserTool` under any step's `run:` cannot be tested on a
 
 Run these workflows against a Galaxy that Planemo serves, as an external Galaxy. [[galaxy-user-tool-workflow-binding]] defines the server setting and user role this provisions.
 
-1. Serve an empty directory with beta tool formats enabled. Serving the workflow itself hits the same `KeyError`. `--docker` lets the embedded tools' `container:` images run.
+1. Serve an empty directory. Serving the workflow itself hits the same `KeyError`. Planemo enables beta tool formats in every Galaxy it configures, and the override variable below makes that explicit. `--docker` lets the embedded tools' `container:` images run.
 
    ```sh
    mkdir -p empty
@@ -97,8 +97,15 @@ Run these workflows against a Galaxy that Planemo serves, as an external Galaxy.
      planemo serve --docker --port 9123 empty
    ```
 
-2. With the served Galaxy's admin key (`test_key` by default), create a user (`POST /api/users`), then a role holding that user with `role_type: user_tool_execute` (`POST /api/roles` with `user_ids`), then the user's API key (`POST /api/users/{id}/api_key`). Galaxy checks the role, not admin status, so the admin user needs the role as much as any other user. Do not store the user key in run artifacts.
-3. Preinstall Tool Shed repositories that appear only inside subworkflows. The pinned [[planemo]] release installs repositories from top-level format2 steps only. Planemo `master` walks embedded subworkflows ([galaxyproject/planemo#1742](https://github.com/galaxyproject/planemo/pull/1742)), so this step is unnecessary once a release includes that change. Until then, list every repository at any depth in an ephemeris tool list and install it with `shed-tools install -g http://localhost:9123 -a test_key -t tools.yml`.
+2. With the served Galaxy's admin key (`test_key` by default), provision a user that can run embedded tools. Galaxy checks the role, not admin status, so the admin user needs the role as much as any other user. Do not store the user key in run artifacts.
+
+   | Request | Body |
+   | --- | --- |
+   | `POST /api/users` | `{"username": "...", "email": "...", "password": "..."}` |
+   | `POST /api/roles` | `{"name": "udt_exec", "description": "run user-defined tools", "user_ids": ["<user id>"], "role_type": "user_tool_execute"}` |
+   | `POST /api/users/<user id>/api_key` | none. The response is the user key. |
+
+3. Preinstall every Tool Shed repository the workflow references, at any subworkflow depth, by listing them in an ephemeris tool list and running `shed-tools install -g http://localhost:9123 -a test_key -t tools.yml`. The [data-table check](#data-table-inputs) needs the tools installed before the run. The pinned [[planemo]] release would also miss the nested ones, because it installs repositories from top-level format2 steps only. Planemo `master` walks embedded subworkflows ([galaxyproject/planemo#1742](https://github.com/galaxyproject/planemo/pull/1742)).
 4. Run the test against the served Galaxy:
 
    ```sh
@@ -118,10 +125,10 @@ A tool select backed by a Galaxy data table (`<options from_data_table="...">`) 
 Detect the dependency before running:
 
 1. **Find the table.** The parsed tool model hides it: a data-table select has `options: null`. Read the tool source instead. The Tool Shed serves it with macros expanded at `GET /api/tools/<owner>~<repo>~<tool_id>/versions/<version>/tool_source`, with `+` in the version URL-encoded as `%2B`. The full Tool Shed GUID does not work as the id there. Collect every `from_data_table` attribute. One tool can read several tables, and a later table can filter on an earlier select's value.
-2. **Keep the selects the step actually sets.** A select on a conditional branch the step's state does not take is not a dependency.
-3. **Query the table.** On an external Galaxy, after the workflow's tools are installed, call `GET /api/tool_data/<table>`. Any user key works because the endpoint is public. A missing table returns 404 and means the tool is not installed. An empty table returns `fields: []`. Otherwise check that some row carries the value the step selects.
+2. **Keep the selects the step depends on.** Count every non-optional data-table select on the conditional branch the step takes, and every optional one its state sets. A select on a branch the step does not take is not a dependency.
+3. **Query the table.** On an external Galaxy, after the workflow's tools are installed, call `GET /api/tool_data/<table>`. Any user key works because the endpoint is public. A 404 after the tools are installed means the repository registers no such table. An empty table returns `fields: []`. Otherwise check that some row carries the value the step selects.
 
-A Planemo-managed Galaxy exists only while `planemo test` runs, so its tables cannot be queried before the invocation. Treat a data-table select as unmet there unless the caller supplied data-table configuration that contains the value, for example through Planemo's `--tool_data_table` and `--tool_data_path` options.
+A Planemo-managed Galaxy exists only while `planemo test` runs, so its tables cannot be queried before the invocation. Treat a data-table select as unmet there unless the repository's `.loc.sample` already carries the value, or the caller supplied data-table configuration that contains it, for example through Planemo's `--tool_data_table` and `--tool_data_path` options.
 
 When the table or the row is missing, the test cannot pass. [[run-workflow-test]] records `not-run` and names the table, the value, and the step. Provisioning the table is optional and is the caller's decision. [[iwc-test-data-conventions]] covers how the test file writes a data-table value.
 
