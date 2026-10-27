@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 5,
     "content_hash": "99b1b5f90fa3860ae60a02c9182ac74b18b96ad8ee455bdf9692e962417c2785",
-    "commit": "ba14d15b6a3ed7c0799765f3cf812c9977d33594"
+    "commit": "f0515353aec7d57e89f60cac678c80907cf91e4c"
   },
-  "cast_at": "2026-10-19T19:01:28.640Z",
+  "cast_at": "2026-10-27T20:17:22.163Z",
   "refs": [
     {
       "kind": "pattern",
@@ -134,8 +134,8 @@
       "purpose": "In/out contract: the draft this Mold reads and re-wires conforms to [[galaxy-workflow-draft]]; cast bundles the JSON Schema so the re-wired draft stays inside the superset the per-step loop expects.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
-      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "src_hash": "fd49d477f73427ca85236ba602b6c06bcda65123c98ee7c7eb8fd79b177aebfd",
+      "dst_hash": "fd49d477f73427ca85236ba602b6c06bcda65123c98ee7c7eb8fd79b177aebfd",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }

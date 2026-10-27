@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "a9a4393c49eec26be0c7c67925e04960a04ea07d5d7ee6ecd415c2491bcac467",
-    "commit": "c2406d44954aebf094e8590e2edd7fc8bd5d0f6a"
+    "commit": "f0515353aec7d57e89f60cac678c80907cf91e4c"
   },
-  "cast_at": "2026-10-22T16:42:52.007Z",
+  "cast_at": "2026-10-27T20:17:18.950Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -227,8 +227,8 @@
       "purpose": "Output contract: the emitted gxformat2 draft conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema so the skill carries its output shape alongside the [[draft-validate]] CLI checks.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
-      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "src_hash": "fd49d477f73427ca85236ba602b6c06bcda65123c98ee7c7eb8fd79b177aebfd",
+      "dst_hash": "fd49d477f73427ca85236ba602b6c06bcda65123c98ee7c7eb8fd79b177aebfd",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     }

@@ -75,7 +75,7 @@
           ]
         },
         "tool_shed_repository": {
-          "$ref": "#/$defs/Shared15"
+          "$ref": "#/$defs/Shared18"
         },
         "tool_version": {
           "anyOf": [
@@ -108,7 +108,7 @@
           ]
         },
         "in": {
-          "$ref": "#/$defs/Shared16"
+          "$ref": "#/$defs/Shared19"
         },
         "out": {
           "anyOf": [
@@ -309,7 +309,7 @@
               ]
             },
             "outputs": {
-              "$ref": "#/$defs/Shared14"
+              "$ref": "#/$defs/Shared17"
             },
             "release": {
               "anyOf": [
@@ -412,22 +412,28 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Shared11"
+                "$ref": "#/$defs/Shared12"
               },
               {
                 "$ref": "#/$defs/Shared5"
               },
               {
-                "$ref": "#/$defs/Shared10"
+                "$ref": "#/$defs/Shared11"
               },
               {
-                "$ref": "#/$defs/Shared12"
+                "$ref": "#/$defs/Shared13"
               },
               {
                 "$ref": "#/$defs/Shared8"
               },
               {
-                "$ref": "#/$defs/Shared13"
+                "$ref": "#/$defs/Shared14"
+              },
+              {
+                "$ref": "#/$defs/Shared15"
+              },
+              {
+                "$ref": "#/$defs/Shared9"
               }
             ]
           },
@@ -437,22 +443,28 @@
           "additionalProperties": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Shared11"
+                "$ref": "#/$defs/Shared12"
               },
               {
                 "$ref": "#/$defs/Shared5"
               },
               {
-                "$ref": "#/$defs/Shared10"
+                "$ref": "#/$defs/Shared11"
               },
               {
-                "$ref": "#/$defs/Shared12"
+                "$ref": "#/$defs/Shared13"
               },
               {
                 "$ref": "#/$defs/Shared8"
               },
               {
-                "$ref": "#/$defs/Shared13"
+                "$ref": "#/$defs/Shared14"
+              },
+              {
+                "$ref": "#/$defs/Shared15"
+              },
+              {
+                "$ref": "#/$defs/Shared9"
               },
               {
                 "type": "string"
@@ -927,7 +939,7 @@
           ]
         },
         "in": {
-          "$ref": "#/$defs/Shared16"
+          "$ref": "#/$defs/Shared19"
         },
         "label": {
           "anyOf": [
@@ -1040,7 +1052,7 @@
           ]
         },
         "tool_shed_repository": {
-          "$ref": "#/$defs/Shared15"
+          "$ref": "#/$defs/Shared18"
         },
         "tool_state": {
           "anyOf": [
@@ -1856,7 +1868,9 @@
                 "text",
                 "File",
                 "data",
-                "collection"
+                "collection",
+                "color",
+                "directory_uri"
               ],
               "type": "string"
             }
@@ -1952,10 +1966,10 @@
           ]
         },
         "restrictions": {
-          "$ref": "#/$defs/Shared17"
+          "$ref": "#/$defs/Shared20"
         },
         "suggestions": {
-          "$ref": "#/$defs/Shared17"
+          "$ref": "#/$defs/Shared20"
         },
         "type": {
           "enum": [
@@ -1963,6 +1977,9 @@
             "string"
           ],
           "type": "string"
+        },
+        "validators": {
+          "$ref": "#/$defs/Shared16"
         }
       },
       "required": [
@@ -1971,6 +1988,96 @@
       "type": "object"
     },
     "Shared9": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "title": "unknown"
+        },
+        "doc": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "optional": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "left": {
+                  "type": "number"
+                },
+                "top": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "top",
+                "left"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": {
+          "enum": [
+            "directory_uri"
+          ],
+          "type": "string"
+        },
+        "validators": {
+          "$ref": "#/$defs/Shared16"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Shared10": {
       "additionalProperties": false,
       "properties": {
         "default": {
@@ -2016,7 +2123,7 @@
       "required": [],
       "type": "object"
     },
-    "Shared10": {
+    "Shared11": {
       "additionalProperties": false,
       "properties": {
         "default": {
@@ -2124,7 +2231,7 @@
       ],
       "type": "object"
     },
-    "Shared11": {
+    "Shared12": {
       "additionalProperties": false,
       "properties": {
         "default": {
@@ -2230,7 +2337,7 @@
       "required": [],
       "type": "object"
     },
-    "Shared12": {
+    "Shared13": {
       "additionalProperties": false,
       "properties": {
         "default": {
@@ -2337,7 +2444,7 @@
       ],
       "type": "object"
     },
-    "Shared13": {
+    "Shared14": {
       "additionalProperties": false,
       "properties": {
         "default": {
@@ -2424,7 +2531,143 @@
       ],
       "type": "object"
     },
-    "Shared14": {
+    "Shared15": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "title": "unknown"
+        },
+        "doc": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "optional": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "left": {
+                  "type": "number"
+                },
+                "top": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "top",
+                "left"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": {
+          "enum": [
+            "color"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Shared16": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "expression": {
+                "type": "string"
+              },
+              "message": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "negate": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "regex"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "expression"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "Shared17": {
       "anyOf": [
         {
           "items": {
@@ -2457,7 +2700,7 @@
         }
       ]
     },
-    "Shared15": {
+    "Shared18": {
       "anyOf": [
         {
           "type": "null"
@@ -2488,11 +2731,11 @@
         }
       ]
     },
-    "Shared16": {
+    "Shared19": {
       "anyOf": [
         {
           "items": {
-            "$ref": "#/$defs/Shared9"
+            "$ref": "#/$defs/Shared10"
           },
           "type": "array"
         },
@@ -2500,7 +2743,7 @@
           "additionalProperties": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Shared9"
+                "$ref": "#/$defs/Shared10"
               },
               {
                 "type": "string"
@@ -2522,7 +2765,7 @@
         }
       ]
     },
-    "Shared17": {
+    "Shared20": {
       "anyOf": [
         {
           "type": "null"
@@ -2610,7 +2853,7 @@
       "$ref": "#/$defs/Shared1"
     },
     "outputs": {
-      "$ref": "#/$defs/Shared14"
+      "$ref": "#/$defs/Shared17"
     },
     "uuid": {
       "anyOf": [
