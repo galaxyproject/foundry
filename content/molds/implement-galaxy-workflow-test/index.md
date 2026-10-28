@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-21
-revision: 11
+revised: 2026-10-26
+revision: 12
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[freeform-summary-to-galaxy-test-plan]]"
@@ -40,6 +40,14 @@ references:
     evidence: corpus-observed
     purpose: "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution."
     trigger: "After authoring or editing a Galaxy workflow test file and before Planemo invocation."
+  - kind: cli-command
+    ref: "[[gxwf validate]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Resolve each asserted output's collection type from the `--connections` report's `resolved_outputs`, so output assertions take dataset or collection form from the workflow, not the plan."
+    trigger: "Before authoring output assertions, and again after any workflow edit that touches an asserted output's producing step."
   - kind: cli-tool
     ref: "[[planemo]]"
     used_at: runtime
@@ -121,9 +129,12 @@ The workflow is the contract: input and output labels in the test file must addr
    - **Materialize a local `test-data/` layout only when the ref needs prep a URL can't express** — a concatenation (e.g. per-isolate chromosome+plasmid into one FASTA), a subset (one chromosome, selected loci), or a column split into named collection elements. In that case the test file's `path:` entries point at files this Mold writes: fetch from the ref's verified source URLs, run the documented prep, and lay the result out in the `test-data/` directory addressed by the `*-tests.yml`, relative to the workflow. The collection element identifiers in the staged layout must match the test file and the workflow labels exactly.
    - Never emit a `path:` (or `location:`) the test references but no source produces — an un-materialized path passes the static cross-check and fails only at upload, far from here. If a ref is `resolved: false`, surface the gap rather than authoring a path to a file that does not exist.
 
-   Inputs must match the workflow's collection shapes and datatypes.
-3. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions. Choose assertion families and tolerances per [[planemo-asserts-idioms]]; check each shortcut against [[iwc-shortcuts-anti-patterns]] so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation. A `family` naming an output-attribute field (`element_count`, `count`, `ftype`, `checksum`, `metadata`) or a compare operator goes beside `asserts:`, not inside it; a non-null `element_identifier` goes under `element_tests`, with `/` separating nested ranks.
-4. **Validate static.** Run [[validate-tests]] for the schema gate, then the workflow-label cross-check (`checkTestsAgainstWorkflow`): zero missing input labels, zero missing output labels, no collection/datatype mismatches. Fix before spending a Planemo run.
-5. **Run green.** Drive [[planemo]] `test` with the staged data. "Managed Galaxy" here means **Planemo-managed**: `planemo test` bootstraps its own Galaxy and installs the workflow's tools from the Tool Shed/conda — it does **not** require a pre-provisioned external server, so absence of a running Galaxy is not a reason to skip this gate (cost/runtime of heavy tool or reference-DB installs may be, but that is a deliberate deferral, not an impossibility). On green, hand off the test file plus enough invocation/job/assertion context for [[run-workflow-test]] and [[debug-galaxy-workflow-output]] to use if a later run fails.
+   Check each job input against its workflow input declaration by hand: a `data_collection` input takes `class: Collection` with the declared `collection_type`, a `data` input takes `class: File`, and `filetype` must be the input's `format` or a subtype of it.
+3. **Trace output kinds.** Before writing assertions, resolve each asserted output's kind from the workflow, not the plan. Run [[gxwf validate]] `<workflow> --connections --cache-dir <cache> --json` and resolve each output's producing step's `resolved_outputs` entry as that page describes. A non-null `collection_type` means collection form, which map-over can produce from a dataset tool output. Null means dataset form only under that page's conditions; otherwise the kind is unknown, so derive it by hand from the wiring and tool outputs and name the output as hand-checked in the handoff.
+
+   When the plan's `output_kind`/`collection_shape` disagrees with the resolved kind, report it as a test-plan defect in the handoff (output label, plan value, resolved value), not silently. Author the assertion in the resolved form, because Planemo checks against what the workflow produces. If the plan reflects the intended design, the disagreement is testability pressure on the workflow ([[galaxy-workflow-testability-design]]).
+4. **Author assertions.** Materialize the plan's assertion intent into concrete output assertions, in the form step 3 resolved. A collection output takes `class: Collection` and `collection_type`, plus `element_tests` keyed by identifiers you can derive (map-over keeps the mapped input's identifiers) or `element_count` when you can't. Never invent identifiers. Check each `ftype` by hand against the producing output's datatype: a `change_datatype` on that step output wins, otherwise the tool output's `format` (or the input its `format_source` names). Choose assertion families and tolerances per [[planemo-asserts-idioms]]; check each shortcut against [[iwc-shortcuts-anti-patterns]] so an existence-only or size-only assertion is a deliberate choice, not an evasion. Honor the plan's `omissions[]` and treat low-`confidence` synthesized intent as a starting point to tighten against the real invocation. A `family` naming an output-attribute field (`element_count`, `count`, `ftype`, `checksum`, `metadata`) or a compare operator goes beside `asserts:`, not inside it; a non-null `element_identifier` goes under `element_tests`, with `/` separating nested ranks.
+5. **Validate static.** Run [[validate-tests]] for the schema gate, then the workflow cross-check (`checkTestsAgainstWorkflow`, via `--workflow`): zero missing input labels, zero missing output labels, every required input supplied, and each job value of the right JSON type. It does not compare collection shape or datatype, so a dataset assertion on a collection output passes it; step 3's trace is the shape gate, and input shape and both datatype checks stay manual. Fix before spending a Planemo run.
+6. **Run green.** Drive [[planemo]] `test` with the staged data. "Managed Galaxy" here means **Planemo-managed**: `planemo test` bootstraps its own Galaxy and installs the workflow's tools from the Tool Shed/conda — it does **not** require a pre-provisioned external server, so absence of a running Galaxy is not a reason to skip this gate (cost/runtime of heavy tool or reference-DB installs may be, but that is a deliberate deferral, not an impossibility). On green, hand off the test file plus enough invocation/job/assertion context for [[run-workflow-test]] and [[debug-galaxy-workflow-output]] to use if a later run fails.
 
 Author tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs ([[planemo-workflow-test-architecture]]) — that traceability is what makes the downstream debug Mold able to locate failure evidence.

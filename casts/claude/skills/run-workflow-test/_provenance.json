@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 7,
     "content_hash": "259675e41c65f7622049cc9ef5f64b7d9f7ac5edb005555a09045e747708218c",
-    "commit": "47aa5c1cf419386ea72929c8ee34aec0db65588f"
+    "commit": "f48c01b6cae92f90980c5fe3d42597bfcbab07e0"
   },
-  "cast_at": "2026-10-22T03:42:32.077Z",
+  "cast_at": "2026-10-26T16:05:27.861Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -30,8 +30,8 @@
       "evidence": "corpus-observed",
       "purpose": "Run static schema and workflow-label checks before expensive workflow execution.",
       "trigger": "Before invoking Planemo when a Galaxy workflow test file is present.",
-      "src_hash": "7157ef7750ead142086e0597d52d2ef6ef072e8ec2939f2ac6965bdccf04849d",
-      "dst_hash": "973184698733ffb86bb5a15781902846afec311047f5684f779f8ad023e5d24c",
+      "src_hash": "85823df2ccdb93084d2f4b7ba3b156a218aa80d94f3d916fb3c800a879d9c233",
+      "dst_hash": "30049d7c6cdfa2e9d147b0ad6bab696e616c6ae535735db16cc22726256f4391",
       "source": "deterministic"
     },
     {
