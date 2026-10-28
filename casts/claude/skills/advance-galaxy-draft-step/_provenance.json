@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 10,
     "content_hash": "cd510f127a0f2a88980737c5e3bf04b860c6591ae70500c1cae078104c9e8eef",
-    "commit": "99cbe8375efbdc7984baf0f93b70e69b8caf16b8"
+    "commit": "f0515353aec7d57e89f60cac678c80907cf91e4c"
   },
-  "cast_at": "2026-10-25T23:09:11.839Z",
+  "cast_at": "2026-10-27T20:17:16.100Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -179,8 +179,8 @@
       "purpose": "In/out contract: the draft this Mold reads and mutates one step per iteration conforms to [[galaxy-workflow-draft]]. Cast bundles the JSON Schema alongside the [[draft-validate]] CLI checks.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
-      "dst_hash": "86822b6bf4c11ba1d9eaa12d9e442db7f7d28b2734a2daddf62b5cdd2f1f75aa",
+      "src_hash": "fd49d477f73427ca85236ba602b6c06bcda65123c98ee7c7eb8fd79b177aebfd",
+      "dst_hash": "fd49d477f73427ca85236ba602b6c06bcda65123c98ee7c7eb8fd79b177aebfd",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },

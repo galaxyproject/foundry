@@ -3,9 +3,9 @@ type: cli-tool
 tool: galaxy-tool-cache
 origin: npm
 package: "@galaxy-tool-util/cli"
-package_version: "^1.14.0"
+package_version: "^1.15.0"
 invoke: galaxy-tool-cache
-invoke_fallback: "npx --yes --package @galaxy-tool-util/cli@1.14.0 galaxy-tool-cache"
+invoke_fallback: "npx --yes --package @galaxy-tool-util/cli@1.15.0 galaxy-tool-cache"
 availability_check: "galaxy-tool-cache --help | grep -q summarize"
 docs_url: "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli"
 tags:
@@ -23,4 +23,4 @@ Fetches Galaxy tool metadata from the Tool Shed, caches the parsed wrapper local
 
 ## Install
 
-`npx --yes --package @galaxy-tool-util/cli@1.14.0 galaxy-tool-cache <subcommand>` runs without a global install. For repeat use, `npm install -g @galaxy-tool-util/cli@1.14.0`. The `@1.14.0` pin matches [[gxwf]] (same npm package), tracks the repository dependency floor, and includes stock/built-in tool resolution (bare ids).
+`npx --yes --package @galaxy-tool-util/cli@1.15.0 galaxy-tool-cache <subcommand>` runs without a global install. For repeat use, `npm install -g @galaxy-tool-util/cli@1.15.0`. The `@1.15.0` pin matches [[gxwf]] (same npm package), tracks the repository dependency floor, and includes stock/built-in tool resolution (bare ids).

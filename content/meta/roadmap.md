@@ -73,6 +73,7 @@ Make custom Galaxy tool development a reliable branch of workflow construction b
 
 - [ ] [#368 — Include upstream advice/prompts/docs for tool development.](https://github.com/galaxyproject/foundry/issues/368)
 - [ ] [#468 — author-galaxy-tool-wrapper: no validation step, no GalaxyUserTool schema, and the bundled prompt contradicts it](https://github.com/galaxyproject/foundry/issues/468)
+- [ ] [#672 — galaxy-user-tool-authoring: invalid collection-output example, no vendoring recipes, and an unanswered input-object question](https://github.com/galaxyproject/foundry/issues/672)
 
 ### [#318 — Revise how skills working on draft coordinate - more direct, more deterministic, more YAML](https://github.com/galaxyproject/foundry/issues/318)
 
