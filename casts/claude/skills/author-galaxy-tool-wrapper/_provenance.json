@@ -6,9 +6,9 @@
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 7,
     "content_hash": "9902b753cdc5228221107dd8c26785173985734aab8775380ab8a3529e93d7c7",
-    "commit": "7cbb53a2107d14c2458218eb9799c9f34949ef7d"
+    "commit": "f48c01b6cae92f90980c5fe3d42597bfcbab07e0"
   },
-  "cast_at": "2026-10-23T22:57:05.239Z",
+  "cast_at": "2026-10-26T16:04:19.217Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -91,8 +91,8 @@
       "evidence": "corpus-observed",
       "purpose": "Register an authored tool through `/api/unprivileged_tools`, not the admin-only `/api/dynamic_tools`, when it must run on a server outside a workflow step.",
       "trigger": "When the caller asks to register, upload, or run the authored tool on a Galaxy server instead of embedding it in a workflow step.",
-      "src_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
-      "dst_hash": "cfdf62f982349c02cdfa5f3214f3feb9f54cf664b880e438294e5748f9002902",
+      "src_hash": "ff8cc62ebd679f8eb51c06c214a80dc66bdd6189e436b7844c78dbacdce33ef8",
+      "dst_hash": "ff8cc62ebd679f8eb51c06c214a80dc66bdd6189e436b7844c78dbacdce33ef8",
       "source": "deterministic"
     },
     {

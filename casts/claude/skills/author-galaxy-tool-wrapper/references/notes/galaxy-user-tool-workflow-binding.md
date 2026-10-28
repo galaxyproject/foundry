@@ -5,22 +5,25 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-09-24
-revised: 2026-10-23
-revision: 4
+revised: 2026-10-26
+revision: 5
 related_notes:
   - "[[galaxy-user-tool-authoring-help]]"
   - "[[galaxy-user-tool-authoring]]"
   - "[[galaxy-workflow-draft-format]]"
   - "[[gxformat2-schema]]"
+  - "[[planemo-workflow-test-architecture]]"
 related_molds:
   - "[[author-galaxy-tool-wrapper]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[advance-galaxy-draft-step]]"
+  - "[[run-workflow-test]]"
 sources:
   - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/client/src/components/Tool/authoringHelp.yml"
   - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy/managers/tools.py"
   - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy/webapps/galaxy/api/dynamic_tools.py"
   - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/lib/galaxy/schema/schema.py"
 summary: "How a workflow step uses an authored GalaxyUserTool: embedded under run:, never by tool_uuid, tool_id or content_id; registering via /api/unprivileged_tools."
 ---
 
@@ -32,7 +35,7 @@ The rule is derived from the `workflows` section ("Using a tool in a workflow") 
 
 ## Embedding the definition in a gxformat2 step
 
-The embedded form makes the workflow self-contained. When a user imports it, Galaxy registers a private copy of the tool for that user. That requires a server with `enable_beta_tool_formats` set and a user holding the `Custom Tool Execution` role, the same conditions as registering the tool directly. Converting the workflow to native `.ga` with gxformat2 carries the definition as `tool_representation`, with no `tool_id`, `tool_version`, or `tool_uuid`, and Galaxy imports that form the same way. Galaxy's own `.ga` export also includes the definition as `tool_representation`. Nothing has to be registered first, and nothing has to be injected into the converted file afterwards.
+The embedded form makes the workflow self-contained. When a user imports it, Galaxy registers a private copy of the tool for that user. That requires a server with `enable_beta_tool_formats` set and a user holding the `Custom Tool Execution` role, the same conditions as registering the tool directly. Through the API, that role is created with `role_type: user_tool_execute`. Galaxy checks for the role on every user, admins included. Converting the workflow to native `.ga` with gxformat2 carries the definition as `tool_representation`, with no `tool_id`, `tool_version`, or `tool_uuid`, and Galaxy imports that form the same way. Galaxy's own `.ga` export also includes the definition as `tool_representation`. Nothing has to be registered first, and nothing has to be injected into the converted file afterwards.
 
 To bind a step:
 
@@ -86,6 +89,6 @@ A step that embeds its tool does not need it registered. Registering is for runn
 - Do not use `POST /api/dynamic_tools`. It is admin-only and returns 403 for an ordinary user.
 - A returned `uuid` means Galaxy accepted the definition, not that the tool runs. Run it on test data before reporting it as working.
 
-## Open questions
+## Testing a workflow with an embedded tool
 
-- Whether a Planemo-managed Galaxy runs a workflow with an embedded tool has not been tested. It would need `enable_beta_tool_formats` on that server and the `Custom Tool Execution` role for the test user.
+A Planemo-managed Galaxy cannot test such a workflow. Planemo fails with `KeyError: 'tool_id'` before Galaxy starts ([galaxyproject/planemo#1757](https://github.com/galaxyproject/planemo/issues/1757)), and its test user lacks the `Custom Tool Execution` role, so the import would return HTTP 403 even past that crash. Testing against a Galaxy served by Planemo, with beta tool formats enabled and a user holding the role, does work. [[planemo-workflow-test-architecture]] gives the commands.

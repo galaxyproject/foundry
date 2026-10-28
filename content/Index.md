@@ -267,7 +267,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nf-schema-samplesheet-galaxy-gaps]] — nf-schema validation mapped to Galaxy column_definitions: what survives, degrades, or is lost; Galaxy work items + cast loss-recording vocabulary.
 - [[open-requirements-ledger]] — Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state.
 - [[planemo-asserts-idioms]] — Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints.
-- [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
+- [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, user-defined-tool and data-table runs, API polling, and noisy failure boundaries.
 - [[nextflow-test-case-selection]] — A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage.
 - [[workflow-brief-design]] — Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers.
 
