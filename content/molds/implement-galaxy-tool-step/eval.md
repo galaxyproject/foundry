@@ -12,6 +12,11 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 - check: llm-judged
 - assertion: records whether a later failure should be investigated as tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue.
 
+## Property: a Tool Shed step names its tool by full versioned id
+
+- check: deterministic
+- assertion: every implemented step whose `tool_id` starts with a Tool Shed host has the form `<shed>/repos/<owner>/<repo>/<tool>/<version>`, and that last segment equals the step's `tool_version`. A versionless shed id is a failure even when draft-validate passes, because exact-version invocation rejects it.
+
 ## Property: an authored user-defined tool is embedded, never referenced by id or uuid
 
 - check: deterministic

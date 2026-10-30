@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "b14eef623c16859a525a138e7fd4beddbb5cf8568ab9f4c1cdb9b12fc7803a44",
-    "commit": "f0515353aec7d57e89f60cac678c80907cf91e4c"
+    "commit": "9678dfba7293f01d34bb755adbb6dbfa7913dea0"
   },
-  "cast_at": "2026-10-27T20:17:17.767Z",
+  "cast_at": "2026-10-28T17:07:15.083Z",
   "refs": [
     {
       "kind": "cli-command",
