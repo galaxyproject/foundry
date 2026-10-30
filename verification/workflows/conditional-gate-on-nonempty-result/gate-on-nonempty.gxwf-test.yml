@@ -1,6 +1,6 @@
-- doc: "Gate true: non-empty input runs the optional step"
+- doc: "Non-empty collection and non-empty table: both gates open and only the gated reports run"
   job:
-    inputs:
+    results:
       class: Collection
       collection_type: list
       elements:
@@ -8,19 +8,55 @@
           class: File
           path: test-data/nonempty.txt
           filetype: txt
+    table:
+      class: File
+      path: test-data/telomere_hits.txt
+      filetype: txt
   outputs:
-    gate_boolean: true
-    gated_marker:
+    has_elements: true
+    ran_when_nonempty:
       file: test-data/expected_ran_marker.txt
+    collection_branch:
+      file: test-data/expected_ran_marker.txt
+    table_has_content: true
+    table_branch:
+      file: test-data/telomere_hits.txt
 
-- doc: "Gate false: empty input skips the optional step"
+- doc: "Empty collection and zero-byte table: both gates close and only the negated steps run"
   job:
-    inputs:
+    results:
       class: Collection
       collection_type: list
       elements: []
+    table:
+      class: File
+      path: test-data/empty.txt
+      filetype: txt
   outputs:
-    false_path_marker:
-      asserts:
-        has_text:
-          text: "False"
+    ran_when_empty:
+      file: test-data/expected_no_elements.txt
+    collection_branch:
+      file: test-data/expected_no_elements.txt
+    table_branch:
+      file: test-data/expected_line_count_0.txt
+
+- doc: "One zero-byte element opens the collection gate. A newline-only table closes the text gate"
+  job:
+    results:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: empty_sample
+          class: File
+          path: test-data/empty.txt
+          filetype: txt
+    table:
+      class: File
+      path: test-data/newline_only.txt
+      filetype: txt
+  outputs:
+    has_elements: true
+    collection_branch:
+      file: test-data/expected_zero_byte_identifiers.txt
+    table_branch:
+      file: test-data/expected_line_count_1.txt
