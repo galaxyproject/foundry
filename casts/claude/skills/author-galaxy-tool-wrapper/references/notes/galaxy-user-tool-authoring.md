@@ -5,7 +5,7 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-08-24
-revised: 2026-10-26
+revised: 2026-10-30
 revision: 3
 component: tool_util_models
 related_notes:
@@ -16,7 +16,8 @@ sources:
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_container_critic.md"
   - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tool_util_models/tool_outputs.py"
   - "https://github.com/galaxyproject/galaxy/blob/51e0a80a0db648b9153bf00e793f3e152278fe20/lib/galaxy/tool_util_models/parameters.py"
-  - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/lib/galaxy/tools/runtime.py"
+  - "https://github.com/galaxyproject/galaxy/blob/319c04fc5067f9d453a2fa9287565891114b176f/lib/galaxy/tools/runtime.py"
+  - "https://github.com/galaxyproject/galaxy/blob/319c04fc5067f9d453a2fa9287565891114b176f/lib/galaxy/tools/evaluation.py"
   - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/lib/galaxy/tool_util_models/yaml_parameters.py"
   - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/lib/galaxy/workflow/modules.py"
   - "https://github.com/galaxyproject/galaxy/blob/87d295c92ebbd5aaafac5540b0dc5c21a1d77216/test/functional/tools/collection_paired_test_y.yml"
@@ -71,9 +72,9 @@ Expressions are JavaScript, spliced into the command verbatim.
 
 **What `inputs.x` is for a `data` input.** A CWL-style file object with `class` (`File`, or `Directory` for a directory dataset), `path`, `location`, `basename`, `nameroot`, `nameext`, `format` (the Galaxy datatype extension) and `size`.
 
-- **`element_identifier` is `null` on a mapped-over `data` input.** The field exists, but map-over hands each job a plain dataset, so `$(inputs.x.element_identifier)` renders `null`. On a plain dataset it is `null` too. This was API-tested against Galaxy dev at `51e0a80a`, through both `/api/tools` and `/api/jobs`. Fixes are open, not merged: galaxyproject/galaxy#24434 and galaxyproject/galaxy#24422.
-- **`basename` and `nameroot` are not the element identifier either.** They come from the dataset's original upload filename or, failing that, its history name. They happen to match the identifier only when the element was created with the same name.
-- **Consequence: a tool mapped over a collection cannot name its own element.** A per-sample label that the tool writes into a file has to come from a `text` parameter. Mapped over a collection, every element gets the same value, so a downstream aggregator such as MultiQC can collapse the rows into one. To get identifiers today, take the whole collection as a `data_collection` input (below). Otherwise say so in `help` rather than guessing an accessor. A wrong one validates clean and fails at runtime.
+- **`element_identifier` names the sample.** Mapped over a collection, `$(inputs.x.element_identifier)` is that job's element identifier. On a plain dataset it falls back to the dataset's name, as Cheetah's `$x.element_identifier` does.
+- **`basename` and `nameroot` are not the element identifier.** They come from the dataset's original upload filename or, failing that, its history name. They match the identifier only when the element was created with the same name.
+- **Write per-sample labels from `element_identifier`.** A `text` parameter gets the same value for every element of a mapped collection, so a downstream aggregator such as MultiQC can collapse the rows into one.
 
 **What `inputs.x` is for a `data_collection` input.** An object with `class: Collection`, `name` (the collection's name), `collection_type`, `tags` and `elements`. Each leaf is a file object as above, plus a non-null `element_identifier`. The shape of `elements` depends on the collection type:
 
@@ -83,9 +84,9 @@ Expressions are JavaScript, spliced into the command verbatim.
 
   ``$(inputs.x.has_single_item ? `'${inputs.x.elements.unpaired.path}'` : `'${inputs.x.elements.forward.path}' '${inputs.x.elements.reverse.path}'`)``
 - **Nested types** — `list:*` and `sample_sheet:*` give an array of inner collections, other outer types an object of them. Each inner collection has the shape above, with its identifier in `name`, not `element_identifier`, so `e.path` on one is `undefined`. For `list:paired`: ``$(inputs.x.elements.map((e) => `'${e.elements.forward.path}'`).join(" "))``.
-- **Mapped over a nested collection** — a `paired` input mapped over a `list:paired` gets one inner pair per job, and `inputs.x.name` is that pair's outer identifier. This is how a per-sample tool gets its sample name today.
+- **Mapped over a nested collection** — a `paired` input mapped over a `list:paired` gets one inner pair per job, and `inputs.x.name` is that pair's outer identifier.
 
-**Write `inputs.x.elements.forward`, not `inputs.x.forward`.** Validation does not catch the difference: it checks that `inputs.x` is declared, not the fields after it. Galaxy's own test tool `collection_paired_test_y.yml` uses the `elements` form. A deprecated builder, used for `/api/tools` submissions and for workflow steps whose request state Galaxy fails to capture, returns a bare array for `list` and a bare identifier-keyed object for every other type, with none of the collection fields. A run that passes there proves nothing about the form above. No Galaxy test yet reads leaf `element_identifier`, `has_single_item` or a mapped pair's `name` from a user-defined tool.
+**Write `inputs.x.elements.forward`, not `inputs.x.forward`.** Validation does not catch the difference: it checks that `inputs.x` is declared, not the fields after it. Galaxy's own test tool `collection_paired_test_y.yml` uses the `elements` form. A deprecated builder, used for `/api/tools` submissions and for workflow steps whose request state Galaxy fails to capture, returns a bare array for `list` and a bare identifier-keyed object for every other type, with none of the collection fields. A run that passes there proves nothing about the form above. No Galaxy test yet reads a collection leaf's `element_identifier`, `has_single_item` or a mapped pair's `name` from a user-defined tool.
 
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
 
@@ -104,7 +105,7 @@ Each input needs a `type`: `data`, `data_collection`, `text`, `integer`, `float`
 
 - **`data`** — a single file, captured with `from_work_dir`.
 - **`collection`** — requires `discover_datasets`. A collection with only `from_work_dir` is rejected: nothing would claim its elements from the working directory.
-- **Collection fields sit on the output itself.** `collection_type` and `discover_datasets` are siblings of `name` and `type`, as below. Galaxy before 26.1 nested them under `structure:`. 26.1 lifts that legacy form, but don't write it.
+- **Collection fields sit on the output itself.** `collection_type` and `discover_datasets` are siblings of `name` and `type`, as below. There is no `structure:` wrapper.
 - **A `discover_datasets` entry needs only `pattern`.** `directory`, `format`, `visible`, `recurse`, `sort_key` and the rest are optional. A misspelled key is rejected, not ignored.
 - **`format` on an output is a single string**, unlike a data input's `format`, which is a list. The asymmetry is real and easy to get backwards.
 
@@ -124,8 +125,6 @@ outputs:
             directory: splits
             format: fastqsanger
 ```
-
-**Validator defect, temporary.** `gxwf validate-tool-source` up to 1.14.0 rejects this collection output. Its bundled schema predates Galaxy's 26.1 change and demands the `structure:` form plus all ten discovery fields. Galaxy accepts the example as written. Until the fixed release is pinned, treat those errors on a collection output as a validator defect: keep the flat form, and don't add `structure:` or a duplicate `discover_datasets` to satisfy it. Remove this warning once the Foundry pins a gxwf release with the resynced schema.
 
 ## 6. Script placement — inline or configfile
 
