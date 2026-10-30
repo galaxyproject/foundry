@@ -6,9 +6,9 @@
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 7,
     "content_hash": "9902b753cdc5228221107dd8c26785173985734aab8775380ab8a3529e93d7c7",
-    "commit": "7cbb53a2107d14c2458218eb9799c9f34949ef7d"
+    "commit": "d0040395e91b2c80aa644cc44d52d91266cb8715"
   },
-  "cast_at": "2026-10-23T22:57:05.239Z",
+  "cast_at": "2026-10-30T04:05:45.885Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -61,8 +61,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Field contract, expression syntax, script placement, and package inference for a `GalaxyUserTool` definition.",
-      "src_hash": "365fad455369945a34bda537c8dbf409a0966f0f88da9fe78b61cff32d5b0d0d",
-      "dst_hash": "365fad455369945a34bda537c8dbf409a0966f0f88da9fe78b61cff32d5b0d0d",
+      "src_hash": "32de8a40af70e32ecaf20370635e1ab223b062406dbe7739aeb3976f46002f02",
+      "dst_hash": "32de8a40af70e32ecaf20370635e1ab223b062406dbe7739aeb3976f46002f02",
       "source": "deterministic"
     },
     {
