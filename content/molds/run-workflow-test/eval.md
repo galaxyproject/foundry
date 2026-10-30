@@ -10,7 +10,10 @@ scenario produces.
 - check: deterministic
 - assertion: a run with Planemo configured to emit structured test output
   preserves the invocation id, history id, workflow id, the Planemo structured
-  result, and any test-output artifact paths needed by debug molds.
+  result, and any test-output artifact paths needed by debug molds. When Galaxy
+  rejected the workflow import, the ids and structured result are recorded as
+  absent, and the Planemo terminal log, Galaxy server log, and import response
+  are preserved in their place.
 
 ## Property: existing versus managed Galaxy mode
 
@@ -26,7 +29,11 @@ scenario produces.
   a failed invocation, missing outputs, or upload/staging problems, the output
   hands off a structured summary that identifies the observed failure modality
   and the next reference surface to inspect: Planemo result, Galaxy job API,
-  Galaxy invocation API, history contents, or test assertion report.
+  Galaxy invocation API, history contents, test assertion report, workflow
+  import response, or Galaxy server log. A workflow import Galaxy rejected for
+  the workflow's content or through a server defect is a `fail` with modality
+  `workflow-import-rejected`, never a `not-run` and never an assertion or
+  invocation failure.
 
 ## Property: honest non-execution
 

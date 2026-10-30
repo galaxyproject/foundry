@@ -50,3 +50,5 @@ No committed fixture exercises `status: "not-run"`, or a run against an existing
 rather than a Planemo-managed Galaxy (`galaxy_mode: "existing"`) — every fixture
 that ran records `galaxy_mode: "managed"`, and `missing-test` records none at all
 because nothing ran. No case asserts either until a fixture binds them.
+
+No fixture exercises `failure_modality: "workflow-import-rejected"` either.
