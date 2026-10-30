@@ -12,7 +12,8 @@ the oracle here is applied to whatever a scenario produces.
 - bucket: schema
 - check: deterministic + llm-judged
 - assertion: any emitted `galaxy-workflow-draft.gxwf.yml` has no gxformat2
-  structural or encoding errors under `gxwf validate --json`. Missing concrete
+  structural or encoding errors under `gxwf draft-validate --json` (plain
+  `gxwf validate` rejects the `GalaxyWorkflowDraft` class). Missing concrete
   tool IDs may be skipped or clearly marked as TODOs rather than invented or
   silently dropped.
 

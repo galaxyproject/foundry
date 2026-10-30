@@ -69,11 +69,13 @@ Properties are tagged by bucket:
 
 - bucket: implementation
 - check: deterministic + llm-judged
-- assertion: after the cast skill implements the chosen step, the mutated draft
-  contains **no** `TODO` / `TODO_*` token — `tool_id` is concrete, each output
-  port is renamed from its `TODO_*` sentinel to the wrapper's real name, and
-  every downstream consumer's source is repointed to that real name (no dangling
-  `TODO_` reference). Mechanically: `grep -c TODO` on the result is 0.
+- assertion: after the cast skill implements the chosen step, that step's
+  block contains **no** `TODO` / `TODO_*` token — `tool_id` is concrete, each
+  output port is renamed from its `TODO_*` sentinel to the wrapper's real name,
+  and every downstream consumer's source is repointed to that real name (no
+  dangling `TODO_` reference to the step). Mechanically: `grep -c TODO` is 0 on
+  the step's block and on references to its outputs; on the whole draft only
+  at the loop endstate, since other drafty steps keep theirs mid-loop.
   Hallucination guardrail: a fabricated `tool_id` or an invented output port
   that doesn't match the resolved wrapper's summary is a failure, not a pass.
 
