@@ -70,3 +70,4 @@ Start from `summary-cwl.graph.edges[]` instead of rediscovering the DAG. The mai
 - Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.
 - Preserve declared artifact filenames unless the user or harness supplies explicit paths.
 - Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.
+- The pattern pages linked from `references/patterns/galaxy-collection-patterns.md`, `references/patterns/galaxy-conditionals-patterns.md`, `references/patterns/galaxy-interval-patterns.md` are packaged too: a double-bracketed `<slug>` link there names `references/patterns/<slug>.md`, which carries the tool settings and worked state.
