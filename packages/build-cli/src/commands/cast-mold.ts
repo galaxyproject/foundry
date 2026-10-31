@@ -24,6 +24,7 @@ import {
   stripWikiLinks,
   type CastHooks,
   type ProvenanceRefEntry,
+  type RefExpansionContext,
 } from "@galaxy-foundry/cast";
 import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command";
 import {
@@ -262,12 +263,12 @@ const GALAXY_HOOKS: CastHooks = {
         "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
         "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
         "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
-        ...mocLinkNotes(runtime),
+        ...mocLinkNotes(runtime, metaByPath),
       ]),
     ];
   },
   // A pattern map of content is an index; the leaves it lists are what a cast skill reads.
-  expandRefs: ({ ref, meta, metaByPath, slugMap }) => mocLeafRefs(ref, meta, metaByPath, slugMap),
+  expandRefs: mocLeafRefs,
   // Which npm module a `package-export` ref means. It has to be imported from HERE: a bare
   // `import(spec)` resolves relative to the file that runs it, and @galaxy-foundry/cast is
   // installed somewhere this repo's own packages are not visible from. Written in this tree,
@@ -300,12 +301,12 @@ const GALAXY_HOOKS: CastHooks = {
  * A listed sibling map is skipped: it is a route, not a leaf, and ships only when a Mold declares
  * it.
  */
-export function mocLeafRefs(
-  ref: ProvenanceRefEntry,
-  meta: Frontmatter,
-  metaByPath: ReadonlyMap<string, Frontmatter>,
-  slugMap: ReadonlyMap<string, string>,
-): Record<string, unknown>[] {
+function mocLeafRefs({
+  ref,
+  meta,
+  metaByPath,
+  slugMap,
+}: RefExpansionContext): Readonly<Record<string, unknown>>[] {
   if (ref.kind !== "pattern" || meta.pattern_kind !== "moc") return [];
   const listed = Array.isArray(meta.related_patterns) ? meta.related_patterns : [];
   return listed
@@ -323,25 +324,28 @@ export function mocLeafRefs(
     }));
 }
 
-/** One Runtime Notes line per directory of expanded leaves, naming the maps that list them. */
-function mocLinkNotes(runtime: readonly ProvenanceRefEntry[]): string[] {
-  const mapsByDir = new Map<string, Set<string>>();
-  for (const r of runtime) {
-    if (!r.expanded_from) continue;
-    const dir = path.posix.dirname(r.dst);
-    const maps = mapsByDir.get(dir) ?? new Set<string>();
-    maps.add(r.expanded_from);
-    mapsByDir.set(dir, maps);
-  }
-  return [...mapsByDir.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([dir, maps]) => {
-      const names = [...maps]
-        .sort()
-        .map((m) => `\`${m}\``)
-        .join(", ");
-      return `- The pattern pages linked from ${names} are packaged too: a double-bracketed \`<slug>\` link there names \`${dir}/<slug>.md\`, which carries the tool settings and worked state.`;
-    });
+/**
+ * One Runtime Notes line naming the declared pattern maps and where their leaf links resolve.
+ *
+ * Scoped to leaves: a map also links research notes and sibling maps, which ship only when this
+ * skill lists them.
+ */
+function mocLinkNotes(
+  runtime: readonly ProvenanceRefEntry[],
+  metaByPath: ReadonlyMap<string, Frontmatter>,
+): string[] {
+  const maps = runtime
+    .filter((r) => r.kind === "pattern" && !r.expanded_from && !r.companion_of)
+    .filter((r) => metaByPath.get(r.src)?.pattern_kind === "moc")
+    .map((r) => r.dst)
+    .sort();
+  const leaf = runtime.find((r) => r.expanded_from && !r.companion_of);
+  if (maps.length === 0 || !leaf) return [];
+  const dir = path.posix.dirname(leaf.dst);
+  const names = maps.map((m) => `\`${m}\``).join(", ");
+  return [
+    `- The leaf pattern pages listed by ${names} are packaged too: a double-bracketed \`<slug>\` link to one of those leaves names \`${dir}/<slug>.md\`, which carries the tool settings and worked state. Links there to research notes or other pattern maps resolve only when this skill lists them above.`,
+  ];
 }
 
 // ---- provenance ----

@@ -1534,13 +1534,36 @@ ${body}
 
       const skill = readFileSync(path.join(bundle(dir), "SKILL.md"), "utf8");
       expect(skill).toMatch(
-        /`references\/patterns\/hub\.md`.*double-bracketed `<slug>` link.*`references\/patterns\/<slug>\.md`/,
+        /listed by `references\/patterns\/hub\.md`.*`references\/patterns\/<slug>\.md`.*resolve only when this skill lists them/,
       );
       // Reached through the map, so it does not get a Load On Demand row of its own.
       expect(skill).not.toMatch(/^- .*references\/patterns\/leaf\.md/m);
 
       const verify = execVerify(dir, "m");
       expect(verify.code, `stderr: ${verify.stderr}\nstdout: ${verify.stdout}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("verifier rejects an expanded_from that names no declared ref", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-moc-tamper-"));
+    seedReferenceContract(dir);
+    try {
+      writeMocFixture(dir, ["[[leaf]]"]);
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+      const provPath = path.join(bundle(dir), "_provenance.json");
+      const prov = JSON.parse(readFileSync(provPath, "utf8")) as {
+        refs: { dst: string; expanded_from?: string }[];
+      };
+      const leaf = prov.refs.find((ref) => ref.dst === "references/patterns/leaf.md")!;
+      leaf.expanded_from = "references/patterns/missing.md";
+      writeFileSync(provPath, JSON.stringify(prov, null, 2) + "\n");
+      const verify = execVerify(dir, "m");
+      expect(verify.code).not.toBe(0);
+      expect(verify.stderr + verify.stdout).toMatch(
+        /expanded_from .*missing\.md is not a declared ref/,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

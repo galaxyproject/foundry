@@ -244,6 +244,7 @@ function main(): void {
   }
 
   // Per-ref checks.
+  const provByDst = new Map((prov.refs ?? []).map((r) => [r.dst, r]));
   for (const r of prov.refs ?? []) {
     // Every byte in a committed bundle was produced deterministically, and provenance has to
     // say so.
@@ -283,8 +284,19 @@ function main(): void {
       }
     }
     // on-demand refs should have trigger text represented in SKILL.md (best-effort: filename basename appears).
-    // An expanded ref is reached through the ref that listed it, which SKILL.md names instead.
-    if (r.load === "on-demand" && r.used_at !== "cast-time" && !r.expanded_from && skillBody) {
+    // An expanded ref is reached through the declared ref that listed it, which SKILL.md names.
+    if (r.expanded_from) {
+      const parent = provByDst.get(r.expanded_from);
+      if (!parent || parent.expanded_from) {
+        errors.push(
+          `ref ${r.src}: expanded_from ${r.expanded_from} is not a declared ref in this provenance`,
+        );
+      } else if (skillBody && r.used_at !== "cast-time" && !skillBody.includes(parent.dst)) {
+        errors.push(`ref ${r.src}: its map ${parent.dst} is not named in SKILL.md`);
+      }
+      continue;
+    }
+    if (r.load === "on-demand" && r.used_at !== "cast-time" && skillBody) {
       const dstBase = path.basename(r.dst);
       if (!skillBody.includes(dstBase) && !skillBody.includes(r.dst)) {
         errors.push(
