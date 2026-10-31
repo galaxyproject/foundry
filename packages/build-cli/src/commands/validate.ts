@@ -32,6 +32,7 @@ import {
 import { checkCompanions } from "@galaxy-foundry/kind-schema";
 import { bundledPolicy, resolveLicenseRow } from "@galaxy-foundry/license-policy";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { isPatternMap, patternMapLeaves } from "../lib/pattern-maps.js";
 import { parsePhases, phaseMoldPaths, type ParsedPhase } from "../lib/pipeline-phases.js";
 import { loadTagRegistry } from "../lib/schema.js";
 import { parseScenarioCases, resolveScenarioFixture } from "../lib/scenarios.js";
@@ -1057,43 +1058,30 @@ const BODY_WIKI_LINK_RE = /\[\[([^\]\n]+)\]\]/g;
 const FENCED_CODE_RE = /```[\s\S]*?```/g;
 const INLINE_CODE_RE = /(`+)[\s\S]+?\1/g;
 
+// Each distinct body wiki link outside fenced and inline code, as `[[inner]]`.
+function bodyWikiLinks(filePath: string): string[] {
+  const body = readMarkdown(filePath).body.replace(FENCED_CODE_RE, "").replace(INLINE_CODE_RE, "");
+  const links = [...body.matchAll(BODY_WIKI_LINK_RE)].map((m) => m[1]?.trim()).filter((s) => !!s);
+  return [...new Set(links.map((inner) => `[[${inner}]]`))];
+}
+
 /** Body wiki links resolve, outside fenced and inline code. */
 function validateBodyWikiLinks(
   files: FileMeta[],
   slugMap: Map<string, string>,
 ): CrossFileFinding[] {
-  const findings: CrossFileFinding[] = [];
-  for (const f of files) {
-    const body = readMarkdown(f.path).body.replace(FENCED_CODE_RE, "").replace(INLINE_CODE_RE, "");
-    const seen = new Set<string>();
-    BODY_WIKI_LINK_RE.lastIndex = 0;
-    let m: RegExpExecArray | null;
-    while ((m = BODY_WIKI_LINK_RE.exec(body)) !== null) {
-      const raw = m[1];
-      if (raw === undefined) continue;
-      const inner = raw.trim();
-      if (!inner) continue;
-      const wl = `[[${inner}]]`;
-      if (seen.has(wl)) continue;
-      seen.add(wl);
-      if (!resolveWikiLink(wl, slugMap)) {
-        findings.push({
-          path: f.path,
-          severity: "error",
-          message: `body wiki-link ${wl} did not resolve`,
-        });
-      }
-    }
-  }
-  return findings;
+  return files.flatMap((f) =>
+    bodyWikiLinks(f.path)
+      .filter((wl) => !resolveWikiLink(wl, slugMap))
+      .map((wl) => ({
+        path: f.path,
+        severity: "error" as const,
+        message: `body wiki-link ${wl} did not resolve`,
+      })),
+  );
 }
 
-/**
- * A pattern map of content declares, in `related_patterns`, every leaf pattern its body routes to.
- *
- * Casting ships a map's `related_patterns` beside it, so a pattern the body links and the field
- * omits is a link the cast skill cannot follow.
- */
+// A map's body may link only the leaves its related_patterns lists, since only those ship.
 function validateMocRelatedPatterns(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -1101,28 +1089,18 @@ function validateMocRelatedPatterns(
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
-    if (f.meta.type !== "pattern" || f.meta.pattern_kind !== "moc") continue;
-    const declared = new Set(
-      (Array.isArray(f.meta.related_patterns) ? f.meta.related_patterns : [])
-        .map((wl) => (typeof wl === "string" ? resolveWikiLink(wl, slugMap) : undefined))
-        .filter((tp): tp is string => !!tp),
-    );
-    const body = readMarkdown(f.path).body.replace(FENCED_CODE_RE, "").replace(INLINE_CODE_RE, "");
-    const reported = new Set<string>();
-    for (const m of body.matchAll(BODY_WIKI_LINK_RE)) {
-      const inner = m[1]?.trim();
-      if (!inner) continue;
-      const tp = resolveWikiLink(`[[${inner}]]`, slugMap);
+    if (!isPatternMap(f.meta)) continue;
+    // Listed leaves, then each leaf already reported.
+    const covered = new Set(patternMapLeaves(f.meta, slugMap, metaByPath).map((l) => l.path));
+    for (const wl of bodyWikiLinks(f.path)) {
+      const tp = resolveWikiLink(wl, slugMap);
       const target = tp ? metaByPath.get(tp) : undefined;
-      // A sibling map is a route, not a leaf; a cast ships it only when the Mold declares it.
-      if (!tp || target?.type !== "pattern" || target.pattern_kind === "moc") continue;
-      if (declared.has(tp)) continue;
-      if (reported.has(tp)) continue;
-      reported.add(tp);
+      if (!tp || target?.type !== "pattern" || isPatternMap(target) || covered.has(tp)) continue;
+      covered.add(tp);
       findings.push({
         path: f.path,
         severity: "error",
-        message: `body links pattern [[${inner}]], which related_patterns does not list — casts ship only the listed patterns beside this map`,
+        message: `body links pattern ${wl}, which related_patterns does not list — casts ship only the listed patterns beside this map`,
       });
     }
   }

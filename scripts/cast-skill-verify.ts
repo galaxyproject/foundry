@@ -283,7 +283,6 @@ function main(): void {
         errors.push(`ref ${r.src}: sidecar does not parse as JSON: ${(e as Error).message}`);
       }
     }
-    // on-demand refs should have trigger text represented in SKILL.md (best-effort: filename basename appears).
     // An expanded ref is reached through the declared ref that listed it, which SKILL.md names.
     if (r.expanded_from) {
       const parent = provByDst.get(r.expanded_from);
@@ -294,9 +293,8 @@ function main(): void {
       } else if (skillBody && r.used_at !== "cast-time" && !skillBody.includes(parent.dst)) {
         errors.push(`ref ${r.src}: its map ${parent.dst} is not named in SKILL.md`);
       }
-      continue;
-    }
-    if (r.load === "on-demand" && r.used_at !== "cast-time" && skillBody) {
+    } else if (r.load === "on-demand" && r.used_at !== "cast-time" && skillBody) {
+      // on-demand refs should have trigger text represented in SKILL.md (best-effort: filename basename appears).
       const dstBase = path.basename(r.dst);
       if (!skillBody.includes(dstBase) && !skillBody.includes(r.dst)) {
         errors.push(

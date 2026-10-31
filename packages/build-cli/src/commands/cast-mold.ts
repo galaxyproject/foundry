@@ -41,6 +41,7 @@ import type {
   ProvenanceArtifacts,
 } from "../lib/artifact-contract.js";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { isPatternMap, patternMapLeaves } from "../lib/pattern-maps.js";
 import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
 import { validateRuns } from "../lib/runs-check.js";
 import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
@@ -263,7 +264,7 @@ const GALAXY_HOOKS: CastHooks = {
         "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
         "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
         "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
-        ...mocLinkNotes(runtime, refs, metaByPath),
+        ...mocLinkNotes(refs, metaByPath),
       ]),
     ];
   },
@@ -294,53 +295,34 @@ const GALAXY_HOOKS: CastHooks = {
 
 // ---- pattern maps of content ----
 
-/**
- * The leaf patterns a declared pattern map of content brings into the bundle.
- *
- * `related_patterns` is the map's declared list, and the validator holds it to the body's links.
- * A listed sibling map is skipped: it is a route, not a leaf, and ships only when a Mold declares
- * it.
- */
+// A declared map brings its leaves as on-demand refs, which the validator holds to its body links.
 function mocLeafRefs({
   ref,
   meta,
   metaByPath,
   slugMap,
 }: RefExpansionContext): Readonly<Record<string, unknown>>[] {
-  if (ref.kind !== "pattern" || meta.pattern_kind !== "moc") return [];
-  const listed = Array.isArray(meta.related_patterns) ? meta.related_patterns : [];
-  return listed
-    .filter((link): link is string => typeof link === "string")
-    .filter((link) => {
-      const target = resolveWikiLink(link, slugMap);
-      return !target || metaByPath.get(target)?.pattern_kind !== "moc";
-    })
-    .map((link) => ({
-      kind: "pattern",
-      ref: link,
-      mode: "verbatim",
-      used_at: ref.used_at,
-      load: "on-demand",
-    }));
+  if (ref.kind !== "pattern" || !isPatternMap(meta)) return [];
+  return patternMapLeaves(meta, slugMap, metaByPath).map(({ link }) => ({
+    kind: "pattern",
+    ref: link,
+    mode: "verbatim",
+    used_at: ref.used_at,
+    load: "on-demand",
+  }));
 }
 
-/**
- * One Runtime Notes line naming the declared pattern maps and where their leaf links resolve.
- *
- * Scoped to leaves: a map also links research notes and sibling maps, which ship only when this
- * skill lists them.
- */
+// One Runtime Notes line naming the runtime maps and where their leaf links resolve.
 function mocLinkNotes(
-  runtime: readonly ProvenanceRefEntry[],
   refs: readonly ProvenanceRefEntry[],
   metaByPath: ReadonlyMap<string, Frontmatter>,
 ): string[] {
-  const maps = runtime
-    .filter((r) => r.kind === "pattern" && !r.expanded_from && !r.companion_of)
-    .filter((r) => metaByPath.get(r.src)?.pattern_kind === "moc")
+  const maps = refs
+    .filter((r) => r.used_at !== "cast-time" && r.kind === "pattern")
+    .filter((r) => isPatternMap(metaByPath.get(r.src)))
     .map((r) => r.dst)
     .sort();
-  // Not `runtime`: a leaf shared with a cast-time map keeps that map's used_at but still ships.
+  // Any used_at: a leaf shared with a cast-time map keeps that map's used_at but still ships.
   const leaf = refs.find((r) => r.expanded_from && !r.companion_of);
   if (maps.length === 0 || !leaf) return [];
   const dir = path.posix.dirname(leaf.dst);
