@@ -1088,6 +1088,47 @@ function validateBodyWikiLinks(
   return findings;
 }
 
+/**
+ * A pattern map of content declares, in `related_patterns`, every leaf pattern its body routes to.
+ *
+ * Casting ships a map's `related_patterns` beside it, so a pattern the body links and the field
+ * omits is a link the cast skill cannot follow.
+ */
+function validateMocRelatedPatterns(
+  files: FileMeta[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    if (f.meta.type !== "pattern" || f.meta.pattern_kind !== "moc") continue;
+    const declared = new Set(
+      (Array.isArray(f.meta.related_patterns) ? f.meta.related_patterns : [])
+        .map((wl) => (typeof wl === "string" ? resolveWikiLink(wl, slugMap) : undefined))
+        .filter((tp): tp is string => !!tp),
+    );
+    const body = readMarkdown(f.path).body.replace(FENCED_CODE_RE, "").replace(INLINE_CODE_RE, "");
+    const reported = new Set<string>();
+    for (const m of body.matchAll(BODY_WIKI_LINK_RE)) {
+      const inner = m[1]?.trim();
+      if (!inner) continue;
+      const tp = resolveWikiLink(`[[${inner}]]`, slugMap);
+      const target = tp ? metaByPath.get(tp) : undefined;
+      // A sibling map is a route, not a leaf; a cast ships it only when the Mold declares it.
+      if (!tp || target?.type !== "pattern" || target.pattern_kind === "moc") continue;
+      if (declared.has(tp)) continue;
+      if (reported.has(tp)) continue;
+      reported.add(tp);
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `body links pattern [[${inner}]], which related_patterns does not list — casts ship only the listed patterns beside this map`,
+      });
+    }
+  }
+  return findings;
+}
+
 const STUB_BODY_RE = /^Stub\.\s+Replace with real/m;
 
 function validateMoldStubBody(files: FileMeta[]): CrossFileFinding[] {
@@ -1562,6 +1603,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateCompanionFiles(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
   crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));
+  crossFindings.push(...validateMocRelatedPatterns(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldStubBody(validFiles));
 
   // Grouped, so each file reads as one block rather than once per cross-file pass that found it.

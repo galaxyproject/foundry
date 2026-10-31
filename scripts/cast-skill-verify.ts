@@ -99,6 +99,7 @@ interface ProvenanceRefEntry {
   dst_hash: string | null;
   source: "deterministic";
   companion_of?: string;
+  expanded_from?: string;
 }
 
 interface Provenance {
@@ -282,7 +283,8 @@ function main(): void {
       }
     }
     // on-demand refs should have trigger text represented in SKILL.md (best-effort: filename basename appears).
-    if (r.load === "on-demand" && r.used_at !== "cast-time" && skillBody) {
+    // An expanded ref is reached through the ref that listed it, which SKILL.md names instead.
+    if (r.load === "on-demand" && r.used_at !== "cast-time" && !r.expanded_from && skillBody) {
       const dstBase = path.basename(r.dst);
       if (!skillBody.includes(dstBase) && !skillBody.includes(r.dst)) {
         errors.push(

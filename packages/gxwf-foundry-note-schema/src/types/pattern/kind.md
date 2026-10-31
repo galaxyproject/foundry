@@ -12,7 +12,8 @@ units has nothing to ground a cast in, whatever the domain.
 - **`title`** — patterns are read by humans browsing the corpus, and a slug is not a title.
 - **`pattern_kind`** — `operation` (one transformation), `recipe` (an assembled sequence), or
   `moc` (a map of content: a hub note whose job is to point at others). The three are browsed
-  and cast differently, so the distinction is declared rather than guessed from the body.
+  and cast differently, so the distinction is declared rather than guessed from the body: a cast
+  that ships a `moc` also ships the leaf patterns its `related_patterns` lists.
 - **`evidence`** — how strongly the corpus supports the claim: `corpus-observed`,
   `structurally-verified`, `corpus-and-verified`, or `hypothesis`. **`hypothesis` is legal**,
   and that is the point: a speculative pattern that is *marked* speculative can be safely

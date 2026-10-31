@@ -1416,6 +1416,161 @@ function execVerify(cwd: string, mold: string): { code: number; stdout: string; 
   }
 }
 
+// A pattern map of content is an index. Its leaves carry the tool settings and worked state, so
+// a cast that ships the map ships the leaves it lists beside it (galaxyproject/foundry#570).
+describe("cast-mold pattern maps of content", () => {
+  function writeMocFixture(dir: string, mocRelated: string[]): void {
+    for (const sub of [
+      "content/molds/m",
+      "content/patterns",
+      "casts/claude",
+      "scripts/lib/schemas",
+    ]) {
+      mkdirSync(path.join(dir, sub), { recursive: true });
+    }
+    writeFileSync(
+      path.join(dir, "scripts/lib/schemas/cast-provenance.schema.json"),
+      readFileSync(path.join(repoRoot, "scripts/lib/schemas/cast-provenance.schema.json"), "utf8"),
+    );
+    writeFileSync(
+      path.join(dir, "casts/claude/_target.yml"),
+      [
+        "bundle_path: skills/{mold}",
+        "document: { path: SKILL.md, noun: skill }",
+        "kinds:",
+        "  pattern:",
+        "    dst_dir: references/patterns/",
+        "    dst_extension: .md",
+        "    modes: [verbatim]",
+        "skill_constraints:",
+        "  frontmatter_required: [name, description]",
+        "  forbidden_runtime_paths: []",
+        "",
+      ].join("\n"),
+    );
+    writeFileSync(
+      path.join(dir, "content/molds/m/index.md"),
+      `---
+type: mold
+name: m
+axis: generic
+tags: [mold]
+status: draft
+created: 2026-10-31
+revised: 2026-10-31
+revision: 1
+summary: Pattern-map cast test mold summary.
+references:
+  - kind: pattern
+    ref: "[[hub]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    trigger: When choosing a collection operation.
+---
+
+# m
+
+Route through the hub.
+`,
+    );
+    const pattern = (slug: string, kind: string, related: string[], body: string) =>
+      writeFileSync(
+        path.join(dir, `content/patterns/${slug}.md`),
+        `---
+type: pattern
+pattern_kind: ${kind}
+evidence: corpus-observed
+title: ${slug}
+tags: [target/galaxy]
+status: draft
+created: 2026-10-31
+revised: 2026-10-31
+revision: 1
+summary: The ${slug} pattern.
+${related.length ? `related_patterns:\n${related.map((r) => `  - "${r}"`).join("\n")}\n` : ""}---
+
+${body}
+`,
+      );
+    pattern("hub", "moc", mocRelated, "Flatten with [[leaf]]; see also [[other-hub]].");
+    pattern("other-hub", "moc", ["[[leaf]]"], "Another map.");
+    pattern("leaf", "operation", [], "Use `__FLATTEN__` with `join_identifier: _`.");
+  }
+
+  const bundle = (dir: string) => path.join(dir, "casts/claude/skills/m");
+  const provRefs = (dir: string) =>
+    (
+      JSON.parse(readFileSync(path.join(bundle(dir), "_provenance.json"), "utf8")) as {
+        refs: {
+          dst: string;
+          expanded_from?: string;
+          load: string;
+          src_hash: string;
+          dst_hash: string;
+        }[];
+      }
+    ).refs;
+
+  it("ships the leaves a map lists, records expanded_from, and tells the skill how links resolve", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-moc-"));
+    seedReferenceContract(dir);
+    try {
+      writeMocFixture(dir, ["[[leaf]]", "[[other-hub]]"]);
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+
+      expect(readFileSync(path.join(bundle(dir), "references/patterns/leaf.md"), "utf8")).toContain(
+        "__FLATTEN__",
+      );
+      // A sibling map is a route, not a leaf: it ships only when the Mold declares it.
+      expect(existsSync(path.join(bundle(dir), "references/patterns/other-hub.md"))).toBe(false);
+
+      const leaf = provRefs(dir).find((ref) => ref.dst === "references/patterns/leaf.md");
+      expect(leaf?.expanded_from).toBe("references/patterns/hub.md");
+      expect(leaf?.load).toBe("on-demand");
+      expect(leaf?.src_hash).toBe(leaf?.dst_hash);
+
+      const skill = readFileSync(path.join(bundle(dir), "SKILL.md"), "utf8");
+      expect(skill).toMatch(
+        /`references\/patterns\/hub\.md`.*double-bracketed `<slug>` link.*`references\/patterns\/<slug>\.md`/,
+      );
+      // Reached through the map, so it does not get a Load On Demand row of its own.
+      expect(skill).not.toMatch(/^- .*references\/patterns\/leaf\.md/m);
+
+      const verify = execVerify(dir, "m");
+      expect(verify.code, `stderr: ${verify.stderr}\nstdout: ${verify.stdout}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("sweeps a leaf the map stops listing", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-moc-sweep-"));
+    seedReferenceContract(dir);
+    try {
+      writeMocFixture(dir, ["[[leaf]]"]);
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+      writeMocFixture(dir, []);
+      const check = runTsx(foundryBuild, [
+        "cast",
+        "m",
+        "--target=claude",
+        "--check",
+        "--root",
+        dir,
+      ]);
+      expect(check.code).not.toBe(0);
+      expect(check.stderr + check.stdout).toMatch(/leaf\.md/);
+      expect(runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]).code).toBe(0);
+      expect(existsSync(path.join(bundle(dir), "references/patterns/leaf.md"))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("validate-artifact process runner", () => {
   it("uses exit code and captures stdout/stderr as opaque evidence", async () => {
     const { runProcessValidation } =
