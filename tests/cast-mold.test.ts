@@ -1419,7 +1419,7 @@ function execVerify(cwd: string, mold: string): { code: number; stdout: string; 
 // A pattern map of content is an index. Its leaves carry the tool settings and worked state, so
 // a cast that ships the map ships the leaves it lists beside it (galaxyproject/foundry#570).
 describe("cast-mold pattern maps of content", () => {
-  function writeMocFixture(dir: string, mocRelated: string[]): void {
+  function writeMocFixture(dir: string, mocRelated: string[], castTimeMap = false): void {
     for (const sub of [
       "content/molds/m",
       "content/patterns",
@@ -1461,7 +1461,17 @@ revised: 2026-10-31
 revision: 1
 summary: Pattern-map cast test mold summary.
 references:
-  - kind: pattern
+${
+  castTimeMap
+    ? `  - kind: pattern
+    ref: "[[other-hub]]"
+    used_at: cast-time
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+`
+    : ""
+}  - kind: pattern
     ref: "[[hub]]"
     used_at: runtime
     load: on-demand
@@ -1541,6 +1551,21 @@ ${body}
 
       const verify = execVerify(dir, "m");
       expect(verify.code, `stderr: ${verify.stderr}\nstdout: ${verify.stdout}`).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("still tells the skill where a leaf is when a cast-time map claimed it first", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "foundry-cast-moc-casttime-"));
+    seedReferenceContract(dir);
+    try {
+      writeMocFixture(dir, ["[[leaf]]"], true);
+      const r = runTsx(foundryBuild, ["cast", "m", "--target=claude", "--root", dir]);
+      expect(r.code, `stderr: ${r.stderr}`).toBe(0);
+      const skill = readFileSync(path.join(bundle(dir), "SKILL.md"), "utf8");
+      expect(skill).toMatch(/listed by `references\/patterns\/hub\.md`/);
+      expect(existsSync(path.join(bundle(dir), "references/patterns/leaf.md"))).toBe(true);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

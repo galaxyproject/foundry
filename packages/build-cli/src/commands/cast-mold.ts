@@ -263,7 +263,7 @@ const GALAXY_HOOKS: CastHooks = {
         "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
         "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
         "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
-        ...mocLinkNotes(runtime, metaByPath),
+        ...mocLinkNotes(runtime, refs, metaByPath),
       ]),
     ];
   },
@@ -332,6 +332,7 @@ function mocLeafRefs({
  */
 function mocLinkNotes(
   runtime: readonly ProvenanceRefEntry[],
+  refs: readonly ProvenanceRefEntry[],
   metaByPath: ReadonlyMap<string, Frontmatter>,
 ): string[] {
   const maps = runtime
@@ -339,7 +340,8 @@ function mocLinkNotes(
     .filter((r) => metaByPath.get(r.src)?.pattern_kind === "moc")
     .map((r) => r.dst)
     .sort();
-  const leaf = runtime.find((r) => r.expanded_from && !r.companion_of);
+  // Not `runtime`: a leaf shared with a cast-time map keeps that map's used_at but still ships.
+  const leaf = refs.find((r) => r.expanded_from && !r.companion_of);
   if (maps.length === 0 || !leaf) return [];
   const dir = path.posix.dirname(leaf.dst);
   const names = maps.map((m) => `\`${m}\``).join(", ");
