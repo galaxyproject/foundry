@@ -300,6 +300,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[repository-layout]] — Where authored source, implementation code, generated artifacts, fixtures, and site files belong. *(reviewed)*
 - [[roadmap]] — The current development direction of the Galaxy Workflow Foundry, grounded in live GitHub issue metadata.
 - [[schema-packages]] — Where a Mold IO schema lives, how cast resolves one through a schema note, and why there is no separate schema package. *(reviewed)*
+- [[start-contributing]] — Entry points for new Foundry contributors: tracks to try, runs to report, and issues to pick up.
 
 ## Prompt
 

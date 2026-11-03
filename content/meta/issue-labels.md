@@ -7,8 +7,8 @@ tags:
   - meta
 status: draft
 created: 2026-10-21
-revised: 2026-10-24
-revision: 2
+revised: 2026-10-31
+revision: 3
 summary: "What each label on galaxyproject/foundry issues means, which labels a triaged issue carries, and what reads them."
 ---
 
@@ -85,4 +85,4 @@ The workflow runs on the `opened`, `reopened`, `labeled` and `unlabeled` issue e
 
 ## GitHub defaults
 
-`bug`, `enhancement` and `documentation` describe the kind of work and are optional. `duplicate`, `invalid`, `wontfix` and `question` keep their GitHub meanings.
+`bug`, `enhancement` and `documentation` describe the kind of work and are optional. `duplicate`, `invalid`, `wontfix` and `question` keep their GitHub meanings. `good first issue` marks a small, self-contained starting point for new contributors; [[start-contributing]] links to them.
