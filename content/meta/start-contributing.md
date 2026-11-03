@@ -8,11 +8,21 @@ tags:
 status: draft
 created: 2026-10-31
 revised: 2026-11-03
-revision: 2
+revision: 3
 summary: "Entry points for new Foundry contributors: tracks to try, runs to report, and issues to pick up."
 ---
 
-TODO: one-paragraph intro.
+This page is where to start contributing to Foundry: pipelines to run, experiments to try, content to add and issues to pick up.
+
+Foundry gets better the more workflows go through it. Every published workflow is data: its runs show where the Molds, the skills and the Galaxy platform underneath them break. Fixing those edges makes the next workflow better and quicker to build. [IWC](https://github.com/galaxyproject/iwc) keeps a high review bar, which suits workflows installed on usegalaxy.\* servers but slows this loop. [IWC Lab](https://github.com/galaxyproject/iwc-lab) sets a lower one. Its workflows go through the same deploy pipeline and are tested nightly, but they aren't installed on public servers. That means we can merge more of them, experiment more freely and learn faster.
+
+```text
+   publish more workflows ──────► more runs, more data
+   (IWC Lab: low bar)                     │
+            ▲                             ▼
+            │                  find edges in skills,
+   better workflows ◄───────── Molds and platform; fix them
+```
 
 ## Set up
 
