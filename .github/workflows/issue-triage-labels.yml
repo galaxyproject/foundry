@@ -29,6 +29,13 @@ name: Issue Triage Labels
 # link can sit unflagged. The event trigger is for fast feedback while you are
 # labelling, and it re-checks the whole graph rather than just the issue that
 # fired, because relabelling a parent invalidates its children.
+#
+# The same run mirrors each issue onto the galaxyproject issue board, a
+# read-only view of the labels: Status from the labels above, Priority from
+# `priority/*`. Labels stay the source of truth, so a dragged card snaps back
+# on the next run. The board needs a GitHub App with Projects write access
+# (`ISSUE_BOARD_APP_CLIENT_ID` variable, `ISSUE_BOARD_APP_KEY` secret) and the
+# project number (`ISSUE_BOARD_PROJECT` variable); without them it is skipped.
 
 on:
   issues:
@@ -39,6 +46,11 @@ on:
 
 permissions: {}
 
+# Each run re-checks every issue, so one queued run covers any burst of events.
+concurrency:
+  group: issue-triage-labels
+  cancel-in-progress: false
+
 jobs:
   triage:
     name: Reconcile needs-triage
@@ -47,7 +59,20 @@ jobs:
     permissions:
       issues: write
     steps:
+      - id: board-token
+        if: vars.ISSUE_BOARD_APP_CLIENT_ID != '' && vars.ISSUE_BOARD_PROJECT != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.ISSUE_BOARD_APP_CLIENT_ID }}
+          private-key: ${{ secrets.ISSUE_BOARD_APP_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: foundry
+          permission-organization-projects: write
+          permission-issues: read
       - uses: actions/github-script@v9
+        env:
+          BOARD_PROJECT: ${{ vars.ISSUE_BOARD_PROJECT }}
+          BOARD_TOKEN: ${{ steps.board-token.outputs.token }}
         with:
           script: |
             const NEEDS = 'needs-triage';
@@ -58,6 +83,7 @@ jobs:
                   issues(first: 100, states: OPEN, after: $cursor) {
                     pageInfo { hasNextPage endCursor }
                     nodes {
+                      id
                       number
                       labels(first: 50) { nodes { name } }
                       parent { number labels(first: 50) { nodes { name } } }
@@ -113,10 +139,31 @@ jobs:
               return out;
             }
 
+            const WORK_COLUMNS = {
+              'work/ready-research': 'Ready: research',
+              'work/ready-implement': 'Ready: implement',
+              'work/in-progress': 'In progress',
+              'work/needs-review': 'Needs review',
+              'work/human': 'Human',
+            };
+
+            // Board column of an open issue; reasons are its contract violations.
+            function boardStatus(issue, reasons) {
+              if (reasons.length) return 'Needs triage';
+              const own = names(issue);
+              if (own.some(isBlocker)) return 'Blocked';
+              return WORK_COLUMNS[own.find((n) => n.startsWith('work/'))] ?? null;
+            }
+
+            const boardPriority = (issue) =>
+              names(issue).find((n) => n.startsWith('priority/'))?.slice('priority/'.length) ?? null;
+
             const rows = [];
+            const wanted = new Map();
             for (const issue of issues) {
               const flagged = names(issue).includes(NEEDS);
               const reasons = violations(issue);
+              wanted.set(issue.id, { Status: boardStatus(issue, reasons), Priority: boardPriority(issue) });
               if (reasons.length && !flagged) {
                 await github.rest.issues.addLabels({
                   ...context.repo, issue_number: issue.number, labels: [NEEDS],
@@ -129,6 +176,95 @@ jobs:
               if (reasons.length) rows.push([`#${issue.number}`, reasons.join('; ')]);
             }
 
+            const BOARD_QUERY = `
+              query($org: String!, $number: Int!, $cursor: String) {
+                organization(login: $org) {
+                  projectV2(number: $number) {
+                    id
+                    fields(first: 50) {
+                      nodes { ... on ProjectV2SingleSelectField { id name options { id name } } }
+                    }
+                    items(first: 100, after: $cursor) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        id
+                        content { ... on Issue { id state repository { nameWithOwner } } }
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name
+                              field { ... on ProjectV2SingleSelectField { name } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`;
+
+            // Mirrors labels onto the board: adds open issues, moves closed ones to Done.
+            async function syncBoard(board, number) {
+              const repo = `${context.repo.owner}/${context.repo.repo}`;
+              const items = new Map();
+              let project = null;
+              let cursor = null;
+              do {
+                const page = await board.graphql(BOARD_QUERY, { org: context.repo.owner, number, cursor });
+                project = page.organization.projectV2;
+                for (const item of project.items.nodes) {
+                  if (item.content?.repository?.nameWithOwner !== repo) continue;
+                  const values = {};
+                  for (const v of item.fieldValues.nodes) if (v.field) values[v.field.name] = v.name;
+                  items.set(item.content.id, { id: item.id, state: item.content.state, values });
+                }
+                cursor = project.items.pageInfo.hasNextPage ? project.items.pageInfo.endCursor : null;
+              } while (cursor);
+
+              const fields = Object.fromEntries(
+                project.fields.nodes.filter((f) => f.options).map((f) => [f.name, f]));
+              const want = new Map(wanted);
+              for (const [contentId, item] of items) {
+                if (!want.has(contentId) && item.state !== 'OPEN') want.set(contentId, { Status: 'Done' });
+              }
+
+              const counts = { added: 0, updated: 0 };
+              const missing = new Set();
+              for (const [contentId, values] of want) {
+                let item = items.get(contentId);
+                if (!item) {
+                  const added = await board.graphql(
+                    `mutation($project: ID!, $content: ID!) {
+                      addProjectV2ItemById(input: { projectId: $project, contentId: $content }) { item { id } }
+                    }`, { project: project.id, content: contentId });
+                  item = { id: added.addProjectV2ItemById.item.id, values: {} };
+                  counts.added++;
+                }
+                for (const [name, value] of Object.entries(values)) {
+                  if (value === null || item.values[name] === value) continue;
+                  const option = fields[name]?.options.find((o) => o.name === value);
+                  if (!option) {
+                    missing.add(`${name}: ${value}`);
+                    continue;
+                  }
+                  await board.graphql(
+                    `mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+                      updateProjectV2ItemFieldValue(input: {
+                        projectId: $project, itemId: $item, fieldId: $field,
+                        value: { singleSelectOptionId: $option }
+                      }) { projectV2Item { id } }
+                    }`, { project: project.id, item: item.id, field: fields[name].id, option: option.id });
+                  counts.updated++;
+                }
+              }
+              for (const m of missing) core.warning(`board has no option ${m}`);
+              return `Board: ${counts.added} added, ${counts.updated} field values set.`;
+            }
+
+            const boardLine = process.env.BOARD_TOKEN
+              ? await syncBoard(getOctokit(process.env.BOARD_TOKEN), Number(process.env.BOARD_PROJECT))
+              : 'Board: skipped (not configured).';
+
             core.summary.addHeading(
               `${rows.length} of ${issues.length} open issues out of contract`, 2);
             if (rows.length) {
@@ -137,4 +273,5 @@ jobs:
                 ...rows,
               ]);
             }
+            core.summary.addRaw(boardLine, true);
             await core.summary.write();

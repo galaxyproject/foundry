@@ -8,7 +8,7 @@ tags:
 status: draft
 created: 2026-10-21
 revised: 2026-11-04
-revision: 4
+revision: 5
 summary: "What each label on galaxyproject/foundry issues means, which labels a triaged issue carries, and what reads them."
 ---
 
@@ -87,6 +87,23 @@ Link the upstream issue or pull request in a comment so the next reader can chec
 - has both a `work/*` label and a blocker label.
 
 The workflow runs on the `opened`, `reopened`, `labeled` and `unlabeled` issue events, and daily, because GitHub sends no event when a parent link changes. Its run summary names each flagged issue and the rule it breaks.
+
+## Issue board
+
+The galaxyproject issue board shows every Foundry issue in one column, so the whole queue reads at a glance. The same workflow sets each card from the issue's labels, so the board is read-only. Change the labels, not the card. A dragged card moves back on the next run.
+
+| Column | Issue |
+|---|---|
+| Needs triage | Breaks a rule above |
+| Blocked | Carries a blocker label |
+| Ready: research | `work/ready-research` |
+| Ready: implement | `work/ready-implement` |
+| In progress | `work/in-progress` |
+| Needs review | `work/needs-review` |
+| Human | `work/human` |
+| Done | Closed |
+
+Each card also carries a Priority field copied from `priority/*`, so views can list ready work in the order agents take it.
 
 ## GitHub defaults
 
