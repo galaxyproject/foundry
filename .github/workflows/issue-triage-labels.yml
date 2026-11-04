@@ -32,14 +32,19 @@ name: Issue Triage Labels
 #
 # The same run mirrors each issue onto the galaxyproject issue board, a
 # read-only view of the labels: Status from the labels above, Priority from
-# `priority/*`. Labels stay the source of truth, so a dragged card snaps back
-# on the next run. The board needs a GitHub App with Projects write access
+# `priority/*`. A `work/in-progress` card moves to Draft PR or PR ready while
+# a pull request that closes the issue is open; the `pull_request_target`
+# trigger keeps that current, and the job never checks out pull request code.
+# Labels stay the source of truth, so a dragged card snaps back on the next
+# run. The board needs a GitHub App with Projects write access
 # (`ISSUE_BOARD_APP_CLIENT_ID` variable, `ISSUE_BOARD_APP_KEY` secret) and the
 # project number (`ISSUE_BOARD_PROJECT` variable); without them it is skipped.
 
 on:
   issues:
     types: [opened, reopened, labeled, unlabeled]
+  pull_request_target: # zizmor: ignore[dangerous-triggers] reads API data only, no checkout
+    types: [opened, reopened, ready_for_review, converted_to_draft, edited, closed]
   schedule:
     - cron: "17 13 * * *"
   workflow_dispatch:
@@ -58,6 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      pull-requests: read
     steps:
       - id: board-token
         if: vars.ISSUE_BOARD_APP_CLIENT_ID != '' && vars.ISSUE_BOARD_PROJECT != ''
@@ -87,6 +93,7 @@ jobs:
                       number
                       labels(first: 50) { nodes { name } }
                       parent { number labels(first: 50) { nodes { name } } }
+                      closedByPullRequestsReferences(first: 10) { nodes { state isDraft } }
                     }
                   }
                 }
@@ -152,7 +159,13 @@ jobs:
               if (reasons.length) return 'Needs triage';
               const own = names(issue);
               if (own.some(isBlocker)) return 'Blocked';
-              return WORK_COLUMNS[own.find((n) => n.startsWith('work/'))] ?? null;
+              const work = own.find((n) => n.startsWith('work/'));
+              if (work === 'work/in-progress') {
+                const prs = issue.closedByPullRequestsReferences.nodes.filter((p) => p.state === 'OPEN');
+                if (prs.some((p) => !p.isDraft)) return 'PR ready';
+                if (prs.length) return 'Draft PR';
+              }
+              return WORK_COLUMNS[work] ?? null;
             }
 
             const boardPriority = (issue) =>

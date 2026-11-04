@@ -8,7 +8,7 @@ tags:
 status: draft
 created: 2026-10-21
 revised: 2026-11-04
-revision: 5
+revision: 6
 summary: "What each label on galaxyproject/foundry issues means, which labels a triaged issue carries, and what reads them."
 ---
 
@@ -98,10 +98,14 @@ The galaxyproject issue board shows every Foundry issue in one column, so the wh
 | Blocked | Carries a blocker label |
 | Ready: research | `work/ready-research` |
 | Ready: implement | `work/ready-implement` |
-| In progress | `work/in-progress` |
+| In progress | `work/in-progress`, with no open pull request that closes it |
+| Draft PR | `work/in-progress`, with an open draft pull request that closes it |
+| PR ready | `work/in-progress`, with an open pull request ready for review that closes it |
 | Needs review | `work/needs-review` |
 | Human | `work/human` |
 | Done | Closed |
+
+A pull request closes an issue when its description says `Closes #N` or it is linked from the issue's Development sidebar. The workflow also runs when a pull request opens, closes, changes draft state or has its description edited, so these cards follow the pull request without a label change.
 
 Each card also carries a Priority field copied from `priority/*`, so views can list ready work in the order agents take it.
 
