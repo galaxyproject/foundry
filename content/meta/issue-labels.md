@@ -53,8 +53,8 @@ An unblocked issue carries exactly one `work/*` label. It says whether an agent 
 |---|---|---|
 | `work/ready-research` | An agent may pick it up, research it and post the first comment. | `work/in-progress` |
 | `work/ready-implement` | An agent may pick it up, implement it and open a pull request. | `work/in-progress` |
-| `work/in-progress` | Someone has claimed it. Their comment links the branch, pull request or upstream work. | `work/needs-review` after research, or closed by the merged pull request |
-| `work/needs-review` | An agent posted research findings and a person needs to read them. | Whatever the reviewer decides |
+| `work/in-progress` | Someone has claimed it. Their comment links the branch, pull request or upstream work. | `work/needs-review` after research or design questions, or closed by the merged pull request |
+| `work/needs-review` | An agent posted research findings or design questions it cannot settle, and a person needs to answer. | Whatever the reviewer decides |
 | `work/human` | A person drives the work. Agents do not pick it up. | Set by that person |
 
 Agents pick up only `work/ready-*` issues, `priority/mvp` before `priority/v2`, then `roadmap/main` before `roadmap/substep` before `roadmap/off`. Claiming an issue means replacing its `work/ready-*` label with `work/in-progress` and commenting with a link to the work, so a second agent does not start the same issue. An agent that gives up restores the `work/ready-*` label it replaced. Pull requests ask for review through GitHub review requests, so an implemented issue stays `work/in-progress` until its pull request merges and closes it.
