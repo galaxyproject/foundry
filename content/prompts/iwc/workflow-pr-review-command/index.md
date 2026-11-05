@@ -6,16 +6,16 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-09-09
-revised: 2026-09-12
-revision: 3
+revised: 2026-11-05
+revision: 4
 sources:
-  - "https://github.com/jmchilton/iwc/blob/d7012eb5fe40b471853acb2866a2a8af334d4c4a/.claude/commands/review.md"
+  - "https://github.com/galaxyproject/iwc/blob/fa25be50fb6157e505b330684b7dfd3c17e72eaf/.claude/commands/review.md"
 license: MIT
 license_file: LICENSES/iwc.LICENSE
 summary: "Vendored IWC command for reviewing a workflow pull request against the contributor and reviewer checklist."
 ---
 
-> **Vendored from the proposed upstream review overhaul**, pinned at SHA `d7012eb`. The raw prompt lives next to this note as `upstream.prompt`.
+> **Vendored from upstream**, pinned at SHA `fa25be5`. The raw prompt lives next to this note as `upstream.prompt`.
 >
 > **When to consult:** as upstream procedural evidence for a Mold that reviews an IWC or IWC Lab workflow submission. This is a repository-local review command, not a GitHub Actions workflow.
 
@@ -26,7 +26,7 @@ Casting consumes `upstream.prompt` verbatim. This wrapper exists for Foundry met
 ## Provenance and acceptance status
 
 - **Pin of record:** the `vendored_upstreams.yml` entry for `upstream.prompt`. That entry, this note's `sources:` URL, and the blockquote above are the only places this repository states the SHA. No Mold, eval, scenario, or Pipeline restates it; a runtime reports the hash recorded for this reference in its cast's provenance record instead.
-- **Acceptance:** proposed, not accepted. galaxyproject/iwc#1366 is still open, so this pin is a proposed revision of the review policy rather than accepted upstream policy. Anything consuming it should say so.
-- **Claude-versus-Copilot superset comparison:** not yet performed. Record the finding here once #1366 is accepted. If the accepted command is not a semantic superset of [[copilot-workflow-review-instructions]], record the specific gaps here and resolve them upstream, or revisit the one-pass decision explicitly rather than silently dropping the difference.
+- **Acceptance:** accepted. The pin is the merge commit of galaxyproject/iwc#1366, on `galaxyproject/iwc` `main`.
+- **Claude-versus-Copilot superset comparison:** at this pin, the command covers every requirement in [[copilot-workflow-review-instructions]] except one. The Copilot instructions say to follow semantic versioning. The command instead sends an apparently breaking change to human versioning review, because it records that IWC changelogs do not necessarily follow semantic versioning. The one-pass review keeps the command's behavior. Upstream requires the superset to hold, so repeat this comparison at each re-pin. Record any new gap here and resolve it upstream, or revisit the one-pass decision explicitly rather than silently dropping the difference.
 
 Refreshing the pin is: re-vendor `upstream.prompt`, update the `vendored_upstreams.yml` entry, update `sources:`, the blockquote, this section, `revised:`, and `revision:` — then `make casts`. Nothing else in the repository needs to change.
