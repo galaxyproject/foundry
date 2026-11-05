@@ -230,3 +230,4 @@ Actual runs should verify:
 - How `workflow_test_on_invocation` behaves for failed, warning-only, mapped collection, and subworkflow invocations.
 - Whether generated test cases from invocation preserve nested output collection structure correctly.
 - Whether a container job in a `planemo test` run reads a `${__HERE__}` database through the generated mount. The mount has been read from the rendered job configuration, not exercised by a job.
+- Whether the recipe holds for a data-table-only wrapper with a filter on its select. The passing run used a wrapper that also accepts a history dataset and has no filter.
