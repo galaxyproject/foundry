@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-21
-revision: 11
+revised: 2026-11-05
+revision: 12
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[freeform-summary-to-galaxy-test-plan]]"
@@ -26,6 +26,9 @@ input_artifacts:
     description: "Concrete gxformat2 workflow being tested — the loop-endstate `galaxy-workflow.gxwf.yml` from [[advance-galaxy-draft-step]] (`class: GalaxyWorkflow`); provides the real input/output labels, outputs, and collection shapes the test must assert against."
   - id: test-data-refs
     description: "Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data."
+  - id: staged-data-table
+    optional: true
+    description: "Data-table configuration [[find-test-data]] staged for a wrapper that takes its database only from a data table. Absent when no input needs one."
 output_artifacts:
   - id: galaxy-workflow-test
     kind: yaml
@@ -101,7 +104,7 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs."
-    trigger: "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations."
+    trigger: "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations, or when the test depends on a staged data table."
 ---
 # implement-galaxy-workflow-test
 
@@ -119,6 +122,7 @@ The workflow is the contract: input and output labels in the test file must addr
 2. **Author job inputs and stage their data.** Wire each workflow input to a `test-data-refs` entry, and make the data the test references actually exist on disk before any Planemo run:
    - **Prefer a bare remote `location:`** ([[iwc-test-data-conventions]], remote-URL-first) whenever the ref is a single fetchable artifact — Galaxy fetches it at upload time, so nothing is staged locally. Record the hash when known.
    - **Materialize a local `test-data/` layout only when the ref needs prep a URL can't express** — a concatenation (e.g. per-isolate chromosome+plasmid into one FASTA), a subset (one chromosome, selected loci), or a column split into named collection elements. In that case the test file's `path:` entries point at files this Mold writes: fetch from the ref's verified source URLs, run the documented prep, and lay the result out in the `test-data/` directory addressed by the `*-tests.yml`, relative to the workflow. The collection element identifiers in the staged layout must match the test file and the workflow labels exactly.
+   - **A `cvmfs-string` ref is a scalar job input, never `class: File`.** Write its `location` as the input's value. If [[find-test-data]] staged a data table, keep `tool_data_table_conf.xml.test`, its `.loc` files, and the database together in the `test-data/` directory beside the workflow, where Planemo discovers them ([[planemo-workflow-test-architecture]]), and add no `--tool_data_table` flag.
    - Never emit a `path:` (or `location:`) the test references but no source produces — an un-materialized path passes the static cross-check and fails only at upload, far from here. If a ref is `resolved: false`, surface the gap rather than authoring a path to a file that does not exist.
 
    Inputs must match the workflow's collection shapes and datatypes.

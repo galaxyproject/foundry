@@ -22,3 +22,9 @@ applied to whatever a scenario produces.
 - bucket: utility
 - check: deterministic
 - assertion: every workflow input label has exactly one entry; each entry is either resolved (URL/path + shape + datatype) or marked `resolved: false` with a reason. No input is uncovered and none is silently absent, so [[implement-galaxy-workflow-test]] can stage from the refs without re-deriving input shapes.
+
+## Property: staged data table is discoverable and portable
+
+- bucket: utility
+- check: deterministic
+- assertion: a run that stages a data table writes `test-data/tool_data_table_conf.xml.test`, and that one file declares by name every table a staged value belongs to. Each `<file path>` and each path column in a `.loc` row starts with `${__HERE__}` and resolves to an existing file or directory from the file that contains it. Each staged value appears in its table's `value` column. No emitted artifact asks for `--tool_data_table`. A run that stages no table passes.

@@ -4,11 +4,11 @@
   "mold": {
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
-    "revision": 8,
-    "content_hash": "854238aee01711044de686f74e789e843f19613e6740722b7d95e68d7ad89e03",
-    "commit": "2f8792a62ca53f074605ddbcfb25e75871f52b24"
+    "revision": 9,
+    "content_hash": "6b05e7203c026b7295d5e85138ce80fb7f660cb3a14d7ecdb043779b67fa38de",
+    "commit": "618853f059af2ae61760a3b233ae35bf2607bcbc"
   },
-  "cast_at": "2026-10-22T03:17:18.861Z",
+  "cast_at": "2026-11-05T20:39:42.672Z",
   "refs": [
     {
       "kind": "research",
@@ -36,8 +36,23 @@
       "evidence": "corpus-observed",
       "purpose": "Match IWC test-data conventions — Zenodo/remote-URL first, SHA-1 integrity, per-input collection layout — when selecting or describing candidate fixtures.",
       "trigger": "When choosing where test data should come from or describing the shape a candidate file must have.",
-      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
-      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "src_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
+      "dst_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[planemo-workflow-test-architecture]]",
+      "src": "content/research/planemo-workflow-test-architecture/index.md",
+      "dst": "references/notes/planemo-workflow-test-architecture.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Stage a data table in the form Planemo discovers: configuration name, `${__HERE__}` paths, and the container mount caveat.",
+      "trigger": "When a workflow input or a step's fixed state selects from a wrapper's data table and the wrapper offers no dataset input.",
+      "src_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
+      "dst_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
       "source": "deterministic"
     },
     {
@@ -65,6 +80,13 @@
         "default_filename": "test-data-refs.json",
         "schema": "[[test-data-refs]]",
         "description": "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring. Carries forward, unchanged, every entry an earlier leg resolved."
+      },
+      {
+        "id": "staged-data-table",
+        "kind": "other",
+        "default_filename": "test-data/tool_data_table_conf.xml.test",
+        "optional": true,
+        "description": "Data-table configuration for a wrapper that takes its database only from a data table, with `.loc` files and the test-size database beside it. Absent when no input needs one."
       }
     ],
     "consumes": [

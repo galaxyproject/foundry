@@ -6,9 +6,9 @@
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
     "revision": 4,
     "content_hash": "1b8362487f534389c4e581cc2cb54e21fc004bb1a06d818b4dff1ba34bdc2423",
-    "commit": "a59d6025d612ce7013b09fa1ccb58f60507ccc6a"
+    "commit": "618853f059af2ae61760a3b233ae35bf2607bcbc"
   },
-  "cast_at": "2026-10-26T16:18:38.156Z",
+  "cast_at": "2026-11-05T20:39:42.079Z",
   "refs": [
     {
       "kind": "research",
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Record job-input fixtures for change-set-added inputs (remote-URL-first locations, hashes, collection shapes) as fixture provenance, reusing the baseline's existing fixtures unchanged.",
       "trigger": "When a change-set adds a workflow input that needs new test data, or when recording provenance for a new fixture.",
-      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
-      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "src_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
+      "dst_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
       "source": "deterministic"
     },
     {
@@ -81,8 +81,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
       "trigger": "When recording the labels and checkpoints the downstream test must address.",
-      "src_hash": "3b688f5a39951ad6f937335bf1217731aefc59fef7472fcbe9f85002019a2caf",
-      "dst_hash": "3b688f5a39951ad6f937335bf1217731aefc59fef7472fcbe9f85002019a2caf",
+      "src_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
+      "dst_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
       "source": "deterministic"
     },
     {
