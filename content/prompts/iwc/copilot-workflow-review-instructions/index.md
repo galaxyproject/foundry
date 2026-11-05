@@ -19,6 +19,6 @@ summary: "Vendored IWC repository instructions that guide Copilot reviews of wor
 >
 > **When to consult:** as upstream review-criteria evidence when designing or running an IWC-compatible workflow review. These instructions shape manually requested Copilot reviews; they do not trigger a review themselves.
 
-The instructions expand the IWC reviewer checklist into checks for Dockstore metadata, genericity, annotations, human-readable labels, naming grammar, documentation, changelogs, and tests. [[workflow-pr-review-command]] covers all of them except semantic versioning, a difference recorded in that note's §Provenance and acceptance status. They remain a separate resource because their runtime, framing, and upstream lifecycle differ.
+The instructions expand the IWC reviewer checklist into checks for Dockstore metadata, genericity, annotations, human-readable labels, naming grammar, documentation, changelogs, and tests. [[workflow-pr-review-command]] is meant to include all of them, with two differences recorded in that note's §Provenance and acceptance status. They remain a separate resource because their runtime, framing, and upstream lifecycle differ.
 
-Casting consumes `upstream.prompt` verbatim. This wrapper exists for Foundry metadata, provenance, and human-facing usage guidance.
+No Mold casts `upstream.prompt`. At review time, [[workflow-pr-review-command]] reads the pull request base's copy, and this pinned copy is what the comparison is checked against. This wrapper exists for Foundry metadata, provenance, and human-facing usage guidance.
