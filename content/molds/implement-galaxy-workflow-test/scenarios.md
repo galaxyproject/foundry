@@ -15,6 +15,11 @@
 - fixture: authored `-tests.yml` and workflow fixture for a representative IWC workflow.
 - expect: gxwf or Planemo static validation reaches a clean result, or emits only explicitly documented warnings that do not block runtime testing.
 
+## Case: data-table values have rows
+
+- fixture: a workflow fixing a step's database value in its tool state, with a `test-data-refs.json` that holds no ref for that value and no staged table.
+- expect: the test stages `tool_data_table_conf.xml.test` for that table, or reports the gap when no test-size database exists. It doesn't reach Planemo with an unmet value.
+
 ## Case: managed Galaxy runtime green
 
 - fixture: authored workflow test for a representative IWC workflow with staged test data and tools available.

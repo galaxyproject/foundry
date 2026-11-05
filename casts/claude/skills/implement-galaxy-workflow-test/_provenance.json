@@ -5,10 +5,10 @@
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 12,
-    "content_hash": "66c64f14f7697626aadaf24b6d1f99f08857b1d0278ca8690e66a081d8932b7a",
-    "commit": "511a6cdfa3aba709d66a2132534642f03335d524"
+    "content_hash": "475046aa5ae084fe03d94b137ac0f1d00ef9556d063b19a3ed803ad9c0babd10",
+    "commit": "52be92b33581113a7290c158a8cf127da739901e"
   },
-  "cast_at": "2026-11-05T20:50:17.797Z",
+  "cast_at": "2026-11-05T21:03:42.746Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
