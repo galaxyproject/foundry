@@ -21,6 +21,11 @@ applied to whatever a scenario produces.
 - check: deterministic
 - assertion: workflow-label bindings carry a `label_status` of `assumed` or `unresolved` (with `workflow.label_source: interface-brief`), and fixtures named only by description carry `storage: unresolved` / `location: null` with the known provenance recorded, rather than invented labels or URLs.
 
+## Property: no data-table flag in the plan
+
+- check: deterministic
+- assertion: no field of the plan asks for `--tool_data_table` or `--tool_data_path`.
+
 ## Property: plan-not-final-tests boundary
 
 - check: llm-judged

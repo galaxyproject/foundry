@@ -26,6 +26,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | --- | --- | --- | --- | --- |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-11-05 | 9 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-11-05 | 12 |
+| [[workflow-brief-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence. | draft | 2026-11-05 | 5 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. | reviewed | 2026-10-26 | 6 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-10-26 | 8 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-10-25 | 10 |
@@ -40,7 +41,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[workflow-brief-to-galaxy-interface]] | Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available. | draft | 2026-10-19 | 5 |
-| [[workflow-brief-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence. | draft | 2026-10-19 | 4 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-10-15 | 2 |
 | [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-10-15 | 4 |
 | [[paper-to-test-data]] | Resolve the test data a paper names into refs for each workflow input. | draft | 2026-10-15 | 3 |

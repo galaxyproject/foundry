@@ -26,9 +26,6 @@ input_artifacts:
     description: "Concrete gxformat2 workflow being tested — the loop-endstate `galaxy-workflow.gxwf.yml` from [[advance-galaxy-draft-step]] (`class: GalaxyWorkflow`); provides the real input/output labels, outputs, and collection shapes the test must assert against."
   - id: test-data-refs
     description: "Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data."
-  - id: staged-data-table
-    optional: true
-    description: "Data-table configuration [[find-test-data]] staged for a wrapper that takes its database only from a data table. Absent when no input needs one."
 output_artifacts:
   - id: galaxy-workflow-test
     kind: yaml

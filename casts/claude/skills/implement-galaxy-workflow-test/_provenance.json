@@ -5,10 +5,10 @@
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
     "revision": 12,
-    "content_hash": "125d650a30cd77f5789eb05ad274e7023ceca13b2594a8ebeaac688894174b5b",
-    "commit": "618853f059af2ae61760a3b233ae35bf2607bcbc"
+    "content_hash": "66c64f14f7697626aadaf24b6d1f99f08857b1d0278ca8690e66a081d8932b7a",
+    "commit": "511a6cdfa3aba709d66a2132534642f03335d524"
   },
-  "cast_at": "2026-11-05T20:39:43.126Z",
+  "cast_at": "2026-11-05T20:50:17.797Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -119,8 +119,8 @@
       "evidence": "corpus-observed",
       "purpose": "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs.",
       "trigger": "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations, or when the test depends on a staged data table.",
-      "src_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
-      "dst_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
+      "src_hash": "79ee0c879f0731d3aac0bf5df75c61eec2a5d36d01b2a24e4a5734e3123aa440",
+      "dst_hash": "79ee0c879f0731d3aac0bf5df75c61eec2a5d36d01b2a24e4a5734e3123aa440",
       "source": "deterministic"
     },
     {
@@ -196,14 +196,6 @@
           "find-test-data",
           "nextflow-to-test-data",
           "paper-to-test-data"
-        ]
-      },
-      {
-        "id": "staged-data-table",
-        "description": "Data-table configuration [[find-test-data]] staged for a wrapper that takes its database only from a data table. Absent when no input needs one.",
-        "optional": true,
-        "producers": [
-          "find-test-data"
         ]
       }
     ]

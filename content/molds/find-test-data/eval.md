@@ -27,4 +27,10 @@ applied to whatever a scenario produces.
 
 - bucket: utility
 - check: deterministic
-- assertion: a run that stages a data table writes `test-data/tool_data_table_conf.xml.test`, and that one file declares by name every table a staged value belongs to. Each `<file path>` and each path column in a `.loc` row starts with `${__HERE__}` and resolves to an existing file or directory from the file that contains it. Each staged value appears in its table's `value` column. No emitted artifact asks for `--tool_data_table`. A run that stages no table passes.
+- assertion: a run that stages a data table writes `test-data/tool_data_table_conf.xml.test` and no other data-table configuration. Each `<file path>`, and each `.loc` field in a column the configuration names `path`, starts with `${__HERE__}` and resolves to an existing file or directory from the file that contains it. No emitted artifact asks for `--tool_data_table`. A run that stages no table passes.
+
+## Property: staged value selects a staged row
+
+- bucket: fidelity
+- check: llm-judged
+- assertion: each ref backed by a staged table has its `location` in the `value` column of a table the configuration declares under the name the wrapper's select reads, and that row passes any filter on the select.

@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 8,
     "content_hash": "6e312c6ee27ef6e45a6ace74087cd28a6509ade11f788a51ee478efce58971b6",
-    "commit": "618853f059af2ae61760a3b233ae35bf2607bcbc"
+    "commit": "511a6cdfa3aba709d66a2132534642f03335d524"
   },
-  "cast_at": "2026-11-05T20:39:43.965Z",
+  "cast_at": "2026-11-05T20:50:18.945Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Run workflow tests while preserving Planemo structured artifacts, Galaxy mode, invocation id, history id, and API follow-up context.",
       "trigger": "When choosing between managed Galaxy, external Galaxy, full test runs, existing invocation checks, or direct workflow runs.",
-      "src_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
-      "dst_hash": "1596c0479e535dd3c28b09b022536d973641b0ff9abe78d498ab8379afc07931",
+      "src_hash": "79ee0c879f0731d3aac0bf5df75c61eec2a5d36d01b2a24e4a5734e3123aa440",
+      "dst_hash": "79ee0c879f0731d3aac0bf5df75c61eec2a5d36d01b2a24e4a5734e3123aa440",
       "source": "deterministic"
     },
     {

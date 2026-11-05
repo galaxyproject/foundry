@@ -47,11 +47,6 @@ output_artifacts:
     default_filename: test-data-refs.json
     schema: "[[test-data-refs]]"
     description: "Test data matched from IWC fixtures or public sources, expressed as URLs/paths plus expected shapes for downstream test authoring. Carries forward, unchanged, every entry an earlier leg resolved."
-  - id: staged-data-table
-    kind: other
-    optional: true
-    default_filename: test-data/tool_data_table_conf.xml.test
-    description: "Data-table configuration for a wrapper that takes its database only from a data table, with `.loc` files and the test-size database beside it. Absent when no input needs one."
 references:
   - kind: schema
     ref: "[[test-data-refs]]"
@@ -83,8 +78,8 @@ references:
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Stage a data table in the form Planemo discovers: configuration name, `${__HERE__}` paths, and the container mount caveat."
-    trigger: "When a workflow input or a step's fixed state selects from a wrapper's data table and the wrapper offers no dataset input."
+    purpose: "Stage a data table in the form Planemo discovers: configuration name, `${__HERE__}` paths, and the database location container jobs can read."
+    trigger: "When a workflow input selects from a wrapper's data table and the wrapper offers no dataset input."
 ---
 # find-test-data
 
@@ -99,7 +94,7 @@ This Mold is the search leg of the harness's `test-data-resolution` branch: it r
 3. **Match each named candidate against the required shape — and don't stop at a shape mismatch.** Check each candidate against step 1's target shape and datatype. A candidate that is the wrong *shape* (e.g. raw signal / reads named when the input is a count matrix) is **not** a resolution — but it is also **not** the end of the search. When the source's named candidates don't fit, follow the source's own guidance to the right-shape public artifact: if the source says the input is a precomputed count matrix, find the canonical public count matrix for that study/domain (GEO/ENCODE/ArrayExpress series, a published supplementary table) rather than reporting "no data." "Named candidates are the wrong shape" ≠ "no data exists."
 4. **Search IWC fixtures and public sources.** Prefer existing IWC test data for the same domain — it already conforms to [[iwc-test-data-conventions]] (remote URL, recorded hash, known collection layout); a near-neighbour IWC `-tests.yml` is the strongest source. Otherwise resolve the right-shape public dataset found in step 3, sized for a fast test run.
 5. **"Small" is a documented subset of a real source, not a fabricated stand-in.** When the source asks for a small fixture (one chromosome, selected loci, a few samples) and only a full real dataset exists, that input is **resolved**: record the real source URL plus the data-import-boundary prep needed to reach the small shape (row-subset by key, column/sample split into the collection's element identifiers). The prep is a note on the ref, not an analysis step and not an excuse to mark the input unresolved. Resolve the *data*; leave analysis parameters (factors, thresholds, reference levels, top-N) to the design Molds — they are not this Mold's to decide.
-6. **Stage a table for a data-table-only wrapper.** When a workflow input or a step's fixed state selects from a wrapper's data table and the wrapper offers no dataset input, the fixture is a test-size database plus a table row. Prefer the database in the wrapper's own `test-data/`, else a documented minimal build. Write `test-data/tool_data_table_conf.xml.test` and its `.loc` files per [[planemo-workflow-test-architecture]]: `${__HERE__}` paths only, every table in one file, and no Planemo flag anywhere in the output. A workflow input's ref then has `storage: cvmfs-string`, `location` set to the row's value, and `provenance` naming the table and the database's source. With no test-size database the input stays `resolved: false`.
+6. **Stage a table for a data-table-only wrapper.** When a workflow input selects from a wrapper's data table and the wrapper offers no dataset input, the fixture is a test-size database plus a table row. Prefer the database in the `test-data/` of the wrapper revision the workflow uses, else a documented minimal build. Wrapper test databases are often trimmed to what the wrapper's own tests need, so check that the workflow's test input can produce a meaningful result against it. Write `test-data/tool_data_table_conf.xml.test`, its `.loc` files, and the database beside the workflow per [[planemo-workflow-test-architecture]]: `${__HERE__}` paths only, every table in one file, and no Planemo flag anywhere in the output. The ref then has `storage: cvmfs-string`, `location` set to the row's value, and `provenance` naming the table and the database's source. With no test-size database the input stays `resolved: false`.
 7. **Emit refs.** Write one `test-data-refs.json` entry per input: the URL/path, the expected Galaxy shape, datatype, element identifiers when it is a collection, integrity hash when known, and any subset/split prep. Per [[galaxy-workflow-testability-design]], make sure each entry maps to an addressable input label. Shape each entry per [[test-data-refs]], set `resolved_by: find-test-data` on the entries you resolve, and validate the file with `foundry validate-test-data-refs` before returning.
 8. **Report genuine gaps only.** Mark `resolved: false` with a reason **only** when steps 2–6 turn up no real source of the right shape — not merely because the source's first-named candidate was the wrong shape or because a real source needs a documented subset. These honest gaps are what the harness hands to `user-supplied`.
 
