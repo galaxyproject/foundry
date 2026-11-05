@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-05-15
-revised: 2026-07-30
-revision: 5
+revised: 2026-11-05
+revision: 6
 summary: "Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) \u2014 a dated snapshot."
 ---
 
@@ -61,6 +61,35 @@ Molds; their *form* does not. Decomposition into Molds, schema-driven validation
 in the inner loop, casting as the integration boundary, and `gxwf` as the source
 of truth for `gxformat2` correctness are the specific responses to specific
 failure modes in those skills.
+
+### Versus one detailed prompt to a coding agent
+
+A detailed prompt hands a general coding agent the whole specification and asks
+for the finished pipeline. One pass can produce a plausible repository, but the
+specification stays prose. No artifact records which requirement each part of
+the code satisfies, so a requirement can disappear without leaving a visible
+hole.
+
+[Munn and Grenier's preprint](https://doi.org/10.64898/2026.09.11.751004)
+(bioRxiv, posted 2026-09-17, not peer reviewed) shows this failure on one
+Nextflow CUT&Tag pipeline. Biomni, Claude Code, and Codex each needed debugging,
+and none produced the merged-group reports the prompt requested, even though all
+three merged by group. Documentation quality and report breadth did not predict
+correctness. The authors call the main failure "semantic drift between the
+prompt, the code, and the report." The study reports no agent versions or repeat
+runs, and its prompt told the agents not to run the pipeline automatically, so
+it cannot separate the limits of one prompt from the missing feedback of a run.
+Its proposed remedies—data contracts, staged tests, and reusable skills—remain
+untested.
+
+The Foundry replaces the single prompt with Pipelines of Molds that exchange
+named artifacts. These direct an agent to validate with `gxwf` at each draft step
+and finish with a `planemo test` run. As of 2026-11, that does not close the
+study's central failure. Nothing records which upstream data product a final
+output must be built from, so an output wired to the wrong but type-compatible
+input can pass validation and a test unless an assertion tells the two apart.
+No comparable benchmark has been run against the Foundry, so this section
+contrasts designs, not measured outcomes.
 
 ---
 
@@ -225,3 +254,8 @@ Append-only. One line per dated sweep of Part B. Mirrors the Mold
   early access, vendor benchmarks unverified). Assessed and rejected — genio.co
   (off-topic EdTech, no KB→skill stance) and Glean (enterprise knowledge-graph +
   runtime retrieval; subsumed by RAG-as-knowledge-base).
+- 2026-11 — Single-paper assessment, not a full sweep. Munn and Grenier's
+  preprint evaluates prompt-driven construction and has no KB-to-skill design,
+  so Part A cites it and Part B does not list it. ClawBio, which the preprint
+  names as a versioned bioinformatics skill library, is an unassessed candidate
+  for the next sweep.
