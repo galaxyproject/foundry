@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-25
-revision: 12
+revised: 2026-11-06
+revision: 13
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool."
 input_artifacts:
   - id: galaxy-tool-summary
@@ -32,6 +32,14 @@ output_artifacts:
     default_filename: open-requirements.ledger.yml
     description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
+  - kind: research
+    ref: "[[gxformat2-schema]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Address a nested parameter with its `|`-joined `in:` key, and name the step part of a connection correctly for the draft's step form."
+    trigger: "When wiring a parameter nested in a conditional or section, or when a draft's steps carry both `id` and `label`."
   - kind: research
     ref: "[[open-requirements-ledger]]"
     used_at: runtime
