@@ -78,3 +78,21 @@ the round-trip oracle. See that directory's `README.md`.
 - expect: exit 1; `concrete.strict_state_errors` names skipped tool-state checks
   and `concrete.ok` is false. Draft structure and topology checks still pass.
   Without `--strict-state`, the same offline command exits 0 despite the skips.
+
+## Case: entry on the picked step that holds only misses
+
+- fixture: `../repair-galaxy-draft-topology/examples/sample-sheet-restore-last-drafty/galaxy-workflow-draft.gxwf.yml`
+  and `open-requirements.ledger.yml` beside it.
+- expect: the entry's Tool Shed misses and cache miss don't skip steps 2-4. Starting
+  from `open_history: [0]` with 2 open blocking entries, a repair that leaves 1 gives
+  `[0, 1]` and doesn't trip the gate. If the call ends with no drafty step, by an
+  authored wrapper or a cited removal, `galaxy-workflow.gxwf.yml` is written in the
+  same call (`class: GalaxyWorkflow`, no `_plan_*`). `nf-core-demo-fastqc-zip-output-unavailable`,
+  on realized `fastqc_per_read`, goes to repair before that extract.
+
+## Case: entry that records the wrapper as confirmed absent
+
+- fixture: `../repair-galaxy-draft-topology/examples/dupradar-wrapper-absent/galaxy-workflow-draft.gxwf.yml`
+  and `open-requirements.ledger.yml` beside it.
+- expect: the call that picks `M19_dupradar`, once `M18_markdup` is realized, goes
+  straight to [[repair-galaxy-draft-topology]] with no new search.

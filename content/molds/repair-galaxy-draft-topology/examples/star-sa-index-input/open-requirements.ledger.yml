@@ -1,0 +1,15 @@
+topology_repair:
+  escalations: 0
+  cap: 5
+  open_history: []
+entries:
+  - id: star-genome-sa-index-unreachable
+    status: open
+    kind: gap
+    blocking: true
+    raised_by: implement-galaxy-workflow-test
+    unmet: "Run both STAR steps against a small test genome."
+    missing: "`genomeSAindexNbases` is the literal 14 in the `state` of both STAR steps. STAR's rule is min(14, log2(genomeLength)/2 - 1), so a small genome aborts the index build. A test job is keyed by workflow input label, so it can't reach a value in `state`."
+    resolved_by: null
+    supersedes: null
+    note: "Remedy: promote the value to a workflow input, wired to `refGenomeSource|genomeSAindexNbases` on both steps."
