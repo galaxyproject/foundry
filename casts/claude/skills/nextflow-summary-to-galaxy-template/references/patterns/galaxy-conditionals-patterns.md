@@ -47,7 +47,7 @@ Galaxy steps in the observed patterns receive a boolean through an input named `
 
 ## Continue with one value
 
-- **Peer alternatives:** [[conditional-route-between-alternative-outputs]] gates the possible modes and merges their compatible outputs with `pick_value`. If exactly one mode must produce a value, choose merge behavior that detects zero or multiple live outputs rather than silently taking the first. A step mapped over a collection leaves a null element for each skipped job, so arms mapped over the same collection merge with `pick_value`, and arms mapped over different collections filter nulls and then merge.
+- **Peer alternatives:** [[conditional-route-between-alternative-outputs]] gates the possible modes and merges their compatible outputs with `pick_value`. If exactly one mode must produce a value, choose merge behavior that detects zero or multiple live outputs rather than silently taking the first. A step mapped over a collection leaves a null element for each skipped job, and a step that consumes that output sees the nulls. Arms mapped over the same collection merge with `pick_value`. Arms mapped over different collections, even of equal length, go through `__FILTER_NULL__` and then `__MERGE_COLLECTION__`, which doesn't detect multiple live arms.
 - **Optional change to an existing value:** [[conditional-transform-or-pass-through]] gates the transform and uses `pick_value` to prefer its output when present, with the original value as the fallback. This preserves one downstream input without duplicating the rest of the workflow.
 
 ## Clean a collection instead
