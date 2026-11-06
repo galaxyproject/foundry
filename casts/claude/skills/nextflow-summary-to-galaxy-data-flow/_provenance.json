@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 8,
     "content_hash": "f71cc2b4ceb115d7d93c3dd2e622cbfafb8b9f338f1dd450ee5773f3c0a0e247",
-    "commit": "c2406d44954aebf094e8590e2edd7fc8bd5d0f6a"
+    "commit": "95ecbbcbf288eb132da9a80ea49b5c1a13fdd7a6"
   },
-  "cast_at": "2026-10-22T20:21:10.378Z",
+  "cast_at": "2026-11-06T18:15:14.509Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -218,8 +218,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the channel topology leaves open — an operator with no Galaxy collection recipe, a value channel with no Galaxy carrier, a join whose key Galaxy can't reconstruct.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
+      "dst_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
       "source": "deterministic"
     },
     {

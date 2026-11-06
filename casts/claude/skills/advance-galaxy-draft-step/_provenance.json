@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 10,
-    "content_hash": "cd510f127a0f2a88980737c5e3bf04b860c6591ae70500c1cae078104c9e8eef",
-    "commit": "9678dfba7293f01d34bb755adbb6dbfa7913dea0"
+    "revision": 11,
+    "content_hash": "83b70b29829ecf17bef62d6700f76ce9f00d11ac41c46983156225866cf5024f",
+    "commit": "95ecbbcbf288eb132da9a80ea49b5c1a13fdd7a6"
   },
-  "cast_at": "2026-10-28T17:07:14.418Z",
+  "cast_at": "2026-11-06T18:15:13.718Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -148,8 +148,8 @@
       "evidence": "hypothesis",
       "purpose": "Read the ledger after each step implementation for a newly appended blocking entry, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.",
       "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that strictly reduces the open count.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
+      "dst_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
       "source": "deterministic"
     },
     {

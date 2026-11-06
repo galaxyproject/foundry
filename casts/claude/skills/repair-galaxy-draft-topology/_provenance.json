@@ -4,12 +4,28 @@
   "mold": {
     "name": "repair-galaxy-draft-topology",
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
-    "revision": 5,
-    "content_hash": "99b1b5f90fa3860ae60a02c9182ac74b18b96ad8ee455bdf9692e962417c2785",
-    "commit": "9678dfba7293f01d34bb755adbb6dbfa7913dea0"
+    "revision": 6,
+    "content_hash": "8145df495f1fbbd1b5a455814469ad0e1c90a4e1a09e188981c758e1b8c25f33",
+    "commit": "95ecbbcbf288eb132da9a80ea49b5c1a13fdd7a6"
   },
-  "cast_at": "2026-10-28T17:07:16.997Z",
+  "cast_at": "2026-11-06T18:15:14.796Z",
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[draft-validate]]",
+      "src": "content/cli/gxwf/draft-validate.md",
+      "dst": "references/cli/draft-validate.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Check the draft contract, including dangling edges and sources, on the edited draft.",
+      "trigger": "After every edit.",
+      "verification": "Cast the skill, run a removal repair on a real draft, confirm the diagnostics name any source left dangling and the repaired draft exits 0.",
+      "src_hash": "37cded427fbccf49ff19a6fe8b03f9e90857afe556e5db0e51a01402fbf33f1e",
+      "dst_hash": "afa59b0815308a340780247df0548909518564d58352a0c695ceca37a07eee5b",
+      "source": "deterministic"
+    },
     {
       "kind": "pattern",
       "mode": "verbatim",
@@ -23,6 +39,21 @@
       "trigger": "When the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge.",
       "src_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
       "dst_hash": "2dbb4b7520ba30d3e9fdf68e6133fb35c597e7e8482478b4dee2abe9f415d6ef",
+      "source": "deterministic"
+    },
+    {
+      "kind": "pattern",
+      "mode": "verbatim",
+      "ref": "[[galaxy-conditionals-patterns]]",
+      "src": "content/patterns/galaxy-conditionals-patterns.md",
+      "dst": "references/patterns/galaxy-conditionals-patterns.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Choose how to merge when a `when`-gated step's output feeds another step.",
+      "trigger": "When an inserted or rewired step consumes a `when`-gated step's output.",
+      "src_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
+      "dst_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
       "source": "deterministic"
     },
     {
@@ -103,9 +134,46 @@
       "evidence": "hypothesis",
       "purpose": "Emit re-wired steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
       "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
-      "src_hash": "6e4e89785e1607af7debb8444ff05fc2a0a6128223627df326af5fdb2134e78a",
-      "dst_hash": "6e4e89785e1607af7debb8444ff05fc2a0a6128223627df326af5fdb2134e78a",
+      "src_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
+      "dst_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
       "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[gxformat2-schema]]",
+      "src": "content/research/gxformat2-schema/index.md",
+      "dst": "references/notes/gxformat2-schema.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Keep post-job actions and nested parameter keys correct when an edit moves them.",
+      "trigger": "When an edit touches `out:` actions (`hide`, `rename`, `change_datatype`) or wires a nested parameter.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
+      "dst_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[gxformat2-schema]]",
+      "src": "content/research/gxformat2-schema/gxformat2.schema.json",
+      "dst": "references/notes/gxformat2.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Keep post-job actions and nested parameter keys correct when an edit moves them.",
+      "trigger": "When an edit touches `out:` actions (`hide`, `rename`, `change_datatype`) or wires a nested parameter.",
+      "companion_of": "references/notes/gxformat2-schema.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "2c4b3df730b70d9c648105ced438fc08be306a41f2aff7d4bd2897f72f94d509",
+      "dst_hash": "2c4b3df730b70d9c648105ced438fc08be306a41f2aff7d4bd2897f72f94d509",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
     {
       "kind": "research",
@@ -116,10 +184,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Scope the repair from the open blocking entries — each names the step, the uncomputable output, and the missing evidence — then mark resolved each one repaired, and leave any it cannot close open with a surrender note for the terminal path.",
+      "purpose": "Scope the repair from the open blocking entries — each names the step and what's missing — then mark resolved each one repaired, and leave any it cannot close open with a note.",
       "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
+      "dst_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
       "source": "deterministic"
     },
     {
@@ -147,7 +215,7 @@
         "kind": "yaml",
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
         "schema": "[[galaxy-workflow-draft]]",
-        "description": "Re-wired gxformat2 draft: a producer step (or small sub-path) inserted so the previously-blocked step's declared output is computable; new steps land at draft (TODO) tier."
+        "description": "Edited gxformat2 draft. Each blocking entry addressed is closed by the named edits, and new or replaced steps land at draft tier."
       },
       {
         "id": "open-requirements-ledger",
@@ -159,7 +227,7 @@
     "consumes": [
       {
         "id": "galaxy-workflow-draft",
-        "description": "Partially-realized gxformat2 draft (see [[galaxy-workflow-draft-format]]) whose topology can't support a declared step — the region to repair.",
+        "description": "Partially-realized gxformat2 draft (see [[galaxy-workflow-draft-format]]) with an open blocking entry.",
         "inherited_schema": "[[galaxy-workflow-draft]]",
         "producers": [
           "advance-galaxy-draft-step",

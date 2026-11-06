@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-10-19
-revision: 5
+revised: 2026-11-06
+revision: 6
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
@@ -36,7 +36,7 @@ Like the `_plan_*` family in [[galaxy-workflow-draft-format]], ledger entries ar
 - id: sccmec-evidence-missing
   status: open                # open | resolved | surrendered
   kind: gap                   # gap | dropped — see below; omit for gap
-  blocking: true              # true only for a computability gap; the convergence gate counts these
+  blocking: true              # true only when a structural edit must close it; the convergence gate counts these
   raised_by: implement-galaxy-tool-step   # Mold that appended it
   step: classify_context       # draft step the obligation attaches to (if any)
   unmet: "SCCmec-region candidate output category"
@@ -86,7 +86,7 @@ finding the run may reason from afterwards. It is a debt, and it should read as 
 
 Provenance (`raised_by`, `resolved_by`) is the audit trail for *when* each obligation entered and left — the traceability #281 asked for, and the evidence the convergence gate reads.
 
-`blocking` separates the two grades of obligation the pipeline carries. A plain entry is an unmet need the chain can keep working around — an unpinned parameter, a missing exemplar. A **blocking** entry is a computability gap: a declared step output no wired input can supply, which `gxwf` validation cannot see because the connection graph knows ports connect, not what they carry. Omit `blocking` (or set it `false`) for a plain obligation. Only blocking entries drive topology-repair escalation, and only they are counted by the decreasing-blocker invariant.
+`blocking` separates the two grades of obligation the pipeline carries. A plain entry is an unmet need the chain can keep working around — an unpinned parameter, a missing exemplar. A **blocking** entry means the settled draft can't give a correct run and a structural edit closes it. The common case is a computability gap: a declared step output no wired input can supply, which `gxwf` validation cannot see because the connection graph knows ports connect, not what they carry. Others are a wrapper confirmed absent, a step another tool subsumes, a value that must vary per run, and a validation failure on an edge an earlier step settled. Omit `blocking` (or set it `false`) for a plain obligation. Only blocking entries drive topology-repair escalation, and only they are counted by the decreasing-blocker invariant.
 
 ## Workflow-run knowledge beside obligations
 
@@ -151,7 +151,7 @@ This section is the runtime protocol for every Mold that carries the ledger. A M
 
 **Preserve every collection.** Carry obligation entries, discoveries, decisions, brief-change recommendations, and run-level headers untouched unless this Mold is explicitly adding to or updating the relevant collection. Never reinterpret one category as another merely to close it.
 
-**Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies. Set `blocking: true` only for a computability gap.
+**Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies. Set `blocking: true` only when the settled draft can't give a correct run and a structural edit closes it.
 
 **Mark resolved what you close.** When a decision you make discharges an open entry, set `status: resolved`, `resolved_by` to your own Mold name, and `note` to how it closed. Resolving is not deleting — a resolved entry stays in the ledger as the audit trail.
 
@@ -177,7 +177,7 @@ surrendered gap whose stated reason is known to be false is worse than an unexpl
 Reopening does not oblige *you* to do the dropped work — it obliges the run to stop
 claiming a settled reason it no longer has.
 
-**Record a surrender note; leave the status to the terminal.** When you cannot close an entry and nothing downstream can either — no producer is discoverable, the output cannot be honestly narrowed — leave it `open` and say so in `note`. `surrendered` is a terminal status, set at the end of a run: the escalation cap reached, or the final artifact emitted with the obligation still unmet. Either way the entry stays visible and is written into the final artifact as a labelled gap, never dropped.
+**Record a surrender note; leave the status to the terminal.** When you cannot close an entry and nothing downstream can either, leave it `open` and say so in `note`. A drafty step never leaves the loop, so [[repair-galaxy-draft-topology]] removes one it can't close, when it can cite why, and records the drop. The dropped entry stays `open`, and the terminal writes it into the final artifact. `surrendered` is a terminal status, set at the end of a run: the escalation cap reached, or the final artifact emitted with the obligation still unmet. Either way the entry stays visible and is written into the final artifact as a labelled gap, never dropped.
 
 **Maintain the escalation budget** — loop Molds only. The `topology_repair` header is loop-level state, described under **Escalation budget (loop-level state)** below. On each escalation the orchestrator increments `escalations`, appends the post-repair open blocking-entry count to `open_history`, and surrenders the still-open blocking entries once `escalations` reaches `cap`.
 
@@ -185,21 +185,21 @@ claiming a settled reason it no longer has.
 
 In the Galaxy per-step loop, the ledger is the substrate the topology-repair escalation rides on (see [[galaxy-workflow-draft-format]] and [[repair-galaxy-draft-topology]]):
 
-- **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs. Rather than fabricate, it appends a blocking entry and falls through to repair.
-- **[[repair-galaxy-draft-topology]]** reads the open blocking entries, re-wires the affected region (template-tier authoring — one step or a small sub-path), and marks each entry it closes `resolved`; the existing discover-or-author → implement machinery then realizes the new steps.
-- The loop's **decreasing-blocker invariant** counts open blocking entries: each repair escalation must strictly reduce that count, under a hard cap on escalations. When the cap is hit with entries still open, those entries are **surrendered** into the final draft — the clean terminal that replaces spin-or-fabricate.
+- **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs. Rather than fabricate, it appends a blocking entry and falls through to repair. Earlier Molds and the loop raise blocking entries too.
+- **[[repair-galaxy-draft-topology]]** reads the open blocking entries, makes the structural edits that close them (template-tier authoring), and marks each entry it closes `resolved`; the existing discover-or-author → implement machinery then realizes any new steps.
+- The loop's **decreasing-blocker invariant** counts open blocking entries: each repair must leave fewer than it found, under a hard cap on escalations. When the cap is hit with entries still open, those entries are **surrendered** into the final draft — the clean terminal that replaces spin-or-fabricate.
 
 So the ledger is not a convenience here; it is the countable state the termination guard depends on.
 
 ## Escalation budget (loop-level state)
 
-The decreasing-blocker invariant needs more than the entries themselves: "strictly reduce the open count, under a hard cap" is *loop-level* state — it spans iterations and belongs to no single entry. The ledger carries it in a small `topology_repair` header beside the `entries:` list:
+The decreasing-blocker invariant needs more than the entries themselves: "lower the open count, under a hard cap" is *loop-level* state — it spans iterations and belongs to no single entry. The ledger carries it in a small `topology_repair` header beside the `entries:` list:
 
 ```yaml
 topology_repair:
   escalations: 2           # repairs invoked this run
   cap: 5                   # hard ceiling; at cap, still-open entries are surrendered
-  open_history: [4, 3, 2]  # open blocking-entry count after each escalation — must be strictly decreasing
+  open_history: [4, 3, 2]  # open blocking-entry count after each escalation
 entries:
   - id: sccmec-evidence-missing
     status: open
@@ -207,9 +207,9 @@ entries:
     # … per-entry shape above
 ```
 
-- `escalations` — how many times [[advance-galaxy-draft-step]] has escalated to [[repair-galaxy-draft-topology]] this run. The orchestrator increments it on each escalation.
+- `escalations` — how many times [[advance-galaxy-draft-step]] has escalated to [[repair-galaxy-draft-topology]] this run. The orchestrator creates the header at the first escalation, with `cap: 5` unless the run sets another, and increments it on each escalation.
 - `cap` — the hard ceiling. When `escalations` reaches `cap`, the loop stops escalating and surrenders any still-`open` blocking entries into the final draft as labelled gaps rather than retrying forever.
-- `open_history` — the open blocking-entry count recorded after each escalation. The convergence gate requires it to be strictly decreasing: a repair that fails to lower the open count — or raises it by inserting a producer that is itself uncomputable — is non-convergent and trips the gate immediately, without waiting for the cap.
+- `open_history` — the open blocking-entry count recorded after each escalation. Entries raised between escalations can raise it again, so the convergence gate compares each repair with the count it started from: a repair must leave fewer open blocking entries than it found. One that doesn't is non-convergent and trips the gate immediately, ending escalation as the cap does. So does answering an entry against a step an earlier repair inserted by inserting another producer, because that grows the DAG without converging.
 
 This block lives in the ledger as a v1 expedient: the ledger is already the carried, cast-visible state the loop reads each iteration. Its better long-term home is the **draft itself** — a workflow-level annotation that travels with the artifact it bounds, so the budget survives even when the ledger is stripped at the terminal. Recorded here for now; migrate when the draft grows a home for it.
 

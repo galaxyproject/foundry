@@ -6,9 +6,9 @@
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 1,
     "content_hash": "38d9fed5e83bcb02cdc044ac1a0858d2b3f5ce42af5905bea2b920451bacca6b",
-    "commit": "2f8792a62ca53f074605ddbcfb25e75871f52b24"
+    "commit": "95ecbbcbf288eb132da9a80ea49b5c1a13fdd7a6"
   },
-  "cast_at": "2026-10-22T03:17:25.422Z",
+  "cast_at": "2026-11-06T18:15:14.448Z",
   "refs": [
     {
       "kind": "prompt",
@@ -68,8 +68,8 @@
       "evidence": "hypothesis",
       "purpose": "Initialize, preserve, and append precise unresolved maturation obligations rather than guessing authorship, licensing, or scientific intent.",
       "verification": "Exercise the ambiguous-reference fixture and confirm the emitted ledger carries a focused unresolved entry without a speculative workflow edit.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
+      "dst_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
       "source": "deterministic"
     },
     {

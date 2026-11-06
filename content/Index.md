@@ -59,7 +59,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan. *(reviewed)*
 - [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. *(reviewed)*
 - [[paper-to-test-data]] — Resolve the test data a paper names into refs for each workflow input.
-- [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
+- [[repair-galaxy-draft-topology]] — Make the smallest structural edit that closes an open blocking entry in a settled Galaxy draft.
 - [[report-foundry-run-feedback]] — Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts.
 - [[review-galaxy-workflow]] — Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. *(reviewed)*
