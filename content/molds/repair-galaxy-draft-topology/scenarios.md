@@ -16,18 +16,30 @@
 - command: `gxwf draft-next-step repaired.gxwf.yml`
 - expect: `draft: true`; `step` equals `["fastqc_archive_per_read"]`.
 
-## Case: repair removes the last drafty step
+## Case: the last drafty step, on evidence that doesn't settle it
 
 - fixture: `examples/sample-sheet-restore-last-drafty/galaxy-workflow-draft.gxwf.yml`
   and `open-requirements.ledger.yml` beside it.
-- expect: `nf-core-demo-trimmed-reads-metadata-carry-forward` ends `resolved`, and
-  open blocking entries fall from their starting 2. `restore_trimmed_sample_sheet_metadata`
-  is gone, `trimmed_reads` is retargeted, and neither its id nor its label is left
-  anywhere in the draft, including the comment frame. A `kind: dropped` entry quotes the
-  searches or the collection semantics rule, not the blocking entry.
-  `gxwf draft-next-step` reports `draft: false`. Driven through
-  [[advance-galaxy-draft-step]], `galaxy-workflow.gxwf.yml` is written in the same
-  call.
+- expect: the entry's Tool Shed searches and cache miss don't carry a removal, and
+  later runs realized this step with an authored wrapper. Either outcome passes:
+  - Removed, with a `kind: dropped` entry from this repair quoting a collection
+    semantics rule such as `SAMPLE_SHEET_MAPPING`, and recording the `sample` metadata
+    as narrowed. `nf-core-demo-trimmed-reads-metadata-carry-forward` ends `resolved`,
+    and open blocking entries fall from their starting 2.
+    `restore_trimmed_sample_sheet_metadata` is gone, `trimmed_reads` is retargeted, and
+    neither the id nor the label is left anywhere in the draft, including the comment
+    frame. `trimmed_reads`'s `doc` no longer promises the original sample metadata.
+    `gxwf draft-next-step` reports `draft: false`.
+  - The step stays, and the entry stays `open` with a note saying what's unproven.
+
+  A removal whose `because` rests on the searches or the cache miss fails.
+
+## Case: a cache miss doesn't justify a removal
+
+- fixture: `examples/dupradar-wrapper-absent/galaxy-workflow-draft.gxwf.yml` with
+  `examples/dupradar-cache-miss-only/open-requirements.ledger.yml`.
+- expect: `M19_dupradar` stays, with every edge and input it reads. `dupradar-unpinned`
+  stays `open` with a note saying what's unproven. No `kind: dropped` entry is added.
 
 ## Case: confirmed-absent wrapper
 

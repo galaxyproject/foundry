@@ -72,8 +72,8 @@ references:
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Preserve collection typing and map-over/reduction semantics when an inserted producer step joins or reshapes collection inputs."
-    trigger: "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections."
+    purpose: "Preserve collection typing and map-over/reduction semantics when an edit joins or reshapes collection inputs, and quote the rule when a removal rests on it."
+    trigger: "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections, or a removal rests on collection semantics."
   - kind: research
     ref: "[[gxformat2-schema]]"
     used_at: runtime
@@ -115,7 +115,7 @@ related_molds:
 ---
 # repair-galaxy-draft-topology
 
-Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop doesn't edit it. This Mold makes the structural edits a settled draft still needs. It runs on an open blocking entry in the [[open-requirements-ledger]]: the settled draft can't give a correct run, and a structural edit closes it. A missing wrapper is this case only when the discover-or-author branch is exhausted: no stock, shed or authored wrapper can produce the step's declared output from its wired inputs, or the ledger already records the wrapper as confirmed absent. A tool version missing from a local cache is not absence. Don't search again.
+Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop doesn't edit it. This Mold makes the structural edits a settled draft still needs. It runs on an open blocking entry in the [[open-requirements-ledger]]: the settled draft can't give a correct run, and a structural edit closes it. A missing wrapper is this case only when the discover-or-author branch is exhausted: no stock, shed or authored wrapper can produce the step's declared output from its wired inputs, or the ledger already records the wrapper as confirmed absent. A tool version missing from a local cache is not absence. When the ledger records absence, don't search again.
 
 Decide the edit from the entry, the surrounding data-flow design ([[galaxy-data-flow-draft-contract]]), IWC structure, and the pattern pages.
 
@@ -123,7 +123,9 @@ Decide the edit from the entry, the surrounding data-flow design ([[galaxy-data-
 
 **Interface.** Change the workflow interface only when an entry names that as the remedy or a narrowing requires it. Promote an input with a default equal to the literal it replaces, and remove the literal from `state`. Expose an output by removing its `hide`, unless the design wants it hidden. Removing an input or output is a narrowing: append a `kind: dropped` entry with its `units` and a cited `because`.
 
-**Claims.** A claim about a step with no resolved wrapper is not a fact. Attach it to that step as a plain ledger entry with `step:` set, and keep it out of `doc:`. "Computable" means the tool's semantics give what the output declares, including element count and identifiers for collections. Reading a pinned wrapper's command block or a consumer's parser is allowed. Picking a wrapper is not. A removal's `because` quotes the primary artifact it rests on: the search run, the wrapper's ports or command block, the semantics rule. Naming the blocking entry is not a citation. If the step isn't fully redundant, narrow it and rewrite its `_plan_*` to the reduced job.
+**Claims.** A claim about a step with no resolved wrapper is not a fact. Attach it to that step as a plain ledger entry with `step:` set, and keep it out of `doc:`. "Computable" means the tool's semantics give what the output declares, including element count and identifiers for collections. Reading a pinned wrapper's command block or a consumer's parser is allowed. Picking a wrapper is not.
+
+**Removal.** When nothing can close an entry against a drafty step, narrow the step if it isn't fully redundant, and rewrite its `_plan_*` to the reduced job. Otherwise remove it, append the `kind: dropped` entry, and resolve the blocking entry with a note naming the drop. A removal's `because` quotes the primary artifact it rests on: the search run, the wrapper's ports or command block, the semantics rule. The quoted artifacts must carry the removal alone: strike everything uncited, and the removal must still follow. Naming the blocking entry is not a citation, and a tool search says nothing about stock tools. Don't remove a realized step.
 
 **After every edit:**
 
@@ -133,4 +135,4 @@ Decide the edit from the entry, the surrounding data-flow design ([[galaxy-data-
 4. Move a removed step's `rename` or `change_datatype` to the step that inherits its consumers.
 5. If an edit touched a step with a twin, make the same edit there.
 
-**Ledger.** Mark each entry you close `resolved`, with a note naming the kinds you applied. A repair must leave fewer open blocking entries than it found. Never insert a producer whose own output is uncomputable from what feeds it. When nothing can close an entry against a drafty step, remove the step, append the `kind: dropped` entry, and resolve the blocking entry with a note naming the drop. Leave an entry `open` with a note, for the terminal path, when a consumer truly needs the removed output, when the step is already realized, or when you have no citation for the removal.
+**Ledger.** Mark each entry you close `resolved`, with a note naming the kinds you applied. A repair must leave fewer open blocking entries than it found. Never insert a producer whose own output is uncomputable from what feeds it. Leave an entry `open`, with a note saying what's unproven, when a consumer truly needs the removed output, when no other edit closes an entry on a realized step, or when the removal doesn't follow from what you can quote. An entry on a realized step reaches the final artifact as a labelled gap. A drafty step stays drafty, and the call reports it.

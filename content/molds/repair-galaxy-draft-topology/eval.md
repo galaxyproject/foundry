@@ -28,9 +28,18 @@
 
 - check: llm-judged
 - assertion: a removed public input or output, or cut source work, has a
-  `kind: dropped` entry with `units` and a `because` that quotes a primary
-  artifact. A `because` that only names the blocking entry, or rests on a tool
-  version missing from a local cache, fails.
+  `kind: dropped` entry from this repair, with `units` and a `because` that quotes
+  a primary artifact. A `because` that only names the blocking entry, rests on a
+  tool version missing from a local cache, or needs an uncited claim for the
+  removal to follow, fails.
+
+## Property: a removal needs standing
+
+- check: llm-judged
+- assertion: no step is removed when a consumer truly needs its output, when the
+  step is realized, or when the removal doesn't follow from what the repair can
+  quote. The entry stays `open` with a note saying what's unproven, and no
+  `kind: dropped` entry is appended for it.
 
 ## Property: a removal leaves nothing dead or stale
 

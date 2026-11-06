@@ -1,0 +1,16 @@
+topology_repair:
+  escalations: 0
+  cap: 5
+  open_history: []
+entries:
+  - id: dupradar-unpinned
+    status: open
+    kind: gap
+    blocking: true
+    raised_by: nextflow-summary-to-galaxy-template
+    step: M19_dupradar
+    unmet: "Per-sample dupRadar duplication assessment for the MultiQC report."
+    missing: "The shared cache has no dupRadar pin. No search has been run."
+    resolved_by: null
+    supersedes: null
+    note: "Treat as blocking until a wrapper is confirmed."
