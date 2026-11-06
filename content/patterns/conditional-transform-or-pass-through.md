@@ -11,8 +11,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-10-21
-revision: 3
+revised: 2026-11-06
+revision: 4
 summary: "Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise."
 related_notes:
   - "[[iwc-conditionals-survey]]"
@@ -135,7 +135,7 @@ In the VGP Hi-C manual-curation workflow, the embedded subworkflow `Add suffix t
 - Consuming the transform's output directly. Downstream steps should read the merge, because the transform may have been skipped.
 - Duplicating the downstream workflow for each case. Merge once with `pick_value` and continue on one path.
 - Wrapping the pass-through in a no-op transform step. Connect the original value directly as the fallback candidate.
-- Reaching for `__FILTER_NULL__`. The conditionals survey found no uses of it in IWC. That absence does not make it wrong, but it leaves no exemplar to follow.
+- Reaching for `__FILTER_NULL__` here. The conditionals survey found no uses of it in IWC, and this fallback has no null to remove. Its one recipe is merging arms mapped over different collections, in [[conditional-route-between-alternative-outputs]].
 
 ## See Also
 
