@@ -21,9 +21,9 @@
 - fixture: `examples/sample-sheet-restore-last-drafty/galaxy-workflow-draft.gxwf.yml`
   and `open-requirements.ledger.yml` beside it.
 - expect: `nf-core-demo-trimmed-reads-metadata-carry-forward` ends `resolved`, and
-  open blocking entries fall from 2 to 1. `restore_trimmed_sample_sheet_metadata`
+  open blocking entries fall from their starting 2. `restore_trimmed_sample_sheet_metadata`
   is gone, `trimmed_reads` is retargeted, and neither its id nor its label is left
-  anywhere, including the comment frame. A `kind: dropped` entry quotes the
+  anywhere in the draft, including the comment frame. A `kind: dropped` entry quotes the
   searches or the collection semantics rule, not the blocking entry.
   `gxwf draft-next-step` reports `draft: false`. Driven through
   [[advance-galaxy-draft-step]], `galaxy-workflow.gxwf.yml` is written in the same
@@ -34,10 +34,10 @@
 - fixture: `examples/dupradar-wrapper-absent/galaxy-workflow-draft.gxwf.yml` and
   `open-requirements.ledger.yml` beside it.
 - expect: no new search runs. `dupradar-wrapper-absent` ends `resolved`. Step
-  `M19_dupradar`, input `P4_dupradar_strandedness_param`, MultiQC edge
-  `TODO_dupradar`, the frame entry and every mention in `doc` and `_plan_*` are
-  gone. `M18_markdup`'s `TODO_bam` port goes too, because only `M19_dupradar` read
-  it. A `kind: dropped` entry quotes the searches as its `because`. `multiqc_report`
+  `M19_dupradar`, MultiQC edge `TODO_dupradar`, the frame entry and every mention
+  in `doc` and `_plan_*` are gone. Inputs `P4_dupradar_strandedness_param` and
+  `annotation` and `M18_markdup`'s `TODO_bam` port go too, because only
+  `M19_dupradar` read them. A `kind: dropped` entry quotes the searches as its `because`. `multiqc_report`
   still has its source. `gxwf draft-validate` exits 0.
 
 ## Case: value must vary per run
