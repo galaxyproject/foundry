@@ -51,7 +51,7 @@ Apply a reviewed change-set to a concrete Galaxy workflow and emit a `galaxy-wor
 
 ### What to apply directly vs. defer
 
-- **Direct edits (applied inline, no drafty step).** `remove-step`, `rewire`, `relabel` / `annotate`, `change-parameter`, `add-input` / `remove-input`, `add-output` / `expose-output`. These need no tool resolution: edit the concrete step/input/output in place and rewire consumers as the change-set dictates. A change-set of purely direct edits yields a draft with `draft: false` — an immediately concrete workflow, no loop iterations.
+- **Direct edits (applied inline, no drafty step).** `remove-step`, `rewire`, `relabel` / `annotate`, `change-parameter`, `add-input` / `remove-input`, `add-output` / `expose-output`, `remove-output`. These need no tool resolution: edit the concrete step/input/output in place and rewire consumers as the change-set dictates. A change-set of purely direct edits yields a draft with `draft: false` — an immediately concrete workflow, no loop iterations.
 - **Deferred edits (injected as drafty steps).** `add-step` and `replace-tool` (when the replacement is a different tool or an unpinned version). Add the step at draft tier with `tool_id: TODO` (or Identity-pinned when the change-set pinned an id), and record the operation, source evidence, and constraints in `_plan_state` / `_plan_context` / `_plan_in` / `_plan_out` so advance-galaxy-draft-step can resolve a wrapper and concretize it.
 
 ### Preserve untouched regions

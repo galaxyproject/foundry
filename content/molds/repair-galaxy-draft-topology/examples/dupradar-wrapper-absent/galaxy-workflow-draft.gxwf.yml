@@ -1,0 +1,88 @@
+class: GalaxyWorkflowDraft
+id: rnaseq_qc
+label: RNA-seq alignment QC
+doc: Mark duplicates, assess duplication with dupRadar in `M19_dupradar`, and aggregate reports with MultiQC.
+inputs:
+  - id: aligned_reads
+    label: Aligned reads
+    type: collection
+    collection_type: list
+    format:
+      - bam
+  - id: annotation
+    label: Annotation GTF
+    type: data
+    format:
+      - gtf
+  - id: P4_dupradar_strandedness_param
+    label: dupRadar strandedness
+    type: int
+    default: 0
+    doc: Library strandedness passed to dupRadar.
+outputs:
+  - id: multiqc_report
+    label: MultiQC report
+    outputSource: G6_multiqc/TODO_report
+steps:
+  M18_markdup:
+    id: M18_markdup
+    label: Mark duplicates
+    type: tool
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      - id: TODO_input
+        source: aligned_reads
+    out:
+      - id: TODO_bam
+      - id: TODO_metrics
+    _plan_state: Mark, do not remove, duplicates and write the metrics file.
+    _plan_out: TODO_bam feeds M19_dupradar. TODO_metrics feeds MultiQC.
+  M19_dupradar:
+    id: M19_dupradar
+    label: dupRadar duplication assessment
+    type: tool
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      - id: TODO_bam
+        source: M18_markdup/TODO_bam
+      - id: TODO_annotation
+        source: annotation
+      - id: TODO_strandedness
+        source: P4_dupradar_strandedness_param
+    out:
+      - id: TODO_multiqc
+    _plan_state: Run dupRadar per sample with the given strandedness.
+    _plan_out: TODO_multiqc is the dupRadar table MultiQC reads.
+  G6_multiqc:
+    id: G6_multiqc
+    label: Aggregate MultiQC report
+    type: tool
+    tool_id: TODO
+    tool_version: TODO
+    in:
+      - id: TODO_duplicates
+        source: M18_markdup/TODO_metrics
+      - id: TODO_dupradar
+        source: M19_dupradar/TODO_multiqc
+    out:
+      - id: TODO_report
+    _plan_state: One section per contributor, including duplicates and dupRadar.
+    _plan_out: TODO_report is the public HTML report.
+comments:
+  - type: frame
+    position: [20, 20]
+    size: [450, 300]
+    color: blue
+    title: Duplication QC
+    contains_steps:
+      - Mark duplicates
+      - dupRadar duplication assessment
+  - type: frame
+    position: [520, 20]
+    size: [450, 300]
+    color: yellow
+    title: Report aggregation
+    contains_steps:
+      - Aggregate MultiQC report

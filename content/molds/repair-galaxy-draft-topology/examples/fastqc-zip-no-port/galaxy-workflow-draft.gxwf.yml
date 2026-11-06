@@ -1,0 +1,280 @@
+---
+class: GalaxyWorkflowDraft
+id: nf_core_demo
+label: 'nf-core/demo: read QC, trimming, and MultiQC'
+license: MIT
+doc: Portable draft for nf-core/demo at 45904cb9d12db3d89900e6c479fe604ef71b297b.
+  It retains the mixed sample-sheet read input, per-read FastQC products, conditional
+  Seqtk trimming, and a MultiQC HTML report. Reference FASTA is deliberately unwired.
+tags:
+- genomics
+- quality-control
+- read-preprocessing
+inputs:
+- id: input_reads
+  label: Input reads
+  type: collection
+  collection_type: sample_sheet:paired_or_unpaired
+  format:
+  - fastqsanger.gz
+  optional: false
+  column_definitions:
+  - name: sample
+    type: string
+    optional: false
+    description: Required source sample identifier; must match ^\S+$.
+  doc: Required mixed single/paired sample-sheet collection. Each row has required
+    fastq_1 and optional fastq_2 fastqsanger.gz members plus its required sample value.
+- id: skip_trim
+  label: Skip read trimming
+  type: boolean
+  optional: true
+  default: false
+  doc: Skip the Seqtk trimfq branch; default false is derived from !params.skip_trim.
+- id: multiqc_title
+  label: MultiQC report title
+  type: string
+  optional: true
+  doc: Optional report title; binding to the selected MultiQC wrapper remains deferred.
+- id: multiqc_config
+  label: MultiQC configuration (optional)
+  type: data
+  optional: true
+  doc: Optional custom MultiQC YAML/YML configuration; no target datatype is asserted.
+- id: multiqc_logo
+  label: MultiQC logo (optional)
+  type: data
+  optional: true
+  doc: Optional MultiQC logo; source module accepts a PNG but no portable target datatype
+    is asserted.
+- id: multiqc_methods_description
+  label: MultiQC methods description (optional)
+  type: data
+  optional: true
+  doc: Optional methods-description YAML dataset; exact wrapper binding is deferred.
+- id: reference_fasta
+  label: Reference FASTA (optional, provisional)
+  type: data
+  format:
+  - fasta
+  optional: true
+  doc: Optional independent FASTA input. It has no attributed source consumer and
+    therefore intentionally has no workflow edge, index build, dbkey, or data-table
+    lookup.
+outputs:
+- id: fastqc_html_reports
+  label: FastQC HTML reports
+  type: collection
+  outputSource: fastqc_per_read/TODO_html_reports
+  doc: Per-read list<html>, identified as sample__R1 or sample__R2.
+- id: fastqc_zip_archives
+  label: FastQC ZIP archives
+  type: collection
+  outputSource: fastqc_per_read/TODO_zip_archives
+  doc: Per-read list<zip>, synchronized with FastQC HTML report identifiers.
+- id: trimmed_reads
+  label: Trimmed reads
+  type: collection
+  outputSource: restore_trimmed_sample_sheet_metadata/TODO_trimmed_sample_sheet
+  doc: Conditional sample_sheet:paired_or_unpaired collection of fastqsanger.gz retaining
+    original sample metadata; skipped when skip_trim is true.
+- id: multiqc_report
+  label: MultiQC report
+  type: data
+  outputSource: aggregate_multiqc/TODO_html_report
+  doc: Final MultiQC HTML report.
+steps:
+  explode_and_label_input_reads:
+    id: explode_and_label_input_reads
+    label: Explode and label input reads
+    type: tool
+    tool_id: __APPLY_RULES__
+    tool_version: 1.1.0
+    doc: Flatten mixed sample-sheet rows into a per-read list and deterministically
+      label each read sample__R1 or sample__R2 while retaining an identifier-to-row/mate
+      map.
+    in:
+    - id: input
+      source: input_reads
+    out:
+    - id: output
+    state:
+      input:
+        __class__: ConnectedValue
+      rules:
+        rules:
+        - type: add_column_from_sample_sheet_index
+          value: 0
+        - type: add_column_metadata
+          value: identifier1
+        - type: add_column_regex
+          target_column: 1
+          expression: '^(?:forward|unpaired)$'
+          replacement: R1
+          allow_unmatched: true
+        - type: add_column_regex
+          target_column: 1
+          expression: '^reverse$'
+          replacement: R2
+          allow_unmatched: true
+        - type: add_column_concatenate
+          target_column_0: 2
+          target_column_1: 3
+        - type: add_column_value
+          value: __
+        - type: add_column_concatenate
+          target_column_0: 0
+          target_column_1: 5
+        - type: add_column_concatenate
+          target_column_0: 6
+          target_column_1: 4
+        mapping:
+        - type: list_identifiers
+          columns:
+          - 7
+  fastqc_per_read:
+    id: fastqc_per_read
+    label: FastQC per read
+    type: tool
+    tool_id: TODO
+    tool_version: TODO
+    doc: Run FastQC 0.12.1 independently on each deterministically labelled FASTQ.
+    in:
+    - id: TODO_reads
+      source: explode_and_label_input_reads/output
+    out:
+    - id: TODO_html_reports
+    - id: TODO_zip_archives
+    _plan_state: Configure the selected wrapper to inspect one fastqsanger.gz per
+      mapped job and produce HTML and ZIP outputs. Map-over must preserve the supplied
+      read identifier on both implicit list outputs.
+    _plan_context: 'Source process FASTQC: fastqc 0.12.1; conda bioconda::fastqc=0.12.1;
+      container biocontainers/fastqc:0.12.1--hdfd78af_0. Command runs fastqc with
+      calculated memory and threads over renamed input reads. Source outputs *.html
+      and *.zip.'
+    _plan_in: TODO_reads is the mapped per-read fastqsanger.gz input.
+    _plan_out: TODO_html_reports and TODO_zip_archives are synchronized list collections
+      with identifiers inherited from TODO_reads; both are public checkpoint outputs,
+      and ZIP archives feed MultiQC.
+  trim_reads_seqtk:
+    id: trim_reads_seqtk
+    label: Trim reads with Seqtk
+    type: tool
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/seqtk/seqtk_trimfq
+    tool_version: 1.4+galaxy0
+    when: "$(inputs.skip_trim == false)"
+    doc: Conditionally trim mixed single/paired input rows with the IUC Seqtk trimfq wrapper.
+    in:
+    - id: in_file
+      source: input_reads
+    out:
+    - id: default
+    state:
+      in_file:
+        __class__: ConnectedValue
+      mode:
+        mode_select: quality
+        q: 0.05
+        l: 30
+  restore_trimmed_sample_sheet_metadata:
+    id: restore_trimmed_sample_sheet_metadata
+    label: Restore trimmed sample-sheet metadata
+    type: tool
+    tool_id: TODO
+    tool_version: TODO
+    doc: Reconstruct original sample-sheet row metadata and pairedness after mapped
+      trimming.
+    in:
+    - id: TODO_trimmed_rows
+      source: trim_reads_seqtk/default
+    - id: TODO_source_rows
+      source: input_reads
+    out:
+    - id: TODO_trimmed_sample_sheet
+    _plan_state: Use an identifier-keyed collection reshape/metadata carry-forward
+      operation. Rebuild the original sample_sheet:paired_or_unpaired row layout and
+      sample column from the source row mapping; do not use parallel scalar metadata
+      inputs.
+    _plan_context: Galaxy mapping does not propagate sample-sheet column_definitions
+      or row columns. The collection semantics require an explicit reconstruction
+      from trimmed rows plus the original row identity; no concrete Galaxy rules configuration
+      is yet evidenced.
+    _plan_in: TODO_trimmed_rows supplies Seqtk's conditional mapped result; TODO_source_rows
+      supplies original sample identifiers, pairedness, and row membership.
+    _plan_out: TODO_trimmed_sample_sheet is sample_sheet:paired_or_unpaired<fastqsanger.gz>
+      with the original sample values and row layout, for public trimmed_reads.
+  aggregate_multiqc:
+    id: aggregate_multiqc
+    label: Aggregate MultiQC report
+    type: tool
+    tool_id: TODO
+    tool_version: TODO
+    doc: Reduce FastQC ZIP archives and optional report inputs to one MultiQC HTML
+      report.
+    in:
+    - id: TODO_qc_archives
+      source: fastqc_per_read/TODO_zip_archives
+    - id: TODO_title
+      source: multiqc_title
+    - id: TODO_config
+      source: multiqc_config
+    - id: TODO_logo
+      source: multiqc_logo
+    - id: TODO_methods_description
+      source: multiqc_methods_description
+    out:
+    - id: TODO_html_report
+    - id: TODO_data_directory
+      hide: true
+    - id: TODO_plots_directory
+      hide: true
+    _plan_state: Bind the QC ZIP list as a collection/multiple-data reduction, optionally
+      bind title, config, logo, and methods-description only when supplied, and emit
+      one HTML report. Do not fabricate empty auxiliary datasets. Keep non-public
+      data/plots directories hidden.
+    _plan_context: 'Source process MULTIQC: multiqc 1.33, conda bioconda::multiqc=1.33,
+      Wave container community.wave.seqera.io/library/multiqc:1.33--ee7739d47738383b.
+      Its inputs include multiqc_files, multiqc_config, extra_multiqc_config, multiqc_logo,
+      replace_names, and sample_names; it emits *.html, *_data, optional *_plots.
+      The source collects FASTQC.out.zip before MultiQC.'
+    _plan_in: TODO_qc_archives is the FastQC ZIP list reduction input. TODO_config
+      and TODO_methods_description map to the wrapper's optional config-like inputs;
+      TODO_logo is optional logo input; TODO_title maps to the report title setting.
+    _plan_out: TODO_html_report is public multiqc_report. TODO_data_directory and
+      TODO_plots_directory are non-public source side-products and remain hidden.
+comments:
+- type: frame
+  position:
+  - 20
+  - 20
+  size:
+  - 450
+  - 300
+  color: blue
+  title: Read expansion and quality control
+  contains_steps:
+  - Explode and label input reads
+  - FastQC per read
+- type: frame
+  position:
+  - 20
+  - 350
+  size:
+  - 450
+  - 220
+  color: green
+  title: Conditional read trimming
+  contains_steps:
+  - Trim reads with Seqtk
+  - Restore trimmed sample-sheet metadata
+- type: frame
+  position:
+  - 520
+  - 20
+  size:
+  - 450
+  - 300
+  color: yellow
+  title: Report aggregation
+  contains_steps:
+  - Aggregate MultiQC report

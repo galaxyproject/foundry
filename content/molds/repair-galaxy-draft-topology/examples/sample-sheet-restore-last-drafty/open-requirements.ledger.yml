@@ -1,0 +1,158 @@
+topology_repair:
+  escalations: 1
+  cap: 5
+  open_history:
+  - 0
+entries:
+- id: nf-core-demo-genome-key-disposition
+  status: open
+  kind: gap
+  blocking: false
+  raised_by: nextflow-summary-to-galaxy-reference-data
+  unmet: A portable Galaxy disposition for the optional source `genome` iGenomes-reference name.
+  missing: The summary provides neither a closed selector enum nor getGenomeAttribute-derived asset paths
+    or a Galaxy data-table mapping.
+  resolved_by: null
+  supersedes: null
+  note: Keep the portable explicit optional `fasta` input; do not introduce a dbkey or .loc table. The
+    key remains excluded unless later evidence establishes a curated selector or concrete expansion.
+- id: nf-core-demo-fasta-consumer-attribution
+  status: open
+  kind: gap
+  blocking: false
+  raised_by: nextflow-summary-to-galaxy-reference-data
+  unmet: A confirmed Galaxy consumer and data-flow edge for optional reference `fasta`.
+  missing: reference_assets[] records `fasta` at medium confidence but its used_by list is empty; the
+    summary warns that workflow graph extraction is intentionally partial.
+  resolved_by: null
+  supersedes: null
+  note: Represent it provisionally as an optional explicit fasta dataset, but do not wire or assert a
+    rebuild behavior without downstream evidence.
+- id: nf-core-demo-fastqc-report-identifiers
+  status: resolved
+  kind: gap
+  blocking: false
+  raised_by: nextflow-summary-to-galaxy-interface
+  unmet: Deterministic Galaxy collection element identifiers for public FastQC HTML and ZIP report collections.
+  missing: FASTQC emits tuple metadata plus wildcard per-read files; the selected test shows two reports
+    for paired samples, but the partial summary neither defines target collection identifiers nor a direct
+    one-report-per-sample shape.
+  resolved_by: repair-galaxy-draft-topology
+  supersedes: null
+  note: Topology repair removes the unimplementable flat-read expansion. FastQC now maps directly over
+    input_reads, so both public collections retain source sample-sheet row identifiers and their forward/reverse
+    or unpaired roles rather than claiming sample__R1/sample__R2 labels.
+- id: nf-core-demo-multiqc-directory-output-representation
+  status: open
+  kind: gap
+  blocking: false
+  raised_by: nextflow-summary-to-galaxy-interface
+  unmet: A portable public Galaxy representation decision for MultiQC's emitted `data` directory and optional
+    `plots` directory.
+  missing: MULTIQC emits path `*_data` and optional `*_plots`; the summary establishes directory-shaped
+    contents but no Galaxy datatype or collection contract, while the primary subworkflow declares only
+    the HTML report.
+  resolved_by: null
+  supersedes: null
+  note: Do not publish these directories in the v1 interface or fabricate a collection shape. Revisit
+    when a concrete Galaxy wrapper/output contract is selected.
+- id: nf-core-demo-trimmed-reads-metadata-carry-forward
+  status: open
+  kind: gap
+  blocking: true
+  raised_by: nextflow-summary-to-galaxy-data-flow
+  step: restore_trimmed_sample_sheet_metadata
+  unmet: Realize the declared `trimmed_reads` sample_sheet:paired_or_unpaired output with the original
+    `sample` metadata and single/paired row layout.
+  missing: Galaxy mapping over a sample-sheet collection does not propagate column_definitions or row
+    columns; the summary provides no concrete Galaxy collection-operation/rules configuration for reattaching
+    them after SEQTK_TRIM. On 2026-10-21, `gxwf tool-search` queries for collection metadata/sample sheet,
+    sample sheet, and collection reshape returned no candidate that can rebuild this collection; the only
+    collection-operation hit (`iuc/collection_element_identifiers`) extracts identifiers and cannot carry
+    forward rows or columns. The shared cache has no confirmed stock Apply-Rules pin.
+  resolved_by: null
+  supersedes: null
+  note: The data-flow brief requires an identifier-keyed reconstruction/carry-forward placeholder after
+    trimming. Template and implementation work must choose and test the concrete Galaxy operation without
+    using parallel scalar metadata inputs. advance-galaxy-draft-step confirmed no acceptable Tool Shed
+    wrapper or cached stock pin, so this is now blocking; topology repair must either supply a validated
+    reconstruction producer or honestly narrow the public trimmed-read metadata contract.
+- id: nf-core-demo-mixed-sample-sheet-read-label-idiom
+  status: resolved
+  kind: gap
+  blocking: false
+  raised_by: compare-against-iwc-exemplar
+  step: explode_and_label_input_reads
+  unmet: A corpus-grounded Galaxy template idiom that explodes `sample_sheet:paired_or_unpaired` into
+    a deterministic per-read list while retaining the source-row/mate map.
+  missing: The nearest domain exemplar `read-preprocessing/short-read-qc-trimming` accepts a `list:paired`
+    directly; it has no mixed single/paired sample-sheet input, `sample` column, optional mate, or `sample__R1`/`sample__R2`
+    expansion.
+  resolved_by: repair-galaxy-draft-topology
+  supersedes: null
+  note: 'Closed by narrowing the topology: the flat labelled-list contract and node A are removed. FastQC
+    maps directly over input_reads and preserves the source sample-sheet row and mate structure; no mixed-row
+    expansion idiom is required.'
+- id: nf-core-demo-mixed-sample-sheet-expansion-unimplementable
+  status: resolved
+  kind: gap
+  blocking: true
+  raised_by: advance-galaxy-draft-step
+  step: explode_and_label_input_reads
+  unmet: Concrete Galaxy implementation of mixed sample-sheet expansion into a collision-checked list<fastqsanger.gz>
+    labelled sample__R1/sample__R2.
+  missing: The sole plausible mechanism is Galaxy's stock collection/Apply-Rules operation, but the supplied
+    shared cache has no confirmed stock pin; the Tool Shed search found no Tool Shed wrapper with the
+    required mixed-row, optional-mate expansion and identifier-preservation contract.
+  resolved_by: repair-galaxy-draft-topology
+  supersedes: null
+  note: Closed by removing explode_and_label_input_reads and wiring input_reads directly to fastqc_per_read.
+    This is computable through generic collection mapping and preserves sample-sheet row and mate structure,
+    while deliberately dropping the flat collision-checked sample__R1/sample__R2 identifier contract.
+- id: nf-core-demo-flat-read-label-contract-dropped
+  status: open
+  kind: dropped
+  blocking: false
+  raised_by: repair-galaxy-draft-topology
+  step: explode_and_label_input_reads
+  units: The flat list<fastqsanger.gz> keyed sample__R1/sample__R2 and its collision-checked identifier-to-row/mate
+    map formerly required of explode_and_label_input_reads.
+  because: 'Cited blocking entry open-requirements-ledger:nf-core-demo-mixed-sample-sheet-expansion-unimplementable:
+    no confirmed stock Apply-Rules pin/configuration and no Tool Shed wrapper can implement the mixed-row
+    optional-mate expansion without inventing wrapper state.'
+  unmet: Public FastQC report collections no longer have flat sample__R1/sample__R2 element identifiers.
+  missing: A confirmed Galaxy Apply-Rules realization capable of collision-checked expansion of the mixed
+    sample-sheet rows remains unavailable.
+  resolved_by: null
+  supersedes: null
+  note: The narrowed topology publishes the directly mapped sample_sheet:paired_or_unpaired report collections
+    instead, preserving source row identifiers and forward/reverse or unpaired roles.
+- id: nf-core-demo-fastqc-zip-output-unavailable
+  status: open
+  kind: gap
+  blocking: true
+  raised_by: advance-galaxy-draft-step
+  step: fastqc_per_read
+  unmet: Per-read FastQC ZIP archive collection required by fastqc_zip_archives and aggregate_multiqc.
+  missing: Tool Shed search (gxwf tool-search fastqc; repo-search fastqc) identified devteam/fastqc as the
+    applicable FastQC wrapper. Its confirmed 0.74+galaxy1 manifest exposes html_file and text_file only,
+    not a ZIP output port; a fastqc zip search returned no candidate.
+  resolved_by: null
+  supersedes: null
+  note: The concrete wrapper maps the declared HTML product to html_file and its second real port to text_file.
+    Topology repair must either revise the archive contract and downstream MultiQC binding to consume the
+    raw FastQC text product or supply a producer that creates FastQC ZIP archives.
+- id: nf-core-demo-multiqc-config-and-methods-binding
+  status: open
+  kind: gap
+  blocking: false
+  raised_by: advance-galaxy-draft-step
+  step: aggregate_multiqc
+  unmet: Bind optional MultiQC configuration and methods-description datasets to the selected Galaxy MultiQC wrapper.
+  missing: The confirmed IUC MultiQC 1.33+galaxy3 workflow schema exposes results, image_content_input,
+    title, comment, flat, export, and png_plots, but no configuration or methods-description dataset inputs.
+  resolved_by: null
+  supersedes: null
+  note: The step concretely binds FastQC raw text, title, and logo; the optional multiqc_config and
+    multiqc_methods_description workflow inputs remain unconsumed until a compatible wrapper or authored
+    wrapper supplies those bindings.
