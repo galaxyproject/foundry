@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-test-plan/index.md",
     "revision": 5,
     "content_hash": "caa0bc67504bece6b9f11fdb5a4f2d67b2ee257ca979e8e4a160965824cf7ebb",
-    "commit": "d81f10e7b0697301f121fae58472d58cbf307443"
+    "commit": "5af44607e70531b5767e167ef2cf95c4751ac7e1"
   },
-  "cast_at": "2026-11-06T12:55:53.596Z",
+  "cast_at": "2026-11-06T13:05:31.024Z",
   "refs": [
     {
       "kind": "research",
@@ -97,8 +97,8 @@
       "evidence": "corpus-observed",
       "purpose": "Keep the plan addressable by stable labels and artifacts Planemo can connect back to invocations, jobs, and outputs.",
       "trigger": "When recording the labels and checkpoints the downstream test must address.",
-      "src_hash": "bd028711511ac2bab7afc1414f135ac0740a93b496dc5593eb5b58db757d0f09",
-      "dst_hash": "bd028711511ac2bab7afc1414f135ac0740a93b496dc5593eb5b58db757d0f09",
+      "src_hash": "0434c8d17ec3fb59c813a0fdddac6815e34aaadf111636ede7be889382ec5a75",
+      "dst_hash": "0434c8d17ec3fb59c813a0fdddac6815e34aaadf111636ede7be889382ec5a75",
       "source": "deterministic"
     },
     {

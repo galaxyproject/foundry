@@ -176,7 +176,7 @@ The test file passes the row's `value` column as a plain scalar, as [[iwc-test-d
 - Write every path with `${__HERE__}`, which Galaxy expands in `<file path>` and in each `.loc` line to the directory of the file it appears in. Rewrite a tools-iuc configuration copied into `test-data/`: those are written from the tool root (`${__HERE__}/test-data/x.loc`).
 - Copy `name` and `<columns>` from the wrapper's `tool_data_table_conf.xml.sample`, and check that the row passes any filter on the select.
 
-Diagnose a table Planemo didn't discover from the Galaxy log or the output dataset's `misc_info`. The job ends in `error` with no command line, and the message reads `Parameter 'index': requires a value, but no legal values defined`.
+Diagnose a table Planemo didn't discover from the Galaxy log or the output dataset's `misc_info`. The job ends in `error` with no command line, and the message reads `Parameter '<name>': requires a value, but no legal values defined`.
 
 Discovery belongs to the local managed engine, so `planemo test` and `planemo serve` read the file. `--engine docker_galaxy` and `--engine external_galaxy` don't. An external Galaxy needs the table provisioned on the server.
 

@@ -5,10 +5,10 @@
     "name": "find-test-data",
     "path": "content/molds/find-test-data/index.md",
     "revision": 9,
-    "content_hash": "2fe44cd36a9f3578bd20dcc47ec4bc253bb7644356656409ff57ce0042cce38b",
-    "commit": "d81f10e7b0697301f121fae58472d58cbf307443"
+    "content_hash": "a369cd4efdfd03e0dfecdbc8927e5e7abeeba3261ebfa5ae41fdb3debdb8585e",
+    "commit": "5af44607e70531b5767e167ef2cf95c4751ac7e1"
   },
-  "cast_at": "2026-11-06T12:55:50.646Z",
+  "cast_at": "2026-11-06T13:05:29.082Z",
   "refs": [
     {
       "kind": "research",
@@ -51,8 +51,8 @@
       "evidence": "corpus-observed",
       "purpose": "Stage a data table in the form Planemo discovers: configuration name, `${__HERE__}` paths, and the database location container jobs can read.",
       "trigger": "When a workflow input selects from a wrapper's data table and the wrapper offers no dataset input.",
-      "src_hash": "bd028711511ac2bab7afc1414f135ac0740a93b496dc5593eb5b58db757d0f09",
-      "dst_hash": "bd028711511ac2bab7afc1414f135ac0740a93b496dc5593eb5b58db757d0f09",
+      "src_hash": "0434c8d17ec3fb59c813a0fdddac6815e34aaadf111636ede7be889382ec5a75",
+      "dst_hash": "0434c8d17ec3fb59c813a0fdddac6815e34aaadf111636ede7be889382ec5a75",
       "source": "deterministic"
     },
     {

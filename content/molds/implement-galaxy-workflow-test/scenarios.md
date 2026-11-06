@@ -17,7 +17,7 @@
 
 ## Case: fixed data-table value with no test-size database
 
-- fixture: IWC `genome_annotation/functional-annotation/functional-annotation-of-sequences`, whose InterProScan step fixes `database: 5.59-91.0` in its tool state, with a `test-data-refs.json` that holds no ref for that value and no staged table.
+- fixture: IWC `genome_annotation/functional-annotation/functional-annotation-of-sequences`, whose InterProScan step fixes `database: 5.59-91.0` in its tool state, targeting a Planemo-managed Galaxy, with a `test-data-refs.json` that holds no ref for that value and no staged table.
 - expect: the output reports `5.59-91.0` as a gap, because the wrapper's `test-data/interproscan.loc` row points at a `fake_db/` the repository doesn't hold. It stages no row for that value.
 
 ## Case: managed Galaxy runtime green
