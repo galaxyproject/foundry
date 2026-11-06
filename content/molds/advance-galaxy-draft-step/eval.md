@@ -63,7 +63,8 @@ Properties are tagged by bucket:
 - assertion: on a draft with two or more drafty tool steps and a fully concrete
   topology, one invocation of the cast skill advances the `draft-next-step`
   pick — resolves a wrapper, implements that one step, runs `draft-validate`
-  `--concrete` — and leaves every other drafty step untouched.
+  `--concrete` — and leaves every other drafty step untouched. A call that goes
+  straight to repair from step 1 resolves and implements nothing.
 
 ## Property: an implemented step leaves no TODO sentinel behind
 
@@ -114,6 +115,35 @@ Properties are tagged by bucket:
   acceptable Tool Shed candidate, [[discover-shed-tool]] returns no match and the
   skill falls through to [[author-galaxy-tool-wrapper]] rather than guessing a
   wrapper.
+
+## Property: only recorded evidence skips wrapper resolution
+
+- bucket: routing
+- check: llm-judged
+- assertion: an `open` blocking entry against the picked step that records the
+  wrapper as confirmed absent, the author branch as ruled out, or why the wired
+  inputs can't supply the step goes straight to [[repair-galaxy-draft-topology]]
+  with no new search. An entry holding only Tool Shed misses or a tool version
+  missing from a cache goes through wrapper resolution first.
+
+## Property: open blocking entries reach repair before extract
+
+- bucket: routing
+- check: llm-judged
+- assertion: once no drafty step is left, an `open` blocking entry on a realized
+  step or with no `step` goes to [[repair-galaxy-draft-topology]] before
+  [[draft-extract]] runs, and a call stops escalating at the cap. An earlier-step
+  defect a structural edit closes appends a blocking entry and escalates.
+
+## Property: the escalation budget tracks each repair
+
+- bucket: routing
+- check: deterministic + llm-judged
+- assertion: each escalation raises `topology_repair.escalations` by one and
+  appends the post-repair open blocking-entry count to `open_history`. A repair that
+  leaves fewer entries than it found doesn't trip the gate, even when the count is
+  higher than the last one in `open_history`. A repair that doesn't sets `escalations`
+  to `cap`.
 
 ## Property: reuse a wrapper already pinned in the draft
 

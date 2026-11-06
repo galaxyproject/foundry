@@ -187,6 +187,7 @@ In the Galaxy per-step loop, the ledger is the substrate the topology-repair esc
 
 - **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs. Rather than fabricate, it appends a blocking entry and falls through to repair. Earlier Molds and the loop raise blocking entries too.
 - **[[repair-galaxy-draft-topology]]** reads the open blocking entries, makes the structural edits that close them (template-tier authoring), and marks each entry it closes `resolved`; the existing discover-or-author → implement machinery then realizes any new steps.
+- Once no drafty step is left, [[advance-galaxy-draft-step]] sends any open blocking entry to repair before extracting.
 - The loop's **decreasing-blocker invariant** counts open blocking entries: each repair must leave fewer than it found, under a hard cap on escalations. When the cap is hit with entries still open, those entries are **surrendered** into the final draft — the clean terminal that replaces spin-or-fabricate.
 
 So the ledger is not a convenience here; it is the countable state the termination guard depends on.
