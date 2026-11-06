@@ -60,9 +60,8 @@
 
 - check: llm-judged
 - assertion: every inserted producer's own output is computable from what feeds
-  it, and no new producer answers an entry against a step an earlier repair
-  inserted. Where nothing can close an entry, the Mold removes the step with a
-  recorded drop or leaves the entry `open` with a note, and doesn't grow the DAG.
+  it. Where nothing can close an entry, the Mold removes the step with a recorded
+  drop or leaves the entry `open` with a note, and doesn't grow the DAG.
 
 ## Property: the edited draft stays loop-consumable
 

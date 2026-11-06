@@ -36,7 +36,7 @@ Like the `_plan_*` family in [[galaxy-workflow-draft-format]], ledger entries ar
 - id: sccmec-evidence-missing
   status: open                # open | resolved | surrendered
   kind: gap                   # gap | dropped — see below; omit for gap
-  blocking: true              # true only when a structural edit must close it; the convergence gate counts these
+  blocking: true              # true only when a structural edit closes it; the convergence gate counts these
   raised_by: implement-galaxy-tool-step   # Mold that appended it
   step: classify_context       # draft step the obligation attaches to (if any)
   unmet: "SCCmec-region candidate output category"
@@ -209,7 +209,7 @@ entries:
 
 - `escalations` — how many times [[advance-galaxy-draft-step]] has escalated to [[repair-galaxy-draft-topology]] this run. The orchestrator creates the header at the first escalation, with `cap: 5` unless the run sets another, and increments it on each escalation.
 - `cap` — the hard ceiling. When `escalations` reaches `cap`, the loop stops escalating and surrenders any still-`open` blocking entries into the final draft as labelled gaps rather than retrying forever.
-- `open_history` — the open blocking-entry count recorded after each escalation. Entries raised between escalations can raise it again, so the convergence gate compares each repair with the count it started from: a repair must leave fewer open blocking entries than it found. One that doesn't is non-convergent and trips the gate immediately, ending escalation as the cap does. So does answering an entry against a step an earlier repair inserted by inserting another producer, because that grows the DAG without converging.
+- `open_history` — the open blocking-entry count recorded after each escalation. Entries raised between escalations can raise it again, so the convergence gate compares each repair with the count it started from: a repair must leave fewer open blocking entries than it found. One that doesn't is non-convergent and trips the gate immediately: set `escalations` to `cap`, so later calls read the same stop the cap gives.
 
 This block lives in the ledger as a v1 expedient: the ledger is already the carried, cast-visible state the loop reads each iteration. Its better long-term home is the **draft itself** — a workflow-level annotation that travels with the artifact it bounds, so the budget survives even when the ledger is stripped at the terminal. Recorded here for now; migrate when the draft grows a home for it.
 
