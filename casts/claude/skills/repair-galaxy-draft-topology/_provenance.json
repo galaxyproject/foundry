@@ -5,10 +5,10 @@
     "name": "repair-galaxy-draft-topology",
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 6,
-    "content_hash": "01ff4f2c7a84a2aabdb518256cac90abc24c85a2d256b8d6f78ba2a0af50052c",
-    "commit": "e2c26d735ea338046c61917fcf7627a7f1dc462e"
+    "content_hash": "6750f1a3b845f099552ed5b3eb5255436c0462b9a97553f3c682e2130086928e",
+    "commit": "da8df536983faff516c02734d2229af24604169d"
   },
-  "cast_at": "2026-11-06T18:57:27.002Z",
+  "cast_at": "2026-11-06T19:06:41.798Z",
   "refs": [
     {
       "kind": "cli-command",
