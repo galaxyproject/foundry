@@ -24,6 +24,7 @@ import {
   stripWikiLinks,
   type CastHooks,
   type ProvenanceRefEntry,
+  type RefExpansionContext,
 } from "@galaxy-foundry/cast";
 import { castCommand, type CastCommandSpec } from "@galaxy-foundry/cast/command";
 import {
@@ -40,6 +41,7 @@ import type {
   ProvenanceArtifacts,
 } from "../lib/artifact-contract.js";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { isPatternMap, patternMapLeaves } from "../lib/pattern-maps.js";
 import { aggregateRequiredTools, requiredToolRows } from "../lib/required-tools.js";
 import { validateRuns } from "../lib/runs-check.js";
 import { buildSlugMap, GALAXY_SLUG_ALIASES } from "../lib/slug-map.js";
@@ -193,6 +195,8 @@ const GALAXY_HOOKS: CastHooks = {
     const artifacts = readArtifactContracts(meta, producerIndexFor(metaByPath));
     const produces = artifacts?.produces ?? [];
     const runtime = refs.filter((r) => r.used_at !== "cast-time");
+    // Reached through the map that lists them, so they get one note rather than a row each.
+    const listed = runtime.filter((r) => !r.expanded_from);
     const feedback = runtimeArtifactsByCorpus
       .get(metaByPath)
       ?.registry.artifacts.get("foundry-feedback-ledger");
@@ -222,14 +226,14 @@ const GALAXY_HOOKS: CastHooks = {
       bulletSection(
         "Load Upfront",
         refRows(
-          runtime.filter((r) => r.load === "upfront"),
+          listed.filter((r) => r.load === "upfront"),
           describe,
         ),
       ),
       bulletSection(
         "Load On Demand",
         refRows(
-          runtime.filter((r) => r.load === "on-demand"),
+          listed.filter((r) => r.load === "on-demand"),
           describe,
         ),
       ),
@@ -260,9 +264,12 @@ const GALAXY_HOOKS: CastHooks = {
         "- Do not read Foundry source files at runtime; use only files packaged in this skill bundle and user-supplied artifacts.",
         "- Preserve declared artifact filenames unless the user or harness supplies explicit paths.",
         "- Carry unresolved assumptions into the output artifact instead of silently inventing missing source evidence.",
+        ...mocLinkNotes(refs, metaByPath),
       ]),
     ];
   },
+  // A pattern map of content is an index; the leaves it lists are what a cast skill reads.
+  expandRefs: mocLeafRefs,
   // Which npm module a `package-export` ref means. It has to be imported from HERE: a bare
   // `import(spec)` resolves relative to the file that runs it, and @galaxy-foundry/cast is
   // installed somewhere this repo's own packages are not visible from. Written in this tree,
@@ -285,6 +292,45 @@ const GALAXY_HOOKS: CastHooks = {
     },
   ],
 };
+
+// ---- pattern maps of content ----
+
+// A declared map brings its leaves as on-demand refs, which the validator holds to its body links.
+function mocLeafRefs({
+  ref,
+  meta,
+  metaByPath,
+  slugMap,
+}: RefExpansionContext): Readonly<Record<string, unknown>>[] {
+  if (ref.kind !== "pattern" || !isPatternMap(meta)) return [];
+  return patternMapLeaves(meta, slugMap, metaByPath).map(({ link }) => ({
+    kind: "pattern",
+    ref: link,
+    mode: "verbatim",
+    used_at: ref.used_at,
+    load: "on-demand",
+  }));
+}
+
+// One Runtime Notes line naming the runtime maps and where their leaf links resolve.
+function mocLinkNotes(
+  refs: readonly ProvenanceRefEntry[],
+  metaByPath: ReadonlyMap<string, Frontmatter>,
+): string[] {
+  const maps = refs
+    .filter((r) => r.used_at !== "cast-time" && r.kind === "pattern")
+    .filter((r) => isPatternMap(metaByPath.get(r.src)))
+    .map((r) => r.dst)
+    .sort();
+  // Any used_at: a leaf shared with a cast-time map keeps that map's used_at but still ships.
+  const leaf = refs.find((r) => r.expanded_from && !r.companion_of);
+  if (maps.length === 0 || !leaf) return [];
+  const dir = path.posix.dirname(leaf.dst);
+  const names = maps.map((m) => `\`${m}\``).join(", ");
+  return [
+    `- The leaf pattern pages listed by ${names} are packaged too: a double-bracketed \`<slug>\` link to one of those leaves names \`${dir}/<slug>.md\`, which carries the tool settings and worked state. Links there to research notes or other pattern maps resolve only when this skill lists them above.`,
+  ];
+}
 
 // ---- provenance ----
 //

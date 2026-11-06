@@ -532,6 +532,52 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
+  // A cast ships a map of content's `related_patterns` beside it, so a pattern the body routes
+  // to but the field omits is a link a cast skill cannot follow.
+  it("rejects a pattern map whose body links a pattern its related_patterns omits", () => {
+    writeFm(path.join(dir, "patterns/leaf-a.md"), patternRequired({ title: "Leaf A" }));
+    writeFm(path.join(dir, "patterns/leaf-b.md"), patternRequired({ title: "Leaf B" }));
+    writeFm(
+      path.join(dir, "patterns/hub.md"),
+      patternRequired({
+        title: "Hub",
+        pattern_kind: "moc",
+        related_patterns: ["[[leaf-a]]"],
+      }),
+    );
+    appendFileSync(path.join(dir, "patterns/hub.md"), "Use [[leaf-a]] or [[leaf-b]].\n");
+
+    let r = { errors: 0 };
+    const out = capturingStdout(() => {
+      r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    });
+    expect(r.errors).toBe(1);
+    expect(out).toMatch(/body links pattern \[\[leaf-b\]\].*related_patterns/);
+  });
+
+  it("accepts a pattern map whose related_patterns covers every leaf its body links", () => {
+    writeFm(path.join(dir, "patterns/leaf-a.md"), patternRequired({ title: "Leaf A" }));
+    writeFm(
+      path.join(dir, "patterns/hub.md"),
+      patternRequired({
+        title: "Hub",
+        pattern_kind: "moc",
+        related_patterns: ["[[leaf-a]]"],
+      }),
+    );
+    writeFm(
+      path.join(dir, "patterns/other-hub.md"),
+      patternRequired({ title: "Other Hub", pattern_kind: "moc" }),
+    );
+    appendFileSync(
+      path.join(dir, "patterns/hub.md"),
+      "Use [[leaf-a]] (`[[not-a-link]]`); sibling map [[other-hub]].\n",
+    );
+
+    const r = validateDirectory({ directory: dir, tagsPath: TAGS_PATH });
+    expect(r.errors).toBe(0);
+  });
+
   it("accepts abstract IWC workflow IDs in iwc_exemplars", () => {
     writeFm(
       path.join(dir, "patterns/pattern-x.md"),

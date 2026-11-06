@@ -56,7 +56,7 @@
     "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",
     "@galaxy-foundry/build-cli": "workspace:*",
-    "@galaxy-foundry/cast": "^0.12.3",
+    "@galaxy-foundry/cast": "^0.13.0",
     "@galaxy-foundry/content-reader": "^0.4.0",
     "@galaxy-foundry/gxwf-foundry": "workspace:*",
     "@galaxy-foundry/gxwf-foundry-note-schema": "workspace:*",
