@@ -32,14 +32,14 @@ references:
     load: upfront
     mode: verbatim
     evidence: cast-validated
-    purpose: "In/out contract: the draft this Mold reads and re-wires conforms to [[galaxy-workflow-draft]]; cast bundles the JSON Schema so the re-wired draft stays inside the superset the per-step loop expects."
+    purpose: "In/out contract: the draft this Mold reads and edits conforms to [[galaxy-workflow-draft]]; cast bundles the JSON Schema so the edited draft stays inside the superset the per-step loop expects."
   - kind: research
     ref: "[[galaxy-workflow-draft-format]]"
     used_at: runtime
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Emit re-wired steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary."
+    purpose: "Emit added or replaced steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary."
     verification: "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft."
   - kind: research
     ref: "[[open-requirements-ledger]]"
@@ -64,7 +64,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Re-wire the affected region consistently with the data-flow design that settled the surrounding topology."
+    purpose: "Edit the affected region consistently with the data-flow design that settled the surrounding topology."
     verification: "Promote after two repairs preserve the surrounding data-flow design without re-deriving it from the source."
   - kind: research
     ref: "[[galaxy-collection-semantics]]"
@@ -97,7 +97,7 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Choose a corpus-attested collection recipe when the missing producer is a collection construction, reshape, or bridge."
-    trigger: "When the repair sub-path needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge."
+    trigger: "When an added step needs collection cleanup, reshaping, relabeling, identifier synchronization, or a collection-tabular bridge."
   - kind: pattern
     ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
@@ -105,7 +105,7 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Choose a corpus-attested tabular recipe when the missing evidence is a column, key, or aggregate a tabular step can produce."
-    trigger: "When the repair sub-path needs a computed column, join key, filter criterion, or aggregate the blocked step depends on."
+    trigger: "When an added step needs a computed column, join key, filter criterion, or aggregate the blocked step depends on."
 related_molds:
   - "[[freeform-summary-to-galaxy-template]]"
   - "[[workflow-brief-to-galaxy-template]]"
@@ -119,7 +119,7 @@ Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the
 
 Decide the edit from the entry, the surrounding data-flow design ([[galaxy-data-flow-draft-contract]]), IWC structure, and the pattern pages.
 
-**Edit.** Close each entry with the smallest set of edits, named by change-set kind: `remove-step`, `rewire`, `change-parameter`, `add-input`, `remove-input`, `add-output` / `expose-output`, `add-step`, `replace-tool`. Apply the direct kinds in place. `add-step` and `replace-tool` land at draft tier ([[galaxy-workflow-draft-format]]): concrete topology and edges, wrapper-tier `TODO` for `tool_id` and ports, `_plan_*` carrying intent. The discover-or-author → `summarize-galaxy-tool` → `implement-galaxy-tool-step` machinery realizes them on later loop iterations. A step duplicated from a realized step keeps its pin and `state`, and changes only the key that distinguishes it. Everything the entries don't name stays as it is.
+**Edit.** Close each open blocking entry you have evidence for, not only the one that triggered the call, with the smallest set of edits, named by change-set kind: `remove-step`, `rewire`, `change-parameter`, `add-input`, `remove-input`, `add-output` / `expose-output`, `remove-output`, `add-step`, `replace-tool`. Apply all but the last two in place. `add-step` and `replace-tool` land at draft tier ([[galaxy-workflow-draft-format]]): concrete topology and edges, wrapper-tier `TODO` for `tool_id` and ports, `_plan_*` carrying intent. The discover-or-author → `summarize-galaxy-tool` → `implement-galaxy-tool-step` machinery realizes them on later loop iterations. A step duplicated from a realized step keeps its pin and `state`, and changes only the key that distinguishes it. Everything the entries don't name stays as it is.
 
 **Interface.** Change the workflow interface only when an entry names that as the remedy or a narrowing requires it. Promote an input with a default equal to the literal it replaces, and remove the literal from `state`. Expose an output by removing its `hide`, unless the design wants it hidden. Removing an input or output is a narrowing: append a `kind: dropped` entry with its `units` and a cited `because`.
 
