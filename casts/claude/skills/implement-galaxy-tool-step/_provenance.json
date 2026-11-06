@@ -5,10 +5,10 @@
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 13,
-    "content_hash": "d902df343f62af16de5a0b7ef48576eeebac5abdfe23ff568f28de7c3e6fa98e",
-    "commit": "520ecf2ecec9d273aedf7c5f697b92f7ef4e163d"
+    "content_hash": "0f83537e2349235bf9099a8b6a5ee134e006cdf822f2d260f5caa4b96ad4b17a",
+    "commit": "a62662316a80cc043e02b1824fbebf1a68bf8e8e"
   },
-  "cast_at": "2026-11-06T18:21:34.915Z",
+  "cast_at": "2026-11-06T18:57:18.990Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -148,12 +148,12 @@
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Address a nested parameter with its `|`-joined `in:` key, and name the step part of a connection correctly for the draft's step form.",
-      "trigger": "When wiring a parameter nested in a conditional or section, or when a draft's steps carry both `id` and `label`.",
+      "purpose": "Name the step part of a connection for the draft's step form, and write a dataset `rename:` value.",
+      "trigger": "When a list-form step carries both `id` and `label`, or when setting a dataset `rename:`.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "cf922d2b3d807b020b466b5f22c15fad36b3d721bfa04c667eb120d1cdddf815",
-      "dst_hash": "cf922d2b3d807b020b466b5f22c15fad36b3d721bfa04c667eb120d1cdddf815",
+      "src_hash": "47a3b94dc15bb954f9193e888522b7aaff80143f2486531a21146fa4daaa54d4",
+      "dst_hash": "47a3b94dc15bb954f9193e888522b7aaff80143f2486531a21146fa4daaa54d4",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
@@ -166,8 +166,8 @@
       "used_at": "runtime",
       "load": "on-demand",
       "evidence": "corpus-observed",
-      "purpose": "Address a nested parameter with its `|`-joined `in:` key, and name the step part of a connection correctly for the draft's step form.",
-      "trigger": "When wiring a parameter nested in a conditional or section, or when a draft's steps carry both `id` and `label`.",
+      "purpose": "Name the step part of a connection for the draft's step form, and write a dataset `rename:` value.",
+      "trigger": "When a list-form step carries both `id` and `label`, or when setting a dataset `rename:`.",
       "companion_of": "references/notes/gxformat2-schema.md",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
