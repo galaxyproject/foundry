@@ -2,7 +2,7 @@
 
 ## Property: every addressed entry is closed or left open with a note
 
-- check: deterministic
+- check: deterministic + llm-judged
 - assertion: each blocking entry the repair addresses ends `resolved`, with a note
   naming the change-set kinds applied, or stays `open` with a note saying why.
   The Mold never sets `surrendered`, because that status belongs to the terminal.
@@ -11,11 +11,11 @@
 
 ## Property: added steps are draft-tier or copied
 
-- check: deterministic
+- check: deterministic + llm-judged
 - assertion: every step the repair adds carries wrapper-tier `TODO` for `tool_id`
   and ports plus `_plan_*` intent. A concrete `tool_id` on an added step appears
-  only when it is copied, with its `state`, from a realized step in the same
-  draft. A fabricated concrete tool id is a fail.
+  only when it is copied, with its `state` apart from the key that distinguishes
+  it, from a realized step in the same draft. A fabricated concrete tool id is a fail.
 
 ## Property: the repair stays local
 

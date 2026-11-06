@@ -5,10 +5,13 @@
 - fixture: `examples/fastqc-zip-no-port/galaxy-workflow-draft.gxwf.yml` and
   `open-requirements.ledger.yml` beside it.
 - expect: `nf-core-demo-fastqc-zip-wrapper-output` ends `resolved`. Either an
-  `add-step` at draft tier with `fastqc_zip_archives` retargeted to it, or the
-  public output removed with a `kind: dropped` entry quoting the wrapper's ports.
-  `text_file` is never bound as a ZIP. Other steps' `tool_id`, `tool_version` and
-  edges are unchanged.
+  `add-step` at draft tier, with `fastqc_zip_archives` retargeted to it and
+  `aggregate_multiqc`'s ZIP edge following it, and `gxwf draft-next-step` on the
+  emitted draft naming the added step; or the public output removed with a
+  `kind: dropped` entry quoting the wrapper's ports, with `aggregate_multiqc` given a
+  FastQC source it can read. `text_file` is never bound as a ZIP. Other steps'
+  `tool_id` and `tool_version` are unchanged, and edges change only where they
+  consumed the moved output.
 
 ## Case: repaired draft re-enters the loop
 
@@ -49,10 +52,14 @@
   `M19_dupradar`, MultiQC edge `TODO_dupradar`, the frame entry and every mention
   in `doc` and `_plan_*` are gone. Inputs `P4_dupradar_strandedness_param` and
   `annotation` and `M18_markdup`'s `TODO_bam` port go too, because only
-  `M19_dupradar` read them. A `kind: dropped` entry quotes the searches as its `because`. `multiqc_report`
+  `M19_dupradar` read them. A `kind: dropped` entry quotes the searches and the note
+  ruling out authoring as its `because`. `multiqc_report`
   still has its source. `gxwf draft-validate` exits 0.
 
 ## Case: value must vary per run
+
+Direct invocation only: this entry comes from the test phase, and no pipeline routes
+a test-phase entry back to the loop.
 
 - fixture: `examples/star-sa-index-input/galaxy-workflow-draft.gxwf.yml` and
   `open-requirements.ledger.yml` beside it.

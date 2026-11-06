@@ -7,7 +7,7 @@ entries:
     status: open
     kind: gap
     blocking: true
-    raised_by: advance-galaxy-draft-step
+    raised_by: nextflow-summary-to-galaxy-template
     step: M19_dupradar
     unmet: "Per-sample dupRadar duplication assessment for the MultiQC report."
     missing: "No wrapper. Zero results on 2026-11-06 from `gxwf tool-search dupradar`, `gxwf tool-search 'duplication rate rna-seq'`, `gxwf tool-search 'rna-seq duplication'` and `gxwf repo-search dupradar`."
