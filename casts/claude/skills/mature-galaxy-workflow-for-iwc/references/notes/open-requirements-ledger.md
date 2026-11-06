@@ -36,7 +36,7 @@ Like the `_plan_*` family in [[galaxy-workflow-draft-format]], ledger entries ar
 - id: sccmec-evidence-missing
   status: open                # open | resolved | surrendered
   kind: gap                   # gap | dropped — see below; omit for gap
-  blocking: true              # true only when a structural edit must close it; the convergence gate counts these
+  blocking: true              # true only when a structural edit closes it; the convergence gate counts these
   raised_by: implement-galaxy-tool-step   # Mold that appended it
   step: classify_context       # draft step the obligation attaches to (if any)
   unmet: "SCCmec-region candidate output category"
@@ -187,6 +187,7 @@ In the Galaxy per-step loop, the ledger is the substrate the topology-repair esc
 
 - **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs. Rather than fabricate, it appends a blocking entry and falls through to repair. Earlier Molds and the loop raise blocking entries too.
 - **[[repair-galaxy-draft-topology]]** reads the open blocking entries, makes the structural edits that close them (template-tier authoring), and marks each entry it closes `resolved`; the existing discover-or-author → implement machinery then realizes any new steps.
+- Once no drafty step is left, [[advance-galaxy-draft-step]] sends any open blocking entry to repair before extracting.
 - The loop's **decreasing-blocker invariant** counts open blocking entries: each repair must leave fewer than it found, under a hard cap on escalations. When the cap is hit with entries still open, those entries are **surrendered** into the final draft — the clean terminal that replaces spin-or-fabricate.
 
 So the ledger is not a convenience here; it is the countable state the termination guard depends on.
@@ -209,7 +210,7 @@ entries:
 
 - `escalations` — how many times [[advance-galaxy-draft-step]] has escalated to [[repair-galaxy-draft-topology]] this run. The orchestrator creates the header at the first escalation, with `cap: 5` unless the run sets another, and increments it on each escalation.
 - `cap` — the hard ceiling. When `escalations` reaches `cap`, the loop stops escalating and surrenders any still-`open` blocking entries into the final draft as labelled gaps rather than retrying forever.
-- `open_history` — the open blocking-entry count recorded after each escalation. Entries raised between escalations can raise it again, so the convergence gate compares each repair with the count it started from: a repair must leave fewer open blocking entries than it found. One that doesn't is non-convergent and trips the gate immediately, ending escalation as the cap does. So does answering an entry against a step an earlier repair inserted by inserting another producer, because that grows the DAG without converging.
+- `open_history` — the open blocking-entry count recorded after each escalation. Entries raised between escalations can raise it again, so the convergence gate compares each repair with the count it started from: a repair must leave fewer open blocking entries than it found. One that doesn't is non-convergent and trips the gate immediately: set `escalations` to `cap`, so later calls read the same stop the cap gives.
 
 This block lives in the ledger as a v1 expedient: the ledger is already the carried, cast-visible state the loop reads each iteration. Its better long-term home is the **draft itself** — a workflow-level annotation that travels with the artifact it bounds, so the budget survives even when the ledger is stripped at the terminal. Recorded here for now; migrate when the draft grows a home for it.
 

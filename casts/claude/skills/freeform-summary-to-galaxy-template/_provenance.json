@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "a9a4393c49eec26be0c7c67925e04960a04ea07d5d7ee6ecd415c2491bcac467",
-    "commit": "95ecbbcbf288eb132da9a80ea49b5c1a13fdd7a6"
+    "commit": "e2c26d735ea338046c61917fcf7627a7f1dc462e"
   },
-  "cast_at": "2026-11-06T18:15:14.234Z",
+  "cast_at": "2026-11-06T18:57:26.436Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -211,8 +211,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
-      "dst_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
+      "src_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
+      "dst_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
       "source": "deterministic"
     },
     {

@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 6,
     "content_hash": "43966773391578490688098c9333f6eb2eaa94574755f5b6554e7f9b72a605c0",
-    "commit": "95ecbbcbf288eb132da9a80ea49b5c1a13fdd7a6"
+    "commit": "e2c26d735ea338046c61917fcf7627a7f1dc462e"
   },
-  "cast_at": "2026-11-06T18:15:14.537Z",
+  "cast_at": "2026-11-06T18:57:26.765Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -142,8 +142,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the pipeline leaves open — a params entry with no Galaxy input, an emitted-but-unpublished output, a channel shape no collection maps cleanly onto.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
-      "dst_hash": "22abc4013eaae8dbdfa3ee028ce36607a1e77321c8800a9e9db21d131cdcfa30",
+      "src_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
+      "dst_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
       "source": "deterministic"
     },
     {
