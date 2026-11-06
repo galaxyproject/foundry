@@ -59,4 +59,5 @@
 - expect: `star-genome-sa-index-unreachable` ends `resolved`. One new integer input
   defaulting to 14, wired to `refGenomeSource|genomeSAindexNbases` on both STAR
   steps with the literal gone from both `state` blocks. No other input, output,
-  step or edge changes. `gxwf draft-next-step` still reports `draft: false`.
+  step or edge changes. `gxwf draft-validate --concrete --strict-state` exits 0.
+  `gxwf draft-next-step` still reports `draft: false`.

@@ -45,9 +45,10 @@
 
 - check: llm-judged
 - assertion: after a removal, no workflow input or step exists only to feed the
-  removed step. No `doc`, `_plan_*` or comment frame mentions its id or label, and
-  a `rename` or `change_datatype` it carried for its consumers has moved to the
-  step that inherits them.
+  removed step, and an input read only by a `${label}` in an `out:` `rename` stays.
+  No `doc`, `_plan_*` or comment frame mentions its id or label, no `doc` promises
+  what it supplied, and a `rename` or `change_datatype` it carried for its consumers
+  has moved to the step that inherits them.
 
 ## Property: no claim about an unresolved step in doc
 
@@ -66,5 +67,6 @@
 ## Property: the edited draft stays loop-consumable
 
 - check: deterministic
-- assertion: `gxwf draft-validate` exits 0 on the emitted draft, so the loop
+- assertion: `gxwf draft-validate` exits 0 on the emitted draft, with
+  `--concrete --strict-state` when the repair edited a realized step, so the loop
   resumes on it without re-running the template Mold over the whole workflow.

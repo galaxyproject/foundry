@@ -129,10 +129,10 @@ Decide the edit from the entry, the surrounding data-flow design ([[galaxy-data-
 
 **After every edit:**
 
-1. Run [[draft-validate]] and fix what it reports.
-2. Remove what existed only to feed a removed step: compute it by walking every step's `in:` and the workflow outputs, not from the entry's wording.
-3. Rewrite or remove mentions of removed ids and labels in `doc`, `_plan_*` and comment frames.
-4. Move a removed step's `rename` or `change_datatype` to the step that inherits its consumers.
-5. If an edit touched a step with a twin, make the same edit there.
+1. Remove what existed only to feed a removed step: compute it by walking every step's `in:`, the workflow outputs, and `${label}` in `out:` `rename`, not from the entry's wording.
+2. Rewrite or remove mentions of removed ids and labels in `doc`, `_plan_*` and comment frames, and any `doc` promising what a removed step supplied.
+3. Move a removed step's `rename` or `change_datatype` to the step that inherits its consumers.
+4. If an edit touched a step with a twin, a step duplicated from the same tool and plan, make the same edit there.
+5. Run [[draft-validate]], with `--concrete --strict-state` when an edit touched a realized step, and fix what it reports.
 
 **Ledger.** Mark each entry you close `resolved`, with a note naming the kinds you applied. A repair must leave fewer open blocking entries than it found. Never insert a producer whose own output is uncomputable from what feeds it. Leave an entry `open`, with a note saying what's unproven, when a consumer truly needs the removed output, when no other edit closes an entry on a realized step, or when the removal doesn't follow from what you can quote. An entry on a realized step reaches the final artifact as a labelled gap. A drafty step stays drafty, and the call reports it.
