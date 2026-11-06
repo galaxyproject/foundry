@@ -1,0 +1,219 @@
+class: GalaxyWorkflowDraft
+id: nf_core_demo
+label: 'nf-core/demo: read QC, trimming, and MultiQC'
+license: MIT
+doc: Portable draft for nf-core/demo at 45904cb9d12db3d89900e6c479fe604ef71b297b. It retains the mixed
+  sample-sheet read input, per-read FastQC products, conditional Seqtk trimming, and a MultiQC HTML report.
+  Reference FASTA is deliberately unwired.
+tags:
+- genomics
+- quality-control
+- read-preprocessing
+inputs:
+- id: input_reads
+  label: Input reads
+  type: collection
+  collection_type: sample_sheet:paired_or_unpaired
+  format:
+  - fastqsanger.gz
+  optional: false
+  column_definitions:
+  - name: sample
+    type: string
+    optional: false
+    description: Required source sample identifier; must match ^\S+$.
+  doc: Required mixed single/paired sample-sheet collection. Each row has required fastq_1 and optional
+    fastq_2 fastqsanger.gz members plus its required sample value.
+- id: skip_trim
+  label: Skip read trimming
+  type: boolean
+  optional: true
+  default: false
+  doc: Skip the Seqtk trimfq branch; default false is derived from !params.skip_trim.
+- id: multiqc_title
+  label: MultiQC report title
+  type: string
+  optional: true
+  doc: Optional report title; binding to the selected MultiQC wrapper remains deferred.
+- id: multiqc_config
+  label: MultiQC configuration (optional)
+  type: data
+  optional: true
+  doc: Optional custom MultiQC YAML/YML configuration; no target datatype is asserted.
+- id: multiqc_logo
+  label: MultiQC logo (optional)
+  type: data
+  optional: true
+  doc: Optional MultiQC logo; source module accepts a PNG but no portable target datatype is asserted.
+- id: multiqc_methods_description
+  label: MultiQC methods description (optional)
+  type: data
+  optional: true
+  doc: Optional methods-description YAML dataset; exact wrapper binding is deferred.
+- id: reference_fasta
+  label: Reference FASTA (optional, provisional)
+  type: data
+  format:
+  - fasta
+  optional: true
+  doc: Optional independent FASTA input. It has no attributed source consumer and therefore intentionally
+    has no workflow edge, index build, dbkey, or data-table lookup.
+outputs:
+- id: fastqc_html_reports
+  label: FastQC HTML reports
+  type: collection
+  outputSource: fastqc_per_read/html_file
+  doc: Per-read sample_sheet:paired_or_unpaired collection of HTML reports. It preserves each source row
+    identifier and its forward/reverse or unpaired role.
+- id: fastqc_zip_archives
+  label: FastQC ZIP archives
+  type: collection
+  outputSource: fastqc_per_read/text_file
+  doc: Per-read sample_sheet:paired_or_unpaired collection of ZIP archives. It preserves each source row
+    identifier and its forward/reverse or unpaired role.
+- id: trimmed_reads
+  label: Trimmed reads
+  type: collection
+  outputSource: restore_trimmed_sample_sheet_metadata/TODO_trimmed_sample_sheet
+  doc: Conditional sample_sheet:paired_or_unpaired collection of fastqsanger.gz retaining original sample
+    metadata; skipped when skip_trim is true.
+- id: multiqc_report
+  label: MultiQC report
+  type: data
+  outputSource: aggregate_multiqc/html_report
+  doc: Final MultiQC HTML report.
+steps:
+  fastqc_per_read:
+    id: fastqc_per_read
+    label: FastQC per read
+    type: tool
+    tool_id: toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc
+    tool_version: 0.74+galaxy1
+    doc: Run FastQC independently on every FASTQ in the source mixed sample-sheet collection.
+    in:
+    - id: input_file
+      source: input_reads
+    out:
+    - id: html_file
+    - id: text_file
+    state:
+      input_file:
+        __class__: ConnectedValue
+      nogroup: false
+      min_length: null
+      kmers: 7
+  trim_reads_seqtk:
+    id: trim_reads_seqtk
+    label: Trim reads with Seqtk
+    type: tool
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/seqtk/seqtk_trimfq
+    tool_version: 1.4+galaxy0
+    when: $(inputs.skip_trim == false)
+    doc: Conditionally trim mixed single/paired input rows using Seqtk trimfq semantics.
+    in:
+    - id: in_file
+      source: input_reads
+    out:
+    - id: default
+    state:
+      in_file:
+        __class__: ConnectedValue
+      mode:
+        mode_select: quality
+        q: 0.05
+        l: 30
+  restore_trimmed_sample_sheet_metadata:
+    id: restore_trimmed_sample_sheet_metadata
+    label: Restore trimmed sample-sheet metadata
+    type: tool
+    tool_id: TODO
+    tool_version: TODO
+    doc: Reconstruct original sample-sheet row metadata and pairedness after mapped trimming.
+    in:
+    - id: TODO_trimmed_rows
+      source: trim_reads_seqtk/default
+    - id: TODO_source_rows
+      source: input_reads
+    out:
+    - id: TODO_trimmed_sample_sheet
+    _plan_state: Use an identifier-keyed collection reshape/metadata carry-forward operation. Rebuild
+      the original sample_sheet:paired_or_unpaired row layout and sample column from the source row mapping;
+      do not use parallel scalar metadata inputs.
+    _plan_context: Galaxy mapping does not propagate sample-sheet column_definitions or row columns. The
+      collection semantics require an explicit reconstruction from trimmed rows plus the original row
+      identity; no concrete Galaxy rules configuration is yet evidenced.
+    _plan_in: TODO_trimmed_rows supplies Seqtk's conditional mapped result; TODO_source_rows supplies
+      original sample identifiers, pairedness, and row membership.
+    _plan_out: TODO_trimmed_sample_sheet is sample_sheet:paired_or_unpaired<fastqsanger.gz> with the original
+      sample values and row layout, for public trimmed_reads.
+  aggregate_multiqc:
+    id: aggregate_multiqc
+    label: Aggregate MultiQC report
+    type: tool
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc
+    tool_version: 1.33+galaxy3
+    doc: Aggregate the mapped FastQC text products into one MultiQC HTML report.
+    in:
+    - id: results_0|software_cond|output_0|input
+      source: fastqc_per_read/text_file
+    - id: title
+      source: multiqc_title
+    - id: image_content_input
+      source: multiqc_logo
+    out:
+    - id: html_report
+    - id: stats
+      hide: true
+    - id: plots
+      hide: true
+    state:
+      results:
+      - software_cond:
+          software: fastqc
+          output:
+          - type: data
+            input:
+              __class__: ConnectedValue
+      image_content_input:
+        __class__: ConnectedValue
+      title:
+        __class__: ConnectedValue
+      comment: ''
+      flat: false
+      export: false
+      png_plots: false
+comments:
+- type: frame
+  position:
+  - 20
+  - 20
+  size:
+  - 450
+  - 300
+  color: blue
+  title: Read quality control
+  contains_steps:
+  - FastQC per read
+- type: frame
+  position:
+  - 20
+  - 350
+  size:
+  - 450
+  - 220
+  color: green
+  title: Conditional read trimming
+  contains_steps:
+  - Trim reads with Seqtk
+  - Restore trimmed sample-sheet metadata
+- type: frame
+  position:
+  - 520
+  - 20
+  size:
+  - 450
+  - 300
+  color: yellow
+  title: Report aggregation
+  contains_steps:
+  - Aggregate MultiQC report

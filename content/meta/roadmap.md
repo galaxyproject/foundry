@@ -79,6 +79,12 @@ Make custom Galaxy tool development a reliable branch of workflow construction b
 
 Move coordination state into the draft workflow itself so unresolved topology and tool-discovery outcomes become explicit YAML TODOs, the next unit of work can be selected deterministically, and the requirements ledger is reserved for obligations rather than general agent handoff.
 
+**Substeps**
+
+- [ ] [#668 — Loop CLI surfaces: errors hidden below empty `*_errors` arrays, in-port wiring unreported, `--connections` unpackaged](https://github.com/galaxyproject/foundry/issues/668)
+- [ ] [#670 — Topology repair forbids both interface edits — input promotion and output promotion — and has no gate for either](https://github.com/galaxyproject/foundry/issues/670)
+- [ ] [#678 — `galaxy-tool-discovery` `status` has no `unsuitable` case, so a capability miss routes the harness to author a wrapper that already exists](https://github.com/galaxyproject/foundry/issues/678)
+
 ### [#332 — Introduce a finalize-workflow step.](https://github.com/galaxyproject/foundry/issues/332)
 
 Add a distinct finalization phase after the draft becomes computationally complete, giving the Foundry one place to review the whole workflow, improve names and comments, resolve presentation concerns, and perform checks that do not belong in per-step implementation.
