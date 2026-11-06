@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-workflow-brief",
     "path": "content/molds/nextflow-summary-to-workflow-brief/index.md",
-    "revision": 2,
-    "content_hash": "c2761e698f7913963c3324379d597b72cd6af456baf08742507ebf31b1b7d599",
-    "commit": "35f525ac6afd41a0e964d635e09661cc17317b13"
+    "revision": 3,
+    "content_hash": "6d139518a5027efc6317a646674c96899c6e0539a2bf788024e95744da426a54",
+    "commit": "5e356215f162f1609b9b9b73d6540605aeabc1f0"
   },
-  "cast_at": "2026-10-23T14:41:05.658Z",
+  "cast_at": "2026-10-25T22:28:28.879Z",
   "refs": [
     {
       "kind": "cli-command",

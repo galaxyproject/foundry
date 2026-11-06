@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: draft
 created: '2026-09-17'
-revised: '2026-10-19'
-revision: 2
+revised: '2026-10-25'
+revision: 3
 summary: Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design
   assumptions.
 input_artifacts:
@@ -78,7 +78,7 @@ Record the selected analyses and source pin. Keep process topology, source conta
 
 ## Evidence and scope
 
-Read the source summary and the caller's stated objective and selection. Identify which scientific work is included and excluded; do not copy every source analysis into scope. If the selection is too ambiguous to proceed, state that uncertainty explicitly in Workflow/Blockers rather than choosing an analysis for the expert.
+Read the source summary and the caller's stated objective and selection. Identify which scientific work is included and excluded; do not copy every source analysis into scope. If the selection is too ambiguous to proceed, state that uncertainty explicitly in Workflow/Blockers rather than choosing an analysis for the expert. A clear selection that conflicts with source behavior is not ambiguous: when a "default run" cannot execute as-is, a required parameter has no default, or a selected branch depends on an optional input, record it in Workflow/Open questions with the caller's intent as the proposal and the conflicting source evidence.
 
 Write `workflow-brief.md` with `## Workflow`, `### Objective`, and `## Agent Environment`. Add optional subsections only when evidence or expert intent supports them. Identify the source and caller instructions, distinguish source facts from expert requirements, and keep scientific inputs, outputs, and acceptance criteria high-level. Missing optional detail does not require filler sections.
 

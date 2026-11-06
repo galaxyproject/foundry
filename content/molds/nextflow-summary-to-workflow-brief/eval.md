@@ -3,7 +3,7 @@
 ## Property: source and expert intent determine scope
 
 - check: llm-judged
-- assertion: Every claimed source fact and requirement has supporting evidence or expert attribution. Ambiguous selection is a blocker; unselected analyses are not silently added.
+- assertion: Every claimed source fact and requirement has supporting evidence or expert attribution. Ambiguous selection is a blocker; a clear selection that conflicts with source behavior (no runnable defaults, a required parameter without a default, a branch gated on an optional input) is a cited open question, not a blocker; unselected analyses are not silently added.
 
 ## Property: brief authoring makes no Galaxy design choices
 
