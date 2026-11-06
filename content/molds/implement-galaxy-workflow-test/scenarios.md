@@ -15,10 +15,10 @@
 - fixture: authored `-tests.yml` and workflow fixture for a representative IWC workflow.
 - expect: gxwf or Planemo static validation reaches a clean result, or emits only explicitly documented warnings that do not block runtime testing.
 
-## Case: data-table values have rows
+## Case: fixed data-table value with no test-size database
 
-- fixture: a workflow fixing a step's database value in its tool state, with a `test-data-refs.json` that holds no ref for that value and no staged table.
-- expect: the test stages `tool_data_table_conf.xml.test` for that table, or reports the gap when no test-size database exists. It doesn't reach Planemo with an unmet value.
+- fixture: IWC `genome_annotation/functional-annotation/functional-annotation-of-sequences`, whose InterProScan step fixes `database: 5.59-91.0` in its tool state, with a `test-data-refs.json` that holds no ref for that value and no staged table.
+- expect: the output reports `5.59-91.0` as a gap, because the wrapper's `test-data/interproscan.loc` row points at a `fake_db/` the repository doesn't hold. It stages no row for that value.
 
 ## Case: managed Galaxy runtime green
 

@@ -137,7 +137,7 @@ Terminal output is not enough for durable failure analysis. Preserve structured 
 
 ## Staging a Data Table for a Workflow Test
 
-Some wrappers take a reference database only from a Galaxy data table (`<options from_data_table="...">`) and offer no dataset input. A test of a workflow that uses one needs a row for a test-size database. On a Planemo-managed Galaxy that row can travel with the workflow, because Planemo discovers the table configuration by name and needs no flag. This recipe covers existing wrappers with no other intake. It doesn't license adding new tables to a translated workflow, which [[nextflow-params-to-galaxy-inputs]] rules out.
+Some wrappers take a reference database only from a Galaxy data table (`<options from_data_table="...">`). A test of a workflow that uses one needs a row for a test-size database, and on a Planemo-managed Galaxy that row can travel with the workflow. The recipe covers existing wrappers with no dataset input, not new tables in a translated workflow ([[nextflow-params-to-galaxy-inputs]]).
 
 Lay the files out beside the workflow, with each `.loc` file next to the configuration:
 
@@ -170,22 +170,17 @@ amrfinderplus_V4.2_2026-05-15.1	V4.2-2026-05-15.1	4.2	${__HERE__}/amrfinderplus-
 
 The test file passes the row's `value` column as a plain scalar, as [[iwc-test-data-conventions]] describes for any data-table input.
 
-| Rule | Why |
-|---|---|
-| Name the file exactly `tool_data_table_conf.xml.test`. | Planemo looks for that name in the workflow's directory, the working directory, then the detected `test-data/` directory, and uses the first match, so a stray copy beside the workflow overrides the one in `test-data/`. If none exists it falls back to `tool_data_table_conf.xml.sample` in the first two. An unsuffixed `tool_data_table_conf.xml` is ignored without a message, and the select then has no matching row. |
-| Merge every table into one file. | Discovery returns a single file. |
-| Don't pass `--tool_data_table`. | The flag replaces discovery rather than adding to it, and a command that needs it is tied to whoever ran it. Test plans and run commands carry no data-table flag. |
-| Write every path with `${__HERE__}`. | Galaxy expands it in the configuration's `<file path>` and in each `.loc` line, so the fixture still works after a move. An absolute path works on one machine only. |
-| Read `${__HERE__}` as the directory of the file it appears in. | The tools-iuc examples keep the configuration at the tool root and write `${__HERE__}/test-data/x.loc`. Copied into `test-data/` unchanged, that path doesn't exist. A `.loc` in a subdirectory also has to climb back to reach a database beside the configuration. |
-| Copy `name` and `<columns>` from the repository's `tool_data_table_conf.xml.sample`. | The wrapper reads rows by column name, and a select's filter can reject a row, for example on a database format version. Check that the row passes the filter. |
+- Name the file exactly `tool_data_table_conf.xml.test`. Planemo searches the workflow's directory, the working directory, then the detected `test-data/`, and the first match wins, so a stray copy beside the workflow overrides this one. It doesn't read an unsuffixed `tool_data_table_conf.xml` ([planemo#1764](https://github.com/galaxyproject/planemo/issues/1764)).
+- Put every table in that one file. Planemo reads only one.
+- Pass no `--tool_data_table`. The flag replaces discovery and ties the command to one machine.
+- Write every path with `${__HERE__}`, which Galaxy expands in `<file path>` and in each `.loc` line to the directory of the file it appears in. Rewrite a tools-iuc configuration copied into `test-data/`: those are written from the tool root (`${__HERE__}/test-data/x.loc`).
+- Copy `name` and `<columns>` from the wrapper's `tool_data_table_conf.xml.sample`, and check that the row passes any filter on the select.
 
-A table Planemo didn't discover fails late. Galaxy accepts the invocation, the job ends in `error` with an empty command line and no stderr, and only the Galaxy log gives the reason: `job rejected while preparing: Parameter 'index': requires a value, but no legal values defined`.
-
-This recipe passed with no data-table flag on planemo 0.75.47 and a managed Galaxy `release_26.1`, without containers, run from an unrelated working directory against the shed-installed `devteam/fasta_compute_length`, whose job read the database path from the staged `.loc`. The same files with the configuration named `tool_data_table_conf.xml` failed with the error above.
+Diagnose a table Planemo didn't discover from the Galaxy log or the output dataset's `misc_info`. The job ends in `error` with no command line, and the message reads `Parameter 'index': requires a value, but no legal values defined`.
 
 Discovery belongs to the local managed engine, so `planemo test` and `planemo serve` read the file. `--engine docker_galaxy` and `--engine external_galaxy` don't. An external Galaxy needs the table provisioned on the server.
 
-Keep the database under `test-data/` for container jobs. Galaxy's default container volumes leave that directory out, but the job configuration Planemo generates adds the detected `test-data/` read-only for Docker and Singularity. `--job_config_file` replaces the generated configuration, so a custom one has to add the mount itself: `docker_volumes: $defaults,<test-data>:<test-data>:ro`.
+Keep the database under `test-data/`. The job configuration Planemo generates mounts the detected `test-data/` read-only for Docker and Singularity. `--job_config_file` replaces that configuration, so a custom one has to add the mount: `docker_volumes: $defaults,<test-data>:<test-data>:ro`.
 
 ## Noisy Boundaries
 
@@ -209,10 +204,6 @@ For [[run-workflow-test]]:
 - Do not treat terminal output as the primary failure artifact.
 - A staged data table applies only to the local managed engine. On an external or Docker Galaxy, a missing table row is a server provisioning gap, not a staging failure.
 
-For [[find-test-data]] and [[implement-galaxy-workflow-test]]:
-
-- Stage a data table for a data-table-only wrapper as [Staging a Data Table for a Workflow Test](#staging-a-data-table-for-a-workflow-test) describes.
-
 For [[debug-galaxy-workflow-output]]:
 
 - Start from structured Planemo output. When there is none because the workflow import failed, start from the upload response and the Galaxy server log.
@@ -229,5 +220,5 @@ Actual runs should verify:
 - Whether target Planemo/Galaxy versions populate `completed`, `/completion`, and step job summaries.
 - How `workflow_test_on_invocation` behaves for failed, warning-only, mapped collection, and subworkflow invocations.
 - Whether generated test cases from invocation preserve nested output collection structure correctly.
-- Whether a container job in a `planemo test` run reads a `${__HERE__}` database through the generated mount. The mount has been read from the rendered job configuration, not exercised by a job.
-- Whether the recipe holds for a data-table-only wrapper with a filter on its select. The passing run used a wrapper that also accepts a history dataset and has no filter.
+- Whether a container job in a `planemo test` run reads a `${__HERE__}` database through the generated mount.
+- Whether the recipe holds for a data-table-only wrapper with a filter on its select.

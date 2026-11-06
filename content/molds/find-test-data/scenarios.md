@@ -17,5 +17,5 @@
 
 ## Case: staged data table is discoverable and portable
 
-- fixture: interface brief for nf-core/funcscan with string inputs selecting `amrfinderplus_versioned_database` and `mmseqs2_databases`, whose wrappers take a database only from those tables.
-- expect: `test-data/tool_data_table_conf.xml.test` declares both tables, every `.loc` path uses `${__HERE__}`, and the AMRFinderPlus database comes from the tools-iuc wrapper's `test-data/test-db`. Moving the run directory leaves `planemo test` able to resolve both values with no `--tool_data_table` flag.
+- fixture: interface brief for `nf-core/funcscan`, pinned in `workflow-fixtures/fixtures.yaml`, with string inputs selecting `amrfinderplus_versioned_database` and `mmseqs2_databases`.
+- expect: `test-data/tool_data_table_conf.xml.test` declares both tables, and the AMRFinderPlus database comes from tools-iuc `tools/amrfinderplus/test-data/test-db`, in a row whose `db_version` passes the wrapper's filter.

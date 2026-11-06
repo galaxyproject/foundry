@@ -4,8 +4,7 @@ Evaluation plan for the `implement-galaxy-workflow-test` Mold. This file is the
 **abstract oracle**: properties any authored Galaxy workflow test must satisfy,
 independent of which workflow fixture it was authored against. Concrete fixtures
 and their expected values live in `scenarios.md`; the oracle here is applied to
-whatever a scenario produces. Every property but one is deterministic — each of
-those gates is mechanically checkable.
+whatever a scenario produces.
 
 ## Property: tests-format schema gate
 
