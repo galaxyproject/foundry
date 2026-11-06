@@ -85,6 +85,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[cleanup-sync-and-publish-nonempty-results]] | Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results. | draft | 2026-10-22 | 2 |
 | [[relabel-via-rules-and-find-replace]] | Relabel the inner level of a list:list by swapping it to the top with Apply Rules, relabeling from a find/replace-built table, and swapping back. | draft | 2026-10-22 | 3 |
 | [[collection-cleanup-after-mapover-failure]] | Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step. | draft | 2026-10-21 | 3 |
 | [[conditional-transform-or-pass-through]] | Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise. | draft | 2026-10-21 | 3 |
@@ -130,7 +131,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[sequence-fasta-tabular-interconvert]] | Move sequence records between FASTA and a (header, sequence) table so tabular tools can edit them; fasta2tab one way, tab2fasta back. | draft | 2026-06-10 | 1 |
 | [[sequence-merge-and-dedup]] | Concatenate several FASTA files into one and drop duplicate records by sequence identity in a single step; fasta_merge_files_and_filter_unique_sequences. | draft | 2026-06-10 | 1 |
 | [[sequence-reformat-line-width]] | Rewrap FASTA records to a fixed sequence-line width so downstream tools and viewers get canonical 60/70/80-column output; cshl_fasta_formatter. | draft | 2026-06-10 | 1 |
-| [[cleanup-sync-and-publish-nonempty-results]] | Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results. | draft | 2026-05-04 | 1 |
 | [[fan-in-bundle-consume-and-flatten]] | Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing. | draft | 2026-05-04 | 1 |
 | [[manifest-to-mapped-collection-lifecycle]] | Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs. | draft | 2026-05-04 | 1 |
 | [[reshape-relabel-remap-by-collection-axis]] | Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis. | draft | 2026-05-04 | 1 |

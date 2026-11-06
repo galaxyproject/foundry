@@ -1,0 +1,108 @@
+- doc: "sampleB has no hits. Filter Empty drops it, its sequence is filtered out to match, each kept hit pairs with its own sequence, and the gated report runs"
+  job:
+    samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sampleA
+          class: File
+          path: test-data/sampleA.tabular
+          filetype: tabular
+        - identifier: sampleB
+          class: File
+          path: test-data/sampleB.tabular
+          filetype: tabular
+        - identifier: sampleC
+          class: File
+          path: test-data/sampleC.tabular
+          filetype: tabular
+    sequences:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sampleA
+          class: File
+          path: test-data/seqA.txt
+          filetype: txt
+        - identifier: sampleB
+          class: File
+          path: test-data/seqB.txt
+          filetype: txt
+        - identifier: sampleC
+          class: File
+          path: test-data/seqC.txt
+          filetype: txt
+  outputs:
+    kept_ids:
+      file: test-data/expected_kept_ids.txt
+    synced:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        sampleA:
+          file: test-data/seqA.txt
+        sampleC:
+          file: test-data/seqC.txt
+    paired:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        sampleA:
+          file: test-data/expected_paired_sampleA.tabular
+        sampleC:
+          file: test-data/expected_paired_sampleC.tabular
+    report_ids:
+      file: test-data/expected_kept_ids.txt
+    has_results: true
+    report:
+      file: test-data/expected_report.tabular
+
+- doc: "No sample has hits. Every collection after cleanup is empty, and the gate skips the report"
+  job:
+    samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sampleA
+          class: File
+          path: test-data/sampleB.tabular
+          filetype: tabular
+        - identifier: sampleB
+          class: File
+          path: test-data/sampleB.tabular
+          filetype: tabular
+        - identifier: sampleC
+          class: File
+          path: test-data/sampleB.tabular
+          filetype: tabular
+    sequences:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sampleA
+          class: File
+          path: test-data/seqA.txt
+          filetype: txt
+        - identifier: sampleB
+          class: File
+          path: test-data/seqB.txt
+          filetype: txt
+        - identifier: sampleC
+          class: File
+          path: test-data/seqC.txt
+          filetype: txt
+  outputs:
+    kept_ids:
+      asserts:
+        has_size:
+          size: 0
+    report_ids:
+      asserts:
+        has_size:
+          size: 0
+    no_results_note:
+      asserts:
+        has_text:
+          text: "False"
