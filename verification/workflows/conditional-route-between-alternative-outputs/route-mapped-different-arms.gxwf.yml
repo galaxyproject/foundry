@@ -1,0 +1,135 @@
+class: GalaxyWorkflow
+name: "Route between alternatives mapped over different collections"
+inputs:
+  - id: left_samples
+    type: collection
+    collection_type: list
+  - id: right_samples
+    type: collection
+    collection_type: list
+  - id: equal_length_samples
+    type: collection
+    collection_type: list
+  - id: use_left
+    type: boolean
+  - id: use_right
+    type: boolean
+outputs:
+  - id: filter_then_merge
+    outputSource: filter_then_merge/output
+  - id: direct_merge
+    outputSource: direct_merge/output
+  - id: direct_merge_live
+    outputSource: direct_merge_live/output
+  - id: equal_length_pick_value
+    outputSource: equal_length_pick_value/output
+steps:
+  - id: left
+    label: left
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: left_samples
+      - id: when
+        source: use_left
+    out:
+      - id: out_file1
+    state: {}
+    when: $(inputs.when)
+  - id: right
+    label: right
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: right_samples
+      - id: when
+        source: use_right
+    out:
+      - id: out_file1
+    state: {}
+    when: $(inputs.when)
+  - id: equal_length_right
+    label: equal_length_right
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: equal_length_samples
+      - id: when
+        source: use_right
+    out:
+      - id: out_file1
+    state: {}
+    when: $(inputs.when)
+  - id: left_live
+    label: left_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: left/out_file1
+    out:
+      - id: output
+    state: {}
+  - id: right_live
+    label: right_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: right/out_file1
+    out:
+      - id: output
+    state: {}
+  - id: filter_then_merge
+    label: filter_then_merge
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: left_live/output
+      - id: inputs_1|input
+        source: right_live/output
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}
+  - id: direct_merge
+    label: direct_merge
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: left/out_file1
+      - id: inputs_1|input
+        source: right/out_file1
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}
+  - id: direct_merge_live
+    label: direct_merge_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: direct_merge/output
+    out:
+      - id: output
+    state: {}
+  - id: equal_length_pick_value
+    label: equal_length_pick_value
+    type: pick_value
+    in:
+      - id: input_0
+        source: left/out_file1
+      - id: input_1
+        source: equal_length_right/out_file1
+    state:
+      mode: first_non_null

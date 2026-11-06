@@ -1,0 +1,137 @@
+class: GalaxyWorkflow
+name: "Route between alternatives mapped over one collection"
+inputs:
+  - id: samples
+    type: collection
+    collection_type: list
+  - id: sentinel_samples
+    type: collection
+    collection_type: list
+  - id: left_marker
+    type: data
+  - id: right_marker
+    type: data
+  - id: use_left
+    type: boolean
+  - id: use_right
+    type: boolean
+outputs:
+  - id: tool_shed_pick_value
+    outputSource: tool_shed_pick_value/data_param
+  - id: builtin_pick_value
+    outputSource: builtin_pick_value/output
+  - id: direct_merge
+    outputSource: direct_merge/output
+  - id: direct_merge_live_plus_sentinel
+    outputSource: direct_merge_live_plus_sentinel/output
+steps:
+  - id: left
+    label: left
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: samples
+      - id: queries_0|input2
+        source: left_marker
+      - id: when
+        source: use_left
+    out:
+      - id: out_file1
+    state:
+      queries:
+        - {}
+    when: $(inputs.when)
+  - id: right
+    label: right
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: samples
+      - id: queries_0|input2
+        source: right_marker
+      - id: when
+        source: use_right
+    out:
+      - id: out_file1
+    state:
+      queries:
+        - {}
+    when: $(inputs.when)
+  - id: tool_shed_pick_value
+    label: tool_shed_pick_value
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: b19e21af9c52
+      name: pick_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: style_cond|type_cond|pick_from_0|value
+        source: left/out_file1
+      - id: style_cond|type_cond|pick_from_1|value
+        source: right/out_file1
+    out:
+      - id: data_param
+    tool_state:
+      style_cond:
+        pick_style: only
+        type_cond:
+          param_type: data
+          pick_from:
+            - value:
+                __class__: ConnectedValue
+            - value:
+                __class__: ConnectedValue
+  - id: builtin_pick_value
+    label: builtin_pick_value
+    type: pick_value
+    in:
+      - id: input_0
+        source: left/out_file1
+      - id: input_1
+        source: right/out_file1
+    state:
+      mode: the_only_non_null
+  - id: direct_merge
+    label: direct_merge
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: left/out_file1
+      - id: inputs_1|input
+        source: right/out_file1
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}
+  - id: direct_merge_live
+    label: direct_merge_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: direct_merge/output
+    out:
+      - id: output
+    state: {}
+  - id: direct_merge_live_plus_sentinel
+    label: direct_merge_live_plus_sentinel
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: direct_merge_live/output
+      - id: inputs_1|input
+        source: sentinel_samples
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}

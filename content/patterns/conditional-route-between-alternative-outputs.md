@@ -28,7 +28,8 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 verification_paths:
   - verification/workflows/conditional-route-between-alternative-outputs/route-between-alternatives.gxwf-test.yml
-  - verification/workflows/conditional-route-between-alternative-outputs/route-mapped-fan-in.gxwf-test.yml
+  - verification/workflows/conditional-route-between-alternative-outputs/route-mapped-same-arms.gxwf-test.yml
+  - verification/workflows/conditional-route-between-alternative-outputs/route-mapped-different-arms.gxwf-test.yml
 iwc_exemplars:
   - workflow: scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy
     why: "Shows a binary 10x import route with legacy and v3 AnnData branches merged by pick_value."

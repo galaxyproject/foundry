@@ -1,0 +1,118 @@
+- doc: "Left arm on: every merge keeps the left arm's elements"
+  job: &job
+    samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: s1
+          class: File
+          path: test-data/mapped-s1.txt
+          filetype: txt
+        - identifier: s2
+          class: File
+          path: test-data/mapped-s2.txt
+          filetype: txt
+    sentinel_samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: sentinel
+          class: File
+          path: test-data/mapped-sentinel.txt
+          filetype: txt
+    left_marker:
+      class: File
+      path: test-data/left-marker.txt
+      filetype: txt
+    right_marker:
+      class: File
+      path: test-data/right-marker.txt
+      filetype: txt
+    use_left: true
+    use_right: false
+  outputs:
+    tool_shed_pick_value:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: &left_elements
+        s1:
+          asserts:
+            - that: has_text
+              text: sample-one
+            - that: has_text
+              text: left-arm
+        s2:
+          asserts:
+            - that: has_text
+              text: sample-two
+            - that: has_text
+              text: left-arm
+    builtin_pick_value:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: *left_elements
+    direct_merge:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: *left_elements
+    direct_merge_live_plus_sentinel:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        s1:
+          asserts:
+            - that: has_text
+              text: sample-one
+            - that: has_text
+              text: left-arm
+        sentinel:
+          asserts:
+            - that: has_text
+              text: sentinel
+
+- doc: "Right arm on: pick_value keeps the right arm, while a direct merge keeps only the skipped left arm's null elements"
+  job:
+    <<: *job
+    use_left: false
+    use_right: true
+  outputs:
+    tool_shed_pick_value:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: &right_elements
+        s1:
+          asserts:
+            - that: has_text
+              text: sample-one
+            - that: has_text
+              text: right-arm
+        s2:
+          asserts:
+            - that: has_text
+              text: sample-two
+            - that: has_text
+              text: right-arm
+    builtin_pick_value:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: *right_elements
+    direct_merge:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: {}
+    direct_merge_live_plus_sentinel:
+      class: Collection
+      collection_type: list
+      element_count: 1
+      element_tests:
+        sentinel:
+          asserts:
+            - that: has_text
+              text: sentinel
