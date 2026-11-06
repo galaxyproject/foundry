@@ -7,12 +7,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-09-22
-revision: 5
-summary: "Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs."
+revised: 2026-11-06
+revision: 6
+summary: "Make the smallest structural edit that closes an open blocking entry in a settled Galaxy draft."
 input_artifacts:
   - id: galaxy-workflow-draft
-    description: "Partially-realized gxformat2 draft (see [[galaxy-workflow-draft-format]]) whose topology can't support a declared step — the region to repair."
+    description: "Partially-realized gxformat2 draft (see [[galaxy-workflow-draft-format]]) with an open blocking entry."
   - id: open-requirements-ledger
     description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
@@ -20,7 +20,7 @@ output_artifacts:
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
     schema: "[[galaxy-workflow-draft]]"
-    description: "Re-wired gxformat2 draft: a producer step (or small sub-path) inserted so the previously-blocked step's declared output is computable; new steps land at draft (TODO) tier."
+    description: "Edited gxformat2 draft. Each blocking entry addressed is closed by the named edits, and new or replaced steps land at draft tier."
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
@@ -47,8 +47,17 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Scope the repair from the open blocking entries — each names the step, the uncomputable output, and the missing evidence — then mark resolved each one repaired, and leave any it cannot close open with a surrender note for the terminal path."
+    purpose: "Scope the repair from the open blocking entries — each names the step and what's missing — then mark resolved each one repaired, and leave any it cannot close open with a note."
     verification: "Promote after a run closes a blocking entry and the loop terminates on the reduced open count."
+  - kind: cli-command
+    ref: "[[draft-validate]]"
+    used_at: runtime
+    load: upfront
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Check the draft contract, including dangling edges and sources, on the edited draft."
+    trigger: "After every edit."
+    verification: "Cast the skill, run a removal repair on a real draft, confirm the diagnostics name any source left dangling and the repaired draft exits 0."
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"
     used_at: runtime
@@ -65,6 +74,22 @@ references:
     evidence: corpus-observed
     purpose: "Preserve collection typing and map-over/reduction semantics when an inserted producer step joins or reshapes collection inputs."
     trigger: "When the repair inserts or rewires steps touching collection inputs, outputs, or mapped/reduced connections."
+  - kind: research
+    ref: "[[gxformat2-schema]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Keep post-job actions and nested parameter keys correct when an edit moves them."
+    trigger: "When an edit touches `out:` actions (`hide`, `rename`, `change_datatype`) or wires a nested parameter."
+  - kind: pattern
+    ref: "[[galaxy-conditionals-patterns]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Choose how to merge when a `when`-gated step's output feeds another step."
+    trigger: "When an inserted or rewired step consumes a `when`-gated step's output."
   - kind: pattern
     ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
@@ -86,13 +111,26 @@ related_molds:
   - "[[workflow-brief-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[compare-against-iwc-exemplar]]"
+  - "[[apply-galaxy-workflow-changeset]]"
 ---
 # repair-galaxy-draft-topology
 
-Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop is wrapper-tier — it does not edit topology. This Mold is the **escalation target** the loop reaches when implementation proves the settled topology cannot support a declared step: a step output that needs evidence no wired input carries (the connection graph validates fine, but nothing produces what the output requires). Wrapper-tier gaps — no Tool Shed wrapper picked yet — are not this case; those route through the discover-or-author branch.
+Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop doesn't edit it. This Mold makes the structural edits a settled draft still needs. It runs on an open blocking entry in the [[open-requirements-ledger]]: the settled draft can't give a correct run, and a structural edit closes it. A missing wrapper is this case only when the discover-or-author branch is exhausted: no stock, shed or authored wrapper can produce the step's declared output from its wired inputs, or the ledger already records the wrapper as confirmed absent. A tool version missing from a local cache is not absence. Don't search again.
 
-You are invoked with the partially-realized draft and the [[open-requirements-ledger]]. Read the open blocking entries: each names a step, the uncomputable output, and the missing evidence. Your job is **bounded topology repair** — not re-settling the workflow. Repair the named region and nothing else; the surrounding topology, already-realized steps, and workflow interface stay put.
+Decide the edit from the entry, the surrounding data-flow design ([[galaxy-data-flow-draft-contract]]), IWC structure, and the pattern pages.
 
-Decide the *shape* of the fix from the missing evidence, the surrounding data-flow design ([[galaxy-data-flow-draft-contract]]), IWC structure, and the pattern pages. It may be one producer step, or a small sub-path of a few tools, or — when the declared output is genuinely uncomputable and no producer exists — narrowing the step to what its inputs can support. Insert the new step(s) in the draft superset ([[galaxy-workflow-draft-format]]): concrete topology and edges, wrapper-tier `TODO` for `tool_id` and ports, `_plan_*` fields carrying intent. The existing discover-or-author → `summarize-galaxy-tool` → `implement-galaxy-tool-step` machinery realizes them on later loop iterations; do not resolve wrappers here.
+**Edit.** Close each entry with the smallest set of edits, named by change-set kind: `remove-step`, `rewire`, `change-parameter`, `add-input`, `remove-input`, `add-output` / `expose-output`, `add-step`, `replace-tool`. Apply the direct kinds in place. `add-step` and `replace-tool` land at draft tier ([[galaxy-workflow-draft-format]]): concrete topology and edges, wrapper-tier `TODO` for `tool_id` and ports, `_plan_*` carrying intent. The discover-or-author → `summarize-galaxy-tool` → `implement-galaxy-tool-step` machinery realizes them on later loop iterations. A step duplicated from a realized step keeps its pin and `state`, and changes only the key that distinguishes it. Everything the entries don't name stays as it is.
 
-Then update the ledger. For each blocking entry your repair addresses, mark it `resolved` with a note on how (producer added, sub-path added, output narrowed). The loop's convergence gate counts open blocking entries and requires each escalation to strictly reduce that count, under a hard cap on escalations. If you cannot close an entry — no producer is discoverable and the output cannot be honestly narrowed — **surrender it**: leave it open with a note, so the terminal path writes it into the final draft as a labelled gap rather than spinning or fabricating. Never insert a producer whose own output is uncomputable from what feeds it; that grows the DAG without reducing the open count and the loop will not converge.
+**Interface.** Change the workflow interface only when an entry names that as the remedy or a narrowing requires it. Promote an input with a default equal to the literal it replaces. Expose an output by removing its `hide`, unless the design wants it hidden. Removing an input or output is a narrowing: append a `kind: dropped` entry with its `units` and a cited `because`.
+
+**Claims.** A claim about a step with no resolved wrapper is not a fact. Attach it to that step as a plain ledger entry with `step:` set, and keep it out of `doc:`. "Computable" means the tool's semantics give what the output declares, including element count and identifiers for collections. Reading a pinned wrapper's command block or a consumer's parser is allowed. Picking a wrapper is not. A removal's `because` quotes the primary artifact it rests on: the search run, the wrapper's ports or command block, the semantics rule. Naming the blocking entry is not a citation. If the step isn't fully redundant, narrow it and rewrite its `_plan_*` to the reduced job.
+
+**After every edit:**
+
+1. Run [[draft-validate]] and fix what it reports.
+2. Remove what existed only to feed a removed step: compute it by walking every step's `in:` and the workflow outputs, not from the entry's wording.
+3. Rewrite or remove mentions of removed ids and labels in `doc`, `_plan_*` and comment frames.
+4. Move a removed step's `rename` or `change_datatype` to the step that inherits its consumers.
+5. If an edit touched a step with a twin, make the same edit there.
+
+**Ledger.** Mark each entry you close `resolved`, with a note naming the kinds you applied. A repair must leave fewer open blocking entries than it found. Never insert a producer whose own output is uncomputable from what feeds it. When nothing can close an entry against a drafty step, remove the step, append the `kind: dropped` entry, and resolve the blocking entry with a note naming the drop. Leave an entry `open` with a note, for the terminal path, when a consumer truly needs the removed output, when the step is already realized, or when you have no citation for the removal.
