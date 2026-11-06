@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
-    "revision": 11,
-    "content_hash": "34855691581889d36265e00178088b8a52a51ee72119329261bca186f7cb480e",
-    "commit": "a59d6025d612ce7013b09fa1ccb58f60507ccc6a"
+    "revision": 12,
+    "content_hash": "0eb818610aa0c251f9fd47ea99c3588b6f69ae881b1fe26effb8e4e29ce84037",
+    "commit": "5af44607e70531b5767e167ef2cf95c4751ac7e1"
   },
-  "cast_at": "2026-10-26T16:18:42.997Z",
+  "cast_at": "2026-11-06T13:05:29.543Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -89,8 +89,8 @@
       "evidence": "corpus-observed",
       "purpose": "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style.",
       "trigger": "When writing or revising the job/input side of a Galaxy workflow test file.",
-      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
-      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "src_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
+      "dst_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
       "source": "deterministic"
     },
     {
@@ -118,9 +118,9 @@
       "load": "on-demand",
       "evidence": "corpus-observed",
       "purpose": "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs.",
-      "trigger": "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations.",
-      "src_hash": "3b688f5a39951ad6f937335bf1217731aefc59fef7472fcbe9f85002019a2caf",
-      "dst_hash": "3b688f5a39951ad6f937335bf1217731aefc59fef7472fcbe9f85002019a2caf",
+      "trigger": "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations, or when the test depends on a staged data table.",
+      "src_hash": "0434c8d17ec3fb59c813a0fdddac6815e34aaadf111636ede7be889382ec5a75",
+      "dst_hash": "0434c8d17ec3fb59c813a0fdddac6815e34aaadf111636ede7be889382ec5a75",
       "source": "deterministic"
     },
     {

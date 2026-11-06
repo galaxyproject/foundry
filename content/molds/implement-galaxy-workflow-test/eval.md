@@ -4,8 +4,7 @@ Evaluation plan for the `implement-galaxy-workflow-test` Mold. This file is the
 **abstract oracle**: properties any authored Galaxy workflow test must satisfy,
 independent of which workflow fixture it was authored against. Concrete fixtures
 and their expected values live in `scenarios.md`; the oracle here is applied to
-whatever a scenario produces. Every property is deterministic — each gate is
-mechanically checkable.
+whatever a scenario produces.
 
 ## Property: tests-format schema gate
 
@@ -25,6 +24,11 @@ mechanically checkable.
 - check: deterministic
 - assertion: gxwf or Planemo static validation reaches a clean result, or emits
   only explicitly documented warnings that do not block runtime testing.
+
+## Property: data-table values have rows
+
+- check: llm-judged
+- assertion: every value the test reaches for a data-table select, from a job input or a step's fixed state, has a row in a staged table or the target Galaxy, or the output reports the gap.
 
 ## Property: managed Galaxy runtime green
 

@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
     "revision": 8,
     "content_hash": "fa769216f621ef25470c9fb907df1278635c0a1e022b647b9462ff7b92469291",
-    "commit": "47aa5c1cf419386ea72929c8ee34aec0db65588f"
+    "commit": "618853f059af2ae61760a3b233ae35bf2607bcbc"
   },
-  "cast_at": "2026-10-22T03:42:30.837Z",
+  "cast_at": "2026-11-05T20:34:21.120Z",
   "refs": [
     {
       "kind": "research",
@@ -68,8 +68,8 @@
       "evidence": "corpus-observed",
       "purpose": "Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes.",
       "trigger": "When writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS.",
-      "src_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
-      "dst_hash": "b7ef14132a0b40f626fff98fde44234ce5c848b6a3c255f4748b803c9a44b074",
+      "src_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
+      "dst_hash": "4b4a042f0d5deec4f7d7fa80ef55374266b31b2e48b6ad6a42e285cc91e40925",
       "source": "deterministic"
     },
     {

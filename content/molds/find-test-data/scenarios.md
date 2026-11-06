@@ -14,3 +14,8 @@
 
 - fixture: a `test-data-refs.json` emitted for an IWC-style workflow such as SARS-CoV-2 variant calling or RNAseq-PE.
 - expect: every workflow input label has exactly one entry; each entry is either resolved (URL/path + shape + datatype) or marked `resolved: false` with a reason. No input is uncovered and none is silently absent, so [[implement-galaxy-workflow-test]] can stage from the refs without re-deriving input shapes.
+
+## Case: staged data table is discoverable and portable
+
+- fixture: interface brief for `nf-core/funcscan`, pinned in `workflow-fixtures/fixtures.yaml`, with string inputs selecting `amrfinderplus_versioned_database` and `mmseqs2_databases`.
+- expect: `test-data/tool_data_table_conf.xml.test` declares both tables, and the AMRFinderPlus database comes from tools-iuc `tools/amrfinderplus/test-data/test-db`, in a row whose `db_version` passes the wrapper's filter.

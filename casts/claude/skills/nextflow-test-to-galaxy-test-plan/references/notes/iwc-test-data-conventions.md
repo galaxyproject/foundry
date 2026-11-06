@@ -4,8 +4,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-10-21
-revision: 5
+revised: 2026-11-05
+revision: 6
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-shortcuts-anti-patterns]]"
@@ -127,7 +127,7 @@ job:
   reference genome: hg38
 ```
 
-The value column depends on the tool and table definition. Check that tool's `tool_data_table_conf.xml` and the target instance's available table entries. This input is a parameter, not a `class: File` fixture. IWC says its default CI Galaxy has CVMFS for built-in indexes. A local or other Galaxy instance must expose the same table value and underlying reference data for this test to run. A portable file input is possible only if the workflow interface and tool accept a file in place of the built-in index. Do not replace the scalar with `class: File` solely in the test YAML.
+The value column depends on the tool and table definition. Check that tool's `tool_data_table_conf.xml` and the target instance's available table entries. This input is a parameter, not a `class: File` fixture. IWC says its default CI Galaxy has CVMFS for built-in indexes. A local or other Galaxy instance must expose the same table value and underlying reference data for this test to run. For a Planemo-managed Galaxy, [[planemo-workflow-test-architecture]] gives the recipe for staging that table with the test. A portable file input is possible only if the workflow interface and tool accept a file in place of the built-in index. Do not replace the scalar with `class: File` solely in the test YAML.
 
 ## Authoring and checking an IWC test
 

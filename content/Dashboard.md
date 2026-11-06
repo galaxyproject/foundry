@@ -24,6 +24,9 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-11-05 | 9 |
+| [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-11-05 | 12 |
+| [[workflow-brief-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence. | draft | 2026-11-05 | 5 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. | reviewed | 2026-10-26 | 6 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-10-26 | 8 |
 | [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-10-25 | 10 |
@@ -34,13 +37,10 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-10-22 | 8 |
 | [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | reviewed | 2026-10-22 | 10 |
 | [[workflow-brief-to-galaxy-template]] | Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence. | draft | 2026-10-22 | 8 |
-| [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-10-21 | 11 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | reviewed | 2026-10-21 | 8 |
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[workflow-brief-to-galaxy-interface]] | Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available. | draft | 2026-10-19 | 5 |
-| [[workflow-brief-to-galaxy-test-plan]] | Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence. | draft | 2026-10-19 | 4 |
-| [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | reviewed | 2026-10-16 | 8 |
 | [[cwl-to-test-data]] | Resolve a CWL workflow's own declared test cases into Galaxy workflow test-data refs. | draft | 2026-10-15 | 2 |
 | [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-10-15 | 4 |
 | [[paper-to-test-data]] | Resolve the test data a paper names into refs for each workflow input. | draft | 2026-10-15 | 3 |
@@ -212,11 +212,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[planemo-workflow-test-architecture]] | Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries. | draft | 2026-10-26 | 4 |
+| [[iwc-test-data-conventions]] | IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values. | draft | 2026-11-05 | 6 |
+| [[planemo-workflow-test-architecture]] | Reference for Planemo workflow test/run architecture, Galaxy modes, data-table staging, API polling, and noisy failure boundaries. | draft | 2026-11-05 | 5 |
 | [[galaxy-user-tool-authoring-help]] | Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows. | draft | 2026-10-23 | 4 |
 | [[galaxy-user-tool-workflow-binding]] | How a workflow step uses an authored GalaxyUserTool: embedded under run:, never by tool_uuid, tool_id or content_id; registering via /api/unprivileged_tools. | draft | 2026-10-23 | 4 |
 | [[gxformat2-schema]] | Vendored gxformat2 structural schema, its input, output, and step vocabulary, and the limits of schema-only validation. | draft | 2026-10-22 | 4 |
-| [[iwc-test-data-conventions]] | IWC and Planemo workflow-test fixture shapes, file provenance, collection identifiers, input hashes, and built-in index values. | draft | 2026-10-21 | 5 |
 | [[planemo-asserts-idioms]] | Choose Galaxy workflow-test output assertions by the failure they should catch, the output's stability, and the available checkpoints. | draft | 2026-10-21 | 10 |
 | [[open-requirements-ledger]] | Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state. | draft | 2026-10-19 | 5 |
 | [[workflow-brief-design]] | Markdown Workflow Brief definition and section contract for scope, constraints, agent environment, and explicit blockers. | draft | 2026-10-19 | 6 |

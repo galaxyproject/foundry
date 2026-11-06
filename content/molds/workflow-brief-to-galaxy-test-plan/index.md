@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-10-19
-revision: 4
+revised: 2026-11-05
+revision: 5
 summary: "Synthesize a Galaxy workflow test plan from a reviewed Workflow Brief, its Galaxy design briefs, and available source evidence."
 input_artifacts:
   - id: workflow-brief
@@ -142,6 +142,8 @@ This Mold consumes the template-era briefs, not the concrete workflow draft or t
 
 - Bind assertions to the labels the interface brief pins, and set `label_status` to `assumed` (or `unresolved` when even the brief is silent) and the plan's `workflow.label_source` to `interface-brief`. [[implement-galaxy-workflow-test]] reconciles these against the real draft labels and the workflow-label cross-check.
 - Record fixtures with `storage: unresolved` and `location: null` when the brief or evidence names test data only by description; capture what is known (a dataset name, an accession, a Zenodo DOI, a rough size) in `fixture.provenance` so test-data resolution and the implement Mold can act on it. Use [[iwc-test-data-conventions]] for the storage classes and the remote-URL-first convention.
+
+A data-table value is a scalar fixture with `storage: cvmfs-string`. The plan must not ask for `--tool_data_table`, in provenance or in an `unresolved[]` entry ([[planemo-workflow-test-architecture]]).
 
 When a binding or fixture cannot be settled from the briefs, add an `unresolved[]` entry (with `blocking: true` when the final test cannot be authored without it) rather than inventing a label or a URL.
 

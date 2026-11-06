@@ -6,17 +6,20 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-10-26
-revision: 4
+revised: 2026-11-05
+revision: 5
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[galaxy-tool-job-failure-reference]]"
   - "[[galaxy-workflow-invocation-failure-reference]]"
   - "[[planemo-asserts-idioms]]"
+  - "[[iwc-test-data-conventions]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
 related_molds:
   - "[[run-workflow-test]]"
   - "[[debug-galaxy-workflow-output]]"
   - "[[implement-galaxy-workflow-test]]"
+  - "[[find-test-data]]"
 sources:
   - "~/projects/repositories/planemo/planemo/commands/cmd_test.py"
   - "~/projects/repositories/planemo/planemo/commands/cmd_run.py"
@@ -25,7 +28,10 @@ sources:
   - "~/projects/repositories/planemo/planemo/galaxy/config.py"
   - "~/projects/repositories/planemo/planemo/galaxy/serve.py"
   - "~/projects/repositories/planemo/planemo/engine/galaxy.py"
-summary: "Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries."
+  - "https://github.com/galaxyproject/galaxy/blob/f7ef344ccb6/lib/galaxy/tool_util/data/__init__.py"
+  - "https://github.com/galaxyproject/galaxy/blob/f7ef344ccb6/lib/galaxy/tool_util/deps/container_classes.py"
+  - "https://github.com/galaxyproject/tools-iuc/blob/main/tools/amrfinderplus/tool_data_table_conf.xml.test"
+summary: "Reference for Planemo workflow test/run architecture, Galaxy modes, data-table staging, API polling, and noisy failure boundaries."
 ---
 
 # Planemo Workflow-Test Architecture
@@ -129,6 +135,53 @@ Useful Planemo artifacts and fields:
 
 Terminal output is not enough for durable failure analysis. Preserve structured output whenever possible.
 
+## Staging a Data Table for a Workflow Test
+
+Some wrappers take a reference database only from a Galaxy data table (`<options from_data_table="...">`). A test of a workflow that uses one needs a row for a test-size database, and on a Planemo-managed Galaxy that row can travel with the workflow. The recipe covers existing wrappers with no dataset input, not new tables in a translated workflow ([[nextflow-params-to-galaxy-inputs]]).
+
+Lay the files out beside the workflow, with each `.loc` file next to the configuration:
+
+```text
+galaxy-workflow.gxwf.yml
+galaxy-workflow.gxwf-tests.yml
+test-data/
+  tool_data_table_conf.xml.test
+  amrfinderplus_versioned.loc
+  amrfinderplus-test-db/
+```
+
+`test-data/tool_data_table_conf.xml.test` declares every table the test needs:
+
+```xml
+<?xml version="1.0"?>
+<tables>
+    <table name="amrfinderplus_versioned_database" comment_char="#">
+        <columns>value, name, db_version, path</columns>
+        <file path="${__HERE__}/amrfinderplus_versioned.loc" />
+    </table>
+</tables>
+```
+
+`test-data/amrfinderplus_versioned.loc` holds tab-separated rows in that column order:
+
+```text
+amrfinderplus_V4.2_2026-05-15.1	V4.2-2026-05-15.1	4.2	${__HERE__}/amrfinderplus-test-db
+```
+
+The test file passes the row's `value` column as a plain scalar, as [[iwc-test-data-conventions]] describes for any data-table input.
+
+- Name the file exactly `tool_data_table_conf.xml.test`. Planemo searches the workflow's directory, the working directory, then the detected `test-data/`, and the first match wins, so a stray copy beside the workflow overrides this one. It doesn't read an unsuffixed `tool_data_table_conf.xml` ([planemo#1764](https://github.com/galaxyproject/planemo/issues/1764)).
+- Put every table in that one file. Planemo reads only one.
+- Pass no `--tool_data_table`. The flag replaces discovery and ties the command to one machine.
+- Write every path with `${__HERE__}`, which Galaxy expands in `<file path>` and in each `.loc` line to the directory of the file it appears in. Rewrite a tools-iuc configuration copied into `test-data/`: those are written from the tool root (`${__HERE__}/test-data/x.loc`).
+- Copy `name` and `<columns>` from the wrapper's `tool_data_table_conf.xml.sample`, and check that the row passes any filter on the select.
+
+Diagnose a table Planemo didn't discover from the Galaxy log or the output dataset's `misc_info`. The job ends in `error` with no command line, and the message reads `Parameter '<name>': requires a value, but no legal values defined`.
+
+Discovery belongs to the local managed engine, so `planemo test` and `planemo serve` read the file. `--engine docker_galaxy` and `--engine external_galaxy` don't. An external Galaxy needs the table provisioned on the server.
+
+Keep the database under `test-data/`. The job configuration Planemo generates mounts the detected `test-data/` read-only for Docker and Singularity. `--job_config_file` replaces that configuration, so a custom one has to add the mount: `docker_volumes: $defaults,<test-data>:<test-data>:ro`.
+
 ## Noisy Boundaries
 
 Planemo transforms and summarizes Galaxy failure information. These are likely information-loss boundaries:
@@ -149,6 +202,7 @@ For [[run-workflow-test]]:
 - Preserve structured Planemo result output, invocation id, history id, workflow id, and Galaxy mode.
 - Record whether the run used managed local Galaxy, Docker Galaxy, or external Galaxy.
 - Do not treat terminal output as the primary failure artifact.
+- A staged data table applies only to the local managed engine. On an external or Docker Galaxy, a missing table row is a server provisioning gap, not a staging failure.
 
 For [[debug-galaxy-workflow-output]]:
 
@@ -166,3 +220,5 @@ Actual runs should verify:
 - Whether target Planemo/Galaxy versions populate `completed`, `/completion`, and step job summaries.
 - How `workflow_test_on_invocation` behaves for failed, warning-only, mapped collection, and subworkflow invocations.
 - Whether generated test cases from invocation preserve nested output collection structure correctly.
+- Whether a container job in a `planemo test` run reads a `${__HERE__}` database through the generated mount.
+- Whether the recipe holds for a data-table-only wrapper with a filter on its select.
