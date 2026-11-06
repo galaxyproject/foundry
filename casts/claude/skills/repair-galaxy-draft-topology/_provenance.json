@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 6,
     "content_hash": "6750f1a3b845f099552ed5b3eb5255436c0462b9a97553f3c682e2130086928e",
-    "commit": "da8df536983faff516c02734d2229af24604169d"
+    "commit": "a0c22945ae22d9922d298437c15c49636f33e17b"
   },
-  "cast_at": "2026-11-06T19:06:41.798Z",
+  "cast_at": "2026-11-06T22:58:18.008Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -151,8 +151,8 @@
       "trigger": "When an edit touches `out:` actions (`hide`, `rename`, `change_datatype`) or wires a nested parameter.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
-      "dst_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
+      "src_hash": "47a3b94dc15bb954f9193e888522b7aaff80143f2486531a21146fa4daaa54d4",
+      "dst_hash": "47a3b94dc15bb954f9193e888522b7aaff80143f2486531a21146fa4daaa54d4",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
