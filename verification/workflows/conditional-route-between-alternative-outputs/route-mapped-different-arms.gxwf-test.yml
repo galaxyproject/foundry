@@ -1,0 +1,156 @@
+- doc: "Left arm on: filter then merge holds the left arm's elements"
+  job: &job
+    left_samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: a1
+          class: File
+          path: test-data/mapped-a1.txt
+          filetype: txt
+        - identifier: shared
+          class: File
+          path: test-data/mapped-a2.txt
+          filetype: txt
+    right_samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: b1
+          class: File
+          path: test-data/mapped-b1.txt
+          filetype: txt
+        - identifier: shared
+          class: File
+          path: test-data/mapped-b2.txt
+          filetype: txt
+        - identifier: b3
+          class: File
+          path: test-data/mapped-b3.txt
+          filetype: txt
+    equal_length_samples:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: c1
+          class: File
+          path: test-data/mapped-c1.txt
+          filetype: txt
+        - identifier: c2
+          class: File
+          path: test-data/mapped-c2.txt
+          filetype: txt
+    use_left: true
+    use_right: false
+  outputs:
+    filter_then_merge:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: &left_elements
+        a1:
+          asserts:
+            - that: has_text
+              text: left-one
+        shared:
+          asserts:
+            - that: has_text
+              text: left-two
+    direct_merge:
+      class: Collection
+      collection_type: list
+      element_count: 4
+      element_tests: *left_elements
+    direct_merge_live:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: *left_elements
+    equal_length_pick_value:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: *left_elements
+
+- doc: "Right arm on: filter then merge keeps the shared element, a direct merge loses it to the left arm's null, and equal-length pick_value labels right-arm data with left-arm identifiers"
+  job:
+    <<: *job
+    use_left: false
+    use_right: true
+  outputs:
+    filter_then_merge:
+      class: Collection
+      collection_type: list
+      element_count: 3
+      element_tests:
+        b1:
+          asserts:
+            - that: has_text
+              text: right-one
+        shared:
+          asserts:
+            - that: has_text
+              text: right-two
+        b3:
+          asserts:
+            - that: has_text
+              text: right-three
+    direct_merge:
+      class: Collection
+      collection_type: list
+      element_count: 4
+      element_tests: &right_live_elements
+        b1:
+          asserts:
+            - that: has_text
+              text: right-one
+        b3:
+          asserts:
+            - that: has_text
+              text: right-three
+    direct_merge_live:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests: *right_live_elements
+    equal_length_pick_value:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        a1:
+          asserts:
+            - that: has_text
+              text: equal-one
+        shared:
+          asserts:
+            - that: has_text
+              text: equal-two
+
+- doc: "Both arms on: filter then merge holds both arms' elements and keeps the first arm's on a shared identifier"
+  job:
+    <<: *job
+    use_left: true
+    use_right: true
+  outputs:
+    filter_then_merge:
+      class: Collection
+      collection_type: list
+      element_count: 4
+      element_tests:
+        a1:
+          asserts:
+            - that: has_text
+              text: left-one
+        shared:
+          asserts:
+            - that: has_text
+              text: left-two
+        b1:
+          asserts:
+            - that: has_text
+              text: right-one
+        b3:
+          asserts:
+            - that: has_text
+              text: right-three
