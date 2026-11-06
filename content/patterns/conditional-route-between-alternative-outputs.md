@@ -7,12 +7,14 @@ aliases:
   - "when-gated alternatives with pick_value"
   - "conditional route with pick_value"
   - "one-of-N Galaxy route"
+  - "conditional fan-in"
+  - "when-gated fan-in"
 tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-09-14
-revision: 4
+revised: 2026-11-06
+revision: 5
 summary: "Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value."
 related_notes:
   - "[[iwc-conditionals-survey]]"
@@ -26,6 +28,7 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 verification_paths:
   - verification/workflows/conditional-route-between-alternative-outputs/route-between-alternatives.gxwf-test.yml
+  - verification/workflows/conditional-route-between-alternative-outputs/route-mapped-fan-in.gxwf-test.yml
 iwc_exemplars:
   - workflow: scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy
     why: "Shows a binary 10x import route with legacy and v3 AnnData branches merged by pick_value."
@@ -150,8 +153,61 @@ Binary route. Two gated peers and the merge, in gxformat2:
 
 One-of-N route: same merge step with one `pick_from` slot per mode, one `map_param_value` mapper per mode producing that mode's boolean, and `pick_style: only` when the modes are meant to be exclusive.
 
+## Mapped branches
+
+A `when`-gated step mapped over a collection still produces its implicit collection, with a null element for each skipped job. A merge must select per element.
+
+**Arms mapped over the same collection.** `pick_value` maps element-wise and gives one element per input, with identifiers kept. For new work, use Galaxy's built-in module. Its `the_only_non_null` mode is the counterpart of `pick_style: only`:
+
+```yaml
+- id: route
+  type: pick_value
+  in:
+    - id: input_0
+      source: branch_left/out_file1
+    - id: input_1
+      source: branch_right/out_file1
+  state:
+    mode: the_only_non_null
+```
+
+Downstream steps read its `output`. The Tool Shed spelling maps the same way, and it is what the Functional_annotation_of_sequences exemplar uses.
+
+**Arms mapped over different collections.** `pick_value` needs the arms to match, and when their lengths differ the invocation fails with `Cannot match collection types`. Filter each arm with `__FILTER_NULL__`, then merge the results with `__MERGE_COLLECTION__`. The output holds only the live arm's elements:
+
+```yaml
+- id: left_live
+  tool_id: __FILTER_NULL__
+  tool_version: 1.1.0
+  in:
+    - id: input
+      source: branch_left/out_file1
+- id: right_live
+  tool_id: __FILTER_NULL__
+  tool_version: 1.1.0
+  in:
+    - id: input
+      source: branch_right/out_file1
+- id: route
+  tool_id: __MERGE_COLLECTION__
+  tool_version: 1.0.0
+  in:
+    - id: inputs_0|input
+      source: left_live/output
+    - id: inputs_1|input
+      source: right_live/output
+  state:
+    inputs:
+      - {}
+      - {}
+    advanced:
+      conflict:
+        duplicate_options: keep_first
+```
+
 ## Pitfalls
 
+- Merging gated arms directly. `__MERGE_COLLECTION__` keeps null elements. Over arms that share identifiers, its default `keep_first` keeps the first arm's elements, so the output is all nulls when that arm is skipped. Over arms with different identifiers, the output carries the skipped arm's elements as nulls.
 - Forgetting the merge. A gated branch output may be absent. Downstream steps should consume `pick_value`, not one branch directly.
 - Non-exclusive booleans. Under `pick_style: first` two live branches resolve to the earlier `pick_from` slot, silently. `only` turns that into a job failure.
 - Omitting the `pick_from` entries. The repeat is what creates the input terminals, so connections alone leave the tool with zero candidates. The job still succeeds and writes the text `null` into the output dataset.

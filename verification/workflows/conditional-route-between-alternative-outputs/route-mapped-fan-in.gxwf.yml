@@ -1,0 +1,245 @@
+class: GalaxyWorkflow
+name: "Route between mapped alternatives"
+inputs:
+  - id: samples
+    type: collection
+    collection_type: list
+  - id: left_samples
+    type: collection
+    collection_type: list
+  - id: right_samples
+    type: collection
+    collection_type: list
+  - id: left_marker
+    type: data
+  - id: right_marker
+    type: data
+  - id: use_left
+    type: boolean
+  - id: use_right
+    type: boolean
+outputs:
+  - id: same_arms_tool_shed_pick_value
+    outputSource: same_arms_pick_value/data_param
+  - id: same_arms_builtin_pick_value
+    outputSource: same_arms_builtin_pick_value/output
+  - id: different_arms_filter_then_merge
+    outputSource: different_arms_merge/output
+  - id: same_arms_direct_merge
+    outputSource: same_arms_direct_merge/output
+  - id: different_arms_direct_merge
+    outputSource: different_arms_direct_merge/output
+  - id: same_arms_direct_merge_live_plus_right_samples
+    outputSource: same_arms_direct_merge_live_plus_right_samples/output
+  - id: different_arms_direct_merge_live
+    outputSource: different_arms_direct_merge_live/output
+steps:
+  - id: same_left
+    label: same_left
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: samples
+      - id: queries_0|input2
+        source: left_marker
+      - id: when
+        source: use_left
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      queries:
+        - input2:
+            __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: same_right
+    label: same_right
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: samples
+      - id: queries_0|input2
+        source: right_marker
+      - id: when
+        source: use_right
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      queries:
+        - input2:
+            __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: same_arms_pick_value
+    label: same_arms_pick_value
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: b19e21af9c52
+      name: pick_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: style_cond|type_cond|pick_from_0|value
+        source: same_left/out_file1
+      - id: style_cond|type_cond|pick_from_1|value
+        source: same_right/out_file1
+    out:
+      - id: data_param
+    tool_state:
+      style_cond:
+        pick_style: only
+        type_cond:
+          param_type: data
+          pick_from:
+            - value:
+                __class__: ConnectedValue
+            - value:
+                __class__: ConnectedValue
+  - id: same_arms_builtin_pick_value
+    label: same_arms_builtin_pick_value
+    type: pick_value
+    in:
+      - id: input_0
+        source: same_left/out_file1
+      - id: input_1
+        source: same_right/out_file1
+    state:
+      mode: the_only_non_null
+  - id: same_arms_direct_merge
+    label: same_arms_direct_merge
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: same_left/out_file1
+      - id: inputs_1|input
+        source: same_right/out_file1
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}
+  - id: different_left
+    label: different_left
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: left_samples
+      - id: when
+        source: use_left
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: different_right
+    label: different_right
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: right_samples
+      - id: when
+        source: use_right
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: different_left_live
+    label: different_left_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: different_left/out_file1
+    out:
+      - id: output
+    state: {}
+  - id: different_right_live
+    label: different_right_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: different_right/out_file1
+    out:
+      - id: output
+    state: {}
+  - id: different_arms_merge
+    label: different_arms_merge
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: different_left_live/output
+      - id: inputs_1|input
+        source: different_right_live/output
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}
+      advanced:
+        conflict:
+          duplicate_options: keep_first
+  - id: different_arms_direct_merge
+    label: different_arms_direct_merge
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: different_left/out_file1
+      - id: inputs_1|input
+        source: different_right/out_file1
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}
+  - id: same_arms_direct_merge_live
+    label: same_arms_direct_merge_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: same_arms_direct_merge/output
+    out:
+      - id: output
+    state: {}
+  - id: same_arms_direct_merge_live_plus_right_samples
+    label: same_arms_direct_merge_live_plus_right_samples
+    tool_id: __MERGE_COLLECTION__
+    tool_version: 1.0.0
+    in:
+      - id: inputs_0|input
+        source: same_arms_direct_merge_live/output
+      - id: inputs_1|input
+        source: right_samples
+    out:
+      - id: output
+    state:
+      inputs:
+        - {}
+        - {}
+  - id: different_arms_direct_merge_live
+    label: different_arms_direct_merge_live
+    tool_id: __FILTER_NULL__
+    tool_version: 1.1.0
+    in:
+      - id: input
+        source: different_arms_direct_merge/output
+    out:
+      - id: output
+    state: {}
