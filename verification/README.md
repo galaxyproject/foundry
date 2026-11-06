@@ -35,6 +35,10 @@ outputs:
 Reach into a `list:list` by nesting `element_tests` inside an element, giving that element its own
 `class: Collection` and using `count` for its size.
 
+## Asserting skipped steps
+
+Planemo omits a workflow output whose boolean is `false`, so asserting `false` fails with "Expected output ... not found in results". Gate a marker step on `$(!inputs.when)` and assert its exact output. To prove exactly one of two gated steps ran, merge them with `pick_value` `pick_style: only`, which errors when both or neither produced output.
+
 ## Local runs
 
 From a workflow directory, run Planemo directly:

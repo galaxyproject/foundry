@@ -91,7 +91,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[collection-swap-nesting-with-apply-rules]] — Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns.
 - [[sync-collections-by-identifier]] — Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections.
 - [[collection-unbox-singleton]] — Use __EXTRACT_DATASET__ with which: first when a one-element collection must become a dataset.
-- [[conditional-gate-on-nonempty-result]] — Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps.
+- [[conditional-gate-on-nonempty-result]] — Derive a boolean from a collection's element count or a dataset's text, then use when to skip report or export steps on empty results.
 - [[conditional-route-between-alternative-outputs]] — Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value.
 - [[conditional-run-optional-step]] — Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch.
 - [[conditional-transform-or-pass-through]] — Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise.
