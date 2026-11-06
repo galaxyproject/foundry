@@ -1,39 +1,50 @@
 # repair-galaxy-draft-topology scenarios
 
-No fixtures are materialized under `examples/` yet — each case describes the
-draft and ledger pair to build.
+## Case: wrapper has no port for a public output
 
-## Case: blocked step with a reachable producer
+- fixture: `examples/fastqc-zip-no-port/galaxy-workflow-draft.gxwf.yml` and
+  `open-requirements.ledger.yml` beside it.
+- expect: `nf-core-demo-fastqc-zip-wrapper-output` ends `resolved`. Either an
+  `add-step` at draft tier with `fastqc_zip_archives` retargeted to it, or the
+  public output removed with a `kind: dropped` entry quoting the wrapper's ports.
+  `text_file` is never bound as a ZIP. Other steps' `tool_id`, `tool_version` and
+  edges are unchanged.
 
-- fixture: a draft with a step whose declared output needs evidence no wired input
-  carries, plus an `open-requirements-ledger` carrying the matching `open`
-  blocking entry. The missing evidence has an obvious producer (a computed column,
-  a collection reshape) in reach.
-- expect: the blocking entry ends `resolved` with a note naming the producer
-  added; the open-blocker count drops by one; the inserted step carries
-  `TODO[tool_id]` and `_plan_*` and no Tool Shed owner/repo/revision.
+## Case: repaired draft re-enters the loop
 
-## Case: repair inside an otherwise realized draft
+- fixture: `examples/fastqc-zip-no-port/repaired.gxwf.yml`
+- command: `gxwf draft-next-step repaired.gxwf.yml`
+- expect: `draft: true`; `step` equals `["fastqc_archive_per_read"]`.
 
-- fixture: a draft where one region is blocked but the rest is already realized —
-  concrete tool steps, settled workflow interface — with the ledger naming only
-  the blocked region.
-- expect: the diff is confined to the blocked region and the edges joining it to
-  its neighbours. Realized `tool_id` / `tool_version` values, workflow inputs and
-  outputs, and unrelated edges are byte-identical.
+## Case: repair removes the last drafty step
 
-## Case: no producer in reach
+- fixture: `examples/sample-sheet-restore-last-drafty/galaxy-workflow-draft.gxwf.yml`
+  and `open-requirements.ledger.yml` beside it.
+- expect: `nf-core-demo-trimmed-reads-metadata-carry-forward` ends `resolved`, and
+  open blocking entries fall from 2 to 1. `restore_trimmed_sample_sheet_metadata`
+  is gone, `trimmed_reads` is retargeted, and neither its id nor its label is left
+  anywhere, including the comment frame. A `kind: dropped` entry quotes the
+  searches or the collection semantics rule, not the blocking entry.
+  `gxwf draft-next-step` reports `draft: false`. Driven through
+  [[advance-galaxy-draft-step]], `galaxy-workflow.gxwf.yml` is written in the same
+  call.
 
-- fixture: a blocking entry whose missing evidence has no producer available — for
-  example SCCmec cassette evidence with no typing tool in the corpus.
-- expect: the declared output is narrowed to what its inputs support, or the entry
-  is left `open` with a surrender note for the terminal path to write out as a
-  labelled gap. No new step is inserted whose own inputs cannot supply its output.
+## Case: confirmed-absent wrapper
 
-## Case: repaired draft re-enters the per-step loop
+- fixture: `examples/dupradar-wrapper-absent/galaxy-workflow-draft.gxwf.yml` and
+  `open-requirements.ledger.yml` beside it.
+- expect: no new search runs. `dupradar-wrapper-absent` ends `resolved`. Step
+  `M19_dupradar`, input `P4_dupradar_strandedness_param`, MultiQC edge
+  `TODO_dupradar`, the frame entry and every mention in `doc` and `_plan_*` are
+  gone. `M18_markdup`'s `TODO_bam` port goes too, because only `M19_dupradar` read
+  it. A `kind: dropped` entry quotes the searches as its `because`. `multiqc_report`
+  still has its source. `gxwf draft-validate` exits 0.
 
-- fixture: the output of any of the cases above, fed back to
-  [[advance-galaxy-draft-step]].
-- expect: the draft validates against [[galaxy-workflow-draft]], and the picker
-  reports `draft: true` naming an inserted step — the loop resumes without the
-  template Mold re-running over the whole workflow.
+## Case: value must vary per run
+
+- fixture: `examples/star-sa-index-input/galaxy-workflow-draft.gxwf.yml` and
+  `open-requirements.ledger.yml` beside it.
+- expect: `star-genome-sa-index-unreachable` ends `resolved`. One new integer input
+  defaulting to 14, wired to `refGenomeSource|genomeSAindexNbases` on both STAR
+  steps with the literal gone from both `state` blocks. No other input, output,
+  step or edge changes. `gxwf draft-next-step` still reports `draft: false`.

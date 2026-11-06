@@ -1,48 +1,61 @@
 # repair-galaxy-draft-topology eval
 
-The **abstract oracle** for `repair-galaxy-draft-topology`: properties any repair
-must satisfy, independent of which blocked draft it ran on. The draft shapes that
-stress them, and what each is expected to yield, live in `scenarios.md`; the
-oracle here applies to whatever a scenario produces.
-
-## Property: every addressed blocking entry is closed or surrendered
+## Property: every addressed entry is closed or left open with a note
 
 - check: deterministic
-- assertion: each blocking entry the repair claims to address ends `resolved` with
-  a note on how (producer added, sub-path added, output narrowed) or `surrendered`
-  with a note on why. No entry is left `open` while the Mold reports the region
-  repaired, and the ledger's open-blocker count strictly decreases. Catches the
-  spin-or-fabricate failure the escalation exists to prevent.
+- assertion: each blocking entry the repair addresses ends `resolved`, with a note
+  naming the change-set kinds applied, or stays `open` with a note saying why.
+  The Mold never sets `surrendered`, because that status belongs to the terminal.
+  The open blocking-entry count falls across the repair unless the repair reports
+  that none of the entries could be closed.
 
-## Property: inserted steps are draft-tier, not fabricated
+## Property: added steps are draft-tier or copied
 
 - check: deterministic
 - assertion: every step the repair adds carries wrapper-tier `TODO` for `tool_id`
-  and ports plus `_plan_*` intent. No added step names a concrete `tool_id`,
-  `tool_version`, or Tool Shed repository — wrapper resolution belongs to the
-  downstream discover-or-author → implement machinery. A fabricated concrete tool
-  id is a fail.
+  and ports plus `_plan_*` intent. A concrete `tool_id` on an added step appears
+  only when it is copied, with its `state`, from a realized step in the same
+  draft. A fabricated concrete tool id is a fail.
 
 ## Property: the repair stays local
 
 - check: llm-judged
-- assertion: the repair touches only the blocked region. Already-realized steps,
-  the workflow interface, and unrelated edges are not silently re-settled or
-  contradicted. Adding and rewiring inside the blocked region is expected;
-  rewriting the surrounding workflow is not.
+- assertion: the workflow interface and realized steps change only where a named
+  entry requires it. Unrelated edges, labels, `doc` and `state` are not re-settled
+  or tidied.
+
+## Property: a narrowing is recorded
+
+- check: llm-judged
+- assertion: a removed public input or output, or cut source work, has a
+  `kind: dropped` entry with `units` and a `because` that quotes a primary
+  artifact. A `because` that only names the blocking entry, or rests on a tool
+  version missing from a local cache, fails.
+
+## Property: a removal leaves nothing dead or stale
+
+- check: llm-judged
+- assertion: after a removal, no workflow input or step exists only to feed the
+  removed step. No `doc`, `_plan_*` or comment frame mentions its id or label, and
+  a `rename` or `change_datatype` it carried for its consumers has moved to the
+  step that inherits them.
+
+## Property: no claim about an unresolved step in doc
+
+- check: llm-judged
+- assertion: no `doc` states what a step with no resolved wrapper produces or
+  guarantees beyond its plan. Such a claim sits in a ledger entry with `step:` set.
 
 ## Property: no convergence-defeating producer
 
 - check: llm-judged
 - assertion: every inserted producer's own output is computable from what feeds
-  it. Where the missing evidence has no producer in reach, the Mold narrows the
-  declared output to what its inputs honestly support or surrenders the entry with
-  a note — it does not insert a producer that grows the DAG without reducing the
-  open-blocker count.
+  it, and no new producer answers an entry against a step an earlier repair
+  inserted. Where nothing can close an entry, the Mold removes the step with a
+  recorded drop or leaves the entry `open` with a note, and doesn't grow the DAG.
 
-## Property: the re-wired draft stays loop-consumable
+## Property: the edited draft stays loop-consumable
 
 - check: deterministic
-- assertion: the emitted draft validates against [[galaxy-workflow-draft]] and
-  stays inside the draft superset the per-step loop expects, so the loop resumes
-  on it without re-running the template Mold over the whole workflow.
+- assertion: `gxwf draft-validate` exits 0 on the emitted draft, so the loop
+  resumes on it without re-running the template Mold over the whole workflow.

@@ -101,8 +101,8 @@ Properties are tagged by bucket:
 
 - bucket: picker
 - check: deterministic
-- assertion: when an invocation concretizes the last drafty step, it leaves
-  `gxwf draft-next-step` reporting `draft: false` and writes
+- assertion: when an invocation concretizes the last drafty step, or a repair
+  removes it, it leaves `gxwf draft-next-step` reporting `draft: false` and writes
   `galaxy-workflow.gxwf.yml` (`class: GalaxyWorkflow`, no `_plan_*`) before
   returning, without a further invocation.
 
