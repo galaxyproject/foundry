@@ -158,7 +158,7 @@ One-of-N route: same merge step with one `pick_from` slot per mode, one `map_par
 
 A `when`-gated step mapped over a collection still produces its implicit collection, with a null element for each skipped job. A merge must select per element.
 
-**Arms mapped over the same collection.** `pick_value` maps element-wise and gives one element per input, with identifiers kept. For new work, use Galaxy's built-in module. Its `the_only_non_null` mode is the counterpart of `pick_style: only`:
+**Arms mapped over the same collection.** `pick_value` maps element-wise and gives one element per input, with identifiers kept. For new work, use Galaxy's built-in module. Its `the_only_non_null` mode is the counterpart of `pick_style: only`, except that a routing bug fails the invocation rather than a job:
 
 ```yaml
 - id: route
@@ -172,9 +172,9 @@ A `when`-gated step mapped over a collection still produces its implicit collect
     mode: the_only_non_null
 ```
 
-Downstream steps read its `output`. The Tool Shed spelling maps the same way, and it is what the Functional_annotation_of_sequences exemplar uses.
+Downstream steps read its `output`. The Tool Shed spelling maps the same way, and it is what the exemplar `genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences` uses.
 
-**Arms mapped over different collections.** `pick_value` needs the arms to match, and when their lengths differ the invocation fails with `Cannot match collection types`. Filter each arm with `__FILTER_NULL__`, then merge the results with `__MERGE_COLLECTION__`. The output holds only the live arm's elements:
+**Arms mapped over different collections.** Galaxy pairs mapped inputs by position and checks only their shape, so `pick_value` fits only arms mapped over the same collection. Arms of different lengths fail the invocation with `Cannot match collection types`. Arms of equal length pass, and the live right arm's data comes out under the left arm's identifiers. Filter each arm with `__FILTER_NULL__`, then merge the results with `__MERGE_COLLECTION__`. The output holds only the live arm's elements. No IWC workflow uses this recipe, so its evidence is the verification test:
 
 ```yaml
 - id: left_live
@@ -201,14 +201,13 @@ Downstream steps read its `output`. The Tool Shed spelling maps the same way, an
     inputs:
       - {}
       - {}
-    advanced:
-      conflict:
-        duplicate_options: keep_first
 ```
+
+This recipe doesn't check that exactly one arm ran, so the booleans have to be exclusive. With both arms live, the output holds both arms' elements, and on a shared identifier it keeps the first arm's.
 
 ## Pitfalls
 
-- Merging gated arms directly. `__MERGE_COLLECTION__` keeps null elements. Over arms that share identifiers, its default `keep_first` keeps the first arm's elements, so the output is all nulls when that arm is skipped. Over arms with different identifiers, the output carries the skipped arm's elements as nulls.
+- Merging gated arms directly. `__MERGE_COLLECTION__` keeps null elements. On a shared identifier, its default `keep_first` keeps the first arm's element even when that's a null and the second arm's is live. Arms over one collection then give all nulls when the first arm is skipped, and arms over different collections lose every live element whose identifier the first arm also has. Filtering after the merge can't recover those, so filter first. Identifiers only the skipped arm has come through as nulls.
 - Forgetting the merge. A gated branch output may be absent. Downstream steps should consume `pick_value`, not one branch directly.
 - Non-exclusive booleans. Under `pick_style: first` two live branches resolve to the earlier `pick_from` slot, silently. `only` turns that into a job failure.
 - Omitting the `pick_from` entries. The repeat is what creates the input terminals, so connections alone leave the tool with zero candidates. The job still succeeds and writes the text `null` into the output dataset.
