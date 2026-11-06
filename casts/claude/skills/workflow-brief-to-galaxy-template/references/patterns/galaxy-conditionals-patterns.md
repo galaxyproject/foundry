@@ -12,8 +12,8 @@ tags:
   - topic/galaxy-transform
 status: draft
 created: 2026-05-02
-revised: 2026-10-15
-revision: 4
+revised: 2026-11-06
+revision: 5
 summary: "Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream."
 related_notes:
   - "[[iwc-conditionals-survey]]"
@@ -47,14 +47,14 @@ Galaxy steps in the observed patterns receive a boolean through an input named `
 
 ## Continue with one value
 
-- **Peer alternatives:** [[conditional-route-between-alternative-outputs]] gates the possible modes and merges their compatible outputs with `pick_value`. If exactly one mode must produce a value, choose merge behavior that detects zero or multiple live outputs rather than silently taking the first.
+- **Peer alternatives:** [[conditional-route-between-alternative-outputs]] gates the possible modes and merges their compatible outputs with `pick_value`. If exactly one mode must produce a value, choose merge behavior that detects zero or multiple live outputs rather than silently taking the first. A step mapped over a collection leaves a null element for each skipped job, so arms mapped over the same collection merge with `pick_value`, and arms mapped over different collections filter nulls and then merge.
 - **Optional change to an existing value:** [[conditional-transform-or-pass-through]] gates the transform and uses `pick_value` to prefer its output when present, with the original value as the fallback. This preserves one downstream input without duplicating the rest of the workflow.
 
 ## Clean a collection instead
 
 [[collection-cleanup-after-mapover-failure]] drops or replaces empty or failed elements after map-over. It changes collection membership or contents, while a `when` gate skips a whole step. If dropping elements affects alignment with a sibling collection, see [[galaxy-collection-patterns]] for the next choice.
 
-`__FILTER_NULL__` can filter null outputs after conditional steps, but the conditionals survey found no IWC use from which to establish a pattern. That absence alone does not make the capability an anti-pattern.
+`__FILTER_NULL__` removes the null elements a skipped mapped step leaves. [[conditional-route-between-alternative-outputs]] uses it to merge arms mapped over different collections.
 
 ## See Also
 

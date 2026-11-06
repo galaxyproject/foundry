@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-template/index.md",
     "revision": 8,
     "content_hash": "ff684b1c73690303127c8465ccdcdf9ffbfe1c95d72a6ed224ca33f153c5ea1d",
-    "commit": "9678dfba7293f01d34bb755adbb6dbfa7913dea0"
+    "commit": "40753f03903c04e7a756f235c709e525f65a9c9b"
   },
-  "cast_at": "2026-10-28T17:07:17.886Z",
+  "cast_at": "2026-11-06T18:35:40.838Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -68,8 +68,8 @@
       "evidence": "corpus-observed",
       "purpose": "Use corpus-grounded conditional pattern guidance for unresolved skeleton steps.",
       "trigger": "When adding TODO steps for optional steps, gating on non-empty results, routing between alternative outputs, or transform-or-pass-through branches.",
-      "src_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
-      "dst_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
+      "src_hash": "e7e791d505f8cb15d676a5042a6f2fe516139a33763a97eae22f3665f9371697",
+      "dst_hash": "e7e791d505f8cb15d676a5042a6f2fe516139a33763a97eae22f3665f9371697",
       "source": "deterministic"
     },
     {

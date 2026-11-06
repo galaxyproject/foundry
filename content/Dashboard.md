@@ -85,12 +85,13 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[conditional-route-between-alternative-outputs]] | Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value. | draft | 2026-11-06 | 5 |
+| [[galaxy-conditionals-patterns]] | Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream. | draft | 2026-11-06 | 5 |
 | [[relabel-via-rules-and-find-replace]] | Relabel the inner level of a list:list by swapping it to the top with Apply Rules, relabeling from a find/replace-built table, and swapping back. | draft | 2026-10-22 | 3 |
 | [[collection-cleanup-after-mapover-failure]] | Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step. | draft | 2026-10-21 | 3 |
 | [[conditional-transform-or-pass-through]] | Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise. | draft | 2026-10-21 | 3 |
 | [[regex-relabel-via-tabular]] | Build an old-to-new identifier table with a tp_find_and_replace regex, then apply it by name with RELABEL_FROM_FILE in tabular mode. | draft | 2026-10-21 | 3 |
 | [[galaxy-collection-patterns]] | Choose a Galaxy collection operation or map-over recipe from the current and required data shapes. | draft | 2026-10-15 | 4 |
-| [[galaxy-conditionals-patterns]] | Choose a Galaxy when gate, routed output, fallback, or collection cleanup by what must change downstream. | draft | 2026-10-15 | 4 |
 | [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-10-15 | 4 |
 | [[collection-build-list-paired-with-apply-rules]] | Use Apply Rules to map a sample column and a read-direction column into a list:paired collection, from flat identifiers or an existing paired level. | draft | 2026-10-14 | 3 |
 | [[tabular-to-collection-by-row]] | Split a tabular file into a list collection by column value, grouping rows that share an identifier. | draft | 2026-10-07 | 4 |
@@ -111,7 +112,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[sync-collections-by-identifier]] | Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections. | draft | 2026-09-15 | 3 |
 | [[tabular-filter-by-regex]] | Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative. | draft | 2026-09-15 | 3 |
 | [[collection-build-named-bundle]] | Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in. | draft | 2026-09-14 | 3 |
-| [[conditional-route-between-alternative-outputs]] | Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value. | draft | 2026-09-14 | 4 |
 | [[tabular-cut-and-reorder-columns]] | Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom. | draft | 2026-09-14 | 3 |
 | [[collection-flatten-after-fanout]] | Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters. | draft | 2026-09-13 | 3 |
 | [[collection-swap-nesting-with-apply-rules]] | Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns. | draft | 2026-09-13 | 3 |
