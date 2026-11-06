@@ -15,10 +15,12 @@ status: draft
 created: 2026-05-02
 revised: 2026-11-06
 revision: 5
-summary: "Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value."
+summary: "Use when-gated alternatives plus pick_value, or a filtered merge for mapped arms, to route binary or one-of-N branches into one downstream value."
 related_notes:
   - "[[iwc-conditionals-survey]]"
   - "[[iwc-parameter-derivation-survey]]"
+  - "[[cwl-pickvalue-to-galaxy]]"
+  - "[[galaxy-collection-tools]]"
 related_patterns:
   - "[[conditional-run-optional-step]]"
   - "[[conditional-transform-or-pass-through]]"
@@ -48,7 +50,7 @@ iwc_exemplars:
 
 Use Galaxy `when:` gates on each alternative-producing step, then use `pick_value` to collapse the possible outputs into one downstream value.
 
-The shapes below use the toolshed tool `toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0` — that is the established pattern, and all 63 corpus steps use it. Galaxy's built-in `pick_value` module will generally be preferred in the future.
+The unmapped shapes below use the toolshed tool `toolshed.g2.bx.psu.edu/repos/iuc/pick_value/pick_value/0.2.0` — that is the established pattern, and all 63 corpus steps use it. Galaxy `release_26.1` adds a built-in `pick_value` module, which [Mapped branches](#mapped-branches) leads with. Prefer it for new work on `release_26.1` or later; workflows that use it don't import on older Galaxy. [[cwl-pickvalue-to-galaxy]] covers its modes.
 
 This is a graph-visible route pattern: each alternative stays as its own Galaxy step or subworkflow, and `pick_value` is the merge point. It is not a wrapper-internal conditional hidden inside one tool state.
 
@@ -69,10 +71,10 @@ Do not use this for "transform if requested, otherwise pass original through" un
 This pattern is:
 
 ```text
-route condition(s) -> when-gated alternative steps -> pick_value merge -> one downstream value
+route condition(s) -> when-gated alternative steps -> merge -> one downstream value
 ```
 
-The reusable operation is the merge, not just the `when:` field. Every alternative may disappear at runtime, so the downstream step should connect to the `pick_value` output, not directly to any branch output.
+The reusable operation is the merge, not just the `when:` field. Every alternative may disappear at runtime, so the downstream step should connect to the merge's output, not directly to any branch output.
 
 For binary routes, one branch often uses the user boolean directly and the other uses a mapped inverse boolean. For one-of-N routes, derive one boolean per mode, gate each mode, then order the candidate outputs in `pick_value`.
 
@@ -208,7 +210,7 @@ This recipe doesn't check that exactly one arm ran, so the booleans have to be e
 ## Pitfalls
 
 - Merging gated arms directly. `__MERGE_COLLECTION__` keeps null elements. On a shared identifier, its default `keep_first` keeps the first arm's element even when that's a null and the second arm's is live. Arms over one collection then give all nulls when the first arm is skipped, and arms over different collections lose every live element whose identifier the first arm also has. Filtering after the merge can't recover those, so filter first. Identifiers only the skipped arm has come through as nulls.
-- Forgetting the merge. A gated branch output may be absent. Downstream steps should consume `pick_value`, not one branch directly.
+- Forgetting the merge. A gated branch output may be absent. Downstream steps should consume the merge, not one branch directly.
 - Non-exclusive booleans. Under `pick_style: first` two live branches resolve to the earlier `pick_from` slot, silently. `only` turns that into a job failure.
 - Omitting the `pick_from` entries. The repeat is what creates the input terminals, so connections alone leave the tool with zero candidates. The job still succeeds and writes the text `null` into the output dataset.
 - Mismatched output semantics. `pick_value` can merge present values, but it does not make incompatible outputs equivalent. Branches should produce the same logical artifact.
