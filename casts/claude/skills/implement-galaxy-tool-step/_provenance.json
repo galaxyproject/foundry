@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 12,
-    "content_hash": "249336bfc24d3502e525a75c04856ac753f42d7638296e404954b6423cf97ab1",
-    "commit": "9678dfba7293f01d34bb755adbb6dbfa7913dea0"
+    "revision": 13,
+    "content_hash": "d902df343f62af16de5a0b7ef48576eeebac5abdfe23ff568f28de7c3e6fa98e",
+    "commit": "520ecf2ecec9d273aedf7c5f697b92f7ef4e163d"
   },
-  "cast_at": "2026-10-28T17:07:15.966Z",
+  "cast_at": "2026-11-06T18:21:34.915Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -138,6 +138,43 @@
       "src_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "dst_hash": "c7dc5421bdd35af8000e61e618c813e162889416a0f322f8d0cb24a66ccad153",
       "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[gxformat2-schema]]",
+      "src": "content/research/gxformat2-schema/index.md",
+      "dst": "references/notes/gxformat2-schema.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Address a nested parameter with its `|`-joined `in:` key, and name the step part of a connection correctly for the draft's step form.",
+      "trigger": "When wiring a parameter nested in a conditional or section, or when a draft's steps carry both `id` and `label`.",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "cf922d2b3d807b020b466b5f22c15fad36b3d721bfa04c667eb120d1cdddf815",
+      "dst_hash": "cf922d2b3d807b020b466b5f22c15fad36b3d721bfa04c667eb120d1cdddf815",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[gxformat2-schema]]",
+      "src": "content/research/gxformat2-schema/gxformat2.schema.json",
+      "dst": "references/notes/gxformat2.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Address a nested parameter with its `|`-joined `in:` key, and name the step part of a connection correctly for the draft's step form.",
+      "trigger": "When wiring a parameter nested in a conditional or section, or when a draft's steps carry both `id` and `label`.",
+      "companion_of": "references/notes/gxformat2-schema.md",
+      "license": "MIT",
+      "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
+      "src_hash": "2c4b3df730b70d9c648105ced438fc08be306a41f2aff7d4bd2897f72f94d509",
+      "dst_hash": "2c4b3df730b70d9c648105ced438fc08be306a41f2aff7d4bd2897f72f94d509",
+      "source": "deterministic",
+      "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
     {
       "kind": "research",

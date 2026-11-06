@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-10-22
-revision: 4
+revised: 2026-11-06
+revision: 5
 license: MIT
 license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 related_notes:
@@ -52,6 +52,10 @@ The generated schema does not include all fields accepted by current gxformat2 i
 An output entry can carry `id`, `label`, `doc`, `outputSource`, and `type`. `outputSource` names the producing step output, commonly `step_id/output_id`. The output's **public name** is not always its `label`: normalized gxformat2 export places a native Galaxy workflow-output label in `id`, and the pinned IWC [SRA manifest workflow](https://github.com/galaxyproject/iwc/blob/main/workflows/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.ga) exports `id: paired_output`. Current gxformat2 import chooses `label` when present and otherwise `id`. Check the effective name after import or conversion before writing the sibling test's `outputs:` key. See [[galaxy-workflow-testability-design]].
 
 The schema makes `outputSource` optional, even though a usable produced output needs a valid source. Its string type cannot prove that the referenced step and port exist. gxformat2 lint checks the step reference. Workflow validation must also check that the producing port exists.
+
+The step part of a `source` or `outputSource` depends on how the workflow lists its steps. In list form it is the step's `label` when one is present, otherwise its `id`. In map form it is the map key, even when the step also carries `id` and `label`.
+
+A step's `in:` key addresses a parameter nested in a conditional or section with a `|`-joined path, and a repeat instance with `_N`. For example, `input_type|i` wires an input inside a conditional in `genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences`, and `style_cond|type_cond|pick_from_0|value` wires the first instance of a repeat inside two conditionals in [[conditional-route-between-alternative-outputs]]. The key names the path, and the conditional's selector value stays in `state`.
 
 Step `out:` entries serve a different purpose. They can be output names or records with `id` and actions such as `rename`, `change_datatype`, `add_tags`, `remove_tags`, `hide`, `delete_intermediate_datasets`, and `set_columns`. These actions affect produced datasets or history presentation. They do not supply a top-level output's public name.
 
