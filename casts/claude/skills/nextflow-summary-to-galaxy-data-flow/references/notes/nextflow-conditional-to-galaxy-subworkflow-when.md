@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-08
-revised: 2026-05-08
-revision: 1
+revised: 2026-11-07
+revision: 2
 related_notes:
   - "[[nextflow-to-galaxy-reference-data-mapping]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
@@ -19,7 +19,7 @@ related_molds:
 sources:
   - "https://github.com/galaxyproject/gxformat2"
   - "https://github.com/iwc-workflows"
-summary: "Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule."
+summary: "Stub. Translate Nextflow conditionals into Galaxy `when:` (single workflow). Subworkflow vs inline is an aesthetic call, not a rule."
 ---
 
 # Nextflow conditional to Galaxy subworkflow / when
@@ -28,9 +28,11 @@ Stub. Surfaced from sarek emulation (2026-05-08). Companion to [[nextflow-to-gal
 
 ## Posture
 
-For v1 of the Nextflow-to-Galaxy translation Molds the output is a single Galaxy workflow per source pipeline, even when the source has substantial branching. IWC reviewers historically prefer sibling workflows for what looks like one pipeline with toggles, and we agree; but for the *translation step* a single artifact keeps the Mold pipeline deterministic, the harness simple, and the reviewer's mental model of "this draft maps 1:1 to the source" intact. Sibling-extraction is a polish pass a human or follow-up Mold runs *after* translation, not a decision the translation Mold makes.
+The Nextflow-to-Galaxy translation Molds output a single Galaxy workflow per source pipeline, even when the source has substantial branching, and capture as much of the source's scope as conditionals allow. IWC workflows don't typically dispatch on different tools within a workflow, but that reflects the corpus, not a design constraint. When the source offers a tool choice, carry it in one workflow with conditionals, especially when porting a workflow that already dispatches this way. A second workflow just for a tool choice is not a goal.
 
-The question this note addresses is: given that v1 is one Galaxy workflow, *how* should source conditionals translate? The two structural tools available are:
+IWC reviewers have historically preferred sibling workflows for what looks like one pipeline with toggles. A human or follow-up Mold can still extract siblings after translation, but the translation Mold doesn't aim for that split. A single artifact also keeps the Mold pipeline deterministic, the harness simple, and the reviewer's mental model of "this draft maps 1:1 to the source" intact.
+
+The question this note addresses is: given one Galaxy workflow, *how* should source conditionals translate? The two structural tools available are:
 
 - **Inline `when:` on a tool step.** Step runs or doesn't, based on an ECMAScript 5.1 expression over workflow inputs. Lightweight; doesn't change the DAG shape.
 - **`when:` on a subworkflow step.** A bundle of steps runs or doesn't as a unit. Adds a subworkflow boundary and the wiring overhead that comes with it (typed inputs, typed outputs, explicit pass-through). When the parent's `when:` is false the inner steps inherit the skip via the engine's `when_values` propagation.
@@ -63,7 +65,7 @@ These are the cases where the call is genuinely judgment, and an agent rendering
 
 - **Sarek `aligner` (bwa-mem | bwa-mem2 | dragmap | sentieon | parabricks).** Five-way. Source has `FASTQ_ALIGN_BWAMEM_MEM2_DRAGMAP_SENTIEON` as one subworkflow, plus a separate `FASTQ_PREPROCESS_PARABRICKS` because parabricks bundles align+sort+dedup. Mixed signal: the source leans subworkflow for four of the five, parabricks is its own beast. Probably means: subworkflow for the four-way alignment swap (matches source), a sibling `when:`-gated subworkflow step for parabricks (matches source). Inline `when:` would scatter five alignment tool choices through the main workflow body.
 - **Sarek `wes`.** Two-way boolean. Source scopes WES handling inside `PREPARE_INTERVALS` and a few variant-calling internals. Strong "subworkflow `when:`" signal — source already structured it that way, cascade is wide, interface is narrow (intervals BED in, intervals BED out).
-- **Sarek `tools` selector (variant callers).** Source scopes each caller in its own subworkflow (`BAM_VARIANT_CALLING_HAPLOTYPECALLER`, `BAM_VARIANT_CALLING_FREEBAYES`, …). Each caller's outputs land in a downstream merge. Strong "subworkflow `when:` per caller" signal — but the wiring at the merge is delicate (each branch contributes a different VCF format), so the merge step itself becomes the awkward part. Maybe the right answer here is sibling Galaxy workflows after all, even at v1 — flag for the human reviewer.
+- **Sarek `tools` selector (variant callers).** Source scopes each caller in its own subworkflow (`BAM_VARIANT_CALLING_HAPLOTYPECALLER`, `BAM_VARIANT_CALLING_FREEBAYES`, …). Each caller's outputs land in a downstream merge. Strong "subworkflow `when:` per caller" signal — but the wiring at the merge is delicate (each branch contributes a different VCF format), so the merge step itself becomes the awkward part. Flag that wiring for the human reviewer rather than splitting the workflow.
 
 ## Output fan-in: use `pick_value`, not a generic merge
 
@@ -86,7 +88,7 @@ IWC uses the `when:` + `pick_value` pattern in production. Two confirmed example
 - `sars-cov-2-variant-calling/sars-cov-2-pe-illumina-artic-ivar-analysis/pe-wgs-ivar-analysis.gxwf.yml` — two parallel tool steps both gated by `when: $(inputs.when)` from a shared boolean, merged downstream with a `pick_value` step.
 - `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml` — multiple HyPhy analyses guarded by optional foreground/background booleans, merged downstream.
 
-So `when:` + `pick_value` for branch selection is corpus-observed and IWC-acceptable. **What is *not* observed in IWC**: dynamic tool selection via `when:` (e.g. "run bwa-mem or parabricks based on a `tools` selector input"). Every IWC workflow commits to a fixed tool stack at authoring time. A Nextflow-to-Galaxy translation that surfaces aligner choice as a runtime `when:`-gated swap would be a novel pattern in IWC. The mechanism is well-supported by the engine; the precedent is missing. Worth flagging in any draft brief that proposes it: "this works mechanically, but IWC has no exemplar for tool-selection-via-when, and a reviewer may push back toward sibling workflows."
+So `when:` + `pick_value` for branch selection is corpus-observed and IWC-acceptable. **What IWC doesn't typically do**: dynamic tool selection via `when:` (e.g. "run bwa-mem or parabricks based on a `tools` selector input"). IWC workflows typically commit to a fixed tool stack at authoring time, so a Nextflow-to-Galaxy translation that keeps aligner choice as a runtime `when:`-gated swap has little corpus precedent. The engine supports the mechanism, and the missing precedent is not a reason to cut the choice or split the workflow. A draft brief can record it as evidence for the reviewer.
 
 ## Confirmed engine behavior
 
@@ -103,7 +105,7 @@ The engine's design here is more deliberate and more tolerant than the working m
 
 ## When this note's posture stops working
 
-- **A pipeline whose conditionals don't cleanly bucket either way.** If the heuristics keep producing "mixed signals" across most conditionals, the source pipeline is probably one where sibling Galaxy workflows really are the right answer at v1, and the translation Mold should surface that as an Open Question on the brief rather than force one workflow.
+- **A pipeline whose conditionals don't cleanly bucket either way.** If the heuristics keep producing "mixed signals" across most conditionals, the translation Mold should surface that as an Open Question on the brief. Consider sibling workflows only when one workflow can't carry the branches, not because of a tool choice alone.
 - **Galaxy invocation engine doesn't behave the way this note assumes.** Confirmed against source on 2026-05-08; the engine is robust here. Risk reopens only if a future Galaxy refactor changes `when:` semantics or the `pick_value` module is deprecated.
 - **A second Nextflow pipeline emulation surfaces a third pattern.** sarek covers tool-swap (`aligner`), boolean phase toggle (`wes`), and selector (`tools`). RNAseq might add quantifier choice (`salmon | star_salmon | hisat2`) — likely a subworkflow case but worth checking. Taxprofiler might add database-driven branching. New patterns sharpen the heuristics.
 

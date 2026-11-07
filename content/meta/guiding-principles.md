@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-05-01
-revised: 2026-07-17
-revision: 7
+revised: 2026-11-07
+revision: 8
 summary: "The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding."
 ---
 
@@ -123,6 +123,8 @@ Corpus-first does not mean copying the corpus wholesale. It means abstractions s
 - Mold behavior should align with recurring construction tasks.
 - Evaluation plans should exercise casts against realistic workflow shapes.
 - New taxonomy should appear after content demands it, not before.
+
+The corpus grounds how we build, not what workflows may do. A capability the engine supports but IWC hasn't attested is still worth building, especially when the source workflow already has it. Missing precedent is something to record, not a reason to cut.
 
 The same posture applies to the research notes Molds reference at runtime. A runtime-reference note should start as a stub — frontmatter, title, primary-source link — and grow paragraph-by-paragraph from gaps observed when the Mold is cast against real targets. Each paragraph earns its place by naming a motivating case: a workflow, a cast run, a log entry where the runtime agent guessed, fell back, or contradicted the schema. Pre-written comprehensive notes are an anti-pattern; they read as plausible, sound authoritative, and quietly propagate the author's prior beliefs into every downstream cast. The runtime agent has no way to tell invented prose from earned prose, so the safer default is to write nothing until contact with the corpus demands it.
 
