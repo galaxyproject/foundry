@@ -26,3 +26,8 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 
 - check: llm-judged
 - assertion: every `rename:` on a step output uses `#{input}` for an input's dataset name and `${label}` only for a declared workflow parameter input; a tool-XML label variable such as `${on_string}` or `${tool.name}` in a rename is a failure, because Galaxy treats it as an untyped run-time parameter, not the input's name.
+
+## Property: a repeat-instance connection has its repeat entry
+
+- check: deterministic
+- assertion: for every implemented step, each `in:` key with a `_N` repeat segment has an entry at index `N` in that repeat in `state`. A connection with no entry is a failure even when draft-validate passes, because the repeat creates the input terminal and the job can succeed with no candidates.
