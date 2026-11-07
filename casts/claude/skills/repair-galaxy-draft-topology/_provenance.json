@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 6,
     "content_hash": "6750f1a3b845f099552ed5b3eb5255436c0462b9a97553f3c682e2130086928e",
-    "commit": "a0c22945ae22d9922d298437c15c49636f33e17b"
+    "commit": "1d38b9c2ce56ff1103e577c0668b595c5deb32ee"
   },
-  "cast_at": "2026-11-06T22:58:18.008Z",
+  "cast_at": "2026-11-07T14:52:05.144Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -52,8 +52,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose how to merge when a `when`-gated step's output feeds another step.",
       "trigger": "When an inserted or rewired step consumes a `when`-gated step's output.",
-      "src_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
-      "dst_hash": "a021818026c66d41772b20265897ce14fe5de06b765ffe375039e238bff7da4a",
+      "src_hash": "522f9afc04e16a5b49ee5443c0a67b2130e6ef9f42e9405c948b03e6c5c7a1e0",
+      "dst_hash": "522f9afc04e16a5b49ee5443c0a67b2130e6ef9f42e9405c948b03e6c5c7a1e0",
       "source": "deterministic"
     },
     {

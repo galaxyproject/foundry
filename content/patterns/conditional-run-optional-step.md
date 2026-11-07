@@ -11,8 +11,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-03
-revision: 4
+revised: 2026-11-06
+revision: 5
 summary: "Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch."
 related_notes:
   - "[[iwc-conditionals-survey]]"
@@ -134,7 +134,7 @@ The second shape is conceptual, derived from the VGP Hi-C suffixing branch. The 
 - Consuming a missing optional output unconditionally. If downstream requires a value regardless of the boolean, add an explicit merge/fallback with `pick_value`.
 - Confusing user choice with data-derived choice. Empty/non-empty result checks need a separate boolean-producing shim before `when:`.
 - Duplicating normalization logic inside optional tools. If the gate depends on a derived boolean, compute it once and connect that boolean as `id: when`.
-- Leading with `__FILTER_NULL__` as conditional cleanup. The survey found zero `__FILTER_NULL__` hits in the IWC corpus; keep it as catalog knowledge, not the corpus-backed authoring path.
+- Leading with `__FILTER_NULL__` as conditional cleanup. The survey found zero `__FILTER_NULL__` hits in the IWC corpus, so it isn't the corpus-backed authoring path. Its one recipe is merging arms mapped over different collections, in [[conditional-route-between-alternative-outputs]].
 
 ## See Also
 
