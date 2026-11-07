@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 10,
     "content_hash": "77f885d640900cca7dac4a3bbb33308d4d8065e871c919c672487db61caf93ab",
-    "commit": "a0c22945ae22d9922d298437c15c49636f33e17b"
+    "commit": "ae8beb6df85b09a61706d0f6990e99bccd718394"
   },
-  "cast_at": "2026-11-06T22:58:17.898Z",
+  "cast_at": "2026-11-07T15:09:32.240Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -265,8 +265,8 @@
       "evidence": "corpus-observed",
       "purpose": "Emit `when:` clauses on the right step type (subworkflow vs tool) and the right output fan-in primitive (`pick_value`, modes `first_non_null` / `first_or_skip` / `the_only_non_null`) when the data-flow brief carries a conditional disposition through to the skeleton.",
       "trigger": "When the upstream data-flow brief assigns a source conditional to a subworkflow `when:` or inline `when:` shape, or when emitting the merge step for two or more `when:`-gated branches that produce the same logical output.",
-      "src_hash": "e341284cdf3a2cdb7381c37aa50e409f99fde7c5dbcdefe64cf2ca15dd28f85e",
-      "dst_hash": "e341284cdf3a2cdb7381c37aa50e409f99fde7c5dbcdefe64cf2ca15dd28f85e",
+      "src_hash": "f38341565d0927321248b67a9d99ce9533cc89ef4e543cbf80378260e7025f7e",
+      "dst_hash": "f38341565d0927321248b67a9d99ce9533cc89ef4e543cbf80378260e7025f7e",
       "source": "deterministic"
     },
     {
