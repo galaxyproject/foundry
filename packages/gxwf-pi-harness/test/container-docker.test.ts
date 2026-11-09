@@ -10,6 +10,7 @@ import { expect, test } from "vitest";
 import {
   DEFAULT_CONTAINER_IMAGE,
   inspectContainerImage,
+  PLANEMO_VERSION,
   type ContainerLaunchConfig,
 } from "../src/index.js";
 
@@ -72,7 +73,7 @@ testInContainer("the Docker worker cannot see checkout-only resources", () => {
     "test ! -e /_emulated-runs",
     "foundry --help >/dev/null",
     "python3 --version >/dev/null",
-    'test "$(planemo --version)" = "planemo, version 0.75.47"',
+    `test "$(planemo --version)" = "planemo, version ${PLANEMO_VERSION}"`,
     "planemo lint --fail_level error /inputs/minimal-tool.xml >/dev/null",
     "! touch /skill/forbidden",
     "! touch /inputs/forbidden",

@@ -13,8 +13,12 @@ import path from "node:path";
 import { afterEach, expect, test, vi } from "vitest";
 import { stringify } from "yaml";
 
+import { planemoTestReportProvenance } from "@galaxy-foundry/planemo-test-report-schema";
+
 import { stageLabTool, type StageLabToolOptions } from "../src/stage.js";
 import { prepareLabTool } from "../src/index.js";
+
+const PLANEMO_VERSION = planemoTestReportProvenance.planemo_version;
 
 const roots: string[] = [];
 const hash = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
@@ -117,7 +121,7 @@ function fixture() {
   const planemoFile = path.join(root, "planemo.cjs");
   writeFileSync(
     planemoFile,
-    `const fs = require('node:fs'); const args = process.argv.slice(2); if (args.includes('--version')) console.log('planemo, version 0.75.47'); if (args.includes('test')) { const file = args[args.indexOf('--test_output_json') + 1]; fs.writeFileSync(file, JSON.stringify({version:'0.1',exit_code:0,summary:{num_tests:1,num_errors:0,num_failures:0,num_skips:0},tests:[{id:'nfcore_compat_seqkit_stats-0',has_data:true,data:{status:'success'}}]})); }`,
+    `const fs = require('node:fs'); const args = process.argv.slice(2); if (args.includes('--version')) console.log('planemo, version ${PLANEMO_VERSION}'); if (args.includes('test')) { const file = args[args.indexOf('--test_output_json') + 1]; fs.writeFileSync(file, JSON.stringify({version:'0.1',exit_code:0,summary:{num_tests:1,num_errors:0,num_failures:0,num_skips:0},tests:[{id:'nfcore_compat_seqkit_stats-0',has_data:true,data:{status:'success'}}]})); }`,
   );
   const options: StageLabToolOptions = {
     inputDir,
@@ -431,7 +435,7 @@ test.each(["missing", "skipped", "wrong_identity", "empty", "bad_summary", "malf
     if (kind === "bad_summary") r.summary.num_tests = 99;
     writeFileSync(
       f.planemoFile,
-      `const fs=require('node:fs'); const a=process.argv.slice(2); if(a.includes('--version')) console.log('planemo, version 0.75.47'); if(a.includes('test') && ${JSON.stringify(kind)} !== 'missing') fs.writeFileSync(a[a.indexOf('--test_output_json')+1], ${JSON.stringify(kind === "malformed" ? "{" : JSON.stringify(r))});`,
+      `const fs=require('node:fs'); const a=process.argv.slice(2); if(a.includes('--version')) console.log('planemo, version ${PLANEMO_VERSION}'); if(a.includes('test') && ${JSON.stringify(kind)} !== 'missing') fs.writeFileSync(a[a.indexOf('--test_output_json')+1], ${JSON.stringify(kind === "malformed" ? "{" : JSON.stringify(r))});`,
     );
     const report = await stageLabTool(f.options);
     expect(report.checks.find((c) => c.id === "planemo_tests")?.status).toBe("failed");

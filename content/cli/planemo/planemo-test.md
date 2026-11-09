@@ -3,7 +3,7 @@ type: cli-command
 tool: planemo
 command: test
 package: "planemo"
-source_url: "https://github.com/galaxyproject/planemo/blob/0.75.47/planemo/commands/cmd_test.py"
+source_url: "https://github.com/galaxyproject/planemo/blob/0.75.48/planemo/commands/cmd_test.py"
 tags:
   - cli/planemo
 status: draft
@@ -40,6 +40,8 @@ planemo test [OPTIONS] TOOL_PATH
 | --failed_json | path | — | — | JSON file from a previous planemo test run to read failed test IDs from when using --failed/--lf. Defaults to --test_output_json. |
 | --test_index | integer | [] | — | Index(es) of specific test(s) to run (1-based). Can be specified multiple times (e.g., --test_index 1 --test_index 3) to run specific tests. If not specified, all tests are run. |
 | --polling_backoff | integer | 0 | — | Poll resources with an increasing interval between requests. Useful when testing against remote and/or production instances to limit generated traffic. |
+| --use_cache, --no_use_cache | flag | false | — | Reuse cached job results if available. Off by default - Galaxy replays the outputs of an equivalent job, so a tool edited without a version bump is never actually re-run and the test passes against stale results. Only honored for tests defined in a test file; tests embedded in a tool's <tests> block run through the Galaxy test interactor, which ignores this. |
+| --cwltool_cache_directory | directory | — | — | Directory the cwltool engine caches computed steps in when --use_cache is enabled (defaults to a directory in the planemo workspace). |
 | --galaxy_root | directory | — | — | Root of development galaxy directory to execute command with. |
 | --galaxy_python_version | choice | — | — | Python version to start Galaxy under |
 | --extra_tools | path | — | — | Extra tool sources to include in Galaxy's tool panel (file or directory). These will not be linted/tested/etc... but they will be available to workflows and for interactive use. |
@@ -56,7 +58,8 @@ planemo test [OPTIONS] TOOL_PATH
 | --docker_host | text | — | — | Docker host to target when executing docker commands (defaults to localhost). |
 | --docker_sudo_cmd | text | sudo | — | sudo command to use when --docker_sudo is enabled (defaults to sudo). |
 | --docker_run_extra_arguments | text | — | — | Extra arguments to pass to docker run. |
-| --mulled_containers, --biocontainers | flag | — | — | Test tools against mulled containers (forces --docker). Disables conda resolution unless any conda option has been set explicitly. |
+| --mulled_containers, --biocontainers | flag | — | — | Test tools against mulled containers. Requires --docker or --singularity; --docker is enabled automatically if neither is given. Disables conda resolution unless any conda option has been set explicitly. |
+| --container_resolvers_config_file | file | — | — | Path to a Galaxy container resolvers configuration file to use instead of Galaxy's default resolvers. |
 | --galaxy_startup_timeout | integer range | 900 | — | Wait for galaxy to start before assuming Galaxy did not start. |
 | --job_config_file | file | — | — | Job configuration file for Galaxy to target. |
 | --job_workers | integer | 1 | — | Number of workers for the local job runner (default 1). |
@@ -78,14 +81,18 @@ planemo test [OPTIONS] TOOL_PATH
 | --simultaneous_uploads, --no_simultaneous_uploads | flag | false | — | When uploading files to Galaxy for tool or workflow tests or runs, upload multiple files simultaneously without waiting for the previous file upload to complete. |
 | --check_uploads_ok, --no_check_uploads_ok | flag | true | — | When uploading files to Galaxy for tool or workflow tests or runs, check that the history is in an 'ok' state before beginning tool or workflow execution. |
 | --profile | text | — | — | Name of profile (created with the profile_create command) to use with this command. |
-| --database_type | choice | auto | — | Type of database to use for profile - 'auto', 'sqlite', 'postgres', 'postgres_docker' , and postgres_singularity are available options. Use postgres to use an existing postgres server you user can access without a password via the psql command. Use postgres_docker to have Planemo manage a docker container running postgres. . Use  postgres_singularity to have Planemo run postgres using singularity/apptainer. Data with postgres_docker is not yet persisted past when you restart the docker container launched by Planemo so be careful with this option. |
+| --database_type | choice | auto | — | Type of database to use for profile - 'auto', 'sqlite', 'postgres', 'postgres_docker' , and postgres_singularity are available options. The default 'auto' means sqlite - a postgres server is only stood up when named. Use postgres to use an existing postgres server you user can access without a password via the psql command. Use postgres_docker to have Planemo manage a docker container running postgres. . Use  postgres_singularity to have Planemo run postgres using singularity/apptainer. Data with postgres_docker is not yet persisted past when you restart the docker container launched by Planemo so be careful with this option. |
 | --postgres_psql_path | text | psql | — | Name or or path to postgres client binary (psql). |
 | --postgres_database_user | text | postgres | — | Postgres username for managed development databases. |
 | --postgres_database_host | text | — | — | Postgres host name for managed development databases. |
 | --postgres_database_port | text | — | — | Postgres port for managed development databases. |
+| --postgres-storage-location, --postgres_storage_location | directory | — | — | Storage path for PostgreSQL data managed through Singularity. |
+| --singularity, --no_singularity | flag | false | — | Run Galaxy tools in Singularity if enabled. |
+| --singularity_cmd | text | singularity | — | Command used to execute singularity (defaults to 'singularity'). |
+| --singularity_sudo, --no_singularity_sudo | flag | — | — | Flag to use sudo when running Singularity. |
+| --singularity_sudo_cmd | text | sudo | — | sudo command to use when --singularity_sudo is enabled (defaults to sudo). |
 | --file_path | directory | — | — | Location for files created by Galaxy (e.g. database/files). |
 | --database_connection | text | — | — | Database connection string to use for Galaxy. |
-| --postgres-storage-location | text | — | — | storage path for postgres database, used for local singularity postgres. |
 | --shed_tool_conf | text | — | — | Location of shed tools conf file for Galaxy. |
 | --shed_tool_path | text | — | — | Location of shed tools directory for Galaxy. |
 | --shed_tool_data_table_config | text | — | — | Location of the shed tool data table config file for Galaxy (records data tables registered by shed-installed repositories). |
@@ -106,12 +113,13 @@ planemo test [OPTIONS] TOOL_PATH
 | --job_output_files | directory | — | — | Write job outputs to specified directory. |
 | --summary | choice | minimal | — | Summary style printed to planemo's standard output (see output reports for more complete summary). Set to 'none' to disable completely. |
 | --test_timeout | integer | 86400 | — | Maximum runtime of a single test in seconds. |
-| --fail_fast | flag | — | — | Stop on first job failure. |
+| --fail_fast | flag | — | — | Stop on first failure. |
 | --engine | choice | — | — | Select an engine to run or test artifacts such as tools and workflows. Defaults to a local Galaxy, but running Galaxy within a Docker container or the CWL reference implementation 'cwltool' and 'toil' be selected. |
 | --non_strict_cwl | flag | false | — | Disable strict validation of CWL. |
 | --no-container, --no_container | flag | false | — | If cwltool engine is used, disable Docker container usage. |
 | --docker_galaxy_image | text | quay.io/bgruening/galaxy | — | Docker image identifier for docker-galaxy-flavor used if engine type is specified as ``docker-galaxy``. Defaults to quay.io/bgruening/galaxy. |
 | --docker_extra_volume | path | — | — | Extra path to mount if --engine docker or `--biocontainers` or `--docker`. |
+| --singularity_extra_volume | path | — | — | Extra path to mount if `--biocontainers` or `--singularity`. |
 | --ignore_dependency_problems | flag | false | — | When installing shed repositories for workflows, ignore dependency issues. These likely indicate a problem but in some cases may not prevent a workflow from successfully executing. |
 | --shed_install, --no_shed_install | flag | true | — | By default Planemo will attempt to install repositories needed for workflow testing. This may not be appropriate for production servers and so this can disabled by calling planemo with --no_shed_install. |
 | --install_tool_dependencies, --no_install_tool_dependencies | flag | false | — | Turn on installation of tool dependencies using classic toolshed packages. |

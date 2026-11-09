@@ -6,9 +6,9 @@
     "path": "content/molds/convert-nfcore-module-to-galaxy-tool/index.md",
     "revision": 11,
     "content_hash": "35e945843889b66b1e87b894db30670959431d4eb871cce5e74b541b7f527098",
-    "commit": "f80289eed36509c51cbe54ce6f721efb19984060"
+    "commit": "a25b85b301234170473cd3512ed0bf7619e1cd46"
   },
-  "cast_at": "2026-09-26T20:07:26.273Z",
+  "cast_at": "2026-11-09T17:08:37.182Z",
   "cast_date": "2026-07-20",
   "cast_revision": 2,
   "cast_history": [
@@ -36,7 +36,7 @@
       "purpose": "Reference for `planemo lint` flags and output classification; first gate in the convergence loop.",
       "trigger": "Step 10.1 — after every <command>/<inputs>/<outputs> emission.",
       "verification": "Cast and confirm the cast skill consults the manpage's exit-code and error-shape sections, not free-text guesses.",
-      "src_hash": "d129ae09924ec895ad6350184f5e364b5bc4972f4ce5103badc71a4bc4196593",
+      "src_hash": "b1a49ad5c89b9b4d259ef69d70bdc350ebcb02145ce1d81b0eb35b385eaf3db7",
       "dst_hash": "d3251d1d2925f375c0446213b1e1abf3abc13fd6d1d860641fe55bf6332c4072",
       "source": "deterministic"
     },
@@ -52,8 +52,8 @@
       "purpose": "Reference for `planemo test --test_output_json` invocation, exit codes, and the JSON report path.",
       "trigger": "Step 10.2 — after lint clears.",
       "verification": "Cast and confirm the cast skill always runs with --test_output_json and reads from the JSON, not stdout.",
-      "src_hash": "fec237a064746d57c800f4f55c96bfc54ed375debda518649ad66e47a1d27c8f",
-      "dst_hash": "42790a9b0ab08912dda7119da3dfd00dfd791531467ae633747a50248aadc9cb",
+      "src_hash": "27518720eaa8fff04966bfb121ed0e63e3daaaa0a7c32f831bac2559be38cc9e",
+      "dst_hash": "7f978461e4eed6fc6e11afb6625665079c0563b80468022a40b8cc78508c16e5",
       "source": "deterministic"
     },
     {
@@ -68,8 +68,8 @@
       "purpose": "Install metadata for the planemo CLI invoked by the convergence loop.",
       "trigger": "Always — the cast skill needs planemo on PATH before running lint/test.",
       "verification": "Cast and confirm the bundle's _required_tools.json carries the pinned planemo install command.",
-      "src_hash": "12e8cac3ffb4ab7f007ced7a8d4f01e6b3785d06a55926496bbacc0a8f3fc5c5",
-      "dst_hash": "12e8cac3ffb4ab7f007ced7a8d4f01e6b3785d06a55926496bbacc0a8f3fc5c5",
+      "src_hash": "7a149ff6f1cc396dd72bbdd7d0b93acecb12e1b86663c6119d4c0815b411fe94",
+      "dst_hash": "7a149ff6f1cc396dd72bbdd7d0b93acecb12e1b86663c6119d4c0815b411fe94",
       "source": "deterministic"
     },
     {

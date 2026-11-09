@@ -170,7 +170,7 @@ is local draft-PR readiness, **not** merge approval or deployment permission.
 - Require explicit `<tests><test>` blocks, then check hash-bound human licensing
   and upstream-case coverage attestations described below. Macro-expanded test
   inventories are currently unsupported and blocked, not awarded a pass.
-- Verify Planemo **0.75.47**, the version pinned by the published test-report
+- Verify Planemo **0.75.48**, the version pinned by the published test-report
   schema. Run `planemo lint --fail_level warn`,
   `planemo shed_lint --ensure_metadata --fail_level warn`, and `planemo test` on the
   execution copy. Parse a fresh report with the published schema and require all
