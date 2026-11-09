@@ -3,7 +3,7 @@ FROM ${NODE_IMAGE}
 
 ARG PI_VERSION=0.84.4
 ARG FOUNDRY_CLI_VERSION=0.1.0
-ARG PLANEMO_VERSION=0.75.47
+ARG PLANEMO_VERSION=0.75.48
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends bash ca-certificates git python3 python3-venv ripgrep \

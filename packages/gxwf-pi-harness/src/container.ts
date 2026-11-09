@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { VERSION as PI_VERSION } from "@earendil-works/pi-coding-agent";
 
 export const FOUNDRY_CLI_VERSION = "0.1.0";
-export const PLANEMO_VERSION = "0.75.47";
+export const PLANEMO_VERSION = "0.75.48";
 export const DEFAULT_CONTAINER_IMAGE = `galaxy-foundry/gxwf-pi-harness:pi-${PI_VERSION}-foundry-${FOUNDRY_CLI_VERSION}-planemo-${PLANEMO_VERSION}`;
 export const CONTAINER_PI_VERSION_LABEL = "org.galaxyproject.foundry.pi-version";
 export const CONTAINER_FOUNDRY_VERSION_LABEL = "org.galaxyproject.foundry.cli-version";
