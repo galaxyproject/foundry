@@ -1,0 +1,86 @@
+class: GalaxyWorkflowDraft
+id: rnaseq_alignment
+label: RNA-seq alignment against a history genome
+doc: Align paired and single-end reads with STAR against a genome supplied in the history.
+inputs:
+  - id: reads_paired
+    label: Paired reads
+    type: collection
+    collection_type: list:paired
+    format:
+      - fastqsanger.gz
+  - id: reads_single
+    label: Single-end reads
+    type: collection
+    collection_type: list
+    format:
+      - fastqsanger.gz
+  - id: genome
+    label: Genome FASTA
+    type: data
+    format:
+      - fasta
+outputs:
+  - id: bam_paired
+    label: Paired alignments
+    outputSource: star_paired/mapped_reads
+  - id: bam_single
+    label: Single-end alignments
+    outputSource: star_single/mapped_reads
+steps:
+  star_paired:
+    id: star_paired
+    label: STAR paired-end
+    type: tool
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/2.7.11b+galaxy0
+    tool_version: 2.7.11b+galaxy0
+    tool_shed_repository:
+      name: rgrnastar
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+      changeset_revision: de21b616f03a
+    in:
+      - id: singlePaired|input
+        source: reads_paired
+      - id: refGenomeSource|genomeFastaFiles
+        source: genome
+    out:
+      - id: mapped_reads
+    state:
+      singlePaired:
+        sPaired: paired_collection
+      refGenomeSource:
+        geneSource: history
+        genomeSAindexNbases: 14
+        GTFconditional:
+          GTFselect: without-gtf
+        diploidconditional:
+          diploid: 'No'
+  star_single:
+    id: star_single
+    label: STAR single-end
+    type: tool
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/2.7.11b+galaxy0
+    tool_version: 2.7.11b+galaxy0
+    tool_shed_repository:
+      name: rgrnastar
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+      changeset_revision: de21b616f03a
+    in:
+      - id: singlePaired|input1
+        source: reads_single
+      - id: refGenomeSource|genomeFastaFiles
+        source: genome
+    out:
+      - id: mapped_reads
+    state:
+      singlePaired:
+        sPaired: single
+      refGenomeSource:
+        geneSource: history
+        genomeSAindexNbases: 14
+        GTFconditional:
+          GTFselect: without-gtf
+        diploidconditional:
+          diploid: 'No'

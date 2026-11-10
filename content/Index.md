@@ -59,7 +59,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan. *(reviewed)*
 - [[nextflow-to-test-data]] — Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. *(reviewed)*
 - [[paper-to-test-data]] — Resolve the test data a paper names into refs for each workflow input.
-- [[repair-galaxy-draft-topology]] — Re-wire a Galaxy draft region when a step's declared output can't be computed from its wired inputs.
+- [[repair-galaxy-draft-topology]] — Make the smallest structural edit that closes an open blocking entry in a settled Galaxy draft.
 - [[report-foundry-run-feedback]] — Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts.
 - [[review-galaxy-workflow]] — Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. *(reviewed)*
@@ -250,7 +250,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.
 - [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
 - [[markdown-document-contract]] — Declarative Markdown section schemas and a shared parser for Foundry build checks and runtime artifact validation.
-- [[nextflow-conditional-to-galaxy-subworkflow-when]] — Stub. Translate Nextflow conditionals into Galaxy `when:` (single-workflow v1). Subworkflow vs inline is an aesthetic call, not a rule.
+- [[nextflow-conditional-to-galaxy-subworkflow-when]] — Stub. Translate Nextflow conditionals into Galaxy `when:` (single workflow). Subworkflow vs inline is an aesthetic call, not a rule.
 - [[nextflow-snapshot-to-galaxy-assertions]] — Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape.
 - [[nextflow-operators-to-galaxy-collection-recipes]] — Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.
 - [[nextflow-params-to-galaxy-inputs]] — Rules for translating Nextflow params, sample sheets, channels, and control flags into gxformat2 inputs.

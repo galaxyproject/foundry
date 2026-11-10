@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "b14eef623c16859a525a138e7fd4beddbb5cf8568ab9f4c1cdb9b12fc7803a44",
-    "commit": "9678dfba7293f01d34bb755adbb6dbfa7913dea0"
+    "commit": "a0c22945ae22d9922d298437c15c49636f33e17b"
   },
-  "cast_at": "2026-10-28T17:07:15.083Z",
+  "cast_at": "2026-11-06T22:58:17.464Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -196,8 +196,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "6e4e89785e1607af7debb8444ff05fc2a0a6128223627df326af5fdb2134e78a",
-      "dst_hash": "6e4e89785e1607af7debb8444ff05fc2a0a6128223627df326af5fdb2134e78a",
+      "src_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
+      "dst_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
       "source": "deterministic"
     },
     {
@@ -227,8 +227,8 @@
       "purpose": "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and placeholder wiring.",
       "license": "MIT",
       "license_file": "LICENSES/galaxy-tool-util-ts.LICENSE",
-      "src_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
-      "dst_hash": "1a7a1723870d1e44c7c52dbb28a6ef91e4cc81989a8d4600db2c97e36859910c",
+      "src_hash": "47a3b94dc15bb954f9193e888522b7aaff80143f2486531a21146fa4daaa54d4",
+      "dst_hash": "47a3b94dc15bb954f9193e888522b7aaff80143f2486531a21146fa4daaa54d4",
       "source": "deterministic",
       "license_file_hash": "383450c494c01c466bcf22df102540a39ac89da50563fd7be686ba06772f96b3"
     },
@@ -261,8 +261,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
-      "dst_hash": "6077adfc863090e314390e71a8ec69be7fcc57213f027883a57dedcadd967f35",
+      "src_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
+      "dst_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
       "source": "deterministic"
     },
     {

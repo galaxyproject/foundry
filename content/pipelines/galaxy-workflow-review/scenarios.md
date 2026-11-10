@@ -66,9 +66,6 @@ Nothing below has been walked. These are claims to test, not observations.
    harvested from a real run. The issue's own task — exercise this on at least one
    real IWC or IWC-Lab pull request — is the next move, and the two harness-gate
    cases above can only be walked there.
-2. **The policy pin is proposed, not accepted.** galaxyproject/iwc#1366 is still
-   open, so the vendored review command is a proposed revision. See
-   [[workflow-pr-review-command]] §Provenance and acceptance status.
-3. **`galaxy-workflow-pr-context` has no producer.** Pull-request context is
+2. **`galaxy-workflow-pr-context` has no producer.** Pull-request context is
    harness-supplied with no Mold behind it, so the two gate cases are checked by
    this oracle rather than by the artifact graph.

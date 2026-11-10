@@ -48,7 +48,7 @@ The harness owns the interaction style (interactive session, saved transcript, o
 
 Emit Markdown: an ordered list of edit intents. Each entry carries:
 
-- **kind** — one of: `add-step`, `replace-tool`, `remove-step`, `change-parameter`, `add-input`, `remove-input`, `add-output` / `expose-output`, `rewire`, `relabel` / `annotate`.
+- **kind** — one of: `add-step`, `replace-tool`, `remove-step`, `change-parameter`, `add-input`, `remove-input`, `add-output` / `expose-output`, `remove-output`, `rewire`, `relabel` / `annotate`.
 - **anchor** — the existing step label, input label, output name, or `tool_state` key the edit targets, quoted from the summary; or `new` for an added element.
 - **intent** — what the user wants, in their words plus the concrete target value where they gave one (e.g. a parameter's new value).
 - **acceptance** — how a reviewer or a test would confirm the edit landed (a new output is present, a parameter reads the new value, a step feeds its intended consumer).

@@ -17,6 +17,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   expectedArtifactsFromSkill,
+  PLANEMO_VERSION,
   runPiSkill,
   sha256Path,
   type PiRunnerDependencies,
@@ -523,7 +524,7 @@ describe("runPiSkill", () => {
             repo_digests: ["example/foundry-pi@sha256:resolved"],
             pi_version: "0.84.4",
             foundry_cli_version: "0.1.0",
-            planemo_version: "0.75.47",
+            planemo_version: PLANEMO_VERSION,
           }),
         },
       );

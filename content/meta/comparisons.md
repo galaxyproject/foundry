@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-05-15
-revised: 2026-07-30
-revision: 5
+revised: 2026-11-05
+revision: 6
 summary: "Where the Foundry sits versus wikis, skill bundles, and the KB-to-skill landscape (MCP, Agent Skills, llms.txt, Corpus2Skill, RAG) \u2014 a dated snapshot."
 ---
 
@@ -18,7 +18,8 @@ the Mold sibling files use, where `index.md` stays stable and the append-only
 `refinements/` journal accretes.
 
 - **Part A — Positioning.** Contrasts against the Foundry's *own* architecture.
-  Stable: these do not move when an external project ships a new spec.
+  Stable: these do not move when an external project ships a new spec. A
+  contrast that cites a study or a current gap dates it.
 - **Part B — Landscape snapshot.** Where the field is on connecting knowledge
   bases to agent skills. Volatile and explicitly dated. This domain moves fast;
   Part B is a point-in-time reading, refreshed on demand as a dated sweep, not
@@ -61,6 +62,37 @@ Molds; their *form* does not. Decomposition into Molds, schema-driven validation
 in the inner loop, casting as the integration boundary, and `gxwf` as the source
 of truth for `gxformat2` correctness are the specific responses to specific
 failure modes in those skills.
+
+### Versus one detailed prompt to a coding agent
+
+A detailed prompt hands a coding agent the whole specification and asks for the
+finished pipeline. One pass can produce a plausible repository, but the
+specification stays prose. No artifact records which requirement each part of
+the code satisfies, so a requirement can disappear without leaving a visible
+hole.
+
+[Munn and Grenier's preprint](https://doi.org/10.64898/2026.09.11.751004)
+(bioRxiv, posted 2026-09-17, not peer reviewed) shows this failure on one
+Nextflow CUT&Tag pipeline. Biomni, Claude Code, and Codex each needed debugging,
+and none produced the merged-group reports the prompt requested, even though all
+three merged by group. Across the three agents, neither documentation quality
+nor report breadth tracked agreement with the authors' reference. The authors
+call the main failure "semantic drift between the prompt, the code, and the
+report." The study reports no agent versions or repeat runs, and its prompt told
+the agents not to run the pipeline automatically, so it cannot separate the
+limits of one prompt from the missing feedback of a run. Its proposed
+remedies—data contracts, staged tests, and reusable skills—remain untested.
+
+The Foundry replaces the single prompt with Pipelines of Molds that exchange
+named artifacts. A Galaxy construction Pipeline records the intended wiring in a
+reviewable data-flow brief, directs an agent to validate with `gxwf` at each
+draft step, and runs `planemo test` on the result. As of 2026-11, that does not
+close the study's central failure. No check compares the finished workflow with
+the data-flow brief, and no artifact maps each acceptance criterion to its
+evidence, so an output wired to the wrong but type-compatible input can pass
+validation and a test unless an assertion tells the two apart. No comparable
+benchmark has been run against the Foundry, so this section contrasts designs,
+not measured outcomes.
 
 ---
 
@@ -206,7 +238,7 @@ detectable. None of the individual ideas here are new; the combination — typed
 references, per-kind casting, content-hash identity, provenance as audit
 substrate, corpus-first authoring — is the Foundry's bet.
 
-This doc tracks one axis only — *when the KB meets the skill*. The adjacent
+Part B tracks one axis only — *when the KB meets the skill*. The adjacent
 question of *which harness runs the casts* (Archon, Claude Code dynamic
 workflows, LangGraph, …) is deliberately out of scope here and evaluated under
 `content/research/component-*/` instead.
@@ -215,8 +247,8 @@ workflows, LangGraph, …) is deliberately out of scope here and evaluated under
 
 ## Refresh log
 
-Append-only. One line per dated sweep of Part B. Mirrors the Mold
-`refinements/<date>-<slug>.md` journal convention.
+Append-only. One entry per dated sweep of Part B or single-candidate assessment.
+Mirrors the Mold `refinements/<date>-<slug>.md` journal convention.
 
 - 2026-05 — Initial Part B from a KB→skills landscape survey (8 entries).
   Corpus2Skill (arXiv 2604.14572) confirmed against arXiv; Custom GPTs citation
@@ -225,3 +257,8 @@ Append-only. One line per dated sweep of Part B. Mirrors the Mold
   early access, vendor benchmarks unverified). Assessed and rejected — genio.co
   (off-topic EdTech, no KB→skill stance) and Glean (enterprise knowledge-graph +
   runtime retrieval; subsumed by RAG-as-knowledge-base).
+- 2026-11 — Single-paper assessment, not a full sweep. Munn and Grenier's
+  preprint evaluates prompt-driven construction and has no KB-to-skill design,
+  so Part A cites it and Part B does not list it. ClawBio, which the preprint
+  names as a versioned bioinformatics skill library, is an unassessed candidate
+  for the next sweep.
