@@ -865,6 +865,41 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
       expect(data.reference_rebuilds).toEqual([]);
     },
   );
+
+  itIfRnaseqFixture("resolves publishDir, ext.args, and template bodies", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    expect(validateSummary(data).valid).toBe(true);
+
+    const featureCounts = data.processes.find(
+      (process: { name: string }) => process.name === "SUBREAD_FEATURECOUNTS",
+    );
+    expect(featureCounts.publish_dir).toContain("featurecounts");
+    expect(
+      featureCounts.resolved_args.some(
+        (arg: { key: string; expression: string; config: string }) =>
+          arg.key === "args" &&
+          arg.expression.includes("'-B -C'") &&
+          arg.config.endsWith("modules/nf-core/subread/featurecounts/nextflow.config"),
+      ),
+    ).toBe(true);
+
+    const dupradar = data.processes.find(
+      (process: { name: string }) => process.name === "DUPRADAR",
+    );
+    expect(dupradar.script_excerpt.trim()).toBe("template 'dupradar.r'");
+    expect(dupradar.template).toEqual(
+      expect.objectContaining({
+        path: "modules/nf-core/dupradar/templates/dupradar.r",
+        line_count: 187,
+      }),
+    );
+    expect(dupradar.template.body).toContain("dupRadar");
+  });
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () => {
