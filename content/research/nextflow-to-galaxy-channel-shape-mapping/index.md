@@ -120,11 +120,12 @@ Galaxy runs one job per element and pairs the two collections by position, not b
 | Text tool parameter | Galaxy's `lib/galaxy_test/workflow/map_over_expression.gxwf.yml` and its `-tests.yml`: per-element values `A` and `B` reach a text input | Verified |
 | Per-element `when` (boolean) | Galaxy's `lib/galaxy_test/api/test_workflows.py::test_run_workflow_conditional_step_map_over_expression_tool`: one of two elements is skipped | Verified |
 | Parameter inside a tool conditional's case | IWC `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun`: mapped "convert min nb of reads to parameter" feeds `samtools_view`'s `mode\|subsample_config\|subsampling_mode\|target`, with values identical across elements | Wiring only |
-| Float or boolean tool parameter | None | Not tested |
-| `select` parameter | None | Not tested |
+| `select` tool parameter | The same fixture's `per-element-select-boolean` workflow: text values `C` and `D` choose `Cut1`'s `delimiter` per element | Verified |
+| Boolean tool parameter | The same workflow: `true` and `false` set `wc_gnu`'s `include_header` per element | Verified |
+| Float tool parameter | None | Not tested |
 | A tool conditional's test parameter | [#661](https://github.com/galaxyproject/foundry/issues/661) reports a Galaxy 500 when one is connected. [#667](https://github.com/galaxyproject/foundry/issues/667) reports a workflow connecting one that runs on usegalaxy.org | Open |
 
-Use this route for every target except the Open row, and cover a Wiring only or Not tested target with a workflow test whose elements carry different values. rnaseq's strandedness reaches two such targets: featureCounts' `strand_specificity` is a `select`, and Salmon's `--libType` (`quant_type|libtype|strandedness`) is a conditional's test parameter.
+Use this route for every target except the Open row, and cover a Wiring only or Not tested target with a workflow test whose elements carry different values. rnaseq's strandedness reaches both kinds of target. featureCounts' `strand_specificity` is a `select` and takes this route. Salmon's `--libType` is `strandedness`, the test parameter of its `libtype` conditional, and takes the fallback.
 
 For a conditional's test parameter, or when a workflow test of this route fails, fall back in this order:
 

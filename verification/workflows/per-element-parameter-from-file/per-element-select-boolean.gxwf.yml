@@ -1,0 +1,81 @@
+class: GalaxyWorkflow
+label: "Per-element select and boolean tool parameters"
+inputs:
+  - id: rows
+    type: collection
+    collection_type: list
+  - id: per_element_delimiter
+    type: collection
+    collection_type: list
+  - id: per_element_header
+    type: collection
+    collection_type: list
+outputs:
+  - id: cut_columns
+    outputSource: cut/out_file1
+  - id: line_counts
+    outputSource: count/out_file1
+steps:
+  - id: read_delimiter
+    label: read_delimiter
+    tool_id: param_value_from_file
+    tool_version: 0.1.0
+    in:
+      - id: input1
+        source: per_element_delimiter
+    out:
+      - id: text_param
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      param_type: text
+      remove_newlines: true
+  - id: cut
+    label: cut
+    tool_id: Cut1
+    tool_version: 1.0.2
+    in:
+      - id: input
+        source: rows
+      - id: delimiter
+        source: read_delimiter/text_param
+    out:
+      - id: out_file1
+    tool_state:
+      columnList: c2
+      delimiter:
+        __class__: ConnectedValue
+      input:
+        __class__: ConnectedValue
+  - id: read_header
+    label: read_header
+    tool_id: param_value_from_file
+    tool_version: 0.1.0
+    in:
+      - id: input1
+        source: per_element_header
+    out:
+      - id: boolean_param
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      param_type: boolean
+      remove_newlines: true
+  - id: count
+    label: count
+    tool_id: wc_gnu
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: rows
+      - id: include_header
+        source: read_header/boolean_param
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      options:
+        - lines
+      include_header:
+        __class__: ConnectedValue
