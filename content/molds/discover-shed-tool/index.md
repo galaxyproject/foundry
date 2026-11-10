@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 5
+revised: 2026-11-10
+revision: 6
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 output_artifacts:
   - id: galaxy-tool-pin
@@ -65,13 +65,13 @@ references:
 
 Discover whether the Galaxy Tool Shed already publishes a wrapper for the tool a workflow step needs, and resolve the discovery to a `(owner, repo, tool_id, version, changeset_revision)` quintuple that downstream steps can pin and cache.
 
-This Mold is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the cast skill recommends a pin and exits successfully. On a miss (or a low-quality hit), it falls through to [[author-galaxy-tool-wrapper]]. The branch itself is harness logic; this Mold owns only the discovery half.
+This Mold is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the cast skill recommends a pin and exits successfully. On a miss, it falls through to [[author-galaxy-tool-wrapper]]; a `weak` hit is confirmed, not authored around. The branch itself is harness logic; this Mold owns only the discovery half.
 
 ## Inputs
 
 The Mold expects, per step:
 
-- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences).
+- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences). Name the source executable when there is one: a search for the operation alone can miss its wrapper.
 - Optional **owner hint** (e.g. `devteam`, `iuc`) when the caller has a strong prior.
 - Optional **exact-name hint** when the caller knows the canonical XML id.
 
@@ -103,8 +103,10 @@ A structured recommendation object, JSON-shaped:
 
 `status` semantics:
 - `hit` — recommend pinning. Caller should cache and proceed.
-- `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller should confirm or fall through.
-- `miss` — no usable hit. Caller falls through to [[author-galaxy-tool-wrapper]].
+- `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller confirms the candidate, then summarizes it. A `weak` result never falls through to authoring.
+- `miss` — no wrapper runs the executable or operation the need names. Caller falls through to [[author-galaxy-tool-wrapper]].
+
+Classify on whether a wrapper runs what the need names, not on whether it fits the step. Fit depends on the step's ports and consumers, which discovery doesn't see. [[implement-galaxy-tool-step]] checks fit after [[summarize-galaxy-tool]] and records a misfit in the ledger. So a wrapper that runs the named executable is a `hit` or `weak`, never a `miss`, even when the rationale doubts its fit.
 
 ## Procedure
 
@@ -157,7 +159,7 @@ Prefer `--latest` so the newest changeset publishing that version wins (tool ver
 Combine the scored hit and the resolved pin into the recommendation object above:
 - One dominant hit + clean version+changeset resolution → `hit`.
 - Multiple plausible hits, ambiguous owner, deprecated suspicion, or only-help-text match → `weak` with the leading candidate plus alternates.
-- No usable hit → `miss`.
+- No wrapper runs what the need names → `miss`.
 
 Validate the recommendation with `validate-galaxy-tool-discovery` before returning it. Do not rely on prose-only shape checks; downstream phases branch on this contract.
 

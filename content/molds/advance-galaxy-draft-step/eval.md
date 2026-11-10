@@ -107,22 +107,24 @@ Properties are tagged by bucket:
   `galaxy-workflow.gxwf.yml` (`class: GalaxyWorkflow`, no `_plan_*`) before
   returning, without a further invocation.
 
-## Property: no acceptable shed candidate falls through to authoring
+## Property: only a miss falls through to authoring
 
 - bucket: routing
 - check: llm-judged
-- assertion: when the chosen step's `_plan_*` describes behavior with no
-  acceptable Tool Shed candidate, [[discover-shed-tool]] returns no match and the
-  skill falls through to [[author-galaxy-tool-wrapper]] rather than guessing a
-  wrapper.
+- assertion: the skill invokes [[author-galaxy-tool-wrapper]] only when
+  [[discover-shed-tool]] returns `miss`, and then rather than guessing a
+  wrapper. A `weak` candidate is confirmed and summarized. A found wrapper that
+  can't serve the step reaches [[repair-galaxy-draft-topology]] through a
+  blocking entry naming it. Authoring in either case is a failure.
 
 ## Property: only recorded evidence skips wrapper resolution
 
 - bucket: routing
 - check: llm-judged
 - assertion: an `open` blocking entry against the picked step that records the
-  wrapper as confirmed absent, the author branch as ruled out, or why the wired
-  inputs can't supply the step goes straight to [[repair-galaxy-draft-topology]]
+  wrapper as confirmed absent, the author branch as ruled out, a found wrapper
+  that can't serve the step, or why the wired inputs can't supply the step goes
+  straight to [[repair-galaxy-draft-topology]]
   with no new search. An entry holding only Tool Shed misses or a tool version
   missing from a cache goes through wrapper resolution first.
 

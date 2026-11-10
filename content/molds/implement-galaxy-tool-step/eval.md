@@ -12,6 +12,11 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 - check: llm-judged
 - assertion: records whether a later failure should be investigated as tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue.
 
+## Property: a wrapper's limit becomes a blocking entry, not a workaround
+
+- check: llm-judged
+- assertion: when the chosen wrapper runs the step's work but can't produce a declared output or take the step's collection shape, and no inserted collection step closes it, the Mold appends an open blocking entry with `step` set, whose `missing` names the wrapper and version and quotes the summary's ports or option. It binds no port that doesn't carry the output. Fabricating the output, or asking for a replacement wrapper, is a failure.
+
 ## Property: a Tool Shed step names its tool by full versioned id
 
 - check: deterministic

@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-11-06
-revision: 13
+revised: 2026-11-10
+revision: 14
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool."
 input_artifacts:
   - id: galaxy-tool-summary
@@ -46,7 +46,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs — the fall-through to topology repair, in place of fabricating the missing evidence."
+    purpose: "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs or the chosen wrapper can't produce it — the fall-through to topology repair, in place of fabricating the output or authoring around a wrapper that exists."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -164,6 +164,8 @@ Single step in scope. This Mold owns the chosen step and the wiring that connect
 
 ## Failure ownership
 
-When the wrapper can't cleanly carry what the plan needs — wrong datatype, missing parameter, unsupported collection shape — record where a later failure should be investigated: tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue. Consult [[galaxy-tool-job-failure-reference]] when the selected wrapper has explicit failure semantics (exit-code rules, stdio regex, strict-shell, dynamic outputs); implement the step's labels and wiring so that evidence survives to runtime rather than being erased by the concretization.
+When the wrapper carries what the plan needs but a datatype, parameter or collection shape could still fail at runtime, record where a later failure should be investigated: tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue. Consult [[galaxy-tool-job-failure-reference]] when the selected wrapper has explicit failure semantics (exit-code rules, stdio regex, strict-shell, dynamic outputs); implement the step's labels and wiring so that evidence survives to runtime rather than being erased by the concretization.
 
 When the step's declared output cannot be computed from the inputs wired to it — the connection graph says the ports connect, but no wired input carries the evidence the output needs — do not fabricate it. Append a **blocking** entry to the [[open-requirements-ledger]] and fall through to [[repair-galaxy-draft-topology]] rather than emitting a step that validates but can't run. A missing Tool Shed wrapper is not this case; that gap routes through the discover-or-author branch.
+
+When the chosen wrapper runs the step's work but can't produce a declared output or take the step's collection shape, and no step 4 insert closes it, treat it the same way. Set `step` on the blocking entry, name the wrapper and version in `missing`, and quote the summary's ports or option that show the limit. Bind no port that doesn't carry the output, and don't ask for a replacement wrapper. A wrapper that doesn't run the step's work at all was the wrong pick: return to wrapper resolution instead.
