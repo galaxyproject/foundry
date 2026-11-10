@@ -3642,6 +3642,19 @@ function extractBlockAt(text: string, openIndex: number): string | null {
       continue;
     }
 
+    if (char === "/" && next === "/") {
+      while (index < text.length && text[index] !== "\n") index += 1;
+      continue;
+    }
+    if (char === "/" && next === "*") {
+      index += 2;
+      while (index < text.length && !(text[index] === "*" && text[index + 1] === "/")) {
+        index += 1;
+      }
+      if (text[index] === "*" && text[index + 1] === "/") index += 1;
+      continue;
+    }
+
     if ((char === "'" || char === '"') && next === char && nextTwo === char) {
       quote = char === "'" ? "'''" : '"""';
       index += 2;

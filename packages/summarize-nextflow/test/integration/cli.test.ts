@@ -911,6 +911,20 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
     expect(names).toHaveLength(11);
   });
 
+  itIfRnaseqFixture("keeps RNASEQ in the workflow list", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const names = [
+      data.workflow.name as string,
+      ...(data.subworkflows as { name: string }[]).map((workflow) => workflow.name),
+    ];
+    expect(names).toContain("RNASEQ");
+  });
+
   itIfRnaseqFixture(
     "emits no reference_rebuilds[] for RNA-seq (positive-form idiom is a known gap)",
     () => {
@@ -1164,7 +1178,7 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/sarek)", () => 
         expect(assetParams).toContain(expected);
       }
       expect(assetParams).not.toContain("pipelines_testdata_base_path");
-      expect(assetParams).toHaveLength(48);
+      expect(assetParams).toHaveLength(56);
       const fasta = (data.reference_assets as { param: string; used_by: string[] }[]).find(
         (a) => a.param === "fasta",
       );

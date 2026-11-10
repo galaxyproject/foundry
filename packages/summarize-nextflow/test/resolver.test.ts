@@ -882,6 +882,47 @@ profiles {
     expect(summary.workflow.name).toBe("ANALYSIS");
   });
 
+  test("closes a workflow when a comment has an apostrophe and a string contains a brace", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/comment-brace' }\n");
+    write(
+      root,
+      "modules/hello.nf",
+      `process HELLO {
+  script:
+  'echo'
+}
+`,
+    );
+    write(
+      root,
+      "workflows/sample.nf",
+      `include { HELLO } from '../modules/hello'
+workflow SAMPLE {
+  take:
+  ch_reads // sample's files
+  main:
+  def note = "brace } and https://example.com"
+  /* sample's } */
+  HELLO(ch_reads)
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { SAMPLE } from './workflows/sample'\nworkflow PIPE { SAMPLE() }\n",
+    );
+
+    const summary = (await summarize(root)) as SummaryLike & {
+      workflow: { name: string; edges: { to: string }[] };
+    };
+    expect(summary.workflow.name).toBe("SAMPLE");
+    expect(summary.workflow.edges).toEqual(
+      expect.arrayContaining([expect.objectContaining({ to: "HELLO" })]),
+    );
+  });
+
   test("ignores commented declarations and preserves aliased subworkflow calls", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'ncbi/egapx-shape' }\n");
