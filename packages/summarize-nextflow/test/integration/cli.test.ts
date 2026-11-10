@@ -1040,9 +1040,15 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     expect(inputs.map((input) => input.role)).toEqual(
       expect.arrayContaining(["samplesheet", "reference_fasta", "reference_gff", "reads"]),
     );
-    expect(inputs.every((input) => input.path.startsWith(dataDir))).toBe(true);
-    expect(inputs.every((input) => existsSync(input.path))).toBe(true);
-    expect(inputs.every((input) => /^[a-f0-9]{40}$/u.test(input.sha1))).toBe(true);
+    const remote = inputs.filter((input) => input.url);
+    const local = inputs.filter((input) => !input.url);
+    expect(remote.every((input) => input.path.startsWith(dataDir))).toBe(true);
+    expect(remote.every((input) => existsSync(input.path))).toBe(true);
+    expect(remote.every((input) => /^[a-f0-9]{40}$/u.test(input.sha1))).toBe(true);
+    expect(local).toEqual([
+      expect.objectContaining({ role: "dfast_config", path: "assets/test_config_dfast.py" }),
+    ]);
+    expect(local.every((input) => existsSync(join(BACASS_PIPELINE, input.path)))).toBe(true);
     expect(inputs.find((input) => input.role === "samplesheet")?.url).toBe(
       "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/bacass/bacass_short.tsv",
     );
