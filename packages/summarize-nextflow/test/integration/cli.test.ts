@@ -49,8 +49,12 @@ const SPAWN_MAX_BUFFER = 64 * 1024 * 1024;
  * blocks the event loop, so under 3 the timer could not fire and these ran as long as they liked;
  * one has been taking ~12-16s against the default 5s budget and reporting success. It now reports
  * "Test timed out in 5000ms" AFTER running to completion, which is the same test, told truthfully.
+ *
+ * Bacass `--fetch-test-data` then downloads four ~55MB FASTQ files sequentially, about two
+ * minutes at 2.5MB/s, plus the samplesheet and references. A 120s cap kills that download
+ * while it is still running, and spawnSync reports `status: null`.
  */
-const NETWORK_SPAWN_TIMEOUT_MS = 120_000;
+const NETWORK_SPAWN_TIMEOUT_MS = 300_000;
 const NETWORK_TEST_TIMEOUT_MS = NETWORK_SPAWN_TIMEOUT_MS + 30_000;
 const DEMO_SUMMARY = resolve(
   FOUNDRY_ROOT,
