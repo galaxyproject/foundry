@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 6,
     "content_hash": "6750f1a3b845f099552ed5b3eb5255436c0462b9a97553f3c682e2130086928e",
-    "commit": "a0c22945ae22d9922d298437c15c49636f33e17b"
+    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
   },
-  "cast_at": "2026-11-06T22:58:18.008Z",
+  "cast_at": "2026-11-10T10:05:12.848Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -186,8 +186,8 @@
       "evidence": "hypothesis",
       "purpose": "Scope the repair from the open blocking entries — each names the step and what's missing — then mark resolved each one repaired, and leave any it cannot close open with a note.",
       "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
-      "src_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
-      "dst_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
+      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
       "source": "deterministic"
     },
     {

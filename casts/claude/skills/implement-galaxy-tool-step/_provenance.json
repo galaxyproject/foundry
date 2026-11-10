@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 13,
-    "content_hash": "0f83537e2349235bf9099a8b6a5ee134e006cdf822f2d260f5caa4b96ad4b17a",
-    "commit": "a0c22945ae22d9922d298437c15c49636f33e17b"
+    "revision": 14,
+    "content_hash": "12839295b7860460a00349e144903284d4d2f744f791735eeadc7137dc6c89ae",
+    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
   },
-  "cast_at": "2026-11-06T22:58:17.710Z",
+  "cast_at": "2026-11-10T10:05:12.593Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -215,10 +215,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs — the fall-through to topology repair, in place of fabricating the missing evidence.",
+      "purpose": "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs or the chosen wrapper can't produce it — the fall-through to topology repair, in place of fabricating the output or authoring around a wrapper that exists.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
-      "dst_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
+      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
       "source": "deterministic"
     },
     {

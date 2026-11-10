@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-11-06
-revision: 6
+revised: 2026-11-10
+revision: 7
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
@@ -86,7 +86,7 @@ finding the run may reason from afterwards. It is a debt, and it should read as 
 
 Provenance (`raised_by`, `resolved_by`) is the audit trail for *when* each obligation entered and left — the traceability #281 asked for, and the evidence the convergence gate reads.
 
-`blocking` separates the two grades of obligation the pipeline carries. A plain entry is an unmet need the chain can keep working around — an unpinned parameter, a missing exemplar. A **blocking** entry means the settled draft can't give a correct run and a structural edit closes it. The common case is a computability gap: a declared step output no wired input can supply, which `gxwf` validation cannot see because the connection graph knows ports connect, not what they carry. Others are a wrapper confirmed absent, a step another tool subsumes, a value that must vary per run, and a validation failure on an edge an earlier step settled. Omit `blocking` (or set it `false`) for a plain obligation. Only blocking entries drive topology-repair escalation, and only they are counted by the decreasing-blocker invariant.
+`blocking` separates the two grades of obligation the pipeline carries. A plain entry is an unmet need the chain can keep working around — an unpinned parameter, a missing exemplar. A **blocking** entry means the settled draft can't give a correct run and a structural edit closes it. The common case is a computability gap: a declared step output no wired input can supply, which `gxwf` validation cannot see because the connection graph knows ports connect, not what they carry. Others are a wrapper confirmed absent, a chosen wrapper that can't produce a declared output, a step another tool subsumes, a value that must vary per run, and a validation failure on an edge an earlier step settled. Omit `blocking` (or set it `false`) for a plain obligation. Only blocking entries drive topology-repair escalation, and only they are counted by the decreasing-blocker invariant.
 
 ## Workflow-run knowledge beside obligations
 
@@ -185,7 +185,7 @@ claiming a settled reason it no longer has.
 
 In the Galaxy per-step loop, the ledger is the substrate the topology-repair escalation rides on (see [[galaxy-workflow-draft-format]] and [[repair-galaxy-draft-topology]]):
 
-- **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs. Rather than fabricate, it appends a blocking entry and falls through to repair. Earlier Molds and the loop raise blocking entries too.
+- **[[implement-galaxy-tool-step]]** detects, mid-implementation, that a declared step output cannot be computed from its wired inputs, or that the chosen wrapper can't produce it. Rather than fabricate or author around the wrapper, it appends a blocking entry and falls through to repair. Earlier Molds and the loop raise blocking entries too.
 - **[[repair-galaxy-draft-topology]]** reads the open blocking entries, makes the structural edits that close them (template-tier authoring), and marks each entry it closes `resolved`; the existing discover-or-author → implement machinery then realizes any new steps.
 - Once no drafty step is left, [[advance-galaxy-draft-step]] sends any open blocking entry to repair before extracting.
 - The loop's **decreasing-blocker invariant** counts open blocking entries: each repair must leave fewer than it found, under a hard cap on escalations. When the cap is hit with entries still open, those entries are **surrendered** into the final draft — the clean terminal that replaces spin-or-fabricate.

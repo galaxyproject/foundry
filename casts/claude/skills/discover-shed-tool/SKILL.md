@@ -39,20 +39,20 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Before starting, check that the installed validator carries the galaxy-tool-discovery schema this bundle was cast with: run `foundry validate-galaxy-tool-discovery --schema-sha256 c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
-- Validate `galaxy-tool-pin.json` before returning it: run `foundry validate-galaxy-tool-discovery --schema-sha256 c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c galaxy-tool-pin.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-discovery --schema-sha256 c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
+- Before starting, check that the installed validator carries the galaxy-tool-discovery schema this bundle was cast with: run `foundry validate-galaxy-tool-discovery --schema-sha256 0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `galaxy-tool-pin.json` before returning it: run `foundry validate-galaxy-tool-discovery --schema-sha256 0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee galaxy-tool-pin.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-discovery --schema-sha256 0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
 
 ## Procedure
 
 Discover whether the Galaxy Tool Shed already publishes a wrapper for the tool a workflow step needs, and resolve the discovery to a `(owner, repo, tool_id, version, changeset_revision)` quintuple that downstream steps can pin and cache.
 
-This skill is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the skill recommends a pin and exits successfully. On a miss (or a low-quality hit), it falls through to author-galaxy-tool-wrapper. The branch itself is harness logic; this skill owns only the discovery half.
+This skill is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the skill recommends a pin and exits successfully. On a miss, it falls through to author-galaxy-tool-wrapper; a `weak` hit is confirmed, not authored around. The branch itself is harness logic; this skill owns only the discovery half.
 
 ### Inputs
 
 The skill expects, per step:
 
-- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences).
+- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences). Name the source executable when there is one: a search for the operation alone can miss its wrapper.
 - Optional **owner hint** (e.g. `devteam`, `iuc`) when the caller has a strong prior.
 - Optional **exact-name hint** when the caller knows the canonical XML id.
 
@@ -84,8 +84,10 @@ A structured recommendation object, JSON-shaped:
 
 `status` semantics:
 - `hit` — recommend pinning. Caller should cache and proceed.
-- `weak` — candidate exists but the skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller should confirm or fall through.
-- `miss` — no usable hit. Caller falls through to author-galaxy-tool-wrapper.
+- `weak` — candidate exists but the skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller confirms the candidate, then summarizes it. A `weak` result never falls through to authoring.
+- `miss` — no wrapper runs the executable or operation the need names. Caller falls through to author-galaxy-tool-wrapper.
+
+Classify on whether a wrapper runs what the need names, not on whether it fits the step. Fit depends on the step's ports and consumers, which discovery doesn't see. implement-galaxy-tool-step checks fit after summarize-galaxy-tool and records a misfit in the ledger. So a wrapper that runs the named executable is a `hit` or `weak`, never a `miss`, even when the rationale doubts its fit.
 
 ### Procedure
 
@@ -138,7 +140,7 @@ Prefer `--latest` so the newest changeset publishing that version wins (tool ver
 Combine the scored hit and the resolved pin into the recommendation object above:
 - One dominant hit + clean version+changeset resolution → `hit`.
 - Multiple plausible hits, ambiguous owner, deprecated suspicion, or only-help-text match → `weak` with the leading candidate plus alternates.
-- No usable hit → `miss`.
+- No wrapper runs what the need names → `miss`.
 
 Validate the recommendation with `validate-galaxy-tool-discovery` before returning it. Do not rely on prose-only shape checks; downstream phases branch on this contract.
 
