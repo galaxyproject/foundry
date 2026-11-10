@@ -1,4 +1,4 @@
-- doc: "Each element's own computed integer parameterizes that element's mapped job"
+- doc: "Each element's own integer parameterizes that element's mapped job"
   job:
     reads:
       class: Collection
@@ -42,7 +42,7 @@
               n: 3
             - that: has_text
               text: b3
-- doc: "Elements pair by position: a value collection in another order gives each element its neighbour's value"
+- doc: "Elements pair by position: a value collection in another order gives each element the value at its position"
   job:
     reads:
       class: Collection

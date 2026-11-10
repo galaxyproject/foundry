@@ -15,7 +15,7 @@ Each workflow directory should contain:
 - One Planemo workflow test file.
 - `test-data/` with tiny inputs and expected baselines.
 
-Pattern pages link directly to the workflow test case through `verification_paths` frontmatter.
+Pattern pages link directly to the workflow test case through `verification_paths` frontmatter. Other notes cite the workflow directory in prose.
 
 ## Asserting collection outputs
 

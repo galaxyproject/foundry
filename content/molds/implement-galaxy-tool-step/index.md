@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-04-30
 revised: 2026-11-10
-revision: 14
+revision: 15
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool."
 input_artifacts:
   - id: galaxy-tool-summary
@@ -111,7 +111,7 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Check whether a concrete tool input/output can preserve the intended source-derived Galaxy collection shape."
-    trigger: "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs."
+    trigger: "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs, or when connecting a per-element computed value to a mapped step's tool parameter."
   - kind: research
     ref: "[[nextflow-operators-to-galaxy-collection-recipes]]"
     used_at: runtime

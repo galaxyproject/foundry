@@ -58,14 +58,14 @@ summary: "Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset
 
 # Nextflow-to-Galaxy Channel Shape Mapping
 
-This note maps source-level Nextflow channel shapes onto Galaxy data and dataset-collection shapes. Evidence quality is uneven: Galaxy collection semantics and IWC collection operations are well grounded; several Nextflow shapes are observed in the pinned fixtures; `fromFilePairs` and arbitrary deep tuple mapping remain low-confidence without direct fixture evidence.
+This note maps source-level Nextflow channel shapes onto Galaxy data and dataset-collection shapes. The Confidence column marks how well each row is grounded.
 
 ## Shape Mapping
 
 | Nextflow shape | Galaxy shape | Confidence | Notes |
 |---|---|---|---|
 | `path(x)` or a single `Channel.fromPath(...).first()` | `File` | High | One dataset input or output. |
-| `val(meta)` alone | No dataset shape | High | Treat as identifiers, labels, tags, sample-sheet metadata, or parameters. It is not a Galaxy dataset by itself. For a value computed per sample and read back as a parameter, see "Per-element parameters from `meta`" below. |
+| `val(meta)` alone | No dataset shape | High | Treat as identifiers, labels, tags, sample-sheet metadata, or parameters. It is not a Galaxy dataset by itself. For a value computed per sample and read by a later process as a tool argument, see "Per-element parameters from `meta`" below. |
 | Repeated `tuple val(meta), path(file)` | `list` | High | One dataset per sample/key. Galaxy maps tools over list collections. |
 | One `tuple(meta, [R1, R2])` | `paired` | High | Use only when the workflow input is one paired sample or one tool consumes one pair. |
 | Repeated `tuple(meta, [R1, R2])` | `list:paired` | High | Common paired-end workflow input shape. |
@@ -74,12 +74,12 @@ This note maps source-level Nextflow channel shapes onto Galaxy data and dataset
 | `tuple(meta, path(a), path(b))` | Parallel lists or per-step `File` inputs | Medium | Not automatically a `paired` collection. It is usually a keyed record of multiple tool inputs. |
 | Global file plus per-sample files | Broadcast `File` plus mapped `list` | Medium | If one input is global, connect it once and map the collection input. |
 | `collect()` or `toList()` | Collection reduction | High | Usually one downstream invocation over a collection or multiple-input value. |
-| `collectFile(...)` | `File` | High | Nextflow creates one new file; Galaxy should model a tool output, not a collection operation. |
+| `collectFile(...)` | `File` | High | Nextflow creates one new file. Galaxy should model a tool output, not a collection operation. |
 | `groupTuple()` by key | `list`, `list:paired`, or `list:list` | Medium | Depends on grouped payload and whether the grouping axis matters downstream. |
 | `transpose()` after grouping | Explicit reshape or subcollection mapping | Medium | May need flattening, Apply Rules, or identifier-preserving reshaping. |
 | `combine(..., by: key)` or `join(...)` | Multi-input collection map if identifiers match | Medium | Otherwise use explicit synchronization by identifiers/order. |
 | `branch { ... }` | Branch wiring or explicit filters | Medium | Shape is whatever each branch returns; per-element routing needs review. |
-| `mix(...)` | Merge compatible streams/collections | Medium | Use direct wiring for reports/versions; use `__MERGE_COLLECTION__` or `__BUILD_LIST__` when materialized. |
+| `mix(...)` | Merge compatible streams/collections | Medium | Use direct wiring for reports/versions, and `__MERGE_COLLECTION__` or `__BUILD_LIST__` when materialized. |
 | `multiMap { ... }` | Synchronized split into Galaxy inputs | Medium | Usually channel-only fan-out, but downstream rejoin depends on identifier discipline. |
 | `fromFilePairs` | `paired` or `list:paired` | Low | Conceptually clean, but not directly observed in the pinned fixtures. |
 | Arbitrary deep tuples | Parallel lists, `list:list`, or manual modeling | Low | Galaxy collection types are not arbitrary tuple records. Require per-tool review. |
@@ -102,33 +102,34 @@ Use explicit Galaxy collection-operation or tabular steps when the translation c
 
 ## Per-element parameters from `meta`
 
-nf-core pipelines often compute a value per sample, write it into `meta`, and read it as a parameter in that sample's later processes. nf-core/rnaseq's `strandedness: auto` path sets `meta.strandedness` this way. The rows above change the data. This route changes a tool parameter per element and leaves the data as it is.
+nf-core pipelines often compute a value per sample, write it into `meta`, and read it as a tool argument in that sample's later processes. In nf-core/rnaseq's `strandedness: auto` path, `subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf` returns `meta + [strandedness: ...]`, and later modules read `meta.strandedness`. The collection operations above reshape data. This route keeps the data as it is and varies a tool parameter per element.
 
-Keep the value as one dataset per element, in a collection with the same structure and order as the data collection. Map `param_value_from_file` over it, set `param_type` to match the target parameter, and connect the typed output (`integer_param`, `float_param`, `text_param` or `boolean_param`) to the downstream step that maps over the data collection:
+Carry the value as a one-value dataset per element, in a collection with the same structure and order as the data collection. Map `param_value_from_file` over it and choose `param_type` by the target: `integer` or `float` for a number, `boolean` for a boolean, `text` for text. Connect the matching output (`integer_param`, `float_param`, `boolean_param` or `text_param`) to the target parameter of the step that maps over the data collection:
 
 ```text
 per-element values (list) ──> param_value_from_file (mapped) ──> integer_param ──┐
                                                                                  ▼
-reads (list) ──────────────────────────────────────────────> downstream tool (mapped, parameter)
+reads (list) ──────────────────────────────────────────> downstream tool (mapped, target parameter)
 ```
 
-Galaxy runs one job per element, and each job gets its own element's value. [[derive-parameter-from-file]] covers the `param_value_from_file` step itself.
+Galaxy runs one job per element and pairs the two collections by position, not by element identifier. A same-length value collection in another order runs without error and gives each element the value at its position, not its own. Produce the values with a step mapped over the data collection so they inherit its order. When they arrive as a separate collection, reorder them first: run `collection_element_identifiers` on the data collection, then `__SORTLIST__` with `sort_type: file` on the value collection, connecting the identifier file to `sort_type|sort_file` ([[harmonize-by-sortlist-from-identifiers]]).
 
-Galaxy pairs the two collections by position, not by element identifier. Produce the values with a step mapped over the data collection itself, so they inherit its order. When they arrive as a separate collection, reorder them with [[harmonize-by-sortlist-from-identifiers]] first. A same-length collection in another order runs without error and gives each element a different element's value.
-
-| Value reaches | Evidence | Status |
+| Target | Evidence | Status |
 |---|---|---|
-| Integer tool parameter | `verification/workflows/per-element-parameter-from-file/`, values 1 and 3 on two elements | Verified |
-| Text tool parameter | Galaxy's `lib/galaxy_test/workflow/map_over_expression.gxwf.yml` | Verified |
-| Per-element `when` (boolean) | Galaxy's API test `test_run_workflow_conditional_step_map_over_expression_tool` skips one of two elements | Verified |
-| Parameter inside a tool conditional's case | IWC `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun`: "split min value", "convert min nb of reads to parameter", then `samtools_view` `target` in "select random reads" | Wiring only, values identical across elements |
+| Integer tool parameter | `verification/workflows/per-element-parameter-from-file/`: values 1 and 3 on two elements, and positional pairing in its second case | Verified |
+| Text tool parameter | Galaxy's `lib/galaxy_test/workflow/map_over_expression.gxwf.yml` and its `-tests.yml`: per-element values `A` and `B` reach a text input | Verified |
+| Per-element `when` (boolean) | Galaxy's `lib/galaxy_test/api/test_workflows.py::test_run_workflow_conditional_step_map_over_expression_tool`: one of two elements is skipped | Verified |
+| Parameter inside a tool conditional's case | IWC `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun`: mapped "convert min nb of reads to parameter" feeds `samtools_view`'s `mode\|subsample_config\|subsampling_mode\|target`, with values identical across elements | Wiring only |
+| Float or boolean tool parameter | None | Not tested |
 | `select` parameter | None | Not tested |
-| A tool conditional's test parameter | Conflicting reports in [#661](https://github.com/galaxyproject/foundry/issues/661) and [#667](https://github.com/galaxyproject/foundry/issues/667). Salmon's `--libType` needs this edge | Open |
+| A tool conditional's test parameter | [#661](https://github.com/galaxyproject/foundry/issues/661) reports a Galaxy 500 when one is connected. [#667](https://github.com/galaxyproject/foundry/issues/667) reports a workflow connecting one that runs on usegalaxy.org | Open |
 
-When the target parameter's row isn't verified, fall back in this order:
+Use this route for every target except the Open row, and cover a Wiring only or Not tested target with a workflow test whose elements carry different values. rnaseq's strandedness reaches two such targets: featureCounts' `strand_specificity` is a `select`, and Salmon's `--libType` (`quant_type|libtype|strandedness`) is a conditional's test parameter.
 
-1. For a small fixed set of values, gate one branch per value with a per-element `when` and give each branch's step a fixed parameter. Rejoin the branches per [[conditional-route-between-alternative-outputs]].
-2. Otherwise, expose one workflow-level parameter for all elements and append a `kind: dropped` entry to the [[open-requirements-ledger]] naming the per-element variation. Expose the computing step's output as a workflow output so a user can run once, read the computed values, and re-run with the value they choose.
+For a conditional's test parameter, or when a workflow test of this route fails, fall back in this order:
+
+1. For a small fixed set of values, run one branch per value. For each value, write a per-element boolean file with a mapped comparison step, read it with mapped `param_value_from_file` (`param_type: boolean`), gate that value's branch with `when`, and give the branch's step that value as a fixed parameter. Rejoin the branches with Galaxy's built-in `pick_value` (`pick_style: first_or_error`) mapped over the branch outputs, never `__MERGE_COLLECTION__`. A gated mapped step still emits a full-size collection with its skipped elements as null, so a merge returns one element per branch per sample. Galaxy's `test_run_workflow_conditional_step_map_over_expression_tool_pick_value` covers this mapped rejoin, and [[conditional-route-between-alternative-outputs]] covers `pick_value`'s settings.
+2. Otherwise, expose one workflow-level parameter for all elements. Append a `kind: dropped` entry to the [[open-requirements-ledger]] whose `units` names the per-element parameter and whose `because` cites the Open row or the failing test. Expose the computing step's output as a workflow output so a user can run once, read the computed values, and re-run with the value they choose.
 
 ## Evidence
 
@@ -139,13 +140,13 @@ Corpus-observed Galaxy semantics:
 - [[galaxy-apply-rules-dsl]] explains identifier-derived collection reshaping.
 - [[iwc-transformations-survey]] records which collection transformations appear in IWC workflows.
 
-Pinned fixture examples used by the research pass:
+Nextflow fixture examples:
 
 - `workflow-fixtures/pipelines/nf-core__demo/subworkflows/local/utils_nfcore_demo_pipeline/main.nf` for `tuple(meta, reads)` paired-read handling.
 - `workflow-fixtures/pipelines/nf-core__rnaseq/main.nf` for single-end versus paired-end branching and reads normalization.
 - `workflow-fixtures/pipelines/nf-core__taxprofiler/main.nf` and `workflow-fixtures/pipelines/nf-core__taxprofiler/subworkflows/local/*/main.nf` for `groupTuple`, `transpose`, `mix`, `combine`, and `multiMap` patterns.
 - `workflow-fixtures/pipelines/nf-core__fetchngs/workflows/sra/main.nf` for `collectFile` and accession-driven data fetching.
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml` as a Galaxy `list:paired` exemplar.
+- IWC `virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping` as a Galaxy `list:paired` exemplar.
 
 ## Low-Confidence TODOs
 

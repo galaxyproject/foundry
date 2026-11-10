@@ -4,6 +4,6 @@ Verifies the "Per-element parameters from `meta`" route in `[[nextflow-to-galaxy
 
 The two elements carry different values, 1 for `a` and 3 for `b`, so a step parameterized once for the whole collection fails one of the two assertions.
 
-The second case passes the value collection in the opposite identifier order. Galaxy pairs elements by position, so `a` gets 3 and `b` gets 1.
+Both cases pass the values as a separate input rather than computing them from `reads`. The second case passes them in the opposite identifier order, and Galaxy pairs elements by position, so `a` gets 3 and `b` gets 1.
 
-Passed on Planemo 0.75.48 against Galaxy `release_26.1`.
+On 2026-11-10, Planemo 0.75.48 ran both cases against Galaxy `release_26.1` and both passed.

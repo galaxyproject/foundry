@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 14,
-    "content_hash": "fb165bc84ff86fac13fe971c5d1355370bde727ff7fb56f46c590b4b0bd96009",
-    "commit": "e72d75cb3a429974045ab4c5b48002b1458dfbf3"
+    "revision": 15,
+    "content_hash": "2009d579cf2a68f8b31d1a69dd751f3f4d80fe3f19f3606f8cac2dda37aa343b",
+    "commit": "a9f7a45b81218168fc2e79d8c5187ac3c62d890f"
   },
-  "cast_at": "2026-11-10T17:10:22.970Z",
+  "cast_at": "2026-11-10T17:29:44.369Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -201,9 +201,9 @@
       "load": "on-demand",
       "evidence": "corpus-observed",
       "purpose": "Check whether a concrete tool input/output can preserve the intended source-derived Galaxy collection shape.",
-      "trigger": "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs.",
-      "src_hash": "432c6c59eaec5494f7c2789980a6f2495136b285eb17eb59161437ff89b706dd",
-      "dst_hash": "432c6c59eaec5494f7c2789980a6f2495136b285eb17eb59161437ff89b706dd",
+      "trigger": "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs, or when connecting a per-element computed value to a mapped step's tool parameter.",
+      "src_hash": "ce6e1402ae3cce4b2a704ad8574c0a9f9ccd3ed88e96eecb28df9dc3bbee1fe9",
+      "dst_hash": "ce6e1402ae3cce4b2a704ad8574c0a9f9ccd3ed88e96eecb28df9dc3bbee1fe9",
       "source": "deterministic"
     },
     {
