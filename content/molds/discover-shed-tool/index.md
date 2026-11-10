@@ -104,6 +104,7 @@ A structured recommendation object, JSON-shaped:
 `status` semantics:
 - `hit` — recommend pinning. Caller should cache and proceed.
 - `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller should confirm or fall through.
+- `unsuitable` — a correct wrapper was found and identified, but it cannot satisfy the need as stated (e.g. the wrapper fuses an index build into the alignment job, or the interface shape is incompatible with the step). **Requires `candidate` to be populated**, exactly as for `hit`/`weak`. Harness action: **escalate to the topology-repair branch** — do not fall through to authoring, and do not pin a wrapper that cannot serve the step.
 - `miss` — no usable hit. Caller falls through to [[author-galaxy-tool-wrapper]].
 
 ## Procedure
