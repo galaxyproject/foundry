@@ -10,6 +10,11 @@
 - fixture: concrete step implementation with a plausible mismatch between expected source behavior and Galaxy wrapper inputs, outputs, datatype, or collection support.
 - expect: records whether a later failure should be investigated as tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue.
 
+## Case: wrapper runs the work but has no index output
+
+- fixture: a draft whose Deferred `STAR genome index` step feeds an index to two STAR alignment steps, and the [[galaxy-tool-summary]] for `iuc/rgrnastar/rna_star` `2.7.11b+galaxy1`. That wrapper has no index output: with `geneSource: history` it builds a temporary index inside the alignment job.
+- expect: no index port is bound. One open blocking entry with `step` set to the index step names `rna_star` `2.7.11b+galaxy1` in `missing` and quotes its outputs and the `geneSource` option. Nothing asks for a new STAR wrapper.
+
 ## Case: step bound to an authored user-defined tool
 
 - fixture: a draft with one Deferred step (`tool_id: TODO`, `TODO_*` ports, `_plan_*` fields) whose Tool Shed discovery missed, plus the `galaxy-user-tool.yml` [[author-galaxy-tool-wrapper]] emitted for it. The definition embedded in Galaxy's `$GALAXY/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml` can stand in for the authored file once its data input's `format` is written as a list (`[txt]`), as [[author-galaxy-tool-wrapper]] emits it.

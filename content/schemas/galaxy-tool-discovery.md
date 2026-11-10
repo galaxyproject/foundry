@@ -11,8 +11,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-04
-revised: 2026-05-04
-revision: 1
+revised: 2026-11-10
+revision: 2
 related_molds:
   - "[[discover-shed-tool]]"
   - "[[summarize-galaxy-tool]]"
@@ -63,7 +63,7 @@ Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by 
 The same object feeds several consumers:
 
 - [[summarize-galaxy-tool]] consumes the selected Tool Shed pin after the harness has populated `galaxy-tool-cache`.
-- [[author-galaxy-tool-wrapper]] receives `weak` or `miss` context when the branch falls through.
+- [[author-galaxy-tool-wrapper]] receives `miss` context when the branch falls through. A `weak` candidate is confirmed instead.
 - [[implement-galaxy-tool-step]] uses the selected wrapper path indirectly, after [[summarize-galaxy-tool]] has produced a wrapper summary.
 
 ## What is intentionally not modeled
