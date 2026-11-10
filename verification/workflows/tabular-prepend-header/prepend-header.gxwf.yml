@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Prepend or replace tabular header with awk"
+label: "Prepend or replace tabular header with awk"
 inputs:
   - id: headerless_rows
     type: data

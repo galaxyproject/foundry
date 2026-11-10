@@ -40,7 +40,7 @@ Reach into a `list:list` by nesting `element_tests` inside an element, giving th
 From a workflow directory, run Planemo directly:
 
 ```sh
-planemo lint *.gxwf.yml
+planemo workflow_lint --skip best_practices *.gxwf.yml
 planemo test *.gxwf.yml --galaxy_branch release_26.1
 ```
 

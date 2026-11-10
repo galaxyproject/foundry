@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Swap collection nesting with Apply Rules"
+label: "Swap collection nesting with Apply Rules"
 inputs:
   - id: sample_by_segment
     type: collection

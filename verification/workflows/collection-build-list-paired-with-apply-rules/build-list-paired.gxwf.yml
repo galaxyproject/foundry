@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Build list:paired from read-direction identifiers with Apply Rules"
+label: "Build list:paired from read-direction identifiers with Apply Rules"
 inputs:
   - id: reads
     type: collection

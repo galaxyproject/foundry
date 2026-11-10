@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Concatenate tabular collection elements"
+label: "Concatenate tabular collection elements"
 inputs:
   - id: headered_tables
     type: collection

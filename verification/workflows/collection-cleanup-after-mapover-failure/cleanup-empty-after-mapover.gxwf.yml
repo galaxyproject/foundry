@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Clean up empty elements after map-over"
+label: "Clean up empty elements after map-over"
 inputs:
   - id: samples
     type: collection

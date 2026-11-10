@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Convert one-based interval rows to strand-specific BED"
+label: "Convert one-based interval rows to strand-specific BED"
 inputs:
   - id: forward_intervals
     type: data
