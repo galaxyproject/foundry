@@ -1427,6 +1427,51 @@ workflow root {
     expect(fasta?.schema_group).toBe("Reference genome options");
   });
 
+  test("records getGenomeAttribute assignments written in main.nf", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/keymap' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              gene_bed: { type: "string", format: "file-path" },
+            },
+          },
+        },
+      }),
+    );
+    write(
+      root,
+      "main.nf",
+      `params.fasta = getGenomeAttribute('fasta')
+params.gene_bed = getGenomeAttribute('bed12')
+def getGenomeAttribute(attribute) { return params.genomes[params.genome][attribute] }
+workflow PIPE { }
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      params: {
+        name: string;
+        source_kind?: string | null;
+        source_expression?: string | null;
+        source_path?: string | null;
+      }[];
+    };
+
+    const fasta = summary.params.find((p) => p.name === "fasta");
+    expect(fasta?.source_kind).toBe("getGenomeAttribute");
+    expect(fasta?.source_expression).toBe("getGenomeAttribute('fasta')");
+    expect(fasta?.source_path).toBe("main.nf");
+    const geneBed = summary.params.find((p) => p.name === "gene_bed");
+    expect(geneBed?.source_expression).toBe("getGenomeAttribute('bed12')");
+  });
+
   test("binds caller positional args to subworkflow take[] names", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'adhoc/invocations' }\n");

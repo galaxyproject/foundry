@@ -855,6 +855,44 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
     expect(assets).toHaveLength(20);
   });
 
+  itIfRnaseqFixture("records getGenomeAttribute provenance for the main.nf genome params", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const params = data.params as {
+      name: string;
+      source_kind: string | null;
+      source_expression: string | null;
+      source_path: string | null;
+    }[];
+    const byName = Object.fromEntries(params.map((param) => [param.name, param]));
+    const expected: Record<string, string> = {
+      fasta: "getGenomeAttribute('fasta')",
+      additional_fasta: "getGenomeAttribute('additional_fasta')",
+      transcript_fasta: "getGenomeAttribute('transcript_fasta')",
+      gff: "getGenomeAttribute('gff')",
+      gtf: "getGenomeAttribute('gtf')",
+      gene_bed: "getGenomeAttribute('bed12')",
+      bbsplit_index: "getGenomeAttribute('bbsplit')",
+      sortmerna_index: "getGenomeAttribute('sortmerna')",
+      star_index: "getGenomeAttribute('star')",
+      rsem_index: "getGenomeAttribute('rsem')",
+      hisat2_index: "getGenomeAttribute('hisat2')",
+      salmon_index: "getGenomeAttribute('salmon')",
+      kallisto_index: "getGenomeAttribute('kallisto')",
+      bowtie2_index: "getGenomeAttribute('bowtie2')",
+    };
+    expect(Object.keys(expected)).toHaveLength(14);
+    for (const [name, expression] of Object.entries(expected)) {
+      expect(byName[name]?.source_kind, name).toBe("getGenomeAttribute");
+      expect(byName[name]?.source_expression, name).toBe(expression);
+      expect(byName[name]?.source_path, name).toBe("main.nf");
+    }
+  });
+
   itIfRnaseqFixture(
     "emits no reference_rebuilds[] for RNA-seq (positive-form idiom is a known gap)",
     () => {

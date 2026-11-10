@@ -947,6 +947,7 @@ const GENOME_ATTRIBUTE_CONFIG_CANDIDATES = [
   "nextflow.config",
   "conf/igenomes.config",
   "conf/genomes.config",
+  "main.nf",
 ];
 
 function parseGetGenomeAttributeAssignments(
