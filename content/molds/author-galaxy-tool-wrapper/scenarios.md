@@ -1,53 +1,31 @@
 # author-galaxy-tool-wrapper scenarios
 
-## Case: conda-only Nextflow process
+## Case: discovery hits
 
-- fixture: Nextflow process summary with a bioconda-only environment directive,
-  explicit command, declared inputs, declared outputs, and minimal test fixture
-  evidence.
-- expect: authors a Galaxy `GalaxyUserTool` YAML definition whose
-  container/package evidence matches the conda spec, whose `shell_command`
-  preserves the process command intent, and whose UDT passes structural
-  validation plus mandatory critic review.
+- fixture: `nf-core/rnaseq` 3.24.0 (`workflow-fixtures/fixtures.yaml`), process
+  `FASTP` (`modules/nf-core/fastp/main.nf`), with a [[discover-shed-tool]]
+  result of `status: hit` on `iuc/fastp/fastp`.
+- expect: stops at §1, emits no `galaxy-user-tool.yml`, and returns
+  `iuc/fastp/fastp` to the caller.
 
-## Case: biocontainers Docker URI
+## Case: Bioconda tool with a BioContainers image
 
-- fixture: Nextflow process summary with a BioContainers Docker URI, command
-  stanza, input/output declarations, and no acceptable Tool Shed discovery hit.
-- expect: derives a plausible conda-equivalent requirement set, preserves
-  command-stanza fidelity, and records uncertainty where container-to-conda
-  mapping is not directly evidenced.
+- fixture: `nf-core/rnaseq` 3.24.0, process `FQ_LINT`
+  (`modules/nf-core/fq/lint/main.nf`), with a [[discover-shed-tool]] result of
+  `status: miss`.
+- expect: container `quay.io/biocontainers/fq:0.12.0--h9ee0642_0` (the
+  pipeline's `docker.registry` is `quay.io`) and package `fq` 0.12.0. The
+  `shell_command` runs `fq lint` on a FASTQ data input and writes its report to
+  a declared text output. The UDT passes structural validation and critic
+  review.
 
-## Case: discovery returns `hit` — do not author UDT
+## Case: Bioconda tool with a Wave image
 
-- fixture: a `discover-shed-tool` result with `status: "hit"` for `fastp`,
-  where the discovered wrapper is structurally acceptable.
-- expect: the mold stops at §1, returns the discovered tool reference to
-  `implement-galaxy-tool-step`, and does not emit `galaxy-user-tool.yml`.
-  Any attempt to author a UDT in this state is a defect.
-
-## Case: discovery returns `unsuitable` — escalate, do not duplicate
-
-- fixture: a `discover-shed-tool` result with `status: "unsuitable"` for an
-  existing tool (e.g., a wrapper for the right name but wrong version or
-  incompatible interface).
-- expect: the mold records the `unsuitable` rationale and escalates to the
-  harness. It must not author a duplicate wrapper for a tool that already
-  exists. The emitted output must not be a `galaxy-user-tool.yml`.
-
-## Case: discovery returns `miss` — author UDT
-
-- fixture: a `discover-shed-tool` result with `status: "miss"` for a tool
-  that is genuinely absent from the Tool Shed, with sufficient command and
-  container evidence in the source summary.
-- expect: the mold proceeds with authoring and emits a structurally valid
-  `galaxy-user-tool.yml` that passes the mandatory critic pass.
-
-## Case: discovery fallthrough against IWC-wrapped tools (legacy)
-
-- fixture: process needs corresponding to IWC-wrapped tools such as fastp and
-  samtools where wrapper discovery should normally succeed.
-- expect: does not author a duplicate UDT; explains why the discovery result
-  was `miss` or why the harness recorded an explicit `fallthrough` with a
-  documented reason. Compares the authored UDT shape (if any) against the
-  existing IWC wrapper's behavior.
+- fixture: `nf-core/rnaseq` 3.24.0, process `RIBODETECTOR`
+  (`modules/nf-core/ribodetector/main.nf`), with a [[discover-shed-tool]]
+  result of `status: miss`.
+- expect: package `ribodetector` 0.3.3 and container
+  `community.wave.seqera.io/library/ribodetector:0.3.3--ad3d7071e408b502`, not
+  an invented BioContainers tag. The `shell_command` runs `ribodetector_cpu`,
+  the source's branch without an accelerator, with `-l` from an integer
+  read-length input.

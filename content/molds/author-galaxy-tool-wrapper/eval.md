@@ -28,8 +28,7 @@ the oracle here is applied to whatever a scenario produces.
 
 - bucket: discovery-guard
 - check: llm-judged
-- assertion: when the process need corresponds to a tool that wrapper discovery
-  should normally satisfy, the Mold does not author a duplicate UDT unless the
-  discovery evidence is unacceptable; when it does fall through, it explains why
-  the fallthrough was justified and compares the authored UDT shape against the
-  existing wrapper's behavior.
+- assertion: the Mold emits a UDT only when the [[discover-shed-tool]] result
+  is `miss`, or `weak` with a candidate the caller's confirmation rejected. On
+  `hit`, or a `weak` candidate the caller accepted, emitting
+  `galaxy-user-tool.yml` is a failure.

@@ -7,15 +7,17 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-23
-revision: 7
+revised: 2026-11-10
+revision: 8
 related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
-summary: "Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable."
+summary: "Author a new Galaxy user-defined tool YAML definition when Tool Shed discovery misses."
 input_artifacts:
   - id: summary-nextflow
     description: "Source pipeline summary from [[summarize-nextflow]]; provides process command, inputs, outputs, and container or conda evidence for UDT authoring."
+  - id: galaxy-tool-pin
+    description: "The [[discover-shed-tool]] result for the step."
 output_artifacts:
   - id: galaxy-user-tool-definition
     kind: yaml
@@ -64,7 +66,7 @@ references:
 ---
 # author-galaxy-tool-wrapper
 
-Author a Galaxy user-defined tool (UDT) YAML definition when [[discover-shed-tool]] cannot produce an acceptable existing Tool Shed wrapper. This Mold owns the author-on-fallthrough path only; do not duplicate existing wrappers unless discovery evidence is weak or missing.
+Author a Galaxy user-defined tool (UDT) YAML definition when [[discover-shed-tool]] finds no wrapper that runs the step's work. This Mold owns the author-on-miss path only.
 
 The output is a single `GalaxyUserTool` YAML document, not Galaxy XML. Preserve source evidence and unresolved assumptions in the emitted artifact or companion notes rather than inventing command flags, containers, datatypes, or package names.
 
@@ -75,28 +77,12 @@ Use the source summary and branch fallthrough context to identify:
 - The process or abstract step that needs a tool.
 - Command intent, required inputs, expected outputs, and test fixture evidence.
 - Container, Bioconda, Conda, or environment evidence from the source pipeline.
-- Why Tool Shed discovery did not supply an acceptable existing wrapper.
 
 ## Procedure
 
 ### 1. Confirm authoring is justified
 
-**MANDATORY GATE — do not skip.**
-
-Before writing any part of the UDT, read the `discover-shed-tool` result. Authoring is permitted **only** when the discovery status is exactly `miss` (no candidate found), or when the harness explicitly records a `fallthrough` decision with a documented reason.
-
-The four discovery statuses and their consequences:
-
-| Status | Meaning | Authoring allowed? |
-|---|---|---|
-| `hit` | A suitable Tool Shed wrapper was found. | **No** — bind the existing wrapper via [[implement-galaxy-tool-step]]. |
-| `weak` | A candidate was found but is not a confident match. | **No** — the harness must either accept the candidate or escalate. Do not author a duplicate. |
-| `unsuitable` | A tool with this name exists but cannot serve this step (wrong version, wrong interface, incompatible container). | **No** — record the reason and escalate to the harness. Do not author a duplicate wrapper for a tool that already exists. |
-| `miss` | No candidate with this name was found. | **Yes** — proceed with authoring. |
-
-**If the discovery status is anything other than `miss`, STOP. Do not author a UDT.** Return the discovered tool reference (or the `unsuitable` rationale) to [[implement-galaxy-tool-step]] and record why the existing wrapper was chosen or rejected.
-
-Authoring a UDT when a suitable Tool Shed wrapper exists is a defect, not a stylistic choice. There is no override for this rule.
+Read the [[discover-shed-tool]] result before writing any part of the UDT. Author only when its `status` is `miss`, or when it is `weak` and the caller's confirmation showed the candidate doesn't run the step's work. Otherwise a wrapper exists: stop without emitting `galaxy-user-tool.yml` and return the candidate to the caller. Authoring a UDT for a step an existing wrapper can run is a failure.
 
 If the missing tool need is under-specified, ask for clarification or emit an unresolved assumption. Do not create a plausible-looking UDT from absent command or container evidence.
 
@@ -146,4 +132,3 @@ The file is handed on as written. [[implement-galaxy-tool-step]] embeds it under
 - **Existing wrapper summarization.** Use [[summarize-galaxy-tool]] for Tool Shed or installed Galaxy wrappers.
 - **Galaxy XML authoring.** This Mold emits UDT YAML only.
 - **Workflow step binding.** [[implement-galaxy-tool-step]] decides how the authored tool is used in a workflow step.
-- **Authoring after `hit`, `weak`, or `unsuitable`.** §1 is a hard gate. If [[discover-shed-tool]] returned anything other than `miss`, this Mold must not run; binding or escalation is [[implement-galaxy-tool-step]]'s job.
