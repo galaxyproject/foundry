@@ -573,6 +573,42 @@ profiles {
     ]);
   });
 
+  test("keeps path-valued params and excludes booleans regardless of name", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/path-params' }
+profiles {
+  test {
+    params {
+      hisat2_index = 'https://example.com/hisat2.tar.gz'
+      salmon_index = 'https://example.com/salmon.tar.gz'
+      skip_bbsplit = false
+      aligner = 'star'
+    }
+  }
+}
+`,
+    );
+    write(root, "main.nf", "workflow PATH_PARAMS { }\n");
+
+    const summary = (await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike & {
+      test_candidates: { inputs: { description: string | null }[] }[];
+    };
+    const names = summary.test_candidates[0]!.inputs.map(
+      (input) => input.description?.split(" from ")[0],
+    );
+    expect(names).toEqual(expect.arrayContaining(["hisat2_index", "salmon_index"]));
+    expect(names).not.toContain("skip_bbsplit");
+    expect(names).not.toContain("aligner");
+  });
+
   test("emits one warned aggregate candidate for dynamically generated cases", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/generated-tests' }\n");

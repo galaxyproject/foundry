@@ -893,6 +893,24 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
     }
   });
 
+  itIfRnaseqFixture("keeps path-valued test indexes and excludes boolean params", () => {
+    const r = spawnSync(
+      "node",
+      [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--profile", "test", "--no-validate"],
+      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER },
+    );
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const candidate = (
+      data.test_candidates as { id: string; inputs: { description: string | null }[] }[]
+    ).find((item) => item.id === "tests/default.nf.test::Params: default");
+    expect(candidate).toBeDefined();
+    const names = candidate!.inputs.map((input) => input.description?.split(" from ")[0]);
+    expect(names).toEqual(expect.arrayContaining(["hisat2_index", "salmon_index"]));
+    expect(names).not.toContain("skip_bbsplit");
+    expect(names).toHaveLength(11);
+  });
+
   itIfRnaseqFixture(
     "emits no reference_rebuilds[] for RNA-seq (positive-form idiom is a known gap)",
     () => {

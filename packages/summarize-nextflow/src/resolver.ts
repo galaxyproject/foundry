@@ -2697,13 +2697,18 @@ function testDataRefs(values: Map<string, string>, source: string): TestDataRef[
 
 function isCandidateInputParam(name: string, value: string): boolean {
   if (!hasUsableParamValue(value)) return false;
+  if (/^(?:true|false)$/u.test(value)) return false;
   if (/^(?:outdir|output|results?|publish_dir|email|help)$/u.test(name)) return false;
-  return (
-    isFixtureParam(name) ||
-    /(?:^|_)(?:input|reads?|genome|reference|variants?|denylist|samplesheet|fasta|fastq|bam|cram|vcf|gff|gtf|bed|proteins?|database|db)(?:_|$)/u.test(
-      name,
-    )
-  );
+  return isPathOrUrlValue(value);
+}
+
+function isPathOrUrlValue(value: string): boolean {
+  const trimmed = value.trim();
+  const withoutQuery = trimmed.split(/[?#]/u)[0] ?? trimmed;
+  const segment = withoutQuery.split(/[/\\]/u).filter(Boolean).at(-1) ?? "";
+  const suffix = /\.([A-Za-z0-9]{1,8})$/u.exec(segment)?.[1];
+  if (!suffix) return false;
+  return !/^(?:b|kb|mb|gb|tb|pb|kib|mib|gib|tib|pib|ms|s|m|h|d)$/iu.test(suffix);
 }
 
 function normalizeCandidatePath(value: string): string | null {
@@ -2712,10 +2717,6 @@ function normalizeCandidatePath(value: string): string | null {
     .replace(/^file:\/\//u, "");
   if (normalized === value && !/[/.{}*]/u.test(value)) return null;
   return normalized;
-}
-
-function isFixtureParam(name: string): boolean {
-  return name === "input" || /(^reference_|_fasta$|_gff$|_gtf$|_bed$|_proteins$)/u.test(name);
 }
 
 function resolveParamExpression(expression: string, params: Map<string, string>): string | null {
