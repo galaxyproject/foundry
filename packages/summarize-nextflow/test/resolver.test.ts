@@ -51,6 +51,21 @@ interface SummaryLike {
     outputs: { name: string; shape: string; topic: string | null }[];
     script_summary?: string;
     script_excerpt: string | null;
+    publish_dir: string | null;
+    publish_dir_matches: {
+      expression: string;
+      selector: string;
+      config: string;
+      profile?: string;
+    }[];
+    resolved_args: {
+      key: string;
+      expression: string;
+      selector: string;
+      config: string;
+      profile?: string;
+    }[];
+    template: { path: string; line_count: number; body: string } | null;
   }[];
   subworkflows: {
     name: string;
@@ -2772,11 +2787,245 @@ profiles {
 
     expect(summary.warnings).toContain(`mulled index path not found: ${root}/missing.tsv`);
   });
+
+  test("resolves publishDir and ext args from includeConfig selectors", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/directives' }
+includeConfig 'conf/modules.config'
+`,
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'FOO' {
+        ext.args = { [
+            '-B -C',
+            params.extra
+        ].join(' ') }
+        ext.args2 = '--second'
+        ext.prefix = { "\${meta.id}.x" }
+        publishDir = [
+            path: { "\${params.outdir}/foo" },
+            mode: 'copy'
+        ]
+    }
+    withName: '.*:BAR' {
+        publishDir = { "\${params.outdir}/bar" }
+    }
+    withName: 'SUB:BAZ' {
+        ext.args = '-n'
+    }
+    withLabel: 'process_low' {
+        ext.prefix = 'low'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "modules/bar.nf", "process BAR {\n  script:\n  'bar'\n}\n");
+    write(root, "modules/baz.nf", "process BAZ {\n  script:\n  'baz'\n}\n");
+    write(root, "modules/low.nf", "process LOW {\n  label 'process_low'\n  script:\n  'low'\n}\n");
+    write(root, "modules/quiet.nf", "process QUIET {\n  script:\n  'quiet'\n}\n");
+    write(
+      root,
+      "main.nf",
+      `include { FOO } from './modules/foo'
+include { BAR } from './modules/bar'
+include { BAZ } from './modules/baz'
+include { LOW } from './modules/low'
+include { QUIET } from './modules/quiet'
+workflow PIPE { FOO(); BAR(); BAZ(); LOW(); QUIET() }
+`,
+    );
+
+    const summary = await summarize(root);
+    const byName = Object.fromEntries(summary.processes.map((process) => [process.name, process]));
+    const foo = byName.FOO!;
+
+    expect(foo.publish_dir).toContain("${params.outdir}/foo");
+    expect(foo.publish_dir_matches).toEqual([
+      expect.objectContaining({
+        selector: "withName:FOO",
+        config: "conf/modules.config",
+      }),
+    ]);
+    expect(foo.resolved_args.map((arg) => arg.key)).toEqual(["args", "args2", "prefix"]);
+    const args = foo.resolved_args[0]!;
+    expect(args.expression).toContain("'-B -C'");
+    expect(args.expression).toContain("params.extra");
+    expect(args.expression).toContain(".join(' ')");
+    expect(args.selector).toBe("withName:FOO");
+    expect(args.config).toBe("conf/modules.config");
+    expect(foo.resolved_args[1]?.expression).toBe("'--second'");
+    expect(foo.resolved_args[2]?.expression).toContain("${meta.id}.x");
+    expect(byName.BAR?.publish_dir).toContain("${params.outdir}/bar");
+    expect(byName.BAR?.publish_dir_matches[0]?.selector).toBe("withName:.*:BAR");
+    expect(byName.BAZ?.resolved_args).toEqual([
+      expect.objectContaining({ key: "args", expression: "'-n'", selector: "withName:SUB:BAZ" }),
+    ]);
+    expect(byName.LOW?.resolved_args).toEqual([
+      expect.objectContaining({
+        key: "prefix",
+        expression: "'low'",
+        selector: "withLabel:process_low",
+      }),
+    ]);
+    expect(byName.QUIET?.publish_dir).toBeNull();
+    expect(byName.QUIET?.resolved_args).toEqual([]);
+    expect(byName.QUIET?.template).toBeNull();
+  });
+
+  test("ignores process selectors shipped under tests/", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/skip-tests' }
+includeConfig 'conf/modules.config'
+includeConfig 'tests/nextflow.config'
+`,
+    );
+    write(
+      root,
+      "conf/modules.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '-B -C'\n    }\n}\n",
+    );
+    write(
+      root,
+      "tests/nextflow.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '--should-not-apply'\n    }\n}\n",
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "main.nf", "include { FOO } from './modules/foo'\nworkflow PIPE { FOO() }\n");
+
+    const summary = await summarize(root);
+    const foo = summary.processes.find((process) => process.name === "FOO");
+
+    expect(foo?.resolved_args.map((arg) => arg.expression)).toEqual(["'-B -C'"]);
+  });
+
+  test("applies a profile includeConfig only when that profile is selected", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/profile-scope' }
+includeConfig 'conf/base.config'
+profiles {
+    test { includeConfig 'conf/test.config' }
+    other { includeConfig 'conf/other.config' }
+}
+`,
+    );
+    write(
+      root,
+      "conf/base.config",
+      "process {\n    withName: 'FOO' {\n        ext.prefix = 'base'\n    }\n}\n",
+    );
+    write(
+      root,
+      "conf/test.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '--from-test'\n    }\n}\n",
+    );
+    write(
+      root,
+      "conf/other.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '--from-other'\n    }\n}\n",
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "main.nf", "include { FOO } from './modules/foo'\nworkflow PIPE { FOO() }\n");
+
+    const byDefault = await summarize(root, undefined, null);
+    const unselected = byDefault.processes.find((process) => process.name === "FOO");
+    expect(unselected?.resolved_args).toEqual([
+      {
+        key: "prefix",
+        expression: "'base'",
+        selector: "withName:FOO",
+        config: "conf/base.config",
+      },
+    ]);
+
+    const selected = await summarize(root, undefined, "test");
+    const foo = selected.processes.find((process) => process.name === "FOO");
+    expect(foo?.resolved_args).toEqual([
+      {
+        key: "prefix",
+        expression: "'base'",
+        selector: "withName:FOO",
+        config: "conf/base.config",
+      },
+      {
+        key: "args",
+        expression: "'--from-test'",
+        selector: "withName:FOO",
+        config: "conf/test.config",
+        profile: "test",
+      },
+    ]);
+  });
+
+  test("keeps an in-body publishDir and loads a template file", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/template' }
+includeConfig 'conf/modules.config'
+`,
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'INBODY' {
+        publishDir = { "\${params.outdir}/from-config" }
+    }
+}
+`,
+    );
+    write(
+      root,
+      "modules/inbody.nf",
+      "process INBODY {\n  publishDir \"${params.outdir}/inbody\"\n  script:\n  'echo hi'\n}\n",
+    );
+    write(root, "modules/nf-core/dup/main.nf", "process DUP {\n  script:\n  template 'dup.r'\n}\n");
+    write(root, "modules/nf-core/dup/templates/dup.r", "line1\nline2\n");
+    write(
+      root,
+      "main.nf",
+      `include { INBODY } from './modules/inbody'
+include { DUP } from './modules/nf-core/dup/main'
+workflow PIPE { INBODY(); DUP() }
+`,
+    );
+
+    const summary = await summarize(root);
+    const inbody = summary.processes.find((process) => process.name === "INBODY");
+    const dup = summary.processes.find((process) => process.name === "DUP");
+
+    expect(inbody?.publish_dir).toContain("${params.outdir}/inbody");
+    expect(inbody?.publish_dir_matches[0]?.expression).toContain("${params.outdir}/from-config");
+    expect(dup?.script_excerpt?.trim()).toBe("template 'dup.r'");
+    expect(dup?.template).toEqual({
+      path: "modules/nf-core/dup/templates/dup.r",
+      line_count: 2,
+      body: "line1\nline2\n",
+    });
+  });
 });
 
-async function summarize(root: string, mulledIndexPath?: string): Promise<SummaryLike> {
+async function summarize(
+  root: string,
+  mulledIndexPath?: string,
+  profile?: string | null,
+): Promise<SummaryLike> {
   return (await buildSummary(root, {
-    profile: "test",
+    profile: profile === null ? undefined : (profile ?? "test"),
     withNextflow: false,
     fetchTestData: false,
     mulledIndexPath,

@@ -166,6 +166,21 @@ whatever a scenario produces. Properties are tagged by bucket:
   to a Galaxy assertion intent or to an explicit "untranslatable" entry; no
   captures are silently elided.
 
+## Property: config directives and template bodies are carried verbatim
+
+- bucket: fidelity
+- check: deterministic
+- assertion: a `publishDir` or `ext.args` / `ext.args2` / `ext.prefix`
+  assignment reached from the root `includeConfig` chain through `withName:`
+  or `withLabel:` is copied verbatim into `publish_dir` /
+  `publish_dir_matches` or `resolved_args`, with the selector and config path.
+  A script block whose only statement is `template 'file'` leaves that
+  directive in `script_excerpt` and carries the template file's path, line
+  count, and body in `template`. Assignments under `tests/` or `.github/`
+  stay out of the summary. Assignments that sit inside a `profiles { }` block,
+  or in a config that block includes, stay out unless the caller selected that
+  profile. A selected profile's entries name it in `profile`.
+
 ## Property: re-runs are reproducible
 
 - bucket: regression

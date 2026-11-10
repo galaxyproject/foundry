@@ -583,9 +583,101 @@ export const summaryNextflowSchema = {
         }
       }
     },
+    "ResolvedArg": {
+      "title": "ResolvedArg",
+      "description": "One `ext.args`, `ext.args2`, or `ext.prefix` assignment copied verbatim from a `withName:` or `withLabel:` selector. Closures stay as Groovy text so a downstream Mold can see which `params` and `meta` fields they read.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "expression",
+        "selector",
+        "config"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "enum": [
+            "args",
+            "args2",
+            "prefix"
+          ]
+        },
+        "expression": {
+          "type": "string",
+          "description": "Right-hand side of the assignment, verbatim, including a closure or list when that is how the config wrote it."
+        },
+        "selector": {
+          "type": "string",
+          "description": "The selector that matched, as `withName:<pattern>` or `withLabel:<pattern>`."
+        },
+        "config": {
+          "type": "string",
+          "description": "Pipeline-relative config file that declared the selector."
+        },
+        "profile": {
+          "type": "string",
+          "description": "Profile that contributed this assignment. Present only when the selector sits in that profile, or in a config the profile includes. Absent for selectors on the root includeConfig chain."
+        }
+      }
+    },
+    "PublishDirMatch": {
+      "title": "PublishDirMatch",
+      "description": "One `publishDir` assignment copied verbatim from a `withName:` or `withLabel:` selector.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expression",
+        "selector",
+        "config"
+      ],
+      "properties": {
+        "expression": {
+          "type": "string",
+          "description": "Right-hand side of `publishDir =`, verbatim."
+        },
+        "selector": {
+          "type": "string",
+          "description": "The selector that matched, as `withName:<pattern>` or `withLabel:<pattern>`."
+        },
+        "config": {
+          "type": "string",
+          "description": "Pipeline-relative config file that declared the selector."
+        },
+        "profile": {
+          "type": "string",
+          "description": "Profile that contributed this assignment. Present only when the selector sits in that profile, or in a config the profile includes. Absent for selectors on the root includeConfig chain."
+        }
+      }
+    },
+    "ProcessTemplate": {
+      "title": "ProcessTemplate",
+      "description": "The file named by a script block whose only statement is `template '<file>'`. `script_excerpt` stays the directive. This object is the program.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "line_count",
+        "body"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Pipeline-relative path of the template file. nf-core modules keep it at `templates/<file>` beside `main.nf`."
+        },
+        "line_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "body": {
+          "type": "string",
+          "description": "Template file contents. Empty when the directive names a file the resolver cannot find. A warning names that miss."
+        }
+      }
+    },
     "Process": {
       "title": "Process",
-      "description": "One Nextflow `process { ... }` block.",
+      "description": "One Nextflow `process { ... }` block. `script_excerpt` is the script, shell, or exec body. When that body is only a `template` directive, `script_excerpt` is the indirection and `template` carries the file it names.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -686,14 +778,39 @@ export const summaryNextflowSchema = {
             "string",
             "null"
           ],
-          "description": "Verbatim `script:`/`shell:`/`exec:` body, dedented and truncated at 4000 characters, or null when the process declares none. Deterministic. For ad-hoc pipelines with no `meta.yml` this is the only evidence of what a process does."
+          "description": "Verbatim `script:`/`shell:`/`exec:` body, dedented and truncated at 4000 characters, or null when the process declares none. Deterministic. For ad-hoc pipelines with no `meta.yml` this is the only evidence of what a process does. When the body is only `template '<file>'`, this stays that directive and `template` carries the file."
         },
         "publish_dir": {
           "type": [
             "string",
             "null"
           ],
-          "description": "`publishDir` value when the process publishes outputs (or null)."
+          "description": "`publishDir` value when the process publishes outputs, or null. An in-body directive is kept as written. Otherwise this is the verbatim `publishDir` assignment from each matching `withName:` / `withLabel:` selector on the root `includeConfig` chain, outside `profiles` blocks, joined by newlines when several match. Selectors from a profile named with `--profile` are included too."
+        },
+        "publish_dir_matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PublishDirMatch"
+          },
+          "description": "Every config-selector `publishDir` that matched this process. Empty when publication is only declared in the process body, or not at all. `publish_dir` still carries an in-body directive when one exists. Entries from a selected profile carry `profile`."
+        },
+        "resolved_args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ResolvedArg"
+          },
+          "description": "`ext.args`, `ext.args2`, and `ext.prefix` assignments from matching config selectors. Expressions are verbatim, including closures. Empty when the chain declares none. Entries from a selected profile carry `profile`."
+        },
+        "template": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProcessTemplate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Template file loaded when `script_excerpt` is only a `template` directive. Null when the process script is not a template indirection."
         }
       }
     },

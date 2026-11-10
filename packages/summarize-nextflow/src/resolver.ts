@@ -225,6 +225,29 @@ interface ChannelIO {
   topic: string | null;
 }
 
+interface ResolvedArg {
+  key: "args" | "args2" | "prefix";
+  expression: string;
+  selector: string;
+  config: string;
+  /** Set when the assignment came from a selected profile. Omitted for the root chain. */
+  profile?: string;
+}
+
+interface PublishDirMatch {
+  expression: string;
+  selector: string;
+  config: string;
+  /** Set when the assignment came from a selected profile. Omitted for the root chain. */
+  profile?: string;
+}
+
+interface ProcessTemplate {
+  path: string;
+  line_count: number;
+  body: string;
+}
+
 interface Process {
   name: string;
   aliases: string[];
@@ -240,6 +263,11 @@ interface Process {
   when: string | null;
   script_excerpt: string | null;
   publish_dir: string | null;
+  publish_dir_matches: PublishDirMatch[];
+  resolved_args: ResolvedArg[];
+  template: ProcessTemplate | null;
+  /** Process `label` names. Used to match `withLabel:` selectors, then removed before emit. */
+  labels?: string[];
 }
 
 interface ModuleMeta {
@@ -448,6 +476,8 @@ export async function resolveNextflowSummary(
 
   const entrypoint = selectEntrypoint(pipelineRoot);
   if (entrypoint) summary.warnings.push(`selected Nextflow entrypoint: ${entrypoint}`);
+
+  attachConfigDirectives(summary, pipelineRoot, options.profile);
 
   if (options.withNextflow) mergeNextflowInspect(summary, pipelineRoot, options.profile);
   if (options.fetchTestData) await fetchTestData(summary, options.testDataDir);
@@ -1161,6 +1191,10 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
       when: normalizeDirective(matchOne(body, /when:\s*\n([\s\S]*?)\n\s*script:/u)),
       script_excerpt: extractScript(body),
       publish_dir: normalizeDirective(matchOne(body, /publishDir\s+([^\n]+)/u)),
+      publish_dir_matches: [],
+      resolved_args: [],
+      template: null,
+      labels: parseProcessLabels(body),
     };
   });
 }
@@ -3074,6 +3108,442 @@ function parseProseAssertions(text: string): string[] {
   return [...text.matchAll(/assert\s+(?!workflow\.success\b)([^}\n]+)/gu)]
     .map((match) => match[1]!.trim())
     .filter((assertion) => !assertion.startsWith("snapshot("));
+}
+
+const EXT_ASSIGNMENTS = [
+  ["args", "ext\\.args(?!\\w)"],
+  ["args2", "ext\\.args2(?!\\w)"],
+  ["prefix", "ext\\.prefix(?!\\w)"],
+] as const;
+
+interface ScopedSelector extends SelectorBlock {
+  config: string;
+  profile: string | null;
+}
+
+/**
+ * Copy `publishDir` and `ext.args` / `ext.args2` / `ext.prefix` from `withName:`
+ * and `withLabel:` selectors on the root `includeConfig` chain. Selectors and
+ * includes inside `profiles { }` apply only for a profile named by `--profile`,
+ * and those entries carry `profile`. Closure text stays verbatim. A script that
+ * is only `template 'file'` also loads that file from the module's `templates/` directory.
+ */
+function attachConfigDirectives(
+  summary: Summary,
+  pipelineRoot: string,
+  selectedProfile?: string,
+): void {
+  const selectors = collectScopedSelectors(pipelineRoot, selectedProfileNames(selectedProfile));
+
+  for (const process of summary.processes) {
+    const matched = selectors.filter((selector) =>
+      selectorMatchesProcess(selector.kind, selector.pattern, process),
+    );
+    const publish = matched.flatMap((selector) =>
+      extractAssignments(selector.body, "publishDir").map((expression) =>
+        withProfile(
+          {
+            expression,
+            selector: `${selector.kind}:${selector.pattern}`,
+            config: selector.config,
+          },
+          selector.profile,
+        ),
+      ),
+    );
+    process.publish_dir_matches = publish;
+    if (process.publish_dir === null && publish.length > 0) {
+      process.publish_dir = publish.map((match) => match.expression).join("\n");
+    }
+    process.resolved_args = matched.flatMap((selector) => {
+      const name = `${selector.kind}:${selector.pattern}`;
+      return EXT_ASSIGNMENTS.flatMap(([key, pattern]) =>
+        extractAssignments(selector.body, pattern).map((expression) =>
+          withProfile(
+            {
+              key,
+              expression,
+              selector: name,
+              config: selector.config,
+            },
+            selector.profile,
+          ),
+        ),
+      );
+    });
+    const template = resolveProcessTemplate(pipelineRoot, process);
+    process.template = template.template;
+    if (template.warning) summary.warnings.push(template.warning);
+    delete process.labels;
+  }
+}
+
+function selectedProfileNames(profile: string | undefined): string[] {
+  if (!profile) return [];
+  return unique(
+    profile
+      .split(",")
+      .map((name) => name.trim().replace(/^\+/, ""))
+      .filter((name) => name.length > 0),
+  );
+}
+
+function withProfile<T extends object>(entry: T, profile: string | null): T & { profile?: string } {
+  return profile ? { ...entry, profile } : entry;
+}
+
+/** `includeConfig` targets in `text`, ignoring any that sit inside `profiles { }`. */
+function unscopedIncludeTargets(text: string): string[] {
+  return includeConfigTargets(maskNamedBlocks(text, "profiles"));
+}
+
+function enqueueIncludes(
+  text: string,
+  baseDir: string,
+  depth: number,
+  pipelineRoot: string,
+  seen: Set<string>,
+  queue: { path: string; depth: number; profile: string | null }[],
+  profile: string | null,
+): void {
+  if (depth >= MAX_INCLUDE_CONFIG_DEPTH) return;
+  for (const target of unscopedIncludeTargets(text)) {
+    if (target.includes("$")) continue;
+    const next = resolve(baseDir, target);
+    if (!existsSync(next) || seen.has(next)) continue;
+    if (NON_PIPELINE_CONFIG_DIR.test(relative(pipelineRoot, next))) continue;
+    queue.push({ path: next, depth: depth + 1, profile });
+  }
+}
+
+function selectorsIn(text: string, config: string, profile: string | null): ScopedSelector[] {
+  return parseProcessSelectors(maskNamedBlocks(text, "profiles")).map((selector) => ({
+    ...selector,
+    config,
+    profile,
+  }));
+}
+
+/**
+ * Root-chain selectors, plus selectors from each selected profile's body and
+ * the `includeConfig` files that body reaches. The first declaration of a
+ * profile name wins, matching `parseProfiles`.
+ */
+function collectScopedSelectors(
+  pipelineRoot: string,
+  selectedProfiles: string[],
+): ScopedSelector[] {
+  const rootConfig = join(pipelineRoot, "nextflow.config");
+  const selectors: ScopedSelector[] = [];
+  const seen = new Set<string>();
+  const queue: { path: string; depth: number; profile: string | null }[] = [];
+  if (existsSync(rootConfig)) queue.push({ path: rootConfig, depth: 0, profile: null });
+
+  const wanted = new Set(selectedProfiles);
+  const profileBodies: { body: string; config: string; depth: number; profile: string }[] = [];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (seen.has(current.path)) continue;
+    seen.add(current.path);
+    const rel = relative(pipelineRoot, current.path);
+    if (NON_PIPELINE_CONFIG_DIR.test(rel)) continue;
+    const text = maskNextflowComments(readText(current.path));
+    const config = rel || "nextflow.config";
+    selectors.push(...selectorsIn(text, config, null));
+    if (wanted.size > 0) {
+      const block = extractNamedBlockBody(text, "profiles");
+      if (block) {
+        for (const profile of profileBlocks(block)) {
+          if (!wanted.has(profile.name)) continue;
+          if (profileBodies.some((found) => found.profile === profile.name)) continue;
+          profileBodies.push({
+            body: profile.body,
+            config,
+            depth: current.depth,
+            profile: profile.name,
+          });
+        }
+      }
+    }
+    enqueueIncludes(text, dirname(current.path), current.depth, pipelineRoot, seen, queue, null);
+  }
+
+  const profileSeen = new Set(seen);
+  const profileQueue: { path: string; depth: number; profile: string | null }[] = [];
+  for (const profile of profileBodies) {
+    selectors.push(...selectorsIn(profile.body, profile.config, profile.profile));
+    enqueueIncludes(
+      profile.body,
+      dirname(join(pipelineRoot, profile.config)),
+      profile.depth,
+      pipelineRoot,
+      profileSeen,
+      profileQueue,
+      profile.profile,
+    );
+  }
+  while (profileQueue.length > 0) {
+    const current = profileQueue.shift()!;
+    if (profileSeen.has(current.path)) continue;
+    profileSeen.add(current.path);
+    const rel = relative(pipelineRoot, current.path);
+    if (NON_PIPELINE_CONFIG_DIR.test(rel)) continue;
+    const text = maskNextflowComments(readText(current.path));
+    selectors.push(...selectorsIn(text, rel, current.profile));
+    enqueueIncludes(
+      text,
+      dirname(current.path),
+      current.depth,
+      pipelineRoot,
+      profileSeen,
+      profileQueue,
+      current.profile,
+    );
+  }
+  return selectors;
+}
+
+interface SelectorBlock {
+  kind: "withName" | "withLabel";
+  pattern: string;
+  body: string;
+}
+
+function parseProcessSelectors(text: string): SelectorBlock[] {
+  const selectors: SelectorBlock[] = [];
+  for (const match of text.matchAll(/\bprocess\s*\{/gu)) {
+    const open = match.index + match[0].lastIndexOf("{");
+    const body = extractBlockAt(text, open);
+    if (body === null) continue;
+    for (const selector of body.matchAll(/\b(withName|withLabel)\s*:\s*/gu)) {
+      const parsed = readSelectorPattern(body, selector.index + selector[0].length);
+      if (parsed === null) continue;
+      let brace = parsed.end;
+      while (brace < body.length && /\s/u.test(body[brace]!)) brace += 1;
+      if (body[brace] !== "{") continue;
+      const inner = extractBlockAt(body, brace);
+      if (inner === null) continue;
+      selectors.push({
+        kind: selector[1] === "withLabel" ? "withLabel" : "withName",
+        pattern: parsed.pattern,
+        body: inner,
+      });
+    }
+  }
+  return selectors;
+}
+
+function readSelectorPattern(text: string, start: number): { pattern: string; end: number } | null {
+  let index = start;
+  while (index < text.length && /\s/u.test(text[index]!)) index += 1;
+  const quote = text[index];
+  if (quote === "'" || quote === '"') {
+    let pattern = "";
+    for (let cursor = index + 1; cursor < text.length; cursor += 1) {
+      const char = text[cursor]!;
+      if (char === "\\") {
+        pattern += text[cursor + 1] ?? "";
+        cursor += 1;
+        continue;
+      }
+      if (char === quote) return { pattern, end: cursor + 1 };
+      pattern += char;
+    }
+    return null;
+  }
+  const match = /^[^\s{]+/u.exec(text.slice(index));
+  if (match === null) return null;
+  return { pattern: match[0], end: index + match[0].length };
+}
+
+function parseProcessLabels(body: string): string[] {
+  return [...body.matchAll(/\blabel\s+(?:(['"])([^'"]+)\1|([A-Za-z_][A-Za-z0-9_]*))/gu)].map(
+    (match) => match[2] ?? match[3]!,
+  );
+}
+
+function selectorMatchesProcess(
+  kind: "withName" | "withLabel",
+  pattern: string,
+  process: Process,
+): boolean {
+  if (kind === "withLabel") {
+    const labels = process.labels ?? [];
+    if (!isRegexSelector(pattern)) return labels.includes(pattern);
+    const regex = compileSelector(pattern);
+    return regex !== null && labels.some((label) => regex.test(label));
+  }
+  const names = [process.name, ...process.aliases];
+  const candidates = [
+    ...names,
+    ...process.in_subworkflows.flatMap((subworkflow) =>
+      names.map((name) => `${subworkflow}:${name}`),
+    ),
+    ...names.map((name) => `workflow:${name}`),
+  ];
+  if (isRegexSelector(pattern)) {
+    const regex = compileSelector(pattern);
+    if (regex !== null && candidates.some((candidate) => regex.test(candidate))) return true;
+  } else if (candidates.includes(pattern)) {
+    return true;
+  }
+  const last = pattern.split(":").at(-1) ?? "";
+  return last.length > 0 && !isRegexSelector(last) && names.includes(last);
+}
+
+function isRegexSelector(pattern: string): boolean {
+  return /[.+*?^$()[\]\\|]/u.test(pattern);
+}
+
+function compileSelector(pattern: string): RegExp | null {
+  if (pattern.length > 200) return null;
+  try {
+    return new RegExp(`^(?:${pattern})$`, "u");
+  } catch {
+    return null;
+  }
+}
+
+function extractAssignments(body: string, namePattern: string): string[] {
+  const regex = new RegExp(`(?:^|[\\n;])[\\t ]*${namePattern}\\s*=`, "gu");
+  const values: string[] = [];
+  for (const match of body.matchAll(regex)) {
+    const value = readConfigExpression(body, match.index + match[0].length);
+    if (value) values.push(value);
+  }
+  return values;
+}
+
+function readConfigExpression(text: string, start: number): string | null {
+  let index = start;
+  while (index < text.length && /\s/u.test(text[index]!)) index += 1;
+  if (index >= text.length) return null;
+  const opener = text[index]!;
+  if (opener === "'" || opener === '"') {
+    const quoted = readQuoted(text, index, opener);
+    return quoted.length > 0 ? quoted : null;
+  }
+  if (opener === "{" || opener === "[" || opener === "(") {
+    const end = scanBalanced(text, index);
+    if (end === null) return null;
+    const value = dedentBlock(text.slice(index, end).trim());
+    return value.length > 0 ? value : null;
+  }
+  const lineEnd = text.indexOf("\n", index);
+  const value = text.slice(index, lineEnd === -1 ? text.length : lineEnd).trim();
+  return value.length > 0 ? value : null;
+}
+
+function readQuoted(text: string, start: number, quote: "'" | '"'): string {
+  if (text[start + 1] === quote && text[start + 2] === quote) {
+    const token = quote.repeat(3);
+    const close = text.indexOf(token, start + 3);
+    return close === -1 ? text.slice(start) : text.slice(start, close + 3);
+  }
+  for (let cursor = start + 1; cursor < text.length; cursor += 1) {
+    if (text[cursor] === "\\") {
+      cursor += 1;
+      continue;
+    }
+    if (text[cursor] === quote) return text.slice(start, cursor + 1);
+  }
+  return text.slice(start);
+}
+
+function scanBalanced(text: string, openIndex: number): number | null {
+  const closers: Record<string, string> = { "{": "}", "[": "]", "(": ")" };
+  const stack = [closers[text[openIndex]!]!];
+  let quote: "'" | '"' | "'''" | '"""' | null = null;
+  for (let index = openIndex + 1; index < text.length; index += 1) {
+    const char = text[index]!;
+    const next = text[index + 1];
+    const nextTwo = text[index + 2];
+    if (quote) {
+      if ((quote === "'" || quote === '"') && char === "\\") {
+        index += 1;
+        continue;
+      }
+      if (quote.length === 3) {
+        if (char === quote[0] && next === quote[0] && nextTwo === quote[0]) {
+          quote = null;
+          index += 2;
+        }
+      } else if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+    if ((char === "'" || char === '"') && next === char && nextTwo === char) {
+      quote = char === "'" ? "'''" : '"""';
+      index += 2;
+      continue;
+    }
+    if (char === "'" || char === '"') {
+      quote = char;
+      continue;
+    }
+    if (char === "{" || char === "[" || char === "(") {
+      stack.push(closers[char]!);
+      continue;
+    }
+    if (char === "}" || char === "]" || char === ")") {
+      if (stack.at(-1) !== char) return null;
+      stack.pop();
+      if (stack.length === 0) return index + 1;
+    }
+  }
+  return null;
+}
+
+function dedentBlock(text: string): string {
+  const lines = text.split("\n");
+  if (lines.length === 1) return text.trim();
+  const indents = lines
+    .filter((line) => line.trim())
+    .map((line) => line.length - line.trimStart().length);
+  const indent = Math.min(...indents);
+  return lines
+    .map((line) => line.slice(indent))
+    .join("\n")
+    .trim();
+}
+
+function resolveProcessTemplate(
+  pipelineRoot: string,
+  process: Process,
+): { template: ProcessTemplate | null; warning?: string } {
+  const excerpt = process.script_excerpt?.trim() ?? "";
+  const match = /^template\s+(['"])([^'"]+)\1\s*$/u.exec(excerpt);
+  if (match === null) return { template: null };
+  const filename = match[2]!;
+  const moduleDir = dirname(join(pipelineRoot, process.module_path));
+  const candidates = [join(moduleDir, "templates", filename), join(moduleDir, filename)];
+  const found = candidates.find((path) => existsSync(path));
+  if (!found) {
+    return {
+      template: {
+        path: relative(pipelineRoot, candidates[0]!),
+        line_count: 0,
+        body: "",
+      },
+      warning: `template not found for ${process.name}: ${filename}`,
+    };
+  }
+  const body = readText(found);
+  return {
+    template: {
+      path: relative(pipelineRoot, found),
+      line_count: countLines(body),
+      body,
+    },
+  };
+}
+
+function countLines(body: string): number {
+  if (body.length === 0) return 0;
+  const parts = body.split("\n");
+  return body.endsWith("\n") ? parts.length - 1 : parts.length;
 }
 
 const SCRIPT_EXCERPT_LIMIT = 4000;
