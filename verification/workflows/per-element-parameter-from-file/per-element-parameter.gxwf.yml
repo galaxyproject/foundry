@@ -1,0 +1,43 @@
+class: GalaxyWorkflow
+label: "Per-element tool parameter"
+inputs:
+  - id: reads
+    type: collection
+    collection_type: list
+  - id: per_element_count
+    type: collection
+    collection_type: list
+outputs:
+  - id: heads
+    outputSource: head/out_file1
+steps:
+  - id: read_count
+    label: read_count
+    tool_id: param_value_from_file
+    tool_version: 0.1.0
+    in:
+      - id: input1
+        source: per_element_count
+    out:
+      - id: integer_param
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      param_type: integer
+      remove_newlines: true
+  - id: head
+    label: head
+    tool_id: Show beginning1
+    tool_version: 1.0.2
+    in:
+      - id: input
+        source: reads
+      - id: lineNum
+        source: read_count/integer_param
+    out:
+      - id: out_file1
+    tool_state:
+      input:
+        __class__: ConnectedValue
+      lineNum:
+        __class__: ConnectedValue

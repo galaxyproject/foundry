@@ -6,9 +6,9 @@
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 14,
     "content_hash": "fb165bc84ff86fac13fe971c5d1355370bde727ff7fb56f46c590b4b0bd96009",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "commit": "e72d75cb3a429974045ab4c5b48002b1458dfbf3"
   },
-  "cast_at": "2026-11-10T10:22:51.715Z",
+  "cast_at": "2026-11-10T17:10:22.970Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -202,8 +202,8 @@
       "evidence": "corpus-observed",
       "purpose": "Check whether a concrete tool input/output can preserve the intended source-derived Galaxy collection shape.",
       "trigger": "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs.",
-      "src_hash": "32efd59cc86563b145819cda38f0692bdd3144aac10ae831dc6d8accd9dcda8d",
-      "dst_hash": "32efd59cc86563b145819cda38f0692bdd3144aac10ae831dc6d8accd9dcda8d",
+      "src_hash": "432c6c59eaec5494f7c2789980a6f2495136b285eb17eb59161437ff89b706dd",
+      "dst_hash": "432c6c59eaec5494f7c2789980a6f2495136b285eb17eb59161437ff89b706dd",
       "source": "deterministic"
     },
     {

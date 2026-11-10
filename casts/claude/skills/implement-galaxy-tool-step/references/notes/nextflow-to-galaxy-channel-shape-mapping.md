@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-06
-revision: 2
+revised: 2026-11-10
+revision: 3
 related_notes:
   - "[[nextflow-workflow-io-semantics]]"
   - "[[nextflow-params-to-galaxy-inputs]]"
@@ -25,6 +25,10 @@ related_notes:
   - "[[relabel-via-rules-and-find-replace]]"
   - "[[reshape-relabel-remap-by-collection-axis]]"
   - "[[sync-collections-by-identifier]]"
+  - "[[harmonize-by-sortlist-from-identifiers]]"
+  - "[[derive-parameter-from-file]]"
+  - "[[conditional-route-between-alternative-outputs]]"
+  - "[[open-requirements-ledger]]"
   - "[[tabular-compute-new-column]]"
   - "[[tabular-concatenate-collection-to-table]]"
   - "[[tabular-cut-and-reorder-columns]]"
@@ -48,6 +52,7 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 sources:
   - "https://github.com/galaxyproject/foundry/issues/52"
+  - "https://github.com/galaxyproject/foundry/issues/757"
 summary: "Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes."
 ---
 
@@ -60,7 +65,7 @@ This note maps source-level Nextflow channel shapes onto Galaxy data and dataset
 | Nextflow shape | Galaxy shape | Confidence | Notes |
 |---|---|---|---|
 | `path(x)` or a single `Channel.fromPath(...).first()` | `File` | High | One dataset input or output. |
-| `val(meta)` alone | No dataset shape | High | Treat as identifiers, labels, tags, sample-sheet metadata, or parameters. It is not a Galaxy dataset by itself. |
+| `val(meta)` alone | No dataset shape | High | Treat as identifiers, labels, tags, sample-sheet metadata, or parameters. It is not a Galaxy dataset by itself. For a value computed per sample and read back as a parameter, see "Per-element parameters from `meta`" below. |
 | Repeated `tuple val(meta), path(file)` | `list` | High | One dataset per sample/key. Galaxy maps tools over list collections. |
 | One `tuple(meta, [R1, R2])` | `paired` | High | Use only when the workflow input is one paired sample or one tool consumes one pair. |
 | Repeated `tuple(meta, [R1, R2])` | `list:paired` | High | Common paired-end workflow input shape. |
@@ -94,6 +99,36 @@ Use explicit Galaxy collection-operation or tabular steps when the translation c
 | Remove empty, failed, or null elements after fan-out | filter empty/failed/null collection tools |
 | Unbox a singleton collection | `__EXTRACT_DATASET__` |
 | Convert a collection of tabular outputs to one table | `collapse_dataset` or `collection_column_join` |
+
+## Per-element parameters from `meta`
+
+nf-core pipelines often compute a value per sample, write it into `meta`, and read it as a parameter in that sample's later processes. nf-core/rnaseq's `strandedness: auto` path sets `meta.strandedness` this way. The rows above change the data. This route changes a tool parameter per element and leaves the data as it is.
+
+Keep the value as one dataset per element, in a collection with the same structure and order as the data collection. Map `param_value_from_file` over it, set `param_type` to match the target parameter, and connect the typed output (`integer_param`, `float_param`, `text_param` or `boolean_param`) to the downstream step that maps over the data collection:
+
+```text
+per-element values (list) ──> param_value_from_file (mapped) ──> integer_param ──┐
+                                                                                 ▼
+reads (list) ──────────────────────────────────────────────> downstream tool (mapped, parameter)
+```
+
+Galaxy runs one job per element, and each job gets its own element's value. [[derive-parameter-from-file]] covers the `param_value_from_file` step itself.
+
+Galaxy pairs the two collections by position, not by element identifier. Produce the values with a step mapped over the data collection itself, so they inherit its order. When they arrive as a separate collection, reorder them with [[harmonize-by-sortlist-from-identifiers]] first. A same-length collection in another order runs without error and gives each element a different element's value.
+
+| Value reaches | Evidence | Status |
+|---|---|---|
+| Integer tool parameter | `verification/workflows/per-element-parameter-from-file/`, values 1 and 3 on two elements | Verified |
+| Text tool parameter | Galaxy's `lib/galaxy_test/workflow/map_over_expression.gxwf.yml` | Verified |
+| Per-element `when` (boolean) | Galaxy's API test `test_run_workflow_conditional_step_map_over_expression_tool` skips one of two elements | Verified |
+| Parameter inside a tool conditional's case | IWC `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun`: "split min value", "convert min nb of reads to parameter", then `samtools_view` `target` in "select random reads" | Wiring only, values identical across elements |
+| `select` parameter | None | Not tested |
+| A tool conditional's test parameter | Conflicting reports in [#661](https://github.com/galaxyproject/foundry/issues/661) and [#667](https://github.com/galaxyproject/foundry/issues/667). Salmon's `--libType` needs this edge | Open |
+
+When the target parameter's row isn't verified, fall back in this order:
+
+1. For a small fixed set of values, gate one branch per value with a per-element `when` and give each branch's step a fixed parameter. Rejoin the branches per [[conditional-route-between-alternative-outputs]].
+2. Otherwise, expose one workflow-level parameter for all elements and append a `kind: dropped` entry to the [[open-requirements-ledger]] naming the per-element variation. Expose the computing step's output as a workflow output so a user can run once, read the computed values, and re-run with the value they choose.
 
 ## Evidence
 
