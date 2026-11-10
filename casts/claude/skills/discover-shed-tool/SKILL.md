@@ -46,13 +46,13 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 Discover whether the Galaxy Tool Shed already publishes a wrapper for the tool a workflow step needs, and resolve the discovery to a `(owner, repo, tool_id, version, changeset_revision)` quintuple that downstream steps can pin and cache.
 
-This skill is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the skill recommends a pin and exits successfully. On a miss, it falls through to author-galaxy-tool-wrapper; a `weak` hit is confirmed, not authored around. The branch itself is harness logic; this skill owns only the discovery half.
+This skill is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the skill recommends a pin and exits successfully. On a miss, it falls through to author-galaxy-tool-wrapper. The branch itself is harness logic; this skill owns only the discovery half.
 
 ### Inputs
 
 The skill expects, per step:
 
-- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences). Name the source executable when there is one: a search for the operation alone can miss its wrapper.
+- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences). It names the source executable when there is one.
 - Optional **owner hint** (e.g. `devteam`, `iuc`) when the caller has a strong prior.
 - Optional **exact-name hint** when the caller knows the canonical XML id.
 
@@ -84,10 +84,10 @@ A structured recommendation object, JSON-shaped:
 
 `status` semantics:
 - `hit` — recommend pinning. Caller should cache and proceed.
-- `weak` — candidate exists but the skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller confirms the candidate, then summarizes it. A `weak` result never falls through to authoring.
+- `weak` — candidate exists but the skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller confirms the candidate before pinning; it never falls through to authoring.
 - `miss` — no wrapper runs the executable or operation the need names. Caller falls through to author-galaxy-tool-wrapper.
 
-Classify on whether a wrapper runs what the need names, not on whether it fits the step. Fit depends on the step's ports and consumers, which discovery doesn't see. implement-galaxy-tool-step checks fit after summarize-galaxy-tool and records a misfit in the ledger. So a wrapper that runs the named executable is a `hit` or `weak`, never a `miss`, even when the rationale doubts its fit.
+Classify on what a wrapper runs, not on fit. Fit depends on the step's ports, which discovery doesn't see, and implement-galaxy-tool-step checks it after summarize. A wrapper that runs the named executable is never a `miss`.
 
 ### Procedure
 
@@ -95,7 +95,7 @@ The skill follows the gxwf-shaped discover-and-pin chain. **It does not call the
 
 #### 1. Search
 
-Issue tool-search with the need's keywords. Start narrow:
+Issue tool-search with the need's keywords, and with the executable when the need names one. Start narrow:
 
 ```
 gxwf tool-search "<keywords>" --json --max-results 10
@@ -113,7 +113,7 @@ For each hit, score on:
 - **Recency.** Recent `last_updated` strengthens a hit; very old wrappers can still be valid but warrant the `weak` classification.
 - **Duplicates across repos.** Two owners can publish wrappers with the same XML id. Either pick the maintained one or downgrade to `weak` and surface the choice.
 
-Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see component-tool-shed-search §6.
+Drop data-manager hits (usually `data_manager_*` repos): they're admin-only and write a tool data table, not a dataset a step can consume. Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see component-tool-shed-search §6.
 
 #### 3. Resolve to a pinnable version
 

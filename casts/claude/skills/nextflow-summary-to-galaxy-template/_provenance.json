@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 10,
     "content_hash": "77f885d640900cca7dac4a3bbb33308d4d8065e871c919c672487db61caf93ab",
-    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
+    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
   },
-  "cast_at": "2026-11-10T10:05:12.743Z",
+  "cast_at": "2026-11-10T10:22:51.890Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -200,8 +200,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
-      "dst_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
+      "src_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
+      "dst_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
       "source": "deterministic"
     },
     {

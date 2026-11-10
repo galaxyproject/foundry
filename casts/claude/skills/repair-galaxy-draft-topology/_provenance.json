@@ -4,11 +4,11 @@
   "mold": {
     "name": "repair-galaxy-draft-topology",
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
-    "revision": 6,
-    "content_hash": "6750f1a3b845f099552ed5b3eb5255436c0462b9a97553f3c682e2130086928e",
-    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
+    "revision": 7,
+    "content_hash": "692708480037be9680eda6be70c7fa2fd93604037432f7d94b6363266a6ca25e",
+    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
   },
-  "cast_at": "2026-11-10T10:05:12.848Z",
+  "cast_at": "2026-11-10T10:22:52.006Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -134,8 +134,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit added or replaced steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
       "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
-      "src_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
-      "dst_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
+      "src_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
+      "dst_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
       "source": "deterministic"
     },
     {

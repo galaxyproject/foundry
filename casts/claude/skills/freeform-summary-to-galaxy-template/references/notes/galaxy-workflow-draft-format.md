@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-06
-revised: 2026-11-06
-revision: 5
+revised: 2026-11-10
+revision: 6
 related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-data-flow-draft-contract]]"
@@ -122,7 +122,7 @@ The template Mold settles topology, but a settled draft can still be unable to g
 
 When one surfaces, the per-step loop does not author topology to fix it. It **escalates**:
 
-- [[implement-galaxy-tool-step]] detects, while implementing, that the declared output can't be computed from the wired inputs. It appends a blocking entry to the [[open-requirements-ledger]] and falls through rather than fabricating the output. Earlier Molds and the loop raise blocking entries too.
+- [[implement-galaxy-tool-step]] detects, while implementing, that the declared output can't be computed from the wired inputs, or that the chosen wrapper can't produce it. It appends a blocking entry to the [[open-requirements-ledger]] and falls through rather than fabricating the output. Earlier Molds and the loop raise blocking entries too.
 - [[repair-galaxy-draft-topology]] — a template-tier Mold sharing the template's reference set — reads the blocking entries and makes the smallest structural edits that close them. New steps land at draft (wrapper-tier `TODO`) tier, so the existing discover-or-author → implement machinery realizes them.
 
 This is **repair**, distinct from **settling**: it is narrow (the entries bound it), reactive (an open blocking entry triggers it), and bounded. The loop's convergence gate counts open blocking entries in the ledger; each repair must leave fewer than it found, under a hard cap on escalations. When the cap is reached with entries still open, they are **surrendered** — written into the final draft as labelled gaps — the clean terminal that replaces spin-or-fabricate. So the boundary "topology decisions do not belong in the per-step loop" still holds: the loop never decides topology, it returns the decision to the template tier.

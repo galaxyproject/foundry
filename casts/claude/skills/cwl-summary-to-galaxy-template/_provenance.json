@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "b14eef623c16859a525a138e7fd4beddbb5cf8568ab9f4c1cdb9b12fc7803a44",
-    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
+    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
   },
-  "cast_at": "2026-11-10T10:05:12.365Z",
+  "cast_at": "2026-11-10T10:22:51.464Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -196,8 +196,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
-      "dst_hash": "e9b84eeb50cac23f70837e3ed73afe787213b49c06e82606540433f414b56fec",
+      "src_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
+      "dst_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
       "source": "deterministic"
     },
     {
