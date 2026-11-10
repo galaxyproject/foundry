@@ -1948,6 +1948,7 @@ workflow PIPE {
               fasta: { type: "string", format: "file-path" },
               fasta_sheet: { type: "string", format: "file-path" },
               igenomes_base: { type: "string", format: "directory-path" },
+              pipelines_testdata_base_path: { type: "string", format: "directory-path" },
             },
           },
         },

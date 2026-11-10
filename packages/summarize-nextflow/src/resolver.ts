@@ -1677,6 +1677,7 @@ const NON_REFERENCE_PARAMS = new Set([
   "hook_url",
   "custom_config_base",
   "igenomes_base",
+  "pipelines_testdata_base_path",
 ]);
 
 function isNonReferenceParam(name: string): boolean {

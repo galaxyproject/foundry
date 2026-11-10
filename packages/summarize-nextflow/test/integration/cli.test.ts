@@ -851,6 +851,8 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
     expect(byName.fasta!.asset_kind).toBe("fasta");
     expect(byName.gtf!.asset_kind).toBe("gtf");
     expect(byName.gff!.asset_kind).toBe("gff");
+    expect(byName.pipelines_testdata_base_path).toBeUndefined();
+    expect(assets).toHaveLength(20);
   });
 
   itIfRnaseqFixture(
@@ -1095,9 +1097,18 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/sarek)", () => 
       expect(validation.valid).toBe(true);
 
       const assetParams = (data.reference_assets as { param: string }[]).map((a) => a.param);
-      for (const expected of ["fasta", "fasta_fai", "dict", "bwa"]) {
+      for (const expected of [
+        "fasta",
+        "fasta_fai",
+        "dict",
+        "bwa",
+        "condel_config",
+        "mastermind_file",
+      ]) {
         expect(assetParams).toContain(expected);
       }
+      expect(assetParams).not.toContain("pipelines_testdata_base_path");
+      expect(assetParams).toHaveLength(48);
       const fasta = (data.reference_assets as { param: string; used_by: string[] }[]).find(
         (a) => a.param === "fasta",
       );
