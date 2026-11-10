@@ -38,6 +38,7 @@ The roadmap is an editorial view over the Foundry's GitHub issues. The checked-i
 - [#40 — Write IWC exemplar match schema](https://github.com/galaxyproject/foundry/issues/40).
 - [#225 — Document Galaxy list-of-record collections for reference data](https://github.com/galaxyproject/foundry/issues/225).
 - [#308 — Design a Claude dynamic-workflow projection for Foundry Pipelines](https://github.com/galaxyproject/foundry/issues/308).
+- [#768 — FAIRness review for Galaxy workflows: a checklist, a review Mold, and Galaxy integration](https://github.com/galaxyproject/foundry/issues/768).
 
 ## Work areas
 
@@ -166,3 +167,11 @@ Research Galaxy's record-shaped collection types as a possible representation fo
 ### [#308 — Design a Claude dynamic-workflow projection for Foundry Pipelines](https://github.com/galaxyproject/foundry/issues/308)
 
 Evaluate how Foundry Pipeline phase graphs, branches, loops, typed handoffs, and validation gates could compile into Claude dynamic workflow scripts without moving harness responsibility into the Foundry or duplicating orchestration semantics in another source format.
+
+### [#768 — FAIRness review for Galaxy workflows: a checklist, a review Mold, and Galaxy integration](https://github.com/galaxyproject/foundry/issues/768)
+
+Evaluate Galaxy workflows against the FAIR principles for computational workflows (Wilkinson et al. 2025) with a FAIRness checklist and review Mold, check that workflows ported from other systems are at least as FAIR as their source, and propose how Galaxy shows the results.
+
+**Substeps**
+
+- [ ] [#774 — IWC corpus survey of FAIR metadata coverage](https://github.com/galaxyproject/foundry/issues/774)
