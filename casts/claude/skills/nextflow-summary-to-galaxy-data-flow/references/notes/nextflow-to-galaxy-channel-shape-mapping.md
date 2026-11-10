@@ -125,7 +125,7 @@ Galaxy runs one job per element and pairs the two collections by position, not b
 | Float tool parameter | None | Not tested |
 | A tool conditional's test parameter | [#661](https://github.com/galaxyproject/foundry/issues/661) reports a Galaxy 500 when one is connected. [#667](https://github.com/galaxyproject/foundry/issues/667) reports a workflow connecting one that runs on usegalaxy.org | Open |
 
-Use this route for every target except the Open row, and cover a Wiring only or Not tested target with a workflow test whose elements carry different values. rnaseq's strandedness reaches both kinds of target. featureCounts' `strand_specificity` is a `select` and takes this route. Salmon's `--libType` is `strandedness`, the test parameter of its `libtype` conditional, and takes the fallback.
+Use this route for every target except the Open row, and cover a Wiring only or Not tested target with a workflow test whose elements carry different values. rnaseq's strandedness reaches both kinds of target. featureCounts' `strand_specificity` is a `select` and takes this route. A `select` takes an option value, not the source's string, so translate first: featureCounts' options are `0`, `1` and `2`, where rnaseq writes `unstranded`, `forward` and `reverse`. [[map-workflow-enum-to-tool-parameter]] does this with `map_param_value`, which hasn't been tested mapped over elements. Salmon's `--libType` is `strandedness`, the test parameter of its `libtype` conditional, and takes the fallback.
 
 For a conditional's test parameter, or when a workflow test of this route fails, fall back in this order:
 

@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
     "revision": 6,
     "content_hash": "43966773391578490688098c9333f6eb2eaa94574755f5b6554e7f9b72a605c0",
-    "commit": "15360ffdbaba03007e2dc4b254be697eabdf192e"
+    "commit": "61da115975d155a36face0e83d5c28f638da7fca"
   },
-  "cast_at": "2026-11-10T18:38:01.981Z",
+  "cast_at": "2026-11-10T18:57:18.730Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -112,8 +112,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Choose Galaxy File/list/paired/list:paired/list:list interface shapes from Nextflow channel shapes.",
-      "src_hash": "7dcb4b500bfb49eef6fe62110c3d6ff4cd14b79cee5cf917cbee0fab295e91be",
-      "dst_hash": "7dcb4b500bfb49eef6fe62110c3d6ff4cd14b79cee5cf917cbee0fab295e91be",
+      "src_hash": "e8d9515c9ae7da29188e8744410d8459e7ee9acd48af550216076fcf7a02b73b",
+      "dst_hash": "e8d9515c9ae7da29188e8744410d8459e7ee9acd48af550216076fcf7a02b73b",
       "source": "deterministic"
     },
     {
