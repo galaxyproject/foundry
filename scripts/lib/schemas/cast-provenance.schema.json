@@ -159,6 +159,10 @@
           "type": "string",
           "description": "Bundle-relative dst of the parent note when this ref is a sibling companion file copied alongside it."
         },
+        "expanded_from": {
+          "type": "string",
+          "description": "Bundle-relative dst of the declared ref whose expansion brought this one in, such as the pattern map of content that lists this leaf pattern."
+        },
         "license": {
           "type": "string",
           "description": "License id of the upstream work this ref draws on, from the source note's frontmatter. Its presence alone does not mean upstream expression is redistributed; see derived."

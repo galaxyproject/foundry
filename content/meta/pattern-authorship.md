@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-05-01
-revised: 2026-07-30
-revision: 4
+revised: 2026-10-31
+revision: 5
 summary: "Developer-facing authorship rules for operation-named, corpus-grounded pattern pages."
 ---
 
@@ -22,7 +22,7 @@ Use `pattern_kind` to describe the level of organization:
 
 - `operation` — an actionable pattern centered on one workflow-construction operation. It may link to related operations but should not require a multi-step lifecycle to explain its core move.
 - `recipe` — an actionable pattern centered on an ordered composition of operations. Use this when the reusable value is sequencing, handoff, and decision points across multiple lower-level operations.
-- `moc` — a map-of-content page that routes readers to operations and recipes. It should not own a primary construction recipe.
+- `moc` — a map-of-content page that routes readers to operations and recipes. It should not own a primary construction recipe. List every leaf pattern its body links in `related_patterns`: a cast that ships the map ships those pages beside it, and validation rejects a body link the field omits. Links to sibling maps are exempt, because a sibling map ships only when a Mold declares it.
 
 ## Naming: operation- and recipe-anchored
 

@@ -85,6 +85,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-interval-patterns]] | Use this MOC to choose corpus-grounded Galaxy genomic interval operations and recipes on coordinate features. | draft | 2026-10-31 | 5 |
 | [[relabel-via-rules-and-find-replace]] | Relabel the inner level of a list:list by swapping it to the top with Apply Rules, relabeling from a find/replace-built table, and swapping back. | draft | 2026-10-22 | 3 |
 | [[collection-cleanup-after-mapover-failure]] | Drop or replace empty or failed elements after map-over with FILTER_EMPTY or FILTER_FAILED before the next collection step. | draft | 2026-10-21 | 3 |
 | [[conditional-transform-or-pass-through]] | Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise. | draft | 2026-10-21 | 3 |
@@ -104,7 +105,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[tabular-group-and-aggregate-with-datamash]] | Group tabular rows by one-based key columns, sort when needed, and choose Datamash operations and header settings from the intended result. | draft | 2026-09-29 | 3 |
 | [[tabular-compute-new-column]] | Append, insert, or replace computed columns with column_maker (Add_a_column1), using a shared input-typing policy and explicit failure handling. | draft | 2026-09-28 | 5 |
 | [[tabular-join-on-key]] | Join tabular files by key with explicit matched-row, missing-value, header, and duplicate-key policies. | draft | 2026-09-28 | 3 |
-| [[galaxy-interval-patterns]] | Use this MOC to choose corpus-grounded Galaxy genomic interval operations and recipes on coordinate features. | draft | 2026-09-23 | 4 |
 | [[galaxy-sequence-patterns]] | Use this MOC to choose corpus-grounded Galaxy operations on sequence records (FASTA) — interconvert, reformat, merge, length, extract/mask by region. | draft | 2026-09-23 | 4 |
 | [[collection-split-identifier-via-rules]] | Use Apply Rules regex columns to split one collection identifier into nested list identifiers. | draft | 2026-09-15 | 3 |
 | [[harmonize-by-sortlist-from-identifiers]] | Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers. | draft | 2026-09-15 | 3 |
