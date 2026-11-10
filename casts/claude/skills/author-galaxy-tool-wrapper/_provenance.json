@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 7,
-    "content_hash": "9902b753cdc5228221107dd8c26785173985734aab8775380ab8a3529e93d7c7",
-    "commit": "7cbb53a2107d14c2458218eb9799c9f34949ef7d"
+    "revision": 8,
+    "content_hash": "77446daafedbcc6754902533a0280d2f0418d1bb8f92e042562404dbc75c9023",
+    "commit": "12aad7c98367138bb26e2ee2d0fff08e6ead6dc8"
   },
-  "cast_at": "2026-10-23T22:57:05.239Z",
+  "cast_at": "2026-11-10T16:48:12.358Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -127,6 +127,14 @@
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "galaxy-tool-pin",
+        "description": "The [[discover-shed-tool]] result for the step.",
+        "inherited_schema": "[[galaxy-tool-discovery]]",
+        "producers": [
+          "discover-shed-tool"
         ]
       }
     ]
