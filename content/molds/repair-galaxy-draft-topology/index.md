@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-11-06
-revision: 6
+revised: 2026-11-10
+revision: 7
 summary: "Make the smallest structural edit that closes an open blocking entry in a settled Galaxy draft."
 input_artifacts:
   - id: galaxy-workflow-draft
@@ -115,7 +115,7 @@ related_molds:
 ---
 # repair-galaxy-draft-topology
 
-Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop doesn't edit it. This Mold makes the structural edits a settled draft still needs. It runs on an open blocking entry in the [[open-requirements-ledger]]: the settled draft can't give a correct run, and a structural edit closes it. A missing wrapper is this case only when the discover-or-author branch is exhausted: no stock, shed or authored wrapper can produce the step's declared output from its wired inputs, or the ledger already records the wrapper as confirmed absent. A tool version missing from a local cache is not absence. When the ledger records absence, don't search again. A chosen wrapper that can't produce one of the step's declared outputs is this case too, whatever other wrappers might do: an `add-step` carries that output, and the loop resolves its wrapper later.
+Topology is settled upstream by the `*-summary-to-galaxy-template` Mold, and the per-step loop doesn't edit it. This Mold makes the structural edits a settled draft still needs. It runs on an open blocking entry in the [[open-requirements-ledger]]: the settled draft can't give a correct run, and a structural edit closes it. A missing wrapper is this case only when the discover-or-author branch is exhausted: no stock, shed or authored wrapper can produce the step's declared output from its wired inputs, or the ledger already records the wrapper as confirmed absent. A tool version missing from a local cache is not absence. When the ledger records absence, don't search again. A chosen wrapper that can't produce one of the step's declared outputs is this case too, whatever other wrappers might do: an `add-step` carries that output, and the loop resolves its wrapper later. When the entry shows a consumer's wrapper does the step's work itself, as `rna_star` builds its index from a genome in the history, fold instead: `remove-step`, `rewire` its inputs to the consumers, and `change-parameter` on the consumers to select that mode. An added producer for the same work would raise the entry again.
 
 Decide the edit from the entry, the surrounding data-flow design ([[galaxy-data-flow-draft-contract]]), IWC structure, and the pattern pages.
 

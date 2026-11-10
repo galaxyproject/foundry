@@ -112,10 +112,10 @@ Properties are tagged by bucket:
 - bucket: routing
 - check: llm-judged
 - assertion: the skill invokes [[author-galaxy-tool-wrapper]] only when
-  [[discover-shed-tool]] returns `miss`, and then rather than guessing a
-  wrapper. A `weak` candidate is confirmed and summarized. A found wrapper that
-  can't serve the step reaches [[repair-galaxy-draft-topology]] through a
-  blocking entry naming it. Authoring in either case is a failure.
+  [[discover-shed-tool]] returns `miss`. Authoring after a confirmed `weak`
+  candidate, or for a found wrapper that can't serve the step, is a failure;
+  that wrapper reaches [[repair-galaxy-draft-topology]] through a blocking entry
+  naming it.
 
 ## Property: only recorded evidence skips wrapper resolution
 

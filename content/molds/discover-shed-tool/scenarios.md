@@ -8,8 +8,9 @@
 
 ## Case: STAR index need
 
-- fixture: step need `build a STAR genome index for the aligner steps`, with
-  source executable `STAR --runMode genomeGenerate`.
+- fixture: step need `build a STAR genome index (STAR --runMode genomeGenerate)
+  for the aligner steps`.
 - expect: `hit` or `weak` with `iuc/rgrnastar/rna_star` as `candidate`, never
-  `miss`. The rationale may say the wrapper has no index output. The index-builder
-  data manager isn't a workflow step, so it isn't the candidate.
+  `miss`. `rna_starsolo`, which outranks it in search, may be an alternate. The
+  index-builder data manager is admin-only and writes a tool data table, so it
+  isn't the candidate.
