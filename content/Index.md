@@ -229,7 +229,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
 - [[galaxy-xsd]] — Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax.
 - [[galaxy-user-tool-authoring-help]] — Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows.
-- [[galaxy-user-tool-authoring]] — What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — derived from Galaxy's own generator prompts.
+- [[galaxy-user-tool-authoring]] — What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — from Galaxy's prompts, authoring help and code.
 - [[galaxy-user-tool-critique]] — What to flag in a structurally-valid GalaxyUserTool definition, what to leave alone, and when a fix is structural.
 - [[galaxy-workflow-comments]] — How to annotate a gxformat2 workflow with editor comments: one titled frame per analysis stage, populate contains_steps, color decorative.
 - [[galaxy-workflow-draft-format]] — gxformat2 draft superset: wrapper-tier TODOs (tool_id, state, port names) plus _plan_state / _plan_context / _plan_in / _plan_out per tool step.
