@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Gate on non-empty collection"
+label: "Gate on non-empty collection"
 inputs:
   - id: inputs
     type: collection

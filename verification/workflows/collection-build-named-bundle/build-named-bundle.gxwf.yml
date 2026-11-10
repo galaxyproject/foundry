@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Build a named collection bundle"
+label: "Build a named collection bundle"
 inputs:
   - id: sources
     type: collection

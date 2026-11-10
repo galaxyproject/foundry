@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Relabel tabular rows by counter"
+label: "Relabel tabular rows by counter"
 inputs:
   - id: rows
     type: data

@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Pivot tabular collection to wide table"
+label: "Pivot tabular collection to wide table"
 inputs:
   - id: headerless_tables
     type: collection

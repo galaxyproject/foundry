@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Relabel the inner level of a list:list by swapping it to the top"
+label: "Relabel the inner level of a list:list by swapping it to the top"
 inputs:
   - id: sample_by_segment
     type: collection

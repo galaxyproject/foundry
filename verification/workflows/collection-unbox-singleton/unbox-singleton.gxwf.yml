@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Unbox singleton collection"
+label: "Unbox singleton collection"
 inputs:
   - id: singleton
     type: collection

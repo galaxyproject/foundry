@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Group and aggregate tabular rows with Datamash"
+label: "Group and aggregate tabular rows with Datamash"
 inputs:
   - id: rows
     type: data

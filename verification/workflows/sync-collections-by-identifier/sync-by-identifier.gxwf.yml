@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Sync a sibling collection by element identifier"
+label: "Sync a sibling collection by element identifier"
 inputs:
   - id: kept
     type: collection

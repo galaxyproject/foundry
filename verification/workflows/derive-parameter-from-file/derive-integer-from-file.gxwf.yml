@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Derive integer parameter from file"
+label: "Derive integer parameter from file"
 inputs:
   - id: scalar_file
     type: data

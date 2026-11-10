@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Compose runtime text parameter"
+label: "Compose runtime text parameter"
 inputs:
   - id: threshold
     type: integer

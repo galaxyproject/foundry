@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Cut and reorder tabular columns"
+label: "Cut and reorder tabular columns"
 inputs:
   - id: rows
     type: data

@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Map enum to text parameter"
+label: "Map enum to text parameter"
 inputs:
   - id: strandedness
     type: text

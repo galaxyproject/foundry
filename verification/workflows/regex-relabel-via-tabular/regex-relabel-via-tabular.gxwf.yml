@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Regex-built mapping table relabels a sibling collection"
+label: "Regex-built mapping table relabels a sibling collection"
 inputs:
   - id: reads
     type: collection

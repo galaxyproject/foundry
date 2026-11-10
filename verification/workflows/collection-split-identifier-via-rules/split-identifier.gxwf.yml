@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Split element identifiers into nested lists with Apply Rules"
+label: "Split element identifiers into nested lists with Apply Rules"
 inputs:
   - id: flat
     type: collection

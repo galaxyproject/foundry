@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Harmonize a sibling collection by sortlist from identifiers"
+label: "Harmonize a sibling collection by sortlist from identifiers"
 inputs:
   - id: reference
     type: collection

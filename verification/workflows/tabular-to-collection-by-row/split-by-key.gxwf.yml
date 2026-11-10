@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Split tabular rows into collection elements by key"
+label: "Split tabular rows into collection elements by key"
 inputs:
   - id: rows
     type: data

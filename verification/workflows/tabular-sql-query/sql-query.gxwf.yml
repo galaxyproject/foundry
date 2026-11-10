@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "SQL join and per-group percentage"
+label: "SQL join and per-group percentage"
 inputs:
   - id: counts
     type: data
