@@ -609,6 +609,109 @@ profiles {
     expect(names).not.toContain("aligner");
   });
 
+  test("strips a trailing nf-test comment outside the value", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/comments' }\n");
+    write(root, "main.nf", "workflow COMMENTS { }\n");
+    write(
+      root,
+      "tests/comment.nf.test",
+      `nextflow_pipeline {
+  test("trailing comment") {
+    when {
+      params {
+        fasta = 'genome.fa' // local reference
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const delta = (
+      summary as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] }
+    ).test_candidates[0]!.params_delta;
+    expect(delta.fasta).toBe("genome.fa");
+  });
+
+  test("keeps // inside an nf-test string while stripping the trailing comment", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/url-comment' }\n");
+    write(root, "main.nf", "workflow URL_COMMENT { }\n");
+    write(
+      root,
+      "tests/url.nf.test",
+      `nextflow_pipeline {
+  test("url comment") {
+    when {
+      params {
+        input = 'https://example.com/a.csv' // see https://docs.example/note
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const delta = (
+      summary as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] }
+    ).test_candidates[0]!.params_delta;
+    expect(delta.input).toBe("https://example.com/a.csv");
+  });
+
+  test("treats an nf-test null override as clearing a profile value", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/null-override' }
+profiles {
+  test {
+    params {
+      input = 'samplesheet.csv'
+      salmon_index = 'https://example.com/salmon.tar.gz'
+    }
+  }
+}
+`,
+    );
+    write(root, "main.nf", "workflow NULL_OVERRIDE { }\n");
+    write(
+      root,
+      "tests/clear.nf.test",
+      `nextflow_pipeline {
+  test("clear index") {
+    when {
+      params {
+        salmon_index = null // force a fresh build
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const candidate = (
+      summary as SummaryLike & {
+        test_candidates: {
+          params_delta: Record<string, unknown>;
+          inputs: { description: string | null; path: string | null; url: string | null }[];
+        }[];
+      }
+    ).test_candidates[0]!;
+    expect(candidate.params_delta.salmon_index).toBeNull();
+    expect(candidate.inputs.map((input) => input.path)).toContain("samplesheet.csv");
+    expect(candidate.inputs.map((input) => input.url)).not.toContain(
+      "https://example.com/salmon.tar.gz",
+    );
+  });
+
   test("emits one warned aggregate candidate for dynamically generated cases", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/generated-tests' }\n");

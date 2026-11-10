@@ -2590,7 +2590,8 @@ function candidateParamData(
   }
   for (const [name, value] of Object.entries(overrides)) {
     delta[name] = value;
-    if (typeof value === "string") values.set(name, value);
+    if (value === null) values.delete(name);
+    else if (typeof value === "string") values.set(name, value);
   }
   return {
     delta,
@@ -2986,14 +2987,40 @@ function parseParamsOverrides(text: string): Record<string, unknown> {
   return values;
 }
 
+// Profile values arrive with quotes already removed, so only a spaced // is a comment.
+function stripTrailingLineComment(expression: string): string {
+  let quote: "'" | '"' | null = null;
+  for (let index = 0; index < expression.length; index += 1) {
+    const char = expression[index]!;
+    const next = expression[index + 1];
+    if (quote) {
+      if (char === "\\" && next !== undefined) {
+        index += 1;
+        continue;
+      }
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === "'" || char === '"') {
+      quote = char;
+      continue;
+    }
+    if (char === "/" && next === "/" && (index === 0 || /\s/u.test(expression[index - 1]!))) {
+      return expression.slice(0, index).trim();
+    }
+  }
+  return expression.trim();
+}
+
 function parseNfTestParamValue(value: string): unknown {
-  const quoted = /^(?:"([^"]*)"|'([^']*)')$/u.exec(value);
+  const stripped = stripTrailingLineComment(value);
+  const quoted = /^(?:"([^"]*)"|'([^']*)')$/u.exec(stripped);
   if (quoted !== null) return quoted[1] ?? quoted[2]!;
-  if (value === "true") return true;
-  if (value === "false") return false;
-  if (value === "null") return null;
-  if (/^-?\d+(?:\.\d+)?$/u.test(value)) return Number(value);
-  return value;
+  if (stripped === "true") return true;
+  if (stripped === "false") return false;
+  if (stripped === "null") return null;
+  if (/^-?\d+(?:\.\d+)?$/u.test(stripped)) return Number(stripped);
+  return stripped;
 }
 
 function parseSnapshot(
