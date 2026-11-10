@@ -177,7 +177,9 @@ whatever a scenario produces. Properties are tagged by bucket:
   A script block whose only statement is `template 'file'` leaves that
   directive in `script_excerpt` and carries the template file's path, line
   count, and body in `template`. Assignments under `tests/` or `.github/`
-  stay out of the summary.
+  stay out of the summary. Assignments that sit inside a `profiles { }` block,
+  or in a config that block includes, stay out unless the caller selected that
+  profile. A selected profile's entries name it in `profile`.
 
 ## Property: re-runs are reproducible
 

@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-04-30
 revised: 2026-11-10
-revision: 19
+revision: 20
 output_artifacts:
   - id: summary-nextflow
     kind: json
@@ -326,7 +326,7 @@ This step does not reshape onto any target idiom (Galaxy `sample_sheet:paired` v
 
 For each `process <NAME> { ... }` in `main.nf`, `workflows/`, `modules/**`, `subworkflows/**`:
 - Pull `container`, `conda`, `publishDir`, `when:` directives **verbatim** into `processes[].container` / `processes[].conda`. Modern nf-core directives are ternary expressions (`workflow.containerEngine == 'singularity' ? <sing-uri> : <docker-uri>`) and file references (`${moduleDir}/environment.yml`); keep the directive text intact and resolve into `tools[]` separately (§5). An in-body `publishDir` is kept in `processes[].publish_dir`.
-- Follow the root `includeConfig` chain into workflow configs, per-module `nextflow.config` files, and `conf/modules/`. Skip `tests/` and `.github/`. Match `withName:` and `withLabel:` selectors, including regular expressions and subworkflow-qualified names, against the process name, its aliases, and its labels. Record each matched `publishDir` in `publish_dir_matches` and, when the process body has none, in `publish_dir`. Record `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args` with the selector and the config path. Keep closure text verbatim so a downstream Mold can see which `params` and `meta` fields it reads.
+- Follow the root `includeConfig` chain into workflow configs, per-module `nextflow.config` files, and `conf/modules/`. Skip `tests/` and `.github/`. Leave `includeConfig` statements and `withName:` / `withLabel:` selectors that sit inside a `profiles { }` block out of that walk. When `--profile` names a profile, follow only that profile's includes and selectors, and set `profile` on the `publish_dir_matches` and `resolved_args` entries they produce. Match selectors, including regular expressions and subworkflow-qualified names, against the process name, its aliases, and its labels. Record each matched `publishDir` in `publish_dir_matches` and, when the process body has none, in `publish_dir`. Record `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args` with the selector and the config path. Keep closure text verbatim so a downstream Mold can see which `params` and `meta` fields it reads.
 - Tokenize the `input:` and `output:` blocks for declared channel names and shapes — typed channels (`tuple val(meta), path(reads)`) become shape strings (`"tuple(meta, [path])"`); arity is preserved as a string, not structured.
 - Sweep live `include { ... }` statements across the pipeline (`main.nf`, `workflows/`, `subworkflows/**`) to populate both `processes[].aliases` and `subworkflows[].aliases`. `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS }` adds `MINIMAP2_CONSENSUS` to the canonical process; the same rule maps aliased subworkflow calls back to their canonical declaration. Calls and edges retain the alias spelling used by the source. Ignore includes inside line or block comments.
 - Detect `topic: <name>` annotations on outputs (Nextflow 24+ channel topics — nf-core templates emit `tuple(val("${task.process}"), val('toolname'), eval(...)) topic: versions` for version aggregation). Record the topic name in `ChannelIO.topic`.

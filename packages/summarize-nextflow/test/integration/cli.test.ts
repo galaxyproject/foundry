@@ -903,6 +903,22 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
       }),
     );
     expect(dupradar.template.body).toContain("dupRadar");
+
+    const rsem = data.processes.find(
+      (process: { name: string; aliases?: string[] }) =>
+        process.name === "RSEM_PREPAREREFERENCE_GENOME" ||
+        process.aliases?.includes("RSEM_PREPAREREFERENCE_GENOME"),
+    );
+    expect(
+      rsem.resolved_args.map((arg: { expression: string }) => arg.expression).join("\n"),
+    ).not.toContain("--genomeSAindexNbases 7");
+
+    const bowtie = data.processes.find(
+      (process: { name: string }) => process.name === "BOWTIE2_ALIGN",
+    );
+    expect(
+      bowtie.resolved_args.map((arg: { expression: string }) => arg.expression).join("\n"),
+    ).not.toContain("--seed 1");
   });
 });
 

@@ -52,8 +52,19 @@ interface SummaryLike {
     script_summary?: string;
     script_excerpt: string | null;
     publish_dir: string | null;
-    publish_dir_matches: { expression: string; selector: string; config: string }[];
-    resolved_args: { key: string; expression: string; selector: string; config: string }[];
+    publish_dir_matches: {
+      expression: string;
+      selector: string;
+      config: string;
+      profile?: string;
+    }[];
+    resolved_args: {
+      key: string;
+      expression: string;
+      selector: string;
+      config: string;
+      profile?: string;
+    }[];
     template: { path: string; line_count: number; body: string } | null;
   }[];
   subworkflows: {
@@ -2897,6 +2908,67 @@ includeConfig 'tests/nextflow.config'
     expect(foo?.resolved_args.map((arg) => arg.expression)).toEqual(["'-B -C'"]);
   });
 
+  test("applies a profile includeConfig only when that profile is selected", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/profile-scope' }
+includeConfig 'conf/base.config'
+profiles {
+    test { includeConfig 'conf/test.config' }
+    other { includeConfig 'conf/other.config' }
+}
+`,
+    );
+    write(
+      root,
+      "conf/base.config",
+      "process {\n    withName: 'FOO' {\n        ext.prefix = 'base'\n    }\n}\n",
+    );
+    write(
+      root,
+      "conf/test.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '--from-test'\n    }\n}\n",
+    );
+    write(
+      root,
+      "conf/other.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '--from-other'\n    }\n}\n",
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "main.nf", "include { FOO } from './modules/foo'\nworkflow PIPE { FOO() }\n");
+
+    const byDefault = await summarize(root, undefined, null);
+    const unselected = byDefault.processes.find((process) => process.name === "FOO");
+    expect(unselected?.resolved_args).toEqual([
+      {
+        key: "prefix",
+        expression: "'base'",
+        selector: "withName:FOO",
+        config: "conf/base.config",
+      },
+    ]);
+
+    const selected = await summarize(root, undefined, "test");
+    const foo = selected.processes.find((process) => process.name === "FOO");
+    expect(foo?.resolved_args).toEqual([
+      {
+        key: "prefix",
+        expression: "'base'",
+        selector: "withName:FOO",
+        config: "conf/base.config",
+      },
+      {
+        key: "args",
+        expression: "'--from-test'",
+        selector: "withName:FOO",
+        config: "conf/test.config",
+        profile: "test",
+      },
+    ]);
+  });
+
   test("keeps an in-body publishDir and loads a template file", async () => {
     const root = tempPipelineRoot();
     write(
@@ -2947,9 +3019,13 @@ workflow PIPE { INBODY(); DUP() }
   });
 });
 
-async function summarize(root: string, mulledIndexPath?: string): Promise<SummaryLike> {
+async function summarize(
+  root: string,
+  mulledIndexPath?: string,
+  profile?: string | null,
+): Promise<SummaryLike> {
   return (await buildSummary(root, {
-    profile: "test",
+    profile: profile === null ? undefined : (profile ?? "test"),
     withNextflow: false,
     fetchTestData: false,
     mulledIndexPath,

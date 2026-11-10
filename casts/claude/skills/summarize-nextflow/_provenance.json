@@ -4,13 +4,13 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 19,
-    "content_hash": "eca2350c310a9725cae46e6653a9516a53fe1453d0f98d6d27a2f2bbf8dfbb3f",
-    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
+    "revision": 20,
+    "content_hash": "d8e6759095994ad000fb8b78018da070761a5abfb8cf0a80c6c59b550a272501",
+    "commit": "871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-11-10T09:08:10.815Z",
+  "cast_at": "2026-11-10T14:45:10.085Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -128,8 +128,8 @@
       "purpose": "Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology.",
       "trigger": "When walking pipeline structure or resolving process aliases and channel flow.",
       "verification": "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves process/channel topology extraction.",
-      "src_hash": "1ff6963770a8372bc38914dcd9e63f4c6eac1997a9f0e387ea28d029aa74511f",
-      "dst_hash": "1ff6963770a8372bc38914dcd9e63f4c6eac1997a9f0e387ea28d029aa74511f",
+      "src_hash": "0cd0e02c9af76a8b195ce7918ed62f03f83dd8299703ec2f2d92926d8477daff",
+      "dst_hash": "0cd0e02c9af76a8b195ce7918ed62f03f83dd8299703ec2f2d92926d8477daff",
       "source": "deterministic"
     },
     {
@@ -241,8 +241,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
       "license": "MIT",
-      "src_hash": "a044113aa22e5216049b9d1a81d48b58e6bf5c6821b4dc266b1822e7e412125e",
-      "dst_hash": "a044113aa22e5216049b9d1a81d48b58e6bf5c6821b4dc266b1822e7e412125e",
+      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
       "source": "deterministic"
     }
   ],

@@ -614,6 +614,10 @@ export const summaryNextflowSchema = {
         "config": {
           "type": "string",
           "description": "Pipeline-relative config file that declared the selector."
+        },
+        "profile": {
+          "type": "string",
+          "description": "Profile that contributed this assignment. Present only when the selector sits in that profile, or in a config the profile includes. Absent for selectors on the root includeConfig chain."
         }
       }
     },
@@ -639,6 +643,10 @@ export const summaryNextflowSchema = {
         "config": {
           "type": "string",
           "description": "Pipeline-relative config file that declared the selector."
+        },
+        "profile": {
+          "type": "string",
+          "description": "Profile that contributed this assignment. Present only when the selector sits in that profile, or in a config the profile includes. Absent for selectors on the root includeConfig chain."
         }
       }
     },
@@ -777,21 +785,21 @@ export const summaryNextflowSchema = {
             "string",
             "null"
           ],
-          "description": "`publishDir` value when the process publishes outputs, or null. An in-body directive is kept as written. Otherwise this is the verbatim `publishDir` assignment from each matching `withName:` / `withLabel:` selector on the root `includeConfig` chain, joined by newlines when several match."
+          "description": "`publishDir` value when the process publishes outputs, or null. An in-body directive is kept as written. Otherwise this is the verbatim `publishDir` assignment from each matching `withName:` / `withLabel:` selector on the root `includeConfig` chain, outside `profiles` blocks, joined by newlines when several match. Selectors from a profile named with `--profile` are included too."
         },
         "publish_dir_matches": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/PublishDirMatch"
           },
-          "description": "Every config-selector `publishDir` that matched this process. Empty when publication is only declared in the process body, or not at all. `publish_dir` still carries an in-body directive when one exists."
+          "description": "Every config-selector `publishDir` that matched this process. Empty when publication is only declared in the process body, or not at all. `publish_dir` still carries an in-body directive when one exists. Entries from a selected profile carry `profile`."
         },
         "resolved_args": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/ResolvedArg"
           },
-          "description": "`ext.args`, `ext.args2`, and `ext.prefix` assignments from matching config selectors. Expressions are verbatim, including closures. Empty when the chain declares none."
+          "description": "`ext.args`, `ext.args2`, and `ext.prefix` assignments from matching config selectors. Expressions are verbatim, including closures. Empty when the chain declares none. Entries from a selected profile carry `profile`."
         },
         "template": {
           "anyOf": [

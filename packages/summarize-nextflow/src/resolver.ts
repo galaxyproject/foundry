@@ -230,12 +230,16 @@ interface ResolvedArg {
   expression: string;
   selector: string;
   config: string;
+  /** Set when the assignment came from a selected profile. Omitted for the root chain. */
+  profile?: string;
 }
 
 interface PublishDirMatch {
   expression: string;
   selector: string;
   config: string;
+  /** Set when the assignment came from a selected profile. Omitted for the root chain. */
+  profile?: string;
 }
 
 interface ProcessTemplate {
@@ -473,7 +477,7 @@ export async function resolveNextflowSummary(
   const entrypoint = selectEntrypoint(pipelineRoot);
   if (entrypoint) summary.warnings.push(`selected Nextflow entrypoint: ${entrypoint}`);
 
-  attachConfigDirectives(summary, pipelineRoot);
+  attachConfigDirectives(summary, pipelineRoot, options.profile);
 
   if (options.withNextflow) mergeNextflowInspect(summary, pipelineRoot, options.profile);
   if (options.fetchTestData) await fetchTestData(summary, options.testDataDir);
@@ -3112,31 +3116,40 @@ const EXT_ASSIGNMENTS = [
   ["prefix", "ext\\.prefix(?!\\w)"],
 ] as const;
 
+interface ScopedSelector extends SelectorBlock {
+  config: string;
+  profile: string | null;
+}
+
 /**
  * Copy `publishDir` and `ext.args` / `ext.args2` / `ext.prefix` from `withName:`
- * and `withLabel:` selectors reached through the root `includeConfig` chain.
- * Closure text stays verbatim. A script that is only `template 'file'` also
- * loads that file from the module's `templates/` directory.
+ * and `withLabel:` selectors on the root `includeConfig` chain. Selectors and
+ * includes inside `profiles { }` apply only for a profile named by `--profile`,
+ * and those entries carry `profile`. Closure text stays verbatim. A script that
+ * is only `template 'file'` also loads that file from the module's `templates/` directory.
  */
-function attachConfigDirectives(summary: Summary, pipelineRoot: string): void {
-  const selectors = collectPipelineConfigs(pipelineRoot).flatMap((file) => {
-    const config = relative(pipelineRoot, file);
-    return parseProcessSelectors(maskNextflowComments(readText(file))).map((selector) => ({
-      ...selector,
-      config,
-    }));
-  });
+function attachConfigDirectives(
+  summary: Summary,
+  pipelineRoot: string,
+  selectedProfile?: string,
+): void {
+  const selectors = collectScopedSelectors(pipelineRoot, selectedProfileNames(selectedProfile));
 
   for (const process of summary.processes) {
     const matched = selectors.filter((selector) =>
       selectorMatchesProcess(selector.kind, selector.pattern, process),
     );
     const publish = matched.flatMap((selector) =>
-      extractAssignments(selector.body, "publishDir").map((expression) => ({
-        expression,
-        selector: `${selector.kind}:${selector.pattern}`,
-        config: selector.config,
-      })),
+      extractAssignments(selector.body, "publishDir").map((expression) =>
+        withProfile(
+          {
+            expression,
+            selector: `${selector.kind}:${selector.pattern}`,
+            config: selector.config,
+          },
+          selector.profile,
+        ),
+      ),
     );
     process.publish_dir_matches = publish;
     if (process.publish_dir === null && publish.length > 0) {
@@ -3145,12 +3158,17 @@ function attachConfigDirectives(summary: Summary, pipelineRoot: string): void {
     process.resolved_args = matched.flatMap((selector) => {
       const name = `${selector.kind}:${selector.pattern}`;
       return EXT_ASSIGNMENTS.flatMap(([key, pattern]) =>
-        extractAssignments(selector.body, pattern).map((expression) => ({
-          key,
-          expression,
-          selector: name,
-          config: selector.config,
-        })),
+        extractAssignments(selector.body, pattern).map((expression) =>
+          withProfile(
+            {
+              key,
+              expression,
+              selector: name,
+              config: selector.config,
+            },
+            selector.profile,
+          ),
+        ),
       );
     });
     const template = resolveProcessTemplate(pipelineRoot, process);
@@ -3160,30 +3178,130 @@ function attachConfigDirectives(summary: Summary, pipelineRoot: string): void {
   }
 }
 
-function collectPipelineConfigs(pipelineRoot: string): string[] {
+function selectedProfileNames(profile: string | undefined): string[] {
+  if (!profile) return [];
+  return unique(
+    profile
+      .split(",")
+      .map((name) => name.trim().replace(/^\+/, ""))
+      .filter((name) => name.length > 0),
+  );
+}
+
+function withProfile<T extends object>(entry: T, profile: string | null): T & { profile?: string } {
+  return profile ? { ...entry, profile } : entry;
+}
+
+/** `includeConfig` targets in `text`, ignoring any that sit inside `profiles { }`. */
+function unscopedIncludeTargets(text: string): string[] {
+  return includeConfigTargets(maskNamedBlocks(text, "profiles"));
+}
+
+function enqueueIncludes(
+  text: string,
+  baseDir: string,
+  depth: number,
+  pipelineRoot: string,
+  seen: Set<string>,
+  queue: { path: string; depth: number; profile: string | null }[],
+  profile: string | null,
+): void {
+  if (depth >= MAX_INCLUDE_CONFIG_DEPTH) return;
+  for (const target of unscopedIncludeTargets(text)) {
+    if (target.includes("$")) continue;
+    const next = resolve(baseDir, target);
+    if (!existsSync(next) || seen.has(next)) continue;
+    if (NON_PIPELINE_CONFIG_DIR.test(relative(pipelineRoot, next))) continue;
+    queue.push({ path: next, depth: depth + 1, profile });
+  }
+}
+
+function selectorsIn(text: string, config: string, profile: string | null): ScopedSelector[] {
+  return parseProcessSelectors(maskNamedBlocks(text, "profiles")).map((selector) => ({
+    ...selector,
+    config,
+    profile,
+  }));
+}
+
+/**
+ * Root-chain selectors, plus selectors from each selected profile's body and
+ * the `includeConfig` files that body reaches. The first declaration of a
+ * profile name wins, matching `parseProfiles`.
+ */
+function collectScopedSelectors(
+  pipelineRoot: string,
+  selectedProfiles: string[],
+): ScopedSelector[] {
   const rootConfig = join(pipelineRoot, "nextflow.config");
-  const found: string[] = [];
+  const selectors: ScopedSelector[] = [];
   const seen = new Set<string>();
-  const queue: { path: string; depth: number }[] = [];
-  if (existsSync(rootConfig)) queue.push({ path: rootConfig, depth: 0 });
+  const queue: { path: string; depth: number; profile: string | null }[] = [];
+  if (existsSync(rootConfig)) queue.push({ path: rootConfig, depth: 0, profile: null });
+
+  const wanted = new Set(selectedProfiles);
+  const profileBodies: { body: string; config: string; depth: number; profile: string }[] = [];
+
   while (queue.length > 0) {
     const current = queue.shift()!;
     if (seen.has(current.path)) continue;
     seen.add(current.path);
     const rel = relative(pipelineRoot, current.path);
     if (NON_PIPELINE_CONFIG_DIR.test(rel)) continue;
-    found.push(current.path);
-    if (current.depth >= MAX_INCLUDE_CONFIG_DEPTH) continue;
     const text = maskNextflowComments(readText(current.path));
-    for (const target of includeConfigTargets(text)) {
-      if (target.includes("$")) continue;
-      const next = resolve(dirname(current.path), target);
-      if (!existsSync(next) || seen.has(next)) continue;
-      if (NON_PIPELINE_CONFIG_DIR.test(relative(pipelineRoot, next))) continue;
-      queue.push({ path: next, depth: current.depth + 1 });
+    const config = rel || "nextflow.config";
+    selectors.push(...selectorsIn(text, config, null));
+    if (wanted.size > 0) {
+      const block = extractNamedBlockBody(text, "profiles");
+      if (block) {
+        for (const profile of profileBlocks(block)) {
+          if (!wanted.has(profile.name)) continue;
+          if (profileBodies.some((found) => found.profile === profile.name)) continue;
+          profileBodies.push({
+            body: profile.body,
+            config,
+            depth: current.depth,
+            profile: profile.name,
+          });
+        }
+      }
     }
+    enqueueIncludes(text, dirname(current.path), current.depth, pipelineRoot, seen, queue, null);
   }
-  return found;
+
+  const profileSeen = new Set(seen);
+  const profileQueue: { path: string; depth: number; profile: string | null }[] = [];
+  for (const profile of profileBodies) {
+    selectors.push(...selectorsIn(profile.body, profile.config, profile.profile));
+    enqueueIncludes(
+      profile.body,
+      dirname(join(pipelineRoot, profile.config)),
+      profile.depth,
+      pipelineRoot,
+      profileSeen,
+      profileQueue,
+      profile.profile,
+    );
+  }
+  while (profileQueue.length > 0) {
+    const current = profileQueue.shift()!;
+    if (profileSeen.has(current.path)) continue;
+    profileSeen.add(current.path);
+    const rel = relative(pipelineRoot, current.path);
+    if (NON_PIPELINE_CONFIG_DIR.test(rel)) continue;
+    const text = maskNextflowComments(readText(current.path));
+    selectors.push(...selectorsIn(text, rel, current.profile));
+    enqueueIncludes(
+      text,
+      dirname(current.path),
+      current.depth,
+      pipelineRoot,
+      profileSeen,
+      profileQueue,
+      current.profile,
+    );
+  }
+  return selectors;
 }
 
 interface SelectorBlock {
