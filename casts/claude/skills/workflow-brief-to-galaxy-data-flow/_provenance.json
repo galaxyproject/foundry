@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-data-flow/index.md",
     "revision": 4,
     "content_hash": "ce9672837d2b670a64e838b2dbe634b3b07aec40d172d01fb3a7504b6d7294cd",
-    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-11-10T10:05:13.149Z",
+  "cast_at": "2026-11-11T23:05:03.722Z",
   "refs": [
     {
       "kind": "pattern",
@@ -111,8 +111,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the narrative leaves open — a described transformation with no named tool, an implied intermediate the source never states, an ordering the prose doesn't fix.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
-      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "src_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
+      "dst_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
       "source": "deterministic"
     },
     {

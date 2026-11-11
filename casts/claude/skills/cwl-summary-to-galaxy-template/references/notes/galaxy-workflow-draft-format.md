@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-06
-revised: 2026-11-10
-revision: 6
+revised: 2026-11-12
+revision: 7
 related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-data-flow-draft-contract]]"
@@ -61,7 +61,7 @@ Workflow inputs (types, collection shapes, formats, optionality), workflow outpu
 
 Free-text fields per tool step capture the template Mold's intent for the downstream per-step implementation Mold. All optional, but expected on any Identity-pinned or Deferred step (`tool_id` is `TODO`, or `tool_id` is pinned but `state` is absent); a Resolved step carries none.
 
-- `_plan_state` — parameter binding intent: which knobs matter, value or range, why. Read by the per-step Mold to bind real `state` once a wrapper is selected.
+- `_plan_state` — parameter binding intent: which knobs matter, value or range, why. Read by the per-step Mold to bind real `state` once a wrapper is selected. When the source sets tool arguments in its config, as nf-core's `ext.args` does, `_plan_state` is instead a YAML document with two keys: `resolved_args`, the arguments copied unchanged from the source summary, and `intent`, the free text. The schema types `_plan_state` as a string, so the document is the string's content, never a mapping value. [[nextflow-summary-to-galaxy-template]] gives its shape, and the per-step Mold records how it handled each flag in the [[open-requirements-ledger]].
 - `_plan_context` — extras the per-step Mold needs to pick a wrapper: source `command:` block, conda packages, Docker/Singularity images, environment variables, preconditions, postconditions, container entrypoints, scratch-disk needs.
 - `_plan_in` — wrapper input port mapping intent. The connection graph already says "this source feeds this step"; `_plan_in` records the semantic role of each port and likely wrapper-side names (`single_paired` vs `paired_input` vs `input`) so the per-step Mold can collapse `TODO_*` keys to the real ones.
 - `_plan_out` — wrapper output surface intent: which outputs downstream consumers depend on (with the existing edges as evidence) so the per-step Mold can pick a wrapper that exposes them, or insert a follow-up step if it does not.
@@ -129,7 +129,7 @@ This is **repair**, distinct from **settling**: it is narrow (the entries bound 
 
 ## Open work
 
-- Decide whether `_plan_state` should grow structure (parameter-name hints, value ranges, references back to the source summary).
+- Decide whether `_plan_state` should grow further structure (parameter-name hints, value ranges, references back to the source summary). Source arguments already travel structured, but inside the string. Typing `_plan_state` as a mapping would need the upstream draft schema to change.
 - Decide whether `_plan_context` should be split into typed fields (`source_command`, `conda`, `containers`, `env`, `pre`, `post`).
 - Decide structure for `_plan_in` and `_plan_out` once two or three worked drafts exercise them. Candidate `_plan_out`: array of `{ semantic_name, downstream_consumers[], required_for }`. Candidate `_plan_in`: map keyed by the `TODO_*` placeholder key to `{ semantic_name, source_step_output, shape_constraint }`.
 - Pick a JSON Schema strategy: extend the gxformat2 schema with `_plan_*` and the relaxed wrapper / port-name rules, or validate the draft via a sibling schema that wraps gxformat2 with the relaxations.

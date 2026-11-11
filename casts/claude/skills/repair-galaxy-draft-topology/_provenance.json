@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 7,
     "content_hash": "692708480037be9680eda6be70c7fa2fd93604037432f7d94b6363266a6ca25e",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-11-10T10:22:52.006Z",
+  "cast_at": "2026-11-11T23:05:03.049Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -134,8 +134,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit added or replaced steps in the draft superset (TODO tool_id, _plan_* fields) so existing per-step machinery realizes them; respect the settle-vs-repair boundary.",
       "verification": "Promote after a repair run inserts a producer the per-step loop then realizes without re-running the template Mold over the whole draft.",
-      "src_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
-      "dst_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
+      "src_hash": "f10c287b53d1a97bae5fb760e2ef908566a0d14288b13cbccf510ac3c0bf92af",
+      "dst_hash": "f10c287b53d1a97bae5fb760e2ef908566a0d14288b13cbccf510ac3c0bf92af",
       "source": "deterministic"
     },
     {
@@ -186,8 +186,8 @@
       "evidence": "hypothesis",
       "purpose": "Scope the repair from the open blocking entries — each names the step and what's missing — then mark resolved each one repaired, and leave any it cannot close open with a note.",
       "verification": "Promote after a run closes a blocking entry and the loop terminates on the reduced open count.",
-      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
-      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "src_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
+      "dst_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
       "source": "deterministic"
     },
     {

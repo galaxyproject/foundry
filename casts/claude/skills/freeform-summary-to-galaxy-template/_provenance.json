@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
     "revision": 7,
     "content_hash": "a9a4393c49eec26be0c7c67925e04960a04ea07d5d7ee6ecd415c2491bcac467",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-11-10T10:22:51.627Z",
+  "cast_at": "2026-11-11T23:05:01.952Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -181,8 +181,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
-      "dst_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
+      "src_hash": "f10c287b53d1a97bae5fb760e2ef908566a0d14288b13cbccf510ac3c0bf92af",
+      "dst_hash": "f10c287b53d1a97bae5fb760e2ef908566a0d14288b13cbccf510ac3c0bf92af",
       "source": "deterministic"
     },
     {
@@ -211,8 +211,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
-      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "src_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
+      "dst_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
       "source": "deterministic"
     },
     {

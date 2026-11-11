@@ -5,14 +5,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-11-10
-revision: 7
+revised: 2026-11-12
+revision: 8
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
   - "[[implement-galaxy-tool-step]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
 summary: "Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state."
 ---
 
@@ -140,6 +141,50 @@ decisions:
 - `confidence: low` copies a proposal the brief marked low confidence, or marks an `agent` answer resting on thin evidence. Omit it otherwise. Never drop a low mark.
 - A Mold that finds an accepted proposal wrong, including the first design Mold while recording it, records a brief-change recommendation, because the expert accepted that answer. It keeps using the accepted answer. If correctness depends on the change, stop as described above.
 - A later Mold that finds an `agent` decision wrong records its own decision. That decision repeats `open_question` and sets `supersedes` to the earlier decision's `id`. The earlier decision stays as history, unlike a superseded obligation entry, which reopens. The current answer to a question is the decision that no other decision supersedes.
+
+## Source arguments
+
+A source can set tool arguments outside the process body. nf-core sets them as `ext.args`, `ext.args2`, and `ext.prefix`, which [[summarize-nextflow]] records per process in `resolved_args`. A wrapper names and groups its parameters its own way, so no rule maps a flag onto `state`. The Mold that binds `state` makes that call and records one disposition per flag, so that a flag the translation dropped or contradicted shows up instead of going missing. [[nextflow-summary-to-galaxy-template]] copies the entries into the step's `_plan_state` ([[galaxy-workflow-draft-format]]). [[implement-galaxy-tool-step]] records the dispositions, or the template records them for a step it resolves itself.
+
+Each record carries a `source_arg` naming the entry it covers:
+
+```yaml
+decisions:
+  - id: arg-view-map-map-args
+    decided_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_map_map               # draft step that translates the call
+      process: SAMTOOLS_VIEW           # processes[].name in summary-nextflow.json
+      invoked_as: SAMTOOLS_VIEW_MAP_MAP  # omit when the call is the process name
+      key: args                        # args | args2 | prefix
+      selector: withName:SAMTOOLS_VIEW_MAP_MAP
+      flags: ["-b", "-f1", "-F12"]     # omit to cover the whole expression
+    disposition: carried               # carried | not_applicable
+    decision: "BAM output, require flag 1, exclude flags 4 and 8, all set in `state`."
+    rationale: "The wrapper exposes output format and both flag filters."
+entries:
+  - id: arg-collate-map-args
+    status: open
+    kind: dropped
+    raised_by: implement-galaxy-tool-step
+    source_arg:
+      step: collate_map
+      process: SAMTOOLS_COLLATEFASTQ
+      invoked_as: COLLATE_FASTQ_MAP
+      key: args
+      selector: withName:COLLATE_FASTQ_MAP
+      flags: ["-f", "-r"]
+    units: "`-f -r <reads_in_memory>` from `ext.args`, set when `params.samtools_collate_fast`"
+    because: "<the wrapper option the tool summary lacks, quoted>"
+    unmet: "fast collation mode"
+    missing: "no wrapper parameter sets it"
+```
+
+- A flag carried into `state` is a decision with `disposition: carried`, and `decision` says where it landed. A flag with no Galaxy counterpart is a decision with `disposition: not_applicable`, and `rationale` says why. An `ext.prefix` that only names output files is the usual case.
+- A flag the step drops is a `kind: dropped` entry. Its `units` names the flag, and its `because` cites the tool summary's missing option. It stays `open`, like any drop.
+- Each flag an expression can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
+- A record names its step inside `source_arg`, never in a top-level `step`, so a dropped flag never reads as a dropped step.
+- Join records to the summary on `source_arg`, not on `id`.
 
 ## How to use the ledger
 
