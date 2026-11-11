@@ -1686,8 +1686,11 @@ workflow root {
       "main.nf",
       `params.fasta = getGenomeAttribute('fasta')
 params.gene_bed = getGenomeAttribute('bed12')
+// params.old_index = getGenomeAttribute('old_index')
 def getGenomeAttribute(attribute) { return params.genomes[params.genome][attribute] }
-workflow PIPE { }
+workflow PIPE {
+  def local_star = getGenomeAttribute('star')
+}
 `,
     );
 
@@ -1706,6 +1709,8 @@ workflow PIPE { }
     expect(fasta?.source_path).toBe("main.nf");
     const geneBed = summary.params.find((p) => p.name === "gene_bed");
     expect(geneBed?.source_expression).toBe("getGenomeAttribute('bed12')");
+    expect(summary.params.map((p) => p.name)).not.toContain("old_index");
+    expect(summary.params.map((p) => p.name)).not.toContain("local_star");
   });
 
   test("binds caller positional args to subworkflow take[] names", async () => {

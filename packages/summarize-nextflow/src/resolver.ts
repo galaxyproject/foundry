@@ -947,19 +947,26 @@ const GENOME_ATTRIBUTE_CONFIG_CANDIDATES = [
   "nextflow.config",
   "conf/igenomes.config",
   "conf/genomes.config",
-  "main.nf",
 ];
+
+const GENOME_ATTRIBUTE_CALL =
+  "([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*(getGenomeAttribute\\s*\\(\\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]\\s*\\))";
 
 function parseGetGenomeAttributeAssignments(
   pipelineRoot: string,
 ): { name: string; provenance: ParamProvenance }[] {
   const results: { name: string; provenance: ParamProvenance }[] = [];
-  for (const relPath of GENOME_ATTRIBUTE_CONFIG_CANDIDATES) {
+  const entrypoint = selectEntrypoint(pipelineRoot);
+  const sources = entrypoint
+    ? [...GENOME_ATTRIBUTE_CONFIG_CANDIDATES, entrypoint]
+    : GENOME_ATTRIBUTE_CONFIG_CANDIDATES;
+  for (const relPath of sources) {
     const fullPath = join(pipelineRoot, relPath);
     if (!existsSync(fullPath)) continue;
-    const text = readText(fullPath);
-    const pattern =
-      /(?:params\s*\.\s*)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(getGenomeAttribute\s*\(\s*['"]([A-Za-z_][A-Za-z0-9_]*)['"]\s*\))/gu;
+    const text = maskNextflowComments(readText(fullPath));
+    // Config params blocks omit the prefix; in a script only params.X is a param.
+    const prefix = relPath.endsWith(".nf") ? "\\bparams\\s*\\.\\s*" : "(?:params\\s*\\.\\s*)?";
+    const pattern = new RegExp(prefix + GENOME_ATTRIBUTE_CALL, "gu");
     for (const match of text.matchAll(pattern)) {
       const lhs = match[1]!;
       const rhs = match[2]!.replace(/\s+/gu, "");
