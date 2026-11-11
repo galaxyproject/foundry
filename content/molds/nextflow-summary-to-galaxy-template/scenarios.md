@@ -24,6 +24,21 @@
   expected input/output shape, and the likely downstream owner. It should be
   enough for later tool-discovery or per-step implementation to start.
 
+## Case: bamtofastq aliases keep their own `samtools view` flags
+
+- fixture: nf-core/bamtofastq at `869832186b25d2ccbcd31d5f69edacc1ba32b718`,
+  summarized by `summarize-nextflow`, with its interface and data-flow briefs.
+  `SAMTOOLS_VIEW` has six aliases, and `conf/modules.config` gives four of
+  them their own `ext.args`.
+- expect: the steps translating `SAMTOOLS_VIEW_MAP_MAP`,
+  `SAMTOOLS_VIEW_MAP_UNMAP`, `SAMTOOLS_VIEW_UNMAP_MAP`, and
+  `SAMTOOLS_VIEW_UNMAP_UNMAP` carry `'-b -f1 -F12'`, `'-b -f8 -F260'`,
+  `'-b -f4 -F264'`, and `'-b -f12 -F256'` respectively in
+  `_plan_state.resolved_args`, each with its own `prefix` entry and with
+  `invoked_as` naming the alias. No step carries another alias's entries or
+  `SAMTOOLS_CHR`'s. The collate steps carry `args2: '-N'`. `gxwf
+  draft-validate --json` exits 0.
+
 ## Case: collection inputs use gxformat2-compatible structure
 
 - fixture: a brief with Galaxy collection or sample-sheet-shaped inputs.

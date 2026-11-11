@@ -17,6 +17,11 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 - check: llm-judged
 - assertion: when the chosen wrapper runs the step's work but can't produce a declared output, and no inserted collection step closes it, the Mold appends an open blocking entry with `step` set, whose `missing` names the wrapper and version and quotes the summary's ports or option. That output's `TODO_*` port stays unbound. Binding another port in its place, fabricating the output, or asking for a replacement wrapper is a failure.
 
+## Property: every source argument gets exactly one disposition
+
+- check: deterministic + llm-judged
+- assertion: when the chosen step's `_plan_state` carries `resolved_args`, the re-emitted ledger has exactly one record for each flag those expressions can set, and that record's `source_arg` names this step and the entry. A record is a `carried` decision whose binding is present in the step's `state`, a `not_applicable` decision with a reason, or an open `kind: dropped` entry with a cited `because`. No flag record sets a top-level `step`. A flag bound to a value other than the one the expression sets, without a record that says so, is a failure.
+
 ## Property: a Tool Shed step names its tool by full versioned id
 
 - check: deterministic
