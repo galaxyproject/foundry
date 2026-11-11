@@ -5,7 +5,7 @@ description: "Apply the pinned IWC publication checklist to an existing Galaxy w
 
 # pipeline-galaxy-workflow-maturation
 
-Harness for the **GALAXY WORKFLOW MATURATION** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/galaxy-workflow-maturation/index.md` (revision 2) — regenerate with `foundry-build assemble-pipeline galaxy-workflow-maturation` if the pipeline changes; do not hand-edit.
+Harness for the **GALAXY WORKFLOW MATURATION** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/galaxy-workflow-maturation/index.md` (revision 3) — regenerate with `foundry-build assemble-pipeline galaxy-workflow-maturation` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -82,7 +82,7 @@ If the run was invoked with `--feedback`, close the ledger next, after the run r
 - Carry unresolved assumptions forward as notes rather than inventing missing inputs.
 - Entry is an existing workflow, not a construction run. The harness supplies a `.gxwf.yml` or `.ga` file; phase 1 normalizes `.ga` to gxformat2 and every checklist judgement downstream is stated against that normalized baseline.
 - Phase 2's optional inputs have no producer in this pipeline. `galaxy-workflow-test`, `open-requirements-ledger`, `iwc-publication-context`, `iwc-workflow-readme`, `iwc-workflow-changelog`, and `iwc-dockstore-metadata` are supplied by the caller or carried in from a prior Foundry run. Absent is a normal result; the harness must not synthesize them.
-- `iwc-maturation-report.md` is the run deliverable a human reads. Phases 3 and 4 add validation and Planemo evidence beside it; neither rewrites it.
+- `iwc-maturation-report.md` is the run deliverable a human reads. Phases 3 and 4 add validation and Planemo evidence beside it; neither rewrites it. That evidence, and any repair attempts, never go into the README; they belong beside the report and in the pull request description.
 - Phases 3 and 4 declare no input artifacts, so nothing in the artifact graph binds them to phase 2's output. The harness must hand phase 2's emitted workflow to phase 3 and its emitted test to phase 4 — that obligation lives here and in `eval.md`, not in a validator gate.
 - A red phase 3 or phase 4 is retained evidence, not a reason to loosen the workflow or the test. Report the failure together with the phase-2 checklist items most likely to have caused it and stop; the user revises an ambiguous decision or invokes [[debug-galaxy-workflow-output]] and reruns.
 - When the caller supplies a prior green `workflow-test-result`, compare the phase-4 result against it and name any regression explicitly. That comparison is a harness obligation — a prior result has no declared consumer in this spine. Without one, the phase-4 outcome becomes the baseline.

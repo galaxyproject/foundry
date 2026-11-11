@@ -8,13 +8,13 @@ tags:
   - journey/existing-workflow
 status: draft
 created: 2026-09-12
-revised: 2026-09-22
-revision: 2
+revised: 2026-11-11
+revision: 3
 summary: "Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result."
 harness_notes:
   - "Entry is an existing workflow, not a construction run. The harness supplies a `.gxwf.yml` or `.ga` file; phase 1 normalizes `.ga` to gxformat2 and every checklist judgement downstream is stated against that normalized baseline."
   - "Phase 2's optional inputs have no producer in this pipeline. `galaxy-workflow-test`, `open-requirements-ledger`, `iwc-publication-context`, `iwc-workflow-readme`, `iwc-workflow-changelog`, and `iwc-dockstore-metadata` are supplied by the caller or carried in from a prior Foundry run. Absent is a normal result; the harness must not synthesize them."
-  - "`iwc-maturation-report.md` is the run deliverable a human reads. Phases 3 and 4 add validation and Planemo evidence beside it; neither rewrites it."
+  - "`iwc-maturation-report.md` is the run deliverable a human reads. Phases 3 and 4 add validation and Planemo evidence beside it; neither rewrites it. That evidence, and any repair attempts, never go into the README; they belong beside the report and in the pull request description."
   - "Phases 3 and 4 declare no input artifacts, so nothing in the artifact graph binds them to phase 2's output. The harness must hand phase 2's emitted workflow to phase 3 and its emitted test to phase 4 — that obligation lives here and in `eval.md`, not in a validator gate."
   - "A red phase 3 or phase 4 is retained evidence, not a reason to loosen the workflow or the test. Report the failure together with the phase-2 checklist items most likely to have caused it and stop; the user revises an ambiguous decision or invokes [[debug-galaxy-workflow-output]] and reruns."
   - "When the caller supplies a prior green `workflow-test-result`, compare the phase-4 result against it and name any regression explicitly. That comparison is a harness obligation — a prior result has no declared consumer in this spine. Without one, the phase-4 outcome becomes the baseline."
