@@ -84,7 +84,7 @@ Move coordination state into the draft workflow itself so unresolved topology an
 
 - [ ] [#668 — Loop CLI surfaces: errors hidden below empty `*_errors` arrays, in-port wiring unreported, `--connections` unpackaged](https://github.com/galaxyproject/foundry/issues/668)
 - [ ] [#670 — Topology repair forbids both interface edits — input promotion and output promotion — and has no gate for either](https://github.com/galaxyproject/foundry/issues/670)
-- [ ] [#678 — `galaxy-tool-discovery` `status` has no `unsuitable` case, so a capability miss routes the harness to author a wrapper that already exists](https://github.com/galaxyproject/foundry/issues/678)
+- [x] [#678 — `galaxy-tool-discovery` `status` has no `unsuitable` case, so a capability miss routes the harness to author a wrapper that already exists](https://github.com/galaxyproject/foundry/issues/678)
 
 ### [#332 — Introduce a finalize-workflow step.](https://github.com/galaxyproject/foundry/issues/332)
 
@@ -175,3 +175,4 @@ Evaluate Galaxy workflows against the FAIR principles for computational workflow
 **Substeps**
 
 - [ ] [#774 — IWC corpus survey of FAIR metadata coverage](https://github.com/galaxyproject/foundry/issues/774)
+- [ ] [#783 — Coverage of existing FAIR assessors on IWC workflows](https://github.com/galaxyproject/foundry/issues/783)
