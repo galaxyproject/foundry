@@ -6,9 +6,9 @@
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 8,
     "content_hash": "77446daafedbcc6754902533a0280d2f0418d1bb8f92e042562404dbc75c9023",
-    "commit": "12aad7c98367138bb26e2ee2d0fff08e6ead6dc8"
+    "commit": "53d1b93e584ed09195044c9e688ed835997b2eeb"
   },
-  "cast_at": "2026-11-10T16:48:12.358Z",
+  "cast_at": "2026-11-11T16:56:50.837Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -61,8 +61,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Field contract, expression syntax, script placement, and package inference for a `GalaxyUserTool` definition.",
-      "src_hash": "365fad455369945a34bda537c8dbf409a0966f0f88da9fe78b61cff32d5b0d0d",
-      "dst_hash": "365fad455369945a34bda537c8dbf409a0966f0f88da9fe78b61cff32d5b0d0d",
+      "src_hash": "94fbbfe2fe4a12379b72609a6360ca4c3f360246ba74e4fe3442bb8705fb9e6e",
+      "dst_hash": "94fbbfe2fe4a12379b72609a6360ca4c3f360246ba74e4fe3442bb8705fb9e6e",
       "source": "deterministic"
     },
     {
@@ -106,8 +106,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.",
       "license": "MIT",
-      "src_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
-      "dst_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
+      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
       "source": "deterministic"
     }
   ],

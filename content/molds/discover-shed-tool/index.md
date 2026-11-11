@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-07-24
-revision: 5
+revised: 2026-11-10
+revision: 6
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 output_artifacts:
   - id: galaxy-tool-pin
@@ -65,13 +65,13 @@ references:
 
 Discover whether the Galaxy Tool Shed already publishes a wrapper for the tool a workflow step needs, and resolve the discovery to a `(owner, repo, tool_id, version, changeset_revision)` quintuple that downstream steps can pin and cache.
 
-This Mold is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the cast skill recommends a pin and exits successfully. On a miss (or a low-quality hit), it falls through to [[author-galaxy-tool-wrapper]]. The branch itself is harness logic; this Mold owns only the discovery half.
+This Mold is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the cast skill recommends a pin and exits successfully. On a miss, it falls through to [[author-galaxy-tool-wrapper]]. The branch itself is harness logic; this Mold owns only the discovery half.
 
 ## Inputs
 
 The Mold expects, per step:
 
-- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences).
+- A free-text **need** describing what the step should do (typically a one-line description of the tool, plus any constraints — file format in/out, container language, license preferences). It names the source executable when there is one.
 - Optional **owner hint** (e.g. `devteam`, `iuc`) when the caller has a strong prior.
 - Optional **exact-name hint** when the caller knows the canonical XML id.
 
@@ -103,8 +103,10 @@ A structured recommendation object, JSON-shaped:
 
 `status` semantics:
 - `hit` — recommend pinning. Caller should cache and proceed.
-- `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller should confirm or fall through.
-- `miss` — no usable hit. Caller falls through to [[author-galaxy-tool-wrapper]].
+- `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller confirms the candidate before pinning; it never falls through to authoring.
+- `miss` — no wrapper runs the executable or operation the need names. Caller falls through to [[author-galaxy-tool-wrapper]].
+
+Classify on what a wrapper runs, not on fit. Fit depends on the step's ports, which discovery doesn't see, and [[implement-galaxy-tool-step]] checks it after summarize. A wrapper that runs the named executable is never a `miss`.
 
 ## Procedure
 
@@ -112,7 +114,7 @@ The cast skill follows the gxwf-shaped discover-and-pin chain. **It does not cal
 
 ### 1. Search
 
-Issue [[tool-search]] with the need's keywords. Start narrow:
+Issue [[tool-search]] with the need's keywords, and with the executable when the need names one. Start narrow:
 
 ```
 gxwf tool-search "<keywords>" --json --max-results 10
@@ -130,7 +132,7 @@ For each hit, score on:
 - **Recency.** Recent `last_updated` strengthens a hit; very old wrappers can still be valid but warrant the `weak` classification.
 - **Duplicates across repos.** Two owners can publish wrappers with the same XML id. Either pick the maintained one or downgrade to `weak` and surface the choice.
 
-Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see [[component-tool-shed-search]] §6.
+Drop data-manager hits (usually `data_manager_*` repos): they're admin-only and write a tool data table, not a dataset a step can consume. Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see [[component-tool-shed-search]] §6.
 
 ### 3. Resolve to a pinnable version
 
@@ -157,7 +159,7 @@ Prefer `--latest` so the newest changeset publishing that version wins (tool ver
 Combine the scored hit and the resolved pin into the recommendation object above:
 - One dominant hit + clean version+changeset resolution → `hit`.
 - Multiple plausible hits, ambiguous owner, deprecated suspicion, or only-help-text match → `weak` with the leading candidate plus alternates.
-- No usable hit → `miss`.
+- No wrapper runs what the need names → `miss`.
 
 Validate the recommendation with `validate-galaxy-tool-discovery` before returning it. Do not rely on prose-only shape checks; downstream phases branch on this contract.
 

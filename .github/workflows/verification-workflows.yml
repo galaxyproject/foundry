@@ -31,7 +31,6 @@ jobs:
         run: python -m pip install planemo==0.75.48
 
       - name: Lint verified workflow
-        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -42,9 +41,17 @@ jobs:
             echo "No verification workflows found" >&2
             exit 1
           fi
+          failed=0
           for workflow in "${workflows[@]}"; do
-            planemo lint "$workflow"
+            echo "::group::$workflow"
+            # Fixtures, not published workflows: skip annotation/creator/license checks.
+            if ! planemo workflow_lint --skip best_practices "$workflow"; then
+              echo "::error file=$workflow::planemo workflow_lint failed"
+              failed=1
+            fi
+            echo "::endgroup::"
           done
+          exit "$failed"
 
       - name: Test verified workflow
         shell: bash

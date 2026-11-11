@@ -49,8 +49,12 @@ const SPAWN_MAX_BUFFER = 64 * 1024 * 1024;
  * blocks the event loop, so under 3 the timer could not fire and these ran as long as they liked;
  * one has been taking ~12-16s against the default 5s budget and reporting success. It now reports
  * "Test timed out in 5000ms" AFTER running to completion, which is the same test, told truthfully.
+ *
+ * Bacass `--fetch-test-data` then downloads four ~55MB FASTQ files sequentially, about two
+ * minutes at 2.5MB/s, plus the samplesheet and references. A 120s cap kills that download
+ * while it is still running, and spawnSync reports `status: null`.
  */
-const NETWORK_SPAWN_TIMEOUT_MS = 120_000;
+const NETWORK_SPAWN_TIMEOUT_MS = 300_000;
 const NETWORK_TEST_TIMEOUT_MS = NETWORK_SPAWN_TIMEOUT_MS + 30_000;
 const DEMO_SUMMARY = resolve(
   FOUNDRY_ROOT,
@@ -865,6 +869,57 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
       expect(data.reference_rebuilds).toEqual([]);
     },
   );
+
+  itIfRnaseqFixture("resolves publishDir, ext.args, and template bodies", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    expect(validateSummary(data).valid).toBe(true);
+
+    const featureCounts = data.processes.find(
+      (process: { name: string }) => process.name === "SUBREAD_FEATURECOUNTS",
+    );
+    expect(featureCounts.publish_dir).toContain("featurecounts");
+    expect(
+      featureCounts.resolved_args.some(
+        (arg: { key: string; expression: string; config: string }) =>
+          arg.key === "args" &&
+          arg.expression.includes("'-B -C'") &&
+          arg.config.endsWith("modules/nf-core/subread/featurecounts/nextflow.config"),
+      ),
+    ).toBe(true);
+
+    const dupradar = data.processes.find(
+      (process: { name: string }) => process.name === "DUPRADAR",
+    );
+    expect(dupradar.script_excerpt.trim()).toBe("template 'dupradar.r'");
+    expect(dupradar.template).toEqual(
+      expect.objectContaining({
+        path: "modules/nf-core/dupradar/templates/dupradar.r",
+        line_count: 187,
+      }),
+    );
+    expect(dupradar.template.body).toContain("dupRadar");
+
+    const rsem = data.processes.find(
+      (process: { name: string; aliases?: string[] }) =>
+        process.name === "RSEM_PREPAREREFERENCE_GENOME" ||
+        process.aliases?.includes("RSEM_PREPAREREFERENCE_GENOME"),
+    );
+    expect(
+      rsem.resolved_args.map((arg: { expression: string }) => arg.expression).join("\n"),
+    ).not.toContain("--genomeSAindexNbases 7");
+
+    const bowtie = data.processes.find(
+      (process: { name: string }) => process.name === "BOWTIE2_ALIGN",
+    );
+    expect(
+      bowtie.resolved_args.map((arg: { expression: string }) => arg.expression).join("\n"),
+    ).not.toContain("--seed 1");
+  });
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () => {

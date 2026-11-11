@@ -5,8 +5,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-09-24
-revised: 2026-10-23
-revision: 4
+revised: 2026-11-10
+revision: 5
 license: MIT
 license_file: LICENSES/galaxy.LICENSE
 related_notes:
@@ -33,6 +33,7 @@ The sections the Foundry reads:
 
 - `workflows` ("Using a tool in a workflow") — how a format2 workflow step embeds a user-defined tool under `run`. [[galaxy-user-tool-workflow-binding]] is derived from it.
 - `api` ("API endpoints") — the `/api/unprivileged_tools` endpoints, the create payload shape, and running a registered tool by `tool_uuid`.
+- `expressions-shell` ("Why do some shell constructs fail?"): which `$` forms Galaxy evaluates and how backslash escapes behave. The escaping rules in §3 of [[galaxy-user-tool-authoring]] follow it.
 - `validation`, `testing` — what Galaxy checks when a tool is created, and that Galaxy stores declared tool tests but does not run them for a tool held in its database.
 
 The field-level rules in `tool-format`, `parameters`, `outputs`, `expressions`, and `containers` overlap [[galaxy-user-tool-authoring]], which was derived earlier from Galaxy's generator prompts. That note remains what [[author-galaxy-tool-wrapper]] loads.

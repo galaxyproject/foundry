@@ -5,21 +5,26 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-08-24
-revised: 2026-08-24
-revision: 1
+revised: 2026-11-10
+revision: 2
 component: tool_util_models
 related_notes:
   - "[[component-nextflow-containers-and-envs]]"
   - "[[galaxy-user-tool-critique]]"
+  - "[[galaxy-user-tool-authoring-help]]"
 sources:
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_structured.md"
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_container_critic.md"
-summary: "What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — derived from Galaxy's own generator prompts."
+  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/7c18ab768ac112bddf485cfcb5c074a83165c591/lib/galaxy/jobs/command_factory.py"
+  - "https://github.com/galaxyproject/galaxy/blob/7c18ab768ac112bddf485cfcb5c074a83165c591/lib/galaxy/tool_util/deps/requirements.py"
+  - "https://github.com/common-workflow-language/cwl-utils/blob/v0.41/cwl_utils/expression.py"
+summary: "What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — from Galaxy's prompts, authoring help and code."
 ---
 
 The rules a `GalaxyUserTool` YAML document has to satisfy, and the decisions worth making while writing one.
 
-Derived from two vendored Galaxy prompts — [[custom-tool-structured]] and [[custom-tool-container-critic]] — rather than restating them. Those prompts are written for Galaxy's in-process agent, where a grammar constrains generation and a deployment-side step may rewrite the container. Neither holds in a cast, so the harness divergences are named in the last section instead of being inherited silently.
+Derived from two vendored Galaxy prompts — [[custom-tool-structured]] and [[custom-tool-container-critic]] — rather than restating them. Those prompts are written for Galaxy's in-process agent, where a grammar constrains generation and a deployment-side step may rewrite the container. Neither holds in a cast, so the harness divergences are named in the last section instead of being inherited silently. The escaping and shell rules in §3 come from Galaxy's own authoring help ([[galaxy-user-tool-authoring-help]]), its job script code and the cwl-utils expression evaluator it uses, because the prompts do not cover them.
 
 Sections 6 and 7 are target-neutral: they are about running a script and naming its dependencies, not about Galaxy. They are kept self-contained so a CWL-side note can lift them without a rewrite.
 
@@ -49,7 +54,7 @@ help:
 
 ## 3. Expression syntax in `shell_command`
 
-Expressions are JavaScript, spliced into the command verbatim.
+Expressions are JavaScript, and their results are spliced into the command verbatim, without shell quoting.
 
 - Single file path: `$(inputs.param_name.path)`
 - Scalar value (text, integer, float, boolean): `$(inputs.param_name)`
@@ -60,7 +65,20 @@ Expressions are JavaScript, spliced into the command verbatim.
   A bare `.join(" ")` leaves paths unquoted, and the result is spliced verbatim, so unquoted paths with spaces break the command.
 - **`inputs.param_name[].path` is not valid.** The empty `[]` is a JavaScript syntax error that surfaces only when the job is built. Indexing itself is fine — `inputs.some_repeat[0].x` works.
 - **`$(outputs.param_name.path)` is not valid at all.** Outputs are captured by `from_work_dir` or `discover_datasets`, never referenced in the command.
-- Escape shell variables that are not Galaxy expressions: `\$(date)`.
+
+**Only `$(` and `${` are expression delimiters.** The rules below follow the `expressions-shell` section of [[galaxy-user-tool-authoring-help]] and the `interpolate` function of cwl-utils, which Galaxy uses to evaluate expressions. They apply equally to every `configfiles` entry's `content`.
+
+| Written | Reaches the shell as |
+| --- | --- |
+| `$(date +%s)`, `${f%.txt}`, `${VAR:-default}` | Nothing. Galaxy evaluates it as JavaScript, and the job fails with an expression error. |
+| `$(( 1 + 2 ))` | `3`. Valid JavaScript is substituted without any error, changing the command's meaning. |
+| `\$(date +%s)`, `\${f%.txt}` | `$(date +%s)`, `${f%.txt}`. Escape a shell command substitution or braced variable this way. |
+| `$GALAXY_SLOTS`, `$name`, `$1` | Unchanged. A `$` not followed by `(` or `{` is not an expression, so it needs no escape. |
+| `\$name` | `\$name`, backslash included. The shell does not expand it to the variable's value. |
+
+So escape the dollar only in front of `(` or `{`, and prefer unbraced variables (`"$f"` rather than `"${f}"`) where the shell allows it. Escape processing only runs on a command or file that contains `$(` or `${` somewhere, even an escaped `\$(`. There, `\\` also collapses to a single `\`, so a literal backslash pair is written `\\\\`.
+
+**Expect the command to run under `/bin/sh` with `set -e`.** Galaxy writes the evaluated `shell_command` into a job script with `set -e`, which it enables for every user-defined tool. When Galaxy runs the container itself (Docker or Singularity on a local or cluster runner), the script's interpreter is the container's `/bin/sh`. Runners that launch the container themselves, such as Kubernetes, use the destination's shell instead, `/bin/bash` by default. Write the script for `/bin/sh` unless it calls `bash` explicitly. In many images `/bin/sh` is a minimal shell such as dash, which may lack bash features such as `set -o pipefail`, arrays and `[[ ]]`. Where `set -o pipefail` is rejected, the job fails at once (exit status 2 under dash). When a script needs bash, put it in a `configfiles` entry and run it with `bash script.sh` (§6), after checking that the image provides `bash`.
 
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
 

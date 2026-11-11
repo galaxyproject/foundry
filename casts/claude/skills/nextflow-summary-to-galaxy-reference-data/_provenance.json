@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
     "revision": 5,
     "content_hash": "b49bae31e3b8918b45f852b8f50e1101e71837380b97f8e8ec237a5dd2955f7f",
-    "commit": "e2c26d735ea338046c61917fcf7627a7f1dc462e"
+    "commit": "77425ce07f69da2bdda1de21faea3abc4600ae00"
   },
-  "cast_at": "2026-11-06T18:57:26.791Z",
+  "cast_at": "2026-11-10T15:33:28.743Z",
   "refs": [
     {
       "kind": "research",
@@ -64,8 +64,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones a settled reference-data shape discharges, and append reference obligations the pipeline leaves open — a genome key with no Galaxy data table, a reference the pipeline builds at runtime, a build the corpus doesn't carry.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
-      "dst_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
+      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
       "source": "deterministic"
     },
     {
@@ -79,8 +79,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read `reference_assets[]` (curated path-typed inputs with `used_by` attribution to consuming subworkflows), `reference_rebuilds[]` (compute-if-missing rebuild rules with builder process and guard), and `params[]` provenance (`source_kind`, including `getGenomeAttribute` for nf-core key-expanded bundles) to determine which reference assets the source pipeline consumes and how it rebuilds them when absent.",
       "license": "MIT",
-      "src_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
-      "dst_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
+      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
       "source": "deterministic"
     }
   ],

@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Route between alternative outputs"
+label: "Route between alternative outputs"
 inputs:
   - id: left_source
     type: data

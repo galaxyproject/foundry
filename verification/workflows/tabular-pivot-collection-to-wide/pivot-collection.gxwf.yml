@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Pivot tabular collection to wide table"
+label: "Pivot tabular collection to wide table"
 inputs:
   - id: headerless_tables
     type: collection
@@ -18,7 +18,7 @@ steps:
     tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3
     tool_version: "0.0.3"
     tool_shed_repository:
-      changeset_revision: 3ddd99c7efee
+      changeset_revision: 4b00d89e8690
       name: collection_column_join
       owner: iuc
       tool_shed: toolshed.g2.bx.psu.edu
@@ -40,7 +40,7 @@ steps:
     tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_column_join/collection_column_join/0.0.3
     tool_version: "0.0.3"
     tool_shed_repository:
-      changeset_revision: 3ddd99c7efee
+      changeset_revision: 4b00d89e8690
       name: collection_column_join
       owner: iuc
       tool_shed: toolshed.g2.bx.psu.edu

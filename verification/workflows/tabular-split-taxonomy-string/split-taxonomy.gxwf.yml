@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Split prefixed taxonomy string into rank columns"
+label: "Split prefixed taxonomy string into rank columns"
 inputs:
   - id: mapseq_rows
     type: data

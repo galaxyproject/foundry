@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Transform or pass through"
+label: "Transform or pass through"
 inputs:
   - id: original
     type: data

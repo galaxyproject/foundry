@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Run optional step"
+label: "Run optional step"
 inputs:
   - id: input_text
     type: data

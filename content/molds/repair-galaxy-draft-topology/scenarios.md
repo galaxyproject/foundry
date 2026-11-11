@@ -56,6 +56,20 @@
   ruling out authoring as its `because`. `multiqc_report`
   still has its source. `gxwf draft-validate` exits 0.
 
+## Case: a consumer's wrapper builds the index
+
+No committed fixture yet.
+
+- fixture: a draft whose drafty `STAR genome index` step feeds an index to two
+  realized `rna_star` steps, and the blocking entry
+  [[implement-galaxy-tool-step]] raised on it, naming `rna_star` `2.7.11b+galaxy1`
+  as having no index output.
+- expect: the entry ends `resolved`. The index step is gone, its genome FASTA is
+  wired to `refGenomeSource|genomeFastaFiles` on both `rna_star` steps, and both
+  set `refGenomeSource.geneSource: history`, as in
+  `examples/star-sa-index-input/`. No step is added for the index. `gxwf
+  draft-validate --concrete --strict-state` exits 0.
+
 ## Case: value must vary per run
 
 Direct invocation only: this entry comes from the test phase, and no pipeline routes

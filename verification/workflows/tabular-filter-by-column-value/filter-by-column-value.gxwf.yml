@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Filter tabular rows by column value"
+label: "Filter tabular rows by column value"
 inputs:
   - id: rows
     type: data

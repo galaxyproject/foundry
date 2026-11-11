@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Compute a new tabular column"
+label: "Compute a new tabular column"
 inputs:
   - id: values
     type: data

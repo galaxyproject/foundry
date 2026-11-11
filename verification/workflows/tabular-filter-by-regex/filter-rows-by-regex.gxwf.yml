@@ -1,5 +1,5 @@
 class: GalaxyWorkflow
-name: "Filter tabular rows by regex"
+label: "Filter tabular rows by regex"
 inputs:
   - id: rows
     type: data

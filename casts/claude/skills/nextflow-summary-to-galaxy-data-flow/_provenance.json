@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 8,
     "content_hash": "f71cc2b4ceb115d7d93c3dd2e622cbfafb8b9f338f1dd450ee5773f3c0a0e247",
-    "commit": "ae8beb6df85b09a61706d0f6990e99bccd718394"
+    "commit": "77425ce07f69da2bdda1de21faea3abc4600ae00"
   },
-  "cast_at": "2026-11-07T15:09:32.185Z",
+  "cast_at": "2026-11-10T15:33:28.636Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -218,8 +218,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the channel topology leaves open — an operator with no Galaxy collection recipe, a value channel with no Galaxy carrier, a join whose key Galaxy can't reconstruct.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
-      "dst_hash": "f9076119f5110cd28d3d827a88898e9ada28de4f5db6efefbd9a827cd9971a18",
+      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
       "source": "deterministic"
     },
     {
@@ -233,8 +233,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure while drafting Galaxy-facing abstract data flow.",
       "license": "MIT",
-      "src_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
-      "dst_hash": "839e11b1892af74df3158377027e7d340a67dafdb9b5965d79e9715a1a109d54",
+      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
       "source": "deterministic"
     }
   ],

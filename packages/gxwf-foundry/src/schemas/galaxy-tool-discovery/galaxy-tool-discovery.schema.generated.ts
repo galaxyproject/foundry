@@ -28,7 +28,7 @@ export const galaxyToolDiscoverySchema = {
             "weak",
             "miss"
           ],
-          "description": "Recommendation class. hit means proceed with the selected Tool Shed pin; weak means candidate exists but needs confirmation or may fall through; miss means no usable wrapper was found."
+          "description": "Recommendation class. hit means proceed with the selected Tool Shed pin; weak means a candidate exists and needs confirmation before it is pinned; miss means no wrapper runs the executable or operation the need names."
         },
         "candidate": {
           "anyOf": [
