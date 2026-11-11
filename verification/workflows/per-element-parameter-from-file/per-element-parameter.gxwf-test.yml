@@ -1,0 +1,88 @@
+- doc: "Each element's own integer parameterizes that element's mapped job"
+  job:
+    reads:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: a
+          class: File
+          path: test-data/a.txt
+          filetype: txt
+        - identifier: b
+          class: File
+          path: test-data/b.txt
+          filetype: txt
+    per_element_count:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: a
+          class: File
+          path: test-data/a_n.txt
+          filetype: txt
+        - identifier: b
+          class: File
+          path: test-data/b_n.txt
+          filetype: txt
+  outputs:
+    heads:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        a:
+          asserts:
+            - that: has_n_lines
+              n: 1
+            - that: has_text
+              text: a1
+        b:
+          asserts:
+            - that: has_n_lines
+              n: 3
+            - that: has_text
+              text: b3
+- doc: "Elements pair by position: a value collection in another order gives each element the value at its position"
+  job:
+    reads:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: a
+          class: File
+          path: test-data/a.txt
+          filetype: txt
+        - identifier: b
+          class: File
+          path: test-data/b.txt
+          filetype: txt
+    per_element_count:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: b
+          class: File
+          path: test-data/b_n.txt
+          filetype: txt
+        - identifier: a
+          class: File
+          path: test-data/a_n.txt
+          filetype: txt
+  outputs:
+    heads:
+      class: Collection
+      collection_type: list
+      element_count: 2
+      element_tests:
+        a:
+          asserts:
+            - that: has_n_lines
+              n: 3
+            - that: has_text
+              text: a3
+        b:
+          asserts:
+            - that: has_n_lines
+              n: 1
+            - that: has_text
+              text: b1
