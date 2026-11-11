@@ -1179,6 +1179,14 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/sarek)", () => 
         "bwa",
         "condel_config",
         "mastermind_file",
+        "ascat_genome",
+        "dbsnp_vqsr",
+        "known_indels_vqsr",
+        "known_snps_vqsr",
+        "snpeff_db",
+        "vep_cache_version",
+        "vep_genome",
+        "vep_species",
       ]) {
         expect(assetParams).toContain(expected);
       }
