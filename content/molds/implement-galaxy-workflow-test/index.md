@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-21
-revision: 11
+revised: 2026-11-11
+revision: 12
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[freeform-summary-to-galaxy-test-plan]]"
@@ -18,6 +18,7 @@ related_notes:
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-asserts-idioms]]"
   - "[[tests-format]]"
+  - "[[galaxy-efficient-tool-substitutions]]"
 summary: "Assemble Galaxy workflow test fixtures and assertions."
 input_artifacts:
   - id: galaxy-test-plan
@@ -32,6 +33,15 @@ output_artifacts:
     default_filename: galaxy-workflow.gxwf-tests.yml
     description: "Galaxy workflow test file (tests-format) with job inputs, expected outputs, assertions; passes static schema + label cross-check. Named as the workflow basename + `-tests.yml` so Planemo discovers it as the companion of `galaxy-workflow.gxwf.yml`."
 references:
+  - kind: research
+    ref: "[[galaxy-efficient-tool-substitutions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Write assertions that hold for a substituted tool's output, and drop source assertions only the original tool satisfies."
+    trigger: "When an asserted output comes from a step whose tool the substitution table replaces, or a source test asserts on such a tool's output."
+    verification: "Promote after a test plan for a workflow with a Falco step passes planemo and carries no FastQC-only assertion."
   - kind: cli-command
     ref: "[[validate-tests]]"
     used_at: runtime

@@ -11,7 +11,7 @@
       "args": [
         "validate-galaxy-tool-discovery",
         "--schema-sha256",
-        "0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee",
+        "89e819f2c623f54c5a174e158e92543ea89842d71c48b2b5dfda64a8ad938278",
         "{artifact_path}"
       ]
     }

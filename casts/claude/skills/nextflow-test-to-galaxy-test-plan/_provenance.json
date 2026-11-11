@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-test-to-galaxy-test-plan",
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
-    "revision": 8,
-    "content_hash": "fa769216f621ef25470c9fb907df1278635c0a1e022b647b9462ff7b92469291",
-    "commit": "871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee"
+    "revision": 9,
+    "content_hash": "f125022580a78efcfd49eaf755dc403d1ae4ef49aebacd36c8c8e0147ae13845",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-10T14:49:42.528Z",
+  "cast_at": "2026-11-11T22:43:20.649Z",
   "refs": [
     {
       "kind": "research",
@@ -40,6 +40,22 @@
       "companion_of": "references/notes/component-nextflow-testing.md",
       "src_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
       "dst_hash": "7d4da038c82a7da9b4abf4a6cdd8480f73a235e155c8d9763d6bd3826acf818e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Write assertions that hold for a substituted tool's output, and drop source assertions only the original tool satisfies.",
+      "trigger": "When an asserted output comes from a step whose tool the substitution table replaces, or a source test asserts on such a tool's output.",
+      "verification": "Promote after a test plan for a workflow with a Falco step passes planemo and carries no FastQC-only assertion.",
+      "src_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "dst_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
       "source": "deterministic"
     },
     {

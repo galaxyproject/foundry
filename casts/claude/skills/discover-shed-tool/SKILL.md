@@ -28,6 +28,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load Upfront
 
+- `references/notes/galaxy-efficient-tool-substitutions.md`: Research note copied verbatim into the bundle. Swap a named tool for its lower-cost Galaxy replacement before searching, unless an opt-out holds.
 - `references/schemas/galaxy-tool-discovery.schema.json`: Schema file copied verbatim into the bundle. Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.
 
 ## Load On Demand
@@ -39,8 +40,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Before starting, check that the installed validator carries the galaxy-tool-discovery schema this bundle was cast with: run `foundry validate-galaxy-tool-discovery --schema-sha256 0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
-- Validate `galaxy-tool-pin.json` before returning it: run `foundry validate-galaxy-tool-discovery --schema-sha256 0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee galaxy-tool-pin.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-discovery --schema-sha256 0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
+- Before starting, check that the installed validator carries the galaxy-tool-discovery schema this bundle was cast with: run `foundry validate-galaxy-tool-discovery --schema-sha256 89e819f2c623f54c5a174e158e92543ea89842d71c48b2b5dfda64a8ad938278` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `galaxy-tool-pin.json` before returning it: run `foundry validate-galaxy-tool-discovery --schema-sha256 89e819f2c623f54c5a174e158e92543ea89842d71c48b2b5dfda64a8ad938278 galaxy-tool-pin.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-galaxy-tool-discovery --schema-sha256 89e819f2c623f54c5a174e158e92543ea89842d71c48b2b5dfda64a8ad938278 galaxy-tool-pin.json`. This checks artifact `galaxy-tool-pin` against the galaxy-tool-discovery schema.
 
 ## Procedure
 
@@ -65,20 +66,39 @@ A structured recommendation object, JSON-shaped:
   "status": "hit",
   "candidate": {
     "tool_shed_url": "https://toolshed.g2.bx.psu.edu",
-    "owner": "devteam",
-    "repo": "fastqc",
-    "tool_id": "fastqc",
-    "trs_tool_id": "devteam~fastqc~fastqc",
-    "version": "0.74+galaxy0",
-    "changeset_revision": "5ec9f6bceaee",
-    "score": 12.3,
+    "owner": "iuc",
+    "repo": "falco",
+    "tool_id": "falco",
+    "trs_tool_id": "iuc~falco~falco",
+    "version": "1.3.2+galaxy0",
+    "changeset_revision": "219ffa24f789",
+    "score": 0,
     "matched_terms": ["fastqc"],
-    "match_fields": ["name", "description"],
-    "rationale": "single dominant hit on tool name"
+    "match_fields": ["substitution_table"],
+    "rationale": "need names fastqc; the substitution table pins iuc/falco and no opt-out applies"
   },
-  "alternates": [],
-  "rationale": "single dominant hit on tool name; latest version pinned to newest changeset",
-  "warnings": []
+  "alternates": [
+    {
+      "tool_shed_url": "https://toolshed.g2.bx.psu.edu",
+      "owner": "devteam",
+      "repo": "fastqc",
+      "tool_id": "fastqc",
+      "trs_tool_id": "devteam~fastqc~fastqc",
+      "version": "0.74+galaxy1",
+      "changeset_revision": "2c64fded1286",
+      "score": 0,
+      "matched_terms": ["fastqc"],
+      "match_fields": ["substitution_table"],
+      "rationale": "the replaced tool, pinned so the caller can reverse the swap"
+    }
+  ],
+  "rationale": "efficient substitution of fastqc by falco; latest version pinned to newest changeset",
+  "warnings": [
+    {
+      "code": "efficient-substitution",
+      "message": "replaced devteam/fastqc with iuc/falco per the efficient substitution table"
+    }
+  ]
 }
 ```
 
@@ -92,6 +112,10 @@ Classify on what a wrapper runs, not on fit. Fit depends on the step's ports, wh
 ### Procedure
 
 The skill follows the gxwf-shaped discover-and-pin chain. **It does not call the Tool Shed HTTP API directly** — the TS CLI wraps the call sequence and gotchas covered in component-tool-shed-search.
+
+#### 0. Check the substitution table
+
+Before searching, match the need, its executable, and any exact-name or pinned `tool_id` against the table in galaxy-efficient-tool-substitutions. On a match, check that row's opt-out conditions against what the need says about inputs, settings, and downstream consumers. If none holds, skip the search, take the replacement's exact owner and repository from the row, and continue at step 3. Emit the result as a `hit` with an `efficient-substitution` warning whose message names the replaced tool and its pin, and list the original wrapper's resolved pin in `alternates` so the caller can reverse the swap. If an opt-out holds, discover the original tool as usual and name the opt-out in `rationale`.
 
 #### 1. Search
 

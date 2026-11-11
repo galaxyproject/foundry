@@ -1,10 +1,18 @@
 # discover-shed-tool scenarios
 
-## Case: fastqc exact hit
+## Case: fastqc need substituted by falco
 
 - fixture: step need `quality control for FASTQ reads using FastQC`
-- expect: recommends an installable FastQC Tool Shed wrapper with owner, repo,
-  tool id, version, and changeset revision.
+- expect: `hit` with `iuc~falco~falco` as `candidate`, pinned to a version and
+  changeset, never `mhh-hematology/falcoamadeus`. `warnings` carries
+  `efficient-substitution`, and `alternates` carries the resolved
+  `devteam~fastqc~fastqc` pin.
+
+## Case: fastqc need with bz2 input keeps fastqc
+
+- fixture: step need `quality control for fastq.bz2 reads using FastQC`
+- expect: `hit` with `devteam~fastqc~fastqc` as `candidate` and no
+  `efficient-substitution` warning. `rationale` names the `fastq.bz2` opt-out.
 
 ## Case: STAR index need
 

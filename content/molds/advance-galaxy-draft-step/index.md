@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-06-02
-revised: 2026-11-10
-revision: 12
+revised: 2026-11-11
+revision: 13
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
@@ -133,6 +133,15 @@ references:
     evidence: hypothesis
     purpose: "Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on."
     verification: "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that leaves fewer open blocking entries than it found."
+  - kind: research
+    ref: "[[galaxy-efficient-tool-substitutions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Record an efficient substitution made by discovery as a ledger decision the run's reviewer can reverse."
+    trigger: "When [[discover-shed-tool]] returns an `efficient-substitution` warning in step 2."
+    verification: "Promote after a loop run on a source with a FastQC step emits iuc/falco and a matching ledger decision."
 related_molds:
   - "[[discover-shed-tool]]"
   - "[[author-galaxy-tool-wrapper]]"
@@ -144,6 +153,7 @@ related_notes:
   - "[[galaxy-workflow-draft-format]]"
   - "[[galaxy-data-flow-draft-contract]]"
   - "[[open-requirements-ledger]]"
+  - "[[galaxy-efficient-tool-substitutions]]"
 ---
 
 # advance-galaxy-draft-step
@@ -163,10 +173,10 @@ Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <
    Otherwise, split on whether the step's tool is a **built-in / stock** Galaxy tool — a bare id with no `owner/repo` path (`Filter1`, `sort1`, `Cut1`, `Show beginning1`, collection ops, `__APPLY_RULES__`):
    - **Built-in / stock** — the bare id *is* the wrapper identity; it does **not** route through [[discover-shed-tool]] (Tool Shed search) or [[author-galaxy-tool-wrapper]]. Only its concrete version needs resolving: the shed serves stock tools by bare id, but its TRS version-list endpoint can't auto-resolve the version, so read it from a populated cache via `galaxy-tool-cache list` or take a known pin from the step plan — never hand-guess a stock version. [[summarize-galaxy-tool]] then performs the bare-id `add`/`summarize` with that explicit `--tool-version`.
    - **Tool Shed wrapper** — branch on whether the template already pinned wrapper identity (see the tiers in [[galaxy-workflow-draft-format]]):
-     - **Identity-pinned** — `tool_id` is concrete and `tool_version` is `TODO`. Treat the pin as a strong seed: confirm it via [[discover-shed-tool]] and resolve the changeset, correcting the `tool_id` only if discovery contradicts the pin (a pinned id is high-confidence template evidence, not a guess to re-derive from scratch).
+     - **Identity-pinned** — `tool_id` is concrete and `tool_version` is `TODO`. Treat the pin as a strong seed: confirm it via [[discover-shed-tool]] and resolve the changeset, correcting the `tool_id` only if discovery contradicts the pin or substitutes it (a pinned id is high-confidence template evidence, not a guess to re-derive from scratch).
      - **Deferred** — `tool_id` is `TODO`. Search fresh: run [[discover-shed-tool]] against the step's `_plan_*` context, naming the source executable when `_plan_context` gives one.
 
-     Either way, fall through to [[author-galaxy-tool-wrapper]] only on `miss`. Confirm a `weak` candidate and continue with it; one that confirmation shows doesn't run the named work counts as a `miss`. A found wrapper that can't serve the step goes to repair through implement's ledger entry (step 5).
+     When discovery returns an `efficient-substitution` warning, use its candidate and append a ledger `decision` for the swap as [[galaxy-efficient-tool-substitutions]] describes, so the original pin in `alternates` stays recoverable. Either way, fall through to [[author-galaxy-tool-wrapper]] only on `miss`. Confirm a `weak` candidate and continue with it; one that confirmation shows doesn't run the named work counts as a `miss`. A found wrapper that can't serve the step goes to repair through implement's ledger entry (step 5).
 
    If the resolved pin is absent from the cache, run [[add]] `<tool_id> --tool-version <v> --cache-dir <dir>` before summarization. In `@galaxy-tool-util/cli` 1.10.0, validation also fetches and caches missing metadata unless `--offline` is set; offline validation requires a populated cache.
 3. **Summarize the wrapper.** If step 2 reused a sibling's pin, reuse that pin's [[galaxy-tool-summary]]: use the file an earlier iteration wrote, or regenerate it from the cache with `galaxy-tool-cache` [[summarize]] `<tool_id> --tool-version <v> --cache-dir <dir> --output <file>`. If step 2 fell through to [[author-galaxy-tool-wrapper]] or reused an embedded definition, skip summarization: the authored `galaxy-user-tool.yml` is not in any toolbox or cache, and its own `inputs` and `outputs` are the port contract. Otherwise, invoke [[summarize-galaxy-tool]] to produce the summary.

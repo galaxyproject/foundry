@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-workflow-test",
     "path": "content/molds/implement-galaxy-workflow-test/index.md",
-    "revision": 11,
-    "content_hash": "34855691581889d36265e00178088b8a52a51ee72119329261bca186f7cb480e",
-    "commit": "4c747d65e84f0100611458b5e869e9641bc50a21"
+    "revision": 12,
+    "content_hash": "cfb396764b3a7449d9af75d72e52f80d35404dcc1e7981fc7435146d534b9c6b",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-09T16:55:02.589Z",
+  "cast_at": "2026-11-11T22:43:20.323Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -46,6 +46,22 @@
       "purpose": "Runtime for workflow_test_init / workflow_test_on_invocation; install before authoring tests against a live invocation.",
       "src_hash": "7a149ff6f1cc396dd72bbdd7d0b93acecb12e1b86663c6119d4c0815b411fe94",
       "dst_hash": "7a149ff6f1cc396dd72bbdd7d0b93acecb12e1b86663c6119d4c0815b411fe94",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Write assertions that hold for a substituted tool's output, and drop source assertions only the original tool satisfies.",
+      "trigger": "When an asserted output comes from a step whose tool the substitution table replaces, or a source test asserts on such a tool's output.",
+      "verification": "Promote after a test plan for a workflow with a Falco step passes planemo and carries no FastQC-only assertion.",
+      "src_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "dst_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
       "source": "deterministic"
     },
     {

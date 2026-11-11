@@ -38,3 +38,21 @@ need it ran on. Concrete fixtures and their expected pins live in
   wrapper that exists under its human name (e.g. `integron finder` for an
   `integron_finder` token) is found rather than mistaken for absent. A `miss`
   that an obvious name-variant would have turned into a hit is a failure.
+
+## Property: a substitution is applied by exact identity and stays reversible
+
+- check: deterministic
+- assertion: when the candidate replaces the tool the need names, its `owner`
+  and `repo` equal the substitution table's row, `warnings` contains exactly one
+  `efficient-substitution` entry naming the replaced tool, and `alternates`
+  contains a resolved pin for the replaced tool. A candidate chosen from the
+  table without that warning, or a swap whose original pin is missing, is a
+  failure.
+
+## Property: an applicable opt-out keeps the original tool
+
+- check: llm-judged
+- assertion: when the need states an input, setting, or downstream consumer
+  that matches one of the row's opt-out conditions, the candidate is the
+  original tool, no `efficient-substitution` warning is emitted, and `rationale`
+  names the opt-out. Swapping despite a stated opt-out is a failure.

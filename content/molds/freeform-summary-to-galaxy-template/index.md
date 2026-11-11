@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-10-22
-revision: 7
+revised: 2026-11-11
+revision: 8
 summary: "gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief."
 input_artifacts:
   - id: freeform-summary
@@ -36,6 +36,15 @@ output_artifacts:
     default_filename: open-requirements.ledger.yml
     description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
+  - kind: research
+    ref: "[[galaxy-efficient-tool-substitutions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Emit the lower-cost replacement for a tool the substitution table lists, and record the swap or the opt-out."
+    trigger: "When a tool step's source executable or chosen `tool_id` names a tool in the substitution table."
+    verification: "Promote after a template run on a source with a FastQC step emits iuc/falco with a matching ledger decision, and the per-step loop implements it without rewiring."
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
     used_at: runtime
@@ -145,6 +154,7 @@ references:
 related_notes:
   - "[[freeform-summary-to-galaxy-interface]]"
   - "[[freeform-summary-to-galaxy-data-flow]]"
+  - "[[galaxy-efficient-tool-substitutions]]"
 ---
 # freeform-summary-to-galaxy-template
 
@@ -153,6 +163,8 @@ Read the original free-form source artifact if present, the free-form summary Ma
 The free-form summary does not have a concrete schema yet; treat it as Markdown. Treat the prior-step index as the working context: source transcript or paper, free-form summary, freeform-to-Galaxy interface and data-flow briefs, and any open questions carried forward.
 
 Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream freeform-to-Galaxy interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. Wrapper resolution, by contrast, is **evidence-gated, not source-gated**: resolve each tool step to the tier its evidence supports — **Resolved** (fully concrete, no `_plan_*`), **Identity-pinned** (concrete `tool_id`, parameters and changeset left to the per-step Mold), or **Deferred** (`tool_id: TODO`) — as defined in [[galaxy-workflow-draft-format]]. Capture whatever you defer in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
+
+**Efficient substitutions.** When a step's tool is one that [[galaxy-efficient-tool-substitutions]] replaces, emit the replacement's `tool_id` at whatever tier the step's evidence supports, unless one of that row's opt-out conditions holds. Carry the source settings through the row's parameter mapping, and append a ledger `decision` recording the swap, or recording the kept original and the opt-out that applied. A pattern page or IWC exemplar that shows the original tool still guides the step's wiring, but it does not override the table.
 
 Source tendency: free-form sources rarely name tools, so steps land in **Deferred** more often than nf-core or CWL — but a free-form source that *does* name a specific tool/version with evidence hardens to the matching tier, and a corpus-confirmed utility wrapper (interval/tabular/collection op) is not deferred just because the surrounding prose is informal. When deferring a domain tool, cite the originating paper section, interview answer, figure, or supplementary table in `_plan_context`, and record vague intent in `_plan_state` ("default settings", "stranded reverse if mentioned, else unstranded") so the per-step Mold knows the evidence ceiling.
 

@@ -52,6 +52,37 @@ describe("validateGalaxyToolDiscovery", () => {
     expect(result).toEqual({ valid: true, errors: [] });
   });
 
+  it("accepts a hit that records an efficient substitution", () => {
+    const result = validateGalaxyToolDiscovery({
+      ...VALID_HIT,
+      candidate: {
+        ...VALID_HIT.candidate,
+        owner: "iuc",
+        repo: "falco",
+        tool_id: "falco",
+        trs_tool_id: "iuc~falco~falco",
+        version: "1.3.2+galaxy0",
+        changeset_revision: "219ffa24f789",
+        match_fields: ["substitution_table"],
+      },
+      warnings: [
+        {
+          code: "efficient-substitution",
+          message: "need named fastqc; pinned iuc/falco per the efficient substitution table",
+        },
+      ],
+    });
+    expect(result).toEqual({ valid: true, errors: [] });
+  });
+
+  it("rejects an unknown warning code", () => {
+    const result = validateGalaxyToolDiscovery({
+      ...VALID_HIT,
+      warnings: [{ code: "greener-tool", message: "not a registered code" }],
+    });
+    expect(result.valid).toBe(false);
+  });
+
   it("rejects a hit without a candidate", () => {
     const result = validateGalaxyToolDiscovery({ ...VALID_HIT, candidate: null });
     expect(result.valid).toBe(false);

@@ -8,8 +8,8 @@ tags:
   - lifecycle/review
 status: draft
 created: 2026-09-12
-revised: 2026-09-12
-revision: 1
+revised: 2026-11-11
+revision: 2
 summary: "Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review."
 input_artifacts:
   - id: starting-galaxy-workflow
@@ -45,6 +45,15 @@ output_artifacts:
     default_filename: galaxy-workflow-review.md
     description: "Advisory IWC-policy review of one Galaxy workflow pull-request subject, citing structural validation, Planemo test evidence, and optional Foundry context."
 references:
+  - kind: research
+    ref: "[[galaxy-efficient-tool-substitutions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Flag steps that use a tool the substitution table replaces as Foundry efficiency advice, separate from IWC policy."
+    trigger: "When a workflow step's `tool_id` names a tool in the substitution table."
+    verification: "Promote after a run on a workflow with a FastQC step reports the Falco suggestion, names any applicable opt-out, and leaves the IWC recommendation unchanged."
   - kind: prompt
     ref: "[[workflow-pr-review-command]]"
     used_at: runtime
@@ -101,6 +110,7 @@ related_molds:
 related_notes:
   - "[[workflow-pr-review-command]]"
   - "[[open-requirements-ledger]]"
+  - "[[galaxy-efficient-tool-substitutions]]"
 ---
 
 # review-galaxy-workflow
@@ -130,7 +140,11 @@ Read the bundled review command and work its checklist in order. Adapt repositor
 
 When `iwc-comparison-notes`, an `open-requirements-ledger`, or source and design handoffs are present, add a clearly labeled **Foundry context** section covering unresolved intent, surrendered or dropped work, and test strength. When they are absent, omit the section or state that no Foundry context was supplied. **Their absence is never an IWC finding.** Do not rerun [[compare-against-iwc-exemplar]]; consume its existing output.
 
-### 5. Write the review
+### 5. Note efficient tool substitutions
+
+Check each step's `tool_id` against [[galaxy-efficient-tool-substitutions]]. For each match, write a suggestion naming the step, the replacement wrapper, and any opt-out condition the step's settings or downstream consumers already show. This is Foundry efficiency advice, not IWC policy: it never becomes a required fix and never changes the recommendation.
+
+### 6. Write the review
 
 Emit `galaxy-workflow-review.md` with, in order:
 
@@ -138,8 +152,9 @@ Emit `galaxy-workflow-review.md` with, in order:
 2. the validation result and the Planemo test result, quoted as statuses rather than as conclusions;
 3. the applicable IWC checklist, one status and its evidence per item;
 4. the Foundry context section, when one was supplied;
-5. required fixes, separated from optional improvements, separated from evidence that was unavailable; and
-6. exactly one advisory recommendation: `approve`, `request changes`, or `needs discussion`.
+5. required fixes, separated from optional improvements, separated from evidence that was unavailable;
+6. efficiency suggestions from step 5, when any step matched, labeled as Foundry advice; and
+7. exactly one advisory recommendation: `approve`, `request changes`, or `needs discussion`.
 
 ## Non-goals
 

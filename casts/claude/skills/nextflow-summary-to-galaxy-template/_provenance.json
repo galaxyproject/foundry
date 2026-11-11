@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
-    "revision": 10,
-    "content_hash": "77f885d640900cca7dac4a3bbb33308d4d8065e871c919c672487db61caf93ab",
-    "commit": "77425ce07f69da2bdda1de21faea3abc4600ae00"
+    "revision": 11,
+    "content_hash": "ab67348bed8b4aba0b7cc0d8aace6714e2c15d645fe13b927e5c5d220ccc0fa2",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-10T15:33:28.827Z",
+  "cast_at": "2026-11-11T22:43:20.565Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -172,6 +172,22 @@
       "verification": "Promote after two worked Nextflow-to-Galaxy templates preserve the data-flow/template split without schema changes.",
       "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
       "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Emit the lower-cost replacement for a tool the substitution table lists, and record the swap or the opt-out.",
+      "trigger": "When a tool step's source executable or chosen `tool_id` names a tool in the substitution table.",
+      "verification": "Promote after a template run on a source with a FastQC step emits iuc/falco with a matching ledger decision, and the per-step loop implements it without rewiring.",
+      "src_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "dst_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
       "source": "deterministic"
     },
     {

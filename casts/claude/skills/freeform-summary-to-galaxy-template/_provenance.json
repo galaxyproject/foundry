@@ -4,11 +4,11 @@
   "mold": {
     "name": "freeform-summary-to-galaxy-template",
     "path": "content/molds/freeform-summary-to-galaxy-template/index.md",
-    "revision": 7,
-    "content_hash": "a9a4393c49eec26be0c7c67925e04960a04ea07d5d7ee6ecd415c2491bcac467",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "revision": 8,
+    "content_hash": "70abeb404b60129cf52f0ae3fc4f3d8aa2a28626e0881219b31f189aea6c945e",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-10T10:22:51.627Z",
+  "cast_at": "2026-11-11T22:43:20.054Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -153,6 +153,22 @@
       "verification": "Promote after two worked freeform-to-Galaxy templates preserve the design-brief/template split without schema changes.",
       "src_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
       "dst_hash": "605cc3f1e4da8f0c0b2b62a4c05c6d123ab0aff7b5e373b377f5bdb2eb33be67",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Emit the lower-cost replacement for a tool the substitution table lists, and record the swap or the opt-out.",
+      "trigger": "When a tool step's source executable or chosen `tool_id` names a tool in the substitution table.",
+      "verification": "Promote after a template run on a source with a FastQC step emits iuc/falco with a matching ledger decision, and the per-step loop implements it without rewiring.",
+      "src_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "dst_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
       "source": "deterministic"
     },
     {

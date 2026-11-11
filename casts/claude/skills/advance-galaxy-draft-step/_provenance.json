@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 12,
-    "content_hash": "12f242ddbbfee7d9fe4ef8b6a2d701beceb71e4885cd19872c51041b04e08b27",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "revision": 13,
+    "content_hash": "861541f1a02394590e0a6c65dd41c838ab956ea31282b7265ed3c6ca7f3a38db",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-10T10:22:51.277Z",
+  "cast_at": "2026-11-11T22:43:19.547Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -104,6 +104,22 @@
       "verification": "Cast the skill, reuse a sibling pin on an IWC-derived draft, confirm summarize --output writes a manifest that validates against galaxy-tool-summary.",
       "src_hash": "96099b98e52244ac882066511a8ffa87c1fbbd6fb1c7acc98de3cca822f98277",
       "dst_hash": "b51364ad4d415f6047e3cf3d3052dea1598cd2197595be66697c9777918b2de7",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Record an efficient substitution made by discovery as a ledger decision the run's reviewer can reverse.",
+      "trigger": "When [[discover-shed-tool]] returns an `efficient-substitution` warning in step 2.",
+      "verification": "Promote after a loop run on a source with a FastQC step emits iuc/falco and a matching ledger decision.",
+      "src_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "dst_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
       "source": "deterministic"
     },
     {

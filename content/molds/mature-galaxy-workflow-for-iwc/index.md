@@ -9,8 +9,8 @@ tags:
   - lifecycle/publication
 status: draft
 created: 2026-09-10
-revised: 2026-09-10
-revision: 1
+revised: 2026-11-11
+revision: 2
 summary: "Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set."
 input_artifacts:
   - id: starting-galaxy-workflow
@@ -67,6 +67,15 @@ output_artifacts:
     default_filename: open-requirements.ledger.yml
     description: "Carried or initialized obligations ledger with unresolved IWC maturation decisions appended and all prior entries preserved."
 references:
+  - kind: research
+    ref: "[[galaxy-efficient-tool-substitutions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Flag steps that use a tool the substitution table replaces as Foundry efficiency advice, separate from IWC policy."
+    trigger: "When a workflow step's `tool_id` names a tool in the substitution table."
+    verification: "Promote after a run on a workflow with a FastQC step reports the Falco suggestion, names any applicable opt-out, and leaves the IWC recommendation unchanged."
   - kind: prompt
     ref: "[[workflow-pr-review-command]]"
     used_at: runtime
@@ -114,6 +123,7 @@ related_notes:
   - "[[workflow-pr-review-command]]"
   - "[[open-requirements-ledger]]"
   - "[[iwc-test-data-conventions]]"
+  - "[[galaxy-efficient-tool-substitutions]]"
 ---
 # mature-galaxy-workflow-for-iwc
 
@@ -149,6 +159,8 @@ Apply clear mechanical corrections: human-readable names, descriptive annotation
 
 Preserve unrelated regions byte-for-byte where practical. Do not change tool identity or version, graph topology, scientifically meaningful defaults, test strength, or assertions merely to satisfy style guidance.
 
+Do not swap a tool for efficiency either. When a step's `tool_id` names a tool in [[galaxy-efficient-tool-substitutions]], leave the step unchanged and list it in the report as an efficiency suggestion: the step, the replacement wrapper, and any opt-out condition its settings or downstream consumers show. The contributor decides whether to make the swap.
+
 Never invent creators, ORCIDs, citations, license choices, release history, scientific purpose, reference-data strategy, or durable URLs. Use `iwc-publication-context` only as supplied evidence. When evidence is missing, leave the relevant value unchanged or visibly unresolved, set the checklist item to `needs-user-input`, and append a focused ledger entry saying what decision or evidence would resolve it.
 
 ### 4. Keep the workflow and test coherent
@@ -165,7 +177,7 @@ When no test exists, emit no `galaxy-workflow-test` artifact. Record `needs-user
 
 ### 6. Report and hand off
 
-Write `iwc-maturation-report.md` with the pinned IWC source revisions from the bundled references, supplied-input inventory, per-item status and evidence, concise before/after descriptions, unresolved ledger ids, and the exact emitted files. End with an explicit statement that this Mold did not run terminal validation or workflow tests and did not create or update a GitHub pull request.
+Write `iwc-maturation-report.md` with the pinned IWC source revisions from the bundled references, supplied-input inventory, per-item status and evidence, concise before/after descriptions, efficiency suggestions labeled as Foundry advice rather than IWC policy, unresolved ledger ids, and the exact emitted files. End with an explicit statement that this Mold did not run terminal validation or workflow tests and did not create or update a GitHub pull request.
 
 The downstream path owns [[validate-galaxy-workflow]], [[run-workflow-test]], repair/retest, and publication automation.
 

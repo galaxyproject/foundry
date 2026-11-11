@@ -4,11 +4,11 @@
   "mold": {
     "name": "discover-shed-tool",
     "path": "content/molds/discover-shed-tool/index.md",
-    "revision": 6,
-    "content_hash": "f861bb1cb096f6e293ed3aaa25fe2f5aed11b5a22020434579513ccf7ed63869",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "revision": 7,
+    "content_hash": "19275712a6f8405c6f7d838a5e1c7cd3a1d3434d7bd1199971d8e5d6498b48d5",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-10T10:22:51.549Z",
+  "cast_at": "2026-11-11T22:43:19.937Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -100,6 +100,21 @@
       "source": "deterministic"
     },
     {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Swap a named tool for its lower-cost Galaxy replacement before searching, unless an opt-out holds.",
+      "verification": "Run discover-shed-tool on a need naming fastqc and confirm it pins iuc~falco~falco with an efficient-substitution warning, and on a need with fastq.bz2 input and confirm it keeps devteam/fastqc.",
+      "src_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "dst_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "source": "deterministic"
+    },
+    {
       "kind": "schema",
       "mode": "verbatim",
       "ref": "[[galaxy-tool-discovery]]",
@@ -110,8 +125,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.",
       "verification": "Run discover-shed-tool against known FastQC, ambiguous BWA-style, and no-hit queries and validate each emitted recommendation.",
-      "src_hash": "0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee",
-      "dst_hash": "0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee",
+      "src_hash": "89e819f2c623f54c5a174e158e92543ea89842d71c48b2b5dfda64a8ad938278",
+      "dst_hash": "89e819f2c623f54c5a174e158e92543ea89842d71c48b2b5dfda64a8ad938278",
       "source": "deterministic"
     }
   ],

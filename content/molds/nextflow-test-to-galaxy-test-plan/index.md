@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-21
-revision: 8
+revised: 2026-11-11
+revision: 9
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 input_artifacts:
   - id: summary-nextflow
@@ -20,6 +20,15 @@ output_artifacts:
     schema: "[[galaxy-workflow-test-plan]]"
     description: "Reviewable Galaxy workflow test plan (see [[galaxy-workflow-test-plan]]): profile, fixture, snapshot, ignored-file, expected-output, rationale provenance translated from nf-test evidence."
 references:
+  - kind: research
+    ref: "[[galaxy-efficient-tool-substitutions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Write assertions that hold for a substituted tool's output, and drop source assertions only the original tool satisfies."
+    trigger: "When an asserted output comes from a step whose tool the substitution table replaces, or a source test asserts on such a tool's output."
+    verification: "Promote after a test plan for a workflow with a Falco step passes planemo and carries no FastQC-only assertion."
   - kind: schema
     ref: "[[galaxy-workflow-test-plan]]"
     used_at: runtime
@@ -96,6 +105,7 @@ related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[summary-nextflow]]"
   - "[[tests-format]]"
+  - "[[galaxy-efficient-tool-substitutions]]"
 ---
 # nextflow-test-to-galaxy-test-plan
 

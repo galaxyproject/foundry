@@ -184,11 +184,12 @@ export const galaxyToolDiscoverySchema = {
               "repo",
               "exact_name_hint",
               "owner_hint",
-              "version_hint"
+              "version_hint",
+              "substitution_table"
             ]
           },
           "uniqueItems": true,
-          "description": "Candidate fields or hints that matched the query. Preserves the older sketch's name/description-style evidence separately from matched_terms."
+          "description": "Candidate fields or hints that matched the query. Preserves the older sketch's name/description-style evidence separately from matched_terms. substitution_table marks a candidate chosen from the Foundry's efficient substitution table rather than by search."
         },
         "rationale": {
           "type": "string",
@@ -218,9 +219,10 @@ export const galaxyToolDiscoverySchema = {
             "version-resolution-gap",
             "changeset-resolution-gap",
             "manual-confirmation-needed",
+            "efficient-substitution",
             "other"
           ],
-          "description": "Machine-stable warning category."
+          "description": "Machine-stable warning category. efficient-substitution records that the candidate replaces the tool the need named with a lower-cost wrapper from the Foundry's efficient substitution table; the message names the replaced tool."
         },
         "message": {
           "type": "string",

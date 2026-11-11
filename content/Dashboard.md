@@ -24,8 +24,16 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-11-10 | 12 |
-| [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | reviewed | 2026-11-10 | 6 |
+| [[advance-galaxy-draft-step]] | Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. | reviewed | 2026-11-11 | 13 |
+| [[cwl-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs. | draft | 2026-11-11 | 7 |
+| [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | reviewed | 2026-11-11 | 7 |
+| [[freeform-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. | reviewed | 2026-11-11 | 8 |
+| [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-11-11 | 12 |
+| [[mature-galaxy-workflow-for-iwc]] | Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set. | draft | 2026-11-11 | 2 |
+| [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | reviewed | 2026-11-11 | 11 |
+| [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | reviewed | 2026-11-11 | 9 |
+| [[review-galaxy-workflow]] | Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review. | draft | 2026-11-11 | 2 |
+| [[workflow-brief-to-galaxy-template]] | Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence. | draft | 2026-11-11 | 9 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool. | reviewed | 2026-11-10 | 14 |
 | [[repair-galaxy-draft-topology]] | Make the smallest structural edit that closes an open blocking entry in a settled Galaxy draft. | draft | 2026-11-10 | 7 |
 | [[summarize-nextflow]] | Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary for downstream translation Molds. | reviewed | 2026-11-10 | 20 |
@@ -34,13 +42,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. | reviewed | 2026-10-26 | 6 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | reviewed | 2026-10-26 | 8 |
 | [[author-galaxy-tool-wrapper]] | Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable. | reviewed | 2026-10-23 | 7 |
-| [[cwl-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs. | draft | 2026-10-22 | 6 |
-| [[freeform-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a free-form summary and Galaxy design brief. | reviewed | 2026-10-22 | 7 |
 | [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-10-22 | 8 |
-| [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | reviewed | 2026-10-22 | 10 |
-| [[workflow-brief-to-galaxy-template]] | Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence. | draft | 2026-10-22 | 8 |
-| [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | reviewed | 2026-10-21 | 11 |
-| [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | reviewed | 2026-10-21 | 8 |
 | [[freeform-summary-to-workflow-brief]] | Turn a freeform source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[nextflow-summary-to-workflow-brief]] | Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions. | draft | 2026-10-19 | 2 |
 | [[workflow-brief-to-galaxy-interface]] | Map a reviewed Workflow Brief into a Galaxy workflow interface design brief, consulting retained source evidence when available. | draft | 2026-10-19 | 5 |
@@ -55,9 +57,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[workflow-brief-to-galaxy-data-flow]] | Translate a reviewed Workflow Brief and its Galaxy interface into a Galaxy data-flow design brief. | draft | 2026-09-20 | 4 |
 | [[convert-nfcore-module-to-galaxy-tool]] | Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests. | draft | 2026-09-16 | 11 |
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-09-15 | 3 |
-| [[review-galaxy-workflow]] | Apply the pinned upstream IWC review policy to one Galaxy workflow or pull request and emit one evidenced advisory Markdown review. | draft | 2026-09-12 | 1 |
 | [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | reviewed | 2026-09-12 | 5 |
-| [[mature-galaxy-workflow-for-iwc]] | Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set. | draft | 2026-09-10 | 1 |
 | [[report-foundry-run-feedback]] | Triage a completed or partial Foundry feedback ledger into a run review and confirmed, deduplicated upstream issue drafts. | draft | 2026-08-25 | 1 |
 | [[cwl-summary-to-galaxy-data-flow]] | Translate a CWL summary into a Galaxy data-flow design brief. | draft | 2026-08-19 | 3 |
 | [[cwl-summary-to-galaxy-interface]] | Map a CWL summary into a Galaxy workflow interface design brief. | draft | 2026-08-19 | 3 |
@@ -212,6 +212,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-efficient-tool-substitutions]] | Galaxy wrappers that replace a common tool at lower compute cost, the rule for swapping them in, and when to keep the original. | draft | 2026-11-11 | 1 |
 | [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-11-10 | 3 |
 | [[galaxy-user-tool-authoring]] | What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — from Galaxy's prompts, authoring help and code. | draft | 2026-11-10 | 2 |
 | [[galaxy-user-tool-authoring-help]] | Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows. | draft | 2026-11-10 | 5 |

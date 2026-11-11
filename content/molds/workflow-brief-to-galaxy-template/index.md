@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-10-22
-revision: 8
+revised: 2026-11-11
+revision: 9
 summary: "Build a gxformat2 skeleton from a reviewed Workflow Brief and its Galaxy design briefs, consulting retained source evidence."
 input_artifacts:
   - id: workflow-brief
@@ -42,6 +42,15 @@ output_artifacts:
     default_filename: open-requirements.ledger.yml
     description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
 references:
+  - kind: research
+    ref: "[[galaxy-efficient-tool-substitutions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Emit the lower-cost replacement for a tool the substitution table lists, and record the swap or the opt-out."
+    trigger: "When a tool step's source executable or chosen `tool_id` names a tool in the substitution table."
+    verification: "Promote after a template run on a source with a FastQC step emits iuc/falco with a matching ledger decision, and the per-step loop implements it without rewiring."
   - kind: schema
     ref: "[[workflow-brief-schema]]"
     used_at: runtime
@@ -166,6 +175,7 @@ references:
 related_notes:
   - "[[workflow-brief-to-galaxy-interface]]"
   - "[[workflow-brief-to-galaxy-data-flow]]"
+  - "[[galaxy-efficient-tool-substitutions]]"
 ---
 # workflow-brief-to-galaxy-template
 
@@ -174,6 +184,8 @@ Read the unchanged Workflow Brief and its Galaxy interface and data-flow briefs.
 The Workflow Brief is the implementation contract. Source artifacts are an evidence dossier: use them to substantiate methods, formats, parameters, and named tools within the selected scope, never to reintroduce excluded work or override expert requirements. A hand-authored brief without a source summary remains a valid input; record consequential missing evidence in the ledger instead of inventing it.
 
 Topology is this Mold's job to settle. The output must be concrete gxformat2: workflow inputs with their final collection shapes and formats, workflow outputs, the step set, the producer→consumer edge graph, branches, and `when:` guards are all decided here. The upstream Workflow-Brief-to-Galaxy interface and data-flow briefs guide those decisions, but if they hedge or leave a topology choice open, this Mold makes the call from reviewed intent, source evidence, IWC exemplars, and pattern pages — never emit a topology `TODO`. Wrapper resolution, by contrast, is **evidence-gated, not source-gated**: resolve each tool step to the tier its evidence supports — **Resolved** (fully concrete, no `_plan_*`), **Identity-pinned** (concrete `tool_id`, parameters and changeset left to the per-step Mold), or **Deferred** (`tool_id: TODO`) — as defined in [[galaxy-workflow-draft-format]]. Capture whatever you defer in the `_plan_*` family (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) so the per-step Mold has the source evidence and constraints it needs.
+
+**Efficient substitutions.** When a step's tool is one that [[galaxy-efficient-tool-substitutions]] replaces, emit the replacement's `tool_id` at whatever tier the step's evidence supports, unless one of that row's opt-out conditions holds. Carry the source settings through the row's parameter mapping, and append a ledger `decision` recording the swap, or recording the kept original and the opt-out that applied. A pattern page or IWC exemplar that shows the original tool still guides the step's wiring, but it does not override the table.
 
 Evidence tendency: narrative sources name tools less often than structured pipeline summaries, so their steps land in **Deferred** more often — but source evidence that names a specific tool/version can harden to the matching tier, and a corpus-confirmed utility wrapper is not deferred merely because the source is informal. When deferring a domain tool, cite the originating paper section, interview answer, pipeline location, figure, or supplementary table in `_plan_context`, and record vague intent in `_plan_state` so the per-step Mold knows the evidence ceiling.
 

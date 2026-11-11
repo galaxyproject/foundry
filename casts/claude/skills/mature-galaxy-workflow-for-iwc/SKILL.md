@@ -44,6 +44,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
+- `references/notes/galaxy-efficient-tool-substitutions.md`: Research note copied verbatim into the bundle. Flag steps that use a tool the substitution table replaces as Foundry efficiency advice, separate from IWC policy. Use when: a workflow step's `tool_id` names a tool in the substitution table.
 - `references/notes/galaxy-workflow-testability-design.md`: Research note copied verbatim into the bundle. Keep workflow interface and test addressing aligned when a safe genericity or human-readable-label correction changes the workflow interface. Use when: maturation changes an input, promoted output, collection identifier, or workflow-output label referenced by a supplied test.
 - `references/notes/iwc-test-data-conventions.md`: Research note copied verbatim into the bundle. Apply current IWC conventions for test labels, durable remote fixtures, creator identifiers, release changes, and companion-file naming. Use when: a supplied test, test-data reference, creator record, or release decision must be checked or updated.
 
@@ -85,6 +86,8 @@ Apply clear mechanical corrections: human-readable names, descriptive annotation
 
 Preserve unrelated regions byte-for-byte where practical. Do not change tool identity or version, graph topology, scientifically meaningful defaults, test strength, or assertions merely to satisfy style guidance.
 
+Do not swap a tool for efficiency either. When a step's `tool_id` names a tool in galaxy-efficient-tool-substitutions, leave the step unchanged and list it in the report as an efficiency suggestion: the step, the replacement wrapper, and any opt-out condition its settings or downstream consumers show. The contributor decides whether to make the swap.
+
 Never invent creators, ORCIDs, citations, license choices, release history, scientific purpose, reference-data strategy, or durable URLs. Use `iwc-publication-context` only as supplied evidence. When evidence is missing, leave the relevant value unchanged or visibly unresolved, set the checklist item to `needs-user-input`, and append a focused ledger entry saying what decision or evidence would resolve it.
 
 #### 4. Keep the workflow and test coherent
@@ -101,7 +104,7 @@ When no test exists, emit no `galaxy-workflow-test` artifact. Record `needs-user
 
 #### 6. Report and hand off
 
-Write `iwc-maturation-report.md` with the pinned IWC source revisions from the bundled references, supplied-input inventory, per-item status and evidence, concise before/after descriptions, unresolved ledger ids, and the exact emitted files. End with an explicit statement that this skill did not run terminal validation or workflow tests and did not create or update a GitHub pull request.
+Write `iwc-maturation-report.md` with the pinned IWC source revisions from the bundled references, supplied-input inventory, per-item status and evidence, concise before/after descriptions, efficiency suggestions labeled as Foundry advice rather than IWC policy, unresolved ledger ids, and the exact emitted files. End with an explicit statement that this skill did not run terminal validation or workflow tests and did not create or update a GitHub pull request.
 
 The downstream path owns validate-galaxy-workflow, run-workflow-test, repair/retest, and publication automation.
 

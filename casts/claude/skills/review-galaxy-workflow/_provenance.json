@@ -4,11 +4,11 @@
   "mold": {
     "name": "review-galaxy-workflow",
     "path": "content/molds/review-galaxy-workflow/index.md",
-    "revision": 1,
-    "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
-    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
+    "revision": 2,
+    "content_hash": "538c5ff561bba6fe2f143b390c1b30f684c0c3b155cde17cdf5b2495ec4e3368",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-10T10:05:12.873Z",
+  "cast_at": "2026-11-11T22:43:20.769Z",
   "refs": [
     {
       "kind": "prompt",
@@ -26,6 +26,22 @@
       "dst_hash": "fc8b084d829491f31d3ec0ed026340f4deab164bd0165dd42d1eaf61de9f82d8",
       "source": "deterministic",
       "license_file_hash": "f817504ef73a0b04fca81604e214ed2bdb0d5b96b8f5cf6a8c5bba7b787c98f0"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Flag steps that use a tool the substitution table replaces as Foundry efficiency advice, separate from IWC policy.",
+      "trigger": "When a workflow step's `tool_id` names a tool in the substitution table.",
+      "verification": "Promote after a run on a workflow with a FastQC step reports the Falco suggestion, names any applicable opt-out, and leaves the IWC recommendation unchanged.",
+      "src_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "dst_hash": "cb2dec642e0299b8dd00a01415403ab30a65ae3e7b423f4cc5ea9803a0463c73",
+      "source": "deterministic"
     },
     {
       "kind": "research",
