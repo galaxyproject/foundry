@@ -2698,7 +2698,6 @@ function testDataRefs(values: Map<string, string>, source: string): TestDataRef[
 
 function isCandidateInputParam(name: string, value: string): boolean {
   if (!hasUsableParamValue(value)) return false;
-  if (/^(?:true|false)$/u.test(value)) return false;
   if (/^(?:outdir|output|results?|publish_dir|email|help)$/u.test(name)) return false;
   return isPathOrUrlValue(value);
 }
