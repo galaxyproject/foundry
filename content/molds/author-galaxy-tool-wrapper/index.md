@@ -7,15 +7,17 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-23
-revision: 7
+revised: 2026-11-10
+revision: 8
 related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
-summary: "Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable."
+summary: "Author a new Galaxy user-defined tool YAML definition when Tool Shed discovery misses."
 input_artifacts:
   - id: summary-nextflow
     description: "Source pipeline summary from [[summarize-nextflow]]; provides process command, inputs, outputs, and container or conda evidence for UDT authoring."
+  - id: galaxy-tool-pin
+    description: "The [[discover-shed-tool]] result for the step."
 output_artifacts:
   - id: galaxy-user-tool-definition
     kind: yaml
@@ -64,7 +66,7 @@ references:
 ---
 # author-galaxy-tool-wrapper
 
-Author a Galaxy user-defined tool (UDT) YAML definition when [[discover-shed-tool]] cannot produce an acceptable existing Tool Shed wrapper. This Mold owns the author-on-fallthrough path only; do not duplicate existing wrappers unless discovery evidence is weak or missing.
+Author a Galaxy user-defined tool (UDT) YAML definition when [[discover-shed-tool]] finds no wrapper that runs the step's work. This Mold owns the author-on-miss path only.
 
 The output is a single `GalaxyUserTool` YAML document, not Galaxy XML. Preserve source evidence and unresolved assumptions in the emitted artifact or companion notes rather than inventing command flags, containers, datatypes, or package names.
 
@@ -75,13 +77,12 @@ Use the source summary and branch fallthrough context to identify:
 - The process or abstract step that needs a tool.
 - Command intent, required inputs, expected outputs, and test fixture evidence.
 - Container, Bioconda, Conda, or environment evidence from the source pipeline.
-- Why Tool Shed discovery did not supply an acceptable existing wrapper.
 
 ## Procedure
 
 ### 1. Confirm authoring is justified
 
-Read the discovery result before authoring. Continue only when discovery returned `miss`, or when the selected hit was weak enough that the harness explicitly fell through.
+Read the [[discover-shed-tool]] result before writing any part of the UDT. Author only when its `status` is `miss`, or when it is `weak` and the caller's confirmation showed the candidate doesn't run the step's work. Otherwise a wrapper exists: stop without emitting `galaxy-user-tool.yml` and return the candidate to the caller. Authoring a UDT for a step an existing wrapper can run is a failure.
 
 If the missing tool need is under-specified, ask for clarification or emit an unresolved assumption. Do not create a plausible-looking UDT from absent command or container evidence.
 

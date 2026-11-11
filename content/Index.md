@@ -22,7 +22,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 - [[advance-galaxy-draft-step]] — Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate. *(reviewed)*
 - [[apply-galaxy-workflow-changeset]] — Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps. *(reviewed)*
-- [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when discovery yields nothing acceptable. *(reviewed)*
+- [[author-galaxy-tool-wrapper]] — Author a new Galaxy user-defined tool YAML definition when Tool Shed discovery misses. *(reviewed)*
 - [[changeset-to-galaxy-test-plan]] — Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan. *(reviewed)*
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring. *(reviewed)*
 - [[convert-nfcore-module-to-galaxy-tool]] — Convert one nf-core module directory into a Galaxy wrapper with local macros, provenance, and remote fixture-backed tests.
