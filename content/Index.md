@@ -239,6 +239,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[gxformat2-workflow-inputs]] — Authoring guidance for gxformat2 workflow input types, constraints, defaults, and validation.
 - [[iwc-comments-survey]] — How IWC uses the gxformat2 `comments:` array: titled stage frames dominate, color is decorative, frames travel with template forks. An authoring convention.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
+- [[iwc-fair-metadata-survey]] — IWC corpus survey of workflow-level FAIR metadata: license, creators and ORCIDs, tags, and input annotations and file formats.
 - [[iwc-interval-operations-survey]] — IWC corpus survey of coordinate-aware genomic interval operations; sizing and candidate boundaries for a galaxy-interval-patterns MOC, with hold-if-thin gate.
 - [[iwc-map-over-lifecycle-survey]] — Survey of IWC map-over lifecycle recipes, with a Nextflow-to-Galaxy crosswalk for collection construction, cleanup, reshape, reduce, and publish phases.
 - [[iwc-parameter-derivation-survey]] — Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters.

@@ -212,6 +212,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[iwc-fair-metadata-survey]] | IWC corpus survey of workflow-level FAIR metadata: license, creators and ORCIDs, tags, and input annotations and file formats. | draft | 2026-11-11 | 1 |
 | [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-11-10 | 3 |
 | [[galaxy-user-tool-authoring]] | What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — from Galaxy's prompts, authoring help and code. | draft | 2026-11-10 | 2 |
 | [[galaxy-user-tool-authoring-help]] | Vendored Galaxy authoring guidance for user-defined tools: tool format, expressions, containers, API endpoints, and use in workflows. | draft | 2026-11-10 | 5 |
