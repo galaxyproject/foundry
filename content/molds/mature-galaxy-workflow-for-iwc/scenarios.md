@@ -24,3 +24,8 @@
 
 - fixture: examples/already-mature/
 - expect: the workflow and test receive no gratuitous churn, passing checklist items cite their evidence, and companion documents are preserved except for changes required to make them mutually consistent.
+
+## Case: supplied README carries development history
+
+- fixture: examples/readme-history/
+- expect: the emitted README keeps the purpose, the inputs and the one-sentence reason for using Clair3 rather than medaka. The `History` block, the superseded invocation `fbf1b200b6a8b01c`, the arm64 NanoPlot failure, the failed medaka 1.4.4 run and the `gxwf validate` reviewer note leave the README and appear in `iwc-maturation-report.md`.

@@ -4,11 +4,11 @@
   "mold": {
     "name": "mature-galaxy-workflow-for-iwc",
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
-    "revision": 1,
-    "content_hash": "38d9fed5e83bcb02cdc044ac1a0858d2b3f5ce42af5905bea2b920451bacca6b",
-    "commit": "94ce4ea20107680b467d03e8889b63689774e325"
+    "revision": 2,
+    "content_hash": "4bacf73ab2deb8cdbe61f4021bbdf155d6aea0ab8672edb9c21bf7f7c329ec7e",
+    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
   },
-  "cast_at": "2026-11-10T10:05:12.652Z",
+  "cast_at": "2026-11-11T17:03:04.219Z",
   "refs": [
     {
       "kind": "prompt",

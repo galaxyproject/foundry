@@ -1,0 +1,21 @@
+class: GalaxyWorkflow
+label: Nanopore DNA variant calling
+doc: This workflow maps Oxford Nanopore DNA reads to a reference genome and calls diploid small variants with Clair3.
+creator:
+  - class: Person
+    name: Example Contributor
+    identifier: https://orcid.org/0000-0002-1825-0097
+license: MIT
+release: "0.1"
+inputs:
+  - id: Nanopore reads
+    type: collection
+    collection_type: list
+    format:
+      - fastqsanger.gz
+  - id: Reference genome
+    type: data
+    format:
+      - fasta
+outputs: []
+steps: []

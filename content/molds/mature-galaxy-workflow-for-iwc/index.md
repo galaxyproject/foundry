@@ -9,8 +9,8 @@ tags:
   - lifecycle/publication
 status: draft
 created: 2026-09-10
-revised: 2026-09-10
-revision: 1
+revised: 2026-11-11
+revision: 2
 summary: "Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set."
 input_artifacts:
   - id: starting-galaxy-workflow
@@ -160,12 +160,14 @@ When no test exists, emit no `galaxy-workflow-test` artifact. Record `needs-user
 ### 5. Prepare ordinary IWC companions
 
 - Create or update a README from evidenced workflow purpose, valid inputs, and expected outputs. Preserve useful supplied material. State unknown comparisons or tutorial links as unresolved; do not invent them.
-- Create or update the changelog, preserving existing history and adding only an evidence-backed entry. If the release cannot be chosen safely, make that a ledger item rather than fabricating a version history.
+- Write the README for a user of the workflow as submitted. It covers purpose, inputs, outputs, fixed settings, limitations, the bundled test data, and how the workflow differs from its source or related IWC workflows. When the final workflow departs from its source, state the choice and its reason in a sentence or two.
+- Keep development history out of the README: earlier or superseded runs and invocation ids, failed or abandoned tools and versions, environment-only failures, validator caveats, and the story of how the run reached its result. Put that material, and any such section in a supplied README, in the maturation report instead.
+- Create or update the changelog, preserving existing history and adding only an evidence-backed entry. An entry says what the release contains, not how it was reached. If the release cannot be chosen safely, make that a ledger item rather than fabricating a version history.
 - Create or update `.dockstore.yml` and align its paths with the emitted filenames. Preserve existing metadata and copy creator information only from workflow metadata or supplied context. Missing authorship is unresolved, not a license to guess.
 
 ### 6. Report and hand off
 
-Write `iwc-maturation-report.md` with the pinned IWC source revisions from the bundled references, supplied-input inventory, per-item status and evidence, concise before/after descriptions, unresolved ledger ids, and the exact emitted files. End with an explicit statement that this Mold did not run terminal validation or workflow tests and did not create or update a GitHub pull request.
+Write `iwc-maturation-report.md` with the pinned IWC source revisions from the bundled references, supplied-input inventory, per-item status and evidence, concise before/after descriptions, unresolved ledger ids, the exact emitted files, and the development history kept out of the README. End with an explicit statement that this Mold did not run terminal validation or workflow tests and did not create or update a GitHub pull request.
 
 The downstream path owns [[validate-galaxy-workflow]], [[run-workflow-test]], repair/retest, and publication automation.
 

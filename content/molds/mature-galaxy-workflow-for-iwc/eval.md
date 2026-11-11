@@ -42,6 +42,12 @@ When no test is supplied, no `galaxy-workflow-test` output is fabricated. The re
 
 README input/output descriptions agree with the emitted workflow; Dockstore paths address the emitted workflow and optional test correctly; changelog entries agree with evidenced release changes; creator metadata agrees across files when it is known.
 
+## Property: README without development history
+
+- check: llm-judged
+
+The README describes the workflow as submitted. It carries no earlier or superseded invocations, failed or abandoned tool attempts, environment-only failures, validator caveats, or narrative of how the run got there, whether that came from a supplied README or from the run. Such evidence is moved to the maturation report, not silently dropped. A one- or two-sentence reason for a final departure from the source workflow is not history.
+
 ## Property: explicit downstream boundary
 
 - check: deterministic
