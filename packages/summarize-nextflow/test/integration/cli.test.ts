@@ -885,7 +885,6 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
       kallisto_index: "getGenomeAttribute('kallisto')",
       bowtie2_index: "getGenomeAttribute('bowtie2')",
     };
-    expect(Object.keys(expected)).toHaveLength(14);
     for (const [name, expression] of Object.entries(expected)) {
       expect(byName[name]?.source_kind, name).toBe("getGenomeAttribute");
       expect(byName[name]?.source_expression, name).toBe(expression);
