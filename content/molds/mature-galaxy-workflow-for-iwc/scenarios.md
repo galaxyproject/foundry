@@ -28,4 +28,4 @@
 ## Case: supplied README carries development history
 
 - fixture: examples/readme-history/
-- expect: the emitted README keeps the purpose, the inputs and the one-sentence reason for using Clair3 rather than medaka. The `History` block, the superseded invocation `fbf1b200b6a8b01c`, the arm64 NanoPlot failure, the failed medaka 1.4.4 run and the `gxwf validate` reviewer note leave the README and appear in `iwc-maturation-report.md`.
+- expect: the emitted README keeps the purpose, the inputs, and the short reason for using Clair3 rather than medaka, which the workflow `doc` also states. The usegalaxy.org pass claim, invocations `4ae2da923366f120` and `fbf1b200b6a8b01c`, the `History` block, the arm64 NanoPlot failure, the failed medaka 1.4.4 run, and the `gxwf validate` reviewer note leave the README and appear in `iwc-maturation-report.md`.

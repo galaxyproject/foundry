@@ -5,10 +5,10 @@
     "name": "mature-galaxy-workflow-for-iwc",
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 2,
-    "content_hash": "4bacf73ab2deb8cdbe61f4021bbdf155d6aea0ab8672edb9c21bf7f7c329ec7e",
-    "commit": "8cbb5f22e31ae67889ee8858082c87a4d33cdd80"
+    "content_hash": "f7dd7ae7e1f5fa2227344cbf16efedb5c2b63ea2455231687641cf6d8ce70d55",
+    "commit": "a4988f41d403f6134dc7b944b8b05f3ade4b9e00"
   },
-  "cast_at": "2026-11-11T17:03:04.219Z",
+  "cast_at": "2026-11-11T17:11:19.085Z",
   "refs": [
     {
       "kind": "prompt",
@@ -125,7 +125,7 @@
         "id": "iwc-maturation-report",
         "kind": "markdown",
         "default_filename": "iwc-maturation-report.md",
-        "description": "Per-checklist status report with evidence, before-and-after changes, unresolved decisions, source pin, and explicit downstream validation disclaimer."
+        "description": "Per-checklist status report with evidence, before-and-after changes, unresolved decisions, source pin, run evidence kept out of the README, and explicit downstream validation disclaimer."
       },
       {
         "id": "open-requirements-ledger",

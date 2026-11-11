@@ -6,13 +6,13 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[galaxy-workflow-maturation]] | Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result. | draft | 2026-11-11 | 3 |
 | [[interview-to-workflow-brief]] | Summarize an interview source and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
 | [[nextflow-to-workflow-brief]] | Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
 | [[paper-to-workflow-brief]] | Summarize a paper source and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
 | [[workflow-brief-to-galaxy]] | Consume an expert-reviewed, unchanged Workflow Brief directly through the Galaxy design and implementation chain. | draft | 2026-10-19 | 6 |
 | [[cwl-to-galaxy]] | Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test. | draft | 2026-10-15 | 5 |
 | [[paper-to-galaxy]] | Direct path from a paper to a Galaxy gxformat2 workflow. No Workflow Brief or CWL intermediate. | draft | 2026-10-15 | 6 |
-| [[galaxy-workflow-maturation]] | Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result. | draft | 2026-09-22 | 2 |
 | [[galaxy-workflow-review]] | Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy. | draft | 2026-09-22 | 2 |
 | [[interview-to-galaxy]] | Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. | reviewed | 2026-09-22 | 5 |
 | [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-09-22 | 3 |

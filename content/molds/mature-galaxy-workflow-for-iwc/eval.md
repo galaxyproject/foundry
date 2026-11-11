@@ -42,11 +42,11 @@ When no test is supplied, no `galaxy-workflow-test` output is fabricated. The re
 
 README input/output descriptions agree with the emitted workflow; Dockstore paths address the emitted workflow and optional test correctly; changelog entries agree with evidenced release changes; creator metadata agrees across files when it is known.
 
-## Property: README without development history
+## Property: README without run evidence
 
-- check: llm-judged
+- check: deterministic + llm-judged
 
-The README describes the workflow as submitted. It carries no earlier or superseded invocations, failed or abandoned tool attempts, environment-only failures, validator caveats, or narrative of how the run got there, whether that came from a supplied README or from the run. Such evidence is moved to the maturation report, not silently dropped. A one- or two-sentence reason for a final departure from the source workflow is not history.
+The README describes the workflow as submitted. It carries no invocation ids, test or validation outcomes, benchmark tables, failed or abandoned tool attempts, environment-only failures, validator caveats, reviewer notes, or narrative of how the run got there. This holds whether the material came from a supplied README, supplied context, or validation and test evidence. The Mold moves that material to the maturation report instead of dropping it. A one- or two-sentence reason for a final departure from the source workflow, a current limitation, and one sentence stating an evidenced accuracy claim are not run evidence.
 
 ## Property: explicit downstream boundary
 
