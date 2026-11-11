@@ -663,6 +663,62 @@ profiles {
     expect(delta.input).toBe("https://example.com/a.csv");
   });
 
+  test("strips an unspaced trailing nf-test comment", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/tight-comment' }\n");
+    write(root, "main.nf", "workflow TIGHT_COMMENT { }\n");
+    write(
+      root,
+      "tests/tight.nf.test",
+      `nextflow_pipeline {
+  test("tight comment") {
+    when {
+      params {
+        input = 'a.csv'// no space before the comment
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const delta = (
+      summary as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] }
+    ).test_candidates[0]!.params_delta;
+    expect(delta.input).toBe("a.csv");
+  });
+
+  test("keeps // inside a profile string and drops a profile trailing comment", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/profile-comments' }
+profiles {
+  test {
+    params {
+      input = 'samplesheet.csv' // local sheet
+      multiqc_title = 'A // B'
+    }
+  }
+}
+`,
+    );
+    write(root, "main.nf", "workflow PROFILE_COMMENTS { }\n");
+
+    const summary = (await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] };
+    const delta = summary.test_candidates[0]!.params_delta;
+    expect(delta.input).toBe("samplesheet.csv");
+    expect(delta.multiqc_title).toBe("A // B");
+  });
+
   test("treats an nf-test null override as clearing a profile value", async () => {
     const root = tempPipelineRoot();
     write(

@@ -2979,7 +2979,7 @@ function parseNfTestExecutionMode(text: string): TestExecutionMode {
 }
 
 function parseParamsOverrides(text: string): Record<string, unknown> {
-  const block = extractNamedBlock(text, "params");
+  const block = extractNamedBlock(maskNextflowComments(text), "params");
   const values: Record<string, unknown> = {};
   for (const match of block?.matchAll(/^\s*([A-Za-z0-9_]+)\s*=\s*(.+?)\s*$/gmu) ?? []) {
     values[match[1]!] = parseNfTestParamValue(match[2]!);
@@ -2987,40 +2987,14 @@ function parseParamsOverrides(text: string): Record<string, unknown> {
   return values;
 }
 
-// Profile values arrive with quotes already removed, so only a spaced // is a comment.
-function stripTrailingLineComment(expression: string): string {
-  let quote: "'" | '"' | null = null;
-  for (let index = 0; index < expression.length; index += 1) {
-    const char = expression[index]!;
-    const next = expression[index + 1];
-    if (quote) {
-      if (char === "\\" && next !== undefined) {
-        index += 1;
-        continue;
-      }
-      if (char === quote) quote = null;
-      continue;
-    }
-    if (char === "'" || char === '"') {
-      quote = char;
-      continue;
-    }
-    if (char === "/" && next === "/" && (index === 0 || /\s/u.test(expression[index - 1]!))) {
-      return expression.slice(0, index).trim();
-    }
-  }
-  return expression.trim();
-}
-
 function parseNfTestParamValue(value: string): unknown {
-  const stripped = stripTrailingLineComment(value);
-  const quoted = /^(?:"([^"]*)"|'([^']*)')$/u.exec(stripped);
+  const quoted = /^(?:"([^"]*)"|'([^']*)')$/u.exec(value);
   if (quoted !== null) return quoted[1] ?? quoted[2]!;
-  if (stripped === "true") return true;
-  if (stripped === "false") return false;
-  if (stripped === "null") return null;
-  if (/^-?\d+(?:\.\d+)?$/u.test(stripped)) return Number(stripped);
-  return stripped;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  if (value === "null") return null;
+  if (/^-?\d+(?:\.\d+)?$/u.test(value)) return Number(value);
+  return value;
 }
 
 function parseSnapshot(
