@@ -415,7 +415,7 @@
 
     "EffectiveArg": {
       "title": "EffectiveArg",
-      "description": "The `resolved_args` entry that takes effect for one `key` of one call, by Nextflow selector priority: `withLabel` < `withName` matching the process name < `withName` matching the alias < `withName` matching the whole `call` path. A pattern must match a whole name, so `SUB:NAME` reaches only a call whose path is exactly `SUB:NAME`, and `.*:SUB:NAME` one that `SUB` really calls. At the same rank, a selected profile's entry beats the root chain's, as under Nextflow's legacy config parser, except that a profile selector the root chain also declares keeps the root's position, so it replaces only that selector's root entries and can tie another root selector. Under the strict parser (default since Nextflow 26.04) a root `includeConfig` placed after `profiles { }`, such as nf-core's trailing `includeConfig 'conf/modules.config'`, can win instead; the summary keeps the legacy order. Then a later declaration of the same selector in one config beats an earlier one.",
+      "description": "The `resolved_args` entry that takes effect for one `key` of one call, by Nextflow selector priority: `withLabel` < `withName` matching the process name < `withName` matching the alias < `withName` matching the whole `call` path. A pattern must match a whole name, so `SUB:NAME` reaches only a call whose path is exactly `SUB:NAME`, and `.*:SUB:NAME` one that `SUB` really calls. At the same rank, a selected profile's entry beats the root chain's, as under Nextflow's legacy config parser, except that a profile selector the root chain also declares keeps the root's position, so it replaces only that selector's root entries and can tie another root selector. Under the strict parser (default since Nextflow 26.04) a root `includeConfig` placed after `profiles { }`, such as nf-core's trailing `includeConfig 'conf/modules.config'`, can win instead. The summary keeps the legacy order. Then a later declaration of the same selector in one config beats an earlier one. A declaration that branches (`if`, `else`, `switch`) keeps every assignment to the key level.",
       "type": "object",
       "additionalProperties": false,
       "required": ["call", "key", "ids"],
@@ -434,7 +434,7 @@
         "tie": {
           "type": "boolean",
           "enum": [true],
-          "description": "Set when entries level after ranking set different expressions: entries from two root configs or from two selected profiles, which Nextflow orders by include or profile order, or two different selectors at one rank in one config, which it orders by first insertion across the merged config. The summary models neither order."
+          "description": "Set when entries level after ranking set different expressions: entries from two root configs or from two selected profiles, which Nextflow orders by include or profile order, two different selectors at one rank in one config, which it orders by first insertion across the merged config, or one selector block that assigns the key in more than one branch. The summary models none of these."
         }
       }
     },

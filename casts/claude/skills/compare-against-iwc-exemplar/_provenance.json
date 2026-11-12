@@ -6,9 +6,9 @@
     "path": "content/molds/compare-against-iwc-exemplar/index.md",
     "revision": 12,
     "content_hash": "84abb427cbcbae5616ae22e4a7fa803f14350605c246638575b3a32c5ad9c6fb",
-    "commit": "fada24fd69f40f901fdba574e7f1204ee901d1db"
+    "commit": "76194bcfad252b2491b4541b29a21661a87a19bf"
   },
-  "cast_at": "2026-11-12T07:38:19.411Z",
+  "cast_at": "2026-11-12T09:08:34.707Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -101,8 +101,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries a corpus exemplar answers — a collection idiom, a label convention, a structural shape the corpus already settles — and append the ones no exemplar covers, so a structural divergence with no corpus precedent reaches the template tier as a recorded obligation.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
-      "dst_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
+      "src_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
+      "dst_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
       "source": "deterministic"
     }
   ],

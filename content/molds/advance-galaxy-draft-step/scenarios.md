@@ -105,5 +105,5 @@ the round-trip oracle. See that directory's `README.md`.
 - expect: before [[draft-validate]] runs, the ledger covers each of `args`'s
   `-f` and `-r` (both set only when `params.samtools_collate_fast`),
   `args2`'s `-N`, and the `prefix` exactly once, in records naming the step in
-  `source_arg`. A
-  call that implements the step without them goes back to implementation.
+  `source_arg`. A call that implements the step without them goes back to
+  implementation.

@@ -144,7 +144,7 @@ decisions:
 
 ## Source arguments
 
-A source can set tool arguments outside the process body. nf-core sets them as `ext.args`, `ext.args2`, and `ext.prefix`, which [[summarize-nextflow]] records per process in `resolved_args`, ranking them per call in `effective_args` so only the entries Nextflow applies reach a step. A wrapper names and groups its parameters its own way, so no rule maps a flag onto `state`. The Mold that binds `state` makes that call and records one disposition per flag, so that a flag the translation dropped or contradicted shows up instead of going missing. [[nextflow-summary-to-galaxy-template]] copies the effective entries into the step's `_plan_state` ([[galaxy-workflow-draft-format]]). [[implement-galaxy-tool-step]] records the dispositions, or the template records them for a step it resolves itself.
+nf-core sets tool arguments outside the process body as `ext.args`, `ext.args2`, and `ext.prefix`. [[summarize-nextflow]] records them per process in `resolved_args` and names the entries that apply to each call in `effective_args`. [[nextflow-summary-to-galaxy-template]] copies a step's effective entries into its `_plan_state` ([[galaxy-workflow-draft-format]]). No rule maps a flag onto a wrapper's parameters, so the Mold that binds `state` records one disposition per flag: [[implement-galaxy-tool-step]], or the template for a step it resolves itself.
 
 Each record carries a `source_arg` naming the entry it covers:
 
@@ -175,11 +175,11 @@ entries:
 ```
 
 - A flag is one option token with any value attached to it (`-f1`, `-hb`). A value passed as the next token (`-r <reads_in_memory>`) belongs to its option, and the record's text names it. A whole `ext.prefix` is one flag, and its record omits `flags`.
-- A flag carried into `state` is a decision with `disposition: carried`, and `decision` says where it landed. A flag with no Galaxy counterpart is a decision with `disposition: not_applicable`, and `rationale` names what makes it inapplicable. An `ext.prefix` that only names output files is the usual case; name those outputs.
+- A flag carried into `state` is a decision with `disposition: carried`, and `decision` says where it landed. A flag with no Galaxy counterpart is a decision with `disposition: not_applicable`, and `rationale` names what makes it inapplicable. An `ext.prefix` that only names output files is the usual case. Name those outputs.
 - A flag the step drops is a `kind: dropped` entry. Its `units` names the flag, and its `because` cites the tool summary's missing option. It stays `open`, like any drop.
 - Entries marked `tie: true` with the same `key` are tied: the summary can't tell which one Nextflow reads last. A flag every tied entry sets the same way is recorded as usual. Any other flag of a tied entry is an open gap (no `kind`), whose `missing` names the other tied entries' `id`s, and it stays out of `state`.
 - Each flag an effective entry can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
-- A record names its step inside `source_arg`, never in a top-level `step`, so a dropped or tied flag never reads as a dropped step or a step gap.
+- A record names its step inside `source_arg`, never in a top-level `step`.
 - `source_arg.arg` is the summary entry's `id`. Join records to the summary on `source_arg.step` and `source_arg.arg`, not on the record's own `id`. While the step keeps a `_plan_state`, its `calls` names the summary call paths the step translates.
 
 ## How to use the ledger

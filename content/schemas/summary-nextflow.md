@@ -92,11 +92,12 @@ Nextflow's selector priority themselves.
   name. At the same rank a selected profile beats the root chain, as under
   the legacy config parser, unless the root chain also declares the
   profile's selector: then the profile replaces only that selector's root
-  entries and can tie another root selector; under the strict parser (default since Nextflow
-  26.04) nf-core's trailing `includeConfig 'conf/modules.config'` can win
-  instead. Then a later declaration of the same selector in one config beats
-  an earlier one. Level entries with different expressions are listed
-  together with `tie: true`.
+  entries and can tie another root selector. Under the strict parser
+  (default since Nextflow 26.04) nf-core's trailing
+  `includeConfig 'conf/modules.config'` can win instead. Then a later
+  declaration of the same selector in one config beats an earlier one, but
+  assignments to one key in different branches of a block stay level. Level
+  entries with different expressions are listed together with `tie: true`.
 - **`resolved_args` membership follows call paths.** A qualified selector
   reaches a process only along a traced path, so `SUB_B:FOO` no longer
   matches a FOO only `SUB_A` calls.

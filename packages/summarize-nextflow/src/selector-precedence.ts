@@ -34,6 +34,10 @@ export interface RankedArg {
   ranks: Map<string, number>;
   /** From a profile selector the root chain never declares, which the legacy parser appends after the root's. */
   appended: boolean;
+  /** 1-based count of the selector's declaration within its config and profile. */
+  ordinal: number;
+  /** The declaring block branches (`if`, `else`, `switch`), so which of its assignments to one key applies is unknown. */
+  conditional: boolean;
 }
 
 export function selectorName(selector: Selector): string {
@@ -72,7 +76,8 @@ export function selectorRanks(
  * Per call and `key`, the entries Nextflow applies: the highest rank, then at
  * that rank any appended profile entries. A profile selector the root also
  * declares merges at the root's position, so it only shadows that selector's
- * root entries. Within one config the later declaration of a selector wins.
+ * root entries. Within one config the later declaration of a selector wins, and
+ * within a branching declaration every assignment to the key stays level.
  * Entries still level with different expressions tie: include order is not modeled.
  */
 export function effectiveArgs(calls: string[], assignments: RankedArg[]): EffectiveArg[] {
@@ -90,7 +95,7 @@ export function effectiveArgs(calls: string[], assignments: RankedArg[]): Effect
       const top = Math.max(...reaching.map(({ ranks }) => ranks.get(call)!));
       const atTop = reaching.filter(({ ranks }) => ranks.get(call) === top);
       const appended = atTop.filter((entry) => entry.appended);
-      const level = lastDeclarations((appended.length > 0 ? appended : atTop).map((e) => e.arg));
+      const level = lastDeclarations(appended.length > 0 ? appended : atTop);
       if (new Set(level.map((arg) => arg.expression)).size === 1) {
         return [{ call, key, ids: [level[0]!.id] }];
       }
@@ -99,11 +104,19 @@ export function effectiveArgs(calls: string[], assignments: RankedArg[]): Effect
   );
 }
 
-/** The last entry per config, profile, and selector, in first-declaration order. */
-function lastDeclarations(args: ResolvedArg[]): ResolvedArg[] {
-  const latest = new Map<string, ResolvedArg>();
-  for (const arg of args) latest.set(`${arg.config}\0${arg.profile ?? ""}\0${arg.selector}`, arg);
-  return [...latest.values()];
+/**
+ * Per config, profile, and selector, in first-declaration order: the last entry,
+ * or every entry of the last declaration when that declaration branches.
+ */
+function lastDeclarations(entries: RankedArg[]): ResolvedArg[] {
+  const latest = new Map<string, RankedArg[]>();
+  for (const entry of entries) {
+    const slot = `${entry.arg.config}\0${entry.arg.profile ?? ""}\0${entry.arg.selector}`;
+    const kept = latest.get(slot) ?? [];
+    const sameBranchingBlock = entry.conditional && kept[0]?.ordinal === entry.ordinal;
+    latest.set(slot, sameBranchingBlock ? [...kept, entry] : [entry]);
+  }
+  return [...latest.values()].flat().map((entry) => entry.arg);
 }
 
 function nameMatcher(pattern: string): (name: string) => boolean {

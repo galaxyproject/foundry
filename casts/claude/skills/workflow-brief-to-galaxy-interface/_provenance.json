@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-interface/index.md",
     "revision": 5,
     "content_hash": "c84d428e03ab42e7b33335c72de6728d5bf26726e4a9986bf49343e6461a2fcd",
-    "commit": "fada24fd69f40f901fdba574e7f1204ee901d1db"
+    "commit": "76194bcfad252b2491b4541b29a21661a87a19bf"
   },
-  "cast_at": "2026-11-12T07:38:22.067Z",
+  "cast_at": "2026-11-12T09:08:36.796Z",
   "refs": [
     {
       "kind": "research",
@@ -88,8 +88,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the narrative never settles — an output the source names but never specifies, a parameter stated only qualitatively, a collection shape the prose doesn't determine.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
-      "dst_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
+      "src_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
+      "dst_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
       "source": "deterministic"
     },
     {

@@ -3565,6 +3565,53 @@ workflow PIPE { FOO(); BAR() }
     ]);
   });
 
+  test("ties a key a selector block assigns in both branches of an if", async () => {
+    // Shaped like nf-core/sarek's markduplicates.config CRAM_TO_BAM block.
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/branches' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'FOO' {
+        ext.args = '-b'
+    }
+    withName: 'PIPE:FOO' {
+        if (params.tools && params.tools.split(',').contains('dedup')) {
+            ext.prefix = { "\${meta.id}.dedup" }
+            ext.args2 = '-x'
+        } else {
+            ext.prefix = { "\${meta.id}.md" }
+            ext.args2 = '-x'
+        }
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "main.nf", "include { FOO } from './modules/foo'\nworkflow PIPE { FOO() }\n");
+
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    expect(summary.processes[0]!.effective_args).toEqual([
+      { call: "PIPE:FOO", key: "args", ids: ["conf/modules.config#withName:FOO/args"] },
+      { call: "PIPE:FOO", key: "args2", ids: ["conf/modules.config#withName:PIPE:FOO/args2"] },
+      {
+        call: "PIPE:FOO",
+        key: "prefix",
+        ids: [
+          "conf/modules.config#withName:PIPE:FOO/prefix",
+          "conf/modules.config#withName:PIPE:FOO/prefix~2",
+        ],
+        tie: true,
+      },
+    ]);
+  });
+
   test("keys a call name used from two subworkflows by its call path", async () => {
     const root = tempPipelineRoot();
     write(

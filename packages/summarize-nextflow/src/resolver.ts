@@ -3136,6 +3136,7 @@ function parseProseAssertions(text: string): string[] {
 }
 
 const EXT_ASSIGNMENTS = EXT_KEYS.map((key) => [key, `ext\\.${key}(?!\\w)`] as const);
+const BRANCHING = /(?:^|[\s;{}])(?:(?:if|switch)\s*\(|else\b)/u;
 
 interface ConfigSelector extends SelectorBlock {
   config: string;
@@ -3207,6 +3208,8 @@ function configDirectives(
       extractAssignments(selector.body, pattern).map((expression, index) => ({
         ranks,
         appended: selector.appended,
+        ordinal: selector.ordinal,
+        conditional: BRANCHING.test(selector.body),
         arg: withProfile(
           {
             id: resolvedArgId(selector, key, index),

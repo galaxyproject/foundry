@@ -32,7 +32,7 @@ output_artifacts:
     kind: yaml
     default_filename: galaxy-workflow-draft.gxwf.yml
     schema: "[[galaxy-workflow-draft]]"
-    description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / state / tool_shed_repository and wrapper-determined port names may be TODO with _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds; _plan_state copies the step's nf-core `resolved_args` as a YAML document."
+    description: "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / state / tool_shed_repository and wrapper-determined port names may be TODO with _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds. _plan_state copies the step's effective nf-core `resolved_args` into a YAML document."
   - id: open-requirements-ledger
     kind: yaml
     default_filename: open-requirements.ledger.yml
@@ -200,7 +200,7 @@ Topology is this Mold's job to settle. The output must be concrete gxformat2: wo
 
 Source tendency: nf-core modules name their tool, pin a version, and carry the `command:` block, conda packages, and container tags — so steps reach **Resolved** when a pattern page or IWC exemplar covers the operation (fill `tool_id`, parameters, and port names from the worked example), and **Identity-pinned** when the module names the tool but its settings for this context stay open. **Deferred** is for domain-specific scientific tools with no covering pattern (alignment, variant calling, expression quantification, etc.) — pack `_plan_context` with the source command, conda specs, container tags, and pre/post conditions the per-step Mold needs to pick a wrapper. Emitting `TODO` over a pattern-covered recipe discards real evidence the per-step Mold cannot recover.
 
-Carry the source's tool arguments into the step as data. `summary-nextflow.json` records each process's `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args`, and names in `effective_args` the entries that take effect for each call, keyed by the call's path (`call`, Nextflow's fully qualified name, e.g. `NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP`). The per-step Mold binds `state` from `_plan_state`, so every flag nf-core applies must reach it there. Copy the entries, don't describe them: a paraphrase is a claim about what the flags do, and nothing downstream checks that claim. For each tool step whose call has at least one `effective_args` row, write `_plan_state` as a YAML document with three keys:
+Carry the source's tool arguments into the step as data. `summary-nextflow.json` records each process's `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args`, and names in `effective_args` the entries that take effect for each call, keyed by the call's path (`call`, Nextflow's fully qualified name, e.g. `NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP`). The per-step Mold binds `state` from `_plan_state`, so copy the entries there rather than paraphrasing them. For each tool step whose call has at least one `effective_args` row, write `_plan_state` as a YAML document with three keys:
 
 ```yaml
 _plan_state: |
@@ -213,11 +213,11 @@ _plan_state: |
 ```
 
 - `calls` lists the `call` path of each call the step translates, spelled as in `effective_args`: usually one. A call name used from two subworkflows has two paths, and each one's step lists only its own path.
-- `resolved_args` holds the entries that the rows for those paths name by `id`, each copied unchanged from the process's `resolved_args`. Add `"tie": true` to the entries of a row marked `tie`. Leave every other entry out: the summary has already ranked them, and an overridden entry never reaches the step. A step that translates several calls lists each one's effective entries, each `id` once. Never evaluate a closure or rewrite an expression.
-- Write `calls` as a one-line JSON array and each entry as a one-line JSON object, as above. JSON is valid YAML, and its quoting keeps every `expression` equal to the summary's string. Unquoted YAML strips Groovy's own quotes and reads a closure's braces as a mapping.
+- `resolved_args` holds the entries that the rows for those paths name by `id`, each copied unchanged from the process's `resolved_args`. Add `"tie": true` to the entries of a row marked `tie`. Leave every other entry out. A step that translates several calls lists each one's effective entries, each `id` once. Never evaluate a closure or rewrite an expression.
+- Write `calls` as a one-line JSON array and each entry as a one-line JSON object, as above, so every `expression` stays equal to the summary's string. Plain YAML strips Groovy's quotes and reads a closure's braces as a mapping.
 - `intent` holds the free-text binding intent the step would otherwise carry. Where it and a flag disagree, the flag is the source evidence.
 
-The draft schema types `_plan_state` as a string, which is why the block is a YAML document inside one; a mapping value fails [[draft-validate]]. A step whose call has no `effective_args` row keeps a plain-text `_plan_state`. `resolved_args` holds only config-set arguments; flags the module's own script writes are in `script_excerpt`, so a missing entry is no evidence that the source sets no flags. A step you resolve fully carries no `_plan_*`, so bind its flags into `state` yourself and record a disposition for each one in the [[open-requirements-ledger]], as its **Source arguments** section describes.
+Keep the document inside the string (`_plan_state: |`). A mapping value fails [[draft-validate]]. A step whose call has no `effective_args` row keeps a plain-text `_plan_state`. `resolved_args` holds only config-set arguments. Flags the module's own script writes are in `script_excerpt`, so a missing entry doesn't mean the source sets no flags. A step you resolve fully carries no `_plan_*`, so bind its flags into `state` yourself and record a disposition for each one in the [[open-requirements-ledger]], as its **Source arguments** section describes.
 
 Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see [[galaxy-workflow-comments]] for the convention.
 

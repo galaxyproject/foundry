@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 11,
-    "content_hash": "4ff031ee2f2dda4e398254788d51b8992540edcbac12bcf3829bf05fff85ee91",
-    "commit": "9727baa6079615d9dcd77de5ea3209a7d51b8df7"
+    "content_hash": "e915e5546bc4b8b12acf932582a718c65e41ce5709ff94fe0a6395529222a317",
+    "commit": "76194bcfad252b2491b4541b29a21661a87a19bf"
   },
-  "cast_at": "2026-11-12T08:18:38.860Z",
+  "cast_at": "2026-11-12T09:08:35.974Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -200,8 +200,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "e9b6ba014ca0989e032a2499cb8197c43eaef663b07f037c69f863fa9b55a01c",
-      "dst_hash": "e9b6ba014ca0989e032a2499cb8197c43eaef663b07f037c69f863fa9b55a01c",
+      "src_hash": "1cb4be511125954325ad5f40bacf9d60927f190b92b81ffcb7987bd60a842323",
+      "dst_hash": "1cb4be511125954325ad5f40bacf9d60927f190b92b81ffcb7987bd60a842323",
       "source": "deterministic"
     },
     {
@@ -310,8 +310,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, record a disposition for each source argument of a step resolved here, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
-      "dst_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
+      "src_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
+      "dst_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
       "source": "deterministic"
     },
     {
@@ -354,7 +354,7 @@
         "kind": "yaml",
         "default_filename": "galaxy-workflow-draft.gxwf.yml",
         "schema": "[[galaxy-workflow-draft]]",
-        "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / state / tool_shed_repository and wrapper-determined port names may be TODO with _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds; _plan_state copies the step's nf-core `resolved_args` as a YAML document."
+        "description": "gxformat2 draft (see [[galaxy-workflow-draft-format]]): topology fully resolved (workflow inputs, outputs, step set, edges); tool_id / state / tool_shed_repository and wrapper-determined port names may be TODO with _plan_state / _plan_context / _plan_in / _plan_out per step for later implementation Molds. _plan_state copies the step's effective nf-core `resolved_args` into a YAML document."
       },
       {
         "id": "open-requirements-ledger",

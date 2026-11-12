@@ -200,8 +200,10 @@ whatever a scenario produces. Properties are tagged by bucket:
   subworkflow doesn't call the process on that path, an entry whose selector
   names a different alias, and `.*:NAME` for an aliased call are never
   effective for it. One call name used from two subworkflows gives separate
-  rows. Several `ids` appear only with `tie: true`, when level entries
-  set different expressions.
+  rows. Within one config a later declaration of the same selector wins,
+  except over assignments to the key in different branches of one block,
+  which stay level. Several `ids` appear only with `tie: true`, when level
+  entries set different expressions.
 
 ## Property: re-runs are reproducible
 

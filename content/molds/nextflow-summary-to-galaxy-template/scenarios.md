@@ -38,11 +38,11 @@
   `_plan_state.resolved_args`, each with its own `prefix` entry and with the
   `id` the alias's `effective_args` rows name. Each step's `calls` is its
   alias's path, e.g.
-  `NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP`. No step carries another
-  alias's entries or `SAMTOOLS_CHR`'s, and a step translating `SAMTOOLS_PE`
-  keeps a plain-text `_plan_state`. Each `expression` parses back to the
-  summary's string, closures included. The collate steps carry
-  `args2: '-N'`. `gxwf draft-validate --json` exits 0.
+  `NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP`. No
+  step carries another alias's entries or `SAMTOOLS_CHR`'s, and a step
+  translating `SAMTOOLS_PE` keeps a plain-text `_plan_state`. Each
+  `expression` parses back to the summary's string, closures included. The
+  collate steps carry `args2: '-N'`. `gxwf draft-validate --json` exits 0.
 
 ## Case: an overridden entry stays out of `_plan_state`
 
@@ -54,17 +54,20 @@
   Each view step lists the alias's `args` and `prefix` entries only, as in
   the case above.
 
-## Case: one call name in two subworkflows keeps its entries apart
+## Case: rnaseq's `SALMON_QUANT` keeps each subworkflow's arguments
 
-- fixture: a synthetic summary whose `FOO` is called as `FOO` by both
-  `SUB_A` and `SUB_B`. `resolved_args` has `args: '-a'` from
-  `withName:.*:SUB_A:FOO` and `args: '-b'` from `withName:.*:SUB_B:FOO`.
-  `effective_args` has two rows, `call: PIPE:SUB_A:FOO` naming the `-a`
-  entry and `call: PIPE:SUB_B:FOO` naming the `-b` entry, neither a tie.
-- expect: the step translating `FOO` in `SUB_A` has `calls:
-  ["PIPE:SUB_A:FOO"]` and only the `-a` entry; the one in `SUB_B` has
-  `calls: ["PIPE:SUB_B:FOO"]` and only the `-b` entry. No entry carries
-  `tie`.
+- fixture: nf-core/rnaseq at `47b3b0d3daad69e99d45c9e2dd8db19ee28307a1`,
+  summarized by `summarize-nextflow`. `SALMON_QUANT` is called by
+  `FASTQ_SUBSAMPLE_FQ_SALMON`, by `QUANTIFY_PSEUDO_ALIGNMENT`, and by that
+  subworkflow's alias `QUANTIFY_BAM_SALMON`, each with its own
+  `withName:.*:<subworkflow>:SALMON_QUANT` `ext.args`.
+- expect: the step translating the subsampling call has `calls:
+  ["NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FASTQ_SUBSAMPLE_FQ_SALMON:SALMON_QUANT"]`
+  and only the `'--skipQuant'` entry. The quantification steps each list
+  their own path (`NFCORE_RNASEQ:RNASEQ:QUANTIFY_BAM_SALMON:SALMON_QUANT` or
+  `NFCORE_RNASEQ:RNASEQ:QUANTIFY_PSEUDO_ALIGNMENT:SALMON_QUANT`) and only
+  that path's `{ params.extra_salmon_quant_args ?: '' }` entry. No
+  quantification step carries `--skipQuant`.
 
 ## Case: collection inputs use gxformat2-compatible structure
 
