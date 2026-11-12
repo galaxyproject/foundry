@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { stringify } from "yaml";
+import YAML, { stringify } from "yaml";
 import { checkStepRemovals, StepRemovalInputError } from "../src/step-removals.js";
 
 // `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at 3fd23149, on its synthetic-diff fixtures.
@@ -83,6 +83,12 @@ describe("checkStepRemovals", () => {
     const clear = { ok: true, removed_steps: [], unlabelled: [], unwired_inputs: [] };
     expect(checkStepRemovals(changedStep, null)).toEqual(clear);
     expect(checkStepRemovals(changedStep, { entries: [chrDropped] })).toEqual(clear);
+  });
+
+  it("reads an empty `entries:` key as a ledger with no drops", () => {
+    expect(checkStepRemovals(draftToFinal, YAML.parse("entries:\n")).unlabelled).toEqual([
+      "chr_filter",
+    ]);
   });
 
   it("reads a ledger written as a bare list of entries", () => {

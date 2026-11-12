@@ -22,7 +22,7 @@ Read the JSON a `gxwf diff --json <before> <after>` prints and an [[open-require
 
 ## Output
 
-Exit `0` means every removed step is labelled, including when none was removed. Exit `4` means at least one is not. A diff without a `steps.removed` object, a ledger that is neither a mapping nor a list, or an `entries` that isn't a list exits `3`. An empty ledger, or a mapping without `entries`, has no drops. Read and parse failures exit `1`.
+Exit `0` means every removed step is labelled, including when none was removed. Exit `4` means at least one is not. A diff without a `steps.removed` object, a ledger that is neither a mapping nor a list, or an `entries` that holds something other than a list exits `3`. An empty ledger, a mapping without `entries`, or an empty `entries:` key has no drops. Read and parse failures exit `1`.
 
 Without `--json`, each unlabelled step prints on stderr, inputs that feed no step print on stdout, and a closing count prints on stdout when every removal is labelled or on stderr when one isn't. With `--json`, stdout holds:
 

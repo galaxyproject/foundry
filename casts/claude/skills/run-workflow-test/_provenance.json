@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 9,
     "content_hash": "ce2666881987abb6a25f356fd731a8c4b831924f8b43cf203a9ba9d48c419db6",
-    "commit": "65f043a47b45a9a22297c23251527aca3b4d3c72"
+    "commit": "ccf4a817874dd6978f9de0173b376cd7563d6e34"
   },
-  "cast_at": "2026-11-12T10:54:32.671Z",
+  "cast_at": "2026-11-12T11:05:08.728Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -31,8 +31,8 @@
       "purpose": "Deterministically match the steps `gxwf diff` reports removed against the ledger's `kind: dropped` entries.",
       "trigger": "After a green Planemo run, when the extracted-workflow snapshot exists.",
       "verification": "Promote after a run with a gxwf release that ships `diff` blocks a green result on a removed step that has no drop entry.",
-      "src_hash": "ffcba66428528f1e59e6b8ed038a08443e76f961d644eab8676ba59aef9d7aae",
-      "dst_hash": "e206519d6d0b2903aacd059389c55e456e9326e87b65badfa7acf8156662fda8",
+      "src_hash": "5c73e496e063ddb7a4247d67406703aa77f04cba9d66f1a2f68b6c3730bee12b",
+      "dst_hash": "bf27d48859b7aa86bba25f624575afc4a82f9aa036aee715325c6cbb90cecbbc",
       "source": "deterministic"
     },
     {
