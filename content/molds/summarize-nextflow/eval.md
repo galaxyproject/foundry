@@ -186,15 +186,18 @@ whatever a scenario produces. Properties are tagged by bucket:
 - bucket: fidelity
 - check: deterministic
 - assertion: each `resolved_args` entry has an `id` unique within its process.
-  For every call of a process and every `key` an entry sets for it,
-  `effective_args` has one row whose `ids` name the entry with the highest
-  rank (`withLabel` < `withName` on the process < `withName` on the alias <
-  fully qualified, where the qualified name ends in the name the call uses).
-  A selected profile's entry and the root chain's at the same rank with
-  different expressions are a tie. An entry whose selector names a different
-  alias, or qualifies the process name for an aliased call, is never
-  effective for the call. Several `ids` appear only with `tie: true`,
-  when level entries set different expressions.
+  Each `effective_args` row's `call` is a call path traced from the entry
+  workflow (subworkflow aliases included, the anonymous entry adding no
+  segment). For every call path of a process and every `key` an entry sets
+  for it, `effective_args` has one row whose `ids` name the entry with the
+  highest rank (`withLabel` < `withName` on the process < `withName` on the
+  alias < `withName` on the whole path). At the same rank a selected
+  profile's entry beats the root chain's. A qualified selector whose
+  subworkflow doesn't call the process on that path, an entry whose selector
+  names a different alias, and `.*:NAME` for an aliased call are never
+  effective for it. One call name used from two subworkflows gives separate
+  rows. Several `ids` appear only with `tie: true`, when level entries
+  set different expressions.
 
 ## Property: re-runs are reproducible
 

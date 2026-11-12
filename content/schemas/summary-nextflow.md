@@ -83,14 +83,21 @@ Nextflow's selector priority themselves.
 - **`ResolvedArg.id` added (required).** It names the assignment by config,
   profile, selector, and key, and stays the same in every process a
   `withLabel` entry matches.
-- **`Process.effective_args` added.** One row per call (`invoked_as`) and
-  `key`, listing the `id` that takes effect: `withLabel` < `withName` on the
-  process < `withName` on the alias < fully qualified (the qualified name
-  ends in the name the call uses). At the same rank a later declaration of
-  the same selector in one config beats an earlier one. Level entries with
-  different expressions are listed together with `tie: true`, including a
-  selected profile against the root chain: the legacy parser applies
-  profiles last, the strict parser where `profiles { }` sits.
+- **`Process.effective_args` added.** One row per call and `key`, listing
+  the `id` that takes effect. `call` is Nextflow's fully qualified call
+  name (`task.process`), traced from the entry workflow through subworkflow
+  aliases, so one call name used from two subworkflows gets two rows.
+  Priority is `withLabel` < `withName` on the process < `withName` on the
+  alias < `withName` on the whole path, and a pattern must match a whole
+  name. At the same rank a selected profile beats the root chain, as under
+  the legacy config parser; under the strict parser (default since Nextflow
+  26.04) nf-core's trailing `includeConfig 'conf/modules.config'` can win
+  instead. Then a later declaration of the same selector in one config beats
+  an earlier one. Level entries with different expressions are listed
+  together with `tie: true`.
+- **`resolved_args` membership follows call paths.** A qualified selector
+  reaches a process only along a traced path, so `SUB_B:FOO` no longer
+  matches a FOO only `SUB_A` calls.
 - **`resolved_args` keeps every match.** Overridden entries stay, so the
   summary still shows what a call's winner replaced.
 

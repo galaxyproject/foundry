@@ -36,7 +36,9 @@
   `SAMTOOLS_VIEW_UNMAP_UNMAP` carry `'-b -f1 -F12'`, `'-b -f8 -F260'`,
   `'-b -f4 -F264'`, and `'-b -f12 -F256'` respectively in
   `_plan_state.resolved_args`, each with its own `prefix` entry and with the
-  `id` the alias's `effective_args` rows name. No step carries another
+  `id` the alias's `effective_args` rows name. Each step's `calls` is its
+  alias's path, e.g.
+  `NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP`. No step carries another
   alias's entries or `SAMTOOLS_CHR`'s, and a step translating `SAMTOOLS_PE`
   keeps a plain-text `_plan_state`. Each `expression` parses back to the
   summary's string, closures included. The collate steps carry
@@ -51,6 +53,18 @@
 - expect: no step's `_plan_state.resolved_args` contains the `'-h'` entry.
   Each view step lists the alias's `args` and `prefix` entries only, as in
   the case above.
+
+## Case: one call name in two subworkflows keeps its entries apart
+
+- fixture: a synthetic summary whose `FOO` is called as `FOO` by both
+  `SUB_A` and `SUB_B`. `resolved_args` has `args: '-a'` from
+  `withName:.*:SUB_A:FOO` and `args: '-b'` from `withName:.*:SUB_B:FOO`.
+  `effective_args` has two rows, `call: PIPE:SUB_A:FOO` naming the `-a`
+  entry and `call: PIPE:SUB_B:FOO` naming the `-b` entry, neither a tie.
+- expect: the step translating `FOO` in `SUB_A` has `calls:
+  ["PIPE:SUB_A:FOO"]` and only the `-a` entry; the one in `SUB_B` has
+  `calls: ["PIPE:SUB_B:FOO"]` and only the `-b` entry. No entry carries
+  `tie`.
 
 ## Case: collection inputs use gxformat2-compatible structure
 

@@ -628,18 +628,18 @@ export const summaryNextflowSchema = {
     },
     "EffectiveArg": {
       "title": "EffectiveArg",
-      "description": "The `resolved_args` entry that takes effect for one `key` of one call, by Nextflow selector priority: `withLabel` < `withName` naming the process < `withName` naming the alias < a `withName` matching the fully qualified name (`SUB:NAME`, `.*:NAME`), which ends in the alias for an aliased call. At the same rank, a later declaration of the same selector in one config beats an earlier one. A selected profile's entry doesn't outrank the root chain's: the legacy parser applies profiles last, the strict parser where `profiles { }` sits.",
+      "description": "The `resolved_args` entry that takes effect for one `key` of one call, by Nextflow selector priority: `withLabel` < `withName` matching the process name < `withName` matching the alias < `withName` matching the whole `call` path. A pattern must match a whole name, so `SUB:NAME` reaches only a call whose path is exactly `SUB:NAME`, and `.*:SUB:NAME` one that `SUB` really calls. At the same rank, a selected profile's entry beats the root chain's, as under Nextflow's legacy config parser. Under the strict parser (default since Nextflow 26.04) a root `includeConfig` placed after `profiles { }`, such as nf-core's trailing `includeConfig 'conf/modules.config'`, can win instead; the summary keeps the legacy order. Then a later declaration of the same selector in one config beats an earlier one.",
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "invoked_as",
+        "call",
         "key",
         "ids"
       ],
       "properties": {
-        "invoked_as": {
+        "call": {
           "type": "string",
-          "description": "The name the workflow calls the process by: its own name or an alias from `aliases`."
+          "description": "Nextflow's fully qualified name for the call, as `task.process` reports it: the names each workflow is called by, from the entry workflow down, joined by `:` and ending in the process name or an alias from `aliases`, e.g. `NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_MAP_MAP`. The anonymous entry workflow adds no segment. Without one, each named workflow no other workflow calls starts a path. A process no traced workflow calls gets its bare name and aliases."
         },
         "key": {
           "type": "string",
@@ -662,7 +662,7 @@ export const summaryNextflowSchema = {
           "enum": [
             true
           ],
-          "description": "Set when entries level after ranking set different expressions. Which one Nextflow reads last depends on include order, profile placement, or subworkflow context, which the summary does not model."
+          "description": "Set when entries level after ranking set different expressions: entries from two root configs or from two selected profiles, which Nextflow orders by include or profile order, or two different selectors at one rank in one config, which it orders by first insertion across the merged config. The summary models neither order."
         }
       }
     },
@@ -844,14 +844,14 @@ export const summaryNextflowSchema = {
           "items": {
             "$ref": "#/$defs/ResolvedArg"
           },
-          "description": "`ext.args`, `ext.args2`, and `ext.prefix` assignments from matching config selectors, including ones a higher-priority selector overrides. Expressions are verbatim, including closures. Empty when the chain declares none. Entries from a selected profile carry `profile`."
+          "description": "`ext.args`, `ext.args2`, and `ext.prefix` assignments from config selectors that reach some call of the process, including ones a higher-priority selector overrides. Expressions are verbatim, including closures. Empty when the chain declares none. Entries from a selected profile carry `profile`."
         },
         "effective_args": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/EffectiveArg"
           },
-          "description": "Per call and `key`, which `resolved_args` entries take effect. Lists each name the workflow calls the process by (every name when none is found among the workflow calls), and only keys some entry sets for that call. Absent when no entry applies."
+          "description": "Per call and `key`, which `resolved_args` entries take effect. One row per call path the workflows trace to the process and per key some entry sets for that call, so one call name used from two subworkflows gets separate rows. Absent when no entry applies."
         },
         "template": {
           "anyOf": [

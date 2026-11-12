@@ -238,7 +238,8 @@ interface ResolvedArg {
 
 /** The entries of one `key` that take effect for one call, by Nextflow selector priority. */
 interface EffectiveArg {
-  invoked_as: string;
+  /** Nextflow's fully qualified call name, e.g. `NFCORE_X:X:SUB:FOO_B`. */
+  call: string;
   key: ResolvedArg["key"];
   ids: string[];
   tie?: true;
@@ -491,7 +492,7 @@ export async function resolveNextflowSummary(
   attachConfigDirectives(
     summary,
     pipelineRoot,
-    new Set(workflows.flatMap((workflow) => workflow.calls)),
+    processCallPaths(pipelineRoot, entrypoint, workflows, processNameSet, aliasToCanonical),
     options.profile,
   );
 
@@ -3160,14 +3161,15 @@ interface ScopedSelector extends SelectorBlock {
 function attachConfigDirectives(
   summary: Summary,
   pipelineRoot: string,
-  calledNames: Set<string>,
+  callPaths: Map<string, string[]>,
   selectedProfile?: string,
 ): void {
   const selectors = collectScopedSelectors(pipelineRoot, selectedProfileNames(selectedProfile));
 
   for (const process of summary.processes) {
+    const calls = callPaths.get(process.name) ?? [process.name, ...process.aliases];
     const matched = selectors.filter((selector) =>
-      selectorMatchesProcess(selector.kind, selector.pattern, process),
+      calls.some((call) => selectorRank(selector.kind, selector.pattern, process, call) !== null),
     );
     const publish = matched.flatMap((selector) =>
       extractAssignments(selector.body, "publishDir").map((expression) =>
@@ -3204,7 +3206,7 @@ function attachConfigDirectives(
       );
     });
     process.resolved_args = assignments.map((assignment) => assignment.arg);
-    const effective = effectiveArgs(process, assignments, calledNames);
+    const effective = effectiveArgs(process, assignments, calls);
     if (effective.length > 0) process.effective_args = effective;
     const template = resolveProcessTemplate(pipelineRoot, process);
     process.template = template.template;
@@ -3222,18 +3224,16 @@ function resolvedArgId(selector: ScopedSelector, key: string, index: number): st
 
 /**
  * Per call and `key`, the entries Nextflow applies. A higher selector rank wins,
- * then the later declaration of the same selector in one config. Entries still
- * level with different expressions are a tie: include order, profile placement
- * (parser-dependent) and subworkflow context are not modeled.
+ * then a selected profile over the root chain (legacy parser order), then the
+ * later declaration of the same selector in one config. Entries still level
+ * with different expressions are a tie: include order is not modeled.
  */
 function effectiveArgs(
   process: Process,
   assignments: { selector: ScopedSelector; arg: ResolvedArg }[],
-  calledNames: Set<string>,
+  calls: string[],
 ): EffectiveArg[] {
-  const names = [process.name, ...process.aliases];
-  const called = names.filter((name) => calledNames.has(name));
-  return (called.length > 0 ? called : names).flatMap((call) =>
+  return calls.flatMap((call) =>
     EXT_ASSIGNMENTS.flatMap(([key]) => {
       const ranked = assignments.flatMap(({ selector, arg }) => {
         if (arg.key !== key) return [];
@@ -3242,17 +3242,86 @@ function effectiveArgs(
       });
       if (ranked.length === 0) return [];
       const top = Math.max(...ranked.map((entry) => entry.rank));
+      const topArgs = ranked.filter((entry) => entry.rank === top).map((entry) => entry.arg);
+      const fromProfile = topArgs.filter((arg) => arg.profile !== undefined);
       const latest = new Map<string, ResolvedArg>();
-      for (const { arg, rank } of ranked) {
-        if (rank === top) latest.set(`${arg.config}\0${arg.profile ?? ""}\0${arg.selector}`, arg);
+      for (const arg of fromProfile.length > 0 ? fromProfile : topArgs) {
+        latest.set(`${arg.config}\0${arg.profile ?? ""}\0${arg.selector}`, arg);
       }
       const level = [...latest.values()];
       if (new Set(level.map((arg) => arg.expression)).size === 1) {
-        return [{ invoked_as: call, key, ids: [level[0]!.id] }];
+        return [{ call, key, ids: [level[0]!.id] }];
       }
-      return [{ invoked_as: call, key, ids: level.map((arg) => arg.id), tie: true as const }];
+      return [{ call, key, ids: level.map((arg) => arg.id), tie: true as const }];
     }),
   );
+}
+
+/**
+ * Nextflow's fully qualified name for each process call, by canonical process name:
+ * workflow call names from the entry workflow down, joined by `:`. Without an
+ * anonymous entry workflow, each named workflow no other workflow calls is a root
+ * and starts the name, as it does when run with `-entry`.
+ */
+function processCallPaths(
+  pipelineRoot: string,
+  entrypoint: string | null,
+  workflows: ParsedWorkflow[],
+  processNames: Set<string>,
+  aliasToCanonical: Map<string, string>,
+): Map<string, string[]> {
+  const byName = new Map<string, ParsedWorkflow>();
+  for (const workflow of workflows) {
+    byName.set(workflow.name, workflow);
+    for (const alias of workflow.aliases) byName.set(alias, workflow);
+  }
+  const paths = new Map<string, Set<string>>();
+  const visit = (calls: string[], prefix: string | null, stack: Set<string>): void => {
+    for (const call of calls) {
+      const path = prefix === null ? call : `${prefix}:${call}`;
+      const canonical = aliasToCanonical.get(call) ?? call;
+      if (processNames.has(canonical)) {
+        paths.set(canonical, (paths.get(canonical) ?? new Set()).add(path));
+        continue;
+      }
+      const workflow = byName.get(call);
+      if (!workflow || stack.has(workflow.name)) continue;
+      visit(workflow.calls, path, new Set(stack).add(workflow.name));
+    }
+  };
+  const entryCalls = entrypoint ? entryWorkflowCalls(pipelineRoot, entrypoint, processNames) : null;
+  if (entryCalls) {
+    visit(entryCalls, null, new Set());
+  } else {
+    const called = new Set(workflows.flatMap((workflow) => workflow.calls));
+    const roots = workflows.filter(
+      (workflow) => ![workflow.name, ...workflow.aliases].some((name) => called.has(name)),
+    );
+    visit(
+      roots.map((workflow) => workflow.name),
+      null,
+      new Set(),
+    );
+  }
+  return new Map([...paths].map(([name, set]) => [name, [...set].sort()]));
+}
+
+/** Calls in the entrypoint's anonymous `workflow { }` block, or null when it has none. */
+function entryWorkflowCalls(
+  pipelineRoot: string,
+  entrypoint: string,
+  processNames: Set<string>,
+): string[] | null {
+  const text = readText(join(pipelineRoot, entrypoint));
+  const blocks = extractWorkflowBlocks(text);
+  const entry = blocks.find((block) => block.name === null);
+  if (!entry) return null;
+  const known = new Set([
+    ...processNames,
+    ...parseIncludeItems(text).map((include) => include.alias ?? include.name),
+    ...blocks.flatMap((block) => (block.name ? [block.name] : [])),
+  ]);
+  return parseWorkflowCalls(entry.body, known);
 }
 
 function selectedProfileNames(profile: string | undefined): string[] {
@@ -3442,25 +3511,15 @@ function parseProcessLabels(body: string): string[] {
   );
 }
 
-function selectorMatchesProcess(
-  kind: "withName" | "withLabel",
-  pattern: string,
-  process: Process,
-): boolean {
-  return [process.name, ...process.aliases].some(
-    (call) => selectorRank(kind, pattern, process, call) !== null,
-  );
-}
-
 /**
- * Rank at which a selector reaches one call: label 0, process 1, alias 2, fully qualified 3.
- * The qualified name ends in the call's own name, and any pattern may match it.
+ * Rank at which a selector reaches one call path: label 0, then the process name,
+ * the alias, and the full path, deduplicated as Nextflow does. Patterns match whole names.
  */
 function selectorRank(
   kind: "withName" | "withLabel",
   pattern: string,
   process: Process,
-  call: string,
+  path: string,
 ): number | null {
   if (kind === "withLabel") {
     const labels = process.labels ?? [];
@@ -3471,11 +3530,11 @@ function selectorRank(
   const regex = isRegexSelector(pattern) ? compileSelector(pattern) : undefined;
   const matches = (candidate: string) =>
     regex === undefined ? candidate === pattern : regex !== null && regex.test(candidate);
-  const qualified = [...process.in_subworkflows, "workflow"].map((scope) => `${scope}:${call}`);
-  if (qualified.some(matches)) return 3;
-  if (pattern.includes(":") && pattern.split(":").at(-1) === call) return 3;
-  if (call !== process.name && matches(call)) return 2;
-  return matches(process.name) ? 1 : null;
+  const names = unique([process.name, path.split(":").at(-1)!, path]);
+  for (let index = names.length - 1; index >= 0; index--) {
+    if (matches(names[index]!)) return index + 1;
+  }
+  return null;
 }
 
 function isRegexSelector(pattern: string): boolean {

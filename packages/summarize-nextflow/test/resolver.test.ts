@@ -66,7 +66,7 @@ interface SummaryLike {
       config: string;
       profile?: string;
     }[];
-    effective_args?: { invoked_as: string; key: string; ids: string[]; tie?: true }[];
+    effective_args?: { call: string; key: string; ids: string[]; tie?: true }[];
     template: { path: string; line_count: number; body: string } | null;
   }[];
   subworkflows: {
@@ -3121,13 +3121,19 @@ includeConfig 'conf/modules.config'
     write(root, "modules/quiet.nf", "process QUIET {\n  script:\n  'quiet'\n}\n");
     write(
       root,
+      "subworkflows/sub.nf",
+      "include { BAZ } from '../modules/baz'\nworkflow SUB { BAZ() }\n",
+    );
+    write(
+      root,
       "main.nf",
       `include { FOO } from './modules/foo'
 include { BAR } from './modules/bar'
-include { BAZ } from './modules/baz'
+include { SUB } from './subworkflows/sub'
 include { LOW } from './modules/low'
 include { QUIET } from './modules/quiet'
-workflow PIPE { FOO(); BAR(); BAZ(); LOW(); QUIET() }
+workflow PIPE { FOO(); BAR(); LOW(); QUIET() }
+workflow { PIPE(); SUB() }
 `,
     );
 
@@ -3282,8 +3288,11 @@ profiles {
     withName: 'FOO_A' {
         ext.args = '-a'
     }
-    withName: 'SUB:FOO_B' {
+    withName: 'PIPE:SUB:FOO_B' {
         ext.args = '-q'
+    }
+    withName: 'SUB:FOO_B' {
+        ext.args = '-n'
     }
     withName: 'FOO_B' {
         ext.args = '-b'
@@ -3319,16 +3328,16 @@ workflow PIPE { FOO_A(); SUB() }
       id("withLabel:lab", "prefix"),
       id("withName:FOO", "args"),
       id("withName:FOO_A", "args"),
-      id("withName:SUB:FOO_B", "args"),
+      id("withName:PIPE:SUB:FOO_B", "args"),
       id("withName:FOO_B", "args"),
     ]);
     expect(foo.effective_args).toEqual([
-      { invoked_as: "FOO", key: "args", ids: [id("withName:FOO", "args")] },
-      { invoked_as: "FOO", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
-      { invoked_as: "FOO_A", key: "args", ids: [id("withName:FOO_A", "args")] },
-      { invoked_as: "FOO_A", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
-      { invoked_as: "FOO_B", key: "args", ids: [id("withName:SUB:FOO_B", "args")] },
-      { invoked_as: "FOO_B", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
+      { call: "PIPE:FOO_A", key: "args", ids: [id("withName:FOO_A", "args")] },
+      { call: "PIPE:FOO_A", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
+      { call: "PIPE:SUB:FOO", key: "args", ids: [id("withName:FOO", "args")] },
+      { call: "PIPE:SUB:FOO", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
+      { call: "PIPE:SUB:FOO_B", key: "args", ids: [id("withName:PIPE:SUB:FOO_B", "args")] },
+      { call: "PIPE:SUB:FOO_B", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
     ]);
   });
 
@@ -3373,13 +3382,13 @@ workflow SUB { FOO(); FOO_B(); FOO_C() }
     const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
     const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
     expect(foo.effective_args).toEqual([
-      { invoked_as: "FOO", key: "args", ids: [id(".*:FOO")] },
-      { invoked_as: "FOO_B", key: "args", ids: [id("FOO_B")] },
-      { invoked_as: "FOO_C", key: "args", ids: [id(".*FOO_C")] },
+      { call: "PIPE:SUB:FOO", key: "args", ids: [id(".*:FOO")] },
+      { call: "PIPE:SUB:FOO_B", key: "args", ids: [id("FOO_B")] },
+      { call: "PIPE:SUB:FOO_C", key: "args", ids: [id(".*FOO_C")] },
     ]);
   });
 
-  test("ties a selected profile with the root chain at the same selector rank only", async () => {
+  test("lets a selected profile beat the root chain at the same selector rank", async () => {
     const root = tempPipelineRoot();
     write(
       root,
@@ -3422,25 +3431,16 @@ includeConfig 'conf/modules.config'
 
     const test = (await summarize(root, undefined, "test")).processes[0]!;
     expect(test.effective_args).toEqual([
-      {
-        invoked_as: "FOO",
-        key: "args",
-        ids: ["conf/modules.config#withName:FOO/args", "conf/test.config[test]#withName:FOO/args"],
-        tie: true,
-      },
-      { invoked_as: "FOO", key: "args2", ids: ["conf/modules.config#withName:FOO/args2"] },
-      { invoked_as: "FOO", key: "prefix", ids: ["conf/modules.config#withName:FOO/prefix"] },
+      { call: "PIPE:FOO", key: "args", ids: ["conf/test.config[test]#withName:FOO/args"] },
+      { call: "PIPE:FOO", key: "args2", ids: ["conf/test.config[test]#withName:FOO/args2"] },
+      { call: "PIPE:FOO", key: "prefix", ids: ["conf/modules.config#withName:FOO/prefix"] },
     ]);
 
     const both = (await summarize(root, undefined, "test,other")).processes[0]!;
     expect(both.effective_args?.[0]).toEqual({
-      invoked_as: "FOO",
+      call: "PIPE:FOO",
       key: "args",
-      ids: [
-        "conf/modules.config#withName:FOO/args",
-        "nextflow.config[other]#withName:FOO/args",
-        "conf/test.config[test]#withName:FOO/args",
-      ],
+      ids: ["nextflow.config[other]#withName:FOO/args", "conf/test.config[test]#withName:FOO/args"],
       tie: true,
     });
   });
@@ -3509,17 +3509,17 @@ workflow PIPE { FOO(); BAR() }
     ]);
     expect(byName.FOO!.effective_args).toEqual([
       {
-        invoked_as: "FOO",
+        call: "PIPE:FOO",
         key: "args",
         ids: ["conf/a.config#withName:FOO/args", "conf/b.config#withName:FOO/args"],
         tie: true,
       },
-      { invoked_as: "FOO", key: "args2", ids: ["conf/a.config#withName:FOO~2/args2~2"] },
-      { invoked_as: "FOO", key: "prefix", ids: ["conf/a.config#withName:FOO/prefix"] },
+      { call: "PIPE:FOO", key: "args2", ids: ["conf/a.config#withName:FOO~2/args2~2"] },
+      { call: "PIPE:FOO", key: "prefix", ids: ["conf/a.config#withName:FOO/prefix"] },
     ]);
   });
 
-  test("ties fully qualified selectors from two subworkflows on one call name", async () => {
+  test("keys a call name used from two subworkflows by its call path", async () => {
     const root = tempPipelineRoot();
     write(
       root,
@@ -3555,21 +3555,141 @@ workflow PIPE { FOO(); BAR() }
       "main.nf",
       `include { SUB_A } from './subworkflows/a'
 include { SUB_B } from './subworkflows/b'
-workflow PIPE { SUB_A(); SUB_B() }
+workflow { SUB_A(); SUB_B() }
 `,
     );
 
     const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
     expect(foo.effective_args).toEqual([
-      {
-        invoked_as: "FOO",
-        key: "args",
-        ids: [
-          "conf/modules.config#withName:SUB_A:FOO/args",
-          "conf/modules.config#withName:SUB_B:FOO/args",
-        ],
-        tie: true,
-      },
+      { call: "SUB_A:FOO", key: "args", ids: ["conf/modules.config#withName:SUB_A:FOO/args"] },
+      { call: "SUB_B:FOO", key: "args", ids: ["conf/modules.config#withName:SUB_B:FOO/args"] },
+    ]);
+  });
+
+  test("matches qualified selectors only along a call chain from the entry workflow", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/chain' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SUB_B:FOO' {
+        ext.args = '-b'
+    }
+    withName: '.*:SUB_B:FOO' {
+        ext.args = '-B'
+    }
+    withName: 'SUB_A:FOO' {
+        ext.args = '-nested'
+    }
+    withName: '.*:SUB_A:FOO' {
+        ext.args = '-a'
+    }
+    withName: 'PIPE:BAR' {
+        ext.args = '-nested'
+    }
+    withName: 'OTHER:BAR' {
+        ext.args = '-o'
+    }
+    withName: 'NFCORE_PIPE:PIPE:BAR' {
+        ext.args = '-p'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "modules/bar.nf", "process BAR {\n  script:\n  'bar'\n}\n");
+    write(
+      root,
+      "subworkflows/a.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB_A { FOO() }\n",
+    );
+    write(
+      root,
+      "subworkflows/b.nf",
+      "include { BAR } from '../modules/bar'\nworkflow SUB_B { BAR() }\n",
+    );
+    write(
+      root,
+      "workflows/pipe.nf",
+      `include { SUB_A } from '../subworkflows/a'
+include { SUB_B } from '../subworkflows/b'
+include { BAR } from '../modules/bar'
+workflow PIPE { SUB_A(); SUB_B(); BAR() }
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PIPE } from './workflows/pipe'
+workflow NFCORE_PIPE { PIPE() }
+workflow { NFCORE_PIPE() }
+`,
+    );
+
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    const byName = Object.fromEntries(summary.processes.map((process) => [process.name, process]));
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+
+    expect(byName.FOO!.resolved_args.map((arg) => arg.id)).toEqual([id(".*:SUB_A:FOO")]);
+    expect(byName.FOO!.effective_args).toEqual([
+      { call: "NFCORE_PIPE:PIPE:SUB_A:FOO", key: "args", ids: [id(".*:SUB_A:FOO")] },
+    ]);
+    expect(byName.BAR!.resolved_args.map((arg) => arg.id)).toEqual([id("NFCORE_PIPE:PIPE:BAR")]);
+    expect(byName.BAR!.effective_args).toEqual([
+      { call: "NFCORE_PIPE:PIPE:BAR", key: "args", ids: [id("NFCORE_PIPE:PIPE:BAR")] },
+    ]);
+  });
+
+  test("qualifies calls in an aliased subworkflow by the subworkflow alias", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/sub-alias' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SUB:FOO' {
+        ext.args = '-s'
+    }
+    withName: 'SUB_X:FOO' {
+        ext.args = '-x'
+    }
+    withName: 'SUB_Y:FOO' {
+        ext.args = '-y'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/sub.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB { FOO() }\n",
+    );
+    write(
+      root,
+      "main.nf",
+      `include { SUB as SUB_X } from './subworkflows/sub'
+include { SUB as SUB_Y } from './subworkflows/sub'
+workflow { SUB_X(); SUB_Y() }
+`,
+    );
+
+    const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+    expect(foo.resolved_args.map((arg) => arg.id)).toEqual([id("SUB_X:FOO"), id("SUB_Y:FOO")]);
+    expect(foo.effective_args).toEqual([
+      { call: "SUB_X:FOO", key: "args", ids: [id("SUB_X:FOO")] },
+      { call: "SUB_Y:FOO", key: "args", ids: [id("SUB_Y:FOO")] },
     ]);
   });
 
@@ -3608,11 +3728,19 @@ workflow PIPE { SUB_A(); SUB_B() }
     );
     write(
       root,
-      "main.nf",
-      `include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_MAP_MAP } from './modules/nf-core/samtools/view/main'
-include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_UNMAP_UNMAP } from './modules/nf-core/samtools/view/main'
-include { SAMTOOLS_VIEW as SAMTOOLS_CHR } from './modules/nf-core/samtools/view/main'
+      "workflows/bamtofastq.nf",
+      `include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_MAP_MAP } from '../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_UNMAP_UNMAP } from '../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_CHR } from '../modules/nf-core/samtools/view/main'
 workflow BAMTOFASTQ { SAMTOOLS_CHR(); SAMTOOLS_VIEW_MAP_MAP(); SAMTOOLS_VIEW_UNMAP_UNMAP() }
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { BAMTOFASTQ } from './workflows/bamtofastq'
+workflow NFCORE_BAMTOFASTQ { BAMTOFASTQ() }
+workflow { NFCORE_BAMTOFASTQ() }
 `,
     );
 
@@ -3623,24 +3751,28 @@ workflow BAMTOFASTQ { SAMTOOLS_CHR(); SAMTOOLS_VIEW_MAP_MAP(); SAMTOOLS_VIEW_UNM
 
     expect(view.resolved_args).toHaveLength(6);
     expect(view.effective_args).toEqual([
-      { invoked_as: "SAMTOOLS_CHR", key: "args", ids: [id("SAMTOOLS_CHR", "args")] },
       {
-        invoked_as: "SAMTOOLS_VIEW_MAP_MAP",
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_CHR",
+        key: "args",
+        ids: [id("SAMTOOLS_CHR", "args")],
+      },
+      {
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_MAP_MAP",
         key: "args",
         ids: [id("SAMTOOLS_VIEW_MAP_MAP", "args")],
       },
       {
-        invoked_as: "SAMTOOLS_VIEW_MAP_MAP",
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_MAP_MAP",
         key: "prefix",
         ids: [id("SAMTOOLS_VIEW_MAP_MAP", "prefix")],
       },
       {
-        invoked_as: "SAMTOOLS_VIEW_UNMAP_UNMAP",
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP",
         key: "args",
         ids: [id("SAMTOOLS_VIEW_UNMAP_UNMAP", "args")],
       },
       {
-        invoked_as: "SAMTOOLS_VIEW_UNMAP_UNMAP",
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP",
         key: "prefix",
         ids: [id("SAMTOOLS_VIEW_UNMAP_UNMAP", "prefix")],
       },
