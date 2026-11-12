@@ -85,12 +85,17 @@ describe("checkStepRemovals", () => {
     expect(checkStepRemovals(changedStep, { entries: [chrDropped] })).toEqual(clear);
   });
 
+  it("reads a ledger written as a bare list of entries", () => {
+    expect(checkStepRemovals(draftToFinal, [chrDropped]).ok).toBe(true);
+    expect(checkStepRemovals(draftToFinal, [{ ...chrDropped, kind: "gap" }]).unlabelled).toEqual([
+      "chr_filter",
+    ]);
+  });
+
   it("rejects input that is not a gxwf diff or a ledger", () => {
     expect(() => checkStepRemovals({ steps: {} }, {})).toThrow(StepRemovalInputError);
     expect(() => checkStepRemovals(draftToFinal, { entries: {} })).toThrow(StepRemovalInputError);
-    expect(() => checkStepRemovals(draftToFinal, ["not", "a", "ledger"])).toThrow(
-      StepRemovalInputError,
-    );
+    expect(() => checkStepRemovals(draftToFinal, "not a ledger")).toThrow(StepRemovalInputError);
   });
 });
 
@@ -122,7 +127,7 @@ describe("foundry check-step-removals", () => {
       writeFileSync(ledger, stringify({ entries: [chrDropped] }));
       const green = run([diffPath, ledger]);
       expect(green.status).toBe(0);
-      expect(green.stdout).toContain("chr");
+      expect(green.stdout).toContain("inputs feeding no step: chr\n");
 
       const piped = run(["-", ledger, "--json"], readFileSync(diffPath, "utf8"));
       expect(piped.status).toBe(0);

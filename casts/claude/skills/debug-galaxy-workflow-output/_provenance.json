@@ -5,10 +5,10 @@
     "name": "debug-galaxy-workflow-output",
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
     "revision": 7,
-    "content_hash": "c0a2b4341041240c68f6f274c3da89e226aa242efa0054978b10107a749c1dd5",
-    "commit": "ef1607a86adda5393d1b8287a421fd5e957f62e9"
+    "content_hash": "2ff22b714ab00e1c21c9ddc53b243b0b45330de0a1c39d9b154df30f5f563e50",
+    "commit": "65f043a47b45a9a22297c23251527aca3b4d3c72"
   },
-  "cast_at": "2026-11-12T10:09:14.827Z",
+  "cast_at": "2026-11-12T10:54:30.538Z",
   "refs": [
     {
       "kind": "research",

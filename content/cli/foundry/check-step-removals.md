@@ -16,13 +16,13 @@ summary: "Check that every step a `gxwf diff` reports removed has a `kind: dropp
 
 # `foundry check-step-removals`
 
-Read the JSON a `gxwf diff --json <before> <after>` prints and an [[open-requirements-ledger]], and check that every step the diff lists under `steps.removed` is labelled as a drop. A removed step is labelled when an obligation entry under `entries` has `kind: dropped`, a top-level `step` equal to the removed step's key or label, and no `source_arg`.
+Read the JSON a `gxwf diff --json <before> <after>` prints and an [[open-requirements-ledger]], and check that every step the diff lists under `steps.removed` is labelled as a drop. A removed step is labelled when an obligation entry under `entries` (or a ledger written as a bare list of entries) has `kind: dropped`, a top-level `step` equal to the removed step's key or label, and no `source_arg`.
 
 `<diff.json>` is a path, or `-` to read the diff from stdin.
 
 ## Output
 
-Exit `0` means every removed step is labelled, including when none was removed. Exit `4` means at least one is not. A diff without a `steps.removed` object, or a ledger that isn't a mapping with an `entries` list, exits `3`. Read and parse failures exit `1`.
+Exit `0` means every removed step is labelled, including when none was removed. Exit `4` means at least one is not. A diff without a `steps.removed` object, a ledger that is neither a mapping nor a list, or an `entries` that isn't a list exits `3`. An empty ledger, or a mapping without `entries`, has no drops. Read and parse failures exit `1`.
 
 Without `--json`, each unlabelled step prints on stderr, inputs that feed no step print on stdout, and a closing count prints on stdout when every removal is labelled or on stderr when one isn't. With `--json`, stdout holds:
 
@@ -46,4 +46,5 @@ gxwf diff --json galaxy-workflow.extracted.gxwf.yml galaxy-workflow.gxwf.yml \
 - Only entries under `entries` count. A decision under `decisions` labels nothing.
 - An entry's `status` doesn't matter. An open drop and a surrendered one both label the step.
 - The check reads the step list only. It says nothing about whether a drop's `because` is cited or still true.
-- `gxwf diff` compares only the top level, so a step removed inside a subworkflow shows up as a change to the subworkflow step, not as a removal.
+- `gxwf diff` compares only top-level steps and doesn't compare an inline subworkflow's `run`, so a step removed inside an inline subworkflow doesn't show up at all.
+- A list-form step's identity is its `label`, else its `id`. Adding or changing that label in the AFTER workflow reads as one removed step plus one added step with the same tool and connections, so the check reports the old key unlabelled. Restore the old label rather than recording a drop.

@@ -52,4 +52,5 @@ scenario produces.
   `unlabelled-step-removal`. A check that couldn't run makes it `fail` with
   modality `step-removal-check-error`. Inputs that feed no step are reported
   and never change the status. Without a snapshot, `step_removals` is `null`
-  and the status follows Planemo.
+  and the status follows Planemo. Only top-level steps are checked; a step
+  removed inside an inline subworkflow is not in the diff.

@@ -79,3 +79,6 @@ No fixture exercises `failure_modality: "workflow-import-rejected"` either.
 No fixture exercises `failure_modality: "step-removal-check-error"`. `gxwf diff`
 isn't in a released `@galaxy-tool-util/cli` yet, so every run on the pinned 1.15
 would hit it.
+
+No case covers a step removed inside an inline subworkflow: `gxwf diff` doesn't
+compare inline `run` contents, so the check can't see it.

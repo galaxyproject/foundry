@@ -35,9 +35,12 @@ function unwiredInputs(diff: unknown): string[] {
   return unwired;
 }
 
+/** A mapping with `entries:`, or a bare list of entries, as run ledgers have been written. */
 function ledgerEntries(ledger: unknown): Entry[] {
   if (ledger === null || ledger === undefined) return [];
-  if (!isRecord(ledger)) throw new StepRemovalInputError("ledger is not a YAML mapping");
+  if (Array.isArray(ledger)) return ledger.filter(isRecord);
+  if (!isRecord(ledger))
+    throw new StepRemovalInputError("ledger is neither a YAML mapping nor a list of entries");
   const entries = ledger.entries ?? [];
   if (!Array.isArray(entries)) throw new StepRemovalInputError("ledger entries is not a list");
   return entries.filter(isRecord);
