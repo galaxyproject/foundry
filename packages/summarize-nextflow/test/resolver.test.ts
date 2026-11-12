@@ -573,6 +573,201 @@ profiles {
     ]);
   });
 
+  test("keeps path-valued params and excludes booleans regardless of name", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/path-params' }
+profiles {
+  test {
+    params {
+      hisat2_index = 'https://example.com/hisat2.tar.gz'
+      salmon_index = 'https://example.com/salmon.tar.gz'
+      skip_bbsplit = false
+      aligner = 'star'
+    }
+  }
+}
+`,
+    );
+    write(root, "main.nf", "workflow PATH_PARAMS { }\n");
+
+    const summary = (await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike & {
+      test_candidates: { inputs: { description: string | null }[] }[];
+    };
+    const names = summary.test_candidates[0]!.inputs.map(
+      (input) => input.description?.split(" from ")[0],
+    );
+    expect(names).toEqual(expect.arrayContaining(["hisat2_index", "salmon_index"]));
+    expect(names).not.toContain("skip_bbsplit");
+    expect(names).not.toContain("aligner");
+  });
+
+  test("strips a trailing nf-test comment outside the value", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/comments' }\n");
+    write(root, "main.nf", "workflow COMMENTS { }\n");
+    write(
+      root,
+      "tests/comment.nf.test",
+      `nextflow_pipeline {
+  test("trailing comment") {
+    when {
+      params {
+        fasta = 'genome.fa' // local reference
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const delta = (
+      summary as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] }
+    ).test_candidates[0]!.params_delta;
+    expect(delta.fasta).toBe("genome.fa");
+  });
+
+  test("keeps // inside an nf-test string while stripping the trailing comment", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/url-comment' }\n");
+    write(root, "main.nf", "workflow URL_COMMENT { }\n");
+    write(
+      root,
+      "tests/url.nf.test",
+      `nextflow_pipeline {
+  test("url comment") {
+    when {
+      params {
+        input = 'https://example.com/a.csv' // see https://docs.example/note
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const delta = (
+      summary as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] }
+    ).test_candidates[0]!.params_delta;
+    expect(delta.input).toBe("https://example.com/a.csv");
+  });
+
+  test("strips an unspaced trailing nf-test comment", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/tight-comment' }\n");
+    write(root, "main.nf", "workflow TIGHT_COMMENT { }\n");
+    write(
+      root,
+      "tests/tight.nf.test",
+      `nextflow_pipeline {
+  test("tight comment") {
+    when {
+      params {
+        input = 'a.csv'// no space before the comment
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const delta = (
+      summary as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] }
+    ).test_candidates[0]!.params_delta;
+    expect(delta.input).toBe("a.csv");
+  });
+
+  test("keeps // inside a profile string and drops a profile trailing comment", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/profile-comments' }
+profiles {
+  test {
+    params {
+      input = 'samplesheet.csv' // local sheet
+      multiqc_title = 'A // B'
+    }
+  }
+}
+`,
+    );
+    write(root, "main.nf", "workflow PROFILE_COMMENTS { }\n");
+
+    const summary = (await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike & { test_candidates: { params_delta: Record<string, unknown> }[] };
+    const delta = summary.test_candidates[0]!.params_delta;
+    expect(delta.input).toBe("samplesheet.csv");
+    expect(delta.multiqc_title).toBe("A // B");
+  });
+
+  test("treats an nf-test null override as clearing a profile value", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/null-override' }
+profiles {
+  test {
+    params {
+      input = 'samplesheet.csv'
+      salmon_index = 'https://example.com/salmon.tar.gz'
+    }
+  }
+}
+`,
+    );
+    write(root, "main.nf", "workflow NULL_OVERRIDE { }\n");
+    write(
+      root,
+      "tests/clear.nf.test",
+      `nextflow_pipeline {
+  test("clear index") {
+    when {
+      params {
+        salmon_index = null // force a fresh build
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const candidate = (
+      summary as SummaryLike & {
+        test_candidates: {
+          params_delta: Record<string, unknown>;
+          inputs: { description: string | null; path: string | null; url: string | null }[];
+        }[];
+      }
+    ).test_candidates[0]!;
+    expect(candidate.params_delta.salmon_index).toBeNull();
+    expect(candidate.inputs.map((input) => input.path)).toContain("samplesheet.csv");
+    expect(candidate.inputs.map((input) => input.url)).not.toContain(
+      "https://example.com/salmon.tar.gz",
+    );
+  });
+
   test("emits one warned aggregate candidate for dynamically generated cases", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/generated-tests' }\n");
@@ -741,6 +936,47 @@ profiles {
     );
     expect(summary.subworkflows.map((workflow) => workflow.name)).not.toContain("ANALYSIS");
     expect(summary.workflow.name).toBe("ANALYSIS");
+  });
+
+  test("closes a workflow when a comment has an apostrophe and a string contains a brace", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/comment-brace' }\n");
+    write(
+      root,
+      "modules/hello.nf",
+      `process HELLO {
+  script:
+  'echo'
+}
+`,
+    );
+    write(
+      root,
+      "workflows/sample.nf",
+      `include { HELLO } from '../modules/hello'
+workflow SAMPLE {
+  take:
+  ch_reads // sample's files
+  main:
+  def note = "brace } and https://example.com"
+  /* sample's } */
+  HELLO(ch_reads)
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      "include { SAMPLE } from './workflows/sample'\nworkflow PIPE { SAMPLE() }\n",
+    );
+
+    const summary = (await summarize(root)) as SummaryLike & {
+      workflow: { name: string; edges: { to: string }[] };
+    };
+    expect(summary.workflow.name).toBe("SAMPLE");
+    expect(summary.workflow.edges).toEqual(
+      expect.arrayContaining([expect.objectContaining({ to: "HELLO" })]),
+    );
   });
 
   test("ignores commented declarations and preserves aliased subworkflow calls", async () => {
@@ -1427,6 +1663,56 @@ workflow root {
     expect(fasta?.schema_group).toBe("Reference genome options");
   });
 
+  test("records getGenomeAttribute assignments written in main.nf", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/keymap' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $defs: {
+          ref: {
+            title: "Reference genome options",
+            properties: {
+              fasta: { type: "string", format: "file-path" },
+              gene_bed: { type: "string", format: "file-path" },
+            },
+          },
+        },
+      }),
+    );
+    write(
+      root,
+      "main.nf",
+      `params.fasta = getGenomeAttribute('fasta')
+params.gene_bed = getGenomeAttribute('bed12')
+// params.old_index = getGenomeAttribute('old_index')
+def getGenomeAttribute(attribute) { return params.genomes[params.genome][attribute] }
+workflow PIPE {
+  def local_star = getGenomeAttribute('star')
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      params: {
+        name: string;
+        source_kind?: string | null;
+        source_expression?: string | null;
+        source_path?: string | null;
+      }[];
+    };
+
+    const fasta = summary.params.find((p) => p.name === "fasta");
+    expect(fasta?.source_kind).toBe("getGenomeAttribute");
+    expect(fasta?.source_expression).toBe("getGenomeAttribute('fasta')");
+    expect(fasta?.source_path).toBe("main.nf");
+    const geneBed = summary.params.find((p) => p.name === "gene_bed");
+    expect(geneBed?.source_expression).toBe("getGenomeAttribute('bed12')");
+    expect(summary.params.map((p) => p.name)).not.toContain("old_index");
+    expect(summary.params.map((p) => p.name)).not.toContain("local_star");
+  });
+
   test("binds caller positional args to subworkflow take[] names", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'adhoc/invocations' }\n");
@@ -1948,6 +2234,7 @@ workflow PIPE {
               fasta: { type: "string", format: "file-path" },
               fasta_sheet: { type: "string", format: "file-path" },
               igenomes_base: { type: "string", format: "directory-path" },
+              pipelines_testdata_base_path: { type: "string", format: "directory-path" },
             },
           },
         },

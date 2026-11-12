@@ -851,6 +851,77 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
     expect(byName.fasta!.asset_kind).toBe("fasta");
     expect(byName.gtf!.asset_kind).toBe("gtf");
     expect(byName.gff!.asset_kind).toBe("gff");
+    expect(byName.pipelines_testdata_base_path).toBeUndefined();
+    expect(assets).toHaveLength(20);
+  });
+
+  itIfRnaseqFixture("records getGenomeAttribute provenance for the main.nf genome params", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const params = data.params as {
+      name: string;
+      source_kind: string | null;
+      source_expression: string | null;
+      source_path: string | null;
+    }[];
+    const byName = Object.fromEntries(params.map((param) => [param.name, param]));
+    const expected: Record<string, string> = {
+      fasta: "getGenomeAttribute('fasta')",
+      additional_fasta: "getGenomeAttribute('additional_fasta')",
+      transcript_fasta: "getGenomeAttribute('transcript_fasta')",
+      gff: "getGenomeAttribute('gff')",
+      gtf: "getGenomeAttribute('gtf')",
+      gene_bed: "getGenomeAttribute('bed12')",
+      bbsplit_index: "getGenomeAttribute('bbsplit')",
+      sortmerna_index: "getGenomeAttribute('sortmerna')",
+      star_index: "getGenomeAttribute('star')",
+      rsem_index: "getGenomeAttribute('rsem')",
+      hisat2_index: "getGenomeAttribute('hisat2')",
+      salmon_index: "getGenomeAttribute('salmon')",
+      kallisto_index: "getGenomeAttribute('kallisto')",
+      bowtie2_index: "getGenomeAttribute('bowtie2')",
+    };
+    for (const [name, expression] of Object.entries(expected)) {
+      expect(byName[name]?.source_kind, name).toBe("getGenomeAttribute");
+      expect(byName[name]?.source_expression, name).toBe(expression);
+      expect(byName[name]?.source_path, name).toBe("main.nf");
+    }
+  });
+
+  itIfRnaseqFixture("keeps path-valued test indexes and excludes boolean params", () => {
+    const r = spawnSync(
+      "node",
+      [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--profile", "test", "--no-validate"],
+      { encoding: "utf8", maxBuffer: SPAWN_MAX_BUFFER },
+    );
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const candidate = (
+      data.test_candidates as { id: string; inputs: { description: string | null }[] }[]
+    ).find((item) => item.id === "tests/default.nf.test::Params: default");
+    expect(candidate).toBeDefined();
+    const names = candidate!.inputs.map((input) => input.description?.split(" from ")[0]);
+    expect(names).toEqual(expect.arrayContaining(["hisat2_index", "salmon_index"]));
+    expect(names).not.toContain("skip_bbsplit");
+    expect(names).toHaveLength(11);
+  });
+
+  itIfRnaseqFixture("keeps RNASEQ in the workflow list", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    const names = [
+      data.workflow.name as string,
+      ...(data.subworkflows as { name: string }[]).map((workflow) => workflow.name),
+    ];
+    expect(names).toContain("RNASEQ");
   });
 
   itIfRnaseqFixture(
@@ -968,9 +1039,15 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     expect(inputs.map((input) => input.role)).toEqual(
       expect.arrayContaining(["samplesheet", "reference_fasta", "reference_gff", "reads"]),
     );
-    expect(inputs.every((input) => input.path.startsWith(dataDir))).toBe(true);
-    expect(inputs.every((input) => existsSync(input.path))).toBe(true);
-    expect(inputs.every((input) => /^[a-f0-9]{40}$/u.test(input.sha1))).toBe(true);
+    const remote = inputs.filter((input) => input.url);
+    const local = inputs.filter((input) => !input.url);
+    expect(remote.every((input) => input.path.startsWith(dataDir))).toBe(true);
+    expect(remote.every((input) => existsSync(input.path))).toBe(true);
+    expect(remote.every((input) => /^[a-f0-9]{40}$/u.test(input.sha1))).toBe(true);
+    expect(local).toEqual([
+      expect.objectContaining({ role: "dfast_config", path: "assets/test_config_dfast.py" }),
+    ]);
+    expect(local.every((input) => existsSync(join(BACASS_PIPELINE, input.path)))).toBe(true);
     expect(inputs.find((input) => input.role === "samplesheet")?.url).toBe(
       "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/bacass/bacass_short.tsv",
     );
@@ -1095,9 +1172,26 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/sarek)", () => 
       expect(validation.valid).toBe(true);
 
       const assetParams = (data.reference_assets as { param: string }[]).map((a) => a.param);
-      for (const expected of ["fasta", "fasta_fai", "dict", "bwa"]) {
+      for (const expected of [
+        "fasta",
+        "fasta_fai",
+        "dict",
+        "bwa",
+        "condel_config",
+        "mastermind_file",
+        "ascat_genome",
+        "dbsnp_vqsr",
+        "known_indels_vqsr",
+        "known_snps_vqsr",
+        "snpeff_db",
+        "vep_cache_version",
+        "vep_genome",
+        "vep_species",
+      ]) {
         expect(assetParams).toContain(expected);
       }
+      expect(assetParams).not.toContain("pipelines_testdata_base_path");
+      expect(assetParams).toHaveLength(56);
       const fasta = (data.reference_assets as { param: string; used_by: string[] }[]).find(
         (a) => a.param === "fasta",
       );

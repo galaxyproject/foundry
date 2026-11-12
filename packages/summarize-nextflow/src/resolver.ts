@@ -949,16 +949,24 @@ const GENOME_ATTRIBUTE_CONFIG_CANDIDATES = [
   "conf/genomes.config",
 ];
 
+const GENOME_ATTRIBUTE_CALL =
+  "([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*(getGenomeAttribute\\s*\\(\\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]\\s*\\))";
+
 function parseGetGenomeAttributeAssignments(
   pipelineRoot: string,
 ): { name: string; provenance: ParamProvenance }[] {
   const results: { name: string; provenance: ParamProvenance }[] = [];
-  for (const relPath of GENOME_ATTRIBUTE_CONFIG_CANDIDATES) {
+  const entrypoint = selectEntrypoint(pipelineRoot);
+  const sources = entrypoint
+    ? [...GENOME_ATTRIBUTE_CONFIG_CANDIDATES, entrypoint]
+    : GENOME_ATTRIBUTE_CONFIG_CANDIDATES;
+  for (const relPath of sources) {
     const fullPath = join(pipelineRoot, relPath);
     if (!existsSync(fullPath)) continue;
-    const text = readText(fullPath);
-    const pattern =
-      /(?:params\s*\.\s*)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(getGenomeAttribute\s*\(\s*['"]([A-Za-z_][A-Za-z0-9_]*)['"]\s*\))/gu;
+    const text = maskNextflowComments(readText(fullPath));
+    // Config params blocks omit the prefix; in a script only params.X is a param.
+    const prefix = relPath.endsWith(".nf") ? "\\bparams\\s*\\.\\s*" : "(?:params\\s*\\.\\s*)?";
+    const pattern = new RegExp(prefix + GENOME_ATTRIBUTE_CALL, "gu");
     for (const match of text.matchAll(pattern)) {
       const lhs = match[1]!;
       const rhs = match[2]!.replace(/\s+/gu, "");
@@ -1677,6 +1685,7 @@ const NON_REFERENCE_PARAMS = new Set([
   "hook_url",
   "custom_config_base",
   "igenomes_base",
+  "pipelines_testdata_base_path",
 ]);
 
 function isNonReferenceParam(name: string): boolean {
@@ -2588,7 +2597,8 @@ function candidateParamData(
   }
   for (const [name, value] of Object.entries(overrides)) {
     delta[name] = value;
-    if (typeof value === "string") values.set(name, value);
+    if (value === null) values.delete(name);
+    else if (typeof value === "string") values.set(name, value);
   }
   return {
     delta,
@@ -2696,12 +2706,16 @@ function testDataRefs(values: Map<string, string>, source: string): TestDataRef[
 function isCandidateInputParam(name: string, value: string): boolean {
   if (!hasUsableParamValue(value)) return false;
   if (/^(?:outdir|output|results?|publish_dir|email|help)$/u.test(name)) return false;
-  return (
-    isFixtureParam(name) ||
-    /(?:^|_)(?:input|reads?|genome|reference|variants?|denylist|samplesheet|fasta|fastq|bam|cram|vcf|gff|gtf|bed|proteins?|database|db)(?:_|$)/u.test(
-      name,
-    )
-  );
+  return isPathOrUrlValue(value);
+}
+
+function isPathOrUrlValue(value: string): boolean {
+  const trimmed = value.trim();
+  const withoutQuery = trimmed.split(/[?#]/u)[0] ?? trimmed;
+  const segment = withoutQuery.split(/[/\\]/u).filter(Boolean).at(-1) ?? "";
+  const suffix = /\.([A-Za-z0-9]{1,8})$/u.exec(segment)?.[1];
+  if (!suffix) return false;
+  return !/^(?:b|kb|mb|gb|tb|pb|kib|mib|gib|tib|pib|ms|s|m|h|d)$/iu.test(suffix);
 }
 
 function normalizeCandidatePath(value: string): string | null {
@@ -2710,10 +2724,6 @@ function normalizeCandidatePath(value: string): string | null {
     .replace(/^file:\/\//u, "");
   if (normalized === value && !/[/.{}*]/u.test(value)) return null;
   return normalized;
-}
-
-function isFixtureParam(name: string): boolean {
-  return name === "input" || /(^reference_|_fasta$|_gff$|_gtf$|_bed$|_proteins$)/u.test(name);
 }
 
 function resolveParamExpression(expression: string, params: Map<string, string>): string | null {
@@ -2975,7 +2985,7 @@ function parseNfTestExecutionMode(text: string): TestExecutionMode {
 }
 
 function parseParamsOverrides(text: string): Record<string, unknown> {
-  const block = extractNamedBlock(text, "params");
+  const block = extractNamedBlock(maskNextflowComments(text), "params");
   const values: Record<string, unknown> = {};
   for (const match of block?.matchAll(/^\s*([A-Za-z0-9_]+)\s*=\s*(.+?)\s*$/gmu) ?? []) {
     values[match[1]!] = parseNfTestParamValue(match[2]!);
@@ -3609,6 +3619,19 @@ function extractBlockAt(text: string, openIndex: number): string | null {
       } else if (char === quote) {
         quote = null;
       }
+      continue;
+    }
+
+    if (char === "/" && next === "/") {
+      while (index < text.length && text[index] !== "\n") index += 1;
+      continue;
+    }
+    if (char === "/" && next === "*") {
+      index += 2;
+      while (index < text.length && !(text[index] === "*" && text[index + 1] === "/")) {
+        index += 1;
+      }
+      if (text[index] === "*" && text[index + 1] === "/") index += 1;
       continue;
     }
 
