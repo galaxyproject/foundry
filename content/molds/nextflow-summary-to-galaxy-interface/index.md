@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-08-19
-revision: 6
+revised: 2026-11-12
+revision: 8
 summary: "Map a Nextflow summary into a Galaxy workflow interface design brief."
 input_artifacts:
   - id: summary-nextflow
@@ -35,7 +35,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the pipeline leaves open — a params entry with no Galaxy input, an emitted-but-unpublished output, a channel shape no collection maps cleanly onto."
+    purpose: "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the pipeline leaves open — a params entry with no Galaxy input, an emitted-but-unpublished output, a channel shape no collection maps cleanly onto. Record the run's scope decision and one scope drop per excluded branch family, per Source scope."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[summary-nextflow]]"
@@ -44,6 +44,14 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs."
+  - kind: research
+    ref: "[[nextflow-test-case-selection]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Read the selected test candidate and its siblings as the evidence for which source branch the run builds."
+    trigger: "When the summary offers alternative branches through `step`, `aligner`, `tools`-style params, mode profiles, or `workflow.conditionals[]`, or when `test_selection.status` is `needs-scope-choice`."
   - kind: research
     ref: "[[nextflow-params-to-galaxy-inputs]]"
     used_at: runtime
@@ -97,6 +105,15 @@ references:
     evidence: corpus-observed
     purpose: "Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence."
     trigger: "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source."
+  - kind: cli-command
+    ref: "[[check-scope-records]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Check the scope decision and scope drops against the summary: record shape, every `from` citation, and every unit name."
+    trigger: "After recording a scope decision, before handing off."
+    verification: "Promote after a scope-narrowing run hands off a ledger the check passes with its summary."
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-template]]"
@@ -109,3 +126,15 @@ related_notes:
 Read a Nextflow summary and emit a reviewable Markdown interface brief for a Galaxy workflow. Capture workflow inputs, workflow outputs, labels, Galaxy collection shapes, checkpoint outputs worth exposing for tests, source-summary provenance, confidence, and open questions.
 
 The output is not a gxformat2 skeleton and not a workflow schema. It is a design handoff consumed by [[nextflow-summary-to-galaxy-data-flow]], [[nextflow-summary-to-galaxy-template]], and later test-plan work.
+
+## Scope
+
+Before choosing inputs, decide which source branch the workflow carries, without stopping to ask. The Source scope section of [[open-requirements-ledger]] defines the branch controls that select it. A pipeline whose branches all fit one workflow needs no scope decision.
+
+- Honor a scope the caller supplied.
+- Otherwise follow the candidate `test_selection` selects. Its `params_delta` and `effective_profiles` name the branch the source's own test runs, and parameter defaults fill the rest.
+- When `test_selection.status` is `needs-scope-choice`, pick the candidate whose `params_delta` changes the fewest branch controls from their defaults, from the primary candidates when there are any. Break a tie by preferring `default.nf.test` or `main.nf.test`, then the first listed. Mark the decision `confidence: low`.
+- Record the choice as a scope decision and each excluded branch family as an open scope drop in the ledger, in the shape that section gives.
+- Run [[check-scope-records]] on the ledger with the summary, and fix every problem it reports before handing off.
+- In the brief, state the selected scope and its candidate `id`, and list the excluded branches by their drop `id`s.
+- A control the scope fixes is not a workflow input. A control left open inside the scope, such as a QC toggle, is one.

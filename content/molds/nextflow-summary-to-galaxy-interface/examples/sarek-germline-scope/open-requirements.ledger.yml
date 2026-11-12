@@ -1,0 +1,147 @@
+decisions:
+  - id: scope-germline-strelka
+    decided_by: nextflow-summary-to-galaxy-interface
+    scope:
+      candidate: "tests/default.nf.test::dynamically-generated"
+      controls:
+        - {control: params.step, value: mapping, from: "params[step].default"}
+        - {control: params.aligner, value: bwa-mem, from: "params[aligner].default"}
+        - {control: params.tools, value: strelka, from: "test_candidates[tests/default.nf.test::dynamically-generated].params_delta"}
+    decision: "Build germline short-variant calling from paired FASTQ: BWA-MEM alignment, duplicate marking, base recalibration, Strelka germline calls, and the QC reports."
+    rationale: "`test_selection` selects `tests/default.nf.test`, which runs profile `test` with `tools: strelka` on one normal sample (`tests/csv/3.0/fastq_single.csv`, status 0). `step` and `aligner` keep their defaults. The workflow test can then exercise every designed step."
+
+entries:
+  - id: scope-somatic-calling
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.tools, value: mutect2, from: "test_candidates[tests/variant_calling_mutect2.nf.test::dynamically-generated]"}
+        - {control: profile, value: mutect, from: "profiles[mutect]"}
+    units: "`BAM_VARIANT_CALLING_SOMATIC_ALL` and its callers: `BAM_VARIANT_CALLING_SOMATIC_MUTECT2`, `BAM_VARIANT_CALLING_SOMATIC_STRELKA`, `BAM_VARIANT_CALLING_SOMATIC_MANTA`, `BAM_VARIANT_CALLING_SOMATIC_ASCAT`, `BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC`, `BAM_VARIANT_CALLING_SOMATIC_MUSE`, `BAM_VARIANT_CALLING_SOMATIC_TIDDIT`, `BAM_VARIANT_CALLING_SOMATIC_TNSCOPE`"
+    because: "outside the selected scope `scope-germline-strelka`: somatic calling needs tumor/normal pairs (`tests/tumor-normal-pair.nf.test`), and the selected candidate's sample sheet holds one normal sample"
+    unmet: "somatic variant calls from tumor/normal pairs"
+    missing: "the interface has no tumor/normal pairing and no designed step calls somatic variants"
+
+  - id: scope-tumor-only-calling
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.tools, value: lofreq, from: "test_candidates[tests/variant_calling_lofreq.nf.test::dynamically-generated]"}
+    units: "`BAM_VARIANT_CALLING_TUMOR_ONLY_ALL` and its callers: `BAM_VARIANT_CALLING_TUMOR_ONLY_MUTECT2`, `BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ`, `BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA`, `BAM_VARIANT_CALLING_TUMOR_ONLY_CONTROLFREEC`, `BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE`"
+    because: "outside the selected scope `scope-germline-strelka`: tumor-only calling runs on samples with status 1, and the selected candidate's sample sheet has none"
+    unmet: "tumor-only variant calls"
+    missing: "no designed step calls tumor-only variants"
+
+  - id: scope-other-germline-callers
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.tools, value: haplotypecaller, from: "test_candidates[tests/variant_calling_haplotypecaller.nf.test::dynamically-generated]"}
+        - {control: params.tools, value: deepvariant, from: "test_candidates[tests/variant_calling_deepvariant.nf.test::dynamically-generated]"}
+        - {control: params.tools, value: freebayes, from: "test_candidates[tests/variant_calling_freebayes.nf.test::dynamically-generated]"}
+    units: "germline short-variant callers under `BAM_VARIANT_CALLING_GERMLINE_ALL` other than `BAM_VARIANT_CALLING_SINGLE_STRELKA`: `BAM_VARIANT_CALLING_HAPLOTYPECALLER`, `BAM_VARIANT_CALLING_DEEPVARIANT`, `BAM_VARIANT_CALLING_FREEBAYES`, `BAM_VARIANT_CALLING_MPILEUP`, `BAM_VARIANT_CALLING_SENTIEON_DNASCOPE`, `BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER`, with joint calling (`BAM_JOINT_CALLING_GERMLINE_GATK`, `BAM_JOINT_CALLING_GERMLINE_SENTIEON`) and `VCF_VARIANT_FILTERING_GATK`"
+    because: "outside the selected scope `scope-germline-strelka`: the scope's `tools` value is `strelka`, and each of these callers runs only when `tools` names it"
+    unmet: "germline calls from the other callers"
+    missing: "no designed step runs them"
+
+  - id: scope-germline-structural-and-copy-number
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.tools, value: manta, from: "test_candidates[tests/variant_calling_manta.nf.test::dynamically-generated]"}
+        - {control: params.tools, value: cnvkit, from: "workflow.conditionals[PREPARE_REFERENCE_CNVKIT]"}
+    units: "`BAM_VARIANT_CALLING_GERMLINE_MANTA`, `BAM_VARIANT_CALLING_SINGLE_TIDDIT`, `BAM_VARIANT_CALLING_CNVKIT`, `BAM_VARIANT_CALLING_INDEXCOV`, and the CNVkit reference build `PREPARE_REFERENCE_CNVKIT`"
+    because: "outside the selected scope `scope-germline-strelka`: structural and copy-number calling run only when `tools` names them, and the scope sets `strelka`"
+    unmet: "germline structural-variant and copy-number calls"
+    missing: "no designed step runs them"
+
+  - id: scope-alternative-aligners
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.aligner, value: bwa-mem2, from: "params[aligner].enum"}
+        - {control: params.aligner, value: dragmap, from: "params[aligner].enum"}
+        - {control: params.aligner, value: sentieon-bwamem, from: "params[aligner].enum"}
+        - {control: params.aligner, value: parabricks, from: "params[aligner].enum"}
+    units: "the other `FASTQ_ALIGN` aligners (`BWAMEM2_MEM`, `DRAGMAP_ALIGN`, `SENTIEON_BWAMEM`) with their index builds (`BWAMEM2_INDEX`, `DRAGMAP_HASHTABLE`), and `FASTQ_PREPROCESS_PARABRICKS`"
+    because: "outside the selected scope `scope-germline-strelka`: the scope fixes `aligner` at its default, `bwa-mem`"
+    unmet: "alignment with the other four aligners"
+    missing: "the interface exposes no aligner choice"
+
+  - id: scope-later-start-steps
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.step, value: markduplicates, from: "params[step].enum"}
+        - {control: params.step, value: prepare_recalibration, from: "params[step].enum"}
+        - {control: params.step, value: recalibrate, from: "params[step].enum"}
+        - {control: params.step, value: variant_calling, from: "params[step].enum"}
+        - {control: params.step, value: annotate, from: "params[step].enum"}
+    units: "the restart arms of `SAMPLESHEET_TO_CHANNEL` and `FASTQ_PREPROCESS_GATK` that read aligned BAM/CRAM, recalibration tables or VCFs instead of FASTQ, one per `step` value after `mapping`"
+    because: "outside the selected scope `scope-germline-strelka`: the scope fixes `step` at its default, `mapping`, so the workflow always starts from FASTQ"
+    unmet: "resuming from an intermediate file"
+    missing: "the interface takes FASTQ only"
+
+  - id: scope-annotation
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.tools, value: snpeff, from: "test_candidates[tests/annotation_snpeff.nf.test::dynamically-generated]"}
+        - {control: params.tools, value: vep, from: "test_candidates[tests/annotation_vep.nf.test::dynamically-generated]"}
+        - {control: params.tools, value: snpsift, from: "workflow.conditionals[PREPARE_SNPSIFT_DATABASES]"}
+    units: "`VCF_ANNOTATE_ALL` (with `VCF_ANNOTATE_SNPEFF`) and its cache and database setup: `DOWNLOAD_CACHE_SNPEFF_VEP`, `ANNOTATION_CACHE_INITIALISATION`, `PREPARE_SNPSIFT_DATABASES`"
+    because: "outside the selected scope `scope-germline-strelka`: annotation runs only when `tools` names an annotator, and the scope sets `strelka`"
+    unmet: "annotated variant calls"
+    missing: "no designed step annotates the VCFs"
+
+  - id: scope-vcf-postprocessing
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.concatenate_vcfs, value: true, from: "params[concatenate_vcfs]"}
+        - {control: params.normalize_vcfs, value: true, from: "params[normalize_vcfs]"}
+        - {control: params.snv_consensus_calling, value: true, from: "params[snv_consensus_calling]"}
+        - {control: params.tools, value: varlociraptor, from: "test_candidates[tests/postprocess_varlociraptor.nf.test::dynamically-generated]"}
+    units: "`POST_VARIANTCALLING` and its parts: `CONCATENATE_GERMLINE_VCFS`, `NORMALIZE_VCFS`, `CONSENSUS`, `FILTER_VCFS`, `VCF_VARLOCIRAPTOR_GERMLINE`"
+    because: "outside the selected scope `scope-germline-strelka`: each step runs only when its toggle is set, and the selected candidate sets none of them"
+    unmet: "concatenated, normalized, consensus or re-scored VCFs"
+    missing: "no designed step post-processes the calls"
+
+  - id: scope-optional-preprocessing
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka
+      selected_by:
+        - {control: params.tools, value: bbsplit, from: "test_candidates[tests/bbsplit.nf.test::dynamically-generated]"}
+        - {control: params.tools, value: sentieon_dedup, from: "test_candidates[tests/sentieon_dedup.nf.test::dynamically-generated]"}
+        - {control: params.tools, value: ngscheckmate, from: "test_candidates[tests/qc_ngscheckmate.nf.test::dynamically-generated]"}
+    units: "UMI consensus (`FASTQ_CREATE_UMI_CONSENSUS_FGBIO`), contaminant removal (`BBMAP_BBSPLIT`), Spark GATK (`BAM_MARKDUPLICATES_SPARK`, `BAM_BASERECALIBRATOR_SPARK`, `BAM_APPLYBQSR_SPARK`), Sentieon deduplication (`BAM_SENTIEON_DEDUP`) and sample matching (`BAM_NGSCHECKMATE`)"
+    because: "outside the selected scope `scope-germline-strelka`: each runs only when `tools`, `umi_read_structure` or `use_gatk_spark` asks for it, and the selected candidate sets none of these"
+    unmet: "UMI, contaminant-removal, Spark and sample-matching variants of preprocessing"
+    missing: "no designed step runs them"

@@ -15,8 +15,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-09-15
-revision: 13
+revised: 2026-11-12
+revision: 14
 related_notes:
   - "[[summarize-nextflow]]"
   - "[[nextflow-workflow-io-semantics]]"
@@ -74,6 +74,35 @@ Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by 
 - **Structured channel typing.** `processes[].inputs[].shape` is a string (`"tuple(meta, [path,path])"`), not a structured type. NF channel typing is a research project; a string is enough for downstream Molds to reason about and an LLM to emit.
 - **Operator-chain semantics.** `Edge.via` records the literal operator chain (`["map", "join", "groupTuple"]`). Reconciling what the chain *does* to channel shapes is left to the LLM step that fills `Edge.notes` when confidence is low.
 - **Multi-tool processes outside decomposed mulled-v2 containers.** A process can run multiple tools (a shell pipeline of two binaries). `Process.tool` is nullable; multi-tool processes set it null and surface tool details in `script_excerpt` and `container`. A `tools[]` foreign-key array on `Process` would be cleaner; deferred until downstream use forces it.
+
+## Revision 14 — 2026-11-12
+
+Config-set tool arguments are ranked per call, so consumers no longer apply
+Nextflow's selector priority themselves.
+
+- **`ResolvedArg.id` added (required).** It names the assignment by config,
+  profile, selector, and key, and stays the same in every process a
+  `withLabel` entry matches.
+- **`Process.effective_args` added.** One row per call and `key`, listing
+  the `id` that takes effect. `call` is Nextflow's fully qualified call
+  name (`task.process`), traced from the entry workflow through subworkflow
+  aliases, so one call name used from two subworkflows gets two rows.
+  Priority is `withLabel` < `withName` on the process name < `withName` on
+  the alias < `withName` on the whole call path, and a pattern must match a
+  whole name. At the same rank a selected profile beats the root chain, as under
+  the legacy config parser, unless the root chain also declares the
+  profile's selector: then the profile replaces only that selector's root
+  entries and can tie another root selector. Under the strict parser
+  (default since Nextflow 26.04) nf-core's trailing
+  `includeConfig 'conf/modules.config'` can win instead. Then a later
+  declaration of the same selector in one config beats an earlier one, but
+  assignments to one key in different branches of a block stay level. Level
+  entries with different expressions are listed together with `tie: true`.
+- **`resolved_args` membership follows call paths.** A qualified selector
+  reaches a process only along a traced path, so `SUB_B:FOO` no longer
+  matches a FOO only `SUB_A` calls.
+- **`resolved_args` keeps every match.** Overridden entries stay, so the
+  summary still shows what a call's winner replaced.
 
 ## Revision 13 — 2026-09-15
 

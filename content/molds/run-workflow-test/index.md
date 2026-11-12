@@ -7,16 +7,24 @@ tags:
   - tool/planemo
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-26
-revision: 8
+revised: 2026-11-12
+revision: 9
 summary: "Execute a workflow's tests via Planemo; emit structured pass/fail and outputs."
 related_notes:
   - "[[tests-format]]"
+  - "[[open-requirements-ledger]]"
+input_artifacts:
+  - id: galaxy-workflow-extracted
+    optional: true
+    description: "The workflow as [[advance-galaxy-draft-step]] first extracted it, before the test phase. Absent when the pipeline has no per-step loop, and then removed steps are not checked."
+  - id: open-requirements-ledger
+    optional: true
+    description: "Carried obligations ledger [[open-requirements-ledger]], read for the `kind: dropped` entries that label removed steps. This Mold never writes it."
 output_artifacts:
   - id: workflow-test-result
     kind: json
     default_filename: workflow-test-result.json
-    description: "Structured status plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output. Also the faithful handoff when no test exists or none could be run."
+    description: "Structured status plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, the removed-step check, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output. Also the faithful handoff when no test exists or none could be run."
 references:
   - kind: schema
     ref: "[[tests-format]]"
@@ -64,10 +72,28 @@ references:
     evidence: corpus-observed
     purpose: "Preserve invocation identifiers and state summaries needed to inspect workflow-level runtime failures after Planemo returns."
     trigger: "When Planemo reports a failed, cancelled, missing-output, or ambiguous workflow invocation result."
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Know what labels a removed step: a `kind: dropped` entry with a top-level `step` and a cited `because`, as opposed to a gap or a per-flag `source_arg` record."
+    trigger: "When the removed-step check reports an unlabelled step."
+    verification: "Promote after a test-phase run that removed a step ends red until the drop is recorded, then green."
+  - kind: cli-command
+    ref: "[[check-step-removals]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Deterministically match the steps `gxwf diff` reports removed against the ledger's `kind: dropped` entries."
+    trigger: "After a green Planemo run, when the extracted-workflow snapshot exists."
+    verification: "Promote after a run blocks a green result on a removed step that has no drop entry."
 ---
 # run-workflow-test
 
-Execute an assembled workflow's test file via [[planemo]] and emit a structured pass/fail with the artifacts a debug pass needs. One invocation runs the test once, captures the evidence, and — on failure — classifies the failure modality and names the next reference surface to inspect. It does not repair anything; that is [[debug-galaxy-workflow-output]]'s job.
+Execute an assembled workflow's test file via [[planemo]] and emit a structured pass/fail with the artifacts a debug pass needs. One invocation runs the test once, captures the evidence, and — on failure — classifies the failure modality and names the next reference surface to inspect. A green run counts as a pass only when every step removed since the workflow was extracted is recorded as a drop in the [[open-requirements-ledger]]. It does not repair anything. That is [[debug-galaxy-workflow-output]]'s job.
 
 ## Sequence
 
@@ -76,7 +102,11 @@ Execute an assembled workflow's test file via [[planemo]] and emit a structured 
 2. **Pick the Galaxy mode.** Run against a Planemo-managed Galaxy or an existing/external Galaxy. **Planemo-managed** is the default and needs no pre-provisioned server: `planemo test` bootstraps its own Galaxy and installs the workflow's tools from the Tool Shed/conda — so the absence of a running Galaxy is not a reason to skip the run. Use an existing/external Galaxy only when you deliberately want to target one (shared instance, pre-installed heavy tools/reference data, specific credentials). The real cost of the managed path is install/runtime weight (large tools or multi-GB reference databases), which is a deliberate deferral, not an impossibility. Record which mode was used, how tools, workflows, and test data were staged, and the URLs or API credentials a follow-up inspection would need. The choice and its consequences are guided by [[planemo-workflow-test-architecture]].
 3. **Do not pin a Galaxy version.** Leave `--galaxy_branch` off the command unless the user or the harness supplied a specific branch, and never guess a `release_*` value — Planemo's default targets the newest Galaxy, which is the only version guaranteed to understand every construct a freshly authored workflow can contain. If a branch was supplied, record it in the output so a later failure can be read against it.
 4. **Run and capture.** Drive `planemo test` with structured output enabled. Preserve the invocation id, history id, workflow id, the Planemo structured result, and any test-output artifact paths — these are the inputs the debug Mold consumes. When Galaxy rejects the workflow import, none of these exist: Planemo stops before writing structured output ([[planemo-workflow-test-architecture]]). Record the ids as absent and preserve the Planemo terminal log, the Galaxy server log, and the import request's HTTP status and response body instead.
-5. **Classify on failure.** When the run exits non-zero or reports failed assertions, failed jobs, a failed invocation, missing outputs, or upload/staging problems, identify the observed failure modality and the single next reference surface to open: Planemo result, Galaxy job API, Galaxy invocation API, history contents, the test assertion report, the workflow import response, or the Galaxy server log. A workflow that Galaxy refused to import for its content or through a server defect is modality `workflow-import-rejected` with `status: fail`, not `not-run`—Galaxy evaluated the workflow itself, so the response and the server log are runtime evidence about it. Name the import response as the next surface for a 4xx that carries a message, and the server log for a 500. Use [[planemo-asserts-idioms]] to read assertion failures and [[galaxy-workflow-invocation-failure-reference]] to preserve invocation identifiers and state.
-6. **Hand off.** Emit the structured summary carrying a `status` from the closed set `pass | fail | test-definition-missing | not-run` — green, or red with modality + captured artifacts + the named next surface — for [[debug-galaxy-workflow-output]]. A `test-definition-missing` or `not-run` result is never reported as a pass and never as a Planemo failure: neither carries a failure modality or a next reference surface, because nothing ran. A consumer must read those two states as *no runtime evidence*, not as a debug target.
+5. **Classify on failure.** When the run exits non-zero or reports failed assertions, failed jobs, a failed invocation, missing outputs, or upload/staging problems, identify the observed failure modality and the single next reference surface to open: Planemo result, Galaxy job API, Galaxy invocation API, history contents, the test assertion report, the workflow import response, the Galaxy server log, or, from step 6, the step-removal check. A workflow that Galaxy refused to import for its content or through a server defect is modality `workflow-import-rejected` with `status: fail`, not `not-run`—Galaxy evaluated the workflow itself, so the response and the server log are runtime evidence about it. Name the import response as the next surface for a 4xx that carries a message, and the server log for a 500. Use [[planemo-asserts-idioms]] to read assertion failures and [[galaxy-workflow-invocation-failure-reference]] to preserve invocation identifiers and state.
+6. **Check removed steps.** A green Planemo run is not yet a `pass`. A pipeline without the per-step loop writes no snapshot: record `step_removals: null`, and the status follows Planemo. When `galaxy-workflow.extracted.gxwf.yml` exists, run `gxwf diff --json galaxy-workflow.extracted.gxwf.yml <workflow>`, save the output beside the test artifacts, record its path as `artifacts.step_diff_json`, and pass it to [[check-step-removals]] with the [[open-requirements-ledger]]. Record the check's JSON in the result as `step_removals`. Inputs that now feed no step land in its `unwired_inputs` and never fail the run. Then set the status:
+   - Every removed step has a `kind: dropped` entry naming it in its top-level `step`, with a `because`: `pass`.
+   - A removed step has none: `fail` with modality `unlabelled-step-removal` and next surface `step-removal check`, with the unlabelled steps listed in `failure_detail`.
+   - Either command can't run: `fail` with modality `step-removal-check-error` and its error.
+7. **Hand off.** Emit the structured summary carrying a `status` from the closed set `pass | fail | test-definition-missing | not-run` — green, or red with modality + captured artifacts + the named next surface — for [[debug-galaxy-workflow-output]]. A `test-definition-missing` or `not-run` result is never reported as a pass and never as a Planemo failure: neither carries a failure modality or a next reference surface, because nothing ran. A consumer must read those two states as *no runtime evidence*, not as a debug target.
 
 Keep this Mold's output a faithful record of what happened, not a diagnosis. Mislabeling a staging failure as an assertion failure here sends the debug pass to the wrong reference surface.

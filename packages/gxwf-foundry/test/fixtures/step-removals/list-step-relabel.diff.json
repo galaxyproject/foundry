@@ -1,0 +1,83 @@
+{
+  "before_is_draft": false,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "outputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "steps": {
+    "added": {},
+    "removed": {},
+    "changed": {
+      "first cat": {
+        "label": "first cat",
+        "fields": {
+          "label": {
+            "before": null,
+            "after": "first cat"
+          }
+        },
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [],
+          "removed": []
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      },
+      "concatenate again": {
+        "label": "concatenate again",
+        "fields": {
+          "label": {
+            "before": "second cat",
+            "after": "concatenate again"
+          }
+        },
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [],
+          "removed": []
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [],
+  "warnings": [],
+  "has_changes": true
+}

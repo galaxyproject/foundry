@@ -1,0 +1,199 @@
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import YAML, { stringify } from "yaml";
+import { InputShapeError } from "../src/ledger.js";
+import { checkStepRemovals } from "../src/step-removals.js";
+
+// `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at 4d086efa, on its synthetic-diff fixtures
+// and on the nested-removals and list-removal pairs here.
+const fixture = (name: string): unknown =>
+  JSON.parse(readFileSync(resolve(__dirname, "fixtures/step-removals", name), "utf8"));
+const draftToFinal = fixture("draft-before-to-after.diff.json");
+const removedLeaf = fixture("removed-leaf-step.diff.json");
+const changedStep = fixture("changed-step.diff.json");
+const nestedRemovals = fixture("nested-removals.diff.json");
+const listRelabel = fixture("list-step-relabel.diff.json");
+const listRemoval = fixture("list-removal.diff.json");
+
+const chrDropped = {
+  id: "chr-filter-dropped",
+  status: "open",
+  kind: "dropped",
+  raised_by: "debug-galaxy-workflow-output",
+  step: "chr_filter",
+  units: "chromosome filter (SAMTOOLS_VIEW --chr)",
+  because: "planemo-test.log.attempt9: samtools view rejected the region list",
+};
+
+describe("checkStepRemovals", () => {
+  it("reports a removed step with no ledger entry, and the unwired input it left", () => {
+    expect(checkStepRemovals(draftToFinal, { entries: [] })).toEqual({
+      ok: false,
+      removed_steps: [
+        { step: "chr_filter", label: "keep only requested chromosomes", dropped_entries: [] },
+      ],
+      unlabelled: ["chr_filter"],
+      unwired_inputs: ["chr"],
+    });
+  });
+
+  it("accepts a removed step named by a kind: dropped entry's top-level step", () => {
+    const result = checkStepRemovals(draftToFinal, { entries: [chrDropped] });
+    expect(result.ok).toBe(true);
+    expect(result.unlabelled).toEqual([]);
+    expect(result.removed_steps[0].dropped_entries).toEqual(["chr-filter-dropped"]);
+    expect(result.unwired_inputs).toEqual(["chr"]);
+  });
+
+  it("matches the removed step's label as well as its key", () => {
+    const byLabel = { ...chrDropped, step: "keep only requested chromosomes" };
+    expect(checkStepRemovals(draftToFinal, { entries: [byLabel] }).ok).toBe(true);
+  });
+
+  it("names a step removed inside an inline subworkflow by its full key", () => {
+    const top = { ...chrDropped, id: "first-dropped", step: "first" };
+    const result = checkStepRemovals(nestedRemovals, { entries: [top] });
+    expect(result.removed_steps).toEqual([
+      { step: "first", label: "first", dropped_entries: ["first-dropped"] },
+      { step: "nested/first", label: "first", dropped_entries: [] },
+    ]);
+    expect(result.unlabelled).toEqual(["nested/first"]);
+
+    const nested = { ...top, id: "nested-first-dropped", step: "nested/first" };
+    const both = checkStepRemovals(nestedRemovals, { entries: [top, nested] });
+    expect(both.ok).toBe(true);
+    expect(both.removed_steps[1].dropped_entries).toEqual(["nested-first-dropped"]);
+    expect(checkStepRemovals(nestedRemovals, { entries: [nested] }).unlabelled).toEqual(["first"]);
+  });
+
+  it("keys a removed list-form step by its label, not its id", () => {
+    const result = checkStepRemovals(listRemoval, { entries: [] });
+    expect(result.removed_steps).toEqual([
+      { step: "second cat", label: "second cat", dropped_entries: [] },
+    ]);
+    const byKey = { ...chrDropped, id: "second-dropped", step: "second cat" };
+    expect(checkStepRemovals(listRemoval, { entries: [byKey] }).ok).toBe(true);
+    const byId = { ...byKey, step: "second" };
+    expect(checkStepRemovals(listRemoval, { entries: [byId] }).unlabelled).toEqual(["second cat"]);
+  });
+
+  it("does not count a drop without a reason", () => {
+    const { because: _because, ...noReason } = chrDropped;
+    expect(checkStepRemovals(draftToFinal, { entries: [noReason] }).ok).toBe(false);
+    for (const because of ["", "  ", [], ["", " "], null])
+      expect(
+        checkStepRemovals(draftToFinal, { entries: [{ ...noReason, because }] }).unlabelled,
+      ).toEqual(["chr_filter"]);
+  });
+
+  it("accepts a reason written as a list", () => {
+    const listed = { ...chrDropped, because: ["", "samtools view rejected the region list"] };
+    expect(checkStepRemovals(draftToFinal, { entries: [listed] }).ok).toBe(true);
+  });
+
+  it("passes a list-form relabel, which removes no step", () => {
+    expect(checkStepRemovals(listRelabel, { entries: [] }).ok).toBe(true);
+  });
+
+  it("ignores flag records, which carry source_arg, even when they set step", () => {
+    const flagRecord = {
+      ...chrDropped,
+      source_arg: { step: "chr_filter", arg: "conf/modules.config#withName:SAMTOOLS_VIEW/args" },
+    };
+    expect(checkStepRemovals(draftToFinal, { entries: [flagRecord] }).unlabelled).toEqual([
+      "chr_filter",
+    ]);
+  });
+
+  it("does not count a gap, a dropped entry without step, or one naming another step", () => {
+    const { kind: _kind, ...gap } = chrDropped;
+    const { step: _step, ...noStep } = chrDropped;
+    const otherStep = { ...chrDropped, step: "to_fastq" };
+    const result = checkStepRemovals(draftToFinal, {
+      entries: [gap, { ...gap, kind: "gap" }, noStep, otherStep],
+    });
+    expect(result.ok).toBe(false);
+    expect(result.unlabelled).toEqual(["chr_filter"]);
+  });
+
+  it("only reads obligation entries, not decisions", () => {
+    expect(checkStepRemovals(draftToFinal, { decisions: [chrDropped] }).ok).toBe(false);
+  });
+
+  it("checks a concrete-to-concrete diff the same way", () => {
+    expect(checkStepRemovals(removedLeaf, {}).unlabelled).toEqual(["filter"]);
+    const dropped = { ...chrDropped, id: "filter-dropped", step: "filter" };
+    expect(checkStepRemovals(removedLeaf, { entries: [dropped] }).ok).toBe(true);
+  });
+
+  it("passes a diff that removes no step, with an empty or absent ledger", () => {
+    const clear = { ok: true, removed_steps: [], unlabelled: [], unwired_inputs: [] };
+    expect(checkStepRemovals(changedStep, null)).toEqual(clear);
+    expect(checkStepRemovals(changedStep, { entries: [chrDropped] })).toEqual(clear);
+  });
+
+  it("reads an empty `entries:` key as a ledger with no drops", () => {
+    expect(checkStepRemovals(draftToFinal, YAML.parse("entries:\n")).unlabelled).toEqual([
+      "chr_filter",
+    ]);
+  });
+
+  it("reads a ledger written as a bare list of entries", () => {
+    expect(checkStepRemovals(draftToFinal, [chrDropped]).ok).toBe(true);
+    expect(checkStepRemovals(draftToFinal, [{ ...chrDropped, kind: "gap" }]).unlabelled).toEqual([
+      "chr_filter",
+    ]);
+  });
+
+  it("rejects input that is not a gxwf diff or a ledger", () => {
+    expect(() => checkStepRemovals({ steps: {} }, {})).toThrow(InputShapeError);
+    expect(() => checkStepRemovals(draftToFinal, { entries: {} })).toThrow(InputShapeError);
+    expect(() => checkStepRemovals(draftToFinal, "not a ledger")).toThrow(InputShapeError);
+  });
+});
+
+describe("foundry check-step-removals", () => {
+  const run = (args: string[], input?: string) =>
+    spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        resolve(__dirname, "../src/bin/foundry.ts"),
+        "check-step-removals",
+        ...args,
+      ],
+      { encoding: "utf8", input },
+    );
+  const diffPath = resolve(__dirname, "fixtures/step-removals/draft-before-to-after.diff.json");
+
+  it("exits 0 when labelled, 4 when not, 3 on bad input and 1 on a missing file", () => {
+    const dir = mkdtempSync(resolve(tmpdir(), "step-removals-"));
+    const ledger = resolve(dir, "open-requirements.ledger.yml");
+    try {
+      writeFileSync(ledger, stringify({ entries: [] }));
+      const red = run([diffPath, ledger, "--json"]);
+      expect(red.status).toBe(4);
+      expect(JSON.parse(red.stdout)).toEqual(checkStepRemovals(draftToFinal, { entries: [] }));
+      expect(run([diffPath, ledger]).stderr).toContain("chr_filter");
+
+      writeFileSync(ledger, stringify({ entries: [chrDropped] }));
+      const green = run([diffPath, ledger]);
+      expect(green.status).toBe(0);
+      expect(green.stdout).toContain("inputs feeding no step: chr\n");
+
+      const piped = run(["-", ledger, "--json"], readFileSync(diffPath, "utf8"));
+      expect(piped.status).toBe(0);
+      expect(JSON.parse(piped.stdout).ok).toBe(true);
+
+      writeFileSync(ledger, stringify({ entries: { not: "a list" } }));
+      expect(run([diffPath, ledger]).status).toBe(3);
+      expect(run([resolve(dir, "missing.json"), ledger]).status).toBe(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 30_000);
+});

@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 15,
-    "content_hash": "2009d579cf2a68f8b31d1a69dd751f3f4d80fe3f19f3606f8cac2dda37aa343b",
-    "commit": "61da115975d155a36face0e83d5c28f638da7fca"
+    "revision": 16,
+    "content_hash": "769b067eafa3739737b420bc1556c591738a1d15ddd7ee87091f4237f8759b7a",
+    "commit": "32720e29c7acb7754683495bfce88810db41a686"
   },
-  "cast_at": "2026-11-10T18:57:18.395Z",
+  "cast_at": "2026-11-12T15:01:37.081Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -215,10 +215,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Read the entries the design tier recorded against this step before implementing it, and append a blocking entry when the step's declared output cannot be computed from its wired inputs or the chosen wrapper can't produce it — the fall-through to topology repair, in place of fabricating the output or authoring around a wrapper that exists.",
+      "purpose": "Read the entries the design tier recorded against this step before implementing it, record a disposition for each source argument the step's `_plan_state` carries, and append a blocking entry when the step's declared output cannot be computed from its wired inputs or the chosen wrapper can't produce it — the fall-through to topology repair, in place of fabricating the output or authoring around a wrapper that exists.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
-      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "src_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
+      "dst_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
       "source": "deterministic"
     },
     {

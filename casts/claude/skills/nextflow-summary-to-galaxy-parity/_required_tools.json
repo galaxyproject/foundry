@@ -1,0 +1,27 @@
+[
+  {
+    "tool": "foundry",
+    "origin": "npm",
+    "package": "@galaxy-foundry/gxwf-foundry",
+    "invoke": "foundry",
+    "invoke_fallback": "npx --package @galaxy-foundry/gxwf-foundry foundry",
+    "availability_check": "foundry --help",
+    "docs_url": "https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md",
+    "source": "implied",
+    "implied_by": [
+      "foundry nextflow-parity"
+    ]
+  },
+  {
+    "tool": "gxwf",
+    "origin": "npm",
+    "package": "@galaxy-tool-util/cli",
+    "package_version": "^1.15.0",
+    "invoke": "gxwf",
+    "invoke_fallback": "npx --yes --package @galaxy-tool-util/cli@1.15.0 gxwf",
+    "availability_check": "gxwf --help | grep -q draft-validate",
+    "docs_url": "https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli",
+    "reference": "references/cli/gxwf.md",
+    "source": "referenced"
+  }
+]

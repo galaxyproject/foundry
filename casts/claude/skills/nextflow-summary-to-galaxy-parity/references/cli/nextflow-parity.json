@@ -1,0 +1,60 @@
+{
+  "type": "cli-command",
+  "tool": "foundry",
+  "command": "nextflow-parity",
+  "summary": "Join a nextflow-to-galaxy run's summary, ledger, draft snapshot, final workflow and their `gxwf diff` into source-parity rows and findings.",
+  "source_path": "content/cli/foundry/nextflow-parity.md",
+  "source_revision": 1,
+  "package": "@galaxy-foundry/gxwf-foundry",
+  "description": "Join a nextflow-to-galaxy run's summary, ledger, draft snapshot, final workflow and their gxwf diff into source-parity rows and findings.",
+  "synopsis": "foundry nextflow-parity [options]",
+  "args": [],
+  "options": [
+    {
+      "flags": "--summary <summary.json>",
+      "name": "summary",
+      "description": "summary-nextflow.json",
+      "takesArgument": true,
+      "argumentPlaceholder": "<summary.json>",
+      "optionalArgument": false,
+      "negatable": false
+    },
+    {
+      "flags": "--ledger <ledger.yml>",
+      "name": "ledger",
+      "description": "Open-requirements ledger",
+      "takesArgument": true,
+      "argumentPlaceholder": "<ledger.yml>",
+      "optionalArgument": false,
+      "negatable": false
+    },
+    {
+      "flags": "--snapshot <snapshot.gxwf.yml>",
+      "name": "snapshot",
+      "description": "Pre-loop draft snapshot, _plan_* intact",
+      "takesArgument": true,
+      "argumentPlaceholder": "<snapshot.gxwf.yml>",
+      "optionalArgument": false,
+      "negatable": false
+    },
+    {
+      "flags": "--workflow <workflow.gxwf.yml>",
+      "name": "workflow",
+      "description": "Final workflow",
+      "takesArgument": true,
+      "argumentPlaceholder": "<workflow.gxwf.yml>",
+      "optionalArgument": false,
+      "negatable": false
+    },
+    {
+      "flags": "--diff <diff.json>",
+      "name": "diff",
+      "description": "gxwf diff --json <snapshot> <workflow>",
+      "takesArgument": true,
+      "argumentPlaceholder": "<diff.json>",
+      "optionalArgument": false,
+      "negatable": false
+    }
+  ],
+  "body": "# `foundry nextflow-parity`\n\nAssemble the joins a source-parity report needs from five files of one `nextflow-to-galaxy` run:\n\n- `--summary`: the run's `summary-nextflow.json`.\n- `--ledger`: the [[open-requirements-ledger]].\n- `--snapshot`: `galaxy-workflow-draft.snapshot.gxwf.yml`, the draft as the per-step loop first received it, with `_plan_*` intact.\n- `--workflow`: the final `galaxy-workflow.gxwf.yml`.\n- `--diff`: `gxwf diff --json <snapshot> <workflow>`.\n\nIt joins what has a key and reports each difference with no recorded reason as a finding, without judging any of them.\n\nSteps are keyed as `gxwf diff` keys them. A dict-form step's key is its dict key. A list-form step's key is its label, else its `id`, else its index counted after the inputs. Inside a subworkflow step that is inline on both sides, the only place `gxwf diff` looks inside one, a step's key is `<parent>/<key>`.\n\n## Output\n\nExit `0` whenever the files could be joined, findings or not. A summary without `processes`, a diff without `steps.removed`, `inputs` or `outputs`, a malformed ledger, or a snapshot and workflow the diff didn't compare exits `3`. A step only in the snapshot must be in the diff's `steps.removed`, and a step only in the workflow in its `steps.added`. Read and parse failures exit `1`.\n\nStdout holds one JSON object:\n\n- `steps`: one row per step in the snapshot or the final workflow, in that order:\n  - `status`: `kept`, `removed` or `added`.\n  - `plan_state`: what the snapshot's `_plan_state` holds: `calls` (a document with a `calls` list), `text`, `none`, or `absent` for a step the snapshot lacks.\n  - `calls`: the summary call paths the step translates. `calls_from` says whether they came from `_plan_state` or from flag records that name the step.\n  - `tool_id` and `tool_version`: from the final workflow, or from the snapshot for a removed step.\n  - `state`: the final workflow step's `state`, else an object `tool_state`, copied as written. `null` for a removed step or a step that sets none.\n  - `source`: each call's process, tool, the tool's declared versions, and the process's `container` and `conda` text.\n  - `dropped_entries`: the `kind: dropped` entries whose top-level `step` names a removed step.\n- `inputs`: the diff's `added` and `removed` inputs, and `unwired`, the final inputs that feed no step.\n- `outputs`: the diff's `added` and `changed` outputs, and `removed` as `{output, source_step, dropped_entries}`, where `source_step` is the snapshot step the output came from, and `dropped_entries` holds the drops naming that step plus the drops whose backticked `units` name the output.\n- `source_args.rows`: one row per `effective_args` row in the summary, with its `process`, `call`, `key`, `ids` and `tie`, plus:\n  - `steps`: the snapshot steps whose `_plan_state.calls` include the call, and `steps_from: plan_state`. A step the template resolved has no `_plan_state`. When no step lists the call, `steps` holds the steps named by flag records that cite an id effective for this call alone, and `steps_from` is `records`, so a `withLabel` entry several calls share never maps a call. With no step either way, `steps` is empty and `steps_from` is `null`. Every row of one call gets the same `steps`.\n  - `covered_by`: for an unmapped call, the drops other than flag records whose backticked `units` name a segment of its call path.\n  - `entries`: each id's `expression` and the well-formed flag records joined on `source_arg.step` and `source_arg.arg`, as `{id, step, collection, disposition, status, flags}`. `disposition` is the decision's `carried` or `not_applicable`, or `dropped` or `gap` for an entry.\n- `source_args.overridden`: the `resolved_args` entries no `effective_args` row names. They need no record.\n- `source_args.stray_records`: flag records joined to no row, with a `problem`: `unknown-step`, `unknown-arg`, `not-effective` (an overridden entry), or `other-step` (effective, but for another step's calls).\n- `scope`: the [[check-scope-records]] result against the summary.\n- `other_drops`: `kind: dropped` entries with no `source_arg` and no `scope_branch` that no removed step's `dropped_entries` lists: the design tier's cuts, output drops, and step drops that name a kept step or lack a `because`.\n- `findings`: one `{kind, subject, detail?}` per difference with no recorded reason:\n  - `step-removed-unrecorded`: a removed step no drop names.\n  - `output-removed-unrecorded`: a removed output no drop names, by its source step or in `units`. `detail` is the source step.\n  - `input-unwired`: a final input that feeds no step.\n  - `source-arg-unrecorded`: an effective entry for a kept step with no flag record. `subject` is the step and `detail` the entry id.\n  - `source-arg-stray`: a stray flag record. `detail` is its problem.\n  - `source-arg-malformed`: a record with `source_arg` that gives no reason, so it records nothing: `source_arg` lacks a string `step` or `arg`, a decision's `disposition` isn't `carried` or `not_applicable`, or a dropped entry has no `because`. `detail` says which. Its entry stays unrecorded.\n  - `call-unmapped`: a call with effective arguments that no step translates and no drop covers.\n  - `scope-record`: a scope-record problem.\n\n## Examples\n\n```sh\ngxwf diff --json galaxy-workflow-draft.snapshot.gxwf.yml galaxy-workflow.gxwf.yml > parity-diff.json\nfoundry nextflow-parity --summary summary-nextflow.json --ledger open-requirements.ledger.yml \\\n  --snapshot galaxy-workflow-draft.snapshot.gxwf.yml --workflow galaxy-workflow.gxwf.yml \\\n  --diff parity-diff.json > nextflow-galaxy-parity.json\n```\n\n## Gotchas\n\n- Diff the snapshot, not `galaxy-workflow.extracted.gxwf.yml`. Only the snapshot keeps `_plan_state.calls`, and only the snapshot shows what the per-step loop removed. Passing a different pair than the diff compared exits `3`.\n- `gxwf diff` pairs list-form steps that share an `id` across a relabel. This command doesn't, so a relabelled list-form step exits `3`. Drafts use dict-form steps.\n- `call-unmapped` sees only calls with `effective_args`. The summary has no full path for a call without arguments, so a call with none that no step translates leaves no finding.\n- A removed step that repair folded into another records no drop, so it appears as `step-removed-unrecorded`. The report says so. It doesn't excuse it.\n- Removed and added inputs have no key the ledger joins on, so they are listed but never become findings here. The [[nextflow-summary-to-galaxy-parity]] Mold reads their reason from the ledger's prose and lists the unexplained ones as findings.\n- Tool versions are joined on the source side only. The wrapper's own software requirement isn't in any of the five files.\n- The flag join stops at the entry. Which flags of a closure a record covers can't be checked without evaluating it."
+}

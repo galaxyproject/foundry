@@ -12,7 +12,13 @@ Evaluation plan for the `nextflow-summary-to-galaxy-interface` Mold. This file i
 
 - bucket: utility
 - check: llm-judged
-- assertion: a branch-affecting control flag is surfaced as a control rather than silently dropped from the interface.
+- assertion: a branch-affecting control flag is surfaced as a control, or fixed by the ledger's scope decision, rather than silently dropped from the interface. Every source branch the brief leaves out has a scope drop in the ledger. When the scope follows a test candidate, the brief names its `id`.
+
+## Property: scope records cite the summary and stay apart from step and flag records
+
+- bucket: handoff
+- check: deterministic
+- assertion: the ledger holds at most one decision with `scope`. Every `kind: dropped` entry with `scope_branch` is `open`, names that decision in `scope_branch.decision` and in `because`, has non-empty `units` and `selected_by`, and has neither a top-level `step` nor `source_arg`. Each `from` resolves to a summary value that backs its control value, and each backticked unit name is a subworkflow or process in the summary. `foundry check-scope-records <ledger> <summary.json>` checks all of it and exits 0.
 
 ## Property: sample-sheet metadata is preserved
 

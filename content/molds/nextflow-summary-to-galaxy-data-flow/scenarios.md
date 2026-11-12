@@ -7,6 +7,17 @@
   aggregation, and the `skip_trim` branch as source facts. It must not present
   unresolved `collect` / `mix` behavior as already implemented Galaxy wiring.
 
+## Case: sarek data flow stays inside the germline scope
+
+- fixture: `summarize-nextflow` output for `workflow-fixtures/pipelines/nf-core__sarek`
+  (3.8.1, `4bd2948f`), its interface brief, and the interface Mold's
+  `examples/sarek-germline-scope/open-requirements.ledger.yml`.
+- expect: the draft covers BWA-MEM alignment, duplicate marking, base
+  recalibration, Strelka germline calling and QC. It has no node for
+  `BAM_VARIANT_CALLING_SOMATIC_ALL`, `VCF_ANNOTATE_ALL` or the other aligners,
+  no `when:` on `aligner` or `step`, and all nine scope drops are still `open`
+  in the re-emitted ledger.
+
 ## Case: operator translation is classified, not guessed
 
 - fixture: a summary whose `workflow.edges[].via` includes operators such as

@@ -1,0 +1,76 @@
+{
+  "before_is_draft": false,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "outputs": {
+    "added": [],
+    "removed": [],
+    "changed": {
+      "out": {
+        "before": "second cat/out_file1",
+        "after": "first/out_file1"
+      }
+    }
+  },
+  "steps": {
+    "added": {},
+    "removed": {
+      "second cat": {
+        "label": "second cat",
+        "id": "second",
+        "type": "tool",
+        "tool_id": "cat1",
+        "tool_version": null,
+        "plan_fields": {},
+        "upstream": [
+          "first"
+        ],
+        "downstream": [],
+        "workflow_outputs": [
+          "out"
+        ],
+        "connections": [
+          "first/out_file1 -> second cat/input1"
+        ]
+      }
+    },
+    "changed": {
+      "first": {
+        "label": null,
+        "fields": {},
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [],
+          "removed": []
+        },
+        "connections_out": {
+          "added": [],
+          "removed": [
+            "first/out_file1 -> second cat/input1"
+          ]
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": [
+            "second cat"
+          ]
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [],
+  "warnings": [],
+  "has_changes": true
+}

@@ -2,6 +2,15 @@ import {
   runCheckWorkflowBrief,
   type WorkflowBriefCheckOptions,
 } from "./commands/check-workflow-brief.js";
+import {
+  runCheckStepRemovals,
+  type StepRemovalsCheckOptions,
+} from "./commands/check-step-removals.js";
+import {
+  runCheckScopeRecords,
+  type ScopeRecordsCheckOptions,
+} from "./commands/check-scope-records.js";
+import { runNextflowParity, type NextflowParityOptions } from "./commands/nextflow-parity.js";
 import { runValidateMarkdown } from "./commands/validate-markdown.js";
 import { runValidateWorkflowBrief } from "./commands/validate-workflow-brief.js";
 import { Command } from "commander";
@@ -128,6 +137,43 @@ export function buildProgram(): Command {
     .action((path: string, options: WorkflowBriefCheckOptions) =>
       runCheckWorkflowBrief(path, options),
     );
+
+  program
+    .command("check-step-removals")
+    .description(
+      "Check that every step a gxwf diff reports removed has a kind: dropped ledger entry naming it and giving a reason.",
+    )
+    .argument("<diff.json>", "gxwf diff --json output, or - for stdin")
+    .argument("<ledger.yml>", "Open-requirements ledger")
+    .option("--json", "Emit the removed steps, their ledger entries and unwired inputs", false)
+    .action((diffPath: string, ledgerPath: string, options: StepRemovalsCheckOptions) =>
+      runCheckStepRemovals(diffPath, ledgerPath, options),
+    );
+
+  program
+    .command("check-scope-records")
+    .description(
+      "Check a ledger's source-scope decision and scope drops, and their citations against a Nextflow summary.",
+    )
+    .argument("<ledger.yml>", "Open-requirements ledger")
+    .argument("[summary.json]", "summary-nextflow.json the citations and units resolve against")
+    .option("--json", "Emit the scope decision, its drops and the problems found", false)
+    .action(
+      (ledgerPath: string, summaryPath: string | undefined, options: ScopeRecordsCheckOptions) =>
+        runCheckScopeRecords(ledgerPath, summaryPath, options),
+    );
+
+  program
+    .command("nextflow-parity")
+    .description(
+      "Join a nextflow-to-galaxy run's summary, ledger, draft snapshot, final workflow and their gxwf diff into source-parity rows and findings.",
+    )
+    .requiredOption("--summary <summary.json>", "summary-nextflow.json")
+    .requiredOption("--ledger <ledger.yml>", "Open-requirements ledger")
+    .requiredOption("--snapshot <snapshot.gxwf.yml>", "Pre-loop draft snapshot, _plan_* intact")
+    .requiredOption("--workflow <workflow.gxwf.yml>", "Final workflow")
+    .requiredOption("--diff <diff.json>", "gxwf diff --json <snapshot> <workflow>")
+    .action((options: NextflowParityOptions) => runNextflowParity(options));
 
   attachSchemaPin(
     program

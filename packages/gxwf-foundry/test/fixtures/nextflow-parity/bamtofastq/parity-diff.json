@@ -1,0 +1,308 @@
+{
+  "before_is_draft": true,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "outputs": {
+    "added": [],
+    "removed": [
+      "chr_alignment"
+    ],
+    "changed": {
+      "unmapped_bam": {
+        "before": "view_unmap_unmap/TODO_output",
+        "after": "view_unmap_unmap/outputsam"
+      }
+    }
+  },
+  "steps": {
+    "added": {},
+    "removed": {
+      "chr_filter": {
+        "label": "keep only requested chromosomes",
+        "id": null,
+        "type": "tool",
+        "tool_id": "TODO",
+        "tool_version": null,
+        "plan_fields": {
+          "_plan_state": "calls: [\"NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_CHR\"]\nresolved_args:\n  - {\"id\":\"conf/modules.config#withName:SAMTOOLS_CHR/args\",\"key\":\"args\",\"expression\":\"{ \\\"-b ${params.chr}\\\" }\",\"selector\":\"withName:SAMTOOLS_CHR\",\"config\":\"conf/modules.config\"}\nintent: |\n  Keep alignments on the contigs named by chr.\n"
+        },
+        "upstream": [
+          "chr",
+          "reads"
+        ],
+        "downstream": [
+          "view_map_map",
+          "view_unmap_unmap"
+        ],
+        "workflow_outputs": [
+          "chr_alignment"
+        ],
+        "connections": [
+          "chr -> chr_filter/TODO_regions",
+          "chr_filter/TODO_filtered -> view_map_map/TODO_input",
+          "chr_filter/TODO_filtered -> view_unmap_unmap/TODO_input",
+          "reads -> chr_filter/TODO_input"
+        ]
+      }
+    },
+    "changed": {
+      "view_map_map": {
+        "label": "view_map_map",
+        "fields": {
+          "tool_id": {
+            "before": "TODO",
+            "after": "toolshed.g2.bx.psu.edu/repos/iuc/samtools_view/samtools_view/1.15.1+galaxy2"
+          },
+          "tool_version": {
+            "before": null,
+            "after": "1.15.1+galaxy2"
+          }
+        },
+        "state": {
+          "output_fmt": {
+            "before": null,
+            "after": "bam",
+            "kind": "added"
+          },
+          "require_flags": {
+            "before": null,
+            "after": "1",
+            "kind": "added"
+          },
+          "exclude_flags": {
+            "before": null,
+            "after": "12",
+            "kind": "added"
+          }
+        },
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "reads -> view_map_map/input"
+          ],
+          "removed": [
+            "chr_filter/TODO_filtered -> view_map_map/TODO_input"
+          ]
+        },
+        "connections_out": {
+          "added": [
+            "view_map_map/outputsam -> collate/input"
+          ],
+          "removed": [
+            "view_map_map/TODO_output -> collate/TODO_input"
+          ]
+        },
+        "upstream": {
+          "added": [
+            "reads"
+          ],
+          "removed": [
+            "chr_filter"
+          ]
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {
+          "_plan_state": "calls: [\"NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP\"]\nresolved_args:\n  - {\"id\":\"conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args\",\"key\":\"args\",\"expression\":\"'-b -f1 -F12'\",\"selector\":\"withName:SAMTOOLS_VIEW_MAP_MAP\",\"config\":\"conf/modules.config\"}\n  - {\"id\":\"conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/prefix\",\"key\":\"prefix\",\"expression\":\"{ \\\"${meta.id}.map_map\\\" }\",\"selector\":\"withName:SAMTOOLS_VIEW_MAP_MAP\",\"config\":\"conf/modules.config\"}\nintent: |\n  Keep pairs whose read and mate both mapped.\n"
+        },
+        "plan_fields_after": {}
+      },
+      "view_unmap_unmap": {
+        "label": "view_unmap_unmap",
+        "fields": {
+          "tool_id": {
+            "before": "TODO",
+            "after": "toolshed.g2.bx.psu.edu/repos/iuc/samtools_view/samtools_view/1.15.1+galaxy2"
+          },
+          "tool_version": {
+            "before": null,
+            "after": "1.15.1+galaxy2"
+          }
+        },
+        "state": {
+          "output_fmt": {
+            "before": null,
+            "after": "bam",
+            "kind": "added"
+          },
+          "require_flags": {
+            "before": null,
+            "after": "12",
+            "kind": "added"
+          },
+          "exclude_flags": {
+            "before": null,
+            "after": "256",
+            "kind": "added"
+          }
+        },
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "reads -> view_unmap_unmap/input"
+          ],
+          "removed": [
+            "chr_filter/TODO_filtered -> view_unmap_unmap/TODO_input"
+          ]
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [
+            "reads"
+          ],
+          "removed": [
+            "chr_filter"
+          ]
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {
+          "_plan_state": "calls: [\"NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP\"]\nresolved_args:\n  - {\"id\":\"conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/args\",\"key\":\"args\",\"expression\":\"'-b -f12 -F256'\",\"selector\":\"withName:SAMTOOLS_VIEW_UNMAP_UNMAP\",\"config\":\"conf/modules.config\"}\n  - {\"id\":\"conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix\",\"key\":\"prefix\",\"expression\":\"{ \\\"${meta.id}.unmap_unmap\\\" }\",\"selector\":\"withName:SAMTOOLS_VIEW_UNMAP_UNMAP\",\"config\":\"conf/modules.config\",\"tie\":true}\n  - {\"id\":\"conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix~2\",\"key\":\"prefix\",\"expression\":\"{ \\\"${meta.id}.unmapped\\\" }\",\"selector\":\"withName:SAMTOOLS_VIEW_UNMAP_UNMAP\",\"config\":\"conf/modules.config\",\"tie\":true}\nintent: |\n  Keep pairs whose read and mate are both unmapped.\n"
+        },
+        "plan_fields_after": {}
+      },
+      "collate": {
+        "label": "collate",
+        "fields": {
+          "tool_id": {
+            "before": "TODO",
+            "after": "toolshed.g2.bx.psu.edu/repos/iuc/samtools_collate/samtools_collate/1.15.1+galaxy0"
+          },
+          "tool_version": {
+            "before": null,
+            "after": "1.15.1+galaxy0"
+          }
+        },
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "view_map_map/outputsam -> collate/input"
+          ],
+          "removed": [
+            "reads_in_memory -> collate/TODO_reads_in_memory",
+            "samtools_collate_fast -> collate/TODO_fast",
+            "view_map_map/TODO_output -> collate/TODO_input"
+          ]
+        },
+        "connections_out": {
+          "added": [
+            "collate/output -> to_fastq/input"
+          ],
+          "removed": [
+            "collate/TODO_output -> to_fastq/input"
+          ]
+        },
+        "upstream": {
+          "added": [],
+          "removed": [
+            "reads_in_memory",
+            "samtools_collate_fast"
+          ]
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {
+          "_plan_state": "calls: [\"NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_COLLATE\"]\nresolved_args:\n  - {\"id\":\"conf/modules.config#withName:SAMTOOLS_COLLATE/args\",\"key\":\"args\",\"expression\":\"{ params.samtools_collate_fast ? \\\"-f -r ${params.reads_in_memory}\\\" : '' }\",\"selector\":\"withName:SAMTOOLS_COLLATE\",\"config\":\"conf/modules.config\"}\nintent: |\n  Group reads by name; fast mode when samtools_collate_fast.\n"
+        },
+        "plan_fields_after": {}
+      },
+      "to_fastq": {
+        "label": "to_fastq",
+        "fields": {},
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "collate/output -> to_fastq/input"
+          ],
+          "removed": [
+            "collate/TODO_output -> to_fastq/input"
+          ]
+        },
+        "connections_out": {
+          "added": [
+            "to_fastq/output -> summarize/input"
+          ],
+          "removed": [
+            "to_fastq/output -> summarize/TODO_input"
+          ]
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      },
+      "summarize": {
+        "label": "summarize",
+        "fields": {
+          "tool_id": {
+            "before": "TODO",
+            "after": "toolshed.g2.bx.psu.edu/repos/iuc/fastq_info/fastq_info/0.25.1+galaxy0"
+          },
+          "tool_version": {
+            "before": null,
+            "after": "0.25.1+galaxy0"
+          }
+        },
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "to_fastq/output -> summarize/input"
+          ],
+          "removed": [
+            "to_fastq/output -> summarize/TODO_input"
+          ]
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {
+          "_plan_state": "Count reads per output FASTQ."
+        },
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [
+    "chr",
+    "samtools_collate_fast",
+    "reads_in_memory"
+  ],
+  "warnings": [],
+  "has_changes": true
+}
