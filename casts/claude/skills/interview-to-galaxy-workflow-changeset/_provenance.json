@@ -6,9 +6,9 @@
     "path": "content/molds/interview-to-galaxy-workflow-changeset/index.md",
     "revision": 4,
     "content_hash": "4da72dca9397dd3e2590a6c83245febc39f6b0137a7aa5c51676c908f26a16c7",
-    "commit": "b74c6bdd0ccc36940ed2db94632931e529733b0a"
+    "commit": "06913c8a4435f00e4deeb362d7e81604f90bb646"
   },
-  "cast_at": "2026-11-12T13:53:29.055Z",
+  "cast_at": "2026-11-12T14:10:52.646Z",
   "refs": [
     {
       "kind": "research",
@@ -21,8 +21,8 @@
       "evidence": "hypothesis",
       "purpose": "Record a requested change the workflow cannot support as described as an open entry, so an unsupportable request survives as a tracked obligation rather than a fabricated anchor or a silent drop.",
       "verification": "Promote after a worked run shows entries this Mold appends are consumed by apply-galaxy-workflow-changeset or a reviewer without re-derivation.",
-      "src_hash": "1b602ee1080aa4d2ce5bd2cc537506a25cabea9b51f6caa1243ca041adc33440",
-      "dst_hash": "1b602ee1080aa4d2ce5bd2cc537506a25cabea9b51f6caa1243ca041adc33440",
+      "src_hash": "1f9d98c3ca5a8f9f931eb9b5fc9ca00a379bfc5ceceda613ae9743e35f23d2e0",
+      "dst_hash": "1f9d98c3ca5a8f9f931eb9b5fc9ca00a379bfc5ceceda613ae9743e35f23d2e0",
       "source": "deterministic"
     },
     {

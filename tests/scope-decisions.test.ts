@@ -18,6 +18,15 @@ const sarek = [
   path.join(os.homedir(), "projects/repositories/workflow-fixtures/pipelines/nf-core__sarek"),
 ].find((dir) => existsSync(dir));
 const itIfSarek = sarek ? it : it.skip;
+// Drop families the interface Mold's sarek scenario requires.
+const SCENARIO_DROPS = [
+  "scope-somatic-calling",
+  "scope-tumor-only-calling",
+  "scope-other-germline-callers",
+  "scope-alternative-aligners",
+  "scope-later-start-steps",
+  "scope-annotation",
+];
 
 interface Control {
   control: string;
@@ -66,6 +75,11 @@ function scopeRecords(ledger: Ledger): { scope: ScopeDecision; drops: ScopeDrop[
   return { scope: scopes[0]!, drops };
 }
 
+const unitNames = (drop: ScopeDrop): string[] =>
+  [...drop.units.matchAll(/`([A-Z][A-Z0-9_]+)`/g)].map(([, name]) => name!);
+
+const controlKey = ({ control, value }: Control): string => `${control}=${String(value)}`;
+
 // Resolves a `from` citation (`<array>[<key>]` plus an optional field) and checks it backs the value.
 function checkCitation(summary: Summary, { control, value, from }: Control): void {
   const match =
@@ -76,7 +90,7 @@ function checkCitation(summary: Summary, { control, value, from }: Control): voi
   if (array === "params") {
     const entry = summary.params.find((p) => p.name === key);
     expect(entry, from).toBeDefined();
-    expect(key).toBe(param);
+    expect(param, from).toBe(key);
     if (field === "enum") expect(entry!.enum, from).toContain(value);
     else if (field === "default") expect(entry!.default, from).toBe(value);
     else {
@@ -90,14 +104,17 @@ function checkCitation(summary: Summary, { control, value, from }: Control): voi
   } else if (array === "test_candidates") {
     const candidate = summary.test_candidates.find((c) => c.id === key);
     expect(candidate, from).toBeDefined();
-    if (field === "params_delta") expect(candidate!.params_delta?.[param!], from).toBe(value);
-    else {
+    if (field === "params_delta") {
+      expect(param, from).toBeDefined();
+      expect(candidate!.params_delta?.[param!], from).toBe(value);
+    } else {
       expect(field, from).toBeUndefined();
       expect(key, from).toContain(String(value));
     }
   } else {
     const conditional = summary.workflow.conditionals.find((c) => c.affects.includes(key!));
     expect(conditional, from).toBeDefined();
+    expect(param, from).toBeDefined();
     expect(conditional!.guard).toContain(param!);
     expect(conditional!.guard).toContain(String(value));
   }
@@ -108,7 +125,8 @@ describe("sarek scope ledger fixture", () => {
     const { scope, drops } = scopeRecords(readLedger());
     expect(scope.decided_by).toBe("nextflow-summary-to-galaxy-interface");
     expect(scope.scope.controls.length).toBeGreaterThan(0);
-    expect(drops.length).toBeGreaterThan(1);
+    expect(drops.map((d) => d.id)).toEqual(expect.arrayContaining(SCENARIO_DROPS));
+    const fixed = new Set(scope.scope.controls.map(controlKey));
     for (const drop of drops) {
       expect(drop, drop.id).toMatchObject({
         status: "open",
@@ -117,7 +135,9 @@ describe("sarek scope ledger fixture", () => {
         scope_branch: { decision: scope.id },
       });
       expect(drop.scope_branch.selected_by.length, drop.id).toBeGreaterThan(0);
-      expect(drop.units.trim(), drop.id).not.toBe("");
+      for (const control of drop.scope_branch.selected_by)
+        expect(fixed.has(controlKey(control)), `${drop.id}: ${controlKey(control)}`).toBe(false);
+      expect(unitNames(drop).length, drop.id).toBeGreaterThan(0);
       expect(drop.because, drop.id).toContain(scope.id);
       expect(drop.step, drop.id).toBeUndefined();
       expect(drop.source_arg, drop.id).toBeUndefined();
@@ -142,8 +162,7 @@ describe("sarek scope ledger fixture", () => {
     ]);
     for (const drop of drops) {
       for (const control of drop.scope_branch.selected_by) checkCitation(summary, control);
-      for (const [, name] of drop.units.matchAll(/`([A-Z][A-Z0-9_]+)`/g))
-        expect(units, `${drop.id}: ${name}`).toContain(name);
+      for (const name of unitNames(drop)) expect(units, `${drop.id}: ${name}`).toContain(name);
     }
   });
 });

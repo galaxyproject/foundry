@@ -6,9 +6,9 @@
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
     "revision": 7,
     "content_hash": "b452187efa9a954117a468ca9966711fbee59a32dc3c3ed0a3b930635ab335cc",
-    "commit": "b74c6bdd0ccc36940ed2db94632931e529733b0a"
+    "commit": "06913c8a4435f00e4deeb362d7e81604f90bb646"
   },
-  "cast_at": "2026-11-12T13:53:28.094Z",
+  "cast_at": "2026-11-12T14:10:51.939Z",
   "refs": [
     {
       "kind": "research",
@@ -118,8 +118,8 @@
       "evidence": "hypothesis",
       "purpose": "Hold a diagnosis against the ledger: a cause that refutes an earlier drop's `because` reopens it, and a step taken out of the workflow is recorded as a `kind: dropped` entry with a cited `because`, never as a gap.",
       "verification": "Promote after a test-phase run reopens a drop its diagnosis refuted and restores the step.",
-      "src_hash": "1b602ee1080aa4d2ce5bd2cc537506a25cabea9b51f6caa1243ca041adc33440",
-      "dst_hash": "1b602ee1080aa4d2ce5bd2cc537506a25cabea9b51f6caa1243ca041adc33440",
+      "src_hash": "1f9d98c3ca5a8f9f931eb9b5fc9ca00a379bfc5ceceda613ae9743e35f23d2e0",
+      "dst_hash": "1f9d98c3ca5a8f9f931eb9b5fc9ca00a379bfc5ceceda613ae9743e35f23d2e0",
       "source": "deterministic"
     },
     {

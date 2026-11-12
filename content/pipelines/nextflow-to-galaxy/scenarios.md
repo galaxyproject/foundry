@@ -78,9 +78,11 @@ Materialize Nextflow fixtures with `make fixtures-nextflow`.
   first 5 workflow steps.
 - expect: the summary's load-bearing branch controls (`step`, `tools`,
   `aligner`) survive into the interface and data-flow briefs as scope decisions:
-  the ledger holds one scope decision, recording the caller's cap and the
-  control values it fixes, and an open scope drop for each excluded branch
-  family, which the final ledger still carries; the per-step loop concretizes
+  the ledger holds one scope decision whose `decision` states the caller's cap
+  and whose `controls` list the values it fixes, an open scope drop for each
+  excluded branch family, and an open `kind: dropped` entry without
+  `scope_branch` for the in-scope steps past the cap, all of which the final
+  ledger still carries; the per-step loop concretizes
   each of the 5 steps; tool resolution is recorded per step (discover or
   author); the partial scope is stated explicitly rather than silently dropping
   the remaining pipeline.

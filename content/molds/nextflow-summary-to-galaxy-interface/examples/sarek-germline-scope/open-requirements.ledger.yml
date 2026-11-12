@@ -95,7 +95,7 @@ entries:
         - {control: params.step, value: recalibrate, from: "params[step].enum"}
         - {control: params.step, value: variant_calling, from: "params[step].enum"}
         - {control: params.step, value: annotate, from: "params[step].enum"}
-    units: "starting from aligned BAM/CRAM, recalibration tables or VCFs: the five `step` values after `mapping`, each reading a restart sample sheet instead of FASTQ"
+    units: "the restart arms of `SAMPLESHEET_TO_CHANNEL` and `FASTQ_PREPROCESS_GATK` that read aligned BAM/CRAM, recalibration tables or VCFs instead of FASTQ, one per `step` value after `mapping`"
     because: "outside the selected scope `scope-germline-strelka`: the scope fixes `step` at its default, `mapping`, so the workflow always starts from FASTQ"
     unmet: "resuming from an intermediate file"
     missing: "the interface takes FASTQ only"
