@@ -214,6 +214,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cwl-v1.2-schemas]] — Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization.
 - [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
 - [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
+- [[fair-computational-workflows-checklist]] — First slice of a FAIR checklist for Galaxy workflows: the item format, the metadata group and the registry items (F4, A1, A2), calibrated on IWC.
 - [[foundry-feedback-ledger]] — Runtime protocol for carrying actionable feedback about Foundry assets, and the related projects a run exercises, from cast skills back to Foundry maintainers.
 - [[foundry-run-manifest]] — Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard.
 - [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.
