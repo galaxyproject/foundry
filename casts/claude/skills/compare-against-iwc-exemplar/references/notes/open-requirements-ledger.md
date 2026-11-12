@@ -144,7 +144,7 @@ decisions:
 
 ## Source arguments
 
-nf-core sets tool arguments outside the process body as `ext.args`, `ext.args2`, and `ext.prefix`. [[summarize-nextflow]] records them per process in `resolved_args` and names the entries that apply to each call in `effective_args`. [[nextflow-summary-to-galaxy-template]] copies a step's effective entries into its `_plan_state` ([[galaxy-workflow-draft-format]]). No rule maps a flag onto a wrapper's parameters, so the Mold that binds `state` records one disposition per flag: [[implement-galaxy-tool-step]], or the template for a step it resolves itself.
+nf-core sets tool arguments outside the process body as `ext.args`, `ext.args2`, and `ext.prefix`. [[summarize-nextflow]] records them per process in `resolved_args` and names the entries that apply to each call in `effective_args`. [[nextflow-summary-to-galaxy-template]] copies a step's effective entries into its `_plan_state` ([[galaxy-workflow-draft-format]]). No rule maps a flag onto a wrapper's parameters, so the Mold that binds `state` records one disposition per flag: [[implement-galaxy-tool-step]], or the template for a step it resolves itself. A disposition is a `carried` or `not_applicable` decision, a `kind: dropped` entry, or, for a tied flag, an open gap, as the rules below describe.
 
 Each record carries a `source_arg` naming the entry it covers:
 

@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 11,
-    "content_hash": "e915e5546bc4b8b12acf932582a718c65e41ce5709ff94fe0a6395529222a317",
-    "commit": "76194bcfad252b2491b4541b29a21661a87a19bf"
+    "content_hash": "b05333628ee2b302b3a8a0d0b3ef79ad6f0c27643c502ecfd2d95a4e22d8d990",
+    "commit": "32673995a003ce4c55b28ba68357fd91b98f3025"
   },
-  "cast_at": "2026-11-12T09:08:35.974Z",
+  "cast_at": "2026-11-12T09:17:17.153Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -200,8 +200,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "1cb4be511125954325ad5f40bacf9d60927f190b92b81ffcb7987bd60a842323",
-      "dst_hash": "1cb4be511125954325ad5f40bacf9d60927f190b92b81ffcb7987bd60a842323",
+      "src_hash": "0bbc8445ac874d58ba71e74854db795112140de7908d6fabdca585fd0a6dc60e",
+      "dst_hash": "0bbc8445ac874d58ba71e74854db795112140de7908d6fabdca585fd0a6dc60e",
       "source": "deterministic"
     },
     {
@@ -310,8 +310,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, record a disposition for each source argument of a step resolved here, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
-      "dst_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
+      "src_hash": "7598e2733792efe69ab0351d981be3dbc5d8ab9095544ac3608a3d329f951c14",
+      "dst_hash": "7598e2733792efe69ab0351d981be3dbc5d8ab9095544ac3608a3d329f951c14",
       "source": "deterministic"
     },
     {

@@ -5,10 +5,10 @@
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
     "revision": 16,
-    "content_hash": "0e813ae9237320d0e18a0f206d0173ceafabc8968488c4fbfe7d1b1f97900212",
-    "commit": "76194bcfad252b2491b4541b29a21661a87a19bf"
+    "content_hash": "769b067eafa3739737b420bc1556c591738a1d15ddd7ee87091f4237f8759b7a",
+    "commit": "32673995a003ce4c55b28ba68357fd91b98f3025"
   },
-  "cast_at": "2026-11-12T09:08:35.549Z",
+  "cast_at": "2026-11-12T09:17:16.546Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -217,8 +217,8 @@
       "evidence": "hypothesis",
       "purpose": "Read the entries the design tier recorded against this step before implementing it, record a disposition for each source argument the step's `_plan_state` carries, and append a blocking entry when the step's declared output cannot be computed from its wired inputs or the chosen wrapper can't produce it — the fall-through to topology repair, in place of fabricating the output or authoring around a wrapper that exists.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
-      "dst_hash": "0b1a63cf4e955e011a769dd461244862bdb69013ecca1308cd9ab5e7d21a0f30",
+      "src_hash": "7598e2733792efe69ab0351d981be3dbc5d8ab9095544ac3608a3d329f951c14",
+      "dst_hash": "7598e2733792efe69ab0351d981be3dbc5d8ab9095544ac3608a3d329f951c14",
       "source": "deterministic"
     },
     {

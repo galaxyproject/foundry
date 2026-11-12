@@ -59,7 +59,7 @@ Workflow inputs (types, collection shapes, formats, optionality), workflow outpu
 
 ## Additions: `_plan_*` planning fields
 
-Free-text fields per tool step capture the template Mold's intent for the downstream per-step implementation Mold. All optional, but expected on any Identity-pinned or Deferred step (`tool_id` is `TODO`, or `tool_id` is pinned but `state` is absent); a Resolved step carries none.
+String fields per tool step, usually free text, capture the template Mold's intent for the downstream per-step implementation Mold. All optional, but expected on any Identity-pinned or Deferred step (`tool_id` is `TODO`, or `tool_id` is pinned but `state` is absent); a Resolved step carries none.
 
 - `_plan_state` — parameter binding intent: which knobs matter, value or range, why. Read by the per-step Mold to bind real `state` once a wrapper is selected. When the source sets tool arguments in its config, as nf-core's `ext.args` does, `_plan_state` is instead a YAML document with three keys. `calls` names the source summary's paths for the calls the step translates, `resolved_args` holds the arguments that take effect for them, copied unchanged from the summary, and `intent` holds the free text. The schema types `_plan_state` as a string, so the document is the string's content, never a mapping value. [[nextflow-summary-to-galaxy-template]] gives its shape, and the per-step Mold records how it handled each flag in the [[open-requirements-ledger]].
 - `_plan_context` — extras the per-step Mold needs to pick a wrapper: source `command:` block, conda packages, Docker/Singularity images, environment variables, preconditions, postconditions, container entrypoints, scratch-disk needs.
