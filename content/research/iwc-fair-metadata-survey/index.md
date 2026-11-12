@@ -14,7 +14,7 @@ summary: "IWC corpus survey of workflow-level FAIR metadata: license, creators a
 
 # IWC FAIR metadata survey
 
-Source corpus: 120 IWC workflows (`*.ga`) under `workflows/` as materialized in `workflow-fixtures/iwc-src/workflows/` at the commit pinned in `workflow-fixtures/fixtures.yaml` (`deafc487`). The Foundry cites this corpus rather than mirroring it, so no per-workflow data is committed. The survey asks how much of the metadata a FAIR checklist would look for is already present in the workflow files themselves.
+Source corpus: 120 IWC workflows (`*.ga`) under `workflows/` in the [galaxyproject/iwc](https://github.com/galaxyproject/iwc/tree/deafc4876f2c778aaf075e48bd8e95f3604ccc92) repository at commit `deafc4876f2c778aaf075e48bd8e95f3604ccc92` (the commit pinned in `workflow-fixtures/fixtures.yaml`), materialized locally by `make fixtures-iwc` in `workflow-fixtures/iwc-src/`. The Foundry cites this corpus rather than mirroring it, so no per-workflow data is committed. The survey asks how much of the metadata a FAIR checklist would look for is already present in the workflow files themselves.
 
 ## 1. Scope
 
@@ -26,6 +26,7 @@ Counting rules:
 - **Subworkflows.** Embedded subworkflows are not counted as separate workflows. Their inner inputs are **not** included in the headline counts; they are reported separately in section 3. 31 of the 120 workflows embed at least one subworkflow (83 subworkflow steps in total).
 - **Creator.** Entries of the workflow's `creator` field with class `Person`. Organization entries are ignored.
 - **ORCID.** A Person identifier that contains four groups of four characters (digits, the last character may be `X`), either as a bare ID or inside an `orcid.org` URL. This is a syntactic check only; no ORCID was resolved.
+- **ORCID as URI.** The identifier is exactly an `https://orcid.org/<ID>` URI. gxformat2's best-practices lint (`CreatorIdentifierNotURI`) flags bare IDs.
 - **Tags.** A non-empty `tags` list.
 - **Inputs.** Top-level steps of type `data_input` or `data_collection_input`. `parameter_input` steps are not counted.
 - **Annotation.** A non-empty annotation after stripping whitespace.
@@ -41,6 +42,7 @@ Evidence quality: every count below is corpus-observed. The interpretation colum
 | License present | 119 / 120 (99%) | License is effectively solved in IWC; a checklist can require it. |
 | At least one Person creator | 104 / 120 (87%) | The remaining 16 workflows have no Person creator entry. |
 | Every Person creator has an ORCID | 93 / 104 (89%) | ORCIDs are the norm but not universal; a checklist should recommend them rather than block on them. |
+| Every Person creator has an ORCID given as an `https://orcid.org/` URI | 70 / 104 (67%) | Bare iDs are flagged by gxformat2's `CreatorIdentifierNotURI` lint. |
 | Non-empty workflow tags | 82 / 120 (68%) | About a third of workflows carry no tags, so discoverability metadata is the weakest workflow-level field. |
 | Data and collection inputs | 277 | Top-level inputs only. |
 | Inputs with an annotation | 245 / 277 (88%) | Input descriptions are mostly present. |
@@ -48,7 +50,9 @@ Evidence quality: every count below is corpus-observed. The interpretation colum
 | Single-file inputs with a format | 79 / 170 (46%) | |
 | Collection inputs with a format | 33 / 107 (31%) | Collections declare formats least often. |
 
-A missing `format` means the input step declares no machine-readable datatype, so Galaxy accepts any dataset there. Some workflows state formats only in prose. Example, found by manually opening `Assembly-Hifi-HiC-phasing-VGP4.ga`: its five data inputs declare no machine-readable `format`, but the `readme` field inside the same `.ga` file lists them as "[fastq]", "[txt]", "[meryldb]" and "[tabular]". The counts cover machine-readable formats declared in the input step only; how many gaps are documented in the `readme` alone was not measured. This survey does not decide whether a missing format is a defect; section 4 raises it as an open question.
+Of the 183 Person entries, 12 have no identifier at all; of the 171 that do, 39 are bare ORCID iDs and 132 are `https://orcid.org/` URIs.
+
+A missing `format` means the input step declares no machine-readable datatype, so Galaxy accepts any dataset there. Some workflows state formats only in prose. Example, found by manually opening [`Assembly-Hifi-HiC-phasing-VGP4.ga`](https://github.com/galaxyproject/iwc/blob/deafc4876f2c778aaf075e48bd8e95f3604ccc92/workflows/VGP-assembly-v2/Assembly-Hifi-HiC-phasing-VGP4/Assembly-Hifi-HiC-phasing-VGP4.ga): its five data inputs declare no machine-readable `format`, but the `readme` field inside the same `.ga` file lists them as "[fastq]", "[txt]", "[meryldb]" and "[tabular]". The counts cover machine-readable formats declared in the input step only; how many gaps are documented in the `readme` alone was not measured. This survey does not decide whether a missing format is a defect; section 4 raises it as an open question.
 
 ## 3. Missing input formats
 

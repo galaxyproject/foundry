@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """IWC FAIR-metadata coverage survey.
 
-Usage: python3 -I iwc_fair_metadata_survey.py <path-to-iwc-checkout> [--csv out.csv]
+Usage: python3 -I iwc-fair-metadata-survey.py <path-to-iwc-checkout> [--csv out.csv]
                                               [--include-subworkflows]
 
 Counts, over every `*.ga` file under <iwc>/workflows/:
@@ -18,6 +18,8 @@ Counting rules
   - Creator: entries with class "Person". Organizations are ignored.
   - ORCID: a Person identifier containing four groups of 4 characters (digits,
     last may be X), as a bare ID or inside an orcid.org URL.
+  - ORCID as URI: the identifier is exactly an https://orcid.org/<ID> URI
+    (gxformat2's best-practices lint flags bare IDs as CreatorIdentifierNotURI).
   - Tags: non-empty `tags` list.
   - Inputs: steps of type data_input or data_collection_input at the top level.
     parameter_input steps are not counted.
@@ -33,6 +35,7 @@ from collections import defaultdict
 from pathlib import Path
 
 ORCID = re.compile(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]")
+ORCID_URI = re.compile(r"https://orcid\.org/\d{4}-\d{4}-\d{4}-\d{3}[\dX]")
 
 
 def iter_inputs(steps, depth=0):
@@ -57,6 +60,7 @@ def main(argv):
     rows = []
     by_cat = defaultdict(lambda: {"workflows": 0, "inputs": 0, "with_format": 0})
     n_sub_steps = 0
+    n_person = n_person_noid = n_person_bare = 0
     unreadable = []
     for p in sorted(wf_root.glob("**/*.ga")):
         try:
@@ -70,11 +74,18 @@ def main(argv):
             creators = [creators]
         persons = [c for c in creators if isinstance(c, dict) and c.get("class") == "Person"]
         orcids = [c for c in persons if ORCID.search(str(c.get("identifier") or ""))]
+        orcid_uris = [c for c in persons if ORCID_URI.fullmatch(str(c.get("identifier") or ""))]
+        for c in persons:
+            ident = str(c.get("identifier") or "")
+            n_person += 1
+            n_person_noid += not ident
+            n_person_bare += bool(ORCID.fullmatch(ident))
         row = {
             "file": str(p.relative_to(root)), "category": cat,
             "license": bool(wf.get("license")),
             "has_person": bool(persons),
             "all_persons_orcid": bool(persons) and len(orcids) == len(persons),
+            "all_persons_orcid_uri": bool(persons) and len(orcid_uris) == len(persons),
             "tags": bool(wf.get("tags")),
             "ds_inputs": 0, "ds_annotated": 0, "ds_format": 0,
             "col_inputs": 0, "col_annotated": 0, "col_format": 0,
@@ -117,12 +128,15 @@ def main(argv):
     if unreadable:
         print(f"unreadable files: {len(unreadable)}", unreadable[:3])
     print(f"embedded subworkflow steps (not counted separately): {n_sub_steps}")
+    print(f"Person entries: {n_person} ({n_person_noid} with no identifier, "
+          f"{n_person_bare} with a bare ORCID iD)")
     print()
     print("| Measure | Count | Share |")
     print("|---|---:|---:|")
     print(f"| License present | {S('license')} / {n} | {pct(S('license'), n)} |")
     print(f"| At least one Person creator | {persons} / {n} | {pct(persons, n)} |")
     print(f"| Every Person creator has an ORCID | {S('all_persons_orcid')} / {persons} | {pct(S('all_persons_orcid'), persons)} |")
+    print(f"| Every Person creator has an ORCID given as an https://orcid.org/ URI | {S('all_persons_orcid_uri')} / {persons} | {pct(S('all_persons_orcid_uri'), persons)} |")
     print(f"| Non-empty workflow tags | {S('tags')} / {n} | {pct(S('tags'), n)} |")
     print(f"| Data and collection inputs with an annotation | {ann} / {n_in} | {pct(ann, n_in)} |")
     print(f"| Inputs with a file format | {fmt} / {n_in} | {pct(fmt, n_in)} |")
