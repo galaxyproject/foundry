@@ -20,6 +20,11 @@
 - fixture: a draft whose Identity-pinned step translates nf-core/bamtofastq's `SAMTOOLS_VIEW_MAP_MAP` (pinned at `869832186b25d2ccbcd31d5f69edacc1ba32b718`). Its `_plan_state.resolved_args` has `args: '-b -f1 -F12'` and `prefix: { "${meta.id}.map_map" }` from `withName:SAMTOOLS_VIEW_MAP_MAP` in `conf/modules.config`, and its `intent` says only to keep mapped reads. Add the [[galaxy-tool-summary]] for the pinned Tool Shed `samtools_view` wrapper.
 - expect: `state` sets BAM output, requires flag 1, and excludes flags 4 and 8, following the flags rather than `intent`. The ledger gains `carried` decisions covering `-b`, `-f1`, and `-F12` once each, and a `not_applicable` decision for `prefix`, each with `source_arg.step` set to the step. No flag record has a top-level `step`.
 
+## Case: an alias selector overrides the process name's
+
+- fixture: the `SAMTOOLS_VIEW_MAP_MAP` case above, with one more synthetic `resolved_args` entry: `args: '-h'` from `withName:SAMTOOLS_VIEW` in a module `nextflow.config`.
+- expect: `state` does not set header output for `-h`. The `withName:SAMTOOLS_VIEW` entry gets one `not_applicable` decision whose `rationale` names `withName:SAMTOOLS_VIEW_MAP_MAP` as the selector that wins, and the alias entry's flags are recorded as in the case above.
+
 ## Case: step bound to an authored user-defined tool
 
 - fixture: a draft with one Deferred step (`tool_id: TODO`, `TODO_*` ports, `_plan_*` fields) whose Tool Shed discovery missed, plus the `galaxy-user-tool.yml` [[author-galaxy-tool-wrapper]] emitted for it. The definition embedded in Galaxy's `$GALAXY/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml` can stand in for the authored file once its data input's `format` is written as a list (`[txt]`), as [[author-galaxy-tool-wrapper]] emits it.

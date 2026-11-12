@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "b14eef623c16859a525a138e7fd4beddbb5cf8568ab9f4c1cdb9b12fc7803a44",
-    "commit": "6224dac5bce8d9eb65c75e99939d55d23df15d04"
+    "commit": "806b65c26c988b00b67b43963b89f3d07365d69f"
   },
-  "cast_at": "2026-11-11T23:14:42.579Z",
+  "cast_at": "2026-11-12T01:23:38.566Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -261,8 +261,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
-      "dst_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
+      "src_hash": "17dfa7f423ed5f53dfd8fc2986358a1e5370c9fc670f30a1d8daa4f063165edd",
+      "dst_hash": "17dfa7f423ed5f53dfd8fc2986358a1e5370c9fc670f30a1d8daa4f063165edd",
       "source": "deterministic"
     },
     {

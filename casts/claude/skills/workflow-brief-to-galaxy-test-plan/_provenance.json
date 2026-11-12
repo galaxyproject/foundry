@@ -6,9 +6,9 @@
     "path": "content/molds/workflow-brief-to-galaxy-test-plan/index.md",
     "revision": 4,
     "content_hash": "df02aa501cbc18fdf5c36ddc3f2ca87e17f4db51c054a52cbbef6eb0a66bd4e3",
-    "commit": "6224dac5bce8d9eb65c75e99939d55d23df15d04"
+    "commit": "806b65c26c988b00b67b43963b89f3d07365d69f"
   },
-  "cast_at": "2026-11-11T23:14:44.684Z",
+  "cast_at": "2026-11-12T01:23:40.890Z",
   "refs": [
     {
       "kind": "research",
@@ -67,8 +67,8 @@
       "purpose": "Follow the current open-question decisions, including answers the interface Mold made for questions the brief left without a proposal, instead of answering them again.",
       "trigger": "When the run supplied an open-requirements ledger whose decisions carry `open_question`.",
       "verification": "Run a brief whose open question about test data has no proposal; confirm the test plan follows the interface Mold's recorded answer.",
-      "src_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
-      "dst_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
+      "src_hash": "17dfa7f423ed5f53dfd8fc2986358a1e5370c9fc670f30a1d8daa4f063165edd",
+      "dst_hash": "17dfa7f423ed5f53dfd8fc2986358a1e5370c9fc670f30a1d8daa4f063165edd",
       "source": "deterministic"
     },
     {

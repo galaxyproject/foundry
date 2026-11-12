@@ -180,9 +180,11 @@ entries:
     missing: "no wrapper parameter sets it"
 ```
 
-- A flag carried into `state` is a decision with `disposition: carried`, and `decision` says where it landed. A flag with no Galaxy counterpart is a decision with `disposition: not_applicable`, and `rationale` says why. An `ext.prefix` that only names output files is the usual case.
+- A flag is one option token with any value attached to it (`-f1`, `-hb`). A value passed as the next token (`-r <reads_in_memory>`) belongs to its option, and the record's text names it. A whole `ext.prefix` is one flag.
+- A flag carried into `state` is a decision with `disposition: carried`, and `decision` says where it landed. A flag with no Galaxy counterpart is a decision with `disposition: not_applicable`, and `rationale` names what makes it inapplicable. An `ext.prefix` that only names output files is the usual case; name those outputs.
 - A flag the step drops is a `kind: dropped` entry. Its `units` names the flag, and its `because` cites the tool summary's missing option. It stays `open`, like any drop.
-- Each flag an expression can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
+- Only one entry per `key` takes effect for a call. Nextflow ranks a `withName` selector above a `withLabel` one, a selector naming the alias above one naming the process, and a fully qualified name above both. Give each overridden entry one `not_applicable` decision covering its whole expression, with `rationale` naming the selector that wins. When two entries tie at one rank, the summary can't show which Nextflow reads last: record both as usual and append one open entry with `step` set, naming both selectors.
+- Each flag the effective entry can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
 - A record names its step inside `source_arg`, never in a top-level `step`, so a dropped flag never reads as a dropped step.
 - Join records to the summary on `source_arg`, not on `id`.
 

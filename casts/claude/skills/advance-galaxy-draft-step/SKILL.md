@@ -36,7 +36,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/cli/draft-next-step.json`: CLI command reference packaged as a sidecar. Deterministically pick the next drafty step (or report no remaining work). The orchestrator owns the loop oracle so the harness reduces to `while draft: invoke skill`. Use when: at the start of every iteration, before any per-step work.
-- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.
+- `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, check each of the step's source arguments has a disposition, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.
 - `references/schemas/galaxy-workflow-draft.schema.json`: Schema file copied verbatim into the bundle. In/out contract: the draft this Mold reads and mutates one step per iteration conforms to galaxy-workflow-draft. Cast bundles the JSON Schema alongside the draft-validate CLI checks.
 
 ## Load On Demand

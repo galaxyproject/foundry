@@ -131,7 +131,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on."
+    purpose: "Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, check each of the step's source arguments has a disposition, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on."
     verification: "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that leaves fewer open blocking entries than it found."
 related_molds:
   - "[[discover-shed-tool]]"
