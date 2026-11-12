@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import YAML, { stringify } from "yaml";
 import { checkStepRemovals, StepRemovalInputError } from "../src/step-removals.js";
 
-// `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at a5c6cd57, on its synthetic-diff fixtures
+// `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at 4d086efa, on its synthetic-diff fixtures
 // and on the nested-removals and list-removal pairs here.
 const fixture = (name: string): unknown =>
   JSON.parse(readFileSync(resolve(__dirname, "fixtures/step-removals", name), "utf8"));

@@ -6,5 +6,5 @@ A test-phase run took `subsample_reads` out of the workflow and recorded only a 
 - `galaxy-workflow.gxwf.yml` and `galaxy-workflow.gxwf-tests.yml`: the workflow and test after the test phase.
 - `open-requirements.ledger.yml`: the ledger, with no `kind: dropped` entry for `subsample_reads`.
 - `open-requirements.dropped.ledger.yml`: the same ledger with the gap recorded as a `kind: dropped` entry instead, still citing only the log line.
-- `step-diff.json`: `gxwf diff --json galaxy-workflow.extracted.gxwf.yml galaxy-workflow.gxwf.yml`, from galaxy-tool-util-ts PR #233 at `a5c6cd57`.
+- `step-diff.json`: `gxwf diff --json galaxy-workflow.extracted.gxwf.yml galaxy-workflow.gxwf.yml`, from galaxy-tool-util-ts PR #233 at `4d086efa`.
 - `workflow-test-result.json`: the result `run-workflow-test` emits.
