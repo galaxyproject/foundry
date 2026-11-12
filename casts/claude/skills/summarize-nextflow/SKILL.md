@@ -240,7 +240,7 @@ Populate `source` from `git remote get-url`, `git rev-parse HEAD` (or the user-s
 
 #### 3. Parse parameters and profiles
 
-Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schema.json` exists (nf-core), prefer it as the source of truth for `type`, `description`, and `required` — it is real JSON Schema, copy verbatim. Some params are computed at config-load time (for example `params.fasta = getGenomeAttribute('fasta')` in `main.nf`) and will not appear in `nextflow_schema.json`; include them with a description noting the dynamic source.
+Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schema.json` exists (nf-core), prefer it as the source of truth for `type`, `description`, and `required` — it is real JSON Schema, copy verbatim. Support both modern `$defs` and legacy `definitions` group objects joined through `allOf`; otherwise an older but valid nf-core schema silently produces an empty `params[]`. Preserve required names from each group's `required[]`, then merge simple literal defaults and parameters found only in the config block. Some params are computed at config-load time (for example `params.fasta = getGenomeAttribute('fasta')` in `main.nf`) and will not appear in `nextflow_schema.json`; include them with a description noting the dynamic source.
 
 **`profiles[]`** — enumerate the `profiles { ... }` block and classify each entry by role. Track brace depth: a profile body contains nested `params { }` and `process { }` blocks, and a flat regex over the block emits those as profile names. The block is not always in `nextflow.config` — follow the root `includeConfig` chain (`epi2me-labs/wf-human-variation` declares all six profiles in `base.config`), and fall back to a bounded scan for other `*.config` files carrying a `profiles { }` block (`biocorecrg/MOP2` keeps them in `nextflow.global.config`, selected at launch with `-c`).
 
@@ -275,6 +275,7 @@ Sample-sheet inputs are the dominant structured-input idiom in modern nf-core pi
 
 Column field rules:
 
+- When a declared `assets/schema_*.json` conflicts with the live header validation, `splitCsv` mapping, or documented examples, follow the live parser and record the stale schema in `warnings[]`; a schema link alone does not prove current columns. Set `discovered_via: splitCsv` and `schema_path: null` when the live parser is the evidence used, and derive path versus metadata roles from downstream `file()`/`path()` consumption.
 - `kind`: `data` when nf-schema `format` is `file-path`/`directory-path`/`path` or when the column is annotated `meta:` is **absent** and the value is consumed as a `path()` downstream. `meta` otherwise (including all `meta: true` annotations and all non-path scalars). Nest the nf-schema `meta:` annotation here even when implicit — translation skills key on it to decide which columns become Galaxy `column_definitions[]` versus element/inner-collection slots.
 - `type`: copy verbatim from the row schema (`string`/`integer`/`number`/`boolean`). Path columns are `string` with a `format` qualifier; do not collapse `path` into a synthetic type.
 - `required`, `default`, `enum`, `pattern`, `exists`, `mimetype`, `description`: copy verbatim when present, leaving null/empty defaults otherwise.
@@ -369,6 +370,8 @@ Classify full-scale candidates as `reference-scale` and minimal/tiny/stub-only c
 Consult component-nextflow-testing when fixtures use a layout outside `conf/test.config` + nf-test (e.g. legacy `test/` scripts, external test harnesses) or when assertions are non-snapshot equality / regex / `containsString` checks.
 
 #### 8. Validate and emit
+
+Treat CLI exit 0 and schema validity as necessary, not sufficient. Before validating, audit the summary against the pinned source: a non-ad-hoc nf-core pipeline with a parameter schema should not emit empty `params[]`; every test-classified profile should appear in `test_candidates[]` when no pipeline nf-test exists; and each selected candidate's `params_delta` should retain its scientific switches, not just paths and resource values. If optional Nextflow inspection fails or returns a thinner result, rerun with `--no-with-nextflow` and compare both outputs before repairing from source. Keep recoveries deterministic, cite the live source used, disclose any remaining loss in `warnings[]`, and never let schema acceptance conceal an empty or partial interface.
 
 Validate the assembled object before emitting: run `foundry validate-summary-nextflow summary-nextflow.json`. The subcommand is shipped by `@galaxy-foundry/gxwf-foundry` and can be invoked from npm with `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-nextflow summary-nextflow.json`. The standalone `summarize-nextflow` bin (from `@galaxy-foundry/summarize-nextflow`) self-validates by default and is the better gate when the skill is also producing the summary. On schema failure, the skill should fail loud — the downstream skills bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early; do not add extra fields to work around a mismatch.
 
