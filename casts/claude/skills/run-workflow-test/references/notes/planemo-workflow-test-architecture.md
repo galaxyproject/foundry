@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-10-26
-revision: 4
+revised: 2026-11-12
+revision: 5
 related_notes:
   - "[[galaxy-workflow-testability-design]]"
   - "[[galaxy-tool-job-failure-reference]]"
@@ -73,6 +73,7 @@ Important managed-mode behavior:
 - Managed Galaxy defaults are convenient but may not match production Galaxy behavior.
 - Planemo can install workflow tool dependencies through Tool Shed metadata when configured.
 - Test histories are created automatically unless a history id is supplied.
+- When `planemo test` exits, Planemo stops the Galaxy it started. Galaxy has already deleted each job's working directory when the job finished (Planemo sets `cleanup_job: always`), and Planemo then removes the temporary configuration directory, which holds the datasets (`files/`) and `job_working_directory/`. Only the structured result and the terminal log remain. The job, invocation, and history APIs are gone, and so are the dataset contents. `--no_cleanup` sets `cleanup_job: never` and keeps the directory. Its path is the prefix of the `job_working_directory/` paths in each job's command line in the structured result. Delete it by hand afterwards.
 
 ## External Galaxy Configuration
 
@@ -154,8 +155,8 @@ For [[debug-galaxy-workflow-output]]:
 
 - Start from structured Planemo output. When there is none because the workflow import failed, start from the upload response and the Galaxy server log.
 - For missing-output failures, check label drift and omitted workflow-level outputs before assuming tool failure.
-- If the failure is job-level, inspect Galaxy job APIs described in [[galaxy-tool-job-failure-reference]].
-- If the failure is invocation-level, inspect Galaxy invocation APIs described in [[galaxy-workflow-invocation-failure-reference]].
+- If the failure is job-level, inspect Galaxy job APIs described in [[galaxy-tool-job-failure-reference]] on an external Galaxy. On a Planemo-managed run, read the job records in the structured result (see Managed Galaxy Configuration).
+- If the failure is invocation-level, inspect Galaxy invocation APIs described in [[galaxy-workflow-invocation-failure-reference]] on an external Galaxy. On a Planemo-managed run, read the invocation details in the structured result (see Managed Galaxy Configuration).
 - If only assertions failed, use [[planemo-asserts-idioms]] before deciding to rerun.
 
 ## Verification Gaps
