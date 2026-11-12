@@ -10,13 +10,15 @@ export interface StepRemovalsCheckOptions {
   json?: boolean;
 }
 
+const stdinOr = (path: string) => (path === "-" ? 0 : path);
+
 export function runCheckStepRemovals(
   diffPath: string,
   ledgerPath: string,
   options: StepRemovalsCheckOptions,
 ): never {
-  const diff = readInputOrExit<unknown>(diffPath, JSON.parse);
-  const ledger = readInputOrExit<unknown>(ledgerPath, YAML.parse);
+  const diff = readInputOrExit<unknown>(diffPath, JSON.parse, stdinOr(diffPath));
+  const ledger = readInputOrExit<unknown>(ledgerPath, YAML.parse, stdinOr(ledgerPath));
   let result: StepRemovalCheck;
   try {
     result = checkStepRemovals(diff, ledger);
