@@ -3281,7 +3281,8 @@ function effectiveArgs(
  * Nextflow's fully qualified name for each process call, by canonical process name:
  * workflow call names from the entry workflow down, joined by `:`. Without an
  * anonymous entry workflow, each named workflow no other workflow calls is a root
- * and starts the name, as it does when run with `-entry`.
+ * and starts the name, as it does when run with `-entry`. A call name resolves
+ * through the calling file's own includes, since aliases are file-scoped.
  */
 function processCallPaths(
   pipelineRoot: string,
@@ -3295,33 +3296,46 @@ function processCallPaths(
     byName.set(workflow.name, workflow);
     for (const alias of workflow.aliases) byName.set(alias, workflow);
   }
+  const includesByFile = new Map<string, Map<string, string>>();
+  const includes = (file: string): Map<string, string> => {
+    let bound = includesByFile.get(file);
+    if (!bound) {
+      const items = parseIncludeItems(readText(join(pipelineRoot, file)));
+      bound = new Map(items.map((include) => [include.alias ?? include.name, include.name]));
+      includesByFile.set(file, bound);
+    }
+    return bound;
+  };
   const paths = new Map<string, Set<string>>();
-  const visit = (calls: string[], prefix: string | null, stack: Set<string>): void => {
+  const visit = (
+    calls: string[],
+    file: string,
+    prefix: string | null,
+    stack: Set<string>,
+  ): void => {
     for (const call of calls) {
       const path = prefix === null ? call : `${prefix}:${call}`;
-      const canonical = aliasToCanonical.get(call) ?? call;
-      if (processNames.has(canonical)) {
-        paths.set(canonical, (paths.get(canonical) ?? new Set()).add(path));
+      const target =
+        includes(file).get(call) ??
+        (processNames.has(call) ? call : (aliasToCanonical.get(call) ?? call));
+      if (processNames.has(target)) {
+        paths.set(target, (paths.get(target) ?? new Set()).add(path));
         continue;
       }
-      const workflow = byName.get(call);
+      const workflow = byName.get(target) ?? byName.get(call);
       if (!workflow || stack.has(workflow.name)) continue;
-      visit(workflow.calls, path, new Set(stack).add(workflow.name));
+      visit(workflow.calls, workflow.path, path, new Set(stack).add(workflow.name));
     }
   };
   const entryCalls = entrypoint ? entryWorkflowCalls(pipelineRoot, entrypoint, processNames) : null;
-  if (entryCalls) {
-    visit(entryCalls, null, new Set());
+  if (entrypoint && entryCalls) {
+    visit(entryCalls, entrypoint, null, new Set());
   } else {
     const called = new Set(workflows.flatMap((workflow) => workflow.calls));
-    const roots = workflows.filter(
-      (workflow) => ![workflow.name, ...workflow.aliases].some((name) => called.has(name)),
-    );
-    visit(
-      roots.map((workflow) => workflow.name),
-      null,
-      new Set(),
-    );
+    for (const workflow of workflows) {
+      if ([workflow.name, ...workflow.aliases].some((name) => called.has(name))) continue;
+      visit([workflow.name], workflow.path, null, new Set());
+    }
   }
   return new Map([...paths].map(([name, set]) => [name, [...set].sort()]));
 }

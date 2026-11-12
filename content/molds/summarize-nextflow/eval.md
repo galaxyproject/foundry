@@ -188,7 +188,9 @@ whatever a scenario produces. Properties are tagged by bucket:
 - assertion: each `resolved_args` entry has an `id` unique within its process.
   Each `effective_args` row's `call` is a call path traced from the entry
   workflow (subworkflow aliases included, the anonymous entry adding no
-  segment). For every call path of a process and every `key` an entry sets
+  segment), or, for a process no traced workflow calls, its bare name or
+  alias. Each call name resolves through the calling file's own includes.
+  For every call path of a process and every `key` an entry sets
   for it, `effective_args` has one row whose `ids` name the entry with the
   highest rank (`withLabel` < `withName` on the process < `withName` on the
   alias < `withName` on the whole path). At the same rank a selected

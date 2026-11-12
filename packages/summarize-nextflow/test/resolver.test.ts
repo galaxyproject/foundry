@@ -3618,6 +3618,59 @@ workflow { SUB_A(); SUB_B() }
     ]);
   });
 
+  test("resolves an alias two files bind to different processes by each file's includes", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/alias-scope' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SUB_A:X' {
+        ext.args = '-p'
+    }
+    withName: 'SUB_B:X' {
+        ext.args = '-q'
+    }
+}
+`,
+    );
+    write(root, "modules/p.nf", "process P {\n  script:\n  'p'\n}\n");
+    write(root, "modules/q.nf", "process Q {\n  script:\n  'q'\n}\n");
+    write(
+      root,
+      "subworkflows/a.nf",
+      "include { P as X } from '../modules/p'\nworkflow SUB_A { X() }\n",
+    );
+    write(
+      root,
+      "subworkflows/b.nf",
+      "include { Q as X } from '../modules/q'\nworkflow SUB_B { X() }\n",
+    );
+    write(
+      root,
+      "main.nf",
+      `include { SUB_A } from './subworkflows/a'
+include { SUB_B } from './subworkflows/b'
+workflow { SUB_A(); SUB_B() }
+`,
+    );
+
+    const byName = Object.fromEntries(
+      (await summarize(root)).processes.map((process) => [process.name, process]),
+    );
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+    expect(byName.P!.effective_args).toEqual([
+      { call: "SUB_A:X", key: "args", ids: [id("SUB_A:X")] },
+    ]);
+    expect(byName.Q!.effective_args).toEqual([
+      { call: "SUB_B:X", key: "args", ids: [id("SUB_B:X")] },
+    ]);
+  });
+
   test("gives a process only an uncalled named workflow calls its bare-name rows", async () => {
     const root = tempPipelineRoot();
     write(
