@@ -1624,6 +1624,58 @@ workflow root {
     expect(fai?.source_expression).toBe("getGenomeAttribute('fasta_fai')");
   });
 
+  test("reads params and sample sheets from legacy draft-07 `definitions` groups", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/legacy' }\n");
+    write(
+      root,
+      "nextflow_schema.json",
+      JSON.stringify({
+        $schema: "http://json-schema.org/draft-07/schema",
+        definitions: {
+          io: {
+            title: "Input/output options",
+            required: ["input"],
+            properties: {
+              input: {
+                type: "string",
+                format: "file-path",
+                mimetype: "text/csv",
+                schema: "assets/schema_input.json",
+              },
+              outdir: { type: "string", default: "./results" },
+            },
+          },
+        },
+        allOf: [{ $ref: "#/definitions/io" }],
+      }),
+    );
+    write(
+      root,
+      "assets/schema_input.json",
+      JSON.stringify({
+        type: "array",
+        items: { type: "object", properties: { sample: { type: "string" } } },
+      }),
+    );
+    write(root, "main.nf", "workflow PIPE { }\n");
+
+    const summary = (await summarize(root)) as unknown as {
+      params: { name: string; required: boolean; schema_group?: string | null; default: unknown }[];
+      sample_sheets: { param: string; discovered_via: string; columns: { name: string }[] }[];
+    };
+
+    const byName = Object.fromEntries(summary.params.map((p) => [p.name, p]));
+    expect(Object.keys(byName).sort()).toEqual(["input", "outdir"]);
+    expect(byName.input!.required).toBe(true);
+    expect(byName.input!.schema_group).toBe("Input/output options");
+    expect(byName.outdir!.default).toBe("./results");
+    expect(summary.sample_sheets.map((s) => [s.param, s.discovered_via])).toEqual([
+      ["input", "nf-schema"],
+    ]);
+    expect(summary.sample_sheets[0]!.columns.map((c) => c.name)).toEqual(["sample"]);
+  });
+
   test("getGenomeAttribute overrides nf-schema provenance when both declare the same param", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/keymap' }\n");

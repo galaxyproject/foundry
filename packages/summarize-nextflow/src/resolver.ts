@@ -875,22 +875,29 @@ function parseProfiles(pipelineRoot: string): Profile[] {
   return profiles;
 }
 
+interface NextflowSchemaGroup {
+  title?: string;
+  fa_icon?: string;
+  required?: string[];
+  properties?: Record<string, Record<string, unknown>>;
+}
+
+interface NextflowSchemaDoc {
+  $defs?: Record<string, NextflowSchemaGroup>;
+  definitions?: Record<string, NextflowSchemaGroup>;
+}
+
+// Legacy nf-core schemas (draft-07) group params under `definitions` instead of `$defs`.
+function schemaGroups(schema: NextflowSchemaDoc): NextflowSchemaGroup[] {
+  return [...Object.values(schema.$defs ?? {}), ...Object.values(schema.definitions ?? {})];
+}
+
 function parseParams(pipelineRoot: string): Param[] {
   const schemaPath = join(pipelineRoot, "nextflow_schema.json");
   const params = new Map<string, Param>();
   if (existsSync(schemaPath)) {
-    const schema = JSON.parse(readText(schemaPath)) as {
-      $defs?: Record<
-        string,
-        {
-          title?: string;
-          fa_icon?: string;
-          required?: string[];
-          properties?: Record<string, Record<string, unknown>>;
-        }
-      >;
-    };
-    for (const section of Object.values(schema.$defs ?? {})) {
+    const schema = JSON.parse(readText(schemaPath)) as NextflowSchemaDoc;
+    for (const section of schemaGroups(schema)) {
       const required = new Set(section.required ?? []);
       const schema_group = typeof section.title === "string" ? section.title : null;
       const fa_icon = typeof section.fa_icon === "string" ? section.fa_icon : null;
@@ -986,11 +993,9 @@ function parseGetGenomeAttributeAssignments(
 function parseSampleSheets(pipelineRoot: string): SampleSheet[] {
   const schemaPath = join(pipelineRoot, "nextflow_schema.json");
   if (!existsSync(schemaPath)) return [];
-  const schema = JSON.parse(readText(schemaPath)) as {
-    $defs?: Record<string, { properties?: Record<string, Record<string, unknown>> }>;
-  };
+  const schema = JSON.parse(readText(schemaPath)) as NextflowSchemaDoc;
   const sheets: SampleSheet[] = [];
-  for (const section of Object.values(schema.$defs ?? {})) {
+  for (const section of schemaGroups(schema)) {
     for (const [paramName, property] of Object.entries(section.properties ?? {})) {
       const rowSchemaRef = typeof property.schema === "string" ? property.schema : null;
       if (!rowSchemaRef) continue;
