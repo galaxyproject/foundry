@@ -30,7 +30,11 @@ function write(root: string, path: string, content: string): void {
 }
 
 function pipelineFiles(root: string, processName: string): void {
-  write(root, "nextflow.config", "manifest { name = 'adhoc/pinned' }\n");
+  write(
+    root,
+    "nextflow.config",
+    "manifest {\n  name = 'adhoc/pinned'\n  homePage = 'https://github.com/example/pinned'\n}\n",
+  );
   write(root, "modules/m.nf", `process ${processName} {\n  script:\n  'x'\n}\n`);
   write(
     root,
@@ -75,6 +79,7 @@ function tempRepo(): { path: string; first: string; second: string; feature: str
 interface SummarySource {
   source: { url: string; version: string };
   processes: { name: string }[];
+  warnings: string[];
 }
 
 async function summarize(pathOrUrl: string, pin?: string): Promise<SummarySource> {
@@ -112,6 +117,8 @@ describe("source resolution", () => {
     expect(summary.processes.map((process) => process.name)).toEqual(["FIRST"]);
     expect(summary.source.version).toBe(repo.first);
     expect(summary.source.url).toBe("https://github.com/example/pinned.git");
+    // The temp checkout's origin is a local path; that must not leak a homePage fallback note.
+    expect(summary.warnings.join("\n")).not.toContain("homePage");
   });
 
   test("resolves branch, short SHA, and full SHA pins to the same commit", async () => {
@@ -156,6 +163,26 @@ describe("source resolution", () => {
     const summary = await summarize(repo.path, "v2.0.0");
 
     expect(validateSummary(summary).valid).toBe(true);
+  });
+
+  test("falls back to manifest.homePage when origin is a local path (Nextflow-managed clone)", async () => {
+    // Nextflow clones into ~/.nextflow/assets/<org>/<repo>/clones/<sha> with origin = a local bare repo.
+    const repo = tempRepo();
+    const scratch = mkdtempSync(join(tmpdir(), "summarize-nextflow-nxf-"));
+    const bare = join(scratch, "bare");
+    const clone = join(scratch, "clone");
+    git(scratch, ["clone", "--quiet", "--bare", repo.path, bare]);
+    git(scratch, ["clone", "--quiet", bare, clone]);
+
+    for (const summary of [await summarize(clone), await summarize(clone, "v1.0.0")]) {
+      expect(summary.source.url).toBe("https://github.com/example/pinned");
+      expect(validateSummary(summary).valid).toBe(true);
+    }
+
+    write(clone, "nextflow.config", "manifest { name = 'adhoc/pinned' }\n");
+    const noHomePage = await summarize(clone);
+    expect(noHomePage.source.url).toBe("https://example.invalid/unknown.git");
+    expect(validateSummary(noHomePage).valid).toBe(true);
   });
 
   test("rejects a missing pipeline path as an input error", () => {
