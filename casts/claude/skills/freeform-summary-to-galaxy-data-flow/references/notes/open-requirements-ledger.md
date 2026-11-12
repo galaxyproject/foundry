@@ -217,8 +217,14 @@ entries:
 ```
 
 - A branch control is a summary value that selects which analyses run: a `params` entry such as `step`, `aligner` or `tools`, a profile such as `mutect`, or a `workflow.conditionals[]` guard.
-- `control` is `params.<name>` or `profile`. `from` names where the summary holds the value: `<array>[<name or id>]` with an optional field, as in `params[aligner].enum`, `params[concatenate_vcfs]` for a boolean set `true`, `profiles[mutect]`, `test_candidates[<id>].params_delta` or `workflow.conditionals[<a name in affects>]`. When a control has no `enum`, cite a test candidate whose `id` names the value, such as `test_candidates[tests/variant_calling_mutect2.nf.test::dynamically-generated]`, with no field. A free-text control with no such value, such as sarek's `umi_read_structure`, goes in `because` instead.
-- Record one drop per branch family (somatic calling, alternative aligners, annotation), not per process. Pipeline plumbing such as initialisation and CSV writing is not a branch.
+- `control` is `params.<name>` or `profile`.
+- `from` names where the summary holds the value, as `<array>[<name or id>]` with an optional field:
+  - `params[<name>].enum` or `params[<name>].default` for a listed or default value, and `params[<name>]` for a boolean set `true`.
+  - `profiles[<name>]` for a profile.
+  - `test_candidates[<id>].params_delta` for a value the candidate sets. When the param has no `enum`, cite a candidate whose `id` names the value, with no field, as in `test_candidates[tests/variant_calling_mutect2.nf.test::dynamically-generated]`.
+  - `workflow.conditionals[<a name in affects>]` for a value a guard tests.
+- A free-text control with no citable value, such as sarek's `umi_read_structure`, goes in `because` instead.
+- Record one drop per branch family (somatic calling, alternative aligners, annotation), not per process. Pipeline plumbing such as initialization and CSV writing is not a branch.
 - `units` names the summary's own subworkflows and processes, backticked, so a reader can join them to the summary.
 - `because` names the scope decision and says what puts the branch outside it.
 - A scope drop has no top-level `step` and no `source_arg`.

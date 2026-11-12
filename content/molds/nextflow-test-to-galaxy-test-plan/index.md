@@ -14,7 +14,7 @@ input_artifacts:
   - id: summary-nextflow
     description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_candidates, test_selection, and snapshot evidence."
   - id: nextflow-galaxy-interface
-    description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]]; names the scope's test candidate when `test_selection` is `needs-scope-choice`."
+    description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]]. It names the scope's test candidate when `test_selection` is `needs-scope-choice`."
 output_artifacts:
   - id: galaxy-test-plan
     kind: yaml
@@ -105,4 +105,4 @@ Translate Nextflow test evidence into a Galaxy workflow test plan. The output is
 
 Set each assertion's `evidence` by where its expected value came from. Use `test-evidence` only for a value translated from an upstream assertion, checksum, or expected file. Use `fixture-derived` for a value measured from the upstream fixture bytes, and `intent` for one read from a wrapper XML or the translated workflow's step state. A snapshot `md5` token translated to `checksum` is `test-evidence`. A snapshot capture that records only names or paths (`stable_name`, `.nftignore`-pruned) carries no expected content: author those assertions as `fixture-derived` or `intent`, and when a test case ends up with no `test-evidence` assertions, record a `warnings[]` entry with code `no-upstream-expected-outputs`.
 
-Consume the candidate selected by [[summarize-nextflow]], or on `needs-scope-choice` the one the interface brief's scope names; do not re-rank profiles here. Use [[nextflow-test-case-selection]] to preserve whether that case is primary coverage, a topology bootstrap, or reference-scale evidence, and to keep deferred science branches visible rather than presenting one translated test as exhaustive.
+Consume the candidate [[summarize-nextflow]] selects or, on `needs-scope-choice`, the one the interface brief's scope names. Do not re-rank profiles here. Use [[nextflow-test-case-selection]] to preserve whether that case is primary coverage, a topology bootstrap, or reference-scale evidence, and to keep deferred science branches visible rather than presenting one translated test as exhaustive.

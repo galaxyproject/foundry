@@ -76,12 +76,11 @@ Materialize Nextflow fixtures with `make fixtures-nextflow`.
 
 - fixture: `workflow-fixtures/pipelines/nf-core__sarek`, scope-narrowed to the
   first 5 workflow steps.
-- expect: the scope decision fixes `step`, `tools` and `aligner` and its
-  `decision` states the 5-step cap, the in-scope
-  steps past the cap get an open `kind: dropped` entry without `scope_branch`,
-  and the final ledger still carries every scope drop and that entry `open`.
-  The per-step loop concretizes each of the 5 steps, and tool resolution is
-  recorded per step (discover or author).
+- expect: the scope decision fixes `step`, `tools` and `aligner`, and its
+  `decision` states the 5-step cap. The in-scope steps past the cap get an open
+  `kind: dropped` entry without `scope_branch`. The final ledger still carries
+  that entry and every scope drop as `open`. The per-step loop concretizes each
+  of the 5 steps, and tool resolution is recorded per step (discover or author).
 
 ## Case: nf-core/eager vs. a human-authored aDNA workflow (compare and contrast)
 
