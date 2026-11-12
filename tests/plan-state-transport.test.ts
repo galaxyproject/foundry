@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { validateDraft } from "@galaxy-tool-util/schema";
 import { beforeAll, describe, expect, it } from "vitest";
 import yaml from "js-yaml";
-import { buildSummary } from "../packages/summarize-nextflow/src/index.js";
+import { buildSummary } from "@galaxy-foundry/summarize-nextflow";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const templateMold = path.join(
@@ -27,6 +27,10 @@ interface Process {
   name: string;
   resolved_args: Entry[];
   effective_args: { call: string; ids: string[]; tie?: true }[];
+}
+interface PlanState {
+  calls: string[];
+  resolved_args: Entry[];
 }
 
 // Shaped like nf-core/bamtofastq 8698321; the UNMAP_UNMAP if/else is synthetic, to get a tie.
@@ -136,7 +140,7 @@ describe("_plan_state transport for effective_args", () => {
       const draft = yaml.load(text) as { steps: { view: { _plan_state: string } } };
 
       expect(validateDraft(draft).ok).toBe(true);
-      const inner = yaml.load(draft.steps.view._plan_state);
+      const inner = yaml.load(draft.steps.view._plan_state) as PlanState;
       expect(inner.calls).toEqual([call]);
       expect(inner.resolved_args).toEqual(entries);
     }
@@ -167,7 +171,7 @@ describe("_plan_state transport for effective_args", () => {
   it("keeps the template Mold's example equal to resolver output", () => {
     const example = templateExample();
     expect(validateDraft(oneStepDraft(example)).ok).toBe(true);
-    const inner = yaml.load(example);
+    const inner = yaml.load(example) as PlanState;
     expect(inner.calls).toEqual([MAP_MAP]);
     expect(inner.resolved_args).toEqual(effectiveEntries(view, [MAP_MAP]));
   });
