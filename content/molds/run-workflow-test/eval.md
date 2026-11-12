@@ -47,8 +47,9 @@ scenario produces.
   the result carries `step_removals` from `foundry check-step-removals` over
   `gxwf diff --json <snapshot> <final workflow>`. It is `status: pass` only if
   every step in the diff's `steps.removed` has a `kind: dropped` ledger entry
-  naming it in its top-level `step`. A removed step labelled only by a gap, a
-  `source_arg` flag record, or nothing makes it `fail` with modality
+  naming it in its top-level `step` and giving a `because`. A removed step
+  labelled only by a gap, a drop with no `because`, a `source_arg` flag record,
+  or nothing makes it `fail` with modality
   `unlabelled-step-removal`. A check that couldn't run makes it `fail` with
   modality `step-removal-check-error`. Inputs that feed no step are reported
   and never change the status. Without a snapshot, `step_removals` is `null`

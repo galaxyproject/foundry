@@ -11,12 +11,12 @@ revised: 2026-11-12
 revision: 1
 related_notes:
   - "[[open-requirements-ledger]]"
-summary: "Check that every step a `gxwf diff` reports removed has a `kind: dropped` ledger entry naming it."
+summary: "Check that every step a `gxwf diff` reports removed has a `kind: dropped` ledger entry naming it and giving a reason."
 ---
 
 # `foundry check-step-removals`
 
-Read the JSON a `gxwf diff --json <before> <after>` prints and an [[open-requirements-ledger]], and check that every step the diff lists under `steps.removed` is labelled as a drop. A removed step is labelled when an obligation entry under `entries` (or a ledger written as a bare list of entries) has `kind: dropped`, a top-level `step` equal to the removed step's key, and no `source_arg`. A step inside an inline subworkflow is keyed by its path, the parent step's key and its own joined by `/` (`nested/first`), and only that full key names it. A step whose key has no `/` also matches its label.
+Read the JSON a `gxwf diff --json <before> <after>` prints and an [[open-requirements-ledger]], and check that every step the diff lists under `steps.removed` is labelled as a drop. A removed step is labelled when an obligation entry under `entries` (or a ledger written as a bare list of entries) has `kind: dropped`, a top-level `step` equal to the removed step's key, a non-empty `because`, and no `source_arg`. A step inside an inline subworkflow is keyed by its path, the parent step's key and its own joined by `/` (`nested/first`), and only that full key names it. A step whose key has no `/` also matches its label.
 
 `<diff.json>` is a path, or `-` to read the diff from stdin.
 
@@ -45,5 +45,5 @@ gxwf diff --json galaxy-workflow.extracted.gxwf.yml galaxy-workflow.gxwf.yml \
 - A per-flag record from **Source arguments** carries `source_arg` and is never a step drop, even when it also sets `step`. A plain gap naming the step doesn't label it either: a gap says the run couldn't do the work, not that it chose to cut it.
 - Only entries under `entries` count. A decision under `decisions` labels nothing.
 - An entry's `status` doesn't matter. An open drop and a surrendered one both label the step.
-- The check reads the step list only. It says nothing about whether a drop's `because` is cited or still true.
+- A `because` may be a string or a list. Blank strings and empty lists count as no reason, and such an entry labels nothing. The check reads only that a reason is there. It says nothing about whether the reason is cited or still true.
 - `step: first` names the top-level step `first`, never `nested/first`. Copy the key from `unlabelled` into the entry.

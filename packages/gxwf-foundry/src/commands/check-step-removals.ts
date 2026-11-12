@@ -31,7 +31,9 @@ export function runCheckStepRemovals(
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } else {
     for (const step of result.unlabelled)
-      process.stderr.write(`  removed step ${step} has no kind: dropped ledger entry naming it\n`);
+      process.stderr.write(
+        `  removed step ${step} has no kind: dropped ledger entry naming it with a because\n`,
+      );
     if (result.unwired_inputs.length > 0)
       process.stdout.write(`inputs feeding no step: ${result.unwired_inputs.join(", ")}\n`);
     const removed = result.removed_steps.length;

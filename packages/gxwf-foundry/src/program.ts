@@ -136,7 +136,7 @@ export function buildProgram(): Command {
   program
     .command("check-step-removals")
     .description(
-      "Check that every step a gxwf diff reports removed has a kind: dropped ledger entry naming it.",
+      "Check that every step a gxwf diff reports removed has a kind: dropped ledger entry naming it and giving a reason.",
     )
     .argument("<diff.json>", "gxwf diff --json output, or - for stdin")
     .argument("<ledger.yml>", "Open-requirements ledger")

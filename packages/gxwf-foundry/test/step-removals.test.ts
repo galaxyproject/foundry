@@ -67,6 +67,20 @@ describe("checkStepRemovals", () => {
     expect(checkStepRemovals(nestedRemovals, { entries: [nested] }).unlabelled).toEqual(["first"]);
   });
 
+  it("does not count a drop without a reason", () => {
+    const { because: _because, ...noReason } = chrDropped;
+    expect(checkStepRemovals(draftToFinal, { entries: [noReason] }).ok).toBe(false);
+    for (const because of ["", "  ", [], ["", " "], null])
+      expect(
+        checkStepRemovals(draftToFinal, { entries: [{ ...noReason, because }] }).unlabelled,
+      ).toEqual(["chr_filter"]);
+  });
+
+  it("accepts a reason written as a list", () => {
+    const listed = { ...chrDropped, because: ["", "samtools view rejected the region list"] };
+    expect(checkStepRemovals(draftToFinal, { entries: [listed] }).ok).toBe(true);
+  });
+
   it("passes a list-form relabel, which removes no step", () => {
     expect(checkStepRemovals(listRelabel, { entries: [] }).ok).toBe(true);
   });

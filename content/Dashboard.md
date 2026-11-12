@@ -156,7 +156,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[check-step-removals]] | Check that every step a `gxwf diff` reports removed has a `kind: dropped` ledger entry naming it. | draft | 2026-11-12 | 1 |
+| [[check-step-removals]] | Check that every step a `gxwf diff` reports removed has a `kind: dropped` ledger entry naming it and giving a reason. | draft | 2026-11-12 | 1 |
 | [[validate-galaxy-tool-discovery]] | AJV gate for discover-shed-tool recommendation documents. | draft | 2026-10-23 | 3 |
 | [[validate-galaxy-tool-summary]] | AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree. | draft | 2026-10-23 | 3 |
 | [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-10-23 | 5 |

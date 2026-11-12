@@ -46,9 +46,20 @@ function ledgerEntries(ledger: unknown): Entry[] {
   return entries.filter(isRecord);
 }
 
-/** A step drop: `kind: dropped`, a top-level `step`, and no `source_arg` (a per-flag record). */
+/** `because` has been written as a string and as a list of strings. */
+const hasReason = (because: unknown): boolean =>
+  typeof because === "string"
+    ? because.trim().length > 0
+    : Array.isArray(because) && because.some(hasReason);
+
+/** A step drop: `kind: dropped`, a top-level `step`, a non-empty `because`, and no `source_arg`. */
 function isStepDrop(entry: Entry): entry is Entry & { step: string } {
-  return entry.kind === "dropped" && typeof entry.step === "string" && !("source_arg" in entry);
+  return (
+    entry.kind === "dropped" &&
+    typeof entry.step === "string" &&
+    hasReason(entry.because) &&
+    !("source_arg" in entry)
+  );
 }
 
 export function checkStepRemovals(diff: unknown, ledger: unknown): StepRemovalCheck {

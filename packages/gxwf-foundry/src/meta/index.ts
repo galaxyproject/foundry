@@ -273,7 +273,7 @@ export const foundryCliMeta: CliProgramSpec = {
       name: "check-step-removals",
       fullName: "foundry check-step-removals",
       description:
-        "Check that every step a gxwf diff reports removed has a kind: dropped ledger entry naming it.",
+        "Check that every step a gxwf diff reports removed has a kind: dropped ledger entry naming it and giving a reason.",
       synopsis: "foundry check-step-removals [options] <diff.json> <ledger.yml>",
       args: [
         {
