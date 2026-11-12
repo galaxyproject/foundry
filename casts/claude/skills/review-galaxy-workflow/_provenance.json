@@ -6,9 +6,9 @@
     "path": "content/molds/review-galaxy-workflow/index.md",
     "revision": 1,
     "content_hash": "6c65f653439814a9150cd24341e67a612f4e2c06c0bf2dd7ee838c9c8430bafe",
-    "commit": "5b3f2b78e0051f108c8a11ca53b82e0d2cc43a25"
+    "commit": "395227117ac418764a99d2d431dd5333c8364e8f"
   },
-  "cast_at": "2026-11-12T01:57:19.627Z",
+  "cast_at": "2026-11-12T02:46:59.074Z",
   "refs": [
     {
       "kind": "prompt",
@@ -84,8 +84,8 @@
       "purpose": "Read a supplied ledger's open and surrendered entries into the clearly labeled Foundry context section without treating their absence as an IWC failure.",
       "trigger": "When the harness supplied an open-requirements ledger and the review needs to report unresolved intent or surrendered work as Foundry context.",
       "verification": "Run the with-foundry-context and without-foundry-context scenarios; confirm the labeled section appears in one, is omitted or explicitly stated absent in the other, and that the IWC checklist verdicts are identical between them.",
-      "src_hash": "930e9eb6f3059862460d1faeeb600bce9e5d0c95d5f75dfa761f97dc0ea72146",
-      "dst_hash": "930e9eb6f3059862460d1faeeb600bce9e5d0c95d5f75dfa761f97dc0ea72146",
+      "src_hash": "f7a1ff8660e55ec853701f5a84d70072d789eefa6f43f04e9a996a8667031f3d",
+      "dst_hash": "f7a1ff8660e55ec853701f5a84d70072d789eefa6f43f04e9a996a8667031f3d",
       "source": "deterministic"
     },
     {

@@ -25,6 +25,11 @@
 - fixture: the `SAMTOOLS_VIEW_MAP_MAP` case above, with one more synthetic `resolved_args` entry: `args: '-h'` from `withName:SAMTOOLS_VIEW` in a module `nextflow.config`.
 - expect: `state` does not set header output for `-h`. The `withName:SAMTOOLS_VIEW` entry gets one `not_applicable` decision whose `rationale` names `withName:SAMTOOLS_VIEW_MAP_MAP` as the selector that wins, and the alias entry's flags are recorded as in the case above.
 
+## Case: two configs tie on one selector
+
+- fixture: the `SAMTOOLS_VIEW_MAP_MAP` case above, with one more synthetic `resolved_args` entry: `args: '-b -f1 -F4'` from the same `withName:SAMTOOLS_VIEW_MAP_MAP` in `conf/extra.config`.
+- expect: `state` sets BAM output and requires flag 1, and sets no exclude filter. Each entry's `-b` and `-f1` are `carried` once. Its `-F12` or `-F4` is an open gap with no `kind`, naming both entries' `selector` and `config` in `missing`. No record has a top-level `step`.
+
 ## Case: step bound to an authored user-defined tool
 
 - fixture: a draft with one Deferred step (`tool_id: TODO`, `TODO_*` ports, `_plan_*` fields) whose Tool Shed discovery missed, plus the `galaxy-user-tool.yml` [[author-galaxy-tool-wrapper]] emitted for it. The definition embedded in Galaxy's `$GALAXY/lib/galaxy_test/workflow/inline_user_defined_tool.gxwf.yml` can stand in for the authored file once its data input's `format` is written as a list (`[txt]`), as [[author-galaxy-tool-wrapper]] emits it.
