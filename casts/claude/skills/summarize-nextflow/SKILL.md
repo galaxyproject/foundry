@@ -46,8 +46,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Validation
 
-- Before starting, check that the installed validator carries the summary-nextflow schema this bundle was cast with: run `foundry validate-summary-nextflow --schema-sha256 d52e784f3ceddce8619b0ea883e5fa92743605f7617f98b27666bb43bc8ad8e8` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
-- Validate `summary-nextflow.json` before returning it: run `foundry validate-summary-nextflow --schema-sha256 d52e784f3ceddce8619b0ea883e5fa92743605f7617f98b27666bb43bc8ad8e8 summary-nextflow.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-nextflow --schema-sha256 d52e784f3ceddce8619b0ea883e5fa92743605f7617f98b27666bb43bc8ad8e8 summary-nextflow.json`. This checks artifact `summary-nextflow` against the summary-nextflow schema.
+- Before starting, check that the installed validator carries the summary-nextflow schema this bundle was cast with: run `foundry validate-summary-nextflow --schema-sha256 3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c` with no artifact. Exit 4, or an `unknown option '--schema-sha256'` error from a validator older than this check, means the validator and this bundle are out of step; stop and report that instead of producing an artifact the validator would misjudge.
+- Validate `summary-nextflow.json` before returning it: run `foundry validate-summary-nextflow --schema-sha256 3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c summary-nextflow.json` from `@galaxy-foundry/gxwf-foundry`. If the command is not on PATH, run `npx --package @galaxy-foundry/gxwf-foundry foundry validate-summary-nextflow --schema-sha256 3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c summary-nextflow.json`. This checks artifact `summary-nextflow` against the summary-nextflow schema.
 
 ## Procedure
 

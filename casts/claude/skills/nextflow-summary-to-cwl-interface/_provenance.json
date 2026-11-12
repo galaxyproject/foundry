@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-cwl-interface/index.md",
     "revision": 1,
     "content_hash": "3fc1ccd78b3828e77382b921fc547a4ea2f56d7123cd92cf0e1cfefd4561984f",
-    "commit": "9727baa6079615d9dcd77de5ea3209a7d51b8df7"
+    "commit": "527622287b8cb53c4c772cffe9d5a5570538173c"
   },
-  "cast_at": "2026-11-12T08:18:38.663Z",
+  "cast_at": "2026-11-12T09:43:19.292Z",
   "refs": [
     {
       "kind": "schema",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing CWL Workflow inputs and outputs.",
       "license": "MIT",
-      "src_hash": "d52e784f3ceddce8619b0ea883e5fa92743605f7617f98b27666bb43bc8ad8e8",
-      "dst_hash": "d52e784f3ceddce8619b0ea883e5fa92743605f7617f98b27666bb43bc8ad8e8",
+      "src_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
+      "dst_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
       "source": "deterministic"
     }
   ],
