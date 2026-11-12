@@ -37,8 +37,6 @@ interface ScopeDecision {
   id: string;
   decided_by: string;
   scope: { candidate?: string; controls: Control[] };
-  decision: string;
-  rationale: string;
 }
 interface ScopeDrop {
   id: string;
@@ -52,8 +50,8 @@ interface ScopeDrop {
   source_arg?: unknown;
 }
 interface Ledger {
-  decisions: (ScopeDecision | Record<string, unknown>)[];
-  entries: (ScopeDrop | Record<string, unknown>)[];
+  decisions: object[];
+  entries: object[];
 }
 interface Summary {
   params: { name: string; type?: string; default?: unknown; enum?: unknown[] }[];
@@ -69,9 +67,9 @@ function readLedger(): Ledger {
 }
 
 function scopeRecords(ledger: Ledger): { scope: ScopeDecision; drops: ScopeDrop[] } {
-  const scopes = ledger.decisions.filter((d) => "scope" in d) as ScopeDecision[];
+  const scopes = ledger.decisions.filter((d): d is ScopeDecision => "scope" in d);
   expect(scopes).toHaveLength(1);
-  const drops = ledger.entries.filter((e) => "scope_branch" in e) as ScopeDrop[];
+  const drops = ledger.entries.filter((e): e is ScopeDrop => "scope_branch" in e);
   return { scope: scopes[0]!, drops };
 }
 

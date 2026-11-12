@@ -120,10 +120,10 @@ The output is not a gxformat2 skeleton and not a workflow schema. It is a design
 
 ## Scope
 
-Decide which source branch the workflow carries before choosing inputs. A pipeline like nf-core/sarek offers germline and somatic calling, five aligners and six start steps, selected by `params` such as `step`, `aligner` and `tools`, by mode profiles such as `mutect`, and by `workflow.conditionals[]` guards. A pipeline whose branches all fit one workflow needs no scope decision.
+Decide which source branch the workflow carries before choosing inputs, using the branch controls the Source scope section of [[open-requirements-ledger]] defines. A pipeline whose branches all fit one workflow needs no scope decision.
 
 - Honour a scope the caller supplied. Otherwise follow the candidate `test_selection` selects: its `params_delta` and `effective_profiles` name the branch the source's own test runs, and parameter defaults fill the rest. When `test_selection.status` is `needs-scope-choice`, pick the candidate whose `params_delta` changes the fewest branch controls from their defaults, from the primary candidates when there are any. Break a tie by preferring `default.nf.test` or `main.nf.test`, then a case not named as a stub, then the first listed. Mark the decision `confidence: low` and carry on.
-- Record the choice as a scope decision and each excluded branch family as an open scope drop in the ledger, in the shape the Source scope section of [[open-requirements-ledger]] gives. Cite every control value from the summary.
+- Record the choice as a scope decision and each excluded branch family as an open scope drop in the ledger, in the shape that section gives.
 - In the brief, state the selected scope and its candidate `id`, and list the excluded branches by their drop `id`s. The test Molds read the candidate from there.
 - A control the scope fixes is not a workflow input. A control left open inside the scope, such as a QC toggle, is one.
 

@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-interface/index.md",
     "revision": 3,
     "content_hash": "de0cb02532205ad18f4aa1ab2881cac725a3191b448468a8a11d0663ff1ec97d",
-    "commit": "94fcfb580b2db0d4dbb0604a6590febea845a72e"
+    "commit": "fc28186c50a9f2e9d491d877befd6acc5f48755a"
   },
-  "cast_at": "2026-11-12T14:25:11.616Z",
+  "cast_at": "2026-11-12T14:32:37.471Z",
   "refs": [
     {
       "kind": "research",
@@ -88,8 +88,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the narrative never settles — an output the source names but never specifies, a parameter stated only qualitatively, a collection shape the prose doesn't determine.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "45caa9692eac7986cb74b2ae592563ca563c53ba39914efd03d18a1f984cb1f1",
-      "dst_hash": "45caa9692eac7986cb74b2ae592563ca563c53ba39914efd03d18a1f984cb1f1",
+      "src_hash": "751de34971e8c3248ff856dca01a53339aa7e58548a416bc5dd5366e2f62878f",
+      "dst_hash": "751de34971e8c3248ff856dca01a53339aa7e58548a416bc5dd5366e2f62878f",
       "source": "deterministic"
     }
   ],

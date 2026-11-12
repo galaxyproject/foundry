@@ -222,7 +222,6 @@ entries:
 - `units` names the summary's own subworkflows and processes, backticked, so a reader can join them to the summary.
 - `because` names the scope decision and says what puts the branch outside it.
 - A scope drop names no top-level `step` and has no `source_arg`. An excluded branch never became a step, so the [[run-workflow-test]] step-removal check never reads it, and `scope_branch` tells it apart from a flag record.
-- A pipeline carried whole needs no scope decision. A control the scope leaves open stays a workflow input, and a control it fixes does not become one.
 
 Later Molds work inside the scope. They design no step, `when:` arm or fan-in for an excluded branch and carry its drop through `open`.
 
