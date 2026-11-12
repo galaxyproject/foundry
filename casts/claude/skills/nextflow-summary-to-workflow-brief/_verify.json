@@ -11,7 +11,7 @@
       "args": [
         "validate-summary-nextflow",
         "--schema-sha256",
-        "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+        "098b2b7fa3b50fadbf15db4db883d48864b17a4b51f59450e71274ab309c316f",
         "{artifact_path}"
       ]
     },

@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-11-10
-revision: 8
+revised: 2026-11-12
+revision: 9
 related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
@@ -94,7 +94,7 @@ Extract the minimum executable contract:
 - Container image or package evidence, with confidence.
 - `shell_command` intent and every referenced input/output token.
 - Input parameters with Galaxy-compatible names, types, labels, defaults, help text, and datatypes when evidenced.
-- Output datasets or collections with formats and `from_work_dir` / discovery rules.
+- Output datasets or collections with formats and `from_work_dir` / discovery rules. When the [[summary-nextflow]] process carries `meta.output_emits[]` or flattened `meta.output[].emit`, use those emit names as output ids, and prefer `meta.output[].ontologies[].edam` (or the matching emit member) when choosing a Galaxy datatype over inventing one from a glob alone.
 
 Prefer BioContainers or directly evidenced containers. If only Conda/package evidence exists, record what is known and avoid guessing an image tag.
 

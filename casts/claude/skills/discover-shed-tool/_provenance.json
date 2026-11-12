@@ -6,9 +6,9 @@
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 6,
     "content_hash": "f861bb1cb096f6e293ed3aaa25fe2f5aed11b5a22020434579513ccf7ed63869",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "commit": "f1a20393a19a7058420606ef5e106f7e6384c0b1"
   },
-  "cast_at": "2026-11-10T10:22:51.549Z",
+  "cast_at": "2026-11-12T09:39:57.216Z",
   "cast_date": "2026-05-07",
   "cast_revision": 5,
   "cast_history": [
@@ -110,8 +110,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.",
       "verification": "Run discover-shed-tool against known FastQC, ambiguous BWA-style, and no-hit queries and validate each emitted recommendation.",
-      "src_hash": "0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee",
-      "dst_hash": "0933a77437e523405e72d2b7ceacede6abee6cc51cc4c6da376d939a1439a2ee",
+      "src_hash": "c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c",
+      "dst_hash": "c0940fc0265e8fd25955f4380f03e088b62d25155fe98e7f051a5a3957d2840c",
       "source": "deterministic"
     }
   ],

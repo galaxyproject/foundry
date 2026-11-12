@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-data-flow/index.md",
     "revision": 8,
     "content_hash": "f71cc2b4ceb115d7d93c3dd2e622cbfafb8b9f338f1dd450ee5773f3c0a0e247",
-    "commit": "61da115975d155a36face0e83d5c28f638da7fca"
+    "commit": "f1a20393a19a7058420606ef5e106f7e6384c0b1"
   },
-  "cast_at": "2026-11-10T18:57:18.688Z",
+  "cast_at": "2026-11-12T09:39:57.720Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -233,8 +233,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure while drafting Galaxy-facing abstract data flow.",
       "license": "MIT",
-      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
-      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "src_hash": "098b2b7fa3b50fadbf15db4db883d48864b17a4b51f59450e71274ab309c316f",
+      "dst_hash": "098b2b7fa3b50fadbf15db4db883d48864b17a4b51f59450e71274ab309c316f",
       "source": "deterministic"
     }
   ],

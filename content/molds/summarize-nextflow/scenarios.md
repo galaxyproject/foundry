@@ -86,11 +86,12 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - fixture: `workflow-fixtures/pipelines/nf-core__bacass`.
 - expect: every `processes[]` row with `module_path` under `modules/nf-core/`
   has `meta != null`; `meta.tools[]`, `meta.input[]`, and `meta.output[]` are
-  normalized from the vendored `meta.yml`; and `module_tests[].length` equals
-  the count of `test("…")` blocks across the `*.nf.test` files under that
-  module's `tests/` directory. Every
-  `processes[]` row under `modules/local/` has `meta == null` and
-  `module_tests == []`.
+  normalized from the vendored `meta.yml` (including emit names and EDAM
+  ontologies when declared, and `input_channels[]` / `output_emits[]` for the
+  current channel/emit layout); and `module_tests[].length` equals the count of
+  `test("…")` blocks across the `*.nf.test` files under that module's `tests/`
+  directory. Every `processes[]` row under `modules/local/` has `meta == null`
+  and `module_tests == []`.
 
 ## Case: bacass subworkflow tests
 
