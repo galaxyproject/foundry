@@ -13,7 +13,7 @@
 ## Case: rnaseq scope falls back without stopping
 
 - fixture: `summarize-nextflow` output for `workflow-fixtures/pipelines/nf-core__rnaseq` (3.24.0, `47b3b0d3`), no caller-supplied scope. `test_selection.status` is `needs-scope-choice`.
-- expect: the run does not stop to ask for a scope. The scope decision's `candidate` is `tests/default.nf.test::Params: default`, which changes no branch control and wins the tie with its `- stub` twin, and the decision carries `confidence: low`. The scope fixes `aligner: star_salmon`, and a scope drop citing `params[aligner].enum` covers the other three aligners.
+- expect: the run does not stop to ask for a scope. The scope decision's `candidate` is `tests/default.nf.test::Params: default`, which changes no branch control and wins the tie with its `- stub` twin, and the decision carries `confidence: low`. The brief names that candidate. The scope fixes `aligner: star_salmon`, and a scope drop citing `params[aligner].enum` covers the other three aligners.
 
 ## Case: sample-sheet metadata is preserved
 

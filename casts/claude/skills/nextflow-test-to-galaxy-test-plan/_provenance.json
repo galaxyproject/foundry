@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-test-to-galaxy-test-plan",
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
-    "revision": 8,
-    "content_hash": "fa769216f621ef25470c9fb907df1278635c0a1e022b647b9462ff7b92469291",
-    "commit": "b74c6bdd0ccc36940ed2db94632931e529733b0a"
+    "revision": 9,
+    "content_hash": "f3ca52953ffc31ac4328895565bb38aa1c9ee13a47a27b80bb6d0f7fc3f524f4",
+    "commit": "94fcfb580b2db0d4dbb0604a6590febea845a72e"
   },
-  "cast_at": "2026-11-12T13:53:29.817Z",
+  "cast_at": "2026-11-12T14:25:12.940Z",
   "refs": [
     {
       "kind": "research",
@@ -184,6 +184,13 @@
         "inherited_schema": "[[summary-nextflow]]",
         "producers": [
           "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "nextflow-galaxy-interface",
+        "description": "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]]; names the scope's test candidate when `test_selection` is `needs-scope-choice`.",
+        "producers": [
+          "nextflow-summary-to-galaxy-interface"
         ]
       }
     ]

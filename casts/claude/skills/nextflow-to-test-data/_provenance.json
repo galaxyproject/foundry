@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-to-test-data",
     "path": "content/molds/nextflow-to-test-data/index.md",
-    "revision": 4,
-    "content_hash": "842e097edfb5bfbc37b62a35d5870ee2087df33919212a7965fd70dae799b189",
-    "commit": "527622287b8cb53c4c772cffe9d5a5570538173c"
+    "revision": 5,
+    "content_hash": "9faeedf909e5983541e8aff612c93a8ae940c4a2c3cdc303cfc9c83696125972",
+    "commit": "94fcfb580b2db0d4dbb0604a6590febea845a72e"
   },
-  "cast_at": "2026-11-12T09:43:19.746Z",
+  "cast_at": "2026-11-12T14:25:13.018Z",
   "refs": [
     {
       "kind": "research",
