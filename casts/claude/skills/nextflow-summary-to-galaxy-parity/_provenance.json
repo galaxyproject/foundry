@@ -1,0 +1,145 @@
+{
+  "provenance_schema_version": 4,
+  "cast_target": "claude",
+  "mold": {
+    "name": "nextflow-summary-to-galaxy-parity",
+    "path": "content/molds/nextflow-summary-to-galaxy-parity/index.md",
+    "revision": 1,
+    "content_hash": "3949e6ba03a17ac260604ae100a781310d76be0019617010b6a0d38ec000783a",
+    "commit": "4ff48eda3b0357215bff23ff0e5d657e61b7366c"
+  },
+  "cast_at": "2026-11-12T16:11:06.595Z",
+  "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[nextflow-parity]]",
+      "src": "content/cli/foundry/nextflow-parity.md",
+      "dst": "references/cli/nextflow-parity.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Join the summary, ledger, snapshot, final workflow and their diff deterministically, so the report renders joins and findings instead of re-deriving them.",
+      "verification": "Promote after a nextflow-to-galaxy run's report lists every finding the command emitted and no difference the command marked recorded as unrecorded.",
+      "src_hash": "ed47376a82d2d4f5dfc990e7aaf0c7ef7fdc8e901e6a9da544fe1897a2de6ccc",
+      "dst_hash": "c72fa9982b32a0d15b09d5837ee89d72026186780d7fa087a0b09b0ac8d1209a",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-workflow-draft-format]]",
+      "src": "content/research/galaxy-workflow-draft-format/index.md",
+      "dst": "references/notes/galaxy-workflow-draft-format.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Read a snapshot step's `_plan_state`, `_plan_context` and TODO sentinels when explaining what the step was designed to carry.",
+      "trigger": "When a step's planned behaviour must be compared with its final state and the parity JSON does not settle it.",
+      "src_hash": "0bbc8445ac874d58ba71e74854db795112140de7908d6fabdca585fd0a6dc60e",
+      "dst_hash": "0bbc8445ac874d58ba71e74854db795112140de7908d6fabdca585fd0a6dc60e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Read each record kind the report links to: step drops, flag records under Source arguments, scope records under Source scope, plain gaps and decisions.",
+      "verification": "Promote after a worked run's report links each listed difference to the ledger entry that records it.",
+      "src_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
+      "dst_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summarize-nextflow#summaryNextflowSchema",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Read source-side detail the command doesn't join: params, publishDir targets, closures in `resolved_args`, and `script_excerpt` flags.",
+      "trigger": "When a report row needs a source fact beyond what `foundry nextflow-parity` printed.",
+      "license": "MIT",
+      "src_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
+      "dst_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "nextflow-galaxy-parity-report",
+        "kind": "markdown",
+        "default_filename": "nextflow-galaxy-parity-report.md",
+        "description": "Reviewable Markdown report of how the final workflow differs from the Nextflow source: outputs, tool versions, parameters and inputs, behaviour, scope, unverified items, and every difference with no recorded reason."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-nextflow",
+        "description": "Structured Nextflow pipeline summary from [[summarize-nextflow]]: the source side of every comparison, including `effective_args` and each process's tool, container and conda.",
+        "inherited_schema": "[[summary-nextflow]]",
+        "producers": [
+          "summarize-nextflow"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]] as the run left it: the drops, flag records, scope records and gaps that give a difference its reason.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-draft-snapshot",
+        "description": "The draft as the per-step loop first received it, `_plan_*` intact, from [[advance-galaxy-draft-step]]: the designed workflow, and through `_plan_state.calls` the map from steps to source calls.",
+        "inherited_schema": "[[galaxy-workflow-draft]]",
+        "producers": [
+          "advance-galaxy-draft-step"
+        ]
+      },
+      {
+        "id": "galaxy-workflow",
+        "description": "The final gxformat2 workflow after the test phase: the workflow the report compares with the source.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "mature-galaxy-workflow-for-iwc"
+        ]
+      },
+      {
+        "id": "workflow-test-result",
+        "description": "Structured handoff from [[run-workflow-test]]: its status says what the run verified, and a missing or red result leaves every claim in the report unverified at runtime.",
+        "optional": true,
+        "producers": [
+          "run-workflow-test"
+        ]
+      }
+    ]
+  }
+}

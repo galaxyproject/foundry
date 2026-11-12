@@ -6,6 +6,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | reviewed | 2026-11-12 | 6 |
 | [[galaxy-workflow-maturation]] | Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result. | draft | 2026-11-11 | 3 |
 | [[interview-to-workflow-brief]] | Summarize an interview source and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
 | [[nextflow-to-workflow-brief]] | Summarize a Nextflow pipeline and produce a scoped Workflow Brief for expert review. | draft | 2026-10-19 | 3 |
@@ -16,7 +17,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-workflow-review]] | Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy. | draft | 2026-09-22 | 2 |
 | [[interview-to-galaxy]] | Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. | reviewed | 2026-09-22 | 5 |
 | [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-09-22 | 3 |
-| [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | reviewed | 2026-09-22 | 5 |
 | [[paper-to-cwl]] | Direct path from a paper to a CWL Workflow + CommandLineTool set. | draft | 2026-09-22 | 3 |
 | [[update-interview-to-galaxy]] | Interview-driven, edit-in-place modification of an existing Galaxy gxformat2 workflow via a reviewable change-set, reusing the per-step draft loop. | reviewed | 2026-09-22 | 3 |
 
@@ -28,7 +28,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs. | reviewed | 2026-11-12 | 7 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool. | reviewed | 2026-11-12 | 16 |
 | [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | reviewed | 2026-11-12 | 9 |
-| [[nextflow-summary-to-galaxy-interface]] | Map a Nextflow summary into a Galaxy workflow interface design brief. | reviewed | 2026-11-12 | 7 |
+| [[nextflow-summary-to-galaxy-interface]] | Map a Nextflow summary into a Galaxy workflow interface design brief. | reviewed | 2026-11-12 | 8 |
+| [[nextflow-summary-to-galaxy-parity]] | Report how the finished Galaxy workflow differs from its Nextflow source, and which differences have no recorded reason. | draft | 2026-11-12 | 1 |
 | [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | reviewed | 2026-11-12 | 11 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | reviewed | 2026-11-12 | 9 |
 | [[nextflow-to-test-data]] | Resolve a Nextflow pipeline's own declared test fixtures into Galaxy workflow test-data refs. | reviewed | 2026-11-12 | 5 |
@@ -156,7 +157,9 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[check-scope-records]] | Check a ledger's source-scope decision and scope drops, and their `from` citations against a Nextflow summary. | draft | 2026-11-12 | 1 |
 | [[check-step-removals]] | Check that every step a `gxwf diff` reports removed has a `kind: dropped` ledger entry naming it and giving a reason. | draft | 2026-11-12 | 1 |
+| [[nextflow-parity]] | Join a nextflow-to-galaxy run's summary, ledger, draft snapshot, final workflow and their `gxwf diff` into source-parity rows and findings. | draft | 2026-11-12 | 1 |
 | [[validate-galaxy-tool-discovery]] | AJV gate for discover-shed-tool recommendation documents. | draft | 2026-10-23 | 3 |
 | [[validate-galaxy-tool-summary]] | AJV gate for galaxy-tool-cache summarize manifests, including the nested parsed_tool subtree. | draft | 2026-10-23 | 3 |
 | [[validate-galaxy-workflow-test-plan]] | AJV gate for Galaxy workflow test-plan YAML documents. | draft | 2026-10-23 | 5 |

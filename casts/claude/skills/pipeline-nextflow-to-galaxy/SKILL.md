@@ -5,7 +5,7 @@ description: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflo
 
 # pipeline-nextflow-to-galaxy
 
-Harness for the **NEXTFLOW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-galaxy/index.md` (revision 5) — regenerate with `foundry-build assemble-pipeline nextflow-to-galaxy` if the pipeline changes; do not hand-edit.
+Harness for the **NEXTFLOW → GALAXY** Foundry pipeline. Runs the constituent skills in order inside a single per-run working directory. Assembled from `content/pipelines/nextflow-to-galaxy/index.md` (revision 6) — regenerate with `foundry-build assemble-pipeline nextflow-to-galaxy` if the pipeline changes; do not hand-edit.
 
 ## When To Use
 
@@ -83,6 +83,7 @@ Run these phases in order. After each, confirm the expected artifact exists in t
 11. **validate-galaxy-workflow** — invoke the `validate-galaxy-workflow` skill. Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 12. **run-workflow-test** — invoke the `run-workflow-test` skill. Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
 13. **debug-galaxy-workflow-output** — invoke the `debug-galaxy-workflow-output` skill. Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs.
+14. **nextflow-summary-to-galaxy-parity** — invoke the `nextflow-summary-to-galaxy-parity` skill. Report how the finished Galaxy workflow differs from its Nextflow source, and which differences have no recorded reason.
 
 ## Done
 
@@ -97,3 +98,4 @@ If the run was invoked with `--feedback`, close the ledger next, after the run r
 - Do not re-implement any skill's internal logic here; this harness only sequences and routes.
 - Carry unresolved assumptions forward as notes rather than inventing missing inputs.
 - Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven.
+- The parity report runs once after the test phase settles, whether the test passed or not. It only reports and never sends the run back into the test loop.

@@ -18,7 +18,7 @@ Evaluation plan for the `nextflow-summary-to-galaxy-interface` Mold. This file i
 
 - bucket: handoff
 - check: deterministic
-- assertion: the ledger holds at most one decision with `scope`. Every `kind: dropped` entry with `scope_branch` is `open`, names that decision in `scope_branch.decision` and in `because`, has non-empty `units` and `selected_by`, and has neither a top-level `step` nor `source_arg`. Each `from` resolves to a summary value that backs its control value, and each backticked unit name is a subworkflow or process in the summary.
+- assertion: the ledger holds at most one decision with `scope`. Every `kind: dropped` entry with `scope_branch` is `open`, names that decision in `scope_branch.decision` and in `because`, has non-empty `units` and `selected_by`, and has neither a top-level `step` nor `source_arg`. Each `from` resolves to a summary value that backs its control value, and each backticked unit name is a subworkflow or process in the summary. `foundry check-scope-records <ledger> <summary.json>` checks all of it and exits 0.
 
 ## Property: sample-sheet metadata is preserved
 

@@ -52,6 +52,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-summary-to-cwl-interface]] — Map a Nextflow summary into a CWL Workflow interface design brief.
 - [[nextflow-summary-to-galaxy-data-flow]] — Translate a Nextflow summary into a Galaxy data-flow design brief. *(reviewed)*
 - [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief. *(reviewed)*
+- [[nextflow-summary-to-galaxy-parity]] — Report how the finished Galaxy workflow differs from its Nextflow source, and which differences have no recorded reason.
 - [[nextflow-summary-to-galaxy-reference-data]] — Decide the Galaxy-side shape of external reference data declared by a Nextflow pipeline. *(reviewed)*
 - [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. *(reviewed)*
 - [[nextflow-summary-to-workflow-brief]] — Turn a nextflow source summary and selected scope into a Workflow Brief without Galaxy design assumptions.
@@ -147,6 +148,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## CLI Commands
 
 - [[add]] — Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema.
+- [[check-scope-records]] — Check a ledger's source-scope decision and scope drops, and their `from` citations against a Nextflow summary.
 - [[check-step-removals]] — Check that every step a `gxwf diff` reports removed has a `kind: dropped` ledger entry naming it and giving a reason.
 - [[check-workflow-brief]] — Check Workflow Brief structure and stop on explicit workflow or agent environment blockers.
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
@@ -154,6 +156,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[draft-next-step]] — Pick the next drafty step a harness should work on, or report no remaining work; deterministic topological + alphabetical tiebreak.
 - [[draft-validate]] — Validate a `class: GalaxyWorkflowDraft` workflow against draft-contract rules; with --concrete, also validate the extracted concrete subset.
 - [[list]] — Enumerate the tools in a cache directory with their resolved versions; the surface for confirming which stock/shed pin got cached.
+- [[nextflow-parity]] — Join a nextflow-to-galaxy run's summary, ledger, draft snapshot, final workflow and their `gxwf diff` into source-parity rows and findings.
 - [[planemo-cli_metadata]] — Export structured metadata for Planemo CLI commands.
 - [[planemo-lint]] — Check for common errors and best practices.
 - [[planemo-output_schema]] — Export JSON Schemas for Planemo machine-readable outputs.

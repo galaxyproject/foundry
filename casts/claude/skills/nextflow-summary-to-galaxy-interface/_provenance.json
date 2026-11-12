@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-interface",
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
-    "revision": 7,
-    "content_hash": "46cf13237a5f332891074d9e9aa117757781793a5bb67f4e133c0d54fe969e09",
-    "commit": "32720e29c7acb7754683495bfce88810db41a686"
+    "revision": 8,
+    "content_hash": "03e3c96d215ff9f916490d9757bdaf4be966da0d3d6bc83d1b1f7de6e6d0f24e",
+    "commit": "4ff48eda3b0357215bff23ff0e5d657e61b7366c"
   },
-  "cast_at": "2026-11-12T15:01:37.650Z",
+  "cast_at": "2026-11-12T16:11:06.550Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -29,6 +29,22 @@
     }
   ],
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[check-scope-records]]",
+      "src": "content/cli/foundry/check-scope-records.md",
+      "dst": "references/cli/check-scope-records.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Check the scope decision and scope drops against the summary: record shape, every `from` citation, and every unit name.",
+      "trigger": "After recording a scope decision, before handing off.",
+      "verification": "Promote after a scope-narrowing run hands off a ledger the check passes with its summary.",
+      "src_hash": "307f0596331a5684e6c2e506f1dc075de41f77b09324ac1e2f90ecd8a0884a3a",
+      "dst_hash": "394efe61263c2aaffc03d7a8727960c55a27dc76277e2066dfb4a6b1e297781e",
+      "source": "deterministic"
+    },
     {
       "kind": "research",
       "mode": "verbatim",

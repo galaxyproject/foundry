@@ -24,7 +24,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- None declared. Procedure should not assume external CLIs are present.
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
+  Check: `foundry --help`.
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
 
 ## Load Upfront
 
@@ -36,6 +39,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
+- `references/cli/check-scope-records.json`: CLI command reference packaged as a sidecar. Check the scope decision and scope drops against the summary: record shape, every `from` citation, and every unit name. Use when: after recording a scope decision, before handing off.
 - `references/notes/galaxy-sample-sheet-collections.md`: Research note copied verbatim into the bundle. Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs. Use when: the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input.
 - `references/notes/galaxy-workflow-testability-design.md`: Research note copied verbatim into the bundle. Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address. Use when: deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs.
 - `references/notes/nextflow-reference-data-classification.md`: Research note copied verbatim into the bundle. Cross-check source-side reference-data classifications before translating the reference-data brief into Galaxy workflow inputs. Use when: the reference-data brief is silent, low-confidence, or conflicts with source evidence for iGenomes-derived params, coordinated bundles, compute-if-missing branches, multi-DB pick-lists, or cohort-specific assets.
@@ -60,6 +64,7 @@ Before choosing inputs, decide which source branch the workflow carries, without
 - Otherwise follow the candidate `test_selection` selects. Its `params_delta` and `effective_profiles` name the branch the source's own test runs, and parameter defaults fill the rest.
 - When `test_selection.status` is `needs-scope-choice`, pick the candidate whose `params_delta` changes the fewest branch controls from their defaults, from the primary candidates when there are any. Break a tie by preferring `default.nf.test` or `main.nf.test`, then the first listed. Mark the decision `confidence: low`.
 - Record the choice as a scope decision and each excluded branch family as an open scope drop in the ledger, in the shape that section gives.
+- Run check-scope-records on the ledger with the summary, and fix every problem it reports before handing off.
 - In the brief, state the selected scope and its candidate `id`, and list the excluded branches by their drop `id`s.
 - A control the scope fixes is not a workflow input. A control left open inside the scope, such as a QC toggle, is one.
 

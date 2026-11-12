@@ -10,7 +10,7 @@ tags:
 status: reviewed
 created: 2026-05-05
 revised: 2026-11-12
-revision: 7
+revision: 8
 summary: "Map a Nextflow summary into a Galaxy workflow interface design brief."
 input_artifacts:
   - id: summary-nextflow
@@ -105,6 +105,15 @@ references:
     evidence: corpus-observed
     purpose: "Translate iGenomes-style and per-asset reference-data params into Galaxy inputs without inheriting nf-core's reference-resolution magic; v1 posture is explicit optional inputs with in-tool rebuild on absence."
     trigger: "When the source pipeline declares iGenomes-derived params (params.genome with getGenomeAttribute), per-asset reference path params (fasta, fasta_fai, dict, bwa_index, dbsnp, known_indels, intervals, pon), or any compute-if-missing index-building branch in the source."
+  - kind: cli-command
+    ref: "[[check-scope-records]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: hypothesis
+    purpose: "Check the scope decision and scope drops against the summary: record shape, every `from` citation, and every unit name."
+    trigger: "After recording a scope decision, before handing off."
+    verification: "Promote after a scope-narrowing run hands off a ledger the check passes with its summary."
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-template]]"
@@ -126,5 +135,6 @@ Before choosing inputs, decide which source branch the workflow carries, without
 - Otherwise follow the candidate `test_selection` selects. Its `params_delta` and `effective_profiles` name the branch the source's own test runs, and parameter defaults fill the rest.
 - When `test_selection.status` is `needs-scope-choice`, pick the candidate whose `params_delta` changes the fewest branch controls from their defaults, from the primary candidates when there are any. Break a tie by preferring `default.nf.test` or `main.nf.test`, then the first listed. Mark the decision `confidence: low`.
 - Record the choice as a scope decision and each excluded branch family as an open scope drop in the ledger, in the shape that section gives.
+- Run [[check-scope-records]] on the ledger with the summary, and fix every problem it reports before handing off.
 - In the brief, state the selected scope and its candidate `id`, and list the excluded branches by their drop `id`s.
 - A control the scope fixes is not a workflow input. A control left open inside the scope, such as a QC toggle, is one.
