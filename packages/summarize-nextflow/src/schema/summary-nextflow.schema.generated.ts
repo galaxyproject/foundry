@@ -628,7 +628,7 @@ export const summaryNextflowSchema = {
     },
     "EffectiveArg": {
       "title": "EffectiveArg",
-      "description": "The `resolved_args` entry that takes effect for one `key` of one call, by Nextflow selector priority: `withLabel` < `withName` naming the process < `withName` naming the alias < a fully qualified `withName` (`SUB:NAME`, `.*:NAME`). At the same rank, a selected profile's entry beats the root chain's, and a later declaration of the same selector in one config beats an earlier one.",
+      "description": "The `resolved_args` entry that takes effect for one `key` of one call, by Nextflow selector priority: `withLabel` < `withName` naming the process < `withName` naming the alias < a `withName` matching the fully qualified name (`SUB:NAME`, `.*:NAME`), which ends in the alias for an aliased call. At the same rank, a later declaration of the same selector in one config beats an earlier one. A selected profile's entry doesn't outrank the root chain's: the legacy parser applies profiles last, the strict parser where `profiles { }` sits.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -662,7 +662,7 @@ export const summaryNextflowSchema = {
           "enum": [
             true
           ],
-          "description": "Set when entries level after ranking set different expressions. Which one Nextflow reads last depends on include order or subworkflow context, which the summary does not model."
+          "description": "Set when entries level after ranking set different expressions. Which one Nextflow reads last depends on include order, profile placement, or subworkflow context, which the summary does not model."
         }
       }
     },

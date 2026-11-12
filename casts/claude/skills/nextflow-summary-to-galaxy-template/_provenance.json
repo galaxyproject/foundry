@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 11,
     "content_hash": "ae829383c6f7b3cd2e0beebdac6353605e71db8cb8650025412807c8042899a0",
-    "commit": "dbca2bc5f97809d449e0bb01cbddd6101e5ef959"
+    "commit": "36e85683bcf079ecb80ac56ef69ceb36f78f9fe6"
   },
-  "cast_at": "2026-11-12T03:43:24.594Z",
+  "cast_at": "2026-11-12T04:10:49.129Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -342,8 +342,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context, and copy the `resolved_args` entries each translated call's `effective_args` names into its step's `_plan_state`.",
       "license": "MIT",
-      "src_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
-      "dst_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
+      "src_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
+      "dst_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
       "source": "deterministic"
     }
   ],

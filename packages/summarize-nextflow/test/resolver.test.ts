@@ -3379,13 +3379,12 @@ workflow SUB { FOO(); FOO_B(); FOO_C() }
     ]);
   });
 
-  test("a selected profile beats the root chain at the same selector rank only", async () => {
+  test("ties a selected profile with the root chain at the same selector rank only", async () => {
     const root = tempPipelineRoot();
     write(
       root,
       "nextflow.config",
       `manifest { name = 'nf-core/profile-rank' }
-includeConfig 'conf/modules.config'
 profiles {
     test { includeConfig 'conf/test.config' }
     other {
@@ -3396,12 +3395,13 @@ profiles {
         }
     }
 }
+includeConfig 'conf/modules.config'
 `,
     );
     write(
       root,
       "conf/modules.config",
-      "process {\n    withName: 'FOO' {\n        ext.args = '--root'\n        ext.prefix = 'root'\n    }\n}\n",
+      "process {\n    withName: 'FOO' {\n        ext.args = '--root'\n        ext.args2 = '-s'\n        ext.prefix = 'root'\n    }\n}\n",
     );
     write(
       root,
@@ -3409,6 +3409,7 @@ profiles {
       `process {
     withName: 'FOO' {
         ext.args = '--profile'
+        ext.args2 = '-s'
     }
     withLabel: 'lab' {
         ext.prefix = 'profile-label'
@@ -3421,7 +3422,13 @@ profiles {
 
     const test = (await summarize(root, undefined, "test")).processes[0]!;
     expect(test.effective_args).toEqual([
-      { invoked_as: "FOO", key: "args", ids: ["conf/test.config[test]#withName:FOO/args"] },
+      {
+        invoked_as: "FOO",
+        key: "args",
+        ids: ["conf/modules.config#withName:FOO/args", "conf/test.config[test]#withName:FOO/args"],
+        tie: true,
+      },
+      { invoked_as: "FOO", key: "args2", ids: ["conf/modules.config#withName:FOO/args2"] },
       { invoked_as: "FOO", key: "prefix", ids: ["conf/modules.config#withName:FOO/prefix"] },
     ]);
 
@@ -3429,7 +3436,11 @@ profiles {
     expect(both.effective_args?.[0]).toEqual({
       invoked_as: "FOO",
       key: "args",
-      ids: ["nextflow.config[other]#withName:FOO/args", "conf/test.config[test]#withName:FOO/args"],
+      ids: [
+        "conf/modules.config#withName:FOO/args",
+        "nextflow.config[other]#withName:FOO/args",
+        "conf/test.config[test]#withName:FOO/args",
+      ],
       tie: true,
     });
   });

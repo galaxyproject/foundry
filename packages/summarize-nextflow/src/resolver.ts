@@ -3222,9 +3222,9 @@ function resolvedArgId(selector: ScopedSelector, key: string, index: number): st
 
 /**
  * Per call and `key`, the entries Nextflow applies. A higher selector rank wins,
- * then a selected profile over the root chain, then the later declaration of the
- * same selector in one config. Entries still level with different expressions
- * are a tie: include order and subworkflow context are not modeled.
+ * then the later declaration of the same selector in one config. Entries still
+ * level with different expressions are a tie: include order, profile placement
+ * (parser-dependent) and subworkflow context are not modeled.
  */
 function effectiveArgs(
   process: Process,
@@ -3235,16 +3235,16 @@ function effectiveArgs(
   const called = names.filter((name) => calledNames.has(name));
   return (called.length > 0 ? called : names).flatMap((call) =>
     EXT_ASSIGNMENTS.flatMap(([key]) => {
-      const scored = assignments.flatMap(({ selector, arg }) => {
+      const ranked = assignments.flatMap(({ selector, arg }) => {
         if (arg.key !== key) return [];
         const rank = selectorRank(selector.kind, selector.pattern, process, call);
-        return rank === null ? [] : [{ arg, score: rank * 2 + (selector.profile ? 1 : 0) }];
+        return rank === null ? [] : [{ arg, rank }];
       });
-      if (scored.length === 0) return [];
-      const top = Math.max(...scored.map((entry) => entry.score));
+      if (ranked.length === 0) return [];
+      const top = Math.max(...ranked.map((entry) => entry.rank));
       const latest = new Map<string, ResolvedArg>();
-      for (const { arg, score } of scored) {
-        if (score === top) latest.set(`${arg.config}\0${arg.profile ?? ""}\0${arg.selector}`, arg);
+      for (const { arg, rank } of ranked) {
+        if (rank === top) latest.set(`${arg.config}\0${arg.profile ?? ""}\0${arg.selector}`, arg);
       }
       const level = [...latest.values()];
       if (new Set(level.map((arg) => arg.expression)).size === 1) {

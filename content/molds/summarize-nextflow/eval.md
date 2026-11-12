@@ -189,9 +189,11 @@ whatever a scenario produces. Properties are tagged by bucket:
   For every call of a process and every `key` an entry sets for it,
   `effective_args` has one row whose `ids` name the entry with the highest
   rank (`withLabel` < `withName` on the process < `withName` on the alias <
-  fully qualified), a selected profile's entry winning a same-rank contest
-  with the root chain's. An entry whose selector names a different alias is
-  never effective for the call. Several `ids` appear only with `tie: true`,
+  fully qualified, where the qualified name ends in the name the call uses).
+  A selected profile's entry and the root chain's at the same rank with
+  different expressions are a tie. An entry whose selector names a different
+  alias, or qualifies the process name for an aliased call, is never
+  effective for the call. Several `ids` appear only with `tie: true`,
   when level entries set different expressions.
 
 ## Property: re-runs are reproducible

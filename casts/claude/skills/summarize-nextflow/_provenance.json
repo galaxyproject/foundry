@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 21,
-    "content_hash": "da5e5b360c423231caddcff2226673f9005da7a3a065798f5f5d94a61b5f82e3",
-    "commit": "dbca2bc5f97809d449e0bb01cbddd6101e5ef959"
+    "content_hash": "8dc0c43fc0855cd10af5034ebac76ffdb0b3bbce662c6309b60917d9d748ba96",
+    "commit": "36e85683bcf079ecb80ac56ef69ceb36f78f9fe6"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-11-12T03:43:25.344Z",
+  "cast_at": "2026-11-12T04:10:49.762Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -241,8 +241,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
       "license": "MIT",
-      "src_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
-      "dst_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
+      "src_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
+      "dst_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
       "source": "deterministic"
     }
   ],

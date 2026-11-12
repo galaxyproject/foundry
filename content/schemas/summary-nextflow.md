@@ -85,10 +85,12 @@ Nextflow's selector priority themselves.
   `withLabel` entry matches.
 - **`Process.effective_args` added.** One row per call (`invoked_as`) and
   `key`, listing the `id` that takes effect: `withLabel` < `withName` on the
-  process < `withName` on the alias < fully qualified. At the same rank a
-  selected profile beats the root chain, and a later declaration of the same
-  selector in one config beats an earlier one. Level entries with different
-  expressions are listed together with `tie: true`.
+  process < `withName` on the alias < fully qualified (the qualified name
+  ends in the name the call uses). At the same rank a later declaration of
+  the same selector in one config beats an earlier one. Level entries with
+  different expressions are listed together with `tie: true`, including a
+  selected profile against the root chain: the legacy parser applies
+  profiles last, the strict parser where `profiles { }` sits.
 - **`resolved_args` keeps every match.** Overridden entries stay, so the
   summary still shows what a call's winner replaced.
 

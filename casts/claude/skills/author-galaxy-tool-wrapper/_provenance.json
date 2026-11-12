@@ -6,9 +6,9 @@
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
     "revision": 8,
     "content_hash": "77446daafedbcc6754902533a0280d2f0418d1bb8f92e042562404dbc75c9023",
-    "commit": "dbca2bc5f97809d449e0bb01cbddd6101e5ef959"
+    "commit": "36e85683bcf079ecb80ac56ef69ceb36f78f9fe6"
   },
-  "cast_at": "2026-11-12T03:43:22.919Z",
+  "cast_at": "2026-11-12T04:10:47.806Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -106,8 +106,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary.",
       "license": "MIT",
-      "src_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
-      "dst_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
+      "src_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
+      "dst_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
       "source": "deterministic"
     }
   ],

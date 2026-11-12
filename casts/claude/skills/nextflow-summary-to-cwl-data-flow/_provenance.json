@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-cwl-data-flow/index.md",
     "revision": 1,
     "content_hash": "68a75d5f934610fd9bf95434c94c3965dc2c591ea33160e911a3662f1f290aaa",
-    "commit": "dbca2bc5f97809d449e0bb01cbddd6101e5ef959"
+    "commit": "36e85683bcf079ecb80ac56ef69ceb36f78f9fe6"
   },
-  "cast_at": "2026-11-12T03:43:24.279Z",
+  "cast_at": "2026-11-12T04:10:48.903Z",
   "refs": [
     {
       "kind": "schema",
@@ -21,8 +21,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure while drafting CWL-facing abstract data flow.",
       "license": "MIT",
-      "src_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
-      "dst_hash": "5dab48906f556c34429b6c8e6ff22d1d5979470523b8b5ba7c171c86b0ff0b4b",
+      "src_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
+      "dst_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
       "source": "deterministic"
     }
   ],
