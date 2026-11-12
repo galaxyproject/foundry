@@ -587,12 +587,17 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "id",
         "key",
         "expression",
         "selector",
         "config"
       ],
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "Names the assignment, not the process: `<config>[<profile>]#<selector>/<key>`, with `[<profile>]` only for a profile's entry, `~n` after the selector for its nth declaration in that config, and `~n` after the key for its nth assignment in one block. A `withLabel` entry has the same `id` in every process it matches. `effective_args` and downstream records cite entries by it."
+        },
         "key": {
           "type": "string",
           "enum": [
@@ -616,6 +621,46 @@
         "profile": {
           "type": "string",
           "description": "Profile that contributed this assignment. Present only when the selector sits in that profile, or in a config the profile includes. Absent for selectors on the root includeConfig chain."
+        }
+      }
+    },
+    "EffectiveArg": {
+      "title": "EffectiveArg",
+      "description": "The `resolved_args` entry that takes effect for one `key` of one call, by Nextflow selector priority: `withLabel` < `withName` naming the process < `withName` naming the alias < a fully qualified `withName` (`SUB:NAME`, `.*:NAME`). At the same rank, a selected profile's entry beats the root chain's, and a later declaration of the same selector in one config beats an earlier one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "invoked_as",
+        "key",
+        "ids"
+      ],
+      "properties": {
+        "invoked_as": {
+          "type": "string",
+          "description": "The name the workflow calls the process by: its own name or an alias from `aliases`."
+        },
+        "key": {
+          "type": "string",
+          "enum": [
+            "args",
+            "args2",
+            "prefix"
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "`resolved_args[].id` of the entry that takes effect, or of every tied entry when `tie` is set. When level entries share one expression, only the first is listed and there is no tie."
+        },
+        "tie": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "description": "Set when entries level after ranking set different expressions. Which one Nextflow reads last depends on include order or subworkflow context, which the summary does not model."
         }
       }
     },
@@ -797,7 +842,14 @@
           "items": {
             "$ref": "#/$defs/ResolvedArg"
           },
-          "description": "`ext.args`, `ext.args2`, and `ext.prefix` assignments from matching config selectors. Expressions are verbatim, including closures. Empty when the chain declares none. Entries from a selected profile carry `profile`."
+          "description": "`ext.args`, `ext.args2`, and `ext.prefix` assignments from matching config selectors, including ones a higher-priority selector overrides. Expressions are verbatim, including closures. Empty when the chain declares none. Entries from a selected profile carry `profile`."
+        },
+        "effective_args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EffectiveArg"
+          },
+          "description": "Per call and `key`, which `resolved_args` entries take effect. Lists each name the workflow calls the process by (every name when none is found among the workflow calls), and only keys some entry sets for that call. Absent when no entry applies."
         },
         "template": {
           "anyOf": [

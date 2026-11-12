@@ -144,7 +144,7 @@ decisions:
 
 ## Source arguments
 
-A source can set tool arguments outside the process body. nf-core sets them as `ext.args`, `ext.args2`, and `ext.prefix`, which [[summarize-nextflow]] records per process in `resolved_args`. A wrapper names and groups its parameters its own way, so no rule maps a flag onto `state`. The Mold that binds `state` makes that call and records one disposition per flag, so that a flag the translation dropped or contradicted shows up instead of going missing. [[nextflow-summary-to-galaxy-template]] copies the entries into the step's `_plan_state` ([[galaxy-workflow-draft-format]]). [[implement-galaxy-tool-step]] records the dispositions, or the template records them for a step it resolves itself.
+A source can set tool arguments outside the process body. nf-core sets them as `ext.args`, `ext.args2`, and `ext.prefix`, which [[summarize-nextflow]] records per process in `resolved_args`, ranking them per call in `effective_args` so only the entries Nextflow applies reach a step. A wrapper names and groups its parameters its own way, so no rule maps a flag onto `state`. The Mold that binds `state` makes that call and records one disposition per flag, so that a flag the translation dropped or contradicted shows up instead of going missing. [[nextflow-summary-to-galaxy-template]] copies the effective entries into the step's `_plan_state` ([[galaxy-workflow-draft-format]]). [[implement-galaxy-tool-step]] records the dispositions, or the template records them for a step it resolves itself.
 
 Each record carries a `source_arg` naming the entry it covers:
 
@@ -154,12 +154,8 @@ decisions:
     decided_by: implement-galaxy-tool-step
     source_arg:
       step: view_map_map               # draft step that translates the call
-      process: SAMTOOLS_VIEW           # processes[].name in summary-nextflow.json
-      invoked_as: SAMTOOLS_VIEW_MAP_MAP  # omit when the call is the process name
-      key: args                        # args | args2 | prefix
-      selector: withName:SAMTOOLS_VIEW_MAP_MAP
-      config: conf/modules.config      # profile: <name> too when the entry has one
-      flags: ["-b", "-f1", "-F12"]     # omit for an ext.prefix or an overridden entry
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args  # the entry's id
+      flags: ["-b", "-f1", "-F12"]     # omit for an ext.prefix
     disposition: carried               # carried | not_applicable
     decision: "BAM output, require flag 1, exclude flags 4 and 8, all set in `state`."
     rationale: "The wrapper exposes output format and both flag filters."
@@ -170,11 +166,7 @@ entries:
     raised_by: implement-galaxy-tool-step
     source_arg:
       step: collate_map
-      process: SAMTOOLS_COLLATEFASTQ
-      invoked_as: COLLATE_FASTQ_MAP
-      key: args
-      selector: withName:COLLATE_FASTQ_MAP
-      config: conf/modules.config
+      arg: conf/modules.config#withName:COLLATE_FASTQ_MAP/args
       flags: ["-f", "-r"]
     units: "`-f -r <reads_in_memory>` from `ext.args`, set when `params.samtools_collate_fast`"
     because: "`parsed_tool` for <wrapper> <version> has no fast-mode input: <its inputs, quoted>"
@@ -185,10 +177,10 @@ entries:
 - A flag is one option token with any value attached to it (`-f1`, `-hb`). A value passed as the next token (`-r <reads_in_memory>`) belongs to its option, and the record's text names it. A whole `ext.prefix` is one flag, and its record omits `flags`.
 - A flag carried into `state` is a decision with `disposition: carried`, and `decision` says where it landed. A flag with no Galaxy counterpart is a decision with `disposition: not_applicable`, and `rationale` names what makes it inapplicable. An `ext.prefix` that only names output files is the usual case; name those outputs.
 - A flag the step drops is a `kind: dropped` entry. Its `units` names the flag, and its `because` cites the tool summary's missing option. It stays `open`, like any drop.
-- Only one entry per `key` takes effect for a call. Nextflow ranks a `withName` selector above a `withLabel` one, a selector naming the alias above one naming the process, and a fully qualified name above both. Give each overridden entry one `not_applicable` decision without `flags`, with `rationale` naming the `selector` and `config` of the entry that wins. When entries tie at the top rank, the summary can't show which one Nextflow reads last, so each tied entry is effective. A flag every tied entry sets the same way is recorded as usual; any other flag of a tied entry is an open gap (no `kind`), whose `missing` names each tied entry's `selector` and `config`, and it stays out of `state`.
+- Entries marked `tie: true` with the same `key` are tied: the summary can't tell which one Nextflow reads last. A flag every tied entry sets the same way is recorded as usual. Any other flag of a tied entry is an open gap (no `kind`), whose `missing` names the other tied entries' `id`s, and it stays out of `state`.
 - Each flag an effective entry can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
 - A record names its step inside `source_arg`, never in a top-level `step`, so a dropped or tied flag never reads as a dropped step or a step gap.
-- `source_arg` copies the entry's `config`, and its `profile` when present, because two entries can share `key` and `selector` (a root config and a profile, or two included configs). Join records to the summary on `source_arg`, not on `id`.
+- `source_arg.arg` is the summary entry's `id`. Join records to the summary on `source_arg.step` and `source_arg.arg`, not on the record's own `id`.
 
 ## How to use the ledger
 
