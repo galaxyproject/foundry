@@ -195,8 +195,8 @@ whatever a scenario produces. Properties are tagged by bucket:
   `withLabel` < `withName` on the process name < `withName` on the alias <
   `withName` on the whole call path. At the same rank a selected profile's
   entry beats the root chain's, unless the root chain declares the same
-  selector. Then the root declaration keeps its position and only that
-  selector's root entries lose. A qualified selector whose subworkflow doesn't
+  selector. Then the profile entry replaces only that selector's root
+  entries, at the root declaration's position. A qualified selector whose subworkflow doesn't
   call the process on that path, an entry whose selector names a different
   alias, and `.*:NAME` for an aliased call are never effective for it. One
   call name used from two subworkflows gives separate rows. Within one config
