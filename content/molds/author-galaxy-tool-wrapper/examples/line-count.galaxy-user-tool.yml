@@ -1,0 +1,17 @@
+class: GalaxyUserTool
+id: line_count
+version: 0.1.0
+name: Count lines
+description: Count lines in a text dataset.
+container: quay.io/biocontainers/coreutils:9.5
+shell_command: wc -l '$(inputs.input.path)' > line_count.txt
+inputs:
+  - name: input
+    type: data
+    format:
+      - txt
+outputs:
+  - name: count
+    type: data
+    format: txt
+    from_work_dir: line_count.txt

@@ -5,19 +5,23 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-08-24
-revised: 2026-11-10
-revision: 2
+revised: 2026-11-12
+revision: 5
 component: tool_util_models
 related_notes:
   - "[[component-nextflow-containers-and-envs]]"
   - "[[galaxy-user-tool-critique]]"
   - "[[galaxy-user-tool-authoring-help]]"
 sources:
-  - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_structured.md"
+  - "https://github.com/galaxyproject/galaxy/blob/09ab857133f28853e5d8ff553aafcbce77aa2eb6/lib/galaxy/agents/prompts/custom_tool_structured.md"
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_container_critic.md"
-  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/09ab857133f28853e5d8ff553aafcbce77aa2eb6/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/09ab857133f28853e5d8ff553aafcbce77aa2eb6/doc/source/admin/user_defined_tools.md"
+  - "https://github.com/galaxyproject/galaxy/blob/09ab857133f28853e5d8ff553aafcbce77aa2eb6/lib/galaxy/tool_util/deps/image_references.py"
+  - "https://github.com/galaxyproject/galaxy/blob/09ab857133f28853e5d8ff553aafcbce77aa2eb6/lib/galaxy/managers/tools.py"
   - "https://github.com/galaxyproject/galaxy/blob/7c18ab768ac112bddf485cfcb5c074a83165c591/lib/galaxy/jobs/command_factory.py"
   - "https://github.com/galaxyproject/galaxy/blob/7c18ab768ac112bddf485cfcb5c074a83165c591/lib/galaxy/tool_util/deps/requirements.py"
+  - "https://github.com/galaxyproject/galaxy-mcp/blob/935381cf674af7bcacb15f05df972b1e209e99ce/python/src/galaxy_mcp/server.py"
   - "https://github.com/common-workflow-language/cwl-utils/blob/v0.41/cwl_utils/expression.py"
 summary: "What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — from Galaxy's prompts, authoring help and code."
 ---
@@ -82,6 +86,8 @@ So escape the dollar only in front of `(` or `{`, and prefer unbraced variables 
 
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
 
+**Free-form text is data, not executable text.** A top-level `text` value is inserted raw. Shell quotes, a quoted heredoc, or Python/R/JavaScript string quotes do not make direct interpolation safe because the value can terminate the surrounding syntax. Do not put `$(inputs.name)` directly in `shell_command` or executable configfile source. Write it into a data configfile as `$(JSON.stringify(inputs.name))` and parse that file from the program. Fixed `select` values and typed numeric or boolean values remain suitable for direct interpolation.
+
 ## 4. Input parameter types
 
 Each input needs a `type`: `data`, `text`, `integer`, `float`, `boolean`, `select`.
@@ -136,11 +142,29 @@ shell_command: python script.py
 
 **The failure mode to check for:** a command that runs a script by name (`python script.py`) with no `configfiles` entry whose `filename` is exactly that name. The file will not exist at runtime. Either add the configfile or inline the script — a half-completed choice is broken, not partial.
 
-## 7. Container, and inferring packages when no image is evidenced
+## 7. Container policy and package-based image resolution
 
-*Target-neutral apart from the `container` field name.*
+Galaxy servers apply `user_defined_tool_allowed_containers` and
+`user_defined_tool_denied_containers` when a UDT is created and again before its
+job runs. The default allows `quay.io/biocontainers/*` and denies nothing. Unless
+the target provides evidence of different lists, an authored UDT must use an
+image strictly below that namespace. Docker Hub, Wave and other registry images
+from a source workflow remain provenance, not directly usable `container`
+values.
 
-Prefer a container the source actually evidences. For a tool derived from another workflow engine, the source's own container or conda directive is stronger evidence than anything inferred from a command string — see [[component-nextflow-containers-and-envs]].
+Galaxy compares parsed image components, not string prefixes. A namespace entry
+ending in `/*` includes repositories at any depth strictly below it. An exact
+image without a tag or digest permits all of its versions; a tag entry permits
+that tag only when no digest is present; a digest entry permits that digest even
+when the reference also carries a tag. Registry hosts are case-insensitive,
+Docker Hub short names are canonicalized, and denied entries override allowed
+entries. The authoring default is intentionally narrower: emit a fully qualified
+reference with no transport scheme and with a tag or digest.
+
+Prefer a pinned `quay.io/biocontainers` image the source already evidences. Confirm
+that it contains every program the command invokes. For any other source image,
+recover pinned Conda package evidence from the process, its `environment.yml`, or
+the commands and imports it uses. See [[component-nextflow-containers-and-envs]].
 
 Where nothing is evidenced, infer the dependencies from the command rather than guessing an image tag. The method:
 
@@ -149,7 +173,34 @@ Where nothing is evidenced, infer the dependencies from the command rather than 
 - Set a version **only** when the command itself pins one (`samtools=1.17`). Otherwise leave it unset — never guess a version, and never invent an image tag or build suffix.
 - Ignore shell builtins and coreutils-level commands (`echo`, `cat`, `cut`, `cd`, `mkdir`, pipes, redirects). If the command is only such builtins, the correct answer is **no packages** — an empty result, not a guess.
 
-Then resolve a `quay.io/biocontainers` image from those packages. Pick an image you are confident exists. **Do not assume anything re-resolves it later:** some Galaxy deployments re-resolve the container against verified biocontainers after generation, but that is off by default, and nothing in a Foundry harness does it at all. Assume the image named is the image that runs. If no suitable image is known, say so rather than guessing.
+Pass all resulting `name` or `name=version` entries together to
+`recommend_biocontainer` when that operation is available. One package resolves
+a single-package image and several resolve a mulled-v2 image. Use
+`data.image` only when `match_quality` is `exact_version` and `verified` is not
+false. A `name_only` result substituted a newer built tag, so show that change
+for confirmation before use. If the operation is unavailable, returns no image,
+reports `verified: false`, or returns an image outside the target policy, do not
+guess a tag. Do not remove a package to force a recommendation.
+
+A command containing only shell builtins or core utilities still needs a
+container. Use a known allowed general-purpose image such as
+`quay.io/biocontainers/python:3.13`, after confirming it contains the required
+commands.
+
+The image written is the image that runs. Before structural validation, parse
+the reference and check it against both target lists. Under the default, require
+registry `quay.io`, a repository strictly below `biocontainers/`, no
+`docker://` or other scheme, and a tag or digest. A target-specific exception
+requires positive policy evidence. When no permitted image is established, stop
+before emitting the UDT and return an unresolved container requirement. Do not
+submit a probe tool or postpone the failure until workflow testing. When
+creating the requested tool returns an HTTP 400 that lists allowed images, treat
+that response as target policy evidence and revise or stop.
+
+Run `gxwf validate-tool-source galaxy-user-tool.yml --json --security` without
+`--schema-only` after the policy check. This validates Galaxy's schema and
+semantic authoring rules plus the narrow direct-text security rule, but does not evaluate arbitrary ECMAScript or shell behavior, the deployment's container
+lists, image existence or command availability; those remain separate gates.
 
 ## 8. Resource requirements
 
@@ -174,5 +225,8 @@ requirements:
 The source prompts assume Galaxy's own agent runtime. Three assumptions do not carry:
 
 - **No output grammar.** Upstream constrains generation with `output_type=UserToolSourceAuthoringView`, so a malformed draft is impossible by construction and the prose only has to nudge. Here the draft is free text and every rule above has to actually hold, checked by explicit validation rather than assumed.
-- **No container re-resolution.** Upstream can hand a draft to a dedicated package-inference step and a deterministic quay.io lookup. Nothing downstream of a cast does that, which is why §7 folds the inference method into authoring instead of deferring it.
+- **Container resolution happens during authoring.** Upstream can hand a draft
+  to a dedicated package-inference step and deterministic quay.io lookup. A
+  Foundry cast must call `recommend_biocontainer` itself when available and
+  must not defer resolution to a later phase.
 - **No `CritiqueReport` apply-loop.** The critique criteria are in [[galaxy-user-tool-critique]]; the structured edit transport they travel on upstream is not reproduced.

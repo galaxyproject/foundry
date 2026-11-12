@@ -6,8 +6,8 @@ tags:
 component: "Nextflow Containers and Environments"
 status: draft
 created: 2026-05-01
-revised: 2026-05-05
-revision: 3
+revised: 2026-11-12
+revision: 4
 summary: "Container URL grammar (depot, BioContainers, mulled-v2, Wave, ORAS) and conda directive resolution rules backing summarize-nextflow §5."
 companions:
   - "component-nextflow-containers-and-envs.yml"
@@ -248,13 +248,13 @@ These are not warnings to log; they are forms the bucketing rules above must con
 The `tools[]` block this Mold produces is the input contract for Galaxy user-defined tool dependency and container selection. The mapping is:
 
 - `tools[].bioconda` (`bioconda::<name>=<version>`) → package evidence for selecting a matching BioContainers image when available.
-- `tools[].biocontainer` / `tools[].singularity` → direct container evidence for the UDT `container` field when the registry, image, and tag are stable.
-- `tools[].wave` alone → no Galaxy round-trip. The UDT authoring Mold must surface this as an unresolved tool.
-- `tools[].docker` alone → direct container evidence only when the image is fully qualified and versioned; otherwise require review.
+- `tools[].biocontainer` below `quay.io/biocontainers/` → direct container evidence for the UDT `container` field when the image and tag are stable.
+- `tools[].singularity` backed by `docker://quay.io/biocontainers/...` or the depot's matching BioContainers image → normalize to its `quay.io/biocontainers/...` Docker reference.
+- `tools[].wave` or `tools[].docker` → source runtime evidence only. Resolve their package evidence to an allowed BioContainers image or surface an unresolved container requirement unless the target Galaxy explicitly allows the source registry.
 
 The [[author-galaxy-tool-wrapper]] Mold owns this translation; this note documents the contract on the producer side.
 
-The safest default for newly authored Galaxy UDTs is a stable, fully qualified container image when one is directly evidenced:
+The default for newly authored Galaxy UDTs is a stable, fully qualified image below Galaxy's default allowed namespace:
 
 ```yaml
 container: quay.io/biocontainers/fastp:0.12.1--h5e1937b_0
@@ -276,8 +276,8 @@ Treat package evidence as directly usable for container search or review when ev
 Emit explicit UDT container values directly when evidence is one of:
 
 - Fully qualified Docker/OCI image with immutable or versioned tag, for example `quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0`.
-- `docker://quay.io/biocontainers/...` or `docker://docker.io/...` where the registry, image, and tag are present.
-- Singularity/Apptainer `docker://...` URI that points back to a Docker-compatible registry and tag.
+- `docker://quay.io/biocontainers/...`, normalized by removing the scheme.
+- A depot Singularity image whose suffix identifies the matching `quay.io/biocontainers/...` image.
 
 Preserve evidence in summaries even when not emitting it into authored UDT YAML. `summarize-nextflow` should keep the raw directive, resolved image, package list, source file, and confidence so `author-galaxy-tool-wrapper` can decide.
 
@@ -385,7 +385,7 @@ For authored UDTs, prefer a stable pullable container when directly evidenced. L
 
 Wave can build or resolve images from process dependencies and can emit stable-looking image URIs. Treat a Wave URI as runtime evidence, not package-authoring evidence, unless accompanying metadata exposes the Conda packages or Dockerfile ingredients used to build the image.
 
-Direct use of a Wave image as a UDT `container` is acceptable only when exact runtime preservation matters and the image is externally pullable by the target Galaxy execution environment. Otherwise, ask for review and try to recover package or BioContainers evidence from the process `conda` directive, nf-core module `environment.yml`, or command invocation.
+Do not use a Wave image directly under Galaxy's default UDT policy. Recover package evidence from the process `conda` directive, nf-core module `environment.yml`, or command invocation, then resolve it through `recommend_biocontainer`. Use the Wave image only when the target Galaxy's allowlist positively permits it.
 
 ### Existing Galaxy Wrapper Summaries
 
@@ -429,9 +429,9 @@ When summarizing Nextflow evidence, preserve:
 
 When authoring Galaxy UDT YAML, emit:
 
-- Stable container values for exact, pullable, directly evidenced images.
+- Stable, pinned `quay.io/biocontainers` values that pass the default target policy, or an image positively allowed by the target Galaxy.
 - Package evidence as review context when no stable container is directly evidenced.
-- A warning when dependency evidence is absent, floating, local, or inconsistent with command usage.
+- An unresolved container requirement when package resolution finds no allowed image.
 
 Do not emit:
 

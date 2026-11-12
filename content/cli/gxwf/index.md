@@ -12,14 +12,14 @@ tags:
   - cli/gxwf
 status: draft
 created: 2026-05-10
-revised: 2026-09-26
-revision: 3
+revised: 2026-11-12
+revision: 4
 summary: "Galaxy workflow design-time CLI (validate, convert, lint, roundtrip, tool-cache discovery)."
 ---
 
 # gxwf
 
-Foundry's primary design-time CLI for Galaxy workflow validation and conversion. Bundled with `@galaxy-tool-util/cli` alongside [[galaxy-tool-cache]]; subcommand pages cover individual operations.
+Foundry's primary design-time CLI for Galaxy workflow and user-tool validation and conversion. Bundled with `@galaxy-tool-util/cli` alongside [[galaxy-tool-cache]]; subcommand pages cover individual operations.
 
 ## Install
 

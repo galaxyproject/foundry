@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 8,
-    "content_hash": "77446daafedbcc6754902533a0280d2f0418d1bb8f92e042562404dbc75c9023",
-    "commit": "53d1b93e584ed09195044c9e688ed835997b2eeb"
+    "revision": 11,
+    "content_hash": "88af9bc9d81dba6f257e4b678e18b09183b58250a6af27bdc26ddfc51d9fc0c5",
+    "commit": "8fcd16eaa88cf5e16ec91569528f72804cfdf242"
   },
-  "cast_at": "2026-11-11T16:56:50.837Z",
+  "cast_at": "2026-11-12T06:12:08.759Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -19,6 +19,21 @@
     }
   ],
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[gxwf validate-tool-source]]",
+      "src": "content/cli/gxwf/validate-tool-source.md",
+      "dst": "references/cli/validate-tool-source.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "cast-validated",
+      "purpose": "Run Galaxy schema and semantic validation on the completed user-tool definition before critique or emission.",
+      "trigger": "After writing galaxy-user-tool.yml and after every structural edit made during critique.",
+      "src_hash": "911cc37cad7a0ecbbcf08c7b9e3ff8527e988b83203a3a2a70ec49d8d982ef60",
+      "dst_hash": "356098f732f9677fffdab4ecfe2c655dfc1df88e0ad1e824eb19786b2edf4297",
+      "source": "deterministic"
+    },
     {
       "kind": "research",
       "mode": "verbatim",
@@ -31,8 +46,8 @@
       "purpose": "Map Nextflow container/conda evidence to Galaxy UDT container and package provenance.",
       "trigger": "When a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.",
       "verification": "Author one UDT from nf-core/bacass or nf-core/rnaseq process evidence and confirm the note improves requirements/container extraction.",
-      "src_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
-      "dst_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
+      "src_hash": "ac0cc0e8b86a35a952edfb84e611b8561225e92ace1fa6e92172399647ec1f36",
+      "dst_hash": "ac0cc0e8b86a35a952edfb84e611b8561225e92ace1fa6e92172399647ec1f36",
       "source": "deterministic"
     },
     {
@@ -61,8 +76,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Field contract, expression syntax, script placement, and package inference for a `GalaxyUserTool` definition.",
-      "src_hash": "94fbbfe2fe4a12379b72609a6360ca4c3f360246ba74e4fe3442bb8705fb9e6e",
-      "dst_hash": "94fbbfe2fe4a12379b72609a6360ca4c3f360246ba74e4fe3442bb8705fb9e6e",
+      "src_hash": "e5e6c7b3907d3d240dc36f4b23b5d1b118666d72f1ab6866602a9b6d87003f1e",
+      "dst_hash": "e5e6c7b3907d3d240dc36f4b23b5d1b118666d72f1ab6866602a9b6d87003f1e",
       "source": "deterministic"
     },
     {
