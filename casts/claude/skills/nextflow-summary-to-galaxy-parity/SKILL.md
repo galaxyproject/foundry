@@ -67,7 +67,7 @@ The ledger alone isn't enough. A run can remove a step, leave an input unwired o
 
 #### Outputs
 
-List every output of the snapshot as carried, renamed or reshaped (`outputs.changed`), or removed. For a removed output, give the drop that names its source step (`dropped_entries`), or list it as a finding. Then list the outputs the design tier never declared, from the drops in `other_drops` and the scope drops whose `units` or `unmet` name an output, each with its `because`.
+List every output of the snapshot as carried, renamed or reshaped (`outputs.changed`), or removed. For a removed output, give the drops in its `dropped_entries`, which name its source step or the output itself, or list it as a finding. Then list the outputs the design tier never declared, from the drops in `other_drops` and the scope drops whose `units` or `unmet` name an output, each with its `because`.
 
 #### Tool versions
 

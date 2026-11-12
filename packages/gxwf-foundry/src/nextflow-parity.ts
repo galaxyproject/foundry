@@ -3,6 +3,8 @@
 
 import YAML from "yaml";
 import {
+  backticked,
+  hasReason,
   InputShapeError,
   isRecord,
   ledgerDecisions,
@@ -210,6 +212,18 @@ function disposition(record: LedgerRecord, collection: ArgRecord["collection"]):
   return record.kind === "dropped" ? "dropped" : "gap";
 }
 
+/** Why a record with `source_arg` gives its entry no reason, or null when it does. */
+function malformedReason(record: LedgerRecord, collection: ArgRecord["collection"]): string | null {
+  if (!sourceArg(record)) return "source_arg has no string step and arg";
+  if (collection === "decisions")
+    return record.disposition === "carried" || record.disposition === "not_applicable"
+      ? null
+      : "disposition is not carried or not_applicable";
+  return record.kind === "dropped" && !hasReason(record.because)
+    ? "a dropped flag record has no because"
+    : null;
+}
+
 export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowParity {
   const summary = (isRecord(inputs.summary) ? inputs.summary : {}) as Summary;
   if (!Array.isArray(summary.processes))
@@ -238,11 +252,14 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
     ...ledgerEntries(inputs.ledger).map((r) => [r, "entries"] as const),
   ];
   const malformed = ledgerRecords
-    .filter(([record]) => "source_arg" in record && !sourceArg(record))
-    .map(([record]) => recordId(record));
+    .filter(([record]) => "source_arg" in record)
+    .flatMap(([record, collection]) => {
+      const detail = malformedReason(record, collection);
+      return detail ? [{ subject: recordId(record), detail }] : [];
+    });
   const records = ledgerRecords.flatMap(([record, collection]) => {
     const arg = sourceArg(record);
-    if (!arg) return [];
+    if (!arg || malformedReason(record, collection)) return [];
     const status = str(record.status);
     const out: ArgRecord = {
       id: recordId(record),
@@ -284,17 +301,21 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
   for (const process of processes)
     for (const { call, ids } of process.effective_args ?? [])
       callIds.set(call, [...(callIds.get(call) ?? []), ...ids]);
+  const idCalls = new Map<string, Set<string>>();
+  for (const [call, ids] of callIds)
+    for (const id of ids) idCalls.set(id, (idCalls.get(id) ?? new Set()).add(call));
   const callSteps = new Map(
     [...callIds].map(([call, ids]): [string, Pick<ArgRow, "steps" | "steps_from">] => {
       const mapped = steps
         .filter((s) => s.calls_from === "plan_state" && s.calls.includes(call))
         .map((s) => s.step);
       if (mapped.length > 0) return [call, { steps: mapped, steps_from: "plan_state" }];
-      // A step the template resolved keeps no `_plan_state`; its flag records still name it.
+      // A step the template resolved keeps no `_plan_state`; its records on this call's own ids name it.
       const named = records
         .filter(
           ({ arg, record }) =>
             ids.includes(arg) &&
+            idCalls.get(arg)!.size === 1 &&
             stepByKey.has(record.step) &&
             stepByKey.get(record.step)!.calls_from !== "plan_state",
         )
@@ -394,10 +415,13 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
       const slash = source.lastIndexOf("/");
       const head = slash < 0 ? source : source.slice(0, slash);
       const source_step = snapshotSteps.has(head) ? head : null;
+      const named = drops.filter((d) => backticked(d.units).includes(output)).map(recordId);
       return {
         output,
         source_step,
-        dropped_entries: source_step ? (removedBy.get(source_step) ?? []) : [],
+        dropped_entries: [
+          ...new Set([...(source_step ? (removedBy.get(source_step) ?? []) : []), ...named]),
+        ],
       };
     });
 
@@ -439,7 +463,7 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
       .map((row) => row.call)
       .filter((call, i, calls) => calls.indexOf(call) === i)
       .map((subject) => ({ kind: "call-unmapped" as const, subject })),
-    ...malformed.map((subject) => ({ kind: "source-arg-malformed" as const, subject })),
+    ...malformed.map((m) => ({ kind: "source-arg-malformed" as const, ...m })),
     ...scope.problems.map((p) => ({
       kind: "scope-record" as const,
       subject: p.record,

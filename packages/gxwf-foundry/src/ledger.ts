@@ -60,8 +60,10 @@ export function sourceArg(record: LedgerRecord): SourceArg | undefined {
   return { step: value.step, arg: value.arg, ...(flags ? { flags } : {}) };
 }
 
+/** Every backticked span in a drop's `units`. */
+export const backticked = (units: unknown): string[] =>
+  typeof units === "string" ? [...units.matchAll(/`([^`]+)`/g)].map(([, span]) => span!) : [];
+
 /** The backticked uppercase summary names in a drop's `units`. */
 export const unitNames = (units: unknown): string[] =>
-  typeof units === "string"
-    ? [...units.matchAll(/`([A-Z][A-Z0-9_]+)`/g)].map(([, name]) => name!)
-    : [];
+  backticked(units).filter((span) => /^[A-Z][A-Z0-9_]+$/.test(span));

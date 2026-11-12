@@ -33,19 +33,19 @@ Stdout holds one JSON object:
 
 - `steps`: one row per step in the snapshot or the final workflow, in that order. `status` is `kept`, `removed` or `added`. `plan_state` says what the snapshot's `_plan_state` holds: `calls` (a document with a `calls` list), `text`, `none`, or `absent` for a step the snapshot lacks. `calls` lists the summary call paths the step translates, and `calls_from` says whether they came from `_plan_state` or from flag records that name the step. `tool_id` and `tool_version` come from the final workflow, or the snapshot for a removed step. `source` gives each call's process, tool, the tool's declared versions, and the process's `container` and `conda` text. `dropped_entries` lists the `kind: dropped` entries whose top-level `step` names a removed step.
 - `inputs`: the diff's `added` and `removed` inputs, and `unwired`, the final inputs that feed no step.
-- `outputs`: the diff's `added` and `changed` outputs, and `removed` as `{output, source_step, dropped_entries}`, where `source_step` is the snapshot step the output came from.
-- `source_args.rows`: one row per `effective_args` row in the summary, with its `process`, `call`, `key`, `ids` and `tie`. `steps` are the snapshot steps whose `_plan_state.calls` include the call. A step the template resolved has no `_plan_state`, so when no step lists the call, `steps` comes from the flag records that cite any of the call's effective `ids` and name such a step, and `steps_from` is `records`. Every row of one call gets the same `steps`. `covered_by` lists the drops, other than flag records, whose backticked `units` name a segment of an unmapped call path. `entries` gives each id's `expression` and the flag records joined on `source_arg.step` and `source_arg.arg`, as `{id, step, collection, disposition, status, flags}`. `disposition` is the decision's `carried` or `not_applicable`, or `dropped` or `gap` for an entry.
+- `outputs`: the diff's `added` and `changed` outputs, and `removed` as `{output, source_step, dropped_entries}`, where `source_step` is the snapshot step the output came from, and `dropped_entries` holds the drops naming that step plus the drops whose backticked `units` name the output.
+- `source_args.rows`: one row per `effective_args` row in the summary, with its `process`, `call`, `key`, `ids` and `tie`. `steps` are the snapshot steps whose `_plan_state.calls` include the call. A step the template resolved has no `_plan_state`, so when no step lists the call, `steps` comes from the flag records that cite one of the call's effective `ids` and name such a step, and `steps_from` is `records`. Only ids effective for that call alone count, so a `withLabel` entry several calls share never maps a call. Every row of one call gets the same `steps`. `covered_by` lists the drops, other than flag records, whose backticked `units` name a segment of an unmapped call path. `entries` gives each id's `expression` and the well-formed flag records joined on `source_arg.step` and `source_arg.arg`, as `{id, step, collection, disposition, status, flags}`. `disposition` is the decision's `carried` or `not_applicable`, or `dropped` or `gap` for an entry.
 - `source_args.overridden`: the `resolved_args` entries no `effective_args` row names. They need no record.
 - `source_args.stray_records`: flag records joined to no row, with a `problem`: `unknown-step`, `unknown-arg`, `not-effective` (an overridden entry), or `other-step` (effective, but for another step's calls).
 - `scope`: the [[check-scope-records]] result against the summary.
 - `other_drops`: `kind: dropped` entries with no top-level `step`, no `source_arg` and no `scope_branch`: the design tier's cuts.
 - `findings`: one `{kind, subject, detail?}` per difference with no recorded reason:
   - `step-removed-unrecorded`: a removed step no drop names.
-  - `output-removed-unrecorded`: a removed output whose source step no drop names. `detail` is that step.
+  - `output-removed-unrecorded`: a removed output no drop names, by its source step or in `units`. `detail` is the source step.
   - `input-unwired`: a final input that feeds no step.
   - `source-arg-unrecorded`: an effective entry for a kept step with no flag record. `subject` is the step and `detail` the entry id.
   - `source-arg-stray`: a stray flag record. `detail` is its problem.
-  - `source-arg-malformed`: a record whose `source_arg` lacks a string `step` or `arg`, so no join can see it.
+  - `source-arg-malformed`: a record with `source_arg` that gives no reason, so it records nothing: `source_arg` lacks a string `step` or `arg`, a decision's `disposition` isn't `carried` or `not_applicable`, or a dropped entry has no `because`. `detail` says which. Its entry stays unrecorded.
   - `call-unmapped`: a call with effective arguments that no step translates and no drop covers.
   - `scope-record`: a scope-record problem.
 
@@ -66,6 +66,6 @@ foundry nextflow-parity --summary summary-nextflow.json --ledger open-requiremen
 - `gxwf diff` pairs list-form steps that share an `id` across a relabel. This command doesn't, so a relabelled list-form step exits `3`. Drafts use dict-form steps.
 - `call-unmapped` sees only calls with `effective_args`. The summary has no full path for a call without arguments, so a call with none that no step translates leaves no finding.
 - A removed step that repair folded into another records no drop, so it appears as `step-removed-unrecorded`. The report says so. It doesn't excuse it.
-- Removed and added inputs have no key the ledger joins on, so they are listed but never become findings. Look for their reason in the ledger's prose.
+- Removed and added inputs have no key the ledger joins on, so they are listed but never become findings here. The [[nextflow-summary-to-galaxy-parity]] Mold reads their reason from the ledger's prose and lists the unexplained ones as findings.
 - Tool versions are joined on the source side only. The wrapper's own software requirement isn't in any of the five files.
 - The flag join stops at the entry. Which flags of a closure a record covers can't be checked without evaluating it.

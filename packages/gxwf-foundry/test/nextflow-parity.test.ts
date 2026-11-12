@@ -220,7 +220,79 @@ describe("assembleNextflowParity", () => {
     expect(assembleNextflowParity(broken).findings).toContainEqual({
       kind: "source-arg-malformed",
       subject: "arg-collate-args",
+      detail: "source_arg has no string step and arg",
     });
+  });
+
+  it("doesn't map a call to a step through an entry id another call shares", () => {
+    const shared = inputs();
+    const summary = shared.summary as {
+      processes: { name: string; effective_args: { call: string; ids: string[] }[] }[];
+    };
+    const sharedId = "conf/base.config#withLabel:process_single/args";
+    for (const p of summary.processes.filter((p) => p.name !== "SAMTOOLS_VIEW"))
+      for (const row of p.effective_args) row.ids = [sharedId];
+    delete (shared.snapshot as { steps: Record<string, unknown> }).steps.collate;
+    delete (shared.workflow as { steps: Record<string, unknown> }).steps.collate;
+    const ledger = shared.ledger as { decisions: { id: string; source_arg?: { arg: string } }[] };
+    ledger.decisions.find((d) => d.id === "arg-to-fastq-args")!.source_arg!.arg = sharedId;
+    expect(assembleNextflowParity(shared).findings).toContainEqual({
+      kind: "call-unmapped",
+      subject: `${CALL}SAMTOOLS_COLLATE`,
+    });
+  });
+
+  it("joins a removed output to a drop whose units name it", () => {
+    const outputDrop = inputs();
+    (outputDrop.ledger as { entries: unknown[] }).entries.push({
+      id: "chr-alignment-dropped",
+      status: "open",
+      kind: "dropped",
+      raised_by: "debug-galaxy-workflow-output",
+      units: "`chr_alignment` output",
+      because: "the filtered BAM is an intermediate",
+    });
+    const result = assembleNextflowParity(outputDrop);
+    expect(result.outputs.removed[0]?.dropped_entries).toEqual(["chr-alignment-dropped"]);
+    expect(result.findings.map((f) => f.kind)).not.toContain("output-removed-unrecorded");
+    expect(result.findings.map((f) => f.kind)).toContain("step-removed-unrecorded");
+  });
+
+  it("doesn't count a flag record with no disposition or reason as recording its entry", () => {
+    const unreasoned = inputs();
+    (unreasoned.ledger as { entries: unknown[] }).entries.push({
+      id: "arg-collate-args",
+      status: "open",
+      kind: "dropped",
+      source_arg: { step: "collate", arg: `${ARG}SAMTOOLS_COLLATE/args`, flags: ["-f", "-r"] },
+    });
+    const ledger = unreasoned.ledger as { decisions: Record<string, unknown>[] };
+    delete ledger.decisions.find((d) => d.id === "arg-view-map-map-args")!.disposition;
+    const result = assembleNextflowParity(unreasoned);
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        {
+          kind: "source-arg-malformed",
+          subject: "arg-collate-args",
+          detail: "a dropped flag record has no because",
+        },
+        {
+          kind: "source-arg-malformed",
+          subject: "arg-view-map-map-args",
+          detail: "disposition is not carried or not_applicable",
+        },
+        {
+          kind: "source-arg-unrecorded",
+          subject: "collate",
+          detail: `${ARG}SAMTOOLS_COLLATE/args`,
+        },
+        {
+          kind: "source-arg-unrecorded",
+          subject: "view_map_map",
+          detail: `${ARG}SAMTOOLS_VIEW_MAP_MAP/args`,
+        },
+      ]),
+    );
   });
 
   it("marks a call with no step as covered by a drop naming one of its units", () => {
