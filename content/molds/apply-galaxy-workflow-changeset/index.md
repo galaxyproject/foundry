@@ -7,14 +7,14 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-07-01
-revised: 2026-11-06
-revision: 4
+revised: 2026-11-12
+revision: 5
 summary: "Apply a reviewed change-set to a concrete Galaxy workflow: untouched regions preserved, tool-introducing edits injected as drafty steps."
 input_artifacts:
   - id: starting-galaxy-workflow
     description: "The normalized concrete gxformat2 workflow being modified, emitted by [[summarize-galaxy-workflow]] (passthrough when already gxformat2, the `.ga`→gxformat2 conversion otherwise). The substrate edits apply to — untouched regions must survive byte-for-byte."
   - id: galaxy-workflow-changeset
-    description: "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]]; the edit intents to realize."
+    description: "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]] or [[improve-galaxy-workflow-efficiency]]; the edit intents to realize."
   - id: open-requirements-ledger
     description: "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one."
 output_artifacts:
@@ -64,6 +64,7 @@ related_molds:
   - "[[interview-to-galaxy-workflow-changeset]]"
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
+  - "[[improve-galaxy-workflow-efficiency]]"
 related_notes:
   - "[[interview-to-galaxy-workflow-changeset]]"
   - "[[galaxy-workflow-draft-format]]"

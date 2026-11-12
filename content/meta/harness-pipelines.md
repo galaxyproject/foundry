@@ -7,10 +7,11 @@ tags:
   - meta
   - lifecycle/review
   - lifecycle/publication
+  - lifecycle/efficiency
 status: revised
 created: 2026-04-30
-revised: 2026-11-10
-revision: 24
+revised: 2026-11-12
+revision: 25
 summary: "The translation and lifecycle journeys that compose Molds, loops, branch phases, and harness-owned behavior."
 ---
 
@@ -32,7 +33,8 @@ Some journeys instead operate on an existing workflow after construction. These 
 **lifecycle pipelines**. Use `lifecycle/*` to classify their purpose:
 
 - `lifecycle/review` — evaluate an existing workflow or submission and emit advisory findings;
-- `lifecycle/publication` — mature, package, and hand an existing workflow to a publication destination.
+- `lifecycle/publication` — mature, package, and hand an existing workflow to a publication destination;
+- `lifecycle/efficiency` — propose edits that make an existing workflow cheaper to run without changing what it computes.
 
 The lifecycle facet is orthogonal to source and target. A Galaxy workflow review can carry
 `source/galaxy` + `lifecycle/review`; a Galaxy publication journey can carry `source/galaxy` +
@@ -226,6 +228,16 @@ Two harness-owned gates sit ahead of phase 3, and both stop the run rather than 
 
 The pipeline is read-only end to end. It cannot approve, comment, push, mark ready, or merge, and it cannot edit the workflow it reviews. An accepted edit belongs to the maturation harness proposed in galaxyproject/foundry#492, not to this journey, and is routed through `apply-galaxy-workflow-changeset` where applicable.
 
+### GALAXY WORKFLOW EFFICIENCY
+
+The Foundry's first `lifecycle/efficiency` journey. An existing Galaxy workflow enters, the efficiency levers the Foundry documents are checked against it, and the approved edits are applied, implemented, and retested. The change driver is a documented lever, starting with the FastQC → Falco row of `galaxy-efficient-tool-substitutions`, so the name carries no source-to-target arrow.
+
+1. `summarize-galaxy-workflow` — normalize the workflow and record the tool ids, settings, connections, input formats, and tests the lever checks need.
+2. `improve-galaxy-workflow-efficiency` — match steps against each lever, check every opt-out the summary can settle, and emit a change-set of `replace-tool` entries plus the matching steps kept with their reasons. A person approves it before anything changes.
+3. `apply-galaxy-workflow-changeset` through `debug-galaxy-workflow-output` — the `UPDATE-INTERVIEW → GALAXY` tail, unchanged: apply as drafty steps, resolve each pinned replacement in the per-step loop, carry the tests forward, validate, and run.
+
+Only phase 2 is new. The interview pipeline already turns a change-set into a retested workflow, so an efficiency journey needs a different change driver, not a different edit path. The tests are the evidence a swap preserved what the workflow computes: assertions the lever's note says the replacement breaks are replaced, and every other one must still pass.
+
 ## Workflow Brief journeys
 
 [[paper-to-workflow-brief]], [[interview-to-workflow-brief]], and [[nextflow-to-workflow-brief]] stop at an expert-editable [[workflow-brief-design]]. Paper and interview reuse their narrative summarizers and [[freeform-summary-to-workflow-brief]]; Nextflow reuses its structured summarizer and [[nextflow-summary-to-workflow-brief]]. These producers capture selected scientific intent and the agent environment without making Galaxy design choices.
@@ -248,7 +260,7 @@ Every implementation phase leaves the brief unchanged. The harness checks its ha
   - Per-step (CWL): `summarize-cwl-tool`, `implement-cwl-tool-step`.
   - Validate: `validate-galaxy-workflow`, `validate-cwl`. (Per-step Galaxy validation moved into `advance-galaxy-draft-step` via `gxwf draft-validate --concrete`.)
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
-- **Lifecycle (post-construction)**: `GALAXY WORKFLOW MATURATION` and `GALAXY WORKFLOW REVIEW` each needed exactly one new Mold — `summarize-galaxy-workflow` plus the validate/run tail are reused unchanged in both. Maturation adds a corrective pass (`mature-galaxy-workflow-for-iwc`, landed by #496) and runs the tail *afterwards*, to check its own edits; review adds a Mold that only reads (`review-galaxy-workflow`) and runs the tail *first*, as evidence producers. A lifecycle pipeline needs no new spine; it needs one action and a reason to run the existing tail on one side of it.
+- **Lifecycle (post-construction)**: `GALAXY WORKFLOW MATURATION`, `GALAXY WORKFLOW REVIEW`, and `GALAXY WORKFLOW EFFICIENCY` each needed exactly one new Mold — `summarize-galaxy-workflow` plus the validate/run tail are reused unchanged in both. Maturation adds a corrective pass (`mature-galaxy-workflow-for-iwc`, landed by #496) and runs the tail *afterwards*, to check its own edits; review adds a Mold that only reads (`review-galaxy-workflow`) and runs the tail *first*, as evidence producers. Efficiency adds a change-set producer (`improve-galaxy-workflow-efficiency`) and reuses the whole update-interview edit tail behind it. A lifecycle pipeline needs no new spine; it needs one action and a reason to run the existing tail on one side of it.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts.
 - **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` derives fixtures from a paper-origin `freeform-summary`; `nextflow-to-test-data` and `cwl-to-test-data` resolve the source's own declared fixtures (`test_candidates[].inputs[]` / `tests[]`) into `test-data-refs`. Each is the first leg of its pipeline's `test-data-resolution` chain, falling through to `find-test-data` (search) then user-supplied data. Interview starts skip directly to `find-test-data` / user-supplied data until a real interview-specific fixture derivation Mold exists.

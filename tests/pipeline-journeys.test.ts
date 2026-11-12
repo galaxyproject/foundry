@@ -53,6 +53,7 @@ describe("pipeline journey taxonomy", () => {
   it("keeps the public route inventory intentional", () => {
     expect(Object.fromEntries(journeys.map(({ slug, journey }) => [slug, journey]))).toEqual({
       "cwl-to-galaxy": "direct-build",
+      "galaxy-workflow-efficiency": "existing-workflow",
       "galaxy-workflow-maturation": "existing-workflow",
       "galaxy-workflow-review": "existing-workflow",
       "interview-to-galaxy": "direct-build",

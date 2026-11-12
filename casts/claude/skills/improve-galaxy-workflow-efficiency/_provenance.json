@@ -1,0 +1,112 @@
+{
+  "provenance_schema_version": 4,
+  "cast_target": "claude",
+  "mold": {
+    "name": "improve-galaxy-workflow-efficiency",
+    "path": "content/molds/improve-galaxy-workflow-efficiency/index.md",
+    "revision": 1,
+    "content_hash": "b806b8f200f19e83cdfb054ae32e3e99396e0fb42bb42409cce0faae8edd4800",
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
+  },
+  "cast_at": "2026-11-12T09:51:00.086Z",
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[galaxy-efficient-tool-substitutions]]",
+      "src": "content/research/galaxy-efficient-tool-substitutions/index.md",
+      "dst": "references/notes/galaxy-efficient-tool-substitutions.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "The substitution table: which tools have a lower-cost replacement, the replacement's exact `tool_id`, how ports and parameters map, and the opt-out conditions that keep the original.",
+      "verification": "Promote after a run on an IWC workflow with a FastQC step emits a replace-tool entry pinned to iuc/falco, and the update chain applies it, implements it, and passes the carried-forward tests.",
+      "src_hash": "27e978caa8575278194ae2c0d5c9dc218a4958955f56bcef106cd3ff338ec8e5",
+      "dst_hash": "27e978caa8575278194ae2c0d5c9dc218a4958955f56bcef106cd3ff338ec8e5",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Record each swap or kept original as a decision, and a matching step whose evidence is too thin to judge as an open entry.",
+      "verification": "Promote after a reviewer reads a run's decisions and can reverse a swap or confirm a kept original without re-deriving the opt-out.",
+      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "[[summary-galaxy-workflow]]",
+      "src": "package://@galaxy-foundry/gxwf-foundry#summaryGalaxyWorkflowSchema",
+      "dst": "references/schemas/summary-galaxy-workflow.schema.json",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Input contract: read step tool ids, settings, connections, input formats, and tests from the existing-workflow summary.",
+      "license": "MIT",
+      "src_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "dst_hash": "55831dd043243e137cae595badc7f1ecc9a84a44936c0e036c7c3f5d33978bb3",
+      "source": "deterministic"
+    }
+  ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "galaxy-workflow-changeset",
+        "kind": "markdown",
+        "default_filename": "galaxy-workflow-changeset.md",
+        "description": "Reviewable change-set in the same entry format [[interview-to-galaxy-workflow-changeset]] emits: one `replace-tool` or `change-parameter` entry per proposed efficiency edit, each anchored to an existing step, preceded by a summary of the levers consulted and the matching steps left unchanged with the reason. The human approval point before [[apply-galaxy-workflow-changeset]] touches the workflow."
+      },
+      {
+        "id": "open-requirements-ledger",
+        "kind": "yaml",
+        "default_filename": "open-requirements.ledger.yml",
+        "description": "Carried obligations ledger re-emitted by this step: a decision for every matching step, swapped or kept, and every other entry passed through with its provenance intact."
+      }
+    ],
+    "consumes": [
+      {
+        "id": "summary-galaxy-workflow",
+        "description": "Structured summary of the existing workflow from [[summarize-galaxy-workflow]]: each step's `tool_id`, `tool_state`, connections and outputs, the workflow inputs' formats, the edge graph, and any existing tests. The anchor set every change-set entry addresses.",
+        "inherited_schema": "[[summary-galaxy-workflow]]",
+        "producers": [
+          "summarize-galaxy-workflow"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: the run's open, resolved, and surrendered entries with their provenance. Absent on the first Mold of a run; start an empty one.",
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "improve-galaxy-workflow-efficiency",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
+        ]
+      }
+    ]
+  }
+}

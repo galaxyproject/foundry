@@ -73,6 +73,7 @@ facets:
     values:
       lifecycle/review: "Evaluate an existing workflow or submission and produce advisory review findings"
       lifecycle/publication: "Mature, package, and hand an existing workflow to a publication destination"
+      lifecycle/efficiency: "Propose edits that make an existing workflow cheaper to run without changing what it computes"
 
   journey:
     label: Journey

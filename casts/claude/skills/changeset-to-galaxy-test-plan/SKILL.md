@@ -14,7 +14,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Inputs
 
 - Read artifact `summary-galaxy-workflow`. Schema: summary-galaxy-workflow. Produced by `summarize-galaxy-workflow`. Structured summary of the existing workflow from summarize-galaxy-workflow; its `tests[]` are the regression baseline to carry forward, and its resolved input/output labels are the anchors baseline assertions bind to.
-- Read artifact `galaxy-workflow-changeset`. Produced by `interview-to-galaxy-workflow-changeset`. Reviewed, step-anchored change-set from interview-to-galaxy-workflow-changeset; names which edits change observable behavior, hence which baseline cases to update and which new assertions to add.
+- Read artifact `galaxy-workflow-changeset`. Produced by `improve-galaxy-workflow-efficiency`, `interview-to-galaxy-workflow-changeset`. Reviewed, step-anchored change-set from interview-to-galaxy-workflow-changeset or improve-galaxy-workflow-efficiency; names which edits change observable behavior, hence which baseline cases to update and which new assertions to add.
 
 ## Outputs
 

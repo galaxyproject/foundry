@@ -9,14 +9,14 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-07-01
-revised: 2026-09-23
-revision: 4
+revised: 2026-11-12
+revision: 5
 summary: "Carry an existing Galaxy workflow's tests forward as a regression baseline and augment them for a change-set's deltas, emitting a Galaxy test plan."
 input_artifacts:
   - id: summary-galaxy-workflow
     description: "Structured summary of the existing workflow from [[summarize-galaxy-workflow]]; its `tests[]` are the regression baseline to carry forward, and its resolved input/output labels are the anchors baseline assertions bind to."
   - id: galaxy-workflow-changeset
-    description: "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]]; names which edits change observable behavior, hence which baseline cases to update and which new assertions to add."
+    description: "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]] or [[improve-galaxy-workflow-efficiency]]; names which edits change observable behavior, hence which baseline cases to update and which new assertions to add."
 output_artifacts:
   - id: galaxy-test-plan
     kind: yaml
@@ -92,6 +92,7 @@ related_molds:
   - "[[interview-to-galaxy-workflow-changeset]]"
   - "[[implement-galaxy-workflow-test]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"
+  - "[[improve-galaxy-workflow-efficiency]]"
 related_notes:
   - "[[galaxy-workflow-test-plan]]"
   - "[[summary-galaxy-workflow]]"
