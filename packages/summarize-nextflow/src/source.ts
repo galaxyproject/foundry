@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { normalizeGitUrl } from "./git-url.js";
+import { normalizeGitUrl, remoteSourceUrl } from "./git-url.js";
 
 export class SummarizeNextflowInputError extends Error {
   readonly exitCode = 1;
@@ -82,7 +82,7 @@ export function resolveSource(pathOrUrl: string, pin?: string): ResolvedSource {
       };
     }
     const origin = tryGit(localRoot, ["remote", "get-url", "origin"]);
-    return checkoutInto(localRoot, pin, origin ? normalizeGitUrl(origin) : null);
+    return checkoutInto(localRoot, pin, remoteSourceUrl(origin));
   }
 
   return checkoutInto(pathOrUrl, pin, normalizeGitUrl(pathOrUrl));

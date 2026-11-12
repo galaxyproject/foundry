@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import YAML from "yaml";
-import { normalizeGitUrl } from "./git-url.js";
+import { remoteSourceUrl } from "./git-url.js";
 
 interface SampleSheetColumn {
   name: string;
@@ -409,14 +409,16 @@ export async function resolveNextflowSummary(
 
   const params = parseParams(pipelineRoot);
 
+  // A Nextflow-managed clone's origin is a local bare repo, not a URI.
+  const sourceUrl =
+    remoteSourceUrl(gitOutput(pipelineRoot, ["remote", "get-url", "origin"])) ??
+    remoteSourceUrl(matchOne(config, /manifest\s*\{[\s\S]*?homePage\s*=\s*['"]([^'"]+)['"]/u));
+
   const summary: Summary = {
     source: {
       ecosystem: workflowName.startsWith("nf-core/") ? "nf-core" : "nextflow",
       workflow: workflowName.split("/").at(-1) ?? basename(pipelineRoot),
-      url: normalizeGitUrl(
-        gitOutput(pipelineRoot, ["remote", "get-url", "origin"]) ??
-          "https://example.invalid/unknown.git",
-      ),
+      url: sourceUrl ?? "https://example.invalid/unknown.git",
       version: gitOutput(pipelineRoot, ["rev-parse", "HEAD"]) ?? "unknown",
       license: existsSync(join(pipelineRoot, "LICENSE")) ? "MIT" : null,
       slug: workflowName.replace("/", "-"),
