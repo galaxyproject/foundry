@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 9,
     "content_hash": "82a262c09c5f21938acd2f81c3ae920a1563e15201c1f81507eb48ab003398c7",
-    "commit": "23ed81323d3a74198f66405fc3c0b811c035ec5f"
+    "commit": "4ae46ef3103fa153fc59173608e6d096d27ca8df"
   },
-  "cast_at": "2026-11-12T12:57:35.658Z",
+  "cast_at": "2026-11-12T13:05:23.857Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -31,8 +31,8 @@
       "purpose": "Deterministically match the steps `gxwf diff` reports removed against the ledger's `kind: dropped` entries.",
       "trigger": "After a green Planemo run, when the extracted-workflow snapshot exists.",
       "verification": "Promote after a run blocks a green result on a removed step that has no drop entry.",
-      "src_hash": "29e72d336445d48a413a5bf96d4497396b7dfd574ca19e77809328e6a36dc653",
-      "dst_hash": "00fad73e050ad5580b0a01688e2cea4a287e83c2abd7545046fe1341e3f50c4d",
+      "src_hash": "f62ffbeda3d11d004aed15290fd4775a00b4bb64c8a25b0e1c1f46863c2dcdd9",
+      "dst_hash": "299a7d2e45ef0e37caccf046fb5f5b02f1bdde40c611a7833f546b04ba3e0baa",
       "source": "deterministic"
     },
     {

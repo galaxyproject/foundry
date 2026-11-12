@@ -16,7 +16,7 @@ summary: "Check that every step a `gxwf diff` reports removed has a `kind: dropp
 
 # `foundry check-step-removals`
 
-Read the JSON a `gxwf diff --json <before> <after>` prints and an [[open-requirements-ledger]], and check that every step the diff lists under `steps.removed` is labelled as a drop. A removed step is labelled when an obligation entry under `entries` (or a ledger written as a bare list of entries) has `kind: dropped`, a top-level `step` equal to the removed step's key, and no `source_arg`. A step inside an inline subworkflow is keyed by its path, the parent step's key and its own joined by `/` (`nested/first`), and only that full key names it. A top-level step also matches its label.
+Read the JSON a `gxwf diff --json <before> <after>` prints and an [[open-requirements-ledger]], and check that every step the diff lists under `steps.removed` is labelled as a drop. A removed step is labelled when an obligation entry under `entries` (or a ledger written as a bare list of entries) has `kind: dropped`, a top-level `step` equal to the removed step's key, and no `source_arg`. A step inside an inline subworkflow is keyed by its path, the parent step's key and its own joined by `/` (`nested/first`), and only that full key names it. A step whose key has no `/` also matches its label.
 
 `<diff.json>` is a path, or `-` to read the diff from stdin.
 
