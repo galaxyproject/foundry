@@ -107,7 +107,9 @@ function checkCitation(summary: Summary, { control, value, from }: Control): voi
       expect(candidate!.params_delta?.[param!], from).toBe(value);
     } else {
       expect(field, from).toBeUndefined();
-      expect(key, from).toContain(String(value));
+      // The candidate's file stem must be the value or end in `_<value>`.
+      const stem = /([^/]+)\.nf\.test::/.exec(key!)?.[1] ?? "";
+      expect([stem, `_${stem}`.endsWith(`_${String(value)}`)], from).toEqual([stem, true]);
     }
   } else {
     const conditional = summary.workflow.conditionals.find((c) => c.affects.includes(key!));
