@@ -98,13 +98,13 @@ If the source image is outside the default allowlist and no permitted equivalent
 
 Write the `GalaxyUserTool` YAML draft from the requirements brief, following `references/notes/galaxy-user-tool-authoring.md`.
 
-Nothing constrains this draft to the schema as it is written, so the rules in that note are load-bearing rather than advisory. The ones that fail most often: `format` on a data input is a list even for a single format; the default field is `value` and never `default`; an output's `format` is a string while an input's is a list; `$(outputs.X.path)` is not valid syntax; and every `inputs.NAME` in `shell_command` must match a declared input exactly.
+Nothing constrains this draft to the schema as it is written, so the rules in that note are load-bearing rather than advisory. The ones that fail most often: `format` on a data input is a list even for a single format; the default field is `value` and never `default`; an output's `format` is a string while an input's is a list; `$(outputs.X.path)` is not valid syntax; and every `inputs.NAME` in `shell_command` must match a declared input exactly. Never interpolate a free-form `text` input directly into `shell_command` or executable script source, even inside quotes. Serialize it into a JSON configfile with `JSON.stringify` and read it as data.
 
 #### 4. Validate structurally
 
 Check the selected image against the resolved allow and deny lists before schema validation. Under the default, require registry `quay.io`, a repository strictly below `biocontainers/`, no transport scheme, and a tag or digest. A source image's existence is not policy evidence.
 
-Write the draft to `galaxy-user-tool.yml` and run `gxwf validate-tool-source galaxy-user-tool.yml --json` without `--schema-only`. Treat container-policy and structural validation failures as authoring failures, not critic feedback. If the command is unavailable, stop with `validation-not-run`; do not substitute visual inspection.
+Write the draft to `galaxy-user-tool.yml` and run `gxwf validate-tool-source galaxy-user-tool.yml --json --security` without `--schema-only`. Treat container-policy, structural and security validation failures as authoring failures, not critic feedback. If the command or its `--security` option is unavailable, stop with `validation-not-run`; do not substitute visual inspection.
 
 Fix validation errors directly. Do not run the critic until the draft passes structural validation.
 
@@ -112,7 +112,7 @@ Fix validation errors directly. Do not run the critic until the draft passes str
 
 After structural validation passes, review the draft against `references/notes/galaxy-user-tool-critique.md`, with the original request and requirements brief in hand.
 
-Apply every concrete clarity or idiomaticity issue. Sort each fix into text-level or structural per that note: text-level fixes are applied to the named field directly; a structural one means regenerating from §3 rather than improvising an edit. Re-run the policy check and `gxwf validate-tool-source` after edits — a `shell_command` or container change can invalidate either gate. If critique conflicts with source evidence, keep the source evidence and record the conflict.
+Apply every concrete clarity or idiomaticity issue. Sort each fix into text-level or structural per that note: text-level fixes are applied to the named field directly; a structural one means regenerating from §3 rather than improvising an edit. Re-run the policy check and `gxwf validate-tool-source --security` after edits — a `shell_command`, configfile or container change can invalidate a gate. If critique conflicts with source evidence, keep the source evidence and record the conflict.
 
 #### 6. Emit the UDT artifact
 

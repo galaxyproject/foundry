@@ -58,9 +58,19 @@ the oracle here is applied to whatever a scenario produces.
 
 - bucket: structural-validity
 - check: deterministic
-- assertion: `gxwf validate-tool-source galaxy-user-tool.yml --json` exits zero
+- assertion: `gxwf validate-tool-source galaxy-user-tool.yml --json --security` exits zero
   without `--schema-only` after drafting and after critique. A missing validator
   is reported as `validation-not-run`, never treated as a pass.
+
+## Property: free text remains data
+
+- bucket: agentic-security
+- check: deterministic
+- assertion: no top-level free-form `text` input is substituted directly into
+  `shell_command` or executable configfile source, even inside quotes. Such
+  values are serialized with `JSON.stringify` into a data configfile and read
+  by the program. Validation exposes violations with
+  `dynamic_tool.unsafe_text_interpolation`.
 
 ## Property: policy discovery leaves no probe tool
 

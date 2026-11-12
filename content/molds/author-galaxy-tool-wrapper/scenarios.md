@@ -88,4 +88,19 @@
 
 - fixture: `examples/line-count.galaxy-user-tool.yml`.
 - expect: the container passes the default policy check and
-  `gxwf validate-tool-source --json` reports `valid: true`.
+  `gxwf validate-tool-source --json --security` reports `valid: true`.
+
+## Case: direct free text inside shell quotes
+
+- fixture: an otherwise valid draft with a top-level `text` input `label` and
+  `shell_command: "printf '%s' '$(inputs.label)' > out.txt"`.
+- expect: security validation fails at `/shell_command` with
+  `dynamic_tool.unsafe_text_interpolation`; the author regenerates the unsafe
+  transport instead of adding more shell quoting.
+
+## Case: free text serialized as JSON data
+
+- fixture: the same tool with `params.json` containing
+  `$(JSON.stringify(inputs.label))`, a script that parses that file, and a
+  `shell_command` that invokes the script without interpolating `label`.
+- expect: `gxwf validate-tool-source --json --security` reports `valid: true`.

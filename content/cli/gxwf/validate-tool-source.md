@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-11-12
 revised: 2026-11-12
-revision: 1
+revision: 2
 summary: "Validate Galaxy user-defined tool YAML against the upstream schema and semantic authoring checks."
 ---
 
@@ -26,11 +26,14 @@ The default output is concise human-readable diagnostics. `--json` emits a struc
 ```bash
 gxwf validate-tool-source galaxy-user-tool.yml
 gxwf validate-tool-source galaxy-user-tool.yml --json
+gxwf validate-tool-source galaxy-user-tool.yml --json --security
 gxwf validate-tool-source galaxy-user-tool.yml --schema-only
 ```
 
 ## Gotchas
 
 - Do not use `--schema-only` for an authored UDT. It skips semantic checks for blank required fields, input references, output discovery and citations.
+- Use `--security` for agent-authored UDTs. It rejects direct top-level `text` interpolation in `shell_command` and executable configfiles with `dynamic_tool.unsafe_text_interpolation`. Serialize free text into a JSON configfile with `JSON.stringify` and read it as data.
+- The security check is deliberately narrow: it does not claim to parse arbitrary ECMAScript, shell code, nested parameters or program behavior.
 - This command validates the tool language, not whether a target Galaxy permits or can pull the named container. Apply the target's allowed and denied container policy separately.
 - A successful static check does not prove the image contains every command or that the tool produces its declared outputs. Confirm image contents and run the workflow test.

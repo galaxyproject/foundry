@@ -6,7 +6,7 @@ tags:
 status: draft
 created: 2026-08-24
 revised: 2026-11-12
-revision: 4
+revision: 5
 component: tool_util_models
 related_notes:
   - "[[component-nextflow-containers-and-envs]]"
@@ -85,6 +85,8 @@ So escape the dollar only in front of `(` or `{`, and prefer unbraced variables 
 **Expect the command to run under `/bin/sh` with `set -e`.** Galaxy writes the evaluated `shell_command` into a job script with `set -e`, which it enables for every user-defined tool. When Galaxy runs the container itself (Docker or Singularity on a local or cluster runner), the script's interpreter is the container's `/bin/sh`. Runners that launch the container themselves, such as Kubernetes, use the destination's shell instead, `/bin/bash` by default. Write the script for `/bin/sh` unless it calls `bash` explicitly. In many images `/bin/sh` is a minimal shell such as dash, which may lack bash features such as `set -o pipefail`, arrays and `[[ ]]`. Where `set -o pipefail` is rejected, the job fails at once (exit status 2 under dash). When a script needs bash, put it in a `configfiles` entry and run it with `bash script.sh` (§6), after checking that the image provides `bash`.
 
 **Name matching is the highest-frequency failure.** Every `inputs.NAME` in `shell_command` must exactly match a declared input's `name`. Never reference an input that is not declared.
+
+**Free-form text is data, not executable text.** A top-level `text` value is inserted raw. Shell quotes, a quoted heredoc, or Python/R/JavaScript string quotes do not make direct interpolation safe because the value can terminate the surrounding syntax. Do not put `$(inputs.name)` directly in `shell_command` or executable configfile source. Write it into a data configfile as `$(JSON.stringify(inputs.name))` and parse that file from the program. Fixed `select` values and typed numeric or boolean values remain suitable for direct interpolation.
 
 ## 4. Input parameter types
 
@@ -195,9 +197,9 @@ submit a probe tool or postpone the failure until workflow testing. When
 creating the requested tool returns an HTTP 400 that lists allowed images, treat
 that response as target policy evidence and revise or stop.
 
-Run `gxwf validate-tool-source galaxy-user-tool.yml --json` without
+Run `gxwf validate-tool-source galaxy-user-tool.yml --json --security` without
 `--schema-only` after the policy check. This validates Galaxy's schema and
-semantic authoring rules but does not evaluate the deployment's container
+semantic authoring rules plus the narrow direct-text security rule, but does not evaluate arbitrary ECMAScript or shell behavior, the deployment's container
 lists, image existence or command availability; those remain separate gates.
 
 ## 8. Resource requirements

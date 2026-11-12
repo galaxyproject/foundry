@@ -1,6 +1,6 @@
 {
   "name": "foundry-skills",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Corpus-grounded, schema-validated skills for constructing Galaxy workflows.",
   "author": {
     "name": "John Chilton",
