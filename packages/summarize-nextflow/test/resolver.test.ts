@@ -534,6 +534,51 @@ nextflow_pipeline {
     ]);
   });
 
+  test("reads the nf-core template's assignment form in nf-test.config", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/profile-assignment' }\nprofiles { test {} test_stub {} }\n",
+    );
+    write(root, "main.nf", "workflow PROFILE_ASSIGNMENT { }\n");
+    write(root, "nf-test.config", 'config {\n  profile = "test"\n}\n');
+    write(
+      root,
+      "tests/default.nf.test",
+      `nextflow_pipeline {
+  test("uses nf-test.config profile") {
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+    write(
+      root,
+      "tests/stub.nf.test",
+      `profile "test_stub"
+nextflow_pipeline {
+  test("file-level profile replaces nf-test.config") {
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = (await buildSummary(root, {
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    })) as SummaryLike;
+
+    expect(
+      summary.test_candidates?.map((candidate) => [candidate.id, candidate.effective_profiles]),
+    ).toEqual([
+      ["tests/default.nf.test::uses nf-test.config profile", ["test"]],
+      ["tests/stub.nf.test::file-level profile replaces nf-test.config", ["test_stub"]],
+    ]);
+  });
+
   test("resolves inline profile params without treating them as pipeline defaults", async () => {
     const root = tempPipelineRoot();
     write(

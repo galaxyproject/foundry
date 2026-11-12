@@ -2910,7 +2910,8 @@ function parseNfTestConfigProfiles(pipelineRoot: string): string[] {
 function parseNfTestFileProfiles(text: string): string[] {
   const fileScope = maskNfTestBlocks(text);
   return unique(
-    [...fileScope.matchAll(/^\s*profile\s+["']([^"']+)["']/gmu)].map((match) => match[1]!),
+    // nf-core's nf-test.config template writes `profile = "test"`; .nf.test files use `profile "test"`.
+    [...fileScope.matchAll(/^\s*profile\s*(?:=\s*)?["']([^"']+)["']/gmu)].map((match) => match[1]!),
   );
 }
 

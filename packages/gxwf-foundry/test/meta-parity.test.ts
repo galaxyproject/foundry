@@ -84,6 +84,13 @@ describe("foundryCliMeta", () => {
     expect(derived).toEqual(foundryCliMeta);
   });
 
+  it("does not default summarize-nextflow --profile (#763)", () => {
+    const command = buildProgram().commands.find((c) => c.name() === "summarize-nextflow");
+    const profile = command?.options.find((o) => o.long === "--profile");
+    expect(profile).toBeDefined();
+    expect(profile?.defaultValue).toBeUndefined();
+  });
+
   it("declares the package.json version", () => {
     const pkgUrl = new URL("../package.json", import.meta.url);
     const pkg = JSON.parse(readFileSync(fileURLToPath(pkgUrl), "utf-8")) as { version: string };

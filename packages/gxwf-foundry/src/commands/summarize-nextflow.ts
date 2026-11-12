@@ -19,7 +19,7 @@ export function attachSummarizeNextflow(parent: Command): void {
     .command("summarize-nextflow")
     .description("Statically introspect a Nextflow / nf-core pipeline and emit a JSON summary.")
     .argument("<path-or-url>", "Path to a local pipeline clone, or a git URL")
-    .option("--profile <name>", "Profile to resolve config under", "test")
+    .option("--profile <name>", "Explicit profile override for candidate resolution")
     .option("--pin <ref>", "Tag, branch, or commit SHA")
     .option("--out <path>", "Write JSON to this path instead of stdout")
     .option(
