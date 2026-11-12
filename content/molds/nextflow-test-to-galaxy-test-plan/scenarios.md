@@ -22,5 +22,5 @@
 
 ## Case: nf-test snapshot fidelity
 
-- fixture: nf-test snapshot evidence covering outputs such as `succeeded_task_count`, `versions.yml`, stable named files, and directory outputs with ignore globs.
-- expect: translated assertion intent exercises the same output intent using suitable assertion families such as `has_text`, `has_n_lines`, `has_size`, stable-name checks, or documented omissions for intentionally unstable files.
+- fixture: nf-test snapshot evidence covering outputs such as `succeeded_task_count`, `versions.yml`, stable named files, and directory outputs with ignore globs, and a `.gz` output token such as nf-core/demo's `SAMPLE1_PE_sample1_R1.fastq.gz:md5,7dd2fd0d542d9259d9aed53550907fae`.
+- expect: translated assertion intent exercises the same output intent using suitable assertion families such as `has_text`, `has_n_lines`, `has_size`, stable-name checks, or documented omissions for intentionally unstable files. The plan does not carry `SAMPLE1_PE_sample1_R1.fastq.gz`'s md5 as `checksum`, and asserts that element with `decompress: true` content assertions or `compare: diff` + `decompress: true`.

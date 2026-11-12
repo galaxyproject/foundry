@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 2
+revised: 2026-11-12
+revision: 3
 related_notes:
   - "[[tests-format]]"
   - "[[summary-nextflow]]"
@@ -21,6 +21,9 @@ related_molds:
 sources:
   - "https://github.com/galaxyproject/foundry/issues/65"
   - "https://github.com/galaxyproject/foundry/issues/142"
+  - "https://github.com/galaxyproject/foundry/issues/764"
+  - "https://github.com/askimed/nf-test/blob/200315a6cd7e168f9673176705604b29698fc182/src/main/java/com/askimed/nf/test/util/FileUtil.java#L97-L114"
+  - "https://github.com/galaxyproject/galaxy/issues/24808"
 summary: "Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape."
 ---
 
@@ -32,7 +35,7 @@ The corpus split is load-bearing: in the pinned `workflow-fixtures/pipelines/` f
 
 ## 0. The framework primitive
 
-nf-test's only assertion mechanism for content is `assert snapshot(<expr>).match()`. The framework serializes `<expr>` to JSON and writes it to a sibling `<name>.nf.test.snap` on first run; subsequent runs diff JSON. When `<expr>` contains files, nf-test serializes each as `<basename>:md5,<hex>` — a content hash, not a byte-equal comparison.
+nf-test's only assertion mechanism for content is `assert snapshot(<expr>).match()`. The framework serializes `<expr>` to JSON and writes it to a sibling `<name>.nf.test.snap` on first run; subsequent runs diff JSON. When `<expr>` contains files, nf-test serializes each as `<basename>:md5,<hex>` — a content hash, not a byte-equal comparison. For a path ending in `.gz`, nf-test (0.8.2 and later) hashes the *decompressed* stream. Every other file, including `.bgz`, `.bz2` and `.zip`, is hashed as raw bytes ([`FileUtil.getMd5`](https://github.com/askimed/nf-test/blob/200315a6cd7e168f9673176705604b29698fc182/src/main/java/com/askimed/nf/test/util/FileUtil.java#L97-L114)). §1a covers what this means for Galaxy.
 
 A `.snap` entry looks like:
 
@@ -72,16 +75,23 @@ Each value is a list of `<basename>:md5,<hex>` strings (or nested lists for coll
 | nf-test snap | Galaxy `-tests.yml` |
 |---|---|
 | named channel key (`genome_gtf`) | `outputs:` label of the same role |
-| `<basename>:md5,<hex>` (single file) | `checksum: md5$<hex>` when preserving nf-test snapshot semantics directly; `file:` + `compare:` only when a materialized expected file is available |
+| `<basename>:md5,<hex>` (single file) | `checksum: md5$<hex>` when preserving nf-test snapshot semantics directly; `file:` + `compare:` only when a materialized expected file is available. A `.gz` basename follows *`.gz` tokens* below |
 | `[<file>, <file>, ...]` (collection emission) | `element_tests:` keyed by element identifier; each element gets the equivalent checksum or file/assertion body |
 | `["TOOL", "lang", "version"]` (scalar tuple — e.g. versions) | drop, or `has_text` on tool name in a versions output if exposed |
 
 Galaxy's test format has two exact-output mechanisms:
 
-- `checksum: "md5$<hex>"` checks the produced output content by digest and does not require a `test-data/` expected file. This is the closest direct translation of nf-test's `<basename>:md5,<hex>` snapshot token.
+- `checksum: "md5$<hex>"` checks the produced output content by digest and does not require a `test-data/` expected file. This is the closest direct translation of nf-test's `<basename>:md5,<hex>` snapshot token, except for a `.gz` token on an output Galaxy stores compressed (below).
 - `file: test-data/<basename>` plus `compare:` compares the produced output against a materialized expected file. Use this when the expected bytes are available and the output format benefits from `compare` options (`diff` with `lines_diff`, `sim_size`, `contains`, etc.).
 
 Do not infer a `file:` comparison from a `.snap` token alone. The token records the expected digest, not the expected bytes.
+
+**`.gz` tokens.** The md5 of a `.gz` basename is the md5 of the decompressed content (§0). Galaxy's `checksum` hashes the output bytes as stored and ignores `decompress: true` ([galaxy#24808](https://github.com/galaxyproject/galaxy/issues/24808)). Choose by how the Galaxy output is stored, not by the Nextflow basename:
+
+- **Galaxy stores it uncompressed** (`fastqsanger`, `vcf`, `tabular`, ...): `checksum: md5$<hex>` works as above.
+- **Galaxy stores it compressed** (`fastqsanger.gz`, `vcf_bgzip`, any `*.gz` datatype): do not emit `checksum` from the token. It never matches. The token hashes the decompressed content, and `checksum` hashes the stored gzip bytes. With a materialized expected file, use `file:` + `compare: diff` + `decompress: true`. With only the token, use content assertions with `decompress: true` (`has_n_lines`, `has_text`, per [[planemo-asserts-idioms]]). Set `evidence: fixture-derived` when `n` or the text is measured from the nf-core output or test fixture, otherwise `intent`. Record a `warnings[]` entry with code `untranslatable-snapshot` whose `path` points at the snapshot token. A [[galaxy-workflow-test-plan]] assertion has no `decompress` field, so write `decompress: true` into its `intent`.
+
+Never record an md5 measured from Galaxy's compressed output as snapshot parity. It pins one compressor's bytes, not the content nf-test checked.
 
 ### 1b. Caveat: stub-mode tests
 
@@ -150,7 +160,7 @@ Three captures, each translatable to a different Galaxy concept (when at all):
 
 - **`removeNextflowVersion(...versions.yml)`** — the pipeline's aggregated tool-versions YAML with the Nextflow version line stripped to avoid spurious diffs across `nextflow` versions. Galaxy has no equivalent — tool versions are tracked by wrapper `<requirements>` and surfaced in invocation provenance, not asserted in `-tests.yml`. **Drop, or replace with a weak `has_text` on a tool name** if a versions output is exposed.
 - **`stable_name` (file paths, no content)** — a *list of paths* under the publish dir. Asserts "these output files exist with these names." In Galaxy this is the *set of labeled outputs* in the workflow's outputs block, plus, for collection outputs, the set of `element_tests:` keys. There is no single Galaxy assertion that mirrors "list every published file"; the equivalent is per-output existence implied by labelling.
-- **`stable_path` (file paths *and* content via md5)** — the `.snap` records `<path>:md5,<hex>`. Translate per-file as in §1a: `checksum` for direct snapshot parity; a file-backed `compare:` or assertion-family choice from [[planemo-asserts-idioms]] §1 when expected files are available or checksum is too brittle. `.nftignore` (see §2a) controls which files are in this set.
+- **`stable_path` (file paths *and* content via md5)** — the `.snap` records `<path>:md5,<hex>`. Translate per-file as in §1a: `checksum` for direct snapshot parity, except `.gz` tokens on compressed Galaxy outputs (§1a *`.gz` tokens*); a file-backed `compare:` or assertion-family choice from [[planemo-asserts-idioms]] §1 when expected files are available or checksum is too brittle. `.nftignore` (see §2a) controls which files are in this set.
 
 ### 2a. `.nftignore`, `ignoreFile:`, and `ignore:` globs
 
@@ -201,7 +211,7 @@ Two staircases reduce assertion-iteration cost. Both detailed in [[planemo-asser
 1. Static gates: `validateTestsFile` (schema) and `checkTestsAgainstWorkflow` (label/type cross-check). Pure-JS, milliseconds, no Galaxy dependency.
 2. `planemo workflow_test_init --from_invocation` to bootstrap a `-tests.yml` from a successful invocation, then `planemo workflow_test_on_invocation` to iterate assertions without re-running the workflow.
 
-For a Nextflow → Galaxy translation: run the translated Galaxy workflow once, bootstrap with `--from_invocation`, then rewrite the autogenerated assertions using the nf-test `.snap` content as the expected-output authority where applicable. If the nf-test token is the only expected-output evidence, prefer `checksum: "md5$<hex>"`; if the expected file is materialized, choose `file:`/`compare:` or richer `asserts:` per [[planemo-asserts-idioms]].
+For a Nextflow → Galaxy translation: run the translated Galaxy workflow once, bootstrap with `--from_invocation`, then rewrite the autogenerated assertions using the nf-test `.snap` content as the expected-output authority where applicable. If the nf-test token is the only expected-output evidence, prefer `checksum: "md5$<hex>"`, unless it is a `.gz` token on a compressed Galaxy output (§1a); if the expected file is materialized, choose `file:`/`compare:` or richer `asserts:` per [[planemo-asserts-idioms]].
 
 ## 7. Source-side gap
 

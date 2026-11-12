@@ -29,4 +29,4 @@ whatever a scenario produces.
 ## Property: nf-test snapshot fidelity
 
 - check: llm-judged
-- assertion: translated assertion intent exercises the same output intent using suitable assertion families such as `has_text`, `has_n_lines`, `has_size`, stable-name checks, or documented omissions for intentionally unstable files.
+- assertion: translated assertion intent exercises the same output intent using suitable assertion families such as `has_text`, `has_n_lines`, `has_size`, stable-name checks, or documented omissions for intentionally unstable files. A `.gz` snapshot md5 on an output Galaxy stores compressed is not emitted as `checksum`. It becomes `decompress: true` content assertions or `compare: diff` with `decompress: true`.
