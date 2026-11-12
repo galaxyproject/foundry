@@ -4,13 +4,13 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 20,
-    "content_hash": "d8e6759095994ad000fb8b78018da070761a5abfb8cf0a80c6c59b550a272501",
-    "commit": "871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee"
+    "revision": 21,
+    "content_hash": "c7599ce12fb73b93e5c26930aa54ca1e79832b142371ae618f948655ff52fe50",
+    "commit": "b74c6bdd0ccc36940ed2db94632931e529733b0a"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-11-10T14:45:10.085Z",
+  "cast_at": "2026-11-12T13:53:30.680Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -175,8 +175,8 @@
       "evidence": "corpus-observed",
       "purpose": "Choose the first whole-pipeline test candidate without equating a profile name with runnability or scientific coverage.",
       "trigger": "When no explicit profile was supplied, multiple pipeline-level nf-tests exist, or the apparent candidate is full-scale, minimal, tiny, or stub-only.",
-      "src_hash": "28a2c267d8fb26ce97b3472cca8a0a09c2295365c56600a2c0811c4be2752623",
-      "dst_hash": "28a2c267d8fb26ce97b3472cca8a0a09c2295365c56600a2c0811c4be2752623",
+      "src_hash": "a5c4cf32869973076a231f0030dce1c91b75e0d475fc30ea0e402759b4fc877d",
+      "dst_hash": "a5c4cf32869973076a231f0030dce1c91b75e0d475fc30ea0e402759b4fc877d",
       "source": "deterministic"
     },
     {
@@ -241,8 +241,8 @@
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
       "license": "MIT",
-      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
-      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "src_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
+      "dst_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
       "source": "deterministic"
     }
   ],

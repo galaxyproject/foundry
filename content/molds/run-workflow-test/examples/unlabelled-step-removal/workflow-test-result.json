@@ -1,0 +1,20 @@
+{
+  "status": "fail",
+  "planemo_result": { "tests": 1, "passed": 1, "failed": 0, "errors": 0 },
+  "galaxy_mode": "managed",
+  "invocation_id": "5b2f0c9a1e7d4f30",
+  "history_id": "9c41e2d7a0b85f16",
+  "artifacts": {
+    "test_output_json": "planemo-test-report.json",
+    "step_diff_json": "step-diff.json"
+  },
+  "failure_modality": "unlabelled-step-removal",
+  "next_reference_surface": "step-removal check",
+  "failure_detail": "Planemo passed, but subsample_reads, present in galaxy-workflow.extracted.gxwf.yml, is gone from galaxy-workflow.gxwf.yml and no kind: dropped ledger entry names it. The only entry on it, subsample-reads-validation-failed, is a plain gap.",
+  "step_removals": {
+    "ok": false,
+    "removed_steps": [{ "step": "subsample_reads", "label": null, "dropped_entries": [] }],
+    "unlabelled": ["subsample_reads"],
+    "unwired_inputs": []
+  }
+}

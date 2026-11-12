@@ -18,6 +18,12 @@ export {
   type WorkflowBrief,
   type WorkflowBriefSection,
 } from "./workflow-brief.js";
+export {
+  checkStepRemovals,
+  StepRemovalInputError,
+  type RemovedStep,
+  type StepRemovalCheck,
+} from "./step-removals.js";
 export { workflowBriefValidator } from "./commands/validate-workflow-brief.js";
 export { testsFormatSchema } from "./schemas/tests-format/tests.schema.generated.js";
 

@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-summary-to-galaxy-interface",
     "path": "content/molds/nextflow-summary-to-galaxy-interface/index.md",
-    "revision": 6,
-    "content_hash": "43966773391578490688098c9333f6eb2eaa94574755f5b6554e7f9b72a605c0",
-    "commit": "61da115975d155a36face0e83d5c28f638da7fca"
+    "revision": 7,
+    "content_hash": "46cf13237a5f332891074d9e9aa117757781793a5bb67f4e133c0d54fe969e09",
+    "commit": "32720e29c7acb7754683495bfce88810db41a686"
   },
-  "cast_at": "2026-11-10T18:57:18.730Z",
+  "cast_at": "2026-11-12T15:01:37.650Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -105,6 +105,21 @@
     {
       "kind": "research",
       "mode": "verbatim",
+      "ref": "[[nextflow-test-case-selection]]",
+      "src": "content/research/nextflow-test-case-selection/index.md",
+      "dst": "references/notes/nextflow-test-case-selection.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "corpus-observed",
+      "purpose": "Read the selected test candidate and its siblings as the evidence for which source branch the run builds.",
+      "trigger": "When the summary offers alternative branches through `step`, `aligner`, `tools`-style params, mode profiles, or `workflow.conditionals[]`, or when `test_selection.status` is `needs-scope-choice`.",
+      "src_hash": "a5c4cf32869973076a231f0030dce1c91b75e0d475fc30ea0e402759b4fc877d",
+      "dst_hash": "a5c4cf32869973076a231f0030dce1c91b75e0d475fc30ea0e402759b4fc877d",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
       "ref": "[[nextflow-to-galaxy-channel-shape-mapping]]",
       "src": "content/research/nextflow-to-galaxy-channel-shape-mapping/index.md",
       "dst": "references/notes/nextflow-to-galaxy-channel-shape-mapping.md",
@@ -140,10 +155,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the pipeline leaves open — a params entry with no Galaxy input, an emitted-but-unpublished output, a channel shape no collection maps cleanly onto.",
+      "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the pipeline leaves open — a params entry with no Galaxy input, an emitted-but-unpublished output, a channel shape no collection maps cleanly onto. Record the run's scope decision and one scope drop per excluded branch family, per Source scope.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
-      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "src_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
+      "dst_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
       "source": "deterministic"
     },
     {
@@ -157,8 +172,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs.",
       "license": "MIT",
-      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
-      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "src_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
+      "dst_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
       "source": "deterministic"
     }
   ],

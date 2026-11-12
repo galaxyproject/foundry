@@ -15,6 +15,10 @@ Harness for the **INTERVIEW → GALAXY** Foundry pipeline. Runs the constituent 
 
 Install the harness CLIs every constituent skill invokes before driving the pipeline. Deduped across all phases; bioinformatics tools the constructed workflow installs are out of scope (the discovery phase pins those).
 
+- **`foundry`** (foundry). `npm install -g @galaxy-foundry/gxwf-foundry`.
+  Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
+  Check: `foundry --help`.
+  Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
 - **`galaxy-tool-cache`** (galaxy-tool-cache). `npm install -g '@galaxy-tool-util/cli@^1.15.0'`.
   Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.15.0 galaxy-tool-cache`.
   Check: `galaxy-tool-cache --help | grep -q summarize`.

@@ -1,0 +1,31 @@
+class: GalaxyWorkflow
+label: a top-level step and an inline subworkflow step that both hold a step keyed first
+inputs:
+  reads: data
+outputs:
+  out:
+    outputSource: nested/out
+steps:
+  first:
+    tool_id: cat1
+    in:
+      input1: reads
+  nested:
+    in:
+      inner_reads: first/out_file1
+    run:
+      class: GalaxyWorkflow
+      inputs:
+        inner_reads: data
+      outputs:
+        out:
+          outputSource: second/out_file1
+      steps:
+        first:
+          tool_id: cat1
+          in:
+            input1: inner_reads
+        second:
+          tool_id: cat1
+          in:
+            input1: first/out_file1

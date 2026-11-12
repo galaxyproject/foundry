@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-workflow-brief/index.md",
     "revision": 2,
     "content_hash": "c2761e698f7913963c3324379d597b72cd6af456baf08742507ebf31b1b7d599",
-    "commit": "871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee"
+    "commit": "527622287b8cb53c4c772cffe9d5a5570538173c"
   },
-  "cast_at": "2026-11-10T14:49:42.424Z",
+  "cast_at": "2026-11-12T09:43:19.573Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -68,8 +68,8 @@
       "evidence": "cast-validated",
       "purpose": "Read and validate the structured source evidence without turning its processes or containers into Galaxy choices.",
       "license": "MIT",
-      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
-      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "src_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
+      "dst_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
       "source": "deterministic"
     },
     {

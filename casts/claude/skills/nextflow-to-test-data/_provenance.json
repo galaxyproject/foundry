@@ -4,11 +4,11 @@
   "mold": {
     "name": "nextflow-to-test-data",
     "path": "content/molds/nextflow-to-test-data/index.md",
-    "revision": 4,
-    "content_hash": "842e097edfb5bfbc37b62a35d5870ee2087df33919212a7965fd70dae799b189",
-    "commit": "871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee"
+    "revision": 5,
+    "content_hash": "562c9977c7123eea41eb33325fd79af88a1b43bf03e310f29b1a5e23c7874afd",
+    "commit": "32720e29c7acb7754683495bfce88810db41a686"
   },
-  "cast_at": "2026-11-10T14:49:42.555Z",
+  "cast_at": "2026-11-12T15:01:38.142Z",
   "refs": [
     {
       "kind": "research",
@@ -83,8 +83,8 @@
       "evidence": "corpus-observed",
       "purpose": "Input contract: read `test_selection` and the chosen `test_candidates[].inputs[]` — role, url/path, sha1, filetype — as the declared source of test data.",
       "license": "MIT",
-      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
-      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "src_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
+      "dst_hash": "3d7a03006d07e08a920f1424b8292e4e9a63399dddcf301e42c26676a487dc8c",
       "source": "deterministic"
     },
     {

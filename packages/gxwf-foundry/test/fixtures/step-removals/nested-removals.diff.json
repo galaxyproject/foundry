@@ -1,0 +1,128 @@
+{
+  "before_is_draft": false,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "outputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "steps": {
+    "added": {},
+    "removed": {
+      "first": {
+        "label": "first",
+        "id": null,
+        "type": "tool",
+        "tool_id": "cat1",
+        "tool_version": null,
+        "plan_fields": {},
+        "upstream": [
+          "reads"
+        ],
+        "downstream": [
+          "nested"
+        ],
+        "workflow_outputs": [],
+        "connections": [
+          "first/out_file1 -> nested/inner_reads",
+          "reads -> first/input1"
+        ]
+      },
+      "nested/first": {
+        "label": "first",
+        "id": null,
+        "type": "tool",
+        "tool_id": "cat1",
+        "tool_version": null,
+        "plan_fields": {},
+        "upstream": [
+          "nested/inner_reads"
+        ],
+        "downstream": [
+          "nested/second"
+        ],
+        "workflow_outputs": [],
+        "connections": [
+          "nested/first/out_file1 -> nested/second/input1",
+          "nested/inner_reads -> nested/first/input1"
+        ]
+      }
+    },
+    "changed": {
+      "nested": {
+        "label": "nested",
+        "fields": {},
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "reads -> nested/inner_reads"
+          ],
+          "removed": [
+            "first/out_file1 -> nested/inner_reads"
+          ]
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [
+            "reads"
+          ],
+          "removed": [
+            "first"
+          ]
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      },
+      "nested/second": {
+        "label": "second",
+        "fields": {},
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "nested/inner_reads -> nested/second/input1"
+          ],
+          "removed": [
+            "nested/first/out_file1 -> nested/second/input1"
+          ]
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [
+            "nested/inner_reads"
+          ],
+          "removed": [
+            "nested/first"
+          ]
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [],
+  "warnings": [],
+  "has_changes": true
+}

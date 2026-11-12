@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
 import { validateMarkdownDocument, type MarkdownDocumentSchema } from "../markdown-document.js";
 import { markdownDocumentSchemas } from "../markdown-document-schemas.js";
+import { readInputOrExit } from "../lib/read-input.js";
 
 export function runValidateMarkdown(name: string, path: string): never {
   const entry = Object.entries(markdownDocumentSchemas).find(([key]) => key === name);
@@ -13,21 +13,8 @@ export function runValidateMarkdown(name: string, path: string): never {
   return runValidateMarkdownFile(path, entry[1]);
 }
 
-export function readMarkdownFile(path: string): string {
-  let markdown: string;
-  try {
-    markdown = readFileSync(path, "utf8");
-  } catch (error) {
-    process.stderr.write(
-      `error reading ${path}: ${error instanceof Error ? error.message : String(error)}\n`,
-    );
-    process.exit(1);
-  }
-  return markdown;
-}
-
 export function runValidateMarkdownFile(path: string, schema: MarkdownDocumentSchema): never {
-  const result = validateMarkdownDocument(readMarkdownFile(path), schema);
+  const result = validateMarkdownDocument(readInputOrExit(path), schema);
   if (result.valid) {
     process.stdout.write(`${path}: valid\n`);
     process.exit(0);

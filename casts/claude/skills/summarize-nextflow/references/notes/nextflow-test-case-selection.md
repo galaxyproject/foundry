@@ -5,8 +5,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-09-15
-revised: 2026-09-15
-revision: 2
+revised: 2026-11-12
+revision: 3
 summary: "A deterministic policy for choosing the first whole-pipeline Nextflow test case without mistaking profile names for coverage."
 sources:
   - "https://github.com/galaxyproject/foundry/issues/67"
@@ -87,7 +87,7 @@ test_selection:
 
 Each `test_candidates[]` entry owns its resolved profiles, parameter delta, inputs, outputs, execution mode, scope, disposition, and assertion evidence. Literal whole-pipeline nf-test cases are the preferred unit. If Groovy generates cases dynamically, static analysis preserves one clearly named file-level aggregate candidate and emits a warning instead of requiring the `nf-test` runtime. When no pipeline nf-test exists, the same array carries the input-bearing profile candidates or the pipeline-defaults fallback. `test_selection` either points to one candidate or records `needs-scope-choice`; there is no parallel singular `test_fixtures` field and no silent `test` default.
 
-A target test-plan Mold can translate additional eligible candidates into additional test entries later. On the Galaxy path, intentionally omitted scientific branches can become `kind: dropped` entries in [[open-requirements-ledger]] once the design tier begins carrying that artifact.
+A target test-plan Mold can translate additional eligible candidates into additional test entries later. On the Galaxy path, [[nextflow-summary-to-galaxy-interface]] follows the selected candidate to a scope decision and records each omitted scientific branch as a scope drop in [[open-requirements-ledger]].
 
 ## Evidence boundary
 

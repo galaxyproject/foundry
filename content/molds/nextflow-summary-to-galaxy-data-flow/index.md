@@ -9,8 +9,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-05-05
-revised: 2026-10-22
-revision: 8
+revised: 2026-11-12
+revision: 9
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
 input_artifacts:
   - id: summary-nextflow
@@ -37,7 +37,7 @@ references:
     load: upfront
     mode: verbatim
     evidence: hypothesis
-    purpose: "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the channel topology leaves open — an operator with no Galaxy collection recipe, a value channel with no Galaxy carrier, a join whose key Galaxy can't reconstruct."
+    purpose: "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the channel topology leaves open — an operator with no Galaxy collection recipe, a value channel with no Galaxy carrier, a join whose key Galaxy can't reconstruct. Design only inside the run's scope decision and carry its scope drops through open, per Source scope."
     verification: "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation."
   - kind: schema
     ref: "[[summary-nextflow]]"
@@ -139,7 +139,7 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Decide between subworkflow `when:` and inline tool-step `when:` for each source conditional, and pick the right output fan-in primitive (`pick_value` vs twin-cascade) so the data-flow brief carries a coherent conditional disposition forward."
-    trigger: "When the Nextflow summary's `workflow.conditionals[]` is non-empty, or when subworkflow boundaries in the source align with parameter-driven branches (step, aligner, wes, tools, skip_*, use_*)."
+    trigger: "When the Nextflow summary's `workflow.conditionals[]` is non-empty, or when subworkflow boundaries in the source align with parameter-driven branches (step, aligner, wes, tools, skip_*, use_*), for the branches inside the run's scope decision."
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
@@ -153,5 +153,7 @@ related_notes:
 Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, Galaxy tool needs, confidence, and open questions.
 
 The output is not gxformat2 and should not resolve exact Tool Shed tools. Nor does it rule them out. Recording that a step's tool does not exist, will not be found, or must be authored is the same adjudication made negative, and it belongs to [[advance-galaxy-draft-step]], which owns routing. Say what each step needs a tool to *do*; let discovery report what exists. Justify step granularity from the source's own structure — subworkflow boundaries, the ratio of plumbing to scientific work. A guess about tool availability is not a justification.
+
+Work inside the ledger's scope decision, as the Source scope section of [[open-requirements-ledger]] describes. When an excluded branch would make a workflow of its own, such as sarek's somatic Mutect2 branch, the brief may name it as a companion workflow in one sentence.
 
 When the brief names collection element identifiers, take them from the source's own output names and check them against the source test's rows. A per-row column such as `sample` can repeat, as when one sample has several runs, so key each element on something unique per dataset and say what makes it unique. A positional suffix (`_1`, `_2`) is a mate only when every row it numbers is paired.

@@ -1,0 +1,23 @@
+class: GalaxyWorkflow
+label: nested-removals.before.gxwf.yml with the top-level first and nested/first removed
+inputs:
+  reads: data
+outputs:
+  out:
+    outputSource: nested/out
+steps:
+  nested:
+    in:
+      inner_reads: reads
+    run:
+      class: GalaxyWorkflow
+      inputs:
+        inner_reads: data
+      outputs:
+        out:
+          outputSource: second/out_file1
+      steps:
+        second:
+          tool_id: cat1
+          in:
+            input1: inner_reads

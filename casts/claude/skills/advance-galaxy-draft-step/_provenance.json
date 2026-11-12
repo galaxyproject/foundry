@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 12,
-    "content_hash": "12f242ddbbfee7d9fe4ef8b6a2d701beceb71e4885cd19872c51041b04e08b27",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "revision": 14,
+    "content_hash": "ff27419b109ddf79c292b67d72d32a13427ebf95fd26cce861070e0728067bc7",
+    "commit": "32720e29c7acb7754683495bfce88810db41a686"
   },
-  "cast_at": "2026-11-10T10:22:51.277Z",
+  "cast_at": "2026-11-12T15:01:35.242Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -146,10 +146,10 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.",
+      "purpose": "Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, check each of the step's source arguments has a disposition, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.",
       "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that leaves fewer open blocking entries than it found.",
-      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
-      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "src_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
+      "dst_hash": "3fe6f8c236fcc5bbdfade24393d4ae4c41c22ae8d8a2ad68cbf3cf658bf1082e",
       "source": "deterministic"
     },
     {
@@ -223,6 +223,19 @@
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
         "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
+      },
+      {
+        "id": "galaxy-workflow-draft-snapshot",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-draft.snapshot.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
+        "description": "Copy of the draft as the loop first received it, with every `_plan_*` field intact: the record of which source work each settled step carried. Written once and never edited."
+      },
+      {
+        "id": "galaxy-workflow-extracted",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow.extracted.gxwf.yml",
+        "description": "Copy of the first `galaxy-workflow.gxwf.yml` this Mold extracts, frozen before the test phase. [[run-workflow-test]] diffs the final workflow against it. Written once and never edited."
       }
     ],
     "consumes": [
