@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 10,
     "content_hash": "77f885d640900cca7dac4a3bbb33308d4d8065e871c919c672487db61caf93ab",
-    "commit": "77425ce07f69da2bdda1de21faea3abc4600ae00"
+    "commit": "f1a20393a19a7058420606ef5e106f7e6384c0b1"
   },
-  "cast_at": "2026-11-10T15:33:28.827Z",
+  "cast_at": "2026-11-12T09:39:57.831Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -342,8 +342,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context.",
       "license": "MIT",
-      "src_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
-      "dst_hash": "1b8872152de9be50634b3ec73cfd5963ae0ec19a95ccb99f6fe734f42656d80d",
+      "src_hash": "098b2b7fa3b50fadbf15db4db883d48864b17a4b51f59450e71274ab309c316f",
+      "dst_hash": "098b2b7fa3b50fadbf15db4db883d48864b17a4b51f59450e71274ab309c316f",
       "source": "deterministic"
     }
   ],

@@ -29,8 +29,40 @@ interface SummaryLike {
       keywords: string[];
       authors: string[];
       tools: { name: string; description?: string; homepage?: string; licence?: string[] }[];
-      input: { name: string; type?: string; description?: string; pattern?: string }[];
-      output: { name: string; type?: string; description?: string; pattern?: string }[];
+      input: {
+        name: string;
+        type?: string;
+        description?: string;
+        pattern?: string;
+        emit?: string;
+        ontologies?: { edam?: string }[];
+      }[];
+      output: {
+        name: string;
+        type?: string;
+        description?: string;
+        pattern?: string;
+        emit?: string;
+        ontologies?: { edam?: string }[];
+      }[];
+      input_channels?: {
+        members: {
+          name: string;
+          type?: string;
+          pattern?: string;
+          ontologies?: { edam?: string }[];
+        }[];
+      }[];
+      output_emits?: {
+        emit: string;
+        members: {
+          name: string;
+          type?: string;
+          pattern?: string;
+          emit?: string;
+          ontologies?: { edam?: string }[];
+        }[];
+      }[];
     } | null;
     module_tests: {
       name: string;
@@ -351,6 +383,11 @@ test("align module") {
     expect(process.meta?.input[0]).toEqual(
       expect.objectContaining({ name: "reads", type: "file", pattern: "*.fastq.gz" }),
     );
+    expect(process.meta?.output[0]).toEqual(
+      expect.objectContaining({ name: "bam", type: "file", pattern: "*.bam" }),
+    );
+    expect(process.meta).not.toHaveProperty("input_channels");
+    expect(process.meta).not.toHaveProperty("output_emits");
     expect(process.module_tests).toHaveLength(1);
     expect(process.module_tests[0]).toEqual(
       expect.objectContaining({
@@ -397,6 +434,117 @@ test("align module") {
         }),
       }),
     );
+  });
+
+  test("parses current nf-core meta.yml channel tuples, emit maps, and ontologies", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/module-meta-new' }\n");
+    write(
+      root,
+      "main.nf",
+      "include { COUNTS } from './modules/nf-core/counts'\nworkflow META_NEW { COUNTS() }\n",
+    );
+    write(root, "modules/nf-core/counts/main.nf", "process COUNTS {\n  script:\n  'counts'\n}\n");
+    write(
+      root,
+      "modules/nf-core/counts/meta.yml",
+      `description: Count features
+keywords:
+  - counts
+authors:
+  - "@author"
+maintainers:
+  - "@author"
+tools:
+  - featurecounts:
+      description: Count reads
+input:
+  - - meta:
+        type: map
+        description: Sample map
+    - bam:
+        type: file
+        description: Alignments
+        pattern: "*.bam"
+        ontologies: []
+output:
+  counts:
+    - - meta:
+          type: map
+          description: Sample map
+      - "*featureCounts.tsv":
+          type: file
+          description: Counts table
+          pattern: "*featureCounts.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475
+  versions:
+    - versions.yml:
+        type: file
+        description: Software versions
+        pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750
+`,
+    );
+
+    const summary = await summarize(root);
+    const meta = summary.processes[0]!.meta!;
+
+    expect(meta.input_channels).toEqual([
+      {
+        members: [
+          expect.objectContaining({ name: "meta", type: "map" }),
+          expect.objectContaining({ name: "bam", type: "file", pattern: "*.bam", ontologies: [] }),
+        ],
+      },
+    ]);
+    expect(meta.input.map((entry) => entry.name)).toEqual(["meta", "bam"]);
+    expect(meta.output_emits?.map((entry) => entry.emit)).toEqual(["counts", "versions"]);
+    const counts = meta.output.find((entry) => entry.name === "*featureCounts.tsv");
+    expect(counts).toEqual(
+      expect.objectContaining({
+        name: "*featureCounts.tsv",
+        emit: "counts",
+        ontologies: [{ edam: "http://edamontology.org/format_3475" }],
+      }),
+    );
+    expect(meta.output.find((entry) => entry.name === "versions.yml")?.ontologies).toEqual([
+      { edam: "http://edamontology.org/format_3750" },
+    ]);
+  });
+
+  test("warns on a malformed module meta.yml output without emptying the rest of the summary", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/module-meta-bad' }\n");
+    write(
+      root,
+      "main.nf",
+      "include { BAD } from './modules/nf-core/bad'\nworkflow META_BAD { BAD() }\n",
+    );
+    write(root, "modules/nf-core/bad/main.nf", "process BAD {\n  script:\n  'bad'\n}\n");
+    write(
+      root,
+      "modules/nf-core/bad/meta.yml",
+      `description: Broken output block
+keywords: []
+authors: []
+maintainers: []
+tools: []
+input:
+  - reads:
+      type: file
+output: "not-a-list-or-map"
+`,
+    );
+
+    const summary = await summarize(root);
+    const meta = summary.processes[0]!.meta!;
+    expect(meta.input).toEqual([expect.objectContaining({ name: "reads", type: "file" })]);
+    expect(meta.output).toEqual([]);
+    expect(
+      summary.warnings.some((warning) => warning.includes("unexpected module meta output")),
+    ).toBe(true);
   });
 
   test("captures subworkflow tests and leaves local process module metadata empty", async () => {

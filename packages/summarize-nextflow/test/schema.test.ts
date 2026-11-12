@@ -123,4 +123,82 @@ describe("validateSummary", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.keyword === "additionalProperties")).toBe(true);
   });
+
+  it("still validates an old summary whose module meta omits the new optional fields", () => {
+    const data = JSON.parse(readFileSync(DEMO_SUMMARY, "utf8"));
+    const withMeta = data.processes.find(
+      (process: { meta: unknown }) => process.meta && typeof process.meta === "object",
+    );
+    expect(withMeta?.meta).toBeDefined();
+    expect(withMeta.meta).not.toHaveProperty("input_channels");
+    expect(withMeta.meta).not.toHaveProperty("output_emits");
+    const result = validateSummary(data);
+    expect(result.valid).toBe(true);
+  });
+
+  it("accepts module meta with optional emit, ontologies, and channel grouping", () => {
+    const data = JSON.parse(readFileSync(DEMO_SUMMARY, "utf8"));
+    const process = data.processes.find(
+      (candidate: { meta: unknown }) => candidate.meta && typeof candidate.meta === "object",
+    );
+    expect(process).toBeDefined();
+    process.meta = {
+      description: "Count reads that map to genomic features",
+      keywords: ["counts"],
+      authors: ["@author"],
+      maintainers: ["@author"],
+      tools: [{ name: "featurecounts" }],
+      input: [
+        { name: "meta", type: "map" },
+        { name: "bams", type: "file", pattern: "*.bam", ontologies: [] },
+      ],
+      output: [
+        {
+          name: "*featureCounts.tsv",
+          type: "file",
+          pattern: "*featureCounts.tsv",
+          emit: "counts",
+          ontologies: [{ edam: "http://edamontology.org/format_3475" }],
+        },
+      ],
+      input_channels: [
+        {
+          members: [
+            { name: "meta", type: "map" },
+            { name: "bams", type: "file", pattern: "*.bam", ontologies: [] },
+          ],
+        },
+      ],
+      output_emits: [
+        {
+          emit: "counts",
+          members: [
+            {
+              name: "*featureCounts.tsv",
+              type: "file",
+              pattern: "*featureCounts.tsv",
+              emit: "counts",
+              ontologies: [{ edam: "http://edamontology.org/format_3475" }],
+            },
+          ],
+        },
+      ],
+    };
+    const result = validateSummary(data);
+    if (!result.valid) console.error("new meta errors:", result.errors);
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects an unknown field on ModuleMetaEntry", () => {
+    const data = JSON.parse(readFileSync(DEMO_SUMMARY, "utf8"));
+    const process = data.processes.find(
+      (candidate: { meta: { input?: unknown[] } | null }) =>
+        candidate.meta && Array.isArray(candidate.meta.input),
+    );
+    expect(process).toBeDefined();
+    process.meta.input = [{ name: "reads", type: "file", not_a_real_field: true }];
+    const result = validateSummary(data);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((error) => error.keyword === "additionalProperties")).toBe(true);
+  });
 });

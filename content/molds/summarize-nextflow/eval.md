@@ -64,10 +64,14 @@ whatever a scenario produces. Properties are tagged by bucket:
 - bucket: fidelity
 - check: deterministic
 - assertion: every `processes[]` row under `modules/nf-core/` has `meta != null`
-  normalized from the vendored `meta.yml` (`meta.tools[]`/`input[]`/`output[]`),
-  and `module_tests[].length` equals the number of `test("…")` blocks across
-  that module's on-disk `*.nf.test` files (one row per test case, not per
-  file); every `modules/local/` row has `meta == null` and `module_tests == []`.
+  normalized from the vendored `meta.yml` (`meta.tools[]`/`input[]`/`output[]`,
+  and when the file uses channel tuples or emit maps also `input_channels[]` /
+  `output_emits[]` with `ontologies` and `emit` where declared), and
+  `module_tests[].length` equals the number of `test("…")` blocks across that
+  module's on-disk `*.nf.test` files (one row per test case, not per file);
+  every `modules/local/` row has `meta == null` and `module_tests == []`. A
+  present input/output block that cannot be read appears in `warnings[]` rather
+  than as a silent empty list when the YAML clearly declared ports.
 
 ## Property: subworkflow tests are enumerated structurally
 

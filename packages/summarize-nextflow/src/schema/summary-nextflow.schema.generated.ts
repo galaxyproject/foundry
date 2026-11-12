@@ -816,7 +816,7 @@ export const summaryNextflowSchema = {
     },
     "ModuleMeta": {
       "title": "ModuleMeta",
-      "description": "Normalized subset of nf-core module `meta.yml`, captured next to a process so module-scoped downstream Molds can consume `processes[i]` without reading the full pipeline summary.",
+      "description": "Normalized subset of nf-core module `meta.yml`, captured next to a process so module-scoped downstream Molds can consume `processes[i]` without reading the full pipeline summary. `input`/`output` stay the flat entry lists (legacy shape and a denormalized view of channel members). When the on-disk `meta.yml` uses the current nf-core channel/emit layout, `input_channels` and `output_emits` carry the grouping; both are omitted when the file only declares the flat form.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -866,12 +866,64 @@ export const summaryNextflowSchema = {
           "items": {
             "$ref": "#/$defs/ModuleMetaEntry"
           }
+        },
+        "input_channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaChannel"
+          },
+          "description": "Input ports grouped as channel tuples, in declaration order. Present when `meta.yml` uses the list-of-lists (or mixed list/dict) input layout. Each channel's `members` are also flattened into `input[]`."
+        },
+        "output_emits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEmit"
+          },
+          "description": "Output ports grouped by Nextflow emit name. Present when `meta.yml` uses an emit-name map or the transitional list-of-emit shape. Each member also appears in `output[]` with `emit` set."
+        }
+      }
+    },
+    "ModuleMetaChannel": {
+      "title": "ModuleMetaChannel",
+      "description": "One input channel from module `meta.yml`: a tuple of named members (for example `meta` + `bam`) or a single standalone member.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "members"
+      ],
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
+        }
+      }
+    },
+    "ModuleMetaEmit": {
+      "title": "ModuleMetaEmit",
+      "description": "One named output emit from module `meta.yml`, with the tuple members that emit carries.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "emit",
+        "members"
+      ],
+      "properties": {
+        "emit": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
         }
       }
     },
     "ModuleMetaEntry": {
       "title": "ModuleMetaEntry",
-      "description": "One named entry from a module `meta.yml` section, normalized from nf-core's single-key YAML maps into `{ name, ...fields }` objects.",
+      "description": "One named entry from a module `meta.yml` section, normalized from nf-core's single-key YAML maps into `{ name, ...fields }` objects. Optional `emit` tags a flattened output member with its emit name; optional `ontologies` carries EDAM (and similar) links from the current meta-schema.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -909,6 +961,28 @@ export const summaryNextflowSchema = {
           "type": "string"
         },
         "pattern": {
+          "type": "string"
+        },
+        "emit": {
+          "type": "string",
+          "description": "Emit name this output member belongs to when flattened from `output_emits[]`. Absent on inputs and on legacy flat output entries."
+        },
+        "ontologies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaOntology"
+          },
+          "description": "Ontology links declared on the meta.yml member (currently EDAM format/data URLs)."
+        }
+      }
+    },
+    "ModuleMetaOntology": {
+      "title": "ModuleMetaOntology",
+      "description": "One ontology link from a module meta.yml member. nf-core modules currently emit `edam` URLs only.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "edam": {
           "type": "string"
         }
       }
