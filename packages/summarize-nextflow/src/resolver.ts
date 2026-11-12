@@ -3452,7 +3452,10 @@ function selectorMatchesProcess(
   );
 }
 
-/** Rank at which a selector reaches one call: label 0, process 1, alias 2, fully qualified 3. */
+/**
+ * Rank at which a selector reaches one call: label 0, process 1, alias 2, fully qualified 3.
+ * The qualified name ends in the call's own name, and any pattern may match it.
+ */
 function selectorRank(
   kind: "withName" | "withLabel",
   pattern: string,
@@ -3468,18 +3471,9 @@ function selectorRank(
   const regex = isRegexSelector(pattern) ? compileSelector(pattern) : undefined;
   const matches = (candidate: string) =>
     regex === undefined ? candidate === pattern : regex !== null && regex.test(candidate);
-  const names = call === process.name ? [call] : [call, process.name];
-  if (pattern.includes(":")) {
-    const qualified = [
-      ...process.in_subworkflows.flatMap((subworkflow) =>
-        names.map((name) => `${subworkflow}:${name}`),
-      ),
-      ...names.map((name) => `workflow:${name}`),
-    ];
-    const last = pattern.split(":").at(-1) ?? "";
-    if (qualified.some(matches)) return 3;
-    if (last.length > 0 && !isRegexSelector(last) && names.includes(last)) return 3;
-  }
+  const qualified = [...process.in_subworkflows, "workflow"].map((scope) => `${scope}:${call}`);
+  if (qualified.some(matches)) return 3;
+  if (pattern.includes(":") && pattern.split(":").at(-1) === call) return 3;
   if (call !== process.name && matches(call)) return 2;
   return matches(process.name) ? 1 : null;
 }

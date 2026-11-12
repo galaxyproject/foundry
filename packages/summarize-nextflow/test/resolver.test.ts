@@ -3332,6 +3332,53 @@ workflow PIPE { FOO_A(); SUB() }
     ]);
   });
 
+  test("qualifies an aliased call by its alias, and ranks a colon-free regex on the qualified name", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/fq-alias' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: '.*:FOO' {
+        ext.args = '-q'
+    }
+    withName: 'FOO_B' {
+        ext.args = '-b'
+    }
+    withName: '.*FOO_C' {
+        ext.args = '-r'
+    }
+    withName: 'FOO_C' {
+        ext.args = '-c'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/sub.nf",
+      `include { FOO } from '../modules/foo'
+include { FOO as FOO_B } from '../modules/foo'
+include { FOO as FOO_C } from '../modules/foo'
+workflow SUB { FOO(); FOO_B(); FOO_C() }
+`,
+    );
+    write(root, "main.nf", "include { SUB } from './subworkflows/sub'\nworkflow PIPE { SUB() }\n");
+
+    const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+    expect(foo.effective_args).toEqual([
+      { invoked_as: "FOO", key: "args", ids: [id(".*:FOO")] },
+      { invoked_as: "FOO_B", key: "args", ids: [id("FOO_B")] },
+      { invoked_as: "FOO_C", key: "args", ids: [id(".*FOO_C")] },
+    ]);
+  });
+
   test("a selected profile beats the root chain at the same selector rank only", async () => {
     const root = tempPipelineRoot();
     write(
