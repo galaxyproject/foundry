@@ -2067,34 +2067,43 @@ function buildSubworkflowInvocations(
 
 function extractCallInvocations(body: string): { name: string; arguments: string[] }[] {
   const invocations: { name: string; arguments: string[] }[] = [];
-  const lines = body.split("\n");
-  for (let index = 0; index < lines.length; index += 1) {
-    const singleLine = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*$/u.exec(lines[index]!);
-    if (singleLine) {
-      invocations.push({
-        name: singleLine[1]!,
-        arguments: splitCallArguments(singleLine[2]!),
-      });
-      continue;
-    }
-    const start = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*$/u.exec(lines[index]!);
-    if (!start) continue;
-    const args: string[] = [];
-    for (index += 1; index < lines.length; index += 1) {
-      const line = lines[index]!.trim();
-      if (line === ")") break;
-      const argument = line.replace(/,$/u, "").trim();
-      if (argument && !argument.startsWith("//")) args.push(argument);
-    }
-    invocations.push({ name: start[1]!, arguments: args });
+  const masked = maskNextflowComments(body);
+  const opener = /^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*\(/gmu;
+  for (let match = opener.exec(masked); match; match = opener.exec(masked)) {
+    const open = match.index + match[0].length - 1;
+    const end = scanBalanced(masked, open);
+    // shortcut: scanBalanced does not understand slashy strings, so a call with an unbalanced bracket in a /regex/ is skipped; upgrade if a real pipeline hits it.
+    if (end === null) continue;
+    // Only calls with nothing after `)` on that line; a same-line `.out...` chain is skipped (shortcut: drops multi-line `X(...).out.y.set{}` invocations, upgrade if a pipeline needs them). `ch = X(...)` is read by collectAssignedCalls.
+    const lineEnd = masked.indexOf("\n", end);
+    if (masked.slice(end, lineEnd === -1 ? undefined : lineEnd).trim()) continue;
+    invocations.push({
+      name: match[1]!,
+      arguments: splitCallArguments(masked.slice(open + 1, end - 1)),
+    });
+    opener.lastIndex = end;
   }
   return invocations;
 }
 
 function splitCallArguments(text: string): string[] {
-  return text
-    .split(",")
-    .map((argument) => argument.trim())
+  const pieces: string[] = [];
+  let start = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index]!;
+    if (char === "(" || char === "[" || char === "{") {
+      index = (scanBalanced(text, index) ?? text.length) - 1;
+    } else if (char === "'" || char === '"') {
+      index += readQuoted(text, index, char).length - 1;
+    } else if (char === ",") {
+      pieces.push(text.slice(start, index));
+      start = index + 1;
+    }
+  }
+  pieces.push(text.slice(start));
+  return pieces
+    .map((piece) => piece.trim())
+    .map((piece) => (piece.includes("\n") ? normalizeWorkflowExpression(piece) : piece))
     .filter(Boolean);
 }
 

@@ -1783,6 +1783,88 @@ workflow PIPE {
     ]);
   });
 
+  test("keeps a call argument that spans several lines as one argument", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'adhoc/multiline-args' }\n");
+    write(root, "modules/multiqc.nf", "process MULTIQC {\n  script:\n  'multiqc'\n}\n");
+    write(
+      root,
+      "subworkflows/local/prepare/main.nf",
+      `workflow PREPARE {
+  take:
+  fasta
+  index
+  main:
+  emit:
+  done = 1
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { MULTIQC } from './modules/multiqc'
+include { PREPARE } from './subworkflows/local/prepare/main'
+workflow PIPE {
+  main:
+  PREPARE(
+    params.fasta,
+    params.index
+      ? file(params.index, checkIfExists: true)
+      : [] // built later
+  )
+  PREPARE(ch_fasta.map { it -> [it, []] }, [[:], []])
+  // sarek 3.8.1 fastq_preprocess_gatk/main.nf:82-87 shape: ) on the last argument line
+  PREPARE(
+    params.fasta,
+    params.index)
+  ch_done = PREPARE.out.done
+  MULTIQC(
+      ch_multiqc_files.collect().map { files ->
+          [
+              [id: 'demo'],
+              files,
+          ]
+      },
+      []
+  )
+}
+`,
+    );
+
+    const summary = (await summarize(root)) as unknown as {
+      workflow: { edges: { from: string; to: string }[] };
+      subworkflows: {
+        name: string;
+        invocations?: { arguments: string[]; bindings: { take: string; argument: string }[] }[];
+      }[];
+    };
+
+    expect(summary.workflow.edges.filter((edge) => edge.to === "MULTIQC")).toEqual([
+      {
+        from: "ch_multiqc_files.collect().map { files -> [ [id: 'demo'], files, ] }",
+        to: "MULTIQC",
+        via: [],
+      },
+      { from: "[]", to: "MULTIQC", via: [] },
+    ]);
+    const prepare = summary.subworkflows.find((sw) => sw.name === "PREPARE");
+    expect(prepare!.invocations!.map((invocation) => invocation.bindings)).toEqual([
+      [
+        { take: "fasta", argument: "params.fasta" },
+        { take: "index", argument: "params.index ? file(params.index, checkIfExists: true) : []" },
+      ],
+      [
+        { take: "fasta", argument: "ch_fasta.map { it -> [it, []] }" },
+        { take: "index", argument: "[[:], []]" },
+      ],
+      [
+        { take: "fasta", argument: "params.fasta" },
+        { take: "index", argument: "params.index" },
+      ],
+    ]);
+  });
+
   test("detects compute-if-missing rebuilds with high confidence when binding is clean", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'adhoc/rebuild' }\n");
